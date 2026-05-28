@@ -995,6 +995,11 @@ def _build_attach_proposal(
     }
 
 
+# Read-only tools whose raw output is replayed for ~2 turns. propose_* and
+# extract_entities stay out — their outputs become AgentActions, not replays.
+REPLAYABLE_TOOLS: frozenset[str] = frozenset({"query_objects", "search_library"})
+
+
 def dispatch_tool_call(
     tool_name: str,
     arguments: dict,

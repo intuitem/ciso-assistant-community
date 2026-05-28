@@ -13,17 +13,10 @@ import zlib
 
 class MappingEngine:
     def __init__(self):
-        # Values are compressed (zlib) JSON bytes of the RMS object.
-        self.all_rms: dict[tuple[str, str], bytes] = {}
-        self.framework_mappings: dict[str, list[str]] = defaultdict(list)
-        self.frameworks: dict[str, dict[str, int]] = defaultdict(dict)
-        self.direct_mappings: set[tuple[str, str]] = set()
-
-        if not self.frameworks:
-            self.load_frameworks()
-
-        if not self.direct_mappings:
-            self.load_rms_data()
+        self._all_rms = None
+        self._framework_mappings = None
+        self._frameworks = None
+        self._direct_mappings = None
 
         self.fields_to_map: list[str] = [
             "result",
@@ -40,6 +33,46 @@ class MappingEngine:
             "evidences",
         ]
 
+    def _ensure_loaded(self):
+        if self._frameworks is None:
+            self.reload_cache()
+
+    @property
+    def all_rms(self):
+        self._ensure_loaded()
+        return self._all_rms
+
+    @all_rms.setter
+    def all_rms(self, value):
+        self._all_rms = value
+
+    @property
+    def framework_mappings(self):
+        self._ensure_loaded()
+        return self._framework_mappings
+
+    @framework_mappings.setter
+    def framework_mappings(self, value):
+        self._framework_mappings = value
+
+    @property
+    def frameworks(self):
+        self._ensure_loaded()
+        return self._frameworks
+
+    @frameworks.setter
+    def frameworks(self, value):
+        self._frameworks = value
+
+    @property
+    def direct_mappings(self):
+        self._ensure_loaded()
+        return self._direct_mappings
+
+    @direct_mappings.setter
+    def direct_mappings(self, value):
+        self._direct_mappings = value
+
     # --- Compression helpers ---
     def _compress_rms(self, obj: dict) -> bytes:
         return zlib.compress(json.dumps(obj, separators=(",", ":")).encode("utf-8"))
@@ -53,14 +86,46 @@ class MappingEngine:
             return None
         return self._decompress_rms(data)
 
-    def load_rms_data(self) -> None:
+    def reload_cache(self) -> None:
+        """Reloads all engine cache data: frameworks and RMS data.
+
+        Builds new local containers from the database first, and only swaps
+        them into the instance attributes after both reads succeed. If the
+        tables are not yet available (e.g. during migrations), the existing
+        instance cache is preserved so ``_ensure_loaded`` can retry later.
+        """
+        from django.db.utils import ProgrammingError, OperationalError
+
+        try:
+            local_frameworks = self.load_frameworks()
+            (
+                local_all_rms,
+                local_framework_mappings,
+                local_direct_mappings,
+            ) = self.load_rms_data()
+        except (ProgrammingError, OperationalError):
+            # Tables might not exist during migrations. Preserve whatever
+            # cache state already exists and let the next access retry.
+            return
+
+        self._frameworks = local_frameworks
+        self._all_rms = local_all_rms
+        self._framework_mappings = local_framework_mappings
+        self._direct_mappings = local_direct_mappings
+
+    def load_rms_data(
+        self,
+    ) -> tuple[dict, "defaultdict[str, list[str]]", set[tuple[str, str]]]:
         """
         Loads requirement mapping sets (RMS) from libraries.
-        Builds internal structures: all_rms and framework_mappings.
+
+        Returns the tuple ``(all_rms, framework_mappings, direct_mappings)``
+        built from the database. The caller is responsible for swapping these
+        into the instance attributes once the load is known to have succeeded.
         """
-        self.framework_mappings = defaultdict(list)
-        self.direct_mappings = set()
-        self.all_rms = {}
+        all_rms: dict = {}
+        framework_mappings: "defaultdict[str, list[str]]" = defaultdict(list)
+        direct_mappings: set[tuple[str, str]] = set()
 
         for lib in StoredLibrary.objects.filter(
             Q(content__requirement_mapping_set__isnull=False)
@@ -77,7 +142,7 @@ class MappingEngine:
                     index = (obj["source_framework_urn"], obj["target_framework_urn"])
                     obj["library_urn"] = library_urn
                     obj["id"] = str(lib_id)
-                    self.all_rms[index] = self._compress_rms(obj)
+                    all_rms[index] = self._compress_rms(obj)
 
                 if "requirement_mapping_sets" in content:
                     for obj in content["requirement_mapping_sets"]:
@@ -87,14 +152,21 @@ class MappingEngine:
                         )
                         obj["library_urn"] = library_urn
                         obj["id"] = str(lib_id)
-                        self.all_rms[index] = self._compress_rms(obj)
+                        all_rms[index] = self._compress_rms(obj)
 
-        for src, tgt in self.all_rms:
-            self.framework_mappings[src].append(tgt)
-            self.direct_mappings.add((src, tgt))
+        for src, tgt in all_rms:
+            framework_mappings[src].append(tgt)
+            direct_mappings.add((src, tgt))
 
-    def load_frameworks(self) -> None:
-        self.frameworks = dict(
+        return all_rms, framework_mappings, direct_mappings
+
+    def load_frameworks(self) -> dict:
+        """Returns the frameworks mapping loaded from the database.
+
+        The caller is responsible for swapping the returned dict into the
+        instance attribute after the full reload succeeds.
+        """
+        return dict(
             [
                 (
                     f.urn,

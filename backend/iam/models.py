@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from iam.cache_builders import AssignmentLite
 from core.utils import (
     BUILTIN_USERGROUP_CODENAMES,
-    BUILTIN_ROLE_CODENAMES,
+    get_translated_builtin_role_name,
 )
 from core.base_models import (
     AbstractBaseModel,
@@ -262,6 +262,8 @@ class Folder(NameDescriptionMixin):
             ["solution", "provider_entity", "folder"],
             ["processing", "folder"],
             ["journey", "folder"],
+            ["questionnaire_run", "folder"],
+            ["agent_run", "folder"],
         ]
 
         # Attempt to traverse each path until a valid folder is found or all paths are exhausted.
@@ -435,19 +437,15 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
         verbose_name_plural = _("user groups")
 
     def __str__(self) -> str:
-        resolved_name = (
-            BUILTIN_USERGROUP_CODENAMES.get(self.name) if self.builtin else self.name
-        ) or self.name
-        return f"{self.folder.name} - {resolved_name}"
+        if self.builtin:
+            role_codename = BUILTIN_USERGROUP_CODENAMES.get(self.name, self.name)
+            role_name = get_translated_builtin_role_name(role_codename)
+        else:
+            role_name = self.name
+        return f"{self.folder.name} - {role_name}"
 
     def get_name_display(self) -> str:
         return self.name
-
-    def get_localization_dict(self) -> dict:
-        resolved_name = (
-            BUILTIN_USERGROUP_CODENAMES.get(self.name) if self.builtin else self.name
-        ) or self.name
-        return {"folder": self.folder.name, "role": resolved_name}
 
     def save(self, *args, **kwargs):
         result = super().save(*args, **kwargs)
@@ -546,7 +544,7 @@ class UserManager(BaseUserManager):
             try:
                 user.mailing(
                     email_template_name=template_name,
-                    subject=_("Welcome to Ciso Assistant!"),
+                    subject=_("Welcome to CISO Assistant!"),
                 )
             except Exception as exception:
                 print(f"sending email to {email} failed")
@@ -736,11 +734,17 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         uid = urlsafe_base64_encode(force_bytes(self.pk))
         token = default_token_generator.make_token(self)
 
+        questionnaire_url = (
+            f"{settings.CISO_ASSISTANT_URL}/{object}/{object_id}"
+            if object
+            else settings.CISO_ASSISTANT_URL
+        )
+
         # Build context for the YAML template system
         context = {
             "set_password_url": f"{settings.CISO_ASSISTANT_URL}/first-connexion?uidb64={uid}&token={token}",
             "reset_password_url": f"{settings.CISO_ASSISTANT_URL}/password-reset/confirm?uidb64={uid}&token={token}",
-            "questionnaire_url": f"{settings.CISO_ASSISTANT_URL}/{object}/{object_id}/table-mode"
+            "questionnaire_url": questionnaire_url
             if object
             else settings.CISO_ASSISTANT_URL,
         }
@@ -777,6 +781,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             "pk": str(pk) if pk else None,
             "object": object,
             "object_id": object_id,
+            "questionnaire_url": questionnaire_url,
         }
         with translation_override(user_lang):
             email = render_to_string(email_template_name, header)
@@ -990,7 +995,7 @@ class Role(NameDescriptionMixin, FolderMixin):
 
     def __str__(self) -> str:
         if self.builtin:
-            return f"{BUILTIN_ROLE_CODENAMES.get(self.name)}"
+            return get_translated_builtin_role_name(self.name)
         return self.name
 
     fields_to_check = ["name"]
@@ -1320,6 +1325,14 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 objects_iter = object_type.objects.filter(
                     journey__folder_id__in=folder_ids
                 ).values_list("id", "journey__folder_id")
+            elif hasattr(object_type, "questionnaire_run"):
+                objects_iter = object_type.objects.filter(
+                    questionnaire_run__folder_id__in=folder_ids
+                ).values_list("id", "questionnaire_run__folder_id")
+            elif hasattr(object_type, "agent_run"):
+                objects_iter = object_type.objects.filter(
+                    agent_run__folder_id__in=folder_ids
+                ).values_list("id", "agent_run__folder_id")
             else:
                 raise NotImplementedError("type not supported")
 

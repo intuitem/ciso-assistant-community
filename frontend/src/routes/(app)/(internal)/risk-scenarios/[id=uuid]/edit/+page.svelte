@@ -16,6 +16,7 @@
 
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
+	import { goto } from '$lib/utils/breadcrumbs';
 
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -54,7 +55,7 @@
 			var currentUrl = window.location.href;
 			var url = new URL(currentUrl);
 			var nextValue = getSecureRedirect(url.searchParams.get('next'));
-			if (nextValue) window.location.href = nextValue;
+			if (nextValue) goto(nextValue);
 		}
 	}
 
@@ -258,6 +259,16 @@
 						optionsExtraFields={[['folder', 'str']]}
 						field="vulnerabilities"
 						label={m.vulnerabilities()}
+					/>
+					<AutocompleteSelect
+						multiple
+						lazy
+						form={_form}
+						optionsEndpoint="incidents"
+						optionsLabelField="auto"
+						optionsExtraFields={[['folder', 'str']]}
+						field="incidents"
+						label={m.incidents()}
 					/>
 					<AutocompleteSelect
 						multiple

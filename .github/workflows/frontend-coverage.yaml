@@ -7,6 +7,7 @@ on:
     branches: ["main"]
     paths:
       - "frontend/**"
+      - ".github/workflows/frontend-coverage.yaml"
   workflow_dispatch:
 
 # Cancel older in-progress runs for the same PR or the same ref (branch)
@@ -28,20 +29,18 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        node-version: ["22"]
+        node-version: ["24"]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       - name: Set up node ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Install latest pnpm
-        working-directory: ${{env.working-directory}}
-        run: |
-          npm install -g pnpm &&
-          pnpm --version &&
-          pnpm list -g --depth 0
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10
       - name: Install dependencies
         working-directory: ${{env.working-directory}}
         run: pnpm i --frozen-lockfile

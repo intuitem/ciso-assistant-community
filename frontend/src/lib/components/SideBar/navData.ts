@@ -48,7 +48,8 @@ export const navData = {
 						'view_assessment',
 						'view_riskassessment',
 						'view_requirementassignment'
-					]
+					],
+					exclude: ['BI-RL-TPR']
 				},
 				{
 					name: 'auditDashboard',
@@ -178,7 +179,8 @@ export const navData = {
 					name: 'xRays',
 					fa_icon: 'fa-solid fa-bolt',
 					href: '/x-rays',
-					permissions: ['view_riskassessment', 'view_assessment']
+					permissions: ['view_riskassessment', 'view_assessment'],
+					exclude: ['BI-RL-TPR']
 				},
 				{
 					name: 'incidents',
@@ -294,7 +296,7 @@ export const navData = {
 					name: 'complianceAssessments',
 					fa_icon: 'fa-solid fa-certificate',
 					href: '/compliance-assessments',
-					exclude: ['BI-RL-ADE']
+					exclude: ['BI-RL-ADE', 'BI-RL-TPR']
 				},
 				{
 					name: 'evidences',
@@ -423,6 +425,18 @@ export const navData = {
 					fa_icon: 'fa-solid fa-award',
 					href: '/accreditations',
 					permissions: ['view_accreditation']
+				},
+				{
+					name: 'projects',
+					fa_icon: 'fa-solid fa-diagram-project',
+					href: '/projects',
+					permissions: ['view_project']
+				},
+				{
+					name: 'responsibilityMatrices',
+					fa_icon: 'fa-solid fa-people-arrows',
+					href: '/responsibility-matrices',
+					permissions: ['view_responsibilitymatrix']
 				}
 			]
 		},

@@ -1,7 +1,7 @@
 from django.db import IntegrityError, transaction
 from rest_framework import serializers
 from django.conf import settings
-from core.models import ComplianceAssessment, Framework
+from core.models import ComplianceAssessment, Framework, RequirementAssignment
 
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
 from core.serializers import BaseModelSerializer
@@ -56,12 +56,22 @@ class EntityReadSerializer(BaseModelSerializer):
         """Number of solutions where this entity is declared as a subcontractor.
 
         Powers the Entity detail view's "Used as subcontractor in N solutions"
-        panel and the disabled-delete-button tooltip.
+        panel and the disabled-delete-button tooltip. Skipped on the list
+        endpoint to avoid one COUNT per row (N+1); computed everywhere else
+        (detail, direct serializer use, exports, tests).
         """
+        if self.context.get("action") == "list":
+            return 0
         return obj.subcontracts.count()
 
     def get_subcontracts_usage(self, obj):
-        """Up to 50 solutions blocking deletion, with parent contract."""
+        """Up to 50 solutions blocking deletion, with parent contract.
+
+        Skipped on the list endpoint to avoid a per-row N+1; computed
+        everywhere else.
+        """
+        if self.context.get("action") == "list":
+            return []
         rows = obj.subcontracts.select_related("solution").order_by("solution__name")[
             :50
         ]
@@ -234,7 +244,10 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
                 audit.create_requirement_assessments()
                 audit.reviewers.set(instance.reviewers.all())
                 representatives = instance.representatives.all()
-                audit.authors.set([rep.actor for rep in representatives])
+                audit.authors.set(
+                    [rep.actor for rep in representatives if hasattr(rep, "actor")]
+                )
+                self._create_requirement_assignment(audit, representatives)
                 instance.compliance_assessment = audit
                 instance.save()
         else:
@@ -242,8 +255,33 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
                 audit = instance.compliance_assessment
                 audit.reviewers.set(instance.reviewers.all())
                 representatives = instance.representatives.all()
-                audit.authors.set([rep.actor for rep in representatives])
+                audit.authors.set(
+                    [rep.actor for rep in representatives if hasattr(rep, "actor")]
+                )
+                self._sync_requirement_assignment(audit, representatives)
             instance.save()
+
+    def _sync_requirement_assignment(self, audit, representatives):
+        """Create or update the RequirementAssignment so its actors match the representatives."""
+        actors = [rep.actor for rep in representatives if hasattr(rep, "actor")]
+        assignment = audit.requirement_assignments.first()
+        if assignment is None:
+            if not actors:
+                return
+            requirement_assessments = audit.requirement_assessments.all()
+            if not requirement_assessments.exists():
+                return
+            assignment = RequirementAssignment.objects.create(
+                compliance_assessment=audit,
+                folder=audit.folder,
+            )
+            assignment.actor.set(actors)
+            assignment.requirement_assessments.set(requirement_assessments)
+        else:
+            assignment.actor.set(actors)
+
+    def _create_requirement_assignment(self, audit, representatives):
+        self._sync_requirement_assignment(audit, representatives)
 
     def _assign_third_party_respondents(
         self,

@@ -4,6 +4,14 @@ permissions:
 
 on:
   pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize]
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - "enterprise/**"
+      - "docker-compose-build.yml"
+      - ".github/workflows/startup-tests.yml"
   workflow_dispatch:
 
 # Cancel older in-progress runs for the same PR or the same ref (branch)
@@ -25,7 +33,48 @@ env:
   PYTHON_VERSION: "3.12"
 
 jobs:
+  prime_playwright_cache:
+    runs-on: ubuntu-24.04
+    outputs:
+      playwright-version: ${{ steps.playwright-version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10
+
+      - name: Install frontend dependencies
+        working-directory: ${{ env.frontend-directory }}
+        run: pnpm i --frozen-lockfile
+
+      - name: Get installed Playwright version
+        id: playwright-version
+        working-directory: ${{ env.frontend-directory }}
+        run: |
+          PLAYWRIGHT_VERSION=$(node -p "require('@playwright/test/package.json').version")
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> "$GITHUB_ENV"
+          echo "version=$PLAYWRIGHT_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Cache playwright binaries
+        id: playwright-cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
+
+      - name: Download Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        working-directory: ${{ env.frontend-directory }}
+        run: pnpm exec playwright install
+
   startup-functional-test:
+    needs: prime_playwright_cache
     runs-on: ubuntu-24.04
     env:
       LOG_LEVEL: DEBUG
@@ -56,15 +105,15 @@ jobs:
         python-version: ["3.14"]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: lts/*
+          node-version: "24"
       - name: Install Poetry via pipx
         shell: bash
         run: |
@@ -80,12 +129,26 @@ jobs:
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
         run: poetry install
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10
       - name: Install frontend dependencies
         working-directory: ${{ env.frontend-directory }}
+        run: pnpm i --frozen-lockfile
+      - name: Get installed Playwright version
+        working-directory: ${{ env.frontend-directory }}
         run: |
-          npm install -g pnpm
-          pnpm i --frozen-lockfile
-      - name: Install Playwright Browsers
+          PLAYWRIGHT_VERSION=$(node -p "require('@playwright/test/package.json').version")
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> "$GITHUB_ENV"
+      - name: Cache playwright binaries
+        id: playwright-cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
+      - name: Download Playwright browsers (cache miss fallback)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         working-directory: ${{ env.frontend-directory }}
         run: pnpm exec playwright install
       - name: Run migrations
@@ -98,7 +161,7 @@ jobs:
           nohup poetry run python manage.py runserver &
       - name: Build frontend
         env:
-          NODE_OPTIONS: "--max-old-space-size=6144"
+          NODE_OPTIONS: "--max-old-space-size=10240"
         working-directory: ${{ env.frontend-directory }}
         run: pnpm run build
       - name: Run tests
@@ -112,7 +175,7 @@ jobs:
         run: |
           SAFE_NAME=$(echo "$BRANCH_NAME" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
           echo "BRANCH_SANITIZED=$SAFE_NAME" >> $GITHUB_ENV
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}
@@ -122,21 +185,36 @@ jobs:
           retention-days: 5
 
   startup-docker-compose-test:
+    needs: prime_playwright_cache
     runs-on: ubuntu-24.04
     timeout-minutes: 22
     env:
       COMPOSE_TEST: True
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: lts/*
+          node-version: "24"
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10
       - name: Install frontend dependencies
         working-directory: ${{ env.frontend-directory }}
+        run: pnpm i --frozen-lockfile
+      - name: Get installed Playwright version
+        working-directory: ${{ env.frontend-directory }}
         run: |
-          npm install -g pnpm
-          pnpm i --frozen-lockfile
-      - name: Install Playwright Browsers
+          PLAYWRIGHT_VERSION=$(node -p "require('@playwright/test/package.json').version")
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> "$GITHUB_ENV"
+      - name: Cache playwright binaries
+        id: playwright-cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
+      - name: Download Playwright browsers (cache miss fallback)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         working-directory: ${{ env.frontend-directory }}
         run: pnpm exec playwright install
       - name: Build the Docker app
@@ -171,6 +249,7 @@ jobs:
           exit 1
 
   enterprise-startup-functional-test:
+    needs: prime_playwright_cache
     runs-on: ubuntu-24.04
     timeout-minutes: 19
     env:
@@ -203,15 +282,15 @@ jobs:
         python-version: ["3.14"]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: lts/*
+          node-version: "24"
       - name: Install Poetry via pipx
         shell: bash
         run: |
@@ -235,9 +314,21 @@ jobs:
       - name: Build enterprise frontend
         working-directory: ${{ env.enterprise-frontend-directory }}
         env:
-          NODE_OPTIONS: "--max-old-space-size=6144"
+          NODE_OPTIONS: "--max-old-space-size=10240"
         run: make
-      - name: Install Playwright Browsers
+      - name: Get installed Playwright version
+        working-directory: ${{ env.enterprise-frontend-build-directory }}
+        run: |
+          PLAYWRIGHT_VERSION=$(node -p "require('@playwright/test/package.json').version")
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> "$GITHUB_ENV"
+      - name: Cache playwright binaries
+        id: playwright-cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
+      - name: Download Playwright browsers (cache miss fallback)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         working-directory: ${{ env.enterprise-frontend-build-directory }}
         run: pnpm exec playwright install
       - name: Run migrations
@@ -261,7 +352,7 @@ jobs:
         run: |
           SAFE_NAME=$(echo "$BRANCH_NAME" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
           echo "BRANCH_SANITIZED=$SAFE_NAME" >> $GITHUB_ENV
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}
@@ -271,18 +362,31 @@ jobs:
           retention-days: 5
 
   enterprise-startup-docker-compose-test:
+    needs: prime_playwright_cache
     runs-on: ubuntu-24.04
     env:
       COMPOSE_TEST: True
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: lts/*
+          node-version: "24"
       - name: Install frontend dependencies
         working-directory: ${{ env.enterprise-frontend-directory }}
         run: make pre-build
-      - name: Install Playwright Browsers
+      - name: Get installed Playwright version
+        working-directory: ${{ env.enterprise-frontend-build-directory }}
+        run: |
+          PLAYWRIGHT_VERSION=$(node -p "require('@playwright/test/package.json').version")
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> "$GITHUB_ENV"
+      - name: Cache playwright binaries
+        id: playwright-cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
+      - name: Download Playwright browsers (cache miss fallback)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         working-directory: ${{ env.enterprise-frontend-build-directory }}
         run: pnpm exec playwright install
       - name: Build the Docker app

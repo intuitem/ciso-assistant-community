@@ -1,0 +1,1241 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:iec-62443-4-2-2019
+locale: en
+ref_id: iec-62443-4-2-2019
+name: "IEC 62443-4-2:2019 \u2014 Technical security requirements for IACS components\
+  \ (outline)"
+description: "Outline of IEC 62443-4-2:2019 \u2014 Security for industrial automation\
+  \ and control systems - Part 4-2: Technical security requirements for IACS components.\
+  \ Targets product suppliers; basis of the ISASecure CSA certification. Lists 4 Common\
+  \ Component Security Constraints (CCSCs), 58 Component Requirements (CRs) inheriting\
+  \ the 7 Foundational Requirements from 62443-3-3, plus component-type overlays for\
+  \ software applications (SAR), embedded devices (EDR), host devices (HDR) and network\
+  \ devices (NDR). 92 assessable rows with paraphrased descriptions; purchase the\
+  \ standard for normative text, REs, and Annex B SL gating table."
+copyright: IEC - Purchase the standard for the full normative text.
+version: 1
+publication_date: 2026-04-28
+provider: IEC
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:iec-62443-4-2-2019
+    ref_id: iec-62443-4-2-2019
+    name: "IEC 62443-4-2:2019 \u2014 Technical security requirements for IACS components\
+      \ (outline)"
+    description: 'Use implementation-group filtering to scope by component type: select
+      ''cr'' + ''software_app'' / ''embedded_device'' / ''host_device'' / ''network_device''
+      depending on what is being certified. Always include ''ccsc''.'
+    min_score: 0
+    max_score: 5
+    scores_definition:
+    - score: 0
+      name: Incomplete
+      description: Ad hoc and unknown
+    - score: 1
+      name: Initial
+      description: Unpredictable and reactive
+    - score: 2
+      name: Managed
+      description: Managed on the project level
+    - score: 3
+      name: Defined
+      description: Proactive, rather than reactive
+    - score: 4
+      name: Quantitatively managed
+      description: Measured and controlled
+    - score: 5
+      name: Optimizing
+      description: Stable and flexible
+    implementation_groups_definition:
+    - ref_id: ccsc
+      name: Common Component Security Constraints
+      description: 4 framing constraints (clause 4) - mandatory for all components.
+    - ref_id: cr
+      name: Component Requirements
+      description: 58 CRs across FR1-FR7 (clauses 5-11) - mandatory for all components.
+    - ref_id: software_app
+      name: Software Application Requirements
+      description: 2 SARs specific to software applications (clause 12).
+    - ref_id: embedded_device
+      name: Embedded Device Requirements
+      description: 8 EDRs specific to embedded devices (clause 13).
+    - ref_id: host_device
+      name: Host Device Requirements
+      description: 8 HDRs specific to host devices (clause 14).
+    - ref_id: network_device
+      name: Network Device Requirements
+      description: 12 NDRs specific to network devices (clause 15).
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Common component security constraints
+      description: Foundational constraints applying to every component requirement;
+        must hold for any SL-C(component) claim.
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ccsc-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:4
+      ref_id: CCSC 1
+      name: Support of essential functions
+      description: 'Control: Component security mechanisms do not impair the operation
+        of essential functions of the broader control system, including under degraded
+        conditions or failure of the security mechanism itself. Verify: Component
+        behavior under security-mechanism failure (auth server unreachable, certificate
+        expired) is documented and acceptable; essential-function trace exists.'
+      implementation_groups:
+      - ccsc
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ccsc-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:4
+      ref_id: CCSC 2
+      name: Compensating countermeasures
+      description: 'Control: Where a component requirement cannot be met directly,
+        compensating countermeasures provide equivalent capability at the target SL-C(component)
+        for the affected zone. Verify: Each compensating countermeasure is documented
+        with the CR it offsets, equivalent SL-C analysis, asset-owner approval, and
+        effectiveness evidence.'
+      implementation_groups:
+      - ccsc
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ccsc-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:4
+      ref_id: CCSC 3
+      name: Least privilege
+      description: 'Control: Component access controls grant users, processes, and
+        connected devices only the privileges required for authorized component functions.
+        Verify: Component role/permission definitions are minimal-privilege; service
+        accounts run with restricted rights; emergency elevations are logged.'
+      implementation_groups:
+      - ccsc
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ccsc-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:4
+      ref_id: CCSC 4
+      name: Software development process
+      description: 'Control: The component is developed under a secure development
+        process meeting IEC 62443-4-1. Verify: The supplier holds an SDLA certification
+        or equivalent attestation against 62443-4-1; supporting process artifacts
+        are referenced.'
+      implementation_groups:
+      - ccsc
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: FR 1 - Identification and authentication control
+      description: The component identifies and authenticates all human users, software
+        processes, and devices before granting access.
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      ref_id: CR 1.1
+      name: Human user identification and authentication
+      description: 'Control: The component identifies and authenticates each human
+        user before granting access on every interface (local console, remote, configuration
+        tool). Verify: Each human user has a unique identity for non-shared use; where
+        shared/role accounts are operationally required they are documented with compensating
+        controls. NIST 800-53: IA-2, IA-5, IA-8.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      ref_id: CR 1.2
+      name: Software process and device identification and authentication
+      description: 'Control: The component identifies and authenticates software processes
+        and connected devices before granting them access. Verify: Each non-human
+        entity has a distinct identity used during authentication. NIST 800-53: IA-3,
+        IA-9.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      ref_id: CR 1.3
+      name: Account management
+      description: 'Control: Component accounts (operator, engineer, admin, service,
+        vendor) are created, modified, enabled, disabled, and removed under a documented
+        account-management process. Verify: Component supports the account-lifecycle
+        steps; vendor and maintenance accounts have documented offboarding. NIST 800-53:
+        AC-2.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      ref_id: CR 1.4
+      name: Identifier management
+      description: 'Control: Component identifiers (user IDs, device IDs) are unique
+        over the system lifetime, non-reusable for a defined period after retirement,
+        and traceable in audit records. Verify: Identifier-management policy is documented
+        and enforced by the component. NIST 800-53: IA-4.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      ref_id: CR 1.5
+      name: Authenticator management
+      description: 'Control: The component supports issuing, distributing, storing
+        protected (hashed/encrypted, never plaintext), rotating, and revoking authenticators;
+        default credentials are changed before commissioning. Verify: Authenticator
+        storage uses appropriate protection; rotation/revocation is supported; default
+        credentials can be (and are) changed before production. NIST 800-53: IA-5.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      ref_id: CR 1.6
+      name: Wireless access management
+      description: 'Control: Wireless connections to the component are authorized,
+        identified, authenticated, encrypted, and segregated from wired networks.
+        Verify: Component supports authenticated/encrypted wireless protocols; rogue-AP
+        detection coordinates with the broader system. NIST 800-53: AC-18.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      ref_id: CR 1.7
+      name: Strength of password-based authentication
+      description: 'Control: Component password-based authentication uses configurable
+        strength rules (length, complexity, lifetime, history) appropriate to the
+        assigned SL-C(component). Verify: Password policy is enforced and configurable
+        on the component. NIST 800-53: IA-5(1).'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      ref_id: CR 1.8
+      name: Public key infrastructure certificates
+      description: 'Control: Where PKI is used, the component supports certificate
+        issuance, validation, revocation checking, and trust-chain management. Verify:
+        Component validates certificates (path, expiry, CRL/OCSP) on every authentication
+        attempt. NIST 800-53: IA-5(2).'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      ref_id: CR 1.9
+      name: Strength of public key-based authentication
+      description: 'Control: Component public-key authentication uses key strengths
+        and algorithms appropriate to the assigned SL-C (e.g. RSA-2048+, ECDSA P-256+).
+        Verify: Key sizes and algorithms in use meet documented minimums and are upgradable.
+        NIST 800-53: SC-12, SC-13.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      ref_id: CR 1.10
+      name: Authenticator feedback
+      description: 'Control: Component authentication input (e.g. typed passwords)
+        is obscured and authentication errors do not disclose which factor was incorrect.
+        Verify: Password fields obscure input; failure messages are generic. NIST
+        800-53: IA-6.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      ref_id: CR 1.11
+      name: Unsuccessful login attempts
+      description: 'Control: Component limits consecutive failed login attempts and
+        takes a defined action (lockout, alert) when the threshold is reached, balanced
+        against essential-function continuity. Verify: Failed-attempt threshold is
+        configurable; lockout is logged and has a recovery procedure. NIST 800-53:
+        AC-7.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      ref_id: CR 1.12
+      name: System use notification
+      description: 'Control: Component displays an authorized-use banner before granting
+        access. Verify: Banner is configurable and displayed on all interactive sessions.
+        NIST 800-53: AC-8.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      ref_id: CR 1.13
+      name: Access via untrusted networks
+      description: 'Control: Component access from untrusted networks is monitored,
+        individually authorized, terminated at a controlled boundary, and protected
+        by additional safeguards. Verify: Untrusted-network access paths are documented;
+        safeguards exceed intra-zone authentication. NIST 800-53: AC-17.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-1.14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:5
+      ref_id: CR 1.14
+      name: Strength of symmetric key-based authentication
+      description: 'Control: Component symmetric-key authentication uses key strengths
+        and algorithms appropriate to the assigned SL-C. Verify: Symmetric primitives
+        in use are documented, current, and key management is documented. NIST 800-53:
+        SC-12, SC-13.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: FR 2 - Use control
+      description: The component restricts what authenticated users, processes, and
+        devices can do.
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
+      ref_id: CR 2.1
+      name: Authorization enforcement
+      description: "Control: Component enforces authorizations on every protected\
+        \ action \u2014 view-only, operate, configure, override \u2014 per role assigned.\
+        \ Verify: Component supports a role-to-action matrix; access decisions match\
+        \ assignments. NIST 800-53: AC-3."
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
+      ref_id: CR 2.2
+      name: Wireless use control
+      description: 'Control: Wireless connections to the component are subject to
+        the same use-control authorizations as wired access. Verify: Wireless access
+        does not bypass authorization checks present on wired interfaces.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
+      ref_id: CR 2.3
+      name: Use control for portable and mobile devices
+      description: 'Control: Portable and mobile devices connected to the component
+        are authorized, monitored, and constrained. Verify: Component logs portable-device
+        connections; unauthorized devices are blocked. NIST 800-53: MP-7.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
+      ref_id: CR 2.4
+      name: Mobile code
+      description: 'Control: Component restricts mobile code (interpreters, scripts,
+        plugins) to authorized types and trusted sources. Verify: Allowed mobile-code
+        types/sources are documented; unauthorized code is blocked. NIST 800-53: SC-18.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
+      ref_id: CR 2.5
+      name: Session lock
+      description: 'Control: Component session locks after configurable inactivity
+        and requires re-authentication to resume. Verify: Session-lock timeout is
+        configurable on the component. NIST 800-53: AC-11.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
+      ref_id: CR 2.6
+      name: Remote session termination
+      description: 'Control: Remote sessions on the component are terminated automatically
+        after defined inactivity or upon logout. Verify: Remote-session termination
+        is configurable, enforced, and logged. NIST 800-53: AC-12.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
+      ref_id: CR 2.7
+      name: Concurrent session control
+      description: 'Control: Component limits concurrent sessions per user/device
+        to a configurable value. Verify: Concurrent-session limit is configurable
+        and enforced. NIST 800-53: AC-10.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
+      ref_id: CR 2.8
+      name: Auditable events
+      description: 'Control: Component records audit events covering authentication,
+        authorization, account changes, privilege escalations, and configuration changes
+        (including changes to the audit configuration itself). Verify: Auditable-event
+        catalog is documented and the component captures each listed event class.
+        NIST 800-53: AU-2, AU-3, AU-12.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
+      ref_id: CR 2.9
+      name: Audit storage capacity
+      description: 'Control: Component provides sufficient audit storage to retain
+        records for the required retention period under expected event rates. Verify:
+        Storage sizing and overflow handling (rotation, alarms) are documented. NIST
+        800-53: AU-4.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
+      ref_id: CR 2.10
+      name: Response to audit processing failures
+      description: 'Control: Component takes a configured response to audit-processing
+        failures (logger crash, storage exhaustion): alarm, halt, or controlled overwrite.
+        Verify: Failure response is documented and tested. NIST 800-53: AU-5.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
+      ref_id: CR 2.11
+      name: Timestamps
+      description: 'Control: Component uses synchronized, accurate timestamps for
+        audit records and inter-component sequencing. Verify: Component is time-synchronized
+        to a documented reference; clock drift is bounded. NIST 800-53: AU-8, SC-45.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
+      ref_id: CR 2.12
+      name: Non-repudiation
+      description: 'Control: Component binds audit records and security-critical actions
+        to the originating identity such that the originator cannot plausibly deny
+        the action. Verify: Audit identifiers map uniquely to authenticated users/devices;
+        audit integrity is protected. NIST 800-53: AU-10.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-2.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:6
+      ref_id: CR 2.13
+      name: Use of physical diagnostic and test interfaces
+      description: 'Control: Component physical diagnostic/test interfaces (JTAG,
+        UART, debug ports, programming headers) are protected against unauthorized
+        use after development (disabled, locked, or authentication-protected). Verify:
+        Production components have diagnostic interfaces disabled or authenticated;
+        field-debug access is logged.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: FR 3 - System integrity
+      description: The component protects its own software, configuration, and security-critical
+        data from unauthorized modification.
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      ref_id: CR 3.1
+      name: Communication integrity
+      description: 'Control: Component protects communications against unauthorized
+        modification (cryptographic integrity codes, trusted-channel protocols); legacy
+        protocols without native integrity are wrapped. Verify: Each communication
+        channel uses an integrity mechanism appropriate to its target SL. NIST 800-53:
+        SC-8, SC-8(1).'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      ref_id: CR 3.2
+      name: Protection from malicious code
+      description: 'Control: Component implements detection and response measures
+        against malicious code suited to its operational context (allowlisting, anti-malware,
+        integrity checks). Verify: Documented malicious-code defense is in place and
+        does not conflict with essential functions. NIST 800-53: SI-3.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      ref_id: CR 3.3
+      name: Security functionality verification
+      description: 'Control: Component supports operator-initiated tests confirming
+        that security functions operate as intended. Verify: Security-functionality
+        tests exist, are documented, and are executable on the component. NIST 800-53:
+        SI-6.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      ref_id: CR 3.4
+      name: Software and information integrity
+      description: 'Control: Component detects unauthorized changes to software, configuration,
+        and security-critical information. Verify: Integrity monitoring (file-integrity,
+        signed firmware checks) is configured and alerts on deviations. NIST 800-53:
+        SI-7.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      ref_id: CR 3.5
+      name: Input validation
+      description: 'Control: Component validates inputs to security-relevant interfaces
+        (operator commands, network messages, configuration imports) against expected
+        syntax and semantics. Verify: Input-validation rules are documented per interface;
+        malformed inputs are rejected and logged. NIST 800-53: SI-10.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      ref_id: CR 3.6
+      name: Deterministic output
+      description: 'Control: Under abnormal conditions (failure, fault), component
+        outputs are placed in a documented, predetermined state to maintain process
+        safety. Verify: Fail-safe / fail-fixed behavior is documented per output and
+        validated under test.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      ref_id: CR 3.7
+      name: Error handling
+      description: 'Control: Component handles errors without exposing sensitive information
+        or destabilizing operation. Verify: Error messages disclose only what is needed;
+        no leakage of credentials, paths, or internal configuration. NIST 800-53:
+        SI-11.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      ref_id: CR 3.8
+      name: Session integrity
+      description: 'Control: Component sessions are protected against hijacking, replay,
+        and unauthorized re-use (unpredictable tokens, timeouts, source binding).
+        Verify: Session tokens are unpredictable, expire, and are invalidated on logout.
+        NIST 800-53: SC-23.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      ref_id: CR 3.9
+      name: Protection of audit information
+      description: 'Control: Component audit records and audit tooling are protected
+        from unauthorized access, modification, and deletion. Verify: Audit data has
+        restricted access; integrity is enforced (write-once or signed). NIST 800-53:
+        AU-9.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      ref_id: CR 3.10
+      name: Support for updates
+      description: 'Control: Component supports authenticated, integrity-protected
+        updates throughout its lifecycle. Verify: Update mechanism uses signed packages;
+        update history is auditable; update failure is handled gracefully (rollback,
+        atomic install). NIST 800-53: SI-2.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      ref_id: CR 3.11
+      name: Physical tamper resistance and detection
+      description: 'Control: Component resists (where SL requires) and detects physical
+        tamper attempts. Verify: Tamper-resistance and tamper-detection mechanisms
+        are documented per SL; tamper events are logged or trigger key zeroization.
+        NIST 800-53: PE-3, SC-12(8).'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      ref_id: CR 3.12
+      name: Provisioning product supplier roots of trust
+      description: 'Control: Roots of trust originating from the product supplier
+        (signing keys, factory certificates) are provisioned and protected. Verify:
+        Provisioning process is documented and audited; supplier root-of-trust integrity
+        is verifiable from firmware.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      ref_id: CR 3.13
+      name: Provisioning asset owner roots of trust
+      description: 'Control: Roots of trust originating from the asset owner (customer
+        CAs, configuration-signing keys) can be provisioned, replacing or augmenting
+        supplier defaults. Verify: Documented procedure exists for asset-owner root-of-trust
+        provisioning; supplier defaults can be removed.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-3.14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:7
+      ref_id: CR 3.14
+      name: Integrity of the boot process
+      description: 'Control: Component boot process verifies the integrity of firmware,
+        bootloader, and OS images using cryptographic mechanisms (secure boot). Verify:
+        Secure boot is enabled by default in production; boot-failure response (halt,
+        alert, recovery) is documented.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:8
+      assessable: false
+      depth: 1
+      ref_id: '8'
+      name: FR 4 - Data confidentiality
+      description: The component protects data at rest and in transit from unauthorized
+        disclosure.
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:8
+      ref_id: CR 4.1
+      name: Information confidentiality
+      description: 'Control: Component protects information classified as confidential
+        against unauthorized disclosure both at rest and in transit. Verify: Encryption
+        at rest, encryption/trusted channel in transit, and access control match the
+        classification scheme. NIST 800-53: SC-8, SC-28.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:8
+      ref_id: CR 4.2
+      name: Information persistence
+      description: "Control: Component sanitizes or renders unreadable data that persists\
+        \ in any storage medium beyond its operational need \u2014 including NVRAM,\
+        \ flash, EEPROM, removable storage, swap files, configuration backups, and\
+        \ decommissioning paths. Verify: Data-disposal procedure is documented per\
+        \ medium type and supported by the component (factory-reset, secure-erase,\
+        \ key-zeroization). NIST 800-53: MP-6."
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-4.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:8
+      ref_id: CR 4.3
+      name: Use of cryptography
+      description: 'Control: Cryptographic mechanisms in the component follow approved
+        algorithms, modes, and key-length minimums appropriate to the assigned SL.
+        Verify: Cryptographic primitives are documented, current, and key management
+        is documented. NIST 800-53: SC-13.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:9
+      assessable: false
+      depth: 1
+      ref_id: '9'
+      name: FR 5 - Restricted data flow
+      description: The component supports the zone-and-conduit data-flow model defined
+        for the system.
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:9
+      ref_id: CR 5.1
+      name: Network segmentation
+      description: 'Control: Component supports network segmentation (e.g. multiple
+        network interfaces, VLAN tagging) consistent with the zone-and-conduit design.
+        Verify: Component segmentation capabilities match the documented zone diagram.
+        NIST 800-53: SC-7, SC-32, AC-4.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:9
+      ref_id: CR 5.2
+      name: Zone boundary protection
+      description: 'Control: Component (when acting as a boundary) enforces the documented
+        inter-zone data-flow policy. Verify: Boundary rules implemented by the component
+        match the zone-and-conduit design; rule changes go through change control.
+        NIST 800-53: SC-7, SC-46.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-5.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:9
+      ref_id: CR 5.3
+      name: General-purpose person-to-person communication restrictions
+      description: 'Control: Component restricts general-purpose person-to-person
+        communications (email, chat, browsing) on or through it. Verify: Such applications
+        are not installed on the component, or their network access is blocked at
+        the boundary.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-5.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:9
+      ref_id: CR 5.4
+      name: Application partitioning
+      description: 'Control: Component application functions are partitioned so compromise
+        of one component-internal function does not propagate freely to others. Verify:
+        Application functions run in isolated execution environments (separate processes,
+        accounts) per documented design. NIST 800-53: SC-2, SC-3.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:10
+      assessable: false
+      depth: 1
+      ref_id: '10'
+      name: FR 6 - Timely response to events
+      description: The component supports detecting and reporting security-relevant
+        events.
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-6.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:10
+      ref_id: CR 6.1
+      name: Audit log accessibility
+      description: 'Control: Authorized personnel can read and analyze component audit
+        records via a defined interface. Verify: Audit-data access is provisioned
+        for security and operations staff; read access does not interfere with workload.
+        NIST 800-53: AU-6, AU-7.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-6.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:10
+      ref_id: CR 6.2
+      name: Continuous monitoring
+      description: 'Control: Component supports continuous monitoring by forwarding
+        security-relevant events to a central facility (SIEM, monitoring station).
+        Verify: Monitoring path exists and is operational; monitored event categories
+        cover the auditable-events catalog. NIST 800-53: SI-4, CA-7.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:11
+      assessable: false
+      depth: 1
+      ref_id: '11'
+      name: FR 7 - Resource availability
+      description: The component maintains the availability of its resources during
+        normal and adverse conditions.
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-7.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:11
+      ref_id: CR 7.1
+      name: Denial of service protection
+      description: 'Control: Component maintains operational state under defined denial-of-service
+        conditions through resource limits, rate limits, and segmentation. Verify:
+        DoS protections are configured and tested; essential functions remain available.
+        NIST 800-53: SC-5.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-7.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:11
+      ref_id: CR 7.2
+      name: Resource management
+      description: 'Control: Component reserves or prioritizes resources for security-relevant
+        and safety-relevant functions over non-essential workloads. Verify: Resource
+        limits are documented per process; monitoring detects exhaustion. NIST 800-53:
+        SC-6.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-7.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:11
+      ref_id: CR 7.3
+      name: Control system backup
+      description: 'Control: Component supports backup of its state (configuration,
+        applications, programs) on a defined schedule with secure storage. Verify:
+        Backup scope is documented; backups are completed and integrity-verified.
+        NIST 800-53: CP-9, CP-6.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-7.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:11
+      ref_id: CR 7.4
+      name: Control system recovery and reconstitution
+      description: 'Control: Component supports recovery to a known-good operational
+        state after a disruption using available backups. Verify: Documented recovery
+        procedures exist and have been tested end-to-end. NIST 800-53: CP-10.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-7.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:11
+      ref_id: CR 7.5
+      name: Emergency power
+      description: 'Control: Component supports operation through an emergency power
+        source sized for the required hold-up time (where applicable). Verify: Emergency
+        power coverage is documented; hold-up time is tested on a schedule. NIST 800-53:
+        PE-11.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-7.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:11
+      ref_id: CR 7.6
+      name: Network and security configuration settings
+      description: 'Control: Component ships with a secure-by-default configuration
+        (no unnecessary services enabled, no default credentials in production, encryption
+        on by default); on-site changes are managed under configuration control against
+        a documented secure baseline. Verify: Out-of-the-box configuration meets a
+        documented secure baseline; deviations applied during deployment are reviewed
+        and approved; default credentials are forced-changed at first use. NIST 800-53:
+        CM-6.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-7.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:11
+      ref_id: CR 7.7
+      name: Least functionality
+      description: 'Control: Component is configured to provide only the network ports,
+        services, and applications required for its authorized functions. Verify:
+        Installed services and open ports are documented and minimized; unused services
+        are disabled. NIST 800-53: CM-7.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:cr-7.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:11
+      ref_id: CR 7.8
+      name: Control system component inventory
+      description: 'Control: Component supports being inventoried (hardware identifiers,
+        firmware versions, software versions) by the broader IACS asset-management
+        system. Verify: Inventory data is exposed via a documented interface; reconciles
+        with the deployed component state. NIST 800-53: CM-8.'
+      implementation_groups:
+      - cr
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:12
+      assessable: false
+      depth: 1
+      ref_id: '12'
+      name: Software application requirements (SAR)
+      description: Component-type-specific overlays for software applications. Apply
+        when certifying a software-application component.
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:sar-2.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:12
+      ref_id: SAR 2.4
+      name: Mobile code (software application)
+      description: "Control: For software applications, mobile-code restrictions cover\
+        \ the application's runtime \u2014 embedded interpreters, scripting hosts,\
+        \ plugin systems. Verify: Application mobile-code execution paths are documented\
+        \ and constrained per allowlist."
+      implementation_groups:
+      - software_app
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:sar-3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:12
+      ref_id: SAR 3.2
+      name: Protection from malicious code (software application)
+      description: 'Control: Software application provides hooks for malicious-code
+        protection (allowlisting, integrity validation) compatible with its runtime.
+        Verify: Application-level integrity checks (manifest verification, code signing,
+        plugin signing) are documented.'
+      implementation_groups:
+      - software_app
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:13
+      assessable: false
+      depth: 1
+      ref_id: '13'
+      name: Embedded device requirements (EDR)
+      description: Component-type-specific overlays for embedded devices (PLCs, RTUs,
+        IEDs). Apply when certifying an embedded-device component.
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:edr-2.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:13
+      ref_id: EDR 2.4
+      name: Mobile code (embedded device)
+      description: 'Control: Embedded device mobile-code restrictions cover firmware-loaded
+        scripts, interpreters, and dynamically loaded code. Verify: Firmware does
+        not load unsigned dynamic code; allowed-types list is documented.'
+      implementation_groups:
+      - embedded_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:edr-2.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:13
+      ref_id: EDR 2.13
+      name: Use of physical diagnostic and test interfaces (embedded device)
+      description: 'Control: Embedded device debug interfaces (JTAG, UART, programming
+        headers) are disabled or authentication-locked in production. Verify: Production
+        firmware disables debug interfaces; access requires an authenticated procedure.'
+      implementation_groups:
+      - embedded_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:edr-3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:13
+      ref_id: EDR 3.2
+      name: Protection from malicious code (embedded device)
+      description: 'Control: Embedded device firmware integrity is verified (signed
+        firmware, secure boot); the device does not execute unsigned code. Verify:
+        Firmware signing is enforced at boot; signing-key management is documented.'
+      implementation_groups:
+      - embedded_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:edr-3.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:13
+      ref_id: EDR 3.10
+      name: Support for updates (embedded device)
+      description: 'Control: Embedded device firmware updates are authenticated, integrity-protected,
+        and survive interruption (atomic install / dual-bank). Verify: Update mechanism
+        uses signed firmware; partial-update failure does not brick the device.'
+      implementation_groups:
+      - embedded_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:edr-3.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:13
+      ref_id: EDR 3.11
+      name: Physical tamper resistance and detection (embedded device)
+      description: 'Control: Embedded device tamper-resistance mechanisms (potting,
+        mesh, sensors) match the SL-C; tamper events are logged or trigger key zeroization.
+        Verify: Physical-tamper testing has been performed; tamper-response behavior
+        is documented.'
+      implementation_groups:
+      - embedded_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:edr-3.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:13
+      ref_id: EDR 3.12
+      name: Provisioning product supplier roots of trust (embedded device)
+      description: 'Control: Supplier roots of trust are provisioned in a secure factory
+        environment and protected in hardware (secure element, fuses, OTP). Verify:
+        Factory provisioning has documented controls; supplier roots are stored in
+        tamper-resistant storage.'
+      implementation_groups:
+      - embedded_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:edr-3.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:13
+      ref_id: EDR 3.13
+      name: Provisioning asset owner roots of trust (embedded device)
+      description: 'Control: Asset-owner roots can be provisioned through an authenticated
+        procedure; supplier defaults can be replaced. Verify: A documented owner-provisioning
+        procedure exists; ownership-transfer steps are auditable.'
+      implementation_groups:
+      - embedded_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:edr-3.14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:13
+      ref_id: EDR 3.14
+      name: Integrity of the boot process (embedded device)
+      description: 'Control: Embedded device secure boot validates firmware authenticity
+        from the immutable hardware root of trust through bootloader and OS. Verify:
+        Secure-boot chain is documented; boot-failure behavior (halt, recovery) is
+        defined.'
+      implementation_groups:
+      - embedded_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:14
+      assessable: false
+      depth: 1
+      ref_id: '14'
+      name: Host device requirements (HDR)
+      description: Component-type-specific overlays for host devices (engineering
+        workstations, servers, HMI hosts). Apply when certifying a host-device component.
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:hdr-2.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:14
+      ref_id: HDR 2.4
+      name: Mobile code (host device)
+      description: 'Control: Host device mobile-code restrictions cover OS-level interpreters,
+        drivers, plugins, and scripts. Verify: Host-OS configurations restrict mobile-code
+        execution per documented allowlist.'
+      implementation_groups:
+      - host_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:hdr-2.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:14
+      ref_id: HDR 2.13
+      name: Use of physical diagnostic and test interfaces (host device)
+      description: 'Control: Host device physical interfaces (USB, serial, JTAG) are
+        managed (disabled where not needed, authentication-locked otherwise). Verify:
+        Physical-interface policy is documented and enforced via OS or hardware controls.'
+      implementation_groups:
+      - host_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:hdr-3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:14
+      ref_id: HDR 3.2
+      name: Protection from malicious code (host device)
+      description: 'Control: Host devices implement malicious-code protection appropriate
+        to a general-purpose OS (anti-malware, allowlisting, integrity monitoring).
+        Verify: Host-OS protection is configured, current, and monitored.'
+      implementation_groups:
+      - host_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:hdr-3.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:14
+      ref_id: HDR 3.10
+      name: Support for updates (host device)
+      description: 'Control: Host-OS and application updates are authenticated and
+        integrity-protected. Verify: OS and application updates are signed; update
+        mechanism is documented.'
+      implementation_groups:
+      - host_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:hdr-3.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:14
+      ref_id: HDR 3.11
+      name: Physical tamper resistance and detection (host device)
+      description: 'Control: Host devices implement physical access controls and tamper
+        detection (chassis intrusion, boot-time integrity). Verify: Tamper-detection
+        events are logged; physical-access controls are documented.'
+      implementation_groups:
+      - host_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:hdr-3.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:14
+      ref_id: HDR 3.12
+      name: Provisioning product supplier roots of trust (host device)
+      description: 'Control: Host devices ship with supplier roots of trust protected
+        by hardware (TPM, OS keys). Verify: TPM/HSM provenance is documented; supplier-root
+        integrity is verifiable.'
+      implementation_groups:
+      - host_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:hdr-3.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:14
+      ref_id: HDR 3.13
+      name: Provisioning asset owner roots of trust (host device)
+      description: 'Control: Asset owners can provision their own roots of trust onto
+        the host (TPM ownership transfer, custom CA install). Verify: Owner-provisioning
+        procedure is documented; supplier defaults can be replaced.'
+      implementation_groups:
+      - host_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:hdr-3.14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:14
+      ref_id: HDR 3.14
+      name: Integrity of the boot process (host device)
+      description: 'Control: Host secure boot (UEFI Secure Boot, measured boot) validates
+        the host boot chain from hardware root of trust. Verify: Secure boot is enabled
+        in production; boot-time integrity is measurable (e.g. via TPM PCR values).'
+      implementation_groups:
+      - host_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
+      assessable: false
+      depth: 1
+      ref_id: '15'
+      name: Network device requirements (NDR)
+      description: Component-type-specific overlays for network devices (switches,
+        routers, firewalls, gateways). Apply when certifying a network-device component.
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-1.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
+      ref_id: NDR 1.6
+      name: Wireless access management (network device)
+      description: 'Control: Network devices providing wireless access (APs) implement
+        wireless-specific authentication, encryption, and segregation. Verify: Wireless-AP
+        configurations are documented (SSIDs, encryption, auth methods); wireless
+        segments are isolated.'
+      implementation_groups:
+      - network_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-1.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
+      ref_id: NDR 1.13
+      name: Access via untrusted networks (network device)
+      description: 'Control: Network devices acting as boundaries between trusted
+        and untrusted zones implement the additional safeguards required for untrusted-network
+        access. Verify: Boundary configurations match the documented inter-zone policy;
+        untrusted-side access requires elevated safeguards.'
+      implementation_groups:
+      - network_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-2.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
+      ref_id: NDR 2.4
+      name: Mobile code (network device)
+      description: 'Control: Mobile-code execution on network devices (embedded scripting,
+        automation) is restricted to authorized types and sources. Verify: Network-device
+        scripting/automation is constrained per documented allowlist.'
+      implementation_groups:
+      - network_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-2.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
+      ref_id: NDR 2.13
+      name: Use of physical diagnostic and test interfaces (network device)
+      description: 'Control: Network device physical interfaces (console, USB, JTAG)
+        are managed and physical access is controlled. Verify: Console/management
+        ports require authentication; out-of-band access is protected.'
+      implementation_groups:
+      - network_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
+      ref_id: NDR 3.2
+      name: Protection from malicious code (network device)
+      description: 'Control: Network device firmware integrity is verified; unauthorized
+        firmware will not load. Verify: Firmware signing is enforced; firmware-update
+        history is auditable.'
+      implementation_groups:
+      - network_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-3.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
+      ref_id: NDR 3.10
+      name: Support for updates (network device)
+      description: 'Control: Network device firmware updates are authenticated, integrity-protected,
+        and minimize service disruption (e.g. ISSU, graceful failover). Verify: Update
+        mechanism is documented; failover/rollback procedures are tested.'
+      implementation_groups:
+      - network_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-3.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
+      ref_id: NDR 3.11
+      name: Physical tamper resistance and detection (network device)
+      description: 'Control: Network devices implement physical access controls suited
+        to their deployment (locked enclosures, intrusion sensors). Verify: Physical-security
+        requirements are documented per deployment scenario.'
+      implementation_groups:
+      - network_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-3.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
+      ref_id: NDR 3.12
+      name: Provisioning product supplier roots of trust (network device)
+      description: 'Control: Supplier roots of trust are protected in network device
+        hardware (TPM, secure element). Verify: Supplier root-of-trust storage is
+        documented; provenance is verifiable.'
+      implementation_groups:
+      - network_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-3.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
+      ref_id: NDR 3.13
+      name: Provisioning asset owner roots of trust (network device)
+      description: 'Control: Asset-owner roots can be provisioned onto network devices
+        (custom CAs, signed configurations). Verify: Owner-provisioning procedure
+        exists; supplier defaults can be replaced.'
+      implementation_groups:
+      - network_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-3.14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
+      ref_id: NDR 3.14
+      name: Integrity of the boot process (network device)
+      description: 'Control: Network device secure boot validates firmware from hardware
+        root of trust. Verify: Secure-boot chain is documented and enforced in production.'
+      implementation_groups:
+      - network_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
+      ref_id: NDR 5.2
+      name: Zone boundary protection (network device)
+      description: 'Control: Network devices enforcing zone boundaries (firewalls,
+        gateways, data diodes) implement the documented inter-zone data-flow policy.
+        Verify: Boundary rules match the zone-and-conduit design; rule changes go
+        through change control. NIST 800-53: SC-7.'
+      implementation_groups:
+      - network_device
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:ndr-5.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-2-2019:15
+      ref_id: NDR 5.3
+      name: General purpose, person-to-person communication restrictions (network
+        device)
+      description: 'Control: Network devices block general-purpose person-to-person
+        communications (email, chat, browsing) at boundaries between control zones
+        and external networks. Verify: Boundary policies block general-purpose comms
+        protocols/ports between control zones and corporate/Internet zones.'
+      implementation_groups:
+      - network_device

@@ -19,6 +19,7 @@
 
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import ExportModal, { type ExportGroup } from '$lib/components/Modals/ExportModal.svelte';
 
 	import {
 		complianceResultColorMap,
@@ -39,7 +40,12 @@
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import SuggestControlsModal from '$lib/components/Modals/SuggestControlsModal.svelte';
-	import { displayScoreColor, darkenColor, getScoreHexColor } from '$lib/utils/helpers';
+	import {
+		displayScoreColor,
+		darkenColor,
+		getScoreHexColor,
+		getFieldVisibility
+	} from '$lib/utils/helpers';
 	import { auditFiltersStore, expandedNodesState } from '$lib/utils/stores';
 	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
 	import { derived } from 'svelte/store';
@@ -47,6 +53,9 @@
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
 	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
+
+	const CYFUN_2025_FRAMEWORK_URN = 'urn:intuitem:risk:framework:ccb-cyfun2025';
+	const ISO27001_FRAMEWORK_URN_PREFIX = 'urn:intuitem:risk:framework:iso27001';
 
 	interface Props {
 		data: PageData;
@@ -74,6 +83,16 @@
 			model: requirementAssessmentModel.name,
 			domain: data.compliance_assessment.folder.id
 		});
+
+	const viewerRole: 'auditor' | 'respondent' = page.data.user.is_third_party
+		? 'respondent'
+		: 'auditor';
+	const fieldVis = $derived(getFieldVisibility(compliance_assessment, viewerRole));
+	const showAnswers = $derived(fieldVis.showAnswers);
+	const showResult = $derived(fieldVis.showResult);
+	const showExtendedResult = $derived(fieldVis.showExtendedResult);
+	const showStatus = $derived(fieldVis.showStatus);
+	const showScore = $derived(fieldVis.showScore);
 
 	const has_threats = data.threats.total_unique_threats > 0;
 
@@ -222,6 +241,10 @@
 					...node,
 					canEditRequirementAssessment,
 					hasParentNode,
+					showAnswers,
+					showResult,
+					showStatus,
+					showScore,
 					showDocumentationScore: data.compliance_assessment.show_documentation_score,
 					scoringEnabled: data.compliance_assessment.scoring_enabled,
 					scoreCalculationMethod: data.compliance_assessment.score_calculation_method,
@@ -238,11 +261,15 @@
 					score: node.score,
 					documentationScore: node.documentation_score,
 					isScored: node.is_scored,
+					showResult,
+					showScore,
+					showStatus,
 					scoringEnabled: data.compliance_assessment.scoring_enabled,
 					showDocumentationScore: data.compliance_assessment.show_documentation_score,
 					max_score: node.max_score,
 					progressStatusEnabled: data.compliance_assessment.progress_status_enabled,
 					extendedResultEnabled: data.compliance_assessment.extended_result_enabled,
+					showExtendedResult,
 					extendedResult: node.extended_result,
 					extendedResultColor: extendedResultColorMap[node.extended_result]
 				},
@@ -323,6 +350,113 @@
 		modalStore.trigger(modal);
 	}
 
+	function buildExportGroups(): ExportGroup[] {
+		const ca = data.compliance_assessment;
+		const id = ca.id;
+		const isInternal = !page.data.user.is_third_party;
+		const frameworkUrn = ca.framework?.urn ?? '';
+		// CyFun stays exact: backend cyfun_xlsx (views.py) hardcodes the 2025
+		// sheet layout, so other versions would 400. Bump both when a new CyFun
+		// ships. ISO27001 is prefix-matched — SoA only navigates to a page
+		// whose semantics carry across 27001 versions.
+		const isCyFun = frameworkUrn === CYFUN_2025_FRAMEWORK_URN;
+		const isIso27001 = frameworkUrn.startsWith(ISO27001_FRAMEWORK_URN_PREFIX);
+
+		const auditOptions = [
+			isInternal && {
+				titleKey: 'exportRequirementsData',
+				descriptionKey: 'exportRequirementsDataDesc',
+				format: 'CSV' as const,
+				href: `/compliance-assessments/${id}/export/csv`,
+				testId: 'export-option-csv'
+			},
+			isInternal && {
+				titleKey: 'exportRequirementsWorkbook',
+				descriptionKey: 'exportRequirementsWorkbookDesc',
+				format: 'XLSX' as const,
+				href: `/compliance-assessments/${id}/export/xlsx`,
+				testId: 'export-option-xlsx'
+			},
+			isInternal && {
+				titleKey: 'exportExecutiveSummary',
+				descriptionKey: 'exportExecutiveSummaryDesc',
+				format: 'DOCX' as const,
+				href: `/compliance-assessments/${id}/export/word`,
+				testId: 'export-option-word'
+			},
+			isInternal &&
+				isCyFun && {
+					titleKey: 'exportCyFunAssessment',
+					descriptionKey: 'exportCyFunAssessmentDesc',
+					format: 'XLSX' as const,
+					href: `/compliance-assessments/${id}/export/cyfun-xlsx`,
+					testId: 'export-option-cyfun-xlsx'
+				},
+			{
+				titleKey: 'exportBundleWithEvidences',
+				descriptionKey: 'exportBundleWithEvidencesDesc',
+				format: 'ZIP' as const,
+				href: `/compliance-assessments/${id}/export`,
+				testId: 'export-option-zip'
+			},
+			isInternal &&
+				isIso27001 && {
+					titleKey: 'exportSoaBuilder',
+					descriptionKey: 'exportSoaBuilderDesc',
+					format: 'HTML' as const,
+					href: `/reports/soa?ca=${id}`,
+					kind: 'navigate' as const,
+					testId: 'export-option-soa'
+				}
+		].filter(Boolean);
+
+		const actionPlanOptions = isInternal
+			? [
+					{
+						titleKey: 'exportControlsList',
+						descriptionKey: 'exportControlsListDesc',
+						format: 'CSV' as const,
+						href: `/compliance-assessments/${id}/action-plan/export/csv`,
+						testId: 'export-option-ap-csv'
+					},
+					{
+						titleKey: 'exportControlsWorkbook',
+						descriptionKey: 'exportControlsWorkbookDesc',
+						format: 'XLSX' as const,
+						href: `/compliance-assessments/${id}/action-plan/export/xlsx`,
+						testId: 'export-option-ap-xlsx'
+					},
+					{
+						titleKey: 'exportStatusGroupedReport',
+						descriptionKey: 'exportStatusGroupedReportDesc',
+						format: 'PDF' as const,
+						href: `/compliance-assessments/${id}/action-plan/export/pdf`,
+						testId: 'export-option-ap-pdf'
+					}
+				]
+			: [];
+
+		return [
+			{ titleKey: 'complianceAssessment', options: auditOptions as ExportGroup['options'] },
+			{ titleKey: 'actionPlan', options: actionPlanOptions }
+		];
+	}
+
+	function modalExport(): void {
+		const modalComponent: ModalComponent = {
+			ref: ExportModal,
+			props: {
+				title: m.exportOptionsTitle(),
+				groups: buildExportGroups()
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent
+		};
+		modalStore.trigger(modal);
+	}
+
 	function modalRequestValidation(): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
@@ -393,7 +527,10 @@
 	let createAppliedControlsLoading = $state(false);
 
 	async function modalConfirmCreateSuggestedControls(id: string, _name: string, _action: string) {
-		let previewItems: { id: string; label: string }[] = [];
+		if (createAppliedControlsLoading) return;
+		createAppliedControlsLoading = true;
+		type PreviewItem = { id: string; label: string; status: 'create' | 'reuse' | 'linked' };
+		let previewItems: PreviewItem[] = [];
 		try {
 			const previewResponse = await fetch(
 				`/compliance-assessments/${id}/suggestions/applied-controls?dry_run=true`
@@ -410,7 +547,8 @@
 							control?.reference_control?.str ||
 							control?.reference_control?.name ||
 							control?.ref_id ||
-							''
+							'',
+						status: (control?.suggestion_status as 'create' | 'reuse' | 'linked') ?? 'create'
 					}))
 					.filter((item) => {
 						if (seen.has(item.id)) return false;
@@ -431,11 +569,15 @@
 						control?.reference_control?.str ||
 						control?.reference_control?.name ||
 						control?.ref_id ||
-						''
+						'',
+					status: 'create' as const
 				}));
 		}
 
-		if (previewItems.length === 0) return;
+		if (previewItems.length === 0) {
+			createAppliedControlsLoading = false;
+			return;
+		}
 
 		const modalComponent: ModalComponent = {
 			ref: SuggestControlsModal,
@@ -449,20 +591,18 @@
 			component: modalComponent,
 			title: m.suggestControls(),
 			body: m.createAppliedControlsFromSuggestionsConfirmMessage({
-				count: previewItems.length
+				count: previewItems.filter((i) => i.status !== 'linked').length
 			}),
 			response: () => {
 				createAppliedControlsLoading = false;
 			}
 		};
-		createAppliedControlsLoading = true;
 		modalStore.trigger(modal);
 	}
 
 	let tree = $derived(data.tree);
 	let compliance_assessment_donut_values = $derived(data.compliance_assessment_donut_values);
 
-	let exportPopupOpen = $state(false);
 	let filterPopupOpen = $state(false);
 
 	run(() => {
@@ -614,7 +754,7 @@
 					<div class="font-medium">{m.createdAt()}</div>
 					{formatDateOrDateTime(data.compliance_assessment.created_at, getLocale())}
 				</div>
-				{#if compliance_assessment.framework.outcomes_definition?.length}
+				{#if showResult && compliance_assessment.framework.outcomes_definition?.length}
 					<div>
 						<div class="text-sm font-medium text-gray-800">{safeTranslate('outcomes')}</div>
 						<div class="flex flex-wrap gap-1.5 mt-1">
@@ -653,7 +793,7 @@
 				{/if}
 			</div>
 			{#key compliance_assessment_donut_values}
-				{#if data.global_score && data.global_score.maturity_score >= 0}
+				{#if showScore && data.global_score && data.global_score.maturity_score >= 0}
 					<div class="w-1/4">
 						<RingProgress
 							name="global_maturity"
@@ -669,20 +809,22 @@
 						/>
 					</div>
 				{/if}
-				<div class={data.compliance_assessment.extended_result_enabled ? 'w-1/4' : 'w-1/3'}>
-					<DonutChart
-						s_label="Result"
-						name="compliance_result"
-						title={m.compliance()}
-						orientation="horizontal"
-						values={compliance_assessment_donut_values.result.values}
-						colors={compliance_assessment_donut_values.result.values.map(
-							(object) => object.itemStyle.color
-						)}
-						showPercentage={true}
-					/>
-				</div>
-				{#if data.compliance_assessment.extended_result_enabled && compliance_assessment_donut_values.extended_result?.values?.length > 0}
+				{#if showResult}
+					<div class={data.compliance_assessment.extended_result_enabled ? 'w-1/4' : 'w-1/3'}>
+						<DonutChart
+							s_label="Result"
+							name="compliance_result"
+							title={m.compliance()}
+							orientation="horizontal"
+							values={compliance_assessment_donut_values.result.values}
+							colors={compliance_assessment_donut_values.result.values.map(
+								(object) => object.itemStyle.color
+							)}
+							showPercentage={true}
+						/>
+					</div>
+				{/if}
+				{#if showExtendedResult && compliance_assessment_donut_values.extended_result?.values?.length > 0}
 					<div class="w-1/4">
 						<DonutChart
 							s_label="Extended Result"
@@ -697,7 +839,7 @@
 						/>
 					</div>
 				{/if}
-				{#if data.compliance_assessment.progress_status_enabled}
+				{#if showStatus}
 					<div class={data.compliance_assessment.extended_result_enabled ? 'w-1/4' : 'w-1/3'}>
 						<DonutChart
 							s_label="Status"
@@ -713,7 +855,7 @@
 					</div>
 				{/if}
 			{/key}
-			{#if data.compliance_assessment.answers_progress != null}
+			{#if showAnswers && data.compliance_assessment.answers_progress != null}
 				<div class="flex items-center gap-2 text-sm text-gray-600 mt-2">
 					<i class="fa-solid fa-clipboard-question text-primary-500"></i>
 					<span>{m.questions()}: {data.compliance_assessment.answers_progress}%</span>
@@ -727,82 +869,14 @@
 			{/if}
 			<div class="flex flex-col space-y-2 ml-4">
 				<div class="flex flex-row space-x-2">
-					<Popover
-						open={exportPopupOpen}
-						onOpenChange={(e) => (exportPopupOpen = e.open)}
-						positioning={{ placement: 'bottom' }}
+					<button
+						type="button"
+						class="btn preset-filled-primary-500 w-full"
+						onclick={modalExport}
+						data-testid="export-button"
 					>
-						<Popover.Trigger class="btn preset-filled-primary-500 w-full">
-							<span data-testid="export-button">
-								<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
-							</span>
-						</Popover.Trigger>
-						<Popover.Positioner>
-							<Popover.Content
-								class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
-							>
-								<div>
-									<p class="block px-4 py-2 text-sm text-gray-800">{m.complianceAssessment()}</p>
-									{#if !page.data.user.is_third_party}
-										<a
-											href="/compliance-assessments/{data.compliance_assessment.id}/export/csv"
-											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-											>... {m.asCSV()}</a
-										>
-										<a
-											href="/compliance-assessments/{data.compliance_assessment.id}/export/xlsx"
-											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-											>... {m.asXLSX()}</a
-										>
-										<a
-											href="/compliance-assessments/{data.compliance_assessment.id}/export/word"
-											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-											>... {m.asWord()}</a
-										>
-										{#if data.compliance_assessment.framework?.urn === 'urn:intuitem:risk:framework:ccb-cyfun2025'}
-											<a
-												href="/compliance-assessments/{data.compliance_assessment
-													.id}/export/cyfun-xlsx"
-												class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-												>... {m.asCyFunExcel()}</a
-											>
-										{/if}
-									{/if}
-									<a
-										href="/compliance-assessments/{data.compliance_assessment.id}/export"
-										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-										>... {m.asZIP()}</a
-									>
-									{#if !page.data.user.is_third_party}
-										<a
-											href="/reports/soa?ca={data.compliance_assessment.id}"
-											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-											>... {m.statementOfApplicability()}</a
-										>
-										<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
-										<a
-											href="/compliance-assessments/{data.compliance_assessment
-												.id}/action-plan/export/csv"
-											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-											>... {m.asCSV()}</a
-										>
-										<a
-											href="/compliance-assessments/{data.compliance_assessment
-												.id}/action-plan/export/xlsx"
-											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-											>... {m.asXLSX()}</a
-										>
-										<a
-											href="/compliance-assessments/{data.compliance_assessment
-												.id}/action-plan/export/pdf"
-											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-											>... {m.asPDF()}</a
-										>
-									{/if}
-								</div>
-							</Popover.Content>
-						</Popover.Positioner>
-					</Popover>
+						<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+					</button>
 					{#if canEditObject}
 						<Anchor
 							breadcrumbAction="push"
@@ -1061,28 +1135,30 @@
 						<Popover.Content
 							class="card p-2 bg-white w-fit shadow-lg space-y-2 border border-surface-200 z-10"
 						>
-							<div>
-								<span class="text-sm font-bold">{m.result()}</span>
-								<div class="flex flex-wrap gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
-									{#each Object.entries(complianceResultColorMap) as [result, color]}
-										<button
-											type="button"
-											onclick={() => toggleResult(result)}
-											class="px-2 py-1 rounded-md font-bold"
-											style="background-color: {selectedResults.includes(result)
-												? color
-												: 'grey'}; color: {selectedResults.includes(result)
-												? result === 'not_applicable'
-													? 'white'
-													: 'black'
-												: 'black'}; opacity: {selectedResults.includes(result) ? 1 : 0.3};"
-										>
-											{safeTranslate(result)}
-										</button>
-									{/each}
+							{#if showResult}
+								<div>
+									<span class="text-sm font-bold">{m.result()}</span>
+									<div class="flex flex-wrap gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+										{#each Object.entries(complianceResultColorMap) as [result, color]}
+											<button
+												type="button"
+												onclick={() => toggleResult(result)}
+												class="px-2 py-1 rounded-md font-bold"
+												style="background-color: {selectedResults.includes(result)
+													? color
+													: 'grey'}; color: {selectedResults.includes(result)
+													? result === 'not_applicable'
+														? 'white'
+														: 'black'
+													: 'black'}; opacity: {selectedResults.includes(result) ? 1 : 0.3};"
+											>
+												{safeTranslate(result)}
+											</button>
+										{/each}
+									</div>
 								</div>
-							</div>
-							{#if data.compliance_assessment.progress_status_enabled}
+							{/if}
+							{#if showStatus}
 								<div>
 									<span class="text-sm font-bold">{m.status()}</span>
 									<div
@@ -1105,7 +1181,7 @@
 									</div>
 								</div>
 							{/if}
-							{#if data.compliance_assessment.extended_result_enabled}
+							{#if showExtendedResult}
 								<div>
 									<span class="text-sm font-bold">{m.extendedResult()}</span>
 									<div

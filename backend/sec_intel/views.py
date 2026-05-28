@@ -40,7 +40,24 @@ class SecurityAdvisoryViewSet(BaseModelViewSet):
         "urn",
         "source",
     ]
-    search_fields = ["name", "ref_id", "description", "cvss_vector"]
+    search_fields = ["name", "ref_id", "description", "cvss_vector", "aliases"]
+
+    def get_queryset(self):
+        qs = (
+            super()
+            .get_queryset()
+            .select_related(
+                "folder",
+                "folder__parent_folder",  # For folder path / FieldsRelatedField
+                "library",  # FieldsRelatedField(["name", "id"])
+            )
+        )
+        if self.action == "autocomplete":
+            return qs
+        # `filtering_labels` is rendered as FieldsRelatedField(["id", "folder"]),
+        # so prefetch the nested folder too — otherwise each label fires a fresh
+        # query for its folder, producing a per-row × per-label N+1.
+        return qs.prefetch_related("filtering_labels__folder")
 
     @action(detail=False, name="Get source choices")
     def source(self, request):
@@ -145,27 +162,38 @@ class SecurityAdvisoryViewSet(BaseModelViewSet):
                 logger.warning("EUVD enrich failed", exc_info=True)
                 return Response({"error": "Failed to fetch data from EUVD"}, status=502)
         else:
-            from sec_intel.feeds import NVDFeed
+            from sec_intel.feeds import EPSSFeed, NVDFeed, get_feed_settings
 
             if not lookup_id or not lookup_id.startswith("CVE-"):
                 return Response(
                     {"error": "CVE ref_id or name must start with CVE-"}, status=400
                 )
             raw = NVDFeed.fetch_cve(lookup_id)
-            if raw is None:
+            fields = NVDFeed.parse_cve(raw) if raw is not None else {}
+
+            if get_feed_settings().get("epss_feed_enabled", False):
+                epss = EPSSFeed.fetch_cve(lookup_id)
+                if epss:
+                    fields.update(epss)
+
+            if raw is None and not fields:
                 return Response({"error": "Failed to fetch data from NVD"}, status=502)
-            fields = NVDFeed.parse_cve(raw)
 
         if not fields:
             return Response({"detail": "No enrichment data found", "updated": []})
 
         skip_fields = {"euvd_id", "source", "aliases", "ref_id"}
+        always_overwrite = {"epss_score", "epss_percentile"}
         updated = []
         for k, v in fields.items():
             if k in skip_fields:
                 continue
             current = getattr(sa, k, None)
-            if current in (None, "", 0, []):
+            if k in always_overwrite:
+                if current != v:
+                    setattr(sa, k, v)
+                    updated.append(k)
+            elif current in (None, "", 0, []):
                 setattr(sa, k, v)
                 updated.append(k)
 
@@ -191,6 +219,16 @@ class CWEViewSet(BaseModelViewSet):
         "urn",
     ]
     search_fields = ["name", "ref_id", "description"]
+
+    def get_queryset(self):
+        qs = (
+            super()
+            .get_queryset()
+            .select_related("folder", "folder__parent_folder", "library")
+        )
+        if self.action == "autocomplete":
+            return qs
+        return qs.prefetch_related("filtering_labels__folder")
 
     @action(detail=False, name="Lightweight autocomplete search")
     def autocomplete(self, request):

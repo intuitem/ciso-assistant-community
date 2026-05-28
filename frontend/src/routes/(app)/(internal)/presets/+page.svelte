@@ -66,7 +66,7 @@
 							});
 							if (response.ok) {
 								const result = await response.json();
-								goto(`/preset-journeys/${result.journey_id}`, {
+								goto(`/journeys/${result.journey_id}`, {
 									label: result.journey_name ?? presetName,
 									breadcrumbAction: 'push'
 								});
@@ -148,7 +148,7 @@
 	}
 
 	function hasUpgrade(journey: any): boolean {
-		return journey.latest_version && journey.latest_version > journey.version;
+		return journey.latest_version && journey.latest_version > journey.applied_version;
 	}
 </script>
 
@@ -159,7 +159,7 @@
 			<div class="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-100">
 				<i class="fa-solid fa-route text-indigo-600 text-sm"></i>
 			</div>
-			<h2 class="text-lg font-semibold text-gray-800">{m.activeJourneys()}</h2>
+			<h2 class="text-lg font-semibold text-gray-800">{m.recentlyActiveJourneys()}</h2>
 			{#if data.journeys.length > 0}
 				<span
 					class="ml-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-100 text-xs font-semibold text-indigo-700"
@@ -167,6 +167,12 @@
 					{data.journeys.length}
 				</span>
 			{/if}
+			<a
+				href="/journeys"
+				class="ml-auto text-xs text-indigo-600 hover:text-indigo-800 transition-colors inline-flex items-center gap-1"
+			>
+				{m.viewAll()} <i class="fa-solid fa-arrow-right text-[10px]"></i>
+			</a>
 		</div>
 
 		{#if data.journeys.length === 0}
@@ -184,7 +190,7 @@
 					{@const progress = getProgressPercent(journey)}
 					{@const counts = getStepCounts(journey)}
 					<Anchor
-						href="/preset-journeys/{journey.id}"
+						href="/journeys/{journey.id}"
 						breadcrumbAction="push"
 						label={journey.name}
 						class="group relative flex flex-col rounded-xl border border-gray-200 bg-white p-5 shadow-sm
@@ -299,7 +305,9 @@
 				<div class="flex items-center justify-center w-8 h-8 rounded-lg bg-violet-100">
 					<i class="fa-solid fa-box-open text-violet-600 text-sm"></i>
 				</div>
-				<h2 class="text-lg font-semibold text-gray-800">{m.availablePresets()}</h2>
+				<h2 class="text-lg font-semibold text-gray-800" data-testid="available-templates-heading">
+					{m.availablePresets()}
+				</h2>
 				<i
 					class="fa-solid fa-chevron-down text-xs text-gray-400 transition-transform duration-200 {presetsCollapsed
 						? '-rotate-90'
@@ -326,6 +334,7 @@
 								? 'bg-gray-800 text-white shadow-sm'
 								: 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300 hover:text-gray-700'}"
 							onclick={() => (activeFilter = region)}
+							data-testid="filter-{region}"
 						>
 							{REGION_FLAGS[region] ?? ''}
 							{region.toUpperCase()}
@@ -352,6 +361,7 @@
 							{isExpanded
 								? 'border-violet-300 shadow-md ring-1 ring-violet-100'
 								: 'border-gray-200 hover:shadow-md hover:border-gray-300'}"
+							data-testid="preset-card-{preset.id}"
 						>
 							<!-- Card header — always visible -->
 							<button
@@ -359,7 +369,10 @@
 								onclick={() => toggleExpand(preset.id)}
 							>
 								<div class="flex-1 min-w-0">
-									<h3 class="font-semibold text-[15px] text-gray-800 leading-tight">
+									<h3
+										class="font-semibold text-[15px] text-gray-800 leading-tight"
+										data-testid="preset-name-{preset.id}"
+									>
 										{preset.name}
 									</h3>
 									{#if preset.description}
@@ -417,6 +430,7 @@
 										class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium
 										transition-all duration-150 cursor-pointer
 										bg-violet-600 text-white hover:bg-violet-700 active:bg-violet-800 shadow-sm"
+										data-testid="preset-apply-{preset.id}"
 										onclick={() => applyPreset(preset.id, preset.name)}
 									>
 										<i class="fa-solid fa-play text-[10px]"></i>

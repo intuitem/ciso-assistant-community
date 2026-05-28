@@ -819,7 +819,8 @@
 						{#key editingAssignmentId}
 							<AutocompleteSelect
 								form={assignmentSuperForm}
-								optionsEndpoint="actors?user__is_third_party=False"
+								optionsEndpoint="actors"
+								optionsDetailedUrlParameters={[['include_third_parties', 'true']]}
 								optionsLabelField="str"
 								optionsInfoFields={{
 									fields: [{ field: 'type', translate: true }],

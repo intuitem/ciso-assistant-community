@@ -118,6 +118,26 @@
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 	<AutocompleteSelect
 		multiple
+		lazy
+		{form}
+		optionsEndpoint="applied-controls"
+		optionsLabelField="auto"
+		optionsExtraFields={[['folder', 'str']]}
+		field="applied_controls"
+		label={m.appliedControls()}
+	/>
+	<AutocompleteSelect
+		multiple
+		lazy
+		{form}
+		optionsEndpoint="task-templates"
+		optionsLabelField="auto"
+		optionsExtraFields={[['folder', 'str']]}
+		field="task_templates"
+		label={m.taskTemplates()}
+	/>
+	<AutocompleteSelect
+		multiple
 		{form}
 		optionsEndpoint="terminologies?field_path=qualifications&is_visible=true"
 		field="qualifications"

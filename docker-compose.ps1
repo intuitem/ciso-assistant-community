@@ -2,18 +2,18 @@
 
 # Check if database file exists
 if (Test-Path "db/ciso-assistant.sqlite3") {
-    Write-Output "The database seems already created. You should launch 'docker compose up -d' instead."
-    Write-Output "`nFor a clean start, you can remove the db folder, and then run 'docker compose rm -fs' and start over"
+    Write-Host "The database seems already created. You should launch 'docker compose up -d' instead." -ForegroundColor Yellow
+    Write-Host "For a clean start, you can remove the db folder, and then run 'docker compose rm -fs' and start over" -ForegroundColor Yellow
     exit 1
 }
 
-Write-Output "Starting CISO Assistant services..."
+Write-Host "Starting CISO Assistant services..." -ForegroundColor Cyan
 docker compose pull
 
-Write-Output "Initializing the database. This can take a minute, please wait.."
+Write-Host ""
+Write-Host "Waiting for CISO Assistant backend to be ready, please wait..." -ForegroundColor Cyan
 docker compose up -d
 
-Write-Output "Waiting for CISO Assistant backend to be ready..."
 do {
     $backendReady = $false
     try {
@@ -23,14 +23,17 @@ do {
         }
     }
     catch {
-        Write-Output "Backend is not ready - waiting 10s..."
+        Write-Host "Backend is not ready - waiting 10s..." -ForegroundColor Cyan
         Start-Sleep -Seconds 10
     }
 } while (-not $backendReady)
 
-Write-Output "`nBackend is ready!"
-Write-Output "Creating superuser..."
+Write-Host "Backend is ready!" -ForegroundColor Green
+
+Write-Host ""
+Write-Host "Creating superuser..." -ForegroundColor Cyan
 docker compose exec backend poetry run python manage.py createsuperuser
 
-Write-Output "`nInitialization complete!"
-Write-Output "You can now access CISO Assistant at https://localhost:8443 (or the host:port you've specified)"
+Write-Host ""
+Write-Host "Initialization complete!" -ForegroundColor Green
+Write-Host "You can now access CISO Assistant at https://localhost:8443 (or the host:port you've specified)" -ForegroundColor Green

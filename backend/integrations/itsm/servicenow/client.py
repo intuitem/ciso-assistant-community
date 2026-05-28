@@ -3,6 +3,7 @@ import requests
 from structlog import get_logger
 from integrations.models import SyncMapping
 from core.models import AppliedControl
+from core.net_safety import check_integration_url
 from integrations.base import BaseIntegrationClient
 from .mapper import ServiceNowFieldMapper
 
@@ -13,6 +14,11 @@ class ServiceNowClient(BaseIntegrationClient):
     def __init__(self, configuration):
         super().__init__(configuration)
         self.base_url = self.credentials.get("instance_url", "").rstrip("/")
+        try:
+            check_integration_url(self.base_url, "ServiceNow instance_url")
+        except ValueError:
+            logger.error("ServiceNow instance_url blocked by SSRF guard", exc_info=True)
+            raise
         username = self.credentials.get("username", "")
         password = self.credentials.get("password", "")
         self.auth = (username, password)
@@ -41,6 +47,7 @@ class ServiceNowClient(BaseIntegrationClient):
                 headers=self._get_headers(),
                 json=payload,
                 timeout=30,
+                allow_redirects=False,
             )
             response.raise_for_status()
             result = response.json().get("result", {})
@@ -77,6 +84,7 @@ class ServiceNowClient(BaseIntegrationClient):
                 headers=self._get_headers(),
                 json=changes,
                 timeout=30,
+                allow_redirects=False,
             )
             response.raise_for_status()
             logger.info(
@@ -100,7 +108,11 @@ class ServiceNowClient(BaseIntegrationClient):
 
         try:
             response = requests.get(
-                url, auth=self.auth, headers=self._get_headers(), timeout=30
+                url,
+                auth=self.auth,
+                headers=self._get_headers(),
+                timeout=30,
+                allow_redirects=False,
             )
             response.raise_for_status()
             result = response.json().get("result", {})
@@ -144,6 +156,7 @@ class ServiceNowClient(BaseIntegrationClient):
                 headers=self._get_headers(),
                 params=params,
                 timeout=30,
+                allow_redirects=False,
             )
             response.raise_for_status()
 
@@ -263,6 +276,7 @@ class ServiceNowClient(BaseIntegrationClient):
                 headers=self._get_headers(),
                 params=params,
                 timeout=30,
+                allow_redirects=False,
             )
             response.raise_for_status()
             results = response.json().get("result", [])
@@ -317,6 +331,7 @@ class ServiceNowClient(BaseIntegrationClient):
                 headers=self._get_headers(),
                 params=params,
                 timeout=10,
+                allow_redirects=False,
             )
             resp.raise_for_status()
             result = resp.json().get("result", [])
@@ -343,6 +358,7 @@ class ServiceNowClient(BaseIntegrationClient):
                 headers=self._get_headers(),
                 params=params,
                 timeout=10,
+                allow_redirects=False,
             )
             if resp.status_code == 200:
                 return resp.json().get("result", {}).get("name")
@@ -368,6 +384,7 @@ class ServiceNowClient(BaseIntegrationClient):
                 headers=self._get_headers(),
                 params=params,
                 timeout=10,
+                allow_redirects=False,
             )
             response.raise_for_status()
             results = response.json().get("result", [])
@@ -430,6 +447,7 @@ class ServiceNowClient(BaseIntegrationClient):
                 headers=self._get_headers(),
                 params=params,
                 timeout=10,
+                allow_redirects=False,
             )
             response.raise_for_status()
             results = response.json().get("result", [])
@@ -456,6 +474,7 @@ class ServiceNowClient(BaseIntegrationClient):
                 headers=self._get_headers(),
                 params=params,
                 timeout=10,
+                allow_redirects=False,
             )
             return response.status_code == 200
         except Exception:

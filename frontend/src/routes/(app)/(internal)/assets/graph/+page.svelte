@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import GraphExplorer from '$lib/components/DataViz/GraphExplorer.svelte';
-	import { pageTitle } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
 	import { goto } from '$lib/utils/breadcrumbs';
 
@@ -10,7 +9,6 @@
 	}
 
 	let { data }: Props = $props();
-	pageTitle.set('Assets Explorer');
 </script>
 
 <div class="bg-white shadow-sm flex flex-col overflow-x-auto">
@@ -37,7 +35,7 @@
 	</div>
 	<div class="w-full h-screen">
 		<GraphExplorer
-			title="Assets Explorer"
+			title={m.assetsExplorer()}
 			data={data.data}
 			edgeLength={100}
 			maxLegendItems={15}

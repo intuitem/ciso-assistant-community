@@ -7,6 +7,12 @@ on:
   pull_request:
     branches: [main, develop]
     types: [opened, synchronize]
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - "enterprise/**"
+      - ".github/actions/**"
+      - ".github/workflows/functional-tests.yml"
   workflow_dispatch:
 
 # Cancel older in-progress runs for the same PR or the same ref (branch)
@@ -35,23 +41,25 @@ jobs:
       build_done: "true"
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: lts/*
+          node-version: "24"
 
       - name: Cache pnpm modules for Build
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ env.frontend-directory }}/node_modules
           key: ${{ runner.os }}-pnpm-${{ hashFiles('${{ env.frontend-directory }}/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
 
-      - name: Install pnpm globally
-        run: npm install -g pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10
 
       - name: Install community frontend dependencies
         working-directory: ${{ env.frontend-directory }}
@@ -60,11 +68,11 @@ jobs:
       - name: Build community frontend
         working-directory: ${{ env.frontend-directory }}
         env:
-          NODE_OPTIONS: "--max-old-space-size=6144"
+          NODE_OPTIONS: "--max-old-space-size=10240"
         run: pnpm run build
 
       - name: Upload Community Frontend Build Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: community-frontend-build
           include-hidden-files: true
@@ -79,32 +87,34 @@ jobs:
       build_done: "true"
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: lts/*
+          node-version: "24"
 
       - name: Cache pnpm modules for Build
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ env.enterprise-frontend-build-directory }}/node_modules
           key: ${{ runner.os }}-pnpm-${{ hashFiles('${{ env.enterprise-frontend-build-directory }}/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
 
-      - name: Install pnpm globally
-        run: npm install -g pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10
 
       - name: Build enterprise frontend
         working-directory: ${{ env.enterprise-frontend-directory }}
         env:
-          NODE_OPTIONS: "--max-old-space-size=6144"
+          NODE_OPTIONS: "--max-old-space-size=10240"
         run: make
 
       - name: Upload Enterprise Frontend Build Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: enterprise-frontend-build
           include-hidden-files: true
@@ -112,6 +122,54 @@ jobs:
             ${{ env.enterprise-frontend-build-directory }}/build/
             ${{ env.enterprise-frontend-build-directory }}/.svelte-kit/
           retention-days: 1
+
+  prime_playwright_cache:
+    runs-on: ubuntu-24.04
+    outputs:
+      playwright-version: ${{ steps.playwright-version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Cache pnpm modules
+        uses: actions/cache@v5
+        with:
+          path: ${{ env.frontend-directory }}/node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('${{ env.frontend-directory }}/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10
+
+      - name: Install community frontend dependencies
+        working-directory: ${{ env.frontend-directory }}
+        run: pnpm i --frozen-lockfile
+
+      - name: Get installed Playwright version
+        id: playwright-version
+        working-directory: ${{ env.frontend-directory }}
+        run: |
+          PLAYWRIGHT_VERSION=$(node -p "require('@playwright/test/package.json').version")
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> "$GITHUB_ENV"
+          echo "version=$PLAYWRIGHT_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Cache playwright binaries
+        id: playwright-cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}-chromium
+
+      - name: Download Playwright chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        working-directory: ${{ env.frontend-directory }}
+        run: pnpm exec playwright install chromium
 
   get_playwright_test_files:
     needs:
@@ -123,7 +181,7 @@ jobs:
       enterprise_test_files: ${{ steps.list_enterprise_files.outputs.test_files }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Get Community Playwright Test Files
         id: list_community_files
@@ -146,7 +204,9 @@ jobs:
           echo "test_files=$ENTERPRISE_TEST_FILES" >> $GITHUB_OUTPUT
 
   functional-tests:
-    needs: get_playwright_test_files
+    needs:
+      - get_playwright_test_files
+      - prime_playwright_cache
     runs-on: ubuntu-24.04
     env:
       LOG_LEVEL: DEBUG
@@ -190,19 +250,19 @@ jobs:
         test_file: ${{ fromJson(needs.get_playwright_test_files.outputs.community_test_files) }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Start Keycloak
         uses: ./.github/actions/start-keycloak
 
       - name: Download Community Frontend Build Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: community-frontend-build
           path: ${{ env.frontend-directory }}/
 
       - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
@@ -226,42 +286,48 @@ jobs:
         run: poetry install
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: lts/*
+          node-version: "24"
 
       - name: Cache pnpm modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ env.frontend-directory }}/node_modules
           key: ${{ runner.os }}-pnpm-${{ hashFiles('${{ env.frontend-directory }}/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
 
-      - name: Install pnpm globally
-        run: npm install -g pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10
 
       - name: Install community frontend dependencies (if not cached/part of build artifact)
         working-directory: ${{ env.frontend-directory }}
         run: pnpm i --frozen-lockfile
 
-      - name: Get installed Playwright version
-        id: playwright-version
-        run: echo "PLAYWRIGHT_VERSION=$(pnpm exec playwright --version | awk -F ' ' '{print $2}')" >> $GITHUB_ENV
-
-      - name: Cache playwright binaries
-        uses: actions/cache@v4
+      - name: Restore Playwright binaries cache
+        uses: actions/cache@v5
         id: playwright-cache
+        env:
+          PLAYWRIGHT_VERSION: ${{ needs.prime_playwright_cache.outputs.playwright-version }}
         with:
-          path: |
-            ~/.cache/ms-playwright
+          path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}-${{ matrix.playwright-browser }}
 
-      - name: Install Playwright browser ${{ matrix.playwright-browser }}
+      - name: Download Playwright browser (cache miss fallback)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         working-directory: ${{ env.frontend-directory }}
         env:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
-        run: pnpm exec playwright install --with-deps "$PLAYWRIGHT_BROWSER"
+        run: pnpm exec playwright install "$PLAYWRIGHT_BROWSER"
+
+      - name: Install Playwright system deps
+        working-directory: ${{ env.frontend-directory }}
+        env:
+          PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
+        run: pnpm exec playwright install-deps "$PLAYWRIGHT_BROWSER"
 
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
@@ -298,7 +364,7 @@ jobs:
         run: |
           SAFE_FILE_NAME=$(echo "$TEST_FILE" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
           echo "TEST_FILE_SANITIZED=$SAFE_FILE_NAME" >> $GITHUB_ENV
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}-${{ env.TEST_FILE_SANITIZED }}
@@ -310,7 +376,9 @@ jobs:
           retention-days: 5
 
   enterprise-functional-tests:
-    needs: get_playwright_test_files
+    needs:
+      - get_playwright_test_files
+      - prime_playwright_cache
     runs-on: ubuntu-24.04
     env:
       LOG_LEVEL: DEBUG
@@ -356,19 +424,19 @@ jobs:
         test_file: ${{ fromJson(needs.get_playwright_test_files.outputs.enterprise_test_files) }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Start Keycloak
         uses: ./.github/actions/start-keycloak
 
       - name: Download Enterprise Frontend Build Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: enterprise-frontend-build
           path: ${{ env.enterprise-frontend-build-directory }}/
 
       - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
@@ -398,12 +466,12 @@ jobs:
         working-directory: ${{ env.enterprise-backend-directory }}
         run: poetry install
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: lts/*
+          node-version: "24"
 
       - name: Cache pnpm modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ env.enterprise-frontend-build-directory }}/node_modules
           key: ${{ runner.os }}-pnpm-${{ hashFiles('${{ env.enterprise-frontend-build-directory }}/pnpm-lock.yaml') }}
@@ -414,30 +482,36 @@ jobs:
         working-directory: ${{ env.enterprise-frontend-directory }}
         run: make pre-build
 
-      - name: Install pnpm globally
-        run: npm install -g pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10
 
       - name: Install enterprise frontend dependencies
         working-directory: ${{ env.enterprise-frontend-build-directory }}
         run: pnpm i --frozen-lockfile
 
-      - name: Get installed Playwright version
-        id: playwright-version
-        run: echo "PLAYWRIGHT_VERSION=$(pnpm exec playwright --version | awk -F ' ' '{print $2}')" >> $GITHUB_ENV
-
-      - name: Cache playwright binaries
-        uses: actions/cache@v4
+      - name: Restore Playwright binaries cache
+        uses: actions/cache@v5
         id: playwright-cache
+        env:
+          PLAYWRIGHT_VERSION: ${{ needs.prime_playwright_cache.outputs.playwright-version }}
         with:
-          path: |
-            ~/.cache/ms-playwright
+          path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}-${{ matrix.playwright-browser }}
 
-      - name: Install Playwright browser ${{ matrix.playwright-browser }}
+      - name: Download Playwright browser (cache miss fallback)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         working-directory: ${{ env.enterprise-frontend-build-directory }}
         env:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
-        run: pnpm exec playwright install --with-deps "$PLAYWRIGHT_BROWSER"
+        run: pnpm exec playwright install "$PLAYWRIGHT_BROWSER"
+
+      - name: Install Playwright system deps
+        working-directory: ${{ env.enterprise-frontend-build-directory }}
+        env:
+          PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
+        run: pnpm exec playwright install-deps "$PLAYWRIGHT_BROWSER"
 
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
@@ -476,7 +550,7 @@ jobs:
         run: |
           SAFE_FILE_NAME=$(echo "$TEST_FILE" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
           echo "TEST_FILE_SANITIZED=$SAFE_FILE_NAME" >> $GITHUB_ENV
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}-${{ env.TEST_FILE_SANITIZED }}
