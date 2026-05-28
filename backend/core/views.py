@@ -9118,6 +9118,24 @@ class FrameworkViewSet(BaseModelViewSet):
                 node_data["display_mode"] = node.display_mode
             if node.weight and node.weight != 1:
                 node_data["weight"] = node.weight
+            # Per-requirement scoring overrides. scores_definition is either a
+            # string ref into framework.scores_definition.alternatives, or a
+            # wrapped {"scale": [...]} we emit as a bare list to match the
+            # YAML conventions used everywhere else.
+            if node.min_score is not None:
+                node_data["min_score"] = node.min_score
+            if node.max_score is not None:
+                node_data["max_score"] = node.max_score
+            if node.scores_definition is not None:
+                if isinstance(node.scores_definition, str):
+                    node_data["scores_definition"] = node.scores_definition
+                elif (
+                    isinstance(node.scores_definition, dict)
+                    and "scale" in node.scores_definition
+                ):
+                    node_data["scores_definition"] = node.scores_definition["scale"]
+                else:
+                    node_data["scores_definition"] = node.scores_definition
             if node.translations:
                 node_data["translations"] = node.translations
 
@@ -9178,7 +9196,18 @@ class FrameworkViewSet(BaseModelViewSet):
         if framework.max_score != 100:
             framework_obj["max_score"] = framework.max_score
         if framework.scores_definition:
-            framework_obj["scores_definition"] = framework.scores_definition
+            sd = framework.scores_definition
+            # Emit a bare list when there are no alternatives (matches the
+            # legacy YAML convention used by every shipped framework); emit
+            # the wrapped dict when alternatives exist to preserve them.
+            if (
+                isinstance(sd, dict)
+                and "scale" in sd
+                and not sd.get("alternatives")
+            ):
+                framework_obj["scores_definition"] = sd["scale"]
+            else:
+                framework_obj["scores_definition"] = sd
         if framework.implementation_groups_definition:
             framework_obj["implementation_groups_definition"] = (
                 framework.implementation_groups_definition
@@ -13061,32 +13090,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         status=status.HTTP_400_BAD_REQUEST,
                     )
 
-            # validate if score value is within allowed range
-            if score is not None:
-                try:
-                    score = int(score)
-                    # Only validate range if min_score and max_score are defined
-                    if (
-                        compliance_assessment.min_score is not None
-                        and compliance_assessment.max_score is not None
-                    ):
-                        if (
-                            score < compliance_assessment.min_score
-                            or score > compliance_assessment.max_score
-                        ):
-                            return Response(
-                                {
-                                    "error": f"Score must be between {compliance_assessment.min_score} and {compliance_assessment.max_score}"
-                                },
-                                status=status.HTTP_400_BAD_REQUEST,
-                            )
-                except (ValueError, TypeError):
-                    return Response(
-                        {"error": "Score must be a valid integer"},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-
-            # Find the requirement assessment to update
+            # Find the requirement assessment first so we can validate score
+            # against the per-RA resolved scale (Node override > CA bounds).
             requirement_assessment = RequirementAssessment.objects.filter(
                 compliance_assessment=compliance_assessment, requirement__urn=urn
             ).first()
@@ -13096,6 +13101,33 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     {"error": f"Requirement with urn {urn} not found"},
                     status=status.HTTP_404_NOT_FOUND,
                 )
+
+            # validate if score value is within the resolved scale
+            if score is not None:
+                try:
+                    score = int(score)
+                    resolved = requirement_assessment.get_resolved_scoring()
+                    resolved_min = resolved["min_score"]
+                    resolved_max = resolved["max_score"]
+                    if (
+                        resolved_min is not None
+                        and resolved_max is not None
+                        and (score < resolved_min or score > resolved_max)
+                    ):
+                        return Response(
+                            {
+                                "error": (
+                                    f"Score must be between {resolved_min} and "
+                                    f"{resolved_max}"
+                                )
+                            },
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
+                except (ValueError, TypeError):
+                    return Response(
+                        {"error": "Score must be a valid integer"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
 
             # Update the requirement assessment
             requirement_assessment.result = result
@@ -13348,9 +13380,14 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         """Returns the global score of the compliance assessment"""
         compliance_assessment = self.get_object()
         scores = compliance_assessment.get_global_score()
-        scores_definition = get_referential_translation(
-            compliance_assessment.framework, "scores_definition", get_language()
-        )
+        # Source of truth is the CA copy (set at save() and customisable
+        # independently of the framework). Fall back to the framework's
+        # translated definition for the labels.
+        scores_definition = compliance_assessment.scores_definition
+        if not scores_definition:
+            scores_definition = get_referential_translation(
+                compliance_assessment.framework, "scores_definition", get_language()
+            )
         if isinstance(scores_definition, dict) and "scale" in scores_definition:
             scores_definition = scores_definition["scale"]
         return Response(

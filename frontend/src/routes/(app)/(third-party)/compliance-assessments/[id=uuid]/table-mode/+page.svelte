@@ -827,6 +827,9 @@
 													{/if}
 												{/if}
 											{:else if complianceAssessment.scoring_enabled && complianceAssessment.show_documentation_score && requirementAssessment.is_scored}
+												{@const raMin =
+													requirementAssessment.effective_min_score ??
+													complianceAssessment.min_score}
 												{@const raMax =
 													requirementAssessment.effective_max_score ??
 													complianceAssessment.max_score}
@@ -889,6 +892,9 @@
 													</div>
 												</div>
 											{:else if complianceAssessment.scoring_enabled && requirementAssessment.is_scored}
+												{@const raMin =
+													requirementAssessment.effective_min_score ??
+													complianceAssessment.min_score}
 												{@const raMax =
 													requirementAssessment.effective_max_score ??
 													complianceAssessment.max_score}
