@@ -135,6 +135,11 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                             "default_language": f"Invalid language. Must be one of: {valid_codes}"
                         }
                     )
+            if key == "chat_temperature_enabled":
+                if not isinstance(value, bool):
+                    raise serializers.ValidationError(
+                        {"chat_temperature_enabled": "Must be a boolean."}
+                    )
             if key == "chat_temperature":
                 try:
                     temp = float(value)

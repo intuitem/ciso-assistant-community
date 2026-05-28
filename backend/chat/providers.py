@@ -380,11 +380,7 @@ class OllamaLLM:
                 content=message.get("content", "")[:200],
             )
         except httpx.HTTPStatusError as e:
-            logger.warning(
-                "tool_call_failed",
-                status=e.response.status_code,
-                body=e.response.text[:1000],
-            )
+            logger.warning("tool_call_failed", status=e.response.status_code)
         except Exception as e:
             logger.warning("tool_call_failed", error=e)
 
@@ -536,11 +532,7 @@ class OpenAICompatibleLLM:
                 content=message.get("content", "")[:200],
             )
         except httpx.HTTPStatusError as e:
-            logger.warning(
-                "tool_call_failed",
-                status=e.response.status_code,
-                body=e.response.text[:1000],
-            )
+            logger.warning("tool_call_failed", status=e.response.status_code)
         except Exception as e:
             logger.warning("tool_call_failed", error=e)
 
