@@ -33,48 +33,7 @@ env:
   PYTHON_VERSION: "3.12"
 
 jobs:
-  prime_playwright_cache:
-    runs-on: ubuntu-24.04
-    outputs:
-      playwright-version: ${{ steps.playwright-version.outputs.version }}
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "24"
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v5
-        with:
-          version: 10
-
-      - name: Install frontend dependencies
-        working-directory: ${{ env.frontend-directory }}
-        run: pnpm i --frozen-lockfile
-
-      - name: Get installed Playwright version
-        id: playwright-version
-        working-directory: ${{ env.frontend-directory }}
-        run: |
-          PLAYWRIGHT_VERSION=$(node -p "require('@playwright/test/package.json').version")
-          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> "$GITHUB_ENV"
-          echo "version=$PLAYWRIGHT_VERSION" >> "$GITHUB_OUTPUT"
-
-      - name: Cache playwright binaries
-        id: playwright-cache
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
-
-      - name: Download Playwright browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        working-directory: ${{ env.frontend-directory }}
-        run: pnpm exec playwright install
-
   startup-functional-test:
-    needs: prime_playwright_cache
     runs-on: ubuntu-24.04
     env:
       LOG_LEVEL: DEBUG
@@ -142,15 +101,22 @@ jobs:
           PLAYWRIGHT_VERSION=$(node -p "require('@playwright/test/package.json').version")
           echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> "$GITHUB_ENV"
       - name: Cache playwright binaries
-        id: playwright-cache
         uses: actions/cache@v5
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
-      - name: Download Playwright browsers (cache miss fallback)
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
+      - name: Install Playwright Browsers
         working-directory: ${{ env.frontend-directory }}
-        run: pnpm exec playwright install
+        timeout-minutes: 25
+        run: |
+          for attempt in 1 2 3; do
+            if timeout 600 pnpm exec playwright install; then
+              exit 0
+            fi
+            echo "::warning::Playwright install attempt $attempt failed; retrying in 15s"
+            sleep 15
+          done
+          exit 1
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
         run: poetry run python manage.py migrate
@@ -185,7 +151,6 @@ jobs:
           retention-days: 5
 
   startup-docker-compose-test:
-    needs: prime_playwright_cache
     runs-on: ubuntu-24.04
     timeout-minutes: 22
     env:
@@ -208,15 +173,22 @@ jobs:
           PLAYWRIGHT_VERSION=$(node -p "require('@playwright/test/package.json').version")
           echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> "$GITHUB_ENV"
       - name: Cache playwright binaries
-        id: playwright-cache
         uses: actions/cache@v5
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
-      - name: Download Playwright browsers (cache miss fallback)
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
+      - name: Install Playwright Browsers
         working-directory: ${{ env.frontend-directory }}
-        run: pnpm exec playwright install
+        timeout-minutes: 25
+        run: |
+          for attempt in 1 2 3; do
+            if timeout 600 pnpm exec playwright install; then
+              exit 0
+            fi
+            echo "::warning::Playwright install attempt $attempt failed; retrying in 15s"
+            sleep 15
+          done
+          exit 1
       - name: Build the Docker app
         run: |
           rm -rf db
@@ -249,7 +221,6 @@ jobs:
           exit 1
 
   enterprise-startup-functional-test:
-    needs: prime_playwright_cache
     runs-on: ubuntu-24.04
     timeout-minutes: 19
     env:
@@ -322,15 +293,22 @@ jobs:
           PLAYWRIGHT_VERSION=$(node -p "require('@playwright/test/package.json').version")
           echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> "$GITHUB_ENV"
       - name: Cache playwright binaries
-        id: playwright-cache
         uses: actions/cache@v5
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
-      - name: Download Playwright browsers (cache miss fallback)
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
+      - name: Install Playwright Browsers
         working-directory: ${{ env.enterprise-frontend-build-directory }}
-        run: pnpm exec playwright install
+        timeout-minutes: 25
+        run: |
+          for attempt in 1 2 3; do
+            if timeout 600 pnpm exec playwright install; then
+              exit 0
+            fi
+            echo "::warning::Playwright install attempt $attempt failed; retrying in 15s"
+            sleep 15
+          done
+          exit 1
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
         env:
@@ -362,7 +340,6 @@ jobs:
           retention-days: 5
 
   enterprise-startup-docker-compose-test:
-    needs: prime_playwright_cache
     runs-on: ubuntu-24.04
     env:
       COMPOSE_TEST: True
@@ -380,15 +357,22 @@ jobs:
           PLAYWRIGHT_VERSION=$(node -p "require('@playwright/test/package.json').version")
           echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> "$GITHUB_ENV"
       - name: Cache playwright binaries
-        id: playwright-cache
         uses: actions/cache@v5
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
-      - name: Download Playwright browsers (cache miss fallback)
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
+      - name: Install Playwright Browsers
         working-directory: ${{ env.enterprise-frontend-build-directory }}
-        run: pnpm exec playwright install
+        timeout-minutes: 25
+        run: |
+          for attempt in 1 2 3; do
+            if timeout 600 pnpm exec playwright install; then
+              exit 0
+            fi
+            echo "::warning::Playwright install attempt $attempt failed; retrying in 15s"
+            sleep 15
+          done
+          exit 1
       - name: Build the Docker app
         run: docker compose -f enterprise/docker-compose-build.yml up -d
       - name: Config the Docker app
