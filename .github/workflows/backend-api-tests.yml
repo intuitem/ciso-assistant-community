@@ -130,7 +130,7 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
-      max-parallel: 8
+      max-parallel: 16
       matrix:
         test-file: ${{ fromJson(needs.list-files.outputs.matrix) }}
         backend: [sqlite, postgres]
