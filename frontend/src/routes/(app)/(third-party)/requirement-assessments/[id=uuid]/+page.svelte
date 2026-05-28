@@ -160,10 +160,10 @@
 		{#if data.complianceAssessmentScore.scoring_enabled && data.requirementAssessment.is_scored}
 			{#if showScore}
 				<div class="shrink-0 relative">
-					<Progress value={formatScoreValue(score, max_score, min_score)} min={0} max={100}>
+					<Progress value={formatScoreValue(score, max_score, false, min_score)} min={0} max={100}>
 						<Progress.Circle class="[--size:--spacing(10)]">
 							<Progress.CircleTrack />
-							<Progress.CircleRange class={displayScoreColor(score, max_score, min_score)} />
+							<Progress.CircleRange class={displayScoreColor(score, max_score, false, min_score)} />
 						</Progress.Circle>
 						<div class="absolute inset-0 flex items-center justify-center">
 							<span class="text-xs font-bold">{score}</span>
@@ -174,14 +174,14 @@
 			{#if showDocumentationScore}
 				<div class="shrink-0 relative">
 					<Progress
-						value={formatScoreValue(documentationScore, max_score, min_score)}
+						value={formatScoreValue(documentationScore, max_score, false, min_score)}
 						min={0}
 						max={100}
 					>
 						<Progress.Circle class="[--size:--spacing(10)]">
 							<Progress.CircleTrack />
 							<Progress.CircleRange
-								class={displayScoreColor(documentationScore, max_score, min_score)}
+								class={displayScoreColor(documentationScore, max_score, false, min_score)}
 							/>
 						</Progress.Circle>
 						<div class="absolute inset-0 flex items-center justify-center">

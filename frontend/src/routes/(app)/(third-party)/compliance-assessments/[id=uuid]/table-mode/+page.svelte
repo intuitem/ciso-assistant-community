@@ -869,7 +869,9 @@
 														<Progress
 															value={formatScoreValue(
 																requirementAssessment.documentation_score,
-																raMax
+																raMax,
+																false,
+																raMin
 															)}
 															min={0}
 															max={100}
@@ -879,7 +881,9 @@
 																<Progress.CircleRange
 																	class={displayScoreColor(
 																		requirementAssessment.documentation_score,
-																		raMax
+																		raMax,
+																		false,
+																		raMin
 																	)}
 																/>
 															</Progress.Circle>
