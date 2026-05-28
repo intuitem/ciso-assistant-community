@@ -99,7 +99,7 @@ export function formatScoreValue(
 		return 100;
 	}
 	const range = max_score - min_score;
-	if (!range) {
+	if (range <= 0) {
 		return 0;
 	}
 	return ((value - min_score) * 100) / range;

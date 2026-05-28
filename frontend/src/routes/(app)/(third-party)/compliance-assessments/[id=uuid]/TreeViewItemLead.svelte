@@ -75,9 +75,12 @@
 		{/if}
 		{#if showScore && resultI18n !== 'notApplicable' && isScored}
 			{@const range = max_score - min_score}
+			{@const safeScore = score ?? min_score}
 			<div class="relative">
 				<Progress
-					value={range > 0 ? ((score - min_score) * 100) / range : 0}
+					value={range > 0
+						? Math.max(0, Math.min(100, ((safeScore - min_score) * 100) / range))
+						: 0}
 					min={0}
 					max={100}
 					data-testid="progress-ring-svg"
@@ -92,9 +95,12 @@
 				</Progress>
 			</div>
 			{#if showDocumentationScore}
+				{@const safeDoc = documentationScore ?? min_score}
 				<div class="relative">
 					<Progress
-						value={range > 0 ? ((documentationScore - min_score) * 100) / range : 0}
+						value={range > 0
+							? Math.max(0, Math.min(100, ((safeDoc - min_score) * 100) / range))
+							: 0}
 						min={0}
 						max={100}
 					>
