@@ -67,6 +67,8 @@ jobs:
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         working-directory: ${{ env.frontend-directory }}
         timeout-minutes: 17
+        env:
+          DEBUG: pw:install
         run: |
           for attempt in 1 2 3; do
             if timeout 300 pnpm exec playwright install chromium; then
@@ -112,6 +114,8 @@ jobs:
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         working-directory: ${{ env.frontend-directory }}
         timeout-minutes: 32
+        env:
+          DEBUG: pw:install
         run: |
           for attempt in 1 2 3; do
             if timeout 600 pnpm exec playwright install; then
