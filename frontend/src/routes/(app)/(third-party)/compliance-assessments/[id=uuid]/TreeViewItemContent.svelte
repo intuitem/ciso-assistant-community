@@ -449,7 +449,7 @@
 											/>
 										</Progress.Circle>
 										<div class="absolute inset-0 flex items-center justify-center">
-											<span class="text-xs font-bold">{nodeScore()}/{nodeTotalMaxScore()}</span>
+											<span class="text-xs font-bold">{nodeScore()}</span>
 										</div>
 									</Progress>
 								</div>
@@ -477,9 +477,7 @@
 												/>
 											</Progress.Circle>
 											<div class="absolute inset-0 flex items-center justify-center">
-												<span class="text-xs font-bold"
-													>{nodeDocumentationScore()}/{nodeTotalMaxScore()}</span
-												>
+												<span class="text-xs font-bold">{nodeDocumentationScore()}</span>
 											</div>
 										</Progress>
 									</div>
@@ -510,7 +508,7 @@
 										/>
 									</Progress.Circle>
 									<div class="absolute inset-0 flex items-center justify-center">
-										<span class="text-xs font-bold">{nodeScore()}/{nodeTotalMaxScore()}</span>
+										<span class="text-xs font-bold">{nodeScore()}</span>
 									</div>
 								</Progress>
 							</div>
@@ -538,9 +536,7 @@
 											/>
 										</Progress.Circle>
 										<div class="absolute inset-0 flex items-center justify-center">
-											<span class="text-xs font-bold"
-												>{nodeDocumentationScore()}/{nodeTotalMaxScore()}</span
-											>
+											<span class="text-xs font-bold">{nodeDocumentationScore()}</span>
 										</div>
 									</Progress>
 								</div>
