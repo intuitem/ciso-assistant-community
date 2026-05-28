@@ -32,7 +32,7 @@ env:
   DEBUG: pw:webserver
   POSTGRES_VERSION: "16"
   UBUNTU_VERSION: "24.04"
-  PYTHON_VERSION: "3.12"
+  PYTHON_VERSION: "3.14"
 
 jobs:
   build_community_frontend:

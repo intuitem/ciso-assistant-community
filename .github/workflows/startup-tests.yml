@@ -30,7 +30,7 @@ env:
   enterprise-backend-settings-module: enterprise_core.settings
   POSTGRES_VERSION: "16"
   UBUNTU_VERSION: "ubuntu-24.04"
-  PYTHON_VERSION: "3.12"
+  PYTHON_VERSION: "3.14"
 
 jobs:
   startup-functional-test:
