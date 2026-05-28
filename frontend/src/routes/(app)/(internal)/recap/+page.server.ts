@@ -135,9 +135,9 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 
 			folderRecap.compliance_assessments.push(complianceAssessmentData);
 			folderToRecap[folderId] = folderRecap;
-
-			folderRecaps = Object.values(folderToRecap);
 		}
+
+		folderRecaps = Object.values(folderToRecap);
 	} else {
 		console.error(`An error occured while fetching recap data.`);
 	}
