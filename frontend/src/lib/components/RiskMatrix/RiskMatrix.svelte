@@ -185,7 +185,9 @@
 								<Tooltip.Content>
 									<div
 										class="card bg-black p-4 shadow-lg rounded-sm w-max"
-										style="color: {yHeader.hexcolor ?? '#FFFFFF'}; max-width: min(28rem, 90vw);"
+										style="color: {isDark(yHeader.hexcolor)
+								? '#FFFFFF'
+								: (yHeader.hexcolor ?? '#FFFFFF')}; max-width: min(28rem, 90vw);"
 									>
 										<p
 											data-testid="y-header-description"
