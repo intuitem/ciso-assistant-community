@@ -107,7 +107,7 @@ jobs:
           key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
       - name: Install Playwright Browsers
         working-directory: ${{ env.frontend-directory }}
-        timeout-minutes: 25
+        timeout-minutes: 32
         run: |
           for attempt in 1 2 3; do
             if timeout 600 pnpm exec playwright install; then
@@ -179,7 +179,7 @@ jobs:
           key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
       - name: Install Playwright Browsers
         working-directory: ${{ env.frontend-directory }}
-        timeout-minutes: 25
+        timeout-minutes: 32
         run: |
           for attempt in 1 2 3; do
             if timeout 600 pnpm exec playwright install; then
@@ -299,7 +299,7 @@ jobs:
           key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
       - name: Install Playwright Browsers
         working-directory: ${{ env.enterprise-frontend-build-directory }}
-        timeout-minutes: 25
+        timeout-minutes: 32
         run: |
           for attempt in 1 2 3; do
             if timeout 600 pnpm exec playwright install; then
@@ -363,7 +363,7 @@ jobs:
           key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
       - name: Install Playwright Browsers
         working-directory: ${{ env.enterprise-frontend-build-directory }}
-        timeout-minutes: 25
+        timeout-minutes: 32
         run: |
           for attempt in 1 2 3; do
             if timeout 600 pnpm exec playwright install; then
