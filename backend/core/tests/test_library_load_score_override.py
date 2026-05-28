@@ -44,24 +44,14 @@ def test_yaml_library_load_creates_overrides():
     )
     assert default_node.min_score is None
     assert default_node.max_score is None
-    assert default_node.scores_definition is None
+    assert default_node.scores_definition_ref is None
 
     binary_by_ref = RequirementNode.objects.get(
         urn="urn:intuitem:test:req_node:mixed:binary-by-ref"
     )
     assert binary_by_ref.min_score == 0
     assert binary_by_ref.max_score == 1
-    # Stored as a bare string reference, not inlined.
-    assert binary_by_ref.scores_definition == "binary"
-
-    binary_inline = RequirementNode.objects.get(
-        urn="urn:intuitem:test:req_node:mixed:binary-inline"
-    )
-    assert binary_inline.min_score == 0
-    assert binary_inline.max_score == 1
-    # YAML bare list gets wrapped to {"scale": [...]} on storage.
-    assert isinstance(binary_inline.scores_definition, dict)
-    assert binary_inline.scores_definition.get("scale")
+    assert binary_by_ref.scores_definition_ref == "binary"
 
 
 @pytest.mark.django_db

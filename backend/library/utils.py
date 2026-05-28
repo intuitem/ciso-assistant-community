@@ -101,12 +101,6 @@ class RequirementNodeImporter:
         if parent_urn:
             parent_urn = parent_urn.lower()
 
-        # YAML scores_definition is a bare list; wrap it in {"scale": [...]}
-        # to match Framework storage shape.
-        scores_definition = self.requirement_data.get("scores_definition")
-        if isinstance(scores_definition, list):
-            scores_definition = {"scale": scores_definition}
-
         requirement_node = RequirementNode.objects.create(
             folder=Folder.get_root_folder(),
             framework=framework_object,
@@ -127,7 +121,7 @@ class RequirementNodeImporter:
             weight=self.requirement_data.get("weight", 1),
             min_score=self.requirement_data.get("min_score"),
             max_score=self.requirement_data.get("max_score"),
-            scores_definition=scores_definition,
+            scores_definition_ref=self.requirement_data.get("scores_definition_ref"),
             locale=framework_object.locale,
             default_locale=framework_object.default_locale,
             translations=self.requirement_data.get("translations", {}),

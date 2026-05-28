@@ -23,9 +23,12 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name="requirementnode",
-            name="scores_definition",
-            field=models.JSONField(
-                blank=True, null=True, verbose_name="Score definition"
+            name="scores_definition_ref",
+            field=models.CharField(
+                blank=True,
+                max_length=100,
+                null=True,
+                verbose_name="Scores definition reference",
             ),
         ),
         migrations.AddField(

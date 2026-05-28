@@ -2897,17 +2897,6 @@ class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
 
 class RequirementAssessmentReadSerializer(BaseModelSerializer):
     class FilteredNodeSerializer(RequirementNodeReadSerializer):
-        # scores_definition is stored as {"scale": [...]} but exposed as a bare
-        # list everywhere else in the API (FrameworkReadSerializer,
-        # effective_scores_definition). Match that shape here for consistency.
-        scores_definition = serializers.SerializerMethodField()
-
-        def get_scores_definition(self, obj):
-            sd = obj.scores_definition
-            if isinstance(sd, dict) and "scale" in sd:
-                return sd["scale"]
-            return sd
-
         class Meta:
             model = RequirementNode
             fields = [
@@ -2926,7 +2915,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
                 "display_mode",
                 "min_score",
                 "max_score",
-                "scores_definition",
+                "scores_definition_ref",
                 "weight",
             ]
 

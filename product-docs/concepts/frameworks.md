@@ -34,17 +34,17 @@ A framework is a tree of **requirement nodes**. Most nodes are _assessable_ — 
 
 Frameworks can define a default scoring scale with a minimum score, a maximum score, and optional level descriptions. For example, a CMMI-style framework may use `0..5`, while another framework may use `1..4` or `0..100`.
 
-An individual requirement node can override that default scale with its own `min_score`, `max_score`, and `scores_definition`. These overrides are useful when a standard mixes different scoring shapes in the same tree: for example, a mostly maturity-based framework that also contains binary pass/fail requirements.
+An individual requirement node can override that default scale with its own `min_score`, `max_score`, and `scores_definition_ref`. These overrides are useful when a standard mixes different scoring shapes in the same tree: for example, a mostly maturity-based framework that also contains binary pass/fail requirements.
 
 The override is resolved independently for each field:
 
 - If a requirement defines `min_score`, that value is used; otherwise the audit-level minimum is used.
 - If a requirement defines `max_score`, that value is used; otherwise the audit-level maximum is used.
-- If a requirement defines `scores_definition`, those labels are used; otherwise the audit-level labels are used when they fit the requirement's effective range.
+- If a requirement defines `scores_definition_ref`, those labels (resolved from the framework's alternatives registry) are used; otherwise the audit-level labels are used when they fit the requirement's effective range.
 
 ### Alternative scales registry
 
-When several requirements share the same custom scale, the framework can declare a named **alternatives** registry alongside its default scale. Each requirement can then reference an entry by name instead of duplicating the labels:
+Per-requirement label overrides go through a named **alternatives** registry declared on the framework alongside its default scale. Each requirement references an entry by name, keeping shared scales DRY and avoiding duplication on the node:
 
 ```yaml
 framework:
@@ -66,24 +66,14 @@ framework:
     - urn: ...:r1
       min_score: 0
       max_score: 1
-      scores_definition: binary       # ← reference by name, DRY
+      scores_definition_ref: binary       # reference by name, DRY
     - urn: ...:r2
       min_score: 0
       max_score: 1
-      scores_definition: binary       # ← same reference, same scale
-    - urn: ...:r3
-      min_score: 0
-      max_score: 3
-      scores_definition:              # ← inline (escape hatch for one-off scales)
-        - score: 0
-          name: "None"
-        - score: 1
-          name: "Partial"
-        - score: 2
-          name: "Most"
-        - score: 3
-          name: "Full"
+      scores_definition_ref: binary       # same reference, same scale
 ```
+
+One-off scales that only apply to a single requirement are added as a new entry in the framework's alternatives registry and referenced by name, just like shared scales. The node always carries a reference, never inlined labels.
 
 The audit copies the framework's `scores_definition` (default scale + alternatives) at creation, so per-requirement references resolve against the audit's own copy. This keeps the audit self-contained: customising the audit's scale later doesn't break references on its requirements.
 

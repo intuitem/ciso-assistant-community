@@ -287,7 +287,7 @@ Important columns:
 * `description`
 * `implementation_groups` (if applicable)
 * `questions` / `answers` (if applicable)
-* `min_score`, `max_score`, `scores_definition` (optional requirement-level scoring override)
+* `min_score`, `max_score`, `scores_definition_ref` (optional requirement-level scoring override)
 
 {% hint style="info" %}
 Order matters: the hierarchy is inferred from row order + depth.
@@ -299,9 +299,9 @@ Framework `_meta` tabs define the default scoring scale with `min_score`, `max_s
 
 * `min_score` — integer minimum score for this requirement.
 * `max_score` — integer maximum score for this requirement.
-* `scores_definition` — name of a `scores` object block to use as the level labels for this requirement.
+* `scores_definition_ref` — name of a `scores` object block from the framework's alternatives registry to use as the level labels for this requirement.
 
-Each field cascades independently. Leave the cells blank to inherit the audit-level value at runtime; that audit value is usually initialised from the framework when the audit is created. If you override the range, make sure the requirement's `scores_definition` covers every integer score from `min_score` to `max_score`; otherwise conversion or import validation will reject the library. Also keep choice `add_score` values within the requirement's effective range.
+Each field cascades independently. Leave the cells blank to inherit the audit-level value at runtime; that audit value is usually initialised from the framework when the audit is created. If you override the range, make sure the referenced alternative covers every integer score from `min_score` to `max_score`; otherwise conversion or import validation will reject the library. Also keep choice `add_score` values within the requirement's effective range.
 
 ### 4.6 Threats
 

@@ -10,7 +10,7 @@ description: Authoring frameworks, matrices, and other library content from Exce
 
 This page captures the editorial conventions for Excel-driven authoring; the full v2 Excel format reference and the converter command-line are in [Designing your own libraries](../libraries/custom-libraries.md).
 
-For framework scoring, the framework `_meta` tab defines the default `min_score`, `max_score`, and `scores_definition` used when audits are created. Individual requirement rows can override those values with their own `min_score`, `max_score`, and `scores_definition` when a framework mixes scoring ranges. Leave those cells blank to inherit the audit-level scale at runtime.
+For framework scoring, the framework `_meta` tab defines the default `min_score`, `max_score`, and `scores_definition` used when audits are created. Individual requirement rows can override those values with their own `min_score`, `max_score`, and `scores_definition_ref` (a named entry in the framework's `scores_definition.alternatives` registry) when a framework mixes scoring ranges. Leave those cells blank to inherit the audit-level scale at runtime.
 
 ## What this page will cover
 

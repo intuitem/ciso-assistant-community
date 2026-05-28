@@ -9118,24 +9118,14 @@ class FrameworkViewSet(BaseModelViewSet):
                 node_data["display_mode"] = node.display_mode
             if node.weight and node.weight != 1:
                 node_data["weight"] = node.weight
-            # Per-requirement scoring overrides. scores_definition is either a
-            # string ref into framework.scores_definition.alternatives, or a
-            # wrapped {"scale": [...]} we emit as a bare list to match the
-            # YAML conventions used everywhere else.
+            # Per-requirement scoring overrides. scores_definition_ref points
+            # at an entry in framework.scores_definition.alternatives.
             if node.min_score is not None:
                 node_data["min_score"] = node.min_score
             if node.max_score is not None:
                 node_data["max_score"] = node.max_score
-            if node.scores_definition is not None:
-                if isinstance(node.scores_definition, str):
-                    node_data["scores_definition"] = node.scores_definition
-                elif (
-                    isinstance(node.scores_definition, dict)
-                    and "scale" in node.scores_definition
-                ):
-                    node_data["scores_definition"] = node.scores_definition["scale"]
-                else:
-                    node_data["scores_definition"] = node.scores_definition
+            if node.scores_definition_ref:
+                node_data["scores_definition_ref"] = node.scores_definition_ref
             if node.translations:
                 node_data["translations"] = node.translations
 
@@ -9200,11 +9190,7 @@ class FrameworkViewSet(BaseModelViewSet):
             # Emit a bare list when there are no alternatives (matches the
             # legacy YAML convention used by every shipped framework); emit
             # the wrapped dict when alternatives exist to preserve them.
-            if (
-                isinstance(sd, dict)
-                and "scale" in sd
-                and not sd.get("alternatives")
-            ):
+            if isinstance(sd, dict) and "scale" in sd and not sd.get("alternatives"):
                 framework_obj["scores_definition"] = sd["scale"]
             else:
                 framework_obj["scores_definition"] = sd

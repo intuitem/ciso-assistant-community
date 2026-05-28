@@ -1083,11 +1083,6 @@ class LibraryUpdater:
                         ].lower()
                     requirement_node_dict["order_id"] = order_id
                     order_id += 1
-                    # Match storage shape used by the library loader.
-                    if isinstance(requirement_node_dict.get("scores_definition"), list):
-                        requirement_node_dict["scores_definition"] = {
-                            "scale": requirement_node_dict["scores_definition"]
-                        }
 
                     if urn in existing_requirement_node_objects:
                         requirement_node_object = existing_requirement_node_objects[urn]
@@ -2574,8 +2569,14 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
     max_score = models.IntegerField(
         null=True, blank=True, verbose_name=_("Maximum score")
     )
-    scores_definition = models.JSONField(
-        null=True, blank=True, verbose_name=_("Score definition")
+    # Reference into the framework's scores_definition.alternatives registry
+    # (resolved through the CA's copy at read time). Custom labels for a
+    # requirement go through the registry — there's no inline override.
+    scores_definition_ref = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        verbose_name=_("Scores definition reference"),
     )
     target_score = models.FloatField(
         null=True, blank=True, verbose_name=_("Target score")
@@ -2681,24 +2682,17 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
 
         return result if result else None
 
-    def _unwrap_scores_definition(self):
-        sd = self.scores_definition
-        if isinstance(sd, dict) and "scale" in sd:
-            return sd["scale"]
-        return sd
-
     def clean(self):
         """Validate the optional per-requirement scale override.
 
-        Each field is independently null-or-set. scores_definition is checked
-        against the Node-level resolved bounds: the Node's own value when set,
-        the Framework value otherwise.
+        Bounds are checked against the resolved scale (Node's own value when
+        set, Framework value otherwise). scores_definition_ref must point at
+        an existing entry in the framework's scores_definition.alternatives.
         """
         from django.core.exceptions import ValidationError
 
         super().clean()
 
-        # Bounds visible at Node level (no CA context).
         if self.framework is not None:
             fallback_min = self.framework.min_score
             fallback_max = self.framework.max_score
@@ -2716,9 +2710,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
                 {"max_score": _("max_score must be strictly greater than min_score.")}
             )
 
-        if isinstance(self.scores_definition, str):
-            # String reference into framework.scores_definition["alternatives"].
-            # Validate the ref resolves to an existing entry.
+        if self.scores_definition_ref:
             fw_sd = (
                 self.framework.scores_definition
                 if self.framework is not None
@@ -2726,42 +2718,16 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
                 else {}
             )
             alternatives = fw_sd.get("alternatives") or {}
-            if self.scores_definition not in alternatives:
+            if self.scores_definition_ref not in alternatives:
                 raise ValidationError(
                     {
-                        "scores_definition": _(
-                            "scores_definition reference '%(ref)s' does not exist "
+                        "scores_definition_ref": _(
+                            "scores_definition_ref '%(ref)s' does not exist "
                             "in the framework's alternatives."
                         )
-                        % {"ref": self.scores_definition}
+                        % {"ref": self.scores_definition_ref}
                     }
                 )
-        elif self.scores_definition is not None:
-            scale = self._unwrap_scores_definition()
-            if not isinstance(scale, list) or not scale:
-                raise ValidationError(
-                    {
-                        "scores_definition": _(
-                            "scores_definition must be a non-empty list of entries."
-                        )
-                    }
-                )
-            if resolved_min is not None and resolved_max is not None:
-                seen = {
-                    entry.get("score")
-                    for entry in scale
-                    if isinstance(entry, dict) and entry.get("score") is not None
-                }
-                expected = set(range(resolved_min, resolved_max + 1))
-                if seen != expected:
-                    raise ValidationError(
-                        {
-                            "scores_definition": _(
-                                "scores_definition entries must cover every integer score "
-                                "in [min_score, max_score]."
-                            )
-                        }
-                    )
 
     class Meta:
         verbose_name = _("RequirementNode")
@@ -8359,12 +8325,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     def get_resolved_scoring(self) -> dict:
         """Resolve the effective score scale via the cascade Node -> CA.
 
-        Each scale field cascades independently: Node value when set, CA value
-        otherwise. Node.scores_definition is polymorphic:
-          - None      : inherit CA's default scale
-          - str       : reference into CA.scores_definition["alternatives"][name]
-          - list/dict : inline override (wrapped or bare)
-        scores_definition is returned unwrapped (bare list) or None.
+        Scale bounds (min_score/max_score) cascade independently. The labels
+        come from either the Node's scores_definition_ref (resolved through
+        the CA's copy of scores_definition.alternatives) or the CA's default
+        scale. scores_definition is returned as a bare list or None.
         """
         req = self.requirement
         ca = self.compliance_assessment
@@ -8372,7 +8336,6 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         min_score = req.min_score if req.min_score is not None else ca.min_score
         max_score = req.max_score if req.max_score is not None else ca.max_score
 
-        req_sd = req.scores_definition
         # Defensive normalization: legacy data may have a bare list at the CA
         # level instead of the wrapped {"scale": [...]} form.
         if isinstance(ca.scores_definition, dict):
@@ -8381,38 +8344,28 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             ca_sd = {"scale": ca.scores_definition}
         else:
             ca_sd = {}
-        node_overrides = req_sd is not None
 
-        if req_sd is None:
-            # Inherit CA's default scale.
-            scores_definition = ca_sd.get("scale")
-        elif isinstance(req_sd, str):
-            # Reference into the CA's alternatives registry.
-            scores_definition = ca_sd.get("alternatives", {}).get(req_sd)
-        elif isinstance(req_sd, dict) and "scale" in req_sd:
-            scores_definition = req_sd["scale"]
-        elif isinstance(req_sd, list):
-            scores_definition = req_sd
+        if req.scores_definition_ref:
+            scores_definition = ca_sd.get("alternatives", {}).get(
+                req.scores_definition_ref
+            )
         else:
-            scores_definition = None
-
-        # Inherited scores_definition (from CA default) may not cover the
-        # Node-overridden bounds. Drop the labels rather than display them
-        # out of range.
-        if (
-            scores_definition is not None
-            and not node_overrides
-            and min_score is not None
-            and max_score is not None
-            and isinstance(scores_definition, list)
-        ):
-            scored_values = {
-                entry.get("score")
-                for entry in scores_definition
-                if isinstance(entry, dict) and entry.get("score") is not None
-            }
-            if not set(range(min_score, max_score + 1)).issubset(scored_values):
-                scores_definition = None
+            scores_definition = ca_sd.get("scale")
+            # Inherited default may not cover the Node's overridden bounds.
+            # Drop the labels rather than display them out of range.
+            if (
+                scores_definition is not None
+                and isinstance(scores_definition, list)
+                and min_score is not None
+                and max_score is not None
+            ):
+                scored_values = {
+                    entry.get("score")
+                    for entry in scores_definition
+                    if isinstance(entry, dict) and entry.get("score") is not None
+                }
+                if not set(range(min_score, max_score + 1)).issubset(scored_values):
+                    scores_definition = None
 
         return {
             "min_score": min_score,

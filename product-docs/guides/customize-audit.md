@@ -94,7 +94,7 @@ The **Anchor N/A to target score** checkbox controls how _Not Applicable_ requir
 By default every requirement in an audit is scored on the same scale (e.g. 0..5). When a framework needs a few requirements scored on a different scale — for example a binary "Yes / No" check inside an otherwise maturity-style framework — those requirements can ship their own scale:
 
 - `min_score` / `max_score` override the bounds of the audit-level scale for that requirement only.
-- `scores_definition` overrides the labels. It can either be **inlined** on the requirement or, when the framework declares an **alternatives registry**, given as a **named reference**. Two requirements pointing at the same name share the same definition without duplication.
+- `scores_definition_ref` overrides the labels. The framework declares an **alternatives registry** keyed by name, and each requirement references an entry by name. Two requirements pointing at the same name share the same definition without duplication.
 
 Per-requirement overrides are defined when the library is authored (Excel converter or YAML loader). They are not editable through the platform UI.
 
