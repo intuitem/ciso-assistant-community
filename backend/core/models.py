@@ -2728,6 +2728,31 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
                         % {"ref": self.scores_definition_ref}
                     }
                 )
+            # The referenced alternative must cover every integer in the
+            # resolved range; otherwise the labels would be displayed against
+            # scores outside the alternative's domain.
+            if resolved_min is not None and resolved_max is not None:
+                entries = alternatives[self.scores_definition_ref]
+                covered = {
+                    entry.get("score")
+                    for entry in entries
+                    if isinstance(entry, dict) and entry.get("score") is not None
+                }
+                required = set(range(resolved_min, resolved_max + 1))
+                if not required.issubset(covered):
+                    raise ValidationError(
+                        {
+                            "scores_definition_ref": _(
+                                "Alternative '%(ref)s' does not cover the "
+                                "requirement's effective range [%(min)s, %(max)s]."
+                            )
+                            % {
+                                "ref": self.scores_definition_ref,
+                                "min": resolved_min,
+                                "max": resolved_max,
+                            }
+                        }
+                    )
 
     class Meta:
         verbose_name = _("RequirementNode")

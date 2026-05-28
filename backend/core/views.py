@@ -8924,6 +8924,10 @@ class FrameworkViewSet(BaseModelViewSet):
                     locale=node.locale,
                     default_locale=node.default_locale,
                     translations=node.translations,
+                    min_score=node.min_score,
+                    max_score=node.max_score,
+                    scores_definition_ref=node.scores_definition_ref,
+                    target_score=node.target_score,
                 )
                 node_id_map[old_id] = new_node.id
 

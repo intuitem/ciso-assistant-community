@@ -2809,12 +2809,19 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                     result=RequirementAssessment.Result.NOT_APPLICABLE,
                 )
                 if updated_instance.scoring_enabled:
-                    # Turn on: set is_scored=True, initialize score to min_score
-                    # only for RAs that don't already have a score
+                    # Turn on: set is_scored=True, initialize score to the RA's
+                    # resolved minimum (Node override falling back to CA) only
+                    # for RAs that don't already have a score. A RN that
+                    # overrides min_score above the CA min must not be
+                    # initialised below its own range.
                     assessable_ras.update(is_scored=True)
-                    assessable_ras.filter(score__isnull=True).update(
-                        score=updated_instance.min_score or 0
-                    )
+                    ca_min = updated_instance.min_score or 0
+                    for ra in assessable_ras.filter(score__isnull=True).select_related(
+                        "requirement"
+                    ):
+                        req_min = ra.requirement.min_score
+                        ra.score = req_min if req_min is not None else ca_min
+                        ra.save(update_fields=["score"])
                 else:
                     # Turn off: only flip is_scored, preserve existing scores
                     assessable_ras.update(is_scored=False)
