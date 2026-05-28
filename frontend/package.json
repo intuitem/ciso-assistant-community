@@ -20,7 +20,7 @@
 	},
 	"devDependencies": {
 		"@inlang/paraglide-js": "^2.17.0",
-		"@playwright/test": "^1.55.1",
+		"@playwright/test": "^1.60.0",
 		"@skeletonlabs/skeleton": "^4.0.0",
 		"@skeletonlabs/skeleton-svelte": "^4.0.0",
 		"@svelte-put/copy": "^3.0.2",
