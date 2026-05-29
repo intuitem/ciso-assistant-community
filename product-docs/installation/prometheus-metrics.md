@@ -7,7 +7,7 @@ description: >-
 
 # Prometheus metrics
 
-### Overview
+## Overview
 
 When enabled, the backend exposes a `/metrics` endpoint that returns instance-level gauges in the [Prometheus exposition format](https://prometheus.io/docs/instrumenting/exposition_formats/):
 
@@ -84,4 +84,4 @@ ciso_assistant_nb_users 3.0
 ...
 ```
 
-If the endpoint returns a 404, check that `EXPOSE_METRICS=true` is set and that the backend has restarted.
+If the endpoint returns a 404, check that `EXPOSE_METRICS=True` is set and that the backend has restarted.

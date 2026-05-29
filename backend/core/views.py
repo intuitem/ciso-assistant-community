@@ -19011,7 +19011,7 @@ def metrics_view(request):
         nb_risk_scenarios_gauge.set(metrics.get("nb_risk_scenarios", 0))
         nb_risk_acceptances_gauge.set(metrics.get("nb_risk_acceptances", 0))
         nb_seats_gauge.set(metrics.get("nb_seats", 0))
-        nb_editors_gauge.set(metrics.get("nb_edges", 0))
+        nb_editors_gauge.set(metrics.get("nb_editors", 0))
         expiration_gauge.set(metrics.get("expiration", 0))
         created_at_gauge.set(metrics.get("created_at", 0))
         last_login_gauge.set(metrics.get("last_login", 0))
