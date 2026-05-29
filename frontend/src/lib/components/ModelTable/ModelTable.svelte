@@ -307,8 +307,8 @@
 
 	let contextMenuOpenRow: TableSource | undefined = $state(undefined);
 
-	const filters = source?.filters ?? tableFilters;
-	const filteredFields = Object.keys(filters);
+	const filters = $derived(source?.filters ?? tableFilters);
+	const filteredFields = $derived(Object.keys(filters));
 	// Only persist filters on standalone list pages, not embedded sub-tables
 	const isStandaloneTable = baseEndpoint === `/${URLModel}`;
 	const filterStoreKey = `${page.url.pathname}::${baseEndpoint}`;
