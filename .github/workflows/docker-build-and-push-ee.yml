@@ -1,7 +1,6 @@
 name: Build and Push Docker Images EE
 permissions:
   contents: read
-  packages: write
 
 on:
   push:
@@ -39,6 +38,9 @@ jobs:
   build-frontend:
     needs: prepare
     runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+      packages: write
     strategy:
       matrix:
         include:
@@ -85,6 +87,9 @@ jobs:
   build-backend:
     needs: prepare
     runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+      packages: write
     strategy:
       matrix:
         include:
@@ -144,6 +149,9 @@ jobs:
   merge-manifests:
     needs: [prepare, build-frontend, build-backend]
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
