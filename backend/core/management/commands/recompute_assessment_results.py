@@ -97,13 +97,19 @@ class Command(BaseCommand):
         unknown / legacy values that pure SQL cannot match cleanly.
 
         When scoped to a single compliance assessment, the scan is restricted
-        to requirements that audit references, so single-CA runs don't pay the
-        full-tenant cost.
+        to requirement nodes that audit references, so single-CA runs don't
+        pay the full-tenant cost. We avoid the ORM reverse path through
+        `RequirementAssessment` because `RequirementAssessment.requirement`
+        has no `related_name`, so resolving the join name implicitly is
+        fragile and easy to break with future model edits.
         """
         choices_qs = QuestionChoice.objects.filter(compute_result__isnull=False)
         if scoped_ca is not None:
+            scoped_requirement_ids = RequirementAssessment.objects.filter(
+                compliance_assessment=scoped_ca,
+            ).values_list("requirement_id", flat=True)
             choices_qs = choices_qs.filter(
-                question__requirement_node__requirement_assessments__compliance_assessment=scoped_ca,
+                question__requirement_node_id__in=scoped_requirement_ids,
             )
         pairs = choices_qs.values_list(
             "question__requirement_node_id", "compute_result"
