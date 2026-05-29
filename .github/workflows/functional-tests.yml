@@ -32,7 +32,7 @@ env:
   DEBUG: pw:webserver
   POSTGRES_VERSION: "16"
   UBUNTU_VERSION: "24.04"
-  PYTHON_VERSION: "3.12"
+  PYTHON_VERSION: "3.14"
 
 jobs:
   build_community_frontend:
@@ -155,8 +155,152 @@ jobs:
           echo "Enterprise Test files found: $ENTERPRISE_TEST_FILES"
           echo "test_files=$ENTERPRISE_TEST_FILES" >> $GITHUB_OUTPUT
 
+  setup-pg-dump-community:
+    runs-on: ubuntu-24.04
+    env:
+      DJANGO_DEBUG: "True"
+      POSTGRES_NAME: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      DB_HOST: localhost
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres # test credential
+          POSTGRES_DB: postgres
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: Install Poetry via pipx
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade pipx
+          python -m pipx ensurepath
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          python -m pipx install poetry
+
+      - name: Configure Poetry virtualenv in project
+        run: poetry config virtualenvs.in-project true
+
+      - name: Cache Virtualenv
+        uses: actions/cache@v5
+        with:
+          path: ${{ env.backend-directory }}/.venv
+          key: venv-${{ runner.os }}-py${{ env.PYTHON_VERSION }}-${{ hashFiles('backend/poetry.lock') }}
+
+      - name: Install backend requirements
+        working-directory: ${{ env.backend-directory }}
+        run: poetry install
+
+      - name: Restore PG dump cache
+        id: pg-dump-cache
+        uses: actions/cache@v5
+        with:
+          path: ${{ env.backend-directory }}/db/prebuilt-pg-community.sql
+          key: pg-dump-community-${{ runner.os }}-${{ hashFiles('backend/**/migrations/*.py', 'backend/poetry.lock') }}
+
+      - name: Run migrations and dump
+        if: steps.pg-dump-cache.outputs.cache-hit != 'true'
+        working-directory: ${{ env.backend-directory }}
+        env:
+          PGPASSWORD: postgres
+        run: |
+          poetry run python manage.py migrate
+          pg_dump -h localhost -U postgres -d postgres > db/prebuilt-pg-community.sql
+
+      - name: Upload PG dump
+        uses: actions/upload-artifact@v7
+        with:
+          name: prebuilt-pg-dump-community
+          path: ${{ env.backend-directory }}/db/prebuilt-pg-community.sql
+          retention-days: 1
+
+  setup-pg-dump-enterprise:
+    runs-on: ubuntu-24.04
+    env:
+      DJANGO_DEBUG: "True"
+      POSTGRES_NAME: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      DB_HOST: localhost
+      DJANGO_SETTINGS_MODULE: enterprise_core.settings
+      LICENSE_SEATS: 999
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres # test credential
+          POSTGRES_DB: postgres
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: Install Poetry via pipx
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade pipx
+          python -m pipx ensurepath
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          python -m pipx install poetry
+
+      - name: Configure Poetry to not use virtualenvs
+        run: poetry config virtualenvs.create false
+
+      - name: Install backend requirements
+        working-directory: ${{ env.backend-directory }}
+        run: poetry install
+
+      - name: Install enterprise backend requirements
+        working-directory: ${{ env.enterprise-backend-directory }}
+        run: poetry install
+
+      - name: Restore PG dump cache
+        id: pg-dump-cache
+        uses: actions/cache@v5
+        with:
+          path: ${{ env.backend-directory }}/db/prebuilt-pg-enterprise.sql
+          key: pg-dump-enterprise-${{ runner.os }}-${{ hashFiles('backend/**/migrations/*.py', 'enterprise/backend/**/migrations/*.py', 'backend/poetry.lock', 'enterprise/backend/poetry.lock') }}
+
+      - name: Run migrations and dump
+        if: steps.pg-dump-cache.outputs.cache-hit != 'true'
+        working-directory: ${{ env.backend-directory }}
+        env:
+          PGPASSWORD: postgres
+        run: |
+          poetry run python manage.py migrate
+          pg_dump -h localhost -U postgres -d postgres > db/prebuilt-pg-enterprise.sql
+
+      - name: Upload PG dump
+        uses: actions/upload-artifact@v7
+        with:
+          name: prebuilt-pg-dump-enterprise
+          path: ${{ env.backend-directory }}/db/prebuilt-pg-enterprise.sql
+          retention-days: 1
+
   functional-tests:
-    needs: get_playwright_test_files
+    needs: [get_playwright_test_files, setup-pg-dump-community]
     runs-on: ubuntu-24.04
     env:
       LOG_LEVEL: DEBUG
@@ -231,6 +375,15 @@ jobs:
         shell: bash
         run: poetry --version
 
+      - name: Configure Poetry virtualenv in project
+        run: poetry config virtualenvs.in-project true
+
+      - name: Cache Virtualenv
+        uses: actions/cache@v5
+        with:
+          path: ${{ env.backend-directory }}/.venv
+          key: venv-${{ runner.os }}-py${{ matrix.python-version }}-${{ hashFiles('backend/poetry.lock') }}
+
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
         run: poetry install
@@ -287,6 +440,18 @@ jobs:
           done
           exit 1
 
+      - name: Download PG dump
+        uses: actions/download-artifact@v8
+        with:
+          name: prebuilt-pg-dump-community
+          path: ${{ env.backend-directory }}/db/
+
+      - name: Restore PG dump
+        working-directory: ${{ env.backend-directory }}
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d postgres -f db/prebuilt-pg-community.sql > /dev/null
+
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
         run: |
@@ -334,7 +499,7 @@ jobs:
           retention-days: 5
 
   enterprise-functional-tests:
-    needs: get_playwright_test_files
+    needs: [get_playwright_test_files, setup-pg-dump-enterprise]
     runs-on: ubuntu-24.04
     env:
       LOG_LEVEL: DEBUG
@@ -476,6 +641,18 @@ jobs:
             sleep 15
           done
           exit 1
+
+      - name: Download PG dump
+        uses: actions/download-artifact@v8
+        with:
+          name: prebuilt-pg-dump-enterprise
+          path: ${{ env.backend-directory }}/db/
+
+      - name: Restore PG dump
+        working-directory: ${{ env.backend-directory }}
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d postgres -f db/prebuilt-pg-enterprise.sql > /dev/null
 
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
