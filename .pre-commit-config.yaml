@@ -4,7 +4,13 @@ repos:
     hooks:
       - id: check-yaml
       - id: end-of-file-fixer
+        # Vendored, generated bundle (ncc output) must stay byte-exact so it
+        # remains reproducible from src and passes cla-assistant-dist-check.
+        exclude: ^\.github/actions/cla-assistant/dist/
       - id: trailing-whitespace
+        # ncc emits boilerplate with trailing tabs; stripping it breaks the
+        # reproducible build hash (see .github/actions/cla-assistant/README.md).
+        exclude: ^\.github/actions/cla-assistant/dist/
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.9.2
     hooks:
