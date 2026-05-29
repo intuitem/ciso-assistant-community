@@ -24,6 +24,7 @@ from django.contrib.auth.models import Permission
 
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
+from django.core.exceptions import ValidationError as DjangoValidationError
 
 from integrations.models import IntegrationConfiguration, SyncMapping
 
@@ -2178,14 +2179,27 @@ class RequirementNodeWriteSerializer(BaseModelSerializer):
         # because requirement nodes on draft frameworks should be editable.
         self._check_object_perm(instance, "change")
         try:
-            return super(BaseModelSerializer, self).update(instance, validated_data)
-        except Exception as e:
-            logger.error(
-                "Failed to update RequirementNode", error=str(e), exc_info=True
-            )
-            raise serializers.ValidationError(
-                "Failed to update requirement node. Please check the input data."
-            )
+            with transaction.atomic():
+                m2m_field_names = {f.name for f in instance._meta.many_to_many}
+                m2m_values = {
+                    attr: validated_data.pop(attr)
+                    for attr in list(validated_data.keys())
+                    if attr in m2m_field_names
+                }
+                for attr, value in validated_data.items():
+                    setattr(instance, attr, value)
+                # Trigger RequirementNode.clean() for override constraints. M2M
+                # fields aren't yet attached at this point; exclude them.
+                instance.full_clean(exclude=list(m2m_field_names))
+                instance.save()
+                for attr, value in m2m_values.items():
+                    getattr(instance, attr).set(value)
+                return instance
+        except DjangoValidationError as e:
+            raise serializers.ValidationError(getattr(e, "message_dict", e.messages))
+        except Exception:
+            logger.error("Failed to update RequirementNode", exc_info=True)
+            raise
 
     class Meta:
         model = RequirementNode
@@ -2795,12 +2809,31 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                     result=RequirementAssessment.Result.NOT_APPLICABLE,
                 )
                 if updated_instance.scoring_enabled:
-                    # Turn on: set is_scored=True, initialize score to min_score
-                    # only for RAs that don't already have a score
+                    # Turn on: set is_scored=True, initialize score to the RA's
+                    # resolved minimum (Node override falling back to CA) only
+                    # for RAs that don't already have a score. A RN that
+                    # overrides min_score above the CA min must not be
+                    # initialised below its own range.
                     assessable_ras.update(is_scored=True)
-                    assessable_ras.filter(score__isnull=True).update(
-                        score=updated_instance.min_score or 0
+                    ca_min = updated_instance.min_score
+                    framework_min = (
+                        updated_instance.framework.min_score
+                        if updated_instance.framework is not None
+                        else None
                     )
+                    for ra in assessable_ras.filter(score__isnull=True).select_related(
+                        "requirement"
+                    ):
+                        req_min = ra.requirement.min_score
+                        if req_min is not None:
+                            ra.score = req_min
+                        elif ca_min is not None:
+                            ra.score = ca_min
+                        elif framework_min is not None:
+                            ra.score = framework_min
+                        else:
+                            ra.score = 0
+                        ra.save(update_fields=["score"])
                 else:
                     # Turn off: only flip is_scored, preserve existing scores
                     assessable_ras.update(is_scored=False)
@@ -2899,6 +2932,9 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
                 "questions",
                 "implementation_groups",
                 "display_mode",
+                "min_score",
+                "max_score",
+                "scores_definition_ref",
                 "weight",
             ]
 
@@ -2926,6 +2962,29 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     is_locked = serializers.BooleanField()
     applied_controls = FieldsRelatedField(many=True)
     answers = serializers.SerializerMethodField()
+
+    # Effective scale after the Node -> CA cascade. Null when the CA has
+    # scoring disabled (no scale to expose).
+    effective_min_score = serializers.SerializerMethodField()
+    effective_max_score = serializers.SerializerMethodField()
+    effective_scores_definition = serializers.SerializerMethodField()
+
+    def _resolved(self, obj):
+        if not obj.compliance_assessment.scoring_enabled:
+            return None
+        return obj.get_resolved_scoring()
+
+    def get_effective_min_score(self, obj):
+        r = self._resolved(obj)
+        return r["min_score"] if r else None
+
+    def get_effective_max_score(self, obj):
+        r = self._resolved(obj)
+        return r["max_score"] if r else None
+
+    def get_effective_scores_definition(self, obj):
+        r = self._resolved(obj)
+        return r["scores_definition"] if r else None
 
     def get_answers(self, obj):
         """Reconstruct old JSON format {question_urn: answer_value} from Answer model."""
@@ -3080,17 +3139,34 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
 
         return super().validate(attrs)
 
-    def validate_score(self, value):
-        compliance_assessment = self.get_compliance_assessment()
+    def _validate_against_resolved(self, value):
+        """Reject scores that fall outside the RA's resolved scale.
 
-        if value is not None:
-            value = max(
-                (
-                    compliance_assessment.min_score,
-                    min(value, compliance_assessment.max_score),
-                )
+        Rejection (rather than silent clamping) keeps client bugs visible and
+        matches the update_requirement endpoint's behavior. Reject on missing
+        instance or unresolved bounds so out-of-range values never reach the DB.
+        """
+        if value is None:
+            return value
+        if not self.instance:
+            raise serializers.ValidationError(
+                "Cannot validate score before the requirement assessment is created."
             )
+        resolved = self.instance.get_resolved_scoring()
+        lo, hi = resolved["min_score"], resolved["max_score"]
+        if lo is None or hi is None:
+            raise serializers.ValidationError(
+                "Scoring is not configured for this audit."
+            )
+        if value < lo or value > hi:
+            raise serializers.ValidationError(f"Score must be between {lo} and {hi}.")
         return value
+
+    def validate_score(self, value):
+        return self._validate_against_resolved(value)
+
+    def validate_documentation_score(self, value):
+        return self._validate_against_resolved(value)
 
     def get_compliance_assessment(self):
         if hasattr(self, "instance") and self.instance:

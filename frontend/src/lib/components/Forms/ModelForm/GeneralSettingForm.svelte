@@ -635,6 +635,23 @@
 						label={m.chatSystemPrompt()}
 						helpText={m.chatSystemPromptHelpText()}
 					/>
+					<Checkbox
+						{form}
+						field="chat_temperature_enabled"
+						label={m.chatTemperatureEnabled()}
+						helpText={m.chatTemperatureEnabledHelpText()}
+					/>
+					{#if $formStore.chat_temperature_enabled}
+						<NumberField
+							{form}
+							field="chat_temperature"
+							label={m.chatTemperature()}
+							helpText={m.chatTemperatureHelpText()}
+							min={0}
+							max={2}
+							step={0.1}
+						/>
+					{/if}
 				</div>
 			</Accordion.ItemContent>
 		</Accordion.Item>
