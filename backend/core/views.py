@@ -13101,26 +13101,29 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             if score is not None:
                 try:
                     score = int(score)
-                    resolved = requirement_assessment.get_resolved_scoring()
-                    resolved_min = resolved["min_score"]
-                    resolved_max = resolved["max_score"]
-                    if (
-                        resolved_min is not None
-                        and resolved_max is not None
-                        and (score < resolved_min or score > resolved_max)
-                    ):
-                        return Response(
-                            {
-                                "error": (
-                                    f"Score must be between {resolved_min} and "
-                                    f"{resolved_max}"
-                                )
-                            },
-                            status=status.HTTP_400_BAD_REQUEST,
-                        )
                 except (ValueError, TypeError):
                     return Response(
                         {"error": "Score must be a valid integer"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                resolved = requirement_assessment.get_resolved_scoring()
+                resolved_min = resolved["min_score"]
+                resolved_max = resolved["max_score"]
+                if resolved_min is None or resolved_max is None:
+                    return Response(
+                        {
+                            "error": "Cannot set score: scoring is not configured for this audit."
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                if score < resolved_min or score > resolved_max:
+                    return Response(
+                        {
+                            "error": (
+                                f"Score must be between {resolved_min} and "
+                                f"{resolved_max}"
+                            )
+                        },
                         status=status.HTTP_400_BAD_REQUEST,
                     )
 
