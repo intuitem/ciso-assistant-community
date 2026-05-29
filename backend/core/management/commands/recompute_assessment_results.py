@@ -80,15 +80,15 @@ class Command(BaseCommand):
             try:
                 ca = ComplianceAssessment.objects.get(pk=ca_uuid)
             except ComplianceAssessment.DoesNotExist as exc:
-                raise CommandError(
-                    f"ComplianceAssessment {ca_uuid} not found"
-                ) from exc
+                raise CommandError(f"ComplianceAssessment {ca_uuid} not found") from exc
             queryset = queryset.filter(compliance_assessment=ca)
             self.stdout.write(f"Scoped to compliance assessment {ca_uuid}")
 
         total = queryset.count()
         if total == 0:
-            self.stdout.write(self.style.WARNING("No requirement assessments to process."))
+            self.stdout.write(
+                self.style.WARNING("No requirement assessments to process.")
+            )
             return
 
         mode_label = []
