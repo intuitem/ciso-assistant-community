@@ -99,7 +99,7 @@ from django.core.files.uploadedfile import UploadedFile
 from django.http import HttpRequest
 from datetime import datetime
 from types import MappingProxyType
-from typing import Optional, Final, ClassVar, Any, Iterable, Callable, Mapping, Hashable
+from typing import Optional, Final, ClassVar, Any, Iterable, Callable, Mapping
 from dataclasses import dataclass, field, KW_ONLY
 from abc import ABC, abstractmethod
 import enum
@@ -290,8 +290,7 @@ def _resolve_filtering_labels(value, ctx: BaseContext) -> list[UUID]:
     label_names = set(name.strip() for name in re.split(r"[|,]", value) if name.strip())
     label_ids: set[UUID] = set()
 
-    viewable_name_to_ids = ctx.get_viewable_object_ids(FilteringLabel, ["label"])
-    viewable_ids = list(viewable_name_to_ids.values())
+    viewable_ids = ctx.get_viewable_ids(FilteringLabel)
 
     newly_created_label_name_map: dict[str, FilteringLabel] = {}
     base_query = FilteringLabel.objects.filter(id__in=viewable_ids)
@@ -332,8 +331,7 @@ def _resolve_owners(record_value: Any, ctx: BaseContext) -> list[UUID]:
     ]
     actor_id_set = set()
 
-    viewable_name_to_ids = ctx.get_viewable_object_ids(Actor, ["user"])
-    viewable_ids = list(viewable_name_to_ids.values())
+    viewable_ids = ctx.get_viewable_ids(Actor)
     base_query = Actor.objects.filter(id__in=viewable_ids).select_related("user")
 
     for entry in actor_entries:
@@ -342,12 +340,12 @@ def _resolve_owners(record_value: Any, ctx: BaseContext) -> list[UUID]:
         if actor is None:
             # Try matching as team name
             actor = base_query.filter(team__name__iexact=entry).first()
-        if actor is not None and actor.id not in actor_id_set:
-            actor_id_set.add(actor.id)
-        else:
+        if actor is None:
             logger.warning(
-                "Could not resolve an owner reference to a user email or team name during Applied Control import; skipping."
+                f"Could not resolve owner reference {entry!r} to a user email or team name; skipping."
             )
+            continue
+        actor_id_set.add(actor.id)
 
     return list(actor_id_set)
 
@@ -494,53 +492,27 @@ class BaseContext:
     matrix_id: Optional[str] = None
     framework_id: Optional[str] = None
     on_conflict: ConflictMode = ConflictMode.STOP
-    viewable_object_ids: dict[
-        type[AbstractBaseModel], dict[tuple[Hashable, ...], UUID]
-    ] = field(default_factory=dict)
+    viewable_id_sets: dict[type[AbstractBaseModel], set[UUID]] = field(
+        default_factory=dict
+    )
     """
-    Cache viewable object ids as calling `RoleAssignment.get_accessible_object_ids` for each newly processed record is expensive.
+    Cache the set of viewable object ids per model, as calling `RoleAssignment.get_accessible_object_ids` for each processed record is expensive.
 
-    Caching object ids can lead to minor data inconsistencies where a stale object id would be kept in cache even if another user delete the object while the data-wizard processes records.
-
-    This is acceptable as the underlying RDBMS would protect us from setting invalid foreign keys anyway.
+    Caching can lead to minor inconsistencies (a stale id kept in cache if another user deletes the object mid-import); this is acceptable as the underlying RDBMS protects us from setting invalid foreign keys anyway.
     """
 
-    def get_viewable_object_ids(
-        self, model: type[AbstractBaseModel], primary_field_names: list[str] = ["name"]
-    ) -> dict[tuple[Hashable, ...], UUID]:
-        """
-        The field set of `model` represented by `primary_field_names` MUST be unique per-object.
-
-        Return a hashmap where:
-        - The key is the tuple of values mapped to the keys of `primary_field_names`.
-        - The value is objet associated to this field combination.
-
-        **WARNING:** All string values in the return dict key tuples are lowercased.
-        """
-
-        cached_obj_name_to_ids = self.viewable_object_ids.get(model, None)
-        if cached_obj_name_to_ids is not None:
-            return cached_obj_name_to_ids
+    def get_viewable_ids(self, model: type[AbstractBaseModel]) -> set[UUID]:
+        """Return the cached set of ids of `model` objects the request user can view."""
+        cached_ids = self.viewable_id_sets.get(model)
+        if cached_ids is not None:
+            return cached_ids
 
         (viewable_object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), self.request.user, model
         )
-        obj_name_to_ids: dict[tuple[Hashable, ...], UUID] = {}
-
-        for obj in model.objects.filter(id__in=viewable_object_ids):
-            map_key: list[Hashable] = []
-
-            for primary_field_name in primary_field_names:
-                value = getattr(obj, primary_field_name)
-                if isinstance(value, str):
-                    value = value.lower()
-
-                map_key.append(value)
-
-            obj_name_to_ids[tuple(map_key)] = obj.id
-
-        self.viewable_object_ids[model] = obj_name_to_ids
-        return obj_name_to_ids
+        viewable_ids = set(viewable_object_ids)
+        self.viewable_id_sets[model] = viewable_ids
+        return viewable_ids
 
 
 class _UnsetClass:
@@ -760,8 +732,15 @@ class CharField(Field[str, str]):
         if value is None:
             return self.success()
 
-        if value == "" and not self.blank:
-            return self.error(f"Field {self.name!r} can't be an empty string.", record)
+        if value == "":
+            if not self.blank:
+                return self.error(
+                    f"Field {self.name!r} can't be an empty string.", record
+                )
+            # A blank value is treated as unset so the model/serializer default
+            # applies. Returning here also avoids the choices check below, which
+            # would otherwise reject the empty string for choice fields.
+            return self.success()
 
         length = len(value)
 
@@ -941,6 +920,7 @@ class ManyToManyField(Field[str, list[UUID]]):
         return self.success(result=obj_ids)
 
 
+@dataclass(frozen=True)
 class FolderField(Field[str, UUID]):
     INPUT_TYPES = (str, type(None))
 
@@ -3122,7 +3102,9 @@ class FieldCollection:
         CharField("name", required=True, max_length=200),
         CharField("description", blank=True, null=True),
     ]
-    FilteringLabelMixin = [ManyToManyField("filtering_labels", FilteringLabel)]
+    FilteringLabelMixin = [
+        ManyToManyField("filtering_labels", FilteringLabel, blank=True)
+    ]
     FolderMixin = [FolderField("folder")]
 
 
@@ -3132,6 +3114,7 @@ class MetricInstanceRecordConsumer(RecordConsumer[None]):
     FIELDS = [
         *FieldCollection.NameDescriptionMixin,
         *FieldCollection.FilteringLabelMixin,
+        *FieldCollection.FolderMixin,
         CharField("ref_id", blank=True),
         FloatField("target_value", null=True),
         CharField(
@@ -3142,10 +3125,13 @@ class MetricInstanceRecordConsumer(RecordConsumer[None]):
             choices=format_choices(MetricInstance.Frequency),
         ),
         CharField(
-            "status", max_length=20, choices=format_choices(MetricInstance.Status)
+            "status",
+            max_length=20,
+            blank=True,
+            choices=format_choices(MetricInstance.Status),
         ),
         ForeignKey("metric_definition", MetricDefinition),
-        ManyToManyField("owner", Actor),
+        ManyToManyField("owner", Actor, blank=True),
     ]
 
 
