@@ -34,38 +34,6 @@ The endpoint is disabled by default (`EXPOSE_METRICS=False`).
 The `/metrics` endpoint is **unauthenticated**. It must never be reachable from the public internet. Always block it at the reverse proxy level and only allow access from your internal network or from Prometheus itself.
 {% endhint %}
 
-Here is for example the caddy service we use in docker-compose.yml but we authorize a local prometheus to go search in it while not authorizing exterior connection to check:
-
-```yaml
-  backend:
-    ...
-    environment:
-      - EXPOSE_METRICS=True
-    ...
-    ports:
-      - "127.0.0.1:8000:8000"
-
-  caddy:
-    container_name: caddy
-    image: caddy:2.11.2
-    environment:
-      - CISO_ASSISTANT_URL=https://localhost:8443
-    depends_on:
-      backend:
-        condition: service_healthy
-    restart: unless-stopped
-    ports:
-      - 8443:8443
-    volumes:
-      - ./db/caddy:/data/caddy
-    command: |
-      sh -c 'echo $$CISO_ASSISTANT_URL "{
-      reverse_proxy /api/* backend:8000
-      reverse_proxy /* frontend:3000
-      tls internal
-      }" > Caddyfile && caddy run'
-```
-
 ### Prometheus configuration (single VM)
 
 If your prometheus runs in local you can for example check the /metrics endpoint with this config 
