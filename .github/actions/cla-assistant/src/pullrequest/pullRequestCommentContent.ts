@@ -37,7 +37,7 @@ function dco(signed: boolean, committerMap: CommitterMap): string {
 
     if (committersCount > 1 && committerMap && committerMap.signed && committerMap.notSigned) {
         text += `**${committerMap.signed.length}** out of **${committerMap.signed.length + committerMap.notSigned.length}** committers have signed the DCO.`
-        committerMap.signed.forEach(signedCommitter => { text += `<br/>:white_check_mark: (${signedCommitter.name})[https://github.com/${signedCommitter.name}]` })
+        committerMap.signed.forEach(signedCommitter => { text += `<br/>:white_check_mark: [${signedCommitter.name}](https://github.com/${signedCommitter.name})` })
         committerMap.notSigned.forEach(unsignedCommitter => {
             text += `<br/>:x: @${unsignedCommitter.name}`
         })
@@ -82,7 +82,7 @@ function cla(signed: boolean, committerMap: CommitterMap): string {
 
     if (committersCount > 1 && committerMap && committerMap.signed && committerMap.notSigned) {
         text += `**${committerMap.signed.length}** out of **${committerMap.signed.length + committerMap.notSigned.length}** committers have signed the CLA.`
-        committerMap.signed.forEach(signedCommitter => { text += `<br/>:white_check_mark: (${signedCommitter.name})[https://github.com/${signedCommitter.name}]` })
+        committerMap.signed.forEach(signedCommitter => { text += `<br/>:white_check_mark: [${signedCommitter.name}](https://github.com/${signedCommitter.name})` })
         committerMap.notSigned.forEach(unsignedCommitter => {
             text += `<br/>:x: @${unsignedCommitter.name}`
         })

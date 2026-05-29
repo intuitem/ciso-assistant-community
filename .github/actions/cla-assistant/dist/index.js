@@ -744,7 +744,7 @@ function dco(signed, committerMap) {
    `;
     if (committersCount > 1 && committerMap && committerMap.signed && committerMap.notSigned) {
         text += `**${committerMap.signed.length}** out of **${committerMap.signed.length + committerMap.notSigned.length}** committers have signed the DCO.`;
-        committerMap.signed.forEach(signedCommitter => { text += `<br/>:white_check_mark: (${signedCommitter.name})[https://github.com/${signedCommitter.name}]`; });
+        committerMap.signed.forEach(signedCommitter => { text += `<br/>:white_check_mark: [${signedCommitter.name}](https://github.com/${signedCommitter.name})`; });
         committerMap.notSigned.forEach(unsignedCommitter => {
             text += `<br/>:x: @${unsignedCommitter.name}`;
         });
@@ -781,7 +781,7 @@ function cla(signed, committerMap) {
    `;
     if (committersCount > 1 && committerMap && committerMap.signed && committerMap.notSigned) {
         text += `**${committerMap.signed.length}** out of **${committerMap.signed.length + committerMap.notSigned.length}** committers have signed the CLA.`;
-        committerMap.signed.forEach(signedCommitter => { text += `<br/>:white_check_mark: (${signedCommitter.name})[https://github.com/${signedCommitter.name}]`; });
+        committerMap.signed.forEach(signedCommitter => { text += `<br/>:white_check_mark: [${signedCommitter.name}](https://github.com/${signedCommitter.name})`; });
         committerMap.notSigned.forEach(unsignedCommitter => {
             text += `<br/>:x: @${unsignedCommitter.name}`;
         });
@@ -1056,7 +1056,7 @@ function getCLAFileContentandSHA(committers, committerMap) {
             result = yield (0, persistence_1.getFileContent)();
         }
         catch (error) {
-            if (error.status === "404") {
+            if (error.status === 404) {
                 return createClaFileAndPRComment(committers, committerMap);
             }
             else {

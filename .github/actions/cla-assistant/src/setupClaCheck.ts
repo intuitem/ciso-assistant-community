@@ -64,7 +64,7 @@ async function getCLAFileContentandSHA(
   try {
     result = await getFileContent()
   } catch (error) {
-    if (error.status === "404") {
+    if (error.status === 404) {
       return createClaFileAndPRComment(committers, committerMap)
     } else {
       throw new Error(

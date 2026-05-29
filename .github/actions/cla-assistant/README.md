@@ -30,8 +30,8 @@ Result: `npm audit` reports **0 vulnerabilities** (prod and dev).
 actually executes. It is reproduced deterministically from the `src/` and
 `package-lock.json` in this directory, so it is not a blob to trust blindly:
 
-```
-sha256(dist/index.js) = b0805f1080ae56759f93ca0bf76adca06d9c1a0d71d0d3a755c0139767f89450
+```text
+sha256(dist/index.js) = 80f28622a67894c239a24be343dd2e2b5bfa08cee033ffdf06d8dee14ae03654
 ```
 
 To re-verify locally (Node 24):

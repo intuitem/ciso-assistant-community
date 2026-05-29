@@ -1,5 +1,5 @@
 name: "CLA assistant lite"
-description: "An action to handle the Contributor License Agreement (CLA) and Developer Certificate of Orgin (DCO)"
+description: "An action to handle the Contributor License Agreement (CLA) and Developer Certificate of Origin (DCO)"
 author: "SAP"
 branding:
   icon: "award"
