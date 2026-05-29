@@ -1,7 +1,6 @@
 name: Publish Helm Chart - CE
 permissions:
   contents: read
-  packages: write
 on:
   push:
     branches:
@@ -18,9 +17,12 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 

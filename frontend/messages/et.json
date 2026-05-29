@@ -838,7 +838,8 @@
 	"linkHelpText": "Väline URL jälgimiseks või viitamiseks (nt ITSM, SharePoint, Jira jne)",
 	"effortHelpText": "Rakendatud kontrollmeetme elluviimiseks vajalik töömaht",
 	"costHelpText": "Rakendatud kontrollmeetme elluviimiseks vajalik kulu",
-	"riskAcceptanceJusitficationHelpText": "Riskiaktsepti põhjendus. Seda välja saab muuta ainult kinnitaja.",
+	"riskAcceptanceJustificationHelpText": "Riskiaktsepti põhjendus. Seda välja saab muuta ainult kinnitaja.",
+	"riskAcceptanceJustificationLabel": "Riskiaktsepti põhjendus",
 	"approverHelpText": "Riskiomaniku ja kinnitaja identiteet",
 	"riskAcceptanceRiskScenariosHelpText": "Aktsepteeritud riskistsenaariumid",
 	"attachmentHelpText": "Tõendi fail (nt ekraanipilt, logifail jne). Valimisel saad kleepida ekraanipilte otse lõikelaualt.",
@@ -4815,5 +4816,6 @@
 	"builderQuestionTypeUniqueChoice": "Üksikvalik",
 	"builderQuestionTypeMultipleChoice": "Mitmikvalik",
 	"builderQuestionTypeDate": "Kuupäev",
-	"builderChangedOn": "muudetud"
+	"builderChangedOn": "muudetud",
+	"requirementWeight": "Kaal"
 }

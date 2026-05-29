@@ -219,6 +219,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [
 			{ field: 'perimeter', urlModel: 'compliance-assessments' },
 			{ field: 'perimeter', urlModel: 'risk-assessments' },
+			{ field: 'perimeter', urlModel: 'findings-assessments' },
+			{ field: 'perimeter', urlModel: 'business-impact-analysis' },
 			{ field: 'perimeter', urlModel: 'entity-assessments' },
 			{ field: 'perimeters', urlModel: 'campaigns' },
 			{ field: 'perimeters', urlModel: 'processings' }
@@ -2030,8 +2032,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'perimeter', urlModel: 'perimeters' },
 			{ field: 'authors', urlModel: 'actors' },
 			{ field: 'reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' },
-			{ field: 'owner', urlModel: 'actors', urlParams: 'is_third_party=false' },
-			{ field: 'evidences', urlModel: 'evidences' }
+			{ field: 'owner', urlModel: 'actors', urlParams: 'is_third_party=false' }
 		],
 		reverseForeignKeyFields: [
 			{ field: 'findings_assessment', urlModel: 'findings' },
@@ -2069,13 +2070,33 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Findings',
 		foreignKeyFields: [
 			{ field: 'findings_assessment', urlModel: 'findings-assessments' },
-			{ field: 'threats', urlModel: 'threats' },
-			{ field: 'applied_controls', urlModel: 'applied-controls' },
-			{ field: 'evidences', urlModel: 'evidences' }
+			{ field: 'owner', urlModel: 'actors' },
+			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
+			{ field: 'perimeter', urlModel: 'perimeters' }
 		],
 		reverseForeignKeyFields: [
-			// 	{ field: 'findings', urlModel: 'vulnerabilities' },
-			// 	{ field: 'findings', urlModel: 'reference-controls' },
+			{
+				field: 'findings',
+				urlModel: 'threats',
+				addExisting: {
+					parentField: 'threats'
+				}
+			},
+			{
+				field: 'findings',
+				urlModel: 'vulnerabilities',
+				addExisting: {
+					parentField: 'vulnerabilities'
+				}
+			},
+			{
+				field: 'findings',
+				urlModel: 'reference-controls',
+				addExisting: {
+					parentField: 'reference_controls'
+				}
+			},
 			{
 				field: 'findings',
 				urlModel: 'applied-controls',
@@ -2664,6 +2685,61 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'filtering_labels' }
 		]
 	},
+	projects: {
+		name: 'project',
+		localName: 'project',
+		localNamePlural: 'projects',
+		verboseName: 'Project',
+		verboseNamePlural: 'Projects',
+		endpointUrl: 'pmbok/projects',
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'folder' },
+			{ field: 'ref_id' },
+			{ field: 'ref_link' },
+			{ field: 'owner' },
+			{ field: 'sponsor' },
+			{ field: 'status' },
+			{ field: 'priority' },
+			{ field: 'health' },
+			{ field: 'start_date', type: 'date' },
+			{ field: 'end_date', type: 'date' },
+			{ field: 'eta', type: 'date' },
+			{ field: 'closed_at', type: 'date' },
+			{ field: 'progress' },
+			{ field: 'budget' },
+			{ field: 'currency' },
+			{ field: 'linked_collection', urlModel: 'generic-collections' },
+			{ field: 'parent_project', urlModel: 'projects' },
+			{ field: 'updated_at', type: 'datetime' }
+		],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'owner', urlModel: 'actors' },
+			{ field: 'sponsor', urlModel: 'actors' },
+			{ field: 'linked_collection', urlModel: 'generic-collections' },
+			{ field: 'parent_project', urlModel: 'projects' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+		],
+		selectFields: [
+			{ field: 'folder' },
+			{ field: 'ref_id' },
+			{ field: 'kind', endpointUrl: 'pmbok/projects' },
+			{ field: 'priority', endpointUrl: 'pmbok/projects' }
+		],
+		filters: [
+			{ field: 'folder' },
+			{ field: 'kind' },
+			{ field: 'status' },
+			{ field: 'priority' },
+			{ field: 'health' },
+			{ field: 'owner' },
+			{ field: 'sponsor' },
+			{ field: 'parent_project' },
+			{ field: 'linked_collection' },
+			{ field: 'filtering_labels' }
+		]
+	},
 	'responsibility-roles': {
 		name: 'responsibilityrole',
 		localName: 'responsibilityRole',
@@ -2966,7 +3042,7 @@ const FIELD_COMPONENT_MAP = {
 		[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
 	},
 	'user-groups': {
-		localization_dict: UserGroupNameDisplay
+		name: UserGroupNameDisplay
 	},
 	'quantitative-risk-hypotheses': {
 		lec_data: LecChartPreview

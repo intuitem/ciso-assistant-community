@@ -632,17 +632,19 @@
 
 						<!-- Attack Path Flow Text -->
 						{#if scenarioAttackPaths.length > 0}
+							{@const chainFearedEventIds = scenario.focused_feared_event
+								? [scenario.focused_feared_event.id]
+								: (scenario.feared_events?.map((sFe) => sFe.id) ?? [])}
+							{@const chainFearedEvents = reportData.feared_events.filter((fe) =>
+								chainFearedEventIds.includes(fe.id)
+							)}
 							<h4 class="text-md font-semibold text-gray-800 mb-3">
 								<i class="fa-solid fa-route mr-2"></i>{m.attackPaths()}
 							</h4>
 							<AttackPathFlowText
 								attackPaths={scenarioAttackPaths}
-								fearedEvents={reportData.feared_events.filter((fe) =>
-									scenario.feared_events?.some((sFe) => sFe.id === fe.id)
-								)}
-								fearedEventsWithAssets={reportData.feared_events.filter((fe) =>
-									scenario.feared_events?.some((sFe) => sFe.id === fe.id)
-								)}
+								fearedEvents={chainFearedEvents}
+								fearedEventsWithAssets={chainFearedEvents}
 							/>
 						{/if}
 					</div>

@@ -537,7 +537,8 @@
 	"linkHelpText": "Vanjski URL za potrebe praćenja ili reference (npr. ITSM, sharepoint, jira, itd.)",
 	"effortHelpText": "Trud potreban za implementaciju primijenjene kontrole",
 	"costHelpText": "Trošak implementacije primijenjene kontrole",
-	"riskAcceptanceJusitficationHelpText": "Opravdanje za prihvaćanje rizika. Samo odobravatelj može uređivati ovo polje.",
+	"riskAcceptanceJustificationHelpText": "Opravdanje za prihvaćanje rizika. Samo odobravatelj može uređivati ovo polje.",
+	"riskAcceptanceJustificationLabel": "Obrazloženje prihvaćanja rizika",
 	"approverHelpText": "Vlasnik i odobravatelj rizika",
 	"riskAcceptanceRiskScenariosHelpText": "Scenariji rizika koji su prihvaćeni",
 	"attachmentHelpText": "Datoteka za dokaz (npr. screenshot, dnevnički zapis, itd.). Kad je odabrano, možete zalijepiti screenshot iz međuspremnika.",
@@ -4094,5 +4095,6 @@
 	"builderQuestionTypeUniqueChoice": "Jednostruki odabir",
 	"builderQuestionTypeMultipleChoice": "Višestruki odabir",
 	"builderQuestionTypeDate": "Datum",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "promijenjeno u",
+	"requirementWeight": "Težina"
 }

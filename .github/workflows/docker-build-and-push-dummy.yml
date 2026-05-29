@@ -1,7 +1,6 @@
 name: Build and Push Docker Images Dummy
 permissions:
   contents: read
-  packages: write
 on:
   workflow_dispatch:
 
@@ -19,7 +18,7 @@ jobs:
     runs-on: ubuntu-24.04-arm
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
