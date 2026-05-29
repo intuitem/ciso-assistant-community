@@ -110,12 +110,7 @@ def resolve_compute_result(compute_result: str | None) -> str | None:
 
 
 def aggregate_compute_results(resolved_results: list[str | None]) -> str | None:
-    """Aggregate resolved compute_result values: not_applicable is neutral, else worst-wins.
-
-    Mirrored by `_aggregate_compute_results` in
-    `core/migrations/0170_backfill_requirement_assessment_results.py`. Keep
-    both in sync if the rules change.
-    """
+    """Aggregate resolved compute_result values: not_applicable is neutral, else worst-wins."""
     contributing = [r for r in resolved_results if r is not None]
     if not contributing:
         return None

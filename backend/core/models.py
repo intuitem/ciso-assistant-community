@@ -8632,8 +8632,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         """
         questions_qs = self.requirement.questions.prefetch_related("choices").all()
 
-        # No questions → this RA is manual or respondent-alignment-driven.
-        # Nothing to recompute; leave score/result/is_scored untouched.
+        # No questions to evaluate; nothing to recompute.
         if not questions_qs:
             return
 

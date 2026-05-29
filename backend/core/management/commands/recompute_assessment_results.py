@@ -17,7 +17,15 @@ from core.models import ComplianceAssessment, RequirementAssessment
 logger = logging.getLogger(__name__)
 
 BATCH_SIZE = 500
-RESULT_UPDATE_FIELDS = ["score", "result", "is_scored"]
+RESULT_UPDATE_FIELDS = ["score", "result", "is_scored", "updated_at"]
+
+
+class _NullContext:
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        return False
 
 
 class Command(BaseCommand):
@@ -38,10 +46,31 @@ class Command(BaseCommand):
             action="store_true",
             help="Report what would change without writing to the database.",
         )
+        parser.add_argument(
+            "--atomic",
+            action="store_true",
+            help="Wrap the full run in a single transaction (default: commit per batch).",
+        )
+        parser.add_argument(
+            "--batch-size",
+            type=int,
+            default=BATCH_SIZE,
+            help=f"Batch size for bulk_update (default: {BATCH_SIZE}).",
+        )
+
+    def _flush_batch(self, batch, fields, dry_run):
+        if not batch or dry_run:
+            batch.clear()
+            return
+        with transaction.atomic():
+            RequirementAssessment.objects.bulk_update(batch, fields)
+        batch.clear()
 
     def handle(self, *args, **options):
         ca_uuid = options.get("compliance_assessment")
         dry_run = options.get("dry_run", False)
+        run_atomic = options.get("atomic", False)
+        batch_size = options.get("batch_size") or BATCH_SIZE
 
         queryset = RequirementAssessment.objects.select_related(
             "compliance_assessment", "requirement"
@@ -62,27 +91,34 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING("No requirement assessments to process."))
             return
 
-        self.stdout.write(
-            f"Processing {total} requirement assessment(s)"
-            + (" [DRY RUN]" if dry_run else "")
-        )
+        mode_label = []
+        if dry_run:
+            mode_label.append("DRY RUN")
+        if run_atomic:
+            mode_label.append("ATOMIC")
+        suffix = f" [{', '.join(mode_label)}]" if mode_label else ""
+        self.stdout.write(f"Processing {total} requirement assessment(s){suffix}")
 
         changed = 0
         unchanged = 0
-        skipped = 0
-        batch = []
+        seen_per_ca: dict[str, int] = {}
+        batch: list[RequirementAssessment] = []
 
-        with transaction.atomic():
-            for ra in queryset.iterator(chunk_size=BATCH_SIZE):
-                if not ra.requirement.questions.exists():
-                    skipped += 1
-                    continue
+        outer = transaction.atomic() if run_atomic else _NullContext()
+
+        with outer:
+            for ra in queryset.iterator(chunk_size=batch_size):
+                ca_key = str(ra.compliance_assessment_id)
+                seen_per_ca[ca_key] = seen_per_ca.get(ca_key, 0) + 1
 
                 previous = (ra.score, ra.result, ra.is_scored)
                 ra.recompute_assessment()
                 current = (ra.score, ra.result, ra.is_scored)
 
                 if previous == current:
+                    # recompute_assessment() short-circuits when a requirement has
+                    # no questions, so "unchanged" covers both that case and rows
+                    # already aligned with the current logic.
                     unchanged += 1
                     continue
 
@@ -96,23 +132,19 @@ class Command(BaseCommand):
                     current[0],
                 )
 
-                if dry_run:
-                    continue
-
                 batch.append(ra)
-                if len(batch) >= BATCH_SIZE:
-                    RequirementAssessment.objects.bulk_update(batch, RESULT_UPDATE_FIELDS)
-                    batch = []
+                if len(batch) >= batch_size:
+                    self._flush_batch(batch, RESULT_UPDATE_FIELDS, dry_run)
 
-            if batch and not dry_run:
-                RequirementAssessment.objects.bulk_update(batch, RESULT_UPDATE_FIELDS)
+            self._flush_batch(batch, RESULT_UPDATE_FIELDS, dry_run)
 
-            if dry_run:
+            if run_atomic and dry_run:
                 transaction.set_rollback(True)
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Done. changed={changed} unchanged={unchanged} skipped={skipped}"
-                + (" (rolled back, dry run)" if dry_run else "")
+                f"Done. compliance_assessments={len(seen_per_ca)} "
+                f"changed={changed} unchanged={unchanged}"
+                + (" (no writes, dry run)" if dry_run else "")
             )
         )
