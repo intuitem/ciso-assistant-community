@@ -1,0 +1,46 @@
+name: "CLA assistant lite"
+description: "An action to handle the Contributor License Agreement (CLA) and Developer Certificate of Orgin (DCO)"
+author: "SAP"
+branding:
+  icon: "award"
+  color: blue
+inputs:
+  path-to-signatures:
+    description: "Give a path for storing CLAs in a json file "
+    default: "./signatures/cla.json"
+  branch:
+    description: "provide a branch where all the CLAs are stored"
+    default: "master"
+  allowlist:
+    description: "users in the allow list don't have to sign the CLA document"
+    default: ""
+  remote-repository-name:
+    description: "provide the remote repository name where all the signatures should be stored"
+  remote-organization-name:
+    description: "provide the remote organization name where all the signatures should be stored"
+  path-to-document:
+    description: "Fully qualified web link to the document - example: https://github.com/cla-assistant/github-action/blob/master/SAPCLA.md"
+  signed-commit-message:
+    description: "Commit message when a new contributor signs the CLA in a PR"
+  signed-empty-commit-message:
+    description: "Commit message when a new contributor signs the CLA (empty)"
+  create-file-commit-message:
+    description: "Commit message when a new file is created"
+  custom-notsigned-prcomment:
+    description: "Introductory message to ask new contributors to sign"
+  custom-pr-sign-comment:
+    description: "The signature to be committed in order to sign the CLA."
+  custom-allsigned-prcomment:
+    description: "pull request comment when everyone has signed, defaults to **CLA Assistant Lite** All Contributors have signed the CLA."
+  use-dco-flag:
+    description: "Set this to true if you want to use a dco instead of a cla"
+    default: "false"
+  lock-pullrequest-aftermerge:
+    description: "Will lock the pull request after merge so that the signature the contributors cannot revoke their signature comments after merge"
+    default: "true"
+  suggest-recheck:
+    description: "Controls whether or not the action's comment should suggest that users comment `recheck`."
+    default: "true"
+runs:
+  using: "node20"
+  main: 'dist/index.js'
