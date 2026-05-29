@@ -86,7 +86,9 @@ class Command(BaseCommand):
             ),
         )
 
-    def _resolvable_requirement_ids(self, scoped_ca: "ComplianceAssessment | None") -> set:
+    def _resolvable_requirement_ids(
+        self, scoped_ca: "ComplianceAssessment | None"
+    ) -> set:
         """Return requirement node IDs that carry at least one choice with a
         compute_result value resolvable by `resolve_compute_result`.
 
