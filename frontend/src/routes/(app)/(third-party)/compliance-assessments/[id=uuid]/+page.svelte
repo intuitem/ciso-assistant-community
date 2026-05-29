@@ -267,6 +267,7 @@
 					scoringEnabled: data.compliance_assessment.scoring_enabled,
 					showDocumentationScore: data.compliance_assessment.show_documentation_score,
 					max_score: node.max_score,
+					min_score: node.min_score ?? 0,
 					progressStatusEnabled: data.compliance_assessment.progress_status_enabled,
 					extendedResultEnabled: data.compliance_assessment.extended_result_enabled,
 					showExtendedResult,
