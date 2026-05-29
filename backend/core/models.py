@@ -7742,12 +7742,34 @@ class ComplianceAssessment(Assessment):
         return measures_status_count
 
     def donut_render(self) -> dict:
-        def union_queries(base_query, groups, field_name):
-            queries = [
-                base_query.filter(**{f"{field_name}__icontains": group}).distinct()
-                for group in groups
-            ]
-            return queries[0].union(*queries[1:]) if queries else base_query.none()
+        ig = (
+            set(self.selected_implementation_groups)
+            if self.selected_implementation_groups
+            else None
+        )
+        if ig is not None:
+            matching_requirement_ids = {
+                ra.requirement_id
+                for ra in RequirementAssessment.objects.filter(
+                    compliance_assessment=self, requirement__assessable=True
+                ).select_related("requirement")
+                if ra.requirement.implementation_groups
+                and ig & set(ra.requirement.implementation_groups)
+            }
+        else:
+            matching_requirement_ids = None
+
+        def scoped_filter(extra=None):
+            f = {"compliance_assessment": self, "requirement__assessable": True}
+            if extra:
+                f.update(extra)
+            return f
+
+        def scoped_query(extra=None):
+            qs = RequirementAssessment.objects.filter(**scoped_filter(extra))
+            if matching_requirement_ids is not None:
+                qs = qs.filter(requirement_id__in=matching_requirement_ids)
+            return qs
 
         color_map = {
             RequirementAssessment.Result.NOT_ASSESSED: "#d1d5db",
@@ -7768,25 +7790,7 @@ class ComplianceAssessment(Assessment):
 
         compliance_assessments_result = {"values": [], "labels": []}
         for result in RequirementAssessment.Result.values:
-            assessable_requirements_filter = {
-                "compliance_assessment": self,
-                "requirement__assessable": True,
-            }
-
-            base_query = RequirementAssessment.objects.filter(
-                result=result, **assessable_requirements_filter
-            ).distinct()
-
-            if self.selected_implementation_groups:
-                union_query = union_queries(
-                    base_query,
-                    self.selected_implementation_groups,
-                    "requirement__implementation_groups",
-                )
-            else:
-                union_query = base_query
-
-            count = union_query.count()
+            count = scoped_query({"result": result}).count()
             value_entry = {
                 "name": result,
                 "localName": camel_case(result),
@@ -7799,25 +7803,7 @@ class ComplianceAssessment(Assessment):
 
         compliance_assessments_status = {"values": [], "labels": []}
         for status in RequirementAssessment.Status.values:
-            assessable_requirements_filter = {
-                "compliance_assessment": self,
-                "requirement__assessable": True,
-            }
-
-            base_query = RequirementAssessment.objects.filter(
-                status=status, **assessable_requirements_filter
-            ).distinct()
-
-            if self.selected_implementation_groups:
-                union_query = union_queries(
-                    base_query,
-                    self.selected_implementation_groups,
-                    "requirement__implementation_groups",
-                )
-            else:
-                union_query = base_query
-
-            count = union_query.count()
+            count = scoped_query({"status": status}).count()
             value_entry = {
                 "name": status,
                 "localName": camel_case(status),
@@ -7830,28 +7816,11 @@ class ComplianceAssessment(Assessment):
 
         compliance_assessments_extended_result = {"values": [], "labels": []}
         if self.extended_result_enabled:
-            assessable_requirements_filter = {
-                "compliance_assessment": self,
-                "requirement__assessable": True,
-            }
-
-            # Count "not_set" first (requirements without extended_result)
-            base_query_not_set = (
-                RequirementAssessment.objects.filter(**assessable_requirements_filter)
+            not_set_count = (
+                scoped_query()
                 .filter(Q(extended_result__isnull=True) | Q(extended_result=""))
-                .distinct()
+                .count()
             )
-
-            if self.selected_implementation_groups:
-                union_query_not_set = union_queries(
-                    base_query_not_set,
-                    self.selected_implementation_groups,
-                    "requirement__implementation_groups",
-                )
-            else:
-                union_query_not_set = base_query_not_set
-
-            not_set_count = union_query_not_set.count()
             compliance_assessments_extended_result["values"].append(
                 {
                     "name": "not_set",
@@ -7864,20 +7833,7 @@ class ComplianceAssessment(Assessment):
 
             # Count each extended_result value
             for extended_result in RequirementAssessment.ExtendedResult.values:
-                base_query = RequirementAssessment.objects.filter(
-                    extended_result=extended_result, **assessable_requirements_filter
-                ).distinct()
-
-                if self.selected_implementation_groups:
-                    union_query = union_queries(
-                        base_query,
-                        self.selected_implementation_groups,
-                        "requirement__implementation_groups",
-                    )
-                else:
-                    union_query = base_query
-
-                count = union_query.count()
+                count = scoped_query({"extended_result": extended_result}).count()
                 value_entry = {
                     "name": extended_result,
                     "localName": camel_case(extended_result),

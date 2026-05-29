@@ -44,6 +44,24 @@ def set_ciso_assistant_url(_, __, event_dict):
     return event_dict
 
 
+_SENSITIVE_QUERY_PARAMS = frozenset({"code", "token", "id_token", "access_token"})
+
+
+def redact_sensitive_query_params(_, __, event_dict):
+    request = event_dict.get("request")
+    if not isinstance(request, str) or "?" not in request:
+        return event_dict
+    path, _, query_string = request.partition("?")
+    from urllib.parse import parse_qsl, urlencode
+
+    params = parse_qsl(query_string, keep_blank_values=True)
+    redacted = [
+        (k, "REDACTED") if k in _SENSITIVE_QUERY_PARAMS else (k, v) for k, v in params
+    ]
+    event_dict["request"] = f"{path}?{urlencode(redacted)}"
+    return event_dict
+
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -66,6 +84,10 @@ LOGGING = {
     "loggers": {
         "": {"handlers": ["console"], "level": LOG_LEVEL},
         "httpx": {"handlers": ["console"], "level": "WARNING", "propagate": False},
+        # Disable Django's default request logger — it logs full URLs including
+        # sensitive OAuth2 query params (code, token). Request logging is already
+        # handled by django_structlog with query-param redaction.
+        "django.server": {"handlers": [], "propagate": False},
     },
 }
 
@@ -81,6 +103,7 @@ if LOG_OUTFILE:
 structlog.configure(
     processors=[
         structlog.contextvars.merge_contextvars,
+        redact_sensitive_query_params,
         set_ciso_assistant_url,
         structlog.stdlib.filter_by_level,
         structlog.processors.TimeStamper(fmt="iso"),  # ISO 8601 timestamps
