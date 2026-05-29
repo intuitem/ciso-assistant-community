@@ -442,9 +442,14 @@ def annotate_tree_with_aggregated_scores(
                 and node.get("assessable")
                 and node.get("result") != "not_applicable"
             )
+            score_val = node.get("score")
+            # `is_scored` with `score is None` is a data inconsistency; treat
+            # it as unscored to avoid producing a negative ratio on offset
+            # scales (where (0 - min) / range < 0).
+            if is_assessed and score_val is None:
+                is_assessed = False
             weight = node.get("weight") or 1
             if is_assessed:
-                score_val = node.get("score") or 0
                 ra_min = (
                     node.get("min_score") if node.get("min_score") is not None else 0
                 )
@@ -466,12 +471,17 @@ def annotate_tree_with_aggregated_scores(
                 node["_leaf_weighted_max"] = ra_max * weight
                 node["_leaf_weight"] = weight
                 if show_doc:
-                    doc_val = node.get("documentation_score") or 0
-                    doc_ratio = (doc_val - ra_min) / ra_range
-                    node["aggregated_documentation_score"] = doc_val
-                    node["_aggregated_doc_ratio"] = doc_ratio
-                    node["_leaf_weighted_doc_ratio"] = doc_ratio * weight
-                    node["_leaf_weighted_doc"] = doc_val * weight
+                    doc_val = node.get("documentation_score")
+                    if doc_val is None:
+                        node["_aggregated_doc_ratio"] = None
+                        node["_leaf_weighted_doc_ratio"] = 0
+                        node["_leaf_weighted_doc"] = 0
+                    else:
+                        doc_ratio = (doc_val - ra_min) / ra_range
+                        node["aggregated_documentation_score"] = doc_val
+                        node["_aggregated_doc_ratio"] = doc_ratio
+                        node["_leaf_weighted_doc_ratio"] = doc_ratio * weight
+                        node["_leaf_weighted_doc"] = doc_val * weight
             else:
                 node["_aggregated_ratio"] = None
                 node["_aggregated_doc_ratio"] = None

@@ -282,3 +282,147 @@ class TestNonZeroMinDenormalization:
         offset_scale_setup.save()
         # score=15 → ratio=(15-10)/10=0.5 → denormalized=10+0.5*10=15.0
         assert offset_scale_setup.get_global_score()["implementation_score"] == 15.0
+
+
+@pytest.mark.django_db
+class TestTreeAggregationNoneScoreOnOffsetScale:
+    """Regression: an is_scored leaf with score=None on an offset scale must
+    not pull the parent below the audit's min via a negative ratio."""
+
+    def test_none_score_does_not_produce_negative_aggregate(self):
+        from core.helpers import (
+            annotate_tree_with_aggregated_scores,
+            get_sorted_requirement_nodes,
+        )
+
+        root = Folder.get_root_folder()
+        folder = Folder.objects.create(parent_folder=root, name="none-score folder")
+        perimeter = Perimeter.objects.create(name="none-score perimeter", folder=folder)
+        framework = Framework.objects.create(
+            name="Offset Framework (1..4)",
+            urn="urn:test:fw-1to4-none-score",
+            min_score=1,
+            max_score=4,
+            folder=root,
+        )
+        section = RequirementNode.objects.create(
+            urn="urn:test:none-score-sec",
+            framework=framework,
+            assessable=False,
+            folder=root,
+        )
+        # Two leaves: one scored at 3, one is_scored=True but score=None
+        # (inconsistent state observed on legacy audits).
+        scored_leaf = RequirementNode.objects.create(
+            urn="urn:test:none-score-r1",
+            framework=framework,
+            parent_urn=section.urn,
+            assessable=True,
+            weight=1,
+            folder=root,
+        )
+        unscored_leaf = RequirementNode.objects.create(
+            urn="urn:test:none-score-r2",
+            framework=framework,
+            parent_urn=section.urn,
+            assessable=True,
+            weight=1,
+            folder=root,
+        )
+        ca = ComplianceAssessment.objects.create(
+            name="None-score CA",
+            framework=framework,
+            folder=folder,
+            perimeter=perimeter,
+        )
+        RequirementAssessment.objects.create(
+            compliance_assessment=ca,
+            requirement=scored_leaf,
+            folder=folder,
+            is_scored=True,
+            score=3,
+        )
+        RequirementAssessment.objects.create(
+            compliance_assessment=ca,
+            requirement=unscored_leaf,
+            folder=folder,
+            is_scored=True,
+            score=None,
+        )
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
+        ca.save()
+
+        nodes = list(RequirementNode.objects.filter(framework=framework))
+        ras = list(RequirementAssessment.objects.filter(compliance_assessment=ca))
+        tree = get_sorted_requirement_nodes(
+            nodes, ras, framework.max_score, framework.min_score
+        )
+        annotate_tree_with_aggregated_scores(tree, ca)
+
+        def _find(t, ref):
+            for n in t.values():
+                if n.get("urn") == ref:
+                    return n
+                f = _find(n.get("children") or {}, ref)
+                if f is not None:
+                    return f
+            return None
+
+        section_node = _find(tree, section.urn)
+        # The unscored leaf must be excluded so the parent reflects only the
+        # one valid leaf (score 3 on 1..4). Score 3 stays in the framework's
+        # range [1, 4]; the parent should never dip below min_score.
+        assert section_node["aggregated_score"] == 3
+        assert section_node["aggregated_score"] >= framework.min_score
+
+
+@pytest.mark.django_db
+class TestRadarDataNormalizesMixedScales:
+    """Regression for the compare endpoint's per-top-level radar slice:
+    mixed-scale subtrees must normalise before averaging, otherwise a binary
+    0..1 leaf and a 0..5 leaf can't be compared.
+    """
+
+    def test_avg_radar_normalises_mixed_scales(self, mixed_scale_setup):
+        """A1=4/5 (ratio 0.8), A2=1/1 (ratio 1.0) under section A.
+        Weighted avg ratio = (0.8 + 1.0) / 2 = 0.9. Denormalised on the CA
+        (0..5): 0.9 * 5 = 4.5. The legacy ad-hoc path returned (4 + 1) / 2 =
+        2.5 instead — meaningless across mixed scales.
+        """
+        ca = mixed_scale_setup["ca"]
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
+        ca.save()
+        _score(mixed_scale_setup, "a1", 4)
+        _score(mixed_scale_setup, "a2", 1)
+
+        a1 = mixed_scale_setup["a1"]
+        a2 = mixed_scale_setup["a2"]
+        scored = list(
+            RequirementAssessment.objects.filter(
+                compliance_assessment=ca, requirement__in=[a1, a2]
+            )
+        )
+        result = ca._compute_score_for_field(
+            scored, None, "score", ca.anchor_na_to_target
+        )
+        assert result == 4.5
+
+    def test_sum_radar_keeps_raw_weighted_sum(self, mixed_scale_setup):
+        """SUM stays raw — operator's responsibility to interpret across scales."""
+        ca = mixed_scale_setup["ca"]
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.SUM
+        ca.save()
+        _score(mixed_scale_setup, "a1", 4)
+        _score(mixed_scale_setup, "a2", 1)
+
+        scored = list(
+            RequirementAssessment.objects.filter(
+                compliance_assessment=ca,
+                requirement__in=[mixed_scale_setup["a1"], mixed_scale_setup["a2"]],
+            )
+        )
+        # raw weighted: 4*1 + 1*1 = 5
+        assert (
+            ca._compute_score_for_field(scored, None, "score", ca.anchor_na_to_target)
+            == 5.0
+        )
