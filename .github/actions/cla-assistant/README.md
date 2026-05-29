@@ -48,8 +48,19 @@ directory and fails if the committed `dist/` drifts from `src/`.
 ## Updating
 
 Edit `src/`, run `npm run build`, commit the regenerated `dist/`. The CI guard
-enforces that the two stay in sync. Keep deps current with the Dependabot entry
-scoped to this directory.
+enforces that the two stay in sync.
+
+There is no Dependabot entry for this vendored copy; keep its deps current
+manually. Periodically run `npm ci && npm audit` in this directory, bump the
+flagged packages in `package.json` (re-pinning `overrides.undici` if the
+`@actions/*` chain pulls a vulnerable version back in), then `npm run build`
+and commit the regenerated `package-lock.json` and `dist/`.
+
+Reproducibility note: the committed `dist/` hash is tied to the `ncc`/`tsc`
+versions in `package-lock.json` and the Node major used by the `dist-check`
+workflow (currently `24`). A future Node minor bump can in rare cases shift the
+bundler output — if `dist-check` fails without a `src/` change, rebuild and
+recommit `dist/` rather than treating it as tampering.
 
 ## License
 
