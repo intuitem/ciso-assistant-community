@@ -45,6 +45,7 @@
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-intuitem-sveltekit": "file:plugins/eslint/eslint-plugin-intuitem-sveltekit",
 		"eslint-plugin-svelte": "^3.14.0",
+		"fast-check": "^4.8.0",
 		"jsdom": "^26.1.0",
 		"prettier": "^3.6.1",
 		"prettier-plugin-svelte": "^3.4.1",
