@@ -3255,18 +3255,20 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                         answer.value = answer_value
                         answer.save(update_fields=["value"])
 
-                # Check if any choice has scoring or result logic
+                # Check if any choice has scoring or result logic. For
+                # compute_result, mirror `resolve_compute_result`: empty strings,
+                # whitespace and unknown values are not actually result-bearing
+                # and should not trigger the compute path.
                 from core.models import QuestionChoice
+                from core.utils import resolve_compute_result
 
-                has_score_or_result = (
-                    QuestionChoice.objects.filter(
-                        question__requirement_node=instance.requirement,
-                    )
-                    .filter(
-                        models.Q(add_score__isnull=False)
-                        | models.Q(compute_result__isnull=False)
-                    )
-                    .exists()
+                choices = QuestionChoice.objects.filter(
+                    question__requirement_node=instance.requirement,
+                ).values_list("add_score", "compute_result")
+
+                has_score_or_result = any(
+                    add_score is not None or resolve_compute_result(cr) is not None
+                    for add_score, cr in choices
                 )
 
                 if has_score_or_result:

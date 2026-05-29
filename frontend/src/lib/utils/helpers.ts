@@ -343,8 +343,15 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 		score = null;
 	}
 
+	// A requirement is "result-driven" only if at least one choice carries a
+	// resolvable compute_result. For score-only questionnaires we return
+	// result=null so the edit page falls back to the manual result select.
+	const isResultDriven = hasComputedResult(questions);
+
 	let result: string | null;
-	if (visibleCount === 0) {
+	if (!isResultDriven) {
+		result = null;
+	} else if (visibleCount === 0) {
 		result = 'not_applicable';
 	} else if (answeredVisibleCount < visibleCount || results.length === 0) {
 		result = 'not_assessed';
@@ -357,7 +364,7 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 }
 
 /** Map a QuestionChoice.compute_result value to a Result string. */
-function resolveComputeResult(value: unknown): string | null {
+export function resolveComputeResult(value: unknown): string | null {
 	if (value === null || value === undefined) return null;
 	if (typeof value === 'boolean') return value ? 'compliant' : 'non_compliant';
 	if (typeof value !== 'string') return null;
@@ -496,16 +503,18 @@ export function getFieldVisibility(
 }
 
 /**
- * Check whether any question in a questions object has choices with `compute_result` defined.
+ * Check whether any question in a questions object has at least one choice with
+ * a *resolvable* `compute_result`. Mirrors `resolveComputeResult`: empty strings,
+ * whitespace, and unknown values are not treated as result-bearing, so a
+ * questionnaire that only carries scoring (`add_score`) does not hide the manual
+ * result select on the requirement edit page.
  */
 export function hasComputedResult(questions: Record<string, any> | null | undefined): boolean {
 	if (!questions) return false;
 	return Object.values(questions).some(
 		(question: any) =>
 			Array.isArray(question.choices) &&
-			question.choices.some(
-				(choice: any) => choice.compute_result !== undefined && choice.compute_result !== null
-			)
+			question.choices.some((choice: any) => resolveComputeResult(choice?.compute_result) !== null)
 	);
 }
 

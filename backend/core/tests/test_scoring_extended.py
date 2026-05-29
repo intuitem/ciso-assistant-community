@@ -301,7 +301,9 @@ class TestScoringExtended:
         )
         a2.selected_choices.set([d["q2_good"]])
 
-        # Set a non-default result to prove compute_score_and_result persists
+        # Set a non-default result to prove compute_score_and_result leaves the
+        # manual result alone when the requirement is not compute_result-driven
+        # (no choice has a resolvable compute_result).
         d["ra"].result = "compliant"
         d["ra"].is_scored = True
         d["ra"].save(update_fields=["result", "is_scored"])
@@ -309,8 +311,10 @@ class TestScoringExtended:
         d["ra"].compute_score_and_result()
         d["ra"].refresh_from_db()
 
-        # No crash; results list empty -> not_assessed is persisted
-        assert d["ra"].result == "not_assessed"
+        # No crash; the requirement isn't result-driven, so the auditor-set
+        # result is preserved. Score is still recomputed (and falls back to
+        # None / is_scored=False since no choice carries add_score either).
+        assert d["ra"].result == "compliant"
         assert d["ra"].is_scored is False
         assert d["ra"].score is None
 

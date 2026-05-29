@@ -8709,22 +8709,35 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             new_score = None
         new_is_scored = is_score_computed
 
-        # Determine overall result
-        if visible_questions == 0:
-            new_result = self.Result.NOT_APPLICABLE
-        elif answered_visible_questions < visible_questions:
-            new_result = self.Result.NOT_ASSESSED
-        elif not results:
-            new_result = self.Result.NOT_ASSESSED
-        else:
-            aggregated = aggregate_compute_results(results)
-            result_map = {
-                "compliant": self.Result.COMPLIANT,
-                "partially_compliant": self.Result.PARTIALLY_COMPLIANT,
-                "non_compliant": self.Result.NON_COMPLIANT,
-                "not_applicable": self.Result.NOT_APPLICABLE,
-            }
-            new_result = result_map.get(aggregated, self.Result.NOT_ASSESSED)
+        # A requirement is "result-driven" only if at least one of its choices
+        # carries a resolvable compute_result. For score-only questionnaires (or
+        # questionnaires with compute_result values that don't resolve), we must
+        # NOT touch self.result, otherwise a manually-set result would be
+        # silently reset to NOT_ASSESSED on every recompute.
+        is_result_driven = any(
+            resolve_compute_result(choice.compute_result) is not None
+            for question in questions_qs
+            for choice in question.choices.all()
+            if choice.compute_result is not None
+        )
+
+        new_result = self.result
+        if is_result_driven:
+            if visible_questions == 0:
+                new_result = self.Result.NOT_APPLICABLE
+            elif answered_visible_questions < visible_questions:
+                new_result = self.Result.NOT_ASSESSED
+            elif not results:
+                new_result = self.Result.NOT_ASSESSED
+            else:
+                aggregated = aggregate_compute_results(results)
+                result_map = {
+                    "compliant": self.Result.COMPLIANT,
+                    "partially_compliant": self.Result.PARTIALLY_COMPLIANT,
+                    "non_compliant": self.Result.NON_COMPLIANT,
+                    "not_applicable": self.Result.NOT_APPLICABLE,
+                }
+                new_result = result_map.get(aggregated, self.Result.NOT_ASSESSED)
 
         # Update attributes
         self.score = new_score
