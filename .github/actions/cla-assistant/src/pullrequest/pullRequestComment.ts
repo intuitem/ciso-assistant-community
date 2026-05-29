@@ -38,7 +38,7 @@ export default async function prCommentSetup(committerMap: CommitterMap, committ
 }
 
 async function createComment(signed: boolean, committerMap: CommitterMap): Promise<void> {
-  await octokit.issues.createComment({
+  await octokit.rest.issues.createComment({
     owner: context.repo.owner,
     repo: context.repo.repo,
     issue_number: context.issue.number,
@@ -47,7 +47,7 @@ async function createComment(signed: boolean, committerMap: CommitterMap): Promi
 }
 
 async function updateComment(signed: boolean, committerMap: CommitterMap, claBotComment: any): Promise<void> {
-  await octokit.issues.updateComment({
+  await octokit.rest.issues.updateComment({
     owner: context.repo.owner,
     repo: context.repo.repo,
     comment_id: claBotComment.id,
@@ -57,14 +57,14 @@ async function updateComment(signed: boolean, committerMap: CommitterMap, claBot
 
 async function getComment() {
   try {
-    const response = await octokit.issues.listComments({ owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number })
+    const response = await octokit.rest.issues.listComments({ owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number })
 
     //TODO: check the below regex
     // using a `string` true or false purposely as github action input cannot have a boolean value
     if (getUseDcoFlag() === 'true') {
-      return response.data.find(comment => comment.body.match(/.*DCO Assistant Lite bot.*/m))
+      return response.data.find(comment => comment.body?.match(/.*DCO Assistant Lite bot.*/m))
     } else if (getUseDcoFlag() === 'false') {
-      return response.data.find(comment => comment.body.match(/.*CLA Assistant Lite bot.*/m))
+      return response.data.find(comment => comment.body?.match(/.*CLA Assistant Lite bot.*/m))
     }
   } catch (error) {
     throw new Error(`Error occured when getting  all the comments of the pull request: ${error.message}`)

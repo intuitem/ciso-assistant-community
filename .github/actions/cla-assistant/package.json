@@ -1,47 +1,32 @@
 {
-  "name": "github-action",
-  "version": "0.0.1",
-  "description": "GitHub Action for storing CLA signatures",
+  "name": "cla-assistant-action",
+  "version": "2.6.1-intuitem.1",
+  "description": "GitHub Action for storing CLA signatures (vendored, patched fork of contributor-assistant/github-action@v2.6.1)",
   "main": "lib/main.js",
   "scripts": {
-    "test": "jest",
-    "build": "tsc && ncc build",
-    "buildAndAdd": "npm run build && git add ."
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run buildAndAdd"
-    }
+    "build": "tsc && ncc build"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cla-assistant/github-action.git"
+    "url": "git+https://github.com/contributor-assistant/github-action.git"
   },
   "keywords": [
     "actions",
     "node",
-    "setup"
+    "cla"
   ],
   "dependencies": {
-    "@actions/core": "^1.10.0",
-    "@actions/github": "^4.0.0",
-    "@octokit/rest": "^16.43.2",
-    "actions-toolkit": "^2.1.0",
-    "husky": "^4.3.8",
-    "lodash": "^4.17.21",
-    "node-fetch": "^3.3.0"
+    "@actions/core": "^1.11.1",
+    "@actions/github": "^6.0.0"
+  },
+  "overrides": {
+    "undici": "^6.26.0"
   },
   "devDependencies": {
-    "@octokit/types": "8.1.1",
-    "@types/node": "^18.11.18",
-    "@vercel/ncc": "^0.38.0",
-    "ts-jest": "^29.0.5",
-    "typescript": "^4.9.4"
+    "@types/node": "^20.19.0",
+    "@vercel/ncc": "^0.38.3",
+    "typescript": "^5.7.3"
   },
   "author": "ibakshay",
-  "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/cla-assistant/github-action/issues"
-  },
-  "homepage": "https://github.com/cla-assistant/github-action#readme"
+  "license": "Apache-2.0"
 }

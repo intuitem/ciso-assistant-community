@@ -1,9 +1,10 @@
 import { CommittersDetails } from './interfaces'
 
-import * as _ from 'lodash'
 import * as input from './shared/getInputs'
 
-
+function escapeRegExp(value: string): string {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
 
 function isUserNotInAllowList(committer) {
 
@@ -12,7 +13,7 @@ function isUserNotInAllowList(committer) {
     return allowListPatterns.filter(function (pattern) {
         pattern = pattern.trim()
         if (pattern.includes('*')) {
-            const regex = _.escapeRegExp(pattern).split('\\*').join('.*')
+            const regex = escapeRegExp(pattern).split('\\*').join('.*')
 
             return new RegExp(regex).test(committer)
         }

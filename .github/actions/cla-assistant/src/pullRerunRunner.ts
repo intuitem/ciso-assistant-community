@@ -28,7 +28,7 @@ export async function reRunLastWorkFlowIfRequired() {
 }
 
 async function getBranchOfPullRequest(): Promise<string> {
-  const pullRequest = await octokit.pulls.get({
+  const pullRequest = await octokit.rest.pulls.get({
     owner: context.repo.owner,
     repo: context.repo.repo,
     pull_number: context.issue.number
@@ -42,7 +42,7 @@ async function getSelfWorkflowId(): Promise<number> {
   let hasNextPage = true
 
   for (let page = 1; hasNextPage === true; page++) {
-    const workflowList = await octokit.actions.listRepoWorkflows({
+    const workflowList = await octokit.rest.actions.listRepoWorkflows({
       owner: context.repo.owner,
       repo: context.repo.repo,
       per_page: perPage,
@@ -72,7 +72,7 @@ async function listWorkflowRunsInBranch(
   workflowId: number
 ): Promise<any> {
   console.debug(branch)
-  const runs = await octokit.actions.listWorkflowRuns({
+  const runs = await octokit.rest.actions.listWorkflowRuns({
     owner: context.repo.owner,
     repo: context.repo.repo,
     branch,
@@ -84,7 +84,7 @@ async function listWorkflowRunsInBranch(
 
 async function reRunWorkflow(run: number): Promise<any> {
   // Personal Access token with repo scope is required to access this api - https://github.community/t/bug-rerun-workflow-api-not-working/126742
-  await octokit.actions.reRunWorkflow({
+  await octokit.rest.actions.reRunWorkflow({
     owner: context.repo.owner,
     repo: context.repo.repo,
     run_id: run
@@ -92,7 +92,7 @@ async function reRunWorkflow(run: number): Promise<any> {
 }
 
 async function checkIfLastWorkFlowFailed(run: number): Promise<boolean> {
-  const response: any = await octokit.actions.getWorkflowRun({
+  const response: any = await octokit.rest.actions.getWorkflowRun({
     owner: context.repo.owner,
     repo: context.repo.repo,
     run_id: run

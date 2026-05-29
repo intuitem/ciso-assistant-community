@@ -1,23 +1,40 @@
-# Vendored CLA Assistant action
+# Vendored CLA Assistant action (patched fork)
 
-Local copy of [`contributor-assistant/github-action`](https://github.com/contributor-assistant/github-action)
-at tag **`v2.6.1`** (commit `ca4a40a`). Upstream was archived (read-only) on
-2026-03-23, so we vendor it here to remove the dependency on an unmaintained
-external action while keeping behaviour identical.
+Local, **patched** copy of
+[`contributor-assistant/github-action`](https://github.com/contributor-assistant/github-action)
+`v2.6.1` (commit `ca4a40a`). Upstream was archived (read-only) on 2026-03-23,
+so we vendor it here to remove the dependency on an unmaintained external
+action and to patch the vulnerable, stale dependencies it shipped with.
 
 Used by `.github/workflows/cla.yml` via `uses: ./.github/actions/cla-assistant`.
 
-## Provenance — the committed `dist/` is verified, not opaque
+## Changes vs upstream v2.6.1
+
+- **Pruned dead dependencies** never imported by `src/`: `@octokit/rest`,
+  `actions-toolkit`, `husky`, `node-fetch` (and dev-only `jest`/`ts-jest`/
+  `@octokit/types`). This removed the bulk of the CVE surface.
+- **Bumped** `@actions/github` `^4 → ^6` and `@actions/core` `→ ^1.11`, with an
+  `overrides` pin of `undici` to `^6.26.0` (the `@actions/*` chain otherwise
+  resolves a vulnerable `undici`).
+- **Inlined** the single `lodash.escapeRegExp` use in `checkAllowList.ts` as a
+  native helper, dropping `lodash` entirely.
+- **Updated REST call sites** `octokit.<resource>` → `octokit.rest.<resource>`
+  (required by the newer Octokit) and added type-faithful null guards.
+- **Retargeted the runtime** `node20 → node24` in `action.yml`.
+
+Result: `npm audit` reports **0 vulnerabilities** (prod and dev).
+
+## Provenance — the committed `dist/` is reproducible, not opaque
 
 `dist/index.js` is the bundler output (`tsc && ncc build`) and is what GitHub
-actually executes. It was reproduced byte-for-byte from the `src/` in this
-directory, so it is not a blob you have to trust blindly:
+actually executes. It is reproduced deterministically from the `src/` and
+`package-lock.json` in this directory, so it is not a blob to trust blindly:
 
 ```
-sha256(dist/index.js) = a44111084c0d4782206c04b4276292f7fec6d1f7a33525512fbeef3242079dfb
+sha256(dist/index.js) = b0805f1080ae56759f93ca0bf76adca06d9c1a0d71d0d3a755c0139767f89450
 ```
 
-To re-verify locally:
+To re-verify locally (Node 24):
 
 ```bash
 npm ci        # deterministic install from package-lock.json
@@ -31,7 +48,8 @@ directory and fails if the committed `dist/` drifts from `src/`.
 ## Updating
 
 Edit `src/`, run `npm run build`, commit the regenerated `dist/`. The CI guard
-enforces that the two stay in sync.
+enforces that the two stay in sync. Keep deps current with the Dependabot entry
+scoped to this directory.
 
 ## License
 

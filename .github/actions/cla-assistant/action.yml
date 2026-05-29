@@ -42,5 +42,5 @@ inputs:
     description: "Controls whether or not the action's comment should suggest that users comment `recheck`."
     default: "true"
 runs:
-  using: "node20"
+  using: "node24"
   main: 'dist/index.js'

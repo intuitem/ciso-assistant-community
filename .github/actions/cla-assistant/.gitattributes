@@ -1,6 +1,5 @@
-# The repo root applies `* text=auto eol=lf`, which would rewrite the bundler
-# output and change its bytes. Store dist/index.js verbatim so the committed
-# file stays byte-identical to the verified, reproducible ncc build
-# (sha256 a44111084c0d4782206c04b4276292f7fec6d1f7a33525512fbeef3242079dfb)
+# The repo root applies `* text=auto eol=lf`. Store dist/index.js verbatim so
+# the committed file stays byte-identical to the reproducible ncc build
+# (sha256 b0805f1080ae56759f93ca0bf76adca06d9c1a0d71d0d3a755c0139767f89450)
 # and so the dist-check CI rebuild diffs cleanly.
 dist/index.js -text
