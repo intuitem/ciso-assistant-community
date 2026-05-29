@@ -24,9 +24,15 @@ export function getRequirementTitle(ref_id: string, name: string) {
 	return title;
 }
 
-export function displayScoreColor(value: number | null, max_score: number, inversedColors = false) {
-	value ??= 0;
-	value = (value * 100) / max_score;
+export function displayScoreColor(
+	value: number | null,
+	max_score: number,
+	inversedColors = false,
+	min_score = 0
+) {
+	value ??= min_score;
+	const range = max_score - min_score;
+	value = range > 0 ? ((value - min_score) * 100) / range : 0;
 	if (inversedColors) {
 		if (value < 25) {
 			return 'stroke-green-300';
@@ -52,9 +58,15 @@ export function displayScoreColor(value: number | null, max_score: number, inver
 	}
 }
 
-export function getScoreHexColor(value: number | null, max_score: number, inversedColors = false) {
-	value ??= 0;
-	const percentage = max_score > 0 ? (value * 100) / max_score : 0;
+export function getScoreHexColor(
+	value: number | null,
+	max_score: number,
+	inversedColors = false,
+	min_score = 0
+) {
+	value ??= min_score;
+	const range = max_score - min_score;
+	const percentage = range > 0 ? ((value - min_score) * 100) / range : 0;
 	// Tailwind color hex equivalents
 	const colors = {
 		red400: '#f87171',
@@ -75,16 +87,22 @@ export function getScoreHexColor(value: number | null, max_score: number, invers
 	}
 }
 
-export function formatScoreValue(value: number, max_score: number, fullDonut = false) {
+export function formatScoreValue(
+	value: number,
+	max_score: number,
+	fullDonut = false,
+	min_score = 0
+) {
 	if (value === null) {
 		return 0;
 	} else if (fullDonut) {
 		return 100;
 	}
-	if (!max_score) {
+	const range = max_score - min_score;
+	if (range <= 0) {
 		return 0;
 	}
-	return (value * 100) / max_score;
+	return ((value - min_score) * 100) / range;
 }
 
 export function getSecureRedirect(url: any): string {
@@ -240,8 +258,16 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 	if (!questions) return { score: null, result: null };
 
 	let totalScore: number | null = 0;
-	const min_score = requirementAssessment.compliance_assessment.min_score || 0;
-	const max_score = requirementAssessment.compliance_assessment.max_score || 100;
+	// Use the effective scale from the cascade so per-requirement overrides
+	// clamp the preview to the same range the backend will persist to.
+	const min_score =
+		requirementAssessment.effective_min_score ??
+		requirementAssessment.compliance_assessment.min_score ??
+		0;
+	const max_score =
+		requirementAssessment.effective_max_score ??
+		requirementAssessment.compliance_assessment.max_score ??
+		100;
 	let results: boolean[] | null = [];
 	let visibleCount = 0;
 	let answeredVisibleCount = 0;
