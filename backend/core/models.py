@@ -4,7 +4,7 @@ import re
 import hashlib
 from datetime import date, datetime
 from pathlib import Path
-from typing import Self, Union, List, Optional, Literal, Tuple, Final
+from typing import Self, Union, List, Optional, Literal, Tuple, Final, Iterable
 import statistics
 
 from django.contrib.contenttypes.models import ContentType
@@ -7383,7 +7383,9 @@ class ComplianceAssessment(Assessment):
         avg_ratio = total_ratio_weighted / total_weight
         return _truncate_one_decimal(ca_min + avg_ratio * ca_range)
 
-    def get_global_score(self):
+    def get_global_score(
+        self, prefetched_requirements: Optional[list[RequirementAssessment]] = None
+    ) -> dict:
         """
         Calculate scores as three independent layers:
         - implementation_score: computed from the 'score' field
@@ -7396,25 +7398,44 @@ class ComplianceAssessment(Assessment):
         When anchor_na_to_target is True, N/A requirements are included with
         their scores replaced by the effective target (target_score or max_score).
         Returns a dict with all three values.
-        """
-        qs = (
-            RequirementAssessment.objects.filter(compliance_assessment=self)
-            .select_related("requirement", "compliance_assessment")
-            .exclude(requirement__assessable=False)
-        )
-        if self.anchor_na_to_target:
-            # Keep N/A items (they'll be anchored to target), but still
-            # exclude non-N/A items that have is_scored=False.
-            qs = qs.exclude(
-                ~Q(result=RequirementAssessment.Result.NOT_APPLICABLE),
-                is_scored=False,
-            )
-        else:
-            qs = qs.exclude(is_scored=False).exclude(
-                result=RequirementAssessment.Result.NOT_APPLICABLE
-            )
 
-        requirement_assessments_scored = list(qs)
+        **WARNING:** If provided `prefetched_requirements` **MUST** be a list of `RequirementAssessment` `req` WHERE `req.compliance_assessment == self` AND `req.requirement.assessable is True`.
+        """
+        if prefetched_requirements is not None:
+            # Caller supplied an in-memory list (e.g. the /recap action) — filter in Python.
+            if self.anchor_na_to_target:
+                requirement_assessments_scored = [
+                    requirement
+                    for requirement in prefetched_requirements
+                    if requirement.is_scored
+                    or requirement.result == RequirementAssessment.Result.NOT_APPLICABLE
+                ]
+            else:
+                requirement_assessments_scored = [
+                    requirement
+                    for requirement in prefetched_requirements
+                    if requirement.is_scored
+                    and requirement.result
+                    != RequirementAssessment.Result.NOT_APPLICABLE
+                ]
+        else:
+            qs = (
+                RequirementAssessment.objects.filter(compliance_assessment=self)
+                .select_related("requirement", "compliance_assessment")
+                .exclude(requirement__assessable=False)
+            )
+            if self.anchor_na_to_target:
+                # Keep N/A items (they'll be anchored to target), but still
+                # exclude non-N/A items that have is_scored=False.
+                qs = qs.exclude(
+                    ~Q(result=RequirementAssessment.Result.NOT_APPLICABLE),
+                    is_scored=False,
+                )
+            else:
+                qs = qs.exclude(is_scored=False).exclude(
+                    result=RequirementAssessment.Result.NOT_APPLICABLE
+                )
+            requirement_assessments_scored = list(qs)
 
         ig = (
             set(self.selected_implementation_groups)
@@ -7741,35 +7762,14 @@ class ComplianceAssessment(Assessment):
             )
         return measures_status_count
 
-    def donut_render(self) -> dict:
-        ig = (
-            set(self.selected_implementation_groups)
-            if self.selected_implementation_groups
-            else None
-        )
-        if ig is not None:
-            matching_requirement_ids = {
-                ra.requirement_id
-                for ra in RequirementAssessment.objects.filter(
-                    compliance_assessment=self, requirement__assessable=True
-                ).select_related("requirement")
-                if ra.requirement.implementation_groups
-                and ig & set(ra.requirement.implementation_groups)
-            }
-        else:
-            matching_requirement_ids = None
+    def get_donut_data(
+        self, prefetched_requirements: Optional[list[RequirementAssessment]] = None
+    ) -> dict:
+        """
+        Return donut data used by the frontend `<DonutChart/>` component.
 
-        def scoped_filter(extra=None):
-            f = {"compliance_assessment": self, "requirement__assessable": True}
-            if extra:
-                f.update(extra)
-            return f
-
-        def scoped_query(extra=None):
-            qs = RequirementAssessment.objects.filter(**scoped_filter(extra))
-            if matching_requirement_ids is not None:
-                qs = qs.filter(requirement_id__in=matching_requirement_ids)
-            return qs
+        **WARNING:** If provided `prefetched_requirements` **MUST** be a list of `RequirementAssessment` `req` WHERE `req.compliance_assessment == self` AND `req.requirement.assessable is True`.
+        """
 
         color_map = {
             RequirementAssessment.Result.NOT_ASSESSED: "#d1d5db",
@@ -7788,9 +7788,53 @@ class ComplianceAssessment(Assessment):
             RequirementAssessment.ExtendedResult.GOOD_PRACTICE: "#22c55e",
         }
 
-        compliance_assessments_result = {"values": [], "labels": []}
+        base_requirements: Iterable[RequirementAssessment] = []
+
+        if prefetched_requirements is None:
+            base_requirements = RequirementAssessment.objects.filter(
+                compliance_assessment=self,
+                requirement__assessable=True,
+            ).select_related("requirement")
+        else:
+            base_requirements = prefetched_requirements
+
+        if self.selected_implementation_groups:
+            requirements = [
+                requirement
+                for requirement in base_requirements
+                if any(
+                    group in (requirement.requirement.implementation_groups or [])
+                    for group in self.selected_implementation_groups
+                )
+            ]
+        else:
+            requirements = list(base_requirements)
+
+        result_to_count: dict[RequirementAssessment.Result, int] = {}
+        status_to_count: dict[RequirementAssessment.Status, int] = {}
+        extended_result_to_count: dict[RequirementAssessment.ExtendedResult, int] = {}
+
+        for requirement in requirements:
+            result = requirement.result
+            result_count = result_to_count.get(result, 0)
+            result_to_count[result] = result_count + 1
+
+            status = requirement.status
+            status_count = status_to_count.get(status, 0)
+            status_to_count[status] = status_count + 1
+
+            extended_result = requirement.extended_result
+            if not extended_result:
+                continue  # We ignore ""/None extended_result values.
+            extended_result_count = extended_result_to_count.get(extended_result, 0)
+            extended_result_to_count[extended_result] = extended_result_count + 1
+
+        # Iterate enum values (not dict insertion order) so the emitted slices
+        # have a stable order across audits — needed for the side-by-side
+        # compare view, where ECharts renders pie slices in array order.
+        compliance_assessment_results = {"values": [], "labels": []}
         for result in RequirementAssessment.Result.values:
-            count = scoped_query({"result": result}).count()
+            count = result_to_count.get(result, 0)
             value_entry = {
                 "name": result,
                 "localName": camel_case(result),
@@ -7798,12 +7842,12 @@ class ComplianceAssessment(Assessment):
                 "itemStyle": {"color": color_map[result]},
             }
 
-            compliance_assessments_result["values"].append(value_entry)
-            compliance_assessments_result["labels"].append(result)
+            compliance_assessment_results["values"].append(value_entry)
+            compliance_assessment_results["labels"].append(result)
 
-        compliance_assessments_status = {"values": [], "labels": []}
+        compliance_assessment_statuses = {"values": [], "labels": []}
         for status in RequirementAssessment.Status.values:
-            count = scoped_query({"status": status}).count()
+            count = status_to_count.get(status, 0)
             value_entry = {
                 "name": status,
                 "localName": camel_case(status),
@@ -7811,29 +7855,28 @@ class ComplianceAssessment(Assessment):
                 "itemStyle": {"color": color_map[status]},
             }
 
-            compliance_assessments_status["values"].append(value_entry)
-            compliance_assessments_status["labels"].append(status)
+            compliance_assessment_statuses["values"].append(value_entry)
+            compliance_assessment_statuses["labels"].append(status)
 
-        compliance_assessments_extended_result = {"values": [], "labels": []}
+        compliance_assessment_extended_results = {"values": [], "labels": []}
         if self.extended_result_enabled:
-            not_set_count = (
-                scoped_query()
-                .filter(Q(extended_result__isnull=True) | Q(extended_result=""))
-                .count()
+            unset_extended_result_count = sum(
+                not requirement.extended_result  # Count extended_result in [None, ""]
+                for requirement in requirements
             )
-            compliance_assessments_extended_result["values"].append(
+
+            compliance_assessment_extended_results["values"].append(
                 {
                     "name": "not_set",
                     "localName": "notSet",
-                    "value": not_set_count,
+                    "value": unset_extended_result_count,
                     "itemStyle": {"color": "#d1d5db"},
                 }
             )
-            compliance_assessments_extended_result["labels"].append("not_set")
+            compliance_assessment_extended_results["labels"].append("not_set")
 
-            # Count each extended_result value
             for extended_result in RequirementAssessment.ExtendedResult.values:
-                count = scoped_query({"extended_result": extended_result}).count()
+                count = extended_result_to_count.get(extended_result, 0)
                 value_entry = {
                     "name": extended_result,
                     "localName": camel_case(extended_result),
@@ -7841,13 +7884,13 @@ class ComplianceAssessment(Assessment):
                     "itemStyle": {"color": color_map[extended_result]},
                 }
 
-                compliance_assessments_extended_result["values"].append(value_entry)
-                compliance_assessments_extended_result["labels"].append(extended_result)
+                compliance_assessment_extended_results["values"].append(value_entry)
+                compliance_assessment_extended_results["labels"].append(extended_result)
 
         return {
-            "result": compliance_assessments_result,
-            "status": compliance_assessments_status,
-            "extended_result": compliance_assessments_extended_result,
+            "result": compliance_assessment_results,
+            "status": compliance_assessment_statuses,
+            "extended_result": compliance_assessment_extended_results,
         }
 
     def quality_check(self) -> dict:

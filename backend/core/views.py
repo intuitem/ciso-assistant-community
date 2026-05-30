@@ -12220,6 +12220,21 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             return ComplianceAssessmentListSerializer
         return super().get_serializer_class(**kwargs)
 
+    def get_queryset_minimalistic(self) -> QuerySet[ComplianceAssessment]:
+        """Get the minimalistic base viewset `QuerySet` (with no extra JOIN or secondary query)."""
+
+        qs = super().get_queryset()
+
+        auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
+        if auditee_folders:
+            user_actors = Actor.get_all_for_user(self.request.user)
+            qs = qs.filter(
+                ~Q(folder_id__in=auditee_folders)
+                | Q(requirement_assignments__actor__in=user_actors)
+            ).distinct()
+
+        return qs
+
     def _get_optimized_object_data(self, queryset):
         """Compute per-page requirement counts in one bounded GROUP BY,
         replacing the Count(distinct=True) annotations dropped from the
@@ -12264,20 +12279,17 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         """Optimize queries for table view and serializer, with conditional annotations for sorting"""
         from core.models import Question
 
-        qs = (
-            super()
-            .get_queryset()
-            .select_related(
-                "folder",
-                "folder__parent_folder",  # For get_folder_full_path() optimization
-                "framework",  # Displayed in table
-                "perimeter",  # Displayed in table
-            )
-            .annotate(
-                _has_questions=Exists(
-                    Question.objects.filter(
-                        requirement_node__framework=OuterRef("framework")
-                    )
+        qs = self.get_queryset_minimalistic()
+
+        qs = qs.select_related(
+            "folder",
+            "folder__parent_folder",  # For get_folder_full_path() optimization
+            "framework",  # Displayed in table
+            "perimeter",  # Displayed in table
+        ).annotate(
+            _has_questions=Exists(
+                Question.objects.filter(
+                    requirement_node__framework=OuterRef("framework")
                 )
             )
         )
@@ -12347,14 +12359,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     distinct=True,
                 ),
             )
-
-        auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
-        if auditee_folders:
-            user_actors = Actor.get_all_for_user(self.request.user)
-            qs = qs.filter(
-                ~Q(folder_id__in=auditee_folders)
-                | Q(requirement_assignments__actor__in=user_actors)
-            ).distinct()
 
         return qs
 
@@ -13857,10 +13861,58 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         else:
             return Response({"error": "Permission denied"})
 
+    @action(detail=False, methods=["get"])
+    def recap(self, request):
+        # list[{"donut_data": {...}, "global_score": {...}, **compliance_assessment_data}]
+        recap_data: list[dict[str, Any]] = []
+
+        compliance_assessments = (
+            self.get_queryset_minimalistic()
+            .select_related("folder", "framework")
+            .prefetch_related(
+                Prefetch(
+                    "requirement_assessments",
+                    queryset=RequirementAssessment.objects.filter(
+                        requirement__assessable=True
+                    ).select_related("requirement"),
+                )
+            )
+            .order_by(Lower("folder__name"), Lower("name"))
+        )
+
+        for compliance_assessment in compliance_assessments:
+            requirement_assessments = list(
+                compliance_assessment.requirement_assessments.all()
+            )
+
+            donut_data = compliance_assessment.get_donut_data(requirement_assessments)
+            global_score = compliance_assessment.get_global_score(
+                requirement_assessments
+            )
+
+            compliance_assessment_data = {
+                "id": str(compliance_assessment.id),
+                "name": compliance_assessment.name,
+                "folder": {
+                    "id": str(compliance_assessment.folder.pk),
+                    "name": compliance_assessment.folder.name,
+                },
+                "framework": {"str": str(compliance_assessment.framework)},
+                "donut": donut_data,
+                "global_score": {
+                    **global_score,
+                    "min_score": compliance_assessment.min_score,
+                    "max_score": compliance_assessment.max_score,
+                },
+            }
+            recap_data.append(compliance_assessment_data)
+
+        return Response(recap_data)
+
     @action(detail=True, methods=["get"])
     def donut_data(self, request, pk):
         compliance_assessment = self.get_object()
-        return Response(compliance_assessment.donut_render())
+        return Response(compliance_assessment.get_donut_data())
 
     @action(detail=True, methods=["get"], url_path="is-auditee")
     def is_auditee(self, request, pk):
@@ -14206,7 +14258,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "max_score": base_audit.max_score,
                 "total_max_score": base_audit.get_total_max_score(),
                 "score_calculation_method": base_audit.score_calculation_method,
-                "donut_data": base_audit.donut_render(),
+                "donut_data": base_audit.get_donut_data(),
                 "radar_data": aggregate_by_top_level(base_audit),
             },
             "compare": {
@@ -14228,7 +14280,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "max_score": compare_audit.max_score,
                 "total_max_score": compare_audit.get_total_max_score(),
                 "score_calculation_method": compare_audit.score_calculation_method,
-                "donut_data": compare_audit.donut_render(),
+                "donut_data": compare_audit.get_donut_data(),
                 "radar_data": aggregate_by_top_level(compare_audit),
             },
         }
