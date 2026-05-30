@@ -69,9 +69,10 @@ class DocumentTemplate(AbstractBaseModel, FolderMixin, I18nObjectMixin):
     """
     Reusable starter content for a ManagedDocument.
 
-    Built-in templates also exist as .md files on disk and are merged
-    into the listing endpoint at request time. DB rows here represent
-    user-authored templates — folder-scoped and editable in-app.
+    Both built-in and user-authored templates live as rows here. Built-ins
+    (origin=builtin) are seeded from the shipped .md files on startup and are
+    locked except for `status`; user templates (origin=user) are folder-scoped
+    and fully editable in-app. The listing endpoint queries this table directly.
     """
 
     class Status(models.TextChoices):
