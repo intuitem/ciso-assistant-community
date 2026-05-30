@@ -98,6 +98,7 @@
 		(data.viewerRole ?? 'auditor') as 'respondent' | 'auditor'
 	);
 	const fieldVis = $derived(getFieldVisibility(complianceAssessment, viewerRole));
+	const showAnswers = $derived(fieldVis.showAnswers);
 	const showResult = $derived(fieldVis.showResult);
 	const showScore = $derived(fieldVis.showScore);
 	const showObservation = $derived(fieldVis.showObservation);
@@ -680,7 +681,7 @@
 												</div>
 											</div>
 										{/if}
-										{#if requirementAssessment.requirement.questions != null && Object.keys(requirementAssessment.requirement.questions).length !== 0}
+										{#if showAnswers && requirementAssessment.requirement.questions != null && Object.keys(requirementAssessment.requirement.questions).length !== 0}
 											<div class="flex flex-col w-full space-y-2">
 												<Question
 													questions={requirementAssessment.requirement.questions}
@@ -729,6 +730,15 @@
 												: ''}"
 										>
 											{#if showScore && !shallow && complianceAssessment.scoring_enabled}
+												{@const raMin =
+													requirementAssessment.effective_min_score ??
+													complianceAssessment.min_score}
+												{@const raMax =
+													requirementAssessment.effective_max_score ??
+													complianceAssessment.max_score}
+												{@const raScoresDef =
+													requirementAssessment.effective_scores_definition ??
+													data.scores.scores_definition}
 												{#if hasComputedScore(requirementAssessment.requirement.questions)}
 													<div class="flex flex-row items-center space-x-4">
 														<span class="font-medium">{m.score()}</span>
@@ -736,7 +746,9 @@
 															<Progress
 																value={formatScoreValue(
 																	requirementAssessment.score,
-																	complianceAssessment.max_score
+																	raMax,
+																	false,
+																	raMin
 																)}
 																min={0}
 																max={100}
@@ -746,7 +758,9 @@
 																	<Progress.CircleRange
 																		class={displayScoreColor(
 																			requirementAssessment.score,
-																			complianceAssessment.max_score
+																			raMax,
+																			false,
+																			raMin
 																		)}
 																	/>
 																</Progress.Circle>
@@ -761,9 +775,9 @@
 												{:else if requirementAssessment.result !== 'not_applicable'}
 													<Score
 														form={scoreForms[requirementAssessment.id]}
-														min_score={complianceAssessment.min_score}
-														max_score={complianceAssessment.max_score}
-														scores_definition={data.scores.scores_definition}
+														min_score={raMin}
+														max_score={raMax}
+														scores_definition={raScoresDef}
 														field="score"
 														label={complianceAssessment.show_documentation_score
 															? m.implementationScore()
@@ -797,9 +811,9 @@
 													{#if complianceAssessment.show_documentation_score}
 														<Score
 															form={docScoreForms[requirementAssessment.id]}
-															min_score={complianceAssessment.min_score}
-															max_score={complianceAssessment.max_score}
-															scores_definition={data.scores.scores_definition}
+															min_score={raMin}
+															max_score={raMax}
+															scores_definition={raScoresDef}
 															field="documentation_score"
 															label={m.documentationScore()}
 															isDoc={true}
@@ -813,12 +827,22 @@
 													{/if}
 												{/if}
 											{:else if complianceAssessment.scoring_enabled && complianceAssessment.show_documentation_score && requirementAssessment.is_scored}
+												{@const raMin =
+													requirementAssessment.effective_min_score ??
+													complianceAssessment.min_score}
+												{@const raMax =
+													requirementAssessment.effective_max_score ??
+													complianceAssessment.max_score}
 												<div class="flex flex-row items-center space-x-2 w-full">
 													<span>{m.implementationScoreResult()}</span>
 													<div class="relative">
 														<Progress
-															value={(requirementAssessment.score * 100) /
-																complianceAssessment.max_score}
+															value={formatScoreValue(
+																requirementAssessment.score,
+																raMax,
+																false,
+																raMin
+															)}
 															min={0}
 															max={100}
 														>
@@ -827,7 +851,9 @@
 																<Progress.CircleRange
 																	class={displayScoreColor(
 																		requirementAssessment.score,
-																		complianceAssessment.max_score
+																		raMax,
+																		false,
+																		raMin
 																	)}
 																/>
 															</Progress.Circle>
@@ -841,8 +867,12 @@
 													<span>{m.documentationScoreResult()}</span>
 													<div class="relative">
 														<Progress
-															value={(requirementAssessment.documentation_score * 100) /
-																complianceAssessment.max_score}
+															value={formatScoreValue(
+																requirementAssessment.documentation_score,
+																raMax,
+																false,
+																raMin
+															)}
 															min={0}
 															max={100}
 														>
@@ -851,7 +881,9 @@
 																<Progress.CircleRange
 																	class={displayScoreColor(
 																		requirementAssessment.documentation_score,
-																		complianceAssessment.max_score
+																		raMax,
+																		false,
+																		raMin
 																	)}
 																/>
 															</Progress.Circle>
@@ -864,12 +896,22 @@
 													</div>
 												</div>
 											{:else if complianceAssessment.scoring_enabled && requirementAssessment.is_scored}
+												{@const raMin =
+													requirementAssessment.effective_min_score ??
+													complianceAssessment.min_score}
+												{@const raMax =
+													requirementAssessment.effective_max_score ??
+													complianceAssessment.max_score}
 												<div class="flex flex-row items-center space-x-2 w-full">
 													<span>{m.scoreResult()}</span>
 													<div class="relative">
 														<Progress
-															value={(requirementAssessment.score * 100) /
-																complianceAssessment.max_score}
+															value={formatScoreValue(
+																requirementAssessment.score,
+																raMax,
+																false,
+																raMin
+															)}
 															min={0}
 															max={100}
 														>
@@ -878,7 +920,9 @@
 																<Progress.CircleRange
 																	class={displayScoreColor(
 																		requirementAssessment.score,
-																		complianceAssessment.max_score
+																		raMax,
+																		false,
+																		raMin
 																	)}
 																/>
 															</Progress.Circle>

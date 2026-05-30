@@ -878,11 +878,9 @@
 		{:else if URLModel === 'dashboards'}
 			<DashboardForm
 				{form}
-				{model}
 				{cacheLocks}
 				{formDataCache}
 				initialData={{ ...initialData, ...additionalInitialData }}
-				{data}
 				{...rest}
 			/>
 		{:else if URLModel === 'dashboard-widgets'}
@@ -892,7 +890,6 @@
 				{cacheLocks}
 				{formDataCache}
 				initialData={{ ...initialData, ...additionalInitialData }}
-				{data}
 				{object}
 				{...rest}
 			/>
@@ -913,7 +910,6 @@
 				{cacheLocks}
 				{formDataCache}
 				initialData={{ ...initialData, ...additionalInitialData }}
-				{data}
 				{object}
 				{...rest}
 			/>

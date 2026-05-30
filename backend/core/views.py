@@ -1,7 +1,7 @@
 from django.db.utils import IntegrityError, OperationalError, ProgrammingError
 from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
-from openpyxl.styles import Alignment
+from openpyxl.styles import Alignment, Font
 import copy
 import csv
 import hashlib
@@ -62,13 +62,14 @@ import random
 from django.db.models.functions import Lower
 
 from docxtpl import DocxTemplate
+from jinja2.sandbox import SandboxedEnvironment
 from integrations.models import SyncMapping
 from integrations.tasks import sync_object_to_integrations
 from webhooks.service import dispatch_webhook_event
 from .generators import gen_audit_context
 from .serializer_fields import FieldsRelatedField
 
-from django.utils import timezone
+from django.utils import timezone, translation
 from django.utils.text import slugify
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -6990,6 +6991,22 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
     filterset_class = RiskAcceptanceFilterSet
     search_fields = ["name", "description", "justification"]
 
+    def _get_justification(self, request):
+        raw_justification = request.data.get("justification", "")
+        if not isinstance(raw_justification, str):
+            return None, Response(
+                {"error": "The justification field must be a string"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        justification = raw_justification.strip()
+        max_len = RiskAcceptance._meta.get_field("justification").max_length
+        if max_len and len(justification) > max_len:
+            return None, Response(
+                {"error": f"Justification must be at most {max_len} characters"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return justification, None
+
     def update(self, request, *args, **kwargs):
         initial_data = self.get_object()
         updated_data = request.data
@@ -7045,7 +7062,13 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
             raise PermissionDenied(
                 {"error": "Only the approver can accept the risk acceptance"}
             )
-        self.get_object().set_state("accepted")
+
+        justification, res = self._get_justification(request)
+        if justification is None:
+            return res
+        risk_acceptance = self.get_object()
+        risk_acceptance.justification = justification
+        risk_acceptance.set_state("accepted")
         return Response({"results": "state updated to accepted"})
 
     @action(detail=True, methods=["post"], name="Reject risk acceptance")
@@ -7059,7 +7082,13 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
             raise PermissionDenied(
                 {"error": "Only the approver can reject the risk acceptance"}
             )
-        self.get_object().set_state("rejected")
+
+        justification, res = self._get_justification(request)
+        if justification is None:
+            return res
+        risk_acceptance = self.get_object()
+        risk_acceptance.justification = justification
+        risk_acceptance.set_state("rejected")
         return Response({"results": "state updated to rejected"})
 
     @action(detail=True, methods=["post"], name="Revoke risk acceptance")
@@ -7073,7 +7102,12 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
             raise PermissionDenied(
                 {"error": "Only the approver can revoke the risk acceptance"}
             )
-        self.get_object().set_state("revoked")
+        justification, res = self._get_justification(request)
+        if justification is None:
+            return res
+        risk_acceptance = self.get_object()
+        risk_acceptance.justification = justification
+        risk_acceptance.set_state("revoked")
         return Response({"results": "state updated to revoked"})
 
     @action(detail=False, methods=["get"], name="Get waiting risk acceptances")
@@ -7412,9 +7446,9 @@ class UserViewSet(BaseModelViewSet):
         return queryset.distinct().prefetch_related(
             Prefetch(
                 "user_groups",
-                queryset=UserGroup.objects.filter(id__in=viewable_user_group_ids).only(
-                    "id", "builtin"
-                ),
+                queryset=UserGroup.objects.filter(id__in=viewable_user_group_ids)
+                .select_related("folder")
+                .only("id", "builtin", "name", "folder", "folder__name"),
             )
         )
 
@@ -7446,66 +7480,126 @@ class UserViewSet(BaseModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
-class UserGroupOrderingFilter(filters.OrderingFilter):
+class TranslatedNameOrderingFilter(filters.OrderingFilter):
     """
-    Custom ordering filter:
-    - Performs in-memory (Python) sorting only for `localization_dict`.
-    - The sort key is a tuple: (folder full_path OR folder.name, object.name).
-    - Supports `-localization_dict` for descending order.
-    - For all other fields, it falls back to standard SQL ordering.
+    In-memory ordering filter for models whose __str__() returns a
+    locale-translated name (e.g. Role, UserGroup).
+
+    Subclasses set ``translated_ordering_field`` and override ``sort_key(obj)``
+    to control the sort.  Falls back to SQL ordering for other fields.
+    DRF pagination works because it can slice the returned list.
     """
 
+    translated_ordering_field = "name"  # default; override in subclass
+
+    def sort_key(self, obj):
+        return str(obj).casefold()
+
     def filter_queryset(self, request, queryset, view):
+        if getattr(view, "action", None) != "list":
+            return queryset
+
         ordering = self.get_ordering(request, queryset, view)
         if not ordering:
             return queryset
 
-        # Special case: in-memory sorting for `localization_dict`
-        if len(ordering) == 1 and ordering[0].lstrip("-") == "localization_dict":
+        field = self.translated_ordering_field
+        if len(ordering) == 1 and ordering[0].lstrip("-") == field:
             desc = ordering[0].startswith("-")
-
-            # Optimize DB access: fetch the related folder in one query
-            queryset = queryset.select_related("folder")
-
-            # Materialize queryset into a list to sort in Python
             data = list(queryset)
-
-            def full_path_or_name(folder):
-                """
-                Build a string key from the folder:
-                - Prefer the full path (names of all parent folders + current).
-                - Fall back to the folder's name if no path is available.
-                """
-                if folder is None:
-                    return ""
-
-                path_list = getattr(folder, "get_folder_full_path", None)
-                if callable(path_list):
-                    items = folder.get_folder_full_path(include_root=False)
-                    names = [getattr(f, "name", "") or "" for f in items]
-                    if names:
-                        return "/".join(names)
-
-                # Fallback: just the folder name
-                return getattr(folder, "name", "") or ""
-
-            def key_func(obj):
-                # Get the folder from the object
-                folder = getattr(obj, "folder", None)
-                # If you want to be more robust, you could use:
-                # from yourapp.models import Folder
-                # folder = Folder.get_folder(obj)
-
-                path_key = full_path_or_name(folder).casefold()
-                name_key = (getattr(obj, "name", "") or "").casefold()
-                return (path_key, name_key)
-
-            # Perform stable sort, reverse if `-localization_dict`
-            data.sort(key=key_func, reverse=desc)
+            data.sort(key=self.sort_key, reverse=desc)
             return data
 
-        # Default case: fall back to SQL ordering
         return super().filter_queryset(request, queryset, view)
+
+
+class RoleFilter(TranslatedNameOrderingFilter):
+    """
+    Combined search + ordering filter for roles.
+    Builtin role names are translated at runtime.
+    """
+
+    translated_ordering_field = "name"
+
+    def filter_queryset(self, request, queryset, view):
+        if getattr(view, "action", None) != "list":
+            return queryset
+
+        data = list(queryset)
+
+        # In-memory search: match against translated name and description
+        search_term = request.query_params.get("search", "").strip()
+        if search_term:
+            term = search_term.casefold()
+            data = [
+                obj
+                for obj in data
+                if term in str(obj).casefold()
+                or term in (obj.description or "").casefold()
+            ]
+
+        # In-memory ordering
+        ordering = self.get_ordering(request, queryset, view)
+        if (
+            ordering
+            and len(ordering) == 1
+            and ordering[0].lstrip("-") == self.translated_ordering_field
+        ):
+            desc = ordering[0].startswith("-")
+            data.sort(key=self.sort_key, reverse=desc)
+        else:
+            # Default: sort by translated name
+            data.sort(key=self.sort_key)
+
+        return data
+
+
+class UserGroupFilter(TranslatedNameOrderingFilter):
+    """
+    Combined search + ordering filter for user groups.
+    Both need in-memory processing because builtin group names
+    are translated at runtime and don't match their DB values.
+    """
+
+    translated_ordering_field = "name"
+
+    def _full_display(self, obj):
+        """Build the full searchable label from the complete folder path.
+        Untruncated (unlike the frontend display) for broader matching."""
+        path = obj.get_folder_full_path()
+        ancestors = [f.name for f in path[:-1]]
+        return " / ".join(ancestors + [str(obj)])
+
+    def sort_key(self, obj):
+        path = tuple(f.name.casefold() for f in obj.get_folder_full_path())
+        return path + (str(obj).casefold(),)
+
+    def filter_queryset(self, request, queryset, view):
+        if getattr(view, "action", None) != "list":
+            return queryset
+
+        data = list(queryset)
+
+        # In-memory search: match against full rendered label
+        search_term = request.query_params.get("search", "").strip()
+        if search_term:
+            term = search_term.casefold()
+            data = [obj for obj in data if term in self._full_display(obj).casefold()]
+
+        # In-memory ordering
+        ordering = self.get_ordering(request, queryset, view)
+        if (
+            ordering
+            and len(ordering) == 1
+            and ordering[0].lstrip("-") == self.translated_ordering_field
+        ):
+            desc = ordering[0].startswith("-")
+            data.sort(key=self.sort_key, reverse=desc)
+        else:
+            # Default: sort by translated name (naturally groups by folder)
+            data.sort(key=self.sort_key)
+
+        return data
 
 
 class UserGroupViewSet(BaseModelViewSet):
@@ -7514,17 +7608,15 @@ class UserGroupViewSet(BaseModelViewSet):
     """
 
     model = UserGroup
-    ordering = ["builtin", "name"]
-    ordering_fields = ["localization_dict"]
+    ordering_fields = ["name"]
     filterset_fields = ["folder"]
-    search_fields = [
-        "folder__name"
-    ]  # temporary hack, filters only by folder name, not role name
     filter_backends = [
         DjangoFilterBackend,
-        UserGroupOrderingFilter,
-        filters.SearchFilter,
+        UserGroupFilter,
     ]
+
+    def get_queryset(self):
+        return super().get_queryset().select_related("folder")
 
     def destroy(self, request, *args, **kwargs):
         user_group = self.get_object()
@@ -8084,6 +8176,192 @@ def get_governance_calendar_data_view(request):
     )
 
 
+@api_view(["GET"])
+@permission_classes([permissions.IsAuthenticated])
+def get_analytics_export_xlsx(request):
+    """
+    Export all analytics dashboard data as a multi-sheet XLSX file.
+    Sheets: Summary, Risk Levels, Compliance, Controls, Incidents.
+    """
+    user = request.user
+
+    def excel_dt(value):
+        # openpyxl rejects tz-aware datetimes; DB values are UTC, drop tzinfo.
+        if isinstance(value, datetime) and value.tzinfo is not None:
+            return value.replace(tzinfo=None)
+        return value
+
+    # Choice → English label maps. translation.override pins the locale so
+    # the export is portable across users regardless of their UI language.
+    with translation.override("en"):
+        control_status_map = {k: str(v) for k, v in AppliedControl.Status.choices}
+        control_priority_map = {k: str(v) for k, v in AppliedControl.PRIORITY}
+        assessment_status_map = {
+            k: str(v) for k, v in ComplianceAssessment.Status.choices
+        }
+        incident_status_map = {k: str(v) for k, v in Incident.Status.choices}
+        incident_severity_map = {k: str(v) for k, v in Incident.Severity.choices}
+        incident_detection_map = {k: str(v) for k, v in Incident.Detection.choices}
+
+    def label(mapping, value):
+        if value is None or value == "":
+            return ""
+        return mapping.get(value, value)
+
+    wb = Workbook()
+    wb.remove(wb.active)
+
+    header_font = Font(bold=True)
+    center = Alignment(horizontal="center", vertical="center")
+
+    def style_header_row(ws):
+        for cell in ws[1]:
+            cell.font = header_font
+            cell.alignment = center
+
+    def auto_width(ws):
+        for col in ws.columns:
+            max_len = max((len(str(c.value or "")) for c in col), default=10)
+            ws.column_dimensions[get_column_letter(col[0].column)].width = min(
+                max_len + 4, 60
+            )
+
+    # --- Sheet 1: Summary KPIs ---
+    metrics = get_metrics(user, folder_id=None)
+    ws1 = wb.create_sheet(title="Summary")
+    ws1.append(["Category", "Metric", "Value"])
+    style_header_row(ws1)
+    for category, values in metrics.items():
+        if isinstance(values, dict):
+            for key, val in values.items():
+                ws1.append([category, key, val])
+        elif isinstance(values, list):
+            for item in values:
+                # csf_functions ships display labels ("Govern", "(undefined)");
+                # normalize back to raw choice keys so the frontend can translate.
+                name = item.get("name", "").strip("()").lower()
+                ws1.append([category, name, item.get("value", "")])
+    auto_width(ws1)
+
+    # --- Sheet 2: Risk Levels ---
+    risk_levels = risks_count_per_level(user)
+    ws2 = wb.create_sheet(title="Risk Levels")
+    ws2.append(["Type", "Level", "Count"])
+    style_header_row(ws2)
+    for entry in risk_levels.get("current", []):
+        ws2.append(
+            [
+                "Current",
+                escape_excel_formula(entry.get("name", "")),
+                entry.get("value", 0),
+            ]
+        )
+    for entry in risk_levels.get("residual", []):
+        ws2.append(
+            [
+                "Residual",
+                escape_excel_formula(entry.get("name", "")),
+                entry.get("value", 0),
+            ]
+        )
+    auto_width(ws2)
+
+    # --- Sheet 3: Compliance by Framework ---
+    compliance = get_compliance_analytics(user)
+    ws3 = wb.create_sheet(title="Compliance")
+    ws3.append(
+        ["Framework", "Domain", "Assessment", "Perimeter", "Progress (%)", "Status"]
+    )
+    style_header_row(ws3)
+    if isinstance(compliance, dict):
+        for framework_name, fw_data in compliance.items():
+            for domain in fw_data.get("domains", []):
+                for assessment in domain.get("assessments", []):
+                    ws3.append(
+                        [
+                            escape_excel_formula(framework_name),
+                            escape_excel_formula(domain.get("domain", "")),
+                            escape_excel_formula(assessment.get("assessment_name", "")),
+                            escape_excel_formula(assessment.get("perimeter", "")),
+                            assessment.get("progress", 0),
+                            label(assessment_status_map, assessment.get("status")),
+                        ]
+                    )
+    auto_width(ws3)
+
+    # --- Sheet 4: Applied Controls ---
+    (viewable_controls, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, AppliedControl
+    )
+    controls_qs = AppliedControl.objects.filter(id__in=viewable_controls).values(
+        "name", "status", "priority", "eta", "folder__name"
+    )
+    ws4 = wb.create_sheet(title="Controls")
+    ws4.append(["Name", "Status", "Priority", "ETA", "Domain"])
+    style_header_row(ws4)
+    for ctrl in controls_qs:
+        ws4.append(
+            [
+                escape_excel_formula(ctrl.get("name", "")),
+                label(control_status_map, ctrl.get("status")),
+                label(control_priority_map, ctrl.get("priority")),
+                excel_dt(ctrl.get("eta")),
+                escape_excel_formula(ctrl.get("folder__name", "")),
+            ]
+        )
+    auto_width(ws4)
+
+    # --- Sheet 5: Incidents ---
+    (viewable_incidents, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, Incident
+    )
+    incidents_qs = Incident.objects.filter(id__in=viewable_incidents)
+    ws5 = wb.create_sheet(title="Incidents")
+    ws5.append(
+        [
+            "Name",
+            "Status",
+            "Severity",
+            "Detection",
+            "Reported At",
+            "Resolved At",
+            "Domain",
+        ]
+    )
+    style_header_row(ws5)
+    for inc in incidents_qs.values(
+        "name",
+        "status",
+        "severity",
+        "detection",
+        "reported_at",
+        "resolved_at",
+        "folder__name",
+    ):
+        ws5.append(
+            [
+                escape_excel_formula(inc.get("name", "")),
+                label(incident_status_map, inc.get("status")),
+                label(incident_severity_map, inc.get("severity")),
+                label(incident_detection_map, inc.get("detection")),
+                excel_dt(inc.get("reported_at")),
+                excel_dt(inc.get("resolved_at")),
+                escape_excel_formula(inc.get("folder__name", "")),
+            ]
+        )
+    auto_width(ws5)
+
+    buffer = io.BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+
+    # Content-Disposition is set by the SvelteKit proxy.
+    return HttpResponse(
+        buffer.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+
 # TODO: Add all the proper docstrings for the following list of functions
 
 
@@ -8245,6 +8523,7 @@ class FrameworkViewSet(BaseModelViewSet):
                 .all(),
                 None,
                 _framework.max_score,
+                _framework.min_score,
             )
         )
 
@@ -8645,6 +8924,10 @@ class FrameworkViewSet(BaseModelViewSet):
                     locale=node.locale,
                     default_locale=node.default_locale,
                     translations=node.translations,
+                    min_score=node.min_score,
+                    max_score=node.max_score,
+                    scores_definition_ref=node.scores_definition_ref,
+                    target_score=node.target_score,
                 )
                 node_id_map[old_id] = new_node.id
 
@@ -8840,6 +9123,14 @@ class FrameworkViewSet(BaseModelViewSet):
                 node_data["display_mode"] = node.display_mode
             if node.weight and node.weight != 1:
                 node_data["weight"] = node.weight
+            # Per-requirement scoring overrides. scores_definition_ref points
+            # at an entry in framework.scores_definition.alternatives.
+            if node.min_score is not None:
+                node_data["min_score"] = node.min_score
+            if node.max_score is not None:
+                node_data["max_score"] = node.max_score
+            if node.scores_definition_ref:
+                node_data["scores_definition_ref"] = node.scores_definition_ref
             if node.translations:
                 node_data["translations"] = node.translations
 
@@ -8900,7 +9191,14 @@ class FrameworkViewSet(BaseModelViewSet):
         if framework.max_score != 100:
             framework_obj["max_score"] = framework.max_score
         if framework.scores_definition:
-            framework_obj["scores_definition"] = framework.scores_definition
+            sd = framework.scores_definition
+            # Emit a bare list when there are no alternatives (matches the
+            # legacy YAML convention used by every shipped framework); emit
+            # the wrapped dict when alternatives exist to preserve them.
+            if isinstance(sd, dict) and "scale" in sd and not sd.get("alternatives"):
+                framework_obj["scores_definition"] = sd["scale"]
+            else:
+                framework_obj["scores_definition"] = sd
         if framework.implementation_groups_definition:
             framework_obj["implementation_groups_definition"] = (
                 framework.implementation_groups_definition
@@ -11922,6 +12220,21 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             return ComplianceAssessmentListSerializer
         return super().get_serializer_class(**kwargs)
 
+    def get_queryset_minimalistic(self) -> QuerySet[ComplianceAssessment]:
+        """Get the minimalistic base viewset `QuerySet` (with no extra JOIN or secondary query)."""
+
+        qs = super().get_queryset()
+
+        auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
+        if auditee_folders:
+            user_actors = Actor.get_all_for_user(self.request.user)
+            qs = qs.filter(
+                ~Q(folder_id__in=auditee_folders)
+                | Q(requirement_assignments__actor__in=user_actors)
+            ).distinct()
+
+        return qs
+
     def _get_optimized_object_data(self, queryset):
         """Compute per-page requirement counts in one bounded GROUP BY,
         replacing the Count(distinct=True) annotations dropped from the
@@ -11966,20 +12279,17 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         """Optimize queries for table view and serializer, with conditional annotations for sorting"""
         from core.models import Question
 
-        qs = (
-            super()
-            .get_queryset()
-            .select_related(
-                "folder",
-                "folder__parent_folder",  # For get_folder_full_path() optimization
-                "framework",  # Displayed in table
-                "perimeter",  # Displayed in table
-            )
-            .annotate(
-                _has_questions=Exists(
-                    Question.objects.filter(
-                        requirement_node__framework=OuterRef("framework")
-                    )
+        qs = self.get_queryset_minimalistic()
+
+        qs = qs.select_related(
+            "folder",
+            "folder__parent_folder",  # For get_folder_full_path() optimization
+            "framework",  # Displayed in table
+            "perimeter",  # Displayed in table
+        ).annotate(
+            _has_questions=Exists(
+                Question.objects.filter(
+                    requirement_node__framework=OuterRef("framework")
                 )
             )
         )
@@ -12049,14 +12359,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     distinct=True,
                 ),
             )
-
-        auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
-        if auditee_folders:
-            user_actors = Actor.get_all_for_user(self.request.user)
-            qs = qs.filter(
-                ~Q(folder_id__in=auditee_folders)
-                | Q(requirement_assignments__actor__in=user_actors)
-            ).distinct()
 
         return qs
 
@@ -12460,7 +12762,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         tree = get_sorted_requirement_nodes(
             RequirementNode.objects.filter(framework=_framework).all(),
             RequirementAssessment.objects.filter(compliance_assessment=audit_obj).all(),
-            _framework.max_score,
+            audit_obj.max_score
+            if audit_obj.max_score is not None
+            else _framework.max_score,
+            audit_obj.min_score
+            if audit_obj.min_score is not None
+            else _framework.min_score,
         )
         implementation_groups = audit_obj.selected_implementation_groups
         # Don't reassign the return value: the Word spider chart depends on
@@ -12469,7 +12776,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         filter_graph_by_implementation_groups(tree, implementation_groups)
         annotate_tree_with_aggregated_scores(tree, audit_obj)
         context = gen_audit_context(pk, doc, tree, lang)
-        doc.render(context)
+        doc.render(context, jinja_env=SandboxedEnvironment())
         buffer_doc = io.BytesIO()
         doc.save(buffer_doc)
         buffer_doc.seek(0)
@@ -12778,32 +13085,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         status=status.HTTP_400_BAD_REQUEST,
                     )
 
-            # validate if score value is within allowed range
-            if score is not None:
-                try:
-                    score = int(score)
-                    # Only validate range if min_score and max_score are defined
-                    if (
-                        compliance_assessment.min_score is not None
-                        and compliance_assessment.max_score is not None
-                    ):
-                        if (
-                            score < compliance_assessment.min_score
-                            or score > compliance_assessment.max_score
-                        ):
-                            return Response(
-                                {
-                                    "error": f"Score must be between {compliance_assessment.min_score} and {compliance_assessment.max_score}"
-                                },
-                                status=status.HTTP_400_BAD_REQUEST,
-                            )
-                except (ValueError, TypeError):
-                    return Response(
-                        {"error": "Score must be a valid integer"},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-
-            # Find the requirement assessment to update
+            # Find the requirement assessment first so we can validate score
+            # against the per-RA resolved scale (Node override > CA bounds).
             requirement_assessment = RequirementAssessment.objects.filter(
                 compliance_assessment=compliance_assessment, requirement__urn=urn
             ).first()
@@ -12813,6 +13096,36 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     {"error": f"Requirement with urn {urn} not found"},
                     status=status.HTTP_404_NOT_FOUND,
                 )
+
+            # validate if score value is within the resolved scale
+            if score is not None:
+                try:
+                    score = int(score)
+                except (ValueError, TypeError):
+                    return Response(
+                        {"error": "Score must be a valid integer"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                resolved = requirement_assessment.get_resolved_scoring()
+                resolved_min = resolved["min_score"]
+                resolved_max = resolved["max_score"]
+                if resolved_min is None or resolved_max is None:
+                    return Response(
+                        {
+                            "error": "Cannot set score: scoring is not configured for this audit."
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                if score < resolved_min or score > resolved_max:
+                    return Response(
+                        {
+                            "error": (
+                                f"Score must be between {resolved_min} and "
+                                f"{resolved_max}"
+                            )
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
 
             # Update the requirement assessment
             requirement_assessment.result = result
@@ -12979,9 +13292,23 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             )
             if instance.scoring_enabled:
                 assessable_ras.update(is_scored=True)
-                assessable_ras.filter(score__isnull=True).update(
-                    score=instance.min_score or 0
+                # Seed missing scores at the RA's resolved min (Node override
+                # if present, CA min otherwise) so overridden ranges like
+                # 2..5 don't start below their valid floor.
+                ras_to_init = list(
+                    assessable_ras.filter(score__isnull=True).select_related(
+                        "requirement"
+                    )
                 )
+                ca_min = instance.min_score if instance.min_score is not None else 0
+                for ra in ras_to_init:
+                    ra.score = (
+                        ra.requirement.min_score
+                        if ra.requirement.min_score is not None
+                        else ca_min
+                    )
+                if ras_to_init:
+                    RequirementAssessment.objects.bulk_update(ras_to_init, ["score"])
             else:
                 assessable_ras.update(is_scored=False)
 
@@ -12999,14 +13326,28 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def perform_update(self, serializer):
         compliance_assessment = serializer.save()
         if compliance_assessment.show_documentation_score:
-            ra_null_documentation_score = RequirementAssessment.objects.filter(
-                compliance_assessment=compliance_assessment,
-                is_scored=True,
-                documentation_score__isnull=True,
+            ras_to_init = list(
+                RequirementAssessment.objects.filter(
+                    compliance_assessment=compliance_assessment,
+                    is_scored=True,
+                    documentation_score__isnull=True,
+                ).select_related("requirement")
             )
-            ra_null_documentation_score.update(
-                documentation_score=compliance_assessment.min_score
+            ca_min = (
+                compliance_assessment.min_score
+                if compliance_assessment.min_score is not None
+                else 0
             )
+            for ra in ras_to_init:
+                ra.documentation_score = (
+                    ra.requirement.min_score
+                    if ra.requirement.min_score is not None
+                    else ca_min
+                )
+            if ras_to_init:
+                RequirementAssessment.objects.bulk_update(
+                    ras_to_init, ["documentation_score"]
+                )
 
     @action(detail=False, name="Compliance assessments per status")
     def per_status(self, request):
@@ -13037,9 +13378,14 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         """Returns the global score of the compliance assessment"""
         compliance_assessment = self.get_object()
         scores = compliance_assessment.get_global_score()
-        scores_definition = get_referential_translation(
-            compliance_assessment.framework, "scores_definition", get_language()
-        )
+        # Source of truth is the CA copy (set at save() and customisable
+        # independently of the framework). Fall back to the framework's
+        # translated definition for the labels.
+        scores_definition = compliance_assessment.scores_definition
+        if not scores_definition:
+            scores_definition = get_referential_translation(
+                compliance_assessment.framework, "scores_definition", get_language()
+            )
         if isinstance(scores_definition, dict) and "scale" in scores_definition:
             scores_definition = scores_definition["scale"]
         return Response(
@@ -13119,7 +13465,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         tree = get_sorted_requirement_nodes(
             requirement_nodes,
             requirement_assessments,
-            _framework.max_score,
+            compliance_assessment.max_score
+            if compliance_assessment.max_score is not None
+            else _framework.max_score,
+            compliance_assessment.min_score
+            if compliance_assessment.min_score is not None
+            else _framework.min_score,
         )
         implementation_groups = compliance_assessment.selected_implementation_groups
         if (
@@ -13167,7 +13518,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         tree = get_sorted_requirement_nodes(
             requirement_nodes,
             requirement_assessments,
-            _framework.max_score,
+            compliance_assessment.max_score
+            if compliance_assessment.max_score is not None
+            else _framework.max_score,
+            compliance_assessment.min_score
+            if compliance_assessment.min_score is not None
+            else _framework.min_score,
         )
         # Filter by implementation groups from the report selection page (if provided),
         # otherwise fall back to the compliance assessment's own selected groups.
@@ -13505,10 +13861,58 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         else:
             return Response({"error": "Permission denied"})
 
+    @action(detail=False, methods=["get"])
+    def recap(self, request):
+        # list[{"donut_data": {...}, "global_score": {...}, **compliance_assessment_data}]
+        recap_data: list[dict[str, Any]] = []
+
+        compliance_assessments = (
+            self.get_queryset_minimalistic()
+            .select_related("folder", "framework")
+            .prefetch_related(
+                Prefetch(
+                    "requirement_assessments",
+                    queryset=RequirementAssessment.objects.filter(
+                        requirement__assessable=True
+                    ).select_related("requirement"),
+                )
+            )
+            .order_by(Lower("folder__name"), Lower("name"))
+        )
+
+        for compliance_assessment in compliance_assessments:
+            requirement_assessments = list(
+                compliance_assessment.requirement_assessments.all()
+            )
+
+            donut_data = compliance_assessment.get_donut_data(requirement_assessments)
+            global_score = compliance_assessment.get_global_score(
+                requirement_assessments
+            )
+
+            compliance_assessment_data = {
+                "id": str(compliance_assessment.id),
+                "name": compliance_assessment.name,
+                "folder": {
+                    "id": str(compliance_assessment.folder.pk),
+                    "name": compliance_assessment.folder.name,
+                },
+                "framework": {"str": str(compliance_assessment.framework)},
+                "donut": donut_data,
+                "global_score": {
+                    **global_score,
+                    "min_score": compliance_assessment.min_score,
+                    "max_score": compliance_assessment.max_score,
+                },
+            }
+            recap_data.append(compliance_assessment_data)
+
+        return Response(recap_data)
+
     @action(detail=True, methods=["get"])
     def donut_data(self, request, pk):
         compliance_assessment = self.get_object()
-        return Response(compliance_assessment.donut_render())
+        return Response(compliance_assessment.get_donut_data())
 
     @action(detail=True, methods=["get"], url_path="is-auditee")
     def is_auditee(self, request, pk):
@@ -13854,7 +14258,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "max_score": base_audit.max_score,
                 "total_max_score": base_audit.get_total_max_score(),
                 "score_calculation_method": base_audit.score_calculation_method,
-                "donut_data": base_audit.donut_render(),
+                "donut_data": base_audit.get_donut_data(),
                 "radar_data": aggregate_by_top_level(base_audit),
             },
             "compare": {
@@ -13876,7 +14280,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "max_score": compare_audit.max_score,
                 "total_max_score": compare_audit.get_total_max_score(),
                 "score_calculation_method": compare_audit.score_calculation_method,
-                "donut_data": compare_audit.donut_render(),
+                "donut_data": compare_audit.get_donut_data(),
                 "radar_data": aggregate_by_top_level(compare_audit),
             },
         }
@@ -15276,7 +15680,12 @@ def generate_html(
     graph = get_sorted_requirement_nodes(
         list(requirement_nodes),
         list(assessments),
-        compliance_assessment.framework.max_score,
+        compliance_assessment.max_score
+        if compliance_assessment.max_score is not None
+        else compliance_assessment.framework.max_score,
+        compliance_assessment.min_score
+        if compliance_assessment.min_score is not None
+        else compliance_assessment.framework.min_score,
     )
     graph = filter_graph_by_implementation_groups(graph, implementation_groups)
     annotate_tree_with_aggregated_scores(graph, compliance_assessment)

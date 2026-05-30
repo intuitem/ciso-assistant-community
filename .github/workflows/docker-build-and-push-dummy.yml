@@ -1,7 +1,6 @@
 name: Build and Push Docker Images Dummy
 permissions:
   contents: read
-  packages: write
 on:
   workflow_dispatch:
 

@@ -2,6 +2,7 @@ import difflib
 import mimetypes
 from uuid import UUID
 
+import requests
 import structlog
 from django.db import models
 from django.forms import ValidationError as DjangoValidationError
@@ -22,6 +23,7 @@ from rest_framework.response import Response
 import weasyprint
 from weasyprint import HTML
 
+from core.net_safety import BlockedRequestError, assert_public_url
 from core.views import BaseModelViewSet
 from iam.models import RoleAssignment, Folder
 
@@ -41,6 +43,32 @@ def _get_user_lang(request):
     if hasattr(request, "user") and hasattr(request.user, "get_preferences"):
         return request.user.get_preferences().get("lang", "en")
     return "en"
+
+
+_PDF_FETCH_MAX_BYTES = 10 * 1024 * 1024
+
+
+# WeasyPrint passes a configured `ssl_context` we don't thread through:
+# deployments needing a custom CA for embedded images won't get it. File
+# an issue if that becomes a real need.
+def _safe_url_fetcher(url, timeout=10, ssl_context=None):
+    if url.startswith("data:"):
+        return weasyprint.default_url_fetcher(url)
+    assert_public_url(url, allowed_schemes=("https",))
+    r = requests.get(url, timeout=timeout, allow_redirects=False, stream=True)
+    try:
+        status_code = r.status_code
+        final_url = r.url
+        content_type = r.headers.get("Content-Type", "application/octet-stream")
+        if 300 <= status_code < 400:
+            raise BlockedRequestError(f"Redirects not followed: {url}")
+        content = r.raw.read(_PDF_FETCH_MAX_BYTES + 1, decode_content=True)
+    finally:
+        r.close()
+    if len(content) > _PDF_FETCH_MAX_BYTES:
+        raise BlockedRequestError(f"Response exceeds {_PDF_FETCH_MAX_BYTES} bytes")
+    mime = content_type.split(";")[0].strip() or None
+    return {"string": content, "mime_type": mime, "redirected_url": final_url}
 
 
 class ManagedDocumentViewSet(BaseModelViewSet):
@@ -708,20 +736,6 @@ class DocumentRevisionViewSet(BaseModelViewSet):
         html_string = render_to_string(
             "doc_management/policy_document_pdf.html", context
         )
-
-        def _safe_url_fetcher(url, timeout=10, ssl_context=None):
-            """Allow data URIs and public HTTPS images, block everything else.
-
-            Prevents SSRF via file://, internal network URLs, or non-HTTPS schemes
-            while still allowing users to embed external logos/images.
-            """
-            if url.startswith("data:"):
-                return weasyprint.default_url_fetcher(url)
-            if url.startswith("https://"):
-                return weasyprint.default_url_fetcher(
-                    url, timeout=timeout, ssl_context=ssl_context
-                )
-            raise ValueError(f"Blocked resource loading for URL scheme: {url}")
 
         return HTML(string=html_string, url_fetcher=_safe_url_fetcher).write_pdf()
 
