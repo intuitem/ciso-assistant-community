@@ -6,9 +6,8 @@ import { CommittersDetails } from './interfaces'
 
 export default async function getCommitters(): Promise<CommittersDetails[]> {
     try {
-        let committers: CommittersDetails[] = []
-        let filteredCommitters: CommittersDetails[] = []
-        let response: any = await octokit.graphql(`
+        const committers: CommittersDetails[] = []
+        const query = `
         query($owner:String! $name:String! $number:Int! $cursor:String!){
             repository(owner: $owner, name: $name) {
             pullRequest(number: $number) {
@@ -45,29 +44,40 @@ export default async function getCommitters(): Promise<CommittersDetails[]> {
                 }
             }
         }
-    }`.replace(/ /g, ''), {
-            owner: context.repo.owner,
-            name: context.repo.repo,
-            number: context.issue.number,
-            cursor: ''
-        })
-        response.repository.pullRequest.commits.edges.forEach(edge => {
-            const committer = extractUserFromCommit(edge.node.commit)
-            let user = {
-                name: committer.login || committer.name,
-                id: committer.databaseId || '',
-                pullRequestNo: context.issue.number
-            }
-            if (committers.length === 0 || committers.map((c) => {
-                return c.name
-            }).indexOf(user.name) < 0) {
-                committers.push(user)
-            }
-        })
-        filteredCommitters = committers.filter((committer) => {
+    }`.replace(/ /g, '')
+
+        let cursor = ''
+        let hasNextPage = true
+        // Paginate through every page of commits; without this only the first
+        // 100 commits are inspected and committers beyond them can slip the CLA.
+        while (hasNextPage) {
+            const response: any = await octokit.graphql(query, {
+                owner: context.repo.owner,
+                name: context.repo.repo,
+                number: context.issue.number,
+                cursor
+            })
+            const commits = response.repository.pullRequest.commits
+            commits.edges.forEach(edge => {
+                const committer = extractUserFromCommit(edge.node.commit)
+                let user = {
+                    name: committer.login || committer.name,
+                    id: committer.databaseId || '',
+                    pullRequestNo: context.issue.number
+                }
+                if (committers.map((c) => {
+                    return c.name
+                }).indexOf(user.name) < 0) {
+                    committers.push(user)
+                }
+            })
+            hasNextPage = commits.pageInfo.hasNextPage
+            cursor = commits.pageInfo.endCursor
+        }
+
+        return committers.filter((committer) => {
             return committer.id !== 41898282
         })
-        return filteredCommitters
 
     } catch (e) {
         throw new Error(`graphql call to get the committers details failed: ${e}`)

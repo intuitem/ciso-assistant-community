@@ -31,7 +31,7 @@ actually executes. It is reproduced deterministically from the `src/` and
 `package-lock.json` in this directory, so it is not a blob to trust blindly:
 
 ```text
-sha256(dist/index.js) = 80f28622a67894c239a24be343dd2e2b5bfa08cee033ffdf06d8dee14ae03654
+sha256(dist/index.js) = 746a12abdbead8f8fc89dc4fd05dffb995ca4321ea4230068be822bf722e7d3b
 ```
 
 To re-verify locally (Node 24):

@@ -10,7 +10,7 @@ inputs:
     default: "./signatures/cla.json"
   branch:
     description: "provide a branch where all the CLAs are stored"
-    default: "master"
+    default: "main"
   allowlist:
     description: "users in the allow list don't have to sign the CLA document"
     default: ""

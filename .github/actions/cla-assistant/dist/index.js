@@ -85,9 +85,8 @@ const github_1 = __nccwpck_require__(3228);
 function getCommitters() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            let committers = [];
-            let filteredCommitters = [];
-            let response = yield octokit_1.octokit.graphql(`
+            const committers = [];
+            const query = `
         query($owner:String! $name:String! $number:Int! $cursor:String!){
             repository(owner: $owner, name: $name) {
             pullRequest(number: $number) {
@@ -124,29 +123,38 @@ function getCommitters() {
                 }
             }
         }
-    }`.replace(/ /g, ''), {
-                owner: github_1.context.repo.owner,
-                name: github_1.context.repo.repo,
-                number: github_1.context.issue.number,
-                cursor: ''
-            });
-            response.repository.pullRequest.commits.edges.forEach(edge => {
-                const committer = extractUserFromCommit(edge.node.commit);
-                let user = {
-                    name: committer.login || committer.name,
-                    id: committer.databaseId || '',
-                    pullRequestNo: github_1.context.issue.number
-                };
-                if (committers.length === 0 || committers.map((c) => {
-                    return c.name;
-                }).indexOf(user.name) < 0) {
-                    committers.push(user);
-                }
-            });
-            filteredCommitters = committers.filter((committer) => {
+    }`.replace(/ /g, '');
+            let cursor = '';
+            let hasNextPage = true;
+            // Paginate through every page of commits; without this only the first
+            // 100 commits are inspected and committers beyond them can slip the CLA.
+            while (hasNextPage) {
+                const response = yield octokit_1.octokit.graphql(query, {
+                    owner: github_1.context.repo.owner,
+                    name: github_1.context.repo.repo,
+                    number: github_1.context.issue.number,
+                    cursor
+                });
+                const commits = response.repository.pullRequest.commits;
+                commits.edges.forEach(edge => {
+                    const committer = extractUserFromCommit(edge.node.commit);
+                    let user = {
+                        name: committer.login || committer.name,
+                        id: committer.databaseId || '',
+                        pullRequestNo: github_1.context.issue.number
+                    };
+                    if (committers.map((c) => {
+                        return c.name;
+                    }).indexOf(user.name) < 0) {
+                        committers.push(user);
+                    }
+                });
+                hasNextPage = commits.pageInfo.hasNextPage;
+                cursor = commits.pageInfo.endCursor;
+            }
+            return committers.filter((committer) => {
                 return committer.id !== 41898282;
             });
-            return filteredCommitters;
         }
         catch (e) {
             throw new Error(`graphql call to get the committers details failed: ${e}`);
@@ -291,7 +299,9 @@ function getDefaultOctokitClient() {
 }
 function getPATOctokit() {
     if (!isPersonalAccessTokenPresent()) {
-        core.setFailed(`Please add a personal access token as an environment variable for writing signatures in a remote repository/organization as mentioned in the README.md file`);
+        const message = `Please add a personal access token as an environment variable for writing signatures in a remote repository/organization as mentioned in the README.md file`;
+        core.setFailed(message);
+        throw new Error(message);
     }
     return (0, github_1.getOctokit)(personalAccessToken);
 }
@@ -400,7 +410,7 @@ function updateFile(sha, claFileContent, reactedCommitters) {
                 ? input
                     .getSignedCommitMessage()
                     .replace('$contributorName', github_1.context.actor)
-                    // .replace('$pullRequestNo', pullRequestNo.toString())
+                    .replace('$pullRequestNo', pullRequestNo.toString())
                     .replace('$owner', owner)
                     .replace('$repo', repo)
                 : `@${github_1.context.actor} has signed the CLA in ${owner}/${repo}#${pullRequestNo}`,

@@ -35,7 +35,10 @@ export interface CommittersCommentDetails {
     created_at: string,
     updated_at: string
 }
+export interface ClaFileContent {
+    signedContributors: CommittersDetails[]
+}
 export interface ClafileContentAndSha {
-    claFileContent: any,
+    claFileContent: ClaFileContent,
     sha: string
 }

@@ -59,7 +59,7 @@ export async function updateFile(
       ? input
           .getSignedCommitMessage()
           .replace('$contributorName', context.actor)
-          // .replace('$pullRequestNo', pullRequestNo.toString())
+          .replace('$pullRequestNo', pullRequestNo.toString())
           .replace('$owner', owner)
           .replace('$repo', repo)
       : `@${context.actor} has signed the CLA in ${owner}/${repo}#${pullRequestNo}`,

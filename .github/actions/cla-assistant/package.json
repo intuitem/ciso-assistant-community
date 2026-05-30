@@ -4,7 +4,7 @@
   "description": "GitHub Action for storing CLA signatures (vendored, patched fork of contributor-assistant/github-action@v2.6.1)",
   "main": "lib/main.js",
   "scripts": {
-    "build": "tsc && ncc build"
+    "build": "tsc && ncc build lib/main.js -o dist"
   },
   "repository": {
     "type": "git",
