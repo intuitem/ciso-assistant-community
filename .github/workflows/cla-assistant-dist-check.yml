@@ -1,0 +1,42 @@
+name: "CLA Assistant dist check"
+
+# The vendored CLA Assistant action (.github/actions/cla-assistant) ships a
+# committed dist/index.js that GitHub executes directly. This guard rebuilds it
+# from src/ and fails if the committed artifact drifts, so the executed bundle
+# always provably matches inspectable source.
+on:
+  pull_request:
+    paths:
+      - ".github/actions/cla-assistant/**"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/actions/cla-assistant/**"
+
+permissions:
+  contents: read
+
+jobs:
+  verify-dist:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .github/actions/cla-assistant
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: .github/actions/cla-assistant/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Rebuild dist
+        run: npm run build
+      - name: Verify committed dist matches source
+        run: |
+          if ! git diff --exit-code --stat -- dist/; then
+            echo "::error::dist/ is out of sync with src/. Run 'npm run build' in .github/actions/cla-assistant and commit the result."
+            exit 1
+          fi
