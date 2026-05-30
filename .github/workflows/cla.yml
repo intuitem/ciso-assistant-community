@@ -27,7 +27,7 @@ jobs:
       # first. Under pull_request_target the default ref is the (trusted) base
       # branch — do NOT check out the PR head, that would run untrusted code
       # with the write-scoped GITHUB_TOKEN/PERSONAL_ACCESS_TOKEN.
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: "CLA Assistant"
         if: (github.event.comment.body == 'recheck' || github.event.comment.body == 'I have read the CLA Document and I hereby sign the CLA') || github.event_name == 'pull_request_target'
         # Vendored, patched fork of contributor-assistant/github-action@v2.6.1
