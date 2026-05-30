@@ -13,7 +13,7 @@ For the conceptual mental model and the user-facing ↔ internal naming map, rea
 Before you start the study, set up:
 
 1. **A domain** (the study lives in a domain — no perimeter; the study itself is the scope envelope).
-2. **A risk matrix** loaded from the library (or one you authored). The matrix dictates the grids for gravity, likelihood, and risk level used throughout. Picking the matrix _after_ data exists is supported but will clamp out-of-range gravities / likelihoods.
+2. **A risk matrix** loaded from the library (or one you authored). The matrix dictates the grids for gravity, likelihood, and risk level used throughout. _Changing_ the matrix on an existing study is supported and will clamp any out-of-range gravities and likelihoods to the new matrix's scale.
 3. **Optional but recommended** — load the objects you intend to reuse:
    - **Assets** for workshop 1 (primary and supporting).
    - **Frameworks and audits** for the security baseline at workshop 1.4.
@@ -45,11 +45,13 @@ WS1 frames the study and sets its security baseline.
 
 ### 1.1 Define the study framework
 
-In the study landing card, set the mission, scope, regulations, and stakeholders of the framing. This is prose-driven — fill in the description and observation fields.
+In the study landing card, capture the mission, scope, and applicable regulations of the study. This is prose-driven — fill in the description and observation fields.
 
 ### 1.2 Define the business and technical perimeter
 
 Attach the **primary and supporting assets** that fall inside the study. Use **Select asset** to pick from your existing asset inventory rather than re-creating them in EBIOS RM.
+
+> **EBIOS RM vocabulary bridge**: what ANSSI calls **valeur métier** (the missions, processes, and information that carry value for the organisation) maps to a CISO Assistant **Primary asset**; what ANSSI calls **bien support** (the IT, infrastructure, people, premises supporting those valeurs métiers) maps to a **Supporting asset**. The `type` field on each asset is what you set to mark the distinction. A valeur métier is then composed of one or more biens support through the asset parent/child relationship.
 
 > **Content reuse — assets**: the assets attached here are the same `Asset` objects you manage under **Assets**. Updates to an asset (owner, description, parent linkage) propagate automatically into the study. Use the [Assets concept page](../concepts/assets.md) to model them once and reuse them across studies.
 
@@ -63,9 +65,9 @@ In **Feared events**, declare the undesirable outcomes that would matter to the 
 4. Set the **Gravity** (clamped to the matrix's impact scale).
 5. Tick **Is selected** for the events that move to subsequent workshops; document the rationale in **Justification**.
 
-### 1.4 Determine the security baseline
+### 1.4 Determine the security foundation
 
-The **baseline** is your existing compliance position — the controls you already have. CISO Assistant lets you attach one or more existing **audits** rather than re-typing them:
+The **security foundation** — what ANSSI calls the _socle de sécurité_ — is your existing compliance position: the controls you already have. CISO Assistant lets you attach one or more existing **audits** rather than re-typing them:
 
 1. Open **Workshop 1 → Determine the security foundation**.
 2. Pick the compliance assessments to include — ISO 27001, NIST CSF, internal policies, sector-specific framework audits.
@@ -85,7 +87,7 @@ In **Workshop 2 → RO/TO couples**, click **Add RO/TO couple** for each pairing
 
 ### 2.2 Evaluate RO/TO couples
 
-For each couple, rate **Motivation** and **Resources** on a 1–4 scale (very low → strong / limited → unlimited). The **Pertinence** is computed automatically from the 4×4 matrix and displayed as _irrelevant_, _partially relevant_, _fairly relevant_, or _highly relevant_. You can also note the threat-actor **Activity** level for context.
+For each couple, rate **Motivation** (1–4: _very low_ → _strong_) and **Resources** (1–4: _limited_ → _unlimited_). The **Pertinence** is computed automatically from the 4×4 matrix and displayed as _irrelevant_, _partially relevant_, _fairly relevant_, or _highly relevant_. You can also note the threat-actor **Activity** level for context.
 
 ### 2.3 Select RO/TO couples
 
@@ -118,8 +120,22 @@ The **ecosystem radar** at the top of the page visualises stakeholders by critic
 In **Workshop 3 → Strategic scenarios**, build one or more scenarios per selected RO/TO couple:
 
 1. Click **Add strategic scenario**.
-2. Pick the **RO/TO couple** and give the scenario a name and optional **Focused feared event** (overrides the gravity computed from the RO/TO).
-3. Inside the scenario, add **Attack paths** — each path picks the **stakeholders** the attacker leverages to reach the objective. Tick **Is selected** for the paths to carry into WS4.
+2. Pick the **RO/TO couple** and give the scenario a name.
+3. Optionally pick a **Focused feared event** — see [Focusing on one feared event](#focusing-on-one-feared-event) below.
+4. Inside the scenario, add **Attack paths** — each path picks the **stakeholders** the attacker leverages to reach the objective. Tick **Is selected** for the paths to carry into WS4.
+
+#### Focusing on one feared event
+
+A RO/TO couple often ties to several feared events at once — a single risk origin pursuing a single target objective can plausibly trigger _data exfiltration_, _service disruption_, and _regulatory exposure_ in the same study.
+
+By default, the strategic scenario's gravity is the **maximum** gravity across the RO/TO's selected feared events — the worst-case framing. That's the right default for "headline" reporting, but it hides the texture when several scenarios under the same RO/TO actually target different outcomes.
+
+The **Focused feared event** field on a strategic scenario lets you zoom in on one specific feared event from the RO/TO and use **its** gravity instead of the RO/TO-wide max. Two common uses:
+
+- **Splitting a RO/TO into multiple scenarios** — one strategic scenario per feared event, each focused on its own, so the deliverable shows each outcome's gravity rather than collapsing them into the worst one.
+- **Telling a precise story** — the scenario describes a specific attack chain ending on a specific feared event; focusing the field aligns the scenario's gravity with that narrative rather than borrowing the worst sibling's score.
+
+Leave it blank to fall back to the RO/TO max. Changing it later just retargets the gravity reference — no downstream data is lost.
 
 ### 3.3 Define ecosystem security measures
 
@@ -165,8 +181,8 @@ CISO Assistant supports two levels of detail:
 A few rules of thumb from the editor:
 
 - Keep **one kill chain per operating mode** — it reads better and lets each be quoted independently when running in _Express_ mode.
-- Drag nodes to reduce link crossover; the graph layout is persisted (`position_x` / `position_y` per step, plus stage column sizes).
-- Marking a step **highlighted** is the way to flag a pivotal action when you discuss the scenario with stakeholders.
+- Drag nodes to reduce link crossover — the layout is persisted.
+- Mark a step as **highlighted** to flag a pivotal action when you discuss the scenario with stakeholders.
 
 ### 4.2 Evaluate the likelihood
 
@@ -183,6 +199,22 @@ Click **Generate the risk assessment** on the study page. The platform either:
 - **Creates a new** `RiskAssessment` seeded with one risk scenario per selected operational scenario, or
 - **Syncs an existing** assessment that was generated previously — the modal walks you through which mode to use (sync mode applies to operational scenarios / attack paths / stakeholders / applied controls).
 
+#### How the generator seeds risk scenarios
+
+The generator does not require a fully completed study. It scans the workshops and, for each candidate, picks the **finest level of detail you've actually filled in**, falling back to coarser data when needed. Whatever's there gets carried through; whatever's missing leaves the corresponding field blank for you to set later on the risk scenario.
+
+![EBIOS RM generator cascade — from operating modes down to feared events](../.gitbook/assets/ebios-rm-cascade-logic.png)
+
+Reading the cascade top-down:
+
+1. **Operating mode rated with a quantified likelihood** (WS4.2, Express quotation): seed a risk scenario tied to _strategic scenario + attack path_, carrying the operating mode's likelihood through.
+2. **Macro operational scenario rated with a quantified likelihood** (WS4.1, Manual quotation): same identification, with the operational scenario's own likelihood.
+3. **Attack path identified at WS3.2** without a quantified likelihood yet: seed a risk scenario tied to _strategic scenario + attack path_ — likelihood is left blank for you to qualify manually on the risk scenario.
+4. **Strategic scenario identified at WS3.2** without attack paths: seed a risk scenario tied to the _strategic scenario_ only.
+5. **Only a feared event identified at WS1.3**: seed a risk scenario tied to the _feared event_ alone.
+
+The practical consequence: a half-finished study still produces a useful risk register, and a fully completed one brings maximum quantitative detail through without manual re-entry. You can also run the generator early — say, after WS3 — to get an initial risk register seeded from strategic scenarios, then re-sync after completing WS4 to upgrade the likelihoods.
+
 ### 5.2–5.5 Treat, control, accept, and monitor
 
 Steps 5.2 onwards run on the resulting **risk assessment** — same flow as a standalone qualitative risk study:
@@ -194,9 +226,23 @@ Steps 5.2 onwards run on the resulting **risk assessment** — same flow as a st
 
 See [Risk assessments](../concepts/risk-assessments.md) for the WS5 mechanics. Because EBIOS RM scenarios sit in the same risk register as qualitative ones, the residual-risk picture you produce here aggregates naturally with risk work done elsewhere on the perimeter.
 
+### The consolidated action plan
+
+The final EBIOS RM action plan that lands in the report isn't a single list — it's a stack of **three layers**, each fed by a different workshop:
+
+| Layer | Source | What it contains |
+|---|---|---|
+| **Compliance** | WS1.4 — the baseline audits | Applied controls attached to the requirement assessments of the linked compliance assessments. These are the controls you need anyway to meet the security baseline. |
+| **Ecosystem** | WS3.3 — stakeholder controls | Applied controls attached to selected stakeholders to lower their criticality. These reduce the attack surface offered by partners, suppliers, and other parties. |
+| **Scenario-specific** | WS5 — risk treatment | Applied controls attached to the risk scenarios generated from WS4. These address the residual risk that compliance and ecosystem measures don't already cover. |
+
+Because all three layers point at the **same** `AppliedControl` objects used everywhere else in the platform, the consolidated plan is a deduplicated view: a control listed under compliance _and_ as a scenario treatment shows up once, with both its origins traceable. That keeps the deliverable honest — readers see the actual cost of the action plan rather than three padded copies of the same controls.
+
+The Excel export carries the same three layers across its sheets (`1.4.N {audit}` for the compliance layer, `3.3 Stakeholder Controls` for the ecosystem layer, and the action plan section of the generated risk assessment for the scenario layer).
+
 ## Quotation methods
 
-The **Quotation method** chosen when creating the study controls how operational-scenario likelihood is set.
+The **Quotation method** set at study creation controls how operational-scenario likelihoods are computed.
 
 ### Manual
 
@@ -229,15 +275,15 @@ Open **Report** from the study page. It's a printable, workshop-by-workshop doss
 - WS4 — elementary actions catalogue, operational scenarios with operating modes rendered inline (graphs included), kill-chain flow text.
 - WS5 — risk register matrix (inherent / current / residual), action plans from compliance assessments and from the generated risk assessment.
 
-A floating workshop pad on the right-hand side jumps between sections. The browser's **Print** dialog produces a clean PDF — use the **Export PDF** action, which triggers the browser's print dialog with print stylesheets applied.
+A floating workshop pad on the right-hand side jumps between sections. Click **Export PDF** to open the browser's print dialog with the report's print stylesheet applied — print to file for a clean PDF.
 
-### Visual analysis
+### Visual Analysis
 
-The **Visual** view is an interactive dashboard of the study: counters per workshop, ecosystem radar, attack-path flow diagrams, and a risk distribution chart. Use it for live walkthroughs at study reviews where flipping between print pages would slow you down.
+The **Visual Analysis** view is an interactive dashboard of the study: counters per workshop, ecosystem radar, attack-path flow diagrams, and a risk distribution chart. Use it for live walkthroughs at study reviews where flipping between print pages would slow you down.
 
 ### Excel export
 
-The **Export to XLSX** action produces a multi-sheet workbook covering every workshop:
+The **Excel** export produces a multi-sheet workbook covering every workshop:
 
 | Sheet | Content |
 |---|---|
@@ -258,11 +304,11 @@ The **Export to XLSX** action produces a multi-sheet workbook covering every wor
 
 The same Excel export is **re-importable** into a different CISO Assistant instance. This is how you share studies across instances (e.g. transferring a study from a consultant's instance to a client's, or restoring an exported study after a migration):
 
-1. **Export** the study from instance A with **Export to XLSX**.
-2. On instance B, go to **Extra → Data wizard** and pick **EBIOS RM study (CISO Assistant format)**. Upload the file.
-3. The wizard recreates the study with all workshops, scaffolds the linked objects (assets, feared events, RO/TOs, stakeholders, strategic scenarios, attack paths, operational scenarios, operating modes, kill chains).
+1. **Export** the study from instance A using the **Excel** action.
+2. On instance B, go to **Extra → Data Wizard** and pick **EBIOS RM study (CISO Assistant format)**. Upload the file.
+3. The wizard recreates the study with all workshops and scaffolds the linked objects (assets, feared events, RO/TOs, stakeholders, strategic scenarios, attack paths, operational scenarios, operating modes, kill chains).
 
-There is also an **EBIOS RM study (ARM format)** import that reads ANSSI's own [Atelier de Risk Manager (ARM)](https://cyber.gouv.fr/atelier-risk-manager-arm) Excel files. ARM is a proprietary schema and not all objects map cleanly — header or sheet changes in the source can drop fields silently. Use the CISO Assistant format whenever the source is itself a CISO Assistant export.
+There is also an **EBIOS RM study (ARM format)** import that reads ANSSI's own _Atelier de Risk Manager (ARM)_ Excel files. ARM is a proprietary schema and not all objects map cleanly — header or sheet changes in the source can drop fields silently. Use the CISO Assistant format whenever the source is itself a CISO Assistant export.
 
 ## Tips and patterns
 
