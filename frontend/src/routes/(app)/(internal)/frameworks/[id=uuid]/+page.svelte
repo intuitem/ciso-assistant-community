@@ -1,6 +1,8 @@
 <script lang="ts">
 	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
 	import { m } from '$paraglide/messages';
+	import { getLocale } from '$paraglide/runtime';
+	import { formatDate } from '$lib/utils/datetime';
 	import type { TreeViewNode } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData } from './$types';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
@@ -207,7 +209,7 @@
 				{#if fw.updated_at}
 					<div class="flex flex-col">
 						<dt class="text-xs text-gray-500">{m.updatedAt()}</dt>
-						<dd>{new Date(fw.updated_at).toLocaleString()}</dd>
+						<dd>{formatDate(new Date(fw.updated_at), true, getLocale())}</dd>
 					</div>
 				{/if}
 				<div class="flex flex-col">

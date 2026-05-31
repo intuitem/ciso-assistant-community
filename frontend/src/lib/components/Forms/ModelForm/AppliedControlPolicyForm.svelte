@@ -15,6 +15,7 @@
 	import { run } from 'svelte/legacy';
 	import { page } from '$app/state';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { formatDate } from '$lib/utils/datetime';
 	import { getLocale } from '$paraglide/runtime';
 
 	let displayCurrency = $state(page.data?.settings?.currency ?? '€'); // Default to Euro
@@ -429,7 +430,7 @@
 						<dd>{syncMapping.remote_id}</dd>
 
 						<dt class="font-medium">{m.lastSynced()}</dt>
-						<dd>{new Date(syncMapping.last_synced_at).toLocaleString(getLocale())}</dd>
+						<dd>{formatDate(new Date(syncMapping.last_synced_at), true, getLocale())}</dd>
 
 						<dt class="font-medium">{m.status()}</dt>
 						<dd>{safeTranslate(syncMapping.sync_status)}</dd>

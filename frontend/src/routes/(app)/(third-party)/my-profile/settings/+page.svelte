@@ -7,6 +7,13 @@
 	import RegisterWebAuthnModal from './mfa/components/RegisterWebAuthnModal.svelte';
 
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
+	import { invalidateAll } from '$app/navigation';
+	import { page } from '$app/state';
+	import {
+		formatDate,
+		sampleDateForPreference,
+		type DateFormatPreference
+	} from '$lib/utils/datetime';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
 	import { defaults } from 'sveltekit-superforms';
@@ -83,6 +90,28 @@
 	}
 
 	let group = $state('security');
+
+	const dateFormatOptions: { value: DateFormatPreference; label: string }[] = [
+		{ value: 'auto', label: m.dateFormatAuto() },
+		{ value: 'iso', label: m.dateFormatIso() },
+		{ value: 'ddmmyyyy', label: m.dateFormatDdmmyyyy() },
+		{ value: 'mmddyyyy', label: m.dateFormatMmddyyyy() },
+		{ value: 'long', label: m.dateFormatLong() }
+	];
+
+	let dateFormat = $state(
+		(page.data.user?.preferences?.date_format as DateFormatPreference) ?? 'auto'
+	);
+
+	async function handleDateFormatChange(event: Event) {
+		const value = (event.target as HTMLSelectElement).value as DateFormatPreference;
+		dateFormat = value;
+		await fetch('/fe-api/user-preferences', {
+			method: 'PATCH',
+			body: JSON.stringify({ date_format: value })
+		});
+		await invalidateAll();
+	}
 	function modalPATCreateForm(): void {
 		const modalComponent: ModalComponent = {
 			ref: CreatePatModal,
@@ -176,6 +205,9 @@
 		<Tabs.Trigger value="security"
 			><i class="fa-solid fa-shield-halved mr-2"></i>{m.securitySettings()}</Tabs.Trigger
 		>
+		<Tabs.Trigger value="preferences"
+			><i class="fa-solid fa-sliders mr-2"></i>{m.preferencesSettings()}</Tabs.Trigger
+		>
 		<Tabs.Indicator />
 	</Tabs.List>
 	<Tabs.Content value="security">
@@ -255,7 +287,7 @@
 												<span class="flex flex-col">
 													<p class="font-medium">{credential.name}</p>
 													<p class="text-xs text-surface-600">
-														{new Date(credential.created_at * 1000).toLocaleDateString(getLocale())}
+														{formatDate(new Date(credential.created_at * 1000), false, getLocale())}
 													</p>
 												</span>
 												<button
@@ -319,7 +351,7 @@
 														</p>
 														<p>
 															{m.expiresOn({
-																date: new Date(pat.expiry).toLocaleDateString(getLocale())
+																date: formatDate(new Date(pat.expiry), false, getLocale())
 															})}
 														</p>
 													</span>
@@ -345,6 +377,40 @@
 						</div>
 					</dl>
 				{/if}
+			</div>
+		</div>
+	</Tabs.Content>
+	<Tabs.Content value="preferences">
+		<div class="p-4 flex flex-col space-y-4">
+			<div class="flex flex-col">
+				<h3 class="h3 font-medium">{m.preferencesSettings()}</h3>
+				<p class="text-sm text-surface-800">{m.preferencesSettingsDescription()}</p>
+			</div>
+			<hr />
+			<div class="flow-root">
+				<dl class="-my-3 divide-y divide-surface-100 text-sm">
+					<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+						<dt class="font-medium">{m.dateFormat()}</dt>
+						<dd class="text-surface-900 sm:col-span-2">
+							<div class="flex flex-col space-y-2 max-w-[40ch]">
+								<p class="text-sm text-surface-800">{m.dateFormatDescription()}</p>
+								<select
+									class="select"
+									data-testid="date-format-select"
+									value={dateFormat}
+									onchange={handleDateFormatChange}
+								>
+									{#each dateFormatOptions as option}
+										<option value={option.value}>{option.label}</option>
+									{/each}
+								</select>
+								<p class="text-xs text-surface-600">
+									{sampleDateForPreference(dateFormat, getLocale())}
+								</p>
+							</div>
+						</dd>
+					</div>
+				</dl>
 			</div>
 		</div>
 	</Tabs.Content>

@@ -12,7 +12,7 @@
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import { type ModelMapEntry, type ReverseForeignKeyField } from '$lib/utils/crud';
 	import { getModelInfo } from '$lib/utils/crud.js';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import { formatDate, formatDateOrDateTime } from '$lib/utils/datetime';
 	import { isURL } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales.js';
@@ -492,7 +492,7 @@
 					<dd>{syncMapping.remote_id}</dd>
 
 					<dt class="font-medium">{m.lastSynced()}</dt>
-					<dd>{new Date(syncMapping.last_synced_at).toLocaleString(getLocale())}</dd>
+					<dd>{formatDate(new Date(syncMapping.last_synced_at), true, getLocale())}</dd>
 
 					<dt class="font-medium">{m.status()}</dt>
 					<dd>{safeTranslate(syncMapping.sync_status)}</dd>
