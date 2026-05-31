@@ -106,12 +106,21 @@
 
 	async function handleDateFormatChange(event: Event) {
 		const value = (event.target as HTMLSelectElement).value as DateFormatPreference;
+		const previous = dateFormat;
 		dateFormat = value;
-		await fetch('/fe-api/user-preferences', {
-			method: 'PATCH',
-			body: JSON.stringify({ date_format: value })
-		});
-		await invalidateAll();
+		try {
+			const response = await fetch('/fe-api/user-preferences', {
+				method: 'PATCH',
+				body: JSON.stringify({ date_format: value })
+			});
+			if (!response.ok) {
+				dateFormat = previous;
+				return;
+			}
+			await invalidateAll();
+		} catch {
+			dateFormat = previous;
+		}
 	}
 	function modalPATCreateForm(): void {
 		const modalComponent: ModalComponent = {

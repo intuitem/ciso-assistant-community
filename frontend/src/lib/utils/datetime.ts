@@ -94,7 +94,12 @@ export function formatDateOrDateTime(isoString: string, locale = 'en'): string {
 	if (typeof isoString !== 'string') {
 		return isoString;
 	}
-	return formatDate(new Date(isoString), isoString.includes('T'), locale);
+	const hasTime = isoString.includes('T');
+	// A date-only ISO string (YYYY-MM-DD) is parsed as UTC midnight, which renders
+	// the previous day in time zones west of UTC. Anchoring it with a local time
+	// (no offset → parsed as local per the ES spec) preserves the calendar date.
+	const date = new Date(hasTime ? isoString : `${isoString}T00:00:00`);
+	return formatDate(date, hasTime, locale);
 }
 
 /**
