@@ -599,7 +599,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
     email = models.CharField(max_length=100, unique=True)
     first_login = models.BooleanField(default=True)
     preferences = models.JSONField(default=dict)
-    DATE_FORMATS = {"auto", "iso", "ddmmyyyy", "mmddyyyy", "long"}
+    DATE_FORMATS = {"auto", "iso", "ddmmyyyy", "mmddyyyy", "long_dmy", "long_mdy"}
     keep_local_login = models.BooleanField(
         default=False,
         help_text=_(

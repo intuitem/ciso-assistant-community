@@ -96,7 +96,8 @@
 		{ value: 'iso', label: m.dateFormatIso() },
 		{ value: 'ddmmyyyy', label: m.dateFormatDdmmyyyy() },
 		{ value: 'mmddyyyy', label: m.dateFormatMmddyyyy() },
-		{ value: 'long', label: m.dateFormatLong() }
+		{ value: 'long_dmy', label: m.dateFormatLongDmy() },
+		{ value: 'long_mdy', label: m.dateFormatLongMdy() }
 	];
 
 	let dateFormat = $state(

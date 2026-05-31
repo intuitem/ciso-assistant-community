@@ -115,6 +115,7 @@
   * [Excel-driven authoring](configuration/authoring/excel.md)
 * [Data import wizard](configuration/data-import.md)
 * [Changing the language](configuration/language.md)
+* [Date format](configuration/date-format.md)
 
 ## Guides
 

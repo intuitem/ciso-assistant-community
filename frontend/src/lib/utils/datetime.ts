@@ -1,16 +1,45 @@
 import { page } from '$app/state';
 
-export type DateFormatPreference = 'auto' | 'iso' | 'ddmmyyyy' | 'mmddyyyy' | 'long';
+export type DateFormatPreference =
+	| 'auto'
+	| 'iso'
+	| 'ddmmyyyy'
+	| 'mmddyyyy'
+	| 'long_dmy'
+	| 'long_mdy';
+
+const DATE_FORMAT_PREFERENCES: DateFormatPreference[] = [
+	'auto',
+	'iso',
+	'ddmmyyyy',
+	'mmddyyyy',
+	'long_dmy',
+	'long_mdy'
+];
 
 function getDateFormatPreference(): DateFormatPreference {
 	const pref = page?.data?.user?.preferences?.date_format;
-	return pref === 'iso' || pref === 'ddmmyyyy' || pref === 'mmddyyyy' || pref === 'long'
-		? pref
-		: 'auto';
+	return DATE_FORMAT_PREFERENCES.includes(pref) ? pref : 'auto';
 }
 
 function pad(n: number): string {
 	return n.toString().padStart(2, '0');
+}
+
+// Build a long-form date with a fixed component order while still localizing the
+// month name (e.g. "mai" in French) — the order can't be forced through Intl
+// options, so we read the localized parts and reassemble them ourselves.
+function longDate(date: Date, locale: string, monthFirst: boolean): string {
+	const parts = new Intl.DateTimeFormat(locale, {
+		day: 'numeric',
+		month: 'long',
+		year: 'numeric'
+	}).formatToParts(date);
+	const find = (type: string) => parts.find((p) => p.type === type)?.value ?? '';
+	const day = find('day');
+	const month = find('month');
+	const year = find('year');
+	return monthFirst ? `${month} ${day}, ${year}` : `${day} ${month} ${year}`;
 }
 
 function formatDatePart(date: Date, preference: DateFormatPreference, locale: string): string {
@@ -29,12 +58,10 @@ function formatDatePart(date: Date, preference: DateFormatPreference, locale: st
 				month: '2-digit',
 				year: 'numeric'
 			});
-		case 'long':
-			return date.toLocaleDateString(locale, {
-				day: 'numeric',
-				month: 'long',
-				year: 'numeric'
-			});
+		case 'long_dmy':
+			return longDate(date, locale, false);
+		case 'long_mdy':
+			return longDate(date, locale, true);
 		default:
 			return date.toLocaleDateString(locale);
 	}
