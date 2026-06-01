@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
+	import { getLocale } from '$paraglide/runtime';
+	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -301,8 +303,7 @@
 	// Format date for display
 	function formatDate(dateStr: string | null): string {
 		if (!dateStr) return '--';
-		const date = new Date(dateStr);
-		return date.toLocaleDateString();
+		return formatDateOrDateTime(dateStr, getLocale());
 	}
 
 	const folders = $derived(getUniqueFolders());

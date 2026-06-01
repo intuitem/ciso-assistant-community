@@ -599,6 +599,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
     email = models.CharField(max_length=100, unique=True)
     first_login = models.BooleanField(default=True)
     preferences = models.JSONField(default=dict)
+    DATE_FORMATS = {"auto", "iso", "ddmmyyyy", "mmddyyyy", "long_dmy", "long_mdy"}
     keep_local_login = models.BooleanField(
         default=False,
         help_text=_(
@@ -714,6 +715,8 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             except Exception:
                 default_lang = "en"
             prefs["lang"] = default_lang
+        if prefs.get("date_format") not in self.DATE_FORMATS:
+            prefs["date_format"] = "auto"
         return prefs
 
     # Maps Django HTML template names to YAML template keys
