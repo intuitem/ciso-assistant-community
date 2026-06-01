@@ -527,7 +527,8 @@
 	"linkHelpText": "Εξωτερικό URL για παρακολούθηση ή αναφορά (π.χ. ITSM, SharePoint, Jira)",
 	"effortHelpText": "Η προσπάθεια που απαιτείται για την εφαρμογή του ελέγχου",
 	"costHelpText": "Το κόστος που απαιτείται για την εφαρμογή του ελέγχου",
-	"riskAcceptanceJusitficationHelpText": "Αιτιολόγηση για την αποδοχή κινδύνου. Μόνο ο εγκρίνων μπορεί να επεξεργαστεί αυτό το πεδίο.",
+	"riskAcceptanceJustificationHelpText": "Αιτιολόγηση για την αποδοχή κινδύνου. Μόνο ο εγκρίνων μπορεί να επεξεργαστεί αυτό το πεδίο.",
+	"riskAcceptanceJustificationLabel": "Αιτιολόγηση αποδοχής κινδύνου",
 	"approverHelpText": "Ιδιοκτήτης κινδύνου και ταυτότητα εγκρίνοντος",
 	"riskAcceptanceRiskScenariosHelpText": "Τα σενάρια κινδύνου που γίνονται αποδεκτά",
 	"attachmentHelpText": "Αρχείο ως αποδεικτικό (π.χ. στιγμιότυπο, log). Μπορείτε να επικολλήσετε στιγμιότυπα απευθείας από το πρόχειρο.",
@@ -783,7 +784,7 @@
 	"maturity": "Ωριμότητα",
 	"progress": "Πρόοδος",
 	"back": "Πίσω",
-	"backToWorkshop": "Επιστροφή στη μελέτη Ebios RM / στο οικοσύστημα",
+	"backToWorkshop": "Επιστροφή στη μελέτη EBIOS RM / στο οικοσύστημα",
 	"duplicate": "Διπλότυπο",
 	"duplicateRiskAssessment": "Δημιουργία αντιγράφου της εκτίμησης κινδύνου",
 	"duplicateAppliedControl": "Δημιουργία αντιγράφου του ελέγχου",
@@ -1438,7 +1439,7 @@
 	"demoEnvironmentBeingPrepared": "Το περιβάλλον δειγμάτων ετοιμάζεται. Αυτό μπορεί να διαρκέσει λίγα λεπτά.",
 	"firstTimeLoginModalTitle": "Καλώς ήρθατε στο CISO Assistant!",
 	"firstTimeLoginModalDescription": "Είναι η πρώτη σας είσοδος. Θέλετε μια γρήγορη ξενάγηση;",
-	"ebiosRadarParameters": "Παράμετροι ραντάρ Ebios RM",
+	"ebiosRadarParameters": "Παράμετροι ραντάρ EBIOS RM",
 	"maxRadius": "Μέγιστη ακτίνα",
 	"greenZoneRadius": "Ακτίνα πράσινης ζώνης",
 	"yellowZoneRadius": "Ακτίνα κίτρινης ζώνης",
@@ -2279,5 +2280,6 @@
 	"builderQuestionTypeUniqueChoice": "Μοναδική επιλογή",
 	"builderQuestionTypeMultipleChoice": "Πολλαπλή επιλογή",
 	"builderQuestionTypeDate": "Ημερομηνία",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "άλλαξε σε",
+	"requirementWeight": "Βάρος"
 }

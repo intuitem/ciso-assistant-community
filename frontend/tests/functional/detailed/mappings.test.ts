@@ -131,7 +131,7 @@ test('user can map iso27001-2022 audit to a new csf-1.1 audit', async ({
 			framework: vars.framework.name
 		});
 		// Enable scoring on the new CA via the visibility editor in the modal.
-		await page.getByText('More').click();
+		// (The More dropdown is auto-expanded by form.fill() above.)
 		await page.getByTestId('visibility-score-everyone').click();
 		await applyMappingForm.saveButton.click();
 		await expect(applyMappingForm.formTitle).not.toBeVisible();
