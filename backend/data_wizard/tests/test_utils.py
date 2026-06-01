@@ -1,5 +1,6 @@
 """Unit tests for the data wizard helpers."""
 
+import pytest
 import unittest
 from pathlib import Path
 
@@ -250,27 +251,28 @@ class EgerieRealSamplesTest(unittest.TestCase):
         self.assertEqual(len(data["strategic_scenarios"]), 0)
 
 
-class NormalizeDfColumnsTest(unittest.TestCase):
+class TestNormalizeDfColumns:
     def test_strips_and_lowercases(self):
         # check that the fields are well trimed and put in lowercase
         df = pd.DataFrame(columns=[" Name ", "DESCRIPTION", "  Ref_ID"])
         df = normalize_df_columns(df)
-        self.assertEqual(list(df.columns), ["name", "description", "ref_id"])
+        assert list(df.columns) == ["name", "description", "ref_id"]
 
     def test_already_normalized(self):
         # checks that nothing changes
         df = pd.DataFrame(columns=["name", "ref"])
         df = normalize_df_columns(df)
-        self.assertEqual(list(df.columns), ["name", "ref"])
+        assert list(df.columns) == ["name", "ref"]
 
     def test_numeric_column_name(self):
         # check for int values
         df = pd.DataFrame(columns=[0, 1, 2])
         df = normalize_df_columns(df)
-        self.assertEqual(list(df.columns), ["0", "1", "2"])
+        assert list(df.columns) == ["0", "1", "2"]
 
     def test_duplicate_after_normalization_raises(self):
         df = pd.DataFrame(columns=["Name", " name"])
-        with self.assertRaises(ValueError) as ctx:
+        with pytest.raises(ValueError) as exc_info:
             normalize_df_columns(df)
-        self.assertIn("name", str(ctx.exception))
+        assert "name" in str(exc_info.value)
+
