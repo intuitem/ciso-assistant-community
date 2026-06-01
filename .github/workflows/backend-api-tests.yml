@@ -84,7 +84,7 @@ jobs:
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ env.BACKEND_DIR }}/db/prebuilt-pg.sql
-          key: pg-dump-${{ runner.os }}-${{ hashFiles('backend/**/migrations/*.py', 'backend/poetry.lock') }}
+          key: pg-dump-${{ runner.os }}-${{ hashFiles('backend/**/migrations/*.py', 'backend/uv.lock') }}
 
       - name: Run migrations (postgres) and dump
         if: steps.pg-dump-cache.outputs.cache-hit != 'true'
@@ -95,7 +95,7 @@ jobs:
           POSTGRES_PASSWORD: postgres
           PGPASSWORD: postgres
         run: |
-          poetry run python manage.py migrate
+          uv run python manage.py migrate
           pg_dump -h localhost -U postgres -d postgres > db/prebuilt-pg.sql
 
       - name: Upload PG dump

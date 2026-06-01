@@ -50,7 +50,7 @@ function Prepare-MetaFile {
 
 function Wait-ForMigrations {
     for ($i = 1; $i -le $MigrationCheckAttempts; $i++) {
-        & docker compose -f $DockerComposeFile exec -T backend poetry run python manage.py migrate --check *> $null
+        & docker compose -f $DockerComposeFile exec -T backend uv run python manage.py migrate --check *> $null
         if ($LASTEXITCODE -eq 0) {
             Write-Host "Migrations complete!" -ForegroundColor Green
             return
@@ -108,7 +108,7 @@ try {
     Write-Host ""
     Write-Host "Initialize your superuser account..." -ForegroundColor Cyan
     # Keep TTY allocation for the interactive Django prompts in Windows terminals.
-    Invoke-DockerCompose exec backend poetry run python manage.py createsuperuser
+    Invoke-DockerCompose exec backend uv run python manage.py createsuperuser
 
     Write-Host ""
     Write-Host "CISO Assistant is ready!" -ForegroundColor Green
