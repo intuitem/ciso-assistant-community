@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { m } from '$paraglide/messages';
+
 	interface Props {
 		/** Warning text shown next to confirm/cancel when active */
 		message?: string;
@@ -15,7 +17,7 @@
 	let {
 		message = '',
 		onconfirm,
-		confirmLabel = 'Confirm',
+		confirmLabel,
 		triggerClass = 'text-gray-300 hover:text-red-500 text-xs transition-colors',
 		confirmClass = 'text-xs text-red-600 font-medium'
 	}: Props = $props();
@@ -35,10 +37,10 @@
 			active = false;
 		}}
 	>
-		{confirmLabel}
+		{confirmLabel ?? m.confirm()}
 	</button>
 	<button type="button" class="text-xs text-gray-500" onclick={() => (active = false)}>
-		Cancel
+		{m.cancel()}
 	</button>
 {:else}
 	<button type="button" class={triggerClass} onclick={() => (active = true)}>

@@ -597,6 +597,7 @@ LANGUAGES = [
     ("zh", "Chinese (Simplified)"),
     ("lt", "Lithuanian"),
     ("ko", "Korean"),
+    ("et", "Estonian"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -622,7 +623,7 @@ LIBRARIES_PATH = library_path = _lib_path
 if "POSTGRES_NAME" in os.environ:
     DATABASES = {
         "default": {
-            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "ENGINE": "django.db.backends.postgresql",
             "NAME": os.environ["POSTGRES_NAME"],
             "USER": os.environ["POSTGRES_USER"],
             "PASSWORD": os.environ["POSTGRES_PASSWORD"],

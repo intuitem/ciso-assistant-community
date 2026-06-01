@@ -60,6 +60,8 @@ GENERAL_SETTINGS_KEYS = [
     "openai_api_base",
     "openai_model",
     "openai_api_key",
+    "chat_temperature_enabled",
+    "chat_temperature",
     "default_custom_analytics_dashboard",
 ]
 
@@ -133,6 +135,23 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                             "default_language": f"Invalid language. Must be one of: {valid_codes}"
                         }
                     )
+            if key == "chat_temperature_enabled":
+                if not isinstance(value, bool):
+                    raise serializers.ValidationError(
+                        {"chat_temperature_enabled": "Must be a boolean."}
+                    )
+            if key == "chat_temperature":
+                try:
+                    temp = float(value)
+                except (TypeError, ValueError):
+                    raise serializers.ValidationError(
+                        {"chat_temperature": "Must be a number."}
+                    )
+                if not 0 <= temp <= 2:
+                    raise serializers.ValidationError(
+                        {"chat_temperature": "Must be between 0 and 2."}
+                    )
+                validated_data["value"][key] = temp
             if key == "default_custom_analytics_dashboard":
                 validated_data["value"][key] = validate_default_dashboard_value(value)
             setattr(instance, "value", validated_data["value"])
@@ -303,10 +322,10 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         source="value.chat_mode", required=False, default=False
     )
     auditee_mode = serializers.BooleanField(
-        source="value.auditee_mode", required=False, default=False
+        source="value.auditee_mode", required=False, default=True
     )
     advanced_analytics = serializers.BooleanField(
-        source="value.advanced_analytics", required=False, default=False
+        source="value.advanced_analytics", required=False, default=True
     )
     comments = serializers.BooleanField(
         source="value.comments", required=False, default=True

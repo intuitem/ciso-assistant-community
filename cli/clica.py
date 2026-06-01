@@ -11,7 +11,7 @@ import os
 from dotenv import load_dotenv
 import json
 from rich import print as rprint
-from typing import Optional, Callable, Dict
+from typing import Optional, Dict
 import uuid
 
 from icecream import ic
@@ -20,8 +20,6 @@ cli_cfg = dict()
 auth_data = dict()
 
 GLOBAL_FOLDER_ID: Optional[str] = None
-
-CLICA_CONFG_PATH = ".clica_config.yaml"
 
 load_dotenv(".clica.env")
 
@@ -41,6 +39,12 @@ VERIFY_CERTIFICATE = os.getenv("VERIFY_CERTIFICATE", "true").lower() in (
     "yes",
     "on",
 )
+
+# Set CLICA_DEBUG=1 to enable ic() debug prints across the CLI.
+if os.getenv("CLICA_DEBUG"):
+    ic(API_URL, VERIFY_CERTIFICATE)
+else:
+    ic.disable()
 
 
 def ids_map(model, folder=None):
@@ -567,6 +571,23 @@ DATA_WIZARD_COMMANDS = [
         "requires_matrix": True,
     },
     {
+        "command": "import_ebios_rm_study_egerie_xml",
+        "model_type": "EbiosRMStudyEgerieXML",
+        "help": (
+            "Import an EBIOS RM study from an Egerie Suite XML export (analyse_*.xml).\n"
+            "Creates the study, primary + supporting assets, feared events, RoTo couples, "
+            "stakeholders, strategic scenarios, attack paths, elementary actions, "
+            "operational scenarios, and applied controls.\n"
+            "Egerie 0..1 scales are mapped onto the chosen risk matrix; controls are "
+            "imported without scenario linking.\n"
+            "\nConflict detection: by name within the study (or folder for assets/EAs/controls)"
+        ),
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": True,
+    },
+    {
         "command": "import_vulnerabilities",
         "model_type": "Vulnerability",
         "help": "Import vulnerabilities using the Data Wizard backend.",
@@ -629,6 +650,7 @@ def register_data_wizard_command(config: Dict[str, object]) -> None:
         "FindingsAssessment",
         "EbiosRMStudyARM",
         "EbiosRMStudyExcel",
+        "EbiosRMStudyEgerieXML",
     }
 
     @cli.command(name=cli_name, help=help_text)
