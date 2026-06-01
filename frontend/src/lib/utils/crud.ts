@@ -2073,7 +2073,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'owner', urlModel: 'actors' },
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
-			{ field: 'perimeter', urlModel: 'perimeters' }
+			{ field: 'perimeter', urlModel: 'perimeters' },
+			{ field: 'vulnerabilities', urlModel: 'vulnerabilities' }
 		],
 		reverseForeignKeyFields: [
 			{
