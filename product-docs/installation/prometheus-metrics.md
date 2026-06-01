@@ -31,7 +31,7 @@ The endpoint is disabled by default (`EXPOSE_METRICS=False`).
 ### Security — never expose `/metrics` publicly
 
 {% hint style="danger" %}
-The `/metrics` endpoint is **unauthenticated**. It must never be reachable from the public internet. Always block it at the reverse proxy level and only allow access from your internal network or from Prometheus itself.
+The `/metrics` endpoint is **unauthenticated**. If you enable it, make sure it is never reachable from the public internet — either by restricting access to trusted IP ranges, or by binding the endpoint to an internal interface only.
 {% endhint %}
 
 ### Prometheus configuration (single VM)
