@@ -17,7 +17,7 @@ const DATE_FORMAT_PREFERENCES: DateFormatPreference[] = [
 	'long_mdy'
 ];
 
-function getDateFormatPreference(): DateFormatPreference {
+export function getDateFormatPreference(): DateFormatPreference {
 	const pref = page?.data?.user?.preferences?.date_format;
 	return DATE_FORMAT_PREFERENCES.includes(pref) ? pref : 'auto';
 }
