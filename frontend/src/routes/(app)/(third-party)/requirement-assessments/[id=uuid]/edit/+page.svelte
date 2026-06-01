@@ -312,9 +312,10 @@
 	const showRespondentAlignment = $derived(fieldVis.showRespondentAlignment);
 	const showComments = $derived(fieldVis.showComments);
 
-	const isAuditor = $derived(viewerRole === 'auditor');
 	const canShowAppliedControls = $derived(showAppliedControls && !page.data.user.is_third_party);
-	const canShowSecurityExceptions = $derived(showSecurityExceptions && !page.data.user.is_third_party);
+	const canShowSecurityExceptions = $derived(
+		showSecurityExceptions && !page.data.user.is_third_party
+	);
 
 	function pickDefaultTab(): string {
 		if (canShowAppliedControls) return 'applied_controls';

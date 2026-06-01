@@ -39,7 +39,6 @@
 	import { Accordion, Progress } from '@skeletonlabs/skeleton-svelte';
 	import { superForm, type SuperForm } from 'sveltekit-superforms';
 	import type { ActionData, PageData } from './$types';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { invalidateAll } from '$app/navigation';
 	import { countMasked } from '$lib/utils/related-visibility';
 

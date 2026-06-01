@@ -45,7 +45,6 @@
 	import { generateTocFromElements, type TocItem } from '$lib/utils/toc';
 	import { onMount } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { countMasked } from '$lib/utils/related-visibility';
 
 	interface Props {
