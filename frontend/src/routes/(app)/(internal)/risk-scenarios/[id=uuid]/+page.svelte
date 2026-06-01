@@ -6,6 +6,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
+	import { formatDate } from '$lib/utils/datetime';
 
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { isDark } from '$lib/utils/helpers';
@@ -258,7 +259,7 @@
 				<div>
 					<p class="text-sm font-semibold text-gray-400">{m.lastUpdate()}</p>
 					<p class="text-sm font-semibold">
-						{new Date(data.scenario.updated_at).toLocaleString(getLocale())}
+						{formatDate(new Date(data.scenario.updated_at), true, getLocale())}
 					</p>
 				</div>
 				<div>
