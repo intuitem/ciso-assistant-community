@@ -15,6 +15,10 @@ The date format is a personal preference: each user picks how dates are shown, a
 
 The change takes effect immediately and applies everywhere dates appear — tables, detail pages, and exports of record dates.
 
+{% hint style="info" %}
+This setting controls how dates are **displayed**. The date picker used when you enter or edit a date in a form is provided by your browser and follows your browser's locale — its appearance is not affected by this setting.
+{% endhint %}
+
 ## Available formats
 
 | Option | Example |
