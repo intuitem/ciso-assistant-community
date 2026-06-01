@@ -289,11 +289,16 @@ test('third-party representative can fill their assigned audit', async ({
 		await expect(page.getByTestId('evidence-count').first()).toContainText('1');
 	});
 
-	await test.step('check that selected evidences were updated', async () => {
+	await test.step('respondent can save an evidence selection', async () => {
 		await page.getByTestId('select-evidence-button').click();
 		await expect(page.getByTestId('modal-title')).toBeVisible();
 		await expect(page.getByRole('option').first()).toContainText(/.*tp-evidence.*/);
-		await page.getByTestId('cancel-button').click();
+		const savedToast = thirdPartyAuthenticatedPage.isToastVisible(
+			'The requirement assessment object has been successfully saved' + /.*/.source
+		);
+		await page.getByTestId('save-button').click();
+		await savedToast;
+		await expect(page.getByTestId('evidence-count').first()).toContainText('1');
 	});
 });
 

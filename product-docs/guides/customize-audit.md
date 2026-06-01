@@ -35,6 +35,7 @@ In the order they appear on the panel (mirroring the respondent view):
 | **Documentation score** | Hidden | Companion score for documentation maturity. Cannot be more permissive than **Score**. |
 | **Applied controls** | Auditor + Respondent | The controls linked to this requirement. |
 | **Evidences** | Auditor + Respondent | Files / links proving the requirement. |
+| **Security exceptions** | Auditor only | Documented, time-bound deviations linked to this requirement. |
 | **Observation** | Auditor + Respondent | Free-text commentary. |
 | **Comments** | Auditor + Respondent | Per-row comments. Only visible when the `comments` feature flag is on. |
 
@@ -53,7 +54,7 @@ Defaults cascade — most permissive wins gets you _Auditor + Respondent_; every
 
 1. **Audit-level override** — what you set in this panel. Wins if present.
 2. **Framework defaults** — each framework can ship its own `field_visibility` shape. When you pick a framework on the create form, the panel's pills preview the framework's defaults.
-3. **Platform defaults** — the safety net (`Score`, `Documentation score`, `Respondent alignment` default to _Hidden_; `Status` and `Extended result` default to _Auditor only_; everything else to _Auditor + Respondent_).
+3. **Platform defaults** — the safety net (`Score`, `Documentation score`, `Respondent alignment` default to _Hidden_; `Status`, `Extended result` and `Security exceptions` default to _Auditor only_; everything else to _Auditor + Respondent_).
 
 Open the panel on an existing audit and toggle pills as needed; changes save on the next form submit.
 
