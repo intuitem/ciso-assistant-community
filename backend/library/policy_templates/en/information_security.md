@@ -76,4 +76,4 @@ The organization shall:
 
 ## 10. Policy Review
 
-This policy shall be reviewed at least annually or when significant changes occur. All amendments must be approved by senior management.
+This policy shall be reviewed at least annually or when significant changes occur. All amendments shall be approved by senior management.

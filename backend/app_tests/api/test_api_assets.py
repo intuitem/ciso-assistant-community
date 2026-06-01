@@ -273,3 +273,92 @@ class TestAssetListIAMScope:
             f"scoped reader saw asset {asset_in_b.id} from another folder; "
             f"results: {ids}"
         )
+
+    def _build_export_fixture(self):
+        """Two folders × two asset types — A is in-scope, B is out-of-scope.
+        Returns (client, assets) for the scoped reader of folder A."""
+        root = Folder.get_root_folder()
+        folder_a = Folder.objects.create(
+            name=f"perf-test-A-{uuid.uuid4().hex[:6]}",
+            parent_folder=root,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        folder_b = Folder.objects.create(
+            name=f"perf-test-B-{uuid.uuid4().hex[:6]}",
+            parent_folder=root,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        assets = {
+            "a_pr": Asset.objects.create(
+                folder=folder_a,
+                name=f"asset-A-PR-{uuid.uuid4().hex[:6]}",
+                type=Asset.Type.PRIMARY,
+            ),
+            "a_sp": Asset.objects.create(
+                folder=folder_a,
+                name=f"asset-A-SP-{uuid.uuid4().hex[:6]}",
+                type=Asset.Type.SUPPORT,
+            ),
+            "b_pr": Asset.objects.create(
+                folder=folder_b,
+                name=f"asset-B-PR-{uuid.uuid4().hex[:6]}",
+                type=Asset.Type.PRIMARY,
+            ),
+            "b_sp": Asset.objects.create(
+                folder=folder_b,
+                name=f"asset-B-SP-{uuid.uuid4().hex[:6]}",
+                type=Asset.Type.SUPPORT,
+            ),
+        }
+        return _client_for(_make_scoped_reader(folder_a)), assets
+
+    def test_scoped_reader_export_csv_respects_scope_and_filter(self):
+        """CSV export must honor both IAM scope and list filters: the
+        scoped reader hitting /api/assets/export_csv/?type=PR sees only
+        their folder's PR asset."""
+        client, assets = self._build_export_fixture()
+        r = client.get("/api/assets/export_csv/?type=PR")
+        assert r.status_code == status.HTTP_200_OK, r.content
+        assert r["Content-Type"] == "text/csv"
+        content = r.content.decode("utf-8")
+
+        assert assets["a_pr"].name in content, (
+            f"scoped reader should see PR asset {assets['a_pr'].name} from their folder"
+        )
+        assert assets["a_sp"].name not in content, (
+            f"scoped reader should not see SP asset {assets['a_sp'].name} (filtered by type)"
+        )
+        assert assets["b_pr"].name not in content, (
+            f"scoped reader should not see PR asset {assets['b_pr'].name} from another folder"
+        )
+        assert assets["b_sp"].name not in content, (
+            f"scoped reader should not see SP asset {assets['b_sp'].name} from another folder"
+        )
+
+    def test_scoped_reader_export_xlsx_respects_scope_and_filter(self):
+        """XLSX export shares ExportMixin._get_export_queryset with CSV; this
+        regression-guards against a future override that re-skips
+        filter_queryset on the xlsx path."""
+        import io
+        from openpyxl import load_workbook
+
+        client, assets = self._build_export_fixture()
+        r = client.get("/api/assets/export_xlsx/?type=PR")
+        assert r.status_code == status.HTTP_200_OK, r.content
+        assert (
+            r["Content-Type"]
+            == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        wb = load_workbook(io.BytesIO(r.content), read_only=True)
+        cells = {
+            str(c.value)
+            for ws in wb.worksheets
+            for row in ws.iter_rows()
+            for c in row
+            if c.value is not None
+        }
+
+        assert assets["a_pr"].name in cells
+        assert assets["a_sp"].name not in cells
+        assert assets["b_pr"].name not in cells
+        assert assets["b_sp"].name not in cells

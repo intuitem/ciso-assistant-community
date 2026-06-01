@@ -3,8 +3,9 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
-export const GET: RequestHandler = async ({ fetch }) => {
-	const endpoint = `${BASE_API_URL}/entities/export_ecosystem/`;
+export const GET: RequestHandler = async ({ fetch, url }) => {
+	const queryString = url.searchParams.toString();
+	const endpoint = `${BASE_API_URL}/entities/export_ecosystem/${queryString ? '?' + queryString : ''}`;
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {

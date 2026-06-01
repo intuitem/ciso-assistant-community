@@ -15,67 +15,67 @@ This policy applies to all software development activities at [Organization Name
 
 ## 3. Security Requirements
 
-- Security requirements must be identified and documented during the requirements phase of every project.
-- Requirements must address authentication, authorization, data protection, logging, and input validation.
+- Security requirements shall be identified and documented during the requirements phase of every project.
+- Requirements shall address authentication, authorization, data protection, logging, and input validation.
 - Threat modeling should be performed for applications handling sensitive data or exposed to external networks.
 
 ## 4. Secure Coding Standards
 
 ### 4.1 General Principles
 
-- All development must follow recognized secure coding guidelines (e.g., OWASP Top 10, SANS Top 25).
-- Input validation must be applied to all user-supplied data.
-- Output encoding must be used to prevent injection attacks.
-- Sensitive data must never be hardcoded in source code (credentials, keys, tokens).
+- All development shall follow recognized secure coding guidelines (e.g., OWASP Top 10, SANS Top 25).
+- Input validation shall be applied to all user-supplied data.
+- Output encoding shall be used to prevent injection attacks.
+- Sensitive data shall never be hardcoded in source code (credentials, keys, tokens).
 
 ### 4.2 Dependency Management
 
-- Third-party libraries and dependencies must be inventoried and monitored for known vulnerabilities.
-- Dependencies must be updated regularly and pinned to specific versions.
+- Third-party libraries and dependencies shall be inventoried and monitored for known vulnerabilities.
+- Dependencies shall be updated regularly and pinned to specific versions.
 - Use of unmaintained or deprecated libraries is discouraged.
 
 ### 4.3 Secrets Management
 
-- Application secrets must be stored in approved secrets management solutions.
-- Secrets must not be committed to version control repositories.
+- Application secrets shall be stored in approved secrets management solutions.
+- Secrets shall not be committed to version control repositories.
 - Pre-commit hooks or automated scanning should be used to detect accidental secret exposure.
 
 ## 5. Code Review
 
-- All code changes must undergo peer review before merging to main branches.
-- Security-focused reviews must be conducted for changes affecting authentication, authorization, data handling, and cryptography.
+- All code changes shall undergo peer review before merging to main branches.
+- Security-focused reviews shall be conducted for changes affecting authentication, authorization, data handling, and cryptography.
 - Automated static analysis tools should be integrated into the development pipeline.
 
 ## 6. Testing
 
 ### 6.1 Security Testing
 
-- Automated security testing (SAST, DAST) must be integrated into the CI/CD pipeline.
-- Manual security testing must be conducted for high-risk applications before major releases.
-- Identified vulnerabilities must be remediated before production deployment.
+- Automated security testing (SAST, DAST) shall be integrated into the CI/CD pipeline.
+- Manual security testing shall be conducted for high-risk applications before major releases.
+- Identified vulnerabilities shall be remediated before production deployment.
 
 ### 6.2 Test Environments
 
-- Test environments must not contain production data unless anonymized or masked.
-- Test environments must be isolated from production systems.
+- Test environments shall not contain production data unless anonymized or masked.
+- Test environments shall be isolated from production systems.
 
 ## 7. Deployment Security
 
-- Deployments to production must follow the established change management process.
-- Automated deployment pipelines must enforce security gates (tests pass, no critical vulnerabilities).
-- Rollback procedures must be defined and tested for all production deployments.
+- Deployments to production shall follow the established change management process.
+- Automated deployment pipelines shall enforce security gates (tests pass, no critical vulnerabilities).
+- Rollback procedures shall be defined and tested for all production deployments.
 
 ## 8. Environment Separation
 
-- Development, testing, staging, and production environments must be logically or physically separated.
-- Access to production environments must be restricted and audited.
-- Developers must not have direct write access to production systems.
+- Development, testing, staging, and production environments shall be logically or physically separated.
+- Access to production environments shall be restricted and audited.
+- Developers shall not have direct write access to production systems.
 
 ## 9. Source Code Protection
 
-- Source code repositories must be access-controlled with role-based permissions.
-- Branch protection rules must be enforced on main and release branches.
-- Repository access must be reviewed periodically and revoked for departed personnel.
+- Source code repositories shall be access-controlled with role-based permissions.
+- Branch protection rules shall be enforced on main and release branches.
+- Repository access shall be reviewed periodically and revoked for departed personnel.
 
 ## 10. Roles and Responsibilities
 

@@ -1,11 +1,10 @@
-import ipaddress
 import uuid
-from urllib.parse import urlparse
 from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from core.base_models import NameDescriptionMixin
 from core.models import Actor
+from core.net_safety import BlockedRequestError, assert_public_url
 from iam.models import Folder, FolderMixin
 
 
@@ -78,30 +77,18 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
         return f"{self.owner} - {self.url}"
 
     def clean(self):
-        """
-        Model-level validation for SSRF mitigation.
-        """
         super().clean()
-
+        if getattr(settings, "WEBHOOK_ALLOW_PRIVATE_IPS", False):
+            return
         try:
-            hostname = urlparse(self.url).hostname
-            if not hostname:
-                raise ValidationError("The URL provided is invalid.")
-
-            # Try to parse the hostname as an IP address
-            ip = ipaddress.ip_address(hostname)
-
-            if not settings.WEBHOOK_ALLOW_PRIVATE_IPS and (
-                ip.is_private or ip.is_loopback or ip.is_reserved
-            ):
-                raise ValidationError(
-                    "In production, the URL cannot be an internal, loopback, or reserved IP address."
-                )
-        except ValueError:
-            # It's a domain name, not an IP address. This is fine.
-            # We are NOT resolving DNS here, as that's a blocking network call
-            # and belongs in a proxy solution.
-            pass
+            assert_public_url(self.url, allowed_schemes=("http", "https"))
+        except BlockedRequestError:
+            raise ValidationError(
+                {
+                    "url": "URL must point to a public host "
+                    "(no private, loopback, or internal addresses)."
+                }
+            )
 
     def save(self, *args, **kwargs):
         """

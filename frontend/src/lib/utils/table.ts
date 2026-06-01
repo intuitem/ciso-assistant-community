@@ -113,6 +113,40 @@ export const ACCREDITATION_CATEGORY_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const PROJECT_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'terminologies?field_path=project.status',
+		optionsLabelField: 'name',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+export const PROJECT_KIND_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'projects/kind',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'kind',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+export const PROJECT_HEALTH_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'terminologies?field_path=project.health',
+		optionsLabelField: 'name',
+		label: 'health',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 export const DOMAIN_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1718,7 +1752,7 @@ export const listViewFields = {
 	},
 	'user-groups': {
 		head: ['name'],
-		body: ['localization_dict'],
+		body: ['name'],
 		meta: ['id', 'builtin']
 	},
 	roles: {
@@ -2236,8 +2270,8 @@ export const listViewFields = {
 		}
 	},
 	'feared-events': {
-		head: ['selected', 'name', 'assets', 'description', 'qualifications', 'gravity'],
-		body: ['is_selected', 'name', 'assets', 'description', 'qualifications', 'gravity'],
+		head: ['selected', 'refId', 'name', 'assets', 'description', 'qualifications', 'gravity'],
+		body: ['is_selected', 'ref_id', 'name', 'assets', 'description', 'qualifications', 'gravity'],
 		filters: {
 			assets: ASSET_FILTER,
 			qualifications: QUALIFICATION_FILTER,
@@ -2655,7 +2689,8 @@ export const listViewFields = {
 			'lastOccurrenceStatus',
 			'nextOccurrence',
 			'nextOccurrenceStatus',
-			'folder'
+			'folder',
+			'labels'
 		],
 		body: [
 			'ref_id',
@@ -2666,14 +2701,16 @@ export const listViewFields = {
 			'last_occurrence_status',
 			'next_occurrence',
 			'next_occurrence_status',
-			'folder'
+			'folder',
+			'filtering_labels'
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			assigned_to: TASK_TEMPLATE_ASSIGNED_TO_FILTER,
 			is_recurrent: IS_RECURRENT_FILTER,
 			last_occurrence_status: LAST_OCCURENCE_STATUS_FILTER,
-			next_occurrence_status: NEXT_OCCURENCE_STATUS_FILTER
+			next_occurrence_status: NEXT_OCCURENCE_STATUS_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'task-nodes': {
@@ -2715,6 +2752,40 @@ export const listViewFields = {
 			authority: ACCREDITATION_AUTHORITY_FILTER,
 			filtering_labels: LABELS_FILTER
 		}
+	},
+	projects: {
+		head: ['kind', 'ref_id', 'name', 'status', 'health', 'owner', 'progress', 'folder'],
+		body: ['kind', 'ref_id', 'name', 'status', 'health', 'owner', 'progress', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			kind: PROJECT_KIND_FILTER,
+			status: PROJECT_STATUS_FILTER,
+			health: PROJECT_HEALTH_FILTER,
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	'responsibility-matrices': {
+		head: ['ref_id', 'name', 'preset', 'activities_count', 'folder'],
+		body: ['ref_id', 'name', 'preset', 'activities_count', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	'responsibility-roles': {
+		head: ['code', 'name', 'taxonomy', 'color', 'order', 'builtin'],
+		body: ['code', 'name', 'taxonomy', 'color', 'order', 'builtin'],
+		filters: {}
+	},
+	'responsibility-matrix-activities': {
+		head: ['name', 'description', 'order', 'matrix'],
+		body: ['name', 'description', 'order', 'matrix'],
+		filters: {}
+	},
+	'responsibility-assignments': {
+		head: ['activity', 'actor', 'role'],
+		body: ['activity', 'actor', 'role'],
+		filters: {}
 	},
 	'metric-definitions': {
 		head: ['ref_id', 'name', 'description', 'category', 'unit', 'provider', 'labels', 'folder'],

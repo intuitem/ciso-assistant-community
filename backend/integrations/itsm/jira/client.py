@@ -5,6 +5,7 @@ from jira import JIRA
 from structlog import get_logger
 
 from core.models import AppliedControl
+from core.net_safety import check_integration_url
 from integrations.base import BaseIntegrationClient
 
 from .mapper import JiraFieldMapper
@@ -15,12 +16,19 @@ logger = get_logger(__name__)
 class JiraClient(BaseIntegrationClient):
     def __init__(self, configuration):
         super().__init__(configuration)
+        server_url = self.credentials["server_url"]
+        try:
+            check_integration_url(server_url, "Jira server_url")
+        except ValueError:
+            logger.error("Jira server_url blocked by SSRF guard", exc_info=True)
+            raise
         self.jira = JIRA(
-            server=self.credentials["server_url"],
+            server=server_url,
             basic_auth=(self.credentials["email"], self.credentials["api_token"]),
             timeout=30,
             max_retries=3,
         )
+        self.jira._session.max_redirects = 0
         self.mapper = JiraFieldMapper(configuration)
 
     def create_remote_object(self, local_object: AppliedControl):

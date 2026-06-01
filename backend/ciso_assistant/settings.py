@@ -44,6 +44,24 @@ def set_ciso_assistant_url(_, __, event_dict):
     return event_dict
 
 
+_SENSITIVE_QUERY_PARAMS = frozenset({"code", "token", "id_token", "access_token"})
+
+
+def redact_sensitive_query_params(_, __, event_dict):
+    request = event_dict.get("request")
+    if not isinstance(request, str) or "?" not in request:
+        return event_dict
+    path, _, query_string = request.partition("?")
+    from urllib.parse import parse_qsl, urlencode
+
+    params = parse_qsl(query_string, keep_blank_values=True)
+    redacted = [
+        (k, "REDACTED") if k in _SENSITIVE_QUERY_PARAMS else (k, v) for k, v in params
+    ]
+    event_dict["request"] = f"{path}?{urlencode(redacted)}"
+    return event_dict
+
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -66,6 +84,10 @@ LOGGING = {
     "loggers": {
         "": {"handlers": ["console"], "level": LOG_LEVEL},
         "httpx": {"handlers": ["console"], "level": "WARNING", "propagate": False},
+        # Disable Django's default request logger — it logs full URLs including
+        # sensitive OAuth2 query params (code, token). Request logging is already
+        # handled by django_structlog with query-param redaction.
+        "django.server": {"handlers": [], "propagate": False},
     },
 }
 
@@ -81,6 +103,7 @@ if LOG_OUTFILE:
 structlog.configure(
     processors=[
         structlog.contextvars.merge_contextvars,
+        redact_sensitive_query_params,
         set_ciso_assistant_url,
         structlog.stdlib.filter_by_level,
         structlog.processors.TimeStamper(fmt="iso"),  # ISO 8601 timestamps
@@ -133,6 +156,30 @@ ENABLE_CHAT = os.environ.get("ENABLE_CHAT", "False").strip().lower() in (
     "yes",
 )
 logger.info("ENABLE_CHAT: %s", ENABLE_CHAT)
+
+# Questionnaire Autopilot — tunable thresholds. Defaults match the values
+# the feature was developed against; override via env when tuning a
+# specific deployment without redeploying. See chat/questionnaire.py.
+QUESTIONNAIRE_RETRY_THRESHOLD = float(
+    os.environ.get("QUESTIONNAIRE_RETRY_THRESHOLD", "0.7")
+)
+QUESTIONNAIRE_AUTO_ACCEPT_THRESHOLD = float(
+    os.environ.get("QUESTIONNAIRE_AUTO_ACCEPT_THRESHOLD", "0.85")
+)
+QUESTIONNAIRE_PER_QUESTION_TIMEOUT_SEC = int(
+    os.environ.get("QUESTIONNAIRE_PER_QUESTION_TIMEOUT_SEC", "90")
+)
+QUESTIONNAIRE_FAST_MODE_DEFAULT_CONFIDENCE = float(
+    os.environ.get("QUESTIONNAIRE_FAST_MODE_DEFAULT_CONFIDENCE", "0.5")
+)
+logger.info(
+    "QUESTIONNAIRE thresholds: retry=%.2f auto_accept=%.2f fast_default=%.2f "
+    "timeout=%ds",
+    QUESTIONNAIRE_RETRY_THRESHOLD,
+    QUESTIONNAIRE_AUTO_ACCEPT_THRESHOLD,
+    QUESTIONNAIRE_FAST_MODE_DEFAULT_CONFIDENCE,
+    QUESTIONNAIRE_PER_QUESTION_TIMEOUT_SEC,
+)
 
 ENABLE_SANDBOX = os.environ.get(
     "ENABLE_SANDBOX",
@@ -611,6 +658,7 @@ LANGUAGES = [
     ("zh", "Chinese (Simplified)"),
     ("lt", "Lithuanian"),
     ("ko", "Korean"),
+    ("et", "Estonian"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -633,7 +681,7 @@ LIBRARIES_PATH = library_path = BASE_DIR / "library/libraries"
 if "POSTGRES_NAME" in os.environ:
     DATABASES = {
         "default": {
-            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "ENGINE": "django.db.backends.postgresql",
             "NAME": os.environ["POSTGRES_NAME"],
             "USER": os.environ["POSTGRES_USER"],
             "PASSWORD": os.environ["POSTGRES_PASSWORD"],

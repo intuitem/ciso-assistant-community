@@ -29,10 +29,20 @@ class Command(BaseCommand):
         else:
             library_files = [path]
         for fname in library_files:
-            # logger.info("Begin library file storage", filename=fname)
             try:
                 library, error = StoredLibrary.store_library_file(fname, True)
                 if library:
+                    if library.is_preset:
+                        from library.utils import upsert_preset_from_stored_library
+
+                        try:
+                            upsert_preset_from_stored_library(library)
+                        except Exception:
+                            logger.exception(
+                                "Failed to upsert preset from stored library",
+                                filename=fname,
+                                urn=library.urn,
+                            )
                     logger.info(
                         "Successfully stored library",
                         filename=fname,

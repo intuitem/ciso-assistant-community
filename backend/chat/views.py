@@ -6,6 +6,7 @@ import time
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 from django.http import StreamingHttpResponse
+from django.utils import timezone
 from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -24,6 +25,7 @@ from .constants import (
     MODEL_CONTEXT_TOKENS,
     RAG_CONTEXT_TOKENS,
     VERBATIM_WINDOW_TOKENS,
+    Verdict,
 )
 from .context import ContextBuilder
 from .memory import (
@@ -34,7 +36,15 @@ from .memory import (
     update_summary_for_session,
 )
 from .metrics import build_turn_metrics, record_metric
-from .models import ChatSession, ChatMessage, IndexedDocument
+from .models import (
+    ChatSession,
+    ChatMessage,
+    IndexedDocument,
+    QuestionnaireRun,
+    QuestionnaireQuestion,
+    AgentRun,
+    AgentAction,
+)
 from .page_context import parse_page_context
 from .providers import get_llm, is_ollama_available
 from .tokens import count_tokens
@@ -821,6 +831,932 @@ class IndexedDocumentViewSet(BaseModelViewSet):
 
     model = IndexedDocument
     filterset_fields = ["folder", "source_type", "status"]
+
+
+def _excel_safe(value):
+    """Defang Excel formula injection: prefix a single quote to any string
+    starting with =, +, -, @ so Excel treats the cell as text rather than
+    evaluating it as a formula. The leading quote is invisible to humans
+    but the literal value passes through unchanged when copy-pasted.
+    """
+    if not isinstance(value, str):
+        return value
+    if value and value[0] in ("=", "+", "-", "@"):
+        return "'" + value
+    return value
+
+
+class QuestionnaireRunViewSet(BaseModelViewSet):
+    """Experimental: questionnaire prefill runs."""
+
+    model = QuestionnaireRun
+    filterset_fields = ["folder", "status"]
+    search_fields = ["title", "filename"]
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+    @action(detail=False, methods=["post"], url_path="upload")
+    def upload(self, request):
+        """Multipart upload entry point: file + folder + optional title.
+
+        Creates the run in PENDING and queues the parse task. Frontend then
+        polls the detail endpoint for status to flip to PARSED.
+        """
+        file = request.FILES.get("file")
+        folder_id = request.data.get("folder")
+        title = (request.data.get("title") or "").strip()
+
+        if not file:
+            return Response(
+                {"detail": "No file provided."}, status=status.HTTP_400_BAD_REQUEST
+            )
+        if not folder_id:
+            return Response(
+                {"detail": "folder is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Hardened content check — magic bytes + zip structure + macro reject
+        # + zip-bomb guard. Catches renamed/forged/malicious uploads that the
+        # filename + size validators alone would pass.
+        from django.core.exceptions import ValidationError as DjValidationError
+
+        from .upload_validation import validate_questionnaire_upload
+
+        try:
+            validate_questionnaire_upload(file)
+        except DjValidationError as e:
+            # ``validate_questionnaire_upload`` raises ValidationError with
+            # curated, user-safe messages (e.g. "Not a valid .xlsx file"). If
+            # ``messages`` is empty (shouldn't happen — defence in depth),
+            # fall back to a static message and log the real exception
+            # server-side rather than echoing arbitrary text to the client.
+            if e.messages:
+                detail = e.messages[0]
+            else:
+                logger.warning("upload_validation_unexpected", exc_info=True)
+                detail = "Uploaded file failed validation."
+            return Response(
+                {"detail": detail},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        from django.contrib.auth.models import Permission
+
+        from iam.models import Folder, RoleAssignment
+
+        try:
+            folder = Folder.objects.get(id=folder_id)
+        except (Folder.DoesNotExist, ValueError):
+            return Response(
+                {"detail": "Folder not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Folder-scoped check: the user must hold add_questionnairerun in
+        # this specific folder. Holding the perm globally is not enough —
+        # the codebase's permission model is per-folder via role assignment.
+        try:
+            add_qr_perm = Permission.objects.get(codename="add_questionnairerun")
+        except Permission.DoesNotExist:
+            return Response(
+                {"detail": "Server permission state is inconsistent."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        if not RoleAssignment.is_access_allowed(
+            user=request.user, perm=add_qr_perm, folder=folder
+        ):
+            return Response(
+                {
+                    "detail": "You do not have permission to upload a questionnaire to this folder."
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        if not title:
+            from core.utils import generate_friendly_name
+
+            title = generate_friendly_name()
+
+        run = QuestionnaireRun.objects.create(
+            folder=folder,
+            owner=request.user,
+            title=title,
+            file=file,
+            filename=file.name,
+        )
+
+        from .tasks import parse_questionnaire
+
+        parse_questionnaire(str(run.id))
+
+        return Response(
+            {"id": str(run.id), "status": run.status},
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(detail=True, methods=["post"], url_path="extract-questions")
+    def extract_questions(self, request, pk=None):
+        """Materialize QuestionnaireQuestion rows from parsed_data + column_mapping.
+
+        Idempotent: re-running deletes prior extracted rows. Refuses to run if
+        any agent run already targets this questionnaire (would orphan
+        AgentActions referencing deleted question rows).
+        """
+        run = self.get_object()
+        if run.status != QuestionnaireRun.Status.PARSED:
+            return Response(
+                {"detail": f"Run must be parsed; currently {run.status}."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        mapping = run.column_mapping or {}
+        if "sheet" not in mapping or "question_col" not in mapping:
+            return Response(
+                {"detail": "Column mapping not yet saved."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        existing_agent_runs = AgentRun.objects.filter(
+            target_content_type=ContentType.objects.get_for_model(QuestionnaireRun),
+            target_object_id=run.id,
+        )
+        if existing_agent_runs.exists():
+            return Response(
+                {
+                    "detail": "Cannot re-extract: one or more agent runs already "
+                    "reference this questionnaire."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        sheet_name = mapping["sheet"]
+        sheet = next(
+            (s for s in run.parsed_data.get("sheets", []) if s["name"] == sheet_name),
+            None,
+        )
+        if not sheet:
+            return Response(
+                {"detail": f"Sheet '{sheet_name}' not found in parsed data."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        from django.db import transaction
+
+        from .tasks import extract_questions_from_sheet, suggest_value_mapping
+
+        # Atomic: if extraction blows up (parser bug, malformed sheet, transient
+        # DB error), the prior questions stay intact so the run isn't stranded.
+        with transaction.atomic():
+            QuestionnaireQuestion.objects.filter(questionnaire_run=run).delete()
+            created = extract_questions_from_sheet(run, sheet, mapping)
+
+        # Each question now carries its detected answer_candidates. Group +
+        # LLM-map them in the background so per-question mappings are ready
+        # by the time the user clicks Start prefill / Download.
+        suggest_value_mapping(str(run.id))
+
+        return Response(
+            {"questionnaire_run": str(run.id), "extracted": created},
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(detail=True, methods=["patch"], url_path="mapping")
+    def set_mapping(self, request, pk=None):
+        """Persist the user's column-mapping choice for this run."""
+        from .serializers import QuestionnaireRunMappingSerializer
+
+        run = self.get_object()
+        if run.status != QuestionnaireRun.Status.PARSED:
+            return Response(
+                {"detail": f"Run is {run.status}; mapping requires 'parsed'."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        serializer = QuestionnaireRunMappingSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        mapping = {k: v for k, v in serializer.validated_data.items() if v is not None}
+
+        sheet_names = [s["name"] for s in run.parsed_data.get("sheets", [])]
+        if mapping["sheet"] not in sheet_names:
+            return Response(
+                {"detail": f"Unknown sheet '{mapping['sheet']}'."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        run.column_mapping = mapping
+        run.save(update_fields=["column_mapping", "updated_at"])
+
+        # Note: value mapping is now triggered post-extract (it depends on
+        # per-question answer_candidates which only exist once questions
+        # have been materialized).
+        return Response({"column_mapping": run.column_mapping})
+
+    @action(detail=True, methods=["get"], url_path="export")
+    def export_filled(self, request, pk=None):
+        """Stream a copy of the original xlsx with response/comment columns
+        filled from the latest non-expired propose_answer AgentActions.
+
+        Walks the original sheet using the same row-skip logic as the extract
+        step, so the answer/comment cells line up exactly with the extracted
+        QuestionnaireQuestions. Original formatting, cover sheet, and any
+        unmapped columns are preserved untouched.
+        """
+        import io
+        import openpyxl
+
+        from django.http import HttpResponse
+
+        from .models import QuestionnaireQuestion, AgentRun, AgentAction
+
+        run = self.get_object()
+        mapping = run.column_mapping or {}
+        if "sheet" not in mapping or "answer_col" not in mapping:
+            return Response(
+                {
+                    "detail": "Mapping incomplete — at least an answer column "
+                    "must be mapped to export."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        questions_by_ord = {
+            q.ord: q
+            for q in QuestionnaireQuestion.objects.filter(questionnaire_run=run)
+        }
+        if not questions_by_ord:
+            return Response(
+                {"detail": "No questions extracted yet."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Latest agent run that has produced answers (any terminal state).
+        agent_run = (
+            AgentRun.objects.filter(
+                target_content_type=ContentType.objects.get_for_model(QuestionnaireRun),
+                target_object_id=run.id,
+            )
+            .order_by("-created_at")
+            .first()
+        )
+        if not agent_run:
+            return Response(
+                {"detail": "No agent run found for this questionnaire."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        qq_ct = ContentType.objects.get_for_model(QuestionnaireQuestion)
+        actions_qs = (
+            AgentAction.objects.filter(
+                agent_run=agent_run,
+                kind=AgentAction.Kind.PROPOSE_ANSWER,
+                target_content_type=qq_ct,
+            )
+            .exclude(state=AgentAction.State.EXPIRED)
+            .order_by("target_object_id", "-iteration")
+        )
+
+        # Latest iteration per question
+        action_by_question: dict = {}
+        for a in actions_qs:
+            qid = str(a.target_object_id)
+            if qid not in action_by_question:
+                action_by_question[qid] = a
+
+        # Honor the customer's vocabulary if we computed one; otherwise fall
+        # back to internal labels for yes/partial/no.
+        #
+        # Two cases where we deliberately leave the answer cell blank:
+        # 1. status == needs_info — never auto-write anything. Mapping it to
+        #    "N/A" / "Not Applicable" is a real semantic mistake (those mean
+        #    the requirement does not apply, not "I don't know"). Reviewer
+        #    fills the cell manually.
+        # 2. The column has a customer dropdown (candidates non-empty) but
+        #    suggest_value_mapping is in fallback state — writing internal
+        #    labels would violate the dropdown.
+        # In both cases the comment cell still fills with the agent's text.
+        DEFAULT_LABELS = {
+            Verdict.YES: "Yes",
+            Verdict.PARTIAL: "Partial",
+            Verdict.NO: "No",
+        }
+
+        sheet_meta = next(
+            (
+                s
+                for s in run.parsed_data.get("sheets", [])
+                if s["name"] == mapping["sheet"]
+            ),
+            None,
+        )
+        if not sheet_meta:
+            return Response(
+                {"detail": f"Sheet '{mapping['sheet']}' not found."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        header_row = sheet_meta["header_row"]
+        header_count = len(sheet_meta["headers"])
+        q_col = mapping["question_col"]
+        a_col = mapping["answer_col"]
+        c_col = mapping.get("comment_col")
+
+        with run.file.open("rb") as fp:
+            content = fp.read()
+        wb = openpyxl.load_workbook(io.BytesIO(content))
+        ws = wb[mapping["sheet"]]
+
+        # Walk the same way extract does, in parallel with the in-memory ord index.
+        ord_idx = 0
+        for excel_row_idx_zero_based, row in enumerate(
+            ws.iter_rows(values_only=True, max_row=ws.max_row)
+        ):
+            if excel_row_idx_zero_based <= header_row:
+                continue
+            cells = list(row[:header_count])
+            if all(c in (None, "") for c in cells):
+                continue
+            text = cells[q_col] if q_col < len(cells) else None
+            if text in (None, ""):
+                ord_idx += 1
+                continue
+            text = str(text).strip()
+            if not text:
+                ord_idx += 1
+                continue
+
+            question = questions_by_ord.get(ord_idx)
+            ord_idx += 1
+            if question is None:
+                continue
+            action = action_by_question.get(str(question.id))
+            if action is None:
+                continue
+
+            payload = action.payload or {}
+            status_key = (payload.get("status") or Verdict.NEEDS_INFO).lower()
+            comment = (payload.get("comment") or "").strip()
+            # openpyxl is 1-indexed; column indices in mapping are 0-indexed
+            excel_row = excel_row_idx_zero_based + 1
+
+            qm = question.answer_mapping or {}
+            qm_source = qm.get("source")
+            if qm_source and qm_source != "fallback":
+                cell_status_labels = {
+                    Verdict.YES: qm.get(Verdict.YES),
+                    Verdict.PARTIAL: qm.get(Verdict.PARTIAL),
+                    Verdict.NO: qm.get(Verdict.NO),
+                }
+                skip_answer_cell = False
+            elif question.answer_candidates:
+                # Dropdown present but no clean mapping yet — don't pollute it.
+                cell_status_labels = {}
+                skip_answer_cell = True
+            else:
+                cell_status_labels = dict(DEFAULT_LABELS)
+                skip_answer_cell = False
+
+            should_write_answer = (
+                not skip_answer_cell
+                and status_key in cell_status_labels
+                and bool(cell_status_labels[status_key])
+            )
+            if should_write_answer:
+                ws.cell(
+                    row=excel_row,
+                    column=a_col + 1,
+                    value=_excel_safe(cell_status_labels[status_key]),
+                )
+            if c_col is not None and comment:
+                ws.cell(row=excel_row, column=c_col + 1, value=_excel_safe(comment))
+
+        out = io.BytesIO()
+        wb.save(out)
+        out.seek(0)
+
+        # run.filename came from the upload's File.name — client-supplied.
+        # A " or CRLF in there would break the Content-Disposition header
+        # (response-splitting territory). Strip to a safe ASCII fallback for
+        # the legacy `filename` token, then attach the RFC 5987 `filename*`
+        # form so non-ASCII titles still render cleanly on modern clients.
+        import re as _re
+        import urllib.parse as _urlparse
+
+        original_name = run.filename or "questionnaire.xlsx"
+        stem = (
+            original_name[:-5]
+            if original_name.lower().endswith(".xlsx")
+            else original_name
+        )
+        ascii_stem = (
+            _re.sub(r"[^A-Za-z0-9._-]+", "_", stem).strip("._-") or "questionnaire"
+        )
+        ascii_name = f"{ascii_stem[:120]}__prefilled.xlsx"
+        utf8_name = _urlparse.quote(f"{stem}__prefilled.xlsx", safe="")
+
+        response = HttpResponse(
+            out.getvalue(),
+            content_type=(
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            ),
+        )
+        response["Content-Disposition"] = (
+            f"attachment; filename=\"{ascii_name}\"; filename*=UTF-8''{utf8_name}"
+        )
+        return response
+
+
+class QuestionnaireQuestionViewSet(BaseModelViewSet):
+    model = QuestionnaireQuestion
+    filterset_fields = ["questionnaire_run"]
+    search_fields = ["text", "ref_id", "section"]
+
+    @action(detail=True, methods=["post"], url_path="retry-with-control")
+    def retry_with_control(self, request, pk=None):
+        """Re-run a single question's answer pipeline with a chosen
+        AppliedControl as priority context.
+
+        Body: ``{applied_control_id}`` (a single id is the common case;
+        accepts ``applied_control_ids`` list too).
+        Synchronous — caller is the user clicking a button on the review row.
+        """
+        question = self.get_object()
+        ids = request.data.get("applied_control_ids")
+        single = request.data.get("applied_control_id")
+        if not ids and single:
+            ids = [single]
+        if not ids or not isinstance(ids, list):
+            return Response(
+                {"detail": "applied_control_id (or applied_control_ids) required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        from core.models import AppliedControl
+        from iam.models import Folder, RoleAssignment
+
+        # The question's questionnaire run carries the folder; only allow
+        # controls in that same folder, and only those the user can read.
+        run_folder = question.questionnaire_run.folder
+        readable_ac_ids, _, _ = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, AppliedControl
+        )
+        ids_set = set(str(i) for i in ids) & set(str(i) for i in readable_ac_ids)
+        valid_acs = AppliedControl.objects.filter(id__in=ids_set, folder=run_folder)
+        valid_ids = [str(a.id) for a in valid_acs]
+        if not valid_ids:
+            return Response(
+                {
+                    "detail": "No accessible AppliedControl in this folder matched "
+                    "the supplied id(s)."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        from .tasks import retry_question_with_hints
+
+        try:
+            result = retry_question_with_hints(
+                question_id=str(question.id),
+                hint_applied_control_ids=valid_ids,
+            )
+        except ValueError:
+            # ValueErrors here are controlled, user-safe ("No agent run found
+            # for this questionnaire.") — but we don't echo them to avoid
+            # leaking future raises that might carry internal state. Log the
+            # original on the server, return a static message.
+            logger.warning(
+                "retry_with_control_invalid_state",
+                question_id=str(question.id),
+                exc_info=True,
+            )
+            return Response(
+                {"detail": "Cannot retry this question in its current state."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception:
+            logger.error(
+                "retry_with_control_failed", question_id=str(question.id), exc_info=True
+            )
+            return Response(
+                {"detail": "Retry failed. Check server logs."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        return Response(result, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["post"], url_path="suggest-control")
+    def suggest_control(self, request, pk=None):
+        """Synchronous LLM call: draft an AppliedControl that would let us
+        answer this question. Returns the draft as JSON for the user to edit
+        before creating.
+        """
+        question = self.get_object()
+        from .tasks import draft_applied_control_for_question
+
+        draft = draft_applied_control_for_question(question.text)
+        return Response(draft, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["post"], url_path="create-and-retry")
+    def create_and_retry(self, request, pk=None):
+        """Create an AppliedControl in the question's folder from a (possibly
+        user-edited) draft, then immediately retry the question with the new
+        control as priority context.
+        """
+        from django.contrib.auth.models import Permission
+
+        from core.models import AppliedControl
+        from iam.models import RoleAssignment
+
+        question = self.get_object()
+        folder = question.questionnaire_run.folder
+
+        # User must hold add_appliedcontrol in this folder. View access alone
+        # is not enough — Approver / Auditor roles can read a folder's
+        # controls but must not be able to write through this path.
+        try:
+            add_ac_perm = Permission.objects.get(codename="add_appliedcontrol")
+        except Permission.DoesNotExist:
+            return Response(
+                {"detail": "Server permission state is inconsistent."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        if not RoleAssignment.is_access_allowed(
+            user=request.user, perm=add_ac_perm, folder=folder
+        ):
+            return Response(
+                {
+                    "detail": "You do not have permission to add an applied "
+                    "control in this folder."
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        name = (request.data.get("name") or "").strip()
+        if not name:
+            return Response(
+                {"detail": "name is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        description = (request.data.get("description") or "").strip()
+        observation = (request.data.get("observation") or "").strip()
+        ref_id = (request.data.get("ref_id") or "").strip()[:100]
+        status_value = (request.data.get("status") or "to_do").strip().lower()
+        category = (request.data.get("category") or "").strip().lower()
+        csf_function = (request.data.get("csf_function") or "").strip().lower()
+
+        from .tasks import (
+            _VALID_AC_CATEGORIES,
+            _VALID_AC_CSF_FUNCTIONS,
+            _VALID_AC_STATUSES,
+        )
+
+        if status_value not in _VALID_AC_STATUSES:
+            status_value = "to_do"
+        if category and category not in _VALID_AC_CATEGORIES:
+            category = ""
+        if csf_function and csf_function not in _VALID_AC_CSF_FUNCTIONS:
+            csf_function = ""
+
+        ac_kwargs = {
+            "folder": folder,
+            "name": name[:200],
+            "description": description,
+            "observation": observation,
+            "status": status_value,
+        }
+        if ref_id:
+            ac_kwargs["ref_id"] = ref_id
+        if category:
+            ac_kwargs["category"] = category
+        if csf_function:
+            ac_kwargs["csf_function"] = csf_function
+
+        ac = AppliedControl.objects.create(**ac_kwargs)
+        logger.info(
+            "Created AppliedControl %s from question %s suggestion",
+            ac.id,
+            question.id,
+        )
+
+        from .tasks import retry_question_with_hints
+
+        try:
+            result = retry_question_with_hints(
+                question_id=str(question.id),
+                hint_applied_control_ids=[str(ac.id)],
+            )
+        except Exception:
+            logger.error(
+                "create_and_retry_retry_failed",
+                question_id=str(question.id),
+                applied_control_id=str(ac.id),
+                exc_info=True,
+            )
+            # The control was created successfully; retry can be re-issued
+            # via the existing retry-with-control endpoint. Suppress the
+            # exception detail to avoid leaking internals — the control id
+            # is enough for the client to retry.
+            return Response(
+                {
+                    "applied_control_id": str(ac.id),
+                    "retry_failed": True,
+                    "detail": "Control created, but the retry step failed. "
+                    "Use the existing-control retry to try again.",
+                },
+                status=status.HTTP_207_MULTI_STATUS,
+            )
+
+        return Response(
+            {"applied_control_id": str(ac.id), **result},
+            status=status.HTTP_201_CREATED,
+        )
+
+
+_STUCK_RUN_HEARTBEAT_GRACE_SECONDS = 5 * 60
+
+
+def _check_agent_dependencies() -> str:
+    """Cheap preflight before enqueueing an agent run.
+
+    Probes the three pieces of infrastructure the worker can't run without:
+    LLM provider, embedder, and Qdrant (collection present + reachable).
+    Returns an empty string on success, or a user-facing message describing
+    the first failing dependency. Catches the common "Qdrant isn't running"
+    / "Ollama not configured" failure modes that would otherwise produce a
+    run full of silent ``needs_info`` defaults from the worker's per-question
+    exception handler.
+
+    Exception details are logged server-side; the returned message is a
+    static label so we don't echo stack-trace fragments (provider URLs,
+    credentials, internal paths) to API clients.
+    """
+    from .providers import get_llm, get_embedder
+    from .rag import COLLECTION_NAME, get_qdrant_client
+
+    try:
+        get_llm()
+    except Exception:
+        logger.exception("agent_dependency_check_failed: llm_provider")
+        return "LLM provider not available. Check server logs for details."
+    try:
+        get_embedder()
+    except Exception:
+        logger.exception("agent_dependency_check_failed: embedder")
+        return "Embedder not available. Check server logs for details."
+    try:
+        client = get_qdrant_client()
+        collection_names = {c.name for c in client.get_collections().collections}
+    except Exception:
+        logger.exception("agent_dependency_check_failed: qdrant")
+        return "Vector store (Qdrant) unreachable. Check server logs for details."
+    if COLLECTION_NAME not in collection_names:
+        return (
+            f"Vector store collection '{COLLECTION_NAME}' is missing. "
+            "Run `manage.py init_qdrant` first."
+        )
+    return ""
+
+
+def _heal_if_stuck(run):
+    """Lazy stuck-run detector.
+
+    The agent worker heartbeats before each question (`_heartbeat()` in
+    chat.questionnaire). If an AgentRun is RUNNING but its last_heartbeat is
+    older than the grace period, the worker has almost certainly died —
+    flip the run to FAILED so the UI stops spinning forever.
+    Called from the polling/retrieve paths so the heal is opportunistic.
+    """
+    if not run or run.status != AgentRun.Status.RUNNING:
+        return
+    if not run.last_heartbeat_at:
+        return
+    age = (timezone.now() - run.last_heartbeat_at).total_seconds()
+    if age <= _STUCK_RUN_HEARTBEAT_GRACE_SECONDS:
+        return
+    run.status = AgentRun.Status.FAILED
+    run.finished_at = timezone.now()
+    msg = (
+        f"Worker heartbeat stale for {int(age)} s — marking the run as "
+        "failed. Restart Huey and re-run if you want a clean retry."
+    )
+    run.error_message = (
+        f"{run.error_message}\n{msg}".strip() if run.error_message else msg
+    )
+    run.save(
+        update_fields=[
+            "status",
+            "finished_at",
+            "error_message",
+            "updated_at",
+        ]
+    )
+    logger.warning(
+        "AgentRun %s healed from stuck-running (heartbeat %ds old)",
+        run.id,
+        int(age),
+    )
+
+
+class AgentRunViewSet(BaseModelViewSet):
+    model = AgentRun
+    filterset_fields = ["folder", "kind", "status", "target_object_id"]
+    search_fields = ["current_step_label"]
+    # Agent runs are server-spawned: generic POST/PUT/PATCH/DELETE would let
+    # a client point a run at any ContentType+UUID and bypass the per-folder
+    # add_agentrun + per-target read checks done in start_questionnaire_prefill.
+    # PUT/PATCH/DELETE dropped entirely; POST stays only for @action routes.
+    http_method_names = ["get", "head", "options", "post"]
+
+    def create(self, request, *args, **kwargs):
+        return Response(
+            {
+                "detail": "Use /chat/agent-runs/start-questionnaire-prefill/ "
+                "to start an agent run.",
+            },
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        _heal_if_stuck(instance)
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["post"], url_path="start-questionnaire-prefill")
+    def start_questionnaire_prefill(self, request):
+        """Create + enqueue an AgentRun for prefilling a questionnaire.
+
+        Body: {questionnaire_run, strictness}.
+        """
+        from .serializers import StartQuestionnairePrefillSerializer
+
+        serializer = StartQuestionnairePrefillSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        try:
+            qr = QuestionnaireRun.objects.get(id=data["questionnaire_run"])
+        except QuestionnaireRun.DoesNotExist:
+            return Response(
+                {"detail": "Questionnaire run not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        from django.contrib.auth.models import Permission
+
+        from iam.models import RoleAssignment
+
+        # Two-layer check: the user must be able to read the questionnaire run
+        # itself, AND must be able to add an AgentRun in this folder. View
+        # access alone shouldn't license LLM-driven writes.
+        if not RoleAssignment.is_object_readable(request.user, QuestionnaireRun, qr.id):
+            return Response(
+                {"detail": "You do not have access to this questionnaire."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        try:
+            add_agentrun_perm = Permission.objects.get(codename="add_agentrun")
+        except Permission.DoesNotExist:
+            return Response(
+                {"detail": "Server permission state is inconsistent."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        if not RoleAssignment.is_access_allowed(
+            user=request.user, perm=add_agentrun_perm, folder=qr.folder
+        ):
+            return Response(
+                {
+                    "detail": "You do not have permission to start an agent "
+                    "run in this folder."
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        question_count = qr.questions.count()
+        if question_count == 0:
+            return Response(
+                {"detail": "No questions extracted yet — extract first."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Fail fast if the worker's required infrastructure is unreachable.
+        # Without this, a Qdrant outage would still let the run start and
+        # then silently produce a needs_info for every question via the
+        # per-question exception handler in chat.questionnaire.
+        dep_error = _check_agent_dependencies()
+        if dep_error:
+            return Response(
+                {"detail": dep_error},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+
+        # Lock the parent QuestionnaireRun row so two concurrent Start clicks
+        # can't both pass the active-run check and each insert a new AgentRun.
+        # The check + create are now atomic relative to that lock.
+        from django.db import transaction
+
+        with transaction.atomic():
+            QuestionnaireRun.objects.select_for_update().get(id=qr.id)
+            active_exists = AgentRun.objects.filter(
+                target_content_type=ContentType.objects.get_for_model(QuestionnaireRun),
+                target_object_id=qr.id,
+                status__in=[AgentRun.Status.QUEUED, AgentRun.Status.RUNNING],
+            ).exists()
+            if active_exists:
+                return Response(
+                    {
+                        "detail": "An agent run is already in progress for this questionnaire."
+                    },
+                    status=status.HTTP_409_CONFLICT,
+                )
+
+            agent_run = AgentRun.objects.create(
+                owner=request.user,
+                folder=qr.folder,
+                kind=AgentRun.Kind.QUESTIONNAIRE_PREFILL,
+                strictness=data["strictness"],
+                target_content_type=ContentType.objects.get_for_model(QuestionnaireRun),
+                target_object_id=qr.id,
+                total_steps=question_count,
+            )
+
+        from .tasks import run_questionnaire_prefill
+
+        run_questionnaire_prefill(str(agent_run.id))
+
+        return Response(
+            {"id": str(agent_run.id), "status": agent_run.status},
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(detail=True, methods=["post"], url_path="cancel")
+    def cancel(self, request, pk=None):
+        """Mark an active run as cancelled. The worker checks before each step."""
+        run = self.get_object()
+        if run.status not in (AgentRun.Status.QUEUED, AgentRun.Status.RUNNING):
+            return Response(
+                {"detail": f"Run is already {run.status}; cannot cancel."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        run.status = AgentRun.Status.CANCELLED
+        run.finished_at = timezone.now()
+        run.save(update_fields=["status", "finished_at", "updated_at"])
+        return Response({"status": run.status})
+
+
+class AgentActionViewSet(BaseModelViewSet):
+    model = AgentAction
+    filterset_fields = [
+        "agent_run",
+        "kind",
+        "state",
+        "target_content_type",
+        "target_object_id",
+    ]
+    # Agent actions are the AI audit trail. The worker creates them; users
+    # only transition state via approve/reject. Block generic mutation paths.
+    http_method_names = ["get", "head", "options", "post"]
+
+    def create(self, request, *args, **kwargs):
+        return Response(
+            {
+                "detail": "Agent actions are created by the agent, not via this endpoint.",
+            },
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
+
+    # Approve / reject are intentionally not exercised by the questionnaire
+    # autopilot UI — that flow uses confidence-banded review without explicit
+    # per-action approval. They're reserved for the upcoming audit-prefill
+    # page where a human signs off each RequirementAssessment proposal before
+    # it lands on the audit. State transitions stay PROPOSED → APPROVED /
+    # REJECTED; the worker also writes the terminal EXPIRED state during
+    # retry iterations (see _process_question in chat/questionnaire.py).
+    @action(detail=True, methods=["post"], url_path="approve")
+    def approve(self, request, pk=None):
+        action_obj = self.get_object()
+        if action_obj.state != AgentAction.State.PROPOSED:
+            return Response(
+                {"detail": f"Action is {action_obj.state}; cannot approve."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        action_obj.state = AgentAction.State.APPROVED
+        action_obj.approved_by = request.user
+        action_obj.approved_at = timezone.now()
+        action_obj.save(
+            update_fields=["state", "approved_by", "approved_at", "updated_at"]
+        )
+        return Response({"state": action_obj.state})
+
+    @action(detail=True, methods=["post"], url_path="reject")
+    def reject(self, request, pk=None):
+        action_obj = self.get_object()
+        if action_obj.state != AgentAction.State.PROPOSED:
+            return Response(
+                {"detail": f"Action is {action_obj.state}; cannot reject."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        action_obj.state = AgentAction.State.REJECTED
+        action_obj.save(update_fields=["state", "updated_at"])
+        return Response({"state": action_obj.state})
 
 
 @api_view(["GET"])

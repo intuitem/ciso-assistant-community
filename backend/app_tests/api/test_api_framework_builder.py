@@ -1,5 +1,6 @@
 """Tests for framework builder security hardening and URN generation."""
 
+import copy
 import io
 import uuid
 
@@ -2425,3 +2426,567 @@ class TestFrameworkDuplicateBehavior:
         assert new_rn.attachments.count() == 0
         assert new_rn.threats.count() == 0
         assert new_rn.reference_controls.count() == 0
+
+
+def test_rewrite_child_urns_unit_idempotent_and_preserves_node_id():
+    """rewrite_child_urns rewrites segments 1 + 4 only, idempotent across slugs."""
+    from core.utils import rewrite_child_urns
+
+    draft = {
+        "nodes": [
+            {
+                "urn": "urn:old-ns:risk:req_node:old-slug:n1",
+                "parent_urn": None,
+            },
+            {
+                "urn": "urn:mid:risk:req_node:mid-slug:n2",
+                "parent_urn": "urn:old-ns:risk:req_node:old-slug:n1",
+            },
+            {
+                "urn": "urn:old-ns:risk:req_node:old-slug:5.1.1",
+                "parent_urn": "urn:mid:risk:req_node:mid-slug:n2",
+            },
+        ],
+        "questions": [
+            {
+                "urn": "urn:weird:risk:question:other:n1:q1",
+                "depends_on": {
+                    "question": "urn:weird:risk:question:other:q0",
+                    "answers": [
+                        "urn:any:risk:question_choice:something:c1",
+                        "not-a-urn",
+                    ],
+                },
+            },
+        ],
+        "choices": [
+            {"urn": "urn:any:risk:question_choice:something:c1"},
+        ],
+    }
+
+    rewrite_child_urns(draft, "newns", "newslug")
+
+    assert draft["nodes"][0]["urn"] == "urn:newns:risk:req_node:newslug:n1"
+    assert draft["nodes"][1]["urn"] == "urn:newns:risk:req_node:newslug:n2"
+    assert draft["nodes"][1]["parent_urn"] == "urn:newns:risk:req_node:newslug:n1"
+    # Multi-segment node_id (e.g. "5.1.1") survives untouched.
+    assert draft["nodes"][2]["urn"] == "urn:newns:risk:req_node:newslug:5.1.1"
+    assert draft["nodes"][2]["parent_urn"] == "urn:newns:risk:req_node:newslug:n2"
+    # Question with multi-segment node_id ("n1:q1") preserves all trailing segments.
+    assert draft["questions"][0]["urn"] == "urn:newns:risk:question:newslug:n1:q1"
+    assert (
+        draft["questions"][0]["depends_on"]["question"]
+        == "urn:newns:risk:question:newslug:q0"
+    )
+    assert draft["questions"][0]["depends_on"]["answers"][0] == (
+        "urn:newns:risk:question_choice:newslug:c1"
+    )
+    assert draft["questions"][0]["depends_on"]["answers"][1] == "not-a-urn"
+    assert draft["choices"][0]["urn"] == "urn:newns:risk:question_choice:newslug:c1"
+
+    # Idempotent: a second pass with the same target leaves output unchanged.
+    # Use deepcopy so the comparison catches any in-place mutation of the
+    # nested dicts/lists — a shallow copy would share dict identity with
+    # `draft` and pass even if the second pass mutated.
+    snapshot = copy.deepcopy(draft)
+    rewrite_child_urns(draft, "newns", "newslug")
+    assert draft == snapshot
+
+
+def test_rewrite_child_urns_skips_legacy_5_segment_urns():
+    """Legacy 5-segment URNs (`urn:ns:risk:type:<per-node-uuid>`) have no slug
+    position. The helper leaves them untouched — the reconcile rename branch
+    is responsible for catching them and raising a clear error before this
+    helper runs (see TestFrameworkBuilderUrnRename.test_rename_blocked_when_*).
+    """
+    from core.utils import rewrite_child_urns
+
+    legacy = "urn:intuitem:risk:req_node:a9c34399-8823-4bf1-8590-bff92ab636af"
+    draft = {
+        "nodes": [{"urn": legacy, "parent_urn": None}],
+        "questions": [],
+        "choices": [],
+    }
+    rewrite_child_urns(draft, "newns", "newslug")
+    assert draft["nodes"][0]["urn"] == legacy
+
+
+@pytest.mark.django_db
+class TestFrameworkBuilderUrnRename:
+    """Editable urn_namespace + ref_id, gated on absence of compliance assessments."""
+
+    @staticmethod
+    def _build_draft_with_renames(fw, rn, q, c, namespace, ref_id):
+        """Construct a save-draft body that asks for the rename."""
+        return {
+            "framework_meta": {
+                "name": fw.name,
+                "urn_namespace": namespace,
+                "ref_id": ref_id,
+            },
+            "nodes": [
+                {
+                    "id": str(rn.id),
+                    "urn": rn.urn,
+                    "ref_id": rn.ref_id,
+                    "assessable": True,
+                    "order_id": 0,
+                    "weight": 1,
+                    "importance": "undefined",
+                    "display_mode": "default",
+                }
+            ],
+            "questions": [
+                {
+                    "id": str(q.id),
+                    "urn": q.urn,
+                    "requirement_node_id": str(rn.id),
+                    "type": "unique_choice",
+                    "text": q.text,
+                    "order": 0,
+                    "weight": 1,
+                }
+            ],
+            "choices": [
+                {
+                    "id": str(c.id),
+                    "urn": c.urn,
+                    "question_id": str(q.id),
+                    "value": c.value,
+                    "order": 0,
+                }
+            ],
+        }
+
+    @pytest.fixture
+    def fw_tree(self, app_config):
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Renamable FW",
+            folder=folder,
+            is_published=True,
+            urn_namespace="custom",
+            ref_id="renamable-fw",
+        )
+        rn = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:custom:risk:req_node:renamable-fw:1",
+            ref_id="1",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        q = Question.objects.create(
+            requirement_node=rn,
+            urn="urn:custom:risk:question:renamable-fw:q1",
+            text="Are you compliant?",
+            type="unique_choice",
+            order=0,
+            folder=folder,
+            is_published=True,
+        )
+        c = QuestionChoice.objects.create(
+            question=q,
+            urn="urn:custom:risk:question_choice:renamable-fw:c1",
+            value="yes",
+            order=0,
+            folder=folder,
+            is_published=True,
+        )
+        return fw, rn, q, c, folder
+
+    def test_rename_namespace_and_ref_id_rewrites_all_child_urns(
+        self, authenticated_client, fw_tree
+    ):
+        fw, rn, q, c, folder = fw_tree
+        start_url = reverse("frameworks-start-editing", args=[fw.id])
+        authenticated_client.post(start_url)
+
+        draft = self._build_draft_with_renames(fw, rn, q, c, "acme", "newslug")
+        save_url = reverse("frameworks-save-draft", args=[fw.id])
+        authenticated_client.patch(save_url, {"editing_draft": draft}, format="json")
+
+        publish_url = reverse("frameworks-publish-draft", args=[fw.id])
+        response = authenticated_client.post(publish_url)
+        assert response.status_code == 200, response.data
+
+        fw.refresh_from_db()
+        assert fw.urn_namespace == "acme"
+        assert fw.ref_id == "newslug"
+        assert fw.urn is None  # custom frameworks never get framework.urn
+
+        rn.refresh_from_db()
+        q.refresh_from_db()
+        c.refresh_from_db()
+        assert rn.urn == "urn:acme:risk:req_node:newslug:1"
+        assert q.urn == "urn:acme:risk:question:newslug:q1"
+        assert c.urn == "urn:acme:risk:question_choice:newslug:c1"
+
+    def test_rename_blocked_when_compliance_assessment_exists(
+        self, authenticated_client, fw_tree
+    ):
+        fw, rn, q, c, folder = fw_tree
+        perimeter = Perimeter.objects.create(name="Perim", folder=folder)
+        ComplianceAssessment.objects.create(
+            name="CA",
+            framework=fw,
+            folder=folder,
+            perimeter=perimeter,
+            is_published=True,
+            min_score=0,
+            max_score=100,
+        )
+
+        start_url = reverse("frameworks-start-editing", args=[fw.id])
+        authenticated_client.post(start_url)
+
+        draft = self._build_draft_with_renames(fw, rn, q, c, "acme", "newslug")
+        save_url = reverse("frameworks-save-draft", args=[fw.id])
+        authenticated_client.patch(save_url, {"editing_draft": draft}, format="json")
+
+        publish_url = reverse("frameworks-publish-draft", args=[fw.id])
+        response = authenticated_client.post(publish_url)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "compliance assessment" in (response.data.get("error") or "").lower()
+
+        fw.refresh_from_db()
+        rn.refresh_from_db()
+        # Nothing changed.
+        assert fw.urn_namespace == "custom"
+        assert fw.ref_id == "renamable-fw"
+        assert rn.urn == "urn:custom:risk:req_node:renamable-fw:1"
+
+    def test_rename_blocked_on_cross_framework_collision(
+        self, authenticated_client, fw_tree
+    ):
+        fw, rn, q, c, folder = fw_tree
+
+        # Another custom framework already occupies (acme, taken-slug).
+        other_fw = Framework.objects.create(
+            name="Other FW",
+            folder=folder,
+            is_published=True,
+            urn_namespace="acme",
+            ref_id="taken-slug",
+        )
+        RequirementNode.objects.create(
+            framework=other_fw,
+            urn="urn:acme:risk:req_node:taken-slug:99",
+            ref_id="99",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+
+        start_url = reverse("frameworks-start-editing", args=[fw.id])
+        authenticated_client.post(start_url)
+
+        draft = self._build_draft_with_renames(fw, rn, q, c, "acme", "taken-slug")
+        save_url = reverse("frameworks-save-draft", args=[fw.id])
+        authenticated_client.patch(save_url, {"editing_draft": draft}, format="json")
+
+        publish_url = reverse("frameworks-publish-draft", args=[fw.id])
+        response = authenticated_client.post(publish_url)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert (
+            "another framework already uses"
+            in (response.data.get("error") or "").lower()
+        )
+
+        fw.refresh_from_db()
+        assert fw.urn_namespace == "custom"
+        assert fw.ref_id == "renamable-fw"
+
+    def test_rename_blocked_on_legacy_5_segment_urns(self, authenticated_client):
+        """Frameworks with 5-segment URNs (no slug, no node_id) — produced by
+        an older duplicate flow — cannot be renamed. The reconcile rename
+        branch must raise a clear DraftValidationError before any state
+        change, rather than silently leaving the framework metadata out of
+        sync with its child URNs."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Legacy URN FW",
+            folder=folder,
+            is_published=True,
+            urn_namespace="intuitem",
+            ref_id="legacy",
+        )
+        legacy_rn_urn = (
+            "urn:intuitem:risk:req_node:a9c34399-8823-4bf1-8590-bff92ab636af"
+        )
+        rn = RequirementNode.objects.create(
+            framework=fw,
+            urn=legacy_rn_urn,
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+
+        start_url = reverse("frameworks-start-editing", args=[fw.id])
+        authenticated_client.post(start_url)
+        save_url = reverse("frameworks-save-draft", args=[fw.id])
+        draft = {
+            "framework_meta": {
+                "name": fw.name,
+                "urn_namespace": "newns",
+                "ref_id": "renamed",
+            },
+            "nodes": [
+                {
+                    "id": str(rn.id),
+                    "urn": legacy_rn_urn,
+                    "ref_id": None,
+                    "assessable": True,
+                    "order_id": 0,
+                    "weight": 1,
+                    "importance": "undefined",
+                    "display_mode": "default",
+                }
+            ],
+            "questions": [],
+            "choices": [],
+        }
+        authenticated_client.patch(save_url, {"editing_draft": draft}, format="json")
+
+        publish_url = reverse("frameworks-publish-draft", args=[fw.id])
+        response = authenticated_client.post(publish_url)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        msg = (response.data.get("error") or "").lower()
+        assert "legacy urn" in msg
+        assert legacy_rn_urn in (response.data.get("error") or "")
+
+        fw.refresh_from_db()
+        rn.refresh_from_db()
+        # Nothing moved.
+        assert fw.urn_namespace == "intuitem"
+        assert fw.ref_id == "legacy"
+        assert rn.urn == legacy_rn_urn
+
+    def test_rename_only_namespace_keeps_ref_id_stable(
+        self, authenticated_client, fw_tree
+    ):
+        """Changing only urn_namespace rewrites segment 1 of every child URN
+        and leaves ref_id (segment 4) untouched."""
+        fw, rn, q, c, _folder = fw_tree
+        start_url = reverse("frameworks-start-editing", args=[fw.id])
+        authenticated_client.post(start_url)
+
+        draft = self._build_draft_with_renames(fw, rn, q, c, "newns", fw.ref_id)
+        save_url = reverse("frameworks-save-draft", args=[fw.id])
+        authenticated_client.patch(save_url, {"editing_draft": draft}, format="json")
+
+        publish_url = reverse("frameworks-publish-draft", args=[fw.id])
+        response = authenticated_client.post(publish_url)
+        assert response.status_code == 200, response.data
+
+        fw.refresh_from_db()
+        rn.refresh_from_db()
+        q.refresh_from_db()
+        c.refresh_from_db()
+        assert fw.urn_namespace == "newns"
+        assert fw.ref_id == "renamable-fw"
+        assert rn.urn == "urn:newns:risk:req_node:renamable-fw:1"
+        assert q.urn == "urn:newns:risk:question:renamable-fw:q1"
+        assert c.urn == "urn:newns:risk:question_choice:renamable-fw:c1"
+
+    def test_rename_only_ref_id_keeps_namespace_stable(
+        self, authenticated_client, fw_tree
+    ):
+        """Changing only ref_id rewrites segment 4 of every child URN and
+        leaves urn_namespace (segment 1) untouched."""
+        fw, rn, q, c, _folder = fw_tree
+        start_url = reverse("frameworks-start-editing", args=[fw.id])
+        authenticated_client.post(start_url)
+
+        draft = self._build_draft_with_renames(fw, rn, q, c, fw.urn_namespace, "v2")
+        save_url = reverse("frameworks-save-draft", args=[fw.id])
+        authenticated_client.patch(save_url, {"editing_draft": draft}, format="json")
+
+        publish_url = reverse("frameworks-publish-draft", args=[fw.id])
+        response = authenticated_client.post(publish_url)
+        assert response.status_code == 200, response.data
+
+        fw.refresh_from_db()
+        rn.refresh_from_db()
+        q.refresh_from_db()
+        c.refresh_from_db()
+        assert fw.urn_namespace == "custom"
+        assert fw.ref_id == "v2"
+        assert rn.urn == "urn:custom:risk:req_node:v2:1"
+        assert q.urn == "urn:custom:risk:question:v2:q1"
+        assert c.urn == "urn:custom:risk:question_choice:v2:c1"
+
+    @pytest.mark.parametrize(
+        "bad_ref_id",
+        ["", "has spaces", "with:colon", "with.dot", "héllo"],
+    )
+    def test_rename_rejects_invalid_ref_id(
+        self, authenticated_client, fw_tree, bad_ref_id
+    ):
+        """ref_id must match [A-Za-z0-9_-]+; everything else returns 400 and
+        leaves the framework untouched."""
+        fw, rn, q, c, _folder = fw_tree
+        start_url = reverse("frameworks-start-editing", args=[fw.id])
+        authenticated_client.post(start_url)
+
+        draft = self._build_draft_with_renames(
+            fw, rn, q, c, fw.urn_namespace, bad_ref_id
+        )
+        save_url = reverse("frameworks-save-draft", args=[fw.id])
+        authenticated_client.patch(save_url, {"editing_draft": draft}, format="json")
+
+        publish_url = reverse("frameworks-publish-draft", args=[fw.id])
+        response = authenticated_client.post(publish_url)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "ref_id" in (response.data.get("error") or "").lower()
+
+        fw.refresh_from_db()
+        rn.refresh_from_db()
+        # Nothing changed.
+        assert fw.urn_namespace == "custom"
+        assert fw.ref_id == "renamable-fw"
+        assert rn.urn == "urn:custom:risk:req_node:renamable-fw:1"
+
+    def test_cel_outcome_evaluates_identically_after_rename(
+        self, authenticated_client, app_config
+    ):
+        """node_id (segments 5+) is preserved across a namespace+ref_id rename,
+        so an outcomes_definition CEL keying off answers.<q_node_id> must yield
+        identical computed outcomes pre- and post-rename. This pins the CEL
+        safety contract that motivates the whole rewrite logic."""
+        from core.cel_service import evaluate_outcomes
+
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Equivalence FW",
+            folder=folder,
+            is_published=True,
+            min_score=0,
+            max_score=100,
+            urn_namespace="custom",
+            ref_id="equivalence",
+            outcomes_definition=[
+                {
+                    "ref_id": "compliant",
+                    "expression": 'answers["policy-exists"].value == "yes"',
+                    "result": "pass",
+                    "label": "Compliant",
+                }
+            ],
+        )
+        rn = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:custom:risk:req_node:equivalence:governance",
+            ref_id="governance",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        q = Question.objects.create(
+            requirement_node=rn,
+            urn="urn:custom:risk:question:equivalence:policy-exists",
+            ref_id="policy-exists",
+            text="Is there a policy?",
+            type=Question.Type.TEXT,
+            folder=folder,
+            is_published=True,
+        )
+        perimeter = Perimeter.objects.create(name="Perim", folder=folder)
+
+        # --- Pre-rename: build a CA, answer "yes", evaluate, snapshot. ---
+        ca_before = ComplianceAssessment.objects.create(
+            name="Before",
+            framework=fw,
+            folder=folder,
+            perimeter=perimeter,
+            is_published=True,
+            min_score=0,
+            max_score=100,
+        )
+        ra_before = RequirementAssessment.objects.create(
+            compliance_assessment=ca_before, requirement=rn, folder=folder
+        )
+        Answer.objects.create(
+            requirement_assessment=ra_before,
+            question=q,
+            value="yes",
+            folder=folder,
+        )
+        evaluate_outcomes(ca_before)
+        ca_before.refresh_from_db()
+        pre_outcome = ca_before.computed_outcome
+        assert pre_outcome == {"compliant": {"result": "pass", "label": "Compliant"}}
+
+        # Drop the CA so the rename gate allows the change.
+        ca_before.delete()
+
+        # --- Rename namespace + ref_id. ---
+        start_url = reverse("frameworks-start-editing", args=[fw.id])
+        authenticated_client.post(start_url)
+        save_url = reverse("frameworks-save-draft", args=[fw.id])
+        draft = {
+            "framework_meta": {
+                "name": fw.name,
+                "urn_namespace": "newns",
+                "ref_id": "renamed",
+            },
+            "nodes": [
+                {
+                    "id": str(rn.id),
+                    "urn": rn.urn,
+                    "ref_id": rn.ref_id,
+                    "assessable": True,
+                    "order_id": 0,
+                    "weight": 1,
+                    "importance": "undefined",
+                    "display_mode": "default",
+                }
+            ],
+            "questions": [
+                {
+                    "id": str(q.id),
+                    "urn": q.urn,
+                    "ref_id": q.ref_id,
+                    "requirement_node_id": str(rn.id),
+                    "type": "text",
+                    "text": q.text,
+                    "order": 0,
+                    "weight": 1,
+                }
+            ],
+            "choices": [],
+        }
+        authenticated_client.patch(save_url, {"editing_draft": draft}, format="json")
+        publish_url = reverse("frameworks-publish-draft", args=[fw.id])
+        response = authenticated_client.post(publish_url)
+        assert response.status_code == 200, response.data
+
+        rn.refresh_from_db()
+        q.refresh_from_db()
+        # Sanity: child URN prefixes were rewritten, node_id segments preserved.
+        assert rn.urn == "urn:newns:risk:req_node:renamed:governance"
+        assert q.urn == "urn:newns:risk:question:renamed:policy-exists"
+
+        # --- Post-rename: re-create CA + answer, evaluate again, compare. ---
+        ca_after = ComplianceAssessment.objects.create(
+            name="After",
+            framework=fw,
+            folder=folder,
+            perimeter=perimeter,
+            is_published=True,
+            min_score=0,
+            max_score=100,
+        )
+        ra_after = RequirementAssessment.objects.create(
+            compliance_assessment=ca_after, requirement=rn, folder=folder
+        )
+        Answer.objects.create(
+            requirement_assessment=ra_after,
+            question=q,
+            value="yes",
+            folder=folder,
+        )
+        evaluate_outcomes(ca_after)
+        ca_after.refresh_from_db()
+
+        assert ca_after.computed_outcome == pre_outcome

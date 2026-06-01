@@ -75,4 +75,4 @@ This policy covers all access to organizational information systems, networks, a
 
 ## 10. Policy Review
 
-This policy shall be reviewed at least annually and updated as needed. Changes must be approved by the Information Security Officer.
+This policy shall be reviewed at least annually and updated as needed. Changes shall be approved by the Information Security Officer.

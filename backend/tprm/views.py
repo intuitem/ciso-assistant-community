@@ -718,8 +718,14 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
             Folder.get_root_folder(), request.user, Contract
         )
 
-        entities = Entity.objects.filter(id__in=viewable_entity_ids).select_related(
-            "folder", "parent_entity"
+        # Honor the filters/search applied on the entities list page so the
+        # exported "Entities" sheet matches what the user is viewing. The
+        # Solutions/Contracts sheets stay on the full IAM-scoped set since
+        # entity-level filters don't translate to those models.
+        entities = self.filter_queryset(
+            Entity.objects.filter(id__in=viewable_entity_ids).select_related(
+                "folder", "parent_entity"
+            )
         )
         solutions = Solution.objects.filter(
             id__in=viewable_solution_ids
