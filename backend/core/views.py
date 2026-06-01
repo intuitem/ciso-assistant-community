@@ -740,7 +740,12 @@ class GenericFilterSet(df.FilterSet):
         }
 
 
-class FolderOrderingFilter(filters.OrderingFilter):
+class SmartOrderingFilter(filters.OrderingFilter):
+    # Suffixes of fields ordered case-insensitively. Postgres sorts uppercase
+    # before lowercase while SQLite does not, so a raw name ordering is
+    # inconsistent across backends; wrapping in Lower() makes it deterministic.
+    case_insensitive_suffixes = ("name",)
+
     def get_ordering(self, request, queryset, view):
         ordering = super().get_ordering(request, queryset, view)
         if ordering:
@@ -753,6 +758,20 @@ class FolderOrderingFilter(filters.OrderingFilter):
                 for f in ordering
             ]
         return ordering
+
+    def filter_queryset(self, request, queryset, view):
+        ordering = self.get_ordering(request, queryset, view)
+        if ordering:
+            return queryset.order_by(*[self._as_term(f) for f in ordering])
+        return queryset
+
+    def _as_term(self, term):
+        descending = term.startswith("-")
+        field = term[1:] if descending else term
+        if field.split("__")[-1] in self.case_insensitive_suffixes:
+            expr = Lower(field)
+            return expr.desc() if descending else expr.asc()
+        return term
 
 
 class BaseModelViewSet(viewsets.ModelViewSet):
