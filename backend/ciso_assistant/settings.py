@@ -200,6 +200,14 @@ CSRF_TRUSTED_ORIGINS = [CISO_ASSISTANT_URL]
 LOCAL_STORAGE_DIRECTORY = os.environ.get(
     "LOCAL_STORAGE_DIRECTORY", BASE_DIR / "db/attachments"
 )
+
+EXPOSE_METRICS = os.environ.get("EXPOSE_METRICS", "False").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+logger.info("EXPOSE_METRICS: %s", EXPOSE_METRICS)
+
 ATTACHMENT_MAX_SIZE_MB = os.environ.get("ATTACHMENT_MAX_SIZE_MB", 25)
 
 USE_S3 = os.getenv("USE_S3", "False").lower() in ("true", "1", "yes")
