@@ -275,4 +275,3 @@ class TestNormalizeDfColumns:
         with pytest.raises(ValueError) as exc_info:
             normalize_df_columns(df)
         assert "name" in str(exc_info.value)
-
