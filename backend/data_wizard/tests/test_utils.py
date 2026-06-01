@@ -3,6 +3,7 @@
 import pytest
 import unittest
 from pathlib import Path
+import pandas as pd
 
 from data_wizard.egerie_xml_helpers import (
     map_egerie_status,
@@ -10,7 +11,6 @@ from data_wizard.egerie_xml_helpers import (
     quartile_to_index,
 )
 
-import pandas as pd
 from data_wizard.views import normalize_df_columns
 
 # Minimal Egerie analysis XML covering the elements we actually consume.
