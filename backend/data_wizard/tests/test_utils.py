@@ -272,5 +272,5 @@ class NormalizeDfColumnsTest(unittest.TestCase):
     def test_duplicate_after_normalization_raises(self):
         df = pd.DataFrame(columns=["Name", " name"])
         with self.assertRaises(ValueError) as ctx:
-            df = normalize_df_columns(df)
+            normalize_df_columns(df)
         self.assertIn("name", str(ctx.exception))
