@@ -63,6 +63,7 @@ GENERAL_SETTINGS_KEYS = [
     "chat_temperature_enabled",
     "chat_temperature",
     "default_custom_analytics_dashboard",
+    "audit_tree_aggregation_strategy",
 ]
 
 

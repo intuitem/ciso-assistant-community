@@ -15,6 +15,50 @@
 
 	let { data }: Props = $props();
 
+	// Flatten the combined_tree into the assessable requirements that actually
+	// inherit a value from an ancestor audit (nearest-first path preserved).
+	function flattenInherited(tree: Record<string, any>): any[] {
+		const out: any[] = [];
+		const walk = (nodes: Record<string, any>) => {
+			for (const node of Object.values(nodes ?? {})) {
+				if (node?.assessable && node?.inheritance?.inherited) {
+					out.push({
+						ref_id: node.ref_id,
+						name: node.name,
+						inheritance: node.inheritance
+					});
+				}
+				if (node?.children) walk(node.children);
+			}
+		};
+		walk(tree);
+		return out;
+	}
+
+	function strategyLabel(strategy: string): string {
+		switch (strategy) {
+			case 'parent_wins':
+				return m.auditTreeAggregationParentWins();
+			case 'child_wins':
+				return m.auditTreeAggregationChildWins();
+			case 'best_case':
+				return m.auditTreeAggregationBestCase();
+			case 'worst_case':
+				return m.auditTreeAggregationWorstCase();
+			default:
+				return m.auditTreeAggregationNone();
+		}
+	}
+
+	function inhPathTitle(inh: any): string {
+		return (inh?.path ?? [])
+			.map(
+				(e: any) =>
+					`${e.folder_name ?? '—'} · ${e.ca_name}: ${e.result ? safeTranslate(e.result) : '—'}`
+			)
+			.join('  ←  ');
+	}
+
 	const RESULT_KEYS = [
 		'not_assessed',
 		'partially_compliant',
@@ -201,6 +245,82 @@
 			{/await}
 		</div>
 	</section>
+
+	<!-- Domain-tree inheritance -->
+	{#await data.stream.combinedTree then combined}
+		{#if combined && combined.strategy && combined.strategy !== 'none'}
+			{@const inheritedRows = flattenInherited(combined.tree)}
+			{#if inheritedRows.length > 0}
+				<section class="rounded-xl border border-slate-200 bg-white overflow-hidden">
+					<div class="border-b border-slate-100 px-6 py-4 flex items-center gap-2.5">
+						<span
+							class="flex items-center justify-center w-7 h-7 rounded-md bg-emerald-50 text-emerald-500"
+						>
+							<i class="fa-solid fa-code-branch text-xs"></i>
+						</span>
+						<h2 class="text-sm font-semibold text-slate-800 tracking-tight">
+							{m.combinedView()}
+						</h2>
+						<span class="text-xs text-slate-400">{strategyLabel(combined.strategy)}</span>
+					</div>
+					<div class="p-6 overflow-x-auto">
+						<table class="w-full text-sm">
+							<thead>
+								<tr class="text-left text-slate-500 border-b border-slate-100">
+									<th class="py-2 pr-3">{m.requirement()}</th>
+									<th class="py-2 px-3">{m.ownResult()}</th>
+									<th class="py-2 px-3">{m.effectiveResult()}</th>
+									<th class="py-2 px-3 text-right">{m.score()}</th>
+									<th class="py-2 pl-3">{m.inheritedFrom()}</th>
+								</tr>
+							</thead>
+							<tbody>
+								{#each inheritedRows as row}
+									{@const inh = row.inheritance}
+									<tr class="border-b border-slate-50">
+										<td class="py-2 pr-3">
+											<span class="font-mono text-xs text-slate-400">{row.ref_id ?? ''}</span>
+											{row.name ?? ''}
+										</td>
+										<td class="py-2 px-3 text-slate-500">
+											{inh.own?.result ? safeTranslate(inh.own.result) : '—'}
+										</td>
+										<td class="py-2 px-3">
+											<span class="inline-flex items-center gap-1.5">
+												<span
+													class="inline-block w-2 h-2 rounded-full"
+													style="background:{complianceResultColorMap[inh.effective_result] ??
+														'#9ca3af'}"
+												></span>
+												{safeTranslate(inh.effective_result)}
+											</span>
+										</td>
+										<td class="py-2 px-3 text-right font-mono">
+											{inh.effective_score ?? '—'}
+											{#if inh.scale?.max != null}
+												<span class="text-[10px] text-slate-300">/ {inh.scale.max}</span>
+											{/if}
+										</td>
+										<td class="py-2 pl-3">
+											<a
+												class="anchor inline-flex items-center gap-1"
+												href="/compliance-assessments/{inh.source?.ca_id}"
+												title={inhPathTitle(inh)}
+											>
+												<i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+												<span class="text-slate-400">{inh.source?.folder_name ?? '—'} ·</span>
+												{inh.source?.ca_name}
+											</a>
+										</td>
+									</tr>
+								{/each}
+							</tbody>
+						</table>
+					</div>
+				</section>
+			{/if}
+		{/if}
+	{/await}
 
 	<!-- Compliance by Section -->
 	<section class="rounded-xl border border-slate-200 bg-white overflow-hidden">
