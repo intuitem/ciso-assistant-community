@@ -491,7 +491,8 @@
 	"linkHelpText": "Külső URL nyomon követéshez vagy hivatkozáshoz (pl. Sharepoint, Jira, stb.)",
 	"effortHelpText": "Az alkalmazott kontroll bevezetéséhez szükséges ráfordítás",
 	"costHelpText": "Az alkalmazott kontroll bevezetéséhez szükséges költség",
-	"riskAcceptanceJusitficationHelpText": "A kockázatelfogadás indoklása. Csak a jóváhagyó szerkesztheti ezt a mezőt.",
+	"riskAcceptanceJustificationHelpText": "A kockázatelfogadás indoklása. Csak a jóváhagyó szerkesztheti ezt a mezőt.",
+	"riskAcceptanceJustificationLabel": "A kockázatelfogadás indoklása",
 	"approverHelpText": "A kockázat tulajdonosának és jóváhagyójának azonosítója",
 	"riskAcceptanceRiskScenariosHelpText": "Az elfogadott kockázati forgatókönyvek",
 	"attachmentHelpText": "Fájl bizonyítékként (pl. képernyőkép, naplófájl stb.)",
@@ -738,7 +739,7 @@
 	"maturity": "Érettség",
 	"progress": "Előrehaladás",
 	"back": "Vissza",
-	"backToWorkshop": "Vissza az Ebios RM tanulmányhoz / ökoszisztémához",
+	"backToWorkshop": "Vissza az EBIOS RM tanulmányhoz / ökoszisztémához",
 	"duplicate": "Duplikálás",
 	"duplicateRiskAssessment": "Kockázatértékelés duplikálása",
 	"duplicateAppliedControl": "Alkalmazott kontroll duplikálása",
@@ -1581,5 +1582,6 @@
 	"builderQuestionTypeUniqueChoice": "Single choice",
 	"builderQuestionTypeMultipleChoice": "Multiple choice",
 	"builderQuestionTypeDate": "Date",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "módosítva itt:",
+	"requirementWeight": "Súly"
 }

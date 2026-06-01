@@ -79,6 +79,7 @@
 	const fw = $derived(complianceAssessment.framework);
 	const viewerRole = $derived((data.viewerRole ?? 'respondent') as 'respondent' | 'auditor');
 	const fieldVis = $derived(getFieldVisibility(complianceAssessment, viewerRole));
+	const showAnswers = $derived(fieldVis.showAnswers);
 	const showResult = $derived(fieldVis.showResult);
 	const showScore = $derived(fieldVis.showScore);
 	const showDocumentationScore = $derived(fieldVis.showDocumentationScore);
@@ -313,7 +314,7 @@
 			return sum + answered;
 		}, 0)
 	);
-	const useQuestionProgress = $derived(totalQuestions > 0);
+	const useQuestionProgress = $derived(showAnswers && totalQuestions > 0);
 
 	const totalAssessable = $derived(assessableItems.length);
 	const assessedCount = $derived(
@@ -943,7 +944,7 @@
 							method="post"
 						>
 							<!-- Questions (if present) -->
-							{#if requirement.questions != null && Object.keys(requirement.questions).length !== 0}
+							{#if showAnswers && requirement.questions != null && Object.keys(requirement.questions).length !== 0}
 								<div class="flex flex-col w-full space-y-2">
 									<Question
 										questions={requirement.questions}
@@ -1025,7 +1026,7 @@
 
 							<!-- Result -->
 							{#if showResult}
-								<div class="flex flex-col items-center w-full my-2">
+								<div class="flex flex-col items-center w-full my-2" data-testid="result-field">
 									<p class="flex items-center font-semibold text-purple-600 italic">
 										{m.result()}
 									</p>
@@ -1085,14 +1086,15 @@
 							{#if showScore}
 								<div class="flex flex-col w-full place-items-center">
 									{#if complianceAssessment.scoring_enabled && hasComputedScore(requirement.questions)}
+										{@const raMin =
+											requirementAssessment.effective_min_score ?? complianceAssessment.min_score}
+										{@const raMax =
+											requirementAssessment.effective_max_score ?? complianceAssessment.max_score}
 										<div class="flex flex-row items-center space-x-4">
 											<span class="font-medium">{m.score()}</span>
 											<div class="shrink-0 relative">
 												<Progress
-													value={formatScoreValue(
-														requirementAssessment.score,
-														complianceAssessment.max_score
-													)}
+													value={formatScoreValue(requirementAssessment.score, raMax, false, raMin)}
 													min={0}
 													max={100}
 												>
@@ -1101,7 +1103,9 @@
 														<Progress.CircleRange
 															class={displayScoreColor(
 																requirementAssessment.score,
-																complianceAssessment.max_score
+																raMax,
+																false,
+																raMin
 															)}
 														/>
 													</Progress.Circle>
@@ -1112,11 +1116,18 @@
 											</div>
 										</div>
 									{:else if complianceAssessment.scoring_enabled && requirementAssessment.result !== 'not_applicable'}
+										{@const raMin =
+											requirementAssessment.effective_min_score ?? complianceAssessment.min_score}
+										{@const raMax =
+											requirementAssessment.effective_max_score ?? complianceAssessment.max_score}
+										{@const raScoresDef =
+											requirementAssessment.effective_scores_definition ??
+											complianceAssessment.scores_definition}
 										<Score
 											form={scoreForms[requirementAssessment.id]}
-											min_score={complianceAssessment.min_score}
-											max_score={complianceAssessment.max_score}
-											scores_definition={complianceAssessment.scores_definition}
+											min_score={raMin}
+											max_score={raMax}
+											scores_definition={raScoresDef}
 											field="score"
 											label={complianceAssessment.show_documentation_score
 												? m.implementationScore()
@@ -1147,12 +1158,12 @@
 												</div>
 											{/snippet}
 										</Score>
-										{#if complianceAssessment.show_documentation_score && showDocumentationScore}
+										{#if showDocumentationScore}
 											<Score
 												form={docScoreForms[requirementAssessment.id]}
-												min_score={complianceAssessment.min_score}
-												max_score={complianceAssessment.max_score}
-												scores_definition={complianceAssessment.scores_definition}
+												min_score={raMin}
+												max_score={raMax}
+												scores_definition={raScoresDef}
 												field="documentation_score"
 												label={m.documentationScore()}
 												isDoc={true}

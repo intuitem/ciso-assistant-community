@@ -492,7 +492,8 @@
 	"linkHelpText": "Externí URL pro sledování nebo reference (např. sharepoint, jira, atd.)",
 	"effortHelpText": "Úsilí potřebné k implementaci aplikované kontroly",
 	"costHelpText": "Cena potřebná k implementaci aplikované kontroly",
-	"riskAcceptanceJusitficationHelpText": "Odůvodnění akceptace rizika. Toto pole může upravit pouze schvalovatel.",
+	"riskAcceptanceJustificationHelpText": "Odůvodnění pro přijetí rizika. Toto pole může upravit pouze schvalovatel.",
+	"riskAcceptanceJustificationLabel": "Odůvodnění přijetí rizika",
 	"approverHelpText": "Identita vlastníka rizika a schvalovatele",
 	"riskAcceptanceRiskScenariosHelpText": "Rizikové scénáře, které jsou akceptovány",
 	"attachmentHelpText": "Soubor pro důkaz (např. snímek obrazovky, protokolovací soubor atd.). Po vybrání můžete snímky obrazovky vložit přímo ze schránky.",
@@ -737,7 +738,7 @@
 	"maturity": "Zralost",
 	"progress": "Pokrok",
 	"back": "Zpět",
-	"backToWorkshop": "Zpět ke studii Ebios RM / ekosystému",
+	"backToWorkshop": "Zpět ke studii EBIOS RM / ekosystému",
 	"duplicate": "Duplikovat",
 	"duplicateRiskAssessment": "Duplikovat hodnocení rizika",
 	"size": "Velikost",
@@ -1871,5 +1872,6 @@
 	"builderQuestionTypeUniqueChoice": "Jedinečná volba",
 	"builderQuestionTypeMultipleChoice": "Více možností",
 	"builderQuestionTypeDate": "Datum",
-	"builderChangedOn": "Změněno dne"
+	"builderChangedOn": "změněno v",
+	"requirementWeight": "Váha"
 }

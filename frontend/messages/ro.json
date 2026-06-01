@@ -490,7 +490,8 @@
 	"linkHelpText": "URL extern pentru urmărire sau referință (ex. sharepoint, jira, etc.)",
 	"effortHelpText": "Efortul necesar pentru a implementa controlul aplicat",
 	"costHelpText": "Costul necesar pentru a implementa controlul aplicat",
-	"riskAcceptanceJusitficationHelpText": "Justificarea pentru acceptarea riscului. Doar aprobatorul poate edita acest câmp.",
+	"riskAcceptanceJustificationHelpText": "Justificarea pentru acceptarea riscului. Doar aprobatorul poate edita acest câmp.",
+	"riskAcceptanceJustificationLabel": "Justificarea acceptării riscului",
 	"approverHelpText": "Identitatea proprietarului și a aprobatorului riscului",
 	"riskAcceptanceRiskScenariosHelpText": "Scenariile de risc care sunt acceptate",
 	"attachmentHelpText": "Fișier pentru dovadă (de exemplu, captură de ecran, fișier jurnal etc.). Când este selectat, puteți lipi capturi de ecran direct din clipboard-ul dvs.",
@@ -735,7 +736,7 @@
 	"maturity": "Maturitate",
 	"progress": "Progres",
 	"back": "Înapoi",
-	"backToWorkshop": "Înapoi la studiul Ebios RM / ecosistem",
+	"backToWorkshop": "Înapoi la studiul EBIOS RM / ecosistem",
 	"duplicate": "Dublică",
 	"duplicateRiskAssessment": "Dublarea evaluării riscului",
 	"duplicateAppliedControl": "Duplicați control aplicat",
@@ -1597,5 +1598,6 @@
 	"builderQuestionTypeUniqueChoice": "Alegere unică",
 	"builderQuestionTypeMultipleChoice": "Alegere multiplă",
 	"builderQuestionTypeDate": "Data",
-	"builderChangedOn": "changed on"
+	"builderChangedOn": "modificat în",
+	"requirementWeight": "Pondere"
 }
