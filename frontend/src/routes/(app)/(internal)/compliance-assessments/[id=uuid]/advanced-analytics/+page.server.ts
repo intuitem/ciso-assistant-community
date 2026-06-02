@@ -63,7 +63,10 @@ export const load = (async ({ fetch, params }) => {
 		}));
 
 	const combinedTreePromise = fetch(`${endpoint}/combined_tree/`)
-		.then((res) => res.json())
+		.then(async (res) => {
+			if (!res.ok) throw new Error(`combined_tree failed: ${res.status}`);
+			return res.json();
+		})
 		.catch(() => ({ tree: {}, strategy: 'none', ancestors: [], canonical_scale: {} }));
 
 	return {

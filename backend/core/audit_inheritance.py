@@ -87,9 +87,14 @@ def get_strategy() -> str:
         gs = GlobalSettings.objects.get(name=GlobalSettings.Names.GENERAL)
     except GlobalSettings.DoesNotExist:
         return AuditTreeAggregationStrategy.NONE
-    return (gs.value or {}).get(
+    strategy = (gs.value or {}).get(
         "audit_tree_aggregation_strategy", AuditTreeAggregationStrategy.NONE
     )
+    # Normalize: a typo or legacy value must disable inheritance, never silently
+    # fall through to the pessimistic worst_case branch in _pick_result.
+    if strategy not in AuditTreeAggregationStrategy.values:
+        return AuditTreeAggregationStrategy.NONE
+    return strategy
 
 
 def _ca_scale(ca) -> tuple[Optional[int], Optional[int]]:

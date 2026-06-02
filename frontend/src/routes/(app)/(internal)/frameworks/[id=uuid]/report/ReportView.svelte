@@ -35,7 +35,12 @@
 		effective_result: Result;
 		effective_score: number | null;
 		scale: { min: number | null; max: number | null };
-		own: { result: Result | null; score: number | null; is_scored: boolean } | null;
+		own: {
+			result: Result | null;
+			score: number | null;
+			is_scored: boolean;
+			scale: { min: number | null; max: number | null };
+		} | null;
 		source: InheritancePathEntry | null;
 		path: InheritancePathEntry[];
 	};
@@ -924,7 +929,9 @@
 																		class="text-[10px] text-gray-400"
 																		title="{m.ownResult()}: {inh.own.result
 																			? resultLabel(inh.own.result)
-																			: '—'}{inh.own.score !== null ? ` (${inh.own.score})` : ''}"
+																			: '—'}{inh.own.score !== null
+																			? ` (${inh.own.score}${inh.own.scale?.max != null ? ` / ${inh.own.scale.max}` : ''})`
+																			: ''}"
 																	>
 																		<i class="fa-solid fa-circle-info"></i>
 																	</span>

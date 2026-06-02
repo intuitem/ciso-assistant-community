@@ -13573,7 +13573,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
         def attach(nodes: dict):
             for req_id, node in nodes.items():
-                ov = overlay.get(req_id)
+                ov = overlay.get(str(req_id))
                 if ov is not None:
                     node["inheritance"] = ov
                 children = node.get("children")
