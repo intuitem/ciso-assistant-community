@@ -18,7 +18,7 @@
 		createHandleGatedDragHandlers
 	} from './builder-utils.svelte';
 	import { locales as supportedLocales } from '$paraglide/runtime';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { installKeyboardHandlers } from './keyboard';
 	import {
 		createCollapsedStore,
@@ -91,9 +91,9 @@
 		const parts: string[] = [];
 		const rules = ($frameworkStore.outcomes_definition ?? []).length;
 		const groups = ($frameworkStore.implementation_groups_definition ?? []).length;
-		if (rules > 0) parts.push(`${rules} outcome rule${rules > 1 ? 's' : ''}`);
-		if (groups > 0) parts.push(`${groups} group${groups > 1 ? 's' : ''}`);
-		return parts.length > 0 ? parts.join(', ') : 'No rules or groups configured';
+		if (rules > 0) parts.push(m.builderOutcomeRuleSummary({ count: rules }));
+		if (groups > 0) parts.push(m.builderImplementationGroupsSummaryShort({ count: groups }));
+		return parts.length > 0 ? parts.join(', ') : m.builderNoRulesOrGroupsConfigured();
 	});
 
 	interface ScaleEntry {
@@ -212,15 +212,11 @@
 		unsavedStore.subscribe((v) => (hasUnsaved = v))();
 		unpublishedStore.subscribe((v) => (hasUnpublished = v))();
 		if (hasUnsaved) {
-			if (!confirm('You have unsaved changes that will be lost. Leave anyway?')) {
+			if (!confirm(m.builderUnsavedChangesNavigation())) {
 				navigation.cancel();
 			}
 		} else if (hasUnpublished) {
-			if (
-				!confirm(
-					'You have unpublished changes. Your draft is saved and you can resume later. Leave anyway?'
-				)
-			) {
+			if (!confirm(m.builderUnpublishedChangesNavigation())) {
 				navigation.cancel();
 			}
 		}
@@ -346,7 +342,7 @@
 								<input
 									type="text"
 									value={getTranslation($frameworkStore.translations, $activeLanguageStore, 'name')}
-									placeholder="Translate name..."
+									placeholder={m.builderTranslateName()}
 									class="w-full text-2xl font-bold bg-transparent border-0 border-b-2 border-transparent hover:border-blue-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors py-1"
 									onblur={(e) => {
 										builder.updateFramework({
@@ -365,7 +361,7 @@
 										$activeLanguageStore,
 										'description'
 									)}
-									placeholder="Translate description..."
+									placeholder={m.builderTranslateDescription()}
 									rows="2"
 									class="w-full text-sm bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1"
 									onblur={(e) => {
@@ -385,7 +381,7 @@
 						<input
 							type="text"
 							value={$frameworkStore.name}
-							placeholder="Framework name"
+							placeholder={m.builderFrameworkNamePlaceholder()}
 							class="w-full text-2xl font-bold bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors py-1"
 							onblur={(e) => {
 								builder.updateFramework({ name: e.currentTarget.value });
@@ -393,7 +389,7 @@
 						/>
 						<textarea
 							value={$frameworkStore.description ?? ''}
-							placeholder="Framework description (optional)"
+							placeholder={m.builderFrameworkDescriptionPlaceholder()}
 							rows="2"
 							class="w-full text-sm text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1"
 							onblur={(e) => {
@@ -411,7 +407,7 @@
 								class="fa-solid {urnCopy.copied ? 'fa-check text-green-500' : 'fa-copy'} text-[9px]"
 							></i>
 							{#if urnCopy.copied}
-								<span class="text-green-500">Copied!</span>
+								<span class="text-green-500">{m.copied()}</span>
 							{:else}
 								{$frameworkStore.urn}
 							{/if}
@@ -436,7 +432,7 @@
 									: 'fa-chevron-right'} text-[10px] text-gray-400"
 							></i>
 							<span class="text-xs font-semibold text-gray-600 uppercase tracking-wider"
-								>Framework Settings</span
+								>{m.builderFrameworkSettings()}</span
 							>
 							{#if !showSettings}
 								<span class="text-xs text-gray-400">{settingsSummary}</span>
@@ -449,11 +445,11 @@
 							<!-- Annotation -->
 							<div>
 								<span class="text-xs font-medium text-gray-500 uppercase tracking-wider"
-									>Annotation</span
+									>{m.annotation()}</span
 								>
 								<textarea
 									value={$frameworkStore.annotation ?? ''}
-									placeholder="Framework annotation (optional guidance text)"
+									placeholder={m.builderFrameworkAnnotationPlaceholder()}
 									rows="2"
 									class="mt-1 w-full text-sm text-gray-500 bg-transparent border border-gray-200 rounded-lg px-3 py-2 hover:border-gray-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
 									onblur={(e) => {
@@ -467,7 +463,7 @@
 								<div class="flex gap-3">
 									<label class="block">
 										<span class="text-xs text-gray-500 uppercase tracking-wider font-medium"
-											>URN namespace</span
+											>{m.builderUrnNamespace()}</span
 										>
 										<input
 											type="text"
@@ -531,13 +527,13 @@
 											? 'fa-chevron-down'
 											: 'fa-chevron-right'} text-[9px]"
 									></i>
-									Scoring settings
+									{m.builderScoringSettings()}
 								</button>
 								{#if showScoringSettings}
 									<div class="border border-gray-200 rounded-lg bg-gray-50/50 px-3 py-3 space-y-3">
 										<div class="grid grid-cols-3 gap-3">
 											<label class="block">
-												<span class="text-xs text-gray-500">Min score</span>
+												<span class="text-xs text-gray-500">{m.minScore()}</span>
 												<input
 													type="number"
 													value={$frameworkStore.min_score}
@@ -550,7 +546,7 @@
 												/>
 											</label>
 											<label class="block">
-												<span class="text-xs text-gray-500">Max score</span>
+												<span class="text-xs text-gray-500">{m.maxScore()}</span>
 												<input
 													type="number"
 													value={$frameworkStore.max_score}
@@ -563,20 +559,19 @@
 												/>
 											</label>
 											<label class="block">
-												<span class="text-xs text-gray-500">Aggregation</span>
+												<span class="text-xs text-gray-500">{m.aggregation()}</span>
 												<select
 													value={getAggregation()}
 													class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-white"
 													onchange={(e) => setAggregation(e.currentTarget.value)}
 												>
-													<option value="average">Average</option>
-													<option value="sum">Sum</option>
+													<option value="average">{m.average()}</option>
+													<option value="sum">{m.sum()}</option>
 												</select>
 											</label>
 										</div>
 										<p class="text-xs text-gray-400">
-											<strong>Average</strong> divides total score by number of questions.
-											<strong>Sum</strong> adds all scores directly. Use Sum for binary (0/1) scoring.
+											{m.builderAggregationHint()}
 										</p>
 
 										<!-- Scale entries editor -->
@@ -591,8 +586,9 @@
 														? 'fa-chevron-down'
 														: 'fa-chevron-right'} text-[9px]"
 												></i>
-												Score scale ({scaleEntries.length}
-												{scaleEntries.length === 1 ? 'level' : 'levels'})
+												{m.builderScoreScale()} ({m.builderScaleLevel({
+													count: scaleEntries.length
+												})})
 											</button>
 											{#if showScalesEditor}
 												<div class="space-y-1.5">
@@ -602,7 +598,7 @@
 														>
 															<div class="flex items-start gap-2">
 																<label class="block w-16 shrink-0">
-																	<span class="text-[10px] text-gray-400">Score</span>
+																	<span class="text-[10px] text-gray-400">{m.score()}</span>
 																	<input
 																		type="number"
 																		value={entry.score}
@@ -615,11 +611,11 @@
 																	/>
 																</label>
 																<label class="block flex-1 min-w-0">
-																	<span class="text-[10px] text-gray-400">Name</span>
+																	<span class="text-[10px] text-gray-400">{m.name()}</span>
 																	<input
 																		type="text"
 																		value={entry.name}
-																		placeholder="e.g. Partial"
+																		placeholder={m.builderScaleNamePlaceholder()}
 																		class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 																		onblur={(e) => {
 																			const entries = [...scaleEntries];
@@ -629,11 +625,11 @@
 																	/>
 																</label>
 																<label class="block flex-1 min-w-0">
-																	<span class="text-[10px] text-gray-400">Description</span>
+																	<span class="text-[10px] text-gray-400">{m.description()}</span>
 																	<input
 																		type="text"
 																		value={entry.description}
-																		placeholder="Optional"
+																		placeholder={m.builderScaleDescriptionPlaceholder()}
 																		class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 																		onblur={(e) => {
 																			const entries = [...scaleEntries];
@@ -661,12 +657,14 @@
 																>
 																	<label class="block flex-1 min-w-0">
 																		<span class="text-[10px] text-blue-500"
-																			>{lang.toUpperCase()} Name</span
+																			>{m.builderScaleNameTranslate({
+																				lang: lang.toUpperCase()
+																			})}</span
 																		>
 																		<input
 																			type="text"
 																			value={getTranslation(entry.translations, lang, 'name')}
-																			placeholder="Translate name..."
+																			placeholder={m.builderTranslateName()}
 																			class="w-full text-sm border border-blue-100 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 																			onblur={(e) => {
 																				const entries = [...scaleEntries];
@@ -682,7 +680,9 @@
 																	</label>
 																	<label class="block flex-1 min-w-0">
 																		<span class="text-[10px] text-blue-500"
-																			>{lang.toUpperCase()} Description</span
+																			>{m.builderScaleDescriptionTranslate({
+																				lang: lang.toUpperCase()
+																			})}</span
 																		>
 																		<input
 																			type="text"
@@ -691,7 +691,7 @@
 																				lang,
 																				'description'
 																			)}
-																			placeholder="Translate description..."
+																			placeholder={m.builderTranslateDescription()}
 																			class="w-full text-sm border border-blue-100 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 																			onblur={(e) => {
 																				const entries = [...scaleEntries];
@@ -718,7 +718,7 @@
 															setScaleEntries(entries);
 														}}
 													>
-														<i class="fa-solid fa-plus mr-1"></i>Add scale level
+														<i class="fa-solid fa-plus mr-1"></i>{m.builderAddScaleLevel()}
 													</button>
 												</div>
 											{/if}
@@ -761,13 +761,13 @@
 							<!-- Languages -->
 							<div class="space-y-1.5">
 								<span class="text-xs font-medium text-gray-500 uppercase tracking-wider"
-									>Languages</span
+									>{m.builderLanguagesSection()}</span
 								>
 								<p class="text-xs text-gray-400">
-									Set the base language and add target languages for translation.
+									{m.builderLanguagesHint()}
 								</p>
 								<div class="flex items-center gap-2 py-1">
-									<span class="text-sm text-gray-600 w-24">Base language</span>
+									<span class="text-sm text-gray-600 w-24">{m.builderBaseLanguage()}</span>
 									<select
 										value={$frameworkStore.locale ?? 'en'}
 										class="text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-white"
@@ -779,7 +779,7 @@
 									</select>
 								</div>
 								<div class="space-y-1">
-									<span class="text-xs text-gray-500">Target languages</span>
+									<span class="text-xs text-gray-500">{m.builderTargetLanguages()}</span>
 									<div class="flex flex-wrap gap-1.5">
 										{#each $frameworkStore.available_languages ?? [] as lang}
 											<span
@@ -802,7 +802,7 @@
 												bind:value={newLangCode}
 												class="text-xs border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-white"
 											>
-												<option value="">Add a language...</option>
+												<option value="">{m.builderAddLanguagePlaceholder()}</option>
 												{#each addableLocales as code}
 													<option value={code}>{localeLabel(code)}</option>
 												{/each}
@@ -816,7 +816,7 @@
 													newLangCode = '';
 												}}
 											>
-												<i class="fa-solid fa-plus mr-0.5"></i>Add
+												<i class="fa-solid fa-plus mr-0.5"></i>{m.builderAdd()}
 											</button>
 										</div>
 									{/if}
@@ -848,7 +848,7 @@
 
 					<AddNodeMenu
 						parent={null}
-						triggerLabel={'+ Add top-level node'}
+						triggerLabel={m.builderAddTopLevelNode()}
 						triggerClass="w-full py-4 border-2 border-dashed border-gray-200 rounded-lg text-sm text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors"
 					/>
 				{/if}

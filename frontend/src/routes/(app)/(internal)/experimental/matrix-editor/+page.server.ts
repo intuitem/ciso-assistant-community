@@ -1,5 +1,6 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import type { PageServerLoad } from './$types';
+import { m } from '$paraglide/messages';
 
 export const load = (async ({ fetch }) => {
 	// Load all risk matrices (published ones for "clone from", ones with editing_draft for "resume")
@@ -11,5 +12,5 @@ export const load = (async ({ fetch }) => {
 	const matrices = allMatrices.filter((m: any) => m.is_enabled);
 	const drafts = allMatrices.filter((m: any) => m.has_editing_draft);
 
-	return { matrices, drafts };
+	return { title: m.matrixEditor(), matrices, drafts };
 }) satisfies PageServerLoad;

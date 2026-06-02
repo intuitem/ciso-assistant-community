@@ -1,4 +1,5 @@
 import { LOCALE_MAP, language, defaultLangLabels } from '$lib/utils/locales';
+import { m } from '$paraglide/messages';
 
 // ----- locale helpers (F1) -----
 
@@ -23,27 +24,51 @@ export function localeLabel(code: string): string {
  * Splitting the two means the picker can surface "Number (slider)" as a
  * first-class entry without needing a new value in the data model.
  */
-export interface QuestionTypeInfo {
-	value: string;
-	storedType: string;
-	widget: 'native' | 'slider';
-	label: string;
+// `storedType` is what gets written to `Question.type`. Native variants use that
+// same value as their picker key; slider variants use `<storedType>:slider`.
+// Only `number` and `unique_choice` have a slider variant — this is enforced by
+// the discriminated union below.
+export type NativeStoredType =
+	| 'text'
+	| 'boolean'
+	| 'number'
+	| 'unique_choice'
+	| 'multiple_choice'
+	| 'date';
+export type SliderStoredType = Extract<NativeStoredType, 'number' | 'unique_choice'>;
+
+interface BaseQuestionTypeInfo {
+	get label(): string;
 	icon: string;
 	color: string;
 }
+
+export type QuestionTypeInfo =
+	| (BaseQuestionTypeInfo & {
+			widget: 'native';
+			storedType: NativeStoredType;
+			value: NativeStoredType;
+	  })
+	| (BaseQuestionTypeInfo & {
+			widget: 'slider';
+			storedType: SliderStoredType;
+			value: `${SliderStoredType}:slider`;
+	  });
 
 const SLIDER_ICON = 'fa-sliders';
 
 // Order matters: the picker is a 2-column grid, so positions [0,1] form
 // row 1, [2,3] row 2, etc. We pair each slider variant on the same row
 // as its parent.
-export const QUESTION_TYPES: QuestionTypeInfo[] = [
+export const QUESTION_TYPES: readonly QuestionTypeInfo[] = [
 	// Row 1
 	{
 		value: 'text',
 		storedType: 'text',
 		widget: 'native',
-		label: 'Text',
+		get label() {
+			return m.builderQuestionTypeText();
+		},
 		icon: 'fa-font',
 		color: 'text-blue-600 bg-blue-50'
 	},
@@ -51,7 +76,9 @@ export const QUESTION_TYPES: QuestionTypeInfo[] = [
 		value: 'boolean',
 		storedType: 'boolean',
 		widget: 'native',
-		label: 'Boolean',
+		get label() {
+			return m.builderQuestionTypeBoolean();
+		},
 		icon: 'fa-toggle-on',
 		color: 'text-green-600 bg-green-50'
 	},
@@ -60,7 +87,9 @@ export const QUESTION_TYPES: QuestionTypeInfo[] = [
 		value: 'number',
 		storedType: 'number',
 		widget: 'native',
-		label: 'Number',
+		get label() {
+			return m.builderQuestionTypeNumber();
+		},
 		icon: 'fa-hashtag',
 		color: 'text-emerald-600 bg-emerald-50'
 	},
@@ -68,7 +97,9 @@ export const QUESTION_TYPES: QuestionTypeInfo[] = [
 		value: 'number:slider',
 		storedType: 'number',
 		widget: 'slider',
-		label: 'Number (slider)',
+		get label() {
+			return `${m.builderQuestionTypeNumber()} (${m.builderSlider()})`;
+		},
 		icon: SLIDER_ICON,
 		color: 'text-emerald-600 bg-emerald-50'
 	},
@@ -77,7 +108,9 @@ export const QUESTION_TYPES: QuestionTypeInfo[] = [
 		value: 'unique_choice',
 		storedType: 'unique_choice',
 		widget: 'native',
-		label: 'Single choice',
+		get label() {
+			return m.builderQuestionTypeUniqueChoice();
+		},
 		icon: 'fa-circle-dot',
 		color: 'text-violet-600 bg-violet-50'
 	},
@@ -85,7 +118,9 @@ export const QUESTION_TYPES: QuestionTypeInfo[] = [
 		value: 'unique_choice:slider',
 		storedType: 'unique_choice',
 		widget: 'slider',
-		label: 'Single choice (slider)',
+		get label() {
+			return `${m.builderQuestionTypeUniqueChoice()} (${m.builderSlider()})`;
+		},
 		icon: SLIDER_ICON,
 		color: 'text-violet-600 bg-violet-50'
 	},
@@ -94,7 +129,9 @@ export const QUESTION_TYPES: QuestionTypeInfo[] = [
 		value: 'multiple_choice',
 		storedType: 'multiple_choice',
 		widget: 'native',
-		label: 'Multiple choice',
+		get label() {
+			return m.builderQuestionTypeMultipleChoice();
+		},
 		icon: 'fa-square-check',
 		color: 'text-purple-600 bg-purple-50'
 	},
@@ -102,7 +139,9 @@ export const QUESTION_TYPES: QuestionTypeInfo[] = [
 		value: 'date',
 		storedType: 'date',
 		widget: 'native',
-		label: 'Date',
+		get label() {
+			return m.builderQuestionTypeDate();
+		},
 		icon: 'fa-calendar',
 		color: 'text-amber-600 bg-amber-50'
 	}

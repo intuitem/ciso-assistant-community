@@ -351,14 +351,20 @@
 			if (finalFilterValue) {
 				finalFilterValue.forEach(({ value }) => page.url.searchParams.append(field, value));
 			}
-
-			const hrefPattern = new RegExp(`^/${URLModel}(\\?.*)?$`);
-			const fullPath = page.url.pathname + page.url.search;
-			if (hrefPattern.test(fullPath)) {
-				breadcrumbs.updateCrumb(hrefPattern, { href: fullPath });
-			}
 		}
 		history.replaceState(history.state, '', page.url.pathname + page.url.search);
+		// Sync the current crumb's href with the new filter query.
+		breadcrumbs.update((crumbs) => {
+			if (crumbs.length < 2) return crumbs;
+			const last = crumbs[crumbs.length - 1];
+			const lastPath = last.href?.split('?')[0];
+			if (lastPath !== page.url.pathname) return crumbs;
+			const newHref = page.url.pathname + page.url.search;
+			if (last.href === newHref) return crumbs;
+			const next = crumbs.slice();
+			next[next.length - 1] = { ...last, href: newHref };
+			return next;
+		});
 		// untracked so resetFilters can delete the entry without retriggering us
 		if (isStandaloneTable) {
 			untrack(() => {
@@ -982,7 +988,9 @@
 															<span class="ml-4"><i class="{bd.icon} {bd.colorClass}"></i></span>
 														{:else if key === 'progress' || key === 'treatment_progress'}
 															<span class="ml-9"
-																>{safeTranslate('percentageDisplay', { number: value })}</span
+																>{value != null
+																	? safeTranslate('percentageDisplay', { number: value })
+																	: '--'}</span
 															>
 														{:else if key === 'translations'}
 															{#if Object.keys(value).length > 0}

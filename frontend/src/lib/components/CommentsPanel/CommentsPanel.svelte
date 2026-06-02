@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { m } from '$paraglide/messages';
+	import { getLocale } from '$paraglide/runtime';
+	import { formatDate } from '$lib/utils/datetime';
 	import { browser } from '$app/environment';
 	import {
 		getModalStore,
@@ -99,7 +101,7 @@
 		if (hours < 24) return m.hoursAgo({ count: String(hours) });
 		const days = Math.floor(hours / 24);
 		if (days < 30) return m.daysAgo({ count: String(days) });
-		return new Date(dateStr).toLocaleDateString();
+		return formatDate(new Date(dateStr), false, getLocale());
 	}
 
 	async function fetchComments() {

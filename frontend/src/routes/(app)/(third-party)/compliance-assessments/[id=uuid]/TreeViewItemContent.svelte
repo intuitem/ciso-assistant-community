@@ -23,6 +23,10 @@
 		children?: Record<string, Record<string, unknown>> | undefined;
 		canEditRequirementAssessment: boolean;
 		hasParentNode: boolean;
+		showAnswers: boolean;
+		showResult: boolean;
+		showStatus: boolean;
+		showScore: boolean;
 		showDocumentationScore: boolean;
 		scoringEnabled?: boolean;
 		scoreCalculationMethod: string;
@@ -45,6 +49,10 @@
 		children = undefined,
 		canEditRequirementAssessment,
 		hasParentNode,
+		showAnswers,
+		showResult,
+		showStatus,
+		showScore,
 		showDocumentationScore,
 		scoringEnabled = false,
 		scoreCalculationMethod,
@@ -147,13 +155,28 @@
 	}
 
 	function nodeTotalMaxScore(): number {
-		// For SUM, the total max is max_score * total_weight
-		// For AVG, the total max is just max_score
+		// Backend computes the per-node ceiling via
+		// annotate_tree_with_aggregated_scores so the donut stays coherent for
+		// mixed-scale subtrees. Falls back to node.max_score for older payloads.
+		const raw = (rest as Record<string, any>).aggregated_max_score;
+		if (typeof raw === 'number') return raw;
 		if (scoreCalculationMethod === 'sum' && resultCounts?.total_weight) {
 			return node.max_score * resultCounts['total_weight'];
 		}
 		return node.max_score;
 	}
+
+	function nodeTotalMinScore(): number {
+		const raw = (rest as Record<string, any>).aggregated_min_score;
+		if (typeof raw === 'number') return raw;
+		// SUM aggregates start at 0; AVG/AVG_OF_AVG inherit from the CA but
+		// the prop isn't available here. 0 is a safe default for legacy payloads.
+		return 0;
+	}
+
+	const rawWeight = (rest as Record<string, unknown>).weight;
+	const nodeWeight: number | null =
+		typeof rawWeight === 'number' && Number.isFinite(rawWeight) ? rawWeight : null;
 
 	let classesShowInfo = $derived((show: boolean) => (!show ? 'hidden' : ''));
 	let classesShowInfoText = $derived((show: boolean) => (show ? 'text-primary-500' : ''));
@@ -204,6 +227,7 @@
 							{#if canEditRequirementAssessment}
 								<Anchor
 									breadcrumbAction="push"
+									label={title || m.requirementAssessment()}
 									href="/requirement-assessments/{ra_id}/edit?next={page.url.pathname}"
 								>
 									{#if title || description}
@@ -221,6 +245,7 @@
 							{:else}
 								<Anchor
 									breadcrumbAction="push"
+									label={title || m.requirementAssessment()}
 									href="/requirement-assessments/{ra_id}?next={page.url.pathname}"
 								>
 									{#if title}
@@ -243,7 +268,7 @@
 						</p>
 					{/if}
 				</div>
-				{#if !assessable}
+				{#if showResult && !assessable}
 					<div class="flex flex-row items-end items-middle text-xs mr-2" style="width:6rem">
 						{#each orderedResultPercentages as rp}
 							{#if resultCounts && resultCounts[rp.result] !== undefined}
@@ -274,7 +299,7 @@
 					</div>
 				{/if}
 				<div>
-					{#if hasAssessableChildren}
+					{#if showStatus && hasAssessableChildren}
 						{#each Object.entries(complianceStatusColorMap) as [status, color]}
 							{#if resultCounts?.status && (selectedStatus.includes(status) || selectedStatus.length === 0)}
 								<span
@@ -287,7 +312,12 @@
 							{/if}
 						{/each}
 					{/if}
-					{#if node.questions}
+					{#if assessable && nodeWeight !== null && nodeWeight !== 1}
+						<span class="badge mr-1 bg-indigo-100 text-indigo-800" title={m.requirementWeight()}>
+							{m.requirementWeight()}: {nodeWeight}
+						</span>
+					{/if}
+					{#if showAnswers && node.questions}
 						{@const badgeStyles = getBadgeStyles(node.answers, node.questions)}
 						<span
 							class="badge"
@@ -373,29 +403,36 @@
 		{/if}
 		{#if hasAssessableChildren}
 			<div class="flex max-w-96 grow items-center space-x-2">
-				<div
-					class="flex max-w-96 grow bg-gray-200 rounded-full overflow-hidden h-4 shrink self-center"
-				>
-					{#each orderedResultPercentages as rp}
-						<div
-							class="flex flex-col justify-center overflow-hidden text-xs text-center {classesPercentText(
-								complianceResultColorMap[rp.result]
-							)}"
-							style="width: {rp.percentage.value}%; background-color: {complianceResultColorMap[
-								rp.result
-							]}"
-						>
-							{rp.percentage.display}%
-						</div>
-					{/each}
-				</div>
+				{#if showResult}
+					<div
+						class="flex max-w-96 grow bg-gray-200 rounded-full overflow-hidden h-4 shrink self-center"
+					>
+						{#each orderedResultPercentages as rp}
+							<div
+								class="flex flex-col justify-center overflow-hidden text-xs text-center {classesPercentText(
+									complianceResultColorMap[rp.result]
+								)}"
+								style="width: {rp.percentage.value}%; background-color: {complianceResultColorMap[
+									rp.result
+								]}"
+							>
+								{rp.percentage.display}%
+							</div>
+						{/each}
+					</div>
+				{/if}
 				<div class="flex flex-row space-x-2 items-center">
-					{#if scoringEnabled}
+					{#if showScore}
 						{#if hasParentNode}
 							{#if nodeScore() !== null}
 								<div class="relative">
 									<Progress
-										value={formatScoreValue(nodeScore(), nodeTotalMaxScore())}
+										value={formatScoreValue(
+											nodeScore(),
+											nodeTotalMaxScore(),
+											false,
+											nodeTotalMinScore()
+										)}
 										min={0}
 										max={100}
 										data-testid="progress-ring-svg"
@@ -403,7 +440,12 @@
 										<Progress.Circle class="[--size:--spacing(12)]">
 											<Progress.CircleTrack />
 											<Progress.CircleRange
-												class={displayScoreColor(nodeScore(), nodeTotalMaxScore())}
+												class={displayScoreColor(
+													nodeScore(),
+													nodeTotalMaxScore(),
+													false,
+													nodeTotalMinScore()
+												)}
 											/>
 										</Progress.Circle>
 										<div class="absolute inset-0 flex items-center justify-center">
@@ -414,14 +456,24 @@
 								{#if showDocumentationScore}
 									<div class="relative">
 										<Progress
-											value={formatScoreValue(nodeDocumentationScore(), nodeTotalMaxScore())}
+											value={formatScoreValue(
+												nodeDocumentationScore(),
+												nodeTotalMaxScore(),
+												false,
+												nodeTotalMinScore()
+											)}
 											min={0}
 											max={100}
 										>
 											<Progress.Circle class="[--size:--spacing(12)]">
 												<Progress.CircleTrack />
 												<Progress.CircleRange
-													class={displayScoreColor(nodeDocumentationScore(), nodeTotalMaxScore())}
+													class={displayScoreColor(
+														nodeDocumentationScore(),
+														nodeTotalMaxScore(),
+														false,
+														nodeTotalMinScore()
+													)}
 												/>
 											</Progress.Circle>
 											<div class="absolute inset-0 flex items-center justify-center">
@@ -434,7 +486,12 @@
 						{:else if nodeScore() !== null}
 							<div class="relative">
 								<Progress
-									value={formatScoreValue(nodeScore(), nodeTotalMaxScore())}
+									value={formatScoreValue(
+										nodeScore(),
+										nodeTotalMaxScore(),
+										false,
+										nodeTotalMinScore()
+									)}
 									min={0}
 									max={100}
 									data-testid="progress-ring-svg"
@@ -442,7 +499,12 @@
 									<Progress.Circle class="[--size:--spacing(12)]">
 										<Progress.CircleTrack />
 										<Progress.CircleRange
-											class={displayScoreColor(nodeScore(), nodeTotalMaxScore())}
+											class={displayScoreColor(
+												nodeScore(),
+												nodeTotalMaxScore(),
+												false,
+												nodeTotalMinScore()
+											)}
 										/>
 									</Progress.Circle>
 									<div class="absolute inset-0 flex items-center justify-center">
@@ -453,14 +515,24 @@
 							{#if showDocumentationScore}
 								<div class="relative">
 									<Progress
-										value={formatScoreValue(nodeDocumentationScore(), nodeTotalMaxScore())}
+										value={formatScoreValue(
+											nodeDocumentationScore(),
+											nodeTotalMaxScore(),
+											false,
+											nodeTotalMinScore()
+										)}
 										min={0}
 										max={100}
 									>
 										<Progress.Circle class="[--size:--spacing(12)]">
 											<Progress.CircleTrack />
 											<Progress.CircleRange
-												class={displayScoreColor(nodeDocumentationScore(), nodeTotalMaxScore())}
+												class={displayScoreColor(
+													nodeDocumentationScore(),
+													nodeTotalMaxScore(),
+													false,
+													nodeTotalMinScore()
+												)}
 											/>
 										</Progress.Circle>
 										<div class="absolute inset-0 flex items-center justify-center">

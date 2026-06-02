@@ -12,6 +12,7 @@
 	import QuestionEditor from './QuestionEditor.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import AddNodeMenu from './AddNodeMenu.svelte';
+	import { m } from '$paraglide/messages';
 
 	interface Props {
 		node: BuilderNode;
@@ -97,13 +98,16 @@
 
 	// Status line text
 	const statusLine = $derived.by(() => {
-		if (node.node.display_mode === 'splash') return 'Splash screen';
-		if (node.node.assessable && node.children.length > 0)
-			return `Assessable · ${node.children.length} ${node.children.length === 1 ? 'child' : 'children'}`;
-		if (node.node.assessable) return 'Assessable leaf';
-		if (node.children.length > 0)
-			return `Group · ${node.children.length} ${node.children.length === 1 ? 'child' : 'children'}`;
-		return 'Empty node';
+		if (node.node.display_mode === 'splash') return m.builderSplashScreenStatus();
+		const childCount = node.children.length;
+		if (node.node.assessable && childCount > 0) {
+			return m.builderAssessableWithChildren({ count: childCount });
+		}
+		if (node.node.assessable) return m.builderAssessableLeaf();
+		if (childCount > 0) {
+			return m.builderGroupWithChildren({ count: childCount });
+		}
+		return m.builderEmptyNode();
 	});
 
 	// ===== Markdown editor helpers (ported from SplashScreenBlock.svelte) =====
@@ -295,10 +299,9 @@
 		{#if node.depth >= 3 && node.node.parent_urn}
 			<div class="px-4 pt-2 pb-0">
 				<span class="text-[10px] text-gray-400">
-					<i class="fa-solid fa-turn-up fa-rotate-90 mr-1"></i>nested under {node.node.parent_urn
-						.split(':')
-						.pop()
-						?.slice(0, 12)}
+					<i class="fa-solid fa-turn-up fa-rotate-90 mr-1"></i>{m.builderNestedUnder({
+						parent: node.node.parent_urn.split(':').pop()?.slice(0, 12) ?? ''
+					})}
 				</span>
 			</div>
 		{/if}
@@ -314,8 +317,8 @@
 					type="button"
 					class="inline-flex items-center justify-center w-4 h-4 text-gray-400 hover:text-gray-600 transition-colors mr-1"
 					onclick={() => cardCollapsed.toggle(node.node.id)}
-					title={collapsed ? 'Expand children' : 'Collapse children'}
-					aria-label={collapsed ? 'Expand children' : 'Collapse children'}
+					title={collapsed ? m.builderExpandChildren() : m.builderCollapseChildren()}
+					aria-label={collapsed ? m.builderExpandChildren() : m.builderCollapseChildren()}
 				>
 					<i class="fa-solid {collapsed ? 'fa-chevron-right' : 'fa-chevron-down'} text-[10px]"></i>
 				</button>
@@ -336,6 +339,16 @@
 				<i class="fa-solid fa-grip-vertical text-xs"></i>
 			</span>
 
+			{#snippet untranslatedMarker(
+				field: string,
+				source: string | null | undefined,
+				langCode: string
+			)}
+				{#if source && !getTranslation(node.node.translations, langCode, field)}
+					<span class="text-amber-500 ml-1" title={m.builderNotTranslated()}>*</span>
+				{/if}
+			{/snippet}
+
 			<div class="flex-1 min-w-0 space-y-1">
 				{#if $activeLanguageStore}
 					{@const lang = $activeLanguageStore}
@@ -344,29 +357,34 @@
 						<input
 							type="text"
 							value={node.node.ref_id ?? ''}
-							placeholder="Ref ID"
+							placeholder={m.frameworkRefId()}
 							class="w-24 text-xs font-mono bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors text-gray-500"
 							onblur={(e) => saveField('ref_id', e.currentTarget.value || null)}
 						/>
 					</div>
-					<div class="grid grid-cols-2 gap-3">
-						<input
-							type="text"
-							value={node.node.name ?? ''}
-							readonly
-							class="text-sm font-medium bg-transparent border-0 border-b border-transparent py-0.5 text-gray-400 cursor-default"
-						/>
-						<input
-							type="text"
-							value={getTranslation(node.node.translations, lang, 'name')}
-							placeholder={isSplash ? 'Translate title...' : 'Translate name...'}
-							class="text-sm font-medium bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors"
-							onblur={(e) =>
-								saveField(
-									'translations',
-									withTranslation(node.node.translations, lang, 'name', e.currentTarget.value)
-								)}
-						/>
+					<div>
+						<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block">
+							{m.name()}{@render untranslatedMarker('name', node.node.name, lang)}
+						</label>
+						<div class="grid grid-cols-2 gap-3">
+							<input
+								type="text"
+								value={node.node.name ?? ''}
+								readonly
+								class="text-sm font-medium bg-transparent border-0 border-b border-transparent py-0.5 text-gray-400 cursor-default"
+							/>
+							<input
+								type="text"
+								value={getTranslation(node.node.translations, lang, 'name')}
+								placeholder={isSplash ? m.builderTranslateTitle() : m.builderTranslateName()}
+								class="text-sm font-medium bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors"
+								onblur={(e) =>
+									saveField(
+										'translations',
+										withTranslation(node.node.translations, lang, 'name', e.currentTarget.value)
+									)}
+							/>
+						</div>
 					</div>
 					{#if node.node.urn}
 						<button
@@ -378,7 +396,7 @@
 								class="fa-solid {urnCopy.copied ? 'fa-check text-green-500' : 'fa-copy'} text-[9px]"
 							></i>
 							{#if urnCopy.copied}
-								<span class="text-green-500">Copied!</span>
+								<span class="text-green-500">{m.copied()}</span>
 							{:else}
 								{node.node.urn}
 							{/if}
@@ -389,7 +407,11 @@
 						<!-- Description side-by-side -->
 						<div>
 							<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block">
-								Description
+								{m.description()}{@render untranslatedMarker(
+									'description',
+									node.node.description,
+									lang
+								)}
 							</label>
 							<div class="grid grid-cols-2 gap-3">
 								<textarea
@@ -401,7 +423,7 @@
 								></textarea>
 								<textarea
 									value={getTranslation(node.node.translations, lang, 'description')}
-									placeholder="Translate description..."
+									placeholder={m.builderTranslateDescription()}
 									rows="3"
 									use:autogrowAction
 									class="w-full text-xs bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
@@ -428,10 +450,12 @@
 						>
 							<i class="fa-solid {showAdvanced ? 'fa-chevron-down' : 'fa-chevron-right'} text-[8px]"
 							></i>
-							Advanced
+							{m.builderAdvanced()}
 							{#if !showAdvanced}
 								<span class="text-gray-300 normal-case tracking-normal font-normal">
-									— annotation{node.node.assessable ? ', evidence' : ''}
+									— {node.node.assessable
+										? m.builderAdvancedAnnotationEvidence()
+										: m.builderAdvancedAnnotation()}
 								</span>
 							{/if}
 						</button>
@@ -442,7 +466,11 @@
 								<label
 									class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block"
 								>
-									Annotation
+									{m.annotation()}{@render untranslatedMarker(
+										'annotation',
+										node.node.annotation,
+										lang
+									)}
 								</label>
 								<div class="grid grid-cols-2 gap-3">
 									<textarea
@@ -454,7 +482,7 @@
 									></textarea>
 									<textarea
 										value={getTranslation(node.node.translations, lang, 'annotation')}
-										placeholder="Translate annotation..."
+										placeholder={m.builderTranslateAnnotation()}
 										rows="2"
 										use:autogrowAction
 										class="w-full text-xs bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
@@ -478,7 +506,11 @@
 								<label
 									class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block"
 								>
-									Typical evidence
+									{m.typicalEvidence()}{@render untranslatedMarker(
+										'typical_evidence',
+										node.node.typical_evidence,
+										lang
+									)}
 								</label>
 								<div class="grid grid-cols-2 gap-3">
 									<textarea
@@ -490,7 +522,7 @@
 									></textarea>
 									<textarea
 										value={getTranslation(node.node.translations, lang, 'typical_evidence')}
-										placeholder="Translate typical evidence..."
+										placeholder={m.builderTranslateTypicalEvidence()}
 										rows="2"
 										use:autogrowAction
 										class="w-full text-xs bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
@@ -515,7 +547,7 @@
 						<input
 							type="text"
 							value={node.node.ref_id ?? ''}
-							placeholder="Ref ID"
+							placeholder={m.frameworkRefId()}
 							class="w-24 text-xs font-mono bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:{isSplash
 								? 'border-purple-500'
 								: 'border-blue-500'} px-0.5 py-0.5 outline-none focus-visible:ring-2 {isSplash
@@ -528,11 +560,11 @@
 								type="text"
 								value={node.node.name ?? ''}
 								placeholder={isSplash
-									? 'Splash screen title'
+									? m.builderSplashScreenTitlePlaceholder()
 									: node.node.description
 										? node.node.description.slice(0, 60) +
 											(node.node.description.length > 60 ? '...' : '')
-										: 'Node name'}
+										: m.builderNodeNamePlaceholder()}
 								class="w-full text-sm font-medium bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:{isSplash
 									? 'border-purple-500'
 									: 'border-blue-500'} px-0.5 py-0.5 outline-none focus-visible:ring-2 {isSplash
@@ -561,7 +593,7 @@
 								class="fa-solid {urnCopy.copied ? 'fa-check text-green-500' : 'fa-copy'} text-[9px]"
 							></i>
 							{#if urnCopy.copied}
-								<span class="text-green-500">Copied!</span>
+								<span class="text-green-500">{m.copied()}</span>
 							{:else}
 								{node.node.urn}
 							{/if}
@@ -575,7 +607,7 @@
 				{#if !isSplash}
 					<label
 						class="flex items-center gap-1.5 text-xs text-gray-400 cursor-pointer hover:text-gray-600 transition-colors"
-						title="Whether this requirement is assessable by respondents"
+						title={m.builderAssessableTooltip()}
 					>
 						<input
 							type="checkbox"
@@ -583,21 +615,21 @@
 							onchange={(e) => saveField('assessable', e.currentTarget.checked)}
 							class="w-4 h-4 rounded border-gray-300 cursor-pointer"
 						/>
-						Assessable
+						{m.builderAssessable()}
 					</label>
 				{/if}
 				<select
 					value={node.node.display_mode}
 					onchange={(e) => saveField('display_mode', e.currentTarget.value)}
 					class="text-xs bg-transparent border-b border-gray-200 focus:border-blue-500 outline-none"
-					title="Display mode"
+					title={m.builderDisplayMode()}
 				>
-					<option value="default">Default</option>
-					<option value="splash">Splash</option>
+					<option value="default">{m.builderDefaultMode()}</option>
+					<option value="splash">{m.builderSplashMode()}</option>
 				</select>
 				<ConfirmAction
 					onconfirm={() => builder.deleteNode(node.node.id)}
-					confirmLabel="Delete"
+					confirmLabel={m.delete()}
 					triggerClass="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-all"
 					confirmClass="text-xs text-red-600 font-medium px-2 py-0.5 rounded bg-red-50"
 				/>
@@ -614,13 +646,13 @@
 						<!-- Source (read-only preview) -->
 						<div>
 							<span class="text-[10px] text-gray-400 uppercase tracking-wider mb-1 block"
-								>Source</span
+								>{m.builderSplashSource()}</span
 							>
 							<div class="min-h-[120px] bg-gray-50 border border-gray-100 rounded-lg px-3 py-2">
 								{#if splashDescription.trim()}
 									<MarkdownRenderer content={splashDescription} />
 								{:else}
-									<p class="text-sm text-gray-300 italic">No source content.</p>
+									<p class="text-sm text-gray-300 italic">{m.builderSplashNoSourceContent()}</p>
 								{/if}
 							</div>
 						</div>
@@ -634,7 +666,7 @@
 							<textarea
 								bind:value={splashTransDescription}
 								onblur={saveTransDescription}
-								placeholder="Translate markdown content..."
+								placeholder={m.builderTranslateMarkdown()}
 								rows="6"
 								class="w-full text-sm bg-white border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/20 transition-colors resize-y font-mono"
 							></textarea>
@@ -650,7 +682,7 @@
 									: 'bg-gray-50 text-gray-600 hover:bg-gray-100'}"
 								onclick={() => (splashMode = 'edit')}
 							>
-								<i class="fa-solid fa-pen mr-1 text-[10px]"></i>Edit
+								<i class="fa-solid fa-pen mr-1 text-[10px]"></i>{m.edit()}
 							</button>
 							<button
 								class="px-2.5 py-1 text-xs font-medium border-l border-gray-200 transition-colors {splashMode ===
@@ -659,7 +691,7 @@
 									: 'bg-gray-50 text-gray-600 hover:bg-gray-100'}"
 								onclick={() => (splashMode = 'preview')}
 							>
-								<i class="fa-solid fa-eye mr-1 text-[10px]"></i>Preview
+								<i class="fa-solid fa-eye mr-1 text-[10px]"></i>{m.builderPreview()}
 							</button>
 						</div>
 
@@ -668,42 +700,42 @@
 								<button
 									class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
 									onclick={() => wrapSelection('**', '**')}
-									title="Bold"
+									title={m.builderSplashBold()}
 								>
 									<i class="fa-solid fa-bold text-xs"></i>
 								</button>
 								<button
 									class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
 									onclick={() => wrapSelection('*', '*')}
-									title="Italic"
+									title={m.builderSplashItalic()}
 								>
 									<i class="fa-solid fa-italic text-xs"></i>
 								</button>
 								<button
 									class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
 									onclick={() => insertLinePrefix('# ')}
-									title="Heading"
+									title={m.builderSplashHeading()}
 								>
 									<i class="fa-solid fa-heading text-xs"></i>
 								</button>
 								<button
 									class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
 									onclick={() => insertLinePrefix('- ')}
-									title="Bullet list"
+									title={m.builderSplashBulletList()}
 								>
 									<i class="fa-solid fa-list-ul text-xs"></i>
 								</button>
 								<button
 									class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
 									onclick={() => insertLinePrefix('1. ')}
-									title="Numbered list"
+									title={m.builderSplashNumberedList()}
 								>
 									<i class="fa-solid fa-list-ol text-xs"></i>
 								</button>
 								<button
 									class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
 									onclick={() => wrapSelection('[', '](url)')}
-									title="Link"
+									title={m.builderSplashLink()}
 								>
 									<i class="fa-solid fa-link text-xs"></i>
 								</button>
@@ -713,14 +745,14 @@
 										insertAtCursor(
 											'\n| Column 1 | Column 2 |\n|----------|----------|\n| Cell     | Cell     |\n'
 										)}
-									title="Table"
+									title={m.builderSplashTable()}
 								>
 									<i class="fa-solid fa-table text-xs"></i>
 								</button>
 								<button
 									class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
 									onclick={() => fileInputEl?.click()}
-									title="Insert image"
+									title={m.builderSplashInsertImage()}
 									disabled={uploading}
 								>
 									{#if uploading}
@@ -747,7 +779,7 @@
 							bind:this={textareaEl}
 							onpaste={handlePaste}
 							onblur={saveDescription}
-							placeholder="Write markdown content for your splash screen..."
+							placeholder={m.builderSplashEditPlaceholder()}
 							rows="6"
 							class="w-full text-sm bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/20 transition-colors resize-y font-mono"
 						></textarea>
@@ -757,7 +789,7 @@
 								<MarkdownRenderer content={splashDescription} />
 							{:else}
 								<p class="text-sm text-gray-400 italic">
-									No content yet. Switch to Edit to add markdown.
+									{m.builderSplashNoContent()}
 								</p>
 							{/if}
 						</div>
@@ -770,11 +802,11 @@
 				<div class="px-4 pt-2 pb-0 space-y-2">
 					<div>
 						<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block">
-							Description
+							{m.description()}
 						</label>
 						<textarea
 							value={node.node.description ?? ''}
-							placeholder="Optional"
+							placeholder={m.builderDescriptionOptional()}
 							rows="3"
 							use:autogrowAction
 							class="w-full text-xs text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
@@ -791,10 +823,12 @@
 					>
 						<i class="fa-solid {showAdvanced ? 'fa-chevron-down' : 'fa-chevron-right'} text-[8px]"
 						></i>
-						Advanced
+						{m.builderAdvanced()}
 						{#if !showAdvanced}
 							<span class="text-gray-300 normal-case tracking-normal font-normal">
-								— annotation{node.node.assessable ? ', evidence' : ''}, visibility
+								— {node.node.assessable
+									? m.builderAdvancedAnnotationEvidenceVisibility()
+									: m.builderAdvancedAnnotationVisibility()}
 							</span>
 						{/if}
 					</button>
@@ -805,11 +839,11 @@
 								<label
 									class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block"
 								>
-									Annotation
+									{m.annotation()}
 								</label>
 								<textarea
 									value={node.node.annotation ?? ''}
-									placeholder="Optional guidance notes for reviewers"
+									placeholder={m.builderAnnotationPlaceholder()}
 									rows="2"
 									use:autogrowAction
 									class="w-full text-xs text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
@@ -821,11 +855,11 @@
 									<label
 										class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block"
 									>
-										Typical evidence
+										{m.typicalEvidence()}
 									</label>
 									<textarea
 										value={node.node.typical_evidence ?? ''}
-										placeholder="Examples of evidence respondents should attach"
+										placeholder={m.builderTypicalEvidencePlaceholder()}
 										rows="2"
 										use:autogrowAction
 										class="w-full text-xs text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
@@ -843,7 +877,7 @@
 			     the audit-tree filter honours them. -->
 			{#if $frameworkStore.implementation_groups_definition && $frameworkStore.implementation_groups_definition.length > 0}
 				<div class="px-4 py-2 border-b border-gray-100">
-					<span class="text-xs text-gray-500 mr-2">Implementation groups:</span>
+					<span class="text-xs text-gray-500 mr-2">{m.builderImplementationGroupsLabel()}</span>
 					{#each $frameworkStore.implementation_groups_definition as ig}
 						{@const refId = (ig as Record<string, string>).ref_id}
 						{@const selected = (node.node.implementation_groups ?? []).includes(refId)}
@@ -869,11 +903,10 @@
 		{#if isSplash || showAdvanced}
 			<div class="px-4 py-2 {isSplash ? 'border-t border-purple-100' : ''}">
 				<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block mb-1">
-					Visibility expression (CEL)
+					{m.builderVisibilityExpression()}
 					<span
 						class="text-gray-400 ml-1 normal-case"
-						title="CEL expression that must evaluate to true for this requirement to be visible. Example: requirements[&quot;urn:...&quot;].score > 50"
-						>&#9432;</span
+						title={m.builderVisibilityExpressionTooltip()}>&#9432;</span
 					>
 				</label>
 				<input
@@ -881,7 +914,7 @@
 					class="w-full text-xs px-2 py-1 border border-gray-200 rounded font-mono bg-gray-50 focus:bg-white focus:{isSplash
 						? 'border-purple-300'
 						: 'border-blue-300'} focus:outline-none"
-					placeholder={'e.g. requirements["urn:..."].score > 50'}
+					placeholder={m.builderVisibilityExpressionPlaceholder()}
 					value={node.node.visibility_expression ?? ''}
 					onblur={(e) => saveField('visibility_expression', e.currentTarget.value || null)}
 				/>
@@ -916,7 +949,7 @@
 					class="w-full py-2 border-2 border-dashed border-gray-200 rounded-lg text-xs text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors"
 					onclick={() => builder.addQuestion(node.node.id)}
 				>
-					<i class="fa-solid fa-plus mr-1"></i>Add question
+					<i class="fa-solid fa-plus mr-1"></i>{m.builderAddQuestion()}
 				</button>
 			</div>
 		{/if}
@@ -933,7 +966,7 @@
 	{#if node.node.urn}
 		<AddNodeMenu
 			parent={node.node.id}
-			triggerLabel={'+ Add child'}
+			triggerLabel={m.builderAddChild()}
 			triggerClass="w-full py-1 text-[11px] text-gray-300 hover:text-gray-500 transition-colors"
 			onBeforeAdd={() => cardCollapsed.expand(node.node.id)}
 		/>
@@ -944,7 +977,7 @@
 		<AddNodeMenu
 			parent={parentId}
 			afterIndex={indexWithinParent}
-			triggerLabel={'+ Add sibling below'}
+			triggerLabel={m.builderAddSiblingBelow()}
 			triggerClass="w-full py-1 text-[11px] text-gray-300 hover:text-gray-500 transition-colors"
 		/>
 	{/if}
@@ -970,8 +1003,7 @@
 	{/if}
 	{#if node.children.length > 0 && collapsed}
 		<div class="ml-4 mt-1 text-[10px] text-gray-400 italic">
-			{node.children.length}
-			{node.children.length === 1 ? 'child' : 'children'} hidden
+			{m.builderChildrenHidden({ count: node.children.length })}
 		</div>
 	{/if}
 </div>
