@@ -178,6 +178,11 @@
 					field: 'advanced_analytics',
 					label: m.advancedAnalytics(),
 					description: m.advancedAnalyticsDescription()
+				},
+				{
+					field: 'audit_tree_inheritance',
+					label: m.auditTreeInheritance(),
+					description: m.auditTreeInheritanceDescription()
 				}
 			].filter(({ field }) => Object.keys(page.data.featureFlagSettings).includes(field))
 		},

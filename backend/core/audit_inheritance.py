@@ -65,8 +65,23 @@ NOT_APPLICABLE = "not_applicable"
 
 
 def get_strategy() -> str:
-    """Return the org-wide aggregation strategy, defaulting to ``none``."""
+    """Return the org-wide aggregation strategy, defaulting to ``none``.
+
+    Gated by the ``audit_tree_inheritance`` feature flag: when the flag is off
+    (the default), this returns ``none`` regardless of the configured strategy,
+    so every inheritance surface — analytics panels, report toggle — disappears
+    while the backend logic stays intact behind the flag.
+    """
     from global_settings.models import GlobalSettings
+
+    try:
+        flags = GlobalSettings.objects.get(
+            name=GlobalSettings.Names.FEATURE_FLAGS
+        ).value
+    except GlobalSettings.DoesNotExist:
+        flags = {}
+    if not (flags or {}).get("audit_tree_inheritance", False):
+        return AuditTreeAggregationStrategy.NONE
 
     try:
         gs = GlobalSettings.objects.get(name=GlobalSettings.Names.GENERAL)

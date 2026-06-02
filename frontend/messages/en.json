@@ -3079,6 +3079,8 @@
 	"combinedView": "Combined view",
 	"combinedResults": "Combined results",
 	"inheritedRequirements": "Inherited requirements",
+	"auditTreeInheritance": "Domain-tree audit inheritance",
+	"auditTreeInheritanceDescription": "Combine an audit's results with parent-domain audits on the same framework.",
 	"securityObjectivesTooltip": "Security targets are defined on primary assets and automatically inferred on supporting ones",
 	"securityCapabilitiesTooltip": "Security capabilities are defined on supporting assets and automatically inferred on primary ones",
 	"disasterRecoveryObjectivesTooltip": "Recovery objectives are defined on primary assets and automatically inferred on supporting ones",

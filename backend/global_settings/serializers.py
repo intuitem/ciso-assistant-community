@@ -266,6 +266,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     compliance = serializers.BooleanField(
         source="value.compliance", required=False, default=True
     )
+    audit_tree_inheritance = serializers.BooleanField(
+        source="value.audit_tree_inheritance", required=False, default=False
+    )
     tprm = serializers.BooleanField(source="value.tprm", required=False, default=True)
     privacy = serializers.BooleanField(
         source="value.privacy", required=False, default=True

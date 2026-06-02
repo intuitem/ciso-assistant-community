@@ -652,6 +652,7 @@ export const FeatureFlagsSchema = z.object({
 	scoring_assistant: z.boolean().optional(),
 	vulnerabilities: z.boolean().optional(),
 	compliance: z.boolean().optional(),
+	audit_tree_inheritance: z.boolean().optional(),
 	campaigns: z.boolean().optional(),
 	tprm: z.boolean().optional(),
 	ebiosrm: z.boolean().optional(),

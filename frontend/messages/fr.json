@@ -2952,6 +2952,8 @@
 	"combinedView": "Vue combinée",
 	"combinedResults": "Résultats combinés",
 	"inheritedRequirements": "Exigences héritées",
+	"auditTreeInheritance": "Héritage d'audit par arborescence de domaines",
+	"auditTreeInheritanceDescription": "Combine les résultats d'un audit avec ceux des audits des domaines parents sur le même référentiel.",
 	"securityObjectivesTooltip": "Les cibles de sécurité sont définies sur les actifs primaires et automatiquement déduites pour les actifs support",
 	"securityCapabilitiesTooltip": "Les capacités de sécurité sont définies sur les actifs de support et automatiquement déduites pour les actifs primaires",
 	"disasterRecoveryObjectivesTooltip": "Les objectifs de reprise d'activité sont définis sur les actifs primaires et automatiquement déduits pour les actifs support",
