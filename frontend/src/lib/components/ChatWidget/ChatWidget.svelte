@@ -4,6 +4,8 @@
 	import { page } from '$app/stores';
 	import { browser } from '$app/environment';
 	import { m } from '$paraglide/messages';
+	import { getLocale } from '$paraglide/runtime';
+	import { formatDate } from '$lib/utils/datetime';
 	import type { ChatMessage } from './types';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import {
@@ -725,7 +727,8 @@
 								>
 									<span class="text-sm text-gray-700 truncate">{session.title}</span>
 									<span class="text-[10px] text-gray-400">
-										{new Date(session.created_at).toLocaleDateString()} · {session.message_count} msg
+										{formatDate(new Date(session.created_at), false, getLocale())} · {session.message_count}
+										msg
 									</span>
 								</button>
 								<button

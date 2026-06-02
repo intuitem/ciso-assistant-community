@@ -68,6 +68,7 @@
   * [Setting up S3](installation/s3.md)
   * [Setting up mailer](installation/mailer.md)
   * [Infrastructure configuration](installation/infra-config.md)
+  * [Prometheus metrics](installation/prometheus-metrics.md)
 * Maintenance
   * [Updating your local instance](installation/updating.md)
   * [Special cases](installation/special-cases.md)
@@ -116,6 +117,7 @@
   * [Excel-driven authoring](configuration/authoring/excel.md)
 * [Data import wizard](configuration/data-import.md)
 * [Changing the language](configuration/language.md)
+* [Date format](configuration/date-format.md)
 
 ## Guides
 
