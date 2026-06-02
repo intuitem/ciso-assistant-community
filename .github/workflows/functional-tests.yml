@@ -526,6 +526,12 @@ jobs:
       - name: Check uv version
         run: uv --version
 
+      - name: Cache Virtualenv
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ${{ env.enterprise-backend-directory }}/.venv
+          key: venv-${{ runner.os }}-py${{ matrix.python-version }}-${{ hashFiles('enterprise/backend/uv.lock') }}
+
       - name: Install enterprise backend requirements
         working-directory: ${{ env.enterprise-backend-directory }}
         run: uv sync --locked
