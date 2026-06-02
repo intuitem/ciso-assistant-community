@@ -139,7 +139,7 @@ ENABLE_CHAT = os.environ.get("ENABLE_CHAT", "False").strip().lower() in (
 # unauthenticated /infra-config/ endpoint exposes those settings for the
 # infrastructure layer to consume (must never be reachable publicly).
 ENABLE_INFRA_CONFIG_MANAGEMENT = os.environ.get(
-    "ENABLE_INFRA_CONFIG_MANAGEMENT", "True"
+    "ENABLE_INFRA_CONFIG_MANAGEMENT", "False"
 ).strip().lower() in (
     "true",
     "1",
