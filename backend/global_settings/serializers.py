@@ -1,9 +1,10 @@
 import uuid
 
 from django.conf import settings as django_settings
+from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 
-from .models import GlobalSettings
+from .models import GlobalSettings, validate_ip_or_cidr
 
 
 def validate_default_dashboard_value(value):
@@ -321,6 +322,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     chat_mode = serializers.BooleanField(
         source="value.chat_mode", required=False, default=False
     )
+    infra_config_management = serializers.BooleanField(
+        source="value.infra_config_management", required=False, default=True
+    )
     auditee_mode = serializers.BooleanField(
         source="value.auditee_mode", required=False, default=True
     )
@@ -360,6 +364,8 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
 
         if not getattr(settings, "ENABLE_CHAT", False):
             fields.pop("chat_mode", None)
+        if not getattr(settings, "ENABLE_INFRA_CONFIG_MANAGEMENT", False):
+            fields.pop("infra_config_management", None)
         return fields
 
     def update(self, instance, validated_data):
@@ -459,6 +465,86 @@ class VulnerabilitySlaSerializer(serializers.ModelSerializer):
                         current_value_dict.pop(source_key, None)
                     else:
                         current_value_dict[source_key] = new_flag_value
+                    value_changed = True
+
+        if value_changed:
+            instance.value = current_value_dict
+            instance.save(update_fields=["value"])
+
+        return instance
+
+
+MAX_ALLOWED_IPS = 50
+
+
+class InfraConfigSerializer(serializers.ModelSerializer):
+    """
+    Serializer for infrastructure configuration settings, stored as a JSON object
+    in the 'value' field of a GlobalSettings instance (singleton). Currently holds
+    the list of IPs/CIDRs allowed to reach the backend API; new keys can be added
+    over time without a schema change.
+    """
+
+    allowed_ips = serializers.ListField(
+        child=serializers.CharField(),
+        source="value.allowed_ips",
+        required=False,
+        default=list,
+    )
+
+    class Meta:
+        model = GlobalSettings
+        exclude = [
+            "id",
+            "created_at",
+            "updated_at",
+            "name",
+            "value",
+            "folder",
+            "is_published",
+        ]
+        read_only_fields = ["name"]
+
+    def validate_allowed_ips(self, value):
+        cleaned = []
+        errors = []
+        seen = set()
+        for raw in value:
+            ip = (raw or "").strip()
+            if not ip or ip in seen:
+                continue
+            try:
+                validate_ip_or_cidr(ip)
+            except DjangoValidationError as exc:
+                errors.extend(exc.messages)
+                continue
+            seen.add(ip)
+            cleaned.append(ip)
+        if errors:
+            raise serializers.ValidationError(errors)
+        if len(cleaned) > MAX_ALLOWED_IPS:
+            raise serializers.ValidationError(
+                f"You can add at most {MAX_ALLOWED_IPS} IP addresses."
+            )
+        return cleaned
+
+    def update(self, instance, validated_data):
+        current_value_dict = instance.value if isinstance(instance.value, dict) else {}
+        new_value_dict = validated_data.get("value", {})
+        value_changed = False
+
+        for field_name, field_instance in self.fields.items():
+            if field_name in self.Meta.read_only_fields:
+                continue
+            if not hasattr(
+                field_instance, "source"
+            ) or not field_instance.source.startswith("value."):
+                continue
+            if field_name in new_value_dict:
+                source_key = field_instance.source.split(".")[-1]
+                new_val = new_value_dict[field_name]
+                if current_value_dict.get(source_key) != new_val:
+                    current_value_dict[source_key] = new_val
                     value_changed = True
 
         if value_changed:
