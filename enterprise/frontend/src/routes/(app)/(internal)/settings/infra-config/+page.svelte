@@ -4,6 +4,7 @@
 	import {
 		InfraConfigSchema,
 		isIpOrCidr,
+		normalizeIpForCompare,
 		IP_INPUT_MAXLENGTH,
 		MAX_ALLOWED_IPS
 	} from '$lib/utils/infra-config';
@@ -78,7 +79,8 @@
 			inputError = m.invalidIpOrCidr();
 			return;
 		}
-		if (allowedIps.includes(ip)) {
+		const norm = normalizeIpForCompare(ip);
+		if (allowedIps.some((existing) => normalizeIpForCompare(existing) === norm)) {
 			inputError = m.ipAlreadyAdded();
 			return;
 		}

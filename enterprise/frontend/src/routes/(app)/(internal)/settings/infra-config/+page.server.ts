@@ -8,8 +8,17 @@ import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch }) => {
-	const response = await fetch(`${BASE_API_URL}/settings/infra-config/`);
-	const infraConfig = response.ok ? await response.json() : { allowed_ips: [] };
+	let infraConfig: { allowed_ips: string[] } = { allowed_ips: [] };
+	try {
+		const response = await fetch(`${BASE_API_URL}/settings/infra-config/`);
+		if (response.ok) {
+			infraConfig = await response.json();
+		}
+	} catch (e) {
+		// Backend unreachable / timed out — fall back to an empty config rather
+		// than 500-ing the settings page.
+		console.error('Failed to load infra-config settings', e);
+	}
 
 	const form = await superValidate(infraConfig, zod(InfraConfigSchema), { errors: false });
 

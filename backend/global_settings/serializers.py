@@ -1,10 +1,32 @@
+import ipaddress
 import uuid
 
 from django.conf import settings as django_settings
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 
-from .models import GlobalSettings, validate_ip_or_cidr
+from .models import GlobalSettings
+
+
+def canonical_ip_or_cidr(value: str) -> str:
+    """Return the canonical string form of an IP address or CIDR network.
+
+    Host-bit CIDRs are normalised to their network (e.g. ``10.0.0.7/24`` ->
+    ``10.0.0.0/24``) and IPv6 is lower-cased/compressed, so the value published
+    to downstream consumers is stable and equivalent ranges dedupe correctly.
+    Raises ``DjangoValidationError`` on invalid input.
+    """
+    candidate = (value or "").strip()
+    try:
+        return str(ipaddress.ip_address(candidate))
+    except ValueError:
+        pass
+    try:
+        return str(ipaddress.ip_network(candidate, strict=False))
+    except ValueError:
+        raise DjangoValidationError(
+            f"'{value}' is not a valid IP address or CIDR range."
+        )
 
 
 def validate_default_dashboard_value(value):
@@ -511,15 +533,19 @@ class InfraConfigSerializer(serializers.ModelSerializer):
         seen = set()
         for raw in value:
             ip = (raw or "").strip()
-            if not ip or ip in seen:
+            if not ip:
                 continue
             try:
-                validate_ip_or_cidr(ip)
+                canonical = canonical_ip_or_cidr(ip)
             except DjangoValidationError as exc:
                 errors.extend(exc.messages)
                 continue
-            seen.add(ip)
-            cleaned.append(ip)
+            # Dedupe on the canonical form so equivalent ranges (e.g.
+            # 10.0.0.0/24 and 10.0.0.7/24) collapse to a single entry.
+            if canonical in seen:
+                continue
+            seen.add(canonical)
+            cleaned.append(canonical)
         if errors:
             raise serializers.ValidationError(errors)
         if len(cleaned) > MAX_ALLOWED_IPS:

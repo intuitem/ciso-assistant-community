@@ -15,10 +15,23 @@ function isIpv4(addr: string): boolean {
 
 function isIpv6(addr: string): boolean {
 	if (!/^[0-9a-fA-F:]+$/.test(addr)) return false;
-	if ((addr.match(/::/g) || []).length > 1) return false; // at most one '::'
-	const groups = addr.split(':');
-	if (groups.length > 8) return false;
-	return groups.every((g) => g === '' || /^[0-9a-fA-F]{1,4}$/.test(g));
+
+	const validGroup = (g: string) => /^[0-9a-fA-F]{1,4}$/.test(g);
+	const parts = addr.split('::');
+	if (parts.length > 2) return false; // at most one '::'
+
+	if (parts.length === 1) {
+		// No compression: must be exactly 8 valid hextets.
+		const groups = addr.split(':');
+		return groups.length === 8 && groups.every(validGroup);
+	}
+
+	// With '::': each side is a (possibly empty) run of valid hextets, and the
+	// '::' stands for at least one zero group, so the two sides total <= 7.
+	const head = parts[0] ? parts[0].split(':') : [];
+	const tail = parts[1] ? parts[1].split(':') : [];
+	if (!head.every(validGroup) || !tail.every(validGroup)) return false;
+	return head.length + tail.length <= 7;
 }
 
 // Validate a single IP address or CIDR range. Kept close to the backend
@@ -40,6 +53,11 @@ export function isIpOrCidr(value: string): boolean {
 
 	return addr.includes(':') ? isIpv6(addr) : isIpv4(addr);
 }
+
+// Normalise for case-insensitive duplicate comparison (IPv6 is hex, so
+// 2001:DB8::1 and 2001:db8::1 are the same address). The backend canonicalises
+// fully on save; this just prevents obvious client-side dupes.
+export const normalizeIpForCompare = (value: string) => value.trim().toLowerCase();
 
 // Max length of a textual IPv6 + prefix (e.g. full address + "/128").
 export const IP_INPUT_MAXLENGTH = 49;
