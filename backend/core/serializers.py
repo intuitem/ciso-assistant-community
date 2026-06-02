@@ -1480,6 +1480,7 @@ class AppliedControlListSerializer(BaseModelSerializer):
             "eta",
             "start_date",
             "expiry_date",
+            "progress_field",
             "cost",
             "folder",
             "reference_control",

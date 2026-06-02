@@ -76,6 +76,29 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 from django.core.cache import cache
 
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+from core.helpers import get_instance_metrics
+from core.instance_metrics import (
+    nb_users_gauge,
+    nb_first_login_gauge,
+    nb_libraries_gauge,
+    nb_domains_gauge,
+    nb_perimeters_gauge,
+    nb_assets_gauge,
+    nb_threats_gauge,
+    nb_functions_gauge,
+    nb_measures_gauge,
+    nb_evidences_gauge,
+    nb_compliance_assessments_gauge,
+    nb_risk_assessments_gauge,
+    nb_risk_scenarios_gauge,
+    nb_risk_acceptances_gauge,
+    nb_seats_gauge,
+    nb_editors_gauge,
+    expiration_gauge,
+    created_at_gauge,
+    last_login_gauge,
+)
 
 from django.apps import apps
 from django.contrib.auth.models import AnonymousUser, Permission
@@ -717,7 +740,12 @@ class GenericFilterSet(df.FilterSet):
         }
 
 
-class FolderOrderingFilter(filters.OrderingFilter):
+class SmartOrderingFilter(filters.OrderingFilter):
+    # Suffixes of fields ordered case-insensitively. Postgres sorts uppercase
+    # before lowercase while SQLite does not, so a raw name ordering is
+    # inconsistent across backends; wrapping in Lower() makes it deterministic.
+    case_insensitive_suffixes = ("name",)
+
     def get_ordering(self, request, queryset, view):
         ordering = super().get_ordering(request, queryset, view)
         if ordering:
@@ -731,12 +759,26 @@ class FolderOrderingFilter(filters.OrderingFilter):
             ]
         return ordering
 
+    def filter_queryset(self, request, queryset, view):
+        ordering = self.get_ordering(request, queryset, view)
+        if ordering:
+            return queryset.order_by(*[self._as_term(f) for f in ordering])
+        return queryset
+
+    def _as_term(self, term):
+        descending = term.startswith("-")
+        field = term[1:] if descending else term
+        if field.split("__")[-1] in self.case_insensitive_suffixes:
+            expr = Lower(field)
+            return expr.desc() if descending else expr.asc()
+        return term
+
 
 class BaseModelViewSet(viewsets.ModelViewSet):
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
-        FolderOrderingFilter,
+        SmartOrderingFilter,
     ]
     ordering = ["created_at"]
     ordering_fields = "__all__"
@@ -8098,19 +8140,32 @@ class UserPreferencesView(APIView):
         return Response(prefs, status=status.HTTP_200_OK)
 
     def patch(self, request) -> Response:
-        new_language = request.data.get("lang")
-        if new_language is None or new_language not in (
-            lang[0] for lang in settings.LANGUAGES
-        ):
-            logger.error(
-                f"Error in UserPreferencesView: new_language={new_language} available languages={[lang[0] for lang in settings.LANGUAGES]}"
-            )
-            return Response(
-                {"error": "This language doesn't exist."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
         prefs = request.user.get_preferences()
-        prefs["lang"] = new_language
+
+        if "lang" in request.data:
+            new_language = request.data.get("lang")
+            if new_language not in (lang[0] for lang in settings.LANGUAGES):
+                logger.error(
+                    f"Error in UserPreferencesView: new_language={new_language} available languages={[lang[0] for lang in settings.LANGUAGES]}"
+                )
+                return Response(
+                    {"error": "This language doesn't exist."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            prefs["lang"] = new_language
+
+        if "date_format" in request.data:
+            new_date_format = request.data.get("date_format")
+            if new_date_format not in request.user.DATE_FORMATS:
+                logger.error(
+                    f"Error in UserPreferencesView: date_format={new_date_format} available formats={request.user.DATE_FORMATS}"
+                )
+                return Response(
+                    {"error": "This date format doesn't exist."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            prefs["date_format"] = new_date_format
+
         request.user.preferences = prefs
         request.user.save(update_fields=["preferences"])
         return Response({}, status=status.HTTP_200_OK)
@@ -19020,3 +19075,34 @@ def global_search(request):
             "total_candidates": len(candidates),
         }
     )
+
+
+def metrics_view(request):
+    try:
+        metrics = get_instance_metrics()
+        nb_users_gauge.set(metrics.get("nb_users", 0))
+        nb_first_login_gauge.set(metrics.get("nb_first_login", 0))
+        nb_libraries_gauge.set(metrics.get("nb_libraries", 0))
+        nb_domains_gauge.set(metrics.get("nb_domains", 0))
+        nb_perimeters_gauge.set(metrics.get("nb_perimeters", 0))
+        nb_assets_gauge.set(metrics.get("nb_assets", 0))
+        nb_threats_gauge.set(metrics.get("nb_threats", 0))
+        nb_functions_gauge.set(metrics.get("nb_functions", 0))
+        nb_measures_gauge.set(metrics.get("nb_measures", 0))
+        nb_evidences_gauge.set(metrics.get("nb_evidences", 0))
+        nb_compliance_assessments_gauge.set(metrics.get("nb_compliance_assessments", 0))
+        nb_risk_assessments_gauge.set(metrics.get("nb_risk_assessments", 0))
+        nb_risk_scenarios_gauge.set(metrics.get("nb_risk_scenarios", 0))
+        nb_risk_acceptances_gauge.set(metrics.get("nb_risk_acceptances", 0))
+        nb_seats_gauge.set(metrics.get("nb_seats", 0))
+        nb_editors_gauge.set(metrics.get("nb_editors", 0))
+        expiration_gauge.set(metrics.get("expiration", 0))
+        created_at_gauge.set(metrics.get("created_at", 0))
+        last_login_gauge.set(metrics.get("last_login", 0))
+    except Exception as e:
+        logger.warning(f"# Error collecting metrics: {e}\n", exc_info=True)
+        return HttpResponse(
+            "Error collecting metrics", status=500, content_type="text/plain"
+        )
+
+    return HttpResponse(generate_latest(), content_type=CONTENT_TYPE_LATEST)

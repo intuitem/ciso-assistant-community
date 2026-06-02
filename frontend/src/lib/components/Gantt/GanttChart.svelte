@@ -2,6 +2,7 @@
 	import { tick } from 'svelte';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
+	import { formatDate as formatDatePref, getDateFormatPreference } from '$lib/utils/datetime';
 
 	export interface GanttItem {
 		id: string;
@@ -242,7 +243,10 @@
 
 	function formatDate(d: Date | null): string {
 		if (!d) return '—';
-		return d.toLocaleDateString(getLocale(), { year: 'numeric', month: 'short', day: 'numeric' });
+		if (getDateFormatPreference() === 'auto') {
+			return d.toLocaleDateString(getLocale(), { year: 'numeric', month: 'short', day: 'numeric' });
+		}
+		return formatDatePref(d, false, getLocale());
 	}
 
 	// --- Scroll container ref for auto-scroll to today ---
