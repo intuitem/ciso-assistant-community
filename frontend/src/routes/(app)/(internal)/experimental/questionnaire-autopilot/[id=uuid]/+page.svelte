@@ -2,6 +2,8 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
+	import { getLocale } from '$paraglide/runtime';
+	import { formatDate } from '$lib/utils/datetime';
 	import { pageTitle } from '$lib/utils/stores';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
@@ -591,7 +593,7 @@
 	}
 
 	function formatTimestamp(iso: string | null): string {
-		return iso ? new Date(iso).toLocaleString() : '—';
+		return iso ? formatDate(new Date(iso), true, getLocale()) : '—';
 	}
 
 	const runDurationMs = $derived.by(() => {
@@ -751,7 +753,7 @@
 				{/if}
 				<div class="text-xs text-gray-500 mt-1">
 					Domain: {run.folder?.str || run.folder?.name || '—'} · Uploaded
-					{new Date(run.created_at).toLocaleString()}
+					{formatDate(new Date(run.created_at), true, getLocale())}
 				</div>
 			</div>
 			<div class="text-right space-y-1">

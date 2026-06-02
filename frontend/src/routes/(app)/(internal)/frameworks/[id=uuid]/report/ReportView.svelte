@@ -3,6 +3,8 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { m } from '$paraglide/messages';
+	import { getLocale } from '$paraglide/runtime';
+	import { formatDate } from '$lib/utils/datetime';
 	import { safeTranslate } from '$lib/utils/i18n';
 
 	// -----------------------------------------------------------------------------
@@ -543,7 +545,7 @@
 				{/if}
 				<div class="text-xs text-gray-400 mt-1">
 					{m.generatedLabel()}
-					{new Date(report.generated_at).toLocaleString()}
+					{formatDate(new Date(report.generated_at), true, getLocale())}
 				</div>
 			</div>
 			<div class="flex gap-2 items-center">

@@ -19,13 +19,13 @@ graph LR
   RS -->|mitigated by| AC[Applied controls]
 ```
 
-A risk assessment always lives inside a **domain** (the mandatory IAM scope) and is bound to one **risk matrix** that supplies the probability × impact scale (the matrix can be swapped later; the platform refits existing scores onto the new scale). A **perimeter** can optionally narrow the assessment to a specific service or process inside the domain. The assessment is composed of **risk scenarios**; each scenario links to the **assets** it impacts, the **threats** it materialises, and the **applied controls** that mitigate it (split between _existing_ and _planned_ to drive the three-tier risk model below).
+A risk assessment always lives inside a **domain** (the mandatory IAM scope) and is bound to one **risk matrix** that supplies the probability × impact scale (the matrix can be swapped later; existing scores are clamped to the new scale). A **perimeter** can optionally narrow the assessment to a specific service or process inside the domain. The assessment is composed of **risk scenarios**; each scenario links to the **assets** it impacts, the **threats** it materialises, and the **applied controls** that mitigate it (split between _existing_ and _planned_ to drive the three-tier risk model below).
 
 | User-facing | Internal | Notes |
 |---|---|---|
 | Risk assessment | `RiskAssessment` | Also called "Risk study" in the UI |
 | Risk scenario | `RiskScenario` | A row inside the assessment |
-| Risk matrix | `RiskMatrix` | Can be changed; the platform refits existing scenario scores onto the new scale |
+| Risk matrix | `RiskMatrix` | Can be changed; existing scenario scores are clamped to the new scale's bounds |
 | Domain | `Folder` | Required; drives IAM scoping |
 | Threat | `Threat` | Catalog entry from a library |
 
@@ -51,19 +51,19 @@ CISO Assistant tracks three risk levels for each scenario, reflecting where the 
 - **Current risk** — the level given the applied controls _already in place_. The state of risk today.
 - **Residual risk** — the level expected once all _planned_ applied controls have been implemented. The target state, and the figure used in risk-acceptance decisions.
 
-Each level has its own probability, impact, and overall level fields. When scoring, the platform expects monotonicity — residual should not exceed current, current should not exceed inherent — and warns if a scenario violates it.
+Each level has its own probability, impact, and overall level fields. The assessment's consistency check flags a scenario whose **residual** risk exceeds its **current** risk (on level, probability, or impact), and also flags a residual lowered below current when no applied control justifies the reduction.
 
 ## Risk acceptance
 
 Risk acceptance is when an organisation or individual decides to tolerate a certain level of risk without taking further action to reduce it. CISO Assistant provides a workflow to capture formal approval of risk acceptances by management — the approver must hold the **Approver** role.
 
-For context on the process itself, see the [ENISA risk-management process](https://www.enisa.europa.eu/topics/risk-management/current-risk/risk-management-inventory/rm-process/risk-acceptance).
+For the formal definition, see [ISO 31073:2022, term 3.3.32 — risk acceptance](https://www.iso.org/obp/ui/#iso:std:iso:31073:ed-1:v1:en:term:3.3.32).
 
 ## Risk matrix
 
 Risk levels are calculated as a function of the probability and impact of a scenario, using a configurable **risk matrix**. Matrices are imported from libraries — pick one of the built-in matrices or define your own via a custom library.
 
-Most organisations define an official matrix to be used for all risk assessments, but CISO Assistant lets you choose a different matrix per assessment when needed. The matrix **can be changed** after the assessment has been created — the platform performs a best-effort mapping of each scenario's existing probability and impact values onto the new scale (extra fitting computation runs to preserve as much of the prior scoring as possible). Review the migrated scenarios afterwards to confirm the new levels reflect your intent.
+Most organisations define an official matrix to be used for all risk assessments, but CISO Assistant lets you choose a different matrix per assessment when needed. The matrix **can be changed** after the assessment has been created. When you do, each scenario's existing probability and impact values are clamped to the new scale's bounds — a score that falls outside the new range is clipped to the nearest valid value, and unrated scenarios stay unrated. There is no proportional rescaling, so review the scenarios afterwards and correct any score that no longer reflects your intent.
 
 ## Related
 
