@@ -35,7 +35,14 @@ description: '## VOORWOORD
 
 
   Vastgesteld ter invulling van artikel 2 van het Kaderbesluit ABRO rijksdienst, zoals
-  gepubliceerd in de Staatscourant, te Den Haag op 3 december 2025.'
+  gepubliceerd in de Staatscourant, te Den Haag op 3 december 2025.
+
+
+  Bron :
+
+  * https://open.overheid.nl/documenten/a13699d9-fcf4-43ef-b282-ece9519e9b81/file
+
+  * https://open.overheid.nl/documenten/8a2c1e3a-f62c-4cd6-9827-3d4ccc9162ba/file'
 copyright: 'Government of the Netherlands / Open Overheid (CC0)
 
   https://www.open-overheid.nl/service/copyright'
@@ -80,7 +87,14 @@ translations:
 
 
       ABRO 2026 is adopted to implement article 2 of the ''Kaderbesluit ABRO Rijksdienst'',
-      as published in the Government Gazette in The Hague on December 3, 2025.'
+      as published in the Government Gazette in The Hague on December 3, 2025.
+
+
+      Sources :
+
+      * https://open.overheid.nl/documenten/a13699d9-fcf4-43ef-b282-ece9519e9b81/file
+
+      * https://open.overheid.nl/documenten/8a2c1e3a-f62c-4cd6-9827-3d4ccc9162ba/file'
 objects:
   framework:
     urn: urn:intuitem:risk:framework:abro_2026
@@ -118,7 +132,14 @@ objects:
 
 
       Vastgesteld ter invulling van artikel 2 van het Kaderbesluit ABRO rijksdienst,
-      zoals gepubliceerd in de Staatscourant, te Den Haag op 3 december 2025.'
+      zoals gepubliceerd in de Staatscourant, te Den Haag op 3 december 2025.
+
+
+      Bron :
+
+      * https://open.overheid.nl/documenten/a13699d9-fcf4-43ef-b282-ece9519e9b81/file
+
+      * https://open.overheid.nl/documenten/8a2c1e3a-f62c-4cd6-9827-3d4ccc9162ba/file'
     translations:
       en:
         name: General Security Requirements for Central Government Contracts (ABRO)
@@ -158,7 +179,14 @@ objects:
 
 
           ABRO 2026 is adopted to implement article 2 of the ''Kaderbesluit ABRO Rijksdienst'',
-          as published in the Government Gazette in The Hague on December 3, 2025.'
+          as published in the Government Gazette in The Hague on December 3, 2025.
+
+
+          Sources :
+
+          * https://open.overheid.nl/documenten/a13699d9-fcf4-43ef-b282-ece9519e9b81/file
+
+          * https://open.overheid.nl/documenten/8a2c1e3a-f62c-4cd6-9827-3d4ccc9162ba/file'
     implementation_groups_definition:
     - ref_id: '1'
       name: TBB 1 / Stg. ZG
