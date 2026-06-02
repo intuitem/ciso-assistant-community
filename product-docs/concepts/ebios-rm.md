@@ -1,6 +1,6 @@
 # EBIOS RM
 
-**EBIOS RM** (_Expression des Besoins et Identification des Objectifs de Sécurité — Risk Manager_) is the structured risk-management method published by the French national cybersecurity agency, [ANSSI](https://cyber.gouv.fr/en/ebios-risk-manager).
+**EBIOS RM** (_Expression des Besoins et Identification des Objectifs de Sécurité — Risk Manager_) is the structured risk-management method published by the French national cybersecurity agency, [ANSSI](https://cyber.gouv.fr/securisation/analyse-des-risques/methode-ebios-rm/).
 
 CISO Assistant supports EBIOS RM natively, with a dedicated object graph rather than forcing the method into a generic risk-assessment shape.
 

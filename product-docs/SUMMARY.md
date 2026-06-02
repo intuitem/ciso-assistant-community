@@ -67,9 +67,11 @@
   * [Managing secrets](installation/managing-secrets.md)
   * [Setting up S3](installation/s3.md)
   * [Setting up mailer](installation/mailer.md)
+  * [Prometheus metrics](installation/prometheus-metrics.md)
 * Maintenance
   * [Updating your local instance](installation/updating.md)
   * [Special cases](installation/special-cases.md)
+  * [Migrate between different databases](installation/migrate-database.md)
 * [Frequent questions](installation/faq.md)
 
 ## Configuration
@@ -104,8 +106,17 @@
   * [Library upgrade](configuration/libraries/library-upgrade.md)
   * [Upgrading a library](configuration/libraries/upgrading-a-library.md)
   * [Library clean-up](configuration/libraries/library-cleanup.md)
+* [Authoring](configuration/authoring/README.md)
+  * [Framework](configuration/authoring/framework.md)
+    * [Framework builder — reference](configuration/authoring/framework-builder.md)
+  * [Risk matrix](configuration/authoring/matrix.md)
+    * [Matrix editor — reference](configuration/authoring/matrix-editor.md)
+  * [Journey preset](configuration/authoring/preset.md)
+    * [Preset editor — reference](configuration/authoring/preset-editor.md)
+  * [Excel-driven authoring](configuration/authoring/excel.md)
 * [Data import wizard](configuration/data-import.md)
 * [Changing the language](configuration/language.md)
+* [Date format](configuration/date-format.md)
 
 ## Guides
 
