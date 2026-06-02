@@ -2950,6 +2950,8 @@
 	"inheritancePath": "Chemin d'héritage",
 	"applyDomainInheritance": "Appliquer l'héritage entre domaines",
 	"combinedView": "Vue combinée",
+	"combinedResults": "Résultats combinés",
+	"inheritedRequirements": "Exigences héritées",
 	"securityObjectivesTooltip": "Les cibles de sécurité sont définies sur les actifs primaires et automatiquement déduites pour les actifs support",
 	"securityCapabilitiesTooltip": "Les capacités de sécurité sont définies sur les actifs de support et automatiquement déduites pour les actifs primaires",
 	"disasterRecoveryObjectivesTooltip": "Les objectifs de reprise d'activité sont définis sur les actifs primaires et automatiquement déduits pour les actifs support",

@@ -15,17 +15,28 @@
 
 	let { data }: Props = $props();
 
-	// Flatten the combined_tree into the assessable requirements that actually
-	// inherit a value from an ancestor audit (nearest-first path preserved).
-	function flattenInherited(tree: Record<string, any>): any[] {
+	let combinedOpen = $state(true);
+
+	// Flatten the combined_tree into EVERY assessable requirement (all
+	// implementation groups), in tree order, with own vs effective values and the
+	// inheritance source when one applies. Drives both the donut and the table so
+	// they always reflect the same full set.
+	function flattenAssessable(tree: Record<string, any>): any[] {
 		const out: any[] = [];
 		const walk = (nodes: Record<string, any>) => {
 			for (const node of Object.values(nodes ?? {})) {
-				if (node?.assessable && node?.inheritance?.inherited) {
+				if (node?.assessable) {
+					const inh = node.inheritance?.inherited ? node.inheritance : null;
 					out.push({
 						ref_id: node.ref_id,
 						name: node.name,
-						inheritance: node.inheritance
+						own_result: node.result ?? 'not_assessed',
+						own_score: node.score,
+						effective_result: inh ? inh.effective_result : (node.result ?? 'not_assessed'),
+						effective_score: inh ? inh.effective_score : node.score,
+						scale_max: inh ? inh.scale?.max : node.max_score,
+						inherited: !!inh,
+						inheritance: inh
 					});
 				}
 				if (node?.children) walk(node.children);
@@ -33,6 +44,18 @@
 		};
 		walk(tree);
 		return out;
+	}
+
+	function distFromRows(rows: any[]): Record<string, number> {
+		const dist: Record<string, number> = {
+			not_assessed: 0,
+			partially_compliant: 0,
+			non_compliant: 0,
+			compliant: 0,
+			not_applicable: 0
+		};
+		for (const r of rows) if (r.effective_result in dist) dist[r.effective_result]++;
+		return dist;
 	}
 
 	function strategyLabel(strategy: string): string {
@@ -248,77 +271,139 @@
 
 	<!-- Domain-tree inheritance -->
 	{#await data.stream.combinedTree then combined}
-		{#if combined && combined.strategy && combined.strategy !== 'none'}
-			{@const inheritedRows = flattenInherited(combined.tree)}
-			{#if inheritedRows.length > 0}
-				<section class="rounded-xl border border-slate-200 bg-white overflow-hidden">
-					<div class="border-b border-slate-100 px-6 py-4 flex items-center gap-2.5">
-						<span
-							class="flex items-center justify-center w-7 h-7 rounded-md bg-emerald-50 text-emerald-500"
-						>
-							<i class="fa-solid fa-code-branch text-xs"></i>
-						</span>
-						<h2 class="text-sm font-semibold text-slate-800 tracking-tight">
-							{m.combinedView()}
-						</h2>
-						<span class="text-xs text-slate-400">{strategyLabel(combined.strategy)}</span>
+		{#if combined && combined.strategy && combined.strategy !== 'none' && combined.ancestors?.length > 0}
+			{@const rows = flattenAssessable(combined.tree)}
+			{@const dist = distFromRows(rows)}
+			{@const total = rows.length}
+			{@const inheritedCount = rows.filter((r) => r.inherited).length}
+			<section class="rounded-xl border border-slate-200 bg-white overflow-hidden">
+				<button
+					type="button"
+					onclick={() => (combinedOpen = !combinedOpen)}
+					class="w-full border-b border-slate-100 px-6 py-4 flex items-center gap-2.5 cursor-pointer hover:bg-slate-50 transition-colors"
+					aria-expanded={combinedOpen}
+				>
+					<span
+						class="flex items-center justify-center w-7 h-7 rounded-md bg-emerald-50 text-emerald-500"
+					>
+						<i class="fa-solid fa-code-branch text-xs"></i>
+					</span>
+					<h2 class="text-sm font-semibold text-slate-800 tracking-tight">
+						{m.combinedView()}
+					</h2>
+					<span class="text-xs text-slate-400">{strategyLabel(combined.strategy)}</span>
+					<i
+						class="fa-solid fa-chevron-down text-xs text-slate-400 ml-auto transition-transform {combinedOpen
+							? ''
+							: '-rotate-90'}"
+					></i>
+				</button>
+				<div class="p-6 space-y-6 {combinedOpen ? '' : 'hidden'}">
+					<!-- Split progress bar: effective results across ALL requirements (every IG) -->
+					<div>
+						<div class="flex items-center justify-between mb-2">
+							<p class="text-xs text-slate-500">
+								{m.combinedResults()} ({total})
+							</p>
+							<span class="text-xs text-slate-500 inline-flex items-center gap-1.5">
+								<span class="inline-block w-2 h-2 rounded-full bg-emerald-200"></span>
+								{m.inheritedRequirements()}:
+								<strong class="text-slate-700">{inheritedCount}</strong>
+								/ {total}
+							</span>
+						</div>
+						<div class="flex w-full h-6 rounded-md overflow-hidden bg-slate-100">
+							{#each RESULT_KEYS as k, i}
+								{@const v = dist[k] ?? 0}
+								{#if v > 0}
+									{@const pct = (v / total) * 100}
+									<div
+										class="h-full flex items-center justify-center text-[10px] font-medium text-slate-700/80"
+										style="width:{pct}%; background:{RESULT_COLORS[i]}"
+										title="{safeTranslate(k)}: {v} ({Math.round(pct)}%)"
+									>
+										{#if pct >= 7}{Math.round(pct)}%{/if}
+									</div>
+								{/if}
+							{/each}
+						</div>
+						<div class="flex flex-wrap gap-x-4 gap-y-1 mt-3 text-xs text-slate-600">
+							{#each RESULT_KEYS as k, i}
+								{@const v = dist[k] ?? 0}
+								{#if v > 0}
+									<span class="inline-flex items-center gap-1.5">
+										<span
+											class="inline-block w-2.5 h-2.5 rounded-sm"
+											style="background:{RESULT_COLORS[i]}"
+										></span>
+										{safeTranslate(k)}
+										<span class="text-slate-400">{v} ({Math.round((v / total) * 100)}%)</span>
+									</span>
+								{/if}
+							{/each}
+						</div>
 					</div>
-					<div class="p-6 overflow-x-auto">
+
+					<!-- Full combined table: every requirement, inherited rows highlighted -->
+					<div class="overflow-x-auto">
 						<table class="w-full text-sm">
 							<thead>
 								<tr class="text-left text-slate-500 border-b border-slate-100">
 									<th class="py-2 pr-3">{m.requirement()}</th>
-									<th class="py-2 px-3">{m.ownResult()}</th>
 									<th class="py-2 px-3">{m.effectiveResult()}</th>
 									<th class="py-2 px-3 text-right">{m.score()}</th>
 									<th class="py-2 pl-3">{m.inheritedFrom()}</th>
 								</tr>
 							</thead>
 							<tbody>
-								{#each inheritedRows as row}
-									{@const inh = row.inheritance}
-									<tr class="border-b border-slate-50">
+								{#each rows as row}
+									<tr class="border-b border-slate-50 {row.inherited ? 'bg-emerald-50/50' : ''}">
 										<td class="py-2 pr-3">
 											<span class="font-mono text-xs text-slate-400">{row.ref_id ?? ''}</span>
 											{row.name ?? ''}
-										</td>
-										<td class="py-2 px-3 text-slate-500">
-											{inh.own?.result ? safeTranslate(inh.own.result) : '—'}
 										</td>
 										<td class="py-2 px-3">
 											<span class="inline-flex items-center gap-1.5">
 												<span
 													class="inline-block w-2 h-2 rounded-full"
-													style="background:{complianceResultColorMap[inh.effective_result] ??
+													style="background:{complianceResultColorMap[row.effective_result] ??
 														'#9ca3af'}"
 												></span>
-												{safeTranslate(inh.effective_result)}
+												<span class={row.inherited ? 'font-medium' : ''}
+													>{safeTranslate(row.effective_result)}</span
+												>
 											</span>
 										</td>
 										<td class="py-2 px-3 text-right font-mono">
-											{inh.effective_score ?? '—'}
-											{#if inh.scale?.max != null}
-												<span class="text-[10px] text-slate-300">/ {inh.scale.max}</span>
+											{row.effective_score ?? '—'}
+											{#if row.effective_score != null && row.scale_max != null}
+												<span class="text-[10px] text-slate-300">/ {row.scale_max}</span>
 											{/if}
 										</td>
 										<td class="py-2 pl-3">
-											<a
-												class="anchor inline-flex items-center gap-1"
-												href="/compliance-assessments/{inh.source?.ca_id}"
-												title={inhPathTitle(inh)}
-											>
-												<i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-												<span class="text-slate-400">{inh.source?.folder_name ?? '—'} ·</span>
-												{inh.source?.ca_name}
-											</a>
+											{#if row.inherited && row.inheritance?.source}
+												<a
+													class="anchor inline-flex items-center gap-1"
+													href="/compliance-assessments/{row.inheritance.source.ca_id}"
+													title={inhPathTitle(row.inheritance)}
+												>
+													<i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+													<span class="text-slate-400"
+														>{row.inheritance.source.folder_name ?? '—'} ·</span
+													>
+													{row.inheritance.source.ca_name}
+												</a>
+											{:else}
+												<span class="text-slate-300">—</span>
+											{/if}
 										</td>
 									</tr>
 								{/each}
 							</tbody>
 						</table>
 					</div>
-				</section>
-			{/if}
+				</div>
+			</section>
 		{/if}
 	{/await}
 

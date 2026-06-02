@@ -120,8 +120,13 @@ class ChainEntry:
     is_scored: bool
     scale: tuple[Optional[int], Optional[int]]
 
-    def has_value(self) -> bool:
+    def has_result(self) -> bool:
+        """A real result verdict — `not_assessed` carries no opinion."""
         return self.result not in (None, NOT_ASSESSED)
+
+    def has_score(self) -> bool:
+        """An actual score — an unscored requirement carries no opinion."""
+        return self.is_scored and self.score is not None
 
 
 @dataclass
@@ -147,10 +152,11 @@ def select_ancestor_audits(
     """Nearest-first list of inheritable ancestor audits on the same framework.
 
     Exactly one audit per ancestor domain: live status, most recently updated.
-    The global root folder is skipped (org-wide audits live in real domains).
+    The Global root folder participates too — an org-wide audit placed there is a
+    legitimate inheritance source (common capabilities flowing down to every
+    domain).
     """
     from core.models import ComplianceAssessment
-    from iam.models import Folder
 
     folder = target_ca.folder
     if folder is None:
@@ -161,8 +167,6 @@ def select_ancestor_audits(
     distance = 0
     for ancestor in folder.get_parent_folders():  # nearest-first
         distance += 1
-        if ancestor.content_type == Folder.ContentType.ROOT:
-            continue
         qs = ComplianceAssessment.objects.filter(
             folder=ancestor,
             framework_id=target_ca.framework_id,
@@ -176,34 +180,38 @@ def select_ancestor_audits(
     return result
 
 
-def _pick(strategy: str, own: Optional[ChainEntry], chain: list[ChainEntry]):
-    """Select the winning ChainEntry for one requirement, per strategy.
+def _pick_nearest(strategy: str, own, ancestors):
+    """Shared nearest/parent/child selection over a pre-filtered candidate set.
 
-    ``own`` is the target's own entry (distance 0) or None; ``chain`` is the
-    ancestor entries, nearest-first (distance ascending). Returns a ChainEntry
-    or None when nothing carries a value.
+    ``own`` is the target's qualifying entry (distance 0) or None; ``ancestors``
+    are qualifying ancestor entries, nearest-first. Used by both result and
+    score resolution after each has excluded entries lacking that dimension.
     """
-    ancestors_valued = [e for e in chain if e.has_value()]
-    own_valued = own if (own is not None and own.has_value()) else None
-
     if strategy == AuditTreeAggregationStrategy.CHILD_WINS:
-        if own_valued:
-            return own_valued
-        return ancestors_valued[0] if ancestors_valued else None
-
+        return own or (ancestors[0] if ancestors else None)
     if strategy == AuditTreeAggregationStrategy.PARENT_WINS:
-        if ancestors_valued:
-            return ancestors_valued[0]  # nearest ancestor
-        return own_valued
+        return ancestors[0] if ancestors else own
+    return None  # best/worst handled by the dimension-specific picker
 
-    # best_case / worst_case: compare across the whole chain.
-    pool = ([own_valued] if own_valued else []) + ancestors_valued
+
+def _pick_result(strategy: str, own: Optional[ChainEntry], chain: list[ChainEntry]):
+    """Winning entry for the *result* verdict — entries without a real result
+    (``not_assessed``) never count toward the decision."""
+    ancestors = [e for e in chain if e.has_result()]
+    own_r = own if (own is not None and own.has_result()) else None
+
+    if strategy in (
+        AuditTreeAggregationStrategy.CHILD_WINS,
+        AuditTreeAggregationStrategy.PARENT_WINS,
+    ):
+        return _pick_nearest(strategy, own_r, ancestors)
+
+    # best_case / worst_case: compare compliance strength across the chain.
+    pool = ([own_r] if own_r else []) + ancestors
     ranked = [e for e in pool if e.result in RESULT_STRENGTH]
     if ranked:
         if strategy == AuditTreeAggregationStrategy.BEST_CASE:
-            # highest strength; ties -> nearest (smallest distance)
             return max(ranked, key=lambda e: (RESULT_STRENGTH[e.result], -e.distance))
-        # worst_case: lowest strength; ties -> nearest
         return min(ranked, key=lambda e: (RESULT_STRENGTH[e.result], e.distance))
     # Only not_applicable values present: surface the nearest one.
     return pool[0] if pool else None
@@ -219,18 +227,23 @@ def resolve_requirement(
 
     Returns None when no ancestor audit covers this requirement (nothing to
     overlay — the child's own value stands alone).
+
+    Result and score come from the SAME winning assessment: the strategy picks
+    one source by result (entries that are ``not_assessed`` never count), and the
+    score is whatever that source recorded — absent when that source didn't score
+    it. A score is only meaningful paired with the result it was given for, so it
+    never rides along with a different audit's verdict.
     """
     if not chain:
         return None
 
-    chosen = _pick(strategy, own, chain)
+    chosen = _pick_result(strategy, own, chain)
     inherited = bool(chosen is not None and chosen.distance > 0)
 
-    effective_source = chosen if chosen is not None else own
-    effective_result = effective_source.result if effective_source else NOT_ASSESSED
+    effective_result = chosen.result if chosen else NOT_ASSESSED
     effective_score = (
-        normalize_score(effective_source.score, effective_source.scale, canonical_scale)
-        if effective_source
+        normalize_score(chosen.score, chosen.scale, canonical_scale)
+        if (chosen is not None and chosen.has_score())
         else None
     )
 
