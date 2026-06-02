@@ -27,7 +27,11 @@ De Rijksoverheid en politie beschikken over informatie, systemen, materieel en o
 
 De ABRO 2026 is een doorontwikkeling van de ABDO 2019, de Algemene Beveiligingseisen voor Defensieopdrachten. Met het in werking treden van de ABRO 2026 gebruiken de gehele Rijksoverheid en de politie dezelfde beveiligingseisen als leveranciers worden ingeschakeld bij opdrachten waarbij Te Beschermen Belangen zijn betrokken. Voor bestaande contracten van Defensie waarop de ABDO van toepassing zijn, blijven de ABDO gelden voor de looptijd van het contract.
 
-Vastgesteld ter invulling van artikel 2 van het Kaderbesluit ABRO rijksdienst, zoals gepubliceerd in de Staatscourant, te Den Haag op 3 december 2025."""
+Vastgesteld ter invulling van artikel 2 van het Kaderbesluit ABRO rijksdienst, zoals gepubliceerd in de Staatscourant, te Den Haag op 3 december 2025.
+
+Bron :
+* https://open.overheid.nl/documenten/a13699d9-fcf4-43ef-b282-ece9519e9b81/file
+* https://open.overheid.nl/documenten/8a2c1e3a-f62c-4cd6-9827-3d4ccc9162ba/file"""
 FRAMEWORK_DESCRIPTION_EN = """## INTRODUCTION
 
 Geopolitical developments and events such as acts of sabotage in Europe and espionage by state actors stress the need to protect national security interests. The government-wide approach to economic security has further reinforced the attention for this issue. When the Central Government and the police procure products and/or services from a supplier, this may trigger risks to national security. The General Security Requirements for Central Government Contracts (ABRO) 2026 have been prepared to mitigate these risks.
@@ -36,7 +40,11 @@ The Central Government and the police are in the possession of information, syst
 
 The ABRO 2026 represents the continued development of ABDO 2019, the General Security Requirements for Defence Contracts. With the coming into force of the ABRO 2026, the entire Central Government and the police subject suppliers to the same security requirements where contracts involving Interests to be Protected are concerned. Existing Defence contracts to which ABDO applies, are still subject to ABDO for the term of the contract. This document is a translation of the original Dutch ABRO 2026. In the event of any conflict or inconsistency between this English translation and the original Dutch text, the Dutch text shall prevail.
 
-ABRO 2026 is adopted to implement article 2 of the 'Kaderbesluit ABRO Rijksdienst', as published in the Government Gazette in The Hague on December 3, 2025."""
+ABRO 2026 is adopted to implement article 2 of the 'Kaderbesluit ABRO Rijksdienst', as published in the Government Gazette in The Hague on December 3, 2025.
+
+Sources :
+* https://open.overheid.nl/documenten/a13699d9-fcf4-43ef-b282-ece9519e9b81/file
+* https://open.overheid.nl/documenten/8a2c1e3a-f62c-4cd6-9827-3d4ccc9162ba/file"""
 COPYRIGHT = """
 Government of the Netherlands / Open Overheid (CC0)
 https://www.open-overheid.nl/service/copyright"""
