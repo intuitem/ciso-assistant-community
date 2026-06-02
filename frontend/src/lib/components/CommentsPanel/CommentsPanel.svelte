@@ -248,6 +248,7 @@
 		</button>
 		{#if expanded && processedCount > 0}
 			<button
+				type="button"
 				class="ml-auto inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px]
 				transition-all duration-150
 				{hideProcessed
@@ -339,6 +340,7 @@
 										></textarea>
 										<div class="flex gap-2">
 											<button
+												type="button"
 												class="btn btn-sm preset-filled-primary-500 text-xs rounded-md"
 												disabled={submitting || !editBody.trim()}
 												onclick={() => saveEdit(comment.id)}
@@ -346,6 +348,7 @@
 												{m.save()}
 											</button>
 											<button
+												type="button"
 												class="btn btn-sm text-xs rounded-md text-surface-500
 											hover:text-surface-700 hover:bg-surface-100 transition-colors duration-150"
 												onclick={cancelEdit}
@@ -371,6 +374,7 @@
 									>
 										{#if canEdit(comment)}
 											<button
+												type="button"
 												class="comment-action-btn"
 												onclick={() => toggleActive(comment)}
 												title={comment.is_active ? m.markAsProcessed() : m.markAsActive()}
@@ -384,12 +388,17 @@
 													{comment.is_active ? m.markAsProcessed() : m.markAsActive()}
 												</span>
 											</button>
-											<button class="comment-action-btn" onclick={() => startEdit(comment)}>
+											<button
+												type="button"
+												class="comment-action-btn"
+												onclick={() => startEdit(comment)}
+											>
 												<i class="fa-solid fa-pen text-[10px]"></i>
 											</button>
 										{/if}
 										{#if canDelete(comment)}
 											<button
+												type="button"
 												class="comment-action-btn comment-action-btn-danger"
 												onclick={() => deleteComment(comment.id)}
 											>
@@ -426,6 +435,7 @@
 						{/if}
 					</span>
 					<button
+						type="button"
 						class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium
 					transition-all duration-200
 					{newCommentBody.trim() && !submitting
