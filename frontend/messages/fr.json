@@ -4180,7 +4180,7 @@
 	"noComments": "Aucun commentaire",
 	"deleteCommentConfirmation": "Êtes-vous sûr de vouloir supprimer ce commentaire ?",
 	"postComment": "Publier",
-	"commentsDescription": "Activer les commentaires sur les évaluations d'exigences",
+	"commentsDescription": "Activer les commentaires sur les objets supportés",
 	"justNow": "à l'instant",
 	"minutesAgo": "il y a {count} min",
 	"hoursAgo": "il y a {count} h",
