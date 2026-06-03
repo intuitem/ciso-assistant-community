@@ -600,6 +600,10 @@ export const GeneralSettingsSchema = z.object({
 	risk_matrix_swap_axes: z.boolean().default(false).optional(),
 	risk_matrix_flip_vertical: z.boolean().default(false).optional(),
 	risk_matrix_labels: z.enum(['ISO', 'EBIOS']).default('ISO').optional(),
+	audit_tree_aggregation_strategy: z
+		.enum(['none', 'parent_wins', 'child_wins', 'best_case', 'worst_case'])
+		.default('none')
+		.optional(),
 	currency: z.enum(CURRENCY_SYMBOLS).default('€'),
 	daily_rate: z.number().default(500).optional(),
 	mapping_max_depth: z.coerce.number().int().min(2).max(5).default(3).optional(),
@@ -648,6 +652,7 @@ export const FeatureFlagsSchema = z.object({
 	scoring_assistant: z.boolean().optional(),
 	vulnerabilities: z.boolean().optional(),
 	compliance: z.boolean().optional(),
+	audit_tree_inheritance: z.boolean().optional(),
 	campaigns: z.boolean().optional(),
 	tprm: z.boolean().optional(),
 	ebiosrm: z.boolean().optional(),
