@@ -22,7 +22,7 @@
 	const {
 		loadedLibraryID,
 		libraryURN = '',
-		loading = $bindable({ form: false, library: '' }),
+		loading = $bindable({ form: false, library: '' })
 	}: Props = $props();
 
 	const modalStore = getModalStore();
