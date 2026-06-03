@@ -46,8 +46,7 @@ export function formatSelectFieldData(
 			label: option.label,
 			value: isNumber ? parseInt(option.value) : option.value
 		}));
-	}
-	else {
+	} else {
 		fieldOptions = Object.entries(responseData).map(([key, value]) => ({
 			label: value,
 			value: isNumber ? parseInt(key) : key
