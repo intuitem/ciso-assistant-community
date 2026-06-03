@@ -2602,7 +2602,7 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
 
 class AssetClassViewSet(BaseModelViewSet):
     model = AssetClass
-    filterset_fields = ["parent"]
+    filterset_fields = ["parent", "name"]
 
     ordering = ["parent", "name"]
     search_fields = ["name", "description"]
