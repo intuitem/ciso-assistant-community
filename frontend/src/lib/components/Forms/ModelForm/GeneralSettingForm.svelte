@@ -255,6 +255,40 @@
 			</div>
 		</Accordion.ItemContent>
 	</Accordion.Item>
+	{#if $page.data.featureflags?.audit_tree_inheritance}
+		<Accordion.Item value="audits">
+			<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+				<i class="fa-solid fa-list-check mr-2"></i><span class="flex-1 text-left"
+					>{m.complianceAssessments()}</span
+				>
+				<Accordion.ItemIndicator
+					class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+					><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+						><path
+							d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+						/></svg
+					></Accordion.ItemIndicator
+				>
+			</Accordion.ItemTrigger>
+			<Accordion.ItemContent>
+				<div class="p-4">
+					<Select
+						{form}
+						field="audit_tree_aggregation_strategy"
+						options={[
+							{ label: m.auditTreeAggregationNone(), value: 'none' },
+							{ label: m.auditTreeAggregationParentWins(), value: 'parent_wins' },
+							{ label: m.auditTreeAggregationChildWins(), value: 'child_wins' },
+							{ label: m.auditTreeAggregationBestCase(), value: 'best_case' },
+							{ label: m.auditTreeAggregationWorstCase(), value: 'worst_case' }
+						]}
+						label={m.auditTreeAggregationStrategy()}
+						helpText={m.auditTreeAggregationStrategyHelpText()}
+					/>
+				</div>
+			</Accordion.ItemContent>
+		</Accordion.Item>
+	{/if}
 	<Accordion.Item value="riskMatrix">
 		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
 			<i class="fa-solid fa-table-cells-large mr-2"></i><span class="flex-1 text-left"
@@ -421,7 +455,8 @@
 						{ label: 'Polish Złoty (PLN)', value: 'PLN' },
 						{ label: 'Taiwan Dollar (NT$)', value: 'NT$' },
 						{ label: 'Thai Baht (฿)', value: '฿' },
-						{ label: 'Malaysian Ringgit (MYR)', value: 'MYR' }
+						{ label: 'Malaysian Ringgit (MYR)', value: 'MYR' },
+						{ label: 'CFP Franc (XPF)', value: 'XPF' }
 					]}
 					label={m.currency()}
 					helpText={m.currencyHelpText()}
@@ -634,6 +669,23 @@
 						label={m.chatSystemPrompt()}
 						helpText={m.chatSystemPromptHelpText()}
 					/>
+					<Checkbox
+						{form}
+						field="chat_temperature_enabled"
+						label={m.chatTemperatureEnabled()}
+						helpText={m.chatTemperatureEnabledHelpText()}
+					/>
+					{#if $formStore.chat_temperature_enabled}
+						<NumberField
+							{form}
+							field="chat_temperature"
+							label={m.chatTemperature()}
+							helpText={m.chatTemperatureHelpText()}
+							min={0}
+							max={2}
+							step={0.1}
+						/>
+					{/if}
 				</div>
 			</Accordion.ItemContent>
 		</Accordion.Item>

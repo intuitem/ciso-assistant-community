@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from iam.cache_builders import AssignmentLite
 from core.utils import (
     BUILTIN_USERGROUP_CODENAMES,
-    BUILTIN_ROLE_CODENAMES,
+    get_translated_builtin_role_name,
 )
 from core.base_models import (
     AbstractBaseModel,
@@ -437,19 +437,15 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
         verbose_name_plural = _("user groups")
 
     def __str__(self) -> str:
-        resolved_name = (
-            BUILTIN_USERGROUP_CODENAMES.get(self.name) if self.builtin else self.name
-        ) or self.name
-        return f"{self.folder.name} - {resolved_name}"
+        if self.builtin:
+            role_codename = BUILTIN_USERGROUP_CODENAMES.get(self.name, self.name)
+            role_name = get_translated_builtin_role_name(role_codename)
+        else:
+            role_name = self.name
+        return f"{self.folder.name} - {role_name}"
 
     def get_name_display(self) -> str:
         return self.name
-
-    def get_localization_dict(self) -> dict:
-        resolved_name = (
-            BUILTIN_USERGROUP_CODENAMES.get(self.name) if self.builtin else self.name
-        ) or self.name
-        return {"folder": self.folder.name, "role": resolved_name}
 
     def save(self, *args, **kwargs):
         result = super().save(*args, **kwargs)
@@ -603,6 +599,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
     email = models.CharField(max_length=100, unique=True)
     first_login = models.BooleanField(default=True)
     preferences = models.JSONField(default=dict)
+    DATE_FORMATS = {"auto", "iso", "ddmmyyyy", "mmddyyyy", "long_dmy", "long_mdy"}
     keep_local_login = models.BooleanField(
         default=False,
         help_text=_(
@@ -718,6 +715,8 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             except Exception:
                 default_lang = "en"
             prefs["lang"] = default_lang
+        if prefs.get("date_format") not in self.DATE_FORMATS:
+            prefs["date_format"] = "auto"
         return prefs
 
     # Maps Django HTML template names to YAML template keys
@@ -999,7 +998,7 @@ class Role(NameDescriptionMixin, FolderMixin):
 
     def __str__(self) -> str:
         if self.builtin:
-            return f"{BUILTIN_ROLE_CODENAMES.get(self.name)}"
+            return get_translated_builtin_role_name(self.name)
         return self.name
 
     fields_to_check = ["name"]

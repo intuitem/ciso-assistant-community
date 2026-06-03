@@ -1,0 +1,840 @@
+urn: urn:intuitem:risk:library:ai-defense-matrix
+locale: en
+ref_id: ai-defense-matrix
+name: AI Defense Matrix
+description: "A structured framework for defending AI systems, aligned with NIST CSF 2.0 and extending the Cyber Defense Matrix. Source: https://aidefensematrix.com"
+copyright: Copyright 2026 by Lenny Zeltser and Sounil Yu, licensed under CC BY-SA 4.0.
+version: 1
+publication_date: 2026-05-11
+provider: AI Defense Matrix
+packager: steven-hostetler
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:ai-defense-matrix
+    ref_id: ai-defense-matrix
+    name: AI Defense Matrix
+    description: AI defense activities organized by AI asset class and NIST CSF 2.0 function.
+    requirement_nodes:
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-workload-platforms
+        assessable: false
+        depth: 1
+        ref_id: ai-workload-platforms
+        name: AI-Workload Platforms
+        description: "Asset theme: devices."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-workload-platforms:govern
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-workload-platforms
+        ref_id: ai-workload-platforms.govern
+        name: Govern
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-workload-platforms:govern:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-workload-platforms:govern
+        ref_id: ai-workload-platforms.govern.category
+        name: AI-platform standards
+        description: "AI-platform standards
+
+
+          Coverage type: hybrid."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-workload-platforms:identify
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-workload-platforms
+        ref_id: ai-workload-platforms.identify
+        name: Identify
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-workload-platforms:identify:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-workload-platforms:identify
+        ref_id: ai-workload-platforms.identify.category
+        name: AI security posture management
+        description: "AI security posture management
+
+
+          Coverage type: tooling."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-workload-platforms:protect
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-workload-platforms
+        ref_id: ai-workload-platforms.protect
+        name: Protect
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-workload-platforms:protect:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-workload-platforms:protect
+        ref_id: ai-workload-platforms.protect.category
+        name: AI-workload hardening; model-loading supply-chain verification
+        description:
+          "AI-workload hardening; model-loading supply-chain verification
+
+
+          Coverage type: tooling."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-workload-platforms:detect
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-workload-platforms
+        ref_id: ai-workload-platforms.detect
+        name: Detect
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-workload-platforms:detect:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-workload-platforms:detect
+        ref_id: ai-workload-platforms.detect.category
+        name: AI-workload runtime detection
+        description: "AI-workload runtime detection
+
+
+          Coverage type: tooling."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-workload-platforms:respond
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-workload-platforms
+        ref_id: ai-workload-platforms.respond
+        name: Respond
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-workload-platforms:respond:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-workload-platforms:respond
+        ref_id: ai-workload-platforms.respond.category
+        name: Generic container IR
+        description: "Generic container IR
+
+
+          Coverage type: cdm-rollup."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-workload-platforms:recover
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-workload-platforms
+        ref_id: ai-workload-platforms.recover
+        name: Recover
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-workload-platforms:recover:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-workload-platforms:recover
+        ref_id: ai-workload-platforms.recover.category
+        name: Generic platform restore
+        description: "Generic platform restore
+
+
+          Coverage type: cdm-rollup."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-orchestration-tools
+        assessable: false
+        depth: 1
+        ref_id: ai-orchestration-tools
+        name: AI Orchestration Tools
+        description: "Asset theme: devices."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-orchestration-tools:govern
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-orchestration-tools
+        ref_id: ai-orchestration-tools.govern
+        name: Govern
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-orchestration-tools:govern:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-orchestration-tools:govern
+        ref_id: ai-orchestration-tools.govern.category
+        name: AI application governance
+        description: "AI application governance
+
+
+          Coverage type: process."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-orchestration-tools:identify
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-orchestration-tools
+        ref_id: ai-orchestration-tools.identify
+        name: Identify
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-orchestration-tools:identify:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-orchestration-tools:identify
+        ref_id: ai-orchestration-tools.identify.category
+        name: AIBOM for applications; agent-framework discovery
+        description: "AIBOM for applications; agent-framework discovery
+
+
+          Coverage type: tooling."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-orchestration-tools:protect
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-orchestration-tools
+        ref_id: ai-orchestration-tools.protect
+        name: Protect
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-orchestration-tools:protect:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-orchestration-tools:protect
+        ref_id: ai-orchestration-tools.protect.category
+        name: System-prompt hardening; plugin allowlisting
+        description: "System-prompt hardening; plugin allowlisting
+
+
+          Coverage type: tooling."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-orchestration-tools:detect
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-orchestration-tools
+        ref_id: ai-orchestration-tools.detect
+        name: Detect
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-orchestration-tools:detect:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-orchestration-tools:detect
+        ref_id: ai-orchestration-tools.detect.category
+        name: Prompt-injection testing; agent anomaly detection
+        description: "Prompt-injection testing; agent anomaly detection
+
+
+          Coverage type: tooling."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-orchestration-tools:respond
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-orchestration-tools
+        ref_id: ai-orchestration-tools.respond
+        name: Respond
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-orchestration-tools:respond:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-orchestration-tools:respond
+        ref_id: ai-orchestration-tools.respond.category
+        name: Agent runtime IR; plugin disable
+        description: "Agent runtime IR; plugin disable
+
+
+          Coverage type: hybrid."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-orchestration-tools:recover
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-orchestration-tools
+        ref_id: ai-orchestration-tools.recover
+        name: Recover
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-orchestration-tools:recover:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-orchestration-tools:recover
+        ref_id: ai-orchestration-tools.recover.category
+        name: Framework config; prompt rollback
+        description: "Framework config; prompt rollback
+
+
+          Coverage type: hybrid."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-generated-code
+        assessable: false
+        depth: 1
+        ref_id: ai-generated-code
+        name: AI-Generated Code
+        description: "Asset theme: apps."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-generated-code:govern
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-generated-code
+        ref_id: ai-generated-code.govern
+        name: Govern
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-generated-code:govern:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-generated-code:govern
+        ref_id: ai-generated-code.govern.category
+        name: AI coding standards, code-review policy, license; provenance policy
+        description:
+          "AI coding standards, code-review policy, license; provenance policy
+
+
+          Coverage type: process."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-generated-code:identify
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-generated-code
+        ref_id: ai-generated-code.identify
+        name: Identify
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-generated-code:identify:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-generated-code:identify
+        ref_id: ai-generated-code.identify.category
+        name: AI-code provenance; origin tracking
+        description: "AI-code provenance; origin tracking
+
+
+          Coverage type: tooling."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-generated-code:protect
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-generated-code
+        ref_id: ai-generated-code.protect
+        name: Protect
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-generated-code:protect:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-generated-code:protect
+        ref_id: ai-generated-code.protect.category
+        name: AI-aware SAST
+        description: "AI-aware SAST
+
+
+          Coverage type: tooling."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-generated-code:detect
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-generated-code
+        ref_id: ai-generated-code.detect
+        name: Detect
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-generated-code:detect:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-generated-code:detect
+        ref_id: ai-generated-code.detect.category
+        name: Hallucinated dependency; insecure-pattern detection
+        description: "Hallucinated dependency; insecure-pattern detection
+
+
+          Coverage type: tooling."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-generated-code:respond
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-generated-code
+        ref_id: ai-generated-code.respond
+        name: Respond
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-generated-code:respond:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-generated-code:respond
+        ref_id: ai-generated-code.respond.category
+        name: PR block; revert of AI-generated commits
+        description: "PR block; revert of AI-generated commits
+
+
+          Coverage type: hybrid."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-generated-code:recover
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-generated-code
+        ref_id: ai-generated-code.recover
+        name: Recover
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-generated-code:recover:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-generated-code:recover
+        ref_id: ai-generated-code.recover.category
+        name: Code rewrite; replacement of flagged artifacts
+        description: "Code rewrite; replacement of flagged artifacts
+
+
+          Coverage type: hybrid."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-gateways-routers
+        assessable: false
+        depth: 1
+        ref_id: ai-gateways-routers
+        name: AI Gateways and Routers
+        description: "Asset theme: networks."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-gateways-routers:govern
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-gateways-routers
+        ref_id: ai-gateways-routers.govern
+        name: Govern
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-gateways-routers:govern:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-gateways-routers:govern
+        ref_id: ai-gateways-routers.govern.category
+        name: AI egress policy; approved-service registry
+        description: "AI egress policy; approved-service registry
+
+
+          Coverage type: hybrid."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-gateways-routers:identify
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-gateways-routers
+        ref_id: ai-gateways-routers.identify
+        name: Identify
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-gateways-routers:identify:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-gateways-routers:identify
+        ref_id: ai-gateways-routers.identify.category
+        name: AI traffic discovery
+        description: "AI traffic discovery
+
+
+          Coverage type: tooling."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-gateways-routers:protect
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-gateways-routers
+        ref_id: ai-gateways-routers.protect
+        name: Protect
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-gateways-routers:protect:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-gateways-routers:protect
+        ref_id: ai-gateways-routers.protect.category
+        name: AI gateways for egress; MCP gateways for tool gating
+        description: "AI gateways for egress; MCP gateways for tool gating
+
+
+          Coverage type: tooling."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-gateways-routers:detect
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-gateways-routers
+        ref_id: ai-gateways-routers.detect
+        name: Detect
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-gateways-routers:detect:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-gateways-routers:detect
+        ref_id: ai-gateways-routers.detect.category
+        name: Anomalous AI traffic; RAG-leakage egress detection
+        description: "Anomalous AI traffic; RAG-leakage egress detection
+
+
+          Coverage type: tooling."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-gateways-routers:respond
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-gateways-routers
+        ref_id: ai-gateways-routers.respond
+        name: Respond
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-gateways-routers:respond:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-gateways-routers:respond
+        ref_id: ai-gateways-routers.respond.category
+        name: AI traffic blocking; shadow AI takedown
+        description: "AI traffic blocking; shadow AI takedown
+
+
+          Coverage type: hybrid."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-gateways-routers:recover
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-gateways-routers
+        ref_id: ai-gateways-routers.recover
+        name: Recover
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-gateways-routers:recover:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-gateways-routers:recover
+        ref_id: ai-gateways-routers.recover.category
+        name: Generic network failover
+        description: "Generic network failover
+
+
+          Coverage type: cdm-rollup."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-model
+        assessable: false
+        depth: 1
+        ref_id: ai-model
+        name: AI Model
+        description: "Asset theme: data."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-model:govern
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-model
+        ref_id: ai-model.govern
+        name: Govern
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-model:govern:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-model:govern
+        ref_id: ai-model.govern.category
+        name: Model selection; provider evaluation
+        description: "Model selection; provider evaluation
+
+
+          Coverage type: process."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-model:identify
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-model
+        ref_id: ai-model.identify
+        name: Identify
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-model:identify:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-model:identify
+        ref_id: ai-model.identify.category
+        name: Model inventory; AIBOM
+        description: "Model inventory; AIBOM
+
+
+          Coverage type: tooling."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-model:protect
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-model
+        ref_id: ai-model.protect
+        name: Protect
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-model:protect:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-model:protect
+        ref_id: ai-model.protect.category
+        name: Model firewalls; weight protection
+        description: "Model firewalls; weight protection
+
+
+          Coverage type: tooling."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-model:detect
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-model
+        ref_id: ai-model.detect
+        name: Detect
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-model:detect:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-model:detect
+        ref_id: ai-model.detect.category
+        name: Model drift; integrity monitoring
+        description: "Model drift; integrity monitoring
+
+
+          Coverage type: tooling."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-model:respond
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-model
+        ref_id: ai-model.respond
+        name: Respond
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-model:respond:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-model:respond
+        ref_id: ai-model.respond.category
+        name: Model rollback; provider coordination for consumed models
+        description: "Model rollback; provider coordination for consumed models
+
+
+          Coverage type: hybrid."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-model:recover
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-model
+        ref_id: ai-model.recover
+        name: Recover
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-model:recover:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-model:recover
+        ref_id: ai-model.recover.category
+        name: Model version restore; provider re-selection
+        description: "Model version restore; provider re-selection
+
+
+          Coverage type: hybrid."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:training-data
+        assessable: false
+        depth: 1
+        ref_id: training-data
+        name: Training Data
+        description: "Asset theme: data."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:training-data:govern
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:training-data
+        ref_id: training-data.govern
+        name: Govern
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:training-data:govern:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:training-data:govern
+        ref_id: training-data.govern.category
+        name: Dataset provenance; licensing policy
+        description: "Dataset provenance; licensing policy
+
+
+          Coverage type: process."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:training-data:identify
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:training-data
+        ref_id: training-data.identify
+        name: Identify
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:training-data:identify:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:training-data:identify
+        ref_id: training-data.identify.category
+        name: Dataset inventory; lineage
+        description: "Dataset inventory; lineage
+
+
+          Coverage type: tooling."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:training-data:protect
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:training-data
+        ref_id: training-data.protect
+        name: Protect
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:training-data:protect:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:training-data:protect
+        ref_id: training-data.protect.category
+        name: Data access control
+        description: "Data access control
+
+
+          Coverage type: tooling."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:training-data:detect
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:training-data
+        ref_id: training-data.detect
+        name: Detect
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:training-data:detect:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:training-data:detect
+        ref_id: training-data.detect.category
+        name: Poisoning; backdoor detection
+        description: "Poisoning; backdoor detection
+
+
+          Coverage type: tooling."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:training-data:respond
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:training-data
+        ref_id: training-data.respond
+        name: Respond
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:training-data:respond:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:training-data:respond
+        ref_id: training-data.respond.category
+        name: Dataset quarantine; retraining trigger
+        description: "Dataset quarantine; retraining trigger
+
+
+          Coverage type: hybrid."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:training-data:recover
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:training-data
+        ref_id: training-data.recover
+        name: Recover
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:training-data:recover:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:training-data:recover
+        ref_id: training-data.recover.category
+        name: Dataset restore from golden copies; model retraining
+        description: "Dataset restore from golden copies; model retraining
+
+
+          Coverage type: hybrid."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:runtime-ai-data
+        assessable: false
+        depth: 1
+        ref_id: runtime-ai-data
+        name: Runtime AI Data
+        description: "Asset theme: data."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:runtime-ai-data:govern
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:runtime-ai-data
+        ref_id: runtime-ai-data.govern
+        name: Govern
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:runtime-ai-data:govern:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:runtime-ai-data:govern
+        ref_id: runtime-ai-data.govern.category
+        name: Prompt; RAG policy, memory-retention governance, interaction-history policy
+        description:
+          "Prompt; RAG policy, memory-retention governance, interaction-history policy
+
+
+          Coverage type: process."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:runtime-ai-data:identify
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:runtime-ai-data
+        ref_id: runtime-ai-data.identify
+        name: Identify
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:runtime-ai-data:identify:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:runtime-ai-data:identify
+        ref_id: runtime-ai-data.identify.category
+        name: RAG source; LLM-oversharing inventory
+        description: "RAG source; LLM-oversharing inventory
+
+
+          Coverage type: hybrid."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:runtime-ai-data:protect
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:runtime-ai-data
+        ref_id: runtime-ai-data.protect
+        name: Protect
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:runtime-ai-data:protect:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:runtime-ai-data:protect
+        ref_id: runtime-ai-data.protect.category
+        name: Prompt-injection defense, RAG sanitization, memory-poisoning defense, AI-content DLP
+        description:
+          "Prompt-injection defense, RAG sanitization, memory-poisoning defense, AI-content DLP
+
+
+          Coverage type: tooling."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:runtime-ai-data:detect
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:runtime-ai-data
+        ref_id: runtime-ai-data.detect
+        name: Detect
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:runtime-ai-data:detect:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:runtime-ai-data:detect
+        ref_id: runtime-ai-data.detect.category
+        name: Prompt anomaly, jailbreak attempts, RAG leakage, memory tampering
+        description:
+          "Prompt anomaly, jailbreak attempts, RAG leakage, memory tampering
+
+
+          Coverage type: tooling."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:runtime-ai-data:respond
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:runtime-ai-data
+        ref_id: runtime-ai-data.respond
+        name: Respond
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:runtime-ai-data:respond:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:runtime-ai-data:respond
+        ref_id: runtime-ai-data.respond.category
+        name: Session termination; RAG source isolation
+        description: "Session termination; RAG source isolation
+
+
+          Coverage type: hybrid."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:runtime-ai-data:recover
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:runtime-ai-data
+        ref_id: runtime-ai-data.recover
+        name: Recover
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:runtime-ai-data:recover:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:runtime-ai-data:recover
+        ref_id: runtime-ai-data.recover.category
+        name: Vector DB restore; re-indexing
+        description: "Vector DB restore; re-indexing
+
+
+          Coverage type: hybrid."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-agent-identities
+        assessable: false
+        depth: 1
+        ref_id: ai-agent-identities
+        name: AI Agent Identities
+        description: "Asset theme: users."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-agent-identities:govern
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-agent-identities
+        ref_id: ai-agent-identities.govern
+        name: Govern
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-agent-identities:govern:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-agent-identities:govern
+        ref_id: ai-agent-identities.govern.category
+        name: AI agent identity policy, authorization standards, OAuth for agents
+        description:
+          "AI agent identity policy, authorization standards, OAuth for agents
+
+
+          Coverage type: process."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-agent-identities:identify
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-agent-identities
+        ref_id: ai-agent-identities.identify
+        name: Identify
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-agent-identities:identify:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-agent-identities:identify
+        ref_id: ai-agent-identities.identify.category
+        name: AI agent; non-human principal inventory
+        description: "AI agent; non-human principal inventory
+
+
+          Coverage type: tooling."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-agent-identities:protect
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-agent-identities
+        ref_id: ai-agent-identities.protect
+        name: Protect
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-agent-identities:protect:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-agent-identities:protect
+        ref_id: ai-agent-identities.protect.category
+        name: Agent OAuth; capability scoping, short-lived credentials
+        description: "Agent OAuth; capability scoping, short-lived credentials
+
+
+          Coverage type: tooling."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-agent-identities:detect
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-agent-identities
+        ref_id: ai-agent-identities.detect
+        name: Detect
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-agent-identities:detect:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-agent-identities:detect
+        ref_id: ai-agent-identities.detect.category
+        name: Agent behavioral monitoring; runtime authorization drift
+        description: "Agent behavioral monitoring; runtime authorization drift
+
+
+          Coverage type: tooling."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-agent-identities:respond
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-agent-identities
+        ref_id: ai-agent-identities.respond
+        name: Respond
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-agent-identities:respond:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-agent-identities:respond
+        ref_id: ai-agent-identities.respond.category
+        name: Credential revocation, agent quarantine, session termination
+        description:
+          "Credential revocation, agent quarantine, session termination
+
+
+          Coverage type: hybrid."
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-agent-identities:recover
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-agent-identities
+        ref_id: ai-agent-identities.recover
+        name: Recover
+      - urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-agent-identities:recover:category
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:ai-defense-matrix:ai-agent-identities:recover
+        ref_id: ai-agent-identities.recover.category
+        name: Agent identity re-provisioning
+        description: "Agent identity re-provisioning
+
+
+          Coverage type: hybrid."

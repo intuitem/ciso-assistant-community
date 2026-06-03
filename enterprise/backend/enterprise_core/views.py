@@ -26,7 +26,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.conf import settings
 from django.core.exceptions import ValidationError
 
-from core.views import BaseModelViewSet, GenericFilterSet
+from core.views import BaseModelViewSet, GenericFilterSet, RoleFilter
 from core.utils import MAIN_ENTITY_DEFAULT_NAME
 from iam.models import User, Role, UserGroup, RoleAssignment
 from tprm.models import Entity
@@ -266,7 +266,11 @@ class RoleViewSet(BaseModelViewSet):
     """
 
     model = Role
-    ordering = ["builtin", "name"]
+    ordering_fields = ["name"]
+    filter_backends = [
+        DjangoFilterBackend,
+        RoleFilter,
+    ]
 
     def _get_default_permissions(self):
         return Permission.objects.filter(

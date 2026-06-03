@@ -13,9 +13,11 @@
 	import type { PageData, ActionData } from './$types';
 	import RiskLevel from './RiskLevel.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
 
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
+	import { goto } from '$lib/utils/breadcrumbs';
 
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -54,7 +56,7 @@
 			var currentUrl = window.location.href;
 			var url = new URL(currentUrl);
 			var nextValue = getSecureRedirect(url.searchParams.get('next'));
-			if (nextValue) window.location.href = nextValue;
+			if (nextValue) goto(nextValue);
 		}
 	}
 
@@ -601,6 +603,12 @@
 				/>
 			</div>
 		</div>
+
+		{#if page.data?.featureflags?.comments}
+			<div class="my-3">
+				<CommentsPanel parentType="risk_scenario" parentId={data.scenario.id} />
+			</div>
+		{/if}
 
 		<!-- ── Sticky Footer ── -->
 		<div

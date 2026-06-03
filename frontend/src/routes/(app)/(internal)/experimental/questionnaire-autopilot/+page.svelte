@@ -2,6 +2,8 @@
 	import { enhance } from '$app/forms';
 	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
+	import { getLocale } from '$paraglide/runtime';
+	import { formatDate } from '$lib/utils/datetime';
 	import { pageTitle } from '$lib/utils/stores';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import { onDestroy } from 'svelte';
@@ -317,7 +319,7 @@
 									{run.folder?.str || run.folder?.name || '—'}
 								</div>
 								<div class="text-xs text-gray-400">
-									{new Date(run.created_at).toLocaleString()}
+									{formatDate(new Date(run.created_at), true, getLocale())}
 								</div>
 							</a>
 							<button

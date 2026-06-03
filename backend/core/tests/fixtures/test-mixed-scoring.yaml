@@ -1,0 +1,64 @@
+---
+urn: urn:intuitem:test:library:mixed-scoring
+locale: en
+ref_id: TEST-MIXED-SCORING
+name: "Test - Mixed Scoring Library"
+description: "Test fixture exercising per-requirement score scale overrides via the alternatives registry."
+copyright: Test fixture, not for production use.
+version: 1
+publication_date: 2026-05-28
+provider: Test
+packager: Test
+objects:
+  framework:
+    urn: urn:intuitem:test:framework:mixed-scoring
+    ref_id: TEST-MIXED
+    name: "Mixed Scoring Framework"
+    description: "Framework on 0-5 with a 'binary' alternative shared by referenced nodes."
+    min_score: 0
+    max_score: 5
+    scores_definition:
+      scale:
+        - score: 0
+          name: "N/A"
+        - score: 1
+          name: "Initial"
+        - score: 2
+          name: "Repeatable"
+        - score: 3
+          name: "Defined"
+        - score: 4
+          name: "Managed"
+        - score: 5
+          name: "Optimized"
+      alternatives:
+        binary:
+          - score: 0
+            name: "No"
+          - score: 1
+            name: "Yes"
+    requirement_nodes:
+      - urn: urn:intuitem:test:req_node:mixed:root
+        assessable: false
+        depth: 1
+        ref_id: "ROOT"
+        name: "Root"
+
+      - urn: urn:intuitem:test:req_node:mixed:default
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:test:req_node:mixed:root
+        ref_id: "R.1"
+        name: "Default-scale requirement"
+        description: "Uses the framework's 0-5 scale."
+
+      - urn: urn:intuitem:test:req_node:mixed:binary-by-ref
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:test:req_node:mixed:root
+        ref_id: "R.2"
+        name: "Binary requirement (via ref)"
+        description: "0-1 scale resolved through the framework's alternatives['binary']."
+        min_score: 0
+        max_score: 1
+        scores_definition_ref: binary

@@ -4,6 +4,7 @@
 	import { toCamelCase } from '$lib/utils/locales';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { getLocale } from '$paraglide/runtime';
+	import { formatDate } from '$lib/utils/datetime';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import type { PageData } from './$types';
@@ -17,7 +18,7 @@
 			if (!filter.includes(key) && Object.prototype.hasOwnProperty.call(page.data.user, key)) {
 				const str = toCamelCase(key);
 				if (key === 'date_joined')
-					filtered[str] = new Date(page.data.user[key]).toLocaleString(getLocale());
+					filtered[str] = formatDate(new Date(page.data.user[key]), true, getLocale());
 				else filtered[str] = page.data.user[key];
 			}
 		});
@@ -81,7 +82,9 @@
 						{#if group.builtin}
 							<span class="badge preset-tonal-primary mr-2">{m.builtin()}</span>
 						{/if}
-						<p class="font-semibold text-sm">{group.str}</p>
+						<p class="font-semibold text-sm">
+							{group.str}
+						</p>
 					</div>
 				{/each}
 			</div>
