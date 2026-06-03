@@ -133,11 +133,25 @@ ENABLE_CHAT = os.environ.get("ENABLE_CHAT", "False").strip().lower() in (
     "yes",
 )
 
+# Infrastructure configuration management. Disabled by default. When enabled,
+# admins can manage infrastructure configuration settings (e.g. the list of
+# IPs/CIDRs allowed to reach the backend) from the settings UI, and an
+# unauthenticated /infra-config/ endpoint exposes those settings for the
+# infrastructure layer to consume (must never be reachable publicly).
+ENABLE_INFRA_CONFIG_MANAGEMENT = os.environ.get(
+    "ENABLE_INFRA_CONFIG_MANAGEMENT", "False"
+).strip().lower() in (
+    "true",
+    "1",
+    "yes",
+)
+
 LIBRARY_COMPATIBILITY_MODES = [0, 1, 2, 3]
 
 logger.info("DEBUG mode: %s", DEBUG)
 logger.info("ENABLE_SANDBOX: %s", ENABLE_SANDBOX)
 logger.info("ENABLE_CHAT: %s", ENABLE_CHAT)
+logger.info("ENABLE_INFRA_CONFIG_MANAGEMENT: %s", ENABLE_INFRA_CONFIG_MANAGEMENT)
 logger.info("CISO_ASSISTANT_URL: %s", CISO_ASSISTANT_URL)
 # ALLOWED_HOSTS should contain the backend address
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
@@ -623,7 +637,7 @@ LIBRARIES_PATH = library_path = _lib_path
 if "POSTGRES_NAME" in os.environ:
     DATABASES = {
         "default": {
-            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "ENGINE": "django.db.backends.postgresql",
             "NAME": os.environ["POSTGRES_NAME"],
             "USER": os.environ["POSTGRES_USER"],
             "PASSWORD": os.environ["POSTGRES_PASSWORD"],

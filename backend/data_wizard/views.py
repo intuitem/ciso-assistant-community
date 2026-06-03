@@ -2558,6 +2558,18 @@ class EscalationThresholdRecordConsumer(RecordConsumer):
         }, None
 
 
+def normalize_df_columns(df: pd.DataFrame) -> pd.DataFrame:
+    normalized = [str(c).strip().lower() for c in df.columns]
+    seen, duplicates = set(), set()
+    for col in normalized:
+        (duplicates if col in seen else seen).add(col)
+    if duplicates:
+        raise ValueError(f"DuplicateColumns: {sorted(duplicates)}")
+    df = df.copy()
+    df.columns = normalized
+    return df
+
+
 class LoadFileView(APIView):
     parser_classes = (FileUploadParser,)
     serializer_class = LoadFileSerializer
@@ -2638,6 +2650,17 @@ class LoadFileView(APIView):
                         file_type = RecordFileType.CSV
                         df = pd.read_csv(record_file).fillna("")
 
+                    try:
+                        df = normalize_df_columns(df)
+                    except ValueError:
+                        logger.warning(
+                            "Invalid import file structure during column normalization",
+                            exc_info=True,
+                        )
+                        return Response(
+                            {"error": "Invalid file format or columns."},
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
                     base_context = BaseContext(
                         request,
                         folders_map=folders_map,

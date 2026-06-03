@@ -10,6 +10,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import { canPerformAction } from '$lib/utils/access-control';
+	import { formatDate } from '$lib/utils/datetime';
 	import { getLocale } from '$paraglide/runtime';
 	import {
 		getModalStore,
@@ -258,11 +259,11 @@
 						</li>
 						<li>
 							<span class="font-semibold">{m.createdAt()}:</span>
-							{new Date(risk_assessment.created_at).toLocaleString(getLocale())}
+							{formatDate(new Date(risk_assessment.created_at), true, getLocale())}
 						</li>
 						<li>
 							<span class="font-semibold">{m.updatedAt()}:</span>
-							{new Date(risk_assessment.updated_at).toLocaleString(getLocale())}
+							{formatDate(new Date(risk_assessment.updated_at), true, getLocale())}
 						</li>
 					</ul>
 				</div>

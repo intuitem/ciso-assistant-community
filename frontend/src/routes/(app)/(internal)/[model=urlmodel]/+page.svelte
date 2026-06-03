@@ -278,6 +278,13 @@
 										aria-label={m.kanbanMode()}
 										data-testid="kanban-mode-button"><i class="fa-solid fa-table-columns"></i></a
 									>
+									<a
+										href="{URLModel}/analytics/{currentFilterSearch}"
+										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+										title={m.appliedControlsAnalytics()}
+										aria-label={m.appliedControlsAnalytics()}
+										data-testid="analytics-button"><i class="fa-solid fa-chart-pie"></i></a
+									>
 								{/if}
 								{#if URLModel === 'security-advisories'}
 									<button
