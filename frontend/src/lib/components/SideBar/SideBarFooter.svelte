@@ -122,15 +122,17 @@
 							data-testid="get-started-button"
 							><i class="fa-solid fa-rocket mr-2"></i>{m.getStarted()}</button
 						>
-						<button
-							onclick={() => {
-								openState = false;
-								modalBuildInfo();
-							}}
-							class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
-							data-testid="about-button"
-							><i class="fa-solid fa-circle-info mr-2"></i>{m.aboutCiso()}</button
-						>
+						{#if !page.data?.user?.is_third_party}
+							<button
+								onclick={() => {
+									openState = false;
+									modalBuildInfo();
+								}}
+								class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
+								data-testid="about-button"
+								><i class="fa-solid fa-circle-info mr-2"></i>{m.aboutCiso()}</button
+							>
+						{/if}
 						<a
 							href="https://intuitem.gitbook.io/ciso-assistant"
 							target="_blank"
