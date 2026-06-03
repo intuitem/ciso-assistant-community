@@ -12,7 +12,7 @@ copyright: Threat scenarios and reference controls are original content informed
   NIST SP 800-30 Rev.1, NIST CSF 2.0, and MITRE ATT&CK. NIST CSF 2.0 framework content
   is public domain per NIST policy. MITRE ATT&CK is used under CC BY 4.0. Packaged
   for use with the intuitem/CISO Assistant platform.
-version: 1
+version: 2
 publication_date: 2026-06-03
 provider: NIST CSF
 packager: Paul Flatt
@@ -833,9 +833,21 @@ objects:
       ref_id: GV.OC-01
       description: The organizational mission is understood and informs cybersecurity
         risk management.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Share the organization''s mission (e.g., through vision and mission statements,
+        marketing, and service strategies) to provide a basis for identifying risks
+        that may impede that mission'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-01
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-02
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Partagez la mission de\
+            \ l'organisation (par exemple, par le biais d'\xE9nonc\xE9s de vision\
+            \ et de mission, de strat\xE9gies de marketing et de service) afin de\
+            \ fournir une base pour identifier les risques qui peuvent entraver cette\
+            \ mission"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.oc-02
       assessable: true
       depth: 3
@@ -844,9 +856,33 @@ objects:
       description: Internal and external stakeholders are understood, and their needs
         and expectations regarding cybersecurity risk management are understood and
         considered.
+      annotation: '1st: 1st Party Risk
+
+        3rd: 3rd Party Risk
+
+        Ex1: Identify relevant internal stakeholders and their cybersecurity-related
+        expectations (e.g., performance and risk expectations of officers, directors,
+        and advisors; cultural expectations of employees)
+
+        Ex2: Identify relevant external stakeholders and their cybersecurity-related
+        expectations (e.g., privacy expectations of customers, business expectations
+        of partnerships, compliance expectations of regulators, ethics expectations
+        of society)'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-01
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-03
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
+            \ partie\nEx1 : D\xE9terminer les intervenants internes pertinents et\
+            \ leurs attentes en mati\xE8re de cybers\xE9curit\xE9 (p. ex., attentes\
+            \ en mati\xE8re de rendement et de risque des dirigeants, des administrateurs\
+            \ et des conseillers\_; attentes culturelles des employ\xE9s)\nEx2 : Identifier\
+            \ les parties prenantes externes pertinentes et leurs attentes en mati\xE8\
+            re de cybers\xE9curit\xE9 (p. ex., attentes des clients en mati\xE8re\
+            \ de protection de la vie priv\xE9e, attentes op\xE9rationnelles des partenariats,\
+            \ attentes des organismes de r\xE9glementation en mati\xE8re de conformit\xE9\
+            , attentes de la soci\xE9t\xE9 en mati\xE8re d'\xE9thique)"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.oc-03
       assessable: true
       depth: 3
@@ -854,9 +890,35 @@ objects:
       ref_id: GV.OC-03
       description: Legal, regulatory, and contractual requirements regarding cybersecurity
         are understood and managed.
+      annotation: '1st: 1st Party Risk
+
+        3rd: 3rd Party Risk
+
+        Ex1: Determine a process to track and manage legal and regulatory requirements
+        regarding protection of individuals'' information (e.g., Health Insurance
+        Portability and Accountability Act, California Consumer Privacy Act, General
+        Data Protection Regulation)
+
+        Ex2: Determine a process to track and manage contractual requirements for
+        cybersecurity management of supplier, customer, and partner information
+
+        Ex3: Align the organization''s cybersecurity strategy with legal, regulatory,
+        and contractual requirements'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-01
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-04
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
+            \ partie\nEx1 : D\xE9terminer un processus de suivi et de gestion des\
+            \ exigences l\xE9gales et r\xE9glementaires concernant la protection des\
+            \ informations des individus (par exemple, Health Insurance Portability\
+            \ and Accountability Act, California Consumer Privacy Act, General Data\
+            \ Protection Regulation)\nEx2 : D\xE9terminer un processus de suivi et\
+            \ de gestion des exigences contractuelles pour la gestion de la cybers\xE9\
+            curit\xE9 des informations sur les fournisseurs, les clients et les partenaires\n\
+            Ex3 : Aligner la strat\xE9gie de cybers\xE9curit\xE9 de l'organisation\
+            \ sur les exigences l\xE9gales, r\xE9glementaires et contractuelles"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.oc-04
       assessable: true
       depth: 3
@@ -864,9 +926,37 @@ objects:
       ref_id: GV.OC-04
       description: Critical objectives, capabilities, and services that stakeholders
         depend on or expect from the organization are understood and communicated.
+      annotation: '1st: 1st Party Risk
+
+        3rd: 3rd Party Risk
+
+        Ex1: Establish criteria for determining the criticality of capabilities and
+        services as viewed by internal and external stakeholders
+
+        Ex2: Determine (e.g., from a business impact analysis) assets and business
+        operations that are vital to achieving mission objectives and the potential
+        impact of a loss (or partial loss) of such operations
+
+        Ex3: Establish and communicate resilience objectives (e.g., recovery time
+        objectives) for delivering critical capabilities and services in various operating
+        states (e.g., under attack, during recovery, normal operation)'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-01
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-02
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
+            \ partie\nEx1 : \xC9tablir des crit\xE8res pour d\xE9terminer la criticit\xE9\
+            \ des capacit\xE9s et des services selon les intervenants internes et\
+            \ externes\nEx2 : D\xE9terminer (p. ex., \xE0 partir d'une analyse d'impact\
+            \ sur les activit\xE9s) les actifs et les op\xE9rations commerciales qui\
+            \ sont essentiels \xE0 l'atteinte des objectifs de la mission et l'impact\
+            \ potentiel d'une perte (ou d'une perte partielle) de ces op\xE9rations\n\
+            Ex3 : \xC9tablir et communiquer des objectifs de r\xE9silience (par exemple,\
+            \ des objectifs de temps de r\xE9cup\xE9ration) pour fournir des capacit\xE9\
+            s et des services critiques dans divers \xE9tats de fonctionnement (par\
+            \ exemple, en cas d'attaque, pendant la r\xE9cup\xE9ration, en fonctionnement\
+            \ normal)"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.oc-05
       assessable: true
       depth: 3
@@ -874,8 +964,27 @@ objects:
       ref_id: GV.OC-05
       description: Outcomes, capabilities, and services that the organization depends
         on are understood and communicated.
+      annotation: 'Ex1: Create an inventory of the organization''s dependencies on
+        external resources (e.g., facilities, cloud-based hosting providers) and their
+        relationships to organizational assets and business functions
+
+        Ex2: Identify and document external dependencies that are potential points
+        of failure for the organization''s critical capabilities and services, and
+        share that information with appropriate personnel
+
+        3rd: 3rd Party Risk'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+      translations:
+        fr:
+          annotation: "Ex1 : Cr\xE9er un inventaire des d\xE9pendances de l'organisation\
+            \ vis-\xE0-vis des ressources externes (par exemple, installations, fournisseurs\
+            \ d'h\xE9bergement bas\xE9s sur le cloud) et de leurs relations avec les\
+            \ actifs et les fonctions commerciales de l'organisation\nEx2 : Identifier\
+            \ et documenter les d\xE9pendances externes qui sont des points de d\xE9\
+            faillance potentiels pour les capacit\xE9s et les services critiques de\
+            \ l'organisation, et partager ces informations avec le personnel appropri\xE9\
+            \n3\xE8me : Risque de 3\xE8me partie"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rm
       assessable: false
       depth: 2
@@ -892,9 +1001,32 @@ objects:
       ref_id: GV.RM-01
       description: Risk management objectives are established and agreed to by organizational
         stakeholders.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Update near-term and long-term cybersecurity risk management objectives
+        as part of annual strategic planning and when major changes occur
+
+        Ex2: Establish measurable objectives for cybersecurity risk management (e.g.,
+        manage the quality of user training, ensure adequate risk protection for industrial
+        control systems)
+
+        Ex3: Senior leaders agree about cybersecurity objectives and use them for
+        measuring and managing risk and performance'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-02
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-06
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Mettre \xE0 jour les\
+            \ objectifs de gestion des risques de cybers\xE9curit\xE9 \xE0 court et\
+            \ \xE0 long terme dans le cadre de la planification strat\xE9gique annuelle\
+            \ et lorsque des changements majeurs se produisent\nEx2 : \xC9tablir des\
+            \ objectifs mesurables pour la gestion des risques de cybers\xE9curit\xE9\
+            \ (par exemple, g\xE9rer la qualit\xE9 de la formation des utilisateurs,\
+            \ assurer une protection ad\xE9quate contre les risques pour les syst\xE8\
+            mes de contr\xF4le industriel)\nEx3 : Les hauts dirigeants s'entendent\
+            \ sur les objectifs de cybers\xE9curit\xE9 et les utilisent pour mesurer\
+            \ et g\xE9rer les risques et les performances"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rm-02
       assessable: true
       depth: 3
@@ -902,8 +1034,31 @@ objects:
       ref_id: GV.RM-02
       description: Risk appetite and risk tolerance statements are established, communicated,
         and maintained.
+      annotation: '1st: 1st Party Risk
+
+        3rd: 3rd Party Risk
+
+        Ex1: Determine and communicate risk appetite statements that convey expectations
+        about the appropriate level of risk for the organization
+
+        Ex2: Translate risk appetite statements into specific, measurable, and broadly
+        understandable risk tolerance statements
+
+        Ex3: Refine organizational objectives and risk appetite periodically based
+        on known risk exposure and residual risk'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-02
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
+            \ partie\nEx1 : D\xE9terminer et communiquer des \xE9nonc\xE9s de propension\
+            \ au risque qui expriment les attentes concernant le niveau de risque\
+            \ appropri\xE9 pour l'organisation\nEx2 : Traduire les d\xE9clarations\
+            \ d'app\xE9tit pour le risque en d\xE9clarations de tol\xE9rance au risque\
+            \ sp\xE9cifiques, mesurables et largement compr\xE9hensibles\nEx3 : Affiner\
+            \ p\xE9riodiquement les objectifs organisationnels et l'app\xE9tit pour\
+            \ le risque en fonction de l'exposition au risque connue et du risque\
+            \ r\xE9siduel"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rm-03
       assessable: true
       depth: 3
@@ -911,9 +1066,28 @@ objects:
       ref_id: GV.RM-03
       description: Cybersecurity risk management activities and outcomes are included
         in enterprise risk management processes.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Aggregate and manage cybersecurity risks alongside other enterprise risks
+        (e.g., compliance, financial, operational, regulatory, reputational, safety)
+
+        Ex2: Include cybersecurity risk managers in enterprise risk management planning
+
+        Ex3: Establish criteria for escalating cybersecurity risks within enterprise
+        risk management'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-02
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-06
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Regrouper et g\xE9rer\
+            \ les risques de cybers\xE9curit\xE9 en m\xEAme temps que d'autres risques\
+            \ d'entreprise (par exemple, conformit\xE9, finances, op\xE9rations, r\xE9\
+            glementation, r\xE9putation, s\xE9curit\xE9)\nEx2 : Inclure les gestionnaires\
+            \ des risques de cybers\xE9curit\xE9 dans la planification de la gestion\
+            \ des risques d'entreprise\nEx3 : \xC9tablir des crit\xE8res pour l'escalade\
+            \ des risques de cybers\xE9curit\xE9 dans le cadre de la gestion des risques\
+            \ d'entreprise"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rm-04
       assessable: true
       depth: 3
@@ -921,9 +1095,30 @@ objects:
       ref_id: GV.RM-04
       description: Strategic direction that describes appropriate risk response options
         is established and communicated.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Specify criteria for accepting and avoiding cybersecurity risk for various
+        classifications of data
+
+        Ex2: Determine whether to purchase cybersecurity insurance
+
+        Ex3: Document conditions under which shared responsibility models are acceptable
+        (e.g., outsourcing certain cybersecurity functions, having a third party perform
+        financial transactions on behalf of the organization, using public cloud-based
+        services)'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-02
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-04
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Sp\xE9cifier les crit\xE8\
+            res d'acceptation et d'\xE9vitement du risque de cybers\xE9curit\xE9 pour\
+            \ diverses classifications de donn\xE9es\nEx2 : D\xE9terminer s'il faut\
+            \ souscrire une assurance cybers\xE9curit\xE9\nEx3 : Documenter les conditions\
+            \ dans lesquelles les mod\xE8les de responsabilit\xE9 partag\xE9e sont\
+            \ acceptables (p. ex., externalisation de certaines fonctions de cybers\xE9\
+            curit\xE9, confiage d'op\xE9rations financi\xE8res par un tiers au nom\
+            \ de l'organisation, utilisation de services bas\xE9s sur le nuage public)"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rm-05
       assessable: true
       depth: 3
@@ -931,9 +1126,29 @@ objects:
       ref_id: GV.RM-05
       description: Lines of communication across the organization are established
         for cybersecurity risks, including risks from suppliers and other third parties.
+      annotation: '1st: 1st Party Risk
+
+        3rd: 3rd Party Risk
+
+        Ex1: Determine how to update senior executives, directors, and management
+        on the organization''s cybersecurity posture at agreed-upon intervals
+
+        Ex2: Identify how all departments across the organization - such as management,
+        operations, internal auditors, legal, acquisition, physical security, and
+        HR - will communicate with each other about cybersecurity risks'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-03
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
+            \ partie\nEx1 : D\xE9terminer comment mettre \xE0 jour les cadres sup\xE9\
+            rieurs, les directeurs et la direction sur la posture de cybers\xE9curit\xE9\
+            \ de l'organisation \xE0 intervalles convenus\nEx2 : Identifiez comment\
+            \ tous les services de l'organisation, tels que la direction, les op\xE9\
+            rations, les auditeurs internes, les services juridiques, les acquisitions,\
+            \ la s\xE9curit\xE9 physique et les RH, communiqueront entre eux sur les\
+            \ risques de cybers\xE9curit\xE9"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rm-06
       assessable: true
       depth: 3
@@ -941,9 +1156,35 @@ objects:
       ref_id: GV.RM-06
       description: A standardized method for calculating, documenting, categorizing,
         and prioritizing cybersecurity risks is established and communicated.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Establish criteria for using a quantitative approach to cybersecurity
+        risk analysis, and specify probability and exposure formulas
+
+        Ex2: Create and use templates (e.g., a risk register) to document cybersecurity
+        risk information (e.g., risk description, exposure, treatment, and ownership)
+
+        Ex3: Establish criteria for risk prioritization at the appropriate levels
+        within the enterprise
+
+        Ex4: Use a consistent list of risk categories to support integrating, aggregating,
+        and comparing cybersecurity risks'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-02
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-06
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : \xC9tablir des crit\xE8\
+            res d'utilisation d'une approche quantitative pour l'analyse des risques\
+            \ de cybers\xE9curit\xE9 et sp\xE9cifier les formules de probabilit\xE9\
+            \ et d'exposition\nEx2 : Cr\xE9er et utiliser des mod\xE8les (p. ex.,\
+            \ un registre des risques) pour documenter les informations sur les risques\
+            \ de cybers\xE9curit\xE9 (p. ex., description du risque, exposition, traitement\
+            \ et propri\xE9t\xE9)\nEx3 : \xC9tablir des crit\xE8res de hi\xE9rarchisation\
+            \ des risques aux niveaux appropri\xE9s au sein de l'entreprise\nEx4 :\
+            \ Utiliser une liste coh\xE9rente de cat\xE9gories de risques pour prendre\
+            \ en charge l'int\xE9gration, l'agr\xE9gation et la comparaison des risques\
+            \ de cybers\xE9curit\xE9"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rm-07
       assessable: true
       depth: 3
@@ -951,8 +1192,27 @@ objects:
       ref_id: GV.RM-07
       description: Strategic opportunities (i.e., positive risks) are characterized
         and are included in organizational cybersecurity risk discussions.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Define and communicate guidance and methods for identifying opportunities
+        and including them in risk discussions (e.g., strengths, weaknesses, opportunities,
+        and threats [SWOT] analysis)
+
+        Ex2: Identify stretch goals and document them
+
+        Ex3: Calculate, document, and prioritize positive risks alongside negative
+        risks'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-02
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : D\xE9finir et communiquer\
+            \ des directives et des m\xE9thodes pour identifier les opportunit\xE9\
+            s et les inclure dans les discussions sur les risques (par exemple, analyse\
+            \ des forces, des faiblesses, des opportunit\xE9s et des menaces [SWOT])\n\
+            Ex2 : Identifiez les objectifs ambitieux et documentez-les\nEx3 : Calculer,\
+            \ documenter et hi\xE9rarchiser les risques positifs par rapport aux risques\
+            \ n\xE9gatifs"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rr
       assessable: false
       depth: 2
@@ -969,9 +1229,40 @@ objects:
       ref_id: GV.RR-01
       description: Organizational leadership is responsible and accountable for cybersecurity
         risk and fosters a culture that is risk-aware, ethical, and continually improving.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Leaders (e.g., directors) agree on their roles and responsibilities in
+        developing, implementing, and assessing the organization''s cybersecurity
+        strategy
+
+        Ex2: Share leaders'' expectations regarding a secure and ethical culture,
+        especially when current events present the opportunity to highlight positive
+        or negative examples of cybersecurity risk management
+
+        Ex3: Leaders direct the CISO to maintain a comprehensive cybersecurity risk
+        strategy and review and update it at least annually and after major events
+
+        Ex4: Conduct reviews to ensure adequate authority and coordination among those
+        responsible for managing cybersecurity risk'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-01
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-03
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Les dirigeants (p. ex.,\
+            \ les directeurs) s'entendent sur leurs r\xF4les et responsabilit\xE9\
+            s dans l'\xE9laboration, la mise en \u0153uvre et l'\xE9valuation de la\
+            \ strat\xE9gie de cybers\xE9curit\xE9 de l'organisation.\nEx2 : Partager\
+            \ les attentes des dirigeants concernant une culture de s\xE9curit\xE9\
+            \ et d'\xE9thique, en particulier lorsque l'actualit\xE9 offre l'occasion\
+            \ de mettre en \xE9vidence des exemples positifs ou n\xE9gatifs de gestion\
+            \ des risques de cybers\xE9curit\xE9\nEx3 : Les dirigeants demandent au\
+            \ RSSI de maintenir une strat\xE9gie compl\xE8te de gestion des risques\
+            \ de cybers\xE9curit\xE9, puis de l'examiner et de la mettre \xE0 jour\
+            \ au moins une fois par an et apr\xE8s des \xE9v\xE9nements majeurs.\n\
+            Ex4 : Effectuer des examens pour s'assurer que les responsables de la\
+            \ gestion des risques li\xE9s \xE0 la cybers\xE9curit\xE9 disposent d'une\
+            \ autorit\xE9 et d'une coordination ad\xE9quates."
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rr-02
       assessable: true
       depth: 3
@@ -979,8 +1270,39 @@ objects:
       ref_id: GV.RR-02
       description: Roles, responsibilities, and authorities related to cybersecurity
         risk management are established, communicated, understood, and enforced.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Document risk management roles and responsibilities in policy
+
+        Ex2: Document who is responsible and accountable for cybersecurity risk management
+        activities and how those teams and individuals are to be consulted and informed
+
+        Ex3: Include cybersecurity responsibilities and performance requirements in
+        personnel descriptions
+
+        Ex4: Document performance goals for personnel with cybersecurity risk management
+        responsibilities, and periodically measure performance to identify areas for
+        improvement
+
+        Ex5: Clearly articulate cybersecurity responsibilities within operations,
+        risk functions, and internal audit functions'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-03
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Documenter les r\xF4\
+            les et les responsabilit\xE9s en mati\xE8re de gestion des risques dans\
+            \ la politique\nEx2 : Documenter qui est responsable des activit\xE9s\
+            \ de gestion des risques de cybers\xE9curit\xE9 et comment ces \xE9quipes\
+            \ et ces personnes doivent \xEAtre consult\xE9es et inform\xE9es.\nEx3\
+            \ : Inclure les responsabilit\xE9s en mati\xE8re de cybers\xE9curit\xE9\
+            \ et les exigences de performance dans les descriptions du personnel\n\
+            Ex4 : Documenter les objectifs de performance du personnel ayant des responsabilit\xE9\
+            s en mati\xE8re de gestion des risques de cybers\xE9curit\xE9 et mesurer\
+            \ p\xE9riodiquement le rendement pour identifier les domaines \xE0 am\xE9\
+            liorer\nEx5 : \xC9noncer clairement les responsabilit\xE9s en mati\xE8\
+            re de cybers\xE9curit\xE9 au sein des op\xE9rations, des fonctions de\
+            \ risque et des fonctions d'audit interne"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rr-03
       assessable: true
       depth: 3
@@ -988,18 +1310,67 @@ objects:
       ref_id: GV.RR-03
       description: Adequate resources are allocated commensurate with the cybersecurity
         risk strategy, roles, responsibilities, and policies.
+      annotation: '1st: 1st Party Risk
+
+        3rd: 3rd Party Risk
+
+        Ex1: Conduct periodic management reviews to ensure that those given cybersecurity
+        risk management responsibilities have the necessary authority
+
+        Ex2: Identify resource allocation and investment in line with risk tolerance
+        and response
+
+        Ex3: Provide adequate and sufficient people, process, and technical resources
+        to support the cybersecurity strategy'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-03
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-06
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
+            \ partie\nEx1 : Effectuer des examens de gestion p\xE9riodiques pour s'assurer\
+            \ que les personnes charg\xE9es de la gestion des risques de cybers\xE9\
+            curit\xE9 ont l'autorit\xE9 n\xE9cessaire\nEx2 : D\xE9terminer l'allocation\
+            \ des ressources et l'investissement en fonction de la tol\xE9rance au\
+            \ risque et de la r\xE9ponse\nEx3 : Fournir des personnes, des processus\
+            \ et des ressources techniques ad\xE9quats et suffisants pour soutenir\
+            \ la strat\xE9gie de cybers\xE9curit\xE9"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rr-04
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.rr
       ref_id: GV.RR-04
       description: Cybersecurity is included in human resources practices.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Integrate cybersecurity risk management considerations into human resources
+        processes (e.g., personnel screening, onboarding, change notification, offboarding)
+
+        Ex2: Consider cybersecurity knowledge to be a positive factor in hiring, training,
+        and retention decisions
+
+        Ex3: Conduct background checks prior to onboarding new personnel for sensitive
+        roles, and periodically repeat background checks for personnel with such roles
+
+        Ex4: Define and enforce obligations for personnel to be aware of, adhere to,
+        and uphold security policies as they relate to their roles'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-03
       - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-04
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Int\xE9grer les consid\xE9\
+            rations de gestion des risques de cybers\xE9curit\xE9 dans les processus\
+            \ de ressources humaines (p. ex., v\xE9rification du personnel, int\xE9\
+            gration, notification des changements, d\xE9part)\nEx2 : Consid\xE9rer\
+            \ les connaissances en cybers\xE9curit\xE9 comme un facteur positif dans\
+            \ les d\xE9cisions d'embauche, de formation et de r\xE9tention\nEx3 :\
+            \ Effectuer des v\xE9rifications des ant\xE9c\xE9dents avant d'int\xE9\
+            grer de nouveaux employ\xE9s pour des r\xF4les sensibles, et r\xE9p\xE9\
+            ter p\xE9riodiquement les v\xE9rifications des ant\xE9c\xE9dents du personnel\
+            \ ayant de tels r\xF4les\nEx4 : D\xE9finir et faire respecter les obligations\
+            \ du personnel en mati\xE8re de connaissances, d'adh\xE9sion et de respect\
+            \ des politiques de s\xE9curit\xE9 li\xE9es \xE0 leurs r\xF4les"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.po
       assessable: false
       depth: 2
@@ -1016,9 +1387,40 @@ objects:
       description: Policy for managing cybersecurity risks is established based on
         organizational context, cybersecurity strategy, and priorities and is communicated
         and enforced.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Create, disseminate, and maintain an understandable, usable risk management
+        policy with statements of management intent, expectations, and direction
+
+        Ex2: Periodically review policy and supporting processes and procedures to
+        ensure that they align with risk management strategy objectives and priorities,
+        as well as the high-level direction of the cybersecurity policy
+
+        Ex3: Require approval from senior management on policy
+
+        Ex4: Communicate cybersecurity risk management policy and supporting processes
+        and procedures across the organization
+
+        Ex5: Require personnel to acknowledge receipt of policy when first hired,
+        annually, and whenever policy is updated'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-01
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-04
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Cr\xE9er, diffuser et\
+            \ tenir \xE0 jour une politique de gestion des risques compr\xE9hensible\
+            \ et utilisable avec des \xE9nonc\xE9s d'intention, d'attentes et d'orientation\
+            \ de la direction\nEx2 : Examiner p\xE9riodiquement les politiques et\
+            \ les processus et proc\xE9dures de soutien pour s'assurer qu'ils s'harmonisent\
+            \ avec les objectifs et les priorit\xE9s de la strat\xE9gie de gestion\
+            \ des risques, ainsi qu'avec l'orientation g\xE9n\xE9rale de la politique\
+            \ de cybers\xE9curit\xE9\nEx3 : Exiger l'approbation de la haute direction\
+            \ sur la politique\nEx4 : Communiquer la politique de gestion des risques\
+            \ de cybers\xE9curit\xE9 et les processus et proc\xE9dures de soutien\
+            \ \xE0 l'\xE9chelle de l'organisation\nEx5 : Exiger que le personnel accuse\
+            \ r\xE9ception de la politique lors de son embauche, chaque ann\xE9e et\
+            \ chaque fois que la politique est mise \xE0 jour"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.po-02
       assessable: true
       depth: 3
@@ -1027,8 +1429,39 @@ objects:
       description: Policy for managing cybersecurity risks is reviewed, updated, communicated,
         and enforced to reflect changes in requirements, threats, technology, and
         organizational mission.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Update policy based on periodic reviews of cybersecurity risk management
+        results to ensure that policy and supporting processes and procedures adequately
+        maintain risk at an acceptable level
+
+        Ex2: Provide a timeline for reviewing changes to the organization''s risk
+        environment (e.g., changes in risk or in the organization''s mission objectives),
+        and communicate recommended policy updates
+
+        Ex3: Update policy to reflect changes in legal and regulatory requirements
+
+        Ex4: Update policy to reflect changes in technology (e.g., adoption of artificial
+        intelligence) and changes to the business (e.g., acquisition of a new business,
+        new contract requirements)'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-04
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Mettre \xE0 jour la politique\
+            \ en fonction des examens p\xE9riodiques des r\xE9sultats de la gestion\
+            \ des risques de cybers\xE9curit\xE9 pour s'assurer que la politique et\
+            \ les processus et proc\xE9dures connexes maintiennent ad\xE9quatement\
+            \ le risque \xE0 un niveau acceptable.\nEx2 : Fournir un calendrier pour\
+            \ l'examen des changements apport\xE9s \xE0 l'environnement de risque\
+            \ de l'organisation (p. ex., changements dans le risque ou dans les objectifs\
+            \ de la mission de l'organisation) et communiquer les mises \xE0 jour\
+            \ de politique recommand\xE9es\nEx3 : Mettre \xE0 jour la politique pour\
+            \ tenir compte des changements apport\xE9s aux exigences l\xE9gales et\
+            \ r\xE9glementaires\nEx4 : Mettre \xE0 jour la politique pour tenir compte\
+            \ des changements technologiques (p. ex., adoption de l'intelligence artificielle)\
+            \ et des changements apport\xE9s \xE0 l'entreprise (p. ex., acquisition\
+            \ d'une nouvelle entreprise, nouvelles exigences contractuelles)"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.ov
       assessable: false
       depth: 2
@@ -1045,8 +1478,23 @@ objects:
       ref_id: GV.OV-01
       description: Cybersecurity risk management strategy outcomes are reviewed to
         inform and adjust strategy and direction.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Measure how well the risk management strategy and risk results have helped
+        leaders make decisions and achieve organizational objectives
+
+        Ex2: Examine whether cybersecurity risk strategies that impede operations
+        or innovation should be adjusted'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-06
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Mesurer dans quelle mesure\
+            \ la strat\xE9gie de gestion des risques et les r\xE9sultats des risques\
+            \ ont aid\xE9 les dirigeants \xE0 prendre des d\xE9cisions et \xE0 atteindre\
+            \ les objectifs organisationnels\nEx2 : Examiner si les strat\xE9gies\
+            \ de risque de cybers\xE9curit\xE9 qui entravent les op\xE9rations ou\
+            \ l'innovation doivent \xEAtre ajust\xE9es"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.ov-02
       assessable: true
       depth: 3
@@ -1054,9 +1502,27 @@ objects:
       ref_id: GV.OV-02
       description: The cybersecurity risk management strategy is reviewed and adjusted
         to ensure coverage of organizational requirements and risks.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Review audit findings to confirm whether the existing cybersecurity strategy
+        has ensured compliance with internal and external requirements
+
+        Ex2: Review the performance oversight of those in cybersecurity-related roles
+        to determine whether policy changes are necessary
+
+        Ex3: Review strategy in light of cybersecurity incidents'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-04
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-06
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Examiner les r\xE9sultats\
+            \ de l'audit pour confirmer si la strat\xE9gie de cybers\xE9curit\xE9\
+            \ existante a assur\xE9 la conformit\xE9 aux exigences internes et externes.\n\
+            Ex2 : Examiner la surveillance du rendement des personnes occupant des\
+            \ r\xF4les li\xE9s \xE0 la cybers\xE9curit\xE9 afin de d\xE9terminer si\
+            \ des changements de politique sont n\xE9cessaires\nEx3 : Revoir la strat\xE9\
+            gie \xE0 la lumi\xE8re des incidents de cybers\xE9curit\xE9"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.ov-03
       assessable: true
       depth: 3
@@ -1064,8 +1530,27 @@ objects:
       ref_id: GV.OV-03
       description: Organizational cybersecurity risk management performance is evaluated
         and reviewed for adjustments needed.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Review key performance indicators (KPIs) to ensure that organization-wide
+        policies and procedures achieve objectives
+
+        Ex2: Review key risk indicators (KRIs) to identify risks the organization
+        faces, including likelihood and potential impact
+
+        Ex3: Collect and communicate metrics on cybersecurity risk management with
+        senior leadership'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-06
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Examiner les indicateurs\
+            \ cl\xE9s de performance (IRC) pour s'assurer que les politiques et proc\xE9\
+            dures \xE0 l'\xE9chelle de l'organisation atteignent les objectifs\nEx2\
+            \ : Examiner les indicateurs de risque cl\xE9s (KRI) pour identifier les\
+            \ risques auxquels l'organisation est confront\xE9e, y compris la probabilit\xE9\
+            \ et l'impact potentiel\nEx3 : Recueillir et communiquer des mesures sur\
+            \ la gestion des risques de cybers\xE9curit\xE9 avec la haute direction"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc
       assessable: false
       depth: 2
@@ -1082,8 +1567,43 @@ objects:
       description: A cybersecurity supply chain risk management program, strategy,
         objectives, policies, and processes are established and agreed to by organizational
         stakeholders.
+      annotation: 'Ex1: Establish a strategy that expresses the objectives of the
+        cybersecurity supply chain risk management program
+
+        Ex2: Develop the cybersecurity supply chain risk management program, including
+        a plan (with milestones), policies, and procedures that guide implementation
+        and improvement of the program, and share the policies and procedures with
+        the organizational stakeholders
+
+        Ex3: Develop and implement program processes based on the strategy, objectives,
+        policies, and procedures that are agreed upon and performed by the organizational
+        stakeholders
+
+        Ex4: Establish a cross-organizational mechanism that ensures alignment between
+        functions that contribute to cybersecurity supply chain risk management, such
+        as cybersecurity, IT, operations, legal, human resources, and engineering
+
+        3rd: 3rd Party Risk'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+      translations:
+        fr:
+          annotation: "Ex1 : \xC9tablir une strat\xE9gie qui exprime les objectifs\
+            \ du programme de gestion des risques de la cha\xEEne d'approvisionnement\
+            \ en cybers\xE9curit\xE9\nEx2 : \xC9laborer le programme de gestion des\
+            \ risques de la cha\xEEne d'approvisionnement en cybers\xE9curit\xE9,\
+            \ y compris un plan (avec des jalons), des politiques et des proc\xE9\
+            dures qui guident la mise en \u0153uvre et l'am\xE9lioration du programme,\
+            \ et partager les politiques et les proc\xE9dures avec les parties prenantes\
+            \ de l'organisation.\nEx3 : \xC9laborer et mettre en \u0153uvre des processus\
+            \ de programme fond\xE9s sur la strat\xE9gie, les objectifs, les politiques\
+            \ et les proc\xE9dures qui sont convenus et mis en \u0153uvre par les\
+            \ intervenants de l'organisation.\nEx4 : \xC9tablir un m\xE9canisme interorganisationnel\
+            \ qui assure l'harmonisation entre les fonctions qui contribuent \xE0\
+            \ la gestion des risques de la cha\xEEne d'approvisionnement en cybers\xE9\
+            curit\xE9, telles que la cybers\xE9curit\xE9, les TI, les op\xE9rations,\
+            \ les services juridiques, les ressources humaines et l'ing\xE9nierie\n\
+            3\xE8me : Risque de 3\xE8me partie"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc-02
       assessable: true
       depth: 3
@@ -1092,8 +1612,68 @@ objects:
       description: Cybersecurity roles and responsibilities for suppliers, customers,
         and partners are established, communicated, and coordinated internally and
         externally.
+      annotation: 'Ex1: Identify one or more specific roles or positions that will
+        be responsible and accountable for planning, resourcing, and executing cybersecurity
+        supply chain risk management activities
+
+        Ex2: Document cybersecurity supply chain risk management roles and responsibilities
+        in policy
+
+        Ex3: Create responsibility matrixes to document who will be responsible and
+        accountable for cybersecurity supply chain risk management activities and
+        how those teams and individuals will be consulted and informed
+
+        Ex4: Include cybersecurity supply chain risk management responsibilities and
+        performance requirements in personnel descriptions to ensure clarity and improve
+        accountability
+
+        Ex5: Document performance goals for personnel with cybersecurity risk management-specific
+        responsibilities, and periodically measure them to demonstrate and improve
+        performance
+
+        Ex6: Develop roles and responsibilities for suppliers, customers, and business
+        partners to address shared responsibilities for applicable cybersecurity risks,
+        and integrate them into organizational policies and applicable third-party
+        agreements
+
+        Ex7: Internally communicate cybersecurity supply chain risk management roles
+        and responsibilities for third parties
+
+        Ex8: Establish rules and protocols for information sharing and reporting processes
+        between the organization and its suppliers
+
+        3rd: 3rd Party Risk'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+      translations:
+        fr:
+          annotation: "Ex1 : Identifier un ou plusieurs r\xF4les ou postes sp\xE9\
+            cifiques qui seront responsables de la planification, de l'approvisionnement\
+            \ et de l'ex\xE9cution des activit\xE9s de gestion des risques de la cha\xEE\
+            ne d'approvisionnement en cybers\xE9curit\xE9\nEx2 : Documenter les r\xF4\
+            les et les responsabilit\xE9s en mati\xE8re de gestion des risques de\
+            \ la cha\xEEne d'approvisionnement en cybers\xE9curit\xE9 dans la politique\n\
+            Ex3 : Cr\xE9er des matrices de responsabilit\xE9s pour documenter qui\
+            \ sera responsable des activit\xE9s de gestion des risques de la cha\xEE\
+            ne d'approvisionnement en cybers\xE9curit\xE9 et comment ces \xE9quipes\
+            \ et ces personnes seront consult\xE9es et inform\xE9es.\nEx4 : Inclure\
+            \ les responsabilit\xE9s en mati\xE8re de gestion des risques de la cha\xEE\
+            ne d'approvisionnement en cybers\xE9curit\xE9 et les exigences de performance\
+            \ dans les descriptions du personnel afin d'assurer la clart\xE9 et d'am\xE9\
+            liorer la responsabilisation\nEx5 : Documenter les objectifs de performance\
+            \ du personnel ayant des responsabilit\xE9s sp\xE9cifiques \xE0 la gestion\
+            \ des risques de cybers\xE9curit\xE9, et les mesurer p\xE9riodiquement\
+            \ pour d\xE9montrer et am\xE9liorer les performances\nEx6 : \xC9laborer\
+            \ des r\xF4les et des responsabilit\xE9s pour les fournisseurs, les clients\
+            \ et les partenaires commerciaux afin de g\xE9rer les responsabilit\xE9\
+            s partag\xE9es \xE0 l'\xE9gard des risques de cybers\xE9curit\xE9 applicables,\
+            \ et les int\xE9grer aux politiques organisationnelles et aux ententes\
+            \ avec les tiers applicables.\nEx7 : Communiquer \xE0 l'interne les r\xF4\
+            les et responsabilit\xE9s des tiers en mati\xE8re de gestion des risques\
+            \ de la cha\xEEne d'approvisionnement en mati\xE8re de cybers\xE9curit\xE9\
+            \nEx8 : \xC9tablir des r\xE8gles et des protocoles pour les processus\
+            \ d'\xE9change d'information et de production de rapports entre l'organisation\
+            \ et ses fournisseurs\n3\xE8me : Risque de 3\xE8me partie"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc-03
       assessable: true
       depth: 3
@@ -1101,16 +1681,59 @@ objects:
       ref_id: GV.SC-03
       description: Cybersecurity supply chain risk management is integrated into cybersecurity
         and enterprise risk management, risk assessment, and improvement processes.
+      annotation: 'Ex1: Identify areas of alignment and overlap with cybersecurity
+        and enterprise risk management
+
+        Ex2: Establish integrated control sets for cybersecurity risk management and
+        cybersecurity supply chain risk management
+
+        Ex3: Integrate cybersecurity supply chain risk management into improvement
+        processes
+
+        Ex4: Escalate material cybersecurity risks in supply chains to senior management,
+        and address them at the enterprise risk management level
+
+        3rd: 3rd Party Risk'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+      translations:
+        fr:
+          annotation: "Ex1 : Identifier les domaines d'alignement et de chevauchement\
+            \ avec la cybers\xE9curit\xE9 et la gestion des risques d'entreprise\n\
+            Ex2 : \xC9tablir des ensembles de contr\xF4les int\xE9gr\xE9s pour la\
+            \ gestion des risques de cybers\xE9curit\xE9 et la gestion des risques\
+            \ de la cha\xEEne d'approvisionnement en cybers\xE9curit\xE9\nEx3 : Int\xE9\
+            grer la gestion des risques de la cha\xEEne d'approvisionnement en cybers\xE9\
+            curit\xE9 dans les processus d'am\xE9lioration\nEx4 : Faire remonter les\
+            \ risques de cybers\xE9curit\xE9 importants dans les cha\xEEnes d'approvisionnement\
+            \ \xE0 la direction g\xE9n\xE9rale et les aborder au niveau de la gestion\
+            \ des risques d'entreprise.\n3\xE8me : Risque de 3\xE8me partie"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc-04
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc
       ref_id: GV.SC-04
       description: Suppliers are known and prioritized by criticality.
+      annotation: 'Ex1: Develop criteria for supplier criticality based on, for example,
+        the sensitivity of data processed or possessed by suppliers, the degree of
+        access to the organization''s systems, and the importance of the products
+        or services to the organization''s mission
+
+        Ex2: Keep a record of all suppliers, and prioritize suppliers based on the
+        criticality criteria
+
+        3rd: 3rd Party Risk'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+      translations:
+        fr:
+          annotation: "Ex1 : \xC9laborer des crit\xE8res de criticit\xE9 des fournisseurs\
+            \ bas\xE9s, par exemple, sur la sensibilit\xE9 des donn\xE9es trait\xE9\
+            es ou d\xE9tenues par les fournisseurs, le degr\xE9 d'acc\xE8s aux syst\xE8\
+            mes de l'organisation et l'importance des produits ou services pour la\
+            \ mission de l'organisation.\nEx2 : Tenir un registre de tous les fournisseurs\
+            \ et hi\xE9rarchiser les fournisseurs en fonction des crit\xE8res de criticit\xE9\
+            \n3\xE8me : Risque de 3\xE8me partie"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc-05
       assessable: true
       depth: 3
@@ -1119,8 +1742,77 @@ objects:
       description: Requirements to address cybersecurity risks in supply chains are
         established, prioritized, and integrated into contracts and other types of
         agreements with suppliers and other relevant third parties.
+      annotation: 'Ex1: Establish security requirements for suppliers, products, and
+        services commensurate with their criticality level and potential impact if
+        compromised
+
+        Ex2: Include all cybersecurity and supply chain requirements that third parties
+        must follow and how compliance with the requirements may be verified in default
+        contractual language
+
+        Ex3: Define the rules and protocols for information sharing between the organization
+        and its suppliers and sub-tier suppliers in agreements
+
+        Ex4: Manage risk by including security requirements in agreements based on
+        their criticality and potential impact if compromised
+
+        Ex5: Define security requirements in service-level agreements (SLAs) for monitoring
+        suppliers for acceptable security performance throughout the supplier relationship
+        lifecycle
+
+        Ex6: Contractually require suppliers to disclose cybersecurity features, functions,
+        and vulnerabilities of their products and services for the life of the product
+        or the term of service
+
+        Ex7: Contractually require suppliers to provide and maintain a current component
+        inventory (e.g., software or hardware bill of materials) for critical products
+
+        Ex8: Contractually require suppliers to vet their employees and guard against
+        insider threats
+
+        Ex9: Contractually require suppliers to provide evidence of performing acceptable
+        security practices through, for example, self-attestation, conformance to
+        known standards, certifications, or inspections
+
+        Ex10: Specify in contracts and other agreements the rights and responsibilities
+        of the organization, its suppliers, and their supply chains, with respect
+        to potential cybersecurity risks
+
+        3rd: 3rd Party Risk'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+      translations:
+        fr:
+          annotation: "Ex1 : \xC9tablir des exigences de s\xE9curit\xE9 pour les fournisseurs,\
+            \ les produits et les services en fonction de leur niveau de criticit\xE9\
+            \ et de leur impact potentiel en cas de compromission\nEx2 : Inclure toutes\
+            \ les exigences en mati\xE8re de cybers\xE9curit\xE9 et de cha\xEEne d'approvisionnement\
+            \ que les tiers doivent respecter et la mani\xE8re dont la conformit\xE9\
+            \ aux exigences peut \xEAtre v\xE9rifi\xE9e dans le langage contractuel\
+            \ par d\xE9faut\nEx3 : D\xE9finir les r\xE8gles et les protocoles d'\xE9\
+            change d'information entre l'organisation et ses fournisseurs et fournisseurs\
+            \ de niveau inf\xE9rieur dans les ententes\nEx4 : G\xE9rer les risques\
+            \ en incluant des exigences de s\xE9curit\xE9 dans les accords en fonction\
+            \ de leur criticit\xE9 et de leur impact potentiel en cas de compromission\n\
+            Ex5 : D\xE9finir les exigences de s\xE9curit\xE9 dans les accords de niveau\
+            \ de service (SLA) pour surveiller les fournisseurs afin de s'assurer\
+            \ que les performances de s\xE9curit\xE9 sont acceptables tout au long\
+            \ du cycle de vie de la relation avec le fournisseur\nEx6 : Exiger contractuellement\
+            \ des fournisseurs qu'ils divulguent les caract\xE9ristiques, les fonctions\
+            \ et les vuln\xE9rabilit\xE9s de cybers\xE9curit\xE9 de leurs produits\
+            \ et services pendant la dur\xE9e du produit ou la dur\xE9e du service\n\
+            Ex7 : Exiger contractuellement des fournisseurs qu'ils fournissent et\
+            \ tiennent \xE0 jour un inventaire des composants (p. ex., nomenclature\
+            \ logicielle ou mat\xE9rielle) pour les produits critiques.\nEx8 : Exiger\
+            \ contractuellement des fournisseurs qu'ils v\xE9rifient leurs employ\xE9\
+            s et se pr\xE9munissent contre les menaces internes\nEx9 : Exiger contractuellement\
+            \ des fournisseurs qu'ils fournissent la preuve qu'ils appliquent des\
+            \ pratiques de s\xE9curit\xE9 acceptables, par exemple par le biais d'une\
+            \ auto-attestation, de la conformit\xE9 \xE0 des normes connues, de certifications\
+            \ ou d'inspections\nEx10 : Pr\xE9ciser dans les contrats et autres ententes\
+            \ les droits et responsabilit\xE9s de l'organisation, de ses fournisseurs\
+            \ et de leurs cha\xEEnes d'approvisionnement en ce qui concerne les risques\
+            \ potentiels de cybers\xE9curit\xE9\n3\xE8me : Risque de 3\xE8me partie"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc-06
       assessable: true
       depth: 3
@@ -1128,8 +1820,35 @@ objects:
       ref_id: GV.SC-06
       description: Planning and due diligence are performed to reduce risks before
         entering into formal supplier or other third-party relationships.
+      annotation: 'Ex1: Perform thorough due diligence on prospective suppliers that
+        is consistent with procurement planning and commensurate with the level of
+        risk, criticality, and complexity of each supplier relationship
+
+        Ex2: Assess the suitability of the technology and cybersecurity capabilities
+        and the risk management practices of prospective suppliers
+
+        Ex3: Conduct supplier risk assessments against business and applicable cybersecurity
+        requirements
+
+        Ex4: Assess the authenticity, integrity, and security of critical products
+        prior to acquisition and use
+
+        3rd: 3rd Party Risk'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+      translations:
+        fr:
+          annotation: "Ex1 : Effectuer une diligence raisonnable approfondie sur les\
+            \ fournisseurs potentiels, conforme \xE0 la planification de l'approvisionnement\
+            \ et proportionnelle au niveau de risque, de criticit\xE9 et de complexit\xE9\
+            \ de chaque relation avec le fournisseur\nEx2 : \xC9valuer la pertinence\
+            \ de la technologie et des capacit\xE9s de cybers\xE9curit\xE9 ainsi que\
+            \ les pratiques de gestion des risques des fournisseurs potentiels\nEx3\
+            \ : Effectuer des \xE9valuations des risques li\xE9s aux fournisseurs\
+            \ par rapport aux exigences commerciales et de cybers\xE9curit\xE9 applicables\n\
+            Ex4 : \xC9valuer l'authenticit\xE9, l'int\xE9grit\xE9 et la s\xE9curit\xE9\
+            \ des produits critiques avant l'acquisition et l'utilisation\n3\xE8me\
+            \ : Risque de 3\xE8me partie"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc-07
       assessable: true
       depth: 3
@@ -1138,8 +1857,45 @@ objects:
       description: The risks posed by a supplier, their products and services, and
         other third parties are understood, recorded, prioritized, assessed, responded
         to, and monitored over the course of the relationship.
+      annotation: 'Ex1: Adjust assessment formats and frequencies based on the third
+        party''s reputation and the criticality of the products or services they provide
+
+        Ex2: Evaluate third parties'' evidence of compliance with contractual cybersecurity
+        requirements, such as self-attestations, warranties, certifications, and other
+        artifacts
+
+        Ex3: Monitor critical suppliers to ensure that they are fulfilling their security
+        obligations throughout the supplier relationship lifecycle using a variety
+        of methods and techniques, such as inspections, audits, tests, or other forms
+        of evaluation
+
+        Ex4: Monitor critical suppliers, services, and products for changes to their
+        risk profiles, and reevaluate supplier criticality and risk impact accordingly
+
+        Ex5: Plan for unexpected supplier and supply chain-related interruptions to
+        ensure business continuity
+
+        3rd: 3rd Party Risk'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+      translations:
+        fr:
+          annotation: "Ex1 : Ajuster les formats et les fr\xE9quences d'\xE9valuation\
+            \ en fonction de la r\xE9putation du tiers et de la criticit\xE9 des produits\
+            \ ou services qu'il fournit\nEx2 : \xC9valuez les preuves de conformit\xE9\
+            \ des tiers aux exigences contractuelles en mati\xE8re de cybers\xE9curit\xE9\
+            , telles que les auto-attestations, les garanties, les certifications\
+            \ et autres artefacts\nEx3 : Surveiller les fournisseurs critiques pour\
+            \ s'assurer qu'ils remplissent leurs obligations de s\xE9curit\xE9 tout\
+            \ au long du cycle de vie de la relation avec le fournisseur \xE0 l'aide\
+            \ de diverses m\xE9thodes et techniques, telles que des inspections, des\
+            \ audits, des tests ou d'autres formes d'\xE9valuation\nEx4 : Surveiller\
+            \ les fournisseurs, les services et les produits critiques pour d\xE9\
+            tecter les modifications de leurs profils de risque, et r\xE9\xE9valuer\
+            \ la criticit\xE9 des fournisseurs et l'impact des risques en cons\xE9\
+            quence.\nEx5 : Planifier les interruptions impr\xE9vues li\xE9es aux fournisseurs\
+            \ et \xE0 la cha\xEEne d'approvisionnement pour assurer la continuit\xE9\
+            \ des activit\xE9s\n3\xE8me : Risque de 3\xE8me partie"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc-08
       assessable: true
       depth: 3
@@ -1147,9 +1903,37 @@ objects:
       ref_id: GV.SC-08
       description: Relevant suppliers and other third parties are included in incident
         planning, response, and recovery activities.
+      annotation: 'Ex1: Define and use rules and protocols for reporting incident
+        response and recovery activities and the status between the organization and
+        its suppliers
+
+        Ex2: Identify and document the roles and responsibilities of the organization
+        and its suppliers for incident response
+
+        Ex3: Include critical suppliers in incident response exercises and simulations
+
+        Ex4: Define and coordinate crisis communication methods and protocols between
+        the organization and its critical suppliers
+
+        Ex5: Conduct collaborative lessons learned sessions with critical suppliers
+
+        3rd: 3rd Party Risk'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
       - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-03
+      translations:
+        fr:
+          annotation: "Ex1 : D\xE9finir et utiliser des r\xE8gles et des protocoles\
+            \ pour signaler les activit\xE9s d'intervention et de r\xE9cup\xE9ration\
+            \ en cas d'incident et l'\xE9tat d'avancement entre l'organisation et\
+            \ ses fournisseurs\nEx2 : Identifier et documenter les r\xF4les et les\
+            \ responsabilit\xE9s de l'organisation et de ses fournisseurs en mati\xE8\
+            re d'intervention en cas d'incident\nEx3 : Inclure les fournisseurs critiques\
+            \ dans les exercices et les simulations de r\xE9ponse aux incidents\n\
+            Ex4 : D\xE9finir et coordonner les m\xE9thodes et les protocoles de communication\
+            \ de crise entre l'organisation et ses fournisseurs critiques\nEx5 : Organiser\
+            \ des sessions collaboratives sur les le\xE7ons apprises avec les fournisseurs\
+            \ critiques\n3\xE8me : Risque de 3\xE8me partie"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc-09
       assessable: true
       depth: 3
@@ -1158,8 +1942,41 @@ objects:
       description: Supply chain security practices are integrated into cybersecurity
         and enterprise risk management programs, and their performance is monitored
         throughout the technology product and service life cycle.
+      annotation: 'Ex1: Policies and procedures require provenance records for all
+        acquired technology products and services
+
+        Ex2: Periodically provide risk reporting to leaders about how acquired components
+        are proven to be untampered and authentic
+
+        Ex3: Communicate regularly among cybersecurity risk managers and operations
+        personnel about the need to acquire software patches, updates, and upgrades
+        only from authenticated and trustworthy software providers
+
+        Ex4: Review policies to ensure that they require approved supplier personnel
+        to perform maintenance on supplier products
+
+        Ex5: Policies and procedure require checking upgrades to critical hardware
+        for unauthorized changes
+
+        3rd: 3rd Party Risk'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+      translations:
+        fr:
+          annotation: "Ex1 : Les politiques et les proc\xE9dures exigent des registres\
+            \ de provenance pour tous les produits et services technologiques acquis\n\
+            Ex2 : Fournir p\xE9riodiquement des rapports sur les risques aux dirigeants\
+            \ sur la fa\xE7on dont les composants acquis s'av\xE8rent \xEAtre intacts\
+            \ et authentiques\nEx3 : Communiquer r\xE9guli\xE8rement entre les gestionnaires\
+            \ des risques de cybers\xE9curit\xE9 et le personnel d'exploitation sur\
+            \ la n\xE9cessit\xE9 d'acqu\xE9rir des correctifs, des mises \xE0 jour\
+            \ et des mises \xE0 niveau logicielles uniquement aupr\xE8s de fournisseurs\
+            \ de logiciels authentifi\xE9s et dignes de confiance\nEx4 : Examiner\
+            \ les politiques pour s'assurer qu'elles exigent que le personnel approuv\xE9\
+            \ du fournisseur effectue l'entretien des produits du fournisseur\nEx5\
+            \ : Les politiques et proc\xE9dures exigent la v\xE9rification des mises\
+            \ \xE0 niveau du mat\xE9riel critique pour d\xE9tecter les modifications\
+            \ non autoris\xE9es\n3\xE8me : Risque de 3\xE8me partie"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:gv.sc-10
       assessable: true
       depth: 3
@@ -1168,8 +1985,46 @@ objects:
       description: Cybersecurity supply chain risk management plans include provisions
         for activities that occur after the conclusion of a partnership or service
         agreement.
+      annotation: 'Ex1: Establish processes for terminating critical relationships
+        under both normal and adverse circumstances
+
+        Ex2: Define and implement plans for component end-of-life maintenance support
+        and obsolescence
+
+        Ex3: Verify that supplier access to organization resources is deactivated
+        promptly when it is no longer needed
+
+        Ex4: Verify that assets containing the organization''s data are returned or
+        properly disposed of in a timely, controlled, and safe manner
+
+        Ex5: Develop and execute a plan for terminating or transitioning supplier
+        relationships that takes supply chain security risk and resiliency into account
+
+        Ex6: Mitigate risks to data and systems created by supplier termination
+
+        Ex7: Manage data leakage risks associated with supplier termination
+
+        3rd: 3rd Party Risk'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+      translations:
+        fr:
+          annotation: "Ex1 : \xC9tablir des processus pour mettre fin aux relations\
+            \ critiques dans des circonstances normales et d\xE9favorables\nEx2 :\
+            \ D\xE9finir et mettre en \u0153uvre des plans de support de maintenance\
+            \ en fin de vie et d'obsolescence des composants\nEx3 : V\xE9rifiez que\
+            \ l'acc\xE8s du fournisseur aux ressources de l'organisation est d\xE9\
+            sactiv\xE9 rapidement lorsqu'il n'est plus n\xE9cessaire\nEx4 : V\xE9\
+            rifier que les actifs contenant les donn\xE9es de l'organisation sont\
+            \ retourn\xE9s ou \xE9limin\xE9s correctement en temps opportun, de mani\xE8\
+            re contr\xF4l\xE9e et s\xFBre\nEx5 : \xC9laborer et ex\xE9cuter un plan\
+            \ de r\xE9siliation ou de transition des relations avec les fournisseurs\
+            \ qui tient compte des risques de s\xE9curit\xE9 et de r\xE9silience de\
+            \ la cha\xEEne d'approvisionnement\nEx6 : Att\xE9nuer les risques pour\
+            \ les donn\xE9es et les syst\xE8mes cr\xE9\xE9s par le licenciement d'un\
+            \ fournisseur\nEx7 : G\xE9rer les risques de fuite de donn\xE9es associ\xE9\
+            s \xE0 la r\xE9siliation d'un fournisseur\n3\xE8me : Risque de 3\xE8me\
+            \ partie"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id
       assessable: false
       depth: 1
@@ -1191,8 +2046,22 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.am
       ref_id: ID.AM-01
       description: Inventories of hardware managed by the organization are maintained.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Maintain inventories for all types of hardware, including IT, IoT, OT,
+        and mobile devices
+
+        Ex2: Constantly monitor networks to detect new hardware and automatically
+        update inventories'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-id-01
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Tenir \xE0 jour des inventaires\
+            \ pour tous les types de mat\xE9riel, y compris l'informatique, l'IoT,\
+            \ l'OT et les appareils mobiles\nEx2 : Surveiller en permanence les r\xE9\
+            seaux pour d\xE9tecter le nouveau mat\xE9riel et mettre \xE0 jour automatiquement\
+            \ les inventaires"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.am-02
       assessable: true
       depth: 3
@@ -1200,8 +2069,28 @@ objects:
       ref_id: ID.AM-02
       description: Inventories of software, services, and systems managed by the organization
         are maintained.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Maintain inventories for all types of software and services, including
+        commercial-off-the-shelf, open-source, custom applications, API services,
+        and cloud-based applications and services
+
+        Ex2: Constantly monitor all platforms, including containers and virtual machines,
+        for software and service inventory changes
+
+        Ex3: Maintain an inventory of the organization''s systems'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-id-01
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Tenir \xE0 jour des inventaires\
+            \ pour tous les types de logiciels et de services, y compris les applications\
+            \ commerciales pr\xEAtes \xE0 l'emploi, les applications open source,\
+            \ les applications personnalis\xE9es, les services API et les applications\
+            \ et services bas\xE9s sur le cloud\nEx2 : Surveillez en permanence toutes\
+            \ les plateformes, y compris les conteneurs et les machines virtuelles,\
+            \ pour d\xE9tecter les modifications de l'inventaire des logiciels et\
+            \ des services\nEx3 : Tenir un inventaire des syst\xE8mes de l'organisation"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.am-03
       assessable: true
       depth: 3
@@ -1209,17 +2098,64 @@ objects:
       ref_id: ID.AM-03
       description: Representations of the organization's authorized network communication
         and internal and external network data flows are maintained.
+      annotation: '1st: 1st Party Risk
+
+        3rd: 3rd Party Risk
+
+        Ex1: Maintain baselines of communication and data flows within the organization''s
+        wired and wireless networks
+
+        Ex2: Maintain baselines of communication and data flows between the organization
+        and third parties
+
+        Ex3: Maintain baselines of communication and data flows for the organization''s
+        infrastructure-as-a-service (IaaS) usage
+
+        Ex4: Maintain documentation of expected network ports, protocols, and services
+        that are typically used among authorized systems'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-id-02
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
+            \ partie\nEx1 : Maintenir les lignes de base de communication et les flux\
+            \ de donn\xE9es au sein des r\xE9seaux filaires et sans fil de l'organisation\n\
+            Ex2 : Maintenir des bases de r\xE9f\xE9rence pour la communication et\
+            \ les flux de donn\xE9es entre l'organisation et les tiers\nEx3 : Maintenir\
+            \ les lignes de base de communication et les flux de donn\xE9es pour l'utilisation\
+            \ de l'infrastructure en tant que service (IaaS) de l'organisation\nEx4\
+            \ : Tenir \xE0 jour la documentation des ports, protocoles et services\
+            \ r\xE9seau attendus qui sont g\xE9n\xE9ralement utilis\xE9s par les syst\xE8\
+            mes autoris\xE9s"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.am-04
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.am
       ref_id: ID.AM-04
       description: Inventories of services provided by suppliers are maintained.
+      annotation: 'Ex1: Inventory all external services used by the organization,
+        including third-party infrastructure-as-a-service (IaaS), platform-as-a-service
+        (PaaS), and software-as-a-service (SaaS) offerings; APIs; and other externally
+        hosted application services
+
+        Ex2: Update the inventory when a new external service is going to be utilized
+        to ensure adequate cybersecurity risk management monitoring of the organization''s
+        use of that service
+
+        3rd: 3rd Party Risk'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-id-01
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+      translations:
+        fr:
+          annotation: "Ex1 : Inventorier tous les services externes utilis\xE9s par\
+            \ l'organisation, y compris les offres d'infrastructure en tant que service\
+            \ (IaaS), de plateforme en tant que service (PaaS) et de logiciel en tant\
+            \ que service (SaaS) ; Apis; et d'autres services applicatifs h\xE9berg\xE9\
+            s en externe\nEx2 : Mettre \xE0 jour l'inventaire lorsqu'un nouveau service\
+            \ externe sera utilis\xE9 afin d'assurer une surveillance ad\xE9quate\
+            \ de la gestion des risques de cybers\xE9curit\xE9 de l'utilisation de\
+            \ ce service par l'organisation\n3\xE8me : Risque de 3\xE8me partie"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.am-05
       assessable: true
       depth: 3
@@ -1227,8 +2163,23 @@ objects:
       ref_id: ID.AM-05
       description: Assets are prioritized based on classification, criticality, resources,
         and impact on the mission.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Define criteria for prioritizing each class of assets
+
+        Ex2: Apply the prioritization criteria to assets
+
+        Ex3: Track the asset priorities and update them periodically or when significant
+        changes to the organization occur'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-id-01
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : D\xE9finir les crit\xE8\
+            res de priorisation de chaque classe d'actifs\nEx2 : Appliquer les crit\xE8\
+            res de priorisation aux actifs\nEx3 : Suivre les priorit\xE9s des actifs\
+            \ et les mettre \xE0 jour p\xE9riodiquement ou lorsque des changements\
+            \ importants surviennent dans l'organisation"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.am-07
       assessable: true
       depth: 3
@@ -1236,8 +2187,35 @@ objects:
       ref_id: ID.AM-07
       description: Inventories of data and corresponding metadata for designated data
         types are maintained.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Maintain a list of the designated data types of interest (e.g., personally
+        identifiable information, protected health information, financial account
+        numbers, organization intellectual property, operational technology data)
+
+        Ex2: Continuously discover and analyze ad hoc data to identify new instances
+        of designated data types
+
+        Ex3: Assign data classifications to designated data types through tags or
+        labels
+
+        Ex4: Track the provenance, data owner, and geolocation of each instance of
+        designated data types'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-id-01
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Tenir \xE0 jour une liste\
+            \ des types de donn\xE9es d'int\xE9r\xEAt d\xE9sign\xE9s (p. ex., renseignements\
+            \ permettant d'identifier une personne, renseignements sur la sant\xE9\
+            \ prot\xE9g\xE9s, num\xE9ros de compte financier, propri\xE9t\xE9 intellectuelle\
+            \ de l'organisation, donn\xE9es sur la technologie op\xE9rationnelle)\n\
+            Ex2 : D\xE9couvrir et analyser en permanence des donn\xE9es ad hoc pour\
+            \ identifier de nouvelles instances de types de donn\xE9es d\xE9sign\xE9\
+            s\nEx3 : Attribuer des classifications de donn\xE9es \xE0 des types de\
+            \ donn\xE9es d\xE9sign\xE9s par le biais de balises ou d'\xE9tiquettes\n\
+            Ex4 : Suivez la provenance, le propri\xE9taire des donn\xE9es et la g\xE9\
+            olocalisation de chaque instance de types de donn\xE9es d\xE9sign\xE9s"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.am-08
       assessable: true
       depth: 3
@@ -1245,9 +2223,63 @@ objects:
       ref_id: ID.AM-08
       description: Systems, hardware, software, services, and data are managed throughout
         their life cycles.
+      annotation: '1st: 1st Party Risk
+
+        3rd: 3rd Party Risk
+
+        Ex1: Integrate cybersecurity considerations throughout the life cycles of
+        systems, hardware, software, and services
+
+        Ex2: Integrate cybersecurity considerations into product life cycles
+
+        Ex3: Identify unofficial uses of technology to meet mission objectives (i.e.,
+        shadow IT)
+
+        Ex4: Periodically identify redundant systems, hardware, software, and services
+        that unnecessarily increase the organization''s attack surface
+
+        Ex5: Properly configure and secure systems, hardware, software, and services
+        prior to their deployment in production
+
+        Ex6: Update inventories when systems, hardware, software, and services are
+        moved or transferred within the organization
+
+        Ex7: Securely destroy stored data based on the organization''s data retention
+        policy using the prescribed destruction method, and keep and manage a record
+        of the destructions
+
+        Ex8: Securely sanitize data storage when hardware is being retired, decommissioned,
+        reassigned, or sent for repairs or replacement
+
+        Ex9: Offer methods for destroying paper, storage media, and other physical
+        forms of data storage'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-id-01
       - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-07
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
+            \ partie\nEx1 : Int\xE9grer les consid\xE9rations de cybers\xE9curit\xE9\
+            \ tout au long du cycle de vie des syst\xE8mes, du mat\xE9riel, des logiciels\
+            \ et des services\nEx2 : Int\xE9grer les consid\xE9rations de cybers\xE9\
+            curit\xE9 dans le cycle de vie des produits\nEx3 : Identifier les utilisations\
+            \ non officielles de la technologie pour atteindre les objectifs de la\
+            \ mission (c.-\xE0-d. TI fant\xF4mes)\nEx4 : Identifier p\xE9riodiquement\
+            \ les syst\xE8mes, le mat\xE9riel, les logiciels et les services redondants\
+            \ qui augmentent inutilement la surface d'attaque de l'organisation\n\
+            Ex5 : Configurer et s\xE9curiser correctement les syst\xE8mes, le mat\xE9\
+            riel, les logiciels et les services avant leur d\xE9ploiement en production\n\
+            Ex6 : Mettre \xE0 jour les inventaires lorsque les syst\xE8mes, le mat\xE9\
+            riel, les logiciels et les services sont d\xE9plac\xE9s ou transf\xE9\
+            r\xE9s au sein de l'organisation\nEx7 : D\xE9truire en toute s\xE9curit\xE9\
+            \ les donn\xE9es stock\xE9es conform\xE9ment \xE0 la politique de conservation\
+            \ des donn\xE9es de l'organisation \xE0 l'aide de la m\xE9thode de destruction\
+            \ prescrite, et conserver et g\xE9rer un registre des destructions\nEx8\
+            \ : Nettoyer en toute s\xE9curit\xE9 le stockage de donn\xE9es lorsque\
+            \ le mat\xE9riel est mis hors service, mis hors service, r\xE9attribu\xE9\
+            \ ou envoy\xE9 pour r\xE9paration ou remplacement\nEx9 : Proposer des\
+            \ m\xE9thodes de destruction du papier, des supports de stockage et d'autres\
+            \ formes physiques de stockage de donn\xE9es"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra
       assessable: false
       depth: 2
@@ -1262,8 +2294,44 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra
       ref_id: ID.RA-01
       description: Vulnerabilities in assets are identified, validated, and recorded.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Use vulnerability management technologies to identify unpatched and misconfigured
+        software
+
+        Ex2: Assess network and system architectures for design and implementation
+        weaknesses that affect cybersecurity
+
+        Ex3: Review, analyze, or test organization-developed software to identify
+        design, coding, and default configuration vulnerabilities
+
+        Ex4: Assess facilities that house critical computing assets for physical vulnerabilities
+        and resilience issues
+
+        Ex5: Monitor sources of cyber threat intelligence for information on new vulnerabilities
+        in products and services
+
+        Ex6: Review processes and procedures for weaknesses that could be exploited
+        to affect cybersecurity'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-id-03
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Utiliser des technologies\
+            \ de gestion des vuln\xE9rabilit\xE9s pour identifier les logiciels non\
+            \ corrig\xE9s et mal configur\xE9s\nEx2 : \xC9valuer les architectures\
+            \ de r\xE9seau et de syst\xE8me pour d\xE9tecter les faiblesses de conception\
+            \ et de mise en \u0153uvre qui affectent la cybers\xE9curit\xE9\nEx3 :\
+            \ Examiner, analyser ou tester les logiciels d\xE9velopp\xE9s par l'organisation\
+            \ pour identifier les vuln\xE9rabilit\xE9s de conception, de codage et\
+            \ de configuration par d\xE9faut\nEx4 : \xC9valuer les installations qui\
+            \ h\xE9bergent des actifs informatiques critiques pour d\xE9tecter les\
+            \ vuln\xE9rabilit\xE9s physiques et les probl\xE8mes de r\xE9silience\n\
+            Ex5 : Surveiller les sources de renseignements sur les cybermenaces pour\
+            \ obtenir des informations sur les nouvelles vuln\xE9rabilit\xE9s des\
+            \ produits et services\nEx6 : Examiner les processus et les proc\xE9dures\
+            \ pour d\xE9celer les faiblesses qui pourraient \xEAtre exploit\xE9es\
+            \ pour affecter la cybers\xE9curit\xE9"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra-02
       assessable: true
       depth: 3
@@ -1271,8 +2339,29 @@ objects:
       ref_id: ID.RA-02
       description: Cyber threat intelligence is received from information sharing
         forums and sources.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Configure cybersecurity tools and technologies with detection or response
+        capabilities to securely ingest cyber threat intelligence feeds
+
+        Ex2: Receive and review advisories from reputable third parties on current
+        threat actors and their tactics, techniques, and procedures (TTPs)
+
+        Ex3: Monitor sources of cyber threat intelligence for information on the types
+        of vulnerabilities that emerging technologies may have'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-id-04
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Configurer des outils\
+            \ et des technologies de cybers\xE9curit\xE9 dot\xE9s de capacit\xE9s\
+            \ de d\xE9tection ou de r\xE9ponse pour ing\xE9rer en toute s\xE9curit\xE9\
+            \ des flux de renseignements sur les cybermenaces\nEx2 : Recevoir et examiner\
+            \ des avis de tiers r\xE9put\xE9s sur les auteurs de menace actuels et\
+            \ leurs tactiques, techniques et proc\xE9dures (TTP)\nEx3 : Surveiller\
+            \ les sources de renseignements sur les cybermenaces pour obtenir de l'information\
+            \ sur les types de vuln\xE9rabilit\xE9s que les technologies \xE9mergentes\
+            \ peuvent pr\xE9senter"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra-03
       assessable: true
       depth: 3
@@ -1280,8 +2369,28 @@ objects:
       ref_id: ID.RA-03
       description: Internal and external threats to the organization are identified
         and recorded.
+      annotation: '1st: 1st Party Risk
+
+        3rd: 3rd Party Risk
+
+        Ex1: Use cyber threat intelligence to maintain awareness of the types of threat
+        actors likely to target the organization and the TTPs they are likely to use
+
+        Ex2: Perform threat hunting to look for signs of threat actors within the
+        environment
+
+        Ex3: Implement processes for identifying internal threat actors'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-id-04
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
+            \ partie\nEx1 : Utiliser les renseignements sur les cybermenaces pour\
+            \ se tenir au courant des types d'auteurs de menace susceptibles de cibler\
+            \ l'organisation et des TTP qu'ils sont susceptibles d'utiliser\nEx2 :\
+            \ Effectuer une chasse aux menaces pour rechercher des signes d'acteurs\
+            \ malveillants dans l'environnement\nEx3 : Mettre en \u0153uvre des processus\
+            \ d'identification des auteurs de menace internes"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra-04
       assessable: true
       depth: 3
@@ -1289,9 +2398,32 @@ objects:
       ref_id: ID.RA-04
       description: Potential impacts and likelihoods of threats exploiting vulnerabilities
         are identified and recorded.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Business leaders and cybersecurity risk management practitioners work
+        together to estimate the likelihood and impact of risk scenarios and record
+        them in risk registers
+
+        Ex2: Enumerate the potential business impacts of unauthorized access to the
+        organization''s communications, systems, and data processed in or by those
+        systems
+
+        Ex3: Account for the potential impacts of cascading failures for systems of
+        systems'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-id-03
       - urn:intuitem:risk:function:nist-csf-2.0:rc-id-04
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Les dirigeants d'entreprise\
+            \ et les praticiens de la gestion des risques de cybers\xE9curit\xE9 travaillent\
+            \ ensemble pour estimer la probabilit\xE9 et l'impact des sc\xE9narios\
+            \ de risque et les consigner dans les registres des risques\nEx2 : \xC9\
+            num\xE9rer les r\xE9percussions commerciales potentielles d'un acc\xE8\
+            s non autoris\xE9 aux communications, aux syst\xE8mes et aux donn\xE9\
+            es de l'organisation trait\xE9s dans ou par ces syst\xE8mes\nEx3 : Tenir\
+            \ compte des impacts potentiels des d\xE9faillances en cascade sur les\
+            \ syst\xE8mes des syst\xE8mes"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra-05
       assessable: true
       depth: 3
@@ -1299,16 +2431,59 @@ objects:
       ref_id: ID.RA-05
       description: Threats, vulnerabilities, likelihoods, and impacts are used to
         understand inherent risk and inform risk response prioritization.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Develop threat models to better understand risks to the data and identify
+        appropriate risk responses
+
+        Ex2: Prioritize cybersecurity resource allocations and investments based on
+        estimated likelihoods and impacts'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-id-03
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : D\xE9velopper des mod\xE8\
+            les de menaces pour mieux comprendre les risques pour les donn\xE9es et\
+            \ identifier les r\xE9ponses appropri\xE9es aux risques\nEx2 : Prioriser\
+            \ l'allocation des ressources et les investissements en cybers\xE9curit\xE9\
+            \ en fonction des probabilit\xE9s et des impacts estim\xE9s"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra-06
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra
       ref_id: ID.RA-06
       description: Risk responses are chosen, prioritized, planned, tracked, and communicated.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Apply the vulnerability management plan''s criteria for deciding whether
+        to accept, transfer, mitigate, or avoid risk
+
+        Ex2: Apply the vulnerability management plan''s criteria for selecting compensating
+        controls to mitigate risk
+
+        Ex3: Track the progress of risk response implementation (e.g., plan of action
+        and milestones [POA&M], risk register, risk detail report)
+
+        Ex4: Use risk assessment findings to inform risk response decisions and actions
+
+        Ex5: Communicate planned risk responses to affected stakeholders in priority
+        order'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-id-03
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Appliquer les crit\xE8\
+            res du plan de gestion des vuln\xE9rabilit\xE9s pour d\xE9cider d'accepter,\
+            \ de transf\xE9rer, d'att\xE9nuer ou d'\xE9viter le risque\nEx2 : Appliquer\
+            \ les crit\xE8res du plan de gestion des vuln\xE9rabilit\xE9s pour s\xE9\
+            lectionner des contr\xF4les compensatoires afin d'att\xE9nuer les risques\n\
+            Ex3 : Suivre l'avancement de la mise en \u0153uvre de la r\xE9ponse aux\
+            \ risques (p. ex., plan d'action et jalons, registre des risques, rapport\
+            \ d\xE9taill\xE9 sur les risques)\nEx4 : Utiliser les r\xE9sultats de\
+            \ l'\xE9valuation des risques pour \xE9clairer les d\xE9cisions et les\
+            \ mesures de r\xE9ponse aux risques\nEx5 : Communiquer les r\xE9ponses\
+            \ aux risques pr\xE9vues aux parties prenantes touch\xE9es par ordre de\
+            \ priorit\xE9"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra-07
       assessable: true
       depth: 3
@@ -1316,8 +2491,30 @@ objects:
       ref_id: ID.RA-07
       description: Changes and exceptions are managed, assessed for risk impact, recorded,
         and tracked.
+      annotation: 'Ex1: Implement and follow procedures for the formal documentation,
+        review, testing, and approval of proposed changes and requested exceptions
+
+        Ex2: Document the possible risks of making or not making each proposed change,
+        and provide guidance on rolling back changes
+
+        Ex3: Document the risks related to each requested exception and the plan for
+        responding to those risks
+
+        Ex4: Periodically review risks that were accepted based upon planned future
+        actions or milestones'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-id-03
+      translations:
+        fr:
+          annotation: "Ex1 : Mettre en \u0153uvre et suivre les proc\xE9dures de documentation\
+            \ officielle, d'examen, de mise \xE0 l'essai et d'approbation des modifications\
+            \ propos\xE9es et des exceptions demand\xE9es\nEx2 : Documentez les risques\
+            \ possibles li\xE9s \xE0 l'apport ou \xE0 l'\xE9chec de chaque modification\
+            \ propos\xE9e, et fournissez des conseils sur l'annulation des modifications\n\
+            Ex3 : Documenter les risques li\xE9s \xE0 chaque exception demand\xE9\
+            e et le plan d'intervention \xE0 ces risques\nEx4 : Examiner p\xE9riodiquement\
+            \ les risques qui ont \xE9t\xE9 accept\xE9s en fonction des actions ou\
+            \ des jalons futurs pr\xE9vus"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra-08
       assessable: true
       depth: 3
@@ -1325,8 +2522,30 @@ objects:
       ref_id: ID.RA-08
       description: Processes for receiving, analyzing, and responding to vulnerability
         disclosures are established.
+      annotation: '1st: 1st Party Risk
+
+        3rd: 3rd Party Risk
+
+        Ex1: Conduct vulnerability information sharing between the organization and
+        its suppliers following the rules and protocols defined in contracts
+
+        Ex2: Assign responsibilities and verify the execution of procedures for processing,
+        analyzing the impact of, and responding to cybersecurity threat, vulnerability,
+        or incident disclosures by suppliers, customers, partners, and government
+        cybersecurity organizations'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-id-03
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
+            \ partie\nEx1 : Effectuer le partage d'informations sur les vuln\xE9rabilit\xE9\
+            s entre l'organisation et ses fournisseurs en suivant les r\xE8gles et\
+            \ protocoles d\xE9finis dans les contrats\nEx2 : Attribuez les responsabilit\xE9\
+            s et v\xE9rifiez l'ex\xE9cution des proc\xE9dures de traitement, d'analyse\
+            \ de l'impact et de r\xE9ponse aux divulgations de menaces, de vuln\xE9\
+            rabilit\xE9s ou d'incidents de cybers\xE9curit\xE9 par les fournisseurs,\
+            \ les clients, les partenaires et les organisations gouvernementales de\
+            \ cybers\xE9curit\xE9"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra-09
       assessable: true
       depth: 3
@@ -1334,17 +2553,33 @@ objects:
       ref_id: ID.RA-09
       description: The authenticity and integrity of hardware and software are assessed
         prior to acquisition and use.
+      annotation: 'Ex1: Assess the authenticity and cybersecurity of critical technology
+        products and services prior to acquisition and use
+
+        3rd: 3rd Party Risk'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
       - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-07
+      translations:
+        fr:
+          annotation: "Ex1 : \xC9valuer l'authenticit\xE9 et la cybers\xE9curit\xE9\
+            \ des produits et services technologiques critiques avant l'acquisition\
+            \ et l'utilisation\n3\xE8me : Risque de 3\xE8me partie"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra-10
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.ra
       ref_id: ID.RA-10
       description: Critical suppliers are assessed prior to acquisition.
+      annotation: 'Ex1: Conduct supplier risk assessments against business and applicable
+        cybersecurity requirements, including the supply chain'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+      translations:
+        fr:
+          annotation: "Ex1 : Effectuer des \xE9valuations des risques li\xE9s aux\
+            \ fournisseurs par rapport aux exigences commerciales et de cybers\xE9\
+            curit\xE9 applicables, y compris la cha\xEEne d'approvisionnement"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.im
       assessable: false
       depth: 2
@@ -1359,8 +2594,27 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.im
       ref_id: ID.IM-01
       description: Improvements are identified from evaluations.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Perform self-assessments of critical services that take current threats
+        and TTPs into consideration
+
+        Ex2: Invest in third-party assessments or independent audits of the effectiveness
+        of the organization''s cybersecurity program to identify areas that need improvement
+
+        Ex3: Constantly evaluate compliance with selected cybersecurity requirements
+        through automated means'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-id-05
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Effectuer des auto-\xE9\
+            valuations des services critiques en tenant compte des menaces actuelles\
+            \ et des TTP\nEx2 : Investir dans des \xE9valuations par des tiers ou\
+            \ des audits ind\xE9pendants de l'efficacit\xE9 du programme de cybers\xE9\
+            curit\xE9 de l'organisation afin de cerner les domaines \xE0 am\xE9liorer\n\
+            Ex3 : \xC9valuer en permanence la conformit\xE9 aux exigences de cybers\xE9\
+            curit\xE9 s\xE9lectionn\xE9es par des moyens automatis\xE9s"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.im-02
       assessable: true
       depth: 3
@@ -1368,8 +2622,55 @@ objects:
       ref_id: ID.IM-02
       description: Improvements are identified from security tests and exercises,
         including those done in coordination with suppliers and relevant third parties.
+      annotation: '1st: 1st Party Risk
+
+        3rd: 3rd Party Risk
+
+        Ex1: Identify improvements for future incident response activities based on
+        findings from incident response assessments (e.g., tabletop exercises and
+        simulations, tests, internal reviews, independent audits)
+
+        Ex2: Identify improvements for future business continuity, disaster recovery,
+        and incident response activities based on exercises performed in coordination
+        with critical service providers and product suppliers
+
+        Ex3: Involve internal stakeholders (e.g., senior executives, legal department,
+        HR) in security tests and exercises as appropriate
+
+        Ex4: Perform penetration testing to identify opportunities to improve the
+        security posture of selected high-risk systems as approved by leadership
+
+        Ex5: Exercise contingency plans for responding to and recovering from the
+        discovery that products or services did not originate with the contracted
+        supplier or partner or were altered before receipt
+
+        Ex6: Collect and analyze performance metrics using security tools and services
+        to inform improvements to the cybersecurity program'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-id-05
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
+            \ partie\nEx1 : D\xE9terminer les am\xE9liorations \xE0 apporter aux activit\xE9\
+            s d'intervention en cas d'incident futures en fonction des constatations\
+            \ des \xE9valuations d'intervention en cas d'incident (p. ex., exercices\
+            \ et simulations sur table, essais, examens internes, v\xE9rifications\
+            \ ind\xE9pendantes)\nEx2 : Identifier les am\xE9liorations \xE0 apporter\
+            \ aux activit\xE9s futures de continuit\xE9 des activit\xE9s, de reprise\
+            \ apr\xE8s sinistre et de r\xE9ponse aux incidents sur la base d'exercices\
+            \ effectu\xE9s en coordination avec les fournisseurs de services critiques\
+            \ et les fournisseurs de produits\nEx3 : Impliquer les parties prenantes\
+            \ internes (p. ex., cadres sup\xE9rieurs, service juridique, RH) dans\
+            \ les tests et les exercices de s\xE9curit\xE9, le cas \xE9ch\xE9ant\n\
+            Ex4 : Effectuer des tests d'intrusion pour identifier les possibilit\xE9\
+            s d'am\xE9liorer la posture de s\xE9curit\xE9 de certains syst\xE8mes\
+            \ \xE0 haut risque, tels qu'approuv\xE9s par la direction\nEx5 : Mettre\
+            \ \xE0 l'essai des plans d'urgence pour r\xE9agir et se remettre de la\
+            \ d\xE9couverte que les produits ou services ne proviennent pas du fournisseur\
+            \ ou du partenaire contractuel ou qu'ils ont \xE9t\xE9 modifi\xE9s avant\
+            \ leur r\xE9ception\nEx6 : Recueillir et analyser les indicateurs de performance\
+            \ \xE0 l'aide d'outils et de services de s\xE9curit\xE9 pour \xE9clairer\
+            \ les am\xE9liorations du programme de cybers\xE9curit\xE9"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.im-03
       assessable: true
       depth: 3
@@ -1377,8 +2678,24 @@ objects:
       ref_id: ID.IM-03
       description: Improvements are identified from execution of operational processes,
         procedures, and activities.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Conduct collaborative lessons learned sessions with suppliers
+
+        Ex2: Annually review cybersecurity policies, processes, and procedures to
+        take lessons learned into account
+
+        Ex3: Use metrics to assess operational cybersecurity performance over time'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-id-05
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Organiser des sessions\
+            \ collaboratives sur les le\xE7ons apprises avec les fournisseurs\nEx2\
+            \ : Examiner chaque ann\xE9e les politiques, les processus et les proc\xE9\
+            dures de cybers\xE9curit\xE9 pour tenir compte des le\xE7ons apprises.\n\
+            Ex3 : Utiliser des indicateurs pour \xE9valuer les performances op\xE9\
+            rationnelles en mati\xE8re de cybers\xE9curit\xE9 au fil du temps"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:id.im-04
       assessable: true
       depth: 3
@@ -1386,9 +2703,47 @@ objects:
       ref_id: ID.IM-04
       description: Incident response plans and other cybersecurity plans that affect
         operations are established, communicated, maintained, and improved.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Establish contingency plans (e.g., incident response, business continuity,
+        disaster recovery) for responding to and recovering from adverse events that
+        can interfere with operations, expose confidential information, or otherwise
+        endanger the organization''s mission and viability
+
+        Ex2: Include contact and communication information, processes for handling
+        common scenarios, and criteria for prioritization, escalation, and elevation
+        in all contingency plans
+
+        Ex3: Create a vulnerability management plan to identify and assess all types
+        of vulnerabilities and to prioritize, test, and implement risk responses
+
+        Ex4: Communicate cybersecurity plans (including updates) to those responsible
+        for carrying them out and to affected parties
+
+        Ex5: Review and update all cybersecurity plans annually or when a need for
+        significant improvements is identified'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-id-05
       - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-01
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : \xC9tablir des plans\
+            \ d'urgence (p. ex., intervention en cas d'incident, continuit\xE9 des\
+            \ activit\xE9s, reprise apr\xE8s sinistre) pour intervenir et se remettre\
+            \ d'\xE9v\xE9nements ind\xE9sirables qui peuvent interf\xE9rer avec les\
+            \ op\xE9rations, exposer des renseignements confidentiels ou mettre en\
+            \ danger la mission et la viabilit\xE9 de l'organisation.\nEx2 : Inclure\
+            \ les coordonn\xE9es et les informations de communication, les processus\
+            \ de gestion des sc\xE9narios courants et les crit\xE8res de hi\xE9rarchisation,\
+            \ d'escalade et d'\xE9l\xE9vation dans tous les plans d'urgence\nEx3 :\
+            \ Cr\xE9er un plan de gestion des vuln\xE9rabilit\xE9s pour identifier\
+            \ et \xE9valuer tous les types de vuln\xE9rabilit\xE9s et hi\xE9rarchiser,\
+            \ tester et mettre en \u0153uvre des r\xE9ponses aux risques\nEx4 : Communiquer\
+            \ les plans de cybers\xE9curit\xE9 (y compris les mises \xE0 jour) aux\
+            \ personnes responsables de leur ex\xE9cution et aux parties concern\xE9\
+            es\nEx5 : Examiner et mettre \xE0 jour tous les plans de cybers\xE9curit\xE9\
+            \ chaque ann\xE9e ou lorsqu'un besoin d'am\xE9liorations importantes est\
+            \ identifi\xE9"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr
       assessable: false
       depth: 1
@@ -1412,8 +2767,36 @@ objects:
       ref_id: PR.AA-01
       description: Identities and credentials for authorized users, services, and
         hardware are managed by the organization.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Initiate requests for new access or additional access for employees,
+        contractors, and others, and track, review, and fulfill the requests, with
+        permission from system or data owners when needed
+
+        Ex2: Issue, manage, and revoke cryptographic certificates and identity tokens,
+        cryptographic keys (i.e., key management), and other credentials
+
+        Ex3: Select a unique identifier for each device from immutable hardware characteristics
+        or an identifier securely provisioned to the device
+
+        Ex4: Physically label authorized hardware with an identifier for inventory
+        and servicing purposes'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-02
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Lancez des demandes d'acc\xE8\
+            s nouveau ou suppl\xE9mentaire pour les employ\xE9s, les sous-traitants\
+            \ et d'autres personnes, et suivez, examinez et r\xE9pondez aux demandes,\
+            \ avec l'autorisation des propri\xE9taires du syst\xE8me ou des donn\xE9\
+            es, au besoin\nEx2 : \xC9mettre, g\xE9rer et r\xE9voquer des certificats\
+            \ cryptographiques et des jetons d'identit\xE9, des cl\xE9s cryptographiques\
+            \ (c'est-\xE0-dire la gestion des cl\xE9s) et d'autres informations d'identification\n\
+            Ex3 : S\xE9lectionnez un identifiant unique pour chaque appareil \xE0\
+            \ partir de caract\xE9ristiques mat\xE9rielles immuables ou d'un identifiant\
+            \ provisionn\xE9 en toute s\xE9curit\xE9 sur l'appareil\nEx4 : \xC9tiquetez\
+            \ physiquement le mat\xE9riel autoris\xE9 avec un identificateur \xE0\
+            \ des fins d'inventaire et d'entretien"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.aa-02
       assessable: true
       depth: 3
@@ -1421,25 +2804,89 @@ objects:
       ref_id: PR.AA-02
       description: Identities are proofed and bound to credentials based on the context
         of interactions.
+      annotation: '1st: 1st Party Risk
+
+        3rd: 3rd Party Risk
+
+        Ex1: Verify a person''s claimed identity at enrollment time using government-issued
+        identity credentials (e.g., passport, visa, driver''s license)
+
+        Ex2: Issue a different credential for each person (i.e., no credential sharing)'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-02
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
+            \ partie\nEx1 : V\xE9rifier l'identit\xE9 revendiqu\xE9e d'une personne\
+            \ au moment de l'inscription \xE0 l'aide d'identifiants d\xE9livr\xE9\
+            s par le gouvernement (par exemple, passeport, visa, permis de conduire)\n\
+            Ex2 : \xC9mettre un justificatif d'identit\xE9 diff\xE9rent pour chaque\
+            \ personne (c'est-\xE0-dire aucun partage d'identifiant)"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.aa-03
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.aa
       ref_id: PR.AA-03
       description: Users, services, and hardware are authenticated.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Require multifactor authentication
+
+        Ex2: Enforce policies for the minimum strength of passwords, PINs, and similar
+        authenticators
+
+        Ex3: Periodically reauthenticate users, services, and hardware based on risk
+        (e.g., in zero trust architectures)
+
+        Ex4: Ensure that authorized personnel can access accounts essential for protecting
+        safety under emergency conditions'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-01
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Exiger une authentification\
+            \ multifacteur\nEx2 : Appliquer des politiques pour la s\xE9curit\xE9\
+            \ minimale des mots de passe, des codes PIN et des authentificateurs similaires\n\
+            Ex3 : R\xE9authentifier p\xE9riodiquement les utilisateurs, les services\
+            \ et le mat\xE9riel en fonction du risque (par exemple, dans les architectures\
+            \ Zero Trust)\nEx4 : S'assurer que le personnel autoris\xE9 peut acc\xE9\
+            der aux comptes essentiels \xE0 la protection de la s\xE9curit\xE9 en\
+            \ cas d'urgence"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.aa-04
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.aa
       ref_id: PR.AA-04
       description: Identity assertions are protected, conveyed, and verified.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Protect identity assertions that are used to convey authentication and
+        user information through single sign-on systems
+
+        Ex2: Protect identity assertions that are used to convey authentication and
+        user information between federated systems
+
+        Ex3: Implement standards-based approaches for identity assertions in all contexts,
+        and follow all guidance for the generation (e.g., data models, metadata),
+        protection (e.g., digital signing, encryption), and verification (e.g., signature
+        validation) of identity assertions'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-01
       - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-02
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Prot\xE9ger les assertions\
+            \ d'identit\xE9 utilis\xE9es pour transmettre l'authentification et les\
+            \ informations de l'utilisateur via des syst\xE8mes d'authentification\
+            \ unique\nEx2 : Prot\xE9ger les assertions d'identit\xE9 utilis\xE9es\
+            \ pour transmettre l'authentification et les informations utilisateur\
+            \ entre les syst\xE8mes f\xE9d\xE9r\xE9s\nEx3 : Mettre en \u0153uvre des\
+            \ approches fond\xE9es sur des normes pour les assertions d'identit\xE9\
+            \ dans tous les contextes et suivre toutes les directives pour la g\xE9\
+            n\xE9ration (par exemple, mod\xE8les de donn\xE9es, m\xE9tadonn\xE9es),\
+            \ la protection (par exemple, signature num\xE9rique, cryptage) et la\
+            \ v\xE9rification (par exemple, validation de signature) des assertions\
+            \ d'identit\xE9"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.aa-05
       assessable: true
       depth: 3
@@ -1448,9 +2895,37 @@ objects:
       description: Access permissions, entitlements, and authorizations are defined
         in a policy, managed, enforced, and reviewed, and incorporate the principles
         of least privilege and separation of duties.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Review logical and physical access privileges periodically and whenever
+        someone changes roles or leaves the organization, and promptly rescind privileges
+        that are no longer needed
+
+        Ex2: Take attributes of the requester and the requested resource into account
+        for authorization decisions (e.g., geolocation, day/time, requester endpoint''s
+        cyber health)
+
+        Ex3: Restrict access and privileges to the minimum necessary (e.g., zero trust
+        architecture)
+
+        Ex4: Periodically review the privileges associated with critical business
+        functions to confirm proper separation of duties'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-02
       - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-03
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Examinez r\xE9guli\xE8\
+            rement les privil\xE8ges d'acc\xE8s logique et physique et chaque fois\
+            \ qu'une personne change de r\xF4le ou quitte l'organisation, et annulez\
+            \ rapidement les privil\xE8ges qui ne sont plus n\xE9cessaires\nEx2 :\
+            \ Prendre en compte les attributs du demandeur et de la ressource demand\xE9\
+            e pour les d\xE9cisions d'autorisation (par exemple, g\xE9olocalisation,\
+            \ jour/heure, cybersant\xE9 du point de terminaison du demandeur)\nEx3\
+            \ : Restreindre l'acc\xE8s et les privil\xE8ges au minimum n\xE9cessaire\
+            \ (par exemple, architecture Zero Trust)\nEx4 : Examiner p\xE9riodiquement\
+            \ les privil\xE8ges associ\xE9s aux fonctions op\xE9rationnelles essentielles\
+            \ pour confirmer la bonne s\xE9paration des t\xE2ches"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.aa-06
       assessable: true
       depth: 3
@@ -1458,8 +2933,31 @@ objects:
       ref_id: PR.AA-06
       description: Physical access to assets is managed, monitored, and enforced commensurate
         with risk.
+      annotation: '1st: 1st Party Risk
+
+        3rd: 3rd Party Risk
+
+        Ex1: Use security guards, security cameras, locked entrances, alarm systems,
+        and other physical controls to monitor facilities and restrict access
+
+        Ex2: Employ additional physical security controls for areas that contain high-risk
+        assets
+
+        Ex3: Escort guests, vendors, and other third parties within areas that contain
+        business-critical assets'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-03
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
+            \ partie\nEx1 : Utilisez des agents de s\xE9curit\xE9, des cam\xE9ras\
+            \ de s\xE9curit\xE9, des entr\xE9es verrouill\xE9es, des syst\xE8mes d'alarme\
+            \ et d'autres contr\xF4les physiques pour surveiller les installations\
+            \ et restreindre l'acc\xE8s\nEx2 : Utiliser des contr\xF4les de s\xE9\
+            curit\xE9 physique suppl\xE9mentaires pour les zones qui contiennent des\
+            \ actifs \xE0 risque \xE9lev\xE9\nEx3 : Escorter des invit\xE9s, des fournisseurs\
+            \ et d'autres tiers dans des zones contenant des actifs critiques pour\
+            \ l'entreprise"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.at
       assessable: false
       depth: 2
@@ -1476,8 +2974,45 @@ objects:
       description: Personnel are provided with awareness and training so that they
         possess the knowledge and skills to perform general tasks with cybersecurity
         risks in mind.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Provide basic cybersecurity awareness and training to employees, contractors,
+        partners, suppliers, and all other users of the organization''s non-public
+        resources
+
+        Ex2: Train personnel to recognize social engineering attempts and other common
+        attacks, report attacks and suspicious activity, comply with acceptable use
+        policies, and perform basic cyber hygiene tasks (e.g., patching software,
+        choosing passwords, protecting credentials)
+
+        Ex3: Explain the consequences of cybersecurity policy violations, both to
+        individual users and the organization as a whole
+
+        Ex4: Periodically assess or test users on their understanding of basic cybersecurity
+        practices
+
+        Ex5: Require annual refreshers to reinforce existing practices and introduce
+        new practices'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-04
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Fournir une sensibilisation\
+            \ et une formation de base en mati\xE8re de cybers\xE9curit\xE9 aux employ\xE9\
+            s, aux entrepreneurs, aux partenaires, aux fournisseurs et \xE0 tous les\
+            \ autres utilisateurs des ressources non publiques de l'organisation.\n\
+            Ex2 : Former le personnel \xE0 reconna\xEEtre les tentatives d'ing\xE9\
+            nierie sociale et autres attaques courantes, \xE0 signaler les attaques\
+            \ et les activit\xE9s suspectes, \xE0 se conformer aux politiques d'utilisation\
+            \ acceptable et \xE0 effectuer des t\xE2ches de base en mati\xE8re de\
+            \ cyberhygi\xE8ne (p. ex., corriger les logiciels, choisir des mots de\
+            \ passe, prot\xE9ger les justificatifs d'identit\xE9)\nEx3 : Expliquer\
+            \ les cons\xE9quences des violations de la politique de cybers\xE9curit\xE9\
+            , \xE0 la fois aux utilisateurs individuels et \xE0 l'organisation dans\
+            \ son ensemble\nEx4 : \xC9valuer ou tester p\xE9riodiquement les utilisateurs\
+            \ sur leur compr\xE9hension des pratiques de base en mati\xE8re de cybers\xE9\
+            curit\xE9\nEx5 : Exiger des mises \xE0 jour annuelles pour renforcer les\
+            \ pratiques existantes et introduire de nouvelles pratiques"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.at-02
       assessable: true
       depth: 3
@@ -1486,8 +3021,41 @@ objects:
       description: Individuals in specialized roles are provided with awareness and
         training so that they possess the knowledge and skills to perform relevant
         tasks with cybersecurity risks in mind.
+      annotation: '1st: 1st Party Risk
+
+        3rd: 3rd Party Risk
+
+        Ex1: Identify the specialized roles within the organization that require additional
+        cybersecurity training, such as physical and cybersecurity personnel, finance
+        personnel, senior leadership, and anyone with access to business-critical
+        data
+
+        Ex2: Provide role-based cybersecurity awareness and training to all those
+        in specialized roles, including contractors, partners, suppliers, and other
+        third parties
+
+        Ex3: Periodically assess or test users on their understanding of cybersecurity
+        practices for their specialized roles
+
+        Ex4: Require annual refreshers to reinforce existing practices and introduce
+        new practices'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-04
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
+            \ partie\nEx1 : Identifiez les r\xF4les sp\xE9cialis\xE9s au sein de l'organisation\
+            \ qui n\xE9cessitent une formation suppl\xE9mentaire en cybers\xE9curit\xE9\
+            , tels que le personnel physique et de cybers\xE9curit\xE9, le personnel\
+            \ financier, la haute direction et toute personne ayant acc\xE8s \xE0\
+            \ des donn\xE9es critiques pour l'entreprise\nEx2 : Fournir une sensibilisation\
+            \ et une formation en cybers\xE9curit\xE9 bas\xE9es sur les r\xF4les \xE0\
+            \ toutes les personnes occupant des r\xF4les sp\xE9cialis\xE9s, y compris\
+            \ les entrepreneurs, les partenaires, les fournisseurs et d'autres tiers\n\
+            Ex3 : \xC9valuer ou tester p\xE9riodiquement la compr\xE9hension des utilisateurs\
+            \ des pratiques de cybers\xE9curit\xE9 pour leurs r\xF4les sp\xE9cialis\xE9\
+            s\nEx4 : Exiger des mises \xE0 jour annuelles pour renforcer les pratiques\
+            \ existantes et introduire de nouvelles pratiques"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ds
       assessable: false
       depth: 2
@@ -1503,8 +3071,36 @@ objects:
       ref_id: PR.DS-01
       description: The confidentiality, integrity, and availability of data-at-rest
         are protected.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Use encryption, digital signatures, and cryptographic hashes to protect
+        the confidentiality and integrity of stored data in files, databases, virtual
+        machine disk images, container images, and other resources
+
+        Ex2: Use full disk encryption to protect data stored on user endpoints
+
+        Ex3: Confirm the integrity of software by validating signatures
+
+        Ex4: Restrict the use of removable media to prevent data exfiltration
+
+        Ex5: Physically secure removable media containing unencrypted sensitive information,
+        such as within locked offices or file cabinets'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-05
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Utilisez le chiffrement,\
+            \ les signatures num\xE9riques et les hachages cryptographiques pour prot\xE9\
+            ger la confidentialit\xE9 et l'int\xE9grit\xE9 des donn\xE9es stock\xE9\
+            es dans des fichiers, des bases de donn\xE9es, des images de disque de\
+            \ machine virtuelle, des images de conteneur et d'autres ressources\n\
+            Ex2 : Utiliser le chiffrement complet du disque pour prot\xE9ger les donn\xE9\
+            es stock\xE9es sur les terminaux des utilisateurs\nEx3 : Confirmer l'int\xE9\
+            grit\xE9 du logiciel en validant les signatures\nEx4 : Restreindre l'utilisation\
+            \ des supports amovibles pour \xE9viter l'exfiltration de donn\xE9es\n\
+            Ex5 : Supports amovibles physiquement s\xE9curis\xE9s contenant des informations\
+            \ sensibles non crypt\xE9es, par exemple dans des bureaux verrouill\xE9\
+            s ou des classeurs"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ds-02
       assessable: true
       depth: 3
@@ -1512,8 +3108,36 @@ objects:
       ref_id: PR.DS-02
       description: The confidentiality, integrity, and availability of data-in-transit
         are protected.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Use encryption, digital signatures, and cryptographic hashes to protect
+        the confidentiality and integrity of network communications
+
+        Ex2: Automatically encrypt or block outbound emails and other communications
+        that contain sensitive data, depending on the data classification
+
+        Ex3: Block access to personal email, file sharing, file storage services,
+        and other personal communications applications and services from organizational
+        systems and networks
+
+        Ex4: Prevent reuse of sensitive data from production environments (e.g., customer
+        records) in development, testing, and other non-production environments'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-05
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Utilisez le cryptage,\
+            \ les signatures num\xE9riques et les hachages cryptographiques pour prot\xE9\
+            ger la confidentialit\xE9 et l'int\xE9grit\xE9 des communications r\xE9\
+            seau\nEx2 : Chiffrer ou bloquer automatiquement les e-mails sortants et\
+            \ autres communications contenant des donn\xE9es sensibles, en fonction\
+            \ de la classification des donn\xE9es\nEx3 : Bloquer l'acc\xE8s \xE0 la\
+            \ messagerie personnelle, au partage de fichiers, aux services de stockage\
+            \ de fichiers et \xE0 d'autres applications et services de communications\
+            \ personnelles \xE0 partir des syst\xE8mes et r\xE9seaux de l'organisation\n\
+            Ex4 : Emp\xEAcher la r\xE9utilisation des donn\xE9es sensibles des environnements\
+            \ de production (par exemple, les dossiers clients) dans les environnements\
+            \ de d\xE9veloppement, de test et autres environnements hors production"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ds-10
       assessable: true
       depth: 3
@@ -1521,16 +3145,53 @@ objects:
       ref_id: PR.DS-10
       description: The confidentiality, integrity, and availability of data-in-use
         are protected.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Remove data that must remain confidential (e.g., from processors and
+        memory) as soon as it is no longer needed
+
+        Ex2: Protect data in use from access by other users and processes of the same
+        platform'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-05
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Supprimez les donn\xE9\
+            es qui doivent rester confidentielles (par exemple, des processeurs et\
+            \ de la m\xE9moire) d\xE8s qu'elles ne sont plus n\xE9cessaires\nEx2 :\
+            \ Prot\xE9ger les donn\xE9es en cours d'utilisation contre l'acc\xE8s\
+            \ par d'autres utilisateurs et processus de la m\xEAme plateforme"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ds-11
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ds
       ref_id: PR.DS-11
       description: Backups of data are created, protected, maintained, and tested.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Continuously back up critical data in near-real-time, and back up other
+        data frequently at agreed-upon schedules
+
+        Ex2: Test backups and restores for all types of data sources at least annually
+
+        Ex3: Securely store some backups offline and offsite so that an incident or
+        disaster will not damage them
+
+        Ex4: Enforce geographic separation and geolocation restrictions for data backup
+        storage'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-06
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Sauvegardez en continu\
+            \ les donn\xE9es critiques en temps quasi r\xE9el et sauvegardez fr\xE9\
+            quemment d'autres donn\xE9es selon des calendriers convenus\nEx2 : Testez\
+            \ les sauvegardes et les restaurations pour tous les types de sources\
+            \ de donn\xE9es au moins une fois par an\nEx3 : Stocker en toute s\xE9\
+            curit\xE9 certaines sauvegardes hors ligne et hors site afin qu'un incident\
+            \ ou un d\xE9sastre ne les endommage pas\nEx4 : Appliquer des restrictions\
+            \ de s\xE9paration g\xE9ographique et de g\xE9olocalisation pour le stockage\
+            \ des sauvegardes de donn\xE9es"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ps
       assessable: false
       depth: 2
@@ -1545,8 +3206,30 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ps
       ref_id: PR.PS-01
       description: Configuration management practices are established and applied.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Establish, test, deploy, and maintain hardened baselines that enforce
+        the organization''s cybersecurity policies and provide only essential capabilities
+        (i.e., principle of least functionality)
+
+        Ex2: Review all default configuration settings that may potentially impact
+        cybersecurity when installing or upgrading software
+
+        Ex3: Monitor implemented software for deviations from approved baselines'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-07
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : \xC9tablir, tester, d\xE9\
+            ployer et maintenir des bases de r\xE9f\xE9rence renforc\xE9es qui appliquent\
+            \ les politiques de cybers\xE9curit\xE9 de l'organisation et ne fournissent\
+            \ que des capacit\xE9s essentielles (c'est-\xE0-dire le principe de la\
+            \ moindre fonctionnalit\xE9)\nEx2 : Passez en revue tous les param\xE8\
+            tres de configuration par d\xE9faut susceptibles d'avoir un impact sur\
+            \ la cybers\xE9curit\xE9 lors de l'installation ou de la mise \xE0 niveau\
+            \ d'un logiciel\nEx3 : Surveiller les logiciels mis en \u0153uvre pour\
+            \ d\xE9tecter les \xE9carts par rapport aux lignes de base approuv\xE9\
+            es"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ps-02
       assessable: true
       depth: 3
@@ -1554,8 +3237,42 @@ objects:
       ref_id: PR.PS-02
       description: Software is maintained, replaced, and removed commensurate with
         risk.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Perform routine and emergency patching within the timeframes specified
+        in the vulnerability management plan
+
+        Ex2: Update container images, and deploy new container instances to replace
+        rather than update existing instances
+
+        Ex3: Replace end-of-life software and service versions with supported, maintained
+        versions
+
+        Ex4: Uninstall and remove unauthorized software and services that pose undue
+        risks
+
+        Ex5: Uninstall and remove any unnecessary software components (e.g., operating
+        system utilities) that attackers might misuse
+
+        Ex6: Define and implement plans for software and service end-of-life maintenance
+        support and obsolescence'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-07
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Effectuer des correctifs\
+            \ de routine et d'urgence dans les d\xE9lais sp\xE9cifi\xE9s dans le plan\
+            \ de gestion des vuln\xE9rabilit\xE9s\nEx2 : Mettre \xE0 jour les images\
+            \ de conteneur et d\xE9ployer de nouvelles instances de conteneur pour\
+            \ remplacer plut\xF4t que mettre \xE0 jour les instances existantes\n\
+            Ex3 : Remplacer les versions logicielles et de service en fin de vie par\
+            \ des versions prises en charge et g\xE9r\xE9es\nEx4 : D\xE9sinstaller\
+            \ et supprimer les logiciels et services non autoris\xE9s qui pr\xE9sentent\
+            \ des risques excessifs\nEx5 : D\xE9sinstallez et supprimez tous les composants\
+            \ logiciels inutiles (par exemple, les utilitaires du syst\xE8me d'exploitation)\
+            \ que les attaquants pourraient utiliser \xE0 mauvais escient\nEx6 : D\xE9\
+            finir et mettre en \u0153uvre des plans de support de maintenance en fin\
+            \ de vie et d'obsolescence des logiciels et des services"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ps-03
       assessable: true
       depth: 3
@@ -1563,24 +3280,88 @@ objects:
       ref_id: PR.PS-03
       description: Hardware is maintained, replaced, and removed commensurate with
         risk.
+      annotation: '1st: 1st Party Risk
+
+        3rd: 3rd Party Risk
+
+        Ex1: Replace hardware when it lacks needed security capabilities or when it
+        cannot support software with needed security capabilities
+
+        Ex2: Define and implement plans for hardware end-of-life maintenance support
+        and obsolescence
+
+        Ex3: Perform hardware disposal in a secure, responsible, and auditable manner'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-07
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
+            \ partie\nEx1 : Remplacer le mat\xE9riel lorsqu'il ne dispose pas des\
+            \ fonctionnalit\xE9s de s\xE9curit\xE9 n\xE9cessaires ou lorsqu'il ne\
+            \ peut pas prendre en charge les logiciels dot\xE9s des capacit\xE9s de\
+            \ s\xE9curit\xE9 n\xE9cessaires\nEx2 : D\xE9finir et mettre en \u0153\
+            uvre des plans de support de maintenance en fin de vie et d'obsolescence\
+            \ du mat\xE9riel\nEx3 : Effectuer la mise au rebut du mat\xE9riel de mani\xE8\
+            re s\xE9curis\xE9e, responsable et v\xE9rifiable"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ps-04
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ps
       ref_id: PR.PS-04
       description: Log records are generated and made available for continuous monitoring.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Configure all operating systems, applications, and services (including
+        cloud-based services) to generate log records
+
+        Ex2: Configure log generators to securely share their logs with the organization''s
+        logging infrastructure systems and services
+
+        Ex3: Configure log generators to record the data needed by zero-trust architectures'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-08
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Configurer tous les syst\xE8\
+            mes d'exploitation, applications et services (y compris les services bas\xE9\
+            s sur le cloud) pour g\xE9n\xE9rer des enregistrements de journal\nEx2\
+            \ : Configurer les g\xE9n\xE9rateurs de journaux pour partager en toute\
+            \ s\xE9curit\xE9 leurs journaux avec les syst\xE8mes et services d'infrastructure\
+            \ de journalisation de l'organisation.\nEx3 : Configurer des g\xE9n\xE9\
+            rateurs de journaux pour enregistrer les donn\xE9es requises par les architectures\
+            \ Zero Trust"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ps-05
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ps
       ref_id: PR.PS-05
       description: Installation and execution of unauthorized software are prevented.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: When risk warrants it, restrict software execution to permitted products
+        only or deny the execution of prohibited and unauthorized software
+
+        Ex2: Verify the source of new software and the software''s integrity before
+        installing it
+
+        Ex3: Configure platforms to use only approved DNS services that block access
+        to known malicious domains
+
+        Ex4: Configure platforms to allow the installation of organization-approved
+        software only'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-07
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Lorsque le risque le\
+            \ justifie, limitez l'ex\xE9cution du logiciel aux seuls produits autoris\xE9\
+            s ou refusez l'ex\xE9cution des logiciels interdits et non autoris\xE9\
+            s\nEx2 : V\xE9rifiez la source du nouveau logiciel et son int\xE9grit\xE9\
+            \ avant de l'installer\nEx3 : Configurer les plates-formes pour qu'elles\
+            \ n'utilisent que des services DNS approuv\xE9s qui bloquent l'acc\xE8\
+            s aux domaines malveillants connus\nEx4 : Configurer les plates-formes\
+            \ pour autoriser l'installation de logiciels approuv\xE9s par l'organisation\
+            \ uniquement"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ps-06
       assessable: true
       depth: 3
@@ -1588,8 +3369,27 @@ objects:
       ref_id: PR.PS-06
       description: Secure software development practices are integrated, and their
         performance is monitored throughout the software development life cycle.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Protect all components of organization-developed software from tampering
+        and unauthorized access
+
+        Ex2: Secure all software produced by the organization, with minimal vulnerabilities
+        in their releases
+
+        Ex3: Maintain the software used in production environments, and securely dispose
+        of software once it is no longer needed'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-07
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Prot\xE9ger tous les\
+            \ composants des logiciels d\xE9velopp\xE9s par l'organisation contre\
+            \ la falsification et l'acc\xE8s non autoris\xE9\nEx2 : S\xE9curiser tous\
+            \ les logiciels produits par l'organisation, avec un minimum de vuln\xE9\
+            rabilit\xE9s dans leurs versions\nEx3 : Maintenir les logiciels utilis\xE9\
+            s dans les environnements de production et \xE9liminer en toute s\xE9\
+            curit\xE9 les logiciels une fois qu'ils ne sont plus n\xE9cessaires"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ir
       assessable: false
       depth: 2
@@ -1606,8 +3406,40 @@ objects:
       ref_id: PR.IR-01
       description: Networks and environments are protected from unauthorized logical
         access and usage.
+      annotation: '1st: 1st Party Risk
+
+        3rd: 3rd Party Risk
+
+        Ex1: Logically segment organization networks and cloud-based platforms according
+        to trust boundaries and platform types (e.g., IT, IoT, OT, mobile, guests),
+        and permit required communications only between segments
+
+        Ex2: Logically segment organization networks from external networks, and permit
+        only necessary communications to enter the organization''s networks from the
+        external networks
+
+        Ex3: Implement zero trust architectures to restrict network access to each
+        resource to the minimum necessary
+
+        Ex4: Check the cyber health of endpoints before allowing them to access and
+        use production resources'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-09
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
+            \ partie\nEx1 : Segmenter logiquement les r\xE9seaux d'organisation et\
+            \ les plateformes bas\xE9es sur le cloud en fonction des limites de confiance\
+            \ et des types de plateformes (par exemple, IT, IoT, OT, mobile, invit\xE9\
+            s) et autoriser les communications requises uniquement entre les segments\n\
+            Ex2 : Segmenter logiquement les r\xE9seaux de l'organisation des r\xE9\
+            seaux externes et autoriser uniquement les communications n\xE9cessaires\
+            \ \xE0 entrer dans les r\xE9seaux de l'organisation \xE0 partir des r\xE9\
+            seaux externes\nEx3 : Mettre en \u0153uvre des architectures Zero Trust\
+            \ pour limiter l'acc\xE8s au r\xE9seau \xE0 chaque ressource au minimum\
+            \ n\xE9cessaire\nEx4 : V\xE9rifier la cybersant\xE9 des points de terminaison\
+            \ avant de les autoriser \xE0 acc\xE9der aux ressources de production\
+            \ et \xE0 les utiliser"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ir-02
       assessable: true
       depth: 3
@@ -1615,8 +3447,28 @@ objects:
       ref_id: PR.IR-02
       description: The organization's technology assets are protected from environmental
         threats.
+      annotation: '1st: 1st Party Risk
+
+        3rd: 3rd Party Risk
+
+        Ex1: Protect organizational equipment from known environmental threats, such
+        as flooding, fire, wind, and excessive heat and humidity
+
+        Ex2: Include protection from environmental threats and provisions for adequate
+        operating infrastructure in requirements for service providers that operate
+        systems on the organization''s behalf'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-09
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
+            \ partie\nEx1 : Prot\xE9gez l'\xE9quipement organisationnel contre les\
+            \ menaces environnementales connues, telles que les inondations, les incendies,\
+            \ le vent, la chaleur et l'humidit\xE9 excessives\nEx2 : Inclure la protection\
+            \ contre les menaces environnementales et des dispositions relatives \xE0\
+            \ une infrastructure d'exploitation ad\xE9quate dans les exigences pour\
+            \ les fournisseurs de services qui exploitent des syst\xE8mes au nom de\
+            \ l'organisation."
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ir-03
       assessable: true
       depth: 3
@@ -1624,16 +3476,42 @@ objects:
       ref_id: PR.IR-03
       description: Mechanisms are implemented to achieve resilience requirements in
         normal and adverse situations.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Avoid single points of failure in systems and infrastructure
+
+        Ex2: Use load balancing to increase capacity and improve reliability
+
+        Ex3: Use high-availability components like redundant storage and power supplies
+        to improve system reliability'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-09
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : \xC9viter les points\
+            \ de d\xE9faillance uniques dans les syst\xE8mes et l'infrastructure\n\
+            Ex2 : Utiliser l'\xE9quilibrage de charge pour augmenter la capacit\xE9\
+            \ et am\xE9liorer la fiabilit\xE9\nEx3 : Utiliser des composants \xE0\
+            \ haute disponibilit\xE9 tels que le stockage redondant et les alimentations\
+            \ pour am\xE9liorer la fiabilit\xE9 du syst\xE8me"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ir-04
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:pr.ir
       ref_id: PR.IR-04
       description: Adequate resource capacity to ensure availability is maintained.
+      annotation: 'Ex1: Monitor usage of storage, power, compute, network bandwidth,
+        and other resources
+
+        Ex2: Forecast future needs, and scale resources accordingly'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-09
+      translations:
+        fr:
+          annotation: "Ex1 : Surveiller l'utilisation du stockage, de l'alimentation,\
+            \ du calcul, de la bande passante r\xE9seau et d'autres ressources\nEx2\
+            \ : Pr\xE9voir les besoins futurs et faire \xE9voluer les ressources en\
+            \ cons\xE9quence"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de
       assessable: false
       depth: 1
@@ -1655,8 +3533,33 @@ objects:
       ref_id: DE.CM-01
       description: Networks and network services are monitored to find potentially
         adverse events.
+      annotation: 'Ex1: Monitor DNS, BGP, and other network services for adverse events
+
+        Ex2: Monitor wired and wireless networks for connections from unauthorized
+        endpoints
+
+        Ex3: Monitor facilities for unauthorized or rogue wireless networks
+
+        Ex4: Compare actual network flows against baselines to detect deviations
+
+        Ex5: Monitor network communications to identify changes in security postures
+        for zero trust purposes
+
+        1st: 1st Party Risk'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-de-01
+      translations:
+        fr:
+          annotation: "Ex1 : Surveiller les DNS, les BGP et d'autres services r\xE9\
+            seau \xE0 la recherche d'\xE9v\xE9nements ind\xE9sirables\nEx2 : Surveiller\
+            \ les r\xE9seaux c\xE2bl\xE9s et sans fil pour d\xE9tecter les connexions\
+            \ \xE0 partir de points de terminaison non autoris\xE9s\nEx3 : Surveiller\
+            \ les installations \xE0 la recherche de r\xE9seaux sans fil non autoris\xE9\
+            s ou non autoris\xE9s\nEx4 : Comparer les flux r\xE9els du r\xE9seau par\
+            \ rapport aux lignes de base pour d\xE9tecter les \xE9carts\nEx5 : Surveiller\
+            \ les communications r\xE9seau pour identifier les changements dans les\
+            \ postures de s\xE9curit\xE9 \xE0 des fins de Zero Trust\n1er : Risque\
+            \ de 1\xE8re partie"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.cm-02
       assessable: true
       depth: 3
@@ -1664,8 +3567,35 @@ objects:
       ref_id: DE.CM-02
       description: The physical environment is monitored to find potentially adverse
         events.
+      annotation: 'Ex1: Monitor logs from physical access control systems (e.g., badge
+        readers) to find unusual access patterns (e.g., deviations from the norm)
+        and failed access attempts
+
+        Ex2: Review and monitor physical access records (e.g., from visitor registration,
+        sign-in sheets)
+
+        Ex3: Monitor physical access controls (e.g., locks, latches, hinge pins, alarms)
+        for signs of tampering
+
+        Ex4: Monitor the physical environment using alarm systems, cameras, and security
+        guards
+
+        1st: 1st Party Risk'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-de-01
+      translations:
+        fr:
+          annotation: "Ex1 : Surveillez les journaux des syst\xE8mes de contr\xF4\
+            le d'acc\xE8s physiques (par exemple, les lecteurs de badges) pour d\xE9\
+            tecter les mod\xE8les d'acc\xE8s inhabituels (par exemple, les \xE9carts\
+            \ par rapport \xE0 la norme) et les tentatives d'acc\xE8s infructueuses\n\
+            Ex2 : Examiner et surveiller les enregistrements d'acc\xE8s physique (p.\
+            \ ex., enregistrement des visiteurs, feuilles d'\xE9margement)\nEx3 :\
+            \ Surveiller les contr\xF4les d'acc\xE8s physiques (p. ex., serrures,\
+            \ loquets, axes de charni\xE8re, alarmes) pour d\xE9tecter tout signe\
+            \ d'alt\xE9ration\nEx4 : Surveiller l'environnement physique \xE0 l'aide\
+            \ de syst\xE8mes d'alarme, de cam\xE9ras et d'agents de s\xE9curit\xE9\
+            \n1er : Risque de 1\xE8re partie"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.cm-03
       assessable: true
       depth: 3
@@ -1673,8 +3603,27 @@ objects:
       ref_id: DE.CM-03
       description: Personnel activity and technology usage are monitored to find potentially
         adverse events.
+      annotation: 'Ex1: Use behavior analytics software to detect anomalous user activity
+        to mitigate insider threats
+
+        Ex2: Monitor logs from logical access control systems to find unusual access
+        patterns and failed access attempts
+
+        Ex3: Continuously monitor deception technology, including user accounts, for
+        any usage
+
+        1st: 1st Party Risk'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-de-01
+      translations:
+        fr:
+          annotation: "Ex1 : Utiliser un logiciel d'analyse comportementale pour d\xE9\
+            tecter les activit\xE9s anormales des utilisateurs afin d'att\xE9nuer\
+            \ les menaces internes\nEx2 : Surveiller les journaux des syst\xE8mes\
+            \ de contr\xF4le d'acc\xE8s logique pour d\xE9tecter les mod\xE8les d'acc\xE8\
+            s inhabituels et les tentatives d'acc\xE8s infructueuses\nEx3 : Surveillez\
+            \ en permanence la technologie de tromperie, y compris les comptes d'utilisateurs,\
+            \ pour toute utilisation\n1er : Risque de 1\xE8re partie"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.cm-06
       assessable: true
       depth: 3
@@ -1682,9 +3631,24 @@ objects:
       ref_id: DE.CM-06
       description: External service provider activities and services are monitored
         to find potentially adverse events.
+      annotation: 'Ex1: Monitor remote and onsite administration and maintenance activities
+        that external providers perform on organizational systems
+
+        Ex2: Monitor activity from cloud-based services, internet service providers,
+        and other service providers for deviations from expected behavior
+
+        3rd: 3rd Party Risk'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-de-01
       - urn:intuitem:risk:function:nist-csf-2.0:rc-gv-05
+      translations:
+        fr:
+          annotation: "Ex1 : Surveiller les activit\xE9s d'administration et de maintenance\
+            \ \xE0 distance et sur site que les fournisseurs externes effectuent sur\
+            \ les syst\xE8mes organisationnels\nEx2 : Surveiller l'activit\xE9 des\
+            \ services cloud, des fournisseurs de services Internet et d'autres fournisseurs\
+            \ de services pour d\xE9tecter les \xE9carts par rapport au comportement\
+            \ attendu\n3\xE8me : Risque de 3\xE8me partie"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.cm-09
       assessable: true
       depth: 3
@@ -1692,9 +3656,42 @@ objects:
       ref_id: DE.CM-09
       description: Computing hardware and software, runtime environments, and their
         data are monitored to find potentially adverse events.
+      annotation: 'Ex1: Monitor email, web, file sharing, collaboration services,
+        and other common attack vectors to detect malware, phishing, data leaks and
+        exfiltration, and other adverse events
+
+        Ex2: Monitor authentication attempts to identify attacks against credentials
+        and unauthorized credential reuse
+
+        Ex3: Monitor software configurations for deviations from security baselines
+
+        Ex4: Monitor hardware and software for signs of tampering
+
+        Ex5: Use technologies with a presence on endpoints to detect cyber health
+        issues (e.g., missing patches, malware infections, unauthorized software),
+        and redirect the endpoints to a remediation environment before access is authorized
+
+        1st: 1st Party Risk'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-de-01
       - urn:intuitem:risk:function:nist-csf-2.0:rc-de-03
+      translations:
+        fr:
+          annotation: "Ex1 : Surveillez les e-mails, le Web, le partage de fichiers,\
+            \ les services de collaboration et d'autres vecteurs d'attaque courants\
+            \ pour d\xE9tecter les logiciels malveillants, le phishing, les fuites\
+            \ et l'exfiltration de donn\xE9es, ainsi que d'autres \xE9v\xE9nements\
+            \ ind\xE9sirables.\nEx2 : Surveillez les tentatives d'authentification\
+            \ pour identifier les attaques contre les identifiants et la r\xE9utilisation\
+            \ non autoris\xE9e des identifiants\nEx3 : Surveiller les configurations\
+            \ logicielles pour d\xE9tecter les \xE9carts par rapport aux bases de\
+            \ r\xE9f\xE9rence de s\xE9curit\xE9\nEx4 : Surveiller le mat\xE9riel et\
+            \ les logiciels pour d\xE9tecter les signes d'alt\xE9ration\nEx5 : Utiliser\
+            \ des technologies pr\xE9sentes sur les terminaux pour d\xE9tecter les\
+            \ probl\xE8mes de cybersant\xE9 (par exemple, correctifs manquants, infections\
+            \ par des logiciels malveillants, logiciels non autoris\xE9s) et rediriger\
+            \ les terminaux vers un environnement de conversion avant que l'acc\xE8\
+            s ne soit autoris\xE9\n1er : Risque de 1\xE8re partie"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.ae
       assessable: false
       depth: 2
@@ -1710,24 +3707,83 @@ objects:
       ref_id: DE.AE-02
       description: Potentially adverse events are analyzed to better understand associated
         activities.
+      annotation: 'Ex1: Use security information and event management (SIEM) or other
+        tools to continuously monitor log events for known malicious and suspicious
+        activity
+
+        Ex2: Utilize up-to-date cyber threat intelligence in log analysis tools to
+        improve detection accuracy and characterize threat actors, their methods,
+        and indicators of compromise
+
+        Ex3: Regularly conduct manual reviews of log events for technologies that
+        cannot be sufficiently monitored through automation
+
+        Ex4: Use log analysis tools to generate reports on their findings
+
+        1st: 1st Party Risk'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-de-02
+      translations:
+        fr:
+          annotation: "Ex1 : Utilisez la gestion des informations et des \xE9v\xE9\
+            nements de s\xE9curit\xE9 (SIEM) ou d'autres outils pour surveiller en\
+            \ permanence les \xE9v\xE9nements de journal \xE0 la recherche d'activit\xE9\
+            s malveillantes et suspectes connues\nEx2 : Utiliser des renseignements\
+            \ \xE0 jour sur les cybermenaces dans les outils d'analyse des journaux\
+            \ pour am\xE9liorer la pr\xE9cision de la d\xE9tection et caract\xE9riser\
+            \ les acteurs de la menace, leurs m\xE9thodes et les indicateurs de compromission\n\
+            Ex3 : Effectuer r\xE9guli\xE8rement des examens manuels des \xE9v\xE9\
+            nements de journal pour les technologies qui ne peuvent pas \xEAtre suffisamment\
+            \ surveill\xE9es par l'automatisation\nEx4 : Utiliser des outils d'analyse\
+            \ de journaux pour g\xE9n\xE9rer des rapports sur leurs r\xE9sultats\n\
+            1er : Risque de 1\xE8re partie"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.ae-03
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.ae
       ref_id: DE.AE-03
       description: Information is correlated from multiple sources.
+      annotation: 'Ex1: Constantly transfer log data generated by other sources to
+        a relatively small number of log servers
+
+        Ex2: Use event correlation technology (e.g., SIEM) to collect information
+        captured by multiple sources
+
+        Ex3: Utilize cyber threat intelligence to help correlate events among log
+        sources
+
+        1st: 1st Party Risk'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-de-02
+      translations:
+        fr:
+          annotation: "Ex1 : Transf\xE9rer constamment les donn\xE9es de journal g\xE9\
+            n\xE9r\xE9es par d'autres sources vers un nombre relativement restreint\
+            \ de serveurs de journaux\nEx2 : Utiliser la technologie de corr\xE9lation\
+            \ d'\xE9v\xE9nements (par exemple, SIEM) pour collecter des informations\
+            \ captur\xE9es par plusieurs sources\nEx3 : Utiliser les renseignements\
+            \ sur les cybermenaces pour aider \xE0 corr\xE9ler les \xE9v\xE9nements\
+            \ entre les sources de journaux\n1er : Risque de 1\xE8re partie"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.ae-04
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.ae
       ref_id: DE.AE-04
       description: The estimated impact and scope of adverse events are understood.
+      annotation: 'Ex1: Use SIEMs or other tools to estimate impact and scope, and
+        review and refine the estimates
+
+        Ex2: A person creates their own estimates of impact and scope
+
+        1st: 1st Party Risk'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-de-02
+      translations:
+        fr:
+          annotation: "Ex1 : Utiliser des SIEM ou d'autres outils pour estimer l'impact\
+            \ et la port\xE9e, et examiner et affiner les estimations\nEx2 : Une personne\
+            \ cr\xE9e ses propres estimations de l'impact et de la port\xE9e.\n1er\
+            \ : Risque de 1\xE8re partie"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.ae-06
       assessable: true
       depth: 3
@@ -1735,8 +3791,35 @@ objects:
       ref_id: DE.AE-06
       description: Information on adverse events is provided to authorized staff and
         tools.
+      annotation: 'Ex1: Use cybersecurity software to generate alerts and provide
+        them to the security operations center (SOC), incident responders, and incident
+        response tools
+
+        Ex2: Incident responders and other authorized personnel can access log analysis
+        findings at all times
+
+        Ex3: Automatically create and assign tickets in the organization''s ticketing
+        system when certain types of alerts occur
+
+        Ex4: Manually create and assign tickets in the organization''s ticketing system
+        when technical staff discover indicators of compromise
+
+        1st: 1st Party Risk'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-de-02
+      translations:
+        fr:
+          annotation: "Ex1 : Utilisez un logiciel de cybers\xE9curit\xE9 pour g\xE9\
+            n\xE9rer des alertes et les transmettre au centre d'op\xE9rations de s\xE9\
+            curit\xE9 (SOC), aux intervenants en cas d'incident et aux outils de r\xE9\
+            ponse aux incidents.\nEx2 : Les intervenants en cas d'incident et les\
+            \ autres membres du personnel autoris\xE9 peuvent acc\xE9der aux r\xE9\
+            sultats de l'analyse des journaux \xE0 tout moment\nEx3 : Cr\xE9er et\
+            \ attribuer automatiquement des tickets dans le syst\xE8me de billetterie\
+            \ de l'organisation lorsque certains types d'alertes se produisent\nEx4\
+            \ : Cr\xE9er et attribuer manuellement des tickets dans le syst\xE8me\
+            \ de tickets de l'organisation lorsque le personnel technique d\xE9couvre\
+            \ des indicateurs de compromission\n1er : Risque de 1\xE8re partie"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.ae-07
       assessable: true
       depth: 3
@@ -1744,9 +3827,29 @@ objects:
       ref_id: DE.AE-07
       description: Cyber threat intelligence and other contextual information are
         integrated into the analysis.
+      annotation: 'Ex1: Securely provide cyber threat intelligence feeds to detection
+        technologies, processes, and personnel
+
+        Ex2: Securely provide information from asset inventories to detection technologies,
+        processes, and personnel
+
+        Ex3: Rapidly acquire and analyze vulnerability disclosures for the organization''s
+        technologies from suppliers, vendors, and third-party security advisories
+
+        1st: 1st Party Risk'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-de-02
       - urn:intuitem:risk:function:nist-csf-2.0:rc-id-04
+      translations:
+        fr:
+          annotation: "Ex1 : Fournir en toute s\xE9curit\xE9 des flux de renseignements\
+            \ sur les cybermenaces aux technologies, aux processus et au personnel\
+            \ de d\xE9tection\nEx2 : Fournir en toute s\xE9curit\xE9 des informations\
+            \ allant des inventaires d'actifs aux technologies de d\xE9tection, aux\
+            \ processus et au personnel\nEx3 : Acqu\xE9rir et analyser rapidement\
+            \ les divulgations de vuln\xE9rabilit\xE9s pour les technologies de l'organisation\
+            \ aupr\xE8s de fournisseurs, de vendeurs et d'avis de s\xE9curit\xE9 tiers\n\
+            1er : Risque de 1\xE8re partie"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:de.ae-08
       assessable: true
       depth: 3
@@ -1754,8 +3857,21 @@ objects:
       ref_id: DE.AE-08
       description: Incidents are declared when adverse events meet the defined incident
         criteria.
+      annotation: 'Ex1: Apply incident criteria to known and assumed characteristics
+        of activity in order to determine whether an incident should be declared
+
+        Ex2: Take known false positives into account when applying incident criteria
+
+        1st: 1st Party Risk'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-de-02
+      translations:
+        fr:
+          annotation: "Ex1 : Appliquer les crit\xE8res d'incident aux caract\xE9ristiques\
+            \ connues et pr\xE9sum\xE9es de l'activit\xE9 afin de d\xE9terminer si\
+            \ un incident doit \xEAtre d\xE9clar\xE9\nEx2 : Prendre en compte les\
+            \ faux positifs connus lors de l'application des crit\xE8res d'incident\n\
+            1er : Risque de 1\xE8re partie"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs
       assessable: false
       depth: 1
@@ -1776,41 +3892,123 @@ objects:
       ref_id: RS.MA-01
       description: The incident response plan is executed in coordination with relevant
         third parties once an incident is declared.
+      annotation: 'Ex1: Detection technologies automatically report confirmed incidents
+
+        Ex2: Request incident response assistance from the organization''s incident
+        response outsourcer
+
+        Ex3: Designate an incident lead for each incident
+
+        Ex4: Initiate execution of additional cybersecurity plans as needed to support
+        incident response (for example, business continuity and disaster recovery)
+
+        3rd: 3rd Party Risk'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-01
+      translations:
+        fr:
+          annotation: "Ex1 : Les technologies de d\xE9tection signalent automatiquement\
+            \ les incidents confirm\xE9s\nEx2 : Demander de l'aide \xE0 l'externalisateur\
+            \ de r\xE9ponse aux incidents de l'organisation\nEx3 : D\xE9signez un\
+            \ responsable d'incident pour chaque incident\nEx4 : Lancer l'ex\xE9cution\
+            \ de plans de cybers\xE9curit\xE9 suppl\xE9mentaires au besoin pour soutenir\
+            \ la r\xE9ponse aux incidents (par exemple, continuit\xE9 des activit\xE9\
+            s et reprise apr\xE8s sinistre)\n3\xE8me : Risque de 3\xE8me partie"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.ma-02
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.ma
       ref_id: RS.MA-02
       description: Incident reports are triaged and validated.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Preliminarily review incident reports to confirm that they are cybersecurity-related
+        and necessitate incident response activities
+
+        Ex2: Apply criteria to estimate the severity of an incident'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-01
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Examiner pr\xE9liminairement\
+            \ les rapports d'incident pour confirmer qu'ils sont li\xE9s \xE0 la cybers\xE9\
+            curit\xE9 et qu'ils n\xE9cessitent des activit\xE9s d'intervention en\
+            \ cas d'incident.\nEx2 : Appliquer des crit\xE8res pour estimer la gravit\xE9\
+            \ d'un incident"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.ma-03
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.ma
       ref_id: RS.MA-03
       description: Incidents are categorized and prioritized.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Further review and categorize incidents based on the type of incident
+        (e.g., data breach, ransomware, DDoS, account compromise)
+
+        Ex2: Prioritize incidents based on their scope, likely impact, and time-critical
+        nature
+
+        Ex3: Select incident response strategies for active incidents by balancing
+        the need to quickly recover from an incident with the need to observe the
+        attacker or conduct a more thorough investigation'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-01
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Examiner et cat\xE9goriser\
+            \ les incidents en fonction du type d'incident (par exemple, violation\
+            \ de donn\xE9es, ransomware, DDoS, compromission de compte)\nEx2 : Hi\xE9\
+            rarchiser les incidents en fonction de leur port\xE9e, de leur impact\
+            \ probable et de leur caract\xE8re critique\nEx3 : S\xE9lectionner des\
+            \ strat\xE9gies de r\xE9ponse aux incidents actifs en \xE9quilibrant la\
+            \ n\xE9cessit\xE9 de se remettre rapidement d'un incident et la n\xE9\
+            cessit\xE9 d'observer l'attaquant ou de mener une enqu\xEAte plus approfondie"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.ma-04
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.ma
       ref_id: RS.MA-04
       description: Incidents are escalated or elevated as needed.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Track and validate the status of all ongoing incidents
+
+        Ex2: Coordinate incident escalation or elevation with designated internal
+        and external stakeholders'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-01
       - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-03
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Suivre et valider l'\xE9\
+            tat de tous les incidents en cours\nEx2 : Coordonner l'escalade ou l'\xE9\
+            l\xE9vation des incidents avec les parties prenantes internes et externes\
+            \ d\xE9sign\xE9es"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.ma-05
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.ma
       ref_id: RS.MA-05
       description: The criteria for initiating incident recovery are applied.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Apply incident recovery criteria to known and assumed characteristics
+        of the incident to determine whether incident recovery processes should be
+        initiated
+
+        Ex2: Take the possible operational disruption of incident recovery activities
+        into account'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-01
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Appliquer des crit\xE8\
+            res de r\xE9cup\xE9ration d'incident aux caract\xE9ristiques connues et\
+            \ pr\xE9sum\xE9es de l'incident pour d\xE9terminer si des processus de\
+            \ r\xE9cup\xE9ration d'incident doivent \xEAtre lanc\xE9s\nEx2 : Prendre\
+            \ en compte l'\xE9ventuelle perturbation op\xE9rationnelle des activit\xE9\
+            s de r\xE9cup\xE9ration d'incident"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.an
       assessable: false
       depth: 2
@@ -1826,8 +4024,31 @@ objects:
       ref_id: RS.AN-03
       description: Analysis is performed to establish what has taken place during
         an incident and the root cause of the incident.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Determine the sequence of events that occurred during the incident and
+        which assets and resources were involved in each event
+
+        Ex2: Attempt to determine what vulnerabilities, threats, and threat actors
+        were directly or indirectly involved in the incident
+
+        Ex3: Analyze the incident to find the underlying, systemic root causes
+
+        Ex4: Check any cyber deception technology for additional information on attacker
+        behavior'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-02
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : D\xE9terminez la s\xE9\
+            quence des \xE9v\xE9nements qui se sont produits pendant l'incident et\
+            \ quels biens et ressources ont \xE9t\xE9 impliqu\xE9s dans chaque \xE9\
+            v\xE9nement\nEx2 : Tenter de d\xE9terminer quelles vuln\xE9rabilit\xE9\
+            s, menaces et acteurs de menace ont \xE9t\xE9 directement ou indirectement\
+            \ impliqu\xE9s dans l'incident\nEx3 : Analyser l'incident pour trouver\
+            \ les causes profondes syst\xE9miques sous-jacentes\nEx4 : V\xE9rifiez\
+            \ toute technologie de cyber-tromperie pour plus d'informations sur le\
+            \ comportement de l'attaquant"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.an-06
       assessable: true
       depth: 3
@@ -1835,8 +4056,27 @@ objects:
       ref_id: RS.AN-06
       description: Actions performed during an investigation are recorded, and the
         records' integrity and provenance are preserved.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Require each incident responder and others (e.g., system administrators,
+        cybersecurity engineers) who perform incident response tasks to record their
+        actions and make the record immutable
+
+        Ex2: Require the incident lead to document the incident in detail and be responsible
+        for preserving the integrity of the documentation and the sources of all information
+        being reported'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-02
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Exiger que chaque intervenant\
+            \ en cas d'incident et d'autres personnes (par exemple, les administrateurs\
+            \ syst\xE8me, les ing\xE9nieurs en cybers\xE9curit\xE9) qui effectuent\
+            \ des t\xE2ches d'intervention en cas d'incident consignent leurs actions\
+            \ et rendent l'enregistrement immuable\nEx2 : Exiger que le responsable\
+            \ de l'incident documente l'incident en d\xE9tail et \xEAtre responsable\
+            \ de pr\xE9server l'int\xE9grit\xE9 de la documentation et les sources\
+            \ de toutes les informations signal\xE9es"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.an-07
       assessable: true
       depth: 3
@@ -1844,16 +4084,42 @@ objects:
       ref_id: RS.AN-07
       description: Incident data and metadata are collected, and their integrity and
         provenance are preserved.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Collect, preserve, and safeguard the integrity of all pertinent incident
+        data and metadata (e.g., data source, date/time of collection) based on evidence
+        preservation and chain-of-custody procedures'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-02
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Recueillir, pr\xE9server\
+            \ et prot\xE9ger l'int\xE9grit\xE9 de toutes les donn\xE9es et m\xE9tadonn\xE9\
+            es pertinentes sur les incidents (p. ex., source de donn\xE9es, date et\
+            \ heure de la collecte) en fonction des proc\xE9dures de pr\xE9servation\
+            \ des preuves et de la cha\xEEne de possession"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.an-08
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.an
       ref_id: RS.AN-08
       description: An incident's magnitude is estimated and validated.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Review other potential targets of the incident to search for indicators
+        of compromise and evidence of persistence
+
+        Ex2: Automatically run tools on targets to look for indicators of compromise
+        and evidence of persistence'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-02
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Examiner d'autres cibles\
+            \ potentielles de l'incident pour rechercher des indicateurs de compromission\
+            \ et des preuves de persistance\nEx2 : Ex\xE9cuter automatiquement des\
+            \ outils sur les cibles pour rechercher des indicateurs de compromission\
+            \ et des preuves de persistance"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.co
       assessable: false
       depth: 2
@@ -1868,16 +4134,74 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.co
       ref_id: RS.CO-02
       description: Internal and external stakeholders are notified of incidents.
+      annotation: '1st: 1st Party Risk
+
+        3rd: 3rd Party Risk
+
+        Ex1: Follow the organization''s breach notification procedures after discovering
+        a data breach incident, including notifying affected customers
+
+        Ex2: Notify business partners and customers of incidents in accordance with
+        contractual requirements
+
+        Ex3: Notify law enforcement agencies and regulatory bodies of incidents based
+        on criteria in the incident response plan and management approval'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-03
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
+            \ partie\nEx1 : Suivre les proc\xE9dures de notification des atteintes\
+            \ \xE0 la vie priv\xE9e de l'organisation apr\xE8s la d\xE9couverte d'un\
+            \ incident d'atteinte \xE0 la protection des donn\xE9es, y compris la\
+            \ notification des clients touch\xE9s\nEx2 : Informer les partenaires\
+            \ commerciaux et les clients des incidents conform\xE9ment aux exigences\
+            \ contractuelles\nEx3 : Informer les organismes d'application de la loi\
+            \ et les organismes de r\xE9glementation des incidents en fonction des\
+            \ crit\xE8res du plan d'intervention en cas d'incident et de l'approbation\
+            \ de la direction"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.co-03
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.co
       ref_id: RS.CO-03
       description: Information is shared with designated internal and external stakeholders.
+      annotation: '1st: 1st Party Risk
+
+        3rd: 3rd Party Risk
+
+        Ex1: Securely share information consistent with response plans and information
+        sharing agreements
+
+        Ex2: Voluntarily share information about an attacker''s observed TTPs, with
+        all sensitive data removed, with an Information Sharing and Analysis Center
+        (ISAC)
+
+        Ex3: Notify HR when malicious insider activity occurs
+
+        Ex4: Regularly update senior leadership on the status of major incidents
+
+        Ex5: Follow the rules and protocols defined in contracts for incident information
+        sharing between the organization and its suppliers
+
+        Ex6: Coordinate crisis communication methods between the organization and
+        its critical suppliers'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-03
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
+            \ partie\nEx1 : Partager en toute s\xE9curit\xE9 des informations conform\xE9\
+            ment aux plans d'intervention et aux ententes de partage d'informations\n\
+            Ex2 : Partager volontairement des informations sur les TTP observ\xE9\
+            s d'un attaquant, en supprimant toutes les donn\xE9es sensibles, avec\
+            \ un centre de partage et d'analyse d'informations (ISAC)\nEx3 : Informer\
+            \ les RH en cas d'activit\xE9 interne malveillante\nEx4 : Informer r\xE9\
+            guli\xE8rement la haute direction de l'\xE9tat des incidents majeurs\n\
+            Ex5 : Suivre les r\xE8gles et protocoles d\xE9finis dans les contrats\
+            \ d'\xE9change d'informations sur les incidents entre l'organisation et\
+            \ ses fournisseurs\nEx6 : Coordonner les m\xE9thodes de communication\
+            \ de crise entre l'organisation et ses fournisseurs critiques"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.mi
       assessable: false
       depth: 2
@@ -1892,16 +4216,70 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.mi
       ref_id: RS.MI-01
       description: Incidents are contained.
+      annotation: '1st: 1st Party Risk
+
+        3rd: 3rd Party Risk
+
+        Ex1: Cybersecurity technologies (e.g., antivirus software) and cybersecurity
+        features of other technologies (e.g., operating systems, network infrastructure
+        devices) automatically perform containment actions
+
+        Ex2: Allow incident responders to manually select and perform containment
+        actions
+
+        Ex3: Allow a third party (e.g., internet service provider, managed security
+        service provider) to perform containment actions on behalf of the organization
+
+        Ex4: Automatically transfer compromised endpoints to a remediation virtual
+        local area network (VLAN)'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-04
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
+            \ partie\nEx1 : Les technologies de cybers\xE9curit\xE9 (par exemple,\
+            \ les logiciels antivirus) et les fonctionnalit\xE9s de cybers\xE9curit\xE9\
+            \ d'autres technologies (par exemple, les syst\xE8mes d'exploitation,\
+            \ les p\xE9riph\xE9riques d'infrastructure r\xE9seau) effectuent automatiquement\
+            \ des actions de confinement\nEx2 : Autoriser les intervenants en cas\
+            \ d'incident \xE0 s\xE9lectionner et \xE0 ex\xE9cuter manuellement des\
+            \ actions de confinement\nEx3 : Permettre \xE0 un tiers (par exemple,\
+            \ un fournisseur de services Internet, un fournisseur de services de s\xE9\
+            curit\xE9 g\xE9r\xE9s) d'effectuer des actions de confinement au nom de\
+            \ l'organisation\nEx4 : Transfert automatique des points de terminaison\
+            \ compromis vers un r\xE9seau local virtuel (VLAN) de conversion"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.mi-02
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rs.mi
       ref_id: RS.MI-02
       description: Incidents are eradicated.
+      annotation: '1st: 1st Party Risk
+
+        3rd: 3rd Party Risk
+
+        Ex1: Cybersecurity technologies and cybersecurity features of other technologies
+        (e.g., operating systems, network infrastructure devices) automatically perform
+        eradication actions
+
+        Ex2: Allow incident responders to manually select and perform eradication
+        actions
+
+        Ex3: Allow a third party (e.g., managed security service provider) to perform
+        eradication actions on behalf of the organization'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-rs-04
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
+            \ partie\nEx1 : Les technologies de cybers\xE9curit\xE9 et les fonctionnalit\xE9\
+            s de cybers\xE9curit\xE9 d'autres technologies (par exemple, les syst\xE8\
+            mes d'exploitation, les p\xE9riph\xE9riques d'infrastructure r\xE9seau)\
+            \ effectuent automatiquement des actions d'\xE9radication\nEx2 : Autoriser\
+            \ les intervenants en cas d'incident \xE0 s\xE9lectionner et \xE0 ex\xE9\
+            cuter manuellement des actions d'\xE9radication\nEx3 : Autoriser un tiers\
+            \ (par exemple, un fournisseur de services de s\xE9curit\xE9 g\xE9r\xE9\
+            s) \xE0 effectuer des actions d'\xE9radication au nom de l'organisation"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc
       assessable: false
       depth: 1
@@ -1924,16 +4302,45 @@ objects:
       ref_id: RC.RP-01
       description: The recovery portion of the incident response plan is executed
         once initiated from the incident response process.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Begin recovery procedures during or after incident response processes
+
+        Ex2: Make all individuals with recovery responsibilities aware of the plans
+        for recovery and the authorizations required to implement each aspect of the
+        plans'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-rc-01
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Commencer les proc\xE9\
+            dures de r\xE9cup\xE9ration pendant ou apr\xE8s les processus de r\xE9\
+            ponse aux incidents\nEx2 : Informer toutes les personnes ayant des responsabilit\xE9\
+            s en mati\xE8re de r\xE9tablissement des plans de r\xE9tablissement et\
+            \ des autorisations requises pour mettre en \u0153uvre chaque aspect des\
+            \ plans."
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc.rp-02
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc.rp
       ref_id: RC.RP-02
       description: Recovery actions are selected, scoped, prioritized, and performed.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Select recovery actions based on the criteria defined in the incident
+        response plan and available resources
+
+        Ex2: Change planned recovery actions based on a reassessment of organizational
+        needs and resources'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-rc-01
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : S\xE9lectionner les actions\
+            \ de r\xE9cup\xE9ration en fonction des crit\xE8res d\xE9finis dans le\
+            \ plan de r\xE9ponse \xE0 l'incident et des ressources disponibles\nEx2\
+            \ : Modifier les mesures de r\xE9tablissement pr\xE9vues en fonction d'une\
+            \ r\xE9\xE9valuation des besoins et des ressources organisationnelles"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc.rp-03
       assessable: true
       depth: 3
@@ -1941,9 +4348,19 @@ objects:
       ref_id: RC.RP-03
       description: The integrity of backups and other restoration assets is verified
         before using them for restoration.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Check restoration assets for indicators of compromise, file corruption,
+        and other integrity issues before use'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-rc-01
       - urn:intuitem:risk:function:nist-csf-2.0:rc-pr-06
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : V\xE9rifiez les ressources\
+            \ de restauration pour d\xE9tecter des indicateurs de compromission, de\
+            \ corruption de fichiers et d'autres probl\xE8mes d'int\xE9grit\xE9 avant\
+            \ de les utiliser"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc.rp-04
       assessable: true
       depth: 3
@@ -1951,9 +4368,30 @@ objects:
       ref_id: RC.RP-04
       description: Critical mission functions and cybersecurity risk management are
         considered to establish post-incident operational norms.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Use business impact and system categorization records (including service
+        delivery objectives) to validate that essential services are restored in the
+        appropriate order
+
+        Ex2: Work with system owners to confirm the successful restoration of systems
+        and the return to normal operations
+
+        Ex3: Monitor the performance of restored systems to verify the adequacy of
+        the restoration'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-rc-01
       - urn:intuitem:risk:function:nist-csf-2.0:rc-rc-02
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Utiliser les enregistrements\
+            \ d'impact sur l'entreprise et de cat\xE9gorisation du syst\xE8me (y compris\
+            \ les objectifs de prestation de services) pour confirmer que les services\
+            \ essentiels sont r\xE9tablis dans l'ordre appropri\xE9\nEx2 : Travailler\
+            \ avec les propri\xE9taires de syst\xE8mes pour confirmer la r\xE9ussite\
+            \ de la restauration des syst\xE8mes et le retour \xE0 des op\xE9rations\
+            \ normales\nEx3 : Surveiller le rendement des syst\xE8mes restaur\xE9\
+            s pour v\xE9rifier la pertinence de la restauration"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc.rp-05
       assessable: true
       depth: 3
@@ -1961,8 +4399,22 @@ objects:
       ref_id: RC.RP-05
       description: The integrity of restored assets is verified, systems and services
         are restored, and normal operating status is confirmed.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Check restored assets for indicators of compromise and remediation of
+        root causes of the incident before production use
+
+        Ex2: Verify the correctness and adequacy of the restoration actions taken
+        before putting a restored system online'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-rc-01
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : V\xE9rifier les actifs\
+            \ restaur\xE9s pour d\xE9tecter les indicateurs de compromission et rem\xE9\
+            dier aux causes profondes de l'incident avant l'utilisation en production\n\
+            Ex2 : V\xE9rifier l'exactitude et l'ad\xE9quation des actions de restauration\
+            \ entreprises avant de mettre en ligne un syst\xE8me restaur\xE9"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc.rp-06
       assessable: true
       depth: 3
@@ -1970,8 +4422,21 @@ objects:
       ref_id: RC.RP-06
       description: The end of incident recovery is declared based on criteria, and
         incident-related documentation is completed.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Prepare an after-action report that documents the incident itself, the
+        response and recovery actions taken, and lessons learned
+
+        Ex2: Declare the end of incident recovery once the criteria are met'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-rc-01
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Pr\xE9parer un rapport\
+            \ apr\xE8s action qui documente l'incident lui-m\xEAme, les mesures d'intervention\
+            \ et de r\xE9tablissement prises, ainsi que les le\xE7ons apprises.\n\
+            Ex2 : D\xE9clarer la fin de la reprise d'incident une fois les crit\xE8\
+            res remplis"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc.co
       assessable: false
       depth: 2
@@ -1987,8 +4452,35 @@ objects:
       ref_id: RC.CO-03
       description: Recovery activities and progress in restoring operational capabilities
         are communicated to designated internal and external stakeholders.
+      annotation: '1st: 1st Party Risk
+
+        3rd: 3rd Party Risk
+
+        Ex1: Securely share recovery information, including restoration progress,
+        consistent with response plans and information sharing agreements
+
+        Ex2: Regularly update senior leadership on recovery status and restoration
+        progress for major incidents
+
+        Ex3: Follow the rules and protocols defined in contracts for incident information
+        sharing between the organization and its suppliers
+
+        Ex4: Coordinate crisis communication between the organization and its critical
+        suppliers'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-rc-03
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\n3\xE8me : Risque de 3\xE8me\
+            \ partie\nEx1 : Partagez en toute s\xE9curit\xE9 les informations de r\xE9\
+            cup\xE9ration, y compris la progression de la restauration, conform\xE9\
+            ment aux plans d'intervention et aux ententes de partage d'informations\n\
+            Ex2 : Informer r\xE9guli\xE8rement la haute direction de l'\xE9tat du\
+            \ r\xE9tablissement et des progr\xE8s du r\xE9tablissement en cas d'incidents\
+            \ majeurs.\nEx3 : Suivre les r\xE8gles et les protocoles d\xE9finis dans\
+            \ les contrats pour l'\xE9change d'informations sur les incidents entre\
+            \ l'organisation et ses fournisseurs\nEx4 : Coordonner la communication\
+            \ de crise entre l'organisation et ses fournisseurs critiques"
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0-journey:rc.co-04
       assessable: true
       depth: 3
@@ -1996,5 +4488,19 @@ objects:
       ref_id: RC.CO-04
       description: Public updates on incident recovery are shared using approved methods
         and messaging.
+      annotation: '1st: 1st Party Risk
+
+        Ex1: Follow the organization''s breach notification procedures for recovering
+        from a data breach incident
+
+        Ex2: Explain the steps being taken to recover from the incident and to prevent
+        a recurrence'
       reference_controls:
       - urn:intuitem:risk:function:nist-csf-2.0:rc-rc-03
+      translations:
+        fr:
+          annotation: "1er : Risque de 1\xE8re partie\nEx1 : Suivre les proc\xE9dures\
+            \ de notification des atteintes \xE0 la vie priv\xE9e de l'organisation\
+            \ pour se remettre d'un incident d'atteinte \xE0 la protection des donn\xE9\
+            es.\nEx2 : Expliquer les mesures prises pour se remettre de l'incident\
+            \ et \xE9viter qu'il ne se reproduise"
