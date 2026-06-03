@@ -3,7 +3,6 @@ from typing import Final, cast
 import pytest
 from django.http import HttpResponse
 from django.urls import reverse
-from django.core.handlers.wsgi import WSGIRequest
 from knox.models import AuthToken
 from rest_framework import status
 from rest_framework.test import APIClient
