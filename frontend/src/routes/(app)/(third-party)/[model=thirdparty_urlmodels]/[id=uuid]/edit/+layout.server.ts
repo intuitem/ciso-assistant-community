@@ -58,5 +58,5 @@ export const load: LayoutServerLoad = async (event) => {
 	}
 	model.selectOptions = selectOptions;
 
-	return { form, model, object, selectOptions, URLModel };
+	return { form, model, object, selectOptions, URLModel, title: m.edit() };
 };

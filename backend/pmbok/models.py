@@ -1,5 +1,10 @@
-from django.db import models
-from iam.models import FolderMixin, PublishInRootFolderMixin
+from datetime import date
+from decimal import Decimal
+
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models, transaction
+from django.utils.translation import gettext_lazy as _
+from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
 from core.models import (
     FilteringLabelMixin,
     FindingsAssessment,
@@ -14,6 +19,7 @@ from crq.models import QuantitativeRiskStudy
 from ebios_rm.models import EbiosRMStudy
 from tprm.models import Entity, EntityAssessment
 from core.base_models import AbstractBaseModel, NameDescriptionMixin
+from global_settings.models import GlobalSettings
 
 from auditlog.registry import auditlog
 
@@ -160,13 +166,203 @@ class Accreditation(NameDescriptionFolderMixin, FilteringLabelMixin):
     observation = models.TextField(verbose_name="Observation", blank=True, null=True)
 
 
+class Project(NameDescriptionFolderMixin, FilteringLabelMixin):
+    class Kind(models.TextChoices):
+        PORTFOLIO = "portfolio", _("Portfolio")
+        PROGRAM = "program", _("Program")
+        PROJECT = "project", _("Project")
+
+    PRIORITY = [
+        (1, _("P1")),
+        (2, _("P2")),
+        (3, _("P3")),
+        (4, _("P4")),
+    ]
+
+    TOLERANCES_SCHEMA = {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "time": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "plus_days": {"type": "integer", "minimum": 0},
+                    "minus_days": {"type": "integer", "minimum": 0},
+                },
+            },
+            "cost": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "plus_pct": {"type": "number", "minimum": 0},
+                    "minus_pct": {"type": "number", "minimum": 0},
+                },
+            },
+            "scope": {"type": "string"},
+            "quality": {"type": "string"},
+            "benefits": {"type": "string"},
+            "risk": {"type": "string"},
+        },
+    }
+
+    kind = models.CharField(
+        max_length=20,
+        choices=Kind.choices,
+        default=Kind.PROJECT,
+    )
+
+    ref_id = models.CharField(max_length=100, blank=True)
+    ref_link = models.URLField(blank=True)
+
+    owner = models.ForeignKey(
+        "core.Actor",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="owned_projects",
+    )
+    sponsor = models.ForeignKey(
+        "core.Actor",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="sponsored_projects",
+    )
+
+    status = models.ForeignKey(
+        Terminology,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="project_status",
+        limit_choices_to={
+            "field_path": Terminology.FieldPath.PROJECT_STATUS,
+            "is_visible": True,
+        },
+    )
+    priority = models.PositiveSmallIntegerField(
+        choices=PRIORITY,
+        null=True,
+        blank=True,
+        verbose_name=_("Priority"),
+    )
+    health = models.ForeignKey(
+        Terminology,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="project_health",
+        limit_choices_to={
+            "field_path": Terminology.FieldPath.PROJECT_HEALTH,
+            "is_visible": True,
+        },
+    )
+
+    start_date = models.DateField(blank=True, null=True)
+    end_date = models.DateField(blank=True, null=True)
+    eta = models.DateField(blank=True, null=True)
+    closed_at = models.DateField(blank=True, null=True)
+    progress = models.PositiveSmallIntegerField(
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+    )
+
+    purpose = models.TextField(blank=True)
+    objectives = models.TextField(blank=True)
+    success_criteria = models.TextField(blank=True)
+    business_case = models.TextField(blank=True)
+    deliverables = models.TextField(blank=True)
+    assumptions = models.TextField(blank=True)
+    constraints = models.TextField(blank=True)
+    dependencies_note = models.TextField(blank=True)
+    exit_criteria = models.TextField(blank=True)
+    organizational_alignment = models.TextField(blank=True)
+    approval_requirements = models.TextField(blank=True)
+
+    budget = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(0)],
+    )
+    actual_cost = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(0)],
+    )
+    currency = models.CharField(max_length=3, blank=True)
+
+    linked_collection = models.ForeignKey(
+        GenericCollection,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="projects",
+    )
+    parent_project = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="sub_projects",
+    )
+    tolerances = models.JSONField(default=dict, blank=True)
+
+    observation = models.TextField(blank=True, null=True)
+
+    fields_to_check = ["ref_id", "name"]
+
+    @transaction.atomic
+    def save(self, *args, **kwargs):
+        is_new = self._state.adding
+        if is_new:
+            if not self.currency and self.parent_project_id:
+                self.currency = self.parent_project.currency or ""
+            if not self.currency:
+                general = GlobalSettings.objects.filter(name="general").first()
+                if general:
+                    self.currency = general.value.get("currency", "") or ""
+            if self.progress is None:
+                self.progress = 0
+            if self.budget is None:
+                self.budget = Decimal("0")
+            if self.actual_cost is None:
+                self.actual_cost = Decimal("0")
+        previous_status_name = None
+        if not is_new:
+            previous_status_name = (
+                type(self)
+                .objects.filter(pk=self.pk)
+                .values_list("status__name", flat=True)
+                .first()
+            )
+        new_status_name = self.status.name if self.status_id else None
+        if new_status_name == "closed" and previous_status_name != "closed":
+            self.closed_at = self.closed_at or date.today()
+        elif new_status_name != "closed" and previous_status_name == "closed":
+            self.closed_at = None
+
+        super().save(*args, **kwargs)
+
+        if is_new and not self.linked_collection_id and self.folder_id:
+            coll = GenericCollection.objects.create(name=self.name, folder=self.folder)
+            type(self).objects.filter(pk=self.pk).update(linked_collection=coll)
+            self.linked_collection_id = coll.pk
+
+        from metrology.models import BuiltinMetricSample
+
+        BuiltinMetricSample.update_or_create_snapshot(self)
+        if self.folder_id:
+            BuiltinMetricSample.update_or_create_snapshot(self.folder)
+
+
 class ResponsibilityRole(NameDescriptionFolderMixin, PublishInRootFolderMixin):
-    """A single role in a responsibility taxonomy (e.g. 'Responsible' in RACI).
-
-    Multiple taxonomies (RACI, RASCI, RAPID, custom) coexist; a ResponsibilityMatrix
-    references the subset of roles it uses through its `roles` M2M.
-    """
-
     class Taxonomy(models.TextChoices):
         RACI = "raci", "RACI"
         RASCI = "rasci", "RASCI"
@@ -302,13 +498,7 @@ class ResponsibilityRole(NameDescriptionFolderMixin, PublishInRootFolderMixin):
 
     @classmethod
     def create_default_roles(cls):
-        """Idempotently seed the builtin R/A/C/I/S/P/D roles in the root folder.
-
-        Called from core.startup so seeding works even when the root folder is
-        created after all migrations run (fresh installs).
-        """
-        from iam.models import Folder
-
+        # Called from core.startup so the root folder exists on fresh installs.
         root = Folder.objects.filter(content_type=Folder.ContentType.ROOT).first()
         if root is None:
             return
@@ -329,12 +519,6 @@ class ResponsibilityRole(NameDescriptionFolderMixin, PublishInRootFolderMixin):
 
 
 class ResponsibilityMatrix(NameDescriptionFolderMixin, FilteringLabelMixin):
-    """A folder-scoped responsibility matrix (RACI / RASCI / RAPID / custom).
-
-    The `roles` M2M is the authoritative scope of role options available to
-    activities within this matrix.
-    """
-
     class Preset(models.TextChoices):
         RACI = "raci", "RACI"
         RASCI = "rasci", "RASCI"
@@ -352,13 +536,15 @@ class ResponsibilityMatrix(NameDescriptionFolderMixin, FilteringLabelMixin):
         related_name="matrices",
         blank=True,
     )
+    projects = models.ManyToManyField(
+        Project,
+        related_name="responsibility_matrices",
+        blank=True,
+    )
 
     def save(self, *args, **kwargs):
-        # Detect a folder move and propagate to descendants so IAM scoping stays
-        # consistent. Children (activities, matrix_actors, assignments) inherit
-        # folder on their own save(), but only at create-time — bulk update is
-        # needed for moves after the fact. bulk update() skips save() so no
-        # recursion.
+        # On folder move, propagate to children — they only inherit folder at create-time,
+        # so IAM scoping would drift. bulk update() skips save() (no recursion).
         folder_changed = False
         if self.pk:
             old_folder_id = (
@@ -379,8 +565,6 @@ class ResponsibilityMatrix(NameDescriptionFolderMixin, FilteringLabelMixin):
 
 
 class ResponsibilityMatrixActivity(AbstractBaseModel, FolderMixin):
-    """A row in a responsibility matrix: the thing being done."""
-
     matrix = models.ForeignKey(
         ResponsibilityMatrix,
         on_delete=models.CASCADE,
@@ -432,7 +616,7 @@ class ResponsibilityMatrixActivity(AbstractBaseModel, FolderMixin):
         ordering = ["order", "id"]
 
     def save(self, *args, **kwargs):
-        # Inherit folder from parent matrix so IAM scoping can place this object
+        # Inherit folder from the parent matrix for IAM scoping.
         self.folder = self.matrix.folder
         super().save(*args, **kwargs)
 
@@ -441,12 +625,6 @@ class ResponsibilityMatrixActivity(AbstractBaseModel, FolderMixin):
 
 
 class ResponsibilityMatrixActor(AbstractBaseModel, FolderMixin):
-    """An actor attached to a matrix (a matrix column), with display order.
-
-    Promotes actor-on-matrix to a first-class concept so columns can be added,
-    removed, and reordered independently of any concrete assignment.
-    """
-
     matrix = models.ForeignKey(
         ResponsibilityMatrix,
         on_delete=models.CASCADE,
@@ -477,8 +655,6 @@ class ResponsibilityMatrixActor(AbstractBaseModel, FolderMixin):
 
 
 class ResponsibilityAssignment(AbstractBaseModel, FolderMixin):
-    """A single cell: (activity, actor) -> role. One role per cell."""
-
     activity = models.ForeignKey(
         ResponsibilityMatrixActivity,
         on_delete=models.CASCADE,
@@ -518,6 +694,10 @@ auditlog.register(
 )
 auditlog.register(
     Accreditation,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Project,
     exclude_fields=common_exclude,
 )
 auditlog.register(

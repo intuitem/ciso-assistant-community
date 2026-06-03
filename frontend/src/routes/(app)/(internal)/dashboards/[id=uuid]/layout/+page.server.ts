@@ -53,7 +53,7 @@ export const load: PageServerLoad = async (event) => {
 			position_y: firstFreeRow,
 			// Set text widget specific defaults
 			chart_type: 'text',
-			time_range: 'all_time',
+			time_range: 'last_30_days',
 			aggregation: 'none',
 			show_target: false,
 			show_legend: false,
@@ -71,7 +71,7 @@ export const load: PageServerLoad = async (event) => {
 			dashboard: event.params.id,
 			folder: detailData.data.folder?.id || detailData.data.folder,
 			position_y: firstFreeRow,
-			time_range: 'all_time',
+			time_range: 'last_30_days',
 			aggregation: 'none',
 			show_target: false
 		},

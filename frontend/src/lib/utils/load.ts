@@ -28,7 +28,7 @@ interface LoadValidationFlowFormDataParams {
 }
 
 /**
- * Format select field data received by the backend to valid a `SelectFieldData[]` list.
+ * Format select field data received by the backend to a valid `SelectFieldData[]` list.
  * The return value is meant to be assigned to `model.selectOptions[field]` inside load functions.
  * The data will then be usable by components like `<AutoCompleteSelect {...} />` / `<Select {...} />`.
  */
@@ -37,11 +37,23 @@ export function formatSelectFieldData(
 	selectField: SelectField
 ): SelectFieldData[] {
 	const isNumber = selectField.valueType === 'number';
+	const isOptionList = Array.isArray(responseData);
 
-	const fieldOptions = Object.entries(responseData).map(([key, value]) => ({
-		label: value,
-		value: isNumber ? parseInt(key) : key
-	}));
+	let fieldOptions = [];
+
+	if (isOptionList) {
+		fieldOptions = responseData.map((option) => ({
+			label: option.label,
+			value: isNumber ? parseInt(option.value) : option.value
+		}));
+	}
+	else {
+		fieldOptions = Object.entries(responseData).map(([key, value]) => ({
+			label: value,
+			value: isNumber ? parseInt(key) : key
+		}));
+	}
+
 	if (isNumber) {
 		fieldOptions.sort((a, b) => a.value - b.value);
 	}
@@ -298,7 +310,6 @@ export const loadDetail = async ({ event, model, id }) => {
 		const hasName = typeof data.name === 'string' && data.name.trim().length > 0;
 		title = hasName ? data.name : data.ref_id || title;
 	}
-
 	// If any reverseForeignKeyField has addExisting, load the parent's updateForm
 	let updateForm: SuperValidated<FormDataShape> | undefined;
 	const hasAddExisting = model.reverseForeignKeyFields?.some((f) => f.addExisting);
