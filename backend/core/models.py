@@ -26,10 +26,8 @@ from django.core.validators import (
 from django.core.files.storage import default_storage
 from django.db import models, transaction
 from django.db.models import F, Q, OuterRef, Subquery, Prefetch, Count
-from django.db.models.signals import pre_delete
 from django.db.models.query import QuerySet
 from django.forms.models import model_to_dict
-from django.dispatch import receiver
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import get_language
@@ -4679,20 +4677,6 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
             return f"{size / 1024:.1f} KB"
         else:
             return f"{size / 1024 / 1024:.1f} MB"
-
-
-@receiver(pre_delete, sender=EvidenceRevision)
-def _delete_evidence_revision_attachment(sender, instance: EvidenceRevision, **kwargs):
-    if instance.attachment and instance.attachment.name:
-        try:
-            instance.attachment.delete(save=False)
-        except Exception as e:
-            logger.warning(
-                "Failed to delete evidence revision attachment",
-                revision_id=instance.pk,
-                evidence_name=instance.evidence.name,
-                error=str(e),
-            )
 
 
 class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
