@@ -6,6 +6,7 @@
 
 * [Philosophy](introduction/philosophy.md)
 * [Vocabulary](introduction/vocabulary.md)
+* [Community vs PRO](introduction/editions.md)
 
 ## Concepts
 
@@ -66,9 +67,12 @@
   * [Managing secrets](installation/managing-secrets.md)
   * [Setting up S3](installation/s3.md)
   * [Setting up mailer](installation/mailer.md)
+  * [Infrastructure configuration](installation/infra-config.md)
+  * [Prometheus metrics](installation/prometheus-metrics.md)
 * Maintenance
   * [Updating your local instance](installation/updating.md)
   * [Special cases](installation/special-cases.md)
+  * [Migrate between different databases](installation/migrate-database.md)
 * [Frequent questions](installation/faq.md)
 
 ## Configuration
@@ -103,8 +107,17 @@
   * [Library upgrade](configuration/libraries/library-upgrade.md)
   * [Upgrading a library](configuration/libraries/upgrading-a-library.md)
   * [Library clean-up](configuration/libraries/library-cleanup.md)
+* [Authoring](configuration/authoring/README.md)
+  * [Framework](configuration/authoring/framework.md)
+    * [Framework builder — reference](configuration/authoring/framework-builder.md)
+  * [Risk matrix](configuration/authoring/matrix.md)
+    * [Matrix editor — reference](configuration/authoring/matrix-editor.md)
+  * [Journey preset](configuration/authoring/preset.md)
+    * [Preset editor — reference](configuration/authoring/preset-editor.md)
+  * [Excel-driven authoring](configuration/authoring/excel.md)
 * [Data import wizard](configuration/data-import.md)
 * [Changing the language](configuration/language.md)
+* [Date format](configuration/date-format.md)
 
 ## Guides
 
@@ -120,6 +133,7 @@
   * [Customize your audit](guides/customize-audit.md)
   * [EBIOS RM study](guides/ebios-rm.md)
   * [Cyber risk quantification](guides/quantitative-risk.md)
+  * [Cyber risk quantification — methodology](guides/quantitative-risk-methodology.md)
   * [Conducting a Business Impact Analysis](guides/bia.md)
 * Programme management
   * [Managing a project](guides/projects.md)
@@ -144,6 +158,7 @@
 * [X-rays](features/x-rays.md)
 * [Scoring Assistant](features/scoring-assistant.md)
 * [Assignments / respondent mode](features/assignments.md)
+* [Comments](features/comments.md)
 * [Domain export/import](features/domain-export-import.md)
 * [Focus mode](features/focus-mode.md)
 * [Sync to actions](features/sync-to-actions.md)
@@ -152,8 +167,11 @@
 * [Framework report](features/framework-report.md)
 * [Insights](features/insights.md)
 * [Control Plan](features/control-plan.md)
+* [Action plans](features/action-plans.md)
 * [Context menu](features/context-menu.md)
 * [Batch actions](features/batch-actions.md)
+* [Command palette](features/command-palette.md)
+* [Universal search](features/search.md)
 * [My assignments](features/my-assignments.md)
 * [Notifications](features/notifications.md)
 * [Framework-specific features](features/framework-specific/README.md)

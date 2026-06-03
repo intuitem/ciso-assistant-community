@@ -1752,7 +1752,7 @@ export const listViewFields = {
 	},
 	'user-groups': {
 		head: ['name'],
-		body: ['localization_dict'],
+		body: ['name'],
 		meta: ['id', 'builtin']
 	},
 	roles: {

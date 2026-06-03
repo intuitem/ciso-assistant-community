@@ -280,22 +280,29 @@ class OllamaLLM:
         model: str = "mistral",
         base_url: str = "http://localhost:11434",
         system_prompt: str = "",
+        temperature_enabled: bool = True,
+        temperature: float = 0,
     ):
         import httpx
 
         self.model = model
         self.base_url = base_url
         self.system_prompt = system_prompt or DEFAULT_SYSTEM_PROMPT
+        self.temperature_enabled = temperature_enabled
+        self.temperature = temperature
         self.client = httpx.Client(timeout=120)
+
+    def _options(self) -> dict:
+        return {"temperature": self.temperature} if self.temperature_enabled else {}
 
     def generate(
         self, prompt: str, context: str, history: list[dict] | None = None
     ) -> str:
         messages = _build_messages(self.system_prompt, prompt, context, history)
-        resp = self.client.post(
-            f"{self.base_url}/api/chat",
-            json={"model": self.model, "messages": messages, "stream": False},
-        )
+        body: dict = {"model": self.model, "messages": messages, "stream": False}
+        if options := self._options():
+            body["options"] = options
+        resp = self.client.post(f"{self.base_url}/api/chat", json=body)
         resp.raise_for_status()
         return strip_thinking(resp.json()["message"]["content"])
 
@@ -305,10 +312,13 @@ class OllamaLLM:
         import httpx
 
         messages = _build_messages(self.system_prompt, prompt, context, history)
+        body: dict = {"model": self.model, "messages": messages, "stream": True}
+        if options := self._options():
+            body["options"] = options
         with httpx.stream(
             "POST",
             f"{self.base_url}/api/chat",
-            json={"model": self.model, "messages": messages, "stream": True},
+            json=body,
             timeout=120,
         ) as resp:
             for line in resp.iter_lines():
@@ -334,17 +344,19 @@ class OllamaLLM:
                 messages.append({"role": msg["role"], "content": msg["content"]})
         messages.append({"role": "user", "content": prompt})
 
+        import httpx
+
+        body: dict = {
+            "model": self.model,
+            "messages": messages,
+            "tools": tools,
+            "stream": False,
+        }
+        if options := self._options():
+            body["options"] = options
+
         try:
-            resp = self.client.post(
-                f"{self.base_url}/api/chat",
-                json={
-                    "model": self.model,
-                    "messages": messages,
-                    "tools": tools,
-                    "stream": False,
-                    "options": {"temperature": 0},
-                },
-            )
+            resp = self.client.post(f"{self.base_url}/api/chat", json=body)
             resp.raise_for_status()
             data = resp.json()
             message = data.get("message", {})
@@ -367,6 +379,8 @@ class OllamaLLM:
                 "no_tool_called",
                 content=message.get("content", "")[:200],
             )
+        except httpx.HTTPStatusError as e:
+            logger.warning("tool_call_failed", status=e.response.status_code)
         except Exception as e:
             logger.warning("tool_call_failed", error=e)
 
@@ -382,12 +396,16 @@ class OpenAICompatibleLLM:
         base_url: str = "http://localhost:1234/v1",
         system_prompt: str = "",
         api_key: str = "",
+        temperature_enabled: bool = True,
+        temperature: float = 0,
     ):
         import httpx
 
         self.model = model
         self.base_url = base_url.rstrip("/")
         self.system_prompt = system_prompt or DEFAULT_SYSTEM_PROMPT
+        self.temperature_enabled = temperature_enabled
+        self.temperature = temperature
         headers = {}
         if api_key:
             headers["Authorization"] = f"Bearer {api_key}"
@@ -404,6 +422,8 @@ class OpenAICompatibleLLM:
         body: dict = {"messages": messages, "stream": False}
         if self.model:
             body["model"] = self.model
+        if self.temperature_enabled:
+            body["temperature"] = self.temperature
         resp = self.client.post(self._chat_url(), json=body)
         resp.raise_for_status()
         return strip_thinking(resp.json()["choices"][0]["message"]["content"])
@@ -417,6 +437,8 @@ class OpenAICompatibleLLM:
         body: dict = {"messages": messages, "stream": True}
         if self.model:
             body["model"] = self.model
+        if self.temperature_enabled:
+            body["temperature"] = self.temperature
 
         headers = {}
         if self._api_key:
@@ -466,14 +488,17 @@ class OpenAICompatibleLLM:
                 messages.append({"role": msg["role"], "content": msg["content"]})
         messages.append({"role": "user", "content": prompt})
 
+        import httpx
+
         body: dict = {
             "messages": messages,
             "tools": tools,
             "stream": False,
-            "temperature": 0,
         }
         if self.model:
             body["model"] = self.model
+        if self.temperature_enabled:
+            body["temperature"] = self.temperature
 
         try:
             resp = self.client.post(self._chat_url(), json=body)
@@ -506,6 +531,8 @@ class OpenAICompatibleLLM:
                 "no_tool_called",
                 content=message.get("content", "")[:200],
             )
+        except httpx.HTTPStatusError as e:
+            logger.warning("tool_call_failed", status=e.response.status_code)
         except Exception as e:
             logger.warning("tool_call_failed", error=e)
 
@@ -613,6 +640,10 @@ def get_chat_settings() -> dict:
                 ),
                 "openai_model": gs.value.get("openai_model", ""),
                 "openai_api_key": gs.value.get("openai_api_key", ""),
+                "chat_temperature_enabled": gs.value.get(
+                    "chat_temperature_enabled", True
+                ),
+                "chat_temperature": gs.value.get("chat_temperature", 0),
             }
     except Exception as e:
         logger.warning("chat_settings_load_failed", error=e)
@@ -626,6 +657,8 @@ def get_chat_settings() -> dict:
         "openai_api_base": "http://localhost:1234/v1",
         "openai_model": "",
         "openai_api_key": "",
+        "chat_temperature_enabled": True,
+        "chat_temperature": 0,
     }
 
 
@@ -695,6 +728,8 @@ def get_llm() -> LLM:
                     base_url=base_url,
                     system_prompt=settings["chat_system_prompt"],
                     api_key=api_key,
+                    temperature_enabled=settings.get("chat_temperature_enabled", True),
+                    temperature=settings.get("chat_temperature", 0),
                 )
                 logger.info(
                     "llm_initialized",
@@ -732,6 +767,8 @@ def get_llm() -> LLM:
                 model=settings["ollama_model"],
                 base_url=settings["ollama_base_url"],
                 system_prompt=settings["chat_system_prompt"],
+                temperature_enabled=settings.get("chat_temperature_enabled", True),
+                temperature=settings.get("chat_temperature", 0),
             )
             logger.info(
                 "llm_initialized",

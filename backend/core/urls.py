@@ -187,6 +187,11 @@ urlpatterns = [
     path("get_counters/", get_counters_view, name="get_counters_view"),
     path("get_metrics/", get_metrics_view, name="get_metrics_view"),
     path(
+        "analytics/export/xlsx/",
+        get_analytics_export_xlsx,
+        name="get_analytics_export_xlsx",
+    ),
+    path(
         "get_audits_metrics/", get_audits_metrics_view, name="get_audits_metrics_view"
     ),
     path(

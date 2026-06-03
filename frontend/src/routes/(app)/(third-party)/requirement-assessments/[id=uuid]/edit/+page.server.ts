@@ -250,6 +250,12 @@ export const actions: Actions = {
 		if (!('result' in currentRa)) {
 			delete formData.extended_result;
 		}
+		// The Select component's default option renders as <option value={null}>--</option>;
+		// Svelte omits the null attribute so the browser falls back to the text "--",
+		// which the backend rejects as an invalid enum choice. Normalize to null.
+		if (formData.extended_result === '--' || formData.extended_result === '') {
+			formData.extended_result = null;
+		}
 
 		const requestInitOptions: RequestInit = {
 			method: 'PATCH',

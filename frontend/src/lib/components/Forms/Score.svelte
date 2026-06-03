@@ -100,13 +100,15 @@
 			<div class="shrink-0 relative">
 				<Progress
 					value={fullDonut ? max_score : $value}
-					min={0}
+					min={min_score}
 					max={max_score}
 					data-testid="progress-ring-svg"
 				>
 					<Progress.Circle class="[--size:--spacing(12)]">
 						<Progress.CircleTrack />
-						<Progress.CircleRange class={displayScoreColor($value, max_score, inversedColors)} />
+						<Progress.CircleRange
+							class={displayScoreColor($value, max_score, inversedColors, min_score)}
+						/>
 					</Progress.Circle>
 					<div class="absolute inset-0 flex items-center justify-center">
 						<span class="text-xs font-bold">{$value}</span>
