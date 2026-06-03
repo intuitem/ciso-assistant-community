@@ -89,10 +89,12 @@ export function formatDate(date: Date, withTime = false, locale = 'en'): string 
 /**
  * Format an ISO date or datetime string for display. The presence of a time
  * component is inferred from the ISO string (the "T" separator).
+ * 
+ * Return `null` if `isoString` is `null` or `""`.
  */
-export function formatDateOrDateTime(isoString: string, locale = 'en'): string {
-	if (typeof isoString !== 'string') {
-		return isoString;
+export function formatDateOrDateTime(isoString: string | null, locale = 'en'): string | null {
+	if (isoString === null || isoString === "") {
+		return null;
 	}
 	const hasTime = isoString.includes('T');
 	// A date-only ISO string (YYYY-MM-DD) is parsed as UTC midnight, which renders
