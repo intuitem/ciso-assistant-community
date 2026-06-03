@@ -13,6 +13,7 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
 
 	import { goto } from '$app/navigation';
 
@@ -548,4 +549,7 @@
 			</div>
 		{/if}
 	</div>
+	{#if page.data?.featureflags?.comments}
+		<CommentsPanel parentType="risk_scenario" parentId={data.scenario.id} />
+	{/if}
 </div>
