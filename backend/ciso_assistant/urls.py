@@ -14,6 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from django.conf import settings
 from django.urls import include, path
 from drf_spectacular.views import (
     SpectacularAPIView,
@@ -43,6 +44,10 @@ urlpatterns = [
     path("i18n/", include("django.conf.urls.i18n")),
 ]
 
+if getattr(settings, "ENABLE_INFRA_CONFIG_MANAGEMENT", False):
+    from global_settings.views import infra_config_view
+
+    urlpatterns.append(path("infra-config/", infra_config_view, name="infra-config"))
 if getattr(settings, "EXPOSE_METRICS", False):
     from core.views import metrics_view
 
