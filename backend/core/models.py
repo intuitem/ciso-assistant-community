@@ -865,11 +865,12 @@ class LibraryUpdater:
         )
 
         for detached_reference_control in detached_reference_controls:
+            detached_reference_control.urn = None
             detached_reference_control.library = None
 
         ReferenceControl.objects.bulk_update(
             detached_reference_controls,
-            ["library"],
+            ["urn", "library"],
             batch_size=100,
         )
 
