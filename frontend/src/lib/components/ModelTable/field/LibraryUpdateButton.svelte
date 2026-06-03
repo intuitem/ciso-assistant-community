@@ -77,7 +77,7 @@
 				return async ({ result, update }) => {
 					loading.form = false;
 					loading.library = '';
-					if (result.type !== 'error') {
+					if (result.type === 'success') {
 						await update();
 						onUpdate();
 					}
