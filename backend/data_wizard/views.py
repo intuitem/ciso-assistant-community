@@ -685,7 +685,7 @@ class Field[IN, OUT](ABC):
 
         An early return will occur if:
         - The `field.name` isn't found in the `record`
-        - The field value for this record is `None` and the field is nullable
+        - The field value for this record is `None` and the field is nullable (`field.null == True`)
 
         If `ParseResult.is_ready()` is `True`, the caller can return this result immediately.
         """
@@ -1016,7 +1016,7 @@ class RecordConsumer[Context = None](ABC):
         field_name_set = set()
         cleaned_fields = []
 
-        # If we have cls.FIELDS = [..., Field1, ..., Field2, ...] AND Field1.name == Field2.name THEN Field2 will override Field1 (meaning Field1 will be ignored).
+        # If we have `cls.FIELDS = [..., Field1, ..., Field2, ...]` AND `Field1.name == Field2.name` THEN `Field2` will override `Field1` (meaning `Field1` will be ignored).
         for field in reversed(cls.FIELDS):
             if field.name not in field_name_set:
                 cleaned_fields.append(field)
