@@ -47,7 +47,7 @@ copyright: 'Government of the Netherlands / Open Overheid (CC0)
 
   https://www.open-overheid.nl/service/copyright'
 version: 1
-publication_date: 2026-06-02
+publication_date: 2026-06-03
 provider: Government of the Netherlands
 packager: intuitem
 translations:
@@ -6974,11 +6974,11 @@ objects:
         en:
           description: All Special Information located outside the designated physical
             Compartment must be encrypted using Approved Means.
-    - urn: urn:intuitem:risk:req_node:abro_2026:4.1-2
+    - urn: urn:intuitem:risk:req_node:abro_2026:4.10
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:abro_2026:4
-      ref_id: 4.1-2
+      ref_id: '4.10'
       name: Kwetsbaarheden- en patchmanagement
       translations:
         en:
@@ -6986,7 +6986,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:abro_2026:4.10.1
       assessable: true
       depth: 3
-      parent_urn: urn:intuitem:risk:req_node:abro_2026:4.1-2
+      parent_urn: urn:intuitem:risk:req_node:abro_2026:4.10
       ref_id: 4.10.1
       description: Een proces is ingericht voor het identificeren en Mitigeren van
         technische kwetsbaarheden. Dit omvat o.a. detectie van technische kwetsbaarheden
@@ -7010,7 +7010,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:abro_2026:4.10.2
       assessable: true
       depth: 3
-      parent_urn: urn:intuitem:risk:req_node:abro_2026:4.1-2
+      parent_urn: urn:intuitem:risk:req_node:abro_2026:4.10
       ref_id: 4.10.2
       description: Een proces is ingericht om nieuwe updates en Patches tijdig te
         identificeren en door te voeren. Het doorvoeren van een update of Patch vindt
@@ -7028,7 +7028,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:abro_2026:4.10.3
       assessable: true
       depth: 3
-      parent_urn: urn:intuitem:risk:req_node:abro_2026:4.1-2
+      parent_urn: urn:intuitem:risk:req_node:abro_2026:4.10
       ref_id: 4.10.3
       description: Kritieke updates en Patches worden zo spoedig mogelijk doorgevoerd.
       implementation_groups:
@@ -7043,7 +7043,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:abro_2026:4.10.4
       assessable: true
       depth: 3
-      parent_urn: urn:intuitem:risk:req_node:abro_2026:4.1-2
+      parent_urn: urn:intuitem:risk:req_node:abro_2026:4.10
       ref_id: 4.10.4
       description: Indien een kwetsbaarheid bekend is met een CVSS score van 4.0 of
         hoger voor een Systeem met een Externe koppeling, dan wordt de Externe koppeling
