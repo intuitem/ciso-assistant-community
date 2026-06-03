@@ -17,14 +17,12 @@
 		 */
 		libraryURN?: string;
 		loading?: { form: boolean; library: string };
-		onUpdate?: () => void;
 	}
 
 	const {
 		loadedLibraryID,
 		libraryURN = '',
 		loading = $bindable({ form: false, library: '' }),
-		onUpdate = () => {}
 	}: Props = $props();
 
 	const modalStore = getModalStore();
@@ -79,7 +77,6 @@
 					loading.library = '';
 					if (result.type === 'success') {
 						await update();
-						onUpdate();
 					}
 					if (result.type === 'failure' && result.data?.error === 'score_change_detected') {
 						choicesModal(result.data.choices);
