@@ -3,6 +3,8 @@
 	import { invalidateAll } from '$app/navigation';
 	import { goto } from '$lib/utils/breadcrumbs';
 	import { pageTitle } from '$lib/utils/stores';
+	import { getLocale } from '$paraglide/runtime';
+	import { formatDate } from '$lib/utils/datetime';
 
 	let { data }: { data: PageData } = $props();
 	$pageTitle = 'Preset Editor';
@@ -63,7 +65,7 @@
 	function fmtDate(d: string | undefined): string {
 		if (!d) return '—';
 		try {
-			return new Date(d).toLocaleString();
+			return formatDate(new Date(d), true, getLocale());
 		} catch {
 			return d;
 		}

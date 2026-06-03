@@ -157,6 +157,21 @@ ENABLE_CHAT = os.environ.get("ENABLE_CHAT", "False").strip().lower() in (
 )
 logger.info("ENABLE_CHAT: %s", ENABLE_CHAT)
 
+# Infrastructure configuration management. Disabled by default.
+# When ENABLE_INFRA_CONFIG_MANAGEMENT=true, admins can manage infrastructure
+# configuration settings (e.g. the list of IPs/CIDRs allowed to reach the backend)
+# from the settings UI, and an unauthenticated /infra-config/ endpoint exposes
+# those settings for the infrastructure layer to consume (same pattern as
+# EXPOSE_METRICS — must never be reachable publicly).
+ENABLE_INFRA_CONFIG_MANAGEMENT = os.environ.get(
+    "ENABLE_INFRA_CONFIG_MANAGEMENT", "False"
+).strip().lower() in (
+    "true",
+    "1",
+    "yes",
+)
+logger.info("ENABLE_INFRA_CONFIG_MANAGEMENT: %s", ENABLE_INFRA_CONFIG_MANAGEMENT)
+
 # Questionnaire Autopilot — tunable thresholds. Defaults match the values
 # the feature was developed against; override via env when tuning a
 # specific deployment without redeploying. See chat/questionnaire.py.
@@ -200,6 +215,14 @@ CSRF_TRUSTED_ORIGINS = [CISO_ASSISTANT_URL]
 LOCAL_STORAGE_DIRECTORY = os.environ.get(
     "LOCAL_STORAGE_DIRECTORY", BASE_DIR / "db/attachments"
 )
+
+EXPOSE_METRICS = os.environ.get("EXPOSE_METRICS", "False").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+logger.info("EXPOSE_METRICS: %s", EXPOSE_METRICS)
+
 ATTACHMENT_MAX_SIZE_MB = os.environ.get("ATTACHMENT_MAX_SIZE_MB", 25)
 
 USE_S3 = os.getenv("USE_S3", "False").lower() in ("true", "1", "yes")
