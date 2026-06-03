@@ -2599,6 +2599,14 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     extended_result_enabled = serializers.BooleanField(read_only=True)
     progress_status_enabled = serializers.BooleanField(read_only=True)
 
+    # Emit the fully-resolved visibility map (DEFAULT_VISIBILITY ⊕ framework ⊕ stored overrides)
+    field_visibility = serializers.SerializerMethodField()
+
+    def get_field_visibility(self, obj):
+        from core.utils import resolve_complete_field_visibility
+
+        return resolve_complete_field_visibility(obj)
+
     class Meta:
         model = ComplianceAssessment
         fields = "__all__"

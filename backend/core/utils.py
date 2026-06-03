@@ -1468,6 +1468,27 @@ def is_field_editable_by(compliance_assessment, field_name, role):
     return _role_access(compliance_assessment, field_name, role) == "edit"
 
 
+def resolve_complete_field_visibility(compliance_assessment):
+    """Return the fully-resolved `field_visibility` map for a CA instance.
+
+    The stored map only holds the keys a CA actually overrides (and old CAs may
+    predate a field entirely), so it is incomplete on the wire. This layers, in
+    increasing precedence: DEFAULT_VISIBILITY ⊕ framework overrides ⊕ the CA's
+    own stored overrides — yielding a map with an explicit pair for every known
+    field. Clients can then read it without re-implementing the default cascade.
+    """
+    framework = getattr(compliance_assessment, "framework", None)
+    merged = build_initial_field_visibility(framework)
+    for key, pair in (
+        getattr(compliance_assessment, "field_visibility", None) or {}
+    ).items():
+        if not isinstance(pair, dict):
+            continue
+        merged.setdefault(key, dict(EVERYONE_EDIT))
+        merged[key].update(pair)
+    return merged
+
+
 def build_initial_field_visibility(framework):
     """Build the initial `field_visibility` map for a new CA.
 
