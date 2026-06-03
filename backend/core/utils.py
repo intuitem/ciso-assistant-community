@@ -1473,7 +1473,7 @@ def resolve_complete_field_visibility(compliance_assessment):
 
     The stored map only holds the keys a CA actually overrides (and old CAs may
     predate a field entirely), so it is incomplete on the wire. This layers, in
-    increasing precedence: DEFAULT_VISIBILITY ⊕ framework overrides ⊕ the CA's
+    increasing precedence: DEFAULT_VISIBILITY + framework overrides + the CA's
     own stored overrides — yielding a map with an explicit pair for every known
     field. Clients can then read it without re-implementing the default cascade.
     """

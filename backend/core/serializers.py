@@ -2084,7 +2084,7 @@ class FrameworkReadSerializer(ReferentialSerializer):
     has_compliance_assessments = serializers.SerializerMethodField()
     scores_definition = serializers.SerializerMethodField()
     # The complete per-role visibility map a new CA created from this framework
-    # would inherit: DEFAULT_VISIBILITY ⊕ framework.field_visibility. The
+    # would inherit: DEFAULT_VISIBILITY + framework.field_visibility. The
     # CA-creation form's editor reads this so its pills always reflect what
     # the backend will actually save.
     effective_field_visibility = serializers.SerializerMethodField()
@@ -2599,7 +2599,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     extended_result_enabled = serializers.BooleanField(read_only=True)
     progress_status_enabled = serializers.BooleanField(read_only=True)
 
-    # Emit the fully-resolved visibility map (DEFAULT_VISIBILITY ⊕ framework ⊕ stored overrides)
+    # Emit the fully-resolved visibility map (DEFAULT_VISIBILITY + framework + stored overrides)
     field_visibility = serializers.SerializerMethodField()
 
     def get_field_visibility(self, obj):

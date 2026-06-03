@@ -398,7 +398,7 @@ const EDIT_PAIR: VisibilityPair = { auditor: 'edit', respondent: 'edit' };
 
 /**
  * Return the per-role visibility pair for a field. The backend resolves the
- * full cascade (stored overrides ⊕ framework ⊕ DEFAULT_VISIBILITY) before
+ * full cascade (stored overrides + framework + DEFAULT_VISIBILITY) before
  * serializing `field_visibility`, so the map always carries an explicit pair
  * for every known field. A missing key here means a truly unknown/structural
  * field, which everyone may edit.
