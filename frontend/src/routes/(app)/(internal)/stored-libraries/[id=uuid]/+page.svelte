@@ -177,14 +177,12 @@
 			<MarkdownRenderer content={data.library.description} />
 
 			<p class="text-md leading-5 text-gray-700">
-				<strong>{m.provider()}</strong>:
+				<strong>{m.provider()}</strong>: {data.library.provider}
 			</p>
-			<MarkdownRenderer content={data.library.provider} />
 
 			<p class="text-md leading-5 text-gray-700">
-				<strong>{m.packager()}</strong>:
+				<strong>{m.packager()}</strong>: {data.library.packager}
 			</p>
-			<MarkdownRenderer content={data.library.packager} />
 
 			<p class="text-md leading-5 text-gray-700">
 				<strong>{m.version()}</strong>: {data.library.version}
@@ -192,11 +190,11 @@
 
 			{#if data.library.publication_date}
 				<p class="text-md leading-5 text-gray-700">
-					<strong>{m.publicationDate()}</strong>:
+					<strong>{m.publicationDate()}</strong>: {formatDateOrDateTime(
+						data.library.publication_date,
+						getLocale()
+					)}
 				</p>
-				<MarkdownRenderer
-					content={formatDateOrDateTime(data.library.publication_date, getLocale())}
-				/>
 			{/if}
 			{#if data.library.dependencies}
 				<p class="text-md leading-5 text-gray-700">
