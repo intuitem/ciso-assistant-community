@@ -16,6 +16,6 @@ def _delete_evidence_revision_attachment(sender, instance: EvidenceRevision, **k
             logger.warning(
                 "Failed to delete evidence revision attachment",
                 revision_id=instance.pk,
-                evidence_name=instance.evidence.name,
+                evidence_name=instance.evidence_id,
                 error=str(e),
             )
