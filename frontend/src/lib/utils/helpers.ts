@@ -395,18 +395,40 @@ export type RoleAccess = 'edit' | 'read' | 'hidden';
 export type VisibilityPair = { auditor: RoleAccess; respondent: RoleAccess };
 
 const EDIT_PAIR: VisibilityPair = { auditor: 'edit', respondent: 'edit' };
+const AUDITOR_ONLY_PAIR: VisibilityPair = { auditor: 'edit', respondent: 'hidden' };
+const HIDDEN_PAIR: VisibilityPair = { auditor: 'hidden', respondent: 'hidden' };
 
-/** Return the per-role visibility pair for a field. Missing → all roles edit. */
+// Mirror of backend `core.utils.DEFAULT_VISIBILITY`. A CA stores only the keys
+// it overrides, so a missing key must cascade through these defaults before
+// falling back to "everyone edits" — otherwise audits created before a field
+// existed (no stored key) would render it as visible-to-all on the frontend
+// while the backend redacts it. Keep in sync with backend/core/utils.py.
+const DEFAULT_VISIBILITY: Record<string, VisibilityPair> = {
+	score: HIDDEN_PAIR,
+	is_scored: HIDDEN_PAIR,
+	documentation_score: HIDDEN_PAIR,
+	status: AUDITOR_ONLY_PAIR,
+	extended_result: AUDITOR_ONLY_PAIR,
+	security_exceptions: AUDITOR_ONLY_PAIR,
+	respondent_alignment: HIDDEN_PAIR
+};
+
+/**
+ * Return the per-role visibility pair for a field, mirroring the backend
+ * cascade: explicit override → DEFAULT_VISIBILITY → all roles edit.
+ */
 export function resolveFieldVisibility(
 	complianceAssessment: Record<string, any> | null | undefined,
 	fieldName: string
 ): VisibilityPair {
 	const raw = complianceAssessment?.field_visibility?.[fieldName];
-	if (!raw || typeof raw !== 'object') return { ...EDIT_PAIR };
-	return {
-		auditor: (raw.auditor as RoleAccess) ?? 'edit',
-		respondent: (raw.respondent as RoleAccess) ?? 'edit'
-	};
+	if (raw && typeof raw === 'object') {
+		return {
+			auditor: (raw.auditor as RoleAccess) ?? 'edit',
+			respondent: (raw.respondent as RoleAccess) ?? 'edit'
+		};
+	}
+	return { ...(DEFAULT_VISIBILITY[fieldName] ?? EDIT_PAIR) };
 }
 
 function roleAccess(
