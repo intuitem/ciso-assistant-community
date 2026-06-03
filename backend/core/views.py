@@ -76,6 +76,29 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 from django.core.cache import cache
 
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+from core.helpers import get_instance_metrics
+from core.instance_metrics import (
+    nb_users_gauge,
+    nb_first_login_gauge,
+    nb_libraries_gauge,
+    nb_domains_gauge,
+    nb_perimeters_gauge,
+    nb_assets_gauge,
+    nb_threats_gauge,
+    nb_functions_gauge,
+    nb_measures_gauge,
+    nb_evidences_gauge,
+    nb_compliance_assessments_gauge,
+    nb_risk_assessments_gauge,
+    nb_risk_scenarios_gauge,
+    nb_risk_acceptances_gauge,
+    nb_seats_gauge,
+    nb_editors_gauge,
+    expiration_gauge,
+    created_at_gauge,
+    last_login_gauge,
+)
 
 from django.apps import apps
 from django.contrib.auth.models import AnonymousUser, Permission
@@ -717,7 +740,12 @@ class GenericFilterSet(df.FilterSet):
         }
 
 
-class FolderOrderingFilter(filters.OrderingFilter):
+class SmartOrderingFilter(filters.OrderingFilter):
+    # Suffixes of fields ordered case-insensitively. Postgres sorts uppercase
+    # before lowercase while SQLite does not, so a raw name ordering is
+    # inconsistent across backends; wrapping in Lower() makes it deterministic.
+    case_insensitive_suffixes = ("name",)
+
     def get_ordering(self, request, queryset, view):
         ordering = super().get_ordering(request, queryset, view)
         if ordering:
@@ -731,12 +759,26 @@ class FolderOrderingFilter(filters.OrderingFilter):
             ]
         return ordering
 
+    def filter_queryset(self, request, queryset, view):
+        ordering = self.get_ordering(request, queryset, view)
+        if ordering:
+            return queryset.order_by(*[self._as_term(f) for f in ordering])
+        return queryset
+
+    def _as_term(self, term):
+        descending = term.startswith("-")
+        field = term[1:] if descending else term
+        if field.split("__")[-1] in self.case_insensitive_suffixes:
+            expr = Lower(field)
+            return expr.desc() if descending else expr.asc()
+        return term
+
 
 class BaseModelViewSet(viewsets.ModelViewSet):
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
-        FolderOrderingFilter,
+        SmartOrderingFilter,
     ]
     ordering = ["created_at"]
     ordering_fields = "__all__"
@@ -8104,19 +8146,32 @@ class UserPreferencesView(APIView):
         return Response(prefs, status=status.HTTP_200_OK)
 
     def patch(self, request) -> Response:
-        new_language = request.data.get("lang")
-        if new_language is None or new_language not in (
-            lang[0] for lang in settings.LANGUAGES
-        ):
-            logger.error(
-                f"Error in UserPreferencesView: new_language={new_language} available languages={[lang[0] for lang in settings.LANGUAGES]}"
-            )
-            return Response(
-                {"error": "This language doesn't exist."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
         prefs = request.user.get_preferences()
-        prefs["lang"] = new_language
+
+        if "lang" in request.data:
+            new_language = request.data.get("lang")
+            if new_language not in (lang[0] for lang in settings.LANGUAGES):
+                logger.error(
+                    f"Error in UserPreferencesView: new_language={new_language} available languages={[lang[0] for lang in settings.LANGUAGES]}"
+                )
+                return Response(
+                    {"error": "This language doesn't exist."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            prefs["lang"] = new_language
+
+        if "date_format" in request.data:
+            new_date_format = request.data.get("date_format")
+            if new_date_format not in request.user.DATE_FORMATS:
+                logger.error(
+                    f"Error in UserPreferencesView: date_format={new_date_format} available formats={request.user.DATE_FORMATS}"
+                )
+                return Response(
+                    {"error": "This date format doesn't exist."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            prefs["date_format"] = new_date_format
+
         request.user.preferences = prefs
         request.user.save(update_fields=["preferences"])
         return Response({}, status=status.HTTP_200_OK)
@@ -8529,6 +8584,7 @@ class FrameworkViewSet(BaseModelViewSet):
                 .all(),
                 None,
                 _framework.max_score,
+                _framework.min_score,
             )
         )
 
@@ -8591,6 +8647,21 @@ class FrameworkViewSet(BaseModelViewSet):
             )
             for ca in cas
         }
+
+        # Domain-tree inheritance overlay. Computed per live CA (column) against
+        # its ancestor audits when the org-wide strategy is enabled; gated so the
+        # default (none) adds no query cost.
+        from core.audit_inheritance import build_overlay_map, get_strategy
+
+        aggregation_strategy = get_strategy()
+        overlays_by_ca: Dict[Any, Dict[str, Any]] = {}
+        if aggregation_strategy != "none":
+            for ca in cas:
+                overlays_by_ca[ca.id] = build_overlay_map(
+                    ca,
+                    viewable_ca_ids=viewable_ca_ids,
+                    strategy=aggregation_strategy,
+                )["overlay"]
 
         ras = (
             RequirementAssessment.objects.filter(
@@ -8681,6 +8752,9 @@ class FrameworkViewSet(BaseModelViewSet):
                     "indirect_evidences_count": len(
                         indirect_evidence_ids - direct_evidence_ids
                     ),
+                    # Inheritance overlay for this (audit, requirement); None when
+                    # no ancestor audit covers it or the feature is off.
+                    "inheritance": overlays_by_ca.get(ca.id, {}).get(str(req.id)),
                 }
             )
 
@@ -8730,6 +8804,7 @@ class FrameworkViewSet(BaseModelViewSet):
                 "compliance_assessments": compliance_assessments,
                 "ca_status_counts": ca_status_counts,
                 "live_statuses": list(LIVE_STATUSES),
+                "aggregation_strategy": aggregation_strategy,
                 "generated_at": timezone.now().isoformat(),
             }
         )
@@ -8929,6 +9004,10 @@ class FrameworkViewSet(BaseModelViewSet):
                     locale=node.locale,
                     default_locale=node.default_locale,
                     translations=node.translations,
+                    min_score=node.min_score,
+                    max_score=node.max_score,
+                    scores_definition_ref=node.scores_definition_ref,
+                    target_score=node.target_score,
                 )
                 node_id_map[old_id] = new_node.id
 
@@ -9124,6 +9203,14 @@ class FrameworkViewSet(BaseModelViewSet):
                 node_data["display_mode"] = node.display_mode
             if node.weight and node.weight != 1:
                 node_data["weight"] = node.weight
+            # Per-requirement scoring overrides. scores_definition_ref points
+            # at an entry in framework.scores_definition.alternatives.
+            if node.min_score is not None:
+                node_data["min_score"] = node.min_score
+            if node.max_score is not None:
+                node_data["max_score"] = node.max_score
+            if node.scores_definition_ref:
+                node_data["scores_definition_ref"] = node.scores_definition_ref
             if node.translations:
                 node_data["translations"] = node.translations
 
@@ -9184,7 +9271,14 @@ class FrameworkViewSet(BaseModelViewSet):
         if framework.max_score != 100:
             framework_obj["max_score"] = framework.max_score
         if framework.scores_definition:
-            framework_obj["scores_definition"] = framework.scores_definition
+            sd = framework.scores_definition
+            # Emit a bare list when there are no alternatives (matches the
+            # legacy YAML convention used by every shipped framework); emit
+            # the wrapped dict when alternatives exist to preserve them.
+            if isinstance(sd, dict) and "scale" in sd and not sd.get("alternatives"):
+                framework_obj["scores_definition"] = sd["scale"]
+            else:
+                framework_obj["scores_definition"] = sd
         if framework.implementation_groups_definition:
             framework_obj["implementation_groups_definition"] = (
                 framework.implementation_groups_definition
@@ -12206,6 +12300,21 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             return ComplianceAssessmentListSerializer
         return super().get_serializer_class(**kwargs)
 
+    def get_queryset_minimalistic(self) -> QuerySet[ComplianceAssessment]:
+        """Get the minimalistic base viewset `QuerySet` (with no extra JOIN or secondary query)."""
+
+        qs = super().get_queryset()
+
+        auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
+        if auditee_folders:
+            user_actors = Actor.get_all_for_user(self.request.user)
+            qs = qs.filter(
+                ~Q(folder_id__in=auditee_folders)
+                | Q(requirement_assignments__actor__in=user_actors)
+            ).distinct()
+
+        return qs
+
     def _get_optimized_object_data(self, queryset):
         """Compute per-page requirement counts in one bounded GROUP BY,
         replacing the Count(distinct=True) annotations dropped from the
@@ -12250,20 +12359,17 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         """Optimize queries for table view and serializer, with conditional annotations for sorting"""
         from core.models import Question
 
-        qs = (
-            super()
-            .get_queryset()
-            .select_related(
-                "folder",
-                "folder__parent_folder",  # For get_folder_full_path() optimization
-                "framework",  # Displayed in table
-                "perimeter",  # Displayed in table
-            )
-            .annotate(
-                _has_questions=Exists(
-                    Question.objects.filter(
-                        requirement_node__framework=OuterRef("framework")
-                    )
+        qs = self.get_queryset_minimalistic()
+
+        qs = qs.select_related(
+            "folder",
+            "folder__parent_folder",  # For get_folder_full_path() optimization
+            "framework",  # Displayed in table
+            "perimeter",  # Displayed in table
+        ).annotate(
+            _has_questions=Exists(
+                Question.objects.filter(
+                    requirement_node__framework=OuterRef("framework")
                 )
             )
         )
@@ -12333,14 +12439,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     distinct=True,
                 ),
             )
-
-        auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
-        if auditee_folders:
-            user_actors = Actor.get_all_for_user(self.request.user)
-            qs = qs.filter(
-                ~Q(folder_id__in=auditee_folders)
-                | Q(requirement_assignments__actor__in=user_actors)
-            ).distinct()
 
         return qs
 
@@ -12744,7 +12842,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         tree = get_sorted_requirement_nodes(
             RequirementNode.objects.filter(framework=_framework).all(),
             RequirementAssessment.objects.filter(compliance_assessment=audit_obj).all(),
-            _framework.max_score,
+            audit_obj.max_score
+            if audit_obj.max_score is not None
+            else _framework.max_score,
+            audit_obj.min_score
+            if audit_obj.min_score is not None
+            else _framework.min_score,
         )
         implementation_groups = audit_obj.selected_implementation_groups
         # Don't reassign the return value: the Word spider chart depends on
@@ -13062,32 +13165,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         status=status.HTTP_400_BAD_REQUEST,
                     )
 
-            # validate if score value is within allowed range
-            if score is not None:
-                try:
-                    score = int(score)
-                    # Only validate range if min_score and max_score are defined
-                    if (
-                        compliance_assessment.min_score is not None
-                        and compliance_assessment.max_score is not None
-                    ):
-                        if (
-                            score < compliance_assessment.min_score
-                            or score > compliance_assessment.max_score
-                        ):
-                            return Response(
-                                {
-                                    "error": f"Score must be between {compliance_assessment.min_score} and {compliance_assessment.max_score}"
-                                },
-                                status=status.HTTP_400_BAD_REQUEST,
-                            )
-                except (ValueError, TypeError):
-                    return Response(
-                        {"error": "Score must be a valid integer"},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-
-            # Find the requirement assessment to update
+            # Find the requirement assessment first so we can validate score
+            # against the per-RA resolved scale (Node override > CA bounds).
             requirement_assessment = RequirementAssessment.objects.filter(
                 compliance_assessment=compliance_assessment, requirement__urn=urn
             ).first()
@@ -13097,6 +13176,36 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     {"error": f"Requirement with urn {urn} not found"},
                     status=status.HTTP_404_NOT_FOUND,
                 )
+
+            # validate if score value is within the resolved scale
+            if score is not None:
+                try:
+                    score = int(score)
+                except (ValueError, TypeError):
+                    return Response(
+                        {"error": "Score must be a valid integer"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                resolved = requirement_assessment.get_resolved_scoring()
+                resolved_min = resolved["min_score"]
+                resolved_max = resolved["max_score"]
+                if resolved_min is None or resolved_max is None:
+                    return Response(
+                        {
+                            "error": "Cannot set score: scoring is not configured for this audit."
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                if score < resolved_min or score > resolved_max:
+                    return Response(
+                        {
+                            "error": (
+                                f"Score must be between {resolved_min} and "
+                                f"{resolved_max}"
+                            )
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
 
             # Update the requirement assessment
             requirement_assessment.result = result
@@ -13263,9 +13372,23 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             )
             if instance.scoring_enabled:
                 assessable_ras.update(is_scored=True)
-                assessable_ras.filter(score__isnull=True).update(
-                    score=instance.min_score or 0
+                # Seed missing scores at the RA's resolved min (Node override
+                # if present, CA min otherwise) so overridden ranges like
+                # 2..5 don't start below their valid floor.
+                ras_to_init = list(
+                    assessable_ras.filter(score__isnull=True).select_related(
+                        "requirement"
+                    )
                 )
+                ca_min = instance.min_score if instance.min_score is not None else 0
+                for ra in ras_to_init:
+                    ra.score = (
+                        ra.requirement.min_score
+                        if ra.requirement.min_score is not None
+                        else ca_min
+                    )
+                if ras_to_init:
+                    RequirementAssessment.objects.bulk_update(ras_to_init, ["score"])
             else:
                 assessable_ras.update(is_scored=False)
 
@@ -13283,14 +13406,28 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def perform_update(self, serializer):
         compliance_assessment = serializer.save()
         if compliance_assessment.show_documentation_score:
-            ra_null_documentation_score = RequirementAssessment.objects.filter(
-                compliance_assessment=compliance_assessment,
-                is_scored=True,
-                documentation_score__isnull=True,
+            ras_to_init = list(
+                RequirementAssessment.objects.filter(
+                    compliance_assessment=compliance_assessment,
+                    is_scored=True,
+                    documentation_score__isnull=True,
+                ).select_related("requirement")
             )
-            ra_null_documentation_score.update(
-                documentation_score=compliance_assessment.min_score
+            ca_min = (
+                compliance_assessment.min_score
+                if compliance_assessment.min_score is not None
+                else 0
             )
+            for ra in ras_to_init:
+                ra.documentation_score = (
+                    ra.requirement.min_score
+                    if ra.requirement.min_score is not None
+                    else ca_min
+                )
+            if ras_to_init:
+                RequirementAssessment.objects.bulk_update(
+                    ras_to_init, ["documentation_score"]
+                )
 
     @action(detail=False, name="Compliance assessments per status")
     def per_status(self, request):
@@ -13321,9 +13458,14 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         """Returns the global score of the compliance assessment"""
         compliance_assessment = self.get_object()
         scores = compliance_assessment.get_global_score()
-        scores_definition = get_referential_translation(
-            compliance_assessment.framework, "scores_definition", get_language()
-        )
+        # Source of truth is the CA copy (set at save() and customisable
+        # independently of the framework). Fall back to the framework's
+        # translated definition for the labels.
+        scores_definition = compliance_assessment.scores_definition
+        if not scores_definition:
+            scores_definition = get_referential_translation(
+                compliance_assessment.framework, "scores_definition", get_language()
+            )
         if isinstance(scores_definition, dict) and "scale" in scores_definition:
             scores_definition = scores_definition["scale"]
         return Response(
@@ -13403,7 +13545,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         tree = get_sorted_requirement_nodes(
             requirement_nodes,
             requirement_assessments,
-            _framework.max_score,
+            compliance_assessment.max_score
+            if compliance_assessment.max_score is not None
+            else _framework.max_score,
+            compliance_assessment.min_score
+            if compliance_assessment.min_score is not None
+            else _framework.min_score,
         )
         implementation_groups = compliance_assessment.selected_implementation_groups
         if (
@@ -13414,6 +13561,96 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         tree = filter_graph_by_implementation_groups(tree, implementation_groups)
         annotate_tree_with_aggregated_scores(tree, compliance_assessment)
         return Response(tree)
+
+    @action(detail=True, methods=["get"])
+    def combined_tree(self, request, pk):
+        """Requirement tree with domain-tree inheritance applied as an overlay.
+
+        Same shape as ``tree`` but each node also carries an ``inheritance``
+        key when an ancestor audit (same framework, up the Folder tree) covers
+        that requirement. The overlay holds the effective result/score, the
+        winning source audit, and the full inheritance path. The combination
+        strategy is the org-wide ``audit_tree_aggregation_strategy`` setting;
+        when it is ``none`` the overlay map is empty and this behaves like
+        ``tree``.
+        """
+        from core.audit_inheritance import build_overlay_map
+
+        compliance_assessment = self.get_object()
+        _framework = compliance_assessment.framework
+        requirement_assessments = list(
+            compliance_assessment.get_requirement_assessments(
+                include_non_assessable=True,
+                lightweight=True,
+                skip_ig_filter=True,
+            )
+        )
+        requirement_nodes = list(
+            RequirementNode.objects.filter(framework=_framework)
+            .select_related("framework")
+            .prefetch_related(
+                "reference_controls", "threats", "questions", "questions__choices"
+            )
+            .all(),
+        )
+        nodes_by_urn = {node.urn: node for node in requirement_nodes}
+        for node in requirement_nodes:
+            parent = nodes_by_urn.get(node.parent_urn)
+            if parent:
+                node._parent_requirement_obj = parent
+        for ra in requirement_assessments:
+            req = getattr(ra, "requirement", None)
+            if req:
+                parent = nodes_by_urn.get(req.parent_urn)
+                if parent:
+                    req._parent_requirement_obj = parent
+
+        tree = get_sorted_requirement_nodes(
+            requirement_nodes,
+            requirement_assessments,
+            compliance_assessment.max_score
+            if compliance_assessment.max_score is not None
+            else _framework.max_score,
+            compliance_assessment.min_score
+            if compliance_assessment.min_score is not None
+            else _framework.min_score,
+        )
+        implementation_groups = compliance_assessment.selected_implementation_groups
+        if (
+            compliance_assessment.framework.is_dynamic()
+            and not compliance_assessment.selected_implementation_groups
+        ):
+            implementation_groups = None
+        tree = filter_graph_by_implementation_groups(tree, implementation_groups)
+        annotate_tree_with_aggregated_scores(tree, compliance_assessment)
+
+        (viewable_ca_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ComplianceAssessment
+        )
+        result = build_overlay_map(
+            compliance_assessment, viewable_ca_ids=viewable_ca_ids
+        )
+        overlay = result["overlay"]
+
+        def attach(nodes: dict):
+            for req_id, node in nodes.items():
+                ov = overlay.get(str(req_id))
+                if ov is not None:
+                    node["inheritance"] = ov
+                children = node.get("children")
+                if children:
+                    attach(children)
+
+        attach(tree)
+
+        return Response(
+            {
+                "tree": tree,
+                "strategy": result["strategy"],
+                "ancestors": result["ancestors"],
+                "canonical_scale": result["canonical_scale"],
+            }
+        )
 
     @action(detail=True, methods=["get"])
     def soa(self, request, pk):
@@ -13451,7 +13688,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         tree = get_sorted_requirement_nodes(
             requirement_nodes,
             requirement_assessments,
-            _framework.max_score,
+            compliance_assessment.max_score
+            if compliance_assessment.max_score is not None
+            else _framework.max_score,
+            compliance_assessment.min_score
+            if compliance_assessment.min_score is not None
+            else _framework.min_score,
         )
         # Filter by implementation groups from the report selection page (if provided),
         # otherwise fall back to the compliance assessment's own selected groups.
@@ -13789,10 +14031,58 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         else:
             return Response({"error": "Permission denied"})
 
+    @action(detail=False, methods=["get"])
+    def recap(self, request):
+        # list[{"donut_data": {...}, "global_score": {...}, **compliance_assessment_data}]
+        recap_data: list[dict[str, Any]] = []
+
+        compliance_assessments = (
+            self.get_queryset_minimalistic()
+            .select_related("folder", "framework")
+            .prefetch_related(
+                Prefetch(
+                    "requirement_assessments",
+                    queryset=RequirementAssessment.objects.filter(
+                        requirement__assessable=True
+                    ).select_related("requirement"),
+                )
+            )
+            .order_by(Lower("folder__name"), Lower("name"))
+        )
+
+        for compliance_assessment in compliance_assessments:
+            requirement_assessments = list(
+                compliance_assessment.requirement_assessments.all()
+            )
+
+            donut_data = compliance_assessment.get_donut_data(requirement_assessments)
+            global_score = compliance_assessment.get_global_score(
+                requirement_assessments
+            )
+
+            compliance_assessment_data = {
+                "id": str(compliance_assessment.id),
+                "name": compliance_assessment.name,
+                "folder": {
+                    "id": str(compliance_assessment.folder.pk),
+                    "name": compliance_assessment.folder.name,
+                },
+                "framework": {"str": str(compliance_assessment.framework)},
+                "donut": donut_data,
+                "global_score": {
+                    **global_score,
+                    "min_score": compliance_assessment.min_score,
+                    "max_score": compliance_assessment.max_score,
+                },
+            }
+            recap_data.append(compliance_assessment_data)
+
+        return Response(recap_data)
+
     @action(detail=True, methods=["get"])
     def donut_data(self, request, pk):
         compliance_assessment = self.get_object()
-        return Response(compliance_assessment.donut_render())
+        return Response(compliance_assessment.get_donut_data())
 
     @action(detail=True, methods=["get"], url_path="is-auditee")
     def is_auditee(self, request, pk):
@@ -14138,7 +14428,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "max_score": base_audit.max_score,
                 "total_max_score": base_audit.get_total_max_score(),
                 "score_calculation_method": base_audit.score_calculation_method,
-                "donut_data": base_audit.donut_render(),
+                "donut_data": base_audit.get_donut_data(),
                 "radar_data": aggregate_by_top_level(base_audit),
             },
             "compare": {
@@ -14160,7 +14450,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "max_score": compare_audit.max_score,
                 "total_max_score": compare_audit.get_total_max_score(),
                 "score_calculation_method": compare_audit.score_calculation_method,
-                "donut_data": compare_audit.donut_render(),
+                "donut_data": compare_audit.get_donut_data(),
                 "radar_data": aggregate_by_top_level(compare_audit),
             },
         }
@@ -15560,7 +15850,12 @@ def generate_html(
     graph = get_sorted_requirement_nodes(
         list(requirement_nodes),
         list(assessments),
-        compliance_assessment.framework.max_score,
+        compliance_assessment.max_score
+        if compliance_assessment.max_score is not None
+        else compliance_assessment.framework.max_score,
+        compliance_assessment.min_score
+        if compliance_assessment.min_score is not None
+        else compliance_assessment.framework.min_score,
     )
     graph = filter_graph_by_implementation_groups(graph, implementation_groups)
     annotate_tree_with_aggregated_scores(graph, compliance_assessment)
@@ -18895,3 +19190,34 @@ def global_search(request):
             "total_candidates": len(candidates),
         }
     )
+
+
+def metrics_view(request):
+    try:
+        metrics = get_instance_metrics()
+        nb_users_gauge.set(metrics.get("nb_users", 0))
+        nb_first_login_gauge.set(metrics.get("nb_first_login", 0))
+        nb_libraries_gauge.set(metrics.get("nb_libraries", 0))
+        nb_domains_gauge.set(metrics.get("nb_domains", 0))
+        nb_perimeters_gauge.set(metrics.get("nb_perimeters", 0))
+        nb_assets_gauge.set(metrics.get("nb_assets", 0))
+        nb_threats_gauge.set(metrics.get("nb_threats", 0))
+        nb_functions_gauge.set(metrics.get("nb_functions", 0))
+        nb_measures_gauge.set(metrics.get("nb_measures", 0))
+        nb_evidences_gauge.set(metrics.get("nb_evidences", 0))
+        nb_compliance_assessments_gauge.set(metrics.get("nb_compliance_assessments", 0))
+        nb_risk_assessments_gauge.set(metrics.get("nb_risk_assessments", 0))
+        nb_risk_scenarios_gauge.set(metrics.get("nb_risk_scenarios", 0))
+        nb_risk_acceptances_gauge.set(metrics.get("nb_risk_acceptances", 0))
+        nb_seats_gauge.set(metrics.get("nb_seats", 0))
+        nb_editors_gauge.set(metrics.get("nb_editors", 0))
+        expiration_gauge.set(metrics.get("expiration", 0))
+        created_at_gauge.set(metrics.get("created_at", 0))
+        last_login_gauge.set(metrics.get("last_login", 0))
+    except Exception as e:
+        logger.warning(f"# Error collecting metrics: {e}\n", exc_info=True)
+        return HttpResponse(
+            "Error collecting metrics", status=500, content_type="text/plain"
+        )
+
+    return HttpResponse(generate_latest(), content_type=CONTENT_TYPE_LATEST)

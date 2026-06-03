@@ -103,22 +103,25 @@ Beyond the binary compliance result, each requirement assessment can carry a **s
 - **Maturity score** _(single layer)_ — one score per requirement, typically used for CMMI-style or NIST-CSF-style maturity assessments.
 - **Implementation + Documentation scores** _(two layers)_ — toggle on **documentation score** to split scoring into _is this implemented?_ and _is the implementation documented?_. The platform computes the maturity score as the average of the enabled layers.
 
+Each requirement assessment uses an **effective scoring scale**. At audit runtime the fallback is the audit's own scoring scale (`ComplianceAssessment`), which is usually initialised from the framework when the audit is created. A requirement can override that audit-level scale with its own `min_score`, `max_score`, and level labels. The scoring UI, documentation score, exports, and tree views use that effective scale for the requirement.
+
+When an audit contains mixed scales, average-based roll-ups normalise each requirement against its effective range before aggregating, then display the result on the audit scale. Sum-based roll-ups stay raw: they add `score x weight`, and their maximum is the sum of each requirement's effective maximum times its weight.
+
+If **anchor N/A to target** is enabled, not-applicable requirements contribute the audit target projected onto their own effective range. If no target is configured, they contribute their effective maximum.
+
 Together with the compliance result, the analyst dimension, the extended results, and the scoring layers, a single requirement assessment can record: _what's the compliance state_, _who is working on it and where they are_, _how severe any non-conformity is_, and _how mature the implementation is_ — all without conflating them.
 
 ### Comments
 
 Each requirement assessment can carry a thread of **comments** — short, dated, author-attributed notes used for in-context conversation during the audit. They sit alongside the formal fields and don't change the compliance result or the score; they're where the back-and-forth between the analyst, the reviewer, and the auditee happens (clarifications, follow-up questions, agreed-upon next steps).
 
-Each comment has a body, an author, a creation timestamp, and an **active / processed** toggle so resolved threads can be filtered out of the default view without losing the history. Comments can be edited (the platform records the edited state), preserving who said what and when.
+Each comment has a body, an author, a creation timestamp, and an **active / processed** toggle so resolved threads can be filtered out of the default view without losing the history. Comments can be edited (the platform records the edited state), preserving who said what and when. The panel is collapsed by default and shows the comment count, so it stays out of the way until you open it.
 
-Comments are not exclusive to requirement assessments — the same model is shared across **risk scenarios**, **applied controls**, and **findings**, so the same in-context discussion surface exists wherever it's useful to capture iterative review.
+Comments are not exclusive to requirement assessments — the same thread is available on **risk scenarios**, **applied controls**, and **findings**.
 
-#### Feature flag and visibility
+On audits, **Comments** is governed by two controls: the `comments` [feature flag](../configuration/settings/feature-flags.md) (the platform-wide master switch, default on) and the per-audit [field-visibility editor](../guides/customize-audit.md), which lets you make the thread visible to respondents, auditor-only, or hidden. So you can keep comments enabled everywhere while still hiding the discussion from third-party respondents on a sensitive audit. Authors are also masked for third-party participants who can't see other users.
 
-- The `comments` [feature flag](../configuration/settings/feature-flags.md) is the master switch. When off, the comment panel disappears from every supported surface and the per-audit visibility editor stops exposing the **Comments** field. _Default on._
-- When the flag is on, the [audit field-visibility editor](../guides/customize-audit.md) treats **Comments** like any other field — you can choose whether respondents see them, whether they're auditor-only, or whether they're hidden — per audit.
-
-This dual control means you can keep comments enabled platform-wide while still hiding the discussion thread from third-party respondents on sensitive audits.
+See [Comments](../features/comments.md) for the full feature reference — processed state, edit history, permissions, and author privacy.
 
 ## Evidence
 

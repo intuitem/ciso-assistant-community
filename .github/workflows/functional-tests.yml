@@ -1,7 +1,6 @@
 name: Functional Tests
 permissions:
   contents: read
-  actions: write
 
 on:
   pull_request:
@@ -32,7 +31,7 @@ env:
   DEBUG: pw:webserver
   POSTGRES_VERSION: "16"
   UBUNTU_VERSION: "24.04"
-  PYTHON_VERSION: "3.12"
+  PYTHON_VERSION: "3.14"
 
 jobs:
   build_community_frontend:
@@ -41,15 +40,15 @@ jobs:
       build_done: "true"
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: "24"
 
       - name: Cache pnpm modules for Build
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ env.frontend-directory }}/node_modules
           key: ${{ runner.os }}-pnpm-${{ hashFiles('${{ env.frontend-directory }}/pnpm-lock.yaml') }}
@@ -57,7 +56,7 @@ jobs:
             ${{ runner.os }}-pnpm-
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v5
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
         with:
           version: 10
 
@@ -72,7 +71,7 @@ jobs:
         run: pnpm run build
 
       - name: Upload Community Frontend Build Artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: community-frontend-build
           include-hidden-files: true
@@ -87,15 +86,15 @@ jobs:
       build_done: "true"
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: "24"
 
       - name: Cache pnpm modules for Build
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ env.enterprise-frontend-build-directory }}/node_modules
           key: ${{ runner.os }}-pnpm-${{ hashFiles('${{ env.enterprise-frontend-build-directory }}/pnpm-lock.yaml') }}
@@ -103,7 +102,7 @@ jobs:
             ${{ runner.os }}-pnpm-
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v5
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
         with:
           version: 10
 
@@ -114,7 +113,7 @@ jobs:
         run: make
 
       - name: Upload Enterprise Frontend Build Artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: enterprise-frontend-build
           include-hidden-files: true
@@ -122,54 +121,6 @@ jobs:
             ${{ env.enterprise-frontend-build-directory }}/build/
             ${{ env.enterprise-frontend-build-directory }}/.svelte-kit/
           retention-days: 1
-
-  prime_playwright_cache:
-    runs-on: ubuntu-24.04
-    outputs:
-      playwright-version: ${{ steps.playwright-version.outputs.version }}
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "24"
-
-      - name: Cache pnpm modules
-        uses: actions/cache@v5
-        with:
-          path: ${{ env.frontend-directory }}/node_modules
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('${{ env.frontend-directory }}/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v5
-        with:
-          version: 10
-
-      - name: Install community frontend dependencies
-        working-directory: ${{ env.frontend-directory }}
-        run: pnpm i --frozen-lockfile
-
-      - name: Get installed Playwright version
-        id: playwright-version
-        working-directory: ${{ env.frontend-directory }}
-        run: |
-          PLAYWRIGHT_VERSION=$(node -p "require('@playwright/test/package.json').version")
-          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> "$GITHUB_ENV"
-          echo "version=$PLAYWRIGHT_VERSION" >> "$GITHUB_OUTPUT"
-
-      - name: Cache playwright binaries
-        id: playwright-cache
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}-chromium
-
-      - name: Download Playwright chromium
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        working-directory: ${{ env.frontend-directory }}
-        run: pnpm exec playwright install chromium
 
   get_playwright_test_files:
     needs:
@@ -181,7 +132,7 @@ jobs:
       enterprise_test_files: ${{ steps.list_enterprise_files.outputs.test_files }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Get Community Playwright Test Files
         id: list_community_files
@@ -203,10 +154,152 @@ jobs:
           echo "Enterprise Test files found: $ENTERPRISE_TEST_FILES"
           echo "test_files=$ENTERPRISE_TEST_FILES" >> $GITHUB_OUTPUT
 
+  setup-pg-dump-community:
+    runs-on: ubuntu-24.04
+    env:
+      DJANGO_DEBUG: "True"
+      POSTGRES_NAME: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      DB_HOST: localhost
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres # test credential
+          POSTGRES_DB: postgres
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: Install Poetry via pipx
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade pipx
+          python -m pipx ensurepath
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          python -m pipx install poetry
+
+      - name: Configure Poetry virtualenv in project
+        run: poetry config virtualenvs.in-project true
+
+      - name: Cache Virtualenv
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ${{ env.backend-directory }}/.venv
+          key: venv-${{ runner.os }}-py${{ env.PYTHON_VERSION }}-${{ hashFiles('backend/poetry.lock') }}
+
+      - name: Install backend requirements
+        working-directory: ${{ env.backend-directory }}
+        run: poetry install
+
+      - name: Restore PG dump cache
+        id: pg-dump-cache
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ${{ env.backend-directory }}/db/prebuilt-pg-community.sql
+          key: pg-dump-community-${{ runner.os }}-${{ hashFiles('backend/**/migrations/*.py', 'backend/poetry.lock') }}
+
+      - name: Run migrations and dump
+        if: steps.pg-dump-cache.outputs.cache-hit != 'true'
+        working-directory: ${{ env.backend-directory }}
+        env:
+          PGPASSWORD: postgres
+        run: |
+          poetry run python manage.py migrate
+          pg_dump -h localhost -U postgres -d postgres > db/prebuilt-pg-community.sql
+
+      - name: Upload PG dump
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: prebuilt-pg-dump-community
+          path: ${{ env.backend-directory }}/db/prebuilt-pg-community.sql
+          retention-days: 1
+
+  setup-pg-dump-enterprise:
+    runs-on: ubuntu-24.04
+    env:
+      DJANGO_DEBUG: "True"
+      POSTGRES_NAME: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      DB_HOST: localhost
+      DJANGO_SETTINGS_MODULE: enterprise_core.settings
+      LICENSE_SEATS: 999
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres # test credential
+          POSTGRES_DB: postgres
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: Install Poetry via pipx
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade pipx
+          python -m pipx ensurepath
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          python -m pipx install poetry
+
+      - name: Configure Poetry to not use virtualenvs
+        run: poetry config virtualenvs.create false
+
+      - name: Install backend requirements
+        working-directory: ${{ env.backend-directory }}
+        run: poetry install
+
+      - name: Install enterprise backend requirements
+        working-directory: ${{ env.enterprise-backend-directory }}
+        run: poetry install
+
+      - name: Restore PG dump cache
+        id: pg-dump-cache
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ${{ env.backend-directory }}/db/prebuilt-pg-enterprise.sql
+          key: pg-dump-enterprise-${{ runner.os }}-${{ hashFiles('backend/**/migrations/*.py', 'enterprise/backend/**/migrations/*.py', 'backend/poetry.lock', 'enterprise/backend/poetry.lock') }}
+
+      - name: Run migrations and dump
+        if: steps.pg-dump-cache.outputs.cache-hit != 'true'
+        working-directory: ${{ env.backend-directory }}
+        env:
+          PGPASSWORD: postgres
+        run: |
+          poetry run python manage.py migrate
+          pg_dump -h localhost -U postgres -d postgres > db/prebuilt-pg-enterprise.sql
+
+      - name: Upload PG dump
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: prebuilt-pg-dump-enterprise
+          path: ${{ env.backend-directory }}/db/prebuilt-pg-enterprise.sql
+          retention-days: 1
+
   functional-tests:
-    needs:
-      - get_playwright_test_files
-      - prime_playwright_cache
+    needs: [get_playwright_test_files, setup-pg-dump-community]
     runs-on: ubuntu-24.04
     env:
       LOG_LEVEL: DEBUG
@@ -250,19 +343,19 @@ jobs:
         test_file: ${{ fromJson(needs.get_playwright_test_files.outputs.community_test_files) }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Start Keycloak
         uses: ./.github/actions/start-keycloak
 
       - name: Download Community Frontend Build Artifact
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: community-frontend-build
           path: ${{ env.frontend-directory }}/
 
       - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
@@ -281,17 +374,26 @@ jobs:
         shell: bash
         run: poetry --version
 
+      - name: Configure Poetry virtualenv in project
+        run: poetry config virtualenvs.in-project true
+
+      - name: Cache Virtualenv
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ${{ env.backend-directory }}/.venv
+          key: venv-${{ runner.os }}-py${{ matrix.python-version }}-${{ hashFiles('backend/poetry.lock') }}
+
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
         run: poetry install
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: "24"
 
       - name: Cache pnpm modules
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ env.frontend-directory }}/node_modules
           key: ${{ runner.os }}-pnpm-${{ hashFiles('${{ env.frontend-directory }}/pnpm-lock.yaml') }}
@@ -299,7 +401,7 @@ jobs:
             ${{ runner.os }}-pnpm-
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v5
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
         with:
           version: 10
 
@@ -307,27 +409,47 @@ jobs:
         working-directory: ${{ env.frontend-directory }}
         run: pnpm i --frozen-lockfile
 
-      - name: Restore Playwright binaries cache
-        uses: actions/cache@v5
+      - name: Get installed Playwright version
+        id: playwright-version
+        working-directory: ${{ env.frontend-directory }}
+        run: |
+          PLAYWRIGHT_VERSION=$(node -p "require('@playwright/test/package.json').version")
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> "$GITHUB_ENV"
+
+      - name: Cache playwright binaries
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: playwright-cache
-        env:
-          PLAYWRIGHT_VERSION: ${{ needs.prime_playwright_cache.outputs.playwright-version }}
         with:
-          path: ~/.cache/ms-playwright
+          path: |
+            ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}-${{ matrix.playwright-browser }}
 
-      - name: Download Playwright browser (cache miss fallback)
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
+      - name: Install Playwright browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.frontend-directory }}
+        timeout-minutes: 20
         env:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
-        run: pnpm exec playwright install "$PLAYWRIGHT_BROWSER"
+        run: |
+          for attempt in 1 2 3; do
+            if timeout 300 pnpm exec playwright install --with-deps "$PLAYWRIGHT_BROWSER"; then
+              exit 0
+            fi
+            echo "::warning::Playwright install attempt $attempt failed; retrying in 15s"
+            sleep 15
+          done
+          exit 1
 
-      - name: Install Playwright system deps
-        working-directory: ${{ env.frontend-directory }}
+      - name: Download PG dump
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: prebuilt-pg-dump-community
+          path: ${{ env.backend-directory }}/db/
+
+      - name: Restore PG dump
+        working-directory: ${{ env.backend-directory }}
         env:
-          PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
-        run: pnpm exec playwright install-deps "$PLAYWRIGHT_BROWSER"
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d postgres -f db/prebuilt-pg-community.sql > /dev/null
 
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
@@ -364,7 +486,7 @@ jobs:
         run: |
           SAFE_FILE_NAME=$(echo "$TEST_FILE" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
           echo "TEST_FILE_SANITIZED=$SAFE_FILE_NAME" >> $GITHUB_ENV
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
           name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}-${{ env.TEST_FILE_SANITIZED }}
@@ -376,9 +498,7 @@ jobs:
           retention-days: 5
 
   enterprise-functional-tests:
-    needs:
-      - get_playwright_test_files
-      - prime_playwright_cache
+    needs: [get_playwright_test_files, setup-pg-dump-enterprise]
     runs-on: ubuntu-24.04
     env:
       LOG_LEVEL: DEBUG
@@ -424,19 +544,19 @@ jobs:
         test_file: ${{ fromJson(needs.get_playwright_test_files.outputs.enterprise_test_files) }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Start Keycloak
         uses: ./.github/actions/start-keycloak
 
       - name: Download Enterprise Frontend Build Artifact
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: enterprise-frontend-build
           path: ${{ env.enterprise-frontend-build-directory }}/
 
       - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
@@ -466,12 +586,12 @@ jobs:
         working-directory: ${{ env.enterprise-backend-directory }}
         run: poetry install
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: "24"
 
       - name: Cache pnpm modules
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ env.enterprise-frontend-build-directory }}/node_modules
           key: ${{ runner.os }}-pnpm-${{ hashFiles('${{ env.enterprise-frontend-build-directory }}/pnpm-lock.yaml') }}
@@ -483,7 +603,7 @@ jobs:
         run: make pre-build
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v5
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
         with:
           version: 10
 
@@ -491,27 +611,47 @@ jobs:
         working-directory: ${{ env.enterprise-frontend-build-directory }}
         run: pnpm i --frozen-lockfile
 
-      - name: Restore Playwright binaries cache
-        uses: actions/cache@v5
+      - name: Get installed Playwright version
+        id: playwright-version
+        working-directory: ${{ env.enterprise-frontend-build-directory }}
+        run: |
+          PLAYWRIGHT_VERSION=$(node -p "require('@playwright/test/package.json').version")
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> "$GITHUB_ENV"
+
+      - name: Cache playwright binaries
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: playwright-cache
-        env:
-          PLAYWRIGHT_VERSION: ${{ needs.prime_playwright_cache.outputs.playwright-version }}
         with:
-          path: ~/.cache/ms-playwright
+          path: |
+            ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}-${{ matrix.playwright-browser }}
 
-      - name: Download Playwright browser (cache miss fallback)
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
+      - name: Install Playwright browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.enterprise-frontend-build-directory }}
+        timeout-minutes: 20
         env:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
-        run: pnpm exec playwright install "$PLAYWRIGHT_BROWSER"
+        run: |
+          for attempt in 1 2 3; do
+            if timeout 300 pnpm exec playwright install --with-deps "$PLAYWRIGHT_BROWSER"; then
+              exit 0
+            fi
+            echo "::warning::Playwright install attempt $attempt failed; retrying in 15s"
+            sleep 15
+          done
+          exit 1
 
-      - name: Install Playwright system deps
-        working-directory: ${{ env.enterprise-frontend-build-directory }}
+      - name: Download PG dump
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: prebuilt-pg-dump-enterprise
+          path: ${{ env.backend-directory }}/db/
+
+      - name: Restore PG dump
+        working-directory: ${{ env.backend-directory }}
         env:
-          PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
-        run: pnpm exec playwright install-deps "$PLAYWRIGHT_BROWSER"
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d postgres -f db/prebuilt-pg-enterprise.sql > /dev/null
 
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
@@ -550,7 +690,7 @@ jobs:
         run: |
           SAFE_FILE_NAME=$(echo "$TEST_FILE" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
           echo "TEST_FILE_SANITIZED=$SAFE_FILE_NAME" >> $GITHUB_ENV
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
           name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}-${{ env.TEST_FILE_SANITIZED }}

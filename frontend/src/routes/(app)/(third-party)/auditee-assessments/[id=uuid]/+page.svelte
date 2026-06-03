@@ -35,6 +35,8 @@
 	} from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
+	import { getLocale } from '$paraglide/runtime';
+	import { formatDate } from '$lib/utils/datetime';
 	import { Accordion, Progress } from '@skeletonlabs/skeleton-svelte';
 	import { superForm, type SuperForm } from 'sveltekit-superforms';
 	import type { ActionData, PageData } from './$types';
@@ -1063,14 +1065,15 @@
 							{#if showScore}
 								<div class="flex flex-col w-full place-items-center">
 									{#if complianceAssessment.scoring_enabled && hasComputedScore(requirement.questions)}
+										{@const raMin =
+											requirementAssessment.effective_min_score ?? complianceAssessment.min_score}
+										{@const raMax =
+											requirementAssessment.effective_max_score ?? complianceAssessment.max_score}
 										<div class="flex flex-row items-center space-x-4">
 											<span class="font-medium">{m.score()}</span>
 											<div class="shrink-0 relative">
 												<Progress
-													value={formatScoreValue(
-														requirementAssessment.score,
-														complianceAssessment.max_score
-													)}
+													value={formatScoreValue(requirementAssessment.score, raMax, false, raMin)}
 													min={0}
 													max={100}
 												>
@@ -1079,7 +1082,9 @@
 														<Progress.CircleRange
 															class={displayScoreColor(
 																requirementAssessment.score,
-																complianceAssessment.max_score
+																raMax,
+																false,
+																raMin
 															)}
 														/>
 													</Progress.Circle>
@@ -1090,11 +1095,18 @@
 											</div>
 										</div>
 									{:else if complianceAssessment.scoring_enabled && requirementAssessment.result !== 'not_applicable'}
+										{@const raMin =
+											requirementAssessment.effective_min_score ?? complianceAssessment.min_score}
+										{@const raMax =
+											requirementAssessment.effective_max_score ?? complianceAssessment.max_score}
+										{@const raScoresDef =
+											requirementAssessment.effective_scores_definition ??
+											complianceAssessment.scores_definition}
 										<Score
 											form={scoreForms[requirementAssessment.id]}
-											min_score={complianceAssessment.min_score}
-											max_score={complianceAssessment.max_score}
-											scores_definition={complianceAssessment.scores_definition}
+											min_score={raMin}
+											max_score={raMax}
+											scores_definition={raScoresDef}
 											field="score"
 											label={complianceAssessment.show_documentation_score
 												? m.implementationScore()
@@ -1128,9 +1140,9 @@
 										{#if showDocumentationScore}
 											<Score
 												form={docScoreForms[requirementAssessment.id]}
-												min_score={complianceAssessment.min_score}
-												max_score={complianceAssessment.max_score}
-												scores_definition={complianceAssessment.scores_definition}
+												min_score={raMin}
+												max_score={raMax}
+												scores_definition={raScoresDef}
 												field="documentation_score"
 												label={m.documentationScore()}
 												isDoc={true}
@@ -1412,7 +1424,7 @@
 									</span>
 								</div>
 								<span class="text-gray-400 text-xs">
-									{new Date(event.created_at).toLocaleString()}
+									{formatDate(new Date(event.created_at), true, getLocale())}
 								</span>
 								{#if event.event_notes}
 									<div
