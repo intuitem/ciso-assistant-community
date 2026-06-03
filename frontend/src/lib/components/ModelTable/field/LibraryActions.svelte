@@ -4,7 +4,6 @@
 	import { page } from '$app/state';
 	import type { DataHandler } from '@vincjo/datatables/remote';
 	import { tableHandlers } from '$lib/utils/stores';
-	import ChoicesModal from '$lib/components/Modals/ChoicesModal.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,

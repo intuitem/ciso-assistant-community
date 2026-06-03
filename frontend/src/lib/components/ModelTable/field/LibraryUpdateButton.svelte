@@ -7,6 +7,7 @@
 		type ModalSettings
 	} from '$lib/components/Modals/stores';
 	import { tableHandlers } from '$lib/utils/stores';
+	import ChoicesModal from '$lib/components/Modals/ChoicesModal.svelte';
 
 	interface Props {
 		loadedLibraryID: string;
