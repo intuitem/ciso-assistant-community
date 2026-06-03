@@ -3,6 +3,7 @@
 	import * as m from '$paraglide/messages';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 	import ClientSettings from './client-settings/+page.svelte';
+	import InfraConfig from './infra-config/+page.svelte';
 	import { goto, preloadData, pushState } from '$app/navigation';
 	import GeneralSettings from '$lib/components/Settings/GeneralSettings.svelte';
 	import SSOSettings from '$lib/components/Settings/SSOSettings.svelte';
@@ -13,9 +14,19 @@
 	import EmailTemplatesSettings from '$lib/components/Settings/EmailTemplatesSettings.svelte';
 	import WordTemplatesSettings from '$lib/components/Settings/WordTemplatesSettings.svelte';
 
+	// Tabs whose content lives in a dedicated sub-route and is preloaded into
+	// page.state instead of being loaded by the main settings page.
+	const PRELOAD_TABS: Record<string, { href: string; stateKey: string }> = {
+		clientSettings: { href: '/settings/client-settings', stateKey: 'clientSettings' },
+		infraConfig: { href: '/settings/infra-config', stateKey: 'infraConfig' }
+	};
+
 	function deriveInitialTab(): string {
 		if (page.state?.settingsTab) return page.state.settingsTab;
-		return page.url.pathname.endsWith('/client-settings') ? 'clientSettings' : 'general';
+		for (const [tab, { href }] of Object.entries(PRELOAD_TABS)) {
+			if (page.url.pathname.endsWith(href.replace('/settings', ''))) return tab;
+		}
+		return 'general';
 	}
 
 	// Use string-based state for the active tab for better readability and maintenance.
@@ -35,20 +46,20 @@
 		group = newValue;
 		const nextState = { ...page.state, settingsTab: newValue };
 
-		// Preserve the special data-loading logic for the Client Settings tab.
-		// This now triggers when the tab with value 'clientSettings' is selected.
-		// We also check if data already exists to prevent redundant network requests.
-		if (newValue === 'clientSettings' && !page.state.clientSettings) {
-			const href = '/settings/client-settings';
-			const result = await preloadData(href);
+		// Tabs backed by a sub-route preload their data into page.state instead of
+		// being loaded by the main settings page. We skip the fetch if data already
+		// exists to prevent redundant network requests.
+		const preload = PRELOAD_TABS[newValue];
+		if (preload && !page.state[preload.stateKey]) {
+			const result = await preloadData(preload.href);
 
 			if (result.type === 'loaded' && result.status === 200) {
 				// Use pushState to update the page store without a full navigation.
 				// This keeps the UI fast and responsive.
-				pushState(href, { ...nextState, clientSettings: result.data });
+				pushState(preload.href, { ...nextState, [preload.stateKey]: result.data });
 			} else {
 				// Fallback to a full navigation if preloading fails for any reason.
-				goto(href, { state: nextState });
+				goto(preload.href, { state: nextState });
 			}
 			return;
 		}
@@ -97,6 +108,11 @@
 		<Tabs.Trigger value="clientSettings"
 			><i class="fa-solid fa-key"></i> {m.clientSettings()}</Tabs.Trigger
 		>
+		{#if page.data?.featureflags?.infra_config_management}
+			<Tabs.Trigger value="infraConfig"
+				><i class="fa-solid fa-network-wired"></i> {m.infraConfig()}</Tabs.Trigger
+			>
+		{/if}
 		<Tabs.Indicator />
 	</Tabs.List>
 
@@ -188,4 +204,13 @@
 			<p>Loading client settings...</p>
 		{/if}
 	</Tabs.Content>
+	{#if page.data?.featureflags?.infra_config_management}
+		<Tabs.Content value="infraConfig" class="p-4">
+			{#if page.state.infraConfig}
+				<InfraConfig data={page.state.infraConfig} />
+			{:else}
+				<p>{m.loading()}...</p>
+			{/if}
+		</Tabs.Content>
+	{/if}
 </Tabs>
