@@ -86,6 +86,7 @@ GENERAL_SETTINGS_KEYS = [
     "chat_temperature_enabled",
     "chat_temperature",
     "default_custom_analytics_dashboard",
+    "audit_tree_aggregation_strategy",
 ]
 
 
@@ -287,6 +288,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     )
     compliance = serializers.BooleanField(
         source="value.compliance", required=False, default=True
+    )
+    audit_tree_inheritance = serializers.BooleanField(
+        source="value.audit_tree_inheritance", required=False, default=False
     )
     tprm = serializers.BooleanField(source="value.tprm", required=False, default=True)
     privacy = serializers.BooleanField(

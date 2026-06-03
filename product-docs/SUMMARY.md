@@ -158,6 +158,7 @@
 * [X-rays](features/x-rays.md)
 * [Scoring Assistant](features/scoring-assistant.md)
 * [Assignments / respondent mode](features/assignments.md)
+* [Comments](features/comments.md)
 * [Domain export/import](features/domain-export-import.md)
 * [Focus mode](features/focus-mode.md)
 * [Sync to actions](features/sync-to-actions.md)
