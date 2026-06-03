@@ -86,7 +86,7 @@ try {
 
     if (Test-Path -Path "db\ciso-assistant.sqlite3" -PathType Leaf) {
         Write-Host "The database seems already created." -ForegroundColor Yellow
-        Write-Host "For successive runs, you can now use `"docker compose up`"." -ForegroundColor Yellow
+        Write-Host "For successive runs, you can now use `"docker compose -f $DockerComposeFile up`"." -ForegroundColor Yellow
         exit 0
     }
 
@@ -113,7 +113,7 @@ try {
     Write-Host ""
     Write-Host "CISO Assistant is ready!" -ForegroundColor Green
     Write-Host "Connect to CISO Assistant on `"https://localhost:8443`"" -ForegroundColor Green
-    Write-Host "For successive runs, you can now use `"docker compose up`"" -ForegroundColor Green
+    Write-Host "For successive runs, you can now use `"docker compose -f $DockerComposeFile up`"" -ForegroundColor Green
     Write-Host "If the webpage doesn't load, please wait 2-3 minutes" -ForegroundColor Green
 }
 finally {

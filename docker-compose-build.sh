@@ -30,7 +30,7 @@ export COMPOSE_DOCKER_CLI_BUILD=1
 # Check if database already exists
 if [ -f db/ciso-assistant.sqlite3 ]; then
   echo "The database seems already created."
-  echo "For successive runs, you can now use 'docker compose up'."
+  echo "For successive runs, you can now use 'docker compose -f ${DOCKER_COMPOSE_FILE} up'."
 else
   prepare_meta_file
 
@@ -74,5 +74,5 @@ else
 
   echo "🚀 CISO Assistant is ready!"
   echo "Connect to CISO Assistant on https://localhost:8443"
-  echo "For successive runs, you can now use 'docker compose up'."
+  echo "For successive runs, you can now use 'docker compose -f ${DOCKER_COMPOSE_FILE} up'."
 fi
