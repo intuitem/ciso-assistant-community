@@ -134,6 +134,7 @@ IMPLEMENTATION_GROUP_HEADERS = [
 
 SECTION_REF_RE = re.compile(r"^\d+\.\d+$")
 REQUIREMENT_REF_RE = re.compile(r"^\d+\.\d+\.\d+$")
+SECTION_REF_PARTS_RE = re.compile(r"^(\d+)\.(\d+)$")
 
 
 def clean_text(value: Any) -> str:
@@ -144,12 +145,45 @@ def clean_text(value: Any) -> str:
     return "\n".join(line for line in lines if line)
 
 
-def clean_ref_id(value: Any) -> str:
+def decimal_places_from_number_format(number_format: str) -> int:
+    main_format = str(number_format or "").split(";")[0]
+    if "." not in main_format:
+        return 0
+    decimal_part = main_format.split(".", 1)[1]
+    return decimal_part.count("0")
+
+
+def clean_ref_id(cell_or_value: Any) -> str:
+    value = getattr(cell_or_value, "value", cell_or_value)
     if value is None:
         return ""
     if isinstance(value, float) and value.is_integer():
         return str(int(value))
+    if isinstance(value, (int, float)):
+        decimal_places = decimal_places_from_number_format(
+            getattr(cell_or_value, "number_format", "")
+        )
+        if decimal_places:
+            return f"{value:.{decimal_places}f}"
     return clean_text(value)
+
+
+def normalize_section_ref_id(
+    ref_id: str, last_section_minor_by_major: dict[int, int]
+) -> str:
+    match = SECTION_REF_PARTS_RE.match(ref_id)
+    if not match:
+        return ref_id
+
+    major = int(match.group(1))
+    minor = int(match.group(2))
+    last_minor = last_section_minor_by_major.get(major, 0)
+
+    if minor <= last_minor:
+        minor = last_minor + 1
+
+    last_section_minor_by_major[major] = minor
+    return f"{major}.{minor}"
 
 
 def append_key_value_rows(ws: Worksheet, rows: list[tuple[str, Any]]) -> None:
@@ -258,6 +292,7 @@ def build_abro_content(wb_out: Workbook, source_wb) -> int:
     ws_out.append(ABRO_CONTENT_HEADERS)
     rows_written = 0
     ref_id_counts: dict[str, int] = {}
+    last_section_minor_by_major: dict[int, int] = {}
 
     for sheet_name in SOURCE_SHEETS:
         ws_source = source_wb[sheet_name]
@@ -274,7 +309,7 @@ def build_abro_content(wb_out: Workbook, source_wb) -> int:
         rows_written += 1
 
         for row in ws_source.iter_rows(min_row=3):
-            ref_id = clean_ref_id(row[headers[SOURCE_COLUMNS["ref_id"]]].value)
+            ref_id = clean_ref_id(row[headers[SOURCE_COLUMNS["ref_id"]]])
             if not ref_id:
                 continue
 
@@ -284,6 +319,7 @@ def build_abro_content(wb_out: Workbook, source_wb) -> int:
                 continue
 
             if SECTION_REF_RE.match(ref_id):
+                ref_id = normalize_section_ref_id(ref_id, last_section_minor_by_major)
                 append_content_row(
                     ws_out,
                     depth=2,
