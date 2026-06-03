@@ -195,3 +195,61 @@ class TestRequirementNodeSerializerTranslation:
         assert questions["urn:test:trans:qsc"]["text"] == "Pick one color"
         choices = questions["urn:test:trans:qsc"]["choices"]
         assert choices[0]["value"] == "Red"
+
+
+@pytest.mark.django_db
+class TestGetQuestionsTranslatedConfig:
+    """Tests that Question.config flows through get_questions_translated."""
+
+    def test_includes_config_when_present(self, db):
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(name="Cfg FW", folder=folder, is_published=True)
+        rn = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:test:cfg:r1",
+            ref_id="R-1",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        Question.objects.create(
+            requirement_node=rn,
+            urn="urn:test:cfg:q1",
+            ref_id="R-1-q1",
+            text="How many?",
+            type="number",
+            config={"widget": "slider", "min": 0, "max": 100, "step": 5},
+            folder=folder,
+            is_published=True,
+        )
+        result = rn.get_questions_translated
+        assert result["urn:test:cfg:q1"]["config"] == {
+            "widget": "slider",
+            "min": 0,
+            "max": 100,
+            "step": 5,
+        }
+
+    def test_omits_config_when_absent(self, db):
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(name="NoCfg FW", folder=folder, is_published=True)
+        rn = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:test:nocfg:r1",
+            ref_id="R-1",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        Question.objects.create(
+            requirement_node=rn,
+            urn="urn:test:nocfg:q1",
+            ref_id="R-1-q1",
+            text="How many?",
+            type="number",
+            config=None,
+            folder=folder,
+            is_published=True,
+        )
+        result = rn.get_questions_translated
+        assert "config" not in result["urn:test:nocfg:q1"]

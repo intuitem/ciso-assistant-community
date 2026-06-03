@@ -4,6 +4,7 @@
 	import type { ActionData, PageData } from './$types';
 
 	import { page } from '$app/state';
+	import { goto } from '$lib/utils/breadcrumbs';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import HiddenInput from '$lib/components/Forms/HiddenInput.svelte';
@@ -68,10 +69,9 @@
 	}
 
 	function cancel(): void {
-		var currentUrl = window.location.href;
-		var url = new URL(currentUrl);
-		var nextValue = getSecureRedirect(url.searchParams.get('next'));
-		window.location.href = nextValue || complianceAssessmentURL;
+		const url = new URL(window.location.href);
+		const nextValue = getSecureRedirect(url.searchParams.get('next'));
+		goto(nextValue || complianceAssessmentURL);
 	}
 
 	const complianceAssessmentURL = `/compliance-assessments/${data.requirementAssessment.compliance_assessment.id}`;
@@ -142,31 +142,65 @@
 	}
 
 	let createAppliedControlsLoading = $state(false);
+	let actionableSuggestionsCount = $state<number | null>(null);
 
-	async function modalConfirmCreateSuggestedControls(id: string, _name: string, _action: string) {
-		let previewItems: { id: string; label: string }[] = [];
+	type PreviewItem = { id: string; label: string; status: 'create' | 'reuse' | 'linked' };
+
+	function mapPreviewItems(previewData: any[]): PreviewItem[] {
+		return previewData
+			.filter((control) => control?.reference_control?.id)
+			.map((control) => ({
+				id: control.reference_control.id as string,
+				label:
+					control?.name ||
+					control?.reference_control?.str ||
+					control?.reference_control?.name ||
+					control?.ref_id ||
+					'',
+				status: (control?.suggestion_status as 'create' | 'reuse' | 'linked') ?? 'create'
+			}));
+	}
+
+	async function fetchSuggestionsPreview(id: string): Promise<PreviewItem[] | null> {
 		try {
 			const previewResponse = await fetch(
 				`/requirement-assessments/${id}/suggestions/applied-controls?dry_run=true`
 			);
 			if (previewResponse.ok) {
-				const previewData: any[] = await previewResponse.json();
-				previewItems = previewData
-					.filter((control) => control?.reference_control?.id)
-					.map((control) => ({
-						id: control.reference_control.id as string,
-						label:
-							control?.name ||
-							control?.reference_control?.str ||
-							control?.reference_control?.name ||
-							control?.ref_id ||
-							''
-					}));
-			} else {
-				throw new Error(await previewResponse.text());
+				return mapPreviewItems(await previewResponse.json());
 			}
 		} catch (error) {
 			console.error('Unable to fetch suggested controls preview', error);
+		}
+		return null;
+	}
+
+	$effect(() => {
+		// Re-track whenever the RA's applied_controls change (e.g., after "save and stay"
+		// triggers invalidateAll, or after the modal creates/links new controls).
+		const _ = data.requirementAssessment.applied_controls;
+		if (
+			Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') &&
+			reference_controls.length > 0
+		) {
+			fetchSuggestionsPreview(data.requirementAssessment.id).then((items) => {
+				if (items) {
+					actionableSuggestionsCount = items.filter((i) => i.status !== 'linked').length;
+				} else if (actionableSuggestionsCount === null) {
+					actionableSuggestionsCount = reference_controls.length;
+				}
+			});
+		}
+	});
+
+	async function modalConfirmCreateSuggestedControls(id: string, _name: string, _action: string) {
+		if (createAppliedControlsLoading) return;
+		createAppliedControlsLoading = true;
+		let previewItems: PreviewItem[] = [];
+		const fetched = await fetchSuggestionsPreview(id);
+		if (fetched) {
+			previewItems = fetched;
+		} else {
 			previewItems = reference_controls
 				.filter((control) => control?.id)
 				.map((control) => ({
@@ -176,11 +210,15 @@
 						control?.reference_control?.str ||
 						control?.reference_control?.name ||
 						control?.ref_id ||
-						''
+						'',
+					status: 'create' as const
 				}));
 		}
 
-		if (previewItems.length === 0) return;
+		if (previewItems.length === 0) {
+			createAppliedControlsLoading = false;
+			return;
+		}
 
 		const modalComponent: ModalComponent = {
 			ref: SuggestControlsModal,
@@ -194,7 +232,7 @@
 			component: modalComponent,
 			title: m.suggestControls(),
 			body: m.createAppliedControlsFromSuggestionsConfirmMessage({
-				count: previewItems.length
+				count: previewItems.filter((i) => i.status !== 'linked').length
 			}),
 			response: (r: string[] | false | undefined) => {
 				createAppliedControlsLoading = false;
@@ -210,7 +248,6 @@
 				}
 			}
 		};
-		createAppliedControlsLoading = true;
 		modalStore.trigger(modal);
 	}
 
@@ -220,7 +257,7 @@
 		applyAction: true,
 		resetForm: false,
 		validators: zod(schema),
-		taintedMessage: false,
+		taintedMessage: m.taintedFormMessage(),
 		validationMethod: 'auto'
 	});
 
@@ -253,25 +290,29 @@
 		complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : ''
 	);
 
-	// Field visibility
-	const fw = data.requirementAssessment.compliance_assessment.framework;
-	const complianceAssessment = data.requirementAssessment.compliance_assessment;
-	const viewerRole: 'respondent' | 'auditor' =
-		data.viewerRole === 'auditor' ? 'auditor' : 'respondent';
-	const {
-		showResult,
-		showStatus,
-		showScore,
-		showDocumentationScore,
-		showObservation,
-		showAppliedControls,
-		showEvidences,
-		showRespondentAlignment,
-		showComments
-	} = getFieldVisibility(complianceAssessment, viewerRole);
+	// Field visibility — derived so that SvelteKit's data reload (e.g. after the
+	// audit's field_visibility is edited in another tab and the user navigates
+	// back) refreshes the flags. A plain const would capture a stale reference.
+	const fw = $derived(data.requirementAssessment.compliance_assessment.framework);
+	const complianceAssessment = $derived(data.requirementAssessment.compliance_assessment);
+	const viewerRole: 'respondent' | 'auditor' = $derived(
+		data.viewerRole === 'auditor' ? 'auditor' : 'respondent'
+	);
+	const fieldVis = $derived(getFieldVisibility(complianceAssessment, viewerRole));
+	const showAnswers = $derived(fieldVis.showAnswers);
+	const showResult = $derived(fieldVis.showResult);
+	const showExtendedResult = $derived(fieldVis.showExtendedResult);
+	const showStatus = $derived(fieldVis.showStatus);
+	const showScore = $derived(fieldVis.showScore);
+	const showDocumentationScore = $derived(fieldVis.showDocumentationScore);
+	const showObservation = $derived(fieldVis.showObservation);
+	const showAppliedControls = $derived(fieldVis.showAppliedControls);
+	const showEvidences = $derived(fieldVis.showEvidences);
+	const showRespondentAlignment = $derived(fieldVis.showRespondentAlignment);
+	const showComments = $derived(fieldVis.showComments);
 
-	const isAuditor = viewerRole === 'auditor';
-	const canShowAppliedControls = showAppliedControls && !page.data.user.is_third_party;
+	const isAuditor = $derived(viewerRole === 'auditor');
+	const canShowAppliedControls = $derived(showAppliedControls && !page.data.user.is_third_party);
 
 	function pickDefaultTab(): string {
 		if (canShowAppliedControls) return 'applied_controls';
@@ -341,6 +382,15 @@
 
 	let computedResult = $derived(computedScoreAndResult.result);
 	let computedScore = $derived(computedScoreAndResult.score);
+
+	// effective_* are resolved server-side via the Node -> CA cascade. They are
+	// null when scoring is disabled on the CA.
+	const ra = data.requirementAssessment;
+	const req = ra.requirement;
+	const resolvedMin = ra.effective_min_score ?? page.data.compliance_assessment_score.min_score;
+	const resolvedMax = ra.effective_max_score ?? page.data.compliance_assessment_score.max_score;
+	const resolvedScoresDef =
+		ra.effective_scores_definition ?? page.data.compliance_assessment_score.scores_definition;
 </script>
 
 {#if data.requirementAssessment.compliance_assessment.is_locked}
@@ -356,8 +406,13 @@
 {/if}
 <div class="card space-y-2 p-4 bg-white shadow-sm">
 	<div class="flex justify-between">
-		<div class="flex">
+		<div class="flex items-center gap-2">
 			<span class="code left h-min">{data.requirement.urn}</span>
+			{#if data.requirementAssessment.assessable && typeof data.requirement.weight === 'number' && Number.isFinite(data.requirement.weight) && data.requirement.weight !== 1}
+				<span class="badge h-fit bg-indigo-100 text-indigo-800">
+					{m.requirementWeight()}: {data.requirement.weight}
+				</span>
+			{/if}
 		</div>
 		<a
 			class="text-pink-500 hover:text-pink-400"
@@ -584,10 +639,14 @@
 						>
 							<Tabs.List>
 								{#if canShowAppliedControls}
-									<Tabs.Trigger value="applied_controls">{m.appliedControls()}</Tabs.Trigger>
+									<Tabs.Trigger value="applied_controls" data-testid="applied-controls-tab"
+										>{m.appliedControls()}</Tabs.Trigger
+									>
 								{/if}
 								{#if showEvidences}
-									<Tabs.Trigger value="evidences">{m.evidences()}</Tabs.Trigger>
+									<Tabs.Trigger value="evidences" data-testid="evidences-tab"
+										>{m.evidences()}</Tabs.Trigger
+									>
 								{/if}
 								{#if isAuditor}
 									<Tabs.Trigger value="security_exceptions">{m.securityExceptions()}</Tabs.Trigger>
@@ -603,9 +662,17 @@
 									<div class="h-full flex flex-col space-y-2 rounded-container p-4">
 										<span class="flex flex-row justify-end items-center space-x-2">
 											{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && reference_controls.length > 0}
+												{@const nothingToSuggest = actionableSuggestionsCount === 0}
 												<button
-													class="btn text-gray-100 bg-linear-to-r from-fuchsia-500 to-pink-500 h-fit whitespace-normal"
+													class="btn self-end shadow-sm
+														{nothingToSuggest
+														? 'bg-emerald-50 border border-emerald-200 text-emerald-700 cursor-not-allowed pointer-events-none'
+														: 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300'}"
 													type="button"
+													disabled={nothingToSuggest || createAppliedControlsLoading}
+													aria-label={nothingToSuggest
+														? m.allSuggestionsApplied()
+														: m.suggestControls()}
 													onclick={() => {
 														modalConfirmCreateSuggestedControls(
 															page.data.requirementAssessment.id,
@@ -614,19 +681,21 @@
 														);
 													}}
 												>
-													<span class="mr-2">
-														{#if createAppliedControlsLoading}
-															<Progress value={null}>
-																<Progress.Circle class="[--size:--spacing(6)] -ml-2">
-																	<Progress.CircleTrack />
-																	<Progress.CircleRange class="stroke-white" />
-																</Progress.Circle>
-															</Progress>
-														{:else}
-															<i class="fa-solid fa-fire-extinguisher"></i>
-														{/if}
-													</span>
-													{m.suggestControls()}
+													{#if createAppliedControlsLoading}
+														<Progress value={null}>
+															<Progress.Circle class="[--size:--spacing(5)] mr-2">
+																<Progress.CircleTrack />
+																<Progress.CircleRange class="stroke-violet-500" />
+															</Progress.Circle>
+														</Progress>
+														{m.suggestControls()}
+													{:else if nothingToSuggest}
+														<i class="fa-solid fa-circle-check text-emerald-500 mr-2"></i>
+														{m.allSuggestionsApplied()}
+													{:else}
+														<i class="fa-solid fa-wand-magic-sparkles text-violet-500 mr-2"></i>
+														{m.suggestControls()}
+													{/if}
 												</button>
 											{/if}
 											<button
@@ -738,22 +807,26 @@
 				<HiddenInput {form} field="compliance_assessment" />
 				<HiddenInput {form} field="nextRequirementAssessmentId" />
 				<div class="flex flex-col my-8 space-y-6">
-					{#if page.data.requirementAssessment.requirement.questions != null && Object.keys(page.data.requirementAssessment.requirement.questions).length !== 0}
-						<Question
-							{form}
-							field="answers"
-							questions={page.data.requirementAssessment.requirement.questions}
-							label={m.questionSingular()}
-						/>
+					{#if showAnswers && page.data.requirementAssessment.requirement.questions != null && Object.keys(page.data.requirementAssessment.requirement.questions).length !== 0}
+						<div data-testid="answers-field">
+							<Question
+								{form}
+								field="answers"
+								questions={page.data.requirementAssessment.requirement.questions}
+								label={m.questionSingular()}
+							/>
+						</div>
 					{/if}
-					{#if showStatus && page.data.requirementAssessment.compliance_assessment.progress_status_enabled}
-						<Select
-							{form}
-							options={page.data.model.selectOptions['status']}
-							field="status"
-							label={m.status()}
-							helpText={m.requirementAssessmentStatusHelpText()}
-						/>
+					{#if showStatus}
+						<div data-testid="status-field">
+							<Select
+								{form}
+								options={page.data.model.selectOptions['status']}
+								field="status"
+								label={m.status()}
+								helpText={m.requirementAssessmentStatusHelpText()}
+							/>
+						</div>
 					{/if}
 					{#if showRespondentAlignment && page.data.requirementAssessment.respondent_alignment}
 						<p class="flex flex-row items-center space-x-4">
@@ -769,36 +842,40 @@
 						</p>
 					{/if}
 					{#if showResult}
-						{#if computedResult}
-							<p class="flex flex-row items-center space-x-4">
-								<span class="font-medium">{m.result()}</span>
-								<span
-									class="badge text-sm font-semibold"
-									style="background-color: {complianceResultColorMap[
-										computedResult || 'not_assessed'
-									] || '#ddd'}"
-								>
-									{safeTranslate(computedResult || 'not_assessed')}
-								</span>
-							</p>
-						{:else}
+						<div data-testid="result-field">
+							{#if computedResult}
+								<p class="flex flex-row items-center space-x-4">
+									<span class="font-medium">{m.result()}</span>
+									<span
+										class="badge text-sm font-semibold"
+										style="background-color: {complianceResultColorMap[
+											computedResult || 'not_assessed'
+										] || '#ddd'}"
+									>
+										{safeTranslate(computedResult || 'not_assessed')}
+									</span>
+								</p>
+							{:else}
+								<Select
+									{form}
+									options={page.data.model.selectOptions['result']}
+									field="result"
+									label={m.result()}
+									helpText={m.requirementAssessmentResultHelpText()}
+								/>
+							{/if}
+						</div>
+					{/if}
+					{#if showExtendedResult}
+						<div data-testid="extended-result-field">
 							<Select
 								{form}
-								options={page.data.model.selectOptions['result']}
-								field="result"
-								label={m.result()}
-								helpText={m.requirementAssessmentResultHelpText()}
+								options={page.data.model.selectOptions['extended_result']}
+								field="extended_result"
+								label={m.extendedResult()}
+								helpText={m.extendedResultHelpText()}
 							/>
-						{/if}
-					{/if}
-					{#if showResult && page.data.requirementAssessment.compliance_assessment.extended_result_enabled}
-						<Select
-							{form}
-							options={page.data.model.selectOptions['extended_result']}
-							field="extended_result"
-							label={m.extendedResult()}
-							helpText={m.extendedResultHelpText()}
-						/>
+						</div>
 					{/if}
 					{#if page.data.compliance_assessment_score.scoring_enabled}
 						{#if computedScore !== null}
@@ -807,20 +884,14 @@
 									<span class="font-medium">{m.score()}</span>
 									<div class="shrink-0 relative">
 										<Progress
-											value={formatScoreValue(
-												computedScore || 0,
-												page.data.compliance_assessment_score.max_score
-											)}
+											value={formatScoreValue(computedScore || 0, resolvedMax, false, resolvedMin)}
 											min={0}
 											max={100}
 										>
 											<Progress.Circle class="[--size:--spacing(10)]">
 												<Progress.CircleTrack />
 												<Progress.CircleRange
-													class={displayScoreColor(
-														computedScore,
-														page.data.compliance_assessment_score.max_score
-													)}
+													class={displayScoreColor(computedScore, resolvedMax, false, resolvedMin)}
 												/>
 											</Progress.Circle>
 											<div class="absolute inset-0 flex items-center justify-center">
@@ -832,12 +903,12 @@
 							{/if}
 						{:else if data.result !== 'not_applicable'}
 							{#if showScore}
-								<div class="flex flex-col">
+								<div class="flex flex-col" data-testid="score-field">
 									<Score
 										{form}
-										min_score={page.data.compliance_assessment_score.min_score}
-										max_score={page.data.compliance_assessment_score.max_score}
-										scores_definition={page.data.compliance_assessment_score.scores_definition}
+										min_score={resolvedMin}
+										max_score={resolvedMax}
+										scores_definition={resolvedScoresDef}
 										field="score"
 										label={page.data.compliance_assessment_score.show_documentation_score
 											? m.implementationScore()
@@ -863,9 +934,9 @@
 							{#if showDocumentationScore && page.data.compliance_assessment_score.show_documentation_score}
 								<Score
 									{form}
-									min_score={page.data.compliance_assessment_score.min_score}
-									max_score={page.data.compliance_assessment_score.max_score}
-									scores_definition={page.data.compliance_assessment_score.scores_definition}
+									min_score={resolvedMin}
+									max_score={resolvedMax}
+									scores_definition={resolvedScoresDef}
 									field="documentation_score"
 									label={m.documentationScore()}
 									isDoc={true}
@@ -876,7 +947,9 @@
 					{/if}
 
 					{#if showObservation}
-						<MarkdownField {form} field="observation" label="Observation" />
+						<div data-testid="observation-field">
+							<MarkdownField {form} field="observation" label="Observation" />
+						</div>
 					{/if}
 				</div>
 				<div

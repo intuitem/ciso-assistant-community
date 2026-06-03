@@ -56,7 +56,7 @@
       {% if node.assessments.observation %}
           <div class="text-left w-full">
             <p class="font-semibold">{% trans "Observation:" %}</p>
-            <p>{{ node.assessments.observation }}</p>
+            <p>{{ node.assessments.observation|linebreaksbr }}</p>
           </div>
       {% endif %}
     </div>

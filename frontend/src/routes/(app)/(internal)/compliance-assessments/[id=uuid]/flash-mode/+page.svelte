@@ -20,6 +20,7 @@
 	// Field visibility for auditor role
 	const complianceAssessment = $derived(data.compliance_assessment);
 	const fieldVis = $derived(getFieldVisibility(complianceAssessment, 'auditor'));
+	const showAnswers = $derived(fieldVis.showAnswers);
 	const showResult = $derived(fieldVis.showResult);
 	const showObservation = $derived(fieldVis.showObservation);
 
@@ -383,7 +384,14 @@
 								<MarkdownRenderer content={currentSplashNode.description} />
 							</div>
 						{:else if currentRequirementAssessment}
-							<div class="content-section-label">{title}</div>
+							<div class="content-section-label flex items-center gap-3 flex-wrap">
+								<span>{title}</span>
+								{#if typeof requirement?.weight === 'number' && Number.isFinite(requirement.weight) && requirement.weight !== 1 && currentRequirementAssessment.assessable}
+									<span class="badge text-sm font-medium bg-indigo-100 text-indigo-800">
+										{m.requirementWeight()}: {requirement.weight}
+									</span>
+								{/if}
+							</div>
 
 							{#if currentRequirementAssessment.description}
 								<div class="content-description">
@@ -398,7 +406,7 @@
 								</div>
 							{/if}
 
-							{#if hasQuestions}
+							{#if showAnswers && hasQuestions}
 								<div class="mt-4">
 									<Question
 										questions={currentQuestions}

@@ -1,0 +1,2398 @@
+urn: urn:intuitem:risk:library:def-stan-05-138
+locale: en
+ref_id: def-stan-05-138
+name: UK Defence Standard 05-138 Issue 4
+description:
+  UK Ministry of Defence Defence Standard 05-138 Issue 4 - Cyber Security Standard for Suppliers,
+  dated 14 May 2024.
+copyright: Crown Copyright 2024
+version: 1
+publication_date: "2024-05-14"
+provider: UK Ministry of Defence (DStan)
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:def-stan-05-138
+    ref_id: def-stan-05-138
+    name: UK Defence Standard 05-138 Issue 4 - Cyber Security for Defence Suppliers
+    description:
+      "UK Ministry of Defence Defence Standard 05-138 Issue 4, dated 14 May 2024. The Cyber
+      Security Model (CSM) is a risk-based, proportionate approach to strengthening Supplier resilience
+      and protecting UK & Partner Data as it moves through, or is generated in, the defence supply chain.
+      The standard defines four Cyber Risk Profiles (CRPs) - Level 0 'Basic', Level 1 'Foundational',
+      Level 2 'Advanced' and Level 3 'Expert' - which are modelled here as Implementation Groups.
+      Controls are organised under four objectives: A - Managing security risk, B - Protecting against
+      cyber attack, C - Detecting cyber security events, D - Minimising the impact of cyber security incidents.
+
+      Two Cyber Essentials baseline controls (0001, 0002) sit above the objectives.
+
+
+      Source: https://www.gov.uk/government/publications/defence-cyber-protection-partnership-cyber-security-model-industry-buyer-and-supplier-guide"
+    implementation_groups_definition:
+      - ref_id: L0
+        name: Level 0 - Basic
+        description:
+          Normally assigned where there is a very low level of assessed cyber risk to a Supplier
+          delivering an output. Requires Supplier organisations to demonstrate basic cyber security practices.
+      - ref_id: L1
+        name: Level 1 - Foundational
+        description:
+          Normally assigned where there is a low to moderate level of assessed cyber risk to
+          a Supplier delivering an output. Requires Supplier organisations to demonstrate a comprehensive
+          cyber security programme with good practices.
+      - ref_id: L2
+        name: Level 2 - Advanced
+        description:
+          Normally assigned where there is a high level of assessed cyber risk to a Supplier
+          delivering a contracted output. Requires Supplier organisations to demonstrate advanced cyber
+          security oversight and planning which drives robust organisational and cyber practices.
+      - ref_id: L3
+        name: Level 3 - Expert
+        description:
+          Normally assigned where there is a substantial level of assessed cyber risk from a
+          Supplier delivering a contracted output. Requires Supplier organisations to demonstrate expert
+          cyber security capabilities that fully take advantage of the 'defence in depth' methodology to
+          appropriately protect the organisation against new and evolving threats.
+    requirement_nodes:
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:0001
+        assessable: true
+        depth: 1
+        ref_id: "0001"
+        name: Cyber Essentials
+        description:
+          The Supplier shall have Cyber Essentials certification that covers the scope required
+          for all aspects of the contract and commit to maintaining this for the duration of the contract.
+        implementation_groups:
+          - L0
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:0002
+        assessable: true
+        depth: 1
+        ref_id: "0002"
+        name: Cyber Essentials Plus
+        description:
+          The Supplier shall have Cyber Essentials Plus certification that covers the scope required
+          for all aspects of the contract and commit to maintaining this for the duration of the contract.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-a
+        assessable: false
+        depth: 1
+        ref_id: Objective A
+        name: Managing security risk
+        description:
+          The Supplier has appropriate organisational structures, policies, and processes in
+          place to understand, assess and systematically manage security risks to its network, and information
+          systems, including all network and information systems that protect all Data.
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        assessable: false
+        depth: 1
+        ref_id: Objective B
+        name: Protecting against cyber attack
+        description:
+          The Supplier has proportionate security measures in place to protect the networks and
+          information systems supporting all Functions from cyber attack.
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-c
+        assessable: false
+        depth: 1
+        ref_id: Objective C
+        name: Detecting cyber security events
+        description:
+          The Supplier has capabilities which enable security defences to remain effective and
+          detect cyber security events affecting, or with the potential to affect, Functions and protection
+          of Data.
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-d
+        assessable: false
+        depth: 1
+        ref_id: Objective D
+        name: Minimising the impact of cyber security incidents
+        description:
+          The Supplier shall ensure capabilities exist to minimise the adverse impact of a cyber
+          security incident on the operation of Functions and protection of Data, including the restoration
+          of Functions and Data.
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:1100
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-a
+        ref_id: "1100"
+        name: Governance
+        description:
+          The Supplier shall have appropriate management policies and processes in place to govern
+          their approach to the security of the network and information systems supporting Functions and
+          protection of Data.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:1101
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-a
+        ref_id: "1101"
+        name: Board direction
+        description:
+          The Supplier shall have effective organisational security management led at board level
+          and articulated clearly in corresponding policies.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:1102
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-a
+        ref_id: "1102"
+        name: Roles and responsibilities
+        description:
+          The Supplier shall have established roles and responsibilities for the security of
+          networks and information systems at all levels, with clear and well-understood channels for communicating
+          and escalating risks.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:1103
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-a
+        ref_id: "1103"
+        name: Decision-making
+        description:
+          The Supplier shall have senior-level accountability for the security of networks and
+          information systems, and delegates decision-making authority appropriately and effectively. Risks
+          to network and information systems that protect all Data are considered in the context of other
+          organisational risks.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:1200
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-a
+        ref_id: "1200"
+        name: Risk management
+        description:
+          The Supplier shall take appropriate steps to identify, assess, understand and remediate
+          security risks to the network and information systems that protect all Data. This includes an
+          overall organisational approach to risk management.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:1201
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-a
+        ref_id: "1201"
+        name: Risk management process
+        description:
+          The Supplier shall have effective internal processes for managing risks (to the security
+          of network and information systems that protect all Data) and communicating associated activities
+          and solutions.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:1202
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-a
+        ref_id: "1202"
+        name: Periodically assess risk
+        description:
+          The Supplier shall periodically assess the risk to organisational operations (including
+          mission, functions, image, or reputation), organisational assets, and individuals, resulting from
+          the operation of organisational systems and the associated processing, storage, or transmission
+          of Data.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:1203
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-a
+        ref_id: "1203"
+        name: Network diagrams
+        description:
+          The Supplier shall create and maintain up to date network diagrams detailing the network
+          boundaries, internal and external connection, and systems within the operational environment.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:1204
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-a
+        ref_id: "1204"
+        name: Threat intelligence capabilities
+        description:
+          The Supplier shall implement threat intelligence capabilities (internally or externally)
+          as part of a risk assessment to guide and inform the development of organisational systems, security
+          architectures, selection of security solutions, monitoring, threat hunting, system security alerts
+          and advisories, response and recovery activities.
+        implementation_groups:
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:1205
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-a
+        ref_id: "1205"
+        name: Assurance
+        description:
+          The Supplier shall gain validation for the effectiveness of the security of their technology,
+          people, and processes in support of its Functions and which store and/or process Data.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:1206
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-a
+        ref_id: "1206"
+        name: Internal controls assurance
+        description:
+          The Supplier shall monitor security controls on an ongoing basis to ensure the continued
+          effectiveness of the controls. Any identified deficiencies should be recorded, reported to leadership,
+          and mitigated within agreed timeframes.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:1300
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-a
+        ref_id: "1300"
+        name: Asset management
+        description:
+          The Supplier shall reasonably ensure everything required to deliver, maintain or support
+          networks and information systems that support delivery of all Functions which protect all Data
+          are determined and understood. This includes people and systems, as well as any supporting infrastructure
+          (such as power or cooling).
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:1301
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-a
+        ref_id: "1301"
+        name: Automated asset inventory management
+        description:
+          The Supplier shall employ automated discovery and management tools to maintain an up-to-date,
+          complete, accurate, and readily available inventory of data, people, systems and supporting infrastructure
+          used to support business Functions and protect Data.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:1400
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-a
+        ref_id: "1400"
+        name: Supply chain
+        description:
+          The Supplier shall understand and manage security risks to Functions and Data that
+          arise as a result of dependencies on external suppliers. This includes ensuring that appropriate
+          measures are employed where third party services are used.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:1401
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-a
+        ref_id: "1401"
+        name: External provider trusted relationships
+        description:
+          "The Supplier shall establish, document, and maintain trust relationships with external
+          service providers based on the following requirements, properties, factors, or conditions: security
+          and privacy requirements, properties, factors, or conditions defining acceptable trust relationships."
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:1500
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-a
+        ref_id: "1500"
+        name: Physical access controls
+        description:
+          "The Supplier shall, unless prohibited by applicable law, restrict and monitor all
+          physical access to facilities where Data is stored or processed to its authorised Personnel by
+          implementing industry standard physical access controls. Examples of such controls include but
+          are not limited to:
+
+          i) Swipe card technology
+
+          ii) Monitored CCTV
+
+          iii) Remotely monitored alarm systems
+
+          iv) On-premise security guards
+
+          v) Photographic access credentials
+
+          vi) Visitor escort
+
+          vii) Physical access logs
+
+          viii) Authorised access lists.
+
+          The Supplier shall review physical access logs regularly or in the event of a physical or cybersecurity
+          incident."
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:1501
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-a
+        ref_id: "1501"
+        name: Physical access device management
+        description:
+          The Supplier shall manage and maintain an inventory of all physical access devices
+          used on their premises. The inventory should contain a unique identifier for the device regardless
+          of the type (e.g. RFID card, access fob or door key) as well as the named individual who it is
+          assigned to.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:1502
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-a
+        ref_id: "1502"
+        name: Physical access restrictions
+        description:
+          The Supplier shall restrict physical access to sensitive areas within an organisation's
+          premises to only those who are authorised to have access. The Supplier shall maintain and manage
+          an inventory of those staff who have privileged physical access.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:1503
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-a
+        ref_id: "1503"
+        name: Visitor access management
+        description:
+          "The Supplier shall ensure the following controls are applied to all visitors visiting
+          the organisation's premises:
+
+          i) Visitor access and exit shall be logged
+
+          ii) All visitors shall wear visitor ID badges at all times. Visitor badges should visually differ
+          from employee badges
+
+          iii) All visitors should be appropriately escorted at all times while on the premises
+
+          iv) Visitor badges should be returned to the organisation at the end of the day."
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2100
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2100"
+        name: Resilience policy and process development
+        description:
+          The Supplier shall develop, enact and regularly review cyber security and resilience
+          policies and processes to manage and mitigate the risk of adverse impact on Functions and protection
+          of Data.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2101
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2101"
+        name: Policy and process implementation
+        description:
+          The Supplier shall implement security policies and processes that demonstrate the continuing
+          security benefits to Functions and Data.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2200
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2200"
+        name: Identity and access control
+        description:
+          The Supplier shall understand, document and manage (i.e. create, review and disable)
+          access to networks, information systems, and removable storage media & devices supporting Functions
+          and protection of Data. All accounts and identities, including users, system and automated functions
+          that can access Data or systems are appropriately verified, authenticated and authorised.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2201
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2201"
+        name: Access control - multi-factor authentication
+        description:
+          "The Supplier shall implement multi-factor authentication (MFA) mechanisms to control
+          access to critical or sensitive systems, and organisational operations. Factors can include:
+
+          i) Something you know (e.g. password/personal identification number (PIN))
+
+          ii) Something you have (e.g. cryptographic identification device, token)
+
+          iii) Something you are (e.g. biometric)."
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2202
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2202"
+        name: Device management
+        description:
+          The Supplier shall fully understand and trust the devices that are used to access the
+          network and information systems that support Functions and process Data.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2203
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2203"
+        name: Privileged user management
+        description:
+          The Supplier shall closely manage privileged user access and actions to networks and
+          information systems supporting Functions and that protect Data.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2204
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2204"
+        name: Principle of least functionality
+        description:
+          The Supplier shall ensure that all information systems are configured to provide only
+          essential capabilities and to prohibit or restrict the use of non-essential functions, such as
+          ports, protocols, programmes and services that are not integral to the operation of that information
+          system.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2205
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2205"
+        name: Least privilege
+        description:
+          The Supplier shall closely manage all user accounts and employ the principle of least
+          privilege to networks and information systems supporting all Functions and protecting all Data.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2206
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2206"
+        name: Least privilege - audit system
+        description:
+          The Supplier shall limit access to systems' audit/security logging data and functionality
+          to privileged user groups that have a confirmed requirement in accordance with the principle of
+          least privilege.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2207
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2207"
+        name: Separation of duties
+        description:
+          The Supplier shall develop a policy and implement a separation of duties methodology
+          for standard and privileged accounts which support Functions and protect Data.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2208
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2208"
+        name: Identity and Access Management (IdAM)
+        description:
+          The Supplier shall closely manage and maintain identity and access control for users/admins,
+          devices and systems accessing their networks and information systems supporting business Functions
+          and protecting all Data.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2209
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2209"
+        name: Limit access to authorised entities
+        description:
+          The Supplier shall implement automated mechanisms to support the management of system
+          accounts, including processes acting on behalf of authorised users.
+        implementation_groups:
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2210
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2210"
+        name: Limit to authorised transactions
+        description:
+          The Supplier shall issue, manage, verify, revoke, and audit identities and credentials
+          to authorised transactions, users, and processes.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2211
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2211"
+        name: Secure first-time password management
+        description:
+          "The Supplier shall employ secure practices for the secure storage, transmission, and
+          management of first-time and one-time passwords. These practices include, but are not limited
+          to:
+
+          i) Secure storage of first-time password prior to use
+
+          ii) Secure transmission of first-time and one-time passwords to their new user
+
+          iii) Require first-time and one-time passwords are immediately changed after first logon."
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2212
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2212"
+        name: Automated password management
+        description:
+          The Supplier shall employ automated mechanisms for the generation, protection, storage,
+          rotation, transmission, cryptographic protection and management of passwords for staff and systems.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2213
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2213"
+        name: Automated password quality check
+        description:
+          The Supplier shall deploy technical controls to manage the quality of credentials across
+          all identifiers. The technical controls should reflect industry standard requirements such as
+          password length, complexity requirements (e.g. uppercase, lowercase, numbers and symbols), reuse
+          history, prevent reuse of identifiers for a defined period, banned words and insecure pattern
+          recognition (e.g. 1234), as appropriate.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2214
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2214"
+        name: Repeated unsuccessful logon handling
+        description:
+          The Supplier shall employ policies and processes to appropriately manage unsuccessful
+          login attempts to standard and privileged accounts. The Supplier shall lock accounts after at
+          most ten unsuccessful login attempts for a minimum of 15 minutes; the duration of which should
+          increase between multiple account lockouts.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2215
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2215"
+        name: Replay-resistant authentication
+        description:
+          The Supplier shall enforce technical control to protect against the capture of transmitted
+          authentication or access control information and its subsequent retransmission i.e. replay attacks.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2216
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2216"
+        name: Privilege failure handling
+        description:
+          The Supplier shall prevent non-privileged users from executing privileged functions
+          and capture the execution of such functions in audit logs.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2217
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2217"
+        name: Service accounts
+        description:
+          The Supplier shall inventory all generic, service and system accounts used on the network.
+          Every account shall be owned by a single named individual who is responsible and accountable for
+          the account and its usage.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2218
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2218"
+        name: System users and processes
+        description:
+          The Supplier shall identify system users, processes acting on behalf of users, and
+          devices.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2300
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2300"
+        name: Data security
+        description:
+          The Supplier shall appropriately protect data stored or transmitted electronically
+          from actions such as unauthorised access, modification, or deletion that may cause an adverse
+          impact on Functions or Data. Such protection extends to how authorised users, devices and systems
+          access critical data necessary for the operation of Functions and use of Data. Additionally, covers
+          information that would assist an attacker, such as design details of networks and information
+          systems.
+        implementation_groups:
+          - L1
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2301
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2301"
+        name: Understanding data
+        description:
+          The Supplier shall have a good understanding and classification of the data important
+          to the operation of Functions and protection of Data, including where it is stored, where it travels,
+          the application of protective markings to media. The Supplier shall understand how unauthorised
+          access, modification or availability of data would adversely impact the organisation. This shall
+          apply to data released to third parties including those important to the operation of Functions
+          and protection of all Data.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2302
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2302"
+        name: Data in transit
+        description:
+          The Supplier shall protect and control data in transit, including the use of encryption
+          where appropriate, for data important to the operation of the Functions and all Data. This includes
+          the transfer of data to third parties.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2303
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2303"
+        name: Management of established network connections
+        description:
+          The Supplier shall terminate network connections associated with communications sessions
+          at the end of the sessions or after a defined period of inactivity.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2304
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2304"
+        name: Wireless network access control
+        description:
+          "The Supplier shall ensure that the following controls apply to trusted organisational
+          wireless networks:
+
+          i) All users and devices must be authorised and authenticated prior to granting access to the
+          network via the wireless network
+
+          ii) The data transferred over the wireless network must be encrypted using WPA2 or above methodology."
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2305
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2305"
+        name: Remote Access - VPN (Virtual Private Network)
+        description:
+          "The Supplier shall ensure the following controls are enforced for staff to connect
+          to organisational networks and systems using Remote Access technologies, for example VPN:
+
+          i) Enable MFA prior to establishing a remote connection to the network
+
+          ii) Encrypt all data transmitted over a VPN connection
+
+          iii) Disable split-tunnelling to ensure all Data is only transmitted via organisation controlled
+          channels."
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2306
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2306"
+        name: Remote access sessions
+        description:
+          The Supplier shall employ cryptographic mechanisms to protect the confidentiality of
+          remote access sessions.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2307
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2307"
+        name: Managed access control points
+        description: The Supplier shall route remote access via managed access control points.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2308
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2308"
+        name: Stored data
+        description:
+          The Supplier shall appropriately protect the confidentiality of soft and hard copies
+          of data being stored for all Functions.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2309
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2309"
+        name: Mobile data
+        description:
+          The Supplier shall protect, such as through encryption, data important to the operation
+          of Functions and all Data on mobile devices.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2310
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2310"
+        name: Removable media
+        description: "The Supplier shall:
+
+          i) Maintain and manage an inventory of corporately owned removable storage media and devices
+
+          ii) Encrypt removable media using secured and industry best practice methods
+
+          iii) Allow only corporately owned and/or authorised removable storage media and devices to have
+          read/write permissions
+
+          iv) Prohibit the use of removable storage media and devices that are not corporately owned or
+          authorised."
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2311
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2311"
+        name: Authorised working locations
+        description:
+          The Supplier shall maintain and update a list of authorised working locations which
+          are not the organisation's premise and communicate these locations to all employees and contractors.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2312
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2312"
+        name: Security at alternate working locations
+        description:
+          "The Supplier shall employ technical security controls and educate users to reduce
+          the security risks to employees while working outside the organisation's premise. Technical security
+          controls for consideration may include, but are not limited to:
+
+          i) Always-on VPN to protect data in-transit
+
+          ii) Screen privacy protector to prevent shoulder surfing
+
+          iii) Disabling USB ports on devices
+
+          iv) Full disk encryption
+
+
+          User awareness topics may include, but are not limited to:
+
+          i) Risks of using public Wi-Fi
+
+          ii) Avoid taking confidential phone calls within earshot of unauthorised individuals
+
+          iii) Shoulder surfing
+
+          iv) Avoid leaving devices unattended"
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2313
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2313"
+        name: Media/equipment sanitisation
+        description:
+          The Supplier shall appropriately sanitise before reuse and/or disposal the devices,
+          equipment, and removable storage media & devices holding data important to the operation of business
+          Functions and that protect all Data.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2314
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2314"
+        name: Ensure UK GDPR compliance
+        description:
+          The Supplier shall ensure that the processing of personal data is conducted in compliance
+          with the General Data Protection Regulation.
+        implementation_groups:
+          - L0
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2315
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2315"
+        name: Email authentication methods
+        description:
+          The Supplier shall implement Domain-based Message Authentication, Reporting and Conformance
+          (DMARC), DomainKeys Identified Mail (DKIM) and Sender Policy Framework (SPF) to verify the authenticity
+          of an email's source.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2316
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2316"
+        name:
+          Personal and/or Personally Identifiable Information (PII) processing/transparency - control
+          flow
+        description:
+          The Supplier shall employ systems to monitor and control the flow of all Personal and/or
+          Personally Identifiable Information (PII) and all government information (e.g. OFFICIAL and above)
+          provided or produced during the contract throughout the information lifecycle in accordance with
+          approved authorisations, required legislation and contractual requirements.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2317
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2317"
+        name: Endpoint encryption
+        description:
+          The Supplier shall implement and maintain full disk level encryption on all endpoints
+          to industry standard solutions, for example, full disk encryption solutions using AES-256 encryption
+          algorithm or FIPS equivalent.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2318
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2318"
+        name: Approved cryptographic methods
+        description:
+          The Supplier shall employ appropriate nationally or departmentally approved cryptography
+          when used to protect all Data (e.g. FIPS 140-2 or comparable standards).
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2319
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2319"
+        name: Securely manage cryptographic keys
+        description:
+          The Supplier shall establish and manage cryptographic keys for cryptography employed
+          in organisational systems using appropriate nationally or departmentally approved solutions (e.g.
+          FIPS 140-2 or comparable standards).
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2320
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2320"
+        name: Data Loss Prevention (DLP)
+        description:
+          "The Supplier shall implement and maintain appropriate tooling to monitor and restrict
+          the access and use of:
+
+          i) Removable storage media and devices
+
+          ii) External websites
+
+          iii) Email"
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2321
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2321"
+        name: Publicly accessible data
+        description: "The Supplier shall:
+
+          i) Designate individuals authorised to make information publicly accessible
+
+          ii) Train authorised individuals to ensure that publicly accessible information does not contain
+          non-public information
+
+          iii) Review the proposed content of information prior to posting onto the publicly accessible
+          system to ensure that non-public information is not included
+
+          iv) Periodically review the content on the publicly accessible system for non-public information
+          and remove such information, if discovered."
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2322
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2322"
+        name: Mobile devices/Bring Your Own Device (BYOD)
+        description:
+          The Supplier shall ensure that mobile devices accessing its corporate environment/data
+          are appropriately configured and managed using industry recognised solutions such as Mobile Device
+          Management (MDM) tooling.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2323
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2323"
+        name: Secure destruction
+        description:
+          "The Supplier shall, where not otherwise stated explicitly by country, legislation
+          or Authority instructions, implement procedures to ensure that all Data is securely destroyed
+          when no longer needed, or at the expiration or termination of the Agreement. Supplier shall:
+
+          i) Secure and confirm the erasure of Data from its systems and servers, including any physical
+          or electronic copies, prior to asset destruction and disposal
+
+          ii) Provide attestation of destruction, where specified by contract with Authority
+
+          iii) Require that any third parties engaged to process the Data shall securely dispose of such
+          Data when no longer needed to provide the service, unless otherwise stated explicitly by country,
+          legislation or Authority instructions."
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2400
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2400"
+        name: System security
+        description:
+          The Supplier shall ensure that network and information systems and technology critical
+          for the operation of business Functions and protection of Data are protected from cyber attack.
+          An organisational understanding of risk to business Functions and protection of Data informs the
+          use of robust and reliable protective security measures to effectively limit opportunities for
+          attackers to compromise networks and systems.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2401
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2401"
+        name: Secure configuration
+        description:
+          The Supplier shall securely configure the network and information systems that support
+          the operation of business Functions and that protect Data.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2402
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2402"
+        name: Vulnerability management
+        description:
+          "The Supplier shall implement a vulnerability and patch management process to identify,
+          report, and remediate application and system (internal and external facing) vulnerabilities that
+          is approved by the application or system owner and is commensurate with the level of risk by:
+
+          i) Performing vulnerability scans on a monthly basis and during any major system or application
+          updates
+
+          ii) Implementing vendor patches or fixes prioritising using the CVSS v3 scoring
+
+          iii) Developing a Risk Treatment Plan to address identified vulnerabilities.
+
+
+          The Supplier shall address vulnerabilities in accordance with the Supplier's internal vulnerability
+          remediation timelines and in line with reasonable industry standards for vulnerability management
+          based on CVSS v3 or above."
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2403
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2403"
+        name: Penetration testing
+        description:
+          "The Supplier shall conduct penetration testing (minimum every 12 months) against externally
+          facing systems used to support the operation of Functions and that protect Data. The penetration
+          testing programme shall be based upon industry standards and performed by subject matter experts.
+          The Supplier shall ensure that any deficiencies identified are remediated in a timely manner in
+          line with their risk to the network. The Supplier shall retain records including:
+
+          i) The scope and methodology utilised
+
+          ii) The number of critical, high, and medium severity findings
+
+          iii) The name of the tester
+
+          iv) The date of the testing
+
+          v) Timelines and actions for a remedial plan."
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2404
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2404"
+        name: Change management
+        description:
+          "The Supplier shall formally document, publish and review (minimum every 12 months)
+          the change control procedures to manage changes to information systems, supporting infrastructure
+          and facilities. The change management policy includes:
+
+          i) Definitions of the types of change (e.g. standard, critical, emergency) with associated processes
+
+          ii) Roles and responsibilities for those involved in the change or approving the change.
+
+
+          Prior to implementing any changes, Supplier shall:
+
+          i) Establish acceptance criteria for production change approval and implementation
+
+          ii) Require stakeholder approval prior to any change implementation
+
+          iii) Formally record the change in a centralised repository
+
+          iv) Document business impact analysis outcomes and document back-out procedures should the change
+          fail
+
+          v) Keep a full audit trail of the change request, testing conducted, associated documentation,
+          approvals and outcomes
+
+          vi) Document and record security impact analysis outcomes along with any mitigating actions."
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2405
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2405"
+        name: Patch management
+        description:
+          "The Supplier shall develop and maintain an appropriately robust patch management programme
+          to address known vulnerabilities on its network within industry best-practice timelines. The Supplier
+          shall take appropriate steps to identify, assess, test and implement patches for endpoints, network
+          devices and software which address known vulnerabilities within industry best practice timeline.
+
+
+          The Supplier shall have appropriate processes in place to address out-of-band emergency patching
+          and/or mitigating actions."
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2406
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2406"
+        name: Privacy warning notices - prior to access
+        description:
+          "The Supplier shall ensure that mechanisms are in place to ensure users accept appropriate
+          warning notices prior to information system access. At a minimum users must be warned that:
+
+          i) Use of the information system is monitored, recorded and subject to audit
+
+          ii) Unauthorised usage of the information system is prohibited
+
+          iii) Unauthorised usage of the information system use is subject to criminal and civil penalties
+
+          iv) In continuing, the user affirms consent to monitoring and recording of their activities"
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2407
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2407"
+        name: Privacy warning notices - specific handling
+        description:
+          "The Supplier shall ensure that users accept appropriate warning notices prior to information
+          system access where information systems contain information with specific handling requirements
+          imposed by the UK or its International Partners.
+
+          Such warnings must only be provided to authenticated users. At a minimum users must be warned
+          that:
+
+          i) The information system contains information with specific requirements imposed by the UK and/or
+          international partner nations.
+
+          ii) Use of the information system may be subject to other specified requirements associated with
+          certain types of information, such as that subject to Export Controls or licences."
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2408
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2408"
+        name: Screen locking/timeouts
+        description:
+          The Supplier shall have controls in place to automatically lock user sessions after
+          a predefined period. The lock screen shall conceal all information previously displayed on the
+          screen and prevent unauthorised viewing of data.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2409
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2409"
+        name: Identify allowed programs
+        description:
+          The Supplier shall identify software programs authorised to execute on the corporate
+          environment. For all other programs employ a block by default, permit-by-exception policy.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2410
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2410"
+        name: Review the list of approved software
+        description:
+          The Supplier shall review and manage the list of authorised software programs at least
+          every 90 days.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2411
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2411"
+        name: Secured Internet access
+        description:
+          "The Supplier shall ensure the following internet controls are enforced on endpoints:
+
+          i) Technical controls to prevent malware infection from internet browsing are in place
+
+          ii) Block undesirable websites from being accessed (e.g. malicious sites, inappropriate content
+          etc.)
+
+          iii) Prevent code being launched on the corporate host
+
+          iv) Prevent downloads to the corporate host from the internet without sandboxing and anti-malware
+          scan
+
+          v) Automatically block suspicious traffic and communications
+
+          vi) Terminate network connections associated with communications sessions at the end of the sessions
+          or after a defined period of inactivity.
+
+          Ensure auditing is enabled for these controls and security operators are notified of the attempted
+          above actions. Where users have a necessity to perform the above activities, ensure a robust model
+          and supporting processes and technologies are employed to mitigate the additional risk (e.g. allow/block
+          listing, network monitoring, vulnerability scanning etc.)"
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2412
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2412"
+        name: Voice over Internet Protocol (VoIP)
+        description:
+          The Supplier should establish usage restrictions and implementation guidance for Voice
+          over Internet Protocol (VoIP) technologies based on the potential to cause damage to the information
+          system if used maliciously; and ensure controls are in place to authorise, monitor, and control
+          the use of VoIP within the information system.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2413
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2413"
+        name: Mobile code management
+        description:
+          The Supplier shall define acceptable and unacceptable mobile code, and ensure controls
+          are in place to identify, authorise, monitor, review and control the use of mobile code within
+          the organisation.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2414
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2414"
+        name: Communication authenticity protection
+        description:
+          The Supplier shall use secure network management and communication protocols to protect
+          session authenticity addressing communications protection at the session level.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2415
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2415"
+        name: Automatically identify and address misconfigurations and unauthorised components
+        description:
+          The Supplier shall employ automated mechanisms to detect misconfigured or unauthorised
+          system components.
+        implementation_groups:
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2416
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2416"
+        name: Shared system resources
+        description:
+          The supplier shall prevent unauthorised and unintended information transfer via shared
+          system resources (e.g. registers, cache memory, main memory, hard disks).
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2417
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2417"
+        name: Authorise remote execution of privileged commands
+        description:
+          The Supplier shall ensure that all remote users acquire appropriate authorisation prior
+          to accessing and/or executing privileged functions.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2418
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2418"
+        name: Baseline configurations and inventories
+        description:
+          The Supplier shall implement, update and document system hardening procedures. Implement,
+          update and document baseline configurations settings for all information technology products deployed
+          in organisational systems; this shall include the restriction of user actions and of unsupported
+          software and hardware.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2419
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2419"
+        name: Obscure authentication information
+        description:
+          The Supplier shall configure systems to obscure authentication information, for example,
+          passwords to ensure that they are not displayed as cleartext when a user is inputting their credentials.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2420
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2420"
+        name: Authentication feedback
+        description:
+          The Supplier shall configure systems to minimise feedback information from failed logons
+          to ensure that the system does not provide any information that would allow unauthorised individuals
+          to compromise authentication mechanisms, e.g. explicitly stating that the password is the incorrect
+          authentication component.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2421
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2421"
+        name: Network Time Protocol (NTP)
+        description:
+          The Supplier shall implement a Network Time Protocol (NTP) to a recognised authoritative
+          source, to synchronise the clocks of every network device to ensure accurate and consistent timestamps
+          for audit records on associated system logs.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2422
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2422"
+        name: Physical and logical access restrictions
+        description:
+          The Supplier shall define, document, approve, and enforce physical and logical access
+          restrictions associated with changes to organisational systems.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2423
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2423"
+        name: Trusted source repository
+        description:
+          The Supplier shall identify, register and maintain an inventory of system components
+          using automated tooling for those assets that support business Functions and protect Data in an
+          asset register, and at a minimum, include data location and asset ownership information.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2424
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2424"
+        name: Implement audit for stored credentials outside policy
+        description:
+          The Supplier shall ensure administrator credentials are stored through an approved
+          and secured storage mechanism (process/location/tools etc.) and quarterly audits are performed
+          to ensure the control is consistently applied and functions appropriately.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2425
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2425"
+        name: Use integrity verification tools
+        description:
+          The Supplier shall implement an integrity verification tool to detect unauthorised
+          changes to web-facing, critical software and firmware. Upon discovering discrepancies, the tool
+          should automatically trigger the incident response process.
+        implementation_groups:
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2426
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2426"
+        name: Anti-malware capabilities
+        description:
+          The Supplier shall ensure that anti-malware capabilities are regularly audited, to
+          verify they are up to date, functional (e.g. performing real-time scans as well as periodic scans),
+          managed, detect malware, report detections and update both malware signatures and software when
+          new releases are available.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2427
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2427"
+        name: Monitor/protect communications at boundaries
+        description:
+          The Supplier shall monitor, control, and protect communications (information transmitted
+          or received by organisational systems) at the external boundaries except as prohibited by Applicable
+          Law and key internal boundaries of those organisational systems. This includes all staff including
+          all remote workers to carry out their duties.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2428
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2428"
+        name: Verify/limit access to external system connections
+        description:
+          The Supplier shall control and limit connections to external systems by an allow-list
+          on the network boundary.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2429
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2429"
+        name: Verify/limit access from external system connections
+        description:
+          The Supplier shall block unauthorised inbound connections by default. Inbound firewall
+          rules are approved and documented by an authorised person, and include the business need within
+          the documentation.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2430
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2430"
+        name: External system connection review
+        description:
+          The Supplier shall promptly remove or disable unnecessary firewall rules when they
+          are no longer required or fulfil no business need.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2500
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2500"
+        name: Resilient networks and systems
+        description:
+          The Supplier shall build resilience against cyber-attack and system failure into their
+          design, implementation, operation and management of systems that support the operation of business
+          Functions and protection of Data.
+        implementation_groups:
+          - L0
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2501
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2501"
+        name: Design for resilience
+        description:
+          The Supplier shall design the network and information systems supporting their Functions
+          and protect Data to be resilient to cyber security incidents and system failure. Systems shall
+          be appropriately segregated and resource limitations mitigated.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2502
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2502"
+        name: Resilience preparation
+        description:
+          The Supplier shall develop recovery plans for all systems that deliver Functions and
+          protect Data.
+        implementation_groups:
+          - L1
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2503
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2503"
+        name: Resilience preparation with testing
+        description:
+          The Supplier shall develop recovery plans for all systems that deliver Functions and
+          protect Data. Recovery plans must also be tested at least annually with any deficiencies being
+          recorded, risk assessed and resolved within defined timelines.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2504
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2504"
+        name: Backups
+        description:
+          "The Supplier shall hold accessible and secured current backups of data and information
+          needed to recover operation of their Functions and protect Data. Backup procedures and media shall
+          include:
+
+          i) Appropriate encryption technology
+
+          ii) Integrity validation."
+        implementation_groups:
+          - L1
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2505
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2505"
+        name: Resilient backups
+        description:
+          "The Supplier shall hold accessible and secured current backups of data and information
+          needed to recover operation of their Functions and protect Data. Backup procedures and media shall
+          include:
+
+          i) Appropriate encryption technology
+
+          ii) Integrity validation
+
+          iii) Secure offsite storage supporting availability requirements
+
+          iv) Regular backup recovery testing."
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2506
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2506"
+        name: Physical transport of backups
+        description:
+          "The Supplier shall protect the physical movement of media containing Data in transit
+          using the following methodologies:
+
+          i) Store backup media within a secured and locked container prior to transport.
+
+          ii) Utilise a certified backup courier to transport backup drives/tapes.
+
+          iii) Maintain a full chain of custody record.
+
+          iv) Ensure that tracking information is recorded for all drives being transported.
+
+          v) Implement appropriate cryptographic mechanisms to protect confidentiality."
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2507
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2507"
+        name: Deny traffic by default at interfaces
+        description:
+          The Supplier shall ensure that firewalls must block every network connectivity path
+          and network service not explicitly authorised by the appropriate Change Advisory Board (CAB).
+          Traffic flow policy exceptions that are no longer supported by an explicit business need must
+          be removed.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2508
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2508"
+        name: Separate public and internal subnetworks
+        description:
+          The Supplier shall implement network segmentation for publicly accessible system components
+          to ensure logical and/or physical separation from internal network components.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2509
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2509"
+        name: Managed email filtering
+        description:
+          The Supplier shall implement appropriate tooling or methods to detect, block and report
+          malicious or spam emails coming into the network. Such tooling or methods may include learning
+          capabilities for more effectively identifying legitimate communications.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2510
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2510"
+        name: Diagnostic programmes
+        description:
+          The Supplier shall check all media containing diagnostic and/or test programs for malicious
+          code prior to use on the organisational network.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2511
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2511"
+        name: Maintenance activities
+        description:
+          The Supplier shall ensure that relevant good practice tooling, techniques and mechanisms
+          are authorised or provided to maintenance personnel in order to carry out their duties
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2512
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2512"
+        name: MFA for remote maintenance activities
+        description:
+          The Supplier shall require multi-factor authentication to establish non local maintenance
+          sessions via external network connections and terminate such connections when nonlocal maintenance
+          is complete.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2513
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2513"
+        name: Maintenance personnel supervision
+        description:
+          The Supplier shall designate authorised, suitably qualified and experienced personnel
+          to supervise maintenance personnel who do not possess the required physical access authorisations.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2600
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2600"
+        name: Staff awareness and training
+        description:
+          The Supplier shall ensure that staff have appropriate awareness, knowledge and skills
+          to carry out their organisational roles effectively in relation to the security of network and
+          information systems supporting the operation of business Functions and protection of Data.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2601
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2601"
+        name: Cyber security culture
+        description:
+          The Supplier shall develop and maintain a positive cyber security culture which encourages
+          employees to make information security part of their day-to-day activities and incentivises them
+          for doing so.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2602
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2602"
+        name: Cyber security training
+        description:
+          "The Supplier shall ensure that people who support the operation of Functions and protection
+          of Data are appropriately trained in cyber security. The Supplier shall conduct awareness training
+          at least every 12 months to recognise and respond to the following topics:
+
+          i) Social engineering and phishing
+
+          ii) Advanced persistent threats
+
+          iii) Suspected breaches
+
+          iv) Suspicious behaviours.
+
+
+          A range of approaches to cyber security training, awareness and communications shall be employed
+          and the Supplier shall update the training every 12 months or when there are significant changes
+          to the threat."
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2603
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2603"
+        name: Staff risk awareness
+        description:
+          The Supplier shall ensure that managers, systems administrators, and users of organisational
+          information systems are made aware of the security risks associated with their activities and
+          of the applicable policies, standards, and procedures related to the security of organisational
+          information systems. The Supplier shall review and update these security risks at least every
+          12 months or when there is significant change within the organisation or threat.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2604
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2604"
+        name: Acceptable Use Policy
+        description:
+          "The Supplier's Acceptable Use Policy shall consider and include appropriate enforcement
+          of restrictions on:
+
+          i) Use of social media, social networking sites, and external sites/applications
+
+          ii) Posting organisational information on public websites
+
+          iii) Use of organisation-provided identifiers (e.g. email addresses) and authentication secrets
+          (e.g. passwords) for creating accounts on external sites/applications
+
+          iv) Enforce clear desk and clear screen requirements
+
+          v) Handling of physical corporate assets outside the office environment
+
+          vi) Locations for conducting duties
+
+          vii) Remote activation of collaborative computing devices
+
+          viii) Prohibit remote activation of collaborative computing devices and provide indication of
+          devices in use to users present at the device."
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2605
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2605"
+        name: Annual threat focused training feedback
+        description:
+          The Supplier shall conduct practical exercises in awareness training for their organisation
+          that are aligned with current threat scenarios and provide feedback to individuals involved in
+          the training and their supervisors.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2700
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2700"
+        name: Personnel pre-employment checks
+        description:
+          "The Supplier shall, unless prohibited by Applicable Law, perform appropriate background
+          verification checks on Personnel that have access to Data upon hire. The verification checks shall
+          include:
+
+          i) Verifying credentials
+
+          ii) Employment history
+
+          iii) Qualification checks
+
+          iv) Application or verification of BPSS (Baseline Personnel Security Standard)"
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2701
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2701"
+        name: Personnel security vetting
+        description:
+          The Supplier shall define and implement a policy for applying BPSS and National Security
+          Vetting (NSV) checks as appropriate for employees that support Functions and the protection of
+          Data. (It is recognised that application of NSV is normally only possible once a contract requiring
+          such is in place. Potential suppliers who do not meet this requirement at time of submission must,
+          however, be willing and able to enforce their staff through appropriate levels of vetting within
+          a timescale agreed with the project delivery team following contract award).
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2702
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2702"
+        name: Joiners, movers and leavers
+        description:
+          The Supplier shall define and implement a joiners, movers and leavers policy to secure
+          organisational hardware, software and systems.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2703
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2703"
+        name: Whistleblowing
+        description:
+          The Supplier shall define and implement training and processes for employees and contractors
+          to identify and report suspicious activities and/or behaviour including violations of information
+          security policies and procedures without fear of recrimination. The Supplier shall define and
+          implement a disciplinary process to take action against employees who violate information security
+          policies or procedures.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:2704
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-b
+        ref_id: "2704"
+        name: Environmental controls
+        description:
+          "The Supplier shall, where appropriate, implement, install, and maintain the following
+          environmental controls supporting Functions and protection of Data:
+
+          i) Fire suppression systems
+
+          ii) Temperature and humidity controls within a data centre or server room environment
+
+          iii) Backup power technology (e.g. uninterruptible power supply, diesel generator, separate grid
+          connection, etc.)."
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:3100
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-c
+        ref_id: "3100"
+        name: Security monitoring
+        description:
+          The Supplier shall monitor the security status of the networks and systems supporting
+          the operation of business Functions and protection of Data in order to detect potential security
+          problems and to track the ongoing effectiveness of protective security measures.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:3101
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-c
+        ref_id: "3101"
+        name: Monitor security controls
+        description:
+          "The Supplier shall establish and document security event monitoring which at a minimum
+          covers the following:
+
+          i) Security events covered
+
+          ii) Frequency of monitoring
+
+          iii) Clearly defined roles and responsibilities
+
+          iv) Escalation matrix."
+        implementation_groups:
+          - L1
+          - L2
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:3102
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-c
+        ref_id: "3102"
+        name: Continuously monitor security controls
+        description:
+          "The Supplier shall establish and document security event monitoring which at a minimum
+          covers the following:
+
+          i) 24x7x365 monitoring of all identified Information Systems in Production and non-Production
+          environments
+
+          ii) Tools used for 24x7x365 monitoring and correlation
+
+          iii) Security events covered
+
+          iv) Frequency of monitoring
+
+          v) Clearly defined roles and responsibilities
+
+          vi) Escalation matrix."
+        implementation_groups:
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:3103
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-c
+        ref_id: "3103"
+        name: Securing logs
+        description:
+          The Supplier shall hold logging data securely and grant read access only to accounts
+          with business needs. The Supplier shall protect audit tools from unauthorised access, modification
+          and deletion. Logging data shall be retained and protected from deletion to a documented retention
+          period, after which it shall be deleted.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:3104
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-c
+        ref_id: "3104"
+        name: Security event triage
+        description:
+          The Supplier shall provide evidence from their monitoring tool of security incidents
+          to verify the reliability of identified and triggered alerts for triage.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:3105
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-c
+        ref_id: "3105"
+        name: Identifying security incidents
+        description:
+          The Supplier shall contextualise alerts with knowledge of the threat and their systems,
+          and engage Incident Response when an incident (confirmed or otherwise) is identified.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:3106
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-c
+        ref_id: "3106"
+        name: Monitoring tools and skills
+        description:
+          The Supplier shall ensure that monitoring staff skills, tools and roles, including
+          any that are outsourced, reflect governance and reporting requirements, expected threats and the
+          complexities of the network or system data they need to use. Monitoring staff have contextual
+          knowledge of the Functions and requirements for the protection of Data.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:3107
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-c
+        ref_id: "3107"
+        name: Create, retain and correlate audit logs
+        description:
+          "The Supplier shall generate event logs for systems that support the operation of Functions
+          and protection of Data. The following criteria apply:
+
+          i) Logs are archived for a minimum of 12 months
+
+          ii) Logs capture (as a minimum) date, time (from a single NTP source), user ID, device accessed
+          and port used
+
+          iii) Logs capture key security event types (e.g. critical files accessed, user accounts generated,
+          multiple failed login attempts, logging failures from devices, events related to systems that
+          have an internet connection)
+
+          iv) Access to modify system logs is restricted
+
+          v) Logs and security event logs can be made available upon request
+
+          vi) Store audit records in a repository that is part of a physically different system
+
+          vii) The Supplier shall ensure that systems logs are reviewed at least weekly to identify system
+          failures, faults, or potential security incidents and corrective actions are taken to resolve
+          or address issues within a reasonable timeframe
+
+          viii) Review, at least every 6 months the event types selected for logging purposes to ensure
+          these still meet business requirements
+
+          ix) Capture the operational status of the logging system and alert on any failures which impact
+          the system's operational capacity."
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:3108
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-c
+        ref_id: "3108"
+        name: Audit reduction and report generation
+        description:
+          "The Supplier shall provide and implement an appropriate audit record reduction and
+          report generation capability that:
+
+          i) supports on-demand audit record review, analysis, and reporting requirements and after-the-fact
+          investigations of incidents; and
+
+          ii) does not alter the original content or time ordering of audit records."
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:3109
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-c
+        ref_id: "3109"
+        name: Integration of records with incident management
+        description:
+          The Supplier shall integrate audit record review, triage, analysis, and reporting processes
+          with organisational governance and incident management structure.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:3110
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-c
+        ref_id: "3110"
+        name: Monitor alerts/advisories and take action
+        description:
+          The Supplier shall monitor system security alerts and advisories and take action in
+          response.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:3200
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-c
+        ref_id: "3200"
+        name: Proactive security event discovery
+        description:
+          The Supplier shall detect, within networks and information systems, malicious activity
+          affecting, or with the potential to affect, the operation of business Functions and protection
+          of Data even when the activity evades standard signature-based security prevent/detect solutions
+          (or when standard solutions are not deployable).
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:3201
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-c
+        ref_id: "3201"
+        name: System abnormalities for attack detection
+        description:
+          The Supplier shall define examples of abnormal system behaviour to aid in detecting
+          malicious activity that is otherwise hard to identify. The Supplier shall take appropriate action
+          upon identifying this behaviour.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:3202
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-c
+        ref_id: "3202"
+        name: Proactive attack discovery
+        description:
+          The Supplier shall implement reasonable and proportionate measures to detect malicious
+          activity affecting, or with the potential to affect, the operation of Functions and protection
+          of Data.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:3203
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-c
+        ref_id: "3203"
+        name: Use indicators of compromise from alerts
+        description:
+          The Supplier shall monitor system security alerts and advisories and take action in
+          response using agreed and managed indicators of compromise.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:3204
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-c
+        ref_id: "3204"
+        name: Presence of unauthorised system components
+        description: "The Supplier shall implement proportionate measures to:
+
+          i) Detect the presence of unauthorised hardware, software, and firmware components within the
+          system using tooling
+
+          ii) Take the following actions when unauthorised components are detected: disable network access
+          by such components; isolate the components; notify systems administrators and/or security operations
+          teams."
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:4100
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-d
+        ref_id: "4100"
+        name: Response and recovery planning
+        description:
+          The Supplier shall implement well-defined and tested incident management processes
+          that aim to ensure continuity of business Functions and protection of Data in the event of system
+          or service failure. Mitigation activities are designed and where possible automated to contain
+          or limit the impact of a compromise.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:4101
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-d
+        ref_id: "4101"
+        name: Response plan
+        description:
+          The Supplier shall have an up-to-date incident response plan that is grounded in a
+          thorough risk assessment that takes account of business Functions and protection of Data and covers
+          a range of incident scenarios.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:4102
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-d
+        ref_id: "4102"
+        name: Response and recovery capability
+        description:
+          The Supplier shall have the capability to enact their incident response plan, including
+          effective limitation of impact on the operation of Functions and protection of Data. During an
+          incident, the Supplier shall enact processes and capabilities to provide access to information
+          sources on which to base their response decisions to coordinate incident handling activities with
+          contingency planning activities.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:4103
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-d
+        ref_id: "4103"
+        name: Testing and exercising
+        description:
+          The Supplier shall carry out exercises to test response plans at least every 12 months,
+          using past incidents that affected their (and other's) organisation, and scenarios that draw on
+          threat intelligence and risk assessments.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:4104
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-d
+        ref_id: "4104"
+        name: Incident handling capability
+        description:
+          "The Supplier shall establish an operational incident handling capability for organisational
+          information systems that is consistently applied across the organisation and includes:
+
+          i) Adequate preparation, detection, forensic analysis, containment, recovery, and user response
+          activities
+
+          ii) Tracking, documenting, and reporting incidents to appropriate organisational officials and/or
+          authorities
+
+          iii) Sufficient rigour, intensity and scope."
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:4105
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-d
+        ref_id: "4105"
+        name: Exfiltration tests
+        description:
+          The Supplier shall conduct data exfiltration tests at the network boundaries at least
+          every 12 months. These tests must be conducted against both authorised and covert channels.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:4106
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-d
+        ref_id: "4106"
+        name: Attempted unauthorised connections from staff
+        description: The Supplier shall audit the identity of internal users associated with denied communications.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:4200
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-d
+        ref_id: "4200"
+        name: Lessons learned
+        description:
+          The Supplier shall, when an incident occurs, incorporate root cause analysis and lessons
+          learned information from incident response activities into incident response procedures, training
+          and testing. The Supplier shall implement the resulting improvements immediately or, at minimum,
+          within 30 days of the completion of the root cause analysis.
+        implementation_groups:
+          - L1
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:4201
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-d
+        ref_id: "4201"
+        name: Business Continuity Risk Assessments
+        description:
+          The Supplier shall perform Business Continuity Risk Assessments to determine relevant
+          risks, threats, and likelihood & impact of a service outage or Data Breach. The Supplier shall
+          record the output of these Risk Assessments within a risk register along with the required controls
+          and/or procedures to mitigate or remove the risk and/or threat.
+        implementation_groups:
+          - L2
+          - L3
+      - urn: urn:intuitem:risk:req_node:def-stan-05-138:4202
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:def-stan-05-138:objective-d
+        ref_id: "4202"
+        name: Operation resilience for equipment
+        description:
+          The Supplier shall assess the requirement for redundant networking and telecommunication
+          systems to protect Functions and Data. Where required, the Supplier shall implement and protect
+          these systems.
+        implementation_groups:
+          - L3

@@ -1,3 +1,5 @@
+import uuid
+
 from django.contrib.contenttypes.models import ContentType
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -6,6 +8,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from core.views import BaseModelViewSet, LONG_CACHE_TTL
+from iam.models import RoleAssignment
 from metrology.models import (
     MetricDefinition,
     MetricInstance,
@@ -14,14 +17,27 @@ from metrology.models import (
     Dashboard,
     DashboardWidget,
 )
-from metrology.builtin_metrics import BUILTIN_METRICS, get_available_metrics_for_model
+from metrology.builtin_metrics import BUILTIN_METRICS, METRIC_TYPE_CHART_TYPES
+from metrology.serializers import BuiltinMetricSampleReadSerializer
+
+
+def _user_can_read_target(user, content_type, object_id):
+    target_model = content_type.model_class()
+    if target_model is None:
+        return False
+    try:
+        object_uuid = (
+            object_id if isinstance(object_id, uuid.UUID) else uuid.UUID(str(object_id))
+        )
+    except (ValueError, TypeError):
+        return False
+    try:
+        return RoleAssignment.is_object_readable(user, target_model, object_uuid)
+    except NotImplementedError:
+        return False
 
 
 class MetricDefinitionViewSet(BaseModelViewSet):
-    """
-    API endpoint that allows metric definitions to be viewed or edited.
-    """
-
     model = MetricDefinition
     serializers_module = "metrology.serializers"
     filterset_fields = [
@@ -53,10 +69,6 @@ class MetricDefinitionViewSet(BaseModelViewSet):
 
 
 class MetricInstanceViewSet(BaseModelViewSet):
-    """
-    API endpoint that allows metric instances to be viewed or edited.
-    """
-
     model = MetricInstance
     serializers_module = "metrology.serializers"
     filterset_fields = [
@@ -83,10 +95,6 @@ class MetricInstanceViewSet(BaseModelViewSet):
 
 
 class CustomMetricSampleViewSet(BaseModelViewSet):
-    """
-    API endpoint that allows custom metric samples to be viewed or edited.
-    """
-
     model = CustomMetricSample
     serializers_module = "metrology.serializers"
     filterset_fields = ["folder", "metric_instance", "evidence_revision"]
@@ -95,10 +103,6 @@ class CustomMetricSampleViewSet(BaseModelViewSet):
 
 
 class DashboardViewSet(BaseModelViewSet):
-    """
-    API endpoint that allows dashboards to be viewed or edited.
-    """
-
     model = Dashboard
     serializers_module = "metrology.serializers"
     filterset_fields = ["folder", "filtering_labels"]
@@ -106,10 +110,6 @@ class DashboardViewSet(BaseModelViewSet):
 
 
 class DashboardWidgetViewSet(BaseModelViewSet):
-    """
-    API endpoint that allows dashboard widgets to be viewed or edited.
-    """
-
     model = DashboardWidget
     serializers_module = "metrology.serializers"
     filterset_fields = [
@@ -140,12 +140,6 @@ class DashboardWidgetViewSet(BaseModelViewSet):
 
 
 class BuiltinMetricSampleViewSet(BaseModelViewSet):
-    """
-    API endpoint that allows builtin metric samples to be viewed.
-    These are system-computed metrics for objects like ComplianceAssessment,
-    RiskAssessment, FindingsAssessment, and Folder.
-    """
-
     model = BuiltinMetricSample
     serializers_module = "metrology.serializers"
     filterset_fields = ["content_type", "object_id", "date"]
@@ -153,12 +147,8 @@ class BuiltinMetricSampleViewSet(BaseModelViewSet):
     ordering = ["-date"]
 
     def get_queryset(self):
-        """
-        Optionally filter by content_type model name.
-        """
         queryset = super().get_queryset()
-
-        # Allow filtering by model name (e.g., ?model=ComplianceAssessment)
+        # ?model=ComplianceAssessment maps to a ContentType filter.
         model_name = self.request.query_params.get("model")
         if model_name:
             try:
@@ -171,12 +161,7 @@ class BuiltinMetricSampleViewSet(BaseModelViewSet):
 
     @action(detail=False, methods=["get"], name="Get supported models")
     def supported_models(self, request):
-        """
-        Returns list of models that support builtin metrics with their available metrics.
-        Includes chart_types for each metric based on the metric type.
-        """
-        from .builtin_metrics import METRIC_TYPE_CHART_TYPES
-
+        # chart_types are derived per-metric from each metric's declared type.
         result = {}
         for model_name, metrics in BUILTIN_METRICS.items():
             result[model_name] = {
@@ -192,15 +177,7 @@ class BuiltinMetricSampleViewSet(BaseModelViewSet):
 
     @action(detail=False, methods=["get"], name="Get metrics for object")
     def for_object(self, request):
-        """
-        Get all metric samples for a specific object.
-        Query params:
-        - content_type_id: The ContentType ID
-        - object_id: The object's UUID
-        - OR -
-        - model: Model name (e.g., ComplianceAssessment)
-        - object_id: The object's UUID
-        """
+        # Query params: object_id + (content_type_id | model).
         object_id = request.query_params.get("object_id")
         if not object_id:
             return Response(
@@ -227,26 +204,22 @@ class BuiltinMetricSampleViewSet(BaseModelViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
+        if not _user_can_read_target(request.user, content_type, object_id):
+            return Response(
+                {"error": "Not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
         samples = BuiltinMetricSample.objects.filter(
             content_type=content_type, object_id=object_id
         ).order_by("-date")
-
-        from metrology.serializers import BuiltinMetricSampleReadSerializer
 
         serializer = BuiltinMetricSampleReadSerializer(samples, many=True)
         return Response(serializer.data)
 
     @action(detail=False, methods=["post"], name="Refresh metrics for object")
     def refresh(self, request):
-        """
-        Force refresh metrics for a specific object.
-        Body:
-        - content_type_id: The ContentType ID
-        - object_id: The object's UUID
-        - OR -
-        - model: Model name (e.g., ComplianceAssessment)
-        - object_id: The object's UUID
-        """
+        # Body: object_id + (content_type_id | model).
         object_id = request.data.get("object_id")
         if not object_id:
             return Response(
@@ -273,7 +246,12 @@ class BuiltinMetricSampleViewSet(BaseModelViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        # Get the actual object
+        if not _user_can_read_target(request.user, content_type, object_id):
+            return Response(
+                {"error": "Not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
         model_class = content_type.model_class()
         try:
             obj = model_class.objects.get(id=object_id)
@@ -283,11 +261,7 @@ class BuiltinMetricSampleViewSet(BaseModelViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        # Update or create the snapshot
         sample, created = BuiltinMetricSample.update_or_create_snapshot(obj)
-
-        from metrology.serializers import BuiltinMetricSampleReadSerializer
-
         serializer = BuiltinMetricSampleReadSerializer(sample)
         return Response(
             {

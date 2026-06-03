@@ -5,11 +5,11 @@ description = "CISO Assistant CLI tools"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "httpx>=0.28.1",
+    "click>=8.1.0",
+    "icecream>=2.1.0",
     "mcp[cli]>=1.6.0",
-    "pyyaml>=6.0.2",
-    "requests>=2.32.3",
     "python-dotenv>=1.0.0",
+    "requests>=2.32.3",
     "rich>=13.0.0",
 ]
 
