@@ -1,9 +1,13 @@
 """Tests for the builtin metric registry and computation logic."""
 
+import json
+
 import pytest
 
 from core.models import (
+    Asset,
     AppliedControl,
+    Evidence,
     Incident,
     RiskAssessment,
     RiskMatrix,
@@ -12,6 +16,7 @@ from core.models import (
     Severity,
     Perimeter,
     Terminology,
+    Vulnerability,
 )
 from iam.models import Folder
 from metrology.builtin_metrics import (
@@ -57,6 +62,22 @@ class TestBuiltinMetricsRegistry:
             "total_risk_acceptances",
             "total_frameworks_in_use",
             "risk_scenarios_qualifications_breakdown",
+            # Phase 2 additions
+            "total_assets",
+            "assets_type_breakdown",
+            "total_evidence",
+            "evidence_status_breakdown",
+            "evidence_expiring_30d",
+            "total_vulnerabilities",
+            "vulnerabilities_severity_breakdown",
+            "vulnerabilities_status_breakdown",
+            "tasks_overdue",
+            "tasks_due_7d",
+            "controls_eta_breakdown",
+            "controls_priority_breakdown",
+            "total_audits",
+            "audits_status_breakdown",
+            "audits_avg_progress",
         ]:
             assert expected in keys, f"missing {expected} from Folder registry"
 
@@ -77,6 +98,33 @@ class TestFolderMetricsCompute:
         assert m["incidents_severity_breakdown"] == {}
         assert m["incidents_detection_breakdown"] == {}
         assert m["security_exceptions_status_breakdown"] == {}
+        # Phase 2 additions: new totals must be zero on an empty folder
+        assert m["total_assets"] == 0
+        assert m["total_evidence"] == 0
+        assert m["evidence_expiring_30d"] == 0
+        assert m["total_vulnerabilities"] == 0
+        assert m["tasks_overdue"] == 0
+        assert m["tasks_due_7d"] == 0
+        assert m["total_audits"] == 0
+        assert m["audits_avg_progress"] == 0
+        # ETA breakdown always returns its three buckets, all zero.
+        assert m["controls_eta_breakdown"] == {"On track": 0, "Late": 0, "No ETA": 0}
+
+    def test_breakdown_dicts_are_json_serializable(self, domain):
+        """Regression: gettext_lazy proxies satisfy dict.get but break json.dumps as keys."""
+        # Seed one row per choice type that historically used lazy labels, so every
+        # affected breakdown has at least one populated key.
+        Asset.objects.create(name="A1", folder=domain, type=Asset.Type.PRIMARY)
+        Evidence.objects.create(
+            name="E1", folder=domain, status=Evidence.Status.APPROVED
+        )
+        Vulnerability.objects.create(
+            name="V1", folder=domain, status=Vulnerability.Status.EXPLOITABLE
+        )
+
+        m = BuiltinMetricSample.compute_metrics(domain)
+        # json.dumps will raise TypeError if any nested dict key is a lazy proxy.
+        json.dumps(m)
 
     def test_incident_breakdowns(self, domain):
         Incident.objects.create(

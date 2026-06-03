@@ -40,7 +40,12 @@
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import SuggestControlsModal from '$lib/components/Modals/SuggestControlsModal.svelte';
-	import { displayScoreColor, darkenColor, getScoreHexColor } from '$lib/utils/helpers';
+	import {
+		displayScoreColor,
+		darkenColor,
+		getScoreHexColor,
+		getFieldVisibility
+	} from '$lib/utils/helpers';
 	import { auditFiltersStore, expandedNodesState } from '$lib/utils/stores';
 	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
 	import { derived } from 'svelte/store';
@@ -79,6 +84,16 @@
 			model: requirementAssessmentModel.name,
 			domain: data.compliance_assessment.folder.id
 		});
+
+	const viewerRole: 'auditor' | 'respondent' = page.data.user.is_third_party
+		? 'respondent'
+		: 'auditor';
+	const fieldVis = $derived(getFieldVisibility(compliance_assessment, viewerRole));
+	const showAnswers = $derived(fieldVis.showAnswers);
+	const showResult = $derived(fieldVis.showResult);
+	const showExtendedResult = $derived(fieldVis.showExtendedResult);
+	const showStatus = $derived(fieldVis.showStatus);
+	const showScore = $derived(fieldVis.showScore);
 
 	const has_threats = data.threats.total_unique_threats > 0;
 
@@ -227,6 +242,10 @@
 					...node,
 					canEditRequirementAssessment,
 					hasParentNode,
+					showAnswers,
+					showResult,
+					showStatus,
+					showScore,
 					showDocumentationScore: data.compliance_assessment.show_documentation_score,
 					scoringEnabled: data.compliance_assessment.scoring_enabled,
 					scoreCalculationMethod: data.compliance_assessment.score_calculation_method,
@@ -243,11 +262,16 @@
 					score: node.score,
 					documentationScore: node.documentation_score,
 					isScored: node.is_scored,
+					showResult,
+					showScore,
+					showStatus,
 					scoringEnabled: data.compliance_assessment.scoring_enabled,
 					showDocumentationScore: data.compliance_assessment.show_documentation_score,
 					max_score: node.max_score,
+					min_score: node.min_score ?? 0,
 					progressStatusEnabled: data.compliance_assessment.progress_status_enabled,
 					extendedResultEnabled: data.compliance_assessment.extended_result_enabled,
+					showExtendedResult,
 					extendedResult: node.extended_result,
 					extendedResultColor: extendedResultColorMap[node.extended_result]
 				},
@@ -505,7 +529,10 @@
 	let createAppliedControlsLoading = $state(false);
 
 	async function modalConfirmCreateSuggestedControls(id: string, _name: string, _action: string) {
-		let previewItems: { id: string; label: string }[] = [];
+		if (createAppliedControlsLoading) return;
+		createAppliedControlsLoading = true;
+		type PreviewItem = { id: string; label: string; status: 'create' | 'reuse' | 'linked' };
+		let previewItems: PreviewItem[] = [];
 		try {
 			const previewResponse = await fetch(
 				`/compliance-assessments/${id}/suggestions/applied-controls?dry_run=true`
@@ -522,7 +549,8 @@
 							control?.reference_control?.str ||
 							control?.reference_control?.name ||
 							control?.ref_id ||
-							''
+							'',
+						status: (control?.suggestion_status as 'create' | 'reuse' | 'linked') ?? 'create'
 					}))
 					.filter((item) => {
 						if (seen.has(item.id)) return false;
@@ -543,11 +571,15 @@
 						control?.reference_control?.str ||
 						control?.reference_control?.name ||
 						control?.ref_id ||
-						''
+						'',
+					status: 'create' as const
 				}));
 		}
 
-		if (previewItems.length === 0) return;
+		if (previewItems.length === 0) {
+			createAppliedControlsLoading = false;
+			return;
+		}
 
 		const modalComponent: ModalComponent = {
 			ref: SuggestControlsModal,
@@ -561,13 +593,12 @@
 			component: modalComponent,
 			title: m.suggestControls(),
 			body: m.createAppliedControlsFromSuggestionsConfirmMessage({
-				count: previewItems.length
+				count: previewItems.filter((i) => i.status !== 'linked').length
 			}),
 			response: () => {
 				createAppliedControlsLoading = false;
 			}
 		};
-		createAppliedControlsLoading = true;
 		modalStore.trigger(modal);
 	}
 
@@ -726,7 +757,7 @@
 					<div class="font-medium">{m.createdAt()}</div>
 					{formatDateOrDateTime(data.compliance_assessment.created_at, getLocale())}
 				</div>
-				{#if compliance_assessment.framework.outcomes_definition?.length}
+				{#if showResult && compliance_assessment.framework.outcomes_definition?.length}
 					<div>
 						<div class="text-sm font-medium text-gray-800">{safeTranslate('outcomes')}</div>
 						<div class="flex flex-wrap gap-1.5 mt-1">
@@ -765,7 +796,7 @@
 				{/if}
 			</div>
 			{#key compliance_assessment_donut_values}
-				{#if data.global_score && data.global_score.maturity_score >= 0}
+				{#if showScore && data.global_score && data.global_score.maturity_score >= 0}
 					<div class="w-1/4">
 						<RingProgress
 							name="global_maturity"
@@ -781,20 +812,22 @@
 						/>
 					</div>
 				{/if}
-				<div class={data.compliance_assessment.extended_result_enabled ? 'w-1/4' : 'w-1/3'}>
-					<DonutChart
-						s_label="Result"
-						name="compliance_result"
-						title={m.compliance()}
-						orientation="horizontal"
-						values={compliance_assessment_donut_values.result.values}
-						colors={compliance_assessment_donut_values.result.values.map(
-							(object) => object.itemStyle.color
-						)}
-						showPercentage={true}
-					/>
-				</div>
-				{#if data.compliance_assessment.extended_result_enabled && compliance_assessment_donut_values.extended_result?.values?.length > 0}
+				{#if showResult}
+					<div class={data.compliance_assessment.extended_result_enabled ? 'w-1/4' : 'w-1/3'}>
+						<DonutChart
+							s_label="Result"
+							name="compliance_result"
+							title={m.compliance()}
+							orientation="horizontal"
+							values={compliance_assessment_donut_values.result.values}
+							colors={compliance_assessment_donut_values.result.values.map(
+								(object) => object.itemStyle.color
+							)}
+							showPercentage={true}
+						/>
+					</div>
+				{/if}
+				{#if showExtendedResult && compliance_assessment_donut_values.extended_result?.values?.length > 0}
 					<div class="w-1/4">
 						<DonutChart
 							s_label="Extended Result"
@@ -809,7 +842,7 @@
 						/>
 					</div>
 				{/if}
-				{#if data.compliance_assessment.progress_status_enabled}
+				{#if showStatus}
 					<div class={data.compliance_assessment.extended_result_enabled ? 'w-1/4' : 'w-1/3'}>
 						<DonutChart
 							s_label="Status"
@@ -825,7 +858,7 @@
 					</div>
 				{/if}
 			{/key}
-			{#if data.compliance_assessment.answers_progress != null}
+			{#if showAnswers && data.compliance_assessment.answers_progress != null}
 				<div class="flex items-center gap-2 text-sm text-gray-600 mt-2">
 					<i class="fa-solid fa-clipboard-question text-primary-500"></i>
 					<span>{m.questions()}: {data.compliance_assessment.answers_progress}%</span>
@@ -1105,28 +1138,30 @@
 						<Popover.Content
 							class="card p-2 bg-white w-fit shadow-lg space-y-2 border border-surface-200 z-10"
 						>
-							<div>
-								<span class="text-sm font-bold">{m.result()}</span>
-								<div class="flex flex-wrap gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
-									{#each Object.entries(complianceResultColorMap) as [result, color]}
-										<button
-											type="button"
-											onclick={() => toggleResult(result)}
-											class="px-2 py-1 rounded-md font-bold"
-											style="background-color: {selectedResults.includes(result)
-												? color
-												: 'grey'}; color: {selectedResults.includes(result)
-												? result === 'not_applicable'
-													? 'white'
-													: 'black'
-												: 'black'}; opacity: {selectedResults.includes(result) ? 1 : 0.3};"
-										>
-											{safeTranslate(result)}
-										</button>
-									{/each}
+							{#if showResult}
+								<div>
+									<span class="text-sm font-bold">{m.result()}</span>
+									<div class="flex flex-wrap gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+										{#each Object.entries(complianceResultColorMap) as [result, color]}
+											<button
+												type="button"
+												onclick={() => toggleResult(result)}
+												class="px-2 py-1 rounded-md font-bold"
+												style="background-color: {selectedResults.includes(result)
+													? color
+													: 'grey'}; color: {selectedResults.includes(result)
+													? result === 'not_applicable'
+														? 'white'
+														: 'black'
+													: 'black'}; opacity: {selectedResults.includes(result) ? 1 : 0.3};"
+											>
+												{safeTranslate(result)}
+											</button>
+										{/each}
+									</div>
 								</div>
-							</div>
-							{#if data.compliance_assessment.progress_status_enabled}
+							{/if}
+							{#if showStatus}
 								<div>
 									<span class="text-sm font-bold">{m.status()}</span>
 									<div
@@ -1149,7 +1184,7 @@
 									</div>
 								</div>
 							{/if}
-							{#if data.compliance_assessment.extended_result_enabled}
+							{#if showExtendedResult}
 								<div>
 									<span class="text-sm font-bold">{m.extendedResult()}</span>
 									<div

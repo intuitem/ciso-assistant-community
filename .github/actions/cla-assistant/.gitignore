@@ -1,0 +1,8 @@
+# The repo root ignores **/dist/. Re-include the vendored, verified build
+# artifact so the local action has its committed entrypoint.
+!dist/
+!dist/index.js
+
+# Local build/install outputs — never commit these; rebuild from src/ instead.
+node_modules/
+lib/

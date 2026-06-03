@@ -137,7 +137,7 @@ Here is an illustration of the **decoupling** principle and its advantages:
 
 Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistant>.
 
-## Setting up the local AI engine 
+## Setting up the local AI engine
 
 Read more here: [AI engine](backend/chat/README.md)
 
@@ -191,7 +191,7 @@ Read more here: [AI engine](backend/chat/README.md)
 46. FBI CJIS 🇺🇸👮
 47. Operational Technology Cybersecurity Controls (OTCC) 🇸🇦
 48. Secure Controls Framework (SCF) 🇺🇸🌐
-49. NCSC Cyber Assessment Framework (CAF) 🇬🇧
+49. NCSC - Cyber Assessment Framework (CAF) v3.2 🇬🇧
 50. California Consumer Privacy Act (CCPA) 🇺🇸
 51. California Consumer Privacy Act Regulations 🇺🇸
 52. NCSC Cyber Essentials 🇬🇧
@@ -251,9 +251,16 @@ Read more here: [AI engine](backend/chat/README.md)
 106. OWASP Top 10 Web - Threat catalog 🐝🌐
 107. OWASP MAS Threat Modelling Guide - Threat catalog 🐝📱
 108. CISA Cybersecurity Performance Goals (CPG) v2.0 🇺🇸
-109. ANSSI : Référentiel Cyber France pour la réglmentation NIS2 (ReCyF) 🇫🇷 
+109. ANSSI : Référentiel Cyber France pour la réglmentation NIS2 (ReCyF) 🇫🇷
 110. Cadre Conformité Cyber France (3CF) v3.1 (2026) ✈️🇫🇷
 111. Règles OIV - Secteur « Transport aérien » (2016) ✈️🇫🇷
+112. IEC 62443 series — parts 2-1, 2-4, 3-2, 3-3, 4-1, 4-2 🏭🌐
+113. CER Directive (Critical Entities Resilience) 🇪🇺
+114. EUDI ARF — EU Digital Identity Wallet High-Level Requirements (Annex 2.02) 🇪🇺
+115. UK Defence Standard 05-138 Issue 4 🇬🇧
+116. Référentiel HAS - Certification des établissements de santé pour la qualité des soins 🇫🇷🏥
+117. Personal Data Protection Law (PDPL) 🇸🇦
+118. NCSC - Cyber Assessment Framework (CAF) v4.0 🇬🇧
 
 ### Community contributions
 
@@ -284,6 +291,14 @@ Read more here: [AI engine](backend/chat/README.md)
 25. Loi 05-20 relative à la cybersécurité (Maroc) 🇲🇦
 26. Lithuanian NIS2 Cybersecurity Law (Kibernetinio saugumo įstatymas) 🇱🇹
 27. Prestataire d'audit de sécurité des systèmes d'information (PASSI) 🇫🇷
+28. ANS Programme CaRE - Domaine 2 (Continuité et reprise d'activité, sauvegarde) 🇫🇷🏥
+29. ANS HospiConnect HOP'EN2 (Sécurisation de l'accès au SIH) 🇫🇷🏥
+30. Loi n° 09-08 relative à la protection des personnes physiques 🇲🇦
+31. Checklist des exigences de la Loi n° 09-08 🇲🇦
+32. Référentiel des exigences de qualification des prestataires de services cloud ☁️🇲🇦
+33. AI Defense Matrix 🤖🌐
+34. Zero Trust for Operational Technology (ZT OT) 🇺🇸🏭
+35. T.C. CBDDO Bilgi ve İletişim Güvenliği Rehberi (BİGR) 🇹🇷
 
 <br/>
 
@@ -405,7 +420,7 @@ You will also have to add those 2 system environment variables after installing 
 ```conf
 MAGIC=Full path to the `magic.mgc` file (usually `C:\msys64\ucrt64\share\misc\magic.mgc`)
 WEASYPRINT_DLL_DIRECTORIES=Same path as your MSYS2 UCRT64 binaries
-``` 
+```
 
 
 Given that the default encoding on Windows isn't `UTF-8` but `cp1252`, certain python script printing `UTF-8` characters such as emojis may cause the backend crash or malfunction in some cases (e.g. library importation).
@@ -413,7 +428,7 @@ To avoid this issue with this project, enforce the `UTF-8` encoding by adding th
 ```conf
 PYTHONUTF8=1
 PYTHONIOENCODING=utf-8:replace
-``` 
+```
 
 > [!NOTE]
 > ### Known issues
@@ -731,34 +746,13 @@ docker-compose.yml now relies on a non-root user 1001:1001, which is available i
 - docker compose down
 - update the docker-compose.yml file
 - sudo chown -R 1001:1001 db
-- docker compose up -d 
+- docker compose up -d
 
 ## Supported languages 🌐
 
-1. FR: French
-2. EN: English
-3. AR: Arabic
-4. PT: Portuguese
-5. ES: Spanish
-6. DE: German
-7. NL: Dutch
-8. IT: Italian
-9. PL: Polish
-10. RO: Romanian
-11. HI: Hindi
-12. UR: Urdu
-13. CS: Czech
-14. SV: Swedish
-15. ID: Indonesian
-16. DA: Danish
-17. HU: Hungarian
-18. UK: Ukrainian
-19. EL: Greek
-20. TR: Turkish
-21. HR: Croatian
-22. ZH: Chinese (Simplified)
-23. LT: Lithuanian
-24. KO: Korean
+[![Translation progress](https://intuitem.github.io/metrics/i18n/progress.svg)](https://intuitem.github.io/metrics/i18n/)
+
+Reference is `en.json`; coverage = share of reference keys present in each locale file. Auto-refreshed daily — full breakdown at the [dashboard](https://intuitem.github.io/metrics/i18n/).
 
 ## Contributors 🤝
 

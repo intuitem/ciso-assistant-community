@@ -2,6 +2,7 @@
 	import { getTranslation, withTranslation, type ImplementationGroup } from './builder-state';
 	import { createDragHandlers } from './builder-utils.svelte';
 	import ConfirmAction from './ConfirmAction.svelte';
+	import { m } from '$paraglide/messages';
 
 	interface Props {
 		groups: ImplementationGroup[];
@@ -47,14 +48,14 @@
 <div class="space-y-1.5">
 	<div class="flex items-center justify-between">
 		<span class="text-xs font-medium text-gray-500 uppercase tracking-wider"
-			>Implementation groups</span
+			>{m.builderImplementationGroupsTitle()}</span
 		>
 		<button
 			type="button"
 			class="text-xs text-blue-600 hover:text-blue-700 font-medium"
 			onclick={addGroup}
 		>
-			<i class="fa-solid fa-plus mr-1"></i>Add group
+			<i class="fa-solid fa-plus mr-1"></i>{m.builderAddGroup()}
 		</button>
 	</div>
 
@@ -79,7 +80,7 @@
 
 				{#if group.name}
 					<span class="text-sm font-medium text-gray-700 truncate min-w-0">
-						{group.name || 'Untitled group'}
+						{group.name || m.builderUntitledGroup()}
 					</span>
 				{/if}
 
@@ -88,7 +89,7 @@
 				{#if group.default_selected}
 					<span
 						class="text-[10px] px-1.5 py-0.5 rounded-full bg-green-100 text-green-700 border border-green-200"
-						>default</span
+						>{m.builderDefaultBadge()}</span
 					>
 				{/if}
 
@@ -108,7 +109,7 @@
 				<div class="px-3 pb-3 pt-1 border-t border-gray-200 space-y-2">
 					<div class="grid grid-cols-2 gap-2">
 						<label class="block">
-							<span class="text-xs text-gray-500">Ref ID</span>
+							<span class="text-xs text-gray-500">{m.frameworkRefId()}</span>
 							<input
 								type="text"
 								value={group.ref_id}
@@ -120,11 +121,11 @@
 							/>
 						</label>
 						<label class="block">
-							<span class="text-xs text-gray-500">Name</span>
+							<span class="text-xs text-gray-500">{m.name()}</span>
 							<input
 								type="text"
 								value={group.name}
-								placeholder="e.g. Tier 1"
+								placeholder={m.builderGroupNamePlaceholder()}
 								class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 								onblur={(e) => {
 									items[index].name = e.currentTarget.value;
@@ -135,10 +136,10 @@
 					</div>
 
 					<label class="block">
-						<span class="text-xs text-gray-500">Description</span>
+						<span class="text-xs text-gray-500">{m.description()}</span>
 						<textarea
 							value={group.description}
-							placeholder="Description of this implementation group"
+							placeholder={m.builderGroupDescriptionPlaceholder()}
 							rows="2"
 							class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-none"
 							onblur={(e) => {
@@ -158,22 +159,22 @@
 							}}
 							class="w-3.5 h-3.5 rounded border-gray-300"
 						/>
-						<span class="text-xs text-gray-500">Selected by default</span>
+						<span class="text-xs text-gray-500">{m.builderSelectedByDefault()}</span>
 					</label>
 
 					{#if activeLanguage}
 						{@const lang = activeLanguage}
 						<div class="border-t border-gray-200 pt-2 space-y-1.5">
 							<span class="text-[10px] text-blue-500 font-medium uppercase"
-								>{lang.toUpperCase()} translation</span
+								>{m.builderTranslationLabel({ lang: lang.toUpperCase() })}</span
 							>
 							<div class="grid grid-cols-2 gap-2">
 								<label class="block">
-									<span class="text-xs text-blue-500">Name</span>
+									<span class="text-xs text-blue-500">{m.name()}</span>
 									<input
 										type="text"
 										value={getTranslation(group.translations, lang, 'name')}
-										placeholder="Translate name..."
+										placeholder={m.builderTranslateName()}
 										class="w-full text-sm border border-blue-100 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 										onblur={(e) => {
 											items[index].translations = withTranslation(
@@ -187,11 +188,11 @@
 									/>
 								</label>
 								<label class="block">
-									<span class="text-xs text-blue-500">Description</span>
+									<span class="text-xs text-blue-500">{m.description()}</span>
 									<input
 										type="text"
 										value={getTranslation(group.translations, lang, 'description')}
-										placeholder="Translate description..."
+										placeholder={m.builderTranslateDescription()}
 										class="w-full text-sm border border-blue-100 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 										onblur={(e) => {
 											items[index].translations = withTranslation(
@@ -214,7 +215,7 @@
 
 	{#if items.length === 0}
 		<p class="text-xs text-gray-400 text-center py-2">
-			No implementation groups defined. Add one above.
+			{m.builderNoImplementationGroups()}
 		</p>
 	{/if}
 </div>

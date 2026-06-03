@@ -1,22 +1,10 @@
 <script lang="ts">
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/state';
-	import { breadcrumbs, type Breadcrumb } from '$lib/utils/breadcrumbs';
+	import { breadcrumbs, syncBreadcrumbsToCurrentUrl } from '$lib/utils/breadcrumbs';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { pageTitle } from '$lib/utils/stores';
-
-	async function trimBreadcrumbsToCurrentPath(
-		breadcrumbs: Breadcrumb[],
-		currentPath: string
-	): Promise<Breadcrumb[]> {
-		const idx = breadcrumbs.findIndex((c) => c.href?.startsWith(currentPath));
-		// First breadcrumb is home, its href is always '/'
-		if (idx > 0 && idx < breadcrumbs.length - 1) {
-			breadcrumbs = breadcrumbs.slice(0, idx + 1);
-		}
-		return breadcrumbs;
-	}
 
 	function getPageTitle(): string {
 		// Check each source in priority order
@@ -38,13 +26,30 @@
 		return URL_MODEL_MAP[lastPathSegment]?.localNamePlural;
 	}
 
-	afterNavigate(async () => {
-		$breadcrumbs = await trimBreadcrumbsToCurrentPath($breadcrumbs, page.url.pathname);
-	});
+	function sync(fallbackLabel: string, isFreshLoad: boolean) {
+		const currentPath = page.url.pathname;
+		const currentUrl = currentPath + page.url.search;
+		const current = $breadcrumbs;
+		const next = syncBreadcrumbsToCurrentUrl(
+			current,
+			currentPath,
+			currentUrl,
+			fallbackLabel,
+			isFreshLoad
+		);
+		// No-op if unchanged.
+		if (
+			next.length !== current.length ||
+			next.some((c, i) => c.href !== current[i].href || c.label !== current[i].label)
+		) {
+			$breadcrumbs = next;
+		}
+	}
+
+	afterNavigate((nav) => sync(getPageTitle(), nav.type === 'enter'));
 
 	$effect(() => {
 		$pageTitle = getPageTitle();
-		if ($breadcrumbs.length < 2) breadcrumbs.push([{ label: $pageTitle, href: page.url.pathname }]);
 	});
 </script>
 

@@ -61,6 +61,12 @@
 		link="/experimental/asset-board"
 		tags={['assets', 'graph', 'canvas', 'prototype']}
 	/>
+	<Article
+		title="Analytics Export"
+		desc="Export all analytics dashboard data as a multi-sheet Excel file (Summary, Risk Levels, Compliance, Controls, Incidents) — ready to use in Power BI or any reporting tool."
+		link="/experimental/analytics-export"
+		tags={['analytics', 'export', 'xlsx', 'reporting']}
+	/>
 	<!-- <Article -->
 	<!-- 	title="Multi-file evidence (UX prototype)" -->
 	<!-- 	desc="Imagine an evidence whose revisions hold multiple files at once. History timeline with file-level diff (added / removed / replaced / unchanged) and arbitrary revision compare. Static fake data, no backend." -->

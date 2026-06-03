@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getBuilderContext, type Question } from './builder-state';
+	import { m } from '$paraglide/messages';
 
 	interface Props {
 		question: Question;
@@ -58,13 +59,13 @@
 		onclick={toggle}
 	>
 		<i class="fa-solid {active ? 'fa-link-slash' : 'fa-link'} mr-1"></i>
-		{active ? 'Remove condition' : 'Add condition'}
+		{active ? m.builderRemoveCondition() : m.builderAddCondition()}
 	</button>
 
 	{#if active}
 		<div class="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-2">
 			<label class="block">
-				<span class="text-xs text-amber-700 font-medium">Show when this question...</span>
+				<span class="text-xs text-amber-700 font-medium">{m.builderShowWhenThisQuestion()}</span>
 				<select
 					value={dependsOn.question}
 					class="w-full text-sm border border-amber-200 rounded px-2 py-1 mt-1 outline-none focus:border-amber-400 bg-white"
@@ -73,7 +74,7 @@
 						dependsOn.answers = [];
 					}}
 				>
-					<option value="">Select a question...</option>
+					<option value="">{m.builderSelectAQuestion()}</option>
 					{#each availableQuestions as q (q.id)}
 						<option value={q.urn}>{q.ref_id || q.text || q.urn}</option>
 					{/each}
@@ -82,7 +83,7 @@
 
 			{#if sourceQuestion && (sourceQuestion.type === 'unique_choice' || sourceQuestion.type === 'multiple_choice')}
 				<div>
-					<span class="text-xs text-amber-700 font-medium">...has answer:</span>
+					<span class="text-xs text-amber-700 font-medium">{m.builderHasAnswer()}</span>
 					<div class="flex flex-wrap gap-1 mt-1">
 						{#each sourceQuestion.choices as choice (choice.id)}
 							{@const isSelected = dependsOn.answers.includes(choice.urn ?? '')}
@@ -93,14 +94,14 @@
 									: 'bg-white border-amber-200 text-amber-600 hover:border-amber-300'}"
 								onclick={() => toggleAnswer(choice.urn ?? '')}
 							>
-								{choice.value || choice.ref_id || 'Untitled'}
+								{choice.value || choice.ref_id || m.builderUntitled()}
 							</button>
 						{/each}
 					</div>
 				</div>
 
 				<label class="flex items-center gap-2">
-					<span class="text-xs text-amber-700 font-medium">Match:</span>
+					<span class="text-xs text-amber-700 font-medium">{m.builderMatch()}</span>
 					<select
 						value={dependsOn.condition}
 						class="text-xs border border-amber-200 rounded px-2 py-0.5 outline-none bg-white"
@@ -109,13 +110,13 @@
 							save();
 						}}
 					>
-						<option value="any">Any selected</option>
-						<option value="all">All selected</option>
+						<option value="any">{m.builderMatchAny()}</option>
+						<option value="all">{m.builderMatchAll()}</option>
 					</select>
 				</label>
 			{:else if sourceQuestion}
 				<p class="text-xs text-amber-600">
-					Conditions are only supported for choice-type questions.
+					{m.builderConditionsOnlyChoiceTypes()}
 				</p>
 			{/if}
 		</div>

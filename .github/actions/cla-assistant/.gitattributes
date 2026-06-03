@@ -1,0 +1,5 @@
+# The repo root applies `* text=auto eol=lf`. Store dist/index.js verbatim so
+# the committed file stays byte-identical to the reproducible ncc build
+# (sha256 746a12abdbead8f8fc89dc4fd05dffb995ca4321ea4230068be822bf722e7d3b)
+# and so the dist-check CI rebuild diffs cleanly.
+dist/index.js -text
