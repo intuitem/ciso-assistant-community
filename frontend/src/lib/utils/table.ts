@@ -35,6 +35,9 @@ interface ListViewFieldsConfig {
 	[key: string]: {
 		head: string[];
 		body: string[];
+		// Extra columns exposed by the model but hidden by default. Available through the
+		// column selector on standard list pages; `head`/`body` above remain the defaults.
+		optionalFields?: { head: string[]; body: string[] };
 		meta?: string[];
 		breadcrumb_link_disabled?: boolean;
 		filters?: {
@@ -1604,6 +1607,11 @@ export const listViewFields = {
 			'linked_models',
 			'filtering_labels'
 		],
+		// Extra columns already returned by the API (AppliedControlReadSerializer), hidden by default.
+		optionalFields: {
+			head: ['startDate', 'expiryDate', 'createdAt', 'updatedAt'],
+			body: ['start_date', 'expiry_date', 'created_at', 'updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: APPLIED_CONTROL_STATUS_FILTER,
@@ -3579,13 +3587,15 @@ export function getBatchActions(model: urlModel): BatchActionConfig[] {
 
 export function getListViewFields({
 	key,
-	featureFlags = {}
+	featureFlags = {},
+	includeOptional = false
 }: {
 	key: string;
 	featureFlags: Record<string, boolean>;
+	includeOptional?: boolean;
 }) {
 	if (!Object.keys(listViewFields).includes(key)) {
-		return { head: [], body: [] };
+		return { head: [], body: [], defaultBody: [] };
 	}
 
 	const baseEntry = listViewFields[key];
@@ -3607,10 +3617,18 @@ export function getListViewFields({
 		body = body.filter((_, index) => !indicesToPop.includes(index));
 	}
 
+	// `defaultBody` is the set shown out of the box; optional fields are appended but hidden by default.
+	const defaultBody = [...body];
+	if (includeOptional && baseEntry.optionalFields) {
+		head = [...head, ...baseEntry.optionalFields.head];
+		body = [...body, ...baseEntry.optionalFields.body];
+	}
+
 	return {
 		...baseEntry,
 		head,
-		body
+		body,
+		defaultBody
 	};
 }
 

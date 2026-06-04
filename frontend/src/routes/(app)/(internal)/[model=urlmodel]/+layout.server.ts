@@ -1,17 +1,15 @@
-import { listViewFields } from '$lib/utils/table';
+import { getListViewFields } from '$lib/utils/table';
 import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 import { urlParamModelVerboseName, urlParamModelDescriptionKey } from '$lib/utils/crud';
 
-import type { urlModel } from '$lib/utils/types';
-
 export const load = async ({ fetch, params }) => {
-	const headData: Record<string, string> = listViewFields[params.model as urlModel].body.reduce(
-		(obj, key, index) => {
-			obj[key] = listViewFields[params.model as urlModel].head[index];
-			return obj;
-		},
-		{}
-	);
+	// Include optional fields so the column selector can offer them; ModelTable strips
+	// feature-flag-disabled columns client-side, so no flag filtering is needed here.
+	const fields = getListViewFields({ key: params.model, featureFlags: {}, includeOptional: true });
+	const headData: Record<string, string> = fields.body.reduce((obj, key, index) => {
+		obj[key] = fields.head[index];
+		return obj;
+	}, {});
 
 	const table: TableSource = {
 		head: headData,

@@ -26,6 +26,7 @@
 	import { contextMenuActions, listViewFields, getBatchActions } from '$lib/utils/table';
 	import { tableFilterStates } from '$lib/utils/stores';
 	import BatchActionBar from './BatchActionBar.svelte';
+	import ColumnSelector from './ColumnSelector.svelte';
 	import type { urlModel } from '$lib/utils/types.js';
 	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
 	import { m } from '$paraglide/messages';
@@ -45,7 +46,7 @@
 	import ThFilter from './ThFilter.svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import { ContextMenu } from 'bits-ui';
-	import { tableHandlers, tableStates } from '$lib/utils/stores';
+	import { tableHandlers, tableStates, tableColumnStates } from '$lib/utils/stores';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import {
@@ -89,6 +90,7 @@
 		baseEndpoint?: string;
 		detailQueryParameter?: string;
 		fields?: string[];
+		columnSelector?: boolean;
 		canSelectObject?: boolean;
 		overrideFilters?: { [key: string]: any[] };
 		defaultFilters?: { [key: string]: any[] };
@@ -142,6 +144,7 @@
 		baseEndpoint = `/${URLModel}`,
 		detailQueryParameter = $bindable(),
 		fields = [],
+		columnSelector = undefined,
 		canSelectObject = false,
 		overrideFilters = {},
 		defaultFilters = {},
@@ -189,6 +192,50 @@
 				{ head: {}, body: source.body, meta: source.meta }
 			)
 	);
+
+	// --- Column show/hide (browser-persisted per URLModel) ---
+	// Available columns = feature-flag-filtered head keys (defaults + optional, off-by-default).
+	const allColumns = $derived(
+		Object.entries(tableSource.head).map(([key, label]) => ({ key, label: label as string }))
+	);
+	const allColumnKeys = $derived(allColumns.map((c) => c.key));
+	// Defaults are the model's standard columns from table.ts (crud.ts), intersected with what's available.
+	const defaultColumns = $derived(
+		(URLModel && listViewFields[URLModel]?.body
+			? listViewFields[URLModel].body
+			: allColumnKeys
+		).filter((key) => allColumnKeys.includes(key))
+	);
+	const storedColumns = $derived(URLModel ? $tableColumnStates[URLModel] : undefined);
+	const visibleColumns = $derived(storedColumns ?? defaultColumns);
+	const isColumnVisible = (key: string) => visibleColumns.includes(key);
+	// Show the selector on standalone list pages only; curated embedded tables pass `fields`.
+	const showColumnSelector = $derived(
+		(columnSelector ?? Boolean(deleteForm)) &&
+			Boolean(URLModel) &&
+			isStandaloneTable &&
+			fields.length === 0 &&
+			allColumns.length > 1
+	);
+
+	const sameAsDefault = (cols: string[]) =>
+		cols.length === defaultColumns.length && defaultColumns.every((k) => cols.includes(k));
+
+	function setVisibleColumns(visible: string[]) {
+		if (!URLModel) return;
+		if (sameAsDefault(visible)) {
+			resetColumns();
+			return;
+		}
+		$tableColumnStates = { ...$tableColumnStates, [URLModel]: visible };
+	}
+
+	function resetColumns() {
+		if (!URLModel) return;
+		const next = { ...$tableColumnStates };
+		delete next[URLModel];
+		$tableColumnStates = next;
+	}
 
 	function onRowClick(
 		event: SvelteEvent<MouseEvent | KeyboardEvent, HTMLTableRowElement>,
@@ -761,6 +808,14 @@
 			{#if pagination && rowsPerPage}
 				<RowsPerPage {handler} />
 			{/if}
+			{#if showColumnSelector}
+				<ColumnSelector
+					columns={allColumns}
+					visible={visibleColumns}
+					onChange={setVisibleColumns}
+					onReset={resetColumns}
+				/>
+			{/if}
 			<div class="flex space-x-2 items-center">
 				{@render optButton?.()}
 				{#if canSelectObject}
@@ -811,7 +866,7 @@
 					</th>
 				{/if}
 				{#each Object.entries(tableSource.head) as [key, heading]}
-					{#if fields.length === 0 || fields.includes(key)}
+					{#if (fields.length === 0 || fields.includes(key)) && isColumnVisible(key)}
 						<Th {handler} orderBy={isMultiValueColumn(key) ? undefined : key} class={regionHeadCell}
 							>{safeTranslate(heading)}</Th
 						>
@@ -827,10 +882,12 @@
 						<th></th>
 					{/if}
 					{#each Object.entries(tableSource.head) as [key, _]}
-						{#if thFilterFields.includes(key)}
-							<ThFilter {handler} filterBy={key} />
-						{:else}
-							<th></th>
+						{#if isColumnVisible(key)}
+							{#if thFilterFields.includes(key)}
+								<ThFilter {handler} filterBy={key} />
+							{:else}
+								<th></th>
+							{/if}
 						{/if}
 					{/each}
 				</tr>
@@ -871,7 +928,7 @@
 									</td>
 								{/if}
 								{#each Object.entries(row) as [key, value]}
-									{#if key !== 'meta'}
+									{#if key !== 'meta' && isColumnVisible(key)}
 										{@const component = fieldComponentMap[key]}
 										<td role="gridcell">
 											<div class={regionCell}>
