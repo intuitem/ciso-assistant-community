@@ -261,6 +261,7 @@ Read more here: [AI engine](backend/chat/README.md)
 116. Référentiel HAS - Certification des établissements de santé pour la qualité des soins 🇫🇷🏥
 117. Personal Data Protection Law (PDPL) 🇸🇦
 118. NCSC - Cyber Assessment Framework (CAF) v4.0 🇬🇧
+119. Algemene Beveiligingseisen voor Rijksoverheidsopdrachten (ABRO) 2026 🇳🇱
 
 ### Community contributions
 
