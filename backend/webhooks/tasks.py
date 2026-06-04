@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 
 import requests
 from huey.contrib.djhuey import db_task
+from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q, Count
 
@@ -200,3 +201,40 @@ def send_audit_request(endpoint_id, body):
             )
     except requests.exceptions.RequestException as e:
         raise Exception(f"Audit sink network error for {endpoint_id}: {e}")
+
+
+def replay_audit_to_sink(endpoint, since, until=None, cap=None):
+    """
+    Re-emit historical audit events to a single sink (the replay/backfill path).
+    LogEntry is the system of record, so a sink that was down can be backfilled.
+    Bounded by AUDITLOG_MAX_RECORDS with a logged (never silent) truncation.
+    """
+    cap = cap or getattr(settings, "AUDITLOG_MAX_RECORDS", 50000)
+    entries = LogEntry.objects.exclude(action=LogEntry.Action.ACCESS).filter(
+        timestamp__gte=since
+    )
+    if until:
+        entries = entries.filter(timestamp__lte=until)
+
+    target_folder_ids = [str(f.id) for f in endpoint.target_folders.all()]
+    if target_folder_ids:
+        entries = entries.filter(additional_data__folder_id__in=target_folder_ids)
+    entries = entries.order_by("timestamp")
+
+    total = entries.count()
+    truncated = total > cap
+    if truncated:
+        logger.warning(
+            "Audit replay truncated to cap",
+            endpoint_id=str(endpoint.id),
+            total=total,
+            cap=cap,
+        )
+
+    scheduled = 0
+    for entry in entries[:cap].iterator():
+        body = build_audit_body(entry, endpoint.body_format)
+        send_audit_request.schedule(args=(str(endpoint.id), body), delay=1)
+        scheduled += 1
+
+    return {"scheduled": scheduled, "truncated": truncated, "total": total}

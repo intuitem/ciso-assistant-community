@@ -1,5 +1,6 @@
 """Tests for audit-log → SIEM forwarding (Phase 1: OCSF body + dispatch)."""
 
+from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -142,6 +143,58 @@ def test_integration_endpoint_not_selected_for_audit(root_folder):
     ):
         tasks.dispatch_audit_event.call_local(str(le.pk))
     send.schedule.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_replay_schedules_entries_since(root_folder):
+    ep = _make_audit_sink(root_folder)
+    _create_entry("P-replay-1", root_folder)
+    _create_entry("P-replay-2", root_folder)
+    since = datetime(2000, 1, 1, tzinfo=timezone.utc)
+    with patch.object(tasks, "send_audit_request") as send:
+        result = tasks.replay_audit_to_sink(ep, since)
+    assert result["scheduled"] == send.schedule.call_count == result["total"]
+    assert result["scheduled"] >= 2
+    assert result["truncated"] is False
+
+
+@pytest.mark.django_db
+def test_replay_truncates_with_flag(root_folder):
+    ep = _make_audit_sink(root_folder)
+    _create_entry("P-cap-1", root_folder)
+    _create_entry("P-cap-2", root_folder)
+    since = datetime(2000, 1, 1, tzinfo=timezone.utc)
+    with patch.object(tasks, "send_audit_request") as send:
+        result = tasks.replay_audit_to_sink(ep, since, cap=1)
+    assert result["scheduled"] == 1
+    assert result["truncated"] is True
+    assert result["total"] >= 2
+    assert send.schedule.call_count == 1
+
+
+@pytest.mark.django_db
+def test_replay_respects_folder_scope(root_folder, domain_folder):
+    ep = _make_audit_sink(root_folder)
+    ep.target_folders.add(domain_folder)
+    p_out, _ = _create_entry("P-root-only", root_folder)  # outside scope
+    _create_entry("P-in-domain", domain_folder)  # in scope
+    since = datetime(2000, 1, 1, tzinfo=timezone.utc)
+    with patch.object(tasks, "send_audit_request") as send:
+        result = tasks.replay_audit_to_sink(ep, since)
+    # Only in-scope entries (folder_id == domain) are forwarded. Derive the
+    # expected count from the DB — the domain folder's own creation entry is
+    # also in scope, so a hardcoded count is brittle.
+    expected = (
+        LogEntry.objects.filter(additional_data__folder_id=str(domain_folder.id))
+        .exclude(action=LogEntry.Action.ACCESS)
+        .count()
+    )
+    assert result["scheduled"] == send.schedule.call_count == expected
+    assert expected >= 1
+    # the out-of-scope (root) perimeter must not be forwarded
+    assert not LogEntry.objects.filter(
+        object_pk=str(p_out.pk), additional_data__folder_id=str(domain_folder.id)
+    ).exists()
 
 
 @pytest.mark.django_db
