@@ -4660,7 +4660,7 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
         super().save(*args, **kwargs)
 
     def filename(self) -> str:
-        if self.attachment is None:
+        if not self.attachment:
             return ""
         return os.path.basename(self.attachment.name)
 
