@@ -102,6 +102,7 @@ export interface ForeignKeyField {
 	endpointUrl?: string;
 	urlParams?: string;
 	tableFields?: string[];
+	tableHeadings?: string[];
 }
 
 export interface ReverseForeignKeyField extends ForeignKeyField {
@@ -110,6 +111,7 @@ export interface ReverseForeignKeyField extends ForeignKeyField {
 	disableCreate?: boolean;
 	disableDelete?: boolean;
 	disableEdit?: boolean;
+	tabLabel?: string;
 	folderPermsNeeded?: { action: 'add' | 'view' | 'change' | 'delete'; model: string }[]; // Permissions needed on the folder to display this reverse foreign key field
 	defaultFilters?: { [key: string]: any[] }; // Default filters to initialize the table with (user can change/remove them)
 	expectedCountField?: string; // Field on parent payload that holds related items (for masked count)
@@ -128,6 +130,18 @@ export interface ReverseForeignKeyField extends ForeignKeyField {
 		label?: string; // i18n key for button title (defaults to 'batchCreate')
 	};
 }
+
+export const getReverseForeignKeyFieldKey = (
+	field: Pick<ReverseForeignKeyField, 'urlModel' | 'field' | 'endpointUrl'>,
+	fields: Pick<ReverseForeignKeyField, 'urlModel' | 'field' | 'endpointUrl'>[] = []
+) => {
+	const hasDuplicateTargetModel =
+		fields.filter((item) => item.urlModel === field.urlModel).length > 1;
+
+	return hasDuplicateTargetModel
+		? `${field.urlModel}:${field.field}:${field.endpointUrl ?? ''}`
+		: field.urlModel;
+};
 
 interface Field {
 	keyNameOverride?: string;
@@ -534,6 +548,34 @@ export const URL_MODEL_MAP: ModelMap = {
 			{
 				field: 'applied_controls',
 				urlModel: 'requirement-assessments',
+				disableCreate: true,
+				disableDelete: true
+			},
+			{
+				field: 'requirement_assessments',
+				urlModel: 'applied-controls',
+				endpointUrl: './control-catalogue/',
+				tabLabel: 'controlCatalogue',
+				tableFields: [
+					'ref_id',
+					'name',
+					'category',
+					'csf_function',
+					'status',
+					'owner',
+					'eta',
+					'folder'
+				],
+				tableHeadings: [
+					'ID',
+					'name',
+					'category',
+					'csfFunction',
+					'status',
+					'owner',
+					'eta',
+					'domain'
+				],
 				disableCreate: true,
 				disableDelete: true
 			},

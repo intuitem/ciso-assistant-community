@@ -5151,22 +5151,11 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
         "prefetch_related": ["owner", "filtering_labels"],
     }
 
-    def get_queryset(self):
-        """Optimize queries by prefetching related objects used in the table view and serializer"""
+    @staticmethod
+    def _with_linked_model_annotations(qs):
+        """Annotate AppliedControl rows with linked model flags used by the list serializer."""
         from crq.models import QuantitativeRiskHypothesis
 
-        qs = (
-            super()
-            .get_queryset()
-            .select_related(
-                "folder",
-                "folder__parent_folder",  # For get_folder_full_path() optimization
-            )
-        )
-        if self.action == "autocomplete":
-            return qs
-
-        # Annotate with Exists() for each reverse relation to power linked_models
         m2m_through_fields = {
             "has_requirement_assessments": RequirementAssessment.applied_controls.through,
             "has_risk_scenarios": RiskScenario.applied_controls.through,
@@ -5187,21 +5176,39 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             alias: Exists(through.objects.filter(appliedcontrol_id=OuterRef("pk")))
             for alias, through in m2m_through_fields.items()
         }
-        # Comment uses a ForeignKey, not M2M
         annotations["has_comments"] = Exists(
             Comment.objects.filter(applied_control_id=OuterRef("pk"))
         )
 
-        qs = qs.select_related("reference_control").annotate(**annotations)
+        return qs.select_related("reference_control").annotate(**annotations)
+
+    @staticmethod
+    def _with_list_prefetches(qs):
+        return qs.prefetch_related(
+            "owner",
+            "filtering_labels__folder",
+            "assets",
+        )
+
+    def get_queryset(self):
+        """Optimize queries by prefetching related objects used in the table view and serializer"""
+        qs = (
+            super()
+            .get_queryset()
+            .select_related(
+                "folder",
+                "folder__parent_folder",  # For get_folder_full_path() optimization
+            )
+        )
+        if self.action == "autocomplete":
+            return qs
+
+        qs = self._with_linked_model_annotations(qs)
 
         # The list serializer doesn't render findings/evidences/objectives/
         # security_exceptions, so skip those prefetches on the list path.
         if self.action == "list":
-            return qs.prefetch_related(
-                "owner",
-                "filtering_labels__folder",
-                "assets",
-            )
+            return self._with_list_prefetches(qs)
 
         return qs.prefetch_related(
             "owner",
@@ -6639,6 +6646,44 @@ class PolicyViewSet(AppliedControlViewSet):
     @action(detail=False, name="Get csf_function choices")
     def csf_function(self, request):
         return Response(dict(AppliedControl.CSF_FUNCTION))
+
+    @action(detail=True, methods=["get"], url_path="control-catalogue")
+    def control_catalogue(self, request, pk=None):
+        policy = get_object_or_404(Policy.objects.all(), pk=pk)
+        if not RoleAssignment.is_object_readable(request.user, Policy, policy.id):
+            raise PermissionDenied()
+
+        requirement_assessments = policy.requirement_assessments.all()
+        qs = (
+            AppliedControl.objects.filter(
+                requirement_assessments__in=requirement_assessments,
+            )
+            .exclude(Q(id=policy.id) | Q(category="policy"))
+            .distinct()
+            .select_related("folder", "folder__parent_folder")
+        )
+
+        viewable_controls, _, _ = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(),
+            request.user,
+            AppliedControl,
+        )
+        qs = AppliedControlViewSet._with_list_prefetches(
+            AppliedControlViewSet._with_linked_model_annotations(qs)
+        )
+        qs = self.filter_queryset(qs.filter(id__in=viewable_controls))
+
+        from core.serializers import AppliedControlListSerializer
+
+        page = self.paginate_queryset(qs)
+        objects = page if page is not None else qs
+        serializer = AppliedControlListSerializer(
+            objects, many=True, context=self.get_serializer_context()
+        )
+
+        if page is not None:
+            return self.get_paginated_response(serializer.data)
+        return Response(serializer.data)
 
 
 class RiskScenarioFilter(GenericFilterSet):

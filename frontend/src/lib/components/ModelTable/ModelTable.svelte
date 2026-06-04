@@ -91,6 +91,7 @@
 		detailQueryParameter?: string;
 		fields?: string[];
 		columnSelector?: boolean;
+		fieldHeadings?: string[];
 		canSelectObject?: boolean;
 		overrideFilters?: { [key: string]: any[] };
 		defaultFilters?: { [key: string]: any[] };
@@ -145,6 +146,7 @@
 		detailQueryParameter = $bindable(),
 		fields = [],
 		columnSelector = undefined,
+		fieldHeadings = [],
 		canSelectObject = false,
 		overrideFilters = {},
 		defaultFilters = {},
@@ -321,7 +323,7 @@
 			endpoint: baseEndpoint,
 			fields:
 				fields.length > 0
-					? { head: fields, body: fields }
+					? { head: fieldHeadings.length > 0 ? fieldHeadings : fields, body: fields }
 					: {
 							head:
 								typeof tableSource.head[0] === 'string'
@@ -481,21 +483,22 @@
 			: false
 	);
 	let contextMenuCanEditObject = $derived(
-		(model
-			? page.params.id
-				? canPerformAction({
-						user,
-						action: 'change',
-						model: model.name,
-						domain:
-							model.name === 'folder'
-								? contextMenuOpenRow?.meta.id
-								: (contextMenuOpenRow?.meta.folder?.id ??
-									contextMenuOpenRow?.meta.folder ??
-									user.root_folder_id)
-					})
-				: Object.hasOwn(user.permissions, `change_${model.name}`)
-			: false) &&
+		!disableEdit &&
+			(model
+				? page.params.id
+					? canPerformAction({
+							user,
+							action: 'change',
+							model: model.name,
+							domain:
+								model.name === 'folder'
+									? contextMenuOpenRow?.meta.id
+									: (contextMenuOpenRow?.meta.folder?.id ??
+										contextMenuOpenRow?.meta.folder ??
+										user.root_folder_id)
+						})
+					: Object.hasOwn(user.permissions, `change_${model.name}`)
+				: false) &&
 			(!(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn) ||
 				URLModel === 'terminologies' ||
 				URLModel === 'entities')
@@ -508,7 +511,8 @@
 	);
 
 	let contextMenuCanDeleteObject = $derived(
-		!preventDelete(contextMenuOpenRow ?? { head: [], body: [], meta: [] }) &&
+		!disableDelete &&
+			!preventDelete(contextMenuOpenRow ?? { head: [], body: [], meta: [] }) &&
 			(model
 				? page.params.id
 					? canPerformAction({
@@ -1158,29 +1162,33 @@
 						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100" />
 					{/if}
 					{#if !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn) || URLModel === 'terminologies' || URLModel === 'entities'}
-						<ContextMenu.Item
-							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-50"
-							onclick={() => {
-								goto(
-									`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`,
-									{
+						{#if contextMenuDisplayEdit}
+							<ContextMenu.Item
+								class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-50"
+								onclick={() => {
+									goto(
+										`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`,
+										{
+											breadcrumbAction: 'push'
+										}
+									);
+								}}
+							>
+								{m.edit()}
+							</ContextMenu.Item>
+						{/if}
+						{#if !disableView}
+							<ContextMenu.Item
+								class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-50"
+								onclick={() => {
+									goto(`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/`, {
 										breadcrumbAction: 'push'
-									}
-								);
-							}}
-						>
-							{m.edit()}
-						</ContextMenu.Item>
-						<ContextMenu.Item
-							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-50"
-							onclick={() => {
-								goto(`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/`, {
-									breadcrumbAction: 'push'
-								});
-							}}
-						>
-							{m.view()}
-						</ContextMenu.Item>
+									});
+								}}
+							>
+								{m.view()}
+							</ContextMenu.Item>
+						{/if}
 					{/if}
 					{#if contextMenuDisplayDelete}
 						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100" />
