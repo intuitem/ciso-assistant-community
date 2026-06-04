@@ -77,97 +77,100 @@
 	</Popover.Trigger>
 	<Popover.Positioner class="z-50!">
 		<Popover.Content class="card p-2 bg-white w-72 shadow-lg space-y-2 border border-surface-200">
-			<div class="flex items-center justify-between gap-2 px-1">
-				<button type="button" class="text-xs anchor" onclick={showAll}>{m.showAll()}</button>
-				<button type="button" class="text-xs anchor" onclick={hideAll}>{m.hideAll()}</button>
-			</div>
-			<hr class="border-surface-200" />
-			<ul class="max-h-72 overflow-y-auto space-y-1">
-				{#each visibleEntries as column (column.key)}
-					{@const isLastVisible = visible.length <= 1}
-					<li
-						class="flex items-center gap-1 rounded text-sm transition-colors {dragOverKey ===
-						column.key
-							? 'bg-primary-50'
-							: 'hover:bg-surface-50'}"
-						role="listitem"
-						ondragover={(e) => {
-							e.preventDefault();
-							dragOverKey = column.key;
-						}}
-						ondragleave={() => (dragOverKey === column.key ? (dragOverKey = null) : null)}
-						ondrop={(e) => {
-							e.preventDefault();
-							onDrop(column.key);
-						}}
-					>
-						<span
-							class="cursor-grab px-1 text-surface-400 active:cursor-grabbing"
-							draggable={true}
-							role="button"
-							tabindex="-1"
-							aria-label={m.dragToReorder()}
-							title={m.dragToReorder()}
-							ondragstart={() => (draggedKey = column.key)}
-							ondragend={() => {
-								draggedKey = null;
-								dragOverKey = null;
+			<!-- Render content only when open so column labels don't duplicate page text (breaks exact-text locators). -->
+			{#if open}
+				<div class="flex items-center justify-between gap-2 px-1">
+					<button type="button" class="text-xs anchor" onclick={showAll}>{m.showAll()}</button>
+					<button type="button" class="text-xs anchor" onclick={hideAll}>{m.hideAll()}</button>
+				</div>
+				<hr class="border-surface-200" />
+				<ul class="max-h-72 overflow-y-auto space-y-1">
+					{#each visibleEntries as column (column.key)}
+						{@const isLastVisible = visible.length <= 1}
+						<li
+							class="flex items-center gap-1 rounded text-sm transition-colors {dragOverKey ===
+							column.key
+								? 'bg-primary-50'
+								: 'hover:bg-surface-50'}"
+							role="listitem"
+							ondragover={(e) => {
+								e.preventDefault();
+								dragOverKey = column.key;
+							}}
+							ondragleave={() => (dragOverKey === column.key ? (dragOverKey = null) : null)}
+							ondrop={(e) => {
+								e.preventDefault();
+								onDrop(column.key);
 							}}
 						>
-							<i class="fa-solid fa-grip-vertical text-xs"></i>
-						</span>
-						<label
-							class="flex flex-1 items-center gap-2 py-1 pr-1 cursor-pointer {isLastVisible
-								? 'opacity-50 cursor-not-allowed'
-								: ''}"
-							title={isLastVisible ? m.atLeastOneColumnRequired() : undefined}
-						>
-							<input
-								type="checkbox"
-								class="checkbox"
-								checked={true}
-								disabled={isLastVisible}
-								onchange={() => hide(column.key)}
-							/>
-							<span class="truncate">{safeTranslate(column.label)}</span>
-						</label>
-					</li>
-				{/each}
-				{#if hiddenEntries.length > 0}
-					<li class="px-1 pt-1 text-[0.65rem] uppercase tracking-wide text-surface-400">
-						{m.hidden()}
-					</li>
-					{#each hiddenEntries as column (column.key)}
-						<li>
+							<span
+								class="cursor-grab px-1 text-surface-400 active:cursor-grabbing"
+								draggable={true}
+								role="button"
+								tabindex="-1"
+								aria-label={m.dragToReorder()}
+								title={m.dragToReorder()}
+								ondragstart={() => (draggedKey = column.key)}
+								ondragend={() => {
+									draggedKey = null;
+									dragOverKey = null;
+								}}
+							>
+								<i class="fa-solid fa-grip-vertical text-xs"></i>
+							</span>
 							<label
-								class="flex items-center gap-2 rounded py-1 pl-7 pr-1 cursor-pointer text-sm hover:bg-surface-50"
+								class="flex flex-1 items-center gap-2 py-1 pr-1 cursor-pointer {isLastVisible
+									? 'opacity-50 cursor-not-allowed'
+									: ''}"
+								title={isLastVisible ? m.atLeastOneColumnRequired() : undefined}
 							>
 								<input
 									type="checkbox"
 									class="checkbox"
-									checked={false}
-									onchange={() => show(column.key)}
+									checked={true}
+									disabled={isLastVisible}
+									onchange={() => hide(column.key)}
 								/>
 								<span class="truncate">{safeTranslate(column.label)}</span>
 							</label>
 						</li>
 					{/each}
-				{/if}
-			</ul>
-			<hr class="border-surface-200" />
-			<div class="flex justify-end px-1">
-				<button
-					type="button"
-					class="btn preset-tonal-surface text-xs"
-					onclick={() => {
-						onReset();
-						open = false;
-					}}
-				>
-					<i class="fa-solid fa-rotate-left mr-2"></i>
-					{m.resetToDefault()}
-				</button>
-			</div>
+					{#if hiddenEntries.length > 0}
+						<li class="px-1 pt-1 text-[0.65rem] uppercase tracking-wide text-surface-400">
+							{m.hidden()}
+						</li>
+						{#each hiddenEntries as column (column.key)}
+							<li>
+								<label
+									class="flex items-center gap-2 rounded py-1 pl-7 pr-1 cursor-pointer text-sm hover:bg-surface-50"
+								>
+									<input
+										type="checkbox"
+										class="checkbox"
+										checked={false}
+										onchange={() => show(column.key)}
+									/>
+									<span class="truncate">{safeTranslate(column.label)}</span>
+								</label>
+							</li>
+						{/each}
+					{/if}
+				</ul>
+				<hr class="border-surface-200" />
+				<div class="flex justify-end px-1">
+					<button
+						type="button"
+						class="btn preset-tonal-surface text-xs"
+						onclick={() => {
+							onReset();
+							open = false;
+						}}
+					>
+						<i class="fa-solid fa-rotate-left mr-2"></i>
+						{m.resetToDefault()}
+					</button>
+				</div>
+			{/if}
 		</Popover.Content>
 	</Popover.Positioner>
 </Popover>
