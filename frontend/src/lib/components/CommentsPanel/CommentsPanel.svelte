@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { m } from '$paraglide/messages';
+	import { getLocale } from '$paraglide/runtime';
+	import { formatDate } from '$lib/utils/datetime';
 	import { browser } from '$app/environment';
 	import {
 		getModalStore,
@@ -46,12 +48,14 @@
 	let loading = $state(true);
 	let composerFocused = $state(false);
 	let hideProcessed = $state(false);
+	let expanded = $state(false);
 
 	let visibleComments = $derived(hideProcessed ? comments.filter((c) => c.is_active) : comments);
 	let processedCount = $derived(comments.filter((c) => !c.is_active).length);
 
 	const currentUserId: string = page.data.user?.id ?? '';
 	const isAdmin: boolean = page.data.user?.is_admin ?? false;
+	const authorFallback: string = page.data.clientSettings?.settings?.name?.trim() || '***';
 	const modalStore: ModalStore = getModalStore();
 
 	const avatarColors = [
@@ -77,14 +81,14 @@
 		const first = author.first_name?.[0] ?? '';
 		const last = author.last_name?.[0] ?? '';
 		if (first || last) return (first + last).toUpperCase();
-		return author.email?.[0]?.toUpperCase() ?? '?';
+		return (author.email?.[0] ?? authorFallback[0]).toUpperCase();
 	}
 
 	function getDisplayName(author: CommentAuthor): string {
 		if (author.first_name || author.last_name) {
 			return `${author.first_name ?? ''} ${author.last_name ?? ''}`.trim();
 		}
-		return author.email ?? 'Unknown';
+		return author.email || authorFallback;
 	}
 
 	function timeAgo(dateStr: string): string {
@@ -99,7 +103,7 @@
 		if (hours < 24) return m.hoursAgo({ count: String(hours) });
 		const days = Math.floor(hours / 24);
 		if (days < 30) return m.daysAgo({ count: String(days) });
-		return new Date(dateStr).toLocaleDateString();
+		return formatDate(new Date(dateStr), false, getLocale());
 	}
 
 	async function fetchComments() {
@@ -217,23 +221,34 @@
 
 <div class="comments-panel">
 	<!-- Header -->
-	<div class="flex items-center gap-2.5 mb-4">
-		<div class="flex items-center justify-center w-7 h-7 rounded-md bg-surface-100">
-			<i class="fa-solid fa-comments text-xs text-surface-500"></i>
-		</div>
-		<h4 class="text-sm font-semibold tracking-tight text-surface-700">
-			{m.comments()}
-		</h4>
-		{#if !loading}
-			<span
-				class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full
-				text-[11px] font-medium bg-surface-100 text-surface-500"
-			>
-				{comments.length}
-			</span>
-		{/if}
-		{#if processedCount > 0}
+	<div class="flex items-center gap-2.5" class:mb-4={expanded}>
+		<button
+			type="button"
+			class="flex items-center gap-2.5 text-left"
+			onclick={() => (expanded = !expanded)}
+		>
+			<div class="flex items-center justify-center w-7 h-7 rounded-md bg-surface-100">
+				<i class="fa-solid fa-comments text-xs text-surface-500"></i>
+			</div>
+			<h4 class="text-sm font-semibold tracking-tight text-surface-700">
+				{m.comments()}
+			</h4>
+			{#if !loading}
+				<span
+					class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full
+					text-[11px] font-medium bg-surface-100 text-surface-500"
+				>
+					{comments.length}
+				</span>
+			{/if}
+			<i
+				class="fa-solid fa-chevron-down text-[10px] text-surface-400 transition-transform duration-200"
+				class:rotate-180={expanded}
+			></i>
+		</button>
+		{#if expanded && processedCount > 0}
 			<button
+				type="button"
 				class="ml-auto inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px]
 				transition-all duration-150
 				{hideProcessed
@@ -247,188 +262,199 @@
 		{/if}
 	</div>
 
-	<!-- Thread -->
-	{#if loading}
-		<div class="flex items-center justify-center py-8">
-			<div class="loading-dot"></div>
-			<div class="loading-dot" style="animation-delay: 0.15s"></div>
-			<div class="loading-dot" style="animation-delay: 0.3s"></div>
-		</div>
-	{:else if comments.length === 0}
-		<div class="flex flex-col items-center py-6 text-surface-400">
-			<i class="fa-regular fa-comment-dots text-2xl mb-2 opacity-40"></i>
-			<p class="text-xs">{m.noComments()}</p>
-		</div>
-	{:else}
-		<div class="relative">
-			<!-- Timeline connector -->
-			{#if visibleComments.length > 1}
-				<div
-					class="absolute left-[15px] top-4 bottom-4 w-px bg-surface-200"
-					style="z-index: 0;"
-				></div>
-			{/if}
-
-			<div class="space-y-1">
-				{#each visibleComments as comment, i (comment.id)}
+	{#if expanded}
+		<!-- Thread -->
+		{#if loading}
+			<div class="flex items-center justify-center py-8">
+				<div class="loading-dot"></div>
+				<div class="loading-dot" style="animation-delay: 0.15s"></div>
+				<div class="loading-dot" style="animation-delay: 0.3s"></div>
+			</div>
+		{:else if comments.length === 0}
+			<div class="flex flex-col items-center py-6 text-surface-400">
+				<i class="fa-regular fa-comment-dots text-2xl mb-2 opacity-40"></i>
+				<p class="text-xs">{m.noComments()}</p>
+			</div>
+		{:else}
+			<div class="relative">
+				<!-- Timeline connector -->
+				{#if visibleComments.length > 1}
 					<div
-						class="comment-entry group relative"
-						class:comment-processed={!comment.is_active}
-						style="animation-delay: {i * 40}ms"
-					>
-						<!-- Avatar -->
+						class="absolute left-[15px] top-4 bottom-4 w-px bg-surface-200"
+						style="z-index: 0;"
+					></div>
+				{/if}
+
+				<div class="space-y-1">
+					{#each visibleComments as comment, i (comment.id)}
 						<div
-							class="relative z-10 flex-shrink-0 w-8 h-8 rounded-full
+							class="comment-entry group relative"
+							class:comment-processed={!comment.is_active}
+							style="animation-delay: {i * 40}ms"
+						>
+							<!-- Avatar -->
+							<div
+								class="relative z-10 flex-shrink-0 w-8 h-8 rounded-full
 							flex items-center justify-center text-[11px] font-semibold
 							ring-2 ring-white transition-transform duration-200
 							group-hover:scale-105 {getAvatarColor(comment.author?.id ?? '')}"
-						>
-							{getInitials(comment.author)}
-						</div>
-
-						<!-- Content -->
-						<div class="flex-1 min-w-0 pt-0.5">
-							<!-- Meta line -->
-							<div class="flex items-center gap-1.5 flex-wrap">
-								<span class="text-[13px] font-medium text-surface-800">
-									{getDisplayName(comment.author)}
-								</span>
-								<span class="text-[11px] text-surface-400">
-									{timeAgo(comment.created_at)}
-								</span>
-								{#if comment.is_tainted}
-									<span class="text-[10px] text-surface-400 italic">
-										({m.commentEdited()})
-									</span>
-								{/if}
-								{#if !comment.is_active}
-									<span
-										class="inline-flex items-center gap-0.5 px-1.5 py-px rounded-full
-										text-[10px] font-medium bg-emerald-50 text-emerald-600 border border-emerald-200"
-									>
-										<i class="fa-solid fa-check text-[8px]"></i>
-										{m.processed()}
-									</span>
-								{/if}
+							>
+								{getInitials(comment.author)}
 							</div>
 
-							<!-- Body or Edit form -->
-							{#if editingId === comment.id}
-								<div class="mt-2 space-y-2">
-									<textarea
-										class="textarea text-sm w-full rounded-xl border-surface-300
+							<!-- Content -->
+							<div class="flex-1 min-w-0 pt-0.5">
+								<!-- Meta line -->
+								<div class="flex items-center gap-1.5 flex-wrap">
+									<span class="text-[13px] font-medium text-surface-800">
+										{getDisplayName(comment.author)}
+									</span>
+									<span class="text-[11px] text-surface-400">
+										{timeAgo(comment.created_at)}
+									</span>
+									{#if comment.is_tainted}
+										<span class="text-[10px] text-surface-400 italic">
+											({m.commentEdited()})
+										</span>
+									{/if}
+									{#if !comment.is_active}
+										<span
+											class="inline-flex items-center gap-0.5 px-1.5 py-px rounded-full
+										text-[10px] font-medium bg-emerald-50 text-emerald-600 border border-emerald-200"
+										>
+											<i class="fa-solid fa-check text-[8px]"></i>
+											{m.processed()}
+										</span>
+									{/if}
+								</div>
+
+								<!-- Body or Edit form -->
+								{#if editingId === comment.id}
+									<div class="mt-2 space-y-2">
+										<textarea
+											class="textarea text-sm w-full rounded-xl border-surface-300
 										focus:border-primary-400 focus:ring-1 focus:ring-primary-200
 										transition-all duration-200"
-										rows="3"
-										bind:value={editBody}
-									></textarea>
-									<div class="flex gap-2">
-										<button
-											class="btn btn-sm preset-filled-primary-500 text-xs rounded-md"
-											disabled={submitting || !editBody.trim()}
-											onclick={() => saveEdit(comment.id)}
-										>
-											{m.save()}
-										</button>
-										<button
-											class="btn btn-sm text-xs rounded-md text-surface-500
+											rows="3"
+											bind:value={editBody}
+										></textarea>
+										<div class="flex gap-2">
+											<button
+												type="button"
+												class="btn btn-sm preset-filled-primary-500 text-xs rounded-md"
+												disabled={submitting || !editBody.trim()}
+												onclick={() => saveEdit(comment.id)}
+											>
+												{m.save()}
+											</button>
+											<button
+												type="button"
+												class="btn btn-sm text-xs rounded-md text-surface-500
 											hover:text-surface-700 hover:bg-surface-100 transition-colors duration-150"
-											onclick={cancelEdit}
-										>
-											{m.cancel()}
-										</button>
+												onclick={cancelEdit}
+											>
+												{m.cancel()}
+											</button>
+										</div>
 									</div>
-								</div>
-							{:else}
-								<p
-									class="text-[13px] leading-relaxed mt-0.5 text-surface-600
+								{:else}
+									<p
+										class="text-[13px] leading-relaxed mt-0.5 text-surface-600
 									whitespace-pre-wrap break-words"
-								>
-									{comment.body}
-								</p>
-							{/if}
+									>
+										{comment.body}
+									</p>
+								{/if}
 
-							<!-- Actions (appear on hover) -->
-							{#if editingId !== comment.id && (canEdit(comment) || canDelete(comment))}
-								<div
-									class="flex gap-0.5 mt-1.5 opacity-0 group-hover:opacity-100
+								<!-- Actions (appear on hover) -->
+								{#if editingId !== comment.id && (canEdit(comment) || canDelete(comment))}
+									<div
+										class="flex gap-0.5 mt-1.5 opacity-0 group-hover:opacity-100
 									transition-opacity duration-150"
-								>
-									{#if canEdit(comment)}
-										<button
-											class="comment-action-btn"
-											onclick={() => toggleActive(comment)}
-											title={comment.is_active ? m.markAsProcessed() : m.markAsActive()}
-										>
-											<i
-												class="fa-solid {comment.is_active
-													? 'fa-check'
-													: 'fa-rotate-left'} text-[10px]"
-											></i>
-											<span>
-												{comment.is_active ? m.markAsProcessed() : m.markAsActive()}
-											</span>
-										</button>
-										<button class="comment-action-btn" onclick={() => startEdit(comment)}>
-											<i class="fa-solid fa-pen text-[10px]"></i>
-										</button>
-									{/if}
-									{#if canDelete(comment)}
-										<button
-											class="comment-action-btn comment-action-btn-danger"
-											onclick={() => deleteComment(comment.id)}
-										>
-											<i class="fa-solid fa-trash text-[10px]"></i>
-										</button>
-									{/if}
-								</div>
-							{/if}
+									>
+										{#if canEdit(comment)}
+											<button
+												type="button"
+												class="comment-action-btn"
+												onclick={() => toggleActive(comment)}
+												title={comment.is_active ? m.markAsProcessed() : m.markAsActive()}
+											>
+												<i
+													class="fa-solid {comment.is_active
+														? 'fa-check'
+														: 'fa-rotate-left'} text-[10px]"
+												></i>
+												<span>
+													{comment.is_active ? m.markAsProcessed() : m.markAsActive()}
+												</span>
+											</button>
+											<button
+												type="button"
+												class="comment-action-btn"
+												onclick={() => startEdit(comment)}
+											>
+												<i class="fa-solid fa-pen text-[10px]"></i>
+											</button>
+										{/if}
+										{#if canDelete(comment)}
+											<button
+												type="button"
+												class="comment-action-btn comment-action-btn-danger"
+												onclick={() => deleteComment(comment.id)}
+											>
+												<i class="fa-solid fa-trash text-[10px]"></i>
+											</button>
+										{/if}
+									</div>
+								{/if}
+							</div>
 						</div>
-					</div>
-				{/each}
+					{/each}
+				</div>
+			</div>
+		{/if}
+
+		<!-- Composer -->
+		<div class="mt-4 pt-4 border-t border-surface-200">
+			<div class="composer-box" class:composer-focused={composerFocused}>
+				<textarea
+					class="w-full bg-transparent text-[13px] text-surface-700
+				placeholder:text-surface-400 resize-none outline-none
+				border-none leading-relaxed"
+					rows="2"
+					placeholder={m.commentPlaceholder()}
+					bind:value={newCommentBody}
+					onkeydown={handleKeydown}
+					onfocus={() => (composerFocused = true)}
+					onblur={() => (composerFocused = false)}
+				></textarea>
+				<div class="flex items-center justify-between mt-1">
+					<span class="text-[10px] text-surface-400">
+						{#if composerFocused || newCommentBody.trim()}
+							{m.ctrlEnterToPost()}
+						{/if}
+					</span>
+					<button
+						type="button"
+						class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium
+					transition-all duration-200
+					{newCommentBody.trim() && !submitting
+							? 'bg-primary-500 text-white shadow-sm shadow-primary-200 hover:bg-primary-600 hover:shadow-md hover:shadow-primary-200 active:scale-[0.97]'
+							: 'bg-surface-100 text-surface-400 cursor-not-allowed'}"
+						disabled={submitting || !newCommentBody.trim()}
+						onclick={postComment}
+					>
+						{#if submitting}
+							<i class="fa-solid fa-spinner fa-spin text-[10px]"></i>
+						{:else}
+							<i class="fa-solid fa-paper-plane text-[10px]"></i>
+						{/if}
+						{m.postComment()}
+					</button>
+				</div>
 			</div>
 		</div>
 	{/if}
-
-	<!-- Composer -->
-	<div class="mt-4 pt-4 border-t border-surface-200">
-		<div class="composer-box" class:composer-focused={composerFocused}>
-			<textarea
-				class="w-full bg-transparent text-[13px] text-surface-700
-				placeholder:text-surface-400 resize-none outline-none
-				border-none leading-relaxed"
-				rows="2"
-				placeholder={m.commentPlaceholder()}
-				bind:value={newCommentBody}
-				onkeydown={handleKeydown}
-				onfocus={() => (composerFocused = true)}
-				onblur={() => (composerFocused = false)}
-			></textarea>
-			<div class="flex items-center justify-between mt-1">
-				<span class="text-[10px] text-surface-400">
-					{#if composerFocused || newCommentBody.trim()}
-						{m.ctrlEnterToPost()}
-					{/if}
-				</span>
-				<button
-					class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium
-					transition-all duration-200
-					{newCommentBody.trim() && !submitting
-						? 'bg-primary-500 text-white shadow-sm shadow-primary-200 hover:bg-primary-600 hover:shadow-md hover:shadow-primary-200 active:scale-[0.97]'
-						: 'bg-surface-100 text-surface-400 cursor-not-allowed'}"
-					disabled={submitting || !newCommentBody.trim()}
-					onclick={postComment}
-				>
-					{#if submitting}
-						<i class="fa-solid fa-spinner fa-spin text-[10px]"></i>
-					{:else}
-						<i class="fa-solid fa-paper-plane text-[10px]"></i>
-					{/if}
-					{m.postComment()}
-				</button>
-			</div>
-		</div>
-	</div>
 </div>
 
 <style>

@@ -3,26 +3,22 @@
 	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
+	import type { CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 
 	interface Props {
 		form: SuperValidated<any>;
-		model: ModelInfo;
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
-		data?: any;
 		debug?: boolean;
 	}
 
 	let {
 		form,
-		model,
 		cacheLocks = {},
 		formDataCache = $bindable({}),
 		initialData = {},
-		data = {},
 		debug = false
 	}: Props = $props();
 </script>
