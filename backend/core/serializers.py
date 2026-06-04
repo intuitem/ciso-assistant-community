@@ -4841,6 +4841,7 @@ class TaskNodeReadSerializer(BaseModelSerializer):
     task_template = FieldsRelatedField(["folder", "id"])
     folder = FieldsRelatedField()
     name = serializers.SerializerMethodField()
+    description = serializers.CharField()
     assigned_to = FieldsRelatedField(many=True)
     evidences = FieldsRelatedField(["folder", "id"], many=True)
     is_recurrent = serializers.BooleanField(source="task_template.is_recurrent")

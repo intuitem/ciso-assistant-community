@@ -3,6 +3,7 @@
 	import { m } from '$paraglide/messages';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import TableMarkdownField from '$lib/components/Forms/TableMarkdownField.svelte';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { superValidate } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
@@ -203,6 +204,16 @@
 			</div>
 		</div>
 	</div>
+
+	<!-- Task Description -->
+	{#if taskNode.description}
+		<p class="text-gray-700 text-md font-medium tracking-wide">
+			{m.description()}
+		</p>
+		<div class="border rounded-lg p-4 bg-gray-50">
+			<MarkdownRenderer content={taskNode.description} />
+		</div>
+	{/if}
 
 	{#if categories.some((cat) => cat.items?.length > 0)}
 		<div>

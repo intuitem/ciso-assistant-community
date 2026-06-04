@@ -2285,6 +2285,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder' },
 			{ field: 'name' },
 			{ field: 'assigned_to' },
+			{ field: 'description' },
 			{ field: 'evidences', tooltip: 'taskNodeLegacyEvidence' },
 			{ field: 'is_recurrent' },
 			{ field: 'expected_evidence', tooltip: 'taskNodeNewEvidence' },
