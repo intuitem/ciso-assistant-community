@@ -9,10 +9,15 @@ from datetime import datetime, timezone
 import requests
 from huey.contrib.djhuey import db_task
 from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models import Q, Count
 
+from auditlog.models import LogEntry
 from core.net_safety import BlockedRequestError, assert_public_url_unless_dev
+from global_settings.utils import ff_is_enabled
+from iam.models import Folder
 
 from .models import WebhookEndpoint
+from .ocsf import build_audit_body
 
 import structlog
 
@@ -109,3 +114,89 @@ def send_webhook_request(endpoint_id, event_type, data_payload):
         # Network error, timeout, etc.
         # Raise exception to trigger Huey retry
         raise Exception(f"Webhook network error for {endpoint_id}: {e}")
+
+
+@db_task()
+def dispatch_audit_event(log_entry_pk):
+    """
+    Fan a single audit LogEntry out to every active audit-sink endpoint whose
+    folder scope matches. Selection mirrors dispatch_webhook_event: an endpoint
+    with no target_folders applies everywhere, otherwise the changed object's
+    folder must be among them.
+    """
+    if not ff_is_enabled("audit_log_forwarding"):
+        return
+    try:
+        log_entry = LogEntry.objects.select_related("content_type").get(pk=log_entry_pk)
+    except LogEntry.DoesNotExist:
+        return
+
+    folder_id = (log_entry.additional_data or {}).get("folder_id")
+    folder = Folder.objects.filter(id=folder_id).first() if folder_id else None
+
+    endpoints = (
+        WebhookEndpoint.objects.annotate(folder_count=Count("target_folders"))
+        .filter(
+            Q(folder_count=0) | Q(target_folders=folder),
+            kind=WebhookEndpoint.Kind.AUDIT_SINK,
+            transport=WebhookEndpoint.Transport.HTTP,
+            is_active=True,
+        )
+        .distinct()
+    )
+
+    for endpoint in endpoints:
+        body = build_audit_body(log_entry, endpoint.body_format)
+        send_audit_request.schedule(args=(str(endpoint.id), body), delay=1)
+
+
+@db_task(retries=5, retry_delay=60, retry_backoff=2.0)
+def send_audit_request(endpoint_id, body):
+    """
+    Deliver one audit event to a SIEM HTTP endpoint. Unlike send_webhook_request,
+    there is no HMAC envelope: the body is the canonical event (OCSF by default)
+    and auth is the endpoint's static headers (e.g. a Splunk HEC token).
+    """
+    try:
+        endpoint = WebhookEndpoint.objects.get(id=endpoint_id, is_active=True)
+    except WebhookEndpoint.DoesNotExist:
+        logger.warning("Audit sink deleted. Task aborted.", endpoint_id=endpoint_id)
+        return
+
+    json_payload = json.dumps(body, separators=(",", ":"), cls=DjangoJSONEncoder)
+    headers = {"Content-Type": "application/json", **(endpoint.headers or {})}
+
+    # Re-validate at send time (DNS-based targets, post-save DNS changes).
+    try:
+        assert_public_url_unless_dev(endpoint.url, allowed_schemes=("http", "https"))
+    except BlockedRequestError:
+        logger.error(
+            "Audit sink blocked by SSRF guard",
+            endpoint_id=endpoint_id,
+            exc_info=True,
+        )
+        return f"Blocked: {endpoint_id} URL points to a non-public address"
+
+    try:
+        response = requests.post(
+            endpoint.url,
+            data=json_payload.encode("utf-8"),
+            headers=headers,
+            timeout=15,
+            allow_redirects=False,
+        )
+        if 200 <= response.status_code < 300:
+            return f"Success: Sent audit event to {endpoint.url}"
+        elif 300 <= response.status_code < 400:
+            logger.warning(
+                "Audit sink returned redirect; not followed",
+                endpoint_id=endpoint_id,
+                status_code=response.status_code,
+            )
+            return f"Blocked redirect: {endpoint_id} returned {response.status_code}"
+        else:
+            raise Exception(
+                f"Audit sink failed for {endpoint_id} with status {response.status_code}."
+            )
+    except requests.exceptions.RequestException as e:
+        raise Exception(f"Audit sink network error for {endpoint_id}: {e}")
