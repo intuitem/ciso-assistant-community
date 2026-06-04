@@ -3049,7 +3049,7 @@ class Perimeter(NameDescriptionMixin, FolderMixin):
         verbose_name="Default assignee",
         blank=True,
     )
-    fields_to_check = ["name"]
+    fields_to_check = ["ref_id", "name"]
 
     class Meta:
         verbose_name = _("Perimeter")
@@ -3121,7 +3121,7 @@ class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMi
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
     link = models.URLField(null=True, blank=True, verbose_name=_("Link"))
 
-    fields_to_check = ["name"]
+    fields_to_check = ["ref_id", "name"]
 
     def __str__(self):
         return self.name
@@ -3359,7 +3359,7 @@ class Asset(
         verbose_name=_("DORA Discontinuing Impact"),
     )
 
-    fields_to_check = ["name"]
+    fields_to_check = ["ref_id", "name"]
 
     class Meta:
         verbose_name_plural = _("Assets")
@@ -5209,7 +5209,7 @@ class AppliedControl(
         related_name="applied_controls",
     )
 
-    fields_to_check = ["name"]
+    fields_to_check = ["ref_id", "name"]
 
     class Meta:
         verbose_name = _("Applied control")
@@ -5687,7 +5687,7 @@ class Vulnerability(
     )
     is_published = models.BooleanField(_("published"), default=True)
 
-    fields_to_check = ["name"]
+    fields_to_check = ["ref_id", "name"]
 
     def save(self, *args, **kwargs):
         from datetime import date
