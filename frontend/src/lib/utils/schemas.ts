@@ -670,6 +670,7 @@ export const FeatureFlagsSchema = z.object({
 	validation_flows: z.boolean().optional(),
 	focus_mode: z.boolean().optional(),
 	outgoing_webhooks: z.boolean().optional(),
+	audit_log_forwarding: z.boolean().optional(),
 	metrology: z.boolean().optional(),
 	personal_data: z.boolean().optional(),
 	purposes: z.boolean().optional(),
@@ -1875,6 +1876,16 @@ export const webhookEndpointSchema = z.object({
 	secret: z.string().min(1).optional(),
 	target_folders: z.string().uuid().optional().array().optional(),
 	payload_format: z.enum(['thin', 'full']).default('full')
+});
+
+export const auditSinkSchema = z.object({
+	...NameDescriptionMixin,
+	url: z.string().url(),
+	body_format: z.enum(['ocsf', 'raw']).default('ocsf'),
+	// JSON object of static auth headers, edited as text and parsed server-side.
+	headers: z.string().optional(),
+	target_folders: z.string().uuid().optional().array().optional(),
+	is_active: z.boolean().default(true)
 });
 
 export const activateTOTPSchema: ZodSchema = z.object({

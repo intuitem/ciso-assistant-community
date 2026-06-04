@@ -6,6 +6,7 @@
 	import SSOSettings from '$lib/components/Settings/SSOSettings.svelte';
 	import FeatureFlagsSettings from '$lib/components/Settings/FeatureFlagsSettings.svelte';
 	import WebhooksSettings from '$lib/components/Settings/WebhooksSettings.svelte';
+	import AuditLogForwardingSettings from '$lib/components/Settings/AuditLogForwardingSettings.svelte';
 	import VulnerabilitySlaSettings from '$lib/components/Settings/VulnerabilitySlaSettings.svelte';
 	import SecIntelFeedsSettings from '$lib/components/Settings/SecIntelFeedsSettings.svelte';
 
@@ -48,6 +49,11 @@
 				></Tabs.Trigger
 			>
 		{/if}
+		{#if page.data?.featureflags?.audit_log_forwarding}
+			<Tabs.Trigger value="auditLogForwarding"
+				><i class="fa-solid fa-shield-halved"></i> {m.auditLogForwarding()}</Tabs.Trigger
+			>
+		{/if}
 		<Tabs.Indicator />
 	</Tabs.List>
 	<Tabs.Content value="general">
@@ -61,6 +67,9 @@
 	</Tabs.Content>
 	<Tabs.Content value="webhooks">
 		<WebhooksSettings {data} />
+	</Tabs.Content>
+	<Tabs.Content value="auditLogForwarding">
+		<AuditLogForwardingSettings {data} />
 	</Tabs.Content>
 	<Tabs.Content value="vulnerabilitySla">
 		<VulnerabilitySlaSettings {data} />

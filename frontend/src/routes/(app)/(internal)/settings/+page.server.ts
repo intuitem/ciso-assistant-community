@@ -9,7 +9,8 @@ import {
 	SSOSettingsSchema,
 	VulnerabilitySlaSchema,
 	SecIntelFeedsSchema,
-	webhookEndpointSchema
+	webhookEndpointSchema,
+	auditSinkSchema
 } from '$lib/utils/schemas';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -29,6 +30,10 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const webhookEndpoints = await fetch(`${BASE_API_URL}/webhooks/endpoints/`)
 		.then((res) => res.json())
 		.then((res) => res.results);
+
+	const auditSinks = await fetch(`${BASE_API_URL}/webhooks/audit-sinks/`)
+		.then((res) => (res.ok ? res.json() : { results: [] }))
+		.then((res) => res.results ?? []);
 
 	const selectOptions: Record<string, any> = {};
 
@@ -119,6 +124,9 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const webhookEndpointCreateForm = await superValidate(zod(webhookEndpointSchema), {
 		errors: false
 	});
+	const auditSinkCreateForm = await superValidate(zod(auditSinkSchema), {
+		errors: false
+	});
 
 	return {
 		ssoSettings,
@@ -138,6 +146,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		secIntelFeedsModel,
 		webhookEndpoints,
 		webhookEndpointCreateForm,
+		auditSinks,
+		auditSinkCreateForm,
 		title: m.settings()
 	};
 };
@@ -365,5 +375,101 @@ export const actions: Actions = {
 		);
 
 		return message(deleteForm, { status: res.status });
+	},
+	createAuditSink: async (event) => {
+		const formData = await event.request.formData();
+		if (!formData) {
+			return fail(400, { form: null });
+		}
+
+		const form = await superValidate(formData, zod(auditSinkSchema));
+		if (!form.valid) {
+			return fail(400, { form });
+		}
+
+		const data: Record<string, any> = { ...form.data };
+		if (typeof data.headers === 'string' && data.headers.trim()) {
+			try {
+				data.headers = JSON.parse(data.headers);
+			} catch {
+				return setError(form, 'headers', m.invalidJson());
+			}
+		} else {
+			data.headers = {};
+		}
+
+		const endpoint = `${BASE_API_URL}/webhooks/audit-sinks/`;
+		const response = await event.fetch(endpoint, {
+			method: 'POST',
+			body: JSON.stringify(data)
+		});
+
+		if (!response.ok) return handleErrorResponse({ event, response, form });
+
+		setFlash(
+			{ type: 'success', message: m.successfullyCreatedObject({ object: m.auditSink() }) },
+			event
+		);
+		return { form };
+	},
+	deleteAuditSink: async (event) => {
+		const formData = await event.request.formData();
+		const schema = z.object({ id: z.string() });
+		const deleteForm = await superValidate(formData, zod(schema));
+		const id = deleteForm.data.id;
+
+		if (!deleteForm.valid) {
+			return message(deleteForm, { status: 400 });
+		}
+
+		const endpoint = `${BASE_API_URL}/webhooks/audit-sinks/${id}/`;
+		const res = await event.fetch(endpoint, { method: 'DELETE' });
+		if (!res.ok) {
+			return message(deleteForm, { status: res.status });
+		}
+		setFlash(
+			{
+				type: 'success',
+				message: m.successfullyDeletedObject({ object: m.auditSink().toLowerCase() })
+			},
+			event
+		);
+		return message(deleteForm, { status: res.status });
+	},
+	replayAuditSink: async (event) => {
+		const formData = await event.request.formData();
+		const id = formData.get('id');
+		const since = formData.get('since');
+		const until = formData.get('until');
+
+		if (!id || !since) {
+			setFlash({ type: 'error', message: m.sinceRequiredIso8601() }, event);
+			return fail(400, {});
+		}
+
+		const body: Record<string, string> = { since: String(since) };
+		if (until) body.until = String(until);
+
+		const endpoint = `${BASE_API_URL}/webhooks/audit-sinks/${id}/replay/`;
+		const response = await event.fetch(endpoint, {
+			method: 'POST',
+			body: JSON.stringify(body)
+		});
+
+		if (!response.ok) {
+			const r = await response.json().catch(() => ({}));
+			setFlash({ type: 'error', message: safeTranslate(r.error ?? 'replayFailed') }, event);
+			return fail(response.status, {});
+		}
+
+		const result = await response.json();
+		setFlash(
+			{
+				type: 'success',
+				message: m.auditReplayScheduled({ count: result.scheduled ?? 0 })
+			},
+			event
+		);
+		return { success: true };
 	}
 };
