@@ -966,6 +966,8 @@ class LibraryUpdater:
 
                 requirement_assessment_objects_to_create = []
                 requirement_assessment_objects_to_update = []
+                # Parallel set for O(1) dedup; `ra not in <list>` is O(N) via Django __eq__.
+                ra_pks_to_update = set()
                 answers_changed_ca_ids = set()
                 requirement_node_objects_to_update = []
                 order_id = 0
@@ -1200,7 +1202,9 @@ class LibraryUpdater:
                                 ra.is_scored = (
                                     new_score is not None and self.strategy != "reset"
                                 )
-                                requirement_assessment_objects_to_update.append(ra)
+                                if ra.pk not in ra_pks_to_update:
+                                    ra_pks_to_update.add(ra.pk)
+                                    requirement_assessment_objects_to_update.append(ra)
 
                             # -------- Strategy application for documentation_score --------
                             if hasattr(ra, "documentation_score"):
@@ -1209,10 +1213,15 @@ class LibraryUpdater:
 
                                 if new_doc_score != old_doc_score:
                                     ra.documentation_score = new_doc_score
-                                    requirement_assessment_objects_to_update.append(ra)
+                                    if ra.pk not in ra_pks_to_update:
+                                        ra_pks_to_update.add(ra.pk)
+                                        requirement_assessment_objects_to_update.append(
+                                            ra
+                                        )
 
                         if questions is None:
-                            if ra not in requirement_assessment_objects_to_update:
+                            if ra.pk not in ra_pks_to_update:
+                                ra_pks_to_update.add(ra.pk)
                                 requirement_assessment_objects_to_update.append(ra)
                             continue
 
@@ -1275,7 +1284,8 @@ class LibraryUpdater:
 
                         if ra_changed:
                             ra.recompute_assessment()
-                            if ra not in requirement_assessment_objects_to_update:
+                            if ra.pk not in ra_pks_to_update:
+                                ra_pks_to_update.add(ra.pk)
                                 requirement_assessment_objects_to_update.append(ra)
 
                     # update threats linked to the requirement_node
