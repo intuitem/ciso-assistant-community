@@ -31,6 +31,18 @@ class AbstractBaseModel(models.Model):
     def __str__(self) -> str:
         return self.name if hasattr(self, "name") and self.name else str(self.id)
 
+    def get_additional_data(self) -> dict:
+        # Attached to every django-auditlog LogEntry at creation (create/update/
+        # delete and m2m). Runs with the instance in memory, so the folder is
+        # captured even on delete — used to scope audit events forwarded to SIEMs.
+        folder_id = getattr(self, "folder_id", None)
+        if folder_id is None:
+            from iam.models import Folder
+
+            folder = Folder.get_folder(self)
+            folder_id = folder.id if folder else None
+        return {"folder_id": str(folder_id) if folder_id else None}
+
     def is_unique_in_scope(self, scope: models.QuerySet, fields_to_check: list) -> bool:
         """
         Checks if the object is unique in the given scope based on the given fields.
