@@ -206,9 +206,6 @@
 			: allColumnKeys
 		).filter((key) => allColumnKeys.includes(key))
 	);
-	const storedColumns = $derived(URLModel ? $tableColumnStates[URLModel] : undefined);
-	const visibleColumns = $derived(storedColumns ?? defaultColumns);
-	const isColumnVisible = (key: string) => visibleColumns.includes(key);
 	// Show the selector on standalone list pages only; curated embedded tables pass `fields`.
 	const showColumnSelector = $derived(
 		(columnSelector ?? Boolean(deleteForm)) &&
@@ -217,6 +214,16 @@
 			fields.length === 0 &&
 			allColumns.length > 1
 	);
+	// Persisted choice applies only where the selector is available; drop stale keys and
+	// fall back to defaults if nothing survives, so a table never ends up with no columns.
+	const storedColumns = $derived(URLModel ? $tableColumnStates[URLModel] : undefined);
+	const sanitizedStored = $derived(
+		storedColumns ? storedColumns.filter((key) => allColumnKeys.includes(key)) : undefined
+	);
+	const visibleColumns = $derived(
+		sanitizedStored && sanitizedStored.length > 0 ? sanitizedStored : defaultColumns
+	);
+	const isColumnVisible = (key: string) => !showColumnSelector || visibleColumns.includes(key);
 
 	const sameAsDefault = (cols: string[]) =>
 		cols.length === defaultColumns.length && defaultColumns.every((k) => cols.includes(k));
