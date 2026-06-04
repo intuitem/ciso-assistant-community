@@ -25,23 +25,22 @@
 
 	onMount(async () => {
 		const rawOptions = await fetch('/applied-controls/effort').then((r) => r.json());
-		// Move '--' to the end while preserving order of other options
+		// Append the '--' (unset) option at the end, deduplicating if already present
 		options = [
 			...rawOptions.filter((o: { label: string }) => o.label !== '--'),
-			...rawOptions.filter((o: { label: string }) => o.label === '--')
+			{ label: '--', value: null }
 		];
 	});
 
 	async function changeEffort(newEffort: string) {
 		const endpoint = `/applied-controls/${row?.meta?.id}/effort`;
 		// Convert '--' to empty string to clear the field
-		const effortValue = newEffort === '--' ? '' : newEffort;
 		const requestInit = {
 			method: 'PATCH',
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ effort: effortValue })
+			body: JSON.stringify({ effort: newEffort })
 		};
 		try {
 			const response = await fetch(endpoint, requestInit);
