@@ -3659,7 +3659,7 @@ export function getListViewFields({
 	includeOptional?: boolean;
 }) {
 	if (!Object.keys(listViewFields).includes(key)) {
-		return { head: [], body: [], defaultBody: [] };
+		return { head: [], body: [] };
 	}
 
 	const baseEntry = listViewFields[key];
@@ -3681,8 +3681,7 @@ export function getListViewFields({
 		body = body.filter((_, index) => !indicesToPop.includes(index));
 	}
 
-	// `defaultBody` is the set shown out of the box; optional fields are appended but hidden by default.
-	const defaultBody = [...body];
+	// Optional fields are appended after the defaults but are hidden by default in the UI.
 	if (includeOptional && baseEntry.optionalFields) {
 		head = [...head, ...baseEntry.optionalFields.head];
 		body = [...body, ...baseEntry.optionalFields.body];
@@ -3691,8 +3690,7 @@ export function getListViewFields({
 	return {
 		...baseEntry,
 		head,
-		body,
-		defaultBody
+		body
 	};
 }
 

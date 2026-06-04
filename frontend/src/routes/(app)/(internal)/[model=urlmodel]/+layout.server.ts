@@ -1,13 +1,17 @@
-import { getListViewFields } from '$lib/utils/table';
+import { listViewFields } from '$lib/utils/table';
 import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 import { urlParamModelVerboseName, urlParamModelDescriptionKey } from '$lib/utils/crud';
 
 export const load = async ({ fetch, params }) => {
-	// Include optional fields so the column selector can offer them; ModelTable strips
-	// feature-flag-disabled columns client-side, so no flag filtering is needed here.
-	const fields = getListViewFields({ key: params.model, featureFlags: {}, includeOptional: true });
-	const headData: Record<string, string> = fields.body.reduce((obj, key, index) => {
-		obj[key] = fields.head[index];
+	// Build the full column superset (defaults + optional fields), WITHOUT feature-flag
+	// filtering: ModelTable strips flag-disabled columns client-side against the real flags,
+	// and it can only filter the head down — never add a column back. Filtering here (no flags
+	// available) would unconditionally drop every flagged column (e.g. inherent risk levels).
+	const base = listViewFields[params.model];
+	const head = base ? [...base.head, ...(base.optionalFields?.head ?? [])] : [];
+	const body = base ? [...base.body, ...(base.optionalFields?.body ?? [])] : [];
+	const headData: Record<string, string> = body.reduce((obj, key, index) => {
+		obj[key] = head[index];
 		return obj;
 	}, {});
 
