@@ -35,8 +35,7 @@ interface ListViewFieldsConfig {
 	[key: string]: {
 		head: string[];
 		body: string[];
-		// Extra columns exposed by the model but hidden by default. Available through the
-		// column selector on standard list pages; `head`/`body` above remain the defaults.
+		// Extra columns offered via the column selector but hidden by default; `head`/`body` stay the defaults.
 		optionalFields?: { head: string[]; body: string[] };
 		meta?: string[];
 		breadcrumb_link_disabled?: boolean;
@@ -1623,7 +1622,6 @@ export const listViewFields = {
 			'linked_models',
 			'filtering_labels'
 		],
-		// Extra columns already returned by the API (AppliedControlReadSerializer), hidden by default.
 		optionalFields: {
 			head: ['startDate', 'expiryDate', 'createdAt', 'updatedAt'],
 			body: ['start_date', 'expiry_date', 'created_at', 'updated_at']

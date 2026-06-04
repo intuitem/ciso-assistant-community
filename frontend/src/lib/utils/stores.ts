@@ -96,9 +96,7 @@ export const tableStates: Persisted<Record<string, { pageNumber: number; rowsPer
 export const tableFilterStates: Persisted<Record<string, Record<string, { value: string }[]>>> =
 	persisted('tableFilterStates', {});
 
-// Persisted visible columns per URLModel (e.g. "applied-controls" -> ["ref_id", "name", "status"]).
-// An absent entry means "use the model's default columns"; storing the visible set lets users both
-// hide defaults and reveal optional (off-by-default) columns through one mechanism.
+// Persisted visible columns per URLModel, in display order (e.g. "applied-controls" -> ["ref_id", "name"]). Absent = defaults.
 export const tableColumnStates: Persisted<Record<string, string[]>> = persisted(
 	'tableColumnStates',
 	{}

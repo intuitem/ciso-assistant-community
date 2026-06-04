@@ -38,19 +38,20 @@ The **rows-per-page** selector and the page you're on are remembered per table, 
 
 ## Choosing columns
 
-Tables ship with a sensible default set of columns, but the right set depends on the task. The **column selector** — a table-columns icon in the toolbar, next to the rows-per-page control — lets you pick what shows.
+Tables ship with a sensible default set of columns, but the right set — and the right order — depends on the task. The **column selector** — a table-columns icon in the toolbar, next to the rows-per-page control — lets you pick what shows and arrange it.
 
-The dropdown lists every available column with a checkbox:
+The dropdown shows your **visible columns first, in display order**, each with a drag handle, followed by a **Hidden** group you can switch on:
 
 - **Tick / untick** to show or hide a column.
+- **Drag the handle** (⋮⋮) to reorder a visible column — e.g. move **Ref ID** below **Name**.
 - **Show All** reveals everything, including optional columns.
 - **Hide All** trims to a single column.
-- **Reset to default** returns to the table's standard set.
+- **Reset to default** returns to the table's standard columns _and_ order.
 
 When some columns are hidden, the button shows a **visible/total** count (e.g. `12/16`).
 
 {% hint style="info" %}
-At least one column always stays visible — the last one's checkbox is locked with the note _"At least one column must remain visible"_, so a table can never end up empty. Your column choice is **remembered per table, in your browser**.
+At least one column always stays visible — the last one's checkbox is locked with the note _"At least one column must remain visible"_, so a table can never end up empty. Your column **choice and order** are **remembered per table, in your browser**.
 {% endhint %}
 
 ### Default and optional columns
@@ -115,7 +116,7 @@ Your table preferences are stored **locally, per browser and per device** — th
 | Preference | Remembered? |
 |---|---|
 | Active **filters** | Yes, per table (a filter-carrying link overrides) |
-| **Columns** shown | Yes, per table |
+| **Columns** shown and their order | Yes, per table |
 | **Rows per page** and current page | Yes, per table |
 | **Search** text | No — clears each visit |
 | **Sort** column | No — resets to the table's default each visit |

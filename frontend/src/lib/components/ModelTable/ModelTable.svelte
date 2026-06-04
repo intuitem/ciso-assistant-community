@@ -193,20 +193,18 @@
 			)
 	);
 
-	// --- Column show/hide (browser-persisted per URLModel) ---
-	// Available columns = feature-flag-filtered head keys (defaults + optional, off-by-default).
+	// Column visibility & order, persisted per URLModel through the column selector.
 	const allColumns = $derived(
 		Object.entries(tableSource.head).map(([key, label]) => ({ key, label: label as string }))
 	);
 	const allColumnKeys = $derived(allColumns.map((c) => c.key));
-	// Defaults are the model's standard columns from table.ts (crud.ts), intersected with what's available.
 	const defaultColumns = $derived(
 		(URLModel && listViewFields[URLModel]?.body
 			? listViewFields[URLModel].body
 			: allColumnKeys
 		).filter((key) => allColumnKeys.includes(key))
 	);
-	// Show the selector on standalone list pages only; curated embedded tables pass `fields`.
+	// Selector is offered on standalone list pages only; curated embedded tables pass `fields`.
 	const showColumnSelector = $derived(
 		(columnSelector ?? Boolean(deleteForm)) &&
 			Boolean(URLModel) &&
@@ -214,25 +212,17 @@
 			fields.length === 0 &&
 			allColumns.length > 1
 	);
-	// Persisted choice applies only where the selector is available; drop stale keys and
-	// fall back to defaults if nothing survives, so a table never ends up with no columns.
+	// Stored choice, with stale keys dropped and a fallback to defaults so a table is never empty.
 	const storedColumns = $derived(URLModel ? $tableColumnStates[URLModel] : undefined);
-	const sanitizedStored = $derived(
-		storedColumns ? storedColumns.filter((key) => allColumnKeys.includes(key)) : undefined
+	const sanitizedStored = $derived(storedColumns?.filter((key) => allColumnKeys.includes(key)));
+	const visibleColumns = $derived(sanitizedStored?.length ? sanitizedStored : defaultColumns);
+	// Keys to render, in order. Without the selector, keep natural head order (behaviour unchanged).
+	const renderColumnKeys = $derived(
+		showColumnSelector
+			? visibleColumns
+			: allColumnKeys.filter((key) => fields.length === 0 || fields.includes(key))
 	);
-	const visibleColumns = $derived(
-		sanitizedStored && sanitizedStored.length > 0 ? sanitizedStored : defaultColumns
-	);
-	// The ordered list of column keys to render — encodes both visibility and order. Tables without
-	// the selector (embedded / disabled) fall back to natural head order, so behaviour is unchanged.
-	const renderColumnKeys = $derived.by(() => {
-		const naturalKeys = allColumnKeys.filter((key) => fields.length === 0 || fields.includes(key));
-		if (!showColumnSelector) return naturalKeys;
-		const chosen = sanitizedStored && sanitizedStored.length > 0 ? sanitizedStored : defaultColumns;
-		return chosen.filter((key) => naturalKeys.includes(key));
-	});
-
-	// Order-sensitive: a pure reorder that keeps the default set must still persist (not reset).
+	// Order-sensitive so a pure reorder of the default set still persists instead of resetting.
 	const sameAsDefault = (cols: string[]) =>
 		cols.length === defaultColumns.length && cols.every((key, i) => defaultColumns[i] === key);
 
