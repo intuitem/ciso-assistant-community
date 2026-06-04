@@ -42,9 +42,9 @@
 	const scenarioTableFilters = $derived.by(() => {
 		const base = listViewFields['risk-scenarios'].filters;
 		const scope: [string, string][] = [['risk_assessment', risk_assessment.id]];
-		const withScope = (f: ListViewFilterConfig): ListViewFilterConfig => ({
-			...f,
-			props: { ...f.props, optionsDetailedUrlParameters: scope }
+		const withScope = (filter: ListViewFilterConfig): ListViewFilterConfig => ({
+			...filter,
+			props: { ...filter.props, optionsDetailedUrlParameters: scope }
 		});
 		return {
 			...base,

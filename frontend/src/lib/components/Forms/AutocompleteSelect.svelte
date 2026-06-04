@@ -151,13 +151,8 @@
 
 	type SelectValue = string | number | undefined;
 
-	let selected: typeof options = $state([]);
-	let selectedValues: SelectValue[] = $derived(
-		selected.map((item) => {
-			const v = item?.value;
-			return v !== undefined && v !== null && v !== '' ? v : (item?.label ?? item);
-		})
-	);
+	let selected: Option[] = $state([]);
+	let selectedValues: SelectValue[] = $derived(selected.map((item) => item.value));
 	let isInternalUpdate = false;
 	let optionsLoaded = $state(Boolean(options.length));
 	const initialValue = resetForm ? undefined : $value;
@@ -168,7 +163,12 @@
 	// with selected=[] and overwrites $value to [] before onMount restores it — a
 	// race that wipes selections on remount (e.g. when a parent `{#key options}`
 	// block tears the component down on options change).
-	if (initialValue != null && options.length > 0) {
+	if (
+		initialValue !== undefined &&
+		initialValue !== null &&
+		initialValue !== '' &&
+		options.length > 0
+	) {
 		const ids = (Array.isArray(initialValue) ? initialValue : [initialValue]).map(String);
 		selected = options.filter((item) => ids.includes(String(item.value)));
 	}

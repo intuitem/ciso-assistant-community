@@ -2749,12 +2749,11 @@ class RiskMatrixViewSet(BaseModelViewSet):
 
         risk_assessment_id = request.query_params.get("risk_assessment")
         if risk_assessment_id:
-            matrices = matrices.filter(riskassessment__id=risk_assessment_id).distinct()
+            matrices = matrices.filter(riskassessment__id=risk_assessment_id)
 
         undefined = {-1: "--"}
         options = undefined
         for matrix in matrices:
-            _choices = {}
             for i, risk in enumerate(matrix.json_definition.get("risk", [])):
                 translations = risk.get("translations")
                 if not isinstance(translations, dict):
@@ -2763,8 +2762,7 @@ class RiskMatrixViewSet(BaseModelViewSet):
 
                 # Use the translated name if available, otherwise fall back to the default name
                 name = translated.get("name") or risk.get("name", "")
-                _choices[i] = name
-            options = _choices | options
+                options[i] = name
 
         res = [{"value": k, "label": v} for k, v in options.items()]
         return Response(res)
