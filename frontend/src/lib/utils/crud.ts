@@ -136,12 +136,17 @@ interface Field {
 	tooltip?: string;
 }
 
-interface SelectField {
+export interface SelectField {
 	field: string;
 	detail?: boolean;
 	valueType?: 'string' | 'number';
 	endpointUrl?: string;
 	formNestedField?: string;
+}
+
+export interface SelectFieldData {
+	label: string;
+	value: string | number;
 }
 
 type FeatureFlag = string;
