@@ -9479,10 +9479,6 @@ class TaskNode(AbstractBaseModel, FolderMixin):
         return f"{self.task_template.name} ({self.due_date})"
 
     @property
-    def description(self):
-        return self.task_template.description if self.task_template else None
-
-    @property
     def assigned_to(self):
         return self.task_template.assigned_to
 

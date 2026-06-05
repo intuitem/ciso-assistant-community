@@ -206,12 +206,12 @@
 	</div>
 
 	<!-- Task Description -->
-	{#if taskNode.description}
+	{#if taskNode.task_template.description}
 		<p class="text-gray-700 text-md font-medium tracking-wide">
 			{m.description()}
 		</p>
 		<div class="border rounded-lg p-4 bg-gray-50">
-			<MarkdownRenderer content={taskNode.description} />
+			<MarkdownRenderer content={taskNode.task_template.description} />
 		</div>
 	{/if}
 
