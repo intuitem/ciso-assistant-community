@@ -124,7 +124,7 @@
 		optionSnippet = undefined,
 		placeholder = '',
 		lazy = false,
-		lazyLimit = 10,
+		lazyLimit = 20,
 		lazyThreshold = 50,
 		maxVisibleChips: _maxVisibleChips = 3
 	}: Props = $props();
