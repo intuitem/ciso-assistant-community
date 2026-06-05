@@ -1,0 +1,727 @@
+urn: urn:intuitem:risk:library:cppa-bill-c27
+locale: en
+ref_id: CPPA-C27
+name: Consumer Privacy Protection Act (CPPA) - Bill C-27
+description: "Canada's proposed federal privacy law reform. The Consumer Privacy Protection\
+  \ Act (CPPA) is Part 1 of Bill C-27, An Act to enact the Consumer Privacy Protection\
+  \ Act, the Personal Information and Data Protection Tribunal Act and the Artificial\
+  \ Intelligence and Data Act.\nNote: Bill C-27 has not yet received Royal Assent\
+  \ as of 2024. Organizations should monitor legislative progress. The CPPA will\
+  \ replace PIPEDA for commercial activities once enacted.\nhttps://www.parl.ca/LegisInfo/en/bill/44-1/C-27"
+copyright: Government of Canada
+version: 1
+publication_date: 2024-01-01
+provider: Government of Canada
+packager: intuitem
+translations:
+  fr:
+    name: "Loi sur la protection de la vie priv\xE9e des consommateurs (LPVPC)\
+      \ - Projet de loi C-27"
+    description: "R\xE9forme propos\xE9e de la loi f\xE9d\xE9rale canadienne\
+      \ sur la vie priv\xE9e. La Loi sur la protection de la vie priv\xE9e des\
+      \ consommateurs (LPVPC) constitue la Partie 1 du projet de loi C-27.\nRemarque\
+      \ : le projet de loi C-27 n'a pas encore re\xE7u la sanction royale\
+      \ en 2024. Les organisations doivent suivre l'\xE9volution l\xE9gislative.\
+      \ La LPVPC remplacera la LPRPDE pour les activit\xE9s commerciales une fois\
+      \ adopt\xE9e.\nhttps://www.parl.ca/LegisInfo/fr/projet-de-loi/44-1/C-27"
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:cppa-bill-c27
+    ref_id: CPPA-C27
+    name: Consumer Privacy Protection Act (CPPA) - Bill C-27
+    description: "The CPPA significantly modernizes Canada's federal privacy regime,\
+      \ introducing stronger consent requirements, new individual rights (erasure,\
+      \ portability, explanation of automated decisions), mandatory privacy management\
+      \ programs, and substantially higher penalties. Note: This framework reflects\
+      \ Bill C-27 as tabled. Status: NOT YET IN FORCE — Organizations should track\
+      \ legislative progress and prepare for compliance."
+    translations:
+      fr:
+        name: "Loi sur la protection de la vie priv\xE9e des consommateurs (LPVPC)\
+          \ - Projet de loi C-27"
+        description: "La LPVPC modernise consid\xE9rablement le r\xE9gime f\xE9\
+          d\xE9ral canadien de protection de la vie priv\xE9e, introduisant des exigences\
+          \ de consentement plus strictes, de nouveaux droits individuels (suppression,\
+          \ portabilit\xE9, explication des d\xE9cisions automatis\xE9es), des programmes\
+          \ obligatoires de gestion de la vie priv\xE9e et des p\xE9nalit\xE9s\
+          \ nettement plus \xE9lev\xE9es. Remarque : NON ENCORE EN VIGUEUR."
+    requirement_nodes:
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:part-i
+      assessable: false
+      depth: 1
+      ref_id: Part I
+      name: Privacy Management Program
+      description: Organizations must implement a comprehensive privacy management
+        program that is proportionate to the volume and sensitivity of personal information
+        they handle.
+      translations:
+        fr:
+          name: "Programme de gestion de la vie priv\xE9e"
+          description: "Les organisations doivent mettre en œuvre un programme\
+            \ complet de gestion de la vie priv\xE9e proportionnel au volume et \xE0\
+            \ la sensibilit\xE9 des renseignements personnels qu'elles traitent."
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:part-i
+      ref_id: s. 9
+      name: Privacy Management Program Requirements
+      description: Core requirements for establishing and maintaining a privacy management
+        program.
+      translations:
+        fr:
+          name: "Exigences du programme de gestion de la vie priv\xE9e"
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-9-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-9
+      ref_id: 9.a
+      description: An organization must implement a privacy management program that
+        includes policies, practices, and procedures to fulfill its obligations under
+        the Act; the means by which the organization gives effect to the program; and
+        a process for receiving and responding to complaints.
+      translations:
+        fr:
+          description: "Une organisation doit mettre en œuvre un programme\
+            \ de gestion de la vie priv\xE9e comprenant des politiques, pratiques\
+            \ et proc\xE9dures pour remplir ses obligations en vertu de la loi, les\
+            \ moyens par lesquels l'organisation donne effet au programme et\
+            \ un processus de r\xE9ception et de traitement des plaintes."
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-9-b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-9
+      ref_id: 9.b
+      description: The privacy management program must be proportionate to the volume
+        and sensitivity of the personal information handled. Organizations must assess
+        and update the program to address changes in their operations or the regulatory
+        environment.
+      translations:
+        fr:
+          description: "Le programme de gestion de la vie priv\xE9e doit \xEAtre\
+            \ proportionnel au volume et \xE0 la sensibilit\xE9 des renseignements\
+            \ personnels trait\xE9s. Les organisations doivent \xE9valuer et mettre\
+            \ \xE0 jour le programme pour tenir compte des changements dans leurs\
+            \ op\xE9rations ou l'environnement r\xE9glementaire."
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-12
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:part-i
+      ref_id: s. 12
+      name: Designated Individual (Chief Privacy Officer equivalent)
+      description: Obligation to designate an individual responsible for compliance.
+      translations:
+        fr:
+          name: "Personne d\xE9sign\xE9e (responsable de la protection de la vie\
+            \ priv\xE9e)"
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-12-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-12
+      ref_id: 12.a
+      description: An organization must designate one or more individuals to be responsible
+        for ensuring that the organization complies with the Act. The identity of those
+        individuals must be made available to any individual upon request.
+      translations:
+        fr:
+          description: "Une organisation doit d\xE9signer une ou plusieurs personnes\
+            \ responsables de s'assurer que l'organisation se conforme \xE0\
+            \ la loi. L'identit\xE9 de ces personnes doit \xEAtre mise \xE0\
+            \ la disposition de toute personne sur demande."
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:part-ii
+      assessable: false
+      depth: 1
+      ref_id: Part II
+      name: Consent
+      description: Requirements for obtaining valid consent for the collection, use,
+        and disclosure of personal information, including special rules for sensitive
+        information and minors.
+      translations:
+        fr:
+          name: "Consentement"
+          description: "Exigences pour obtenir un consentement valide pour la collecte,\
+            \ l'utilisation et la communication de renseignements personnels,\
+            \ y compris les r\xE8gles sp\xE9ciales pour les renseignements sensibles\
+            \ et les mineurs."
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-15
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:part-ii
+      ref_id: s. 15
+      name: Valid Consent
+      description: Conditions for consent to be considered valid under the CPPA.
+      translations:
+        fr:
+          name: "Consentement valide"
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-15-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-15
+      ref_id: 15.a
+      description: For consent to be valid, the individual must be provided with a
+        plain-language notice of the purposes of the collection, use, or disclosure
+        before or at the time of consent, along with information about any foreseeable
+        consequences of the processing.
+      translations:
+        fr:
+          description: "Pour que le consentement soit valide, la personne doit recevoir\
+            \ un avis en langage clair des fins de la collecte, de l'utilisation\
+            \ ou de la communication avant ou au moment du consentement, ainsi que\
+            \ des informations sur les cons\xE9quences pr\xE9visibles du traitement."
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-15-b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-15
+      ref_id: 15.b
+      description: Consent must be meaningful — the organization must make a reasonable
+        effort to ensure that the individual is aware of the purposes of the collection,
+        use, or disclosure. Bundled, uninformed, or pre-ticked consent is not valid.
+      translations:
+        fr:
+          description: "Le consentement doit \xEAtre \xE9clair\xE9 — l'organisation\
+            \ doit faire des efforts raisonnables pour s'assurer que la personne\
+            \ est au courant des fins. Le consentement group\xE9, non inform\xE9\
+            \ ou avec cases pr\xE9-coch\xE9es n'est pas valide."
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-18
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:part-ii
+      ref_id: s. 18
+      name: Sensitive Personal Information
+      description: Heightened consent requirements for sensitive personal information.
+      translations:
+        fr:
+          name: "Renseignements personnels sensibles"
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-18-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-18
+      ref_id: 18.a
+      description: For sensitive personal information (including health, financial,
+        biometric, genetic, sexual orientation, religious beliefs, and political opinions),
+        express (explicit) consent is required. Implied consent is not sufficient for
+        sensitive information.
+      translations:
+        fr:
+          description: "Pour les renseignements personnels sensibles (notamment la\
+            \ sant\xE9, les finances, les donn\xE9es biom\xE9triques, g\xE9n\xE9\
+            tiques, l'orientation sexuelle, les croyances religieuses et les\
+            \ opinions politiques), le consentement exprès (explicite) est requis.\
+            \ Le consentement implicite n'est pas suffisant."
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-22
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:part-ii
+      ref_id: s. 22
+      name: Legitimate Interest (No Consent Exception)
+      description: Limited circumstances where organizations may collect, use, or disclose
+        personal information without consent based on legitimate interest.
+      translations:
+        fr:
+          name: "Int\xE9r\xEAt l\xE9gitime (exception au consentement)"
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-22-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-22
+      ref_id: 22.a
+      description: An organization may collect or use personal information without
+        consent if it has a legitimate interest that outweighs any adverse effect on
+        the individual, the individual would reasonably expect the use, and the information
+        is not sensitive. Organizations must document their legitimate interest assessments.
+      translations:
+        fr:
+          description: "Une organisation peut collecter ou utiliser des renseignements\
+            \ personnels sans consentement si elle a un int\xE9r\xEAt l\xE9gitime\
+            \ qui l'emporte sur tout effet n\xE9gatif pour la personne, si celle-ci\
+            \ s'attendrait raisonnablement \xE0 cette utilisation et si les\
+            \ renseignements ne sont pas sensibles. Les organisations doivent documenter\
+            \ leurs \xE9valuations d'int\xE9r\xEAt l\xE9gitime."
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:part-iii
+      assessable: false
+      depth: 1
+      ref_id: Part III
+      name: Collection, Use, and Disclosure
+      description: Rules governing the lawful collection, use, and disclosure of personal
+        information, including transfers to service providers.
+      translations:
+        fr:
+          name: "Collecte, utilisation et communication"
+          description: "R\xE8gles r\xE9gissant la collecte, l'utilisation et\
+            \ la communication licites de renseignements personnels, notamment les\
+            \ transferts aux prestataires de services."
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-23
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:part-iii
+      ref_id: s. 23
+      name: Limiting Collection
+      description: Organizations must limit collection to what is reasonably necessary
+        for the identified purpose.
+      translations:
+        fr:
+          name: "Limitation de la collecte"
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-23-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-23
+      ref_id: 23.a
+      description: An organization must limit the collection of personal information
+        to what is necessary to fulfill the purposes for which it is collected. An organization
+        must not collect personal information indiscriminately or deceive individuals
+        about the purposes of collection.
+      translations:
+        fr:
+          description: "Une organisation doit limiter la collecte de renseignements\
+            \ personnels \xE0 ce qui est n\xE9cessaire pour atteindre les fins auxquelles\
+            \ ils sont recueillis. Elle ne doit pas les recueillir de mani\xE8re arbitraire\
+            \ ni tromper les personnes sur les fins de la collecte."
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-27
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:part-iii
+      ref_id: s. 27
+      name: Transfer to Service Providers
+      description: Rules for transferring personal information to service providers
+        for processing.
+      translations:
+        fr:
+          name: "Transfert aux prestataires de services"
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-27-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-27
+      ref_id: 27.a
+      description: An organization may transfer personal information to a service provider
+        only for the purpose for which it was collected, and only if the service provider
+        agrees to protect the information in a manner consistent with the Act. The transferring
+        organization remains responsible for the information under the Act.
+      translations:
+        fr:
+          description: "Une organisation ne peut transf\xE9rer des renseignements\
+            \ personnels \xE0 un prestataire de services qu'\xE0 la fin pour\
+            \ laquelle ils ont \xE9t\xE9 recueillis, et seulement si le prestataire\
+            \ accepte de les prot\xE9ger d'une mani\xE8re conforme \xE0 la\
+            \ loi. L'organisation c\xE9dante demeure responsable des renseignements."
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:part-iv
+      assessable: false
+      depth: 1
+      ref_id: Part IV
+      name: Retention, Accuracy, and Disposal
+      description: Rules for retaining personal information only as long as necessary
+        and for securely disposing of it.
+      translations:
+        fr:
+          name: "Conservation, exactitude et suppression"
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-35
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:part-iv
+      ref_id: s. 35
+      name: Limiting Retention
+      description: Obligation to retain personal information only as long as necessary.
+      translations:
+        fr:
+          name: "Limitation de la conservation"
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-35-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-35
+      ref_id: 35.a
+      description: An organization must retain personal information only as long as
+        necessary to fulfill the purposes for which it was collected. Personal information
+        that is no longer required must be disposed of in a secure manner.
+      translations:
+        fr:
+          description: "Une organisation doit conserver les renseignements personnels\
+            \ seulement aussi longtemps que n\xE9cessaire pour atteindre les fins\
+            \ pour lesquelles ils ont \xE9t\xE9 recueillis. Les renseignements qui\
+            \ ne sont plus n\xE9cessaires doivent \xEAtre \xE9limin\xE9s de mani\xE8\
+            re s\xE9curis\xE9e."
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:part-v
+      assessable: false
+      depth: 1
+      ref_id: Part V
+      name: Openness and Transparency
+      description: Organizations must be open and transparent about their privacy practices,
+        maintaining a readily accessible privacy policy.
+      translations:
+        fr:
+          name: "Ouverture et transparence"
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-62
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:part-v
+      ref_id: s. 62
+      name: Privacy Policy
+      description: Requirements for the content and accessibility of the organization's
+        privacy policy.
+      translations:
+        fr:
+          name: "Politique de confidentialit\xE9"
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-62-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-62
+      ref_id: 62.a
+      description: An organization must make its privacy policy available to the public
+        in plain language. The policy must describe all types of personal information
+        under control of the organization, the purposes for collection, use, and disclosure,
+        how individuals may exercise their rights, and the name of the designated individual
+        responsible for compliance.
+      translations:
+        fr:
+          description: "Une organisation doit rendre sa politique de confidentialit\xE9\
+            \ accessible au public en langage clair. La politique doit d\xE9crire\
+            \ tous les types de renseignements personnels, les fins de collecte, d'\
+            utilisation et de communication, comment les personnes peuvent exercer\
+            \ leurs droits et le nom de la personne d\xE9sign\xE9e responsable de\
+            \ la conformit\xE9."
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:part-vi
+      assessable: false
+      depth: 1
+      ref_id: Part VI
+      name: Individual Rights
+      description: New and enhanced individual rights under the CPPA including access,
+        correction, disposal, portability, and the right to an explanation of automated
+        decisions.
+      translations:
+        fr:
+          name: "Droits des personnes"
+          description: "Droits nouveaux et am\xE9lior\xE9s des personnes en vertu\
+            \ de la LPVPC, notamment l'acc\xE8s, la correction, la suppression,\
+            \ la portabilit\xE9 et le droit \xE0 une explication des d\xE9cisions\
+            \ automatis\xE9es."
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-49
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:part-vi
+      ref_id: s. 49
+      name: Right of Access
+      description: Individual right to access personal information held by an organization.
+      translations:
+        fr:
+          name: "Droit d'acc\xE8s"
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-49-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-49
+      ref_id: 49.a
+      description: An individual has the right to request access to personal information
+        held by an organization. The organization must respond within 30 days (extendable
+        to 60 days for large or complex requests with notice) and provide the information
+        in a comprehensible format.
+      translations:
+        fr:
+          description: "Une personne a le droit de demander l'acc\xE8s aux renseignements\
+            \ personnels d\xE9tenus par une organisation. L'organisation doit\
+            \ r\xE9pondre dans les 30 jours (prolongeable \xE0 60 jours pour les\
+            \ demandes volumineuses ou complexes avec pr\xE9avis) et fournir les\
+            \ renseignements dans un format compr\xE9hensible."
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-52
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:part-vi
+      ref_id: s. 52
+      name: Right to Correction
+      description: Individual right to request correction of inaccurate personal information.
+      translations:
+        fr:
+          name: "Droit de correction"
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-52-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-52
+      ref_id: 52.a
+      description: An individual has the right to request that an organization correct
+        inaccurate personal information. If the organization corrects the information,
+        it must notify other organizations to which it disclosed the information, if
+        reasonably possible.
+      translations:
+        fr:
+          description: "Une personne a le droit de demander \xE0 une organisation\
+            \ de corriger des renseignements personnels inexacts. Si l'organisation\
+            \ corrige les renseignements, elle doit en aviser les autres organisations\
+            \ auxquelles elle les a communiqu\xE9s, si raisonnablement possible."
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-55
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:part-vi
+      ref_id: s. 55
+      name: Right to Disposal (Right to Erasure)
+      description: Individual right to request disposal/deletion of personal information.
+      translations:
+        fr:
+          name: "Droit \xE0 l'\xE9limination (droit \xE0 l'effacement)"
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-55-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-55
+      ref_id: 55.a
+      description: An individual may request that an organization dispose of personal
+        information if the individual has withdrawn consent on which the collection
+        or use is based and there is no other legal basis for retaining it. The organization
+        must inform any service provider that received the information.
+      translations:
+        fr:
+          description: "Une personne peut demander \xE0 une organisation d'\xE9\
+            liminer des renseignements personnels si elle a retir\xE9 le consentement\
+            \ sur lequel la collecte ou l'utilisation est fond\xE9e et qu'\
+            il n'existe pas d'autre base l\xE9gale de conservation. L'\
+            organisation doit informer tout prestataire de services ayant re\xE7u\
+            \ les renseignements."
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-57
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:part-vi
+      ref_id: s. 57
+      name: Right to Data Mobility (Portability)
+      description: Individual right to receive personal information in a portable format
+        and have it transmitted to another organization.
+      translations:
+        fr:
+          name: "Droit \xE0 la mobilit\xE9 des donn\xE9es (portabilit\xE9)"
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-57-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-57
+      ref_id: 57.a
+      description: An individual may request that an organization provide their personal
+        information in a format prescribed by regulations and, if requested, transmit
+        it to another organization. This right applies to personal information that
+        is subject to a data mobility framework established by regulation.
+      translations:
+        fr:
+          description: "Une personne peut demander \xE0 une organisation de fournir\
+            \ ses renseignements personnels dans un format prescrit par r\xE8glement\
+            \ et, sur demande, de les transmettre \xE0 une autre organisation. Ce\
+            \ droit s'applique aux renseignements personnels assujettis \xE0\
+            \ un cadre de mobilit\xE9 des donn\xE9es \xE9tabli par r\xE8glement."
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-63
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:part-vi
+      ref_id: s. 63
+      name: Right to Explanation of Automated Decisions
+      description: Individual right to request an explanation of predictions, recommendations,
+        or decisions made by automated systems.
+      translations:
+        fr:
+          name: "Droit \xE0 l'explication des d\xE9cisions automatis\xE9es"
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-63-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-63
+      ref_id: 63.a
+      description: An individual may request an explanation of any prediction, recommendation,
+        or decision that was made about them based on the processing of their personal
+        information through automated systems. The organization must explain the personal
+        information used, the logic applied, and the significant consequences of the
+        decision.
+      translations:
+        fr:
+          description: "Une personne peut demander une explication de toute pr\xE9\
+            diction, recommandation ou d\xE9cision la concernant fond\xE9e sur le\
+            \ traitement de ses renseignements personnels par des syst\xE8mes automatis\xE9\
+            s. L'organisation doit expliquer les renseignements utilis\xE9s,\
+            \ la logique appliqu\xE9e et les cons\xE9quences importantes de la d\xE9\
+            cision."
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:part-vii
+      assessable: false
+      depth: 1
+      ref_id: Part VII
+      name: Security Safeguards and Breach Notification
+      description: Obligations to protect personal information through appropriate
+        security safeguards and to notify regulators and individuals of security breaches.
+      translations:
+        fr:
+          name: "Mesures de s\xE9curit\xE9 et notification des violations"
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-57-safeguards
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:part-vii
+      ref_id: s. 57 (Safeguards)
+      name: Security Safeguards
+      description: Obligation to implement appropriate security safeguards.
+      translations:
+        fr:
+          name: "Mesures de s\xE9curit\xE9"
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-57-safeguards-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-57-safeguards
+      ref_id: S.57.a
+      description: An organization must protect personal information against loss, theft,
+        and unauthorized access, disclosure, copying, use, or modification through security
+        safeguards appropriate to the sensitivity of the information.
+      translations:
+        fr:
+          description: "Une organisation doit prot\xE9ger les renseignements personnels\
+            \ contre la perte, le vol et tout acc\xE8s, communication, copie, utilisation\
+            \ ou modification non autoris\xE9s par des mesures de s\xE9curit\xE9\
+            \ adapt\xE9es \xE0 la sensibilit\xE9 des renseignements."
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-67
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:part-vii
+      ref_id: s. 67
+      name: Breach of Security Safeguards
+      description: Mandatory breach notification to the Commissioner and affected individuals.
+      translations:
+        fr:
+          name: "Atteinte aux mesures de s\xE9curit\xE9"
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-67-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-67
+      ref_id: 67.a
+      description: An organization must report a breach of security safeguards involving
+        personal information under its control to the Privacy Commissioner as soon as
+        feasible if the breach creates a real risk of significant harm to an individual.
+        The organization must simultaneously notify affected individuals.
+      translations:
+        fr:
+          description: "Une organisation doit signaler une atteinte aux mesures de\
+            \ s\xE9curit\xE9 impliquant des renseignements personnels au Commissaire\
+            \ \xE0 la protection de la vie priv\xE9e d\xE8s que possible si l'\
+            atteinte cr\xE9e un risque r\xE9el de pr\xE9judice grave pour une personne.\
+            \ L'organisation doit simultan\xE9ment aviser les personnes concern\xE9\
+            es."
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-67-b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-67
+      ref_id: 67.b
+      description: An organization must maintain a record of every breach of security
+        safeguards for 24 months after becoming aware of the breach and provide the
+        Commissioner with access to the record on request.
+      translations:
+        fr:
+          description: "Une organisation doit tenir un registre de toutes les atteintes\
+            \ aux mesures de s\xE9curit\xE9 pendant 24 mois apr\xE8s en avoir pris\
+            \ connaissance et donner au Commissaire acc\xE8s \xE0 ce registre sur\
+            \ demande."
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:part-viii
+      assessable: false
+      depth: 1
+      ref_id: Part VIII
+      name: De-identification
+      description: Rules governing the de-identification of personal information and
+        obligations regarding use of de-identified information.
+      translations:
+        fr:
+          name: "D\xE9sidentification"
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-74
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:part-viii
+      ref_id: s. 74
+      name: De-identification Standards
+      description: Requirements for de-identifying personal information.
+      translations:
+        fr:
+          name: "Normes de d\xE9sidentification"
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-74-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-74
+      ref_id: 74.a
+      description: When de-identifying personal information, an organization must use
+        technical and administrative measures to ensure the information is de-identified
+        such that it cannot reasonably be expected to identify an individual. De-identified
+        information that is kept must be protected against re-identification.
+      translations:
+        fr:
+          description: "Lors de la d\xE9sidentification des renseignements personnels,\
+            \ une organisation doit utiliser des mesures techniques et administratives\
+            \ pour s'assurer que les renseignements sont d\xE9sidentifi\xE9s\
+            \ de sorte qu'on ne puisse raisonnablement s'attendre \xE0\
+            \ identifier une personne. Les renseignements d\xE9sidentifi\xE9s conserv\xE9\
+            s doivent \xEAtre prot\xE9g\xE9s contre la r\xE9identification."
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:part-ix
+      assessable: false
+      depth: 1
+      ref_id: Part IX
+      name: Enforcement and Penalties
+      description: Enforcement mechanisms and significantly increased penalties for
+        non-compliance with the CPPA.
+      translations:
+        fr:
+          name: "Application et sanctions"
+          description: "M\xE9canismes d'application et sanctions consid\xE9rablement\
+            \ augment\xE9es pour non-respect de la LPVPC."
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-93
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:part-ix
+      ref_id: s. 93
+      name: Administrative Monetary Penalties
+      description: Penalty structure for violations of the CPPA.
+      translations:
+        fr:
+          name: "Sanctions administratives p\xE9cuniaires"
+
+    - urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-93-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cppa-bill-c27:s-93
+      ref_id: 93.a
+      description: "Organizations may be subject to administrative monetary penalties\
+        \ of up to $10,000,000 or 3% of global annual revenue for less serious violations.\
+        \ For the most serious violations (such as failure to obtain valid consent or\
+        \ breach notification failures), penalties of up to $25,000,000 or 5% of global\
+        \ annual revenue may apply."
+      translations:
+        fr:
+          description: "Les organisations peuvent \xEAtre assujetties \xE0 des sanctions\
+            \ administratives p\xE9cuniaires pouvant atteindre 10\xA0000\xA0000\xA0\
+            $ ou 3\xA0% du chiffre d'affaires annuel mondial pour les violations\
+            \ moins graves. Pour les violations les plus graves (comme le d\xE9faut\
+            \ de consentement valide ou les manquements \xE0 la notification), des\
+            \ sanctions pouvant atteindre 25\xA0000\xA0000\xA0$ ou 5\xA0% s'appliquent."

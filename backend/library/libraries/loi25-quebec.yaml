@@ -1,0 +1,1044 @@
+urn: urn:intuitem:risk:library:loi25-quebec
+locale: en
+ref_id: LOI-25-QC
+name: Quebec Law 25 - Act Respecting the Protection of Personal Information in the Private Sector
+description: "Quebec Law 25 (Bill 64) - Loi modernisant des dispositions l\xE9gislatives\
+  \ en mati\xE8re de protection des renseignements personnels.\nAmends the Act Respecting\
+  \ the Protection of Personal Information in the Private Sector (RLRQ, c. P-39.1).\n\
+  Fully in force as of September 22, 2023.\nhttps://www.legisquebec.gouv.qc.ca/en/document/cs/P-39.1"
+copyright: "Gouvernement du Qu\xE9bec"
+version: 1
+publication_date: 2024-01-01
+provider: "Gouvernement du Qu\xE9bec"
+packager: intuitem
+translations:
+  fr:
+    name: "Loi 25 du Qu\xE9bec - Loi sur la protection des renseignements personnels\
+      \ dans le secteur priv\xE9"
+    description: "Loi 25 du Qu\xE9bec (projet de loi 64) - Loi modernisant des dispositions\
+      \ l\xE9gislatives en mati\xE8re de protection des renseignements personnels.\n\
+      Modifie la Loi sur la protection des renseignements personnels dans le secteur\
+      \ priv\xE9 (RLRQ, c. P-39.1).\nEnt\xE8rement en vigueur depuis le 22 septembre\
+      \ 2023.\nhttps://www.legisquebec.gouv.qc.ca/fr/document/lc/P-39.1"
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:loi25-quebec
+    ref_id: LOI-25-QC
+    name: Quebec Law 25 - Protection of Personal Information in the Private Sector
+    description: "Quebec Law 25 (Bill 64) significantly modernizes Quebec’s privacy\
+      \ law, introducing obligations including privacy by design, mandatory Privacy\
+      \ Impact Assessments (PIA/EFVP), breach notification, rights to de-indexing,\
+      \ data portability, and automated decision-making transparency. Applies to any\
+      \ enterprise collecting, using, or communicating personal information about natural\
+      \ persons in the course of carrying on an enterprise in Quebec."
+    translations:
+      fr:
+        name: "Loi 25 du Qu\xE9bec - Protection des renseignements personnels dans\
+          \ le secteur priv\xE9"
+        description: "La Loi 25 modernise consid\xE9rablement la loi qu\xE9b\xE9coise\
+          \ sur la protection de la vie priv\xE9e, introduisant des obligations telles\
+          \ que la protection de la vie priv\xE9e d\xE8s la conception, les \xE9valuations\
+          \ des facteurs relatifs \xE0 la vie priv\xE9e (EFVP) obligatoires, la notification\
+          \ des incidents de confidentialit\xE9, les droits \xE0 la d\xE9sindexation,\
+          \ \xE0 la portabilit\xE9 des donn\xE9es et \xE0 la transparence des d\xE9\
+          cisions automatis\xE9es."
+    requirement_nodes:
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-i
+      assessable: false
+      depth: 1
+      ref_id: Chapter I
+      name: Governance and Accountability
+      description: Obligations relating to organizational governance, designation of
+        a privacy officer, and publication of privacy policies.
+      translations:
+        fr:
+          name: Gouvernance et responsabilit\xE9
+          description: "Obligations relatives \xE0 la gouvernance organisationnelle,\
+            \ \xE0 la d\xE9signation d’un responsable de la protection des renseignements\
+            \ personnels et \xE0 la publication des politiques de confidentialit\xE9."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-i
+      ref_id: Art. 3.1
+      name: Privacy Officer
+      description: Designation of a person responsible for the protection of personal
+        information.
+      translations:
+        fr:
+          name: "Responsable de la protection des renseignements personnels"
+          description: "D\xE9signation d’une personne responsable de la protection\
+            \ des renseignements personnels."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.1-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.1
+      ref_id: 3.1.a
+      description: A person holding the highest governance role within the enterprise
+        is by default responsible for the protection of personal information. The enterprise
+        may designate another natural person to that role.
+      translations:
+        fr:
+          description: "La personne ayant la plus haute autorit\xE9 au sein de l’\
+            entreprise est, par d\xE9faut, responsable de la protection des renseignements\
+            \ personnels. L’entreprise peut d\xE9signer une autre personne physique\
+            \ \xE0 cette fonction."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.1-b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.1
+      ref_id: 3.1.b
+      description: The title and contact information of the person responsible for
+        the protection of personal information must be published on the enterprise's
+        website or, if no website exists, made available by any other appropriate means.
+      translations:
+        fr:
+          description: "Le titre et les coordonn\xE9es de la personne responsable\
+            \ de la protection des renseignements personnels doivent \xEAtre publi\xE9\
+            s sur le site Web de l’entreprise ou, \xE0 d\xE9faut, rendus disponibles\
+            \ par tout autre moyen appropri\xE9."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-i
+      ref_id: Art. 3.2
+      name: Privacy Governance Framework
+      description: Establishment and publication of privacy governance policies and
+        practices.
+      translations:
+        fr:
+          name: "Cadre de gouvernance de la vie priv\xE9e"
+          description: "\xC9tablissement et publication des politiques et pratiques\
+            \ de gouvernance de la protection de la vie priv\xE9e."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.2-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.2
+      ref_id: 3.2.a
+      description: The enterprise must establish and implement governance policies
+        and practices to ensure the protection of personal information, including rules
+        for retention, destruction, and anonymization.
+      translations:
+        fr:
+          description: "L’entreprise doit \xE9tablir et mettre en œuvre\
+            \ des politiques et des pratiques de gouvernance encadrant la protection\
+            \ des renseignements personnels, notamment des r\xE8gles de conservation,\
+            \ de destruction et d’anonymisation."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.2-b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.2
+      ref_id: 3.2.b
+      description: The privacy policy must be published in plain language on the enterprise's
+        website and describe how complaints about privacy practices may be addressed.
+      translations:
+        fr:
+          description: "La politique de confidentialit\xE9 doit \xEAtre publi\xE9\
+            e en langage clair sur le site Web de l’entreprise et d\xE9crire\
+            \ comment les plaintes relatives aux pratiques de protection de la vie\
+            \ priv\xE9e peuvent \xEAtre trait\xE9es."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-ii
+      assessable: false
+      depth: 1
+      ref_id: Chapter II
+      name: Privacy by Design
+      description: Obligations to integrate privacy protection into technology products,
+        systems, and services from the outset of their design.
+      translations:
+        fr:
+          name: "Protection de la vie priv\xE9e d\xE8s la conception"
+          description: "Obligations d’int\xE9grer la protection de la vie priv\xE9\
+            e dans les produits, syst\xE8mes et services technologiques d\xE8s leur\
+            \ conception."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-ii
+      ref_id: Art. 3.3
+      name: Privacy by Design for Technology
+      description: Privacy protection must be built into IT systems and technology
+        products from design.
+      translations:
+        fr:
+          name: "Protection de la vie priv\xE9e d\xE8s la conception pour la technologie"
+          description: "La protection de la vie priv\xE9e doit \xEAtre int\xE9gr\xE9\
+            e aux syst\xE8mes informatiques et aux produits technologiques d\xE8s\
+            \ leur conception."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.3-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.3
+      ref_id: 3.3.a
+      description: When acquiring, developing, or overhauling an information system
+        or technology product that involves the collection, use, communication, retention,
+        or destruction of personal information, the enterprise must assess privacy risks
+        at the design stage and implement appropriate protective measures.
+      translations:
+        fr:
+          description: "Lors de l’acquisition, du d\xE9veloppement ou de la\
+            \ refonte d’un syst\xE8me d’information ou d’un produit\
+            \ technologique impliquant la collecte, l’utilisation, la communication,\
+            \ la conservation ou la destruction de renseignements personnels, l’\
+            entreprise doit \xE9valuer les risques pour la vie priv\xE9e d\xE8s la\
+            \ conception et mettre en œuvre des mesures de protection appropri\xE9\
+            es."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.3-b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.3
+      ref_id: 3.3.b
+      description: The enterprise must ensure that default settings for any technology
+        product or service involving personal information provide the highest level
+        of privacy protection without requiring any action by the individual.
+      translations:
+        fr:
+          description: "L’entreprise doit veiller \xE0 ce que les param\xE8\
+            tres par d\xE9faut de tout produit ou service technologique impliquant\
+            \ des renseignements personnels assurent le niveau de confidentialit\xE9\
+            \ le plus \xE9lev\xE9 sans qu’aucune action ne soit requise de la\
+            \ part de la personne concern\xE9e."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-iii
+      assessable: false
+      depth: 1
+      ref_id: Chapter III
+      name: Privacy Impact Assessments (PIA / EFVP)
+      description: Obligations to conduct Privacy Impact Assessments before processing
+        activities or communicating personal information outside Quebec.
+      translations:
+        fr:
+          name: "\xC9valuations des facteurs relatifs \xE0 la vie priv\xE9e (EFVP)"
+          description: "Obligations de r\xE9aliser des \xE9valuations des facteurs\
+            \ relatifs \xE0 la vie priv\xE9e avant les activit\xE9s de traitement\
+            \ ou la communication de renseignements personnels hors Qu\xE9bec."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-iii
+      ref_id: Art. 3.4
+      name: Privacy Impact Assessment Requirements
+      description: Conditions triggering a mandatory PIA.
+      translations:
+        fr:
+          name: "Exigences relatives \xE0 l’\xE9valuation des facteurs relatifs\
+            \ \xE0 la vie priv\xE9e"
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.4-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.4
+      ref_id: 3.4.a
+      description: A Privacy Impact Assessment (PIA) must be conducted before any
+        acquisition, development, or overhaul of an information system or electronic
+        service delivery involving personal information.
+      translations:
+        fr:
+          description: "Une \xE9valuation des facteurs relatifs \xE0 la vie priv\xE9\
+            e (EFVP) doit \xEAtre effectu\xE9e avant l’acquisition, le d\xE9\
+            veloppement ou la refonte d’un syst\xE8me d’information ou\
+            \ d’un service de prestation \xE9lectronique impliquant des renseignements\
+            \ personnels."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.4-b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.4
+      ref_id: 3.4.b
+      description: A PIA must be conducted before communicating personal information
+        outside Quebec or entrusting it to a person or organization outside Quebec.
+        The PIA must demonstrate that the information will receive adequate protection
+        equivalent to what Quebec law provides.
+      translations:
+        fr:
+          description: "Une EFVP doit \xEAtre effectu\xE9e avant de communiquer\
+            \ des renseignements personnels \xE0 l’ext\xE9rieur du Qu\xE9bec\
+            \ ou de les confier \xE0 une personne ou organisation hors Qu\xE9bec.\
+            \ L’EFVP doit d\xE9montrer que les renseignements b\xE9n\xE9ficieront\
+            \ d’une protection ad\xE9quate \xE9quivalente \xE0 celle que pr\xE9\
+            voit la loi qu\xE9b\xE9coise."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.4-c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.4
+      ref_id: 3.4.c
+      description: The PIA must be proportionate to the sensitivity of the information,
+        the purpose, the quantity, the distribution, and the medium. A written agreement
+        must be concluded with any third party outside Quebec receiving the information,
+        ensuring equivalent protection.
+      translations:
+        fr:
+          description: "L’EFVP doit \xEAtre proportionnelle \xE0 la sensibilit\xE9\
+            \ des renseignements, \xE0 la finalit\xE9, \xE0 la quantit\xE9, \xE0\
+            \ la distribution et au support. Un accord \xE9crit doit \xEAtre conclu\
+            \ avec tout tiers \xE0 l’ext\xE9rieur du Qu\xE9bec qui re\xE7oit\
+            \ les renseignements, assurant une protection \xE9quivalente."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-iv
+      assessable: false
+      depth: 1
+      ref_id: Chapter IV
+      name: Confidentiality Incidents
+      description: Obligations relating to the detection, reporting, and management
+        of confidentiality incidents (data breaches).
+      translations:
+        fr:
+          name: "Incidents de confidentialit\xE9"
+          description: "Obligations relatives \xE0 la d\xE9tection, au signalement\
+            \ et \xE0 la gestion des incidents de confidentialit\xE9 (violations de\
+            \ donn\xE9es)."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-iv
+      ref_id: Art. 3.5
+      name: Incident Register
+      description: Obligation to maintain an incident register.
+      translations:
+        fr:
+          name: "Registre des incidents"
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.5-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.5
+      ref_id: 3.5.a
+      description: The enterprise must maintain a register of all confidentiality incidents,
+        including those that do not present a risk of serious injury. The register must
+        be kept for a minimum of 5 years and made available to the Commission d'accès
+        à l'information (CAI) upon request.
+      translations:
+        fr:
+          description: "L’entreprise doit tenir un registre de tous les incidents\
+            \ de confidentialit\xE9, y compris ceux qui ne pr\xE9sentent pas de risque\
+            \ de pr\xE9judice s\xE9rieux. Le registre doit \xEAtre conserv\xE9 pendant\
+            \ au moins 5 ans et mis \xE0 la disposition de la Commission d’acc\xE8\
+            s \xE0 l’information (CAI) sur demande."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-iv
+      ref_id: Art. 3.6
+      name: Incident Notification
+      description: Notification to the CAI and affected individuals of incidents presenting
+        a risk of serious injury.
+      translations:
+        fr:
+          name: "Notification des incidents"
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.6-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.6
+      ref_id: 3.6.a
+      description: When a confidentiality incident involving personal information presents
+        a risk of serious injury to any person concerned, the enterprise must notify
+        the CAI as soon as possible and, if applicable, notify any third party whose
+        personal information is involved.
+      translations:
+        fr:
+          description: "Lorsqu’un incident de confidentialit\xE9 impliquant des\
+            \ renseignements personnels pr\xE9sente un risque de pr\xE9judice s\xE9\
+            rieux pour une personne concern\xE9e, l’entreprise doit en aviser\
+            \ la CAI dans les meilleurs d\xE9lais et, le cas \xE9ch\xE9ant, aviser\
+            \ tout tiers dont les renseignements personnels sont vis\xE9s."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.6-b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-3.6
+      ref_id: 3.6.b
+      description: The notification to the person concerned must include the nature
+        of the personal information involved, a brief description of the incident, the
+        date or approximate period, the measures taken to reduce risk, information about
+        remedial measures available, and contact information for questions.
+      translations:
+        fr:
+          description: "La notification \xE0 la personne concern\xE9e doit inclure\
+            \ la nature des renseignements personnels vis\xE9s, une br\xE8ve description\
+            \ de l’incident, la date ou la p\xE9riode approximative, les mesures\
+            \ prises pour r\xE9duire le risque, les mesures correctives disponibles\
+            \ et les coordonn\xE9es pour les questions."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-v
+      assessable: false
+      depth: 1
+      ref_id: Chapter V
+      name: Collection of Personal Information
+      description: Rules governing how personal information is collected, including
+        the necessity principle, consent requirements, and special rules for sensitive
+        information and minors.
+      translations:
+        fr:
+          name: "Collecte de renseignements personnels"
+          description: "R\xE8gles r\xE9gissant la collecte des renseignements personnels,\
+            \ notamment le principe de n\xE9cessit\xE9, les exigences en mati\xE8re\
+            \ de consentement et les r\xE8gles sp\xE9ciales pour les renseignements\
+            \ sensibles et les mineurs."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-v
+      ref_id: Art. 4
+      name: Necessity Principle
+      description: Only personal information necessary for the stated purpose may be
+        collected.
+      translations:
+        fr:
+          name: "Principe de n\xE9cessit\xE9"
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-4-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-4
+      ref_id: 4.a
+      description: Only personal information that is necessary for the purpose of the
+        file may be collected. No one may refuse to deal with a person or withhold a
+        benefit because they refuse to provide personal information beyond what is necessary
+        for the purpose.
+      translations:
+        fr:
+          description: "Seuls les renseignements personnels n\xE9cessaires \xE0 la\
+            \ finalit\xE9 du dossier peuvent \xEAtre recueillis. Nul ne peut refuser\
+            \ de traiter avec une personne ou lui refuser un avantage parce qu’\
+            elle refuse de fournir des renseignements personnels all\xE0-au-del\xE0\
+            \ de ce qui est n\xE9cessaire."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-v
+      ref_id: Art. 5
+      name: Consent
+      description: Consent requirements for the collection of personal information.
+      translations:
+        fr:
+          name: "Consentement"
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-5-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-5
+      ref_id: 5.a
+      description: The collection of personal information requires the free, informed,
+        specific, and unambiguous consent of the person concerned, unless otherwise
+        provided by law.
+      translations:
+        fr:
+          description: "La collecte de renseignements personnels requiert le consentement\
+            \ libre, \xE9clair\xE9, sp\xE9cifique et manifeste de la personne concern\xE9\
+            e, \xE0 moins que la loi ne le pr\xE9voie autrement."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-5-b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-5
+      ref_id: 5.b
+      description: A request for consent must be presented separately from any other
+        information communicated to the person concerned. Consent given as part of a
+        general declaration that also covers other matters is not valid.
+      translations:
+        fr:
+          description: "Une demande de consentement doit \xEAtre pr\xE9sent\xE9e\
+            \ s\xE9par\xE9ment de toute autre information communiqu\xE9e \xE0 la\
+            \ personne concern\xE9e. Le consentement donn\xE9 dans le cadre d’\
+            une d\xE9claration g\xE9n\xE9rale couvrant d’autres sujets n’\
+            est pas valide."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-v
+      ref_id: Art. 6
+      name: Notice at Collection
+      description: Information that must be provided to individuals at the time of
+        collection.
+      translations:
+        fr:
+          name: "Avis au moment de la collecte"
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-6-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-6
+      ref_id: 6.a
+      description: At the time of collection, the enterprise must communicate to the
+        person concerned the purposes for which the information is collected, the means
+        by which it is collected, the rights of access and rectification, the right
+        to withdraw consent, and contact information for the privacy officer.
+      translations:
+        fr:
+          description: "Au moment de la collecte, l’entreprise doit communiquer\
+            \ \xE0 la personne concern\xE9e les finalit\xE9s pour lesquelles les\
+            \ renseignements sont recueillis, les moyens de collecte, les droits d’\
+            acc\xE8s et de rectification, le droit de retirer le consentement et les\
+            \ coordonn\xE9es du responsable de la protection des renseignements personnels."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-6-b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-6
+      ref_id: 6.b
+      description: If personal information may be communicated outside Quebec, the
+        person concerned must be informed of this possibility at the time of collection,
+        and of the fact that the information may not receive equivalent protection.
+      translations:
+        fr:
+          description: "Si des renseignements personnels sont susceptibles d’\
+            \xEAtre communiqu\xE9s hors Qu\xE9bec, la personne concern\xE9e doit\
+            \ en \xEAtre inform\xE9e au moment de la collecte, ainsi que du fait que\
+            \ les renseignements pourraient ne pas b\xE9n\xE9ficier d’une protection\
+            \ \xE9quivalente."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-v
+      ref_id: Art. 8
+      name: Sensitive Personal Information
+      description: Special rules for sensitive personal information requiring explicit
+        consent.
+      translations:
+        fr:
+          name: "Renseignements personnels sensibles"
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-8-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-8
+      ref_id: 8.a
+      description: Sensitive personal information (including health, financial, biometric,
+        sexual characteristics, political opinions, religious beliefs, and genetic information)
+        must be treated with heightened protection. Explicit and specific consent is
+        required for collection, use, or communication of such information.
+      translations:
+        fr:
+          description: "Les renseignements personnels sensibles (notamment les renseignements\
+            \ sur la sant\xE9, les finances, les caract\xE9ristiques biom\xE9triques,\
+            \ les opinions politiques, les croyances religieuses et les renseignements\
+            \ g\xE9n\xE9tiques) doivent faire l’objet d’une protection\
+            \ accrue. Un consentement explicite et sp\xE9cifique est requis pour leur\
+            \ collecte, utilisation ou communication."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-v
+      ref_id: Art. 9
+      name: Withdrawal of Consent
+      description: Right of individuals to withdraw consent at any time.
+      translations:
+        fr:
+          name: "Retrait du consentement"
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-9-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-9
+      ref_id: 9.a
+      description: Any person who has given consent to the collection, use, or communication
+        of personal information may withdraw consent at any time, subject to legal or
+        contractual restrictions and reasonable notice. Withdrawal of consent does not
+        affect the lawfulness of prior processing.
+      translations:
+        fr:
+          description: "Toute personne ayant consenti \xE0 la collecte, \xE0 l’\
+            utilisation ou \xE0 la communication de renseignements personnels peut\
+            \ retirer son consentement \xE0 tout moment, sous r\xE9serve des restrictions\
+            \ l\xE9gales ou contractuelles et d’un pr\xE9avis raisonnable. Le\
+            \ retrait du consentement n’affecte pas la liceit\xE9 du traitement\
+            \ ant\xE9rieur."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-v
+      ref_id: Art. 10
+      name: Minors
+      description: Special rules for collecting personal information from minors.
+      translations:
+        fr:
+          name: "Mineurs"
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-10-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-10
+      ref_id: 10.a
+      description: Consent to the collection of personal information from a person
+        under 14 years of age must be given by the person's parent or legal guardian.
+        For a person 14 to 17 years of age, the minor may consent themselves, unless
+        such consent is contrary to the minor's interests.
+      translations:
+        fr:
+          description: "Le consentement \xE0 la collecte de renseignements personnels\
+            \ d’une personne de moins de 14 ans doit \xEAtre donn\xE9 par son\
+            \ parent ou son tuteur l\xE9gal. Pour une personne de 14 \xE0 17 ans,\
+            \ le mineur peut consentir lui-m\xEAme, \xE0 moins que ce consentement\
+            \ ne soit contraire \xE0 ses int\xE9r\xEAts."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-vi
+      assessable: false
+      depth: 1
+      ref_id: Chapter VI
+      name: Use of Personal Information
+      description: Rules governing how personal information may be used, including
+        purpose limitation and obligations related to automated decision-making.
+      translations:
+        fr:
+          name: "Utilisation des renseignements personnels"
+          description: "R\xE8gles r\xE9gissant l’utilisation des renseignements\
+            \ personnels, notamment la limitation des finalit\xE9s et les obligations\
+            \ li\xE9es aux d\xE9cisions automatis\xE9es."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-12
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-vi
+      ref_id: Art. 12
+      name: Purpose Limitation
+      description: Personal information may only be used for the purpose for which
+        it was collected.
+      translations:
+        fr:
+          name: "Limitation des finalit\xE9s"
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-12-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-12
+      ref_id: 12.a
+      description: Personal information collected for a specific purpose may not be
+        used for another purpose, unless the person concerned consents or the new purpose
+        is consistent with the original purpose.
+      translations:
+        fr:
+          description: "Les renseignements personnels collect\xE9s \xE0 une fin d\xE9\
+            termin\xE9e ne peuvent pas \xEAtre utilis\xE9s \xE0 une autre fin, \xE0\
+            \ moins que la personne concern\xE9e n’y consente ou que la nouvelle\
+            \ fin soit compatible avec la fin initiale."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-12-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-vi
+      ref_id: Art. 12.1
+      name: Automated Decision-Making
+      description: Transparency and human review obligations when decisions are made
+        exclusively by automated means.
+      translations:
+        fr:
+          name: "D\xE9cisions automatis\xE9es"
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-12-1-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-12-1
+      ref_id: 12.1.a
+      description: Any enterprise that uses personal information to render a decision
+        based exclusively on automated processing must inform the person concerned before
+        or at the time the decision is rendered, and must be able to explain the decision
+        upon request.
+      translations:
+        fr:
+          description: "Toute entreprise qui utilise des renseignements personnels\
+            \ pour rendre une d\xE9cision fond\xE9e exclusivement sur un traitement\
+            \ automatis\xE9 doit en informer la personne concern\xE9e avant ou au\
+            \ moment o\xF9 la d\xE9cision est rendue, et doit pouvoir expliquer cette\
+            \ d\xE9cision sur demande."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-12-1-b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-12-1
+      ref_id: 12.1.b
+      description: Upon request, the enterprise must present the person concerned with
+        the personal information used to render the automated decision and give the
+        person the opportunity to submit observations to a human decision-maker who
+        has the authority to review the decision.
+      translations:
+        fr:
+          description: "Sur demande, l’entreprise doit pr\xE9senter \xE0 la\
+            \ personne concern\xE9e les renseignements personnels utilis\xE9s pour\
+            \ rendre la d\xE9cision automatis\xE9e et lui offrir la possibilit\xE9\
+            \ de soumettre des observations \xE0 un d\xE9cideur humain ayant le pouvoir\
+            \ de revoir la d\xE9cision."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-vii
+      assessable: false
+      depth: 1
+      ref_id: Chapter VII
+      name: Communication of Personal Information
+      description: Rules governing how personal information may be communicated to
+        third parties and transferred outside Quebec.
+      translations:
+        fr:
+          name: "Communication des renseignements personnels"
+          description: "R\xE8gles r\xE9gissant la communication des renseignements\
+            \ personnels \xE0 des tiers et leur transfert hors Qu\xE9bec."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-13
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-vii
+      ref_id: Art. 13
+      name: Communication to Third Parties
+      description: Conditions under which personal information may be communicated
+        to third parties.
+      translations:
+        fr:
+          name: "Communication \xE0 des tiers"
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-13-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-13
+      ref_id: 13.a
+      description: Personal information may only be communicated to a third party with
+        the consent of the person concerned or as authorized by law. Any communication
+        must be limited to the information necessary for the purpose.
+      translations:
+        fr:
+          description: "Les renseignements personnels ne peuvent \xEAtre communiqu\xE9\
+            s \xE0 un tiers qu’avec le consentement de la personne concern\xE9\
+            e ou conform\xE9ment \xE0 la loi. Toute communication doit se limiter\
+            \ aux renseignements n\xE9cessaires \xE0 la finalit\xE9."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-13-b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-13
+      ref_id: 13.b
+      description: When entrusting a third party with the collection, retention, use,
+        or communication of personal information, the enterprise must ensure by contract
+        that the third party provides a level of protection comparable to that required
+        under Quebec law.
+      translations:
+        fr:
+          description: "Lorsqu’une entreprise confie \xE0 un tiers la collecte,\
+            \ la conservation, l’utilisation ou la communication de renseignements\
+            \ personnels, elle doit s’assurer par contrat que le tiers offre\
+            \ un niveau de protection comparable \xE0 celui exig\xE9 par la loi qu\xE9\
+            b\xE9coise."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-17
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-vii
+      ref_id: Art. 17
+      name: Cross-Border Transfers
+      description: Requirements for communicating personal information outside Quebec.
+      translations:
+        fr:
+          name: "Transferts transfrontaliers"
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-17-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-17
+      ref_id: 17.a
+      description: Before communicating personal information outside Quebec, the enterprise
+        must complete a PIA and conclude a written agreement with the recipient ensuring
+        equivalent protection. The communication may only proceed if the PIA confirms
+        adequate protection.
+      translations:
+        fr:
+          description: "Avant de communiquer des renseignements personnels \xE0 l’\
+            ext\xE9rieur du Qu\xE9bec, l’entreprise doit r\xE9aliser une EFVP\
+            \ et conclure un accord \xE9crit avec le destinataire assurant une protection\
+            \ \xE9quivalente. La communication ne peut avoir lieu que si l’EFVP\
+            \ confirme une protection ad\xE9quate."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-viii
+      assessable: false
+      depth: 1
+      ref_id: Chapter VIII
+      name: Retention and Destruction
+      description: Rules governing how long personal information must be retained and
+        how it must be destroyed or anonymized.
+      translations:
+        fr:
+          name: "Conservation et destruction"
+          description: "R\xE8gles r\xE9gissant la dur\xE9e de conservation des renseignements\
+            \ personnels et les modalit\xE9s de leur destruction ou anonymisation."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-23
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-viii
+      ref_id: Art. 23
+      name: Retention Schedules
+      description: Obligation to establish and apply retention schedules.
+      translations:
+        fr:
+          name: "Calendriers de conservation"
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-23-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-23
+      ref_id: 23.a
+      description: The enterprise must establish and implement a retention schedule
+        setting out how long personal information is retained for each category of information
+        and each purpose, and follow this schedule consistently.
+      translations:
+        fr:
+          description: "L’entreprise doit \xE9tablir et mettre en œuvre\
+            \ un calendrier de conservation pr\xE9cisant la dur\xE9e de conservation\
+            \ des renseignements personnels pour chaque cat\xE9gorie d’information\
+            \ et chaque finalit\xE9, et suivre ce calendrier de mani\xE8re coh\xE9\
+            rente."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-24
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-viii
+      ref_id: Art. 24
+      name: Destruction of Personal Information
+      description: Obligation to destroy personal information when no longer needed.
+      translations:
+        fr:
+          name: "Destruction des renseignements personnels"
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-24-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-24
+      ref_id: 24.a
+      description: Personal information must be destroyed once the purposes for which
+        it was collected have been achieved, unless its retention is required or authorized
+        by law. Destruction must render the information irrecoverable.
+      translations:
+        fr:
+          description: "Les renseignements personnels doivent \xEAtre d\xE9truits\
+            \ une fois les finalit\xE9s pour lesquelles ils ont \xE9t\xE9 recueillis\
+            \ atteintes, \xE0 moins que leur conservation ne soit requise ou autoris\xE9\
+            e par la loi. La destruction doit rendre les renseignements irr\xE9cup\xE9\
+            rables."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-25
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-viii
+      ref_id: Art. 25
+      name: Anonymization
+      description: Rules for anonymizing personal information as an alternative to
+        destruction.
+      translations:
+        fr:
+          name: "Anonymisation"
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-25-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-25
+      ref_id: 25.a
+      description: Personal information that is retained for study, research, or statistics
+        purposes may be anonymized in accordance with generally accepted best practices.
+        Anonymized information is no longer considered personal information for the
+        purposes of this Act.
+      translations:
+        fr:
+          description: "Les renseignements personnels conserv\xE9s \xE0 des fins\
+            \ d’\xE9tude, de recherche ou de statistique peuvent \xEAtre anonymis\xE9\
+            s conform\xE9ment aux meilleures pratiques g\xE9n\xE9ralement reconnues.\
+            \ Les renseignements anonymis\xE9s ne sont plus consid\xE9r\xE9s comme\
+            \ des renseignements personnels aux fins de la pr\xE9sente loi."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-ix
+      assessable: false
+      depth: 1
+      ref_id: Chapter IX
+      name: Rights of Individuals
+      description: Individual rights including access, rectification, de-indexing (right
+        to be forgotten), and data portability.
+      translations:
+        fr:
+          name: "Droits des personnes concern\xE9es"
+          description: "Droits des personnes, notamment l’acc\xE8s, la rectification,\
+            \ la d\xE9sindexation (droit \xE0 l’oubli) et la portabilit\xE9\
+            \ des donn\xE9es."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-27
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-ix
+      ref_id: Art. 27
+      name: Right of Access
+      description: Right of individuals to access personal information held by an enterprise.
+      translations:
+        fr:
+          name: "Droit d’acc\xE8s"
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-27-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-27
+      ref_id: 27.a
+      description: Every person has the right to be informed of the existence of personal
+        information concerning them held by an enterprise and to access that information.
+        The enterprise must respond to the request within 30 days.
+      translations:
+        fr:
+          description: "Toute personne a le droit d’\xEAtre inform\xE9e de l’\
+            existence de renseignements personnels la concernant d\xE9tenus par une\
+            \ entreprise et d’acc\xE9der \xE0 ces renseignements. L’entreprise\
+            \ doit r\xE9pondre \xE0 la demande dans les 30 jours."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-27-b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-27
+      ref_id: 27.b
+      name: Right to Data Portability
+      description: Every person has the right to receive a copy of personal information
+        about them held by a technology-based enterprise in a structured, commonly used,
+        and technological format, and to have it transferred to another enterprise.
+      translations:
+        fr:
+          name: "Droit \xE0 la portabilit\xE9 des donn\xE9es"
+          description: "Toute personne a le droit de recevoir une copie des renseignements\
+            \ personnels la concernant d\xE9tenus par une entreprise technologique\
+            \ dans un format structur\xE9, couramment utilis\xE9 et lisible par machine,\
+            \ et de les faire transf\xE9rer \xE0 une autre entreprise."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-28
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-ix
+      ref_id: Art. 28
+      name: Right to Rectification
+      description: Right of individuals to have inaccurate personal information corrected.
+      translations:
+        fr:
+          name: "Droit de rectification"
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-28-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-28
+      ref_id: 28.a
+      description: Every person has the right to have personal information about them
+        that is inaccurate, incomplete, or ambiguous corrected or updated, and to have
+        information that is not authorized to be collected or that is no longer necessary
+        for the purpose of the file deleted.
+      translations:
+        fr:
+          description: "Toute personne a le droit de faire corriger ou mettre \xE0\
+            \ jour les renseignements personnels la concernant qui sont inexacts, incomplets\
+            \ ou ambigu\xEBs, et de faire supprimer les renseignements dont la collecte\
+            \ n’est pas autoris\xE9e ou qui ne sont plus n\xE9cessaires \xE0\
+            \ la finalit\xE9 du dossier."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-28-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-ix
+      ref_id: Art. 28.1
+      name: Right to De-indexing (Right to be Forgotten)
+      description: Right of individuals to request de-indexing of personal information
+        causing serious injury.
+      translations:
+        fr:
+          name: "Droit de d\xE9sindexation (droit \xE0 l’oubli)"
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-28-1-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-28-1
+      ref_id: 28.1.a
+      description: Any person may request that a hyperlink attached to their name that
+        gives access to information which causes them serious injury be de-indexed if
+        such dissemination of information contravenes the law or a court order, or if
+        the information was collected from a minor and the person was a minor at the
+        time of collection.
+      translations:
+        fr:
+          description: "Toute personne peut demander que soit d\xE9sindexe un hyperlien\
+            \ attach\xE9 \xE0 son nom donnant acc\xE8s \xE0 des informations qui\
+            \ lui causent un pr\xE9judice s\xE9rieux, si cette diffusion contrevient\
+            \ \xE0 la loi ou \xE0 une ordonnance du tribunal, ou si les informations\
+            \ ont \xE9t\xE9 collect\xE9es aupr\xE8s d’un mineur et que la personne\
+            \ \xE9tait mineure au moment de la collecte."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-x
+      assessable: false
+      depth: 1
+      ref_id: Chapter X
+      name: Penalties and Enforcement
+      description: Administrative and penal penalties for non-compliance with Law 25
+        obligations.
+      translations:
+        fr:
+          name: "Sanctions et application"
+          description: "Sanctions administratives et p\xE9nales en cas de non-respect\
+            \ des obligations de la Loi 25."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-90-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-x
+      ref_id: Art. 90.1
+      name: Administrative Monetary Penalties
+      description: Administrative penalties for non-compliance.
+      translations:
+        fr:
+          name: "Sanctions administratives p\xE9cuniaires"
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-90-1-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-90-1
+      ref_id: 90.1.a
+      description: "Administrative monetary penalties of up to $10,000,000 or 2% of\
+        \ worldwide turnover for the preceding fiscal year, whichever is greater, may\
+        \ be imposed for breaches of the Act’s provisions."
+      translations:
+        fr:
+          description: "Des sanctions administratives p\xE9cuniaires pouvant atteindre\
+            \ 10\xA0000\xA0000\xA0$ ou 2\xA0% du chiffre d’affaires mondial\
+            \ de l’exercice pr\xE9c\xE9dent, selon le montant le plus \xE9lev\xE9\
+            , peuvent \xEAtre impos\xE9es pour les manquements aux dispositions de\
+            \ la loi."
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-91
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:chapter-x
+      ref_id: Art. 91
+      name: Penal Penalties
+      description: Criminal penalties for intentional non-compliance.
+      translations:
+        fr:
+          name: "Sanctions p\xE9nales"
+
+    - urn: urn:intuitem:risk:req_node:loi25-quebec:art-91-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:loi25-quebec:art-91
+      ref_id: 91.a
+      description: "Penal penalties of up to $25,000,000 or 4% of worldwide turnover\
+        \ for the preceding fiscal year, whichever is greater, may be imposed for intentional\
+        \ or negligent violations of the Act’s provisions."
+      translations:
+        fr:
+          description: "Des sanctions p\xE9nales pouvant atteindre 25\xA0000\xA0000\xA0\
+            $ ou 4\xA0% du chiffre d’affaires mondial de l’exercice pr\xE9\
+            c\xE9dent, selon le montant le plus \xE9lev\xE9, peuvent \xEAtre impos\xE9\
+            es pour les violations intentionnelles ou n\xE9gligentes des dispositions\
+            \ de la loi."

@@ -1,0 +1,819 @@
+urn: urn:intuitem:risk:library:cccs-baseline-smo
+locale: en
+ref_id: CCCS-BASELINE-SMO
+name: CCCS Baseline Cyber Security Controls for Small and Medium Organizations
+description: "The Canadian Centre for Cyber Security (CCCS) Baseline Cyber Security\
+  \ Controls for Small and Medium Organizations provides a prioritized set of cyber\
+  \ security controls to help small and medium-sized organizations establish an effective\
+  \ cyber security program.\nhttps://www.cyber.gc.ca/en/guidance/baseline-cyber-security-controls-small-and-medium-organizations"
+copyright: Government of Canada, Canadian Centre for Cyber Security
+version: 1
+publication_date: 2024-01-01
+provider: Canadian Centre for Cyber Security (CCCS)
+packager: intuitem
+translations:
+  fr:
+    name: "Contr\xF4les de base en mati\xE8re de cybers\xE9curit\xE9 du CCCS\
+      \ pour les petites et moyennes organisations"
+    description: "Le Centre canadien pour la cybers\xE9curit\xE9 (CCCS) propose\
+      \ un ensemble prioritaire de contr\xF4les de cybers\xE9curit\xE9 pour aider\
+      \ les petites et moyennes organisations \xE0 \xE9tablir un programme de\
+      \ cybers\xE9curit\xE9 efficace.\nhttps://www.cyber.gc.ca/fr/orientation/controles-de-base-en-matiere-de-cybersecurite-pour-les-petites-et-moyennes-organisations"
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:cccs-baseline-smo
+    ref_id: CCCS-BASELINE-SMO
+    name: CCCS Baseline Cyber Security Controls for Small and Medium Organizations
+    description: "A baseline set of 12 cyber security control areas recommended by\
+      \ the Canadian Centre for Cyber Security (CCCS) for small and medium-sized organizations\
+      \ (SMOs). The controls are designed to be actionable, cost-effective, and appropriate\
+      \ for organizations with limited IT security resources. Addressing these controls\
+      \ significantly reduces exposure to common cyber threats."
+    translations:
+      fr:
+        name: "Contr\xF4les de base en mati\xE8re de cybers\xE9curit\xE9 du\
+          \ CCCS pour les PMO"
+        description: "Ensemble de 12 domaines de contr\xF4les de cybers\xE9curit\xE9\
+          \ recommand\xE9s par le Centre canadien pour la cybers\xE9curit\xE9 (CCCS)\
+          \ pour les petites et moyennes organisations (PMO). Les contr\xF4les sont\
+          \ con\xE7us pour \xEAtre concrets, rentables et adapt\xE9s aux organisations\
+          \ disposant de ressources limit\xE9es en s\xE9curit\xE9 informatique."
+    requirement_nodes:
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-1
+      assessable: false
+      depth: 1
+      ref_id: CA-1
+      name: Develop an IT Security Risk Management Plan
+      description: Establish a documented plan to identify, assess, and manage cyber
+        security risks to the organization's information and systems.
+      translations:
+        fr:
+          name: "\xC9laborer un plan de gestion des risques li\xE9s \xE0 la s\xE9\
+            curit\xE9 informatique"
+          description: "\xC9tablir un plan document\xE9 pour identifier, \xE9valuer\
+            \ et g\xE9rer les risques de cybers\xE9curit\xE9 pour les informations\
+            \ et syst\xE8mes de l'organisation."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-1-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-1
+      ref_id: CA-1.1
+      description: Identify the scope of information systems and information assets
+        to be protected, including on-premises, cloud-based, and remote systems.
+      translations:
+        fr:
+          description: "Identifier la port\xE9e des syst\xE8mes d'information\
+            \ et des actifs informationnels \xE0 prot\xE9ger, y compris les syst\xE8\
+            mes sur site, dans le nuage et \xE0 distance."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-1-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-1
+      ref_id: CA-1.2
+      description: Identify and document the organization's information assets, including
+        hardware, software, data, and services, and their relative business importance.
+      translations:
+        fr:
+          description: "Identifier et documenter les actifs informationnels de l'\
+            organisation, notamment le mat\xE9riel, les logiciels, les donn\xE9es\
+            \ et les services, ainsi que leur importance relative pour l'entreprise."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-1-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-1
+      ref_id: CA-1.3
+      description: Assess cyber security risks by identifying threats, vulnerabilities,
+        and potential impact to business operations, and prioritize risks for treatment.
+      translations:
+        fr:
+          description: "\xC9valuer les risques de cybers\xE9curit\xE9 en identifiant\
+            \ les menaces, les vuln\xE9rabilit\xE9s et l'impact potentiel sur\
+            \ les activit\xE9s commerciales, et prioriser les risques \xE0 traiter."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-1-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-1
+      ref_id: CA-1.4
+      description: Document a risk treatment plan that specifies security controls
+        to be implemented, responsible parties, timelines, and residual risk acceptance
+        decisions.
+      translations:
+        fr:
+          description: "Documenter un plan de traitement des risques pr\xE9cisant\
+            \ les contr\xF4les de s\xE9curit\xE9 \xE0 mettre en œuvre, les\
+            \ responsables, les \xE9ch\xE9anciers et les d\xE9cisions d'acceptation\
+            \ du risque r\xE9siduel."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-1-5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-1
+      ref_id: CA-1.5
+      description: Review and update the IT security risk management plan at least
+        annually and after significant changes to systems, operations, or the threat
+        environment.
+      translations:
+        fr:
+          description: "R\xE9viser et mettre \xE0 jour le plan de gestion des risques\
+            \ de s\xE9curit\xE9 informatique au moins une fois par an et apr\xE8s\
+            \ des changements importants aux syst\xE8mes, aux op\xE9rations ou \xE0\
+            \ l'environnement de menaces."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-2
+      assessable: false
+      depth: 1
+      ref_id: CA-2
+      name: Implement Appropriate Access Control Practices
+      description: Control who can access organizational systems and data using the
+        principle of least privilege, strong authentication, and access reviews.
+      translations:
+        fr:
+          name: "Mettre en œuvre des pratiques de contr\xF4le d'acc\xE8s\
+            \ appropri\xE9es"
+          description: "Contr\xF4ler qui peut acc\xE9der aux syst\xE8mes et donn\xE9\
+            es organisationnels en utilisant le principe du moindre privil\xE8ge,\
+            \ une authentification forte et des examens d'acc\xE8s."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-2-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-2
+      ref_id: CA-2.1
+      description: Implement a formal user account management process covering provisioning,
+        modification, and deprovisioning of accounts. Ensure accounts are disabled or
+        removed promptly when no longer needed.
+      translations:
+        fr:
+          description: "Mettre en œuvre un processus formel de gestion des\
+            \ comptes utilisateurs couvrant la cr\xE9ation, la modification et la\
+            \ suppression des comptes. S'assurer que les comptes sont d\xE9sactiv\xE9\
+            s ou supprim\xE9s rapidement lorsqu'ils ne sont plus n\xE9cessaires."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-2-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-2
+      ref_id: CA-2.2
+      description: Apply the principle of least privilege — grant users only the access
+        rights necessary to perform their job functions. Separate administrative accounts
+        from regular user accounts.
+      translations:
+        fr:
+          description: "Appliquer le principe du moindre privil\xE8ge — n'accorder\
+            \ aux utilisateurs que les droits d'acc\xE8s n\xE9cessaires \xE0\
+            \ l'exercice de leurs fonctions. S\xE9parer les comptes administratifs\
+            \ des comptes utilisateurs ordinaires."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-2-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-2
+      ref_id: CA-2.3
+      description: Enforce strong password policies requiring minimum length (at least
+        12 characters), complexity, and prohibition of reuse of recent passwords. Implement
+        a password manager to support strong, unique passwords.
+      translations:
+        fr:
+          description: "Appliquer des politiques de mots de passe robustes exigeant\
+            \ une longueur minimale (au moins 12 caract\xE8res), la complexit\xE9\
+            \ et l'interdiction de r\xE9utilisation de mots de passe r\xE9cents.\
+            \ Utiliser un gestionnaire de mots de passe."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-2-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-2
+      ref_id: CA-2.4
+      description: Enable multi-factor authentication (MFA) for all user accounts,
+        particularly for remote access, administrative access, cloud services, and email.
+        Prioritize phishing-resistant MFA methods.
+      translations:
+        fr:
+          description: "Activer l'authentification multifacteur (AMF) pour\
+            \ tous les comptes utilisateurs, en particulier pour l'acc\xE8s\
+            \ \xE0 distance, l'acc\xE8s administratif, les services infonuagiques\
+            \ et la messagerie \xE9lectronique. Privil\xE9gier les m\xE9thodes AMF\
+            \ r\xE9sistantes au hame\xE7onnage."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-2-5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-2
+      ref_id: CA-2.5
+      description: Conduct periodic access reviews (at least annually) to verify that
+        user access rights are still appropriate. Remove or adjust access for users
+        whose roles have changed.
+      translations:
+        fr:
+          description: "Effectuer des examens p\xE9riodiques des droits d'acc\xE8\
+            s (au moins une fois par an) pour v\xE9rifier qu'ils sont toujours\
+            \ appropri\xE9s. Supprimer ou ajuster les droits des utilisateurs dont\
+            \ les r\xF4les ont chang\xE9."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-3
+      assessable: false
+      depth: 1
+      ref_id: CA-3
+      name: Develop and Maintain a Patch Management Plan
+      description: Establish processes to identify, test, and apply security patches
+        and software updates to reduce vulnerability exposure.
+      translations:
+        fr:
+          name: "\xC9laborer et maintenir un plan de gestion des correctifs"
+          description: "\xC9tablir des processus pour identifier, tester et appliquer\
+            \ les correctifs de s\xE9curit\xE9 et les mises \xE0 jour logicielles\
+            \ afin de r\xE9duire l'exposition aux vuln\xE9rabilit\xE9s."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-3-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-3
+      ref_id: CA-3.1
+      description: Maintain an up-to-date inventory of all hardware and software assets
+        in the environment, including operating systems, applications, firmware, and
+        cloud services.
+      translations:
+        fr:
+          description: "Tenir un inventaire \xE0 jour de tous les actifs mat\xE9riels\
+            \ et logiciels dans l'environnement, y compris les syst\xE8mes d'\
+            exploitation, les applications, les microprogrammes et les services infonuagiques."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-3-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-3
+      ref_id: CA-3.2
+      description: Subscribe to security advisories for software and systems in use.
+        Monitor for critical and high-severity vulnerabilities and apply patches within
+        defined timeframes (e.g., critical patches within 48 hours, high within 7 days,
+        medium within 30 days).
+      translations:
+        fr:
+          description: "S'abonner aux avis de s\xE9curit\xE9 pour les logiciels\
+            \ et syst\xE8mes utilis\xE9s. Surveiller les vuln\xE9rabilit\xE9s critiques\
+            \ et \xE9lev\xE9es et appliquer les correctifs dans des d\xE9lais d\xE9\
+            finis (p. ex., correctifs critiques sous 48 heures, \xE9lev\xE9s sous\
+            \ 7 jours, moyens sous 30 jours)."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-3-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-3
+      ref_id: CA-3.3
+      description: Replace or isolate systems that can no longer receive security patches
+        (end-of-life systems). Document any exceptions with compensating controls and
+        a migration timeline.
+      translations:
+        fr:
+          description: "Remplacer ou isoler les syst\xE8mes ne pouvant plus recevoir\
+            \ de correctifs de s\xE9curit\xE9 (syst\xE8mes en fin de vie). Documenter\
+            \ les exceptions avec des contr\xF4les compensatoires et un calendrier\
+            \ de migration."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-4
+      assessable: false
+      depth: 1
+      ref_id: CA-4
+      name: Harden Operating Systems, Applications, and Network Devices
+      description: Reduce the attack surface by removing unnecessary features, applying
+        secure configurations, and disabling default accounts.
+      translations:
+        fr:
+          name: "Renforcer les syst\xE8mes d'exploitation, les applications\
+            \ et les appareils r\xE9seau"
+          description: "R\xE9duire la surface d'attaque en supprimant les fonctionnalit\xE9\
+            s inutiles, en appliquant des configurations s\xE9curis\xE9es et en d\xE9\
+            sactivant les comptes par d\xE9faut."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-4-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-4
+      ref_id: CA-4.1
+      description: Disable or remove unnecessary services, protocols, ports, and features
+        from operating systems and applications. Only enable functionality required
+        for business operations.
+      translations:
+        fr:
+          description: "D\xE9sactiver ou supprimer les services, protocoles, ports\
+            \ et fonctionnalit\xE9s inutiles des syst\xE8mes d'exploitation et\
+            \ des applications. N'activer que les fonctionnalit\xE9s requises\
+            \ pour les op\xE9rations commerciales."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-4-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-4
+      ref_id: CA-4.2
+      description: Apply vendor-recommended or industry-standard security configuration
+        baselines (e.g., CIS Benchmarks) to operating systems, applications, and network
+        devices. Document any deviations.
+      translations:
+        fr:
+          description: "Appliquer les configurations de s\xE9curit\xE9 de base recommand\xE9\
+            es par le fournisseur ou les normes industrielles (p. ex., CIS Benchmarks)\
+            \ aux syst\xE8mes d'exploitation, applications et appareils r\xE9\
+            seau. Documenter les \xE9carts."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-4-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-4
+      ref_id: CA-4.3
+      description: Change all default credentials (usernames and passwords) on network
+        devices, operating systems, and applications before deployment. Enforce unique
+        credentials for each system or device.
+      translations:
+        fr:
+          description: "Changer tous les identifiants par d\xE9faut (noms d'utilisateur\
+            \ et mots de passe) sur les appareils r\xE9seau, syst\xE8mes d'exploitation\
+            \ et applications avant le d\xE9ploiement. Utiliser des identifiants uniques\
+            \ pour chaque syst\xE8me ou appareil."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-5
+      assessable: false
+      depth: 1
+      ref_id: CA-5
+      name: Segment and Separate Information
+      description: Use network segmentation and data classification to limit the impact
+        of a breach and control access to sensitive information.
+      translations:
+        fr:
+          name: "Segmenter et s\xE9parer l'information"
+          description: "Utiliser la segmentation du r\xE9seau et la classification\
+            \ des donn\xE9es pour limiter l'impact d'une violation et contr\xF4\
+            ler l'acc\xE8s aux informations sensibles."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-5-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-5
+      ref_id: CA-5.1
+      description: Classify organizational data by sensitivity (e.g., public, internal,
+        confidential, restricted) and apply appropriate protection measures for each
+        classification level.
+      translations:
+        fr:
+          description: "Classer les donn\xE9es organisationnelles par sensibilit\xE9\
+            \ (p. ex., public, interne, confidentiel, restreint) et appliquer des\
+            \ mesures de protection appropri\xE9es pour chaque niveau de classification."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-5-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-5
+      ref_id: CA-5.2
+      description: Implement network segmentation to separate systems with different
+        trust levels, functions, or sensitivity. Isolate critical systems and sensitive
+        data from general user networks.
+      translations:
+        fr:
+          description: "Mettre en œuvre la segmentation du r\xE9seau pour\
+            \ s\xE9parer les syst\xE8mes ayant des niveaux de confiance, fonctions\
+            \ ou sensibilit\xE9s diff\xE9rents. Isoler les syst\xE8mes critiques\
+            \ et les donn\xE9es sensibles des r\xE9seaux utilisateurs g\xE9n\xE9raux."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-6
+      assessable: false
+      depth: 1
+      ref_id: CA-6
+      name: Implement Appropriate Network Security Services
+      description: Deploy network security controls to detect, prevent, and respond
+        to malicious network activity.
+      translations:
+        fr:
+          name: "Mettre en œuvre des services de s\xE9curit\xE9 r\xE9seau\
+            \ appropri\xE9s"
+          description: "D\xE9ployer des contr\xF4les de s\xE9curit\xE9 r\xE9seau\
+            \ pour d\xE9tecter, pr\xE9venir et r\xE9pondre aux activit\xE9s r\xE9\
+            seau malveillantes."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-6-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-6
+      ref_id: CA-6.1
+      description: Deploy and maintain a firewall at all network perimeters (including
+        between internal segments). Configure firewall rules based on business need
+        and review and update rules regularly.
+      translations:
+        fr:
+          description: "D\xE9ployer et maintenir un pare-feu \xE0 tous les p\xE9\
+            rim\xE8tres r\xE9seau (y compris entre les segments internes). Configurer\
+            \ les r\xE8gles de pare-feu selon les besoins commerciaux et les r\xE9\
+            viser r\xE9guli\xE8rement."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-6-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-6
+      ref_id: CA-6.2
+      description: Enable DNS filtering and web content filtering to block access to
+        known malicious domains and inappropriate content categories. Log and review
+        filtering alerts.
+      translations:
+        fr:
+          description: "Activer le filtrage DNS et le filtrage de contenu Web pour\
+            \ bloquer l'acc\xE8s aux domaines malveillants connus et aux cat\xE9\
+            gories de contenu inappropri\xE9. Consigner et examiner les alertes de\
+            \ filtrage."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-6-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-6
+      ref_id: CA-6.3
+      description: Enable logging for network security devices and collect logs in
+        a centralized location. Retain logs for a minimum of 90 days and review security
+        logs regularly for suspicious activity.
+      translations:
+        fr:
+          description: "Activer la journalisation pour les appareils de s\xE9curit\xE9\
+            \ r\xE9seau et centraliser les journaux. Conserver les journaux pendant\
+            \ au moins 90 jours et les examiner r\xE9guli\xE8rement pour d\xE9tecter\
+            \ les activit\xE9s suspectes."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-7
+      assessable: false
+      depth: 1
+      ref_id: CA-7
+      name: Encrypt Information
+      description: Protect sensitive information at rest and in transit using appropriate
+        encryption to prevent unauthorized access.
+      translations:
+        fr:
+          name: "Chiffrer l'information"
+          description: "Prot\xE9ger les informations sensibles au repos et en transit\
+            \ \xE0 l'aide d'un chiffrement appropri\xE9 pour emp\xEAcher\
+            \ tout acc\xE8s non autoris\xE9."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-7-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-7
+      ref_id: CA-7.1
+      description: Encrypt all sensitive data at rest on servers, workstations, laptops,
+        and mobile devices using strong encryption algorithms (e.g., AES-256). Enable
+        full-disk encryption on portable devices.
+      translations:
+        fr:
+          description: "Chiffrer toutes les donn\xE9es sensibles au repos sur les\
+            \ serveurs, postes de travail, ordinateurs portables et appareils mobiles\
+            \ \xE0 l'aide d'algorithmes de chiffrement robustes (p. ex., AES-256).\
+            \ Activer le chiffrement int\xE9gral du disque sur les appareils portables."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-7-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-7
+      ref_id: CA-7.2
+      description: Encrypt all sensitive data in transit using current TLS standards
+        (TLS 1.2 or higher). Disable insecure protocols (e.g., TLS 1.0, SSL, FTP,
+        Telnet, HTTP). Enforce HTTPS for all web services.
+      translations:
+        fr:
+          description: "Chiffrer toutes les donn\xE9es sensibles en transit \xE0\
+            \ l'aide des normes TLS actuelles (TLS 1.2 ou sup\xE9rieur). D\xE9\
+            sactiver les protocoles non s\xE9curis\xE9s (p. ex., TLS 1.0, SSL, FTP,\
+            \ Telnet, HTTP). Imposer HTTPS pour tous les services Web."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-7-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-7
+      ref_id: CA-7.3
+      description: Manage cryptographic keys securely. Store encryption keys separately
+        from the data they protect, use a dedicated key management solution, and rotate
+        keys according to a defined schedule.
+      translations:
+        fr:
+          description: "G\xE9rer les cl\xE9s cryptographiques de fa\xE7on s\xE9curis\xE9\
+            e. Stocker les cl\xE9s de chiffrement s\xE9par\xE9ment des donn\xE9es\
+            \ qu'elles prot\xE8gent, utiliser une solution de gestion des cl\xE9\
+            s d\xE9di\xE9e et les faire pivoter selon un calendrier d\xE9fini."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-8
+      assessable: false
+      depth: 1
+      ref_id: CA-8
+      name: Protect Against Malware
+      description: Deploy and maintain anti-malware controls to detect and prevent
+        malicious software from compromising systems.
+      translations:
+        fr:
+          name: "Se prot\xE9ger contre les logiciels malveillants"
+          description: "D\xE9ployer et maintenir des contr\xF4les anti-logiciels\
+            \ malveillants pour d\xE9tecter et emp\xEAcher les logiciels malveillants\
+            \ de compromettre les syst\xE8mes."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-8-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-8
+      ref_id: CA-8.1
+      description: Deploy endpoint detection and response (EDR) or anti-malware software
+        on all endpoints. Ensure real-time scanning is enabled and signature databases
+        are updated automatically.
+      translations:
+        fr:
+          description: "D\xE9ployer un logiciel de d\xE9tection et r\xE9ponse aux\
+            \ points de terminaison (EDR) ou anti-maliciels sur tous les points de\
+            \ terminaison. Assurer l'activation du balayage en temps r\xE9el\
+            \ et la mise \xE0 jour automatique des bases de signatures."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-8-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-8
+      ref_id: CA-8.2
+      description: Implement email security controls including anti-spam, anti-phishing,
+        and attachment scanning. Enable DMARC, DKIM, and SPF to reduce email spoofing.
+      translations:
+        fr:
+          description: "Mettre en œuvre des contr\xF4les de s\xE9curit\xE9\
+            \ des courriels, notamment anti-spam, anti-hame\xE7onnage et analyse des\
+            \ pi\xE8ces jointes. Activer DMARC, DKIM et SPF pour r\xE9duire l'\
+            usurpation d'identit\xE9 par courriel."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-8-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-8
+      ref_id: CA-8.3
+      description: Disable macros in Microsoft Office documents by default. Only allow
+        macros from trusted, digitally signed sources. Block macros in documents received
+        from the internet.
+      translations:
+        fr:
+          description: "D\xE9sactiver les macros dans les documents Microsoft Office\
+            \ par d\xE9faut. N'autoriser les macros que de sources approuv\xE9\
+            es et sign\xE9es num\xE9riquement. Bloquer les macros dans les documents\
+            \ re\xE7us d'Internet."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-9
+      assessable: false
+      depth: 1
+      ref_id: CA-9
+      name: Train Employees About IT Security
+      description: Equip employees with the knowledge and skills needed to recognize
+        and respond to cyber threats through regular security awareness training.
+      translations:
+        fr:
+          name: "Former les employ\xE9s \xE0 la s\xE9curit\xE9 informatique"
+          description: "Doter les employ\xE9s des connaissances et des comp\xE9tences\
+            \ n\xE9cessaires pour reconna\xEEtre les cybermenaces et y r\xE9agir gr\xE2\
+            ce \xE0 une formation r\xE9guli\xE8re de sensibilisation \xE0 la s\xE9\
+            curit\xE9."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-9-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-9
+      ref_id: CA-9.1
+      description: Provide security awareness training to all employees at least annually,
+        covering topics such as phishing, social engineering, safe web browsing, password
+        hygiene, and incident reporting procedures.
+      translations:
+        fr:
+          description: "Offrir une formation de sensibilisation \xE0 la s\xE9curit\xE9\
+            \ \xE0 tous les employ\xE9s au moins une fois par an, couvrant des sujets\
+            \ tels que l'hame\xE7onnage, l'ing\xE9nierie sociale, la\
+            \ navigation Web s\xE9curis\xE9e, les bonnes pratiques de mots de passe\
+            \ et les proc\xE9dures de signalement des incidents."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-9-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-9
+      ref_id: CA-9.2
+      description: Conduct simulated phishing exercises periodically to assess employee
+        awareness and identify training gaps. Provide targeted training to employees
+        who fail simulated phishing tests.
+      translations:
+        fr:
+          description: "Mener p\xE9riodiquement des exercices de simulation d'hame\xE7\
+            onnage pour \xE9valuer la sensibilisation des employ\xE9s et identifier\
+            \ les lacunes en formation. Offrir une formation cibl\xE9e aux employ\xE9\
+            s qui \xE9chouent aux tests."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-9-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-9
+      ref_id: CA-9.3
+      description: Provide role-specific security training for employees with elevated
+        privileges or access to sensitive systems, including IT administrators, finance
+        staff, and HR personnel.
+      translations:
+        fr:
+          description: "Offrir une formation sp\xE9cifique au r\xF4le pour les employ\xE9\
+            s ayant des privil\xE8ges \xE9lev\xE9s ou l'acc\xE8s aux syst\xE8\
+            mes sensibles, notamment les administrateurs informatiques, le personnel\
+            \ financier et les RH."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-10
+      assessable: false
+      depth: 1
+      ref_id: CA-10
+      name: Back Up and Recover
+      description: Implement a reliable backup strategy to ensure critical data can
+        be recovered following a cyber incident, ransomware attack, or hardware failure.
+      translations:
+        fr:
+          name: "Effectuer des sauvegardes et assurer la reprise des activit\xE9s"
+          description: "Mettre en œuvre une strat\xE9gie de sauvegarde fiable\
+            \ pour garantir que les donn\xE9es critiques peuvent \xEAtre r\xE9cup\xE9\
+            r\xE9es apr\xE8s un incident cybern\xE9tique, une attaque par ran\xE7ongiciel\
+            \ ou une d\xE9faillance mat\xE9rielle."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-10-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-10
+      ref_id: CA-10.1
+      description: Define and implement a backup policy specifying which data is backed
+        up, backup frequency, retention periods, and storage locations. Include all
+        critical business data, system configurations, and application data.
+      translations:
+        fr:
+          description: "D\xE9finir et mettre en œuvre une politique de sauvegarde\
+            \ pr\xE9cisant quelles donn\xE9es sont sauvegard\xE9es, la fr\xE9quence\
+            \ des sauvegardes, les p\xE9riodes de r\xE9tention et les lieux de stockage.\
+            \ Inclure toutes les donn\xE9es commerciales critiques, les configurations\
+            \ syst\xE8me et les donn\xE9es d'application."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-10-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-10
+      ref_id: CA-10.2
+      description: Maintain at least one offline or air-gapped copy of critical backups
+        to ensure recoverability in the event of a ransomware attack. Follow the 3-2-1
+        backup rule (3 copies, 2 different media, 1 offsite).
+      translations:
+        fr:
+          description: "Conserver au moins une copie hors ligne ou en r\xE9seau isol\xE9\
+            \ des sauvegardes critiques pour assurer la reprise en cas d'attaque\
+            \ par ran\xE7ongiciel. Appliquer la r\xE8gle de sauvegarde 3-2-1 (3 copies,\
+            \ 2 supports diff\xE9rents, 1 hors site)."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-10-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-10
+      ref_id: CA-10.3
+      description: Test backup restoration procedures regularly (at least annually)
+        to verify that backups are complete and can be restored within the organization's
+        recovery time objective (RTO). Document test results.
+      translations:
+        fr:
+          description: "Tester r\xE9guli\xE8rement (au moins une fois par an) les\
+            \ proc\xE9dures de restauration des sauvegardes pour v\xE9rifier qu'\
+            elles sont compl\xE8tes et peuvent \xEAtre restaur\xE9es dans l'objectif\
+            \ de d\xE9lai de r\xE9tablissement (RTO) de l'organisation. Documenter\
+            \ les r\xE9sultats des tests."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-11
+      assessable: false
+      depth: 1
+      ref_id: CA-11
+      name: Develop a Cyber Incident Management Plan
+      description: Establish a documented plan to prepare for, respond to, and recover
+        from cyber security incidents, minimizing their impact on the organization.
+      translations:
+        fr:
+          name: "\xC9laborer un plan de gestion des incidents cybern\xE9tiques"
+          description: "\xC9tablir un plan document\xE9 pour se pr\xE9parer aux incidents\
+            \ de cybers\xE9curit\xE9, y r\xE9pondre et s'en remettre, en minimisant\
+            \ leur impact sur l'organisation."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-11-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-11
+      ref_id: CA-11.1
+      description: Develop and document a cyber incident response plan that defines
+        roles and responsibilities, incident classification criteria, escalation procedures,
+        and steps for containment, eradication, and recovery.
+      translations:
+        fr:
+          description: "\xC9laborer et documenter un plan de r\xE9ponse aux incidents\
+            \ cybern\xE9tiques d\xE9finissant les r\xF4les et responsabilit\xE9s,\
+            \ les crit\xE8res de classification des incidents, les proc\xE9dures d'\
+            escalade et les \xE9tapes de confinement, d'\xE9radication et de\
+            \ reprise."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-11-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-11
+      ref_id: CA-11.2
+      description: Designate an incident response team with clear roles (incident coordinator,
+        technical lead, communications lead, legal/compliance). Ensure team members
+        know their responsibilities and have 24/7 contact procedures.
+      translations:
+        fr:
+          description: "D\xE9signer une \xE9quipe de r\xE9ponse aux incidents avec\
+            \ des r\xF4les clairs (coordinateur d'incident, responsable technique,\
+            \ responsable des communications, juridique/conformit\xE9). S'assurer\
+            \ que les membres de l'\xE9quipe connaissent leurs responsabilit\xE9s."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-11-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-11
+      ref_id: CA-11.3
+      description: Include breach notification procedures in the incident response
+        plan, specifying when and how to notify regulatory bodies (CCCS, Privacy Commissioner,
+        provincial regulators) and affected individuals in accordance with PIPEDA and
+        applicable provincial laws.
+      translations:
+        fr:
+          description: "Inclure dans le plan de r\xE9ponse aux incidents les proc\xE9\
+            dures de notification des violations, pr\xE9cisant quand et comment aviser\
+            \ les organismes r\xE9glementaires (CCCS, Commissaire \xE0 la protection\
+            \ de la vie priv\xE9e, r\xE9gulateurs provinciaux) et les personnes concern\xE9\
+            es conform\xE9ment \xE0 la LPRPDE et aux lois provinciales applicables."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-11-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-11
+      ref_id: CA-11.4
+      description: Test the incident response plan at least annually through tabletop
+        exercises or simulations. Conduct post-incident reviews after actual incidents
+        and update the plan based on lessons learned.
+      translations:
+        fr:
+          description: "Tester le plan de r\xE9ponse aux incidents au moins une fois\
+            \ par an par des exercices sur table ou des simulations. Mener des revues\
+            \ post-incident apr\xE8s les incidents r\xE9els et mettre \xE0 jour le\
+            \ plan en fonction des le\xE7ons apprises."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-12
+      assessable: false
+      depth: 1
+      ref_id: CA-12
+      name: Patch and Update Cloud Software and Service Providers
+      description: Manage cyber security risks associated with cloud services by maintaining
+        visibility, understanding shared responsibility, and ensuring timely updates.
+      translations:
+        fr:
+          name: "Mettre \xE0 jour les logiciels infonuagiques et les fournisseurs\
+            \ de services"
+          description: "G\xE9rer les risques de cybers\xE9curit\xE9 li\xE9s aux\
+            \ services infonuagiques en maintenant la visibilit\xE9, en comprenant\
+            \ la responsabilit\xE9 partag\xE9e et en assurant des mises \xE0 jour\
+            \ opportunes."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-12-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-12
+      ref_id: CA-12.1
+      description: Maintain an inventory of all cloud services and SaaS applications
+        in use, including shadow IT discovered through network monitoring. Assess the
+        security posture of each cloud service provider.
+      translations:
+        fr:
+          description: "Tenir un inventaire de tous les services infonuagiques et\
+            \ applications SaaS utilis\xE9s, y compris l'informatique fantôme\
+            \ d\xE9couverte par la surveillance du r\xE9seau. \xC9valuer la posture\
+            \ de s\xE9curit\xE9 de chaque fournisseur de services infonuagiques."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-12-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-12
+      ref_id: CA-12.2
+      description: Understand and document the shared responsibility model for each
+        cloud service used, clearly defining which security controls are the customer's
+        responsibility versus the provider's. Ensure customer responsibilities are implemented.
+      translations:
+        fr:
+          description: "Comprendre et documenter le mod\xE8le de responsabilit\xE9\
+            \ partag\xE9e pour chaque service infonuagique utilis\xE9, en d\xE9finissant\
+            \ clairement les contr\xF4les de s\xE9curit\xE9 relevant du client par\
+            \ rapport \xE0 ceux du fournisseur. S'assurer que les responsabilit\xE9\
+            s du client sont mises en œuvre."
+
+    - urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-12-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cccs-baseline-smo:ca-12
+      ref_id: CA-12.3
+      description: Enable automatic updates for cloud-hosted applications and services
+        where possible. Monitor cloud service provider security bulletins and apply
+        patches to customer-managed components promptly.
+      translations:
+        fr:
+          description: "Activer les mises \xE0 jour automatiques pour les applications\
+            \ et services h\xE9berg\xE9s dans le nuage lorsque possible. Surveiller\
+            \ les bulletins de s\xE9curit\xE9 des fournisseurs de services infonuagiques\
+            \ et appliquer rapidement les correctifs aux composants g\xE9r\xE9s par\
+            \ le client."

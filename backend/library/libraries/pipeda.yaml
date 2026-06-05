@@ -1,0 +1,642 @@
+urn: urn:intuitem:risk:library:pipeda
+locale: en
+ref_id: PIPEDA
+name: Personal Information Protection and Electronic Documents Act (PIPEDA)
+description: "Canada's federal private sector privacy law governing the collection,\
+  \ use, and disclosure of personal information in the course of commercial activities.\n\
+  S.C. 2000, c. 5. Schedule 1 sets out the 10 fair information principles.\n\
+  https://laws-lois.justice.gc.ca/eng/acts/P-8.6/"
+copyright: Government of Canada
+version: 1
+publication_date: 2024-01-01
+provider: Government of Canada
+packager: intuitem
+translations:
+  fr:
+    name: "Loi sur la protection des renseignements personnels et les documents\
+      \ \xE9lectroniques (LPRPDE)"
+    description: "Loi f\xE9d\xE9rale canadienne sur la protection des renseignements\
+      \ personnels dans le secteur priv\xE9, r\xE9gissant la collecte, l'utilisation\
+      \ et la communication de renseignements personnels dans le cadre d'activit\xE9\
+      s commerciales.\nL.C. 2000, ch. 5. L'annexe 1 \xE9nonce les 10 principes\
+      \ \xE9quitables en mati\xE8re d'information.\nhttps://laws-lois.justice.gc.ca/fra/lois/P-8.6/"
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:pipeda
+    ref_id: PIPEDA
+    name: Personal Information Protection and Electronic Documents Act (PIPEDA)
+    description: "PIPEDA applies to private sector organizations across Canada that\
+      \ collect, use, or disclose personal information in the course of commercial\
+      \ activities, including federally regulated businesses operating within provinces.\
+      \ It establishes 10 fair information principles in Schedule 1 that form the\
+      \ basis of privacy obligations. Organizations subject to substantially similar\
+      \ provincial legislation (BC, Alberta, Quebec) may be exempt for intra-provincial\
+      \ activities."
+    translations:
+      fr:
+        name: "Loi sur la protection des renseignements personnels et les documents\
+          \ \xE9lectroniques (LPRPDE)"
+        description: "La LPRPDE s'applique aux organisations du secteur priv\xE9\
+          \ partout au Canada qui collectent, utilisent ou communiquent des renseignements\
+          \ personnels dans le cadre d'activit\xE9s commerciales. Elle \xE9tablit\
+          \ 10 principes de protection des renseignements personnels \xE0 l'annexe\
+          \ 1."
+    requirement_nodes:
+
+    - urn: urn:intuitem:risk:req_node:pipeda:schedule-1
+      assessable: false
+      depth: 1
+      ref_id: Schedule 1
+      name: Fair Information Principles
+      description: The 10 fair information principles that form the foundation of PIPEDA
+        obligations for organizations.
+      translations:
+        fr:
+          name: "Principes \xE9quitables en mati\xE8re d'information"
+          description: "Les 10 principes \xE9quitables en mati\xE8re d'information\
+            \ qui constituent le fondement des obligations LPRPDE pour les organisations."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pipeda:schedule-1
+      ref_id: '4.1'
+      name: Principle 1 - Accountability
+      description: An organization is responsible for personal information under its
+        control and shall designate an individual or individuals accountable for compliance.
+      translations:
+        fr:
+          name: "Principe 1 - Responsabilit\xE9"
+          description: "Une organisation est responsable des renseignements personnels\
+            \ dont elle a la garde et doit d\xE9signer une personne charg\xE9e d'\
+            assurer le respect des obligations."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pipeda:4.1
+      ref_id: 4.1.1
+      description: An organization shall designate one or more individuals to be accountable
+        for the organization's compliance with PIPEDA. Other individuals within the
+        organization may be delegated to act on behalf of the designated individual(s).
+      translations:
+        fr:
+          description: "Une organisation doit d\xE9signer une ou plusieurs personnes\
+            \ charg\xE9es d'assurer le respect de la LPRPDE. D'autres personnes\
+            \ au sein de l'organisation peuvent \xEAtre d\xE9l\xE9gu\xE9es\
+            \ pour agir au nom de la personne d\xE9sign\xE9e."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pipeda:4.1
+      ref_id: 4.1.2
+      description: The identity of the individual(s) designated under this principle
+        shall be made known upon request.
+      translations:
+        fr:
+          description: "L'identit\xE9 de la ou des personnes d\xE9sign\xE9es en vertu\
+            \ de ce principe doit \xEAtre communiqu\xE9e sur demande."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pipeda:4.1
+      ref_id: 4.1.3
+      description: Organizations are responsible for personal information in their
+        possession or custody, including information transferred to a third party for
+        processing. The organization must use contractual or other means to provide
+        a comparable level of protection while the information is being processed by
+        the third party.
+      translations:
+        fr:
+          description: "Les organisations sont responsables des renseignements personnels\
+            \ en leur possession ou sous leur garde, y compris les renseignements\
+            \ transf\xE9r\xE9s \xE0 un tiers aux fins de traitement. L'organisation\
+            \ doit utiliser des moyens contractuels ou autres pour assurer un niveau\
+            \ de protection comparable pendant le traitement par le tiers."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pipeda:schedule-1
+      ref_id: '4.2'
+      name: Principle 2 - Identifying Purposes
+      description: The purposes for which personal information is collected shall be
+        identified by the organization at or before the time the information is collected.
+      translations:
+        fr:
+          name: "Principe 2 - D\xE9termination des fins de la collecte"
+          description: "Les fins auxquelles des renseignements personnels sont recueillis\
+            \ doivent \xEAtre d\xE9termin\xE9es par l'organisation avant la\
+            \ collecte ou au moment de celle-ci."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pipeda:4.2
+      ref_id: 4.2.1
+      description: The identified purposes should be specified at or before the time
+        of collection to the individual from whom the personal information is collected.
+        Purposes shall be stated such that the individual can reasonably understand
+        how the information will be used or disclosed.
+      translations:
+        fr:
+          description: "Les fins d\xE9termin\xE9es doivent \xEAtre sp\xE9cifi\xE9\
+            es \xE0 la personne aupr\xE8s de laquelle les renseignements personnels\
+            \ sont recueillis, au moment de la collecte ou avant. Les fins doivent\
+            \ \xEAtre \xE9nonc\xE9es de mani\xE8re \xE0 ce que la personne puisse\
+            \ raisonnablement comprendre comment les renseignements seront utilis\xE9\
+            s ou communiqu\xE9s."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pipeda:4.2
+      ref_id: 4.2.2
+      description: When personal information that has been collected is to be used
+        for a purpose not previously identified, the new purpose shall be identified
+        prior to use. Unless the new purpose is required by law, the consent of the
+        individual is required before information can be used for that new purpose.
+      translations:
+        fr:
+          description: "Lorsque des renseignements personnels d\xE9j\xE0 recueillis\
+            \ doivent \xEAtre utilis\xE9s \xE0 une fin non pr\xE9c\xE9demment d\xE9\
+            termin\xE9e, la nouvelle fin doit \xEAtre d\xE9termin\xE9e avant l'\
+            utilisation. Le consentement de la personne est requis, \xE0 moins que\
+            \ la nouvelle fin ne soit requise par la loi."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pipeda:schedule-1
+      ref_id: '4.3'
+      name: Principle 3 - Consent
+      description: The knowledge and consent of the individual are required for the
+        collection, use, or disclosure of personal information, except where inappropriate.
+      translations:
+        fr:
+          name: "Principe 3 - Consentement"
+          description: "La personne concern\xE9e doit \xEAtre inform\xE9e de toute\
+            \ collecte, utilisation ou communication de renseignements personnels la\
+            \ concernant, et y consentir."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pipeda:4.3
+      ref_id: 4.3.1
+      description: Consent is required for the collection of personal information and
+        for subsequent use or disclosure of information. Generally, the organization
+        shall seek consent for the use or disclosure of the information at the time
+        of collection. In certain circumstances, consent with respect to use or disclosure
+        may be sought after the information has been collected but before use.
+      translations:
+        fr:
+          description: "Le consentement est requis pour la collecte de renseignements\
+            \ personnels et pour leur utilisation ou communication ult\xE9rieure.\
+            \ En g\xE9n\xE9ral, l'organisation doit obtenir le consentement\
+            \ pour l'utilisation ou la communication au moment de la collecte."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pipeda:4.3
+      ref_id: 4.3.2
+      description: The form of consent sought shall be appropriate for the sensitivity
+        of the information. Although some information is almost always considered to
+        be sensitive (e.g., medical records and income records), other information may
+        be sensitive in the context of the individual's circumstances.
+      translations:
+        fr:
+          description: "La forme de consentement demand\xE9e doit \xEAtre appropri\xE9\
+            e \xE0 la sensibilit\xE9 des renseignements. Bien que certains renseignements\
+            \ soient presque toujours consid\xE9r\xE9s comme sensibles (p. ex., dossiers\
+            \ m\xE9dicaux et revenus), d'autres peuvent \xEAtre sensibles selon\
+            \ les circonstances."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pipeda:4.3
+      ref_id: 4.3.3
+      description: An individual may withdraw consent at any time, subject to legal
+        or contractual restrictions and reasonable notice. The organization shall inform
+        the individual of the implications of such withdrawal.
+      translations:
+        fr:
+          description: "Une personne peut retirer son consentement \xE0 tout moment,\
+            \ sous r\xE9serve des restrictions l\xE9gales ou contractuelles et d'\
+            un pr\xE9avis raisonnable. L'organisation doit informer la personne\
+            \ des cons\xE9quences d'un tel retrait."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pipeda:schedule-1
+      ref_id: '4.4'
+      name: Principle 4 - Limiting Collection
+      description: The collection of personal information shall be limited to that
+        which is necessary for the purposes identified by the organization.
+      translations:
+        fr:
+          name: "Principe 4 - Limitation de la collecte"
+          description: "La collecte de renseignements personnels doit se limiter \xE0\
+            \ ce qui est n\xE9cessaire aux fins d\xE9termin\xE9es par l'organisation."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pipeda:4.4
+      ref_id: 4.4.1
+      description: Organizations shall not collect personal information indiscriminately.
+        Both the amount and the type of information collected shall be limited to that
+        which is necessary to fulfil the purposes identified. The collection shall be
+        by fair and lawful means.
+      translations:
+        fr:
+          description: "Les organisations ne doivent pas recueillir des renseignements\
+            \ personnels de fa\xE7on arbitraire. La quantit\xE9 et le type de renseignements\
+            \ recueillis se limitent \xE0 ce qui est n\xE9cessaire pour atteindre\
+            \ les fins d\xE9termin\xE9es. La collecte doit \xEAtre effectu\xE9e par\
+            \ des moyens justes et licites."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pipeda:schedule-1
+      ref_id: '4.5'
+      name: Principle 5 - Limiting Use, Disclosure, and Retention
+      description: Personal information shall not be used or disclosed for purposes
+        other than those for which it was collected, and shall be retained only as long
+        as necessary.
+      translations:
+        fr:
+          name: "Principe 5 - Limitation de l'utilisation, de la communication\
+            \ et de la conservation"
+          description: "Les renseignements personnels ne doivent pas \xEAtre utilis\xE9\
+            s ou communiqu\xE9s \xE0 des fins autres que celles auxquelles ils ont\
+            \ \xE9t\xE9 recueillis et ne doivent \xEAtre conserv\xE9s qu'aussi\
+            \ longtemps que n\xE9cessaire."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pipeda:4.5
+      ref_id: 4.5.1
+      description: Personal information shall not be used or disclosed for purposes
+        other than those for which it was collected, except with the consent of the
+        individual or as required by law.
+      translations:
+        fr:
+          description: "Les renseignements personnels ne doivent pas \xEAtre utilis\xE9\
+            s ou communiqu\xE9s \xE0 des fins autres que celles de leur collecte,\
+            \ sauf avec le consentement de la personne ou si la loi l'exige."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pipeda:4.5
+      ref_id: 4.5.2
+      description: Personal information that is no longer required to fulfil the identified
+        purposes should be destroyed, erased, or made anonymous. Organizations shall
+        develop guidelines and implement procedures to govern the destruction of personal
+        information.
+      translations:
+        fr:
+          description: "Les renseignements personnels qui ne sont plus n\xE9cessaires\
+            \ aux fins d\xE9termin\xE9es doivent \xEAtre d\xE9truits, effac\xE9s\
+            \ ou rendus anonymes. Les organisations doivent \xE9laborer des lignes\
+            \ directrices et mettre en œuvre des proc\xE9dures pour r\xE9gir\
+            \ la destruction des renseignements personnels."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pipeda:schedule-1
+      ref_id: '4.6'
+      name: Principle 6 - Accuracy
+      description: Personal information shall be as accurate, complete, and up-to-date
+        as is necessary for the purposes for which it is to be used.
+      translations:
+        fr:
+          name: "Principe 6 - Exactitude"
+          description: "Les renseignements personnels doivent \xEAtre aussi exacts,\
+            \ complets et \xE0 jour que l'exigent les fins auxquelles ils sont\
+            \ destin\xE9s."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pipeda:4.6
+      ref_id: 4.6.1
+      description: Organizations shall minimize the possibility of using incorrect
+        information when making decisions about an individual or when disclosing information
+        to third parties. Personal information used on an ongoing basis, including information
+        that is disclosed to third parties, should generally be accurate and up-to-date.
+      translations:
+        fr:
+          description: "Les organisations doivent r\xE9duire au minimum la possibilit\xE9\
+            \ d'utiliser des renseignements inexacts lors de d\xE9cisions concernant\
+            \ une personne ou lors de la communication \xE0 des tiers. Les renseignements\
+            \ personnels utilis\xE9s de mani\xE8re continue doivent g\xE9n\xE9ralement\
+            \ \xEAtre exacts et \xE0 jour."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pipeda:schedule-1
+      ref_id: '4.7'
+      name: Principle 7 - Safeguards
+      description: Personal information shall be protected by security safeguards appropriate
+        to the sensitivity of the information.
+      translations:
+        fr:
+          name: "Principe 7 - Mesures de s\xE9curit\xE9"
+          description: "Les renseignements personnels doivent \xEAtre prot\xE9g\xE9\
+            s par des mesures de s\xE9curit\xE9 adapt\xE9es \xE0 leur sensibilit\xE9."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pipeda:4.7
+      ref_id: 4.7.1
+      description: Security safeguards shall protect personal information against loss
+        or theft, as well as unauthorized access, disclosure, copying, use, or modification.
+        Organizations shall protect personal information regardless of the format in
+        which it is held.
+      translations:
+        fr:
+          description: "Les mesures de s\xE9curit\xE9 doivent prot\xE9ger les renseignements\
+            \ personnels contre la perte, le vol, ainsi que contre l'acc\xE8s\
+            \ non autoris\xE9, la communication, la copie, l'utilisation ou\
+            \ la modification non autoris\xE9s. Les organisations doivent prot\xE9\
+            ger les renseignements personnels quel que soit leur format."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.7.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pipeda:4.7
+      ref_id: 4.7.2
+      description: The nature of the safeguards will vary with the sensitivity of the
+        information that has been collected, the amount, distribution, and format of
+        the information, and the method of storage. More sensitive information should
+        be safeguarded by a higher level of protection.
+      translations:
+        fr:
+          description: "La nature des mesures de s\xE9curit\xE9 varie en fonction\
+            \ de la sensibilit\xE9 des renseignements, de leur quantit\xE9, de leur\
+            \ distribution et de leur format, ainsi que de leur mode de conservation.\
+            \ Les renseignements plus sensibles doivent \xEAtre prot\xE9g\xE9s par\
+            \ des mesures plus \xE9lev\xE9es."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.7.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pipeda:4.7
+      ref_id: 4.7.3
+      description: Organizations shall make their employees aware of the importance
+        of maintaining the confidentiality of personal information. All employees with
+        access to personal information are subject to a duty of confidentiality.
+      translations:
+        fr:
+          description: "Les organisations doivent sensibiliser leurs employ\xE9s \xE0\
+            \ l'importance de pr\xE9server la confidentialit\xE9 des renseignements\
+            \ personnels. Tous les employ\xE9s ayant acc\xE8s aux renseignements personnels\
+            \ sont soumis \xE0 un devoir de confidentialit\xE9."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pipeda:schedule-1
+      ref_id: '4.8'
+      name: Principle 8 - Openness
+      description: An organization shall make readily available to individuals specific
+        information about its policies and practices relating to the management of personal
+        information.
+      translations:
+        fr:
+          name: "Principe 8 - Transparence"
+          description: "Une organisation doit tenir facilement accessibles pour les\
+            \ personnes concern\xE9es des renseignements sp\xE9cifiques sur ses politiques\
+            \ et pratiques relatives \xE0 la gestion des renseignements personnels."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.8.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pipeda:4.8
+      ref_id: 4.8.1
+      description: Organizations shall be open about their policies and practices with
+        respect to the management of personal information. Individuals shall be able
+        to acquire information about an organization's policies and practices without
+        unreasonable effort.
+      translations:
+        fr:
+          description: "Les organisations doivent \xEAtre transparentes sur leurs\
+            \ politiques et pratiques concernant la gestion des renseignements personnels.\
+            \ Les personnes doivent pouvoir obtenir des renseignements sur ces politiques\
+            \ et pratiques sans effort excessif."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pipeda:schedule-1
+      ref_id: '4.9'
+      name: Principle 9 - Individual Access
+      description: Upon request, an individual shall be informed of the existence,
+        use, and disclosure of his or her personal information and shall be given access
+        to that information.
+      translations:
+        fr:
+          name: "Principe 9 - Acc\xE8s aux renseignements personnels"
+          description: "Sur demande, la personne concern\xE9e doit \xEAtre inform\xE9\
+            e de l'existence, de l'utilisation et de la communication\
+            \ de ses renseignements personnels et y avoir acc\xE8s."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.9.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pipeda:4.9
+      ref_id: 4.9.1
+      description: Upon request, an organization shall inform an individual whether
+        or not the organization holds personal information about that individual. Organizations
+        are required to indicate the source of the information, how it is being used,
+        and to whom it has been disclosed.
+      translations:
+        fr:
+          description: "Sur demande, une organisation doit informer une personne si\
+            \ elle d\xE9tient ou non des renseignements personnels la concernant.\
+            \ Les organisations doivent indiquer la source des renseignements, comment\
+            \ ils sont utilis\xE9s et \xE0 qui ils ont \xE9t\xE9 communiqu\xE9s."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.9.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pipeda:4.9
+      ref_id: 4.9.2
+      description: An individual shall be able to challenge the accuracy and completeness
+        of the information and have it amended as appropriate. When a challenge is not
+        resolved to the satisfaction of the individual, the substance of the unresolved
+        challenge shall be recorded by the organization.
+      translations:
+        fr:
+          description: "La personne concern\xE9e doit pouvoir contester l'exactitude\
+            \ et l'int\xE9grit\xE9 des renseignements et les faire modifier\
+            \ au besoin. Lorsqu'une contestation n'est pas r\xE9solue de\
+            \ mani\xE8re satisfaisante, l'organisation doit en consigner l'\
+            essentiel."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pipeda:schedule-1
+      ref_id: '4.10'
+      name: Principle 10 - Challenging Compliance
+      description: An individual shall be able to address a challenge concerning compliance
+        with these principles to the designated individual accountable for the organization's
+        compliance.
+      translations:
+        fr:
+          name: "Principe 10 - Possibilit\xE9 de recours"
+          description: "La personne concern\xE9e doit pouvoir adresser une plainte\
+            \ concernant le respect des principes ci-dessus \xE0 la personne d\xE9\
+            sign\xE9e charg\xE9e d'assurer le respect des obligations."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.10.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pipeda:4.10
+      ref_id: 4.10.1
+      description: Organizations shall maintain procedures for receiving and responding
+        to complaints or inquiries about their policies and practices relating to the
+        handling of personal information. The complaint procedures should be easily
+        accessible and simple to use.
+      translations:
+        fr:
+          description: "Les organisations doivent maintenir des proc\xE9dures pour\
+            \ recevoir et traiter les plaintes ou demandes concernant leurs politiques\
+            \ et pratiques relatives \xE0 la gestion des renseignements personnels.\
+            \ Les proc\xE9dures de plainte doivent \xEAtre facilement accessibles\
+            \ et simples \xE0 utiliser."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:4.10.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pipeda:4.10
+      ref_id: 4.10.2
+      description: An individual who is not satisfied with the response of an organization
+        may submit a complaint to the Privacy Commissioner of Canada.
+      translations:
+        fr:
+          description: "Une personne insatisfaite de la r\xE9ponse d'une organisation\
+            \ peut soumettre une plainte au Commissaire \xE0 la protection de la vie\
+            \ priv\xE9e du Canada."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:part-1
+      assessable: false
+      depth: 1
+      ref_id: Part 1
+      name: Protection of Personal Information in the Private Sector
+      description: Statutory provisions of PIPEDA governing private sector obligations,
+        including breach reporting requirements.
+      translations:
+        fr:
+          name: "Partie 1 - Protection des renseignements personnels dans le secteur\
+            \ priv\xE9"
+          description: "Dispositions l\xE9gislatives de la LPRPDE r\xE9gissant les\
+            \ obligations du secteur priv\xE9, notamment les exigences de signalement\
+            \ des atteintes."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:s-10-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pipeda:part-1
+      ref_id: s. 10.1
+      name: Breach of Security Safeguards
+      description: Mandatory breach notification requirements for organizations subject
+        to PIPEDA.
+      translations:
+        fr:
+          name: "Atteinte aux mesures de s\xE9curit\xE9"
+
+    - urn: urn:intuitem:risk:req_node:pipeda:s-10-1-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pipeda:s-10-1
+      ref_id: 10.1.a
+      description: An organization that has reasonable grounds to believe that a breach
+        of security safeguards has occurred shall report the breach to the Privacy Commissioner
+        of Canada and notify any individual whose personal information is involved in
+        the breach if it is reasonable in the circumstances to believe the breach creates
+        a real risk of significant harm to the individual.
+      translations:
+        fr:
+          description: "Une organisation qui a des motifs raisonnables de croire qu'\
+            une atteinte aux mesures de s\xE9curit\xE9 s'est produite doit\
+            \ en aviser le Commissaire \xE0 la protection de la vie priv\xE9e du\
+            \ Canada et notifier toute personne dont les renseignements personnels\
+            \ sont concern\xE9s, s'il y a lieu de croire que l'atteinte\
+            \ cr\xE9e un risque r\xE9el de pr\xE9judice grave pour la personne."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:s-10-1-b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pipeda:s-10-1
+      ref_id: 10.1.b
+      description: Organizations must maintain and keep a record of every breach of
+        security safeguards involving personal information under the organization's
+        control for 24 months. The organization must provide the Privacy Commissioner
+        with access to the record upon request.
+      translations:
+        fr:
+          description: "Les organisations doivent tenir un registre de toutes les\
+            \ atteintes aux mesures de s\xE9curit\xE9 impliquant des renseignements\
+            \ personnels sous leur contr\xF4le pendant 24 mois. L'organisation\
+            \ doit donner au Commissaire acc\xE8s \xE0 ce registre sur demande."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:s-10-1-c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pipeda:s-10-1
+      ref_id: 10.1.c
+      description: The notification to affected individuals must be given as soon as
+        feasible and contain sufficient information to allow the individual to understand
+        the significance of the breach and to take steps, if any are possible, to reduce
+        the risk of harm or to mitigate harm.
+      translations:
+        fr:
+          description: "La notification aux personnes concern\xE9es doit \xEAtre donn\xE9\
+            e d\xE8s que possible et contenir suffisamment d'informations pour\
+            \ permettre \xE0 la personne de comprendre l'importance de l'\
+            atteinte et de prendre des mesures, si possible, pour r\xE9duire le risque\
+            \ de pr\xE9judice ou att\xE9nuer ce dernier."
+
+    - urn: urn:intuitem:risk:req_node:pipeda:s-8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pipeda:part-1
+      ref_id: s. 8
+      name: Disclosure Without Knowledge or Consent
+      description: Limited circumstances in which personal information may be disclosed
+        without the knowledge or consent of the individual.
+      translations:
+        fr:
+          name: "Communication sans consentement"
+
+    - urn: urn:intuitem:risk:req_node:pipeda:s-8-a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pipeda:s-8
+      ref_id: 8.a
+      description: Organizations may disclose personal information without knowledge
+        or consent only in the specific circumstances listed in s. 7(3) of PIPEDA,
+        including where required by law, for law enforcement purposes, to a lawyer representing
+        the organization, or in an emergency that threatens life, health, or safety.
+      translations:
+        fr:
+          description: "Les organisations ne peuvent communiquer des renseignements\
+            \ personnels sans consentement que dans les cas sp\xE9cifiques \xE9nonc\xE9\
+            s au par. 7(3) de la LPRPDE, notamment lorsque la loi l'exige,\
+            \ \xE0 des fins d'application de la loi, \xE0 l'avocat\
+            \ de l'organisation ou dans une situation d'urgence mena\xE7\
+            ant la vie, la sant\xE9 ou la s\xE9curit\xE9."
