@@ -198,12 +198,16 @@
 		Object.entries(tableSource.head).map(([key, label]) => ({ key, label: label as string }))
 	);
 	const allColumnKeys = $derived(allColumns.map((c) => c.key));
-	const defaultColumns = $derived(
-		(URLModel && listViewFields[URLModel]?.body
-			? listViewFields[URLModel].body
-			: allColumnKeys
-		).filter((key) => allColumnKeys.includes(key))
-	);
+	// Deduplicated: a few models list the same field twice in `body` (e.g. applied-controls `owner`).
+	// A duplicate key would crash the keyed {#each} used for rendering and in the selector.
+	const defaultColumns = $derived([
+		...new Set(
+			(URLModel && listViewFields[URLModel]?.body
+				? listViewFields[URLModel].body
+				: allColumnKeys
+			).filter((key) => allColumnKeys.includes(key))
+		)
+	]);
 	// Selector is offered on standalone list pages only; curated embedded tables pass `fields`.
 	const showColumnSelector = $derived(
 		(columnSelector ?? Boolean(deleteForm)) &&
@@ -215,7 +219,9 @@
 	// Stored choice, with stale keys dropped and a fallback to defaults so a table is never empty.
 	const storedColumns = $derived(URLModel ? $tableColumnStates[URLModel] : undefined);
 	const sanitizedStored = $derived(storedColumns?.filter((key) => allColumnKeys.includes(key)));
-	const visibleColumns = $derived(sanitizedStored?.length ? sanitizedStored : defaultColumns);
+	const visibleColumns = $derived([
+		...new Set(sanitizedStored?.length ? sanitizedStored : defaultColumns)
+	]);
 	// Keys to render, in order. Without the selector, keep natural head order (behaviour unchanged).
 	const renderColumnKeys = $derived(
 		showColumnSelector
