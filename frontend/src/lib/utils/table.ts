@@ -27,7 +27,13 @@ export function tableSourceMapper(source: any[], keys: string[]): any[] {
 
 export interface ListViewFilterConfig {
 	component: ComponentType;
-	props?: { label: string; optionsEndpoint?: string; multiple?: boolean; options?: Option[] };
+	props?: {
+		label: string;
+		optionsEndpoint?: string;
+		multiple?: boolean;
+		options?: Option[];
+		[key: string]: unknown;
+	};
 	hide?: boolean;
 }
 
