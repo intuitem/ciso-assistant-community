@@ -307,7 +307,10 @@ class TestNonZeroMinDenormalization:
 @pytest.mark.django_db
 class TestTreeAggregationNoneScoreOnOffsetScale:
     """Regression: an is_scored leaf with score=None on an offset scale must
-    not pull the parent below the audit's min via a negative ratio."""
+    not pull the parent below the audit's min via a negative ratio. Covers
+    both the tree path (helpers.annotate_tree_with_aggregated_scores) and
+    the shared path used by the radar and global score
+    (models._compute_score_for_field)."""
 
     def test_none_score_does_not_produce_negative_aggregate(self):
         from core.helpers import (
@@ -394,6 +397,19 @@ class TestTreeAggregationNoneScoreOnOffsetScale:
         # range [1, 4]; the parent should never dip below min_score.
         assert section_node["aggregated_score"] == 3
         assert section_node["aggregated_score"] >= framework.min_score
+
+        # Same invariant on the radar / global-score path: the inconsistent
+        # leaf must not coerce to 0 and produce a negative ratio. Both AVG
+        # and SUM exclude the leaf, matching the tree.
+        global_avg = ca.get_global_score()["implementation_score"]
+        assert global_avg == 3.0
+        assert global_avg >= framework.min_score
+
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.SUM
+        ca.save()
+        global_sum = ca.get_global_score()["implementation_score"]
+        # SUM: only the valid leaf (3) contributes, with weight 1.
+        assert global_sum == 3.0
 
 
 @pytest.mark.django_db
