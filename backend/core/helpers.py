@@ -451,7 +451,9 @@ def annotate_tree_with_aggregated_scores(
             weight = node.get("weight") or 1
             if is_assessed:
                 ra_min = (
-                    node.get("min_score") if node.get("min_score") is not None else 0
+                    node.get("min_score")
+                    if node.get("min_score") is not None
+                    else ca_min
                 )
                 ra_max = (
                     node.get("max_score")

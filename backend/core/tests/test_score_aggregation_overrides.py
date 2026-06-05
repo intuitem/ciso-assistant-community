@@ -11,7 +11,11 @@ The existing test_compliance_assessment_scoring.py covers the uniform-scale
 """
 
 import pytest
+from django.urls import reverse
+from knox.models import AuthToken
+from rest_framework.test import APIClient
 
+from core.apps import startup
 from core.models import (
     ComplianceAssessment,
     Framework,
@@ -19,7 +23,23 @@ from core.models import (
     RequirementAssessment,
     RequirementNode,
 )
-from iam.models import Folder
+from iam.models import Folder, User, UserGroup
+
+
+@pytest.fixture
+def admin_client():
+    startup(sender=None, **{})
+    admin = User.objects.create_superuser(
+        "admin@score-aggregation-tests.com", is_published=True
+    )
+    admin_group = UserGroup.objects.get(name="BI-UG-ADM")
+    admin.folder = admin_group.folder
+    admin.save()
+    admin_group.user_set.add(admin)
+    client = APIClient()
+    token = AuthToken.objects.create(user=admin)
+    client.credentials(HTTP_AUTHORIZATION=f"Token {token[1]}")
+    return client
 
 
 @pytest.fixture
@@ -426,3 +446,68 @@ class TestRadarDataNormalizesMixedScales:
             ca._compute_score_for_field(scored, None, "score", ca.anchor_na_to_target)
             == 5.0
         )
+
+    def test_compare_endpoint_radar_normalises_mixed_scales(
+        self, admin_client, mixed_scale_setup
+    ):
+        """End-to-end through the compare endpoint's aggregate_by_top_level():
+        section A's radar slice must be the denormalised mixed-scale average
+        (4.5), not the raw average (2.5). Section B has no scored RAs -> 0.
+        """
+        ca = mixed_scale_setup["ca"]
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
+        ca.save()
+        _score(mixed_scale_setup, "a1", 4)
+        _score(mixed_scale_setup, "a2", 1)
+
+        other = ComplianceAssessment.objects.create(
+            name="Mixed Scoring CA (compare)",
+            framework=ca.framework,
+            folder=mixed_scale_setup["folder"],
+            perimeter=ca.perimeter,
+            min_score=0,
+            max_score=5,
+        )
+
+        url = reverse("compliance-assessments-compare", kwargs={"pk": str(ca.pk)})
+        response = admin_client.get(url, {"compare_id": str(other.pk)})
+        assert response.status_code == 200
+        radar = response.json()["base"]["radar_data"]
+        assert radar["labels"] == ["A", "B"]
+        assert radar["maturity_scores"] == [4.5, 0]
+
+    def test_compare_endpoint_radar_anchors_na_to_target(
+        self, admin_client, mixed_scale_setup
+    ):
+        """With anchor_na_to_target on, an N/A RA contributes its
+        target-projected ratio to the radar slice, matching get_global_score():
+        A1 = 4/5 (0.8), A2 N/A -> CA target 2/5 projected (0.4).
+        Avg ratio 0.6, denormalised on 0..5 -> 3.0. Excluding the N/A RA
+        (the pre-fix behaviour) would yield 4.0 instead.
+        """
+        ca = mixed_scale_setup["ca"]
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
+        ca.anchor_na_to_target = True
+        ca.target_score = 2
+        ca.save()
+        _score(mixed_scale_setup, "a1", 4)
+        _score(mixed_scale_setup, "a2", None, is_scored=False, result="not_applicable")
+
+        other = ComplianceAssessment.objects.create(
+            name="Mixed Scoring CA (compare)",
+            framework=ca.framework,
+            folder=mixed_scale_setup["folder"],
+            perimeter=ca.perimeter,
+            min_score=0,
+            max_score=5,
+        )
+
+        url = reverse("compliance-assessments-compare", kwargs={"pk": str(ca.pk)})
+        response = admin_client.get(url, {"compare_id": str(other.pk)})
+        assert response.status_code == 200
+        body = response.json()
+        radar = body["base"]["radar_data"]
+        assert radar["labels"] == ["A", "B"]
+        assert radar["maturity_scores"][0] == 3.0
+        # Radar slice and global score agree (only section A is scored).
+        assert body["base"]["global_score"] == 3.0
