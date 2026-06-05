@@ -4,6 +4,8 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
 	import { URL_MODEL_MAP, getModelInfo } from '$lib/utils/crud';
+	import { listViewFields } from '$lib/utils/table';
+	import type { ListViewFilterConfig } from '$lib/utils/table';
 	import type { RiskMatrixJsonDefinition, RiskScenario } from '$lib/utils/types';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
@@ -36,6 +38,20 @@
 	const showRisks = true;
 	const useBubbles = data.useBubbles;
 	const risk_assessment = $derived(data.risk_assessment);
+
+	const scenarioTableFilters = $derived.by(() => {
+		const base = listViewFields['risk-scenarios'].filters;
+		const scope: [string, string][] = [['risk_assessment', risk_assessment.id]];
+		const withScope = (filter: ListViewFilterConfig): ListViewFilterConfig => ({
+			...filter,
+			props: { ...filter.props, optionsDetailedUrlParameters: scope }
+		});
+		return {
+			...base,
+			current_level: withScope(base.current_level),
+			residual_level: withScope(base.residual_level)
+		};
+	});
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -436,6 +452,7 @@
 				model={getModelInfo('risk-scenarios')}
 				URLModel="risk-scenarios"
 				search={false}
+				tableFilters={scenarioTableFilters}
 				baseEndpoint="/risk-scenarios?risk_assessment={risk_assessment.id}"
 				folderId={data.risk_assessment.folder.id}
 				{fields}

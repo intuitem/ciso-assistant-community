@@ -16,7 +16,7 @@ import os
 import uuid
 import zipfile
 import tempfile
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from typing import Dict, Any, List, Tuple, Final
 import time
 from django.db.models import (
@@ -2602,7 +2602,7 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
 
 class AssetClassViewSet(BaseModelViewSet):
     model = AssetClass
-    filterset_fields = ["parent"]
+    filterset_fields = ["parent", "name"]
 
     ordering = ["parent", "name"]
     search_fields = ["name", "description"]
@@ -2745,10 +2745,15 @@ class RiskMatrixViewSet(BaseModelViewSet):
         viewable_matrices: list[RiskMatrix] = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, RiskMatrix
         )[0]
+        matrices = RiskMatrix.objects.filter(id__in=viewable_matrices)
+
+        risk_assessment_id = request.query_params.get("risk_assessment")
+        if risk_assessment_id:
+            matrices = matrices.filter(riskassessment__id=risk_assessment_id)
+
         undefined = {-1: "--"}
         options = undefined
-        for matrix in RiskMatrix.objects.filter(id__in=viewable_matrices):
-            _choices = {}
+        for matrix in matrices:
             for i, risk in enumerate(matrix.json_definition.get("risk", [])):
                 translations = risk.get("translations")
                 if not isinstance(translations, dict):
@@ -2757,8 +2762,7 @@ class RiskMatrixViewSet(BaseModelViewSet):
 
                 # Use the translated name if available, otherwise fall back to the default name
                 name = translated.get("name") or risk.get("name", "")
-                _choices[risk.get("id", i)] = name
-            options = options | _choices
+                options[i] = name
 
         res = [{"value": k, "label": v} for k, v in options.items()]
         return Response(res)
@@ -19205,7 +19209,20 @@ def metrics_view(request):
         nb_risk_acceptances_gauge.set(metrics.get("nb_risk_acceptances", 0))
         nb_seats_gauge.set(metrics.get("nb_seats", 0))
         nb_editors_gauge.set(metrics.get("nb_editors", 0))
-        expiration_gauge.set(metrics.get("expiration", 0))
+        # Prometheus onlyhave float64 gauge, so we convert expiration timestamp to int and use -1 for unset/invalid dates
+        try:
+            expiration_date = date.fromisoformat(str(metrics.get("expiration", "")))
+            expiration_ts = int(
+                datetime(
+                    expiration_date.year,
+                    expiration_date.month,
+                    expiration_date.day,
+                    tzinfo=timezone.utc,
+                ).timestamp()
+            )
+        except (ValueError, AttributeError, TypeError):
+            expiration_ts = -1
+        expiration_gauge.set(expiration_ts)
         created_at_gauge.set(metrics.get("created_at", 0))
         last_login_gauge.set(metrics.get("last_login", 0))
     except Exception as e:
