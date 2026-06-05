@@ -26,6 +26,7 @@
 	import { contextMenuActions, listViewFields, getBatchActions } from '$lib/utils/table';
 	import { tableFilterStates } from '$lib/utils/stores';
 	import BatchActionBar from './BatchActionBar.svelte';
+	import ColumnSelector from './ColumnSelector.svelte';
 	import type { urlModel } from '$lib/utils/types.js';
 	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
 	import { m } from '$paraglide/messages';
@@ -45,7 +46,7 @@
 	import ThFilter from './ThFilter.svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import { ContextMenu } from 'bits-ui';
-	import { tableHandlers, tableStates } from '$lib/utils/stores';
+	import { tableHandlers, tableStates, tableColumnStates } from '$lib/utils/stores';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import {
@@ -89,6 +90,7 @@
 		baseEndpoint?: string;
 		detailQueryParameter?: string;
 		fields?: string[];
+		columnSelector?: boolean;
 		canSelectObject?: boolean;
 		overrideFilters?: { [key: string]: any[] };
 		defaultFilters?: { [key: string]: any[] };
@@ -142,6 +144,7 @@
 		baseEndpoint = `/${URLModel}`,
 		detailQueryParameter = $bindable(),
 		fields = [],
+		columnSelector = undefined,
 		canSelectObject = false,
 		overrideFilters = {},
 		defaultFilters = {},
@@ -189,6 +192,55 @@
 				{ head: {}, body: source.body, meta: source.meta }
 			)
 	);
+
+	// Column visibility & order, persisted per URLModel through the column selector.
+	const allColumns = $derived(
+		Object.entries(tableSource.head).map(([key, label]) => ({ key, label: label as string }))
+	);
+	const allColumnKeys = $derived(allColumns.map((c) => c.key));
+	const defaultColumns = $derived(
+		(URLModel && listViewFields[URLModel]?.body
+			? listViewFields[URLModel].body
+			: allColumnKeys
+		).filter((key) => allColumnKeys.includes(key))
+	);
+	// Selector is offered on standalone list pages only; curated embedded tables pass `fields`.
+	const showColumnSelector = $derived(
+		(columnSelector ?? Boolean(deleteForm)) &&
+			Boolean(URLModel) &&
+			isStandaloneTable &&
+			fields.length === 0 &&
+			allColumns.length > 1
+	);
+	// Stored choice, with stale keys dropped and a fallback to defaults so a table is never empty.
+	const storedColumns = $derived(URLModel ? $tableColumnStates[URLModel] : undefined);
+	const sanitizedStored = $derived(storedColumns?.filter((key) => allColumnKeys.includes(key)));
+	const visibleColumns = $derived(sanitizedStored?.length ? sanitizedStored : defaultColumns);
+	// Keys to render, in order. Without the selector, keep natural head order (behaviour unchanged).
+	const renderColumnKeys = $derived(
+		showColumnSelector
+			? visibleColumns
+			: allColumnKeys.filter((key) => fields.length === 0 || fields.includes(key))
+	);
+	// Order-sensitive so a pure reorder of the default set still persists instead of resetting.
+	const sameAsDefault = (cols: string[]) =>
+		cols.length === defaultColumns.length && cols.every((key, i) => defaultColumns[i] === key);
+
+	function setVisibleColumns(visible: string[]) {
+		if (!URLModel) return;
+		if (sameAsDefault(visible)) {
+			resetColumns();
+			return;
+		}
+		$tableColumnStates = { ...$tableColumnStates, [URLModel]: visible };
+	}
+
+	function resetColumns() {
+		if (!URLModel) return;
+		const next = { ...$tableColumnStates };
+		delete next[URLModel];
+		$tableColumnStates = next;
+	}
 
 	function onRowClick(
 		event: SvelteEvent<MouseEvent | KeyboardEvent, HTMLTableRowElement>,
@@ -307,8 +359,8 @@
 
 	let contextMenuOpenRow: TableSource | undefined = $state(undefined);
 
-	const filters = source?.filters ?? tableFilters;
-	const filteredFields = Object.keys(filters);
+	const filters = $derived(source?.filters ?? tableFilters);
+	const filteredFields = $derived(Object.keys(filters));
 	// Only persist filters on standalone list pages, not embedded sub-tables
 	const isStandaloneTable = baseEndpoint === `/${URLModel}`;
 	const filterStoreKey = `${page.url.pathname}::${baseEndpoint}`;
@@ -761,6 +813,14 @@
 			{#if pagination && rowsPerPage}
 				<RowsPerPage {handler} />
 			{/if}
+			{#if showColumnSelector}
+				<ColumnSelector
+					columns={allColumns}
+					visible={visibleColumns}
+					onChange={setVisibleColumns}
+					onReset={resetColumns}
+				/>
+			{/if}
 			<div class="flex space-x-2 items-center">
 				{@render optButton?.()}
 				{#if canSelectObject}
@@ -810,12 +870,10 @@
 						</span>
 					</th>
 				{/if}
-				{#each Object.entries(tableSource.head) as [key, heading]}
-					{#if fields.length === 0 || fields.includes(key)}
-						<Th {handler} orderBy={isMultiValueColumn(key) ? undefined : key} class={regionHeadCell}
-							>{safeTranslate(heading)}</Th
-						>
-					{/if}
+				{#each renderColumnKeys as key (key)}
+					<Th {handler} orderBy={isMultiValueColumn(key) ? undefined : key} class={regionHeadCell}
+						>{safeTranslate(tableSource.head[key])}</Th
+					>
 				{/each}
 				{#if displayActions}
 					<th class="{regionHeadCell} select-none text-end"></th>
@@ -826,7 +884,7 @@
 					{#if hasBatchActions}
 						<th></th>
 					{/if}
-					{#each Object.entries(tableSource.head) as [key, _]}
+					{#each renderColumnKeys as key (key)}
 						{#if thFilterFields.includes(key)}
 							<ThFilter {handler} filterBy={key} />
 						{:else}
@@ -870,177 +928,175 @@
 										</span>
 									</td>
 								{/if}
-								{#each Object.entries(row) as [key, value]}
-									{#if key !== 'meta'}
-										{@const component = fieldComponentMap[key]}
-										<td role="gridcell">
-											<div class={regionCell}>
-												{#if component && browser}
-													{@const CellComponent = component}
-													{#if CellComponent === LecChartPreview}
-														{#key `${meta?.id || rowIndex}-${key}`}
-															<CellComponent {meta} cell={value} />
-														{/key}
-													{:else}
+								{#each renderColumnKeys as key (key)}
+									{@const value = row[key]}
+									{@const component = fieldComponentMap[key]}
+									<td role="gridcell">
+										<div class={regionCell}>
+											{#if component && browser}
+												{@const CellComponent = component}
+												{#if CellComponent === LecChartPreview}
+													{#key `${meta?.id || rowIndex}-${key}`}
 														<CellComponent {meta} cell={value} />
-													{/if}
+													{/key}
 												{:else}
-													<div
-														data-testid="model-table-td-array-elem"
-														class="base-font-family whitespace-pre-line break-words"
-													>
-														{#if Array.isArray(value)}
-															{@const hiddenCount = isRelatedField(key) ? countMasked(value) : 0}
-															{@const visibleValues = isRelatedField(key)
-																? value.filter((item) => !isMaskedPlaceholder(item))
-																: value}
-															{#if visibleValues.length > 0}
-																<ul class="list-disc pl-4 whitespace-normal">
-																	{#each [...visibleValues].sort((a, b) => {
-																		if ((!a.str && typeof a === 'object') || (!b.str && typeof b === 'object')) return 0;
-																		return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
-																	}) as val}
-																		<li>
-																			{#if key === 'linked_models' && typeof val === 'string'}
-																				{safeTranslate(convertLinkedModelName(val))}
-																			{:else if key === 'security_objectives' || key === 'security_capabilities'}
-																				{@const [securityObjectiveName, securityObjectiveValue] =
-																					Object.entries(val)[0]}
-																				{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
-																			{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship' && key !== 'nature'}
-																				{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key.replace(/_/g, '-')}/${val.id}`}
-																				<Anchor href={itemHref} class="anchor" stopPropagation
-																					>{safeTranslate(val.str)}</Anchor
-																				>
-																			{:else if val.str}
-																				{safeTranslate(val.str)}
-																			{:else if typeof val === 'string' && val.includes(':') && unsafeTranslate(val.split(':')[0])}
-																				<span class="text"
-																					>{unsafeTranslate(val.split(':')[0] + 'Colon')}
-																					{val.split(':')[1]}</span
-																				>
-																			{:else}
-																				{val ?? '-'}
-																			{/if}
-																		</li>
-																	{/each}
-																</ul>
-																{#if hiddenCount > 0}
-																	<p class="mt-1 text-xs text-yellow-700">
-																		{m.objectsNotVisible({ count: hiddenCount })}
-																	</p>
-																{/if}
-															{:else if hiddenCount > 0}
-																<p class="text-xs text-yellow-700">
+													<CellComponent {meta} cell={value} />
+												{/if}
+											{:else}
+												<div
+													data-testid="model-table-td-array-elem"
+													class="base-font-family whitespace-pre-line break-words"
+												>
+													{#if Array.isArray(value)}
+														{@const hiddenCount = isRelatedField(key) ? countMasked(value) : 0}
+														{@const visibleValues = isRelatedField(key)
+															? value.filter((item) => !isMaskedPlaceholder(item))
+															: value}
+														{#if visibleValues.length > 0}
+															<ul class="list-disc pl-4 whitespace-normal">
+																{#each [...visibleValues].sort((a, b) => {
+																	if ((!a.str && typeof a === 'object') || (!b.str && typeof b === 'object')) return 0;
+																	return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
+																}) as val}
+																	<li>
+																		{#if key === 'linked_models' && typeof val === 'string'}
+																			{safeTranslate(convertLinkedModelName(val))}
+																		{:else if key === 'security_objectives' || key === 'security_capabilities'}
+																			{@const [securityObjectiveName, securityObjectiveValue] =
+																				Object.entries(val)[0]}
+																			{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
+																		{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship' && key !== 'nature'}
+																			{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key.replace(/_/g, '-')}/${val.id}`}
+																			<Anchor href={itemHref} class="anchor" stopPropagation
+																				>{safeTranslate(val.str)}</Anchor
+																			>
+																		{:else if val.str}
+																			{safeTranslate(val.str)}
+																		{:else if typeof val === 'string' && val.includes(':') && unsafeTranslate(val.split(':')[0])}
+																			<span class="text"
+																				>{unsafeTranslate(val.split(':')[0] + 'Colon')}
+																				{val.split(':')[1]}</span
+																			>
+																		{:else}
+																			{val ?? '-'}
+																		{/if}
+																	</li>
+																{/each}
+															</ul>
+															{#if hiddenCount > 0}
+																<p class="mt-1 text-xs text-yellow-700">
 																	{m.objectsNotVisible({ count: hiddenCount })}
 																</p>
-															{:else}
-																--
 															{/if}
-														{:else if isMaskedPlaceholder(value)}
-															{#if isRelatedField(key)}
-																<p class="text-xs text-yellow-700">
-																	{m.objectsNotVisible({ count: 1 })}
-																</p>
-															{:else}
-																--
-															{/if}
-														{:else if value && value.str}
-															{#if value.id}
-																{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${value.id}`}
-																{#if key === 'ro_to_couple'}
-																	<Anchor
-																		breadcrumbAction="push"
-																		href={itemHref}
-																		class="anchor"
-																		stopPropagation
-																		>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
-																			'-'
-																		)[1]}</Anchor
-																	>
-																{:else}
-																	<Anchor
-																		breadcrumbAction="push"
-																		href={itemHref}
-																		class="anchor"
-																		stopPropagation>{safeTranslate(value.str)}</Anchor
-																	>
-																{/if}
-															{:else}
-																{safeTranslate(value.str) ?? '-'}
-															{/if}
-														{:else if value && value.hexcolor}
-															<p
-																class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap {classesHexBackgroundText(
-																	value.hexcolor
-																)}"
-																style="background-color: {value.hexcolor}"
-															>
-																{safeTranslate(value.name ?? value.str) ?? '-'}
+														{:else if hiddenCount > 0}
+															<p class="text-xs text-yellow-700">
+																{m.objectsNotVisible({ count: hiddenCount })}
 															</p>
-														{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'start_date' || key === 'expiry_date' || key === 'expiration_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'due_date' || key === 'timestamp' || key === 'reported_at' || key === 'discovered_on')}
-															{formatDateOrDateTime(value, getLocale())}
-														{:else if [true, false].includes(value)}
-															{@const bd = booleanDisplay(value, key, URLModel)}
-															<span class="ml-4"><i class="{bd.icon} {bd.colorClass}"></i></span>
-														{:else if value === 'YES' || value === 'NO'}
-															{@const bd = booleanDisplay(value === 'YES', key, URLModel)}
-															<span class="ml-4"><i class="{bd.icon} {bd.colorClass}"></i></span>
-														{:else if key === 'progress' || key === 'treatment_progress'}
-															<span class="ml-9"
-																>{value != null
-																	? safeTranslate('percentageDisplay', { number: value })
-																	: '--'}</span
-															>
-														{:else if key === 'translations'}
-															{#if Object.keys(value).length > 0}
-																<div class="flex flex-col gap-2">
-																	{#each Object.entries(value) as [lang, translation]}
-																		<div class="flex flex-row gap-2">
-																			<strong>{lang}:</strong>
-																			<span>{safeTranslate(translation)}</span>
-																		</div>
-																	{/each}
-																</div>
-															{:else}
-																--
-															{/if}
-														{:else if URLModel == 'risk-acceptances' && key === 'name' && row.meta?.accepted_at && row.meta?.revoked_at == null}
-															<div class="flex items-center space-x-2">
-																<span>{safeTranslate(value ?? '-')}</span>
-																<span
-																	class="bg-green-100 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-sm dark:bg-green-200 dark:text-green-900"
-																>
-																	{m.accept()}
-																</span>
-															</div>
-														{:else if (key === 'name' || key === 'str') && row.meta?.is_locked}
-															<div class="flex items-center space-x-2">
-																<i class="fa-solid fa-lock text-yellow-600" title={m.isLocked()}
-																></i>
-																<span class="text-yellow-600">{safeTranslate(value ?? '-')}</span>
-															</div>
-														{:else if key === 'icon_fa_class'}
-															<i class="text-lg fa {value}"></i>
-														{:else if value && value.name}
-															{value.name}
 														{:else}
-															<!-- NOTE: We will have to handle the ellipses for RTL languages-->
-															{@const displayValue = ['name', 'description', 'ref_id'].includes(key)
-																? (value ?? '-')
-																: safeTranslate(value ?? '-')}
-															{#if displayValue?.length > 300}
-																{displayValue.slice(0, 300)}...
-															{:else}
-																{displayValue}
-															{/if}
+															--
 														{/if}
-														{@render badge?.(key, row)}
-													</div>
-												{/if}
-											</div>
-										</td>
-									{/if}
+													{:else if isMaskedPlaceholder(value)}
+														{#if isRelatedField(key)}
+															<p class="text-xs text-yellow-700">
+																{m.objectsNotVisible({ count: 1 })}
+															</p>
+														{:else}
+															--
+														{/if}
+													{:else if value && value.str}
+														{#if value.id}
+															{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${value.id}`}
+															{#if key === 'ro_to_couple'}
+																<Anchor
+																	breadcrumbAction="push"
+																	href={itemHref}
+																	class="anchor"
+																	stopPropagation
+																	>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
+																		'-'
+																	)[1]}</Anchor
+																>
+															{:else}
+																<Anchor
+																	breadcrumbAction="push"
+																	href={itemHref}
+																	class="anchor"
+																	stopPropagation>{safeTranslate(value.str)}</Anchor
+																>
+															{/if}
+														{:else}
+															{safeTranslate(value.str) ?? '-'}
+														{/if}
+													{:else if value && value.hexcolor}
+														<p
+															class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap {classesHexBackgroundText(
+																value.hexcolor
+															)}"
+															style="background-color: {value.hexcolor}"
+														>
+															{safeTranslate(value.name ?? value.str) ?? '-'}
+														</p>
+													{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'start_date' || key === 'expiry_date' || key === 'expiration_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'due_date' || key === 'timestamp' || key === 'reported_at' || key === 'discovered_on')}
+														{formatDateOrDateTime(value, getLocale())}
+													{:else if [true, false].includes(value)}
+														{@const bd = booleanDisplay(value, key, URLModel)}
+														<span class="ml-4"><i class="{bd.icon} {bd.colorClass}"></i></span>
+													{:else if value === 'YES' || value === 'NO'}
+														{@const bd = booleanDisplay(value === 'YES', key, URLModel)}
+														<span class="ml-4"><i class="{bd.icon} {bd.colorClass}"></i></span>
+													{:else if key === 'progress' || key === 'treatment_progress'}
+														<span class="ml-9"
+															>{value != null
+																? safeTranslate('percentageDisplay', { number: value })
+																: '--'}</span
+														>
+													{:else if key === 'translations'}
+														{#if Object.keys(value).length > 0}
+															<div class="flex flex-col gap-2">
+																{#each Object.entries(value) as [lang, translation]}
+																	<div class="flex flex-row gap-2">
+																		<strong>{lang}:</strong>
+																		<span>{safeTranslate(translation)}</span>
+																	</div>
+																{/each}
+															</div>
+														{:else}
+															--
+														{/if}
+													{:else if URLModel == 'risk-acceptances' && key === 'name' && row.meta?.accepted_at && row.meta?.revoked_at == null}
+														<div class="flex items-center space-x-2">
+															<span>{safeTranslate(value ?? '-')}</span>
+															<span
+																class="bg-green-100 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-sm dark:bg-green-200 dark:text-green-900"
+															>
+																{m.accept()}
+															</span>
+														</div>
+													{:else if (key === 'name' || key === 'str') && row.meta?.is_locked}
+														<div class="flex items-center space-x-2">
+															<i class="fa-solid fa-lock text-yellow-600" title={m.isLocked()}></i>
+															<span class="text-yellow-600">{safeTranslate(value ?? '-')}</span>
+														</div>
+													{:else if key === 'icon_fa_class'}
+														<i class="text-lg fa {value}"></i>
+													{:else if value && value.name}
+														{value.name}
+													{:else}
+														<!-- NOTE: We will have to handle the ellipses for RTL languages-->
+														{@const displayValue = ['name', 'description', 'ref_id'].includes(key)
+															? (value ?? '-')
+															: safeTranslate(value ?? '-')}
+														{#if displayValue?.length > 300}
+															{displayValue.slice(0, 300)}...
+														{:else}
+															{displayValue}
+														{/if}
+													{/if}
+													{@render badge?.(key, row)}
+												</div>
+											{/if}
+										</div>
+									</td>
 								{/each}
 								{#if displayActions}
 									<td class="text-end {regionCell}" role="gridcell">

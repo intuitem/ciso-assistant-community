@@ -4813,7 +4813,7 @@ class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         related_name="incidents",
     )
 
-    fields_to_check = ["name", "ref_id"]
+    fields_to_check = ["ref_id"]
 
     class Meta:
         verbose_name = "Incident"
