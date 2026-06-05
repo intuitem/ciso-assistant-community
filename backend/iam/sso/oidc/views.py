@@ -25,6 +25,7 @@ from django.http import Http404, HttpRequest, HttpResponseRedirect
 from urllib.parse import urlparse
 
 from iam.sso.errors import AuthError
+from iam.sso.redirects import get_sso_authenticate_url
 from iam.utils import generate_token
 
 logger = structlog.get_logger(__name__)
@@ -220,7 +221,7 @@ def callback(request, provider_id):
             )
 
         token = generate_token(request.user)
-        next = f"{settings.CISO_ASSISTANT_URL.rstrip('/')}/sso/authenticate"
+        next = get_sso_authenticate_url(response.get("Location"))
 
         logger.info(
             "SSO authentication successful",
