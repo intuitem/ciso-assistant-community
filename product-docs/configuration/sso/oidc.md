@@ -31,3 +31,7 @@ Once you've retrieved the **Client ID**, the **Client Secret** and the **Issuer 
 {% hint style="warning" %}
 <mark style="color:orange;">Be aware that the user needs to be created on CISO Assistant to be authenticated with SSO.</mark>
 {% endhint %}
+
+{% hint style="info" %}
+CISO Assistant automatically sends a standards-compliant `state` and `nonce` on every OIDC authorization request (40 characters matching `^[A-Za-z0-9-._~,]{36,128}$`), and validates the `nonce` claim returned in the `id_token`. No configuration is required. This is helpful for identity providers that enforce format or length constraints on these parameters. Per OIDC Core 3.1.3.7, the `nonce` sent in the authorization request must be present and match in the `id_token` — a missing or mismatched nonce will reject the login.
+{% endhint %}

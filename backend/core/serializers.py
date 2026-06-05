@@ -1480,6 +1480,7 @@ class AppliedControlListSerializer(BaseModelSerializer):
             "eta",
             "start_date",
             "expiry_date",
+            "progress_field",
             "cost",
             "folder",
             "reference_control",
@@ -4837,7 +4838,7 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
 
 class TaskNodeReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
-    task_template = FieldsRelatedField(["folder", "id"])
+    task_template = FieldsRelatedField(["folder", "id", "description"])
     folder = FieldsRelatedField()
     name = serializers.SerializerMethodField()
     assigned_to = FieldsRelatedField(many=True)

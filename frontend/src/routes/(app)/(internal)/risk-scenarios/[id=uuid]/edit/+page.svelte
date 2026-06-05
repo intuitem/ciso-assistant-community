@@ -13,6 +13,7 @@
 	import type { PageData, ActionData } from './$types';
 	import RiskLevel from './RiskLevel.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
 
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
@@ -602,6 +603,12 @@
 				/>
 			</div>
 		</div>
+
+		{#if page.data?.featureflags?.comments}
+			<div class="my-3">
+				<CommentsPanel parentType="risk_scenario" parentId={data.scenario.id} />
+			</div>
+		{/if}
 
 		<!-- ── Sticky Footer ── -->
 		<div

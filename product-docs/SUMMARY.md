@@ -67,6 +67,8 @@
   * [Managing secrets](installation/managing-secrets.md)
   * [Setting up S3](installation/s3.md)
   * [Setting up mailer](installation/mailer.md)
+  * [Infrastructure configuration](installation/infra-config.md)
+  * [Prometheus metrics](installation/prometheus-metrics.md)
 * Maintenance
   * [Updating your local instance](installation/updating.md)
   * [Special cases](installation/special-cases.md)
@@ -115,6 +117,7 @@
   * [Excel-driven authoring](configuration/authoring/excel.md)
 * [Data import wizard](configuration/data-import.md)
 * [Changing the language](configuration/language.md)
+* [Date format](configuration/date-format.md)
 
 ## Guides
 
@@ -155,6 +158,7 @@
 * [X-rays](features/x-rays.md)
 * [Scoring Assistant](features/scoring-assistant.md)
 * [Assignments / respondent mode](features/assignments.md)
+* [Comments](features/comments.md)
 * [Domain export/import](features/domain-export-import.md)
 * [Focus mode](features/focus-mode.md)
 * [Sync to actions](features/sync-to-actions.md)
@@ -164,8 +168,7 @@
 * [Insights](features/insights.md)
 * [Control Plan](features/control-plan.md)
 * [Action plans](features/action-plans.md)
-* [Context menu](features/context-menu.md)
-* [Batch actions](features/batch-actions.md)
+* [Working with tables](features/working-with-tables.md)
 * [Command palette](features/command-palette.md)
 * [Universal search](features/search.md)
 * [My assignments](features/my-assignments.md)

@@ -3,6 +3,8 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { m } from '$paraglide/messages';
+	import { getLocale } from '$paraglide/runtime';
+	import { formatDate } from '$lib/utils/datetime';
 	import { safeTranslate } from '$lib/utils/i18n';
 
 	// -----------------------------------------------------------------------------
@@ -15,6 +17,35 @@
 		| 'non_compliant'
 		| 'compliant'
 		| 'not_applicable';
+
+	type InheritancePathEntry = {
+		ca_id: string;
+		ca_name: string;
+		folder_id: string | null;
+		folder_name: string | null;
+		distance: number;
+		result: Result | null;
+		score: number | null;
+		raw_score: number | null;
+		is_scored: boolean;
+		scale: { min: number | null; max: number | null };
+	};
+
+	type Inheritance = {
+		strategy: string;
+		inherited: boolean;
+		effective_result: Result;
+		effective_score: number | null;
+		scale: { min: number | null; max: number | null };
+		own: {
+			result: Result | null;
+			score: number | null;
+			is_scored: boolean;
+			scale: { min: number | null; max: number | null };
+		} | null;
+		source: InheritancePathEntry | null;
+		path: InheritancePathEntry[];
+	};
 
 	type ReportRow = {
 		requirement_assessment_id: string;
@@ -42,6 +73,8 @@
 		evidences_count: number;
 		direct_evidences_count: number;
 		indirect_evidences_count: number;
+
+		inheritance: Inheritance | null;
 	};
 
 	type ComplianceAssessmentSummary = {
@@ -79,6 +112,7 @@
 		compliance_assessments: ComplianceAssessmentSummary[];
 		ca_status_counts: Record<string, number>;
 		live_statuses: string[];
+		aggregation_strategy: string;
 		generated_at: string;
 	};
 
@@ -182,6 +216,16 @@
 
 	const resultLabel = (r: Result): string => safeTranslate(r);
 
+	// Human-readable inheritance chain for a tooltip, nearest-first:
+	// "Domain · Audit: Result  ←  Domain · Audit: Result"
+	function pathTitle(inh: Inheritance): string {
+		return inh.path
+			.map(
+				(e) => `${e.folder_name ?? '—'} · ${e.ca_name}: ${e.result ? safeTranslate(e.result) : '—'}`
+			)
+			.join('  ←  ');
+	}
+
 	const RESULT_ORDER: Result[] = [
 		'compliant',
 		'partially_compliant',
@@ -225,10 +269,36 @@
 	}
 
 	// Backend already honors each CA's selected IGs; the dropdown narrows further.
+	// -----------------------------------------------------------------------------
+	// Domain-tree inheritance overlay. When the org-wide strategy is enabled, each
+	// row may carry an `inheritance` block. The "Apply domain inheritance" toggle
+	// swaps each row's result/score for the effective (combined) value, so the
+	// distributions, scores AND the detail cells all reflect the combined view
+	// from a single transform point.
+	// -----------------------------------------------------------------------------
+	let aggregationStrategy = $derived<string>(report.aggregation_strategy ?? 'none');
+	let inheritanceAvailable = $derived(
+		aggregationStrategy !== 'none' && rows.some((r) => r.inheritance?.inherited)
+	);
+	let applyInheritance = $state<boolean>(true);
+
+	function toEffective(r: ReportRow): ReportRow {
+		const inh = r.inheritance;
+		if (!applyInheritance || !inh || !inh.inherited) return r;
+		return {
+			...r,
+			result: inh.effective_result,
+			score: inh.effective_score,
+			is_scored: inh.effective_score !== null
+		};
+	}
+
+	let displayRows = $derived(inheritanceAvailable ? rows.map(toEffective) : rows);
+
 	let filteredRows = $derived(
 		igFilter === 'all'
-			? rows
-			: rows.filter((r) => (r.implementation_groups ?? []).includes(igFilter))
+			? displayRows
+			: displayRows.filter((r) => (r.implementation_groups ?? []).includes(igFilter))
 	);
 
 	// Hierarchical rollup: sections at the top, each carrying its child requirement rollups.
@@ -475,7 +545,7 @@
 				{/if}
 				<div class="text-xs text-gray-400 mt-1">
 					{m.generatedLabel()}
-					{new Date(report.generated_at).toLocaleString()}
+					{formatDate(new Date(report.generated_at), true, getLocale())}
 				</div>
 			</div>
 			<div class="flex gap-2 items-center">
@@ -587,6 +657,22 @@
 				{/each}
 			</div>
 		</div>
+
+		{#if inheritanceAvailable}
+			<div>
+				<label class="text-xs text-gray-500 block" for="apply-inheritance">{m.combinedView()}</label
+				>
+				<label class="inline-flex items-center gap-2 text-sm cursor-pointer h-[34px]">
+					<input
+						id="apply-inheritance"
+						type="checkbox"
+						class="checkbox"
+						bind:checked={applyInheritance}
+					/>
+					{m.applyDomainInheritance()}
+				</label>
+			</div>
+		{/if}
 
 		{#if view === 'requirement' && !isFlat}
 			<div>
@@ -792,6 +878,8 @@
 												<tbody>
 													{#each req.rows as row}
 														{@const returnUrl = page.url.pathname + page.url.search}
+														{@const inh = row.inheritance}
+														{@const showInh = applyInheritance && !!inh?.inherited}
 														{@const evidencesTitle =
 															row.indirect_evidences_count > 0
 																? m.directPlusIndirectEvidences({
@@ -823,9 +911,34 @@
 																		]}"
 																	></span>
 																	{row.result ? resultLabel(row.result) : '—'}
+																	{#if showInh && inh}
+																		<a
+																			class="anchor inline-flex items-center gap-0.5 text-xs text-gray-500"
+																			href="/compliance-assessments/{inh.source?.ca_id}"
+																			title="{m.inheritedFrom()}: {inh.source?.folder_name ??
+																				'—'} · {inh.source?.ca_name}&#10;{pathTitle(inh)}"
+																		>
+																			<i class="fa-solid fa-code-branch text-[10px]"></i>
+																			{inh.source?.ca_name}
+																		</a>
+																	{/if}
 																</span>
 															</td>
-															<td class="py-1 text-right font-mono">{row.score ?? '—'}</td>
+															<td class="py-1 text-right font-mono">
+																{row.score ?? '—'}
+																{#if showInh && inh && inh.own && inh.own.result !== inh.effective_result}
+																	<span
+																		class="text-[10px] text-gray-400"
+																		title="{m.ownResult()}: {inh.own.result
+																			? resultLabel(inh.own.result)
+																			: '—'}{inh.own.score !== null
+																			? ` (${inh.own.score}${inh.own.scale?.max != null ? ` / ${inh.own.scale.max}` : ''})`
+																			: ''}"
+																	>
+																		<i class="fa-solid fa-circle-info"></i>
+																	</span>
+																{/if}
+															</td>
 															<td class="py-1 text-center">{row.applied_controls_count}</td>
 															<td class="py-1 text-center" title={evidencesTitle}>
 																{row.evidences_count}
