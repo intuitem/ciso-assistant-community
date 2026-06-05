@@ -611,11 +611,11 @@ objects:
             atteinte et de prendre des mesures, si possible, pour r\xE9duire le risque\
             \ de pr\xE9judice ou att\xE9nuer ce dernier."
 
-    - urn: urn:intuitem:risk:req_node:pipeda:s-8
+    - urn: urn:intuitem:risk:req_node:pipeda:s-7-3
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:pipeda:part-1
-      ref_id: s. 8
+      ref_id: s. 7(3)
       name: Disclosure Without Knowledge or Consent
       description: Limited circumstances in which personal information may be disclosed
         without the knowledge or consent of the individual.
@@ -623,11 +623,11 @@ objects:
         fr:
           name: "Communication sans consentement"
 
-    - urn: urn:intuitem:risk:req_node:pipeda:s-8-a
+    - urn: urn:intuitem:risk:req_node:pipeda:s-7-3-a
       assessable: true
       depth: 3
-      parent_urn: urn:intuitem:risk:req_node:pipeda:s-8
-      ref_id: 8.a
+      parent_urn: urn:intuitem:risk:req_node:pipeda:s-7-3
+      ref_id: 7(3).a
       description: Organizations may disclose personal information without knowledge
         or consent only in the specific circumstances listed in s. 7(3) of PIPEDA,
         including where required by law, for law enforcement purposes, to a lawyer representing
