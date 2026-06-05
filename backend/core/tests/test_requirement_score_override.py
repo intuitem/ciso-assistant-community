@@ -325,11 +325,14 @@ class TestSerializer:
         assert req["min_score"] == 0
         assert req["max_score"] == 1
 
-    def test_validate_score_clamps_to_node_override(self, ca_05, framework_05):
+    def test_validate_score_rejects_out_of_node_override(self, ca_05, framework_05):
+        """Out-of-range scores are rejected. Clamping would hide client bugs."""
+        from rest_framework import serializers as drf_serializers
+
         from core.serializers import RequirementAssessmentWriteSerializer
 
         node = RequirementNode.objects.create(
-            urn="urn:test:r-clamp",
+            urn="urn:test:r-reject",
             framework=framework_05,
             assessable=True,
             folder=Folder.get_root_folder(),
@@ -339,7 +342,166 @@ class TestSerializer:
         ra = self._ra(ca_05, node)
         serializer = RequirementAssessmentWriteSerializer(instance=ra, data={})
         serializer.is_valid()
-        # Score 5 (on CA scale) must be clamped down to 1 (node max)
-        assert serializer.validate_score(5) == 1
-        # documentation_score uses the same scale
-        assert serializer.validate_documentation_score(5) == 1
+        with pytest.raises(drf_serializers.ValidationError):
+            serializer.validate_score(5)
+        with pytest.raises(drf_serializers.ValidationError):
+            serializer.validate_documentation_score(5)
+        # In-range values pass through unchanged.
+        assert serializer.validate_score(1) == 1
+        assert serializer.validate_documentation_score(0) == 0
+
+    def test_validate_score_rejects_on_create(self, ca_05, framework_05):
+        """No instance means no resolvable scale; the score must be rejected."""
+        from rest_framework import serializers as drf_serializers
+
+        from core.serializers import RequirementAssessmentWriteSerializer
+
+        serializer = RequirementAssessmentWriteSerializer(data={})
+        with pytest.raises(drf_serializers.ValidationError):
+            serializer.validate_score(99999)
+
+    def test_validate_score_rejects_when_bounds_none(self, framework_05):
+        """Null CA bounds (degenerate misconfiguration) reject any score.
+
+        CA.save() auto-copies from the framework, so the only way to land
+        here is via a direct DB write — we simulate that with a queryset
+        update to test the defensive path in the validator.
+        """
+        from rest_framework import serializers as drf_serializers
+
+        from core.serializers import RequirementAssessmentWriteSerializer
+
+        root = Folder.get_root_folder()
+        folder = Folder.objects.create(parent_folder=root, name="no-bounds folder")
+        perimeter = Perimeter.objects.create(name="no-bounds perimeter", folder=folder)
+        ca = ComplianceAssessment.objects.create(
+            name="No-bounds CA",
+            framework=framework_05,
+            folder=folder,
+            perimeter=perimeter,
+        )
+        ComplianceAssessment.objects.filter(id=ca.id).update(
+            min_score=None, max_score=None
+        )
+        ca.refresh_from_db()
+        assert ca.min_score is None and ca.max_score is None
+
+        node = RequirementNode.objects.create(
+            urn="urn:test:r-no-bounds",
+            framework=framework_05,
+            assessable=True,
+            folder=root,
+        )
+        ra = RequirementAssessment.objects.create(
+            compliance_assessment=ca,
+            requirement=node,
+            folder=folder,
+        )
+        serializer = RequirementAssessmentWriteSerializer(instance=ra, data={})
+        with pytest.raises(drf_serializers.ValidationError):
+            serializer.validate_score(3)
+
+
+@pytest.fixture
+def admin_client_with_audit(framework_with_alternatives):
+    """Admin API client + an audit with a binary-override RA, for endpoint tests."""
+    from knox.models import AuthToken
+    from rest_framework.test import APIClient
+
+    from core.apps import startup
+    from iam.models import User, UserGroup
+
+    startup(sender=None)
+
+    admin = User.objects.create_superuser(
+        "admin@update-requirement-tests.com", is_published=True
+    )
+    admin_group = UserGroup.objects.get(name="BI-UG-ADM")
+    admin.folder = admin_group.folder
+    admin.save()
+    admin_group.user_set.add(admin)
+    client = APIClient()
+    token = AuthToken.objects.create(user=admin)
+    client.credentials(HTTP_AUTHORIZATION=f"Token {token[1]}")
+
+    root = Folder.get_root_folder()
+    folder = Folder.objects.create(parent_folder=root, name="update-req folder")
+    perimeter = Perimeter.objects.create(name="update-req perimeter", folder=folder)
+    ca = ComplianceAssessment.objects.create(
+        name="Update-Req CA",
+        framework=framework_with_alternatives,
+        folder=folder,
+        perimeter=perimeter,
+    )
+    binary_node = RequirementNode.objects.create(
+        urn="urn:test:update-req-binary",
+        framework=framework_with_alternatives,
+        assessable=True,
+        folder=root,
+        min_score=0,
+        max_score=1,
+        scores_definition_ref="binary",
+    )
+    ra = RequirementAssessment.objects.create(
+        compliance_assessment=ca,
+        requirement=binary_node,
+        folder=folder,
+    )
+    return {"client": client, "ca": ca, "ra": ra, "urn": binary_node.urn}
+
+
+@pytest.mark.django_db
+class TestUpdateRequirementEndpointScoreValidation:
+    """Regression tests for the update_requirement action's score validation."""
+
+    def _url(self, ca):
+        from django.urls import reverse
+
+        return reverse(
+            "compliance-assessments-update-requirement", kwargs={"pk": str(ca.pk)}
+        )
+
+    def test_rejects_score_above_node_override(self, admin_client_with_audit):
+        ctx = admin_client_with_audit
+        response = ctx["client"].post(
+            self._url(ctx["ca"]),
+            {"urn": ctx["urn"], "result": "compliant", "score": 5},
+            format="json",
+        )
+        assert response.status_code == 400
+        assert "between 0 and 1" in response.json().get("error", "")
+
+    def test_accepts_score_within_node_override(self, admin_client_with_audit):
+        ctx = admin_client_with_audit
+        response = ctx["client"].post(
+            self._url(ctx["ca"]),
+            {"urn": ctx["urn"], "result": "compliant", "score": 1},
+            format="json",
+        )
+        assert response.status_code == 200
+        ctx["ra"].refresh_from_db()
+        assert ctx["ra"].score == 1
+        assert ctx["ra"].is_scored is True
+
+    def test_rejects_score_when_bounds_unresolvable(self, admin_client_with_audit):
+        """If the CA has null bounds, scoring isn't configured and scores reject."""
+        ctx = admin_client_with_audit
+        # Drop the node-level override (incl. the ref into alternatives) so
+        # resolution falls through to the CA bounds.
+        ctx["ra"].requirement.min_score = None
+        ctx["ra"].requirement.max_score = None
+        ctx["ra"].requirement.scores_definition_ref = None
+        ctx["ra"].requirement.save()
+        # Bypass CA.save()'s framework-default copy with a direct queryset
+        # update — the only realistic way bounds can be null in production.
+        ComplianceAssessment.objects.filter(id=ctx["ca"].id).update(
+            min_score=None, max_score=None
+        )
+
+        response = ctx["client"].post(
+            self._url(ctx["ca"]),
+            {"urn": ctx["urn"], "result": "compliant", "score": 3},
+            format="json",
+        )
+        assert response.status_code == 400
+        assert "not configured" in response.json().get("error", "")

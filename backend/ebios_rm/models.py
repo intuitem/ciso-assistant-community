@@ -928,7 +928,7 @@ class ElementaryAction(NameDescriptionMixin, FolderMixin):
     def icon_fa_class(self):
         return self.ICON_MAP.get(self.icon)["fa"] if self.icon else None
 
-    fields_to_check = ["name"]
+    fields_to_check = ["ref_id", "name"]
 
     def __str__(self):
         return self.name if hasattr(self, "name") else f"ElementaryAction {self.id}"

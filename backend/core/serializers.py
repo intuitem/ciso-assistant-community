@@ -1480,6 +1480,7 @@ class AppliedControlListSerializer(BaseModelSerializer):
             "eta",
             "start_date",
             "expiry_date",
+            "progress_field",
             "cost",
             "folder",
             "reference_control",
@@ -3139,21 +3140,34 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
 
         return super().validate(attrs)
 
-    def _clamp_to_resolved(self, value):
-        """Clamp a raw score to the resolved scale (Node override or CA)."""
-        if value is None or not self.instance:
+    def _validate_against_resolved(self, value):
+        """Reject scores that fall outside the RA's resolved scale.
+
+        Rejection (rather than silent clamping) keeps client bugs visible and
+        matches the update_requirement endpoint's behavior. Reject on missing
+        instance or unresolved bounds so out-of-range values never reach the DB.
+        """
+        if value is None:
             return value
+        if not self.instance:
+            raise serializers.ValidationError(
+                "Cannot validate score before the requirement assessment is created."
+            )
         resolved = self.instance.get_resolved_scoring()
         lo, hi = resolved["min_score"], resolved["max_score"]
         if lo is None or hi is None:
-            return value
-        return max(lo, min(value, hi))
+            raise serializers.ValidationError(
+                "Scoring is not configured for this audit."
+            )
+        if value < lo or value > hi:
+            raise serializers.ValidationError(f"Score must be between {lo} and {hi}.")
+        return value
 
     def validate_score(self, value):
-        return self._clamp_to_resolved(value)
+        return self._validate_against_resolved(value)
 
     def validate_documentation_score(self, value):
-        return self._clamp_to_resolved(value)
+        return self._validate_against_resolved(value)
 
     def get_compliance_assessment(self):
         if hasattr(self, "instance") and self.instance:
@@ -4824,7 +4838,7 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
 
 class TaskNodeReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
-    task_template = FieldsRelatedField(["folder", "id"])
+    task_template = FieldsRelatedField(["folder", "id", "description"])
     folder = FieldsRelatedField()
     name = serializers.SerializerMethodField()
     assigned_to = FieldsRelatedField(many=True)
