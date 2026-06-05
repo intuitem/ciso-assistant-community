@@ -45,5 +45,6 @@ Qualitative methods stay useful for everything else.
 
 - [Risk assessments](risk-assessments.md)
 - [EBIOS RM](ebios-rm.md)
-- [Guide → Cyber risk quantification](../guides/quantitative-risk.md)
+- [Guide → Cyber risk quantification](../guides/quantitative-risk.md) — click walkthrough for running a study.
+- [Guide → Cyber risk quantification methodology](../guides/quantitative-risk-methodology.md) — the math behind the LEC, VaR, expected shortfall, ROSI, and tolerance overlay.
 - [Vocabulary → Quantitative risk study / scenario / hypothesis](../introduction/vocabulary.md)

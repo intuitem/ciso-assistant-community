@@ -9,6 +9,7 @@ from ..client import (
 )
 from ..resolvers import (
     resolve_asset_id,
+    resolve_asset_class_id,
     resolve_risk_scenario_id,
     resolve_risk_assessment_id,
     resolve_folder_id,
@@ -50,6 +51,7 @@ async def update_asset(
     dro_rto: int = None,
     dro_rpo: int = None,
     dro_mtd: int = None,
+    asset_class: str = None,
 ) -> str:
     """Update asset properties
 
@@ -84,6 +86,7 @@ async def update_asset(
         dro_rto: Recovery Time Objective in seconds
         dro_rpo: Recovery Point Objective in seconds
         dro_mtd: Maximum Tolerable Downtime in seconds
+        asset_class: Asset class ID/name
     """
     try:
         from ..resolvers import resolve_vulnerability_id
@@ -128,6 +131,9 @@ async def update_asset(
             payload["security_exceptions"] = security_exceptions
         if support_assets is not None:
             payload["support_assets"] = support_assets
+
+        if asset_class is not None:
+            payload["asset_class"] = resolve_asset_class_id(asset_class)
 
         if parent_assets is not None:
             resolved_parents = []
@@ -374,6 +380,7 @@ async def update_applied_control(
     expiry_date: str = None,
     link: str = None,
     ref_id: str = None,
+    owner: list = None,
 ) -> str:
     """Update applied control properties
 
@@ -401,6 +408,7 @@ async def update_applied_control(
         expiry_date: Expiry date YYYY-MM-DD
         link: External link (e.g. Jira URL)
         ref_id: Reference ID
+        owner: List of owner UUIDs (replaces existing)
     """
     try:
         # Resolve control name to ID if needed
@@ -437,6 +445,8 @@ async def update_applied_control(
             payload["link"] = link
         if ref_id is not None:
             payload["ref_id"] = ref_id
+        if owner is not None:
+            payload["owner"] = owner
 
         if not payload:
             return "Error: No fields provided to update"

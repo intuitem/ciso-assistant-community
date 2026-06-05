@@ -2,11 +2,13 @@
 description: Cross-cutting analytical views — impact graph, priority/effort matrix, timeline — across the whole estate
 ---
 
-# Insights (PRO)
+# Insights
+
+{% hint style="info" %}
+**Enterprise (PRO) feature** — ships in the Enterprise edition and is not reachable on the community edition. No feature flag; visibility depends only on edition + the per-view permissions listed below.
+{% endhint %}
 
 The **Insights** menu groups three cross-cutting analytical views that don't belong to any single object — they aggregate across all your applied controls and assessments to surface estate-wide patterns.
-
-Insights is an **Enterprise (PRO)** feature — it ships in the Enterprise edition codebase and isn't reachable on the community edition. It is **not** behind a feature flag; visibility depends only on edition + the per-view permissions listed below.
 
 ## Where this sits in the analytical stack
 

@@ -4,6 +4,7 @@
 	import List from '$lib/components/List/List.svelte';
 	import BatchCreatePersonalDataModal from '$lib/components/Modals/BatchCreatePersonalDataModal.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
+	import RiskAcceptanceModal from '$lib/components/Modals/RiskAcceptanceModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import SelectExistingModal from '$lib/components/Modals/SelectExistingModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
@@ -11,7 +12,7 @@
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import { type ModelMapEntry, type ReverseForeignKeyField } from '$lib/utils/crud';
 	import { getModelInfo } from '$lib/utils/crud.js';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import { formatDate, formatDateOrDateTime } from '$lib/utils/datetime';
 	import { isURL } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales.js';
@@ -36,14 +37,7 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const defaultExcludes = [
-		'id',
-		'is_published',
-		'localization_dict',
-		'str',
-		'path',
-		'sync_mappings'
-	];
+	const defaultExcludes = ['id', 'is_published', 'str', 'path', 'sync_mappings'];
 
 	interface Props {
 		data: any;
@@ -232,6 +226,30 @@
 		};
 		modalStore.trigger(modal);
 	}
+	function modalRiskAcceptanceApproval(id: string, name: string, action: string): void {
+		const urlModel = getModelInfo('risk-acceptances').urlModel;
+		const modalComponent: ModalComponent = {
+			ref: RiskAcceptanceModal,
+			props: {
+				_form: {
+					id: id,
+					urlmodel: urlModel,
+					justification: action.includes('revoke') ? (data.data.justification ?? '') : ''
+				},
+				id: id,
+				debug: false,
+				URLModel: urlModel,
+				formAction: action
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.confirmModalTitle(),
+			body: `${m.confirmModalMessage()}: ${name}?`
+		};
+		modalStore.trigger(modal);
+	}
 
 	function modalConfirm(id: string, name: string, action: string): void {
 		const urlModel = getModelInfo('risk-acceptances').urlModel;
@@ -412,18 +430,16 @@
 			<div class="flex space-x-2">
 				<button
 					onclick={(_) => {
-						modalConfirm(data.data.id, data.data.name, '?/accept');
+						modalRiskAcceptanceApproval(data.data.id, data.data.name, '?/accept');
 					}}
-					onkeydown={(_) => modalConfirm(data.data.id, data.data.name, '?/accept')}
 					class="btn preset-filled-success-500"
 				>
 					<i class="fas fa-check mr-2"></i> {m.validate()}</button
 				>
 				<button
 					onclick={(_) => {
-						modalConfirm(data.data.id, data.data.name, '?/reject');
+						modalRiskAcceptanceApproval(data.data.id, data.data.name, '?/reject');
 					}}
-					onkeydown={(_) => modalConfirm(data.data.id, data.data.name, '?/reject')}
 					class="btn preset-filled-error-500"
 				>
 					<i class="fas fa-xmark mr-2"></i> {m.reject()}</button
@@ -441,9 +457,8 @@
 				<div class="ml-auto whitespace-nowrap">
 					<button
 						onclick={(_) => {
-							modalConfirm(data.data.id, data.data.name, '?/revoke');
+							modalRiskAcceptanceApproval(data.data.id, data.data.name, '?/revoke');
 						}}
-						onkeydown={(_) => modalConfirm(data.data.id, data.data.name, '?/revoke')}
 						class="btn preset-filled-error-500"
 					>
 						<i class="fas fa-xmark mr-2"></i> {m.revoke()}</button
@@ -477,7 +492,7 @@
 					<dd>{syncMapping.remote_id}</dd>
 
 					<dt class="font-medium">{m.lastSynced()}</dt>
-					<dd>{new Date(syncMapping.last_synced_at).toLocaleString(getLocale())}</dd>
+					<dd>{formatDate(new Date(syncMapping.last_synced_at), true, getLocale())}</dd>
 
 					<dt class="font-medium">{m.status()}</dt>
 					<dd>{safeTranslate(syncMapping.sync_status)}</dd>
@@ -637,6 +652,8 @@
 																		rel="noopener noreferrer"
 																		class="anchor">{val.str}</a
 																	>
+																{:else if val.str && key === 'permissions'}
+																	{val.str}
 																{:else if val.str}
 																	{safeTranslate(val.str)}
 																{:else}

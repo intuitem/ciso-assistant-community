@@ -166,7 +166,8 @@ export const ThreatSchema = z.object({
 	provider: z.string().optional().nullable(),
 	ref_id: z.string().optional(),
 	annotation: z.string().optional().nullable(),
-	filtering_labels: z.string().optional().array().optional()
+	filtering_labels: z.string().optional().array().optional(),
+	findings: z.string().uuid().optional().array().optional()
 });
 
 export const SecurityAdvisorySchema = z.object({
@@ -328,7 +329,8 @@ export const ReferenceControlSchema = z.object({
 	folder: z.string(),
 	ref_id: z.string().optional(),
 	annotation: z.string().optional().nullable(),
-	filtering_labels: z.string().optional().array().optional()
+	filtering_labels: z.string().optional().array().optional(),
+	findings: z.string().uuid().optional().array().optional()
 });
 
 export const AssetSchema = z.object({
@@ -419,7 +421,7 @@ export const FilteringLabelSchema = z.object({
 });
 
 export const RequirementAssessmentSchema = z.object({
-	answers: jsonSchema,
+	answers: jsonSchema.optional().nullable(),
 	status: z.string(),
 	result: z.string(),
 	extended_result: z.string().optional().nullable(),
@@ -599,6 +601,10 @@ export const GeneralSettingsSchema = z.object({
 	risk_matrix_swap_axes: z.boolean().default(false).optional(),
 	risk_matrix_flip_vertical: z.boolean().default(false).optional(),
 	risk_matrix_labels: z.enum(['ISO', 'EBIOS']).default('ISO').optional(),
+	audit_tree_aggregation_strategy: z
+		.enum(['none', 'parent_wins', 'child_wins', 'best_case', 'worst_case'])
+		.default('none')
+		.optional(),
 	currency: z.enum(CURRENCY_SYMBOLS).default('€'),
 	daily_rate: z.number().default(500).optional(),
 	mapping_max_depth: z.coerce.number().int().min(2).max(5).default(3).optional(),
@@ -615,7 +621,9 @@ export const GeneralSettingsSchema = z.object({
 	chat_system_prompt: z.string().default('').optional(),
 	openai_api_base: z.string().default('http://localhost:1234/v1').optional(),
 	openai_model: z.string().default('').optional(),
-	openai_api_key: z.string().default('').optional()
+	openai_api_key: z.string().default('').optional(),
+	chat_temperature_enabled: z.boolean().default(true).optional(),
+	chat_temperature: z.coerce.number().min(0).max(2).default(0).optional()
 });
 
 export const SecIntelFeedsSchema = z.object({
@@ -645,6 +653,7 @@ export const FeatureFlagsSchema = z.object({
 	scoring_assistant: z.boolean().optional(),
 	vulnerabilities: z.boolean().optional(),
 	compliance: z.boolean().optional(),
+	audit_tree_inheritance: z.boolean().optional(),
 	campaigns: z.boolean().optional(),
 	tprm: z.boolean().optional(),
 	ebiosrm: z.boolean().optional(),
@@ -878,7 +887,8 @@ export const vulnerabilitySchema = z.object({
 	security_exceptions: z.string().uuid().optional().array().optional(),
 	security_advisories: z.string().uuid().optional().array().optional(),
 	cwes: z.string().uuid().optional().array().optional(),
-	filtering_labels: z.string().optional().array().optional()
+	filtering_labels: z.string().optional().array().optional(),
+	findings: z.string().uuid().optional().array().optional()
 });
 
 export const BusinessImpactAnalysisSchema = z.object({
