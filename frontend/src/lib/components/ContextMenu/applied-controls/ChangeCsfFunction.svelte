@@ -41,7 +41,6 @@
 			},
 			body: JSON.stringify({ csf_function: newCsfFunction })
 		};
-    console.log(requestInit)
 		try {
 			const response = await fetch(endpoint, requestInit);
 			if (!response.ok) {

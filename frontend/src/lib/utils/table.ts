@@ -3052,6 +3052,7 @@ export interface BatchActionConfig {
 	icon: string;
 	field?: string;
 	optionsEndpoint?: string;
+	enableDoubleDash?: boolean;
 	multiSelect?: boolean;
 	children?: BatchActionConfig[];
 	minSelection?: number;
@@ -3077,14 +3078,16 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 					label: 'batchChangePriority',
 					icon: 'fa-solid fa-arrow-up-wide-short',
 					field: 'priority',
-					optionsEndpoint: 'applied-controls/priority'
+					optionsEndpoint: 'applied-controls/priority',
+					enableDoubleDash: true
 				},
 				{
 					type: 'change_field',
 					label: 'changeCsfFunction',
 					icon: 'fa-solid fa-shield-halved',
 					field: 'csf_function',
-					optionsEndpoint: 'applied-controls/csf_function'
+					optionsEndpoint: 'applied-controls/csf_function',
+					enableDoubleDash: true
 				}
 			]
 		},
