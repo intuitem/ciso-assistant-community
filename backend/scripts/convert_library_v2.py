@@ -750,7 +750,7 @@ def _handle_threats(obj, library, compat_mode, verbose):
             urn_suffix = ref_id.lower()
 
         entry = {"urn": f"{base_urn}:{urn_suffix}", "ref_id": ref_id}
-        set_optional_fields(entry, data, ["name", "description"])
+        set_optional_fields(entry, data, ["name", "description", "annotation"])
         attach_translations_from_row(entry, header, row)
         threats.append(entry)
 

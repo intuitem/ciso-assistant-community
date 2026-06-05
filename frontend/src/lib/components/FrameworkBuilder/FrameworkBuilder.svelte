@@ -313,7 +313,7 @@
 		<BuilderToC />
 
 		<div class="flex-1 min-w-0">
-			<div class="{$activeLanguageStore ? 'max-w-5xl' : 'max-w-3xl'} mx-auto px-6 py-8 space-y-8">
+			<div class="max-w-5xl mx-auto px-6 py-8 space-y-8">
 				<!-- Framework metadata -->
 				<div class="space-y-2" data-framework-metadata>
 					{#if $activeLanguageStore}

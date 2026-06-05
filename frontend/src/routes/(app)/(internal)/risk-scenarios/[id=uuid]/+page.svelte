@@ -6,12 +6,14 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
+	import { formatDate } from '$lib/utils/datetime';
 
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { isDark } from '$lib/utils/helpers';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
 
 	import { goto } from '$app/navigation';
 
@@ -258,7 +260,7 @@
 				<div>
 					<p class="text-sm font-semibold text-gray-400">{m.lastUpdate()}</p>
 					<p class="text-sm font-semibold">
-						{new Date(data.scenario.updated_at).toLocaleString(getLocale())}
+						{formatDate(new Date(data.scenario.updated_at), true, getLocale())}
 					</p>
 				</div>
 				<div>
@@ -547,4 +549,7 @@
 			</div>
 		{/if}
 	</div>
+	{#if page.data?.featureflags?.comments}
+		<CommentsPanel parentType="risk_scenario" parentId={data.scenario.id} />
+	{/if}
 </div>
