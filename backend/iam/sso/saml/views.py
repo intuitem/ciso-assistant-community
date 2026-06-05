@@ -150,6 +150,7 @@ class FinishACSView(SAMLViewMixin, View):
             )
             login.state["process"] = AuthProcess.LOGIN
             login.state["next"] = next_url
+        login.state["next"] = get_sso_authenticate_url(login.state["next"])
         try:
             attribute_mapping = provider.app.settings.get("attribute_mapping", {})
             # our parameter is either:
@@ -182,7 +183,6 @@ class FinishACSView(SAMLViewMixin, View):
             user.last_name = idp_last_names[0] if idp_last_names else user.last_name
             user.save()
             token = generate_token(user)
-            login.state["next"] = get_sso_authenticate_url(login.state.get("next"))
             pre_social_login(request, login)
             if request.user.is_authenticated:
                 get_account_adapter(request).logout(request)
