@@ -413,6 +413,64 @@ class TestTreeAggregationNoneScoreOnOffsetScale:
 
 
 @pytest.mark.django_db
+class TestDocumentationScoreNoneLegacySemantic:
+    """documentation_score=None is a legitimate 'no doc' state and must keep
+    its legacy semantic of contributing 0 to the maturity rollup. The strict
+    'exclude None' guard only applies to score-field aggregation."""
+
+    def test_doc_none_counts_as_zero(self):
+        from core.models import RequirementAssessment as RA
+
+        root = Folder.get_root_folder()
+        folder = Folder.objects.create(parent_folder=root, name="doc-none folder")
+        perimeter = Perimeter.objects.create(name="doc-none perimeter", folder=folder)
+        framework = Framework.objects.create(
+            name="0..5 framework (doc)",
+            urn="urn:test:fw-doc-none",
+            min_score=0,
+            max_score=5,
+            folder=root,
+        )
+        ca = ComplianceAssessment.objects.create(
+            name="Doc-None CA",
+            framework=framework,
+            folder=folder,
+            perimeter=perimeter,
+            score_calculation_method=ComplianceAssessment.CalculationMethod.AVG,
+        )
+        # Two scored RAs: one with doc filled, one without.
+        for ref, score, doc in (("r1", 4, 4), ("r2", 4, None)):
+            node = RequirementNode.objects.create(
+                urn=f"urn:test:doc-none-{ref}",
+                framework=framework,
+                assessable=True,
+                folder=root,
+            )
+            RA.objects.create(
+                compliance_assessment=ca,
+                requirement=node,
+                folder=folder,
+                is_scored=True,
+                score=score,
+                documentation_score=doc,
+            )
+
+        ras = list(RA.objects.filter(compliance_assessment=ca))
+        # Implementation: both leaves contribute 4 -> avg 4.
+        assert (
+            ca._compute_score_for_field(ras, None, "score", ca.anchor_na_to_target)
+            == 4.0
+        )
+        # Documentation: r1=4, r2=None counted as 0 -> avg 2 (legacy semantic).
+        assert (
+            ca._compute_score_for_field(
+                ras, None, "documentation_score", ca.anchor_na_to_target
+            )
+            == 2.0
+        )
+
+
+@pytest.mark.django_db
 class TestRadarDataNormalizesMixedScales:
     """Regression for the compare endpoint's per-top-level radar slice:
     mixed-scale subtrees must normalise before averaging, otherwise a binary

@@ -7248,7 +7248,9 @@ class ComplianceAssessment(Assessment):
                 else:
                     raw = getattr(ras, score_field)
                     if raw is None:
-                        continue
+                        if score_field == "score":
+                            continue
+                        raw = 0
                     score = raw
                 total += score * weight
                 total_weight += weight
@@ -7281,7 +7283,9 @@ class ComplianceAssessment(Assessment):
             else:
                 raw = getattr(ras, score_field)
                 if raw is None:
-                    return None
+                    if score_field == "score":
+                        return None
+                    raw = 0
 
             ratio = (raw - ra_min) / ra_range
             return ratio, (ras.requirement.weight or 1)
