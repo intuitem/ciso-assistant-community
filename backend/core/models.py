@@ -9480,7 +9480,7 @@ class TaskNode(AbstractBaseModel, FolderMixin):
 
     @property
     def description(self):
-        return self.task_template.description
+        return self.task_template.description if self.task_template else None
 
     @property
     def assigned_to(self):
