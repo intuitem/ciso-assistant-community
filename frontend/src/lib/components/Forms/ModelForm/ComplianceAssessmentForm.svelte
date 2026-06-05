@@ -12,6 +12,7 @@
 	import { page } from '$app/state';
 	import FrameworkResultSnippet from '$lib/components/Snippets/AutocompleteSelect/FrameworkResultSnippet.svelte';
 	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
+	import { getLocale } from '$paraglide/runtime';
 
 	interface Props {
 		form: SuperForm<any>;
@@ -87,6 +88,13 @@
 
 	let frameworkDefaults = $state<Record<string, any> | null>(null);
 
+	function getImplementationGroupLabel(group: Record<string, any>) {
+		const locale = getLocale();
+		const shortLocale = locale.split('-')[0];
+
+		return group.translations?.[shortLocale]?.name ?? group.name;
+	}
+
 	async function handleFrameworkChange(id: string) {
 		if (id) {
 			await fetch(`/frameworks/${id}`)
@@ -95,7 +103,7 @@
 					is_dynamic = r['is_dynamic'] || false;
 					const implementation_groups = r['implementation_groups_definition'] || [];
 					implementationGroupsChoices = implementation_groups.map((group) => ({
-						label: group.name,
+						label: getImplementationGroupLabel(group),
 						value: group.ref_id
 					}));
 					suggestions = r['reference_controls'].length > 0;
