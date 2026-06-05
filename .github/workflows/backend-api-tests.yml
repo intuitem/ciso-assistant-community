@@ -49,10 +49,10 @@ jobs:
       matrix:
         python-version: ["3.14"]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Set up python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: "pip"
@@ -64,7 +64,7 @@ jobs:
 
       - name: Cache Virtualenv
         id: cache-venv
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ env.BACKEND_DIR }}/.venv
           key: venv-${{ runner.os }}-py${{ env.PYTHON_VERSION }}-${{ hashFiles('backend/poetry.lock') }}
@@ -78,7 +78,7 @@ jobs:
         run: poetry run python manage.py migrate
 
       - name: Upload Database
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: prebuilt-db
           path: ${{ env.BACKEND_DIR }}/db/ciso-assistant.sqlite3
@@ -86,7 +86,7 @@ jobs:
 
       - name: Restore PG dump cache
         id: pg-dump-cache
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ env.BACKEND_DIR }}/db/prebuilt-pg.sql
           key: pg-dump-${{ runner.os }}-${{ hashFiles('backend/**/migrations/*.py', 'backend/poetry.lock') }}
@@ -104,7 +104,7 @@ jobs:
           pg_dump -h localhost -U postgres -d postgres > db/prebuilt-pg.sql
 
       - name: Upload PG dump
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: prebuilt-pg-dump
           path: ${{ env.BACKEND_DIR }}/db/prebuilt-pg.sql
@@ -116,7 +116,7 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Find Test Files
         id: set-matrix
         working-directory: ${{ env.BACKEND_DIR }}
@@ -154,10 +154,10 @@ jobs:
       CISO_ASSISTANT_SUPERUSER_EMAIL: ""
       CISO_ASSISTANT_URL: http://127.0.0.1:5173
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Set up python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: "pip"
@@ -169,7 +169,7 @@ jobs:
 
       # Restore the exact venv created in 'setup' job to skip installation
       - name: Restore Virtualenv Cache
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: cache-venv
         with:
           path: ${{ env.BACKEND_DIR }}/.venv
@@ -181,7 +181,7 @@ jobs:
 
       - name: Download Database
         if: matrix.backend == 'sqlite'
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: prebuilt-db
           path: ${{ env.BACKEND_DIR }}/db/
@@ -195,7 +195,7 @@ jobs:
 
       - name: Download PG dump
         if: matrix.backend == 'postgres'
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: prebuilt-pg-dump
           path: ${{ env.BACKEND_DIR }}/db/
@@ -234,7 +234,7 @@ jobs:
           echo "BRANCH_SANITIZED=$SAFE_BRANCH" >> "$GITHUB_ENV"
           echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> "$GITHUB_ENV"
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
           name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-report-${{ matrix.backend }}-${{ strategy.job-index }}
