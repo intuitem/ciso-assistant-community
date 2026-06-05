@@ -5,6 +5,7 @@ import {
 	urlParamModelSelectFields,
 	urlParamModelVerboseName
 } from '$lib/utils/crud';
+import { formatSelectFieldData } from '$lib/utils/load';
 import { modelSchema } from '$lib/utils/schemas';
 import type { ModelInfo } from '$lib/utils/types';
 import { m } from '$paraglide/messages';
@@ -32,12 +33,8 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		const url = `${BASE_API_URL}/${params.model}/${selectField.field}/`;
 		const response = await fetch(url);
 		if (response.ok) {
-			selectOptions[selectField.field] = await response.json().then((data) =>
-				Object.entries(data).map(([key, value]) => ({
-					label: value,
-					value: selectField.valueType === 'number' ? parseInt(key) : key
-				}))
-			);
+			const responseData = await response.json();
+			selectOptions[selectField.field] = formatSelectFieldData(responseData, selectField);
 		} else {
 			console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
 		}
