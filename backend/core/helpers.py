@@ -473,17 +473,18 @@ def annotate_tree_with_aggregated_scores(
                 node["_leaf_weighted_max"] = ra_max * weight
                 node["_leaf_weight"] = weight
                 if show_doc:
+                    # documentation_score=None keeps its legacy "no doc -> 0"
+                    # semantic so the tree matches the global score and radar,
+                    # which also map doc None -> 0 in _compute_score_for_field.
+                    # (score=None is excluded above; doc is not.)
                     doc_val = node.get("documentation_score")
                     if doc_val is None:
-                        node["_aggregated_doc_ratio"] = None
-                        node["_leaf_weighted_doc_ratio"] = 0
-                        node["_leaf_weighted_doc"] = 0
-                    else:
-                        doc_ratio = (doc_val - ra_min) / ra_range
-                        node["aggregated_documentation_score"] = doc_val
-                        node["_aggregated_doc_ratio"] = doc_ratio
-                        node["_leaf_weighted_doc_ratio"] = doc_ratio * weight
-                        node["_leaf_weighted_doc"] = doc_val * weight
+                        doc_val = 0
+                    doc_ratio = (doc_val - ra_min) / ra_range
+                    node["aggregated_documentation_score"] = doc_val
+                    node["_aggregated_doc_ratio"] = doc_ratio
+                    node["_leaf_weighted_doc_ratio"] = doc_ratio * weight
+                    node["_leaf_weighted_doc"] = doc_val * weight
             else:
                 node["_aggregated_ratio"] = None
                 node["_aggregated_doc_ratio"] = None

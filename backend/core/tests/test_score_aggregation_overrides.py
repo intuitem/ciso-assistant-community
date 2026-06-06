@@ -469,6 +469,92 @@ class TestDocumentationScoreNoneLegacySemantic:
             == 2.0
         )
 
+    def test_doc_none_tree_matches_global_on_offset_scale(self):
+        """On an offset scale (1..4) the tree must also treat documentation_score
+        =None as 0, so its documentation rollup matches the global score. The
+        tree previously neutralised None as ratio 0, which diverged from the
+        global on non-zero-min scales and left the leaf without an explicit
+        aggregated_documentation_score (blank frontend ring instead of 0)."""
+        from core.helpers import (
+            annotate_tree_with_aggregated_scores,
+            get_sorted_requirement_nodes,
+        )
+        from core.models import RequirementAssessment as RA
+
+        root = Folder.get_root_folder()
+        folder = Folder.objects.create(parent_folder=root, name="doc-none-tree folder")
+        perimeter = Perimeter.objects.create(
+            name="doc-none-tree perimeter", folder=folder
+        )
+        framework = Framework.objects.create(
+            name="Offset framework (1..4, doc)",
+            urn="urn:test:fw-doc-none-tree",
+            min_score=1,
+            max_score=4,
+            folder=root,
+        )
+        section = RequirementNode.objects.create(
+            urn="urn:test:doc-none-tree-sec",
+            framework=framework,
+            assessable=False,
+            folder=root,
+        )
+        ca = ComplianceAssessment.objects.create(
+            name="Doc-None tree CA",
+            framework=framework,
+            folder=folder,
+            perimeter=perimeter,
+            score_calculation_method=ComplianceAssessment.CalculationMethod.AVG,
+            show_documentation_score=True,
+        )
+        leaves = {}
+        # Both leaves are scored (score=3); only the doc differs: one filled,
+        # one None. score stays valid so the leaves are not excluded.
+        for ref, doc in (("d1", 3), ("d2", None)):
+            node = RequirementNode.objects.create(
+                urn=f"urn:test:doc-none-tree-{ref}",
+                framework=framework,
+                parent_urn=section.urn,
+                assessable=True,
+                weight=1,
+                folder=root,
+            )
+            leaves[ref] = node
+            RA.objects.create(
+                compliance_assessment=ca,
+                requirement=node,
+                folder=folder,
+                is_scored=True,
+                score=3,
+                documentation_score=doc,
+            )
+
+        nodes = list(RequirementNode.objects.filter(framework=framework))
+        ras = list(RA.objects.filter(compliance_assessment=ca))
+        tree = get_sorted_requirement_nodes(
+            nodes, ras, framework.max_score, framework.min_score
+        )
+        annotate_tree_with_aggregated_scores(tree, ca)
+
+        def _find(t, ref):
+            for n in t.values():
+                if n.get("urn") == ref:
+                    return n
+                f = _find(n.get("children") or {}, ref)
+                if f is not None:
+                    return f
+            return None
+
+        # The None-doc leaf carries an explicit 0, not a missing key.
+        d2_node = _find(tree, leaves["d2"].urn)
+        assert d2_node["aggregated_documentation_score"] == 0
+
+        # doc avg ratio = ((3-1)/3 + (0-1)/3) / 2 = 1/6 -> 1 + 1/6*3 = 1.5,
+        # and the tree must agree with the global score's doc layer.
+        section_node = _find(tree, section.urn)
+        global_doc = ca.get_global_score()["documentation_score"]
+        assert section_node["aggregated_documentation_score"] == global_doc == 1.5
+
 
 @pytest.mark.django_db
 class TestRadarDataNormalizesMixedScales:
