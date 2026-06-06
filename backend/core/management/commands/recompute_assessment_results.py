@@ -25,6 +25,7 @@ recompute them).
 """
 
 import logging
+from contextlib import nullcontext
 
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
@@ -38,14 +39,6 @@ logger = logging.getLogger(__name__)
 
 BATCH_SIZE = 500
 RESULT_UPDATE_FIELDS = ["score", "result", "is_scored", "updated_at"]
-
-
-class _NullContext:
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc, tb):
-        return False
 
 
 class Command(BaseCommand):
@@ -217,7 +210,7 @@ class Command(BaseCommand):
         touched_ca_ids: set = set()
         batch: list[RequirementAssessment] = []
 
-        outer = transaction.atomic() if run_atomic else _NullContext()
+        outer = transaction.atomic() if run_atomic else nullcontext()
 
         with outer:
             for ra in queryset.iterator(chunk_size=batch_size):

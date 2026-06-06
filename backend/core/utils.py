@@ -1293,6 +1293,7 @@ def build_questions_dict(node):
         q_data = {
             "type": question.type,
             "text": question.text or "",
+            "weight": question.weight,
         }
         if question.annotation:
             q_data["annotation"] = question.annotation

@@ -2679,6 +2679,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
             q_data = {
                 "type": question.type,
                 "text": q_tr.get("text", question.text or ""),
+                "weight": question.weight,
             }
             if question.annotation:
                 q_data["annotation"] = question.annotation
@@ -8652,10 +8653,6 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         """
         questions_qs = self.requirement.questions.prefetch_related("choices").all()
 
-        # No questions to evaluate; nothing to recompute.
-        if not questions_qs:
-            return
-
         answers_qs = (
             self.answers.select_related("question")
             .prefetch_related("selected_choices")
@@ -8672,13 +8669,17 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
         total_score = 0
         total_weight = 0
-        resolved = self.get_resolved_scoring()
-        min_score = resolved["min_score"] if resolved["min_score"] is not None else 0
-        max_score = resolved["max_score"] if resolved["max_score"] is not None else 100
+        scoring = self.get_resolved_scoring()
+        min_score = scoring["min_score"] if scoring["min_score"] is not None else 0
+        max_score = scoring["max_score"] if scoring["max_score"] is not None else 100
         results = []
         visible_questions = 0
         answered_visible_questions = 0
         is_score_computed = False
+        # Tracks whether the requirement is configured to drive `result` from
+        # questionnaire answers (i.e. at least one choice carries a resolvable
+        # `compute_result`). Set inline during the question pass below.
+        is_result_driven = False
 
         # Determine aggregation method
         scores_def = self.compliance_assessment.scores_definition
@@ -8697,6 +8698,16 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 aggregation = "mean"
 
         for question in questions_qs:
+            # Detect result-driven capability across ALL choices (selection /
+            # visibility agnostic). Short-circuits across questions once set.
+            if not is_result_driven:
+                for choice in question.choices.all():
+                    if choice.compute_result is None:
+                        continue
+                    if resolve_compute_result(choice.compute_result) is not None:
+                        is_result_driven = True
+                        break
+
             if not _is_question_visible(question, answers_by_urn, questions_by_urn):
                 continue
 
@@ -8715,9 +8726,9 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                         total_weight += question.weight
 
                     if choice.compute_result is not None:
-                        resolved = resolve_compute_result(choice.compute_result)
-                        if resolved is not None:
-                            results.append(resolved)
+                        resolved_cr = resolve_compute_result(choice.compute_result)
+                        if resolved_cr is not None:
+                            results.append(resolved_cr)
 
         if is_score_computed:
             if aggregation == "mean" and total_weight > 0:
@@ -8729,18 +8740,11 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             new_score = None
         new_is_scored = is_score_computed
 
-        # A requirement is "result-driven" only if at least one of its choices
-        # carries a resolvable compute_result. For score-only questionnaires (or
-        # questionnaires with compute_result values that don't resolve), we must
-        # NOT touch self.result, otherwise a manually-set result would be
-        # silently reset to NOT_ASSESSED on every recompute.
-        is_result_driven = any(
-            resolve_compute_result(choice.compute_result) is not None
-            for question in questions_qs
-            for choice in question.choices.all()
-            if choice.compute_result is not None
-        )
-
+        # `is_result_driven` was set inline during the question pass: True iff
+        # at least one choice carries a resolvable `compute_result`. For
+        # score-only questionnaires (or only-unresolvable values), we must NOT
+        # touch self.result, otherwise a manually-set result would be silently
+        # reset to NOT_ASSESSED on every recompute.
         new_result = self.result
         if is_result_driven:
             if visible_questions == 0:

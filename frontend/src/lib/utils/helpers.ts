@@ -250,14 +250,18 @@ export function isQuestionVisible(
 	const targetAnswer = answers[targetUrn];
 	if (targetAnswer === undefined || targetAnswer === null) return false;
 
-	if (dependency.condition === 'any') {
+	// Mirror backend default: missing `condition` (e.g. hand-authored YAML)
+	// is treated as "any".
+	const condition = dependency.condition ?? 'any';
+
+	if (condition === 'any') {
 		if (Array.isArray(targetAnswer)) {
 			return targetAnswer.some((a) => dependency.answers.includes(a));
 		}
 		return dependency.answers.includes(targetAnswer);
 	}
 
-	if (dependency.condition === 'all') {
+	if (condition === 'all') {
 		if (Array.isArray(targetAnswer)) {
 			return dependency.answers.every((a: unknown) => targetAnswer.includes(a));
 		}

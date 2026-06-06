@@ -187,10 +187,12 @@
 		observationTimer = setTimeout(() => saveObservation(value), 500);
 	}
 
-	function saveAnswer(urn: string, newAnswer: any) {
+	async function saveAnswer(urn: string, newAnswer: any) {
 		if (!currentRequirementAssessment) return;
 		if (!currentRequirementAssessment.answers) currentRequirementAssessment.answers = {};
 		currentRequirementAssessment.answers[urn] = newAnswer;
+		// Optimistic preview from the shared compute helper (kept in sync with
+		// the backend aggregation).
 		const computed = computeRequirementScoreAndResult(
 			currentRequirementAssessment,
 			currentRequirementAssessment.answers
@@ -199,14 +201,35 @@
 			currentRequirementAssessment.result = computed.result;
 			result = computed.result;
 		}
+
 		const form = document.getElementById('flashModeForm');
-		fetch(form!.action, {
-			method: 'POST',
-			body: JSON.stringify({
-				id: currentRequirementAssessment.id,
-				answers: { [urn]: newAnswer }
-			})
-		});
+		const targetRa = currentRequirementAssessment;
+		try {
+			const res = await fetch(form!.action, {
+				method: 'POST',
+				body: JSON.stringify({
+					id: targetRa.id,
+					answers: { [urn]: newAnswer }
+				})
+			});
+			// SvelteKit wraps action responses; the actual API body lives at
+			// `data.body`. If the server recomputed a different result/score
+			// (e.g. due to logic the optimistic preview cannot mirror),
+			// reconcile so the badge matches persisted state.
+			const payload = await res.json().catch(() => null);
+			const apiBody = payload?.data?.body ?? payload?.body ?? null;
+			if (apiBody && targetRa.id === currentRequirementAssessment?.id) {
+				if (apiBody.result !== undefined && apiBody.result !== null) {
+					currentRequirementAssessment.result = apiBody.result;
+					result = apiBody.result;
+				}
+				if (apiBody.score !== undefined) {
+					currentRequirementAssessment.score = apiBody.score;
+				}
+			}
+		} catch (err) {
+			console.error('flash-mode saveAnswer failed', err);
+		}
 	}
 
 	let currentQuestions = $derived(

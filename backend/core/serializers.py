@@ -2949,6 +2949,8 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
             "is_locked",
             "min_score",
             "max_score",
+            "scores_definition",
+            "score_calculation_method",
             "progress_status_enabled",
             "extended_result_enabled",
             "field_visibility",

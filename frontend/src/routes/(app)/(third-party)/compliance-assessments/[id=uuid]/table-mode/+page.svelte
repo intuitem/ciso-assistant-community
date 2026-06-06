@@ -33,6 +33,7 @@
 		alignmentValueFromChoiceUrn,
 		choiceUrnFromAlignmentValue,
 		alignmentColorMap,
+		resultBadgeStyle,
 		AUTO_ALIGNMENT_QUESTION_URN
 	} from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -573,12 +574,10 @@
 																<p class="whitespace-pre-line py-1">
 																	<span class="italic">{m.suggestionColon()}</span>
 																	<span
-																		class="badge {getClassesText(
+																		class="badge h-fit"
+																		style={resultBadgeStyle(
 																			requirementAssessment.mapping_inference.result
-																		)} h-fit"
-																		style="background-color: {complianceResultColorMap[
-																			requirementAssessment.mapping_inference.result
-																		]};"
+																		)}
 																	>
 																		{safeTranslate(requirementAssessment.mapping_inference.result)}
 																	</span>
@@ -652,12 +651,8 @@
 													</p>
 													{#if hasComputedResult(requirementAssessment.requirement.questions)}
 														<span
-															class="badge text-sm font-semibold {getClassesText(
-																requirementAssessment.result
-															)}"
-															style="background-color: {complianceResultColorMap[
-																requirementAssessment.result
-															] || '#ddd'}"
+															class="badge text-sm font-semibold"
+															style={resultBadgeStyle(requirementAssessment.result)}
 														>
 															{safeTranslate(requirementAssessment.result)}
 														</span>

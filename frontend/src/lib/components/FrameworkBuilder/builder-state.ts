@@ -8,6 +8,7 @@ import {
 	type DraftJSON
 } from './builder-api';
 import { m } from '$paraglide/messages';
+import { resolveComputeResult } from '$lib/utils/helpers';
 
 // --- Types ---
 
@@ -28,18 +29,16 @@ export function isSliderConfig(
 	return !!config && (config as { widget?: unknown }).widget === 'slider';
 }
 
-/** Normalize legacy compute_result values ("true"/"false") to semantic strings. */
-const LEGACY_COMPUTE_RESULT_MAP: Record<string, string> = {
-	true: 'compliant',
-	false: 'non_compliant'
-};
-
+/**
+ * Normalize a stored `compute_result` value into one of the four semantic
+ * options the builder UI exposes. Delegates to `resolveComputeResult` so the
+ * builder, the live edit-page compute, and the backend `resolve_compute_result`
+ * all share the same closed set of accepted values (true/false/1/0 legacy
+ * literals plus the four semantic strings). Anything else is dropped to null
+ * so a typo never silently round-trips back to the database.
+ */
 function normalizeComputeResult(value: unknown): string | null {
-	if (value === null || value === undefined) return null;
-	if (typeof value === 'boolean') return value ? 'compliant' : 'non_compliant';
-	if (typeof value !== 'string') return null;
-	const v = value.trim().toLowerCase();
-	return LEGACY_COMPUTE_RESULT_MAP[v] ?? (v || null);
+	return resolveComputeResult(value);
 }
 
 export interface QuestionChoice {
