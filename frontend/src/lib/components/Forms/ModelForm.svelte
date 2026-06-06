@@ -338,17 +338,42 @@
 			/>
 		{/if}
 		{#if shape.name && !customNameDescription}
-			<TextField
-				{form}
-				field="name"
-				label={m.name()}
-				cacheLock={cacheLocks['name']}
-				bind:cachedValue={formDataCache['name']}
-				data-focusindex="0"
-				oninput={() => {
-					updated_fields.add('name');
-				}}
-			/>
+			{#if shape.ref_id}
+				<div class="grid grid-cols-[auto_1fr] gap-4">
+					<div class="w-64">
+						<TextField
+							{form}
+							field="ref_id"
+							label={m.refId()}
+							cacheLock={cacheLocks['ref_id']}
+							bind:cachedValue={formDataCache['ref_id']}
+						/>
+					</div>
+					<TextField
+						{form}
+						field="name"
+						label={m.name()}
+						cacheLock={cacheLocks['name']}
+						bind:cachedValue={formDataCache['name']}
+						data-focusindex="0"
+						oninput={() => {
+							updated_fields.add('name');
+						}}
+					/>
+				</div>
+			{:else}
+				<TextField
+					{form}
+					field="name"
+					label={m.name()}
+					cacheLock={cacheLocks['name']}
+					bind:cachedValue={formDataCache['name']}
+					data-focusindex="0"
+					oninput={() => {
+						updated_fields.add('name');
+					}}
+				/>
+			{/if}
 		{/if}
 		{#if shape.description && !customNameDescription}
 			<MarkdownField
