@@ -32,8 +32,13 @@ def slugify(text: str) -> str:
 
 
 def sheet_base_name(ref_id: str) -> str:
-    """Derive a safe Excel sheet base name from ref_id (max 27 chars so _content fits)."""
-    s = re.sub(r"[^a-zA-Z0-9_-]", "_", ref_id)[:27]
+    """Derive a safe Excel sheet base name from ref_id.
+
+    Excel sheet names are capped at 31 chars. The longest suffix we append is
+    '_content' (8 chars), so the base must be at most 23 chars.
+    """
+    max_base = 31 - len("_content")  # 23
+    s = re.sub(r"[^a-zA-Z0-9_-]", "_", ref_id)[:max_base]
     return s
 
 
