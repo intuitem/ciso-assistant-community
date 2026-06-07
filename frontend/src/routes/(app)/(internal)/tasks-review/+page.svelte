@@ -432,23 +432,36 @@
 											class:max-w-0={compactMode}
 										>
 											{#if compactMode}
-												{#if task.ref_id}
-													<Anchor
-														href="/task-templates/{task.id}"
-														class="inline-block text-[11px] font-mono font-medium bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded hover:bg-violet-100 hover:text-violet-700 transition-colors"
-														title={task.name}
-													>
-														{task.ref_id}
-													</Anchor>
-												{:else}
-													<Anchor
-														href="/task-templates/{task.id}"
-														class="text-xs text-gray-700 hover:text-violet-600 truncate block w-full transition-colors"
-														title={task.name}
-													>
-														{task.name}
-													</Anchor>
-												{/if}
+												<span class="inline-flex items-center gap-1">
+													{#if task.ref_id}
+														<Anchor
+															href="/task-templates/{task.id}"
+															class="inline-block text-[11px] font-mono font-medium bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded hover:bg-violet-100 hover:text-violet-700 transition-colors"
+															title={task.name}
+														>
+															{task.ref_id}
+														</Anchor>
+													{:else}
+														<Anchor
+															href="/task-templates/{task.id}"
+															class="text-xs text-gray-700 hover:text-violet-600 truncate block w-full transition-colors"
+															title={task.name}
+														>
+															{task.name}
+														</Anchor>
+													{/if}
+													{#if task.link}
+														<a
+															href={task.link}
+															target="_blank"
+															rel="noopener noreferrer"
+															class="text-gray-400 hover:text-violet-600 transition-colors"
+															title={task.link}
+														>
+															<i class="fa-solid fa-link text-[10px]"></i>
+														</a>
+													{/if}
+												</span>
 											{:else}
 												<div class="flex flex-col gap-0.5">
 													<div class="flex items-center gap-2">
@@ -464,6 +477,17 @@
 														>
 															{task.name}
 														</Anchor>
+														{#if task.link}
+															<a
+																href={task.link}
+																target="_blank"
+																rel="noopener noreferrer"
+																class="text-gray-400 hover:text-violet-600 transition-colors shrink-0"
+																title={task.link}
+															>
+																<i class="fa-solid fa-link text-xs"></i>
+															</a>
+														{/if}
 													</div>
 													{#if task.assigned_to && task.assigned_to.length > 0}
 														<div class="text-[11px] text-gray-400 flex items-center gap-1">
