@@ -61,12 +61,12 @@
 		return [...groups.entries()].map(([framework, items]) => ({ framework, items }));
 	}
 
-	let isEnriching = $state(false);
+	let isApplying = $state(false);
 
-	async function confirmEnrich() {
-		isEnriching = true;
+	async function confirmMapFrom() {
+		isApplying = true;
 		try {
-			const response = await fetch(`/compliance-assessments/${data.targetId}/enrich`, {
+			const response = await fetch(`/compliance-assessments/${data.targetId}/map-from`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ source_audit_id: data.sourceId })
@@ -76,20 +76,20 @@
 				const result = await response.json();
 				flash.set({
 					type: 'success',
-					message: `${m.enrichFromSourceSuccess()} (${result.enriched_count} ${m.requirementsEnriched()})`
+					message: `${m.mapFromSuccess()} (${result.updated_count} ${m.requirementsUpdated()})`
 				});
 				goto(`/compliance-assessments/${data.targetId}`);
 			} else {
 				const err = await response.json();
 				flash.set({
 					type: 'error',
-					message: err.error || m.enrichFromSourceError()
+					message: err.error || m.mapFromError()
 				});
 			}
 		} catch {
-			flash.set({ type: 'error', message: m.enrichFromSourceError() });
+			flash.set({ type: 'error', message: m.mapFromError() });
 		} finally {
-			isEnriching = false;
+			isApplying = false;
 		}
 	}
 </script>
@@ -101,7 +101,7 @@
 			<div class="flex flex-col">
 				<div class="h4 font-bold">
 					<i class="fa-solid fa-arrow-right-to-bracket mr-2"></i>
-					{m.enrichPreview()}
+					{m.mapFromPreview()}
 				</div>
 				<div class="text-sm text-gray-600 mt-1">
 					<span class="font-medium">{m.source()}:</span>
@@ -121,23 +121,23 @@
 				</Anchor>
 				<button
 					class="btn preset-filled-primary-500"
-					onclick={confirmEnrich}
-					disabled={isEnriching || preview.enriched_count === 0}
+					onclick={confirmMapFrom}
+					disabled={isApplying || preview.updated_count === 0}
 				>
-					{#if isEnriching}
+					{#if isApplying}
 						<i class="fa-solid fa-spinner fa-spin mr-2"></i>
 					{:else}
 						<i class="fa-solid fa-check mr-2"></i>
 					{/if}
-					{m.confirmEnrichment()}
+					{m.confirmMapping()}
 				</button>
 			</div>
 		</div>
 
 		<!-- Summary -->
 		<div class="text-sm text-gray-700">
-			<span class="font-semibold">{preview.enriched_count}</span>
-			{m.requirementsEnriched()}
+			<span class="font-semibold">{preview.updated_count}</span>
+			{m.requirementsUpdated()}
 		</div>
 	</div>
 
@@ -375,7 +375,7 @@
 	{:else}
 		<div class="card bg-white shadow-lg p-6 text-center text-gray-500">
 			<i class="fa-solid fa-circle-info text-2xl mb-2"></i>
-			<p>{m.enrichNoChanges()}</p>
+			<p>{m.mapFromNoChanges()}</p>
 		</div>
 	{/if}
 </div>

@@ -5,7 +5,7 @@ import type { RequestHandler } from './$types';
 // exists (and show the error inline) before navigating to the preview page.
 export const GET: RequestHandler = async (event) => {
 	const sourceAuditId = event.url.searchParams.get('source_audit_id') ?? '';
-	const endpoint = `${BASE_API_URL}/compliance-assessments/${event.params.id}/enrich_preview/?source_audit_id=${sourceAuditId}`;
+	const endpoint = `${BASE_API_URL}/compliance-assessments/${event.params.id}/map_from_preview/?source_audit_id=${sourceAuditId}`;
 	const res = await event.fetch(endpoint);
 
 	const payload = await res.text();
@@ -17,7 +17,7 @@ export const GET: RequestHandler = async (event) => {
 
 export const POST: RequestHandler = async (event) => {
 	const body = await event.request.text();
-	const endpoint = `${BASE_API_URL}/compliance-assessments/${event.params.id}/enrich/`;
+	const endpoint = `${BASE_API_URL}/compliance-assessments/${event.params.id}/map_from/`;
 	const res = await event.fetch(endpoint, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },

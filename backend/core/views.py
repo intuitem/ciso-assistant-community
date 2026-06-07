@@ -14534,7 +14534,114 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
         return Response(comparison_data)
 
-    def _compute_enrich_merge(self, target_audit, source_audit):
+    @staticmethod
+    def _is_full_coverage(source_ra, same_framework, origin_fw_id):
+        """Does the source audit's own data fully cover this target requirement?
+
+        Same framework is always a full 1:1 copy. Cross-framework looks only at
+        the path *origins* (the source audit's requirements); intermediate
+        frameworks are transit points the user has no data for, even when they
+        fully cover the target. Coverage is weakest-link (computed by the engine).
+        """
+        if same_framework:
+            return True
+        src_ras = source_ra.get("mapping_inference", {}).get(
+            "source_requirement_assessments", {}
+        )
+        return any(
+            v.get("coverage") == "full"
+            for v in src_ras.values()
+            if (v.get("source_framework") or {}).get("id") == origin_fw_id
+        )
+
+    def _merge_requirement(
+        self, current, source_ra, *, is_full_coverage, same_framework
+    ):
+        """Merge one source RA into one target RA, in memory.
+
+        Returns (merged_fields, field_changes, m2m_added):
+        - merged_fields: values to write on the target
+        - field_changes: before/after pairs for the preview diff
+        - m2m_added: count of genuinely-new M2M links, by field
+        """
+        # Scalar fields and their model defaults. A source value equal to its
+        # default carries no information and never overwrites the target.
+        scalar_defaults = {
+            "result": "not_assessed",
+            "status": "to_do",
+            "score": None,
+            "is_scored": False,
+            "documentation_score": None,
+        }
+        merged_fields = {}
+        field_changes = {}
+
+        # Full coverage copies from source; partial coverage only fills a target
+        # still at its default. Either way, only a meaningful source value flows.
+        for field, default in scalar_defaults.items():
+            current_val = current.get(field)
+            engine_val = source_ra.get(field)
+            engine_is_meaningful = engine_val is not None and engine_val != default
+            target_is_default = current_val is None or current_val == default
+            if engine_is_meaningful and (is_full_coverage or target_is_default):
+                merged_fields[field] = engine_val
+                if engine_val != current_val:
+                    field_changes[field] = {"current": current_val, "new": engine_val}
+
+        # Observation: append unless the source text is already present (keeps
+        # re-running from the same source idempotent).
+        current_obs = current.get("observation") or ""
+        engine_obs = source_ra.get("observation") or ""
+        if engine_obs and engine_obs not in current_obs:
+            merged = (
+                engine_obs if not current_obs else f"{current_obs}\n\n---\n{engine_obs}"
+            )
+            merged_fields["observation"] = merged
+            field_changes["observation"] = {
+                "current": current_obs or None,
+                "new": merged,
+            }
+
+        # M2M: applied_controls flow for every coverage type; evidences and
+        # security_exceptions only on full coverage (or same framework).
+        m2m_added = {}
+        m2m_fields = ["applied_controls"]
+        if is_full_coverage or same_framework:
+            m2m_fields += ["evidences", "security_exceptions"]
+        for m2m_field in m2m_fields:
+            new_ids = set(source_ra.get(m2m_field, [])) - set(
+                current.get(m2m_field, [])
+            )
+            if new_ids:
+                m2m_added[m2m_field] = len(new_ids)
+
+        # Carry the new mapping_inference (cross-framework only) so the RA is
+        # included in merged_target -- this is what gates the M2M apply step.
+        if not same_framework and source_ra.get("mapping_inference"):
+            merged_fields["mapping_inference"] = source_ra["mapping_inference"]
+
+        return merged_fields, field_changes, m2m_added
+
+    @staticmethod
+    def _map_from_sources(urn, source_ra, same_framework):
+        """Source requirement(s) feeding a target, for the preview display.
+        Carries urns; labels are resolved by the caller via safe_display_str."""
+        if same_framework:
+            return [{"urn": urn, "str": source_ra.get("name"), "coverage": "full"}]
+        src_sras = source_ra.get("mapping_inference", {}).get(
+            "source_requirement_assessments", {}
+        )
+        return [
+            {
+                "urn": s.get("urn"),
+                "str": s.get("str"),
+                "coverage": s.get("coverage"),
+                "framework": (s.get("source_framework") or {}).get("name"),
+            }
+            for s in src_sras.values()
+        ]
+
+    def _compute_map_from_merge(self, target_audit, source_audit):
         """
         Compute the merge of source audit data into a target audit.
 
@@ -14573,182 +14680,68 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         target_data = engine.load_audit_fields(target_audit)
         target_ras = target_data.get("requirement_assessments", {})
 
-        scalar_fields = [
-            "result",
-            "status",
-            "score",
-            "is_scored",
-            "documentation_score",
-        ]
-        default_values = {
-            "result": "not_assessed",
-            "status": "to_do",
-            "score": None,
-            "is_scored": False,
-            "documentation_score": None,
-            "observation": None,
-        }
-
         merged_target = {}
         merge_details = []
 
-        for urn, source_ra in mapped_results.get("requirement_assessments", {}).items():
-            if urn not in target_ras:
+        for urn, source_ra in mapped_results["requirement_assessments"].items():
+            current = target_ras.get(urn)
+            if current is None:
                 continue
 
-            current = target_ras[urn]
-
-            if same_framework:
-                is_full_coverage = True
-            else:
-                mi = source_ra.get("mapping_inference", {})
-                src_ras = mi.get("source_requirement_assessments", {})
-                # Only the source audit's own requirements (the path origins)
-                # decide whether to copy: intermediate-framework requirements
-                # are transit points the user has no data for, even when they
-                # fully cover the target. Their coverage is now weakest-link
-                # (engine), so a partial first hop no longer reads as full.
-                is_full_coverage = any(
-                    v.get("coverage") == "full"
-                    for v in src_ras.values()
-                    if (v.get("source_framework") or {}).get("id") == origin_fw_id
-                )
-
-            merged_fields = {}
-            field_changes = {}
-
-            for field in scalar_fields:
-                current_val = current.get(field)
-                engine_val = source_ra.get(field)
-                # A source value equal to its default (e.g. result=not_assessed,
-                # status=to_do, is_scored=False, score=None) carries no
-                # information -- never overwrite the target with it.
-                engine_is_meaningful = (
-                    engine_val is not None and engine_val != default_values.get(field)
-                )
-                target_is_default = (
-                    current_val is None or current_val == default_values.get(field)
-                )
-
-                # Full coverage copies from source; partial coverage only fills
-                # a target that is still at its default. Either way, only a
-                # meaningful source value is propagated.
-                if engine_is_meaningful and (is_full_coverage or target_is_default):
-                    merged_fields[field] = engine_val
-                    if engine_val != current_val:
-                        field_changes[field] = {
-                            "current": current_val,
-                            "new": engine_val,
-                        }
-
-            # Observation: append unless the source text is already present
-            # (keeps re-enrichment from the same source idempotent).
-            current_obs = current.get("observation") or ""
-            engine_obs = source_ra.get("observation") or ""
-            if engine_obs:
-                if not current_obs:
-                    merged_fields["observation"] = engine_obs
-                    field_changes["observation"] = {
-                        "current": None,
-                        "new": engine_obs,
-                    }
-                elif engine_obs not in current_obs:
-                    merged_fields["observation"] = f"{current_obs}\n\n---\n{engine_obs}"
-                    field_changes["observation"] = {
-                        "current": current_obs,
-                        "new": merged_fields["observation"],
-                    }
-
-            # M2M additions. applied_controls flow for every coverage type;
-            # evidences/security_exceptions only on full coverage (or same
-            # framework). Counts are the genuinely-new links vs the target.
-            m2m_added = {}
-            current_ac = set(current.get("applied_controls", []))
-            new_ac = set(source_ra.get("applied_controls", [])) - current_ac
-            if new_ac:
-                m2m_added["applied_controls"] = len(new_ac)
-            if is_full_coverage or same_framework:
-                for m2m_field in ("evidences", "security_exceptions"):
-                    current_ids = set(current.get(m2m_field, []))
-                    new_ids = set(source_ra.get(m2m_field, [])) - current_ids
-                    if new_ids:
-                        m2m_added[m2m_field] = len(new_ids)
-
-            # Carry the new mapping_inference (different frameworks only) so the
-            # RA is included in merged_target -- this is what gates M2M apply.
-            # The apply step merges it with the existing provenance.
-            if not same_framework and source_ra.get("mapping_inference"):
-                merged_fields["mapping_inference"] = source_ra["mapping_inference"]
-
-            # Source requirement(s) that fed this target, for display. Same
-            # framework is a 1:1 copy; different frameworks read the provenance
-            # the engine recorded in mapping_inference. We carry the urn and let
-            # the caller resolve the label via safe_display_str (the raw engine
-            # "name" can be empty for ref_id-only requirements).
-            sources = []
-            if same_framework:
-                sources.append(
-                    {
-                        "urn": urn,
-                        "str": source_ra.get("name"),
-                        "coverage": "full",
-                    }
-                )
-            else:
-                src_sras = source_ra.get("mapping_inference", {}).get(
-                    "source_requirement_assessments", {}
-                )
-                for s in src_sras.values():
-                    sources.append(
-                        {
-                            "urn": s.get("urn"),
-                            "str": s.get("str"),
-                            "coverage": s.get("coverage"),
-                            "framework": (s.get("source_framework") or {}).get("name"),
-                        }
-                    )
-
+            is_full = self._is_full_coverage(source_ra, same_framework, origin_fw_id)
+            merged_fields, field_changes, m2m_added = self._merge_requirement(
+                current,
+                source_ra,
+                is_full_coverage=is_full,
+                same_framework=same_framework,
+            )
             meaningful = bool(field_changes) or bool(m2m_added)
+            if not (merged_fields or meaningful):
+                continue
 
-            if merged_fields or meaningful:
-                merged_target[urn] = merged_fields
-                merge_details.append(
-                    {
-                        "urn": urn,
-                        "name": current.get("name", ""),
-                        "coverage": "full" if is_full_coverage else "partial",
-                        "field_changes": field_changes,
-                        "m2m_added": m2m_added,
-                        "sources": sources,
-                        "meaningful": meaningful,
-                    }
-                )
+            merged_target[urn] = merged_fields
+            merge_details.append(
+                {
+                    "urn": urn,
+                    "name": current.get("name", ""),
+                    "coverage": "full" if is_full else "partial",
+                    "field_changes": field_changes,
+                    "m2m_added": m2m_added,
+                    "sources": self._map_from_sources(urn, source_ra, same_framework),
+                    "meaningful": meaningful,
+                }
+            )
 
         return mapped_results, merged_target, merge_details, target_data
 
-    @action(detail=True, methods=["get"], url_path="enrich_preview")
-    def enrich_preview(self, request, pk):
-        """Preview the effect of enriching this audit from a source audit."""
-        source_audit_id = request.query_params.get("source_audit_id")
+    def _resolve_map_from(self, request, source_audit_id, *, require_change):
+        """Validate a "map from an audit" request. Returns ((target, source), None)
+        on success or (None, error_response). Shared by preview and apply."""
         if not source_audit_id:
-            return Response(
-                {"error": "source_audit_id parameter is required"},
+            return None, Response(
+                {"error": "source_audit_id is required"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         target_audit = self.get_object()
-
         if target_audit.is_locked:
-            return Response(
-                {"error": "Cannot enrich a locked audit"},
+            return None, Response(
+                {"error": "Cannot map into a locked audit"},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+        if require_change and not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_requirementassessment"),
+            folder=target_audit.folder,
+        ):
+            return None, Response(status=status.HTTP_403_FORBIDDEN)
+
+        viewable_objects, _, _ = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, ComplianceAssessment
         )
         if UUID(source_audit_id) not in viewable_objects:
-            return Response(
+            return None, Response(
                 {"error": "Permission denied for source audit"},
                 status=status.HTTP_403_FORBIDDEN,
             )
@@ -14756,17 +14749,31 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         try:
             source_audit = ComplianceAssessment.objects.get(id=source_audit_id)
         except ComplianceAssessment.DoesNotExist:
-            return Response(
+            return None, Response(
                 {"error": "Source audit not found"},
                 status=status.HTTP_404_NOT_FOUND,
             )
+
+        return (target_audit, source_audit), None
+
+    @action(detail=True, methods=["get"], url_path="map_from_preview")
+    def map_from_preview(self, request, pk):
+        """Preview the effect of mapping data from a source audit into this one."""
+        resolved, error = self._resolve_map_from(
+            request,
+            request.query_params.get("source_audit_id"),
+            require_change=False,
+        )
+        if error:
+            return error
+        target_audit, source_audit = resolved
 
         (
             mapped_results,
             merged_target,
             merge_details,
             target_data,
-        ) = self._compute_enrich_merge(target_audit, source_audit)
+        ) = self._compute_map_from_merge(target_audit, source_audit)
 
         if mapped_results is None:
             return Response(
@@ -14843,7 +14850,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 diff_entry["compare"][field] = change["new"]
             differences.append(diff_entry)
 
-        enriched_count = sum(1 for d in merge_details if d["meaningful"])
+        updated_count = sum(1 for d in merge_details if d["meaningful"])
 
         return Response(
             {
@@ -14857,7 +14864,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     "name": target_audit.name,
                     "framework": str(target_audit.framework),
                 },
-                "enriched_count": enriched_count,
+                "updated_count": updated_count,
                 "current_results": current_results,
                 "projected_results": projected_results,
                 "assessable_requirements_count": assessable_count,
@@ -14866,54 +14873,24 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             status=status.HTTP_200_OK,
         )
 
-    @action(detail=True, methods=["post"], url_path="enrich")
-    def enrich(self, request, pk):
-        """Enrich this audit with mapped data from a source audit."""
-        source_audit_id = request.data.get("source_audit_id")
-        if not source_audit_id:
-            return Response(
-                {"error": "source_audit_id is required"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        target_audit = self.get_object()
-
-        if target_audit.is_locked:
-            return Response(
-                {"error": "Cannot enrich a locked audit"},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-
-        if not RoleAssignment.is_access_allowed(
-            user=request.user,
-            perm=Permission.objects.get(codename="change_requirementassessment"),
-            folder=target_audit.folder,
-        ):
-            return Response(status=status.HTTP_403_FORBIDDEN)
-
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, ComplianceAssessment
+    @action(detail=True, methods=["post"], url_path="map_from")
+    def map_from(self, request, pk):
+        """Map data from a source audit into this one."""
+        resolved, error = self._resolve_map_from(
+            request,
+            request.data.get("source_audit_id"),
+            require_change=True,
         )
-        if UUID(source_audit_id) not in viewable_objects:
-            return Response(
-                {"error": "Permission denied for source audit"},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-
-        try:
-            source_audit = ComplianceAssessment.objects.get(id=source_audit_id)
-        except ComplianceAssessment.DoesNotExist:
-            return Response(
-                {"error": "Source audit not found"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+        if error:
+            return error
+        target_audit, source_audit = resolved
 
         (
             mapped_results,
             merged_target,
             merge_details,
             _target_data,
-        ) = self._compute_enrich_merge(target_audit, source_audit)
+        ) = self._compute_map_from_merge(target_audit, source_audit)
 
         if mapped_results is None:
             return Response(
@@ -14972,10 +14949,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 )
 
             mapped_ra_data = mapped_results.get("requirement_assessments", {})
+            details_by_urn = {d["urn"]: d for d in merge_details}
             for ra in ras_to_update:
                 urn = ra.requirement.urn
                 source_ra = mapped_ra_data.get(urn, {})
-                detail = next((d for d in merge_details if d["urn"] == urn), None)
+                detail = details_by_urn.get(urn)
                 is_full = detail and detail["coverage"] == "full"
 
                 ac_ids = source_ra.get("applied_controls", [])
@@ -14991,7 +14969,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         ra.security_exceptions.add(*se_ids)
 
             # If the target audit has scoring disabled, a source with scoring on
-            # must not leak is_scored=True onto the enriched RAs. (When scoring
+            # must not leak is_scored=True onto the mapped RAs. (When scoring
             # is enabled, is_scored only ever flows alongside a compatible score,
             # so no realignment is needed in that direction.)
             if ras_to_update and not target_audit.scoring_enabled:
@@ -14999,11 +14977,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     id__in=[ra.id for ra in ras_to_update],
                 ).update(is_scored=False)
 
-        enriched_count = sum(1 for d in merge_details if d["meaningful"])
+        updated_count = sum(1 for d in merge_details if d["meaningful"])
 
         return Response(
             {
-                "enriched_count": enriched_count,
+                "updated_count": updated_count,
                 "source_audit": str(source_audit),
                 "source_framework": str(source_audit.framework),
             },

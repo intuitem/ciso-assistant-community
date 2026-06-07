@@ -47,11 +47,11 @@
 				errorMessage = '';
 				try {
 					const res = await fetch(
-						`/compliance-assessments/${currentAudit.id}/enrich?source_audit_id=${selectedAuditId}`
+						`/compliance-assessments/${currentAudit.id}/map-from?source_audit_id=${selectedAuditId}`
 					);
 					if (res.ok) {
 						goto(
-							`/compliance-assessments/enrich-preview?target=${currentAudit.id}&source=${selectedAuditId}`
+							`/compliance-assessments/map-from-preview?target=${currentAudit.id}&source=${selectedAuditId}`
 						);
 						modalStore.close();
 					} else if (res.status === 400) {
@@ -59,10 +59,10 @@
 						errorMessage = m.noMappingPath();
 					} else {
 						const body = await res.json().catch(() => ({}));
-						errorMessage = body?.error || m.enrichFromSourceError();
+						errorMessage = body?.error || m.mapFromError();
 					}
 				} catch {
-					errorMessage = m.enrichFromSourceError();
+					errorMessage = m.mapFromError();
 				} finally {
 					checking = false;
 				}
@@ -74,9 +74,9 @@
 </script>
 
 {#if $modalStore[0]}
-	<div class="modal-enrich-audit {cBase}">
+	<div class="modal-map-from-audit {cBase}">
 		<div class="flex items-center justify-between">
-			<header class={cHeader}>{m.enrichFromSource()}</header>
+			<header class={cHeader}>{m.mapFromAudit()}</header>
 			<div
 				role="button"
 				tabindex="0"
@@ -134,7 +134,7 @@
 					{:else}
 						<i class="fa-solid fa-arrow-right-to-bracket mr-2"></i>
 					{/if}
-					{m.enrichFromSource()}
+					{m.mapFromAudit()}
 				</button>
 			</div>
 		</form>

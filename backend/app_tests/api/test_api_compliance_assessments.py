@@ -428,7 +428,7 @@ class TestComplianceAssessmentListProgress:
 
 
 # ---------------------------------------------------------------------------
-# Enrich-from-source feature
+# Map-from-audit feature
 # ---------------------------------------------------------------------------
 
 R = RequirementAssessment.Result
@@ -436,10 +436,10 @@ S = RequirementAssessment.Status
 
 
 @pytest.mark.django_db
-class TestComplianceAssessmentEnrich:
-    """Integration tests for the enrich-from-source feature: the merge strategy
-    in ComplianceAssessmentViewSet._compute_enrich_merge plus the `enrich`
-    (POST) and `enrich_preview` (GET) endpoints and their guards.
+class TestComplianceAssessmentMapFrom:
+    """Integration tests for the map-from-audit feature: the merge strategy in
+    ComplianceAssessmentViewSet._compute_map_from_merge plus the `map_from`
+    (POST) and `map_from_preview` (GET) endpoints and their guards.
 
     Same-framework cases exercise the full-coverage merge path without needing
     a mapping library; cross-framework cases load a RequirementMappingSet into
@@ -465,16 +465,16 @@ class TestComplianceAssessmentEnrich:
     def _ra(self, audit, ref):
         return audit.requirement_assessments.get(requirement__ref_id=ref)
 
-    def _enrich(self, client, target, source):
+    def _map_from(self, client, target, source):
         return client.post(
-            f"/api/compliance-assessments/{target.id}/enrich/",
+            f"/api/compliance-assessments/{target.id}/map_from/",
             {"source_audit_id": str(source.id)},
             format="json",
         )
 
     def _preview(self, client, target, source_id):
         return client.get(
-            f"/api/compliance-assessments/{target.id}/enrich_preview/",
+            f"/api/compliance-assessments/{target.id}/map_from_preview/",
             {"source_audit_id": str(source_id)},
         )
 
@@ -530,9 +530,9 @@ class TestComplianceAssessmentEnrich:
         sa.save()
         sa.applied_controls.add(ctrl)
 
-        resp = self._enrich(authenticated_client, target, source)
+        resp = self._map_from(authenticated_client, target, source)
         assert resp.status_code == status.HTTP_200_OK, resp.content
-        assert resp.json()["enriched_count"] == 1
+        assert resp.json()["updated_count"] == 1
 
         ta = self._ra(target, "A")
         assert ta.result == R.COMPLIANT
@@ -557,7 +557,7 @@ class TestComplianceAssessmentEnrich:
         source = self._audit(fw)
         target = self._audit(fw)
 
-        # source A is meaningful so the call enriches something; source B stays default
+        # source A is meaningful so the call maps something; source B stays default
         sa = self._ra(source, "A")
         sa.result = R.COMPLIANT
         sa.save()
@@ -566,7 +566,7 @@ class TestComplianceAssessmentEnrich:
         tb.result = R.PARTIALLY_COMPLIANT
         tb.save()
 
-        resp = self._enrich(authenticated_client, target, source)
+        resp = self._map_from(authenticated_client, target, source)
         assert resp.status_code == status.HTTP_200_OK, resp.content
 
         # source B (not_assessed) must not overwrite target B (partially_compliant)
@@ -586,12 +586,12 @@ class TestComplianceAssessmentEnrich:
         ta.observation = "TGT"
         ta.save()
 
-        self._enrich(authenticated_client, target, source)
+        self._map_from(authenticated_client, target, source)
         ta = self._ra(target, "A")
         assert ta.observation == "TGT\n\n---\nSRC"
 
-        # re-enrich from the same source: no duplicate appended
-        self._enrich(authenticated_client, target, source)
+        # re-run map-from with the same source: no duplicate appended
+        self._map_from(authenticated_client, target, source)
         assert self._ra(target, "A").observation == "TGT\n\n---\nSRC"
 
     def test_is_scored_not_leaked_when_scoring_disabled(self, authenticated_client):
@@ -608,7 +608,7 @@ class TestComplianceAssessmentEnrich:
         sa.is_scored = True
         sa.save()
 
-        resp = self._enrich(authenticated_client, target, source)
+        resp = self._map_from(authenticated_client, target, source)
         assert resp.status_code == status.HTTP_200_OK, resp.content
         assert self._ra(target, "A").is_scored is False
 
@@ -625,7 +625,7 @@ class TestComplianceAssessmentEnrich:
         resp = self._preview(authenticated_client, target, source.id)
         assert resp.status_code == status.HTTP_200_OK, resp.content
         body = resp.json()
-        assert body["enriched_count"] == 1
+        assert body["updated_count"] == 1
         # IG-correct denominator: assessable RAs that actually exist
         assert body["assessable_requirements_count"] == 2
         assert "current_results" in body and "projected_results" in body
@@ -646,7 +646,7 @@ class TestComplianceAssessmentEnrich:
         target.save()
 
         assert (
-            self._enrich(authenticated_client, target, source).status_code
+            self._map_from(authenticated_client, target, source).status_code
             == status.HTTP_403_FORBIDDEN
         )
         assert (
@@ -659,7 +659,7 @@ class TestComplianceAssessmentEnrich:
         _make_requirement(fw, "A")
         target = self._audit(fw)
         resp = authenticated_client.post(
-            f"/api/compliance-assessments/{target.id}/enrich/",
+            f"/api/compliance-assessments/{target.id}/map_from/",
             {"source_audit_id": str(uuid.uuid4())},
             format="json",
         )
@@ -670,7 +670,7 @@ class TestComplianceAssessmentEnrich:
         _make_requirement(fw, "A")
         target = self._audit(fw)
         resp = authenticated_client.get(
-            f"/api/compliance-assessments/{target.id}/enrich_preview/"
+            f"/api/compliance-assessments/{target.id}/map_from_preview/"
         )
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -690,7 +690,7 @@ class TestComplianceAssessmentEnrich:
         sa.result = R.COMPLIANT
         sa.save()
 
-        resp = self._enrich(authenticated_client, target, source)
+        resp = self._map_from(authenticated_client, target, source)
         assert resp.status_code == status.HTTP_200_OK, resp.content
 
         tx = self._ra(target, "X")
@@ -720,7 +720,7 @@ class TestComplianceAssessmentEnrich:
         tx.result = R.PARTIALLY_COMPLIANT
         tx.save()
 
-        resp = self._enrich(authenticated_client, target, source)
+        resp = self._map_from(authenticated_client, target, source)
         assert resp.status_code == status.HTTP_200_OK, resp.content
 
         tx = self._ra(target, "X")
@@ -743,5 +743,5 @@ class TestComplianceAssessmentEnrich:
         sa.result = R.COMPLIANT
         sa.save()
 
-        resp = self._enrich(authenticated_client, target, source)
+        resp = self._map_from(authenticated_client, target, source)
         assert resp.status_code == status.HTTP_400_BAD_REQUEST

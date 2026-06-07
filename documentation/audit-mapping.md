@@ -1,32 +1,34 @@
-# Audit Enrichment (Enrich from Source)
+# Apply Mapping (Map to / Map from)
 
 ## Overview
 
-**Enrich from source** lets you pull assessment data from an existing **source** audit into an existing **target** audit, using the mapping engine to translate between their frameworks. It is the inverse of **Apply Mapping**: instead of *creating* a new audit from a source, it *merges* mapped data into an audit you already have.
+Both mapping directions live behind a single **Apply mapping** action on a compliance assessment. Clicking it presents two cards:
 
-Typical use: you maintain a detailed ISO 27001 audit and want to seed/refresh a CyFun (or any mapped framework) audit with what you already assessed, without re-doing the work.
+| Card | Direction (from the current audit) | You pick | Outcome |
+|---|---|---|---|
+| **Map to a framework** | outward → | a target **framework** | creates a **new** audit, mapped from this one |
+| **Map from an audit** | inward ← | a source **audit** | merges mapped results **into this** audit |
 
-| | Apply Mapping | Enrich from Source |
-|---|---|---|
-| Starts from | the **source** audit | the **target** audit |
-| Produces | a **new** audit | updates the **existing** audit |
-| Target state | always blank | may already contain work |
+Both reuse the same mapping engine; they differ only in direction and outcome. **Map to a framework** is the original behavior (create a new audit). The rest of this document focuses on **Map from an audit**, which is the inbound direction added later.
 
-> **Design invariant:** if the target audit is completely empty, enriching it produces exactly the same result as creating it via **Apply Mapping** from the same source.
+Typical use of **Map from an audit**: you maintain a detailed ISO 27001 audit and want to seed/refresh a CyFun (or any mapped framework) audit with what you already assessed, without re-doing the work.
+
+> **Design invariant:** if the target audit is completely empty, *Map from an audit* produces exactly the same result as *Map to a framework* would when creating it from the same source.
 
 ## Using it
 
-From a compliance assessment detail page (internal users only), the **Actions** panel has an **Enrich from source** button (hidden when the audit is locked).
+From a compliance assessment detail page (internal users only), the **Actions** panel has an **Apply mapping** button. It opens a two-card chooser (both cards are always shown); pick **Map from an audit**.
 
 ```mermaid
 flowchart LR
-    A[Open target audit] --> B[Click 'Enrich from source']
-    B --> C[Pick a source audit]
-    C --> D{Mapping path exists?}
-    D -- no --> E[Inline error in the form]
-    D -- yes --> F[Preview page: current vs projected]
-    F --> G[Confirm Enrichment]
-    G --> H[Target audit updated]
+    A[Open target audit] --> B[Click 'Apply mapping']
+    B --> C[Choose 'Map from an audit']
+    C --> D[Pick a source audit]
+    D --> E{Mapping path exists?}
+    E -- no --> F[Inline error in the form]
+    E -- yes --> G[Preview page: current vs projected]
+    G --> H[Confirm]
+    H --> I[Target audit updated]
 ```
 
 1. **Pick a source audit.** The picker lists every audit you can view (the current one is excluded). The framework is shown so you can tell same- vs cross-framework sources apart.
@@ -49,7 +51,7 @@ Key rules:
 - **Defaults never clobber.** A source field equal to its default carries no information, so it never overwrites a real value on the target (full coverage included). This prevents a source's `not_assessed` from wiping a target's `partially_compliant`.
 - **Observations are appended, idempotently.** Existing target text is kept and the source observation is appended below a separator; re-running from the same source does not duplicate it.
 - **M2M links are unioned**, never replaced. Evidences travel with their applied controls, so partial coverage adds controls but not standalone evidences/exceptions.
-- **Scoring is respected.** If the target audit has scoring disabled, `is_scored` is never left `true` on enriched requirements.
+- **Scoring is respected.** If the target audit has scoring disabled, `is_scored` is never left `true` on the mapped requirements.
 - **Implementation groups are enforced on both sides.** Only the source's in-scope requirements contribute, and only the target's in-scope requirements are touched.
 
 ### Same framework vs cross framework
@@ -67,23 +69,23 @@ Crucially, the copy decision is based **only on the source audit's own requireme
 
 ## API
 
-Both endpoints live on `ComplianceAssessmentViewSet` and require change permission on the target; locked targets are rejected (`403`).
+The "Map from an audit" flow is backed by these endpoints on `ComplianceAssessmentViewSet`. Both require change permission on the target; locked targets are rejected (`403`).
 
-- `GET /api/compliance-assessments/{id}/enrich_preview/?source_audit_id=<uuid>`
-  Read-only. Returns `current_results`, `projected_results`, `assessable_requirements_count` (implementation-group-correct), `enriched_count` (requirements that actually change), and `differences[]` (each with `sources[]`). Returns `400` when no mapping path exists.
+- `GET /api/compliance-assessments/{id}/map_from_preview/?source_audit_id=<uuid>`
+  Read-only. Returns `current_results`, `projected_results`, `assessable_requirements_count` (implementation-group-correct), `updated_count` (requirements that actually change), and `differences[]` (each with `sources[]`). Returns `400` when no mapping path exists.
 
-- `POST /api/compliance-assessments/{id}/enrich/` with body `{ "source_audit_id": "<uuid>" }`
-  Applies the merge in a transaction and returns `{ enriched_count, source_audit, source_framework }`.
+- `POST /api/compliance-assessments/{id}/map_from/` with body `{ "source_audit_id": "<uuid>" }`
+  Applies the merge in a transaction and returns `{ updated_count, source_audit, source_framework }`.
 
-The shared logic is `ComplianceAssessmentViewSet._compute_enrich_merge`; the multi-hop/weakest-link computation is in `core/mappings/engine.py` (`map_audit_results`, `best_mapping_inferences`).
+The shared logic is `ComplianceAssessmentViewSet._compute_map_from_merge` (with `_merge_requirement`, `_is_full_coverage`, `_map_from_sources` helpers); the multi-hop/weakest-link computation is in `core/mappings/engine.py` (`map_audit_results`, `best_mapping_inferences`).
 
 ## Limitations
 
-- Same-framework enrichment leaves no provenance trail (no `mapping_inference`).
+- Same-framework "Map from an audit" leaves no provenance trail (no `mapping_inference`).
 - The preview recomputes the merge; confirming recomputes it again (no cached hand-off between the two steps).
 - Coverage is computed per source requirement's path; a target is labelled *full* if any origin source requirement fully covers it.
 
 ## Tests
 
 - Engine coverage (including weakest-link): `backend/app_tests/api/test_mapping_engine.py`.
-- Endpoint + merge-strategy integration: `TestComplianceAssessmentEnrich` in `backend/app_tests/api/test_api_compliance_assessments.py`.
+- Endpoint + merge-strategy integration: `TestComplianceAssessmentMapFrom` in `backend/app_tests/api/test_api_compliance_assessments.py`.
