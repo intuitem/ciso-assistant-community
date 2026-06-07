@@ -14573,7 +14573,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         target_data = engine.load_audit_fields(target_audit)
         target_ras = target_data.get("requirement_assessments", {})
 
-        scalar_fields = ["result", "status", "score", "is_scored", "documentation_score"]
+        scalar_fields = [
+            "result",
+            "status",
+            "score",
+            "is_scored",
+            "documentation_score",
+        ]
         default_values = {
             "result": "not_assessed",
             "status": "to_do",
@@ -14618,8 +14624,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 # status=to_do, is_scored=False, score=None) carries no
                 # information -- never overwrite the target with it.
                 engine_is_meaningful = (
-                    engine_val is not None
-                    and engine_val != default_values.get(field)
+                    engine_val is not None and engine_val != default_values.get(field)
                 )
                 target_is_default = (
                     current_val is None or current_val == default_values.get(field)
@@ -14797,8 +14802,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         for d in merge_details:
             all_urns.update(s["urn"] for s in d["sources"] if s.get("urn"))
         nodes_by_urn = {
-            rn.urn: rn
-            for rn in RequirementNode.objects.filter(urn__in=all_urns)
+            rn.urn: rn for rn in RequirementNode.objects.filter(urn__in=all_urns)
         }
 
         def describe(urn, fallback=""):
@@ -14971,9 +14975,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             for ra in ras_to_update:
                 urn = ra.requirement.urn
                 source_ra = mapped_ra_data.get(urn, {})
-                detail = next(
-                    (d for d in merge_details if d["urn"] == urn), None
-                )
+                detail = next((d for d in merge_details if d["urn"] == urn), None)
                 is_full = detail and detail["coverage"] == "full"
 
                 ac_ids = source_ra.get("applied_controls", [])

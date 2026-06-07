@@ -518,7 +518,9 @@ class TestComplianceAssessmentEnrich:
         source = self._audit(fw)
         target = self._audit(fw)
 
-        ctrl = AppliedControl.objects.create(name="ctrl", folder=Folder.get_root_folder())
+        ctrl = AppliedControl.objects.create(
+            name="ctrl", folder=Folder.get_root_folder()
+        )
         sa = self._ra(source, "A")
         sa.result = R.COMPLIANT
         sa.status = S.DONE
