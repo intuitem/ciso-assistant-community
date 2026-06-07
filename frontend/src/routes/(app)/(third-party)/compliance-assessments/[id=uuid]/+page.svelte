@@ -119,6 +119,7 @@
 	import ForceCirclePacking from '$lib/components/DataViz/ForceCirclePacking.svelte';
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 	import CompareAuditModal from '$lib/components/Modals/CompareAuditModal.svelte';
+	import EnrichFromSourceAuditModal from '$lib/components/Modals/EnrichFromSourceAuditModal.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 
 	function handleKeydown(event: KeyboardEvent) {
@@ -340,6 +341,20 @@
 	function modalCompareAudit(): void {
 		const modalComponent: ModalComponent = {
 			ref: CompareAuditModal,
+			props: {
+				currentAudit: data.compliance_assessment
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalEnrichFromSource(): void {
+		const modalComponent: ModalComponent = {
+			ref: EnrichFromSourceAuditModal,
 			props: {
 				currentAudit: data.compliance_assessment
 			}
@@ -965,6 +980,16 @@
 									<i class="fa-solid fa-diagram-project text-emerald-500 text-base"></i>
 									<span class="text-sm font-medium">{m.applyMapping()}</span>
 								</button>
+								{#if !data.compliance_assessment.is_locked}
+									<button
+										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer text-left"
+										onclick={() => modalEnrichFromSource()}
+										data-testid="enrich-from-source-button"
+									>
+										<i class="fa-solid fa-arrow-right-to-bracket text-indigo-500 text-base"></i>
+										<span class="text-sm font-medium">{m.enrichFromSource()}</span>
+									</button>
+								{/if}
 								<button
 									class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer text-left"
 									onclick={() => modalCreateCloneForm()}

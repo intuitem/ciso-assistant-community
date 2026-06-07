@@ -579,6 +579,11 @@ class MappingEngine:
                     },
                 )
             else:
+                # Coverage is weakest-link along a path: an earlier-hop source
+                # can only remain "full" through this hop if this hop is also
+                # full (equal/superset). Otherwise it degrades to "partial".
+                hop_full = rel in ("equal", "superset")
+
                 # Propagate sources from earlier hops.
                 for mif_id, mif_value in (
                     src_assessment.get("mapping_inference", {})
@@ -586,6 +591,8 @@ class MappingEngine:
                     .items()
                 ):
                     copied_value = mif_value.copy()
+                    if not hop_full and copied_value.get("coverage") == "full":
+                        copied_value["coverage"] = "partial"
                     if mapping_set_info and not copied_value.get("used_mapping_set"):
                         copied_value["used_mapping_set"] = mapping_set_info
                     merge_source_requirement_assessment(mif_id, copied_value)
