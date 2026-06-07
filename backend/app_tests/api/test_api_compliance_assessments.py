@@ -517,6 +517,11 @@ class TestComplianceAssessmentMapFrom:
             _make_requirement(fw, r)
         source = self._audit(fw)
         target = self._audit(fw)
+        # Scoring is off by default on a bare audit; enable it on the target so
+        # the is_scored/score copy is actually exercised (otherwise the endpoint
+        # correctly forces is_scored=False).
+        target.scoring_enabled = True
+        target.save()
 
         ctrl = AppliedControl.objects.create(
             name="ctrl", folder=Folder.get_root_folder()
