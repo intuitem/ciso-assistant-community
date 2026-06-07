@@ -76,7 +76,7 @@
 {#if $modalStore[0]}
 	<div class="modal-map-from-audit {cBase}">
 		<div class="flex items-center justify-between">
-			<header class={cHeader}>{m.mapFromAudit()}</header>
+			<header class={cHeader} data-testid="modal-title">{m.mapFromAudit()}</header>
 			<div
 				role="button"
 				tabindex="0"
@@ -128,6 +128,7 @@
 					type="submit"
 					class="btn preset-filled-primary-500"
 					disabled={!$formData.source_audit || checking}
+					data-testid="map-from-submit-button"
 				>
 					{#if checking}
 						<i class="fa-solid fa-spinner fa-spin mr-2"></i>

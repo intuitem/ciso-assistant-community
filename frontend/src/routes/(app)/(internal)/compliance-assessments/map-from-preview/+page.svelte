@@ -123,6 +123,7 @@
 					class="btn preset-filled-primary-500"
 					onclick={confirmMapFrom}
 					disabled={isApplying || preview.updated_count === 0}
+					data-testid="confirm-mapping-button"
 				>
 					{#if isApplying}
 						<i class="fa-solid fa-spinner fa-spin mr-2"></i>
@@ -373,7 +374,10 @@
 			</div>
 		</div>
 	{:else}
-		<div class="card bg-white shadow-lg p-6 text-center text-gray-500">
+		<div
+			class="card bg-white shadow-lg p-6 text-center text-gray-500"
+			data-testid="map-from-no-changes"
+		>
 			<i class="fa-solid fa-circle-info text-2xl mb-2"></i>
 			<p>{m.mapFromNoChanges()}</p>
 		</div>

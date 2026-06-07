@@ -120,6 +120,9 @@ test('user can map iso27001-2022 audit to a new csf-1.1 audit', async ({
 		//NOTE: imitates PageContent.createItem(), since our form is not a "classic"" one
 		// This could be improved
 		await applyMappingButton.click();
+		// "Apply mapping" now opens a direction chooser; pick "Map to a framework"
+		// (create a new audit) to reach the create form.
+		await page.getByTestId('map-to-framework-card').click();
 		await applyMappingForm.hasTitle();
 		if (page) {
 			await page.waitForLoadState('networkidle');
@@ -163,6 +166,66 @@ test('user can map iso27001-2022 audit to a new csf-1.1 audit', async ({
 		await complianceAssessmentsPage.isToastVisible('successfully saved', 'i');
 		await page.goBack();
 		await page.waitForURL(complianceAssessmentsPage.url + '/**');
+	});
+
+	// Map-from = inbound direction (pull a source audit's results INTO the
+	// current one). We change the source audit A, then pull A into the mapped
+	// audit B twice: the first pull applies the change, the second is a no-op
+	// (which also exercises the idempotent, substring-based observation merge).
+	const SOURCE_OBSERVATION = 'map-from-change-' + vars.assessmentName;
+
+	// Helper: open audit B, run "Apply mapping -> Map from an audit" with the
+	// ISO audit (A) as source, and land on the preview page.
+	async function openMapFromPreview() {
+		await complianceAssessmentsPage.goto();
+		await complianceAssessmentsPage.hasUrl();
+		await complianceAssessmentsPage.viewItemDetail('Mapped-' + vars.assessmentName);
+		await applyMappingButton.click();
+		await page.getByTestId('map-from-audit-card').click();
+		// B is excluded from the picker, so selecting the ISO audit by name is
+		// unambiguous.
+		const mapFromForm = new FormContent(page, m.mapFromAudit(), [
+			{ name: 'source_audit', type: FormFieldType.SELECT_AUTOCOMPLETE }
+		]);
+		await mapFromForm.hasTitle();
+		await mapFromForm.fill({ source_audit: vars.assessmentName });
+		await page.getByTestId('map-from-submit-button').click();
+		await page.waitForURL(/map-from-preview/);
+	}
+
+	await test.step('change the source audit (A)', async () => {
+		await complianceAssessmentsPage.goto();
+		await complianceAssessmentsPage.viewItemDetail(vars.assessmentName);
+		const orgContextTree = await complianceAssessmentsPage.itemDetail.treeViewItem(
+			'4.1 - Understanding the organization and its context',
+			['core - Clauses', '4 - Context of the organization']
+		);
+		await orgContextTree.content.click();
+		await page.waitForURL('/requirement-assessments/**');
+
+		// Edit the requirement assessment to add an observation.
+		await page.goto(page.url().replace(/\/$/, '') + '/edit');
+		await page.getByTestId('markdown-edit-btn-observation').click();
+		await page.getByTestId('form-input-observation').fill(SOURCE_OBSERVATION);
+		await page.getByTestId('save-button').click();
+		await complianceAssessmentsPage.isToastVisible('successfully saved', 'i');
+	});
+
+	await test.step('map from A into B: the change is applied', async () => {
+		await openMapFromPreview();
+		// There is a change, so confirmation is possible.
+		await expect(page.getByTestId('confirm-mapping-button')).toBeEnabled();
+		await page.getByTestId('confirm-mapping-button').click();
+		await page.waitForURL(/\/compliance-assessments\/[0-9a-f-]{36}/i);
+		await complianceAssessmentsPage.isToastVisible('updated successfully', 'i');
+	});
+
+	await test.step('map from A into B again: no change (idempotent)', async () => {
+		await openMapFromPreview();
+		// The source observation is already present, so nothing would change:
+		// the no-changes notice shows and confirmation is disabled.
+		await expect(page.getByTestId('map-from-no-changes')).toBeVisible();
+		await expect(page.getByTestId('confirm-mapping-button')).toBeDisabled();
 	});
 });
 
