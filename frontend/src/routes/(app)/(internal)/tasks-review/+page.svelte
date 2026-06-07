@@ -458,7 +458,7 @@
 															class="text-gray-400 hover:text-violet-600 transition-colors"
 															title={task.link}
 														>
-															<i class="fa-solid fa-link text-[10px]"></i>
+															<i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
 														</a>
 													{/if}
 												</span>
@@ -485,7 +485,7 @@
 																class="text-gray-400 hover:text-violet-600 transition-colors shrink-0"
 																title={task.link}
 															>
-																<i class="fa-solid fa-link text-xs"></i>
+																<i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
 															</a>
 														{/if}
 													</div>
