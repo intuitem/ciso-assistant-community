@@ -169,61 +169,55 @@ test('user can map iso27001-2022 audit to a new csf-1.1 audit', async ({
 	});
 
 	// Map-from = inbound direction (pull a source audit's results INTO the
-	// current one). We change the source audit A, then pull A into the mapped
-	// audit B twice: the first pull applies the change, the second is a no-op
-	// (which also exercises the idempotent, substring-based observation merge).
-	const SOURCE_OBSERVATION = 'map-from-change-' + vars.assessmentName;
+	// current one). We create a fresh, empty target audit and pull the
+	// previously-mapped audit into it twice: the first pull applies the data
+	// (changes exist -> confirm), the second is a no-op (idempotent -> the
+	// no-changes notice shows and confirmation is disabled).
+	const pullTargetName = 'PullTarget-' + vars.assessmentName;
 
-	// Helper: open audit B, run "Apply mapping -> Map from an audit" with the
-	// ISO audit (A) as source, and land on the preview page.
+	// Helper: open the empty target audit, run "Apply mapping -> Map from an
+	// audit" sourcing the mapped audit, and land on the preview page. The
+	// target is excluded from the picker, and the mapped audit's name is unique,
+	// so the source selection is unambiguous.
 	async function openMapFromPreview() {
 		await complianceAssessmentsPage.goto();
 		await complianceAssessmentsPage.hasUrl();
-		await complianceAssessmentsPage.viewItemDetail('Mapped-' + vars.assessmentName);
+		await complianceAssessmentsPage.viewItemDetail(pullTargetName);
 		await applyMappingButton.click();
 		await page.getByTestId('map-from-audit-card').click();
-		// B is excluded from the picker, so selecting the ISO audit by name is
-		// unambiguous.
 		const mapFromForm = new FormContent(page, m.mapFromAudit(), [
 			{ name: 'source_audit', type: FormFieldType.SELECT_AUTOCOMPLETE }
 		]);
 		await mapFromForm.hasTitle();
-		await mapFromForm.fill({ source_audit: vars.assessmentName });
+		await mapFromForm.fill({ source_audit: 'Mapped-' + vars.assessmentName });
 		await page.getByTestId('map-from-submit-button').click();
 		await page.waitForURL(/map-from-preview/);
 	}
 
-	await test.step('change the source audit (A)', async () => {
+	await test.step('create an empty target audit for map-from', async () => {
 		await complianceAssessmentsPage.goto();
-		await complianceAssessmentsPage.viewItemDetail(vars.assessmentName);
-		const orgContextTree = await complianceAssessmentsPage.itemDetail.treeViewItem(
-			'4.1 - Understanding the organization and its context',
-			['core - Clauses', '4 - Context of the organization']
-		);
-		await orgContextTree.content.click();
-		await page.waitForURL('/requirement-assessments/**');
-
-		// Edit the requirement assessment to add an observation.
-		await page.goto(page.url().replace(/\/$/, '') + '/edit');
-		await page.getByTestId('markdown-edit-btn-observation').click();
-		await page.getByTestId('form-input-observation').fill(SOURCE_OBSERVATION);
-		await page.getByTestId('save-button').click();
-		await complianceAssessmentsPage.isToastVisible('successfully saved', 'i');
+		await complianceAssessmentsPage.hasUrl();
+		await complianceAssessmentsPage.createItem({
+			name: pullTargetName,
+			description: vars.description,
+			folder: vars.folderName,
+			framework: vars.framework.name
+		});
 	});
 
-	await test.step('map from A into B: the change is applied', async () => {
+	await test.step('map from into the empty target: changes are applied', async () => {
 		await openMapFromPreview();
-		// There is a change, so confirmation is possible.
+		// The target is empty, so the mapping produces changes and confirm is enabled.
 		await expect(page.getByTestId('confirm-mapping-button')).toBeEnabled();
 		await page.getByTestId('confirm-mapping-button').click();
 		await page.waitForURL(/\/compliance-assessments\/[0-9a-f-]{36}/i);
 		await complianceAssessmentsPage.isToastVisible('updated successfully', 'i');
 	});
 
-	await test.step('map from A into B again: no change (idempotent)', async () => {
+	await test.step('map from again: no change (idempotent)', async () => {
 		await openMapFromPreview();
-		// The source observation is already present, so nothing would change:
-		// the no-changes notice shows and confirmation is disabled.
+		// The target now mirrors the source, so nothing would change: the
+		// no-changes notice shows and confirmation is disabled.
 		await expect(page.getByTestId('map-from-no-changes')).toBeVisible();
 		await expect(page.getByTestId('confirm-mapping-button')).toBeDisabled();
 	});
