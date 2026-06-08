@@ -59,13 +59,6 @@
 		cacheLock={cacheLocks['version']}
 		bind:cachedValue={formDataCache['version']}
 	/>
-	<TextField
-		{form}
-		field="ref_id"
-		label={m.refId()}
-		cacheLock={cacheLocks['ref_id']}
-		bind:cachedValue={formDataCache['ref_id']}
-	/>
 	<Select
 		{form}
 		options={model.selectOptions['quotation_method']}
@@ -152,13 +145,6 @@
 			label={m.quotationMethod()}
 			cacheLock={cacheLocks['quotation_method']}
 			bind:cachedValue={formDataCache['quotation_method']}
-		/>
-		<TextField
-			{form}
-			field="ref_id"
-			label={m.refId()}
-			cacheLock={cacheLocks['ref_id']}
-			bind:cachedValue={formDataCache['ref_id']}
 		/>
 		<AutocompleteSelect
 			multiple
