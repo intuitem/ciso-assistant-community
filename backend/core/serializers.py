@@ -2996,10 +2996,21 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
 
-        viewer_role = self.context.get("viewer_role", "auditor")
         ca = getattr(instance, "compliance_assessment", None)
         if ca is None:
             return data
+
+        # Endpoints that scope to a single CA pass an explicit viewer_role.
+        # Generic list/detail routes instead pass the caller's respondent folder
+        # set, so the role is derived per-instance from the RA's CA folder.
+        viewer_role = self.context.get("viewer_role")
+        if viewer_role is None:
+            respondent_folders = self.context.get("respondent_folders")
+            viewer_role = (
+                "respondent"
+                if respondent_folders and ca.folder_id in respondent_folders
+                else "auditor"
+            )
 
         # Strip fields the viewer is not allowed to read. Resolve through the
         # cascade (CA overrides → DEFAULT_VISIBILITY → EVERYONE_EDIT) so that
