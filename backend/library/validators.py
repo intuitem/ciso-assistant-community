@@ -1,6 +1,20 @@
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
 
+REF_ID_MAX_LENGTH = 200
+
+
+def validate_ref_id_length(ref_id: str | None, field_label: str = "ref_id") -> str | None:
+    """
+    Returns an error string if ref_id exceeds REF_ID_MAX_LENGTH, otherwise None.
+    """
+    if ref_id is not None and len(ref_id) > REF_ID_MAX_LENGTH:
+        return (
+            f"'{field_label}' value is too long "
+            f"({len(ref_id)} chars) — maximum allowed is {REF_ID_MAX_LENGTH}."
+        )
+    return None
+
 
 def validate_object(required_fields, fields):
     """
