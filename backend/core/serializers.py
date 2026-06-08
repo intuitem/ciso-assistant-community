@@ -2084,7 +2084,7 @@ class FrameworkReadSerializer(ReferentialSerializer):
     has_compliance_assessments = serializers.SerializerMethodField()
     scores_definition = serializers.SerializerMethodField()
     # The complete per-role visibility map a new CA created from this framework
-    # would inherit: DEFAULT_VISIBILITY ⊕ framework.field_visibility. The
+    # would inherit: DEFAULT_VISIBILITY + framework.field_visibility. The
     # CA-creation form's editor reads this so its pills always reflect what
     # the backend will actually save.
     effective_field_visibility = serializers.SerializerMethodField()
@@ -2591,6 +2591,10 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
             return sd["scale"]
         return sd
 
+    # Fully-resolved visibility map (DEFAULT_VISIBILITY + stored overrides).
+    # Clients read this instead of reconstructing the cascade locally.
+    effective_field_visibility = serializers.JSONField(read_only=True)
+
     # Derived booleans, kept in the API for backwards compatibility. The actual
     # storage is `field_visibility`; clients that want to change these should
     # PATCH `field_visibility` directly.
@@ -2952,6 +2956,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
             "progress_status_enabled",
             "extended_result_enabled",
             "field_visibility",
+            "effective_field_visibility",
             {"framework": ["implementation_groups_definition", "field_visibility"]},
         ]
     )
@@ -2996,10 +3001,21 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
 
-        viewer_role = self.context.get("viewer_role", "auditor")
         ca = getattr(instance, "compliance_assessment", None)
         if ca is None:
             return data
+
+        # Endpoints that scope to a single CA pass an explicit viewer_role.
+        # Generic list/detail routes instead pass the caller's respondent folder
+        # set, so the role is derived per-instance from the RA's CA folder.
+        viewer_role = self.context.get("viewer_role")
+        if viewer_role is None:
+            respondent_folders = self.context.get("respondent_folders")
+            viewer_role = (
+                "respondent"
+                if respondent_folders and ca.folder_id in respondent_folders
+                else "auditor"
+            )
 
         # Strip fields the viewer is not allowed to read. Resolve through the
         # cascade (CA overrides → DEFAULT_VISIBILITY → EVERYONE_EDIT) so that

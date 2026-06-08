@@ -1485,3 +1485,19 @@ def build_initial_field_visibility(framework):
         merged.setdefault(key, dict(EVERYONE_EDIT))
         merged[key].update(pair)
     return merged
+
+
+def build_effective_field_visibility(compliance_assessment):
+    """Return a CA's fully-resolved per-role visibility map.
+
+    The result spans every field that has a non-edit default (the
+    DEFAULT_VISIBILITY keys) plus any field explicitly overridden on the CA,
+    each resolved through the cascade (override → DEFAULT_VISIBILITY). Fields
+    absent from the result legitimately resolve to all-roles-edit, so a client
+    can treat a missing key as everyone-edit without shipping its own copy of
+    DEFAULT_VISIBILITY. This is the single source of truth handed to the
+    frontend.
+    """
+    overrides = getattr(compliance_assessment, "field_visibility", None) or {}
+    keys = set(DEFAULT_VISIBILITY) | set(overrides)
+    return {key: resolve_visibility_from_overrides(overrides, key) for key in keys}

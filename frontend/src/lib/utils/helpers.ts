@@ -395,12 +395,23 @@ export type VisibilityPair = { auditor: RoleAccess; respondent: RoleAccess };
 
 const EDIT_PAIR: VisibilityPair = { auditor: 'edit', respondent: 'edit' };
 
-/** Return the per-role visibility pair for a field. Missing → all roles edit. */
+/**
+ * Return the per-role visibility pair for a field.
+ *
+ * The backend is the single source of truth: it serves `effective_field_visibility`,
+ * the fully-resolved map (DEFAULT_VISIBILITY + stored overrides), so every field
+ * with a non-edit default is already present. This resolver therefore stays dumb
+ * — read the explicit pair, treat a missing field as all-roles-edit. The raw
+ * `field_visibility` is kept only as a fallback for objects that predate the
+ * resolved field.
+ */
 export function resolveFieldVisibility(
 	complianceAssessment: Record<string, any> | null | undefined,
 	fieldName: string
 ): VisibilityPair {
-	const raw = complianceAssessment?.field_visibility?.[fieldName];
+	const map =
+		complianceAssessment?.effective_field_visibility ?? complianceAssessment?.field_visibility;
+	const raw = map?.[fieldName];
 	if (!raw || typeof raw !== 'object') return { ...EDIT_PAIR };
 	return {
 		auditor: (raw.auditor as RoleAccess) ?? 'edit',

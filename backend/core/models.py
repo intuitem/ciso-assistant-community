@@ -6875,6 +6875,17 @@ class ComplianceAssessment(Assessment):
     # per-role pairs ({role: 'edit'|'read'|'hidden'}); the legacy booleans read
     # the auditor axis (the field exists at all if auditor isn't 'hidden').
 
+    @property
+    def effective_field_visibility(self):
+        """Fully-resolved per-role visibility map served to clients.
+
+        Single source of truth: callers read this instead of reconstructing the
+        DEFAULT_VISIBILITY cascade themselves.
+        """
+        from core.utils import build_effective_field_visibility
+
+        return build_effective_field_visibility(self)
+
     def _auditor_visible(self, field):
         from core.utils import resolve_field_visibility
 
