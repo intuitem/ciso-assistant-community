@@ -161,7 +161,6 @@ from core.utils import (
     build_answers_dict,
     compare_schema_versions,
     get_auditee_filtered_folder_ids,
-    get_respondent_filtered_folder_ids,
     is_field_visible_to,
     rewrite_child_urns,
     _generate_occurrences,
@@ -8660,13 +8659,13 @@ class FrameworkViewSet(BaseModelViewSet):
 
         cas = [ca for ca in all_visible_cas if ca.status in LIVE_STATUSES]
 
-        # Per-CA viewer role: respondent (auditee or third-party) on the CA's
-        # folder, auditor otherwise.
-        respondent_folders = get_respondent_filtered_folder_ids(request.user)
+        # Per-CA viewer role: respondent if the user is an auditee on the CA's
+        # folder, auditor otherwise. Computed once per CA.
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
         ca_viewer_roles = {
             ca.id: (
                 "respondent"
-                if (respondent_folders and ca.folder_id in respondent_folders)
+                if (auditee_folders and ca.folder_id in auditee_folders)
                 else "auditor"
             )
             for ca in cas
@@ -13976,12 +13975,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 parent = nodes_by_urn.get(req.parent_urn)
                 if parent:
                     req._parent_requirement_obj = parent
-        # Viewer role: respondent (auditee or third-party) on the CA's folder.
-        respondent_folders = get_respondent_filtered_folder_ids(request.user)
-        is_respondent = bool(
-            respondent_folders and compliance_assessment.folder_id in respondent_folders
+        # Determine viewer role based on auditee status
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        is_auditee = bool(
+            auditee_folders and compliance_assessment.folder_id in auditee_folders
         )
-        viewer_role = "respondent" if is_respondent else "auditor"
+        viewer_role = "respondent" if is_auditee else "auditor"
 
         requirement_assessments = RequirementAssessmentReadSerializer(
             requirement_assessments_objects,
@@ -15350,15 +15349,6 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 | Q(assignments__actor__in=user_actors)
             ).distinct()
         return qs
-
-    def get_serializer_context(self):
-        # Pass respondent folders so the detail route strips fields hidden from
-        # respondents instead of defaulting to "auditor".
-        context = super().get_serializer_context()
-        respondent_folders = get_respondent_filtered_folder_ids(self.request.user)
-        if respondent_folders:
-            context.setdefault("respondent_folders", respondent_folders)
-        return context
 
     def update(self, request, *args, **kwargs):
         return super().update(request, *args, **kwargs)
@@ -18754,18 +18744,12 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
         assignment = self.get_object()
         compliance_assessment = assignment.compliance_assessment
 
-        # Viewer role: respondent if an assigned actor, or a respondent
-        # (auditee / third-party) on the CA's folder; auditor otherwise.
+        # Determine viewer role: respondent if user is an assigned actor, auditor otherwise
         user_actors = Actor.get_all_for_user(request.user)
         is_assigned_actor = assignment.actor.filter(
             id__in=[a.id for a in user_actors]
         ).exists()
-        respondent_folders = get_respondent_filtered_folder_ids(request.user)
-        is_respondent = is_assigned_actor or (
-            bool(respondent_folders)
-            and compliance_assessment.folder_id in respondent_folders
-        )
-        viewer_role = "respondent" if is_respondent else "auditor"
+        viewer_role = "respondent" if is_assigned_actor else "auditor"
 
         assigned_ra_ids = set(
             assignment.requirement_assessments.values_list("id", flat=True)
