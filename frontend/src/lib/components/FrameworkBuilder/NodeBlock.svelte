@@ -262,7 +262,7 @@
 </script>
 
 <div
-	style="margin-left: {Math.min(node.depth, 3) * 16}px"
+	style="margin-left: {node.depth > 0 && node.depth <= 6 ? 16 : 0}px"
 	class="scroll-mt-32 outline-none"
 	data-section-id={node.node.id}
 	data-builder-node

@@ -6,12 +6,14 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
+	import { formatDate } from '$lib/utils/datetime';
 
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { isDark } from '$lib/utils/helpers';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
 
 	import { goto } from '$app/navigation';
 
@@ -151,9 +153,9 @@
 			</div>
 		</div>
 	{/if}
-	<div class="flex flex-row card justify-between px-4 py-2 bg-white shadow-lg">
-		<div class="flex flex-col space-y-4">
-			<span class="flex flex-row space-x-8">
+	<div class="flex flex-col sm:flex-row card justify-between px-4 py-2 bg-white shadow-lg gap-4">
+		<div class="flex flex-col space-y-4 min-w-0 flex-1">
+			<span class="flex flex-row flex-wrap gap-x-8 gap-y-2">
 				<div>
 					<p class="text-sm font-semibold text-gray-400">{m.refId()}</p>
 					<p class="font-semibold">{data.scenario.ref_id}</p>
@@ -175,7 +177,7 @@
 			</div>
 		</div>
 		{#if canEditObject}
-			<div class="flex flex-col space-y-2 my-auto">
+			<div class="flex flex-col space-y-2 sm:my-auto shrink-0">
 				<Anchor
 					href={`${page.url.pathname}/edit?next=${page.url.pathname}`}
 					class="btn preset-filled-primary-500 h-fit mt-1"
@@ -208,10 +210,10 @@
 		{/if}
 	</div>
 
-	<div class="flex flex-row space-x-2">
-		<div class="card px-4 py-2 bg-white shadow-lg w-1/2">
+	<div class="flex flex-col sm:flex-row gap-2">
+		<div class="card px-4 py-2 bg-white shadow-lg w-full sm:w-1/2">
 			<h4 class="h4 font-semibold">{m.scope()}</h4>
-			<div class="flex flex-row justify-between">
+			<div class="flex flex-row flex-wrap gap-x-4 gap-y-2 justify-start">
 				<span>
 					<p class="text-sm font-semibold text-gray-400">{m.folder()}</p>
 					<Anchor class="anchor text-sm font-semibold" href="/folders/{data.scenario.folder.id}"
@@ -252,13 +254,13 @@
 				</div>
 			{/if}
 		</div>
-		<div class="card px-4 py-2 bg-white shadow-lg w-1/2">
+		<div class="card px-4 py-2 bg-white shadow-lg w-full sm:w-1/2">
 			<h4 class="h4 font-semibold">{m.status()}</h4>
-			<div class="flex flex-row justify-between">
+			<div class="flex flex-row flex-wrap gap-x-4 gap-y-2 justify-start">
 				<div>
 					<p class="text-sm font-semibold text-gray-400">{m.lastUpdate()}</p>
 					<p class="text-sm font-semibold">
-						{new Date(data.scenario.updated_at).toLocaleString(getLocale())}
+						{formatDate(new Date(data.scenario.updated_at), true, getLocale())}
 					</p>
 				</div>
 				<div>
@@ -278,8 +280,8 @@
 			</div>
 		</div>
 	</div>
-	<div class="flex flex-row space-x-2">
-		<div class="card px-4 py-2 bg-white shadow-lg w-1/2 max-h-96 overflow-y-auto">
+	<div class="flex flex-col sm:flex-row gap-2">
+		<div class="card px-4 py-2 bg-white shadow-lg w-full sm:w-1/2 max-h-96 overflow-y-auto">
 			<h4 class="h4 font-semibold">{m.assets()}</h4>
 			<ModelTable
 				source={data.tables['assets']}
@@ -288,7 +290,9 @@
 				baseEndpoint="/assets?risk_scenarios={page.params.id}"
 			/>
 		</div>
-		<div class="card px-4 py-2 bg-white shadow-lg space-y-4 w-1/2 max-h-96 overflow-y-auto">
+		<div
+			class="card px-4 py-2 bg-white shadow-lg space-y-4 w-full sm:w-1/2 max-h-96 overflow-y-auto"
+		>
 			<h4 class="h4 font-semibold">{m.threats()}</h4>
 			<ModelTable
 				source={data.tables['threats']}
@@ -317,8 +321,8 @@
 		/>
 	</div>
 
-	<div class="flex flex-row space-x-2">
-		<div class="card px-4 py-2 bg-white shadow-lg w-1/2">
+	<div class="flex flex-col sm:flex-row gap-2">
+		<div class="card px-4 py-2 bg-white shadow-lg w-full sm:w-1/2">
 			<h4 class="h4 font-semibold">{m.riskOrigin()}</h4>
 			{#if data.scenario.risk_origin}
 				<p class="font-semibold text-gray-600">{safeTranslate(data.scenario.risk_origin.name)}</p>
@@ -329,7 +333,7 @@
 				<p class="text-gray-400 italic text-sm">{m.undefined()}</p>
 			{/if}
 		</div>
-		<div class="card px-4 py-2 bg-white shadow-lg w-1/2 max-h-96 overflow-y-auto">
+		<div class="card px-4 py-2 bg-white shadow-lg w-full sm:w-1/2 max-h-96 overflow-y-auto">
 			<h4 class="h4 font-semibold">{m.antecedentScenarios()}</h4>
 			{#if data.scenario.antecedent_scenarios && data.scenario.antecedent_scenarios.length > 0}
 				<ul class="space-y-1">
@@ -348,11 +352,11 @@
 	</div>
 
 	{#if page.data?.featureflags?.inherent_risk}
-		<div class="flex flex-row space-x-4 card px-4 py-2 bg-white shadow-lg justify-between">
-			<div class="flex flex-col w-1/2">
+		<div class="flex flex-col lg:flex-row gap-4 card px-4 py-2 bg-white shadow-lg">
+			<div class="flex flex-col w-full lg:w-1/2">
 				<h4 class="h4 font-semibold">{m.inherentRisk()}</h4>
 			</div>
-			<div class="flex flex-row space-x-4 my-auto items-center justify-center w-1/2 h-full">
+			<div class="flex flex-row flex-wrap gap-4 items-center justify-center w-full lg:w-1/2 h-full">
 				<p class="flex flex-col">
 					<span class="text-sm font-semibold text-gray-400">{m.probability()}</span>
 					<span
@@ -397,8 +401,8 @@
 		</div>
 	{/if}
 
-	<div class="flex flex-row space-x-4 card px-4 py-2 bg-white shadow-lg justify-between">
-		<div class="flex flex-col w-1/2">
+	<div class="flex flex-col lg:flex-row gap-4 card px-4 py-2 bg-white shadow-lg">
+		<div class="flex flex-col w-full lg:w-1/2">
 			<h4 class="h4 font-semibold">{m.currentRisk()}</h4>
 			<p class="text-sm font-semibold text-gray-400">{m.existingControls()}</p>
 			<ModelTable
@@ -407,7 +411,7 @@
 				baseEndpoint="/applied-controls?risk_scenarios_e={page.params.id}"
 			/>
 		</div>
-		<div class="flex flex-row space-x-4 my-auto items-center justify-center w-1/2 h-full">
+		<div class="flex flex-row flex-wrap gap-4 items-center justify-center w-full lg:w-1/2">
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-gray-400">{m.probability()}</span>
 				<span
@@ -447,8 +451,8 @@
 			</p>
 		</div>
 	</div>
-	<div class="flex flex-row space-x-4 card px-4 py-2 bg-white shadow-lg justify-between">
-		<div class="flex flex-col w-1/2">
+	<div class="flex flex-col lg:flex-row gap-4 card px-4 py-2 bg-white shadow-lg">
+		<div class="flex flex-col w-full lg:w-1/2">
 			<h4 class="h4 font-semibold">{m.residualRisk()}</h4>
 			<p class="text-sm font-semibold text-gray-400">{m.extraAppliedControls()}</p>
 			<ModelTable
@@ -457,7 +461,7 @@
 				baseEndpoint="/applied-controls?risk_scenarios={page.params.id}"
 			/>
 		</div>
-		<div class="flex flex-row space-x-4 my-auto items-center justify-center w-1/2">
+		<div class="flex flex-row flex-wrap gap-4 items-center justify-center w-full lg:w-1/2">
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-gray-400">{m.probability()}</span>
 				<span
@@ -545,4 +549,7 @@
 			</div>
 		{/if}
 	</div>
+	{#if page.data?.featureflags?.comments}
+		<CommentsPanel parentType="risk_scenario" parentId={data.scenario.id} />
+	{/if}
 </div>

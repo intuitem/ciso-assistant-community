@@ -1,5 +1,5 @@
 import { getModelInfo, urlParamModelSelectFields } from '$lib/utils/crud';
-import { loadDetail } from '$lib/utils/load';
+import { loadDetail, formatSelectFieldData } from '$lib/utils/load';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { modelSchema } from '$lib/utils/schemas';
 import type { PageServerLoad } from './$types';
@@ -53,7 +53,7 @@ export const load: PageServerLoad = async (event) => {
 			position_y: firstFreeRow,
 			// Set text widget specific defaults
 			chart_type: 'text',
-			time_range: 'all_time',
+			time_range: 'last_30_days',
 			aggregation: 'none',
 			show_target: false,
 			show_legend: false,
@@ -71,7 +71,7 @@ export const load: PageServerLoad = async (event) => {
 			dashboard: event.params.id,
 			folder: detailData.data.folder?.id || detailData.data.folder,
 			position_y: firstFreeRow,
-			time_range: 'all_time',
+			time_range: 'last_30_days',
 			aggregation: 'none',
 			show_target: false
 		},
@@ -88,12 +88,8 @@ export const load: PageServerLoad = async (event) => {
 		const url = `${BASE_API_URL}/${widgetModel.endpointUrl}/${selectField.field}/`;
 		const response = await event.fetch(url);
 		if (response.ok) {
-			selectOptions[selectField.field] = await response.json().then((data: Record<string, any>) =>
-				Object.entries(data).map(([key, value]) => ({
-					label: value,
-					value: selectField.valueType === 'number' ? parseInt(key) : key
-				}))
-			);
+			const responseData = await response.json();
+			selectOptions[selectField.field] = formatSelectFieldData(responseData, selectField);
 		}
 	}
 
