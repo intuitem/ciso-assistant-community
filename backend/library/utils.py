@@ -531,7 +531,6 @@ class RiskMatrixImporter:
         if missing_fields := self.REQUIRED_FIELDS - set(self.risk_matrix_data.keys()):
             return "Missing the following fields : {}".format(", ".join(missing_fields))
 
-        # TODO: validate the json_definition structure (probability, impact, risk, grid…)
         return None
 
     def import_risk_matrix(self, library_object: LoadedLibrary):
