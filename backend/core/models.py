@@ -8652,6 +8652,8 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         Does NOT save the model.
         """
         questions_qs = self.requirement.questions.prefetch_related("choices").all()
+        if not questions_qs.exists():
+            return
 
         answers_qs = (
             self.answers.select_related("question")
