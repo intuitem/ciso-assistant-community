@@ -432,11 +432,11 @@
 											class:max-w-0={compactMode}
 										>
 											{#if compactMode}
-												<span class="inline-flex items-center gap-1">
+												<span class="flex items-center gap-1 w-full min-w-0">
 													{#if task.ref_id}
 														<Anchor
 															href="/task-templates/{task.id}"
-															class="inline-block text-[11px] font-mono font-medium bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded hover:bg-violet-100 hover:text-violet-700 transition-colors"
+															class="inline-block shrink-0 text-[11px] font-mono font-medium bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded hover:bg-violet-100 hover:text-violet-700 transition-colors"
 															title={task.name}
 														>
 															{task.ref_id}
@@ -444,7 +444,7 @@
 													{:else}
 														<Anchor
 															href="/task-templates/{task.id}"
-															class="text-xs text-gray-700 hover:text-violet-600 truncate block w-full transition-colors"
+															class="text-xs text-gray-700 hover:text-violet-600 truncate flex-1 min-w-0 transition-colors"
 															title={task.name}
 														>
 															{task.name}
@@ -455,7 +455,7 @@
 															href={task.link}
 															target="_blank"
 															rel="noopener noreferrer"
-															class="text-gray-400 hover:text-violet-600 transition-colors"
+															class="shrink-0 text-gray-400 hover:text-violet-600 transition-colors"
 															title={task.link}
 														>
 															<i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
