@@ -128,7 +128,17 @@
 			return value.length ? value.map((v) => safeTranslate(String(v))).join(', ') : '∅';
 		}
 		if (value === null || value === undefined || value === '') return '∅';
-		return safeTranslate(String(value));
+		const s = String(value);
+		// Pretty-print embedded JSON (e.g. field_visibility) so it wraps readably.
+		const trimmed = s.trim();
+		if (/^[[{]/.test(trimmed) && /[\]}]$/.test(trimmed)) {
+			try {
+				return JSON.stringify(JSON.parse(trimmed), null, 2);
+			} catch {
+				/* not JSON, fall through */
+			}
+		}
+		return safeTranslate(s);
 	};
 
 	onMount(async () => {
@@ -172,20 +182,24 @@
 								>
 							</div>
 							{#if event.changes.length > 0}
-								<table class="mt-3 text-sm w-full border-separate border-spacing-y-1.5">
-									<tbody>
-										{#each event.changes as change (change.field)}
-											<tr class="align-top">
-												<td class="pr-3 font-medium text-surface-600 whitespace-nowrap"
-													>{safeTranslate(change.field)}</td
+								<div class="mt-3 space-y-2 text-sm">
+									{#each event.changes as change (change.field)}
+										<div class="grid grid-cols-[10rem_minmax(0,1fr)] gap-x-3 gap-y-0.5 items-start">
+											<div class="font-medium text-surface-600 break-words">
+												{safeTranslate(change.field)}
+											</div>
+											<div class="flex flex-wrap items-start gap-x-2 gap-y-1 min-w-0">
+												<span class="text-error-700 whitespace-pre-wrap break-words min-w-0"
+													>{fmt(change.from)}</span
 												>
-												<td class="pr-2 text-error-700">{fmt(change.from)}</td>
-												<td class="px-2 text-surface-400">→</td>
-												<td class="text-success-700">{fmt(change.to)}</td>
-											</tr>
-										{/each}
-									</tbody>
-								</table>
+												<span class="text-surface-400 shrink-0">→</span>
+												<span class="text-success-700 whitespace-pre-wrap break-words min-w-0"
+													>{fmt(change.to)}</span
+												>
+											</div>
+										</div>
+									{/each}
+								</div>
 							{/if}
 						</li>
 					{/each}

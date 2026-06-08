@@ -18,6 +18,7 @@
 	import { Progress, Tabs } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData } from '../[id=uuid]/$types';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
 	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
 	import { countMasked } from '$lib/utils/related-visibility';
 
@@ -107,6 +108,10 @@
 	}
 	let group = $state(pickDefaultTab());
 </script>
+
+<div class="flex justify-end mb-2">
+	<AuditTrailButton model="requirement-assessments" objectId={data.requirementAssessment.id} />
+</div>
 
 <div class="card space-y-2 p-4 bg-white shadow-sm">
 	<div class="flex flex-row space-x-2 items-center">

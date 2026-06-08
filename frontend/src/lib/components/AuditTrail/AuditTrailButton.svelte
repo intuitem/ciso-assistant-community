@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	// Fetched once and shared across all DetailView instances.
+	// Fetched once and shared across all instances.
 	let auditedModelsPromise: Promise<Set<string>> | null = null;
 
 	function loadAuditedModels(fetchFn: typeof fetch): Promise<Set<string>> {
@@ -46,10 +46,10 @@
 		auditedModels = await loadAuditedModels(fetch);
 	});
 
-	const isThirdParty = $derived(page.route.id?.includes('(third-party)') ?? false);
+	const isThirdPartyUser = $derived(page.data?.user?.is_third_party ?? false);
 
 	const enabled = $derived(
-		!isThirdParty && !!contentType && !!objectId && auditedModels.has(contentType)
+		!isThirdPartyUser && !!contentType && !!objectId && auditedModels.has(contentType)
 	);
 
 	function openAuditTrail() {

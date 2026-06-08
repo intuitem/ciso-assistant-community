@@ -18,6 +18,7 @@
 	import TreeViewItemLead from './TreeViewItemLead.svelte';
 
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ExportModal, { type ExportGroup } from '$lib/components/Modals/ExportModal.svelte';
 
@@ -645,6 +646,9 @@
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
+	<div class="flex justify-end">
+		<AuditTrailButton model="compliance-assessments" objectId={data.compliance_assessment.id} />
+	</div>
 	{#if data.compliance_assessment.is_locked}
 		<div
 			class="alert bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-lg shadow-sm"
