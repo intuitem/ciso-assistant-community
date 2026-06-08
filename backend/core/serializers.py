@@ -3000,9 +3000,8 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
         if ca is None:
             return data
 
-        # Endpoints that scope to a single CA pass an explicit viewer_role.
-        # Generic list/detail routes instead pass the caller's respondent folder
-        # set, so the role is derived per-instance from the RA's CA folder.
+        # viewer_role: explicit when set; otherwise derived per-instance from
+        # the caller's respondent_folders against the RA's CA folder.
         viewer_role = self.context.get("viewer_role")
         if viewer_role is None:
             respondent_folders = self.context.get("respondent_folders")

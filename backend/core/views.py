@@ -8660,9 +8660,8 @@ class FrameworkViewSet(BaseModelViewSet):
 
         cas = [ca for ca in all_visible_cas if ca.status in LIVE_STATUSES]
 
-        # Per-CA viewer role: respondent if the user is a respondent (auditee or
-        # third-party respondent) on the CA's folder, auditor otherwise. Computed
-        # once per CA.
+        # Per-CA viewer role: respondent (auditee or third-party) on the CA's
+        # folder, auditor otherwise.
         respondent_folders = get_respondent_filtered_folder_ids(request.user)
         ca_viewer_roles = {
             ca.id: (
@@ -13977,9 +13976,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 parent = nodes_by_urn.get(req.parent_urn)
                 if parent:
                     req._parent_requirement_obj = parent
-        # Determine viewer role based on respondent status (auditee or
-        # third-party respondent), so respondents get respondent-scoped field
-        # visibility on the CA's folder.
+        # Viewer role: respondent (auditee or third-party) on the CA's folder.
         respondent_folders = get_respondent_filtered_folder_ids(request.user)
         is_respondent = bool(
             respondent_folders and compliance_assessment.folder_id in respondent_folders
@@ -15355,10 +15352,8 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         return qs
 
     def get_serializer_context(self):
-        # Mirror the per-CA viewer_role logic of the requirements_list endpoints
-        # so a single RA read also strips fields hidden from respondents (auditee
-        # or third-party). Without this the serializer defaults to "auditor" and
-        # leaks fields like score/status to respondents hitting the detail route.
+        # Pass respondent folders so the detail route strips fields hidden from
+        # respondents instead of defaulting to "auditor".
         context = super().get_serializer_context()
         respondent_folders = get_respondent_filtered_folder_ids(self.request.user)
         if respondent_folders:
@@ -18759,11 +18754,8 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
         assignment = self.get_object()
         compliance_assessment = assignment.compliance_assessment
 
-        # Determine viewer role: respondent if the user is an assigned actor OR
-        # a respondent (auditee / third-party respondent) on the CA's folder,
-        # auditor otherwise. The folder check mirrors the other requirements_list
-        # endpoints so a third-party respondent who isn't the literal assigned
-        # actor still gets respondent-scoped field visibility.
+        # Viewer role: respondent if an assigned actor, or a respondent
+        # (auditee / third-party) on the CA's folder; auditor otherwise.
         user_actors = Actor.get_all_for_user(request.user)
         is_assigned_actor = assignment.actor.filter(
             id__in=[a.id for a in user_actors]
