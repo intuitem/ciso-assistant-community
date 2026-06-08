@@ -48,13 +48,6 @@
 	bind:cachedValue={formDataCache['source']}
 />
 <TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
-<TextField
 	type="date"
 	{form}
 	field="published_date"
