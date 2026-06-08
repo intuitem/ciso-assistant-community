@@ -23,27 +23,37 @@
 	const invalidateAll = true;
 	const formAction = '?/save';
 
-	const schema = z.object({
-		id: z.string(),
-		provider_id: z.string(),
-		folder_id: z.string(),
-		is_active: z.boolean().default(true),
-		webhook_secret: z.string().optional(),
-		credentials: z.object({
-			server_url: z.string().url(),
-			email: z.string().email(),
-			api_token: z.string().optional()
-		}),
-		settings: z.object({
-			enable_outgoing_sync: z.boolean().default(false),
-			enable_incoming_sync: z.boolean().default(false),
-			table_name: z.string().min(1, 'A target table must be selected'),
-			project_key: z.string().optional(),
-			issue_type: z.string().optional(),
-			field_map: z.record(z.string(), z.any()).default({}).optional(),
-			value_map: z.record(z.string(), z.any()).default({}).optional()
+	const schema = z
+		.object({
+			id: z.string(),
+			provider_id: z.string(),
+			folder_id: z.string(),
+			is_active: z.boolean().default(true),
+			webhook_secret: z.string().optional(),
+			credentials: z.object({
+				server_url: z.string().url(),
+				email: z.string().email(),
+				api_token: z.string().optional()
+			}),
+			settings: z.object({
+				enable_outgoing_sync: z.boolean().default(false),
+				enable_incoming_sync: z.boolean().default(false),
+				table_name: z.string().optional(),
+				project_key: z.string().optional(),
+				issue_type: z.string().optional(),
+				field_map: z.record(z.string(), z.any()).default({}).optional(),
+				value_map: z.record(z.string(), z.any()).default({}).optional()
+			})
 		})
-	});
+		.superRefine((data, ctx) => {
+			if (data.id && !data.settings.table_name) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					path: ['settings', 'table_name'],
+					message: 'A target table must be selected'
+				});
+			}
+		});
 
 	const _form = superForm(data.form, {
 		dataType: 'json',
@@ -221,10 +231,10 @@
 					</span>
 					<p class="text-sm text-surface-500 -mt-3">{m.webhookEndpointUrlHelpText()}</p>
 				{/if}
-				{#if page.data?.config?.id}
+				{#if page.data?.config?.id || $formStore.id}
 					<FieldMapper
 						{form}
-						integrationId={page.data?.config?.id}
+						integrationId={page.data?.config?.id || $formStore.id}
 						initialConfig={page.data?.config?.settings}
 						description={m.jiraIntegrationMappingsHelpText()}
 						remoteFieldLabel={m.jiraField()}

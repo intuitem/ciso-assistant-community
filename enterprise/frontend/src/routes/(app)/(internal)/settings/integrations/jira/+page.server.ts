@@ -7,27 +7,40 @@ import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { m } from '$paraglide/messages';
 
-const schema = z.object({
-	id: z.string(),
-	provider_id: z.string(),
-	folder_id: z.string(),
-	is_active: z.boolean().default(true),
-	webhook_secret: z.string().optional(),
-	credentials: z.object({
-		server_url: z.string().url(),
-		email: z.string().email(),
-		api_token: z.string().optional()
-	}),
-	settings: z.object({
-		enable_outgoing_sync: z.boolean().default(false),
-		enable_incoming_sync: z.boolean().default(false),
-		table_name: z.string().min(1, 'A target table must be selected'),
-		project_key: z.string().optional(),
-		issue_type: z.string().optional(),
-		field_map: z.record(z.string(), z.any()).default({}).optional(),
-		value_map: z.record(z.string(), z.any()).default({}).optional()
+const schema = z
+	.object({
+		id: z.string(),
+		provider_id: z.string(),
+		folder_id: z.string(),
+		is_active: z.boolean().default(true),
+		webhook_secret: z.string().optional(),
+		credentials: z.object({
+			server_url: z.string().url(),
+			email: z.string().email(),
+			api_token: z.string().optional()
+		}),
+		settings: z.object({
+			enable_outgoing_sync: z.boolean().default(false),
+			enable_incoming_sync: z.boolean().default(false),
+			// Required for sync to function, but unsettable until the integration
+			// row exists (the table picker only renders once the config has an id).
+			// Enforced via superRefine below for updates.
+			table_name: z.string().optional(),
+			project_key: z.string().optional(),
+			issue_type: z.string().optional(),
+			field_map: z.record(z.string(), z.any()).default({}).optional(),
+			value_map: z.record(z.string(), z.any()).default({}).optional()
+		})
 	})
-});
+	.superRefine((data, ctx) => {
+		if (data.id && !data.settings.table_name) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				path: ['settings', 'table_name'],
+				message: 'A target table must be selected'
+			});
+		}
+	});
 
 export const load: PageServerLoad = async ({ fetch, locals }) => {
 	const response = await fetch(`${BASE_API_URL}/integrations/configs/?provider__name=jira`);
