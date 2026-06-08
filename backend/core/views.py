@@ -1665,6 +1665,67 @@ class ContentTypeListView(APIView):
         return Response(content_types)
 
 
+class AuditedModelsView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, format=None):
+        from auditlog.registry import auditlog
+
+        names = sorted(model._meta.model_name for model in auditlog.get_models())
+        return Response(names)
+
+
+class ObjectAuditTrailView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, format=None):
+        from uuid import UUID
+        from django.contrib.contenttypes.models import ContentType
+        from auditlog.models import LogEntry
+
+        model_name = (request.query_params.get("content_type") or "").lower()
+        raw_object_id = request.query_params.get("object_id")
+        if not model_name or not raw_object_id:
+            return Response(
+                {"detail": "content_type and object_id are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            object_id = UUID(str(raw_object_id))
+        except ValueError:
+            return Response(
+                {"detail": "Invalid object_id."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        content_type = ContentType.objects.filter(model=model_name).first()
+        if content_type is None:
+            return Response(
+                {"detail": "Unknown content type."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        model_class = content_type.model_class()
+        if not RoleAssignment.is_object_readable(request.user, model_class, object_id):
+            raise PermissionDenied
+
+        entries = LogEntry.objects.filter(
+            content_type=content_type, object_pk=str(object_id)
+        ).order_by("-timestamp")
+        results = [
+            {
+                "id": entry.id,
+                "cid": entry.cid or None,
+                "action": entry.get_action_display(),
+                "actor": (entry.additional_data or {}).get("user_email")
+                or (entry.actor.email if entry.actor else None),
+                "timestamp": entry.timestamp,
+                "changes": entry.changes,
+                "object_repr": entry.object_repr,
+            }
+            for entry in entries
+        ]
+        return Response(results)
+
+
 # Risk Assessment
 
 

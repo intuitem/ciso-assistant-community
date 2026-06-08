@@ -28,6 +28,7 @@
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { getListViewFields } from '$lib/utils/table';
 	import { canPerformAction } from '$lib/utils/access-control';
+	import DetailViewExtraActions from '$lib/components/DetailView/DetailViewExtraActions.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
@@ -854,6 +855,7 @@
 				{/if}
 			{/if}
 			{@render actions?.()}
+			<DetailViewExtraActions model={data.urlModel} objectId={data.data?.id} />
 		</div>
 	</div>
 </div>
