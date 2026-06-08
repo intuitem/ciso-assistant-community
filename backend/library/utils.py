@@ -527,7 +527,7 @@ class RiskMatrixImporter:
     def is_valid(self) -> Union[str, None]:
         if err := validate_ref_id_length(self.risk_matrix_data.get("ref_id")):
             return err
-        return None  
+        return None
 
         # Create function to check if the "JSON definition" of the matrix is wrong or not, this function will be called within this is_valid function and return an error string is an error occured or return None or success exactly like this one.
 

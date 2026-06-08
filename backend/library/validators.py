@@ -4,7 +4,9 @@ from django.core.validators import FileExtensionValidator
 REF_ID_MAX_LENGTH = 200
 
 
-def validate_ref_id_length(ref_id: str | None, field_label: str = "ref_id") -> str | None:
+def validate_ref_id_length(
+    ref_id: str | None, field_label: str = "ref_id"
+) -> str | None:
     """
     Returns an error string if ref_id exceeds REF_ID_MAX_LENGTH, otherwise None.
     """
