@@ -124,7 +124,7 @@
 		optionSnippet = undefined,
 		placeholder = '',
 		lazy = false,
-		lazyLimit = 10,
+		lazyLimit = 20,
 		lazyThreshold = 50,
 		maxVisibleChips: _maxVisibleChips = 3
 	}: Props = $props();
@@ -151,28 +151,10 @@
 
 	const initialValue = resetForm ? undefined : $value;
 
-	// Seed `selected` from the form value at instantiation. Otherwise, when the
-	// component mounts with non-empty `options` (e.g. options passed directly
-	// as a prop, or after a {#key options} remount once an async fetch
-	// resolves) AND the form already carries a value at this path, the
-	// "selected → form value" $effect below would observe `selectedValues=[]`
-	// vs `$value='X'`, interpret it as "user cleared the field" and write
-	// `null`/`''` back, wiping the pre-existing form value. Computing the
-	// initial selection here keeps that effect quiet on mount.
-	function initialSelection(): typeof options {
-		if (initialValue === undefined || initialValue === null || initialValue === '') {
-			return [];
-		}
-		if (Array.isArray(initialValue)) {
-			return options.filter((item) => initialValue.includes(item.value));
-		}
-		return options.filter((item) => item.value === initialValue);
-	}
+	type SelectValue = string | number | undefined;
 
-	let selected: typeof options = $state(initialSelection());
-	let selectedValues: (string | undefined)[] = $derived(
-		selected.map((item) => item.value || item.label || item)
-	);
+	let selected: Option[] = $state([]);
+	let selectedValues: SelectValue[] = $derived(selected.map((item) => item.value));
 	let isInternalUpdate = false;
 	let optionsLoaded = $state(Boolean(options.length));
 	const default_value = nullable ? null : '';
@@ -182,9 +164,14 @@
 	// with selected=[] and overwrites $value to [] before onMount restores it — a
 	// race that wipes selections on remount (e.g. when a parent `{#key options}`
 	// block tears the component down on options change).
-	if (initialValue != null && options.length > 0) {
-		const ids = Array.isArray(initialValue) ? initialValue : [initialValue];
-		selected = options.filter((item) => ids.includes(item.value));
+	if (
+		initialValue !== undefined &&
+		initialValue !== null &&
+		initialValue !== '' &&
+		options.length > 0
+	) {
+		const ids = (Array.isArray(initialValue) ? initialValue : [initialValue]).map(String);
+		selected = options.filter((item) => ids.includes(String(item.value)));
 	}
 
 	const multiSelectOptions = {
@@ -287,20 +274,12 @@
 					}
 				}
 				optionsLoaded = true;
-				// After endpoint-fetched options are loaded, set initial selection
-				// from the stored initial value. The prop-options path is already
-				// seeded synchronously at script-init via `initialSelection()`, so
-				// this filter would duplicate (and on re-mount with fresh options
-				// can race) — gate it on the fetch path.
-				if (initialValue) {
-					selected = options.filter((item) =>
-						Array.isArray(initialValue)
-							? initialValue.includes(item.value)
-							: item.value === initialValue
-					);
-				} else if (options.length === 1 && $constraints?.required) {
-					selected = [options[0]];
-				}
+			}
+			if (initialValue !== undefined && initialValue !== null && initialValue !== '') {
+				const ids = (Array.isArray(initialValue) ? initialValue : [initialValue]).map(String);
+				selected = options.filter((item) => ids.includes(String(item.value)));
+			} else if (options.length === 1 && $constraints?.required) {
+				selected = [options[0]];
 			}
 		} catch (error) {
 			console.error(`Error fetching ${optionsEndpoint}:`, error);
@@ -468,11 +447,17 @@
 
 	$effect(() => {
 		if (!isInternalUpdate && optionsLoaded && $value !== initialValue) {
-			const valueArray = $value ? (Array.isArray($value) ? $value : [$value]) : [];
+			const valueArray = (
+				$value !== undefined && $value !== null && $value !== ''
+					? Array.isArray($value)
+						? $value
+						: [$value]
+					: []
+			).map(String);
 			if (valueArray.length === 0) {
 				selected = [];
 			} else {
-				selected = options.filter((item) => valueArray.includes(item.value));
+				selected = options.filter((item) => valueArray.includes(String(item.value)));
 			}
 		}
 	});
@@ -493,12 +478,12 @@
 	}
 
 	function arraysEqual(
-		arr1: string | (string | undefined)[] | null | undefined,
-		arr2: string | (string | undefined)[] | null | undefined
+		arr1: string | number | SelectValue[] | null | undefined,
+		arr2: string | number | SelectValue[] | null | undefined
 	): boolean {
-		const normalize = (val: string | (string | undefined)[] | null | undefined) => {
-			if (typeof val === 'string') return [val];
-			return val ?? [];
+		const normalize = (val: string | number | SelectValue[] | null | undefined) => {
+			const arr = Array.isArray(val) ? val : val !== null && val !== undefined ? [val] : [];
+			return arr.map((v) => (v === null || v === undefined ? v : String(v)));
 		};
 
 		const a1 = normalize(arr1);
