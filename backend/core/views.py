@@ -13926,9 +13926,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 include_non_assessable=not assessable
             )
         )
-        # Auditee filtering: scope to assigned requirements only
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
-        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+        # Respondent filtering: scope to assigned requirements only (auditee or third-party)
+        respondent_folders = get_respondent_filtered_folder_ids(request.user)
+        is_respondent = bool(
+            respondent_folders and compliance_assessment.folder_id in respondent_folders
+        )
+        if is_respondent:
             user_actors = Actor.get_all_for_user(request.user)
             ra_ids = set(
                 RequirementAssignment.objects.filter(
@@ -13978,10 +13981,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 if parent:
                     req._parent_requirement_obj = parent
         # Determine viewer role based on respondent status (auditee or third-party)
-        respondent_folders = get_respondent_filtered_folder_ids(request.user)
-        is_respondent = bool(
-            respondent_folders and compliance_assessment.folder_id in respondent_folders
-        )
         viewer_role = "respondent" if is_respondent else "auditor"
 
         requirement_assessments = RequirementAssessmentReadSerializer(
@@ -15343,11 +15342,11 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 "requirement__questions__choices",  # Needed by get_questions_translated
             )
         )
-        auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
-        if auditee_folders:
+        respondent_folders = get_respondent_filtered_folder_ids(self.request.user)
+        if respondent_folders:
             user_actors = Actor.get_all_for_user(self.request.user)
             qs = qs.filter(
-                ~Q(folder_id__in=auditee_folders)
+                ~Q(folder_id__in=respondent_folders)
                 | Q(assignments__actor__in=user_actors)
             ).distinct()
         return qs
@@ -18600,11 +18599,11 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
                 ),
             )
         )
-        auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
-        if auditee_folders:
+        respondent_folders = get_respondent_filtered_folder_ids(self.request.user)
+        if respondent_folders:
             user_actors = Actor.get_all_for_user(self.request.user)
             qs = qs.filter(
-                ~Q(folder_id__in=auditee_folders) | Q(actor__in=user_actors)
+                ~Q(folder_id__in=respondent_folders) | Q(actor__in=user_actors)
             ).distinct()
         return qs
 
@@ -18638,7 +18637,7 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
     # Valid transitions: (from_status, to_status) → config
-    # reviewer_only: auditee-only users are forbidden
+    # reviewer_only: respondents (auditee or third-party) are forbidden
     # actor_only: only assigned actors can perform this transition
     # check_completion: all assessable requirements must be assessed
     # observation: "clear" removes it, "optional" keeps if provided, "required" must be provided
@@ -18691,15 +18690,15 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Reviewer-only check: auditee-only users are forbidden
+        # Reviewer-only check: respondents (auditee or third-party) are forbidden
         if config.get("reviewer_only"):
-            auditee_folders = get_auditee_filtered_folder_ids(request.user)
+            respondent_folders = get_respondent_filtered_folder_ids(request.user)
             if (
-                auditee_folders
-                and assignment.compliance_assessment.folder_id in auditee_folders
+                respondent_folders
+                and assignment.compliance_assessment.folder_id in respondent_folders
             ):
                 return Response(
-                    {"error": "Auditee users cannot perform this action."},
+                    {"error": "Respondent users cannot perform this action."},
                     status=status.HTTP_403_FORBIDDEN,
                 )
 
