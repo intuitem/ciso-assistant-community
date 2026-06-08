@@ -573,6 +573,7 @@ class LibraryImporter:
         "frameworks",
         "requirement_mapping_set",  # This field name is deprecated
         "requirement_mapping_sets",
+        "preset",
     ]
     NON_DEPRECATED_OBJECT_FIELDS = [
         field

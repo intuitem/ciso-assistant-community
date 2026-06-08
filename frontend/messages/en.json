@@ -3254,6 +3254,8 @@
 	"columns": "columns",
 	"showAll": "Show All",
 	"hideAll": "Hide All",
+	"atLeastOneColumnRequired": "At least one column must remain visible",
+	"hidden": "Hidden",
 	"required": "required",
 	"legendNotes": "Legend & Notes",
 	"legend": "Legend",
