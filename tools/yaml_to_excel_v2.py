@@ -26,6 +26,7 @@ from openpyxl.utils import get_column_letter
 # ---------------------------------------------------------------------------
 
 def slugify(text: str) -> str:
+    """Convert arbitrary text to a lowercase ASCII slug (hyphens/underscores/dots only)."""
     text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")
     text = text.lower().replace(" ", "-")
     return re.sub(r"[^a-z0-9_\-\.]", "_", text)
@@ -43,6 +44,7 @@ def sheet_base_name(ref_id: str) -> str:
 
 
 def style_header_row(ws, row_num: int, col_count: int):
+    """Apply bold white-on-blue styling to every cell in the given header row."""
     fill = PatternFill("solid", fgColor="4472C4")
     font = Font(bold=True, color="FFFFFF")
     for col in range(1, col_count + 1):
@@ -53,6 +55,7 @@ def style_header_row(ws, row_num: int, col_count: int):
 
 
 def autofit_columns(ws):
+    """Set each column width to the longest cell value (capped at 80 chars)."""
     for col_cells in ws.columns:
         max_len = 0
         col_letter = get_column_letter(col_cells[0].column)
@@ -70,6 +73,7 @@ def autofit_columns(ws):
 # ---------------------------------------------------------------------------
 
 def build_library_meta(wb, data: dict):
+    """Write the library_meta sheet with top-level library fields and locale translations."""
     ws = wb.create_sheet("library_meta")
     rows = [
         ("type", "library"),
@@ -97,6 +101,7 @@ def build_library_meta(wb, data: dict):
 
 
 def build_framework_meta(wb, fw: dict, sheet_base: str):
+    """Write the {sheet_base}_meta sheet with framework-level fields and locale translations."""
     ws = wb.create_sheet(f"{sheet_base}_meta")
     base_urn = fw.get("urn", "").replace(":framework:", ":req_node:")
     rows = [
@@ -120,6 +125,7 @@ def build_framework_meta(wb, fw: dict, sheet_base: str):
 
 
 def build_framework_content(wb, fw: dict, sheet_base: str, extra_langs: list):
+    """Write the {sheet_base}_content sheet with one row per requirement node including extra-locale columns."""
     ws = wb.create_sheet(f"{sheet_base}_content")
 
     # Build header
@@ -160,6 +166,7 @@ def build_framework_content(wb, fw: dict, sheet_base: str, extra_langs: list):
 # ---------------------------------------------------------------------------
 
 def convert(yaml_path: Path, output_path: Path):
+    """Load a YAML library file and write the corresponding v2 Excel workbook to output_path."""
     with open(yaml_path, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
 
@@ -198,6 +205,7 @@ def convert(yaml_path: Path, output_path: Path):
 # ---------------------------------------------------------------------------
 
 def main():
+    """Parse CLI arguments and invoke convert() in single-file or bulk mode."""
     parser = argparse.ArgumentParser(description="Convert CISO Assistant YAML library to v2 Excel format")
     parser.add_argument("input", help="Path to YAML file or folder (with --bulk)")
     parser.add_argument("--output", help="Output .xlsx path (single file mode)")
