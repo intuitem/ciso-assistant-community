@@ -1678,10 +1678,13 @@ class AuditedModelsView(APIView):
 class ObjectAuditTrailView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
+    MAX_ENTRIES = 200
+
     def get(self, request, format=None):
         from uuid import UUID
         from django.contrib.contenttypes.models import ContentType
         from auditlog.models import LogEntry
+        from core.utils import get_auditee_filtered_folder_ids
 
         model_name = (request.query_params.get("content_type") or "").lower()
         raw_object_id = request.query_params.get("object_id")
@@ -1707,9 +1710,19 @@ class ObjectAuditTrailView(APIView):
         if not RoleAssignment.is_object_readable(request.user, model_class, object_id):
             raise PermissionDenied
 
-        entries = LogEntry.objects.filter(
-            content_type=content_type, object_pk=str(object_id)
-        ).order_by("-timestamp")
+        # Deny when the user only holds the auditee role on the object's folder:
+        # the trail would otherwise expose raw field changes (bypassing
+        # field_visibility) to respondents/third-party users.
+        obj = model_class.objects.filter(pk=object_id).first()
+        folder_id = getattr(obj, "folder_id", None)
+        if folder_id and folder_id in get_auditee_filtered_folder_ids(request.user):
+            raise PermissionDenied
+
+        entries = (
+            LogEntry.objects.filter(content_type=content_type, object_pk=str(object_id))
+            .select_related("actor")
+            .order_by("-timestamp")[: self.MAX_ENTRIES]
+        )
         results = [
             {
                 "id": entry.id,
@@ -1718,12 +1731,17 @@ class ObjectAuditTrailView(APIView):
                 "actor": (entry.additional_data or {}).get("user_email")
                 or (entry.actor.email if entry.actor else None),
                 "timestamp": entry.timestamp,
-                "changes": entry.changes,
-                "object_repr": entry.object_repr,
+                "changes": self._mask(model_name, entry.changes),
             }
             for entry in entries
         ]
         return Response(results)
+
+    @staticmethod
+    def _mask(model_name, changes):
+        if model_name == "user" and isinstance(changes, dict) and "password" in changes:
+            return {**changes, "password": ["***", "***"]}
+        return changes
 
 
 # Risk Assessment

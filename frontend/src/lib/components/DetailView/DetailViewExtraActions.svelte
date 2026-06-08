@@ -18,6 +18,7 @@
 
 <script lang="ts">
 	import { m } from '$paraglide/messages';
+	import { page } from '$app/state';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import type { urlModel } from '$lib/utils/types';
 	import {
@@ -45,7 +46,11 @@
 		auditedModels = await loadAuditedModels(fetch);
 	});
 
-	const enabled = $derived(!!contentType && !!objectId && auditedModels.has(contentType));
+	const isThirdParty = $derived(page.route.id?.includes('(third-party)') ?? false);
+
+	const enabled = $derived(
+		!isThirdParty && !!contentType && !!objectId && auditedModels.has(contentType)
+	);
 
 	function openAuditTrail() {
 		const modalComponent: ModalComponent = {
