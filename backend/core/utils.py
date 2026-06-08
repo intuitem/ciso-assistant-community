@@ -1487,6 +1487,28 @@ def build_initial_field_visibility(framework):
     return merged
 
 
+def merge_field_visibility(base, overrides):
+    """Deep-merge a partial `field_visibility` map onto a base, per field and
+    per role.
+
+    A shallow ``{**base, **overrides}`` would let a partial pair like
+    {"status": {"auditor": "read"}} replace the whole stored pair and drop the
+    other role's value, which the resolver would then only backfill from the
+    *code* default (not the previous/framework value). Merging per role keeps
+    roles the caller didn't touch.
+    """
+    merged = {
+        key: (dict(pair) if isinstance(pair, dict) else pair)
+        for key, pair in (base or {}).items()
+    }
+    for key, pair in (overrides or {}).items():
+        if isinstance(pair, dict) and isinstance(merged.get(key), dict):
+            merged[key].update(pair)
+        else:
+            merged[key] = dict(pair) if isinstance(pair, dict) else pair
+    return merged
+
+
 def build_effective_field_visibility(compliance_assessment):
     """Return a CA's fully-resolved per-role visibility map.
 

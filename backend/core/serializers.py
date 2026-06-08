@@ -2740,11 +2740,12 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
 
         # Always merge the caller's partial field_visibility with code defaults
         # + framework template so the new CA is stored as a complete snapshot.
-        from core.utils import build_initial_field_visibility
+        # Merge per role so a partial pair doesn't erase a default/framework role.
+        from core.utils import build_initial_field_visibility, merge_field_visibility
 
         defaults = build_initial_field_visibility(validated_data.get("framework"))
         provided = validated_data.get("field_visibility") or {}
-        validated_data["field_visibility"] = {**defaults, **provided}
+        validated_data["field_visibility"] = merge_field_visibility(defaults, provided)
 
         assessment = super().create(validated_data)
 
@@ -2787,11 +2788,16 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
 
         # PATCH semantics for field_visibility: merge incoming partial map onto
         # the existing one so a request that only sets a few keys doesn't wipe
-        # the rest of the snapshot.
+        # the rest of the snapshot. Merge per role too, so a partial pair updates
+        # only the given roles instead of dropping the others.
         if "field_visibility" in validated_data:
+            from core.utils import merge_field_visibility
+
             existing = instance.field_visibility or {}
             provided = validated_data["field_visibility"] or {}
-            validated_data["field_visibility"] = {**existing, **provided}
+            validated_data["field_visibility"] = merge_field_visibility(
+                existing, provided
+            )
 
         old_scoring_enabled = instance.scoring_enabled
 
