@@ -1424,26 +1424,26 @@ DEFAULT_VISIBILITY = {
 
 
 def resolve_visibility_from_overrides(overrides, field_name):
-    """Resolve a field's visibility pair from a raw `field_visibility` dict.
+    """Resolve a field's complete per-role visibility pair from a raw
+    `field_visibility` dict.
 
     Shape: {role: 'edit'|'read'|'hidden'}.
 
-    Lookup order:
-      1. Explicit override in `overrides`.
-      2. DEFAULT_VISIBILITY (backstop in case a new field was added in code
-         without a migration to backfill existing CAs).
-      3. EVERYONE_EDIT (truly unknown field).
+    The override is merged on top of a base pair, per role, so the result always
+    carries every known role. The base is DEFAULT_VISIBILITY for the field (or
+    EVERYONE_EDIT for fields with no default), and the override wins per role.
+    This means a partial stored override like {"status": {"auditor": "edit"}}
+    still resolves `respondent` from the default (hidden) rather than silently
+    falling back to edit, which would reopen a respondent leak.
 
     Use this when you have a raw dict (e.g. from a queryset `.values()` call).
     For a model instance, prefer `resolve_field_visibility(ca, field)`.
     """
+    base = dict(DEFAULT_VISIBILITY.get(field_name) or EVERYONE_EDIT)
     pair = (overrides or {}).get(field_name)
     if isinstance(pair, dict):
-        return pair
-    fallback = DEFAULT_VISIBILITY.get(field_name)
-    if isinstance(fallback, dict):
-        return dict(fallback)
-    return dict(EVERYONE_EDIT)
+        base.update(pair)
+    return base
 
 
 def resolve_field_visibility(compliance_assessment, field_name):

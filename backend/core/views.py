@@ -18750,8 +18750,8 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
     def requirements_list(self, request, pk=None):
         """Returns the scoped requirements list for this assignment.
 
-        Authorization is enforced by get_queryset() which filters
-        auditee-only users to their own assignments.
+        Authorization is enforced by get_queryset() which filters respondents
+        (auditee or third-party) to their own assignments.
         """
         assignment = self.get_object()
         compliance_assessment = assignment.compliance_assessment
