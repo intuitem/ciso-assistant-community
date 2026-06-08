@@ -80,9 +80,9 @@ If a user has lost access to every enrolled second factor (phone wiped, hardware
 
 <figure><img src="../.gitbook/assets/mfa-in-settings.png" alt=""><figcaption><p>The "Reset MFA" link on a user's edit page (visible only to admins, when the target user has MFA enabled).</p></figcaption></figure>
 
-3. On the confirmation page, type `yes` and submit.
+3. On the confirmation page, type the confirmation word shown on screen (the localized word for "yes") and submit.
 
-<figure><img src="../.gitbook/assets/mfa-reset-confirmation.png" alt=""><figcaption><p>The confirmation page requires typing <code>yes</code> before the reset can be submitted.</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/mfa-reset-confirmation.png" alt=""><figcaption><p>The confirmation page requires typing the localized confirmation word shown on screen before the reset can be submitted.</p></figcaption></figure>
 
 All of the user's MFA authenticators (TOTP, WebAuthn credentials, recovery codes) are removed. The user will be prompted to re-enroll MFA on their next login.
 

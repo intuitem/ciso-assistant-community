@@ -480,23 +480,24 @@ class ResetMFAView(views.APIView):
         target_user = serializer.validated_data.get("user")
 
         # Block self-reset: admins must use the normal MFA disable flow
-        # (which requires their TOTP code ) so a  stolen admin session
+        # (which requires their TOTP code) so a stolen admin session
         # cannot silently drop the second factor.
-
         if target_user.pk == request.user.pk:
             return Response(
                 {"error": "cannotResetOwnMFA"},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        authenticators = Authenticator.objects.filter(user=target_user)
-        if not authenticators.exists():
+        # Delete first and branch on the deleted count to avoid an
+        # exists-then-delete race where a concurrent request could empty the
+        # authenticators between the check and the delete.
+        deleted_count, _ = Authenticator.objects.filter(user=target_user).delete()
+        if not deleted_count:
             return Response(
                 {"error": "userHasNoMFAEnabled"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        deleted_count, _ = authenticators.delete()
         logger.warning(
             "Admin reset MFA for another user",
             admin_id=str(request.user.id),
