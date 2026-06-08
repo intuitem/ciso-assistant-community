@@ -136,12 +136,17 @@ interface Field {
 	tooltip?: string;
 }
 
-interface SelectField {
+export interface SelectField {
 	field: string;
 	detail?: boolean;
 	valueType?: 'string' | 'number';
 	endpointUrl?: string;
 	formNestedField?: string;
+}
+
+export interface SelectFieldData {
+	label: string;
+	value: string | number;
 }
 
 type FeatureFlag = string;
@@ -2073,7 +2078,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'owner', urlModel: 'actors' },
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
-			{ field: 'perimeter', urlModel: 'perimeters' }
+			{ field: 'perimeter', urlModel: 'perimeters' },
+			{ field: 'vulnerabilities', urlModel: 'vulnerabilities' }
 		],
 		reverseForeignKeyFields: [
 			{
@@ -3042,7 +3048,7 @@ const FIELD_COMPONENT_MAP = {
 		[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
 	},
 	'user-groups': {
-		localization_dict: UserGroupNameDisplay
+		name: UserGroupNameDisplay
 	},
 	'quantitative-risk-hypotheses': {
 		lec_data: LecChartPreview

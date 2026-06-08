@@ -15,6 +15,7 @@
 	import { run } from 'svelte/legacy';
 	import { page } from '$app/state';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { formatDate } from '$lib/utils/datetime';
 	import { getLocale } from '$paraglide/runtime';
 
 	let displayCurrency = $state(page.data?.settings?.currency ?? '€'); // Default to Euro
@@ -85,6 +86,16 @@
 </script>
 
 {#if !duplicate}
+	{#if schema.shape.category}
+		<Select
+			{form}
+			options={model.selectOptions?.category}
+			field="category"
+			label={m.category()}
+			cacheLock={cacheLocks['category']}
+			bind:cachedValue={formDataCache['category']}
+		/>
+	{/if}
 	<AutocompleteSelect
 		{form}
 		multiple
@@ -142,13 +153,6 @@
 		icon="fa-solid fa-tasks"
 		header={m.projectManagement()}
 	>
-		<TextField
-			{form}
-			field="ref_id"
-			label={m.refId()}
-			cacheLock={cacheLocks['ref_id']}
-			bind:cachedValue={formDataCache['ref_id']}
-		/>
 		<Select
 			{form}
 			options={model.selectOptions?.priority}
@@ -272,16 +276,6 @@
 		icon="fa-solid fa-project-diagram"
 		header={m.relationships()}
 	>
-		{#if schema.shape.category}
-			<Select
-				{form}
-				options={model.selectOptions?.category}
-				field="category"
-				label={m.category()}
-				cacheLock={cacheLocks['category']}
-				bind:cachedValue={formDataCache['category']}
-			/>
-		{/if}
 		<Select
 			{form}
 			options={model.selectOptions?.csf_function}
@@ -429,7 +423,7 @@
 						<dd>{syncMapping.remote_id}</dd>
 
 						<dt class="font-medium">{m.lastSynced()}</dt>
-						<dd>{new Date(syncMapping.last_synced_at).toLocaleString(getLocale())}</dd>
+						<dd>{formatDate(new Date(syncMapping.last_synced_at), true, getLocale())}</dd>
 
 						<dt class="font-medium">{m.status()}</dt>
 						<dd>{safeTranslate(syncMapping.sync_status)}</dd>

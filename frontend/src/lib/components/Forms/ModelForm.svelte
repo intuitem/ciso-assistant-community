@@ -338,17 +338,40 @@
 			/>
 		{/if}
 		{#if shape.name && !customNameDescription}
-			<TextField
-				{form}
-				field="name"
-				label={m.name()}
-				cacheLock={cacheLocks['name']}
-				bind:cachedValue={formDataCache['name']}
-				data-focusindex="0"
-				oninput={() => {
-					updated_fields.add('name');
-				}}
-			/>
+			{#if shape.ref_id}
+				<div class="grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-4">
+					<TextField
+						{form}
+						field="ref_id"
+						label={m.refId()}
+						cacheLock={cacheLocks['ref_id']}
+						bind:cachedValue={formDataCache['ref_id']}
+					/>
+					<TextField
+						{form}
+						field="name"
+						label={m.name()}
+						cacheLock={cacheLocks['name']}
+						bind:cachedValue={formDataCache['name']}
+						data-focusindex="0"
+						oninput={() => {
+							updated_fields.add('name');
+						}}
+					/>
+				</div>
+			{:else}
+				<TextField
+					{form}
+					field="name"
+					label={m.name()}
+					cacheLock={cacheLocks['name']}
+					bind:cachedValue={formDataCache['name']}
+					data-focusindex="0"
+					oninput={() => {
+						updated_fields.add('name');
+					}}
+				/>
+			{/if}
 		{/if}
 		{#if shape.description && !customNameDescription}
 			<MarkdownField
@@ -877,11 +900,9 @@
 		{:else if URLModel === 'dashboards'}
 			<DashboardForm
 				{form}
-				{model}
 				{cacheLocks}
 				{formDataCache}
 				initialData={{ ...initialData, ...additionalInitialData }}
-				{data}
 				{...rest}
 			/>
 		{:else if URLModel === 'dashboard-widgets'}
@@ -891,7 +912,6 @@
 				{cacheLocks}
 				{formDataCache}
 				initialData={{ ...initialData, ...additionalInitialData }}
-				{data}
 				{object}
 				{...rest}
 			/>
@@ -912,7 +932,6 @@
 				{cacheLocks}
 				{formDataCache}
 				initialData={{ ...initialData, ...additionalInitialData }}
-				{data}
 				{object}
 				{...rest}
 			/>
