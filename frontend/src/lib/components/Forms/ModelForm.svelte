@@ -339,16 +339,14 @@
 		{/if}
 		{#if shape.name && !customNameDescription}
 			{#if shape.ref_id}
-				<div class="grid grid-cols-[auto_1fr] gap-4">
-					<div class="w-64">
-						<TextField
-							{form}
-							field="ref_id"
-							label={m.refId()}
-							cacheLock={cacheLocks['ref_id']}
-							bind:cachedValue={formDataCache['ref_id']}
-						/>
-					</div>
+				<div class="grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-4">
+					<TextField
+						{form}
+						field="ref_id"
+						label={m.refId()}
+						cacheLock={cacheLocks['ref_id']}
+						bind:cachedValue={formDataCache['ref_id']}
+					/>
 					<TextField
 						{form}
 						field="name"
