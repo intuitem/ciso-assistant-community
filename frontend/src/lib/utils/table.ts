@@ -12,6 +12,7 @@ import TaskNodeChangeStatus from '$lib/components/ContextMenu/task-nodes/ChangeS
 import { getModelInfo } from './crud';
 import SelectObject from '$lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
 import ChangePriority from '$lib/components/ContextMenu/applied-controls/ChangePriority.svelte';
+import ReplaceWith from '$lib/components/ContextMenu/applied-controls/ReplaceWith.svelte';
 import ChangeAttackStage from '$lib/components/ContextMenu/elementary-actions/ChangeAttackStage.svelte';
 import VulnerabilityChangeStatus from '$lib/components/ContextMenu/vulnerabilities/ChangeStatus.svelte';
 import VulnerabilityChangeSeverity from '$lib/components/ContextMenu/vulnerabilities/ChangeSeverity.svelte';
@@ -26,7 +27,13 @@ export function tableSourceMapper(source: any[], keys: string[]): any[] {
 
 export interface ListViewFilterConfig {
 	component: ComponentType;
-	props?: { label: string; optionsEndpoint?: string; multiple?: boolean; options?: Option[] };
+	props?: {
+		label: string;
+		optionsEndpoint?: string;
+		multiple?: boolean;
+		options?: Option[];
+		[key: string]: unknown;
+	};
 	hide?: boolean;
 }
 
@@ -34,6 +41,8 @@ interface ListViewFieldsConfig {
 	[key: string]: {
 		head: string[];
 		body: string[];
+		// Extra columns offered via the column selector but hidden by default; `head`/`body` stay the defaults.
+		optionalFields?: { head: string[]; body: string[] };
 		meta?: string[];
 		breadcrumb_link_disabled?: boolean;
 		filters?: {
@@ -107,6 +116,40 @@ export const ACCREDITATION_CATEGORY_FILTER: ListViewFilterConfig = {
 		optionsEndpoint: 'terminologies?field_path=accreditation.category',
 		optionsLabelField: 'name',
 		label: 'category',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+export const PROJECT_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'terminologies?field_path=project.status',
+		optionsLabelField: 'name',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+export const PROJECT_KIND_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'projects/kind',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'kind',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+export const PROJECT_HEALTH_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'terminologies?field_path=project.health',
+		optionsLabelField: 'name',
+		label: 'health',
 		browserCache: 'force-cache',
 		multiple: true
 	}
@@ -1285,6 +1328,10 @@ export const listViewFields = {
 	perimeters: {
 		head: ['ref_id', 'name', 'description', 'defaultAssignee', 'domain'],
 		body: ['ref_id', 'name', 'description', 'default_assignee', 'folder'],
+		optionalFields: {
+			head: ['lcStatus', 'createdAt', 'updatedAt'],
+			body: ['lc_status', 'created_at', 'updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			lc_status: PERIMETER_STATUS_FILTER
@@ -1368,6 +1415,10 @@ export const listViewFields = {
 			'perimeter',
 			'updated_at'
 		],
+		optionalFields: {
+			head: ['createdAt'],
+			body: ['created_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -1377,6 +1428,10 @@ export const listViewFields = {
 	threats: {
 		head: ['ref_id', 'name', 'description', 'library', 'domain', 'labels'],
 		body: ['ref_id', 'name', 'description', 'library', 'folder', 'filtering_labels'],
+		optionalFields: {
+			head: ['provider', 'createdAt', 'updatedAt'],
+			body: ['provider', 'created_at', 'updated_at']
+		},
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -1468,6 +1523,10 @@ export const listViewFields = {
 			'treatment',
 			'risk_assessment'
 		],
+		optionalFields: {
+			head: ['createdAt', 'updatedAt'],
+			body: ['created_at', 'updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -1546,7 +1605,6 @@ export const listViewFields = {
 			'csfFunction',
 			'eta',
 			'domain',
-			'owner',
 			'controlImpact',
 			'effort',
 			'linkedModels',
@@ -1563,12 +1621,15 @@ export const listViewFields = {
 			'csf_function',
 			'eta',
 			'folder',
-			'owner',
 			'control_impact',
 			'effort',
 			'linked_models',
 			'filtering_labels'
 		],
+		optionalFields: {
+			head: ['startDate', 'expiryDate', 'createdAt', 'updatedAt'],
+			body: ['start_date', 'expiry_date', 'created_at', 'updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: APPLIED_CONTROL_STATUS_FILTER,
@@ -1609,6 +1670,10 @@ export const listViewFields = {
 			'folder',
 			'reference_control'
 		],
+		optionalFields: {
+			head: ['startDate', 'expiryDate', 'createdAt', 'updatedAt'],
+			body: ['start_date', 'expiry_date', 'created_at', 'updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: APPLIED_CONTROL_STATUS_FILTER,
@@ -1638,6 +1703,10 @@ export const listViewFields = {
 			'folder',
 			'filtering_labels'
 		],
+		optionalFields: {
+			head: ['createdAt', 'updatedAt'],
+			body: ['created_at', 'updated_at']
+		},
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -1671,6 +1740,10 @@ export const listViewFields = {
 			'folder',
 			'filtering_labels'
 		],
+		optionalFields: {
+			head: ['referenceLink', 'createdAt', 'updatedAt'],
+			body: ['reference_link', 'created_at', 'updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			type: ASSET_TYPE_FILTER,
@@ -1717,7 +1790,7 @@ export const listViewFields = {
 	},
 	'user-groups': {
 		head: ['name'],
-		body: ['localization_dict'],
+		body: ['name'],
 		meta: ['id', 'builtin']
 	},
 	roles: {
@@ -1763,6 +1836,10 @@ export const listViewFields = {
 			'created_at',
 			'updated_at'
 		],
+		optionalFields: {
+			head: ['status'],
+			body: ['status']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -1792,6 +1869,10 @@ export const listViewFields = {
 			'filtering_labels',
 			'applied_controls'
 		],
+		optionalFields: {
+			head: ['createdAt'],
+			body: ['created_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			filtering_labels: LABELS_FILTER,
@@ -1887,6 +1968,10 @@ export const listViewFields = {
 			'relationship',
 			'default_criticality'
 		],
+		optionalFields: {
+			head: ['referenceLink', 'createdAt', 'updatedAt'],
+			body: ['reference_link', 'created_at', 'updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			parent_entity: PARENT_ENTITY_FILTER,
@@ -1925,6 +2010,10 @@ export const listViewFields = {
 	solutions: {
 		head: ['refId', 'name', 'description', 'providerEntity', 'criticality', 'labels'],
 		body: ['ref_id', 'name', 'description', 'provider_entity', 'criticality', 'filtering_labels'],
+		optionalFields: {
+			head: ['createdAt', 'updatedAt'],
+			body: ['created_at', 'updated_at']
+		},
 		filters: {
 			provider_entity: ENTITY_FILTER,
 			criticality: SOLUTION_CRITICALITY_FILTER,
@@ -1971,6 +2060,10 @@ export const listViewFields = {
 	'business-impact-analysis': {
 		head: ['name', 'perimeter', 'folder', 'status'],
 		body: ['name', 'perimeter', 'folder', 'status'],
+		optionalFields: {
+			head: ['createdAt', 'updatedAt'],
+			body: ['created_at', 'updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -2172,8 +2265,24 @@ export const listViewFields = {
 		}
 	},
 	'personal-data': {
-		head: ['category', 'isSensitive', 'retention', 'deletionPolicy', 'customName', 'processing'],
-		body: ['category', 'is_sensitive', 'retention', 'deletion_policy', 'name', 'processing'],
+		head: [
+			'category',
+			'isSensitive',
+			'retention',
+			'deletionPolicy',
+			'customName',
+			'assets',
+			'processing'
+		],
+		body: [
+			'category',
+			'is_sensitive',
+			'retention',
+			'deletion_policy',
+			'name',
+			'assets',
+			'processing'
+		],
 		filters: {
 			processing: PROCESSING_FILTER,
 			category: PERSONAL_DATA_CATEGORY_FILTER,
@@ -2219,8 +2328,8 @@ export const listViewFields = {
 		}
 	},
 	'feared-events': {
-		head: ['selected', 'name', 'assets', 'description', 'qualifications', 'gravity'],
-		body: ['is_selected', 'name', 'assets', 'description', 'qualifications', 'gravity'],
+		head: ['selected', 'refId', 'name', 'assets', 'description', 'qualifications', 'gravity'],
+		body: ['is_selected', 'ref_id', 'name', 'assets', 'description', 'qualifications', 'gravity'],
 		filters: {
 			assets: ASSET_FILTER,
 			qualifications: QUALIFICATION_FILTER,
@@ -2376,6 +2485,10 @@ export const listViewFields = {
 			'associated_objects_count',
 			'created_at'
 		],
+		optionalFields: {
+			head: ['updatedAt'],
+			body: ['updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			severity: EXCEPTION_SEVERITY_FILTER,
@@ -2434,6 +2547,10 @@ export const listViewFields = {
 			'applied_controls',
 			'filtering_labels'
 		],
+		optionalFields: {
+			head: ['createdAt', 'updatedAt'],
+			body: ['created_at', 'updated_at']
+		},
 		filters: {
 			filtering_labels: LABELS_FILTER,
 			severity: FINDINGS_SEVERITY_FILTER,
@@ -2467,6 +2584,10 @@ export const listViewFields = {
 			'reported_at',
 			'updated_at'
 		],
+		optionalFields: {
+			head: ['createdAt'],
+			body: ['created_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			qualifications: QUALIFICATION_FILTER,
@@ -2638,7 +2759,8 @@ export const listViewFields = {
 			'lastOccurrenceStatus',
 			'nextOccurrence',
 			'nextOccurrenceStatus',
-			'folder'
+			'folder',
+			'labels'
 		],
 		body: [
 			'ref_id',
@@ -2649,14 +2771,20 @@ export const listViewFields = {
 			'last_occurrence_status',
 			'next_occurrence',
 			'next_occurrence_status',
-			'folder'
+			'folder',
+			'filtering_labels'
 		],
+		optionalFields: {
+			head: ['createdAt', 'updatedAt'],
+			body: ['created_at', 'updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			assigned_to: TASK_TEMPLATE_ASSIGNED_TO_FILTER,
 			is_recurrent: IS_RECURRENT_FILTER,
 			last_occurrence_status: LAST_OCCURENCE_STATUS_FILTER,
-			next_occurrence_status: NEXT_OCCURENCE_STATUS_FILTER
+			next_occurrence_status: NEXT_OCCURENCE_STATUS_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'task-nodes': {
@@ -2698,6 +2826,40 @@ export const listViewFields = {
 			authority: ACCREDITATION_AUTHORITY_FILTER,
 			filtering_labels: LABELS_FILTER
 		}
+	},
+	projects: {
+		head: ['kind', 'ref_id', 'name', 'status', 'health', 'owner', 'progress', 'folder'],
+		body: ['kind', 'ref_id', 'name', 'status', 'health', 'owner', 'progress', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			kind: PROJECT_KIND_FILTER,
+			status: PROJECT_STATUS_FILTER,
+			health: PROJECT_HEALTH_FILTER,
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	'responsibility-matrices': {
+		head: ['ref_id', 'name', 'preset', 'activities_count', 'folder'],
+		body: ['ref_id', 'name', 'preset', 'activities_count', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	'responsibility-roles': {
+		head: ['code', 'name', 'taxonomy', 'color', 'order', 'builtin'],
+		body: ['code', 'name', 'taxonomy', 'color', 'order', 'builtin'],
+		filters: {}
+	},
+	'responsibility-matrix-activities': {
+		head: ['name', 'description', 'order', 'matrix'],
+		body: ['name', 'description', 'order', 'matrix'],
+		filters: {}
+	},
+	'responsibility-assignments': {
+		head: ['activity', 'actor', 'role'],
+		body: ['activity', 'actor', 'role'],
+		filters: {}
 	},
 	'metric-definitions': {
 		head: ['ref_id', 'name', 'description', 'category', 'unit', 'provider', 'labels', 'folder'],
@@ -2899,6 +3061,13 @@ export const listViewFields = {
 			gravity: undefined
 		},
 		body: ['users']
+	},
+	journeys: {
+		head: ['name', 'preset', 'folder', 'appliedVersion', 'appliedAt', 'appliedBy'],
+		body: ['name', 'preset', 'folder', 'applied_version', 'applied_at', 'applied_by'],
+		filters: {
+			folder: DOMAIN_FILTER
+		}
 	}
 } as const satisfies ListViewFieldsConfig;
 
@@ -2914,7 +3083,8 @@ export const contextMenuActions = {
 		{ component: ChangeImpact, props: {} },
 		{ component: ChangeEffort, props: {} },
 		{ component: ChangePriority, props: {} },
-		{ component: ChangeCsfFunction, props: {} }
+		{ component: ChangeCsfFunction, props: {} },
+		{ component: ReplaceWith, props: {} }
 	],
 	evidences: [{ component: EvidenceChangeStatus, props: {} }],
 	'task-nodes': [{ component: TaskNodeChangeStatus, props: {} }],
@@ -2939,37 +3109,47 @@ export interface BatchActionConfig {
 		| 'add_m2m'
 		| 'remove_m2m'
 		| 'change_folder'
-		| 'group';
+		| 'group'
+		| 'merge';
 	label: string;
 	icon: string;
 	field?: string;
 	optionsEndpoint?: string;
 	multiSelect?: boolean;
 	children?: BatchActionConfig[];
+	minSelection?: number;
+	maxSelection?: number;
 }
 
 export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 	'applied-controls': [
 		{
-			type: 'change_field',
-			label: 'changeStatus',
-			icon: 'fa-solid fa-arrow-right-arrow-left',
-			field: 'status',
-			optionsEndpoint: 'applied-controls/status'
-		},
-		{
-			type: 'change_field',
-			label: 'batchChangePriority',
-			icon: 'fa-solid fa-arrow-up-wide-short',
-			field: 'priority',
-			optionsEndpoint: 'applied-controls/priority'
-		},
-		{
-			type: 'change_field',
-			label: 'changeCsfFunction',
-			icon: 'fa-solid fa-shield-halved',
-			field: 'csf_function',
-			optionsEndpoint: 'applied-controls/csf_function'
+			type: 'group',
+			label: 'changeAttributes',
+			icon: 'fa-solid fa-sliders',
+			children: [
+				{
+					type: 'change_field',
+					label: 'changeStatus',
+					icon: 'fa-solid fa-arrow-right-arrow-left',
+					field: 'status',
+					optionsEndpoint: 'applied-controls/status'
+				},
+				{
+					type: 'change_field',
+					label: 'batchChangePriority',
+					icon: 'fa-solid fa-arrow-up-wide-short',
+					field: 'priority',
+					optionsEndpoint: 'applied-controls/priority'
+				},
+				{
+					type: 'change_field',
+					label: 'changeCsfFunction',
+					icon: 'fa-solid fa-shield-halved',
+					field: 'csf_function',
+					optionsEndpoint: 'applied-controls/csf_function'
+				}
+			]
 		},
 		{
 			type: 'change_m2m',
@@ -3008,6 +3188,13 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			icon: 'fa-solid fa-folder',
 			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
 		},
+		{
+			type: 'merge',
+			label: 'mergeControls',
+			icon: 'fa-solid fa-code-merge',
+			minSelection: 2,
+			maxSelection: 20
+		},
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],
 	policies: [
@@ -3023,6 +3210,13 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			label: 'changeDomain',
 			icon: 'fa-solid fa-folder',
 			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{
+			type: 'merge',
+			label: 'mergeControls',
+			icon: 'fa-solid fa-code-merge',
+			minSelection: 2,
+			maxSelection: 20
 		},
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],
@@ -3459,10 +3653,12 @@ export function getBatchActions(model: urlModel): BatchActionConfig[] {
 
 export function getListViewFields({
 	key,
-	featureFlags = {}
+	featureFlags = {},
+	includeOptional = false
 }: {
 	key: string;
 	featureFlags: Record<string, boolean>;
+	includeOptional?: boolean;
 }) {
 	if (!Object.keys(listViewFields).includes(key)) {
 		return { head: [], body: [] };
@@ -3485,6 +3681,12 @@ export function getListViewFields({
 
 		head = head.filter((_, index) => !indicesToPop.includes(index));
 		body = body.filter((_, index) => !indicesToPop.includes(index));
+	}
+
+	// Optional fields are appended after the defaults but are hidden by default in the UI.
+	if (includeOptional && baseEntry.optionalFields) {
+		head = [...head, ...baseEntry.optionalFields.head];
+		body = [...body, ...baseEntry.optionalFields.body];
 	}
 
 	return {

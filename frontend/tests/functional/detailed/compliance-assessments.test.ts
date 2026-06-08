@@ -13,6 +13,7 @@ test('compliance assessments scoring is working properly', async ({
 	page
 }) => {
 	const testRequirements = ['folders', 'perimeters', 'complianceAssessments'];
+	const minScore = 1;
 	const maxScore = 4;
 	const IDAM1Score = {
 		ratio: 0.66,
@@ -31,7 +32,8 @@ test('compliance assessments scoring is working properly', async ({
 		value: 1
 	};
 	// Helper to convert raw score to percentage for tree view assertions
-	const toPercent = (score: number) => ((score / maxScore) * 100).toString();
+	const toPercent = (score: number) =>
+		(((score - minScore) * 100) / (maxScore - minScore)).toString();
 
 	for (let requirement of testRequirements) {
 		requirement += 'Page';
@@ -53,10 +55,11 @@ test('compliance assessments scoring is working properly', async ({
 		testObjectsData.complianceAssessmentsPage.build.name
 	);
 
-	// Enable scoring on the compliance assessment
+	// Enable scoring on the compliance assessment via the visibility editor
+	// (auditor edit access on the score field).
 	await page.getByTestId('edit-button').click();
 	await page.getByText('More').click();
-	await page.getByTestId('form-input-scoring-enabled').check();
+	await page.getByTestId('visibility-score-everyone').click();
 	await page.getByTestId('save-button').click();
 	await page.waitForURL(/\/compliance-assessments\/[^/]+$/);
 

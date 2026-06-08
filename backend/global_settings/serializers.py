@@ -1,7 +1,58 @@
+import ipaddress
+import uuid
+
 from django.conf import settings as django_settings
+from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 
 from .models import GlobalSettings
+
+
+def canonical_ip_or_cidr(value: str) -> str:
+    """Return the canonical string form of an IP address or CIDR network.
+
+    Host-bit CIDRs are normalised to their network (e.g. ``10.0.0.7/24`` ->
+    ``10.0.0.0/24``) and IPv6 is lower-cased/compressed, so the value published
+    to downstream consumers is stable and equivalent ranges dedupe correctly.
+    Raises ``DjangoValidationError`` on invalid input.
+    """
+    candidate = (value or "").strip()
+    try:
+        return str(ipaddress.ip_address(candidate))
+    except ValueError:
+        pass
+    try:
+        return str(ipaddress.ip_network(candidate, strict=False))
+    except ValueError:
+        raise DjangoValidationError(
+            f"'{value}' is not a valid IP address or CIDR range."
+        )
+
+
+def validate_default_dashboard_value(value):
+    """Validate the default_custom_analytics_dashboard setting value.
+
+    Returns the canonical string form (UUID as str) or None if cleared.
+    Raises serializers.ValidationError on bad input.
+    Shared by GeneralSettingsSerializer.update and the
+    set_default_dashboard view action so the rules don't drift.
+    """
+    from metrology.models import Dashboard
+
+    if value in (None, ""):
+        return None
+    try:
+        uuid.UUID(str(value))
+    except (ValueError, TypeError):
+        raise serializers.ValidationError(
+            {"default_custom_analytics_dashboard": "Must be a valid UUID."}
+        )
+    if not Dashboard.objects.filter(id=value).exists():
+        raise serializers.ValidationError(
+            {"default_custom_analytics_dashboard": "Dashboard does not exist."}
+        )
+    return str(value)
+
 
 GENERAL_SETTINGS_KEYS = [
     "security_objective_scale",
@@ -32,6 +83,10 @@ GENERAL_SETTINGS_KEYS = [
     "openai_api_base",
     "openai_model",
     "openai_api_key",
+    "chat_temperature_enabled",
+    "chat_temperature",
+    "default_custom_analytics_dashboard",
+    "audit_tree_aggregation_strategy",
 ]
 
 
@@ -104,6 +159,25 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                             "default_language": f"Invalid language. Must be one of: {valid_codes}"
                         }
                     )
+            if key == "chat_temperature_enabled":
+                if not isinstance(value, bool):
+                    raise serializers.ValidationError(
+                        {"chat_temperature_enabled": "Must be a boolean."}
+                    )
+            if key == "chat_temperature":
+                try:
+                    temp = float(value)
+                except (TypeError, ValueError):
+                    raise serializers.ValidationError(
+                        {"chat_temperature": "Must be a number."}
+                    )
+                if not 0 <= temp <= 2:
+                    raise serializers.ValidationError(
+                        {"chat_temperature": "Must be between 0 and 2."}
+                    )
+                validated_data["value"][key] = temp
+            if key == "default_custom_analytics_dashboard":
+                validated_data["value"][key] = validate_default_dashboard_value(value)
             setattr(instance, "value", validated_data["value"])
 
         # Get new currency value
@@ -215,6 +289,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     compliance = serializers.BooleanField(
         source="value.compliance", required=False, default=True
     )
+    audit_tree_inheritance = serializers.BooleanField(
+        source="value.audit_tree_inheritance", required=False, default=False
+    )
     tprm = serializers.BooleanField(source="value.tprm", required=False, default=True)
     privacy = serializers.BooleanField(
         source="value.privacy", required=False, default=True
@@ -271,11 +348,14 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     chat_mode = serializers.BooleanField(
         source="value.chat_mode", required=False, default=False
     )
+    infra_config_management = serializers.BooleanField(
+        source="value.infra_config_management", required=False, default=True
+    )
     auditee_mode = serializers.BooleanField(
-        source="value.auditee_mode", required=False, default=False
+        source="value.auditee_mode", required=False, default=True
     )
     advanced_analytics = serializers.BooleanField(
-        source="value.advanced_analytics", required=False, default=False
+        source="value.advanced_analytics", required=False, default=True
     )
     comments = serializers.BooleanField(
         source="value.comments", required=False, default=True
@@ -286,6 +366,10 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     policy_documents = serializers.BooleanField(
         source="value.policy_documents", required=False, default=True
     )
+    security_advisories = serializers.BooleanField(
+        source="value.security_advisories", required=False, default=True
+    )
+    cwes = serializers.BooleanField(source="value.cwes", required=False, default=True)
 
     class Meta:
         model = GlobalSettings
@@ -306,6 +390,8 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
 
         if not getattr(settings, "ENABLE_CHAT", False):
             fields.pop("chat_mode", None)
+        if not getattr(settings, "ENABLE_INFRA_CONFIG_MANAGEMENT", False):
+            fields.pop("infra_config_management", None)
         return fields
 
     def update(self, instance, validated_data):
@@ -405,6 +491,90 @@ class VulnerabilitySlaSerializer(serializers.ModelSerializer):
                         current_value_dict.pop(source_key, None)
                     else:
                         current_value_dict[source_key] = new_flag_value
+                    value_changed = True
+
+        if value_changed:
+            instance.value = current_value_dict
+            instance.save(update_fields=["value"])
+
+        return instance
+
+
+MAX_ALLOWED_IPS = 50
+
+
+class InfraConfigSerializer(serializers.ModelSerializer):
+    """
+    Serializer for infrastructure configuration settings, stored as a JSON object
+    in the 'value' field of a GlobalSettings instance (singleton). Currently holds
+    the list of IPs/CIDRs allowed to reach the backend API; new keys can be added
+    over time without a schema change.
+    """
+
+    allowed_ips = serializers.ListField(
+        child=serializers.CharField(),
+        source="value.allowed_ips",
+        required=False,
+        default=list,
+    )
+
+    class Meta:
+        model = GlobalSettings
+        exclude = [
+            "id",
+            "created_at",
+            "updated_at",
+            "name",
+            "value",
+            "folder",
+            "is_published",
+        ]
+        read_only_fields = ["name"]
+
+    def validate_allowed_ips(self, value):
+        cleaned = []
+        errors = []
+        seen = set()
+        for raw in value:
+            ip = (raw or "").strip()
+            if not ip:
+                continue
+            try:
+                canonical = canonical_ip_or_cidr(ip)
+            except DjangoValidationError as exc:
+                errors.extend(exc.messages)
+                continue
+            # Dedupe on the canonical form so equivalent ranges (e.g.
+            # 10.0.0.0/24 and 10.0.0.7/24) collapse to a single entry.
+            if canonical in seen:
+                continue
+            seen.add(canonical)
+            cleaned.append(canonical)
+        if errors:
+            raise serializers.ValidationError(errors)
+        if len(cleaned) > MAX_ALLOWED_IPS:
+            raise serializers.ValidationError(
+                f"You can add at most {MAX_ALLOWED_IPS} IP addresses."
+            )
+        return cleaned
+
+    def update(self, instance, validated_data):
+        current_value_dict = instance.value if isinstance(instance.value, dict) else {}
+        new_value_dict = validated_data.get("value", {})
+        value_changed = False
+
+        for field_name, field_instance in self.fields.items():
+            if field_name in self.Meta.read_only_fields:
+                continue
+            if not hasattr(
+                field_instance, "source"
+            ) or not field_instance.source.startswith("value."):
+                continue
+            if field_name in new_value_dict:
+                source_key = field_instance.source.split(".")[-1]
+                new_val = new_value_dict[field_name]
+                if current_value_dict.get(source_key) != new_val:
+                    current_value_dict[source_key] = new_val
                     value_changed = True
 
         if value_changed:

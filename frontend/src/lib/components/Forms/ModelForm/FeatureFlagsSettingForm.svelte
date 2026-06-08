@@ -28,6 +28,22 @@
 			].filter(({ field }) => Object.keys(page.data.featureFlagSettings).includes(field))
 		},
 		{
+			category: m.catalog(),
+			description: m.CatalogDescription(),
+			fields: [
+				{
+					field: 'security_advisories',
+					label: m.securityAdvisories(),
+					description: m.securityAdvisoriesDescription()
+				},
+				{
+					field: 'cwes',
+					label: m.cwe(),
+					description: m.cweDescription()
+				}
+			].filter(({ field }) => Object.keys(page.data.featureFlagSettings).includes(field))
+		},
+		{
 			category: m.operations(),
 			description: m.operationsDescription(),
 			fields: [
@@ -162,6 +178,11 @@
 					field: 'advanced_analytics',
 					label: m.advancedAnalytics(),
 					description: m.advancedAnalyticsDescription()
+				},
+				{
+					field: 'audit_tree_inheritance',
+					label: m.auditTreeInheritance(),
+					description: m.auditTreeInheritanceDescription()
 				}
 			].filter(({ field }) => Object.keys(page.data.featureFlagSettings).includes(field))
 		},

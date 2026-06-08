@@ -8,7 +8,8 @@
 		formatScoreValue,
 		getFieldVisibility,
 		getRequirementTitle,
-		getSecureRedirect
+		getSecureRedirect,
+		alignmentColorMap
 	} from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales';
@@ -72,7 +73,11 @@
 		complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : ''
 	);
 
-	const max_score = data.complianceAssessmentScore.max_score;
+	// Effective scale falls back to the CA bounds when the RA has no override.
+	const max_score =
+		data.requirementAssessment.effective_max_score ?? data.complianceAssessmentScore.max_score;
+	const min_score =
+		data.requirementAssessment.effective_min_score ?? data.complianceAssessmentScore.min_score ?? 0;
 	const score = data.requirementAssessment.score;
 	const documentationScore = data.requirementAssessment.documentation_score;
 
@@ -88,8 +93,10 @@
 		showStatus,
 		showResult,
 		showScore,
-		showDocumentationScore
-	} = getFieldVisibility(fw, complianceAssessment, viewerRole);
+		showDocumentationScore,
+		showRespondentAlignment,
+		showComments
+	} = getFieldVisibility(complianceAssessment, viewerRole);
 
 	const canShowAppliedControls = showAppliedControls && !page.data.user.is_third_party;
 
@@ -122,6 +129,24 @@
 				{safeTranslate(data.requirementAssessment.result)}
 			</span>
 		{/if}
+		{#if showRespondentAlignment && data.requirementAssessment.respondent_alignment}
+			<span class="flex items-center gap-1 text-xs">
+				<span class="italic text-surface-600">{m.respondentAnswered()}:</span>
+				<span
+					class="badge text-xs font-semibold text-white"
+					style="background-color: {alignmentColorMap[
+						data.requirementAssessment.respondent_alignment
+					]}"
+				>
+					{safeTranslate(data.requirementAssessment.respondent_alignment)}
+				</span>
+			</span>
+		{/if}
+		{#if data.requirementAssessment.assessable && typeof data.requirement.weight === 'number' && Number.isFinite(data.requirement.weight) && data.requirement.weight !== 1}
+			<span class="badge h-fit bg-indigo-100 text-indigo-800">
+				{m.requirementWeight()}: {data.requirement.weight}
+			</span>
+		{/if}
 		{#if data.requirement.implementation_groups && data.requirement.implementation_groups.length > 0}
 			<div class="ml-3">
 				<b class="mr-2">{m.implementationGroups()} :</b>
@@ -135,10 +160,10 @@
 		{#if data.complianceAssessmentScore.scoring_enabled && data.requirementAssessment.is_scored}
 			{#if showScore}
 				<div class="shrink-0 relative">
-					<Progress value={formatScoreValue(score, max_score)} min={0} max={100}>
+					<Progress value={formatScoreValue(score, max_score, false, min_score)} min={0} max={100}>
 						<Progress.Circle class="[--size:--spacing(10)]">
 							<Progress.CircleTrack />
-							<Progress.CircleRange class={displayScoreColor(score, max_score)} />
+							<Progress.CircleRange class={displayScoreColor(score, max_score, false, min_score)} />
 						</Progress.Circle>
 						<div class="absolute inset-0 flex items-center justify-center">
 							<span class="text-xs font-bold">{score}</span>
@@ -146,12 +171,18 @@
 					</Progress>
 				</div>
 			{/if}
-			{#if showDocumentationScore && data.complianceAssessmentScore.show_documentation_score}
+			{#if showDocumentationScore}
 				<div class="shrink-0 relative">
-					<Progress value={formatScoreValue(documentationScore, max_score)} min={0} max={100}>
+					<Progress
+						value={formatScoreValue(documentationScore, max_score, false, min_score)}
+						min={0}
+						max={100}
+					>
 						<Progress.Circle class="[--size:--spacing(10)]">
 							<Progress.CircleTrack />
-							<Progress.CircleRange class={displayScoreColor(documentationScore, max_score)} />
+							<Progress.CircleRange
+								class={displayScoreColor(documentationScore, max_score, false, min_score)}
+							/>
 						</Progress.Circle>
 						<div class="absolute inset-0 flex items-center justify-center">
 							<span class="text-xs font-bold">{documentationScore}</span>
@@ -417,7 +448,7 @@
 			</div>
 		</div>
 	{/if}
-	{#if page.data?.featureflags?.comments}
+	{#if page.data?.featureflags?.comments && showComments}
 		<CommentsPanel parentType="requirement_assessment" parentId={data.requirementAssessment.id} />
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">

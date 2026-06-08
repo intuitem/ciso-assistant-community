@@ -112,8 +112,13 @@ spec:
             value: {{ .Values.backend.config.smtp.host | quote }}
           - name: EMAIL_PORT
             value: {{ .Values.backend.config.smtp.port | quote }}
+          {{- if .Values.backend.config.smtp.useSsl }}
+          - name: EMAIL_USE_SSL
+            value: "True"
+          {{- else if .Values.backend.config.smtp.useTls }}
           - name: EMAIL_USE_TLS
-            value: {{ ternary "True" "False" .Values.backend.config.smtp.useTls | quote }}
+            value: "True"
+          {{- end }}
           {{- if .Values.backend.config.smtp.username }}
           - name: EMAIL_HOST_USER
             value: {{ .Values.backend.config.smtp.username | quote }}
@@ -131,21 +136,27 @@ spec:
                 name: {{ include "ciso-assistant.fullname" . }}-backend
                 key: email-primary-password
           {{- end }}
-        volumeMounts:
-        - name: tmp-data
-          mountPath: /tmp
-        {{- if and (eq .Values.backend.config.databaseType "sqlite") .Values.backend.persistence.sqlite.enabled }}
-        - name: sqlite-data
-          mountPath: /ciso/db
-        {{- end }}
-        {{- if .Values.backend.persistence.localStorage.enabled }}
-        - name: localstorage-data
-          mountPath: /ciso/localStorage
-        {{- end }}
         ports:
-        - name: http
-          containerPort: 8000
-          protocol: TCP
+          - name: http
+            containerPort: 8000
+            protocol: TCP
+        volumeMounts:
+          - name: tmp-data
+            mountPath: /tmp
+          {{- if and (eq .Values.backend.config.databaseType "sqlite") .Values.backend.persistence.sqlite.enabled }}
+          - name: sqlite-data
+            mountPath: /ciso/db
+          {{- end }}
+          {{- if .Values.backend.persistence.localStorage.enabled }}
+          - name: localstorage-data
+            mountPath: /ciso/localStorage
+          {{- end }}
+          {{- if and .Values.backend.extraVolumeMounts (not .Values.backend.extraVolumes) }}
+            {{- fail "backend.extraVolumeMounts can't be set without backend.extraVolumes" }}
+          {{- end }}
+          {{- with .Values.backend.extraVolumeMounts }}
+            {{- toYaml . | nindent 10 }}
+          {{- end }}
         {{- if .Values.backend.resources }}
         resources:
           {{- toYaml .Values.backend.resources | nindent 10 }}
@@ -236,8 +247,13 @@ spec:
             value: {{ .Values.backend.config.smtp.host | quote }}
           - name: EMAIL_PORT
             value: {{ .Values.backend.config.smtp.port | quote }}
+          {{- if .Values.backend.config.smtp.useSsl }}
+          - name: EMAIL_USE_SSL
+            value: "True"
+          {{- else if .Values.backend.config.smtp.useTls }}
           - name: EMAIL_USE_TLS
-            value: {{ ternary "True" "False" .Values.backend.config.smtp.useTls | quote }}
+            value: "True"
+          {{- end }}
           {{- if .Values.backend.config.smtp.username }}
           - name: EMAIL_HOST_USER
             value: {{ .Values.backend.config.smtp.username | quote }}
@@ -256,12 +272,18 @@ spec:
                 key: email-primary-password
           {{- end }}
         volumeMounts:
-        - name: tmp-data
-          mountPath: /tmp
-        {{- if .Values.backend.persistence.sqlite.enabled }}
-        - name: sqlite-data
-          mountPath: /ciso/db
-        {{- end }}
+          - name: tmp-data
+            mountPath: /tmp
+          {{- if .Values.backend.persistence.sqlite.enabled }}
+          - name: sqlite-data
+            mountPath: /ciso/db
+          {{- end }}
+          {{- if and .Values.backend.huey.extraVolumeMounts (not .Values.backend.extraVolumes) }}
+            {{- fail "backend.huey.extraVolumeMounts can't be set without backend.extraVolumes" }}
+          {{- end }}
+          {{- with .Values.backend.huey.extraVolumeMounts }}
+            {{- toYaml . | nindent 10 }}
+          {{- end }}
         {{- if .Values.backend.huey.resources }}
         resources:
           {{- toYaml .Values.backend.huey.resources | nindent 10 }}
@@ -270,33 +292,40 @@ spec:
         securityContext:
           {{- toYaml . | nindent 10 }}
         {{- end }}
-      {{- with .Values.global.nodeSelector }}
+      {{- with .Values.backend.nodeSelector | default .Values.global.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.global.tolerations }}
+      {{- with .Values.backend.tolerations | default .Values.global.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.backend.affinity | default .Values.global.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       volumes:
-      - name: tmp-data
-        emptyDir:
-          sizeLimit: 256Mi
-      {{- if .Values.backend.persistence.sqlite.enabled }}
-      - name: sqlite-data
-        persistentVolumeClaim:
-          {{- if .Values.backend.persistence.sqlite.existingClaim }}
-          claimName: {{ .Values.backend.persistence.sqlite.existingClaim }}
-          {{- else }}
-          claimName: {{ include "ciso-assistant.fullname" . }}-sqlite
-          {{- end }}
-      {{- end }}
-      {{- if .Values.backend.persistence.localStorage.enabled }}
-      - name: localstorage-data
-        persistentVolumeClaim:
-          {{- if .Values.backend.persistence.localStorage.existingClaim }}
-          claimName: {{ .Values.backend.persistence.localStorage.existingClaim }}
-          {{- else }}
-          claimName: {{ include "ciso-assistant.fullname" . }}-localstorage
-          {{- end }}
-      {{- end }}
+        - name: tmp-data
+          emptyDir:
+            sizeLimit: 256Mi
+        {{- if .Values.backend.persistence.sqlite.enabled }}
+        - name: sqlite-data
+          persistentVolumeClaim:
+            {{- if .Values.backend.persistence.sqlite.existingClaim }}
+            claimName: {{ .Values.backend.persistence.sqlite.existingClaim }}
+            {{- else }}
+            claimName: {{ include "ciso-assistant.fullname" . }}-sqlite
+            {{- end }}
+        {{- end }}
+        {{- if .Values.backend.persistence.localStorage.enabled }}
+        - name: localstorage-data
+          persistentVolumeClaim:
+            {{- if .Values.backend.persistence.localStorage.existingClaim }}
+            claimName: {{ .Values.backend.persistence.localStorage.existingClaim }}
+            {{- else }}
+            claimName: {{ include "ciso-assistant.fullname" . }}-localstorage
+            {{- end }}
+        {{- end }}
+        {{- with .Values.backend.extraVolumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}

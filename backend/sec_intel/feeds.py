@@ -142,15 +142,40 @@ class KEVFeed:
 
 # --- EPSS Feed ---
 
-EPSS_URL = "https://epss.cyentia.com/epss_scores-current.csv.gz"
+EPSS_URL = "https://epss.empiricalsecurity.com/epss_scores-current.csv.gz"
+EPSS_API_URL = "https://api.first.org/data/v1/epss"
 
 
 class EPSSFeed:
     def __init__(self, file_path: Optional[Path] = None):
         self.file_path = file_path
 
+    @staticmethod
+    def fetch_cve(cve_id: str) -> Optional[dict]:
+        """Fetch EPSS score for a single CVE from FIRST API.
+        Returns {"epss_score": Decimal, "epss_percentile": Decimal} or None.
+        """
+        try:
+            resp = httpx.get(
+                EPSS_API_URL,
+                params={"cve": cve_id},
+                timeout=_get_timeout(),
+            )
+            resp.raise_for_status()
+            data = resp.json().get("data", [])
+            if not data:
+                return None
+            entry = data[0]
+            return {
+                "epss_score": Decimal(entry["epss"]),
+                "epss_percentile": Decimal(entry["percentile"]),
+            }
+        except Exception:
+            logger.warning("EPSS lookup failed", cve_id=cve_id, exc_info=True)
+            return None
+
     def fetch(self) -> bytes:
-        """Fetch gzipped CSV from Cyentia or read local file."""
+        """Fetch gzipped EPSS CSV from Empirical Security (canonical FIRST EPSS host) or read local file."""
         if self.file_path:
             return self.file_path.read_bytes()
         resp = httpx.get(EPSS_URL, timeout=_get_timeout(), follow_redirects=True)
@@ -295,18 +320,28 @@ class NVDFeed:
         if not settings.get("nvd_enrich_enabled", False):
             return False
 
+        fields = {}
         raw = NVDFeed.fetch_cve(cve_instance.ref_id)
-        if raw is None:
-            return False
+        if raw is not None:
+            fields = NVDFeed.parse_cve(raw)
 
-        fields = NVDFeed.parse_cve(raw)
+        if settings.get("epss_feed_enabled", False):
+            epss = EPSSFeed.fetch_cve(cve_instance.ref_id)
+            if epss:
+                fields.update(epss)
+
         if not fields:
             return False
 
+        always_overwrite = {"epss_score", "epss_percentile"}
         update_fields = []
         for k, v in fields.items():
             current = getattr(cve_instance, k, None)
-            if current in (None, "", 0):
+            if k in always_overwrite:
+                if current != v:
+                    setattr(cve_instance, k, v)
+                    update_fields.append(k)
+            elif current in (None, "", 0, []):
                 setattr(cve_instance, k, v)
                 update_fields.append(k)
 

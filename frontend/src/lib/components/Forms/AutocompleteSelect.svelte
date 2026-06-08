@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { CacheLock } from '$lib/utils/types';
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import { getSearchTarget, normalizeSearchString } from '$lib/utils/helpers';
 	import MultiSelect from 'svelte-multiselect';
@@ -124,7 +124,7 @@
 		optionSnippet = undefined,
 		placeholder = '',
 		lazy = false,
-		lazyLimit = 10,
+		lazyLimit = 20,
 		lazyThreshold = 50,
 		maxVisibleChips: _maxVisibleChips = 3
 	}: Props = $props();
@@ -134,15 +134,13 @@
 
 	if (translateOptions) {
 		options = options.map((option) => {
-			return {
-				...option,
-				translatedLabel:
-					safeTranslate(option.label) !== option.label
-						? safeTranslate(option.label)
-						: safeTranslate(option.value) !== option.value
-							? safeTranslate(option.value)
-							: option.label
-			};
+			const fromLabel = safeTranslate(option.label);
+			if (fromLabel !== option.label) return { ...option, translatedLabel: fromLabel };
+			if (option.label === option.value) {
+				const fromValue = safeTranslate(option.value);
+				if (fromValue !== option.value) return { ...option, translatedLabel: fromValue };
+			}
+			return { ...option, translatedLabel: option.label };
 		});
 	}
 
@@ -151,14 +149,29 @@
 
 	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 
-	let selected: typeof options = $state([]);
-	let selectedValues: (string | undefined)[] = $derived(
-		selected.map((item) => item.value || item.label || item)
-	);
+	type SelectValue = string | number | undefined;
+
+	let selected: Option[] = $state([]);
+	let selectedValues: SelectValue[] = $derived(selected.map((item) => item.value));
 	let isInternalUpdate = false;
 	let optionsLoaded = $state(Boolean(options.length));
 	const initialValue = resetForm ? undefined : $value;
 	const default_value = nullable ? null : '';
+
+	// Seed `selected` synchronously when static options are passed and a form value
+	// already exists. Without this, the reactive `run()` below fires its first pass
+	// with selected=[] and overwrites $value to [] before onMount restores it — a
+	// race that wipes selections on remount (e.g. when a parent `{#key options}`
+	// block tears the component down on options change).
+	if (
+		initialValue !== undefined &&
+		initialValue !== null &&
+		initialValue !== '' &&
+		options.length > 0
+	) {
+		const ids = (Array.isArray(initialValue) ? initialValue : [initialValue]).map(String);
+		selected = options.filter((item) => ids.includes(String(item.value)));
+	}
 
 	const multiSelectOptions = {
 		minSelect: $constraints && $constraints.required === true ? 1 : 0,
@@ -261,13 +274,9 @@
 				}
 				optionsLoaded = true;
 			}
-			// After options are loaded, set initial selection using stored initial value
-			if (initialValue) {
-				selected = options.filter((item) =>
-					Array.isArray(initialValue)
-						? initialValue.includes(item.value)
-						: item.value === initialValue
-				);
+			if (initialValue !== undefined && initialValue !== null && initialValue !== '') {
+				const ids = (Array.isArray(initialValue) ? initialValue : [initialValue]).map(String);
+				selected = options.filter((item) => ids.includes(String(item.value)));
 			} else if (options.length === 1 && $constraints?.required) {
 				selected = [options[0]];
 			}
@@ -436,10 +445,18 @@
 	});
 
 	$effect(() => {
-		if (!isInternalUpdate && $value && optionsLoaded && $value !== initialValue) {
-			const valueArray = Array.isArray($value) ? $value : [$value];
-			if (valueArray.length !== 0) {
-				selected = options.filter((item) => valueArray.includes(item.value));
+		if (!isInternalUpdate && optionsLoaded && $value !== initialValue) {
+			const valueArray = (
+				$value !== undefined && $value !== null && $value !== ''
+					? Array.isArray($value)
+						? $value
+						: [$value]
+					: []
+			).map(String);
+			if (valueArray.length === 0) {
+				selected = [];
+			} else {
+				selected = options.filter((item) => valueArray.includes(String(item.value)));
 			}
 		}
 	});
@@ -460,12 +477,12 @@
 	}
 
 	function arraysEqual(
-		arr1: string | (string | undefined)[] | null | undefined,
-		arr2: string | (string | undefined)[] | null | undefined
+		arr1: string | number | SelectValue[] | null | undefined,
+		arr2: string | number | SelectValue[] | null | undefined
 	): boolean {
-		const normalize = (val: string | (string | undefined)[] | null | undefined) => {
-			if (typeof val === 'string') return [val];
-			return val ?? [];
+		const normalize = (val: string | number | SelectValue[] | null | undefined) => {
+			const arr = Array.isArray(val) ? val : val !== null && val !== undefined ? [val] : [];
+			return arr.map((v) => (v === null || v === undefined ? v : String(v)));
 		};
 
 		const a1 = normalize(arr1);
@@ -491,13 +508,23 @@
 	});
 
 	run(() => {
-		cachedValue = selected.map((option) => option.value);
+		const mapped = selected.map((option) => option.value);
+		cachedValue = mapped.length > 0 ? mapped : undefined;
 		cachedOptions = selected;
 	});
 
 	run(() => {
-		// Only update value after options are loaded
-		if (!isInternalUpdate && optionsLoaded && !arraysEqual(selectedValues, $value)) {
+		// Only update value after options are loaded.
+		// Read $value with untrack so this run() only fires on selected changes (user actions),
+		// not on external form resets — preventing fight-back against programmatic value clears.
+		if (
+			!isInternalUpdate &&
+			optionsLoaded &&
+			!arraysEqual(
+				selectedValues,
+				untrack(() => $value)
+			)
+		) {
 			isInternalUpdate = true;
 			$value = multiple ? selectedValues : (selectedValues[0] ?? default_value);
 			handleSelectChange();

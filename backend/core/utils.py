@@ -16,6 +16,9 @@ import calendar
 from dateutil import relativedelta as rd
 from uuid import UUID
 
+# Re-export so callers can import from a single utils module.
+from .friendly_names import generate_friendly_name  # noqa: F401
+
 logger = structlog.get_logger(__name__)
 
 
@@ -32,6 +35,57 @@ def extract_node_id(urn: str | None) -> str | None:
         return None
     node_id = ":".join(parts[5:]).strip()
     return node_id if node_id else None
+
+
+REWRITABLE_URN_TYPES = {"req_node", "question", "question_choice"}
+
+
+def rewrite_child_urns(draft: dict, new_ns: str, new_slug: str) -> None:
+    """Rewrite segment 1 (namespace) and segment 4 (slug) of every child URN in
+    the draft, in place. Idempotent across slugs.
+
+    URN format: `urn:ns:risk:type:slug:node_id` (6+ segments). Segments 5+
+    (node_id) are preserved so CEL expressions keying off node_id keep
+    resolving. URNs with fewer than 6 segments are left untouched — the
+    rename branch in `_reconcile_draft` rejects drafts that contain such
+    legacy URNs before this helper runs, so encountering one here would be
+    a bug.
+
+    Touches: nodes[*].urn, nodes[*].parent_urn, questions[*].urn,
+    questions[*].depends_on.{question, answers}, choices[*].urn.
+    """
+
+    def sub(u):
+        if not isinstance(u, str):
+            return u
+        parts = u.split(":")
+        if (
+            len(parts) >= 6
+            and parts[0] == "urn"
+            and parts[2] == "risk"
+            and parts[3] in REWRITABLE_URN_TYPES
+        ):
+            parts[1] = new_ns
+            parts[4] = new_slug
+            return ":".join(parts)
+        return u
+
+    for n in draft.get("nodes", []) or []:
+        n["urn"] = sub(n.get("urn"))
+        if n.get("parent_urn"):
+            n["parent_urn"] = sub(n.get("parent_urn"))
+    for q in draft.get("questions", []) or []:
+        q["urn"] = sub(q.get("urn"))
+        dep = q.get("depends_on")
+        if isinstance(dep, dict):
+            if isinstance(dep.get("question"), str):
+                dep["question"] = sub(dep["question"])
+            if isinstance(dep.get("answers"), list):
+                dep["answers"] = [
+                    sub(a) if isinstance(a, str) else a for a in dep["answers"]
+                ]
+    for c in draft.get("choices", []) or []:
+        c["urn"] = sub(c.get("urn"))
 
 
 def is_compute_result_truthy(compute_result: str | None) -> bool:
@@ -70,6 +124,7 @@ _CURRENCY_FORMAT = {
     "NOK": ("after", True),
     "DKK": ("after", True),
     "PLN": ("after", True),
+    "XPF": ("after", True),
 }
 
 
@@ -164,27 +219,233 @@ class UserGroupCodename(Enum):
         return self.value
 
 
-BUILTIN_ROLE_CODENAMES = {
-    str(RoleCodename.ADMINISTRATOR): _("Administrator"),
-    str(RoleCodename.DOMAIN_MANAGER): _("Domain manager"),
-    str(RoleCodename.ANALYST): _("Analyst"),
-    str(RoleCodename.APPROVER): _("Approver"),
-    str(RoleCodename.READER): _("Reader"),
-    str(RoleCodename.THIRD_PARTY_RESPONDENT): _("Third-party respondent"),
-    str(RoleCodename.AUDITEE): _("Auditee"),
+# Translations for builtin role names, following the library localization pattern.
+# Structure: {role_codename: {locale: {"name": translated_name}}}
+# The English name serves as the base; other locales provide translations.
+BUILTIN_ROLE_TRANSLATIONS = {
+    "BI-RL-ADM": {
+        "en": {"name": "Administrator"},
+        "ar": {"name": "المسؤول"},
+        "cs": {"name": "Administrátor"},
+        "da": {"name": "Administrator"},
+        "de": {"name": "Administrator"},
+        "el": {"name": "Διαχειριστής"},
+        "es": {"name": "Administrador"},
+        "et": {"name": "Administraator"},
+        "fr": {"name": "Administrateur"},
+        "hi": {"name": "प्रशासक"},
+        "hr": {"name": "Administrator"},
+        "hu": {"name": "Adminisztrátor"},
+        "id": {"name": "Administrator"},
+        "it": {"name": "Amministratore"},
+        "ko": {"name": "관리자"},
+        "lt": {"name": "Administratorius"},
+        "nl": {"name": "Beheerder"},
+        "pl": {"name": "Administrator"},
+        "pt": {"name": "Administrador"},
+        "ro": {"name": "Administrator"},
+        "sv": {"name": "Administratör"},
+        "tr": {"name": "Yönetici"},
+        "uk": {"name": "Адміністратор"},
+        "ur": {"name": "ایڈمنسٹریٹر"},
+        "zh": {"name": "管理员"},
+    },
+    "BI-RL-DMA": {
+        "en": {"name": "Domain manager"},
+        "ar": {"name": "مدير النطاق"},
+        "cs": {"name": "Správce domény"},
+        "da": {"name": "Domæneansvarlig"},
+        "de": {"name": "Bereichsverantwortlicher"},
+        "el": {"name": "Υπεύθυνος τομέα"},
+        "es": {"name": "Gerente de dominio"},
+        "et": {"name": "Valdkonnahaldur"},
+        "fr": {"name": "Gestionnaire de domaine"},
+        "hi": {"name": "डोमेन प्रबंधक"},
+        "hr": {"name": "Upravitelj domene"},
+        "hu": {"name": "Tartománykezelő"},
+        "id": {"name": "Manajer domain"},
+        "it": {"name": "Gestore del dominio"},
+        "ko": {"name": "도메인 관리자"},
+        "lt": {"name": "Srities vadovas"},
+        "nl": {"name": "Domeinbeheerder"},
+        "pl": {"name": "Menadżer domeny"},
+        "pt": {"name": "Gerente de domínio"},
+        "ro": {"name": "Manager de domeniu"},
+        "sv": {"name": "Domänansvarig"},
+        "tr": {"name": "Etki alanı yöneticisi"},
+        "uk": {"name": "Менеджер домену"},
+        "ur": {"name": "ڈومین مینیجر"},
+        "zh": {"name": "域管理员"},
+    },
+    "BI-RL-ANA": {
+        "en": {"name": "Analyst"},
+        "ar": {"name": "المحلل"},
+        "cs": {"name": "Analytik"},
+        "da": {"name": "Analytiker"},
+        "de": {"name": "Analyst"},
+        "el": {"name": "Αναλυτής"},
+        "es": {"name": "Analista"},
+        "et": {"name": "Analüütik"},
+        "fr": {"name": "Analyste"},
+        "hi": {"name": "विश्लेषक"},
+        "hr": {"name": "Analitičar"},
+        "hu": {"name": "Elemző"},
+        "id": {"name": "Analis"},
+        "it": {"name": "Analista"},
+        "ko": {"name": "분석가"},
+        "lt": {"name": "Analitikas"},
+        "nl": {"name": "Analist"},
+        "pl": {"name": "Analityk"},
+        "pt": {"name": "Analista"},
+        "ro": {"name": "Analist"},
+        "sv": {"name": "Analytiker"},
+        "tr": {"name": "Analist"},
+        "uk": {"name": "Аналітик"},
+        "ur": {"name": "تجزیہ کار"},
+        "zh": {"name": "分析师"},
+    },
+    "BI-RL-APP": {
+        "en": {"name": "Approver"},
+        "ar": {"name": "الموافق"},
+        "cs": {"name": "Schvalovatel"},
+        "da": {"name": "Godkender"},
+        "de": {"name": "Genehmiger"},
+        "el": {"name": "Εγκρίνων"},
+        "es": {"name": "Aprobador"},
+        "et": {"name": "Kinnitaja"},
+        "fr": {"name": "Approbateur"},
+        "hi": {"name": "स्वीकर्ता"},
+        "hr": {"name": "Odobravatelj"},
+        "hu": {"name": "Jóváhagyó"},
+        "id": {"name": "Penyetuju"},
+        "it": {"name": "Approvatore"},
+        "ko": {"name": "승인자"},
+        "lt": {"name": "Tvirtintojas"},
+        "nl": {"name": "Goedkeurder"},
+        "pl": {"name": "Akceptujący"},
+        "pt": {"name": "Aprovador"},
+        "ro": {"name": "Aprobator"},
+        "sv": {"name": "Godkännare"},
+        "tr": {"name": "Onaylayan"},
+        "uk": {"name": "Затверджувач"},
+        "ur": {"name": "منظور کنندہ"},
+        "zh": {"name": "审批者"},
+    },
+    "BI-RL-AUD": {
+        "en": {"name": "Reader"},
+        "ar": {"name": "القارئ"},
+        "cs": {"name": "Čtečka"},
+        "da": {"name": "Læser"},
+        "de": {"name": "Leser"},
+        "el": {"name": "Αναγνώστης"},
+        "es": {"name": "Lector"},
+        "et": {"name": "Lugeja"},
+        "fr": {"name": "Lecteur"},
+        "hi": {"name": "रीडर"},
+        "hr": {"name": "Čitatelj"},
+        "hu": {"name": "Olvasó"},
+        "id": {"name": "Pembaca"},
+        "it": {"name": "Lettore"},
+        "ko": {"name": "열람자"},
+        "lt": {"name": "Skaitytojas"},
+        "nl": {"name": "Lezer"},
+        "pl": {"name": "Czytelnik"},
+        "pt": {"name": "Leitor"},
+        "ro": {"name": "Cititor"},
+        "sv": {"name": "Läsare"},
+        "tr": {"name": "Okuyucu"},
+        "uk": {"name": "Читач"},
+        "ur": {"name": "ریڈر"},
+        "zh": {"name": "阅读者"},
+    },
+    "BI-RL-TPR": {
+        "en": {"name": "Third-party respondent"},
+        "ar": {"name": "المجيب من طرف ثالث"},
+        "cs": {"name": "Respondent třetí strany"},
+        "da": {"name": "Tredjepartsrespondent"},
+        "de": {"name": "Drittanbieter-Befragter"},
+        "el": {"name": "Ερωτώμενος τρίτου μέρους"},
+        "es": {"name": "Encuestado de terceros"},
+        "et": {"name": "Kolmanda osapoole vastaja"},
+        "fr": {"name": "Répondant tiers"},
+        "hi": {"name": "तृतीय-पक्ष प्रतिवादी"},
+        "hr": {"name": "Ispitanik treće strane"},
+        "hu": {"name": "Harmadik fél válaszadója"},
+        "id": {"name": "Responden pihak ketiga"},
+        "it": {"name": "Rispondente di terze parti"},
+        "ko": {"name": "제3자 응답자"},
+        "lt": {"name": "Trečiosios šalies respondentas"},
+        "nl": {"name": "Externe respondent"},
+        "pl": {"name": "Respondent strony trzeciej"},
+        "pt": {"name": "Respondente terceiro"},
+        "ro": {"name": "Respondent terță parte"},
+        "sv": {"name": "Tredjepartsrespondent"},
+        "tr": {"name": "Üçüncü taraf yanıtlayıcı"},
+        "uk": {"name": "Респондент третьої сторони"},
+        "ur": {"name": "فریق ثالث جواب دہندہ"},
+        "zh": {"name": "第三方受访者"},
+    },
+    "BI-RL-ADE": {
+        "en": {"name": "Respondent"},
+        "ar": {"name": "المجيب"},
+        "cs": {"name": "Respondent"},
+        "da": {"name": "Respondent"},
+        "de": {"name": "Befragter"},
+        "el": {"name": "Ερωτώμενος"},
+        "es": {"name": "Encuestado"},
+        "et": {"name": "Vastaja"},
+        "fr": {"name": "Répondant"},
+        "hi": {"name": "प्रतिवादी"},
+        "hr": {"name": "Ispitanik"},
+        "hu": {"name": "Válaszadó"},
+        "id": {"name": "Responden"},
+        "it": {"name": "Rispondente"},
+        "ko": {"name": "응답자"},
+        "lt": {"name": "Respondentas"},
+        "nl": {"name": "Respondent"},
+        "pl": {"name": "Respondent"},
+        "pt": {"name": "Respondente"},
+        "ro": {"name": "Respondent"},
+        "sv": {"name": "Respondent"},
+        "tr": {"name": "Yanıtlayıcı"},
+        "uk": {"name": "Респондент"},
+        "ur": {"name": "جواب دہندہ"},
+        "zh": {"name": "受访者"},
+    },
 }
 
+
+def get_translated_builtin_role_name(role_codename: str) -> str:
+    """Return the translated display name for a builtin role codename.
+
+    Uses the same locale-resolution pattern as library objects:
+    check BUILTIN_ROLE_TRANSLATIONS for the current Django language,
+    fall back to English, then to the raw codename.
+    """
+    from django.utils.translation import get_language
+
+    translations = BUILTIN_ROLE_TRANSLATIONS.get(role_codename, {})
+    lang = get_language() or "en"
+    # Try exact locale, then base language (e.g. "fr-FR" → "fr")
+    locale_trans = translations.get(lang) or translations.get(lang.split("-")[0], {})
+    return locale_trans.get("name") or translations.get("en", {}).get(
+        "name", role_codename
+    )
+
+
 BUILTIN_USERGROUP_CODENAMES = {
-    str(UserGroupCodename.ADMINISTRATOR): _("Administrator"),
-    str(UserGroupCodename.GLOBAL_READER): _("Reader"),
-    str(UserGroupCodename.GLOBAL_APPROVER): _("Approver"),
-    str(UserGroupCodename.GLOBAL_AUDITEE): _("Auditee"),
-    str(UserGroupCodename.DOMAIN_MANAGER): _("Domain manager"),
-    str(UserGroupCodename.ANALYST): _("Analyst"),
-    str(UserGroupCodename.APPROVER): _("Approver"),
-    str(UserGroupCodename.READER): _("Reader"),
-    str(UserGroupCodename.THIRD_PARTY_RESPONDENT): _("Third-party respondent"),
-    str(UserGroupCodename.AUDITEE): _("Auditee"),
+    str(UserGroupCodename.ADMINISTRATOR): str(RoleCodename.ADMINISTRATOR),
+    str(UserGroupCodename.GLOBAL_READER): str(RoleCodename.READER),
+    str(UserGroupCodename.GLOBAL_APPROVER): str(RoleCodename.APPROVER),
+    str(UserGroupCodename.GLOBAL_AUDITEE): str(RoleCodename.AUDITEE),
+    str(UserGroupCodename.DOMAIN_MANAGER): str(RoleCodename.DOMAIN_MANAGER),
+    str(UserGroupCodename.ANALYST): str(RoleCodename.ANALYST),
+    str(UserGroupCodename.APPROVER): str(RoleCodename.APPROVER),
+    str(UserGroupCodename.READER): str(RoleCodename.READER),
+    str(UserGroupCodename.THIRD_PARTY_RESPONDENT): str(
+        RoleCodename.THIRD_PARTY_RESPONDENT
+    ),
+    str(UserGroupCodename.AUDITEE): str(RoleCodename.AUDITEE),
 }
 
 # NOTE: This is set to "Main" now, but will be changed to a unique identifier
@@ -1025,6 +1286,65 @@ def _resolve_auditee_role_ids():
     return auditee_id, higher_ids
 
 
+def _resolve_respondent_role_ids():
+    """Resolve role IDs for respondent roles (auditee + third-party respondent) + higher roles."""
+    from iam.cache_builders import get_roles_state
+
+    role_id_by_name = get_roles_state().role_id_by_name
+    respondent_ids = frozenset(
+        role_id_by_name[rc.value]
+        for rc in (RoleCodename.AUDITEE, RoleCodename.THIRD_PARTY_RESPONDENT)
+        if rc.value in role_id_by_name
+    )
+    higher_ids = frozenset(
+        role_id_by_name[rc.value]
+        for rc in (
+            RoleCodename.ANALYST,
+            RoleCodename.DOMAIN_MANAGER,
+            RoleCodename.ADMINISTRATOR,
+        )
+        if rc.value in role_id_by_name
+    )
+    return respondent_ids, higher_ids
+
+
+def get_respondent_filtered_folder_ids(user) -> set:
+    """Return folder IDs where *user* holds a respondent role (auditee or third-party
+    respondent) but NO higher role. Mirrors :func:`get_auditee_filtered_folder_ids`
+    but widens the role set so third-party respondents are also guarded.
+    """
+    from iam.models import _iter_assignment_lites_for_user
+    from iam.cache_builders import (
+        get_folder_state,
+        iter_descendant_ids,
+    )
+
+    respondent_role_ids, higher_role_ids = _resolve_respondent_role_ids()
+    if not respondent_role_ids:
+        return set()
+
+    state = get_folder_state()
+    folder_roles: dict[UUID, set] = {}
+
+    for a in _iter_assignment_lites_for_user(user):
+        role_id = a.role_id
+        if role_id not in respondent_role_ids and role_id not in higher_role_ids:
+            continue
+        for pf_id in a.perimeter_folder_ids:
+            if a.is_recursive:
+                target_ids = iter_descendant_ids(state, pf_id, include_start=True)
+            else:
+                target_ids = (pf_id,)
+            for fid in target_ids:
+                folder_roles.setdefault(fid, set()).add(role_id)
+
+    return {
+        fid
+        for fid, role_ids in folder_roles.items()
+        if role_ids & respondent_role_ids and role_ids.isdisjoint(higher_role_ids)
+    }
+
+
 def get_auditee_filtered_folder_ids(user) -> set:
     """Return folder IDs where *user* holds the auditee role but NO higher role.
 
@@ -1074,66 +1394,94 @@ def get_auditee_filtered_folder_ids(user) -> set:
 
 
 # --- Field Visibility ---
+#
+# The compliance assessment's `field_visibility` is the single source of truth
+# at runtime. It is populated at CA creation from DEFAULT_VISIBILITY merged with
+# the framework's `field_visibility`, and can be edited per-CA from then on.
+#
+# Storage shape: {field_name: {role: 'edit'|'read'|'hidden'}}
+# Roles known today: 'auditor', 'respondent'. Future roles slot in alongside.
+# A missing field key, or a missing role within a field's pair, resolves to 'edit'
+# (matching the "no restriction" default).
 
-DEFAULT_FIELD_VISIBILITY = {
-    "result": "auditor",
-    "status": "auditor",
-    "score": "auditor",
-    "is_scored": "auditor",
-    "documentation_score": "auditor",
-    "observation": "everyone",
-    "answers": "everyone",
-    "evidences": "everyone",
-    "applied_controls": "auditor",
-    "security_exceptions": "auditor",
+EVERYONE_EDIT = {"auditor": "edit", "respondent": "edit"}
+AUDITOR_ONLY = {"auditor": "edit", "respondent": "hidden"}
+AUDITOR_READ_ONLY = {"auditor": "read", "respondent": "hidden"}
+HIDDEN = {"auditor": "hidden", "respondent": "hidden"}
+
+DEFAULT_VISIBILITY = {
+    "score": HIDDEN,
+    "is_scored": HIDDEN,
+    "documentation_score": HIDDEN,
+    "status": AUDITOR_ONLY,
+    "extended_result": AUDITOR_ONLY,
+    # respondent_alignment is only ever populated by the respondent answering
+    # the auto-question. AUDITOR_ONLY would prevent that, so the auditor's
+    # badge would never render — functionally equivalent to HIDDEN. Default
+    # off; auditors who want it explicitly flip to "Auditor + Respondent".
+    "respondent_alignment": HIDDEN,
 }
 
 
-def resolve_field_visibility(framework, compliance_assessment, field_name):
-    """Resolve the visibility level for a field using the three-tier cascade.
+def resolve_visibility_from_overrides(overrides, field_name):
+    """Resolve a field's visibility pair from a raw `field_visibility` dict.
 
-    Priority: CA override > Framework override > Code default > "auditor" (safe fallback).
+    Shape: {role: 'edit'|'read'|'hidden'}.
 
-    Returns: "everyone", "auditor", or "hidden"
+    Lookup order:
+      1. Explicit override in `overrides`.
+      2. DEFAULT_VISIBILITY (backstop in case a new field was added in code
+         without a migration to backfill existing CAs).
+      3. EVERYONE_EDIT (truly unknown field).
+
+    Use this when you have a raw dict (e.g. from a queryset `.values()` call).
+    For a model instance, prefer `resolve_field_visibility(ca, field)`.
     """
-    # Tier 1: CA-level override (highest priority)
-    ca_overrides = getattr(compliance_assessment, "field_visibility", None) or {}
-    if field_name in ca_overrides:
-        return ca_overrides[field_name]
-
-    # Tier 2: Framework-level override
-    fw_overrides = getattr(framework, "field_visibility", None) or {}
-    if field_name in fw_overrides:
-        return fw_overrides[field_name]
-
-    # Tier 3: Code-level default
-    return DEFAULT_FIELD_VISIBILITY.get(field_name, "auditor")
+    pair = (overrides or {}).get(field_name)
+    if isinstance(pair, dict):
+        return pair
+    fallback = DEFAULT_VISIBILITY.get(field_name)
+    if isinstance(fallback, dict):
+        return dict(fallback)
+    return dict(EVERYONE_EDIT)
 
 
-def get_visible_fields(framework, compliance_assessment, viewer_role="auditor"):
-    """Get the set of field names visible to the given role.
+def resolve_field_visibility(compliance_assessment, field_name):
+    """Return the per-role visibility pair for a field on a CA instance."""
+    overrides = getattr(compliance_assessment, "field_visibility", None) or {}
+    return resolve_visibility_from_overrides(overrides, field_name)
 
-    viewer_role: "respondent" or "auditor"
 
-    Returns a set of field names that should be included in the response.
+def _role_access(compliance_assessment, field_name, role):
+    pair = resolve_field_visibility(compliance_assessment, field_name)
+    return pair.get(role, "edit")
+
+
+def is_field_visible_to(compliance_assessment, field_name, role):
+    """Whether a field is readable by the given role."""
+    return _role_access(compliance_assessment, field_name, role) != "hidden"
+
+
+def is_field_editable_by(compliance_assessment, field_name, role):
+    """Whether a field is writable by the given role."""
+    return _role_access(compliance_assessment, field_name, role) == "edit"
+
+
+def build_initial_field_visibility(framework):
+    """Build the initial `field_visibility` map for a new CA.
+
+    Layered per-role: code defaults are seeded for every known field, then the
+    framework's overrides are merged on top — but per-role, so a framework that
+    only specifies a single role (e.g. {"score": {"auditor": "edit"}}) does not
+    erase the default value for the other roles.
     """
-    all_fields = set(DEFAULT_FIELD_VISIBILITY.keys())
-
-    # Also include any fields mentioned in overrides
     fw_overrides = getattr(framework, "field_visibility", None) or {}
-    ca_overrides = getattr(compliance_assessment, "field_visibility", None) or {}
-    all_fields.update(fw_overrides.keys())
-    all_fields.update(ca_overrides.keys())
-
-    visible = set()
-    for field in all_fields:
-        visibility = resolve_field_visibility(framework, compliance_assessment, field)
-        if visibility == "hidden":
-            continue  # hidden from everyone
-        if visibility == "everyone":
-            visible.add(field)
-        elif visibility == "auditor" and viewer_role == "auditor":
-            visible.add(field)
-        # "auditor" + viewer_role="respondent" -> not visible
-
-    return visible
+    merged = {key: dict(pair) for key, pair in DEFAULT_VISIBILITY.items()}
+    for key, pair in fw_overrides.items():
+        if not isinstance(pair, dict):
+            continue
+        # Ensure the field has a starting pair (DEFAULT_VISIBILITY may not
+        # cover every key the framework configures).
+        merged.setdefault(key, dict(EVERYONE_EDIT))
+        merged[key].update(pair)
+    return merged

@@ -130,12 +130,9 @@ router.register(r"terminologies", TerminologyViewSet, basename="terminologies")
 router.register(r"questions", QuestionViewSet, basename="questions")
 router.register(r"question-choices", QuestionChoiceViewSet, basename="question-choices")
 router.register(r"answers", AnswerViewSet, basename="answers")
-router.register(r"preset-journeys", PresetJourneyViewSet, basename="preset-journeys")
-router.register(
-    r"preset-journey-steps",
-    PresetJourneyStepViewSet,
-    basename="preset-journey-steps",
-)
+router.register(r"presets", PresetViewSet, basename="presets")
+router.register(r"journeys", JourneyViewSet, basename="journeys")
+router.register(r"journey-steps", JourneyStepViewSet, basename="journey-steps")
 
 ROUTES = settings.ROUTES
 MODULES = settings.MODULES.values()
@@ -179,6 +176,11 @@ urlpatterns = [
     ),
     path("get_counters/", get_counters_view, name="get_counters_view"),
     path("get_metrics/", get_metrics_view, name="get_metrics_view"),
+    path(
+        "analytics/export/xlsx/",
+        get_analytics_export_xlsx,
+        name="get_analytics_export_xlsx",
+    ),
     path(
         "get_audits_metrics/", get_audits_metrics_view, name="get_audits_metrics_view"
     ),

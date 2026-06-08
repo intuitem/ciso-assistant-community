@@ -1,0 +1,59 @@
+name: Warm backend venv cache
+
+# Pre-populates the GitHub Actions cache with backend/.venv on the default
+# branch's scope, so PRs targeting it restore the venv on cold start instead
+# of paying ~57s for `poetry install` per shard (multiplied by ~60 functional
+# shards + ~56 API shards + startup-tests = significant).
+#
+# Writes the key that backend-api-tests.yml, functional-tests.yml and
+# startup-tests.yml all look up:
+#   venv-Linux-<hash(backend/poetry.lock)>
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "backend/poetry.lock"
+      - "backend/pyproject.toml"
+      - ".github/workflows/cache-venv.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.14"
+  backend-directory: ./backend
+
+jobs:
+  warm_venv:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: Install Poetry
+        run: |
+          pipx install poetry
+          poetry config virtualenvs.in-project true
+
+      - name: Cache Virtualenv
+        id: cache-venv
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ${{ env.backend-directory }}/.venv
+          key: venv-${{ runner.os }}-py${{ env.PYTHON_VERSION }}-${{ hashFiles('backend/poetry.lock') }}
+
+      - name: Install backend requirements
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+        working-directory: ${{ env.backend-directory }}
+        run: poetry install

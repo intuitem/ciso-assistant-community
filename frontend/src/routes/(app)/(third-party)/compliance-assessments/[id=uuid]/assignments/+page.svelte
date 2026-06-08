@@ -9,6 +9,8 @@
 	import type { PageData } from './$types';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { m } from '$paraglide/messages';
+	import { getLocale } from '$paraglide/runtime';
+	import { formatDate } from '$lib/utils/datetime';
 	import TreeViewItemContentSimple from './TreeViewItemContentSimple.svelte';
 	import TreeViewItemLeadSimple from './TreeViewItemLeadSimple.svelte';
 	import { complianceResultColorMap } from '$lib/utils/constants';
@@ -819,7 +821,8 @@
 						{#key editingAssignmentId}
 							<AutocompleteSelect
 								form={assignmentSuperForm}
-								optionsEndpoint="actors?user__is_third_party=False"
+								optionsEndpoint="actors"
+								optionsDetailedUrlParameters={[['include_third_parties', 'true']]}
 								optionsLabelField="str"
 								optionsInfoFields={{
 									fields: [{ field: 'type', translate: true }],
@@ -1292,7 +1295,7 @@
 									</span>
 								</div>
 								<span class="text-gray-400 text-xs">
-									{new Date(event.created_at).toLocaleString()}
+									{formatDate(new Date(event.created_at), true, getLocale())}
 								</span>
 								{#if event.event_notes}
 									<div

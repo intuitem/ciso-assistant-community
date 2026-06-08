@@ -3,6 +3,7 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
 import { safeTranslate } from '$lib/utils/i18n';
 import { getSecureRedirect } from '$lib/utils/helpers';
+import { formatSelectFieldData } from '$lib/utils/load';
 import { modelSchema } from '$lib/utils/schemas';
 import { headData } from '$lib/utils/table';
 import { m } from '$paraglide/messages';
@@ -74,10 +75,7 @@ export const load = (async ({ fetch, params }) => {
 				const url = `${baseUrl}/${URLModel}/${selectField.field}/`;
 				const data = await fetchJson(url);
 				if (data) {
-					selectOptions[selectField.field] = Object.entries(data).map(([key, value]) => ({
-						label: value,
-						value: selectField.valueType === 'number' ? parseInt(key) : key
-					}));
+					selectOptions[selectField.field] = formatSelectFieldData(data, selectField);
 				}
 			})
 		);
@@ -100,10 +98,7 @@ export const load = (async ({ fetch, params }) => {
 				const url = `${baseUrl}/applied-controls/${selectField.field}/`;
 				const data = await fetchJson(url);
 				if (data) {
-					measureSelectOptions[selectField.field] = Object.entries(data).map(([key, value]) => ({
-						label: value,
-						value: selectField.valueType === 'number' ? parseInt(key) : key
-					}));
+					measureSelectOptions[selectField.field] = formatSelectFieldData(data, selectField);
 				} else {
 					console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
 				}
@@ -141,10 +136,7 @@ export const load = (async ({ fetch, params }) => {
 				const url = `${baseUrl}/evidences/${selectField.field}/`;
 				const data = await fetchJson(url);
 				if (data) {
-					evidenceSelectOptions[selectField.field] = Object.entries(data).map(([key, value]) => ({
-						label: value,
-						value: selectField.valueType === 'number' ? parseInt(key) : key
-					}));
+					evidenceSelectOptions[selectField.field] = formatSelectFieldData(data, selectField);
 				}
 			})
 		);
@@ -166,11 +158,9 @@ export const load = (async ({ fetch, params }) => {
 				const url = `${baseUrl}/security-exceptions/${selectField.field}/`;
 				const data = await fetchJson(url);
 				if (data) {
-					securityExceptionSelectOptions[selectField.field] = Object.entries(data).map(
-						([key, value]) => ({
-							label: value,
-							value: selectField.valueType === 'number' ? parseInt(key) : key
-						})
+					securityExceptionSelectOptions[selectField.field] = formatSelectFieldData(
+						data,
+						selectField
 					);
 				}
 			})
@@ -249,6 +239,12 @@ export const actions: Actions = {
 		// extended_result is a qualifier on result — strip it alongside a hidden result.
 		if (!('result' in currentRa)) {
 			delete formData.extended_result;
+		}
+		// The Select component's default option renders as <option value={null}>--</option>;
+		// Svelte omits the null attribute so the browser falls back to the text "--",
+		// which the backend rejects as an invalid enum choice. Normalize to null.
+		if (formData.extended_result === '--' || formData.extended_result === '') {
+			formData.extended_result = null;
 		}
 
 		const requestInitOptions: RequestInit = {

@@ -133,11 +133,32 @@ ENABLE_CHAT = os.environ.get("ENABLE_CHAT", "False").strip().lower() in (
     "yes",
 )
 
+# Infrastructure configuration management. Disabled by default. When enabled,
+# admins can manage infrastructure configuration settings (e.g. the list of
+# IPs/CIDRs allowed to reach the backend) from the settings UI, and an
+# unauthenticated /infra-config/ endpoint exposes those settings for the
+# infrastructure layer to consume (must never be reachable publicly).
+ENABLE_INFRA_CONFIG_MANAGEMENT = os.environ.get(
+    "ENABLE_INFRA_CONFIG_MANAGEMENT", "False"
+).strip().lower() in (
+    "true",
+    "1",
+    "yes",
+)
+
+EXPOSE_METRICS = os.environ.get("EXPOSE_METRICS", "False").strip().lower() in (
+    "true",
+    "1",
+    "yes",
+)
+
 LIBRARY_COMPATIBILITY_MODES = [0, 1, 2, 3]
 
 logger.info("DEBUG mode: %s", DEBUG)
 logger.info("ENABLE_SANDBOX: %s", ENABLE_SANDBOX)
 logger.info("ENABLE_CHAT: %s", ENABLE_CHAT)
+logger.info("ENABLE_INFRA_CONFIG_MANAGEMENT: %s", ENABLE_INFRA_CONFIG_MANAGEMENT)
+logger.info("EXPOSE_METRICS: %s", EXPOSE_METRICS)
 logger.info("CISO_ASSISTANT_URL: %s", CISO_ASSISTANT_URL)
 # ALLOWED_HOSTS should contain the backend address
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
@@ -149,6 +170,12 @@ LOCAL_STORAGE_DIRECTORY = os.environ.get(
 ATTACHMENT_MAX_SIZE_MB = os.environ.get("ATTACHMENT_MAX_SIZE_MB", 25)
 
 USE_S3 = os.getenv("USE_S3", "False").lower() in ("true", "1", "yes")
+USE_AZURE = os.getenv("USE_AZURE", "False").lower() in ("true", "1", "yes")
+
+if USE_S3 and USE_AZURE:
+    raise ImproperlyConfigured(
+        "Both USE_S3 and USE_AZURE are enabled. Please configure only one storage backend."
+    )
 
 if USE_S3:
     STORAGES = {
@@ -226,6 +253,98 @@ if USE_S3:
 
     AWS_LOCATION = os.getenv("AWS_LOCATION", "")
     AWS_S3_FILE_OVERWRITE = False
+
+elif USE_AZURE:
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.azure_storage.AzureStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+
+    AZURE_ACCOUNT_NAME = os.getenv("AZURE_ACCOUNT_NAME")
+    AZURE_ACCOUNT_KEY = os.getenv("AZURE_ACCOUNT_KEY")
+    AZURE_CONNECTION_STRING = os.getenv("AZURE_CONNECTION_STRING")
+    AZURE_CONTAINER = os.getenv("AZURE_CONTAINER", "ciso-assistant-container")
+    AZURE_CUSTOM_DOMAIN = os.getenv("AZURE_CUSTOM_DOMAIN")
+
+    using_managed_identity = os.getenv(
+        "AZURE_USE_MANAGED_IDENTITY", "False"
+    ).lower() in (
+        "true",
+        "1",
+        "yes",
+    )
+
+    # Managed Identity uses AZURE_ACCOUNT_NAME without a key by design, so only
+    # enforce the name+key pairing when Managed Identity is not requested.
+    if not using_managed_identity and bool(AZURE_ACCOUNT_NAME) != bool(
+        AZURE_ACCOUNT_KEY
+    ):
+        missing = (
+            "AZURE_ACCOUNT_NAME" if not AZURE_ACCOUNT_NAME else "AZURE_ACCOUNT_KEY"
+        )
+        present = (
+            "AZURE_ACCOUNT_KEY" if not AZURE_ACCOUNT_NAME else "AZURE_ACCOUNT_NAME"
+        )
+        raise ImproperlyConfigured(
+            f"{present} is set but {missing} is missing. "
+            "Both AZURE_ACCOUNT_NAME and AZURE_ACCOUNT_KEY are required for Account Key authentication."
+        )
+
+    using_account_key = bool(AZURE_ACCOUNT_NAME and AZURE_ACCOUNT_KEY)
+    using_connection_string = bool(AZURE_CONNECTION_STRING)
+
+    active_auth_methods = sum(
+        [using_account_key, using_connection_string, using_managed_identity]
+    )
+
+    if active_auth_methods > 1:
+        raise ImproperlyConfigured(
+            "Ambiguous Azure credentials configuration. Please configure only one "
+            "authentication method: Account Key (AZURE_ACCOUNT_NAME + AZURE_ACCOUNT_KEY), "
+            "Connection String (AZURE_CONNECTION_STRING), or "
+            "Managed Identity (AZURE_USE_MANAGED_IDENTITY=True)."
+        )
+
+    if active_auth_methods == 0:
+        raise ImproperlyConfigured(
+            "Azure credentials not configured. Either set AZURE_ACCOUNT_NAME and "
+            "AZURE_ACCOUNT_KEY for Account Key authentication, AZURE_CONNECTION_STRING "
+            "for Connection String authentication, or AZURE_USE_MANAGED_IDENTITY=True "
+            "for Managed Identity authentication."
+        )
+
+    if using_account_key:
+        logger.info("Using Azure Account Key for Blob Storage authentication")
+
+    elif using_connection_string:
+        logger.info("Using Azure Connection String for Blob Storage authentication")
+
+    else:
+        if not AZURE_ACCOUNT_NAME:
+            raise ImproperlyConfigured(
+                "AZURE_ACCOUNT_NAME is required when using Managed Identity "
+                "(AZURE_USE_MANAGED_IDENTITY=True)."
+            )
+        logger.info("Using Azure Managed Identity for Blob Storage authentication")
+        from azure.identity import ManagedIdentityCredential
+
+        AZURE_TOKEN_CREDENTIAL = ManagedIdentityCredential()
+        # Clear key/connection string so django-storages uses the token credential only
+        AZURE_ACCOUNT_KEY = None
+        AZURE_CONNECTION_STRING = None
+
+    logger.info("AZURE_CONTAINER: %s", AZURE_CONTAINER)
+    if AZURE_ACCOUNT_NAME:
+        logger.info("AZURE_ACCOUNT_NAME: %s", AZURE_ACCOUNT_NAME)
+    if AZURE_CUSTOM_DOMAIN:
+        logger.info("AZURE_CUSTOM_DOMAIN: %s", AZURE_CUSTOM_DOMAIN)
+
+    AZURE_LOCATION = os.getenv("AZURE_LOCATION", "")
+    AZURE_OVERWRITE_FILES = False
 
 else:
     MEDIA_ROOT = LOCAL_STORAGE_DIRECTORY
@@ -499,6 +618,7 @@ LANGUAGES = [
     ("zh", "Chinese (Simplified)"),
     ("lt", "Lithuanian"),
     ("ko", "Korean"),
+    ("et", "Estonian"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -524,7 +644,7 @@ LIBRARIES_PATH = library_path = _lib_path
 if "POSTGRES_NAME" in os.environ:
     DATABASES = {
         "default": {
-            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "ENGINE": "django.db.backends.postgresql",
             "NAME": os.environ["POSTGRES_NAME"],
             "USER": os.environ["POSTGRES_USER"],
             "PASSWORD": os.environ["POSTGRES_PASSWORD"],

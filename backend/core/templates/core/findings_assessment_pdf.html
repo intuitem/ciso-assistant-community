@@ -26,7 +26,7 @@
                 <p><strong>Reviewers:</strong> {% for reviewer in findings_assessment.reviewers.all %}{{ reviewer.email }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
                 {% endif %}
                 {% if findings_assessment.observation %}
-                <p><strong>Observation:</strong> {{ findings_assessment.observation }}</p>
+                <p><strong>Observation:</strong> {{ findings_assessment.observation|linebreaksbr }}</p>
                 {% endif %}
             </div>
         </div>
@@ -140,7 +140,7 @@
                     <td class="border p-2 text-sm">{{ finding.name }}</td>
                     <td class="border p-2 text-sm capitalize">{{ finding.get_severity_display }}</td>
                     <td class="border p-2 text-sm capitalize">{{ finding.get_status_display }}</td>
-                    <td class="border p-2 text-sm">{{ finding.observation|default:"N/A"|truncatechars:100 }}</td>
+                    <td class="border p-2 text-sm">{{ finding.observation|default:"N/A"|truncatechars:100|linebreaksbr }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -176,7 +176,7 @@
                 </div>
                 <div>
                     <p class="text-sm font-medium">Observation:</p>
-                    <p class="text-sm text-gray-600">{{ finding.observation|default:"N/A" }}</p>
+                    <p class="text-sm text-gray-600">{{ finding.observation|default:"N/A"|linebreaksbr }}</p>
                 </div>
             </div>
 

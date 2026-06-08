@@ -344,7 +344,7 @@ export const test = base.extend<Fixtures>({
 	},
 
 	ebiosRmStudyPage: async ({ page }, use) => {
-		const bPage = new PageContent(page, '/ebios-rm', /Ebios RM stud(ies|y)/, [
+		const bPage = new PageContent(page, '/ebios-rm', /EBIOS RM stud(ies|y)/, [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
 			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
@@ -449,7 +449,7 @@ export const test = base.extend<Fixtures>({
 		const loginPage = new LoginPage(page);
 		await loginPage.goto();
 		await loginPage.login(testData.thirdPartyUser.email, testData.thirdPartyUser.password);
-		await loginPage.skipWelcome(/^.*\/compliance-assessments$/);
+		await loginPage.skipWelcome(/^.*\/auditee-dashboard$/);
 		await use(loginPage);
 	},
 

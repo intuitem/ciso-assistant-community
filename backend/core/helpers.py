@@ -1,8 +1,10 @@
 import json
+from collections import defaultdict
 from collections.abc import MutableMapping
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from typing import Optional
 from typing import Dict, List
+from uuid import UUID
 
 # from icecream import ic
 from django.core.exceptions import NON_FIELD_ERRORS as DJ_NON_FIELD_ERRORS
@@ -241,12 +243,16 @@ def get_sorted_requirement_nodes(
     requirement_nodes: list,
     requirements_assessed: Optional[list] = None,
     max_score: int = 0,
+    min_score: int = 0,
 ) -> dict:
     """
     Recursive function to build framework groups tree
     requirement_nodes: the list of all requirement_nodes
     requirements_assessed: the list of all requirements_assessed
-    max_score: the maximum score. This is an attribute of the framework
+    max_score: the maximum score (CA or framework). Used as the fallback when
+    a RequirementNode has no override.
+    min_score: the minimum score (CA or framework). Used as the fallback when
+    a RequirementNode has no override; needed for offset scales (e.g. 1..4).
     Returns a dictionary containing key=name and value={"description": description, "style": "leaf|node"}}
     Values are correctly sorted based on order_id
     If order_id is missing, sorting is based on created_at
@@ -260,6 +266,14 @@ def get_sorted_requirement_nodes(
     requirement_assessment_from_requirement_id = {
         str(ra.requirement_id): ra for ra in (requirements_assessed or [])
     }
+
+    def _resolved_max(req_node):
+        """Resolved max score for the RA-side display: Node override if set,
+        otherwise the framework's max_score (as fed in via *max_score*)."""
+        return req_node.max_score if req_node.max_score is not None else max_score
+
+    def _resolved_min(req_node):
+        return req_node.min_score if req_node.min_score is not None else min_score
 
     # Build a dictionary to quickly access children nodes
     children_dict = {}
@@ -294,7 +308,8 @@ def get_sorted_requirement_nodes(
                 "is_scored": req_as.is_scored if req_as else None,
                 "score": req_as.score if req_as else None,
                 "documentation_score": req_as.documentation_score if req_as else None,
-                "max_score": max_score if req_as else None,
+                "max_score": _resolved_max(node) if req_as else None,
+                "min_score": _resolved_min(node) if req_as else None,
                 "weight": node.weight if node.weight else 1,
                 "questions": node.get_questions_translated,
                 "answers": build_answers_dict(req_as.answers.all()) if req_as else None,
@@ -338,7 +353,8 @@ def get_sorted_requirement_nodes(
                     "documentation_score": child_req_as.documentation_score
                     if child_req_as
                     else None,
-                    "max_score": max_score if child_req_as else None,
+                    "max_score": _resolved_max(child) if child_req_as else None,
+                    "min_score": _resolved_min(child) if child_req_as else None,
                     "weight": child.weight if child.weight else 1,
                     "questions": child.get_questions_translated,
                     "answers": build_answers_dict(child_req_as.answers.all())
@@ -378,28 +394,45 @@ def annotate_tree_with_aggregated_scores(
     tree: dict[str, dict], compliance_assessment
 ) -> dict[str, dict]:
     """
-    Walk the requirement tree and annotate each node with `aggregated_score`
-    (and optionally `aggregated_documentation_score`) according to the
-    compliance_assessment's score_calculation_method.
+    Walk the requirement tree and annotate each node with `aggregated_score`,
+    `aggregated_max_score` (and the documentation counterparts when enabled).
 
-    For AVG: weighted average of leaf scores in the subtree.
-    For SUM: sum of (score * weight) of leaves in the subtree.
-    For AVG_OF_AVG: weighted average of direct children's aggregated scores
-    (recursive) — matches the per-node `computed[urn]` value inside
-    ComplianceAssessment._compute_score_for_field. The overall global score
-    (ComplianceAssessment.get_global_score) uses a different top-level rule
-    for structural roots and is computed separately.
+    AVG/AVG_OF_AVG: leaves contribute a normalized ratio (against their own
+    resolved scale). The parent rolls up the weighted ratio and denormalizes
+    onto the CA scale. The display ceiling is the CA's max_score.
 
-    Leaf requirements are included only when is_scored is True, the node is
-    assessable, and the result is not N/A.
+    SUM: raw weighted sum of leaf scores, with the display ceiling being the
+    sum of per-RA resolved maxes × weight. Per-requirement scale overrides
+    contribute their own ceiling; 100% stays achievable.
+
+    Leaves are included only when is_scored is True, the node is assessable,
+    and the result is not N/A.
     """
     method = compliance_assessment.score_calculation_method
     show_doc = compliance_assessment.show_documentation_score
+    ca_min = (
+        compliance_assessment.min_score
+        if compliance_assessment.min_score is not None
+        else 0
+    )
+    ca_max = (
+        compliance_assessment.max_score
+        if compliance_assessment.max_score is not None
+        else 100
+    )
+    ca_range = ca_max - ca_min if ca_max > ca_min else 1
+
+    def _clean(value):
+        """Trim float-precision noise (~1e-9) from denormalized display values
+        without losing precision for upstream rollups, which use the raw
+        _aggregated_ratio."""
+        if value is None:
+            return None
+        return round(value, 9)
 
     def walk(node: dict) -> None:
         children = node.get("children") or {}
 
-        # Recurse first so children have their aggregates computed.
         for child in children.values():
             walk(child)
 
@@ -412,68 +445,148 @@ def annotate_tree_with_aggregated_scores(
             weight = node.get("weight") or 1
             if is_assessed:
                 score_val = node.get("score") or 0
+                ra_min = (
+                    node.get("min_score") if node.get("min_score") is not None else 0
+                )
+                ra_max = (
+                    node.get("max_score")
+                    if node.get("max_score") is not None
+                    else ca_max
+                )
+                ra_range = ra_max - ra_min if ra_max > ra_min else 1
+                ratio = (score_val - ra_min) / ra_range
                 node["aggregated_score"] = score_val
+                node["aggregated_min_score"] = ra_min
+                node["aggregated_max_score"] = ra_max
+                # Normalized to [0, 1] on the RA's own scale — the only sane
+                # axis to roll up across mixed scales.
+                node["_aggregated_ratio"] = ratio
+                node["_leaf_weighted_ratio"] = ratio * weight
                 node["_leaf_weighted_score"] = score_val * weight
+                node["_leaf_weighted_max"] = ra_max * weight
                 node["_leaf_weight"] = weight
                 if show_doc:
                     doc_val = node.get("documentation_score") or 0
+                    doc_ratio = (doc_val - ra_min) / ra_range
                     node["aggregated_documentation_score"] = doc_val
+                    node["_aggregated_doc_ratio"] = doc_ratio
+                    node["_leaf_weighted_doc_ratio"] = doc_ratio * weight
                     node["_leaf_weighted_doc"] = doc_val * weight
             else:
+                node["_aggregated_ratio"] = None
+                node["_aggregated_doc_ratio"] = None
+                node["_leaf_weighted_ratio"] = 0
                 node["_leaf_weighted_score"] = 0
-                node["_leaf_weighted_doc"] = 0
+                node["_leaf_weighted_max"] = 0
                 node["_leaf_weight"] = 0
+                node["_leaf_weighted_doc_ratio"] = 0
+                node["_leaf_weighted_doc"] = 0
             return
 
+        leaf_weighted_ratio = sum(
+            c.get("_leaf_weighted_ratio", 0) for c in children.values()
+        )
+        leaf_weighted_doc_ratio = sum(
+            c.get("_leaf_weighted_doc_ratio", 0) for c in children.values()
+        )
         leaf_weighted_score = sum(
             c.get("_leaf_weighted_score", 0) for c in children.values()
         )
         leaf_weighted_doc = sum(
             c.get("_leaf_weighted_doc", 0) for c in children.values()
         )
+        leaf_weighted_max = sum(
+            c.get("_leaf_weighted_max", 0) for c in children.values()
+        )
         leaf_weight = sum(c.get("_leaf_weight", 0) for c in children.values())
+        node["_leaf_weighted_ratio"] = leaf_weighted_ratio
+        node["_leaf_weighted_doc_ratio"] = leaf_weighted_doc_ratio
         node["_leaf_weighted_score"] = leaf_weighted_score
         node["_leaf_weighted_doc"] = leaf_weighted_doc
+        node["_leaf_weighted_max"] = leaf_weighted_max
         node["_leaf_weight"] = leaf_weight
 
         if method == ComplianceAssessment.CalculationMethod.AVG_OF_AVG:
-            total_weighted = 0.0
-            total_weighted_doc = 0.0
+            # Roll up children's normalized ratios (each in [0, 1] regardless
+            # of the child's own scale) weighted by the child's own weight.
+            total_weighted_ratio = 0.0
+            total_weighted_doc_ratio = 0.0
             total_child_weight = 0
             for child in children.values():
-                child_agg = child.get("aggregated_score")
-                if child_agg is None:
+                child_ratio = child.get("_aggregated_ratio")
+                if child_ratio is None:
                     continue
                 cw = child.get("weight") or 1
-                total_weighted += child_agg * cw
+                total_weighted_ratio += child_ratio * cw
                 if show_doc:
-                    total_weighted_doc += (
-                        child.get("aggregated_documentation_score") or 0
-                    ) * cw
+                    child_doc_ratio = child.get("_aggregated_doc_ratio") or 0
+                    total_weighted_doc_ratio += child_doc_ratio * cw
                 total_child_weight += cw
             if total_child_weight > 0:
-                node["aggregated_score"] = total_weighted / total_child_weight
+                avg_ratio = total_weighted_ratio / total_child_weight
+                node["_aggregated_ratio"] = avg_ratio
+                node["aggregated_score"] = _clean(ca_min + avg_ratio * ca_range)
+                node["aggregated_min_score"] = ca_min
+                node["aggregated_max_score"] = ca_max
                 if show_doc:
-                    node["aggregated_documentation_score"] = (
-                        total_weighted_doc / total_child_weight
+                    avg_doc_ratio = total_weighted_doc_ratio / total_child_weight
+                    node["_aggregated_doc_ratio"] = avg_doc_ratio
+                    node["aggregated_documentation_score"] = _clean(
+                        ca_min + avg_doc_ratio * ca_range
                     )
+            else:
+                node["_aggregated_ratio"] = None
+                node["_aggregated_doc_ratio"] = None
         elif method == ComplianceAssessment.CalculationMethod.SUM:
             if leaf_weight > 0:
                 node["aggregated_score"] = leaf_weighted_score
+                node["aggregated_max_score"] = leaf_weighted_max
+                node["aggregated_min_score"] = 0
+                # Ratio in [0, 1] for any future consumer (e.g. nested SUM).
+                node["_aggregated_ratio"] = (
+                    leaf_weighted_score / leaf_weighted_max
+                    if leaf_weighted_max
+                    else None
+                )
                 if show_doc:
                     node["aggregated_documentation_score"] = leaf_weighted_doc
+                    node["_aggregated_doc_ratio"] = (
+                        leaf_weighted_doc / leaf_weighted_max
+                        if leaf_weighted_max
+                        else None
+                    )
+            else:
+                node["_aggregated_ratio"] = None
+                node["_aggregated_doc_ratio"] = None
         else:
             if leaf_weight > 0:
-                node["aggregated_score"] = leaf_weighted_score / leaf_weight
+                avg_ratio = leaf_weighted_ratio / leaf_weight
+                node["_aggregated_ratio"] = avg_ratio
+                node["aggregated_score"] = _clean(ca_min + avg_ratio * ca_range)
+                node["aggregated_min_score"] = ca_min
+                node["aggregated_max_score"] = ca_max
                 if show_doc:
-                    node["aggregated_documentation_score"] = (
-                        leaf_weighted_doc / leaf_weight
+                    avg_doc_ratio = leaf_weighted_doc_ratio / leaf_weight
+                    node["_aggregated_doc_ratio"] = avg_doc_ratio
+                    node["aggregated_documentation_score"] = _clean(
+                        ca_min + avg_doc_ratio * ca_range
                     )
+            else:
+                node["_aggregated_ratio"] = None
+                node["_aggregated_doc_ratio"] = None
 
     def cleanup(node: dict) -> None:
-        node.pop("_leaf_weighted_score", None)
-        node.pop("_leaf_weighted_doc", None)
-        node.pop("_leaf_weight", None)
+        for key in (
+            "_aggregated_ratio",
+            "_aggregated_doc_ratio",
+            "_leaf_weighted_ratio",
+            "_leaf_weighted_doc_ratio",
+            "_leaf_weighted_score",
+            "_leaf_weighted_doc",
+            "_leaf_weighted_max",
+            "_leaf_weight",
+        ):
+            node.pop(key, None)
         for child in (node.get("children") or {}).values():
             cleanup(child)
 
@@ -490,11 +603,17 @@ def filter_graph_by_implementation_groups(
         return graph
 
     def should_include_node(node: dict) -> bool:
-        node_groups = node.get("implementation_groups")
-        if node_groups:
-            return any(group in node_groups for group in implementation_groups)
-
-        # Nodes without implementation groups but with children are included
+        node_groups = node.get("implementation_groups") or []
+        # Include a node if:
+        #   - it has any matching IG of its own, OR
+        #   - any of its children survived the filter (i.e., this node is the
+        #     ancestor of a match).
+        # The prior implementation short-circuited on node_groups and dropped
+        # ancestors whose own IGs didn't match, hiding matching descendants —
+        # e.g., ISO 27001's annex-a (IGs=['SoA']) would hide leaves tagged with
+        # a custom IG added via the framework builder.
+        if any(group in node_groups for group in implementation_groups):
+            return True
         return bool(node.get("children"))
 
     filtered_graph = {}
@@ -771,9 +890,11 @@ def task_template_per_status(user: User):
     )
 
     # For non-recurrent templates, get the single node's status
-    single_node_subq = TaskNode.objects.filter(task_template=OuterRef("pk")).values(
-        "status"
-    )[:1]
+    single_node_subq = (
+        TaskNode.objects.filter(task_template=OuterRef("pk"))
+        .order_by("-due_date")
+        .values("status")[:1]
+    )
 
     non_recurrent_with_status = (
         viewable_task_templates.filter(is_recurrent=False)
@@ -797,7 +918,9 @@ def task_template_per_status(user: User):
     return {"localLables": local_lables, "labels": labels, "values": values}
 
 
-def get_governance_calendar_data(user: User, year: int = None):
+def get_governance_calendar_data(
+    user: User, year: Optional[int] = None, folder_id: Optional[str] = None
+) -> list:
     """
     Generate calendar heatmap data for governance activities.
     Returns activity counts per date for:
@@ -808,16 +931,6 @@ def get_governance_calendar_data(user: User, year: int = None):
     - ComplianceAssessment due dates and ETAs
     - FindingsAssessment due dates and ETAs
     """
-    from core.models import (
-        TaskNode,
-        AppliedControl,
-        RiskAcceptance,
-        RiskAssessment,
-        ComplianceAssessment,
-        FindingsAssessment,
-    )
-    from datetime import datetime
-    from collections import defaultdict
 
     if year is None:
         year = datetime.now().year
@@ -825,27 +938,31 @@ def get_governance_calendar_data(user: User, year: int = None):
     start_date = datetime(year, 1, 1).date()
     end_date = datetime(year, 12, 31).date()
 
+    scoped_folder = (
+        Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+    )
+
     # Dictionary to accumulate activity counts per date
     activity_counts = defaultdict(int)
 
     # Get accessible objects for each model
     (task_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, TaskNode
+        scoped_folder, user, TaskNode
     )
     (control_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, AppliedControl
+        scoped_folder, user, AppliedControl
     )
     (acceptance_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, RiskAcceptance
+        scoped_folder, user, RiskAcceptance
     )
     (risk_assessment_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, RiskAssessment
+        scoped_folder, user, RiskAssessment
     )
     (compliance_assessment_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, ComplianceAssessment
+        scoped_folder, user, ComplianceAssessment
     )
     (findings_assessment_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, FindingsAssessment
+        scoped_folder, user, FindingsAssessment
     )
 
     # Count TaskNode due dates
@@ -939,12 +1056,16 @@ def assessment_per_status(user: User, model: RiskAssessment | ComplianceAssessme
     return {"localLables": local_lables, "labels": labels, "values": values}
 
 
-def combined_assessments_per_status(user: User):
+def combined_assessments_per_status(
+    user: User, folder_id: Optional[str] = None
+) -> dict:
     """
     Returns assessment counts grouped by status for all three assessment types:
     RiskAssessment, ComplianceAssessment, and FindingsAssessment
     """
-    from .models import RiskAssessment, ComplianceAssessment, FindingsAssessment
+    scoped_folder = (
+        Folder.objects.filter(id=folder_id).first() if folder_id else None
+    ) or Folder.get_root_folder()
 
     # Get all unique statuses across all assessment types
     # Using RiskAssessment.Status as they should all share the same status choices
@@ -968,7 +1089,7 @@ def combined_assessments_per_status(user: User):
     for series_name, model in assessment_types:
         # Get accessible objects
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), user, model
+            scoped_folder, user, model
         )
         viewable_assessments = model.objects.filter(id__in=object_ids_view)
 
@@ -1211,10 +1332,14 @@ def risks_per_perimeter_groups(user: User):
     return output
 
 
-def get_counters(user: User):
+def get_counters(user: User, folder_id: Optional[str] = None) -> dict:
+    scoped_folder = (
+        Folder.objects.filter(id=folder_id).first() if folder_id else None
+    ) or Folder.get_root_folder()
+
     # Get all accessible applied controls
     applied_controls_ids = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, AppliedControl
+        scoped_folder, user, AppliedControl
     )[0]
 
     # Count policies and non-policies separately
@@ -1224,24 +1349,22 @@ def get_counters(user: User):
 
     # Get accessible frameworks
     frameworks_ids = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, Framework
+        scoped_folder, user, Framework
     )[0]
 
     # Get accessible risk acceptances
     risk_acceptances_ids = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, RiskAcceptance
+        scoped_folder, user, RiskAcceptance
     )[0]
 
     # Get accessible security exceptions
     security_exceptions_ids = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, SecurityException
+        scoped_folder, user, SecurityException
     )[0]
 
     return {
         "domains": len(
-            RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), user, Folder
-            )[0]
+            RoleAssignment.get_accessible_object_ids(scoped_folder, user, Folder)[0]
         ),
         "frameworks": len(frameworks_ids),
         "applied_controls": applied_controls_count,
@@ -1311,22 +1434,54 @@ def build_audits_tree_metrics(user):
     return tree
 
 
-def build_audits_stats(user, folder_id=None):
-    scoped_folder = (
-        Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+def build_audits_stats(user, folder_id=None, object_ids=None):
+    if object_ids is None:
+        scoped_folder = (
+            Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+        )
+        (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            scoped_folder, user, ComplianceAssessment
+        )
+    top_audits = list(
+        ComplianceAssessment.objects.filter(id__in=object_ids)
+        .order_by("-updated_at")
+        .only("id", "name", "selected_implementation_groups")[:10]
     )
-    (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        scoped_folder, user, ComplianceAssessment
+    if not top_audits:
+        return {"data": [], "names": [], "uuids": []}
+
+    # Single fetch for all RAs across the top 10 audits, then aggregate
+    # in Python so each audit's selected_implementation_groups filter is
+    # honored (replaces 10× get_requirements_result_count()).
+    top_ids = [a.id for a in top_audits]
+    ig_by_audit = {
+        a.id: set(a.selected_implementation_groups)
+        if a.selected_implementation_groups
+        else None
+        for a in top_audits
+    }
+    counts_by_audit: dict = {aid: {} for aid in top_ids}
+    ra_qs = RequirementAssessment.objects.filter(
+        compliance_assessment_id__in=top_ids,
+        requirement__assessable=True,
+    ).values_list(
+        "compliance_assessment_id",
+        "result",
+        "requirement__implementation_groups",
     )
-    data = list()
-    names = list()
-    uuids = list()
-    for audit in ComplianceAssessment.objects.filter(id__in=object_ids).order_by(
-        "-updated_at"
-    )[:10]:
-        data.append([rs[0] for rs in audit.get_requirements_result_count()])
-        names.append(audit.name)
-        uuids.append(audit.id)
+    for ca_id, result, req_igs in ra_qs:
+        ig = ig_by_audit[ca_id]
+        if ig is not None and not (req_igs and ig & set(req_igs)):
+            continue
+        bucket = counts_by_audit[ca_id]
+        bucket[result] = bucket.get(result, 0) + 1
+
+    results_order = list(RequirementAssessment.Result)
+    data = [
+        [counts_by_audit[a.id].get(r, 0) for r in results_order] for a in top_audits
+    ]
+    names = [a.name for a in top_audits]
+    uuids = [a.id for a in top_audits]
     return {"data": data, "names": names, "uuids": uuids}
 
 
@@ -1422,6 +1577,49 @@ def get_metrics(user: User, folder_id):
     return data
 
 
+def _compute_progress_by_assessment(assessment_ids):
+    """
+    Bulk-compute progress (% assessed) for a set of ComplianceAssessment ids,
+    honoring each assessment's selected_implementation_groups. Mirrors the
+    .progress property semantics (assessed = result != NOT_ASSESSED OR score
+    is not None) but in two queries instead of N heavy prefetched ones.
+    """
+    assessment_ids = list(assessment_ids)
+    if not assessment_ids:
+        return {}
+
+    ig_by_audit = {
+        ca_id: set(igs) if igs else None
+        for ca_id, igs in ComplianceAssessment.objects.filter(
+            id__in=assessment_ids
+        ).values_list("id", "selected_implementation_groups")
+    }
+
+    totals = {aid: 0 for aid in assessment_ids}
+    assessed = {aid: 0 for aid in assessment_ids}
+    rows = RequirementAssessment.objects.filter(
+        compliance_assessment_id__in=assessment_ids,
+        requirement__assessable=True,
+    ).values_list(
+        "compliance_assessment_id",
+        "result",
+        "score",
+        "requirement__implementation_groups",
+    )
+    for ca_id, result, score, req_igs in rows:
+        ig = ig_by_audit.get(ca_id)
+        if ig is not None and not (req_igs and ig & set(req_igs)):
+            continue
+        totals[ca_id] += 1
+        if result != RequirementAssessment.Result.NOT_ASSESSED or score is not None:
+            assessed[ca_id] += 1
+
+    return {
+        aid: int((assessed[aid] / totals[aid]) * 100) if totals[aid] else 0
+        for aid in assessment_ids
+    }
+
+
 def get_audits_metrics(user: User, folder_id=None):
     scoped_folder = (
         Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
@@ -1429,15 +1627,11 @@ def get_audits_metrics(user: User, folder_id=None):
     (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
         scoped_folder, user, ComplianceAssessment
     )
-    viewable_compliance_assessments = ComplianceAssessment.objects.filter(
-        id__in=object_ids
-    )
-    progress_avg = math.ceil(
-        mean([x.progress for x in viewable_compliance_assessments] or [0])
-    )
+    progresses = list(_compute_progress_by_assessment(object_ids).values())
+    progress_avg = math.ceil(mean(progresses)) if progresses else 0
     return {
         "progress_avg": progress_avg,
-        "audits_stats": build_audits_stats(user, folder_id),
+        "audits_stats": build_audits_stats(user, folder_id, object_ids=object_ids),
     }
 
 
@@ -1481,28 +1675,14 @@ def get_compliance_analytics(user: User, folder_id=None):
         )
         return model.objects.filter(id__in=object_ids)
 
-    # Get viewable compliance assessments with related data and progress annotation
-    from django.db.models import Count, Q, F, Value, IntegerField, ExpressionWrapper
-    from django.db.models.functions import Greatest, Coalesce
-
-    viewable_assessments = (
-        viewable_items(ComplianceAssessment, folder_id)
-        .select_related("framework", "folder", "perimeter")
-        .annotate(
-            total_requirements=Count(
-                "requirement_assessments",
-                filter=Q(requirement_assessments__requirement__assessable=True),
-                distinct=True,
-            ),
-            assessed_requirements=Count(
-                "requirement_assessments",
-                filter=~Q(
-                    requirement_assessments__result=RequirementAssessment.Result.NOT_ASSESSED
-                )
-                & Q(requirement_assessments__requirement__assessable=True),
-                distinct=True,
-            ),
+    viewable_assessments = list(
+        viewable_items(ComplianceAssessment, folder_id).select_related(
+            "framework", "folder", "perimeter"
         )
+    )
+
+    progress_by_id = _compute_progress_by_assessment(
+        [a.id for a in viewable_assessments]
     )
 
     framework_data = {}
@@ -1517,7 +1697,6 @@ def get_compliance_analytics(user: User, folder_id=None):
         )
         perimeter_id = str(assessment.perimeter.id) if assessment.perimeter else None
 
-        # Initialize framework if not exists
         if framework_name not in framework_data:
             framework_data[framework_name] = {
                 "framework_id": framework_id,
@@ -1525,7 +1704,6 @@ def get_compliance_analytics(user: User, folder_id=None):
                 "domains": {},
             }
 
-        # Initialize domain if not exists
         if domain_name not in framework_data[framework_name]["domains"]:
             framework_data[framework_name]["domains"][domain_name] = {
                 "domain_id": domain_id,
@@ -1533,12 +1711,11 @@ def get_compliance_analytics(user: User, folder_id=None):
                 "assessments": [],
             }
 
-        # Add assessment data using annotated progress
         framework_data[framework_name]["domains"][domain_name]["assessments"].append(
             {
                 "assessment_id": str(assessment.id),
                 "assessment_name": assessment.name,
-                "progress": assessment.progress,
+                "progress": progress_by_id.get(assessment.id, 0),
                 "perimeter": perimeter_name,
                 "perimeter_id": perimeter_id,
                 "status": assessment.status,
@@ -1941,6 +2118,7 @@ def get_folder_content(
     include_enclaves,
     viewable_objects,
     needed_folders,
+    writable_ids: Optional[set[UUID]] = None,
 ):
     content = []
     for f in Folder.objects.filter(parent_folder=folder).distinct():
@@ -1952,6 +2130,7 @@ def get_folder_content(
                 "name": f.name,
                 "uuid": f.id,
                 "viewable": viewable_objects and f.id in viewable_objects,
+                "writable": f.id in writable_ids if writable_ids is not None else True,
                 "content_type": f.content_type,
             }
             # Add enclave-specific styling
@@ -1969,6 +2148,7 @@ def get_folder_content(
                 include_enclaves=include_enclaves,
                 viewable_objects=viewable_objects,
                 needed_folders=needed_folders,
+                writable_ids=writable_ids,
             )
             if len(children) > 0:
                 entry.update({"children": children})
