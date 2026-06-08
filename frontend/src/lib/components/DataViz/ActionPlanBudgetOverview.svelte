@@ -17,6 +17,12 @@
 		total_display: string;
 	}
 
+	interface CostLeg {
+		fixed_cost: number;
+		fixed_cost_display: string;
+		people_days: number;
+	}
+
 	interface BudgetData {
 		count: number;
 		count_with_cost: number;
@@ -24,6 +30,10 @@
 		total_annual_cost_display: string;
 		currency: string;
 		by_status: StatusBucket[];
+		cost_breakdown?: {
+			build: CostLeg;
+			run: CostLeg;
+		};
 	}
 
 	let budgetData: BudgetData | null = $state(null);
@@ -103,6 +113,32 @@
 							/>
 						{/each}
 					</div>
+					{#if budgetData.cost_breakdown}
+						{@const cb = budgetData.cost_breakdown}
+						<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+							{#each [{ leg: cb.build, label: m.buildCosts() }, { leg: cb.run, label: m.runCosts() }] as entry}
+								<div class="border border-gray-200 rounded-lg p-3">
+									<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+										{entry.label}
+									</div>
+									<div class="flex items-baseline justify-between gap-3">
+										<div class="flex flex-col">
+											<span class="text-xl font-bold text-gray-800 leading-none"
+												>{entry.leg.fixed_cost_display}</span
+											>
+											<span class="text-xs text-gray-500 mt-1">{m.fixedCost()}</span>
+										</div>
+										<div class="flex flex-col text-right">
+											<span class="text-xl font-bold text-gray-800 leading-none"
+												>{entry.leg.people_days.toLocaleString()}</span
+											>
+											<span class="text-xs text-gray-500 mt-1">{m.peopleDays()}</span>
+										</div>
+									</div>
+								</div>
+							{/each}
+						</div>
+					{/if}
 					<p class="text-xs text-gray-400 italic">
 						{m.budgetOverviewHint({
 							x: String(budgetData.count_with_cost),
