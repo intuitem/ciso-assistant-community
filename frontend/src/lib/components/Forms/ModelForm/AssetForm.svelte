@@ -37,7 +37,7 @@
 		data = {}
 	}: Props = $props();
 
-	type SecurityObjectiveScale = '0-3' | '1-4' | 'FIPS-199';
+	type SecurityObjectiveScale = keyof typeof SECURITY_OBJECTIVE_SCALE_MAP;
 	const scale: SecurityObjectiveScale = page.data.settings.security_objective_scale;
 	const securityObjectiveScaleMap = SECURITY_OBJECTIVE_SCALE_MAP[scale];
 	const reducedSecurityObjectiveMap = securityObjectiveScaleMap.filter(
