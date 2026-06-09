@@ -16,7 +16,7 @@ You'll use an **online workstation** to download dependencies and build the appl
 **On the online workstation:**
 - Internet connection
 - Git
-- Python 3.12+ with poetry 2.0+
+- Python 3.12+ with uv 0.9+
 - Node 22+ with pnpm 9.0+
 - yaml-cpp library
 
@@ -32,7 +32,7 @@ You'll use an **online workstation** to download dependencies and build the appl
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/intuitem/ciso-assistant-community.git
+git clone --single-branch -b main https://github.com/intuitem/ciso-assistant-community.git
 cd ciso-assistant-community
 ```
 
@@ -42,17 +42,17 @@ cd ciso-assistant-community
 cd backend
 
 # Create virtual environment
-python3 -m venv venv
-source venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
 
-# Install poetry in the venv (required by startup.sh)
-pip install poetry
+# Install uv in the venv (required by startup.sh)
+pip install uv
 
 # Install dependencies
-poetry install --only main
+uv sync --locked --no-dev
 ```
 
-**For Enterprise Edition:**
+**For Enterprise Edition only:**
 
 After installing backend dependencies, copy the enterprise core module:
 
@@ -80,7 +80,7 @@ pnpm prune
 
 **For Enterprise Edition:**
 
-Before building, overlay the enterprise frontend files:
+**Before** building, overlay the enterprise frontend files:
 
 ```bash
 # From the repository root
@@ -91,7 +91,7 @@ cp -r enterprise/frontend/* frontend/
 ## Step 2: Transfer to Offline Server
 
 Transfer the following to the offline server:
-- `backend/` directory (including `venv/` with complete virtual environment)
+- `backend/` directory (including `.venv/` with complete virtual environment)
 - `frontend/` directory (including `build/`, `server/`, `node_modules/`, and `package.json`)
 
 ## Step 3: Deploy on Offline Server
@@ -179,7 +179,7 @@ Before starting the services, run migrations and create a superuser account:
 
 ```bash
 cd /path/to/ciso-assistant-community/backend
-source venv/bin/activate
+source .venv/bin/activate
 
 # Run database migrations
 python manage.py migrate
@@ -208,7 +208,7 @@ Type=exec
 User=ciso-assistant
 Group=ciso-assistant
 WorkingDirectory=/path/to/ciso-assistant-community/backend
-Environment="PATH=/path/to/ciso-assistant-community/backend/venv/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="PATH=/path/to/ciso-assistant-community/backend/.venv/bin:/usr/local/bin:/usr/bin:/bin"
 EnvironmentFile=/path/to/ciso-assistant-community/backend/.env
 ExecStart=/usr/bin/bash startup.sh
 
@@ -232,9 +232,9 @@ Type=simple
 User=ciso-assistant
 Group=ciso-assistant
 WorkingDirectory=/path/to/ciso-assistant-community/backend
-Environment="PATH=/path/to/ciso-assistant-community/backend/venv/bin"
+Environment="PATH=/path/to/ciso-assistant-community/backend/.venv/bin"
 EnvironmentFile=/path/to/ciso-assistant-community/backend/.env
-ExecStart=/path/to/ciso-assistant-community/backend/venv/bin/python \
+ExecStart=/path/to/ciso-assistant-community/backend/.venv/bin/python \
     manage.py run_huey -w 2 -k process
 
 [Install]
@@ -429,7 +429,7 @@ sudo systemctl status ciso-assistant-frontend
 
 To update an offline deployment:
 
-1. On online workstation: Pull latest code, rebuild venv and frontend (including `pnpm prune`)
+1. On online workstation: Pull latest code, rebuild `.venv` (`uv sync --locked --no-dev`) and frontend (including `pnpm prune`)
 2. **Enterprise only:** Re-copy enterprise modules (`enterprise_core` and enterprise frontend files)
 3. Transfer updated files to offline server
 4. Restart services: `sudo systemctl restart ciso-assistant-backend ciso-assistant-huey ciso-assistant-frontend`
