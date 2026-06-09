@@ -50,55 +50,90 @@ async def get_risk_scenarios(folder: str = None, risk_assessment: str = None):
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
-        result += "|Ref|Name|Assets|Threats|Existing Controls|Additional Controls|Current|Residual|\n"
-        result += "|---|---|---|---|---|---|---|---|\n"
+        result += "|UUID|Ref|Name|Inherent Level|Current Level|Residual Level|Treatment|\n"
+        result += "|---|---|---|---|---|---|---|\n"
 
         for rs in scenarios:
+            uuid = rs.get("id", "N/A")
             ref_id = rs.get("ref_id") or "N/A"
             name = rs.get("name", "N/A")
+            inherent_level = (rs.get("inherent_level") or {}).get("name", "--")
             current_level = (rs.get("current_level") or {}).get("name", "--")
             residual_level = (rs.get("residual_level") or {}).get("name", "--")
+            treatment = rs.get("treatment") or "--"
 
-            # Extract asset names
-            assets = rs.get("assets", [])
-            asset_names = (
-                ", ".join(a.get("name", a.get("str", "?")) for a in assets)
-                if assets
-                else "-"
-            )
-
-            # Extract threat names
-            threats = rs.get("threats", [])
-            threat_names = (
-                ", ".join(t.get("name", t.get("str", "?")) for t in threats)
-                if threats
-                else "-"
-            )
-
-            # Extract existing applied control names (current risk)
-            existing_applied_controls = rs.get("existing_applied_controls", [])
-            existing_applied_control_names = (
-                ", ".join(
-                    a.get("name", a.get("str", "?")) for a in existing_applied_controls
-                )
-                if existing_applied_controls
-                else "-"
-            )
-
-            # Extract applied control names (additional/treatment controls for residual risk)
-            applied_controls = rs.get("applied_controls", [])
-            applied_control_names = (
-                ", ".join(a.get("name", a.get("str", "?")) for a in applied_controls)
-                if applied_controls
-                else "-"
-            )
-
-            result += f"|{ref_id}|{name}|{asset_names}|{threat_names}|{existing_applied_control_names}|{applied_control_names}|{current_level}|{residual_level}|\n"
+            result += f"|{uuid}|{ref_id}|{name}|{inherent_level}|{current_level}|{residual_level}|{treatment}|\n"
 
         return success_response(
             result,
             "get_risk_scenarios",
-            "Use this table to answer the user's question about risk scenarios",
+            "Use get_risk_scenario with a UUID to retrieve full details of a specific scenario",
+        )
+    except Exception as e:
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
+        )
+
+
+async def get_risk_scenario(scenario_id: str):
+    """Retrieve full details of a single risk scenario by its UUID
+
+    Args:
+        scenario_id: Risk scenario UUID
+    """
+    try:
+        from ..resolvers import resolve_risk_scenario_id
+
+        resolved_id = resolve_risk_scenario_id(scenario_id)
+        res = make_get_request(f"/risk-scenarios/{resolved_id}/")
+
+        if res.status_code != 200:
+            return http_error_response(res.status_code, res.text)
+
+        rs = res.json()
+
+        result = f"## Risk Scenario: {rs.get('name', 'N/A')}\n\n"
+        result += f"**ID:** {rs.get('id', 'N/A')}\n"
+        result += f"**Ref ID:** {rs.get('ref_id') or '-'}\n"
+        result += f"**Description:** {rs.get('description') or '-'}\n"
+        result += f"**Justification:** {rs.get('justification') or '-'}\n"
+        result += f"**Treatment:** {rs.get('treatment') or '-'}\n"
+        result += f"**Existing Controls:** {rs.get('existing_controls') or '-'}\n\n"
+
+        result += "### Inherent Risk\n"
+        result += f"**Proba:** {(rs.get('inherent_proba') or {}).get('name', '--')}\n"
+        result += f"**Impact:** {(rs.get('inherent_impact') or {}).get('name', '--')}\n"
+        result += f"**Level:** {(rs.get('inherent_level') or {}).get('name', '--')}\n\n"
+
+        result += "### Current Risk\n"
+        result += f"**Proba:** {(rs.get('current_proba') or {}).get('name', '--')}\n"
+        result += f"**Impact:** {(rs.get('current_impact') or {}).get('name', '--')}\n"
+        result += f"**Level:** {(rs.get('current_level') or {}).get('name', '--')}\n\n"
+
+        result += "### Residual Risk\n"
+        result += f"**Proba:** {(rs.get('residual_proba') or {}).get('name', '--')}\n"
+        result += f"**Impact:** {(rs.get('residual_impact') or {}).get('name', '--')}\n"
+        result += f"**Level:** {(rs.get('residual_level') or {}).get('name', '--')}\n\n"
+
+        threats = rs.get("threats", [])
+        if threats:
+            result += f"**Threats:** {', '.join(t.get('str', str(t)) if isinstance(t, dict) else str(t) for t in threats)}\n"
+
+        assets = rs.get("assets", [])
+        if assets:
+            result += f"**Assets:** {', '.join(a.get('str', str(a)) if isinstance(a, dict) else str(a) for a in assets)}\n"
+
+        applied_controls = rs.get("applied_controls", [])
+        if applied_controls:
+            result += f"**Applied Controls:** {', '.join(c.get('str', str(c)) if isinstance(c, dict) else str(c) for c in applied_controls)}\n"
+
+        return success_response(
+            result,
+            "get_risk_scenario",
+            "Use update_risk_scenario to modify this scenario",
         )
     except Exception as e:
         return error_response(
@@ -141,8 +176,8 @@ async def get_applied_controls(folder: str = None):
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
-        result += "|UUID|Ref|Name|Status|ETA|Owner|Domain|Category|CSF Function|Effort|Impact|Priority|Cost|\n"
-        result += "|---|---|---|---|---|---|---|---|---|---|---|---|---|\n"
+        result += "|UUID|Ref|Name|Status|ETA|Owner|Owner UUIDs|Domain|Category|CSF Function|Effort|Impact|Priority|Cost|\n"
+        result += "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n"
 
         for item in controls:
             uuid = item.get("id")
@@ -159,6 +194,14 @@ async def get_applied_controls(folder: str = None):
                 if owners
                 else "N/A"
             )
+            owner_uuids = (
+                ", ".join(
+                    o.get("id", "") if isinstance(o, dict) else str(o)
+                    for o in owners
+                )
+                if owners
+                else "N/A"
+            )
             domain = (item.get("folder") or {}).get("str", "N/A")
             category = item.get("category", "N/A")
             csf_function = item.get("csf_function", "N/A")
@@ -167,7 +210,7 @@ async def get_applied_controls(folder: str = None):
             priority = item.get("priority", "N/A")
             cost = item.get("cost", 0)
 
-            result += f"|{uuid}|{ref_id}|{name}|{status}|{eta}|{owner_str}|{domain}|{category}|{csf_function}|{effort}|{impact}|{priority}|{cost}|\n"
+            result += f"|{uuid}|{ref_id}|{name}|{status}|{eta}|{owner_str}|{owner_uuids}|{domain}|{category}|{csf_function}|{effort}|{impact}|{priority}|{cost}|\n"
 
         return success_response(
             result,
@@ -1429,4 +1472,149 @@ async def get_vulnerability(vulnerability_id: str):
     except Exception as e:
         return error_response(
             "Error", str(e), "Check the vulnerability ID and retry", retry_allowed=True
+        )
+
+
+async def get_asset_classes(
+    parent: str = None,
+    search: str = None,
+):
+    """List all asset classes with IDs and names
+
+    Args:
+        parent: Parent asset class UUID to filter by
+        search: Search term to filter results
+    """
+    try:
+        params = {}
+        filters = {}
+
+        if parent:
+            params["parent"] = parent
+            filters["parent"] = parent
+        if search:
+            params["search"] = search
+            filters["search"] = search
+
+        res = make_get_request("/asset-class/", params=params)
+
+        if res.status_code != 200:
+            return http_error_response(res.status_code, res.text)
+
+        data = res.json()
+        asset_classes = get_paginated_results(data)
+
+        if not asset_classes:
+            return empty_response("asset classes", filters)
+
+        result = f"Found {len(asset_classes)} asset classes"
+        if filters:
+            result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
+        result += "\n\n"
+        result += "|ID|Name|Parent|\n"
+        result += "|---|---|---|\n"
+
+        for ac in asset_classes:
+            ac_id = ac.get("id", "N/A")
+            name = ac.get("name", "N/A")
+            parent_obj = ac.get("parent")
+            parent_name = parent_obj.get("str", "N/A") if isinstance(parent_obj, dict) else (parent_obj or "N/A")
+            result += f"|{ac_id}|{name}|{parent_name}|\n"
+
+        return success_response(
+            result,
+            "get_asset_classes",
+            "Use the asset class ID or name with update_asset to set the asset_class field",
+        )
+    except Exception as e:
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
+        )
+
+
+async def get_users(
+    search: str = None,
+    email: str = None,
+    first_name: str = None,
+    last_name: str = None,
+    is_active: bool = None,
+    is_applied_control_owner: bool = None,
+    exclude_current: bool = None,
+):
+    """List users with their UUIDs, names and emails
+
+    Args:
+        search: Search term (name or email)
+        email: Filter by email address
+        first_name: Filter by first name
+        last_name: Filter by last name
+        is_active: Filter by active status
+        is_applied_control_owner: Filter to users who are applied control owners
+        exclude_current: Exclude the currently authenticated user
+    """
+    try:
+        params = {}
+        filters = {}
+
+        if search:
+            params["search"] = search
+            filters["search"] = search
+        if email:
+            params["email"] = email
+            filters["email"] = email
+        if first_name:
+            params["first_name"] = first_name
+            filters["first_name"] = first_name
+        if last_name:
+            params["last_name"] = last_name
+            filters["last_name"] = last_name
+        if is_active is not None:
+            params["is_active"] = is_active
+            filters["is_active"] = is_active
+        if is_applied_control_owner is not None:
+            params["is_applied_control_owner"] = is_applied_control_owner
+            filters["is_applied_control_owner"] = is_applied_control_owner
+        if exclude_current is not None:
+            params["exclude_current"] = exclude_current
+
+        res = make_get_request("/users/", params=params)
+
+        if res.status_code != 200:
+            return http_error_response(res.status_code, res.text)
+
+        data = res.json()
+        users = get_paginated_results(data)
+
+        if not users:
+            return empty_response("users", filters)
+
+        result = f"Found {len(users)} users"
+        if filters:
+            result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
+        result += "\n\n"
+        result += "|UUID|Email|First Name|Last Name|Active|\n"
+        result += "|---|---|---|---|---|\n"
+
+        for user in users:
+            user_id = user.get("id", "N/A")
+            user_email = user.get("email", "N/A")
+            first = user.get("first_name", "") or ""
+            last = user.get("last_name", "") or ""
+            active = user.get("is_active", "N/A")
+            result += f"|{user_id}|{user_email}|{first}|{last}|{active}|\n"
+
+        return success_response(
+            result,
+            "get_users",
+            "Use the UUID column to set the owner field when calling update_applied_control or update_asset",
+        )
+    except Exception as e:
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
         )

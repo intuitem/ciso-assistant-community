@@ -3,19 +3,29 @@ convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any
 urn: urn:intuitem:risk:library:vendor-due-diligence
 locale: fr
 ref_id: vendor-due-diligence
-name: Vendor Due Diligence - simple
-description: Simple framework for rapid due diligence review of vendors
+name: Vendor Due Diligence (VDD) - simple
+description: "Framework simplifi\xE9 pour l'\xE9valuation rapide de la cybers\xE9\
+  curit\xE9 des fournisseurs"
 copyright: intuitem
-version: 1
-publication_date: 2025-10-30
+version: 2
+publication_date: 2026-05-29
 provider: intuitem
 packager: intuitem
+translations:
+  en:
+    name: Vendor Due Diligence (VDD) - simple
+    description: Simple framework for rapid due diligence review of vendors
 objects:
   framework:
     urn: urn:intuitem:risk:framework:vendor-due-diligence
     ref_id: vendor-due-diligence
-    name: Vendor Due Diligence - simple
-    description: Simple framework for rapid due diligence review of vendors
+    name: Vendor Due Diligence (VDD) - simple
+    description: "Framework simplifi\xE9 pour l'\xE9valuation rapide de la cybers\xE9\
+      curit\xE9 des fournisseurs"
+    translations:
+      en:
+        name: Vendor Due Diligence (VDD) - simple
+        description: Simple framework for rapid due diligence review of vendors
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:vendor-due-diligence:gov
       assessable: false

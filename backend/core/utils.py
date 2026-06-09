@@ -1269,25 +1269,12 @@ def build_questions_dict(node):
 
 
 def _resolve_auditee_role_ids():
-    """Resolve role IDs for auditee + higher roles via IAM snapshot cache."""
-    from iam.cache_builders import get_roles_state
+    """Resolve respondent role IDs (auditee + third-party respondent) and the
+    "higher" role IDs (analyst, domain-manager, administrator) via IAM cache.
 
-    role_id_by_name = get_roles_state().role_id_by_name
-    auditee_id = role_id_by_name.get(RoleCodename.AUDITEE.value)
-    higher_ids = frozenset(
-        role_id_by_name[rc.value]
-        for rc in (
-            RoleCodename.ANALYST,
-            RoleCodename.DOMAIN_MANAGER,
-            RoleCodename.ADMINISTRATOR,
-        )
-        if rc.value in role_id_by_name
-    )
-    return auditee_id, higher_ids
-
-
-def _resolve_respondent_role_ids():
-    """Resolve role IDs for respondent roles (auditee + third-party respondent) + higher roles."""
+    Auditee and third-party respondent are synonymous here — both are
+    respondents on an audit and get the scoped, field-stripped view.
+    """
     from iam.cache_builders import get_roles_state
 
     role_id_by_name = get_roles_state().role_id_by_name
@@ -1308,45 +1295,9 @@ def _resolve_respondent_role_ids():
     return respondent_ids, higher_ids
 
 
-def get_respondent_filtered_folder_ids(user) -> set:
-    """Return folder IDs where *user* holds a respondent role (auditee or third-party
-    respondent) but NO higher role. Mirrors :func:`get_auditee_filtered_folder_ids`
-    but widens the role set so third-party respondents are also guarded.
-    """
-    from iam.models import _iter_assignment_lites_for_user
-    from iam.cache_builders import (
-        get_folder_state,
-        iter_descendant_ids,
-    )
-
-    respondent_role_ids, higher_role_ids = _resolve_respondent_role_ids()
-    if not respondent_role_ids:
-        return set()
-
-    state = get_folder_state()
-    folder_roles: dict[UUID, set] = {}
-
-    for a in _iter_assignment_lites_for_user(user):
-        role_id = a.role_id
-        if role_id not in respondent_role_ids and role_id not in higher_role_ids:
-            continue
-        for pf_id in a.perimeter_folder_ids:
-            if a.is_recursive:
-                target_ids = iter_descendant_ids(state, pf_id, include_start=True)
-            else:
-                target_ids = (pf_id,)
-            for fid in target_ids:
-                folder_roles.setdefault(fid, set()).add(role_id)
-
-    return {
-        fid
-        for fid, role_ids in folder_roles.items()
-        if role_ids & respondent_role_ids and role_ids.isdisjoint(higher_role_ids)
-    }
-
-
 def get_auditee_filtered_folder_ids(user) -> set:
-    """Return folder IDs where *user* holds the auditee role but NO higher role.
+    """Return folder IDs where *user* holds a respondent role (auditee or
+    third-party respondent) but NO higher role.
 
     "Higher" means analyst, domain-manager or administrator — any role that
     already grants full access to compliance data. For those folders the
@@ -1361,8 +1312,8 @@ def get_auditee_filtered_folder_ids(user) -> set:
         iter_descendant_ids,
     )
 
-    auditee_role_id, higher_role_ids = _resolve_auditee_role_ids()
-    if auditee_role_id is None:
+    respondent_role_ids, higher_role_ids = _resolve_auditee_role_ids()
+    if not respondent_role_ids:
         return set()
 
     state = get_folder_state()
@@ -1372,7 +1323,7 @@ def get_auditee_filtered_folder_ids(user) -> set:
 
     for a in _iter_assignment_lites_for_user(user):
         role_id = a.role_id
-        if role_id != auditee_role_id and role_id not in higher_role_ids:
+        if role_id not in respondent_role_ids and role_id not in higher_role_ids:
             continue  # irrelevant role
 
         # expand perimeter folders
@@ -1385,11 +1336,11 @@ def get_auditee_filtered_folder_ids(user) -> set:
             for fid in target_ids:
                 folder_roles.setdefault(fid, set()).add(role_id)
 
-    # Return only folders where user is auditee and has NO higher role
+    # Return only folders where user is a respondent and has NO higher role
     return {
         fid
         for fid, role_ids in folder_roles.items()
-        if auditee_role_id in role_ids and role_ids.isdisjoint(higher_role_ids)
+        if role_ids & respondent_role_ids and role_ids.isdisjoint(higher_role_ids)
     }
 
 
