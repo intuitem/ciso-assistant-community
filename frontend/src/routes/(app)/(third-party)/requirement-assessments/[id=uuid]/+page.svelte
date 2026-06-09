@@ -109,10 +109,6 @@
 	let group = $state(pickDefaultTab());
 </script>
 
-<div class="flex justify-end mb-2">
-	<AuditTrailButton model="requirement-assessments" objectId={data.requirementAssessment.id} />
-</div>
-
 <div class="card space-y-2 p-4 bg-white shadow-sm">
 	<div class="flex flex-row space-x-2 items-center">
 		<code class="code">{data.requirement.urn}</code>
@@ -196,6 +192,9 @@
 				</div>
 			{/if}
 		{/if}
+		<div class="ml-auto shrink-0 self-center">
+			<AuditTrailButton model="requirement-assessments" objectId={data.requirementAssessment.id} />
+		</div>
 	</div>
 	{#if data.requirement.description}
 		<div class="font-light text-lg card p-4 preset-tonal-primary">
