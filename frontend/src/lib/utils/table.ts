@@ -76,7 +76,7 @@ const CONTENT_TYPE_OPTIONS = [
 	{ label: 'ENCLAVE', value: 'EN' }
 ];
 
-const YES_NO_UNSET_OPTIONS = [
+const YES_NO_CAPITAL_OPTIONS = [
 	{ label: 'YES', value: 'YES' },
 	{ label: 'NO', value: 'NO' }
 ];
@@ -345,7 +345,7 @@ export const RISK_TOLERANCE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'withinTolerance',
-		options: YES_NO_UNSET_OPTIONS,
+		options: YES_NO_CAPITAL_OPTIONS,
 		multiple: false,
 		nullable: true
 	}
