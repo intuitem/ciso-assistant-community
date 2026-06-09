@@ -146,6 +146,8 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
             if key not in GENERAL_SETTINGS_KEYS:
                 raise serializers.ValidationError(f"Invalid key: {key}")
             if key in ("ollama_base_url", "openai_api_base") and value:
+                if not isinstance(value, str):
+                    raise serializers.ValidationError({key: "URL must be a string."})
                 parsed = urlparse(value)
                 if parsed.scheme not in ("http", "https"):
                     raise serializers.ValidationError(
