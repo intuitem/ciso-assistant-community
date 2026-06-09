@@ -9994,6 +9994,25 @@ class FrameworkViewSet(BaseModelViewSet):
             if isinstance(framework.ref_id, str) and framework.ref_id.strip()
             else None
         )
+        if current_ref is None:
+            # The ref_id column can be NULL on frameworks created before it was
+            # persisted (or duplicated without copying it over), yet start_editing
+            # seeds the draft ref_id from the slug carried by the child URNs
+            # (falling back to a slug of the name). Reconstruct that same value
+            # here so a no-op republish doesn't read as a rename and get blocked
+            # by the "compliance assessment uses this framework" guard below.
+            for record in draft_nodes + draft_questions + draft_choices:
+                parts = (record.get("urn") or "").split(":")
+                if (
+                    len(parts) >= 6
+                    and parts[0] == "urn"
+                    and parts[2] == "risk"
+                    and parts[3] in REWRITABLE_URN_TYPES
+                ):
+                    current_ref = parts[4]
+                    break
+            if current_ref is None:
+                current_ref = self._slugify_framework_name(framework.name, framework.id)
 
         ns_changed = bool(new_namespace) and new_namespace != current_namespace
         ref_changed = new_ref_id is not None and new_ref_id != (current_ref or "")

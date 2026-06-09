@@ -2656,6 +2656,56 @@ class TestFrameworkBuilderUrnRename:
         assert fw.ref_id == "renamable-fw"
         assert rn.urn == "urn:custom:risk:req_node:renamable-fw:1"
 
+    def test_noop_publish_allowed_when_ref_id_column_empty(
+        self, authenticated_client, app_config
+    ):
+        """A framework whose ref_id column is empty (e.g. created before ref_id
+        was persisted, or duplicated without it) but whose child URNs carry a
+        slug must stay republishable when audits exist. start_editing seeds the
+        draft ref_id from the URN slug; reconcile must treat that as the current
+        identity, not a rename, otherwise a no-op republish is wrongly blocked.
+        """
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Legacy FW",
+            folder=folder,
+            is_published=True,
+            urn_namespace="custom",
+            ref_id="",  # the bug condition: ref_id was never persisted
+        )
+        RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:custom:risk:req_node:legacy-slug:1",
+            ref_id="1",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        perimeter = Perimeter.objects.create(name="Perim", folder=folder)
+        ComplianceAssessment.objects.create(
+            name="CA",
+            framework=fw,
+            folder=folder,
+            perimeter=perimeter,
+            is_published=True,
+            min_score=0,
+            max_score=100,
+        )
+
+        # Real flow: start_editing seeds the draft (ref_id taken from URN slug).
+        start_url = reverse("frameworks-start-editing", args=[fw.id])
+        assert authenticated_client.post(start_url).status_code == 200
+
+        # Publish the seeded draft unchanged — must not trip the rename guard.
+        publish_url = reverse("frameworks-publish-draft", args=[fw.id])
+        response = authenticated_client.post(publish_url)
+        assert response.status_code == 200, response.data
+
+        fw.refresh_from_db()
+        rn = RequirementNode.objects.get(framework=fw)
+        # No rename happened; the URN slug is preserved.
+        assert rn.urn == "urn:custom:risk:req_node:legacy-slug:1"
+
     def test_rename_blocked_on_cross_framework_collision(
         self, authenticated_client, fw_tree
     ):
