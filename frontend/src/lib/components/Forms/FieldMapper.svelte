@@ -299,9 +299,9 @@
 						{@const remoteField = fieldMap[field.key]}
 						{@const choices = choicesCache[`${selectedTable}:${remoteField}`] || []}
 
-						<div class="border border-surface-200 rounded-lg overflow-hidden">
+						<div class="border border-surface-200 rounded-lg">
 							<div
-								class="bg-surface-100 px-4 py-2 border-b border-surface-200 font-medium text-surface-700 flex justify-between"
+								class="bg-surface-100 px-4 py-2 border-b border-surface-200 font-medium text-surface-700 flex justify-between rounded-t-lg"
 							>
 								<span>{m.valueMappingForField({ field: safeTranslate(field.label) })}</span>
 								<span class="text-xs bg-surface-200 px-2 py-1 rounded text-surface-600">
