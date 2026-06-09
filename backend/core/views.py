@@ -160,7 +160,7 @@ from core.utils import (
     REWRITABLE_URN_TYPES,
     build_answers_dict,
     compare_schema_versions,
-    get_auditee_filtered_folder_ids,
+    get_respondent_scoped_folder_ids,
     is_field_visible_to,
     rewrite_child_urns,
     _generate_occurrences,
@@ -8659,13 +8659,13 @@ class FrameworkViewSet(BaseModelViewSet):
 
         cas = [ca for ca in all_visible_cas if ca.status in LIVE_STATUSES]
 
-        # Per-CA viewer role: respondent if the user is an auditee on the CA's
-        # folder, auditor otherwise. Computed once per CA.
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        # Per-CA viewer role: respondent unless the user holds the full auditor
+        # view (view_audit_full) on the CA's folder. Computed once per CA.
+        respondent_folders = get_respondent_scoped_folder_ids(request.user)
         ca_viewer_roles = {
             ca.id: (
                 "respondent"
-                if (auditee_folders and ca.folder_id in auditee_folders)
+                if (respondent_folders and ca.folder_id in respondent_folders)
                 else "auditor"
             )
             for ca in cas
@@ -12328,11 +12328,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
         qs = super().get_queryset()
 
-        auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
-        if auditee_folders:
+        respondent_folders = get_respondent_scoped_folder_ids(self.request.user)
+        if respondent_folders:
             user_actors = Actor.get_all_for_user(self.request.user)
             qs = qs.filter(
-                ~Q(folder_id__in=auditee_folders)
+                ~Q(folder_id__in=respondent_folders)
                 | Q(requirement_assignments__actor__in=user_actors)
             ).distinct()
 
@@ -13532,8 +13532,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             )
         )
         # Auditee filtering: scope to assigned requirements only
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
-        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+        respondent_folders = get_respondent_scoped_folder_ids(request.user)
+        if respondent_folders and compliance_assessment.folder_id in respondent_folders:
             user_actors = Actor.get_all_for_user(request.user)
             ra_ids = set(
                 RequirementAssignment.objects.filter(
@@ -13689,8 +13689,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             )
         )
         # Auditee filtering: scope to assigned requirements only
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
-        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+        respondent_folders = get_respondent_scoped_folder_ids(request.user)
+        if respondent_folders and compliance_assessment.folder_id in respondent_folders:
             user_actors = Actor.get_all_for_user(request.user)
             ra_ids = set(
                 RequirementAssignment.objects.filter(
@@ -13925,8 +13925,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             )
         )
         # Auditee filtering: scope to assigned requirements only
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
-        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+        respondent_folders = get_respondent_scoped_folder_ids(request.user)
+        if respondent_folders and compliance_assessment.folder_id in respondent_folders:
             user_actors = Actor.get_all_for_user(request.user)
             ra_ids = set(
                 RequirementAssignment.objects.filter(
@@ -13975,12 +13975,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 parent = nodes_by_urn.get(req.parent_urn)
                 if parent:
                     req._parent_requirement_obj = parent
-        # Determine viewer role based on auditee status
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
-        is_auditee = bool(
-            auditee_folders and compliance_assessment.folder_id in auditee_folders
+        # Viewer role: respondent unless the user holds the full auditor view
+        # (view_audit_full) on the CA's folder.
+        respondent_folders = get_respondent_scoped_folder_ids(request.user)
+        is_respondent = bool(
+            respondent_folders and compliance_assessment.folder_id in respondent_folders
         )
-        viewer_role = "respondent" if is_auditee else "auditor"
+        viewer_role = "respondent" if is_respondent else "auditor"
 
         requirement_assessments = RequirementAssessmentReadSerializer(
             requirement_assessments_objects,
@@ -14111,9 +14112,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def is_auditee(self, request, pk):
         """Returns whether the current user is an auditee for this compliance assessment."""
         compliance_assessment = self.get_object()
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        respondent_folders = get_respondent_scoped_folder_ids(request.user)
         is_auditee = bool(
-            auditee_folders and compliance_assessment.folder_id in auditee_folders
+            respondent_folders and compliance_assessment.folder_id in respondent_folders
         )
         return Response({"is_auditee": is_auditee})
 
@@ -14707,9 +14708,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         ).select_related("requirement")
 
         # Auditee filtering
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        respondent_folders = get_respondent_scoped_folder_ids(request.user)
         ra_ids = None
-        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+        if respondent_folders and compliance_assessment.folder_id in respondent_folders:
             user_actors = Actor.get_all_for_user(request.user)
             ra_ids = set(
                 RequirementAssignment.objects.filter(
@@ -14842,9 +14843,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         ).select_related("requirement")
 
         # Auditee filtering
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        respondent_folders = get_respondent_scoped_folder_ids(request.user)
         ra_ids = None
-        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+        if respondent_folders and compliance_assessment.folder_id in respondent_folders:
             user_actors = Actor.get_all_for_user(request.user)
             ra_ids = set(
                 RequirementAssignment.objects.filter(
@@ -14853,7 +14854,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 ).values_list("requirement_assessments__id", flat=True)
             )
 
-        # Filter by implementation groups and auditee
+        # Filter by implementation groups and respondent scope
         filtered_ras = []
         for ra in ras:
             if ra_ids is not None and ra.id not in ra_ids:
@@ -14930,9 +14931,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         ).select_related("requirement")
 
         # Auditee filtering
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        respondent_folders = get_respondent_scoped_folder_ids(request.user)
         ra_ids = None
-        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+        if respondent_folders and compliance_assessment.folder_id in respondent_folders:
             user_actors = Actor.get_all_for_user(request.user)
             ra_ids = set(
                 RequirementAssignment.objects.filter(
@@ -15040,9 +15041,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             requirement__assessable=True,
         ).select_related("requirement")
 
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        respondent_folders = get_respondent_scoped_folder_ids(request.user)
         ra_ids = None
-        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+        if respondent_folders and compliance_assessment.folder_id in respondent_folders:
             user_actors = Actor.get_all_for_user(request.user)
             ra_ids = set(
                 RequirementAssignment.objects.filter(
@@ -15154,9 +15155,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         ).select_related("requirement")
 
         # Auditee filtering
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        respondent_folders = get_respondent_scoped_folder_ids(request.user)
         ra_ids = None
-        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+        if respondent_folders and compliance_assessment.folder_id in respondent_folders:
             user_actors = Actor.get_all_for_user(request.user)
             ra_ids = set(
                 RequirementAssignment.objects.filter(
@@ -15341,11 +15342,11 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 "requirement__questions__choices",  # Needed by get_questions_translated
             )
         )
-        auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
-        if auditee_folders:
+        respondent_folders = get_respondent_scoped_folder_ids(self.request.user)
+        if respondent_folders:
             user_actors = Actor.get_all_for_user(self.request.user)
             qs = qs.filter(
-                ~Q(folder_id__in=auditee_folders)
+                ~Q(folder_id__in=respondent_folders)
                 | Q(assignments__actor__in=user_actors)
             ).distinct()
         return qs
@@ -18587,11 +18588,11 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
                 ),
             )
         )
-        auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
-        if auditee_folders:
+        respondent_folders = get_respondent_scoped_folder_ids(self.request.user)
+        if respondent_folders:
             user_actors = Actor.get_all_for_user(self.request.user)
             qs = qs.filter(
-                ~Q(folder_id__in=auditee_folders) | Q(actor__in=user_actors)
+                ~Q(folder_id__in=respondent_folders) | Q(actor__in=user_actors)
             ).distinct()
         return qs
 
@@ -18625,7 +18626,7 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
     # Valid transitions: (from_status, to_status) → config
-    # reviewer_only: auditee-only users are forbidden
+    # reviewer_only: respondents are forbidden
     # actor_only: only assigned actors can perform this transition
     # check_completion: all assessable requirements must be assessed
     # observation: "clear" removes it, "optional" keeps if provided, "required" must be provided
@@ -18678,12 +18679,12 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Reviewer-only check: auditee-only users are forbidden
+        # Reviewer-only check: respondents are forbidden
         if config.get("reviewer_only"):
-            auditee_folders = get_auditee_filtered_folder_ids(request.user)
+            respondent_folders = get_respondent_scoped_folder_ids(request.user)
             if (
-                auditee_folders
-                and assignment.compliance_assessment.folder_id in auditee_folders
+                respondent_folders
+                and assignment.compliance_assessment.folder_id in respondent_folders
             ):
                 return Response(
                     {"error": "Auditee users cannot perform this action."},
@@ -19080,15 +19081,16 @@ def global_search(request):
         )[0]
         qs = model_class.objects.filter(id__in=accessible_ids)
 
-        # ComplianceAssessment has extra auditee scoping: users with only the
-        # auditee role in a folder can only see assessments where they have a
-        # requirement assignment. Mirror the logic from ComplianceAssessmentViewSet.
+        # ComplianceAssessment has extra respondent scoping: users who lack the
+        # full auditor view (view_audit_full) in a folder can only see
+        # assessments where they have a requirement assignment. Mirror the logic
+        # from ComplianceAssessmentViewSet.
         if model_class is ComplianceAssessment:
-            auditee_folders = get_auditee_filtered_folder_ids(request.user)
-            if auditee_folders:
+            respondent_folders = get_respondent_scoped_folder_ids(request.user)
+            if respondent_folders:
                 user_actors = Actor.get_all_for_user(request.user)
                 qs = qs.filter(
-                    ~Q(folder_id__in=auditee_folders)
+                    ~Q(folder_id__in=respondent_folders)
                     | Q(requirement_assignments__actor__in=user_actors)
                 ).distinct()
 

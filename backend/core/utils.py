@@ -1268,79 +1268,31 @@ def build_questions_dict(node):
     return result if result else None
 
 
-def _resolve_auditee_role_ids():
-    """Resolve respondent role IDs (auditee + third-party respondent) and the
-    "higher" role IDs (analyst, domain-manager, administrator) via IAM cache.
-
-    Auditee and third-party respondent are synonymous here — both are
-    respondents on an audit and get the scoped, field-stripped view.
-    """
-    from iam.cache_builders import get_roles_state
-
-    role_id_by_name = get_roles_state().role_id_by_name
-    respondent_ids = frozenset(
-        role_id_by_name[rc.value]
-        for rc in (RoleCodename.AUDITEE, RoleCodename.THIRD_PARTY_RESPONDENT)
-        if rc.value in role_id_by_name
-    )
-    higher_ids = frozenset(
-        role_id_by_name[rc.value]
-        for rc in (
-            RoleCodename.ANALYST,
-            RoleCodename.DOMAIN_MANAGER,
-            RoleCodename.ADMINISTRATOR,
-        )
-        if rc.value in role_id_by_name
-    )
-    return respondent_ids, higher_ids
+AUDITOR_VIEW_PERM = "view_audit_full"
+AUDIT_ACCESS_PERM = "view_complianceassessment"
 
 
-def get_auditee_filtered_folder_ids(user) -> set:
-    """Return folder IDs where *user* holds a respondent role (auditee or
-    third-party respondent) but NO higher role.
+def get_respondent_scoped_folder_ids(user) -> set:
+    """Return folder IDs where *user* sees audits as a **respondent** — i.e. the
+    scoped, field-stripped view applies.
 
-    "Higher" means analyst, domain-manager or administrator — any role that
-    already grants full access to compliance data. For those folders the
-    normal queryset is sufficient; only the returned set needs assignment
-    filtering.
+    A user is a respondent on a folder when they can access compliance
+    assessments there (``view_complianceassessment``) but have NOT been granted
+    the full auditor view (``view_audit_full``). This is permission-based and
+    **default-deny**: any role not explicitly granted ``view_audit_full`` is
+    treated as a respondent. Auditor-side roles (reader, approver, analyst,
+    domain-manager, administrator) hold ``view_audit_full`` and are therefore
+    excluded; auditee and third-party respondent do not and are included.
 
     Uses the IAM snapshot caches exclusively (no extra DB queries).
     """
-    from iam.models import _iter_assignment_lites_for_user
-    from iam.cache_builders import (
-        get_folder_state,
-        iter_descendant_ids,
-    )
+    from iam.models import RoleAssignment
 
-    respondent_role_ids, higher_role_ids = _resolve_auditee_role_ids()
-    if not respondent_role_ids:
-        return set()
-
-    state = get_folder_state()
-
-    # folder_id -> set of role_ids the user has on that folder
-    folder_roles: dict[UUID, set] = {}
-
-    for a in _iter_assignment_lites_for_user(user):
-        role_id = a.role_id
-        if role_id not in respondent_role_ids and role_id not in higher_role_ids:
-            continue  # irrelevant role
-
-        # expand perimeter folders
-        for pf_id in a.perimeter_folder_ids:
-            if a.is_recursive:
-                target_ids = iter_descendant_ids(state, pf_id, include_start=True)
-            else:
-                target_ids = (pf_id,)
-
-            for fid in target_ids:
-                folder_roles.setdefault(fid, set()).add(role_id)
-
-    # Return only folders where user is a respondent and has NO higher role
+    perms_per_folder = RoleAssignment.get_permissions_per_folder(user, recursive=True)
     return {
-        fid
-        for fid, role_ids in folder_roles.items()
-        if role_ids & respondent_role_ids and role_ids.isdisjoint(higher_role_ids)
+        UUID(folder_id)
+        for folder_id, codenames in perms_per_folder.items()
+        if AUDIT_ACCESS_PERM in codenames and AUDITOR_VIEW_PERM not in codenames
     }
 
 
