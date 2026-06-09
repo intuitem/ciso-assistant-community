@@ -28,7 +28,7 @@ export const loadTableData = async ({
 	const response = await fetch(url.toString()).then((res) => res.json());
 	state.setTotalRows(response.count);
 
-	const baseFields = getListViewFields({ key: URLModel, featureFlags });
+	const baseFields = getListViewFields({ key: URLModel, featureFlags, includeOptional: true });
 
 	const fieldsToUse =
 		fields?.head && fields.head.length > 0 && fields.head.toString() !== baseFields.head.toString()

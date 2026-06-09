@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getRequirementTitle } from '$lib/utils/helpers';
 	import { getOptions } from '$lib/utils/crud';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
 	interface Props {
 		ref_id: string;
@@ -64,21 +65,21 @@
 </script>
 
 <div>
-	<span class="whitespace-pre-line" style="font-weight: 300;">
-		<span class="max-w-[80ch]">
+	<div class="whitespace-pre-line" style="font-weight: 300;">
+		<div class="max-w-[80ch]">
 			{#if title || description}
 				{#if title}
 					<span style="font-weight: 600;">{title}</span>
 				{/if}
 				{#if description}
-					<p>{description}</p>
+					<MarkdownRenderer content={description} />
 				{/if}
 			{:else if node?.questions && Object.keys(node.questions).length > 0}
 				<!-- This displays the first question's text -->
 				{Object.entries(node?.questions)[0][1].text}
 			{/if}
-		</span>
-	</span>
+		</div>
+	</div>
 	{#if (threats && threats.length > 0) || (reference_controls && reference_controls.length > 0)}
 		<div
 			role="button"
