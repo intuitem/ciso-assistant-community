@@ -905,27 +905,15 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:4-1
       ref_id: 4-1-P-1
-      description: "In addition to implementing the ECC controls 4-1-2 and 4-1-3,\
-        \ the CSP shall cover the following additional subcontrols for third-party\
-        \ cybersecurity requirements, as a minimum: (1) Ensure that the CSP fulfills\
-        \ NCA's requests to remove software or services, provided by third-party providers\
-        \ that may be considered a cybersecurity threat to national organizations,\
-        \ from the marketplace provided to CSTs. (2) Requirement to provide security\
-        \ documentation for any equipment or services from suppliers and third-party\
-        \ providers. (3) Third party providers compliant with law and regulatory requirements\
-        \ relevant to their scope. (4) Risk management and security governance on\
-        \ third-party providers as part of general cybersecurity risk management and\
-        \ governance. Annex No. (A): Cloud Cybersecurity Controls Levels Cybersecurity\
-        \ controls for cloud services are divided into four levels using a top down\
-        \ approach, level 1, level 2, level 3, and level 4: \u2022 Level 1: A classification\
-        \ level applies to data classified as a (top secret) based on what is issued\
-        \ by the competent authority. \u2022 Level 2: A classification level applies\
-        \ to data classified as a (secret) based on what is issued by the competent\
-        \ authority. \u2022 Level 3: A classification level applies to data classified\
-        \ as a (confidential) based on what is issued by the competent authority.\
-        \ \u2022 Level 4: classification level applies to data classified as a (public)\
-        \ based on what is issued by the competent authority. Please note that the\
-        \ highest level of classification should be adopted when the content of an\
-        \ integrated set of data includes different levels."
+      description: 'In addition to implementing the ECC controls 4-1-2 and 4-1-3,
+        the CSP shall cover the following additional subcontrols for third-party cybersecurity
+        requirements, as a minimum: (1) Ensure that the CSP fulfills NCA''s requests
+        to remove software or services, provided by third-party providers that may
+        be considered a cybersecurity threat to national organizations, from the marketplace
+        provided to CSTs. (2) Requirement to provide security documentation for any
+        equipment or services from suppliers and third-party providers. (3) Third
+        party providers compliant with law and regulatory requirements relevant to
+        their scope. (4) Risk management and security governance on third-party providers
+        as part of general cybersecurity risk management and governance.'
       implementation_groups:
       - CSP
