@@ -1,19 +1,27 @@
-[tool.poetry]
+[project]
 name = "enterprise_core"
 version = "0.1.0"
 description = ""
-authors = ["intuitem <contact@intuitem.com>"]
+authors = [{ name = "intuitem", email = "contact@intuitem.com" }]
+requires-python = ">=3.14,<4"
 readme = "README.md"
 
-[tool.poetry.dependencies]
-python = "^3.14"
-django = "^6.0.4"
-python-dotenv = "^1.0.1"
-markdown = "^3.10.2"
+dependencies = [
+    "django>=6.0.3,<7",
+    "python-dotenv>=1.0.1,<2",
+    "markdown>=3.10.2,<4",
+    "ciso-assistant-community",
+]
 
-[tool.poetry.group.dev.dependencies]
-pytest = "^9.0.2"
+[dependency-groups]
+dev = ["pytest>=9.0.2,<10"]
+
+[tool.uv.sources]
+ciso-assistant-community = { path = "../../backend", package = false}
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["enterprise_core"]
