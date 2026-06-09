@@ -22,4 +22,6 @@ To create your own, follow one of the examples under `/tools` in the repository,
 
 To apply a mapping, first load it from the library. Then head to your audit, click `apply mapping`, select the targeted framework, and watch the projection get created.
 
+The list of targets isn't limited to frameworks you mapped directly. If a mapping exists from your framework to a pivot (e.g. ISO 27001) and from that pivot to another framework, the engine **chains them automatically** and offers the far framework as a target too — no dedicated crosswalk required. See [transitive inference](../concepts/mappings.md#transitive-inference-pivot-mappings) for how chained coverage is computed.
+
 > The apply-mapping feature can also be reused to clone an audit and create a new revision, if the same framework and same scope are selected.

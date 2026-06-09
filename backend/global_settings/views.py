@@ -112,6 +112,20 @@ class FeatureFlagsViewSet(viewsets.ModelViewSet):
         self.check_object_permissions(self.request, obj)
         return obj
 
+    @action(detail=False, methods=["get"])
+    def defaults(self, request, pk=None):
+        """Expose each flag's serializer default so the frontend "Reset to
+        defaults" never drifts from the backend. Only exposed flags are
+        returned (get_fields already drops gated ones like chat_mode)."""
+        serializer = self.get_serializer_class()()
+        flag_defaults = {
+            name: field.default
+            for name, field in serializer.fields.items()
+            if name not in serializer.Meta.read_only_fields
+            and getattr(field, "default", serializers.empty) is not serializers.empty
+        }
+        return Response(flag_defaults)
+
 
 class GeneralSettingsViewSet(viewsets.ModelViewSet):
     model = GlobalSettings
