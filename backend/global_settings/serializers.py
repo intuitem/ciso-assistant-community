@@ -83,6 +83,9 @@ GENERAL_SETTINGS_KEYS = [
     "openai_api_base",
     "openai_model",
     "openai_api_key",
+    "litellm_model",
+    "litellm_api_key",
+    "litellm_api_base",
     "chat_temperature_enabled",
     "chat_temperature",
     "default_custom_analytics_dashboard",
@@ -120,6 +123,7 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
         ret = super().to_representation(instance)
         if "value" in ret and isinstance(ret["value"], dict):
             ret["value"].pop("openai_api_key", None)
+            ret["value"].pop("litellm_api_key", None)
         return ret
 
     def update(self, instance, validated_data):
@@ -129,6 +133,10 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                 existing_key = instance.value.get("openai_api_key")
                 if existing_key:
                     validated_data["value"]["openai_api_key"] = existing_key
+            if not validated_data["value"].get("litellm_api_key") and instance.value:
+                existing_key = instance.value.get("litellm_api_key")
+                if existing_key:
+                    validated_data["value"]["litellm_api_key"] = existing_key
 
         # Track old currency value for potential propagation
         old_currency = instance.value.get("currency") if instance.value else None

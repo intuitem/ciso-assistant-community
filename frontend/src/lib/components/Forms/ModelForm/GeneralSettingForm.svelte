@@ -585,12 +585,36 @@
 							{
 								label: 'OpenAI-compatible (LM Studio, vLLM, llama.cpp...)',
 								value: 'openai_compatible'
+							},
+							{
+								label: 'LiteLLM (100+ providers: OpenAI, Anthropic, Google, Azure...)',
+								value: 'litellm'
 							}
 						]}
 						label={m.llmProvider()}
 						helpText={m.llmProviderHelpText()}
 					/>
-					{#if $formStore.llm_provider === 'openai_compatible'}
+					{#if $formStore.llm_provider === 'litellm'}
+						<TextField
+							{form}
+							field="litellm_model"
+							label="LiteLLM Model"
+							helpText="Model string, e.g. openai/gpt-4o, anthropic/claude-sonnet-4-6, groq/llama-3.3-70b-versatile"
+						/>
+						<TextField
+							{form}
+							field="litellm_api_key"
+							label="API Key (optional)"
+							helpText="Provider API key. Leave empty to use environment variables (OPENAI_API_KEY, ANTHROPIC_API_KEY, etc.)"
+							type="password"
+						/>
+						<TextField
+							{form}
+							field="litellm_api_base"
+							label="API Base URL (optional)"
+							helpText="Custom base URL, e.g. for a LiteLLM proxy server"
+						/>
+					{:else if $formStore.llm_provider === 'openai_compatible'}
 						<TextField
 							{form}
 							field="openai_api_base"

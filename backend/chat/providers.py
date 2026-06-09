@@ -593,6 +593,108 @@ def _merge_thinking_stream(
             return  # filter_thinking_tokens consumed the rest of the iterator
 
 
+class LiteLLMProvider:
+    """LLM using LiteLLM for 100+ provider support (OpenAI, Anthropic, Google, etc.)."""
+
+    def __init__(
+        self,
+        model: str = "openai/gpt-4o-mini",
+        system_prompt: str = "",
+        api_key: str = "",
+        api_base: str = "",
+    ):
+        self.model = model
+        self.system_prompt = system_prompt or DEFAULT_SYSTEM_PROMPT
+        self._api_key = api_key or None
+        self._api_base = api_base or None
+
+    def _call_kwargs(self) -> dict:
+        kwargs: dict = {"model": self.model, "drop_params": True}
+        if self._api_key:
+            kwargs["api_key"] = self._api_key
+        if self._api_base:
+            kwargs["api_base"] = self._api_base
+        return kwargs
+
+    def generate(
+        self, prompt: str, context: str, history: list[dict] | None = None
+    ) -> str:
+        import litellm
+
+        messages = _build_messages(self.system_prompt, prompt, context, history)
+        resp = litellm.completion(messages=messages, **self._call_kwargs())
+        return strip_thinking(resp.choices[0].message.content)
+
+    def _raw_stream(
+        self, prompt: str, context: str, history: list[dict] | None = None
+    ) -> Iterator[tuple[str, str]]:
+        import litellm
+
+        messages = _build_messages(self.system_prompt, prompt, context, history)
+        resp = litellm.completion(
+            messages=messages, stream=True, **self._call_kwargs()
+        )
+        for chunk in resp:
+            delta = chunk.choices[0].delta
+            if reasoning := getattr(delta, "reasoning_content", None):
+                yield ("thinking", reasoning)
+            if content := getattr(delta, "content", None):
+                yield ("raw", content)
+
+    def stream(
+        self, prompt: str, context: str, history: list[dict] | None = None
+    ) -> Iterator[tuple[str, str]]:
+        return _merge_thinking_stream(self._raw_stream(prompt, context, history))
+
+    def tool_call(
+        self,
+        prompt: str,
+        tools: list[dict],
+        history: list[dict] | None = None,
+    ) -> dict | None:
+        import litellm
+
+        messages = [{"role": "system", "content": TOOL_SYSTEM_PROMPT}]
+        if history:
+            for msg in history:
+                messages.append({"role": msg["role"], "content": msg["content"]})
+        messages.append({"role": "user", "content": prompt})
+
+        try:
+            resp = litellm.completion(
+                messages=messages,
+                tools=tools,
+                temperature=0,
+                **self._call_kwargs(),
+            )
+            message = resp.choices[0].message
+            tool_calls = getattr(message, "tool_calls", None)
+            if tool_calls and len(tool_calls) > 0:
+                tc = tool_calls[0]
+                func = tc.function
+                arguments = func.arguments
+                if isinstance(arguments, str):
+                    try:
+                        arguments = json.loads(arguments)
+                    except json.JSONDecodeError:
+                        arguments = {}
+                logger.info(
+                    "tool_call_response",
+                    name=func.name,
+                    args=arguments,
+                )
+                return {"name": func.name, "arguments": arguments}
+
+            logger.info(
+                "no_tool_called",
+                content=getattr(message, "content", "")[:200],
+            )
+        except Exception as e:
+            logger.warning("tool_call_failed", error=e)
+
+        return None
+
+
 class StubLLM:
     """Fallback when no LLM is available — returns retrieval results only."""
 
@@ -640,6 +742,9 @@ def get_chat_settings() -> dict:
                 ),
                 "openai_model": gs.value.get("openai_model", ""),
                 "openai_api_key": gs.value.get("openai_api_key", ""),
+                "litellm_model": gs.value.get("litellm_model", ""),
+                "litellm_api_key": gs.value.get("litellm_api_key", ""),
+                "litellm_api_base": gs.value.get("litellm_api_base", ""),
                 "chat_temperature_enabled": gs.value.get(
                     "chat_temperature_enabled", True
                 ),
@@ -657,6 +762,9 @@ def get_chat_settings() -> dict:
         "openai_api_base": "http://localhost:1234/v1",
         "openai_model": "",
         "openai_api_key": "",
+        "litellm_model": "",
+        "litellm_api_key": "",
+        "litellm_api_base": "",
         "chat_temperature_enabled": True,
         "chat_temperature": 0,
     }
@@ -707,6 +815,29 @@ def get_llm() -> LLM:
 
     settings = get_chat_settings()
     provider = settings.get("llm_provider", "ollama")
+
+    if provider == "litellm":
+        model = settings.get("litellm_model", "")
+        if not model:
+            logger.warning("litellm_model_not_configured")
+            return StubLLM()
+        try:
+            _cached_llm = LiteLLMProvider(
+                model=model,
+                system_prompt=settings["chat_system_prompt"],
+                api_key=settings.get("litellm_api_key", ""),
+                api_base=settings.get("litellm_api_base", ""),
+            )
+            logger.info(
+                "llm_initialized",
+                provider="litellm",
+                model=model,
+                has_api_key=bool(settings.get("litellm_api_key")),
+            )
+            return _cached_llm
+        except Exception as e:
+            logger.warning("litellm_init_failed", error=e)
+            return StubLLM()
 
     if provider == "openai_compatible":
         base_url = settings.get("openai_api_base", "http://localhost:1234/v1")
