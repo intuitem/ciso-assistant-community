@@ -2507,6 +2507,8 @@
 	"logEntryRepr": "{timestamp} - {actor} - {action} - {object}",
 	"auditLog": "Audit log",
 	"auditTrail": "Audit trail",
+	"objectAuditTrail": "Object audit trail",
+	"objectAuditTrailDescription": "Show a per-object audit trail button on detail pages, listing each object's change history.",
 	"noHistoryForThisObject": "No recorded history for this object yet.",
 	"system": "System",
 	"actor": "Actor",

@@ -16,7 +16,8 @@ from rest_framework.decorators import (
     permission_classes,
 )
 from rest_framework.parsers import FileUploadParser
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import mixins, viewsets, filters
@@ -27,7 +28,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 
 from core.views import BaseModelViewSet, GenericFilterSet, RoleFilter
-from core.utils import MAIN_ENTITY_DEFAULT_NAME
+from core.utils import MAIN_ENTITY_DEFAULT_NAME, get_auditee_filtered_folder_ids
 from iam.models import User, Role, UserGroup, RoleAssignment
 from tprm.models import Entity
 
@@ -808,3 +809,80 @@ class CustomWordTemplateViewSet(BaseModelViewSet):
             as_attachment=True,
             filename=f"{template_key}_template_{resolved_language}.docx",
         )
+
+
+class AuditedModelsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, format=None):
+        from auditlog.registry import auditlog
+
+        names = sorted(model._meta.model_name for model in auditlog.get_models())
+        return Response(names)
+
+
+class ObjectAuditTrailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    MAX_ENTRIES = 200
+
+    def get(self, request, format=None):
+        from uuid import UUID
+        from django.contrib.contenttypes.models import ContentType
+
+        model_name = (request.query_params.get("content_type") or "").lower()
+        raw_object_id = request.query_params.get("object_id")
+        if not model_name or not raw_object_id:
+            return Response(
+                {"detail": "content_type and object_id are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            object_id = UUID(str(raw_object_id))
+        except ValueError:
+            return Response(
+                {"detail": "Invalid object_id."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        content_type = ContentType.objects.filter(model=model_name).first()
+        if content_type is None:
+            return Response(
+                {"detail": "Unknown content type."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        model_class = content_type.model_class()
+        if not RoleAssignment.is_object_readable(request.user, model_class, object_id):
+            raise PermissionDenied
+
+        # Deny when the user only holds the auditee role on the object's folder:
+        # the trail would otherwise expose raw field changes (bypassing
+        # field_visibility) to respondents/third-party users.
+        obj = model_class.objects.filter(pk=object_id).first()
+        folder_id = getattr(obj, "folder_id", None)
+        if folder_id and folder_id in get_auditee_filtered_folder_ids(request.user):
+            raise PermissionDenied
+
+        entries = (
+            LogEntry.objects.filter(content_type=content_type, object_pk=str(object_id))
+            .select_related("actor")
+            .order_by("-timestamp")[: self.MAX_ENTRIES]
+        )
+        results = [
+            {
+                "id": entry.id,
+                "cid": entry.cid or None,
+                "action": entry.get_action_display(),
+                "actor": (entry.additional_data or {}).get("user_email")
+                or (entry.actor.email if entry.actor else None),
+                "timestamp": entry.timestamp,
+                "changes": self._mask(model_name, entry.changes),
+            }
+            for entry in entries
+        ]
+        return Response(results)
+
+    @staticmethod
+    def _mask(model_name, changes):
+        if model_name == "user" and isinstance(changes, dict) and "password" in changes:
+            return {**changes, "password": ["***", "***"]}
+        return changes

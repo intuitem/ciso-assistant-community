@@ -2130,6 +2130,8 @@
 	"pentest": "Test d'intrusion",
 	"audit": "Audit",
 	"auditTrail": "Journal de l'objet",
+	"objectAuditTrail": "Journal d'audit par objet",
+	"objectAuditTrailDescription": "Afficher un bouton de journal d'audit sur les pages de détail, retraçant l'historique des modifications de chaque objet.",
 	"noHistoryForThisObject": "Aucun historique enregistré pour cet objet pour le moment.",
 	"system": "Système",
 	"selfIdentified": "Auto-identifié",

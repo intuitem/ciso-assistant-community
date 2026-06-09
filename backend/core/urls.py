@@ -246,16 +246,6 @@ urlpatterns = [
     path("quick-start/", QuickStartView.as_view(), name="quick-start"),
     path("content-types/", ContentTypeListView.as_view(), name="content-types-list"),
     path(
-        "object-audit-trail/",
-        ObjectAuditTrailView.as_view(),
-        name="object-audit-trail",
-    ),
-    path(
-        "audited-models/",
-        AuditedModelsView.as_view(),
-        name="audited-models",
-    ),
-    path(
         "task-nodes/<uuid:pk>/evidences/",
         TaskNodeEvidenceList.as_view(),
     ),

@@ -173,9 +173,7 @@
 					{#each events as event (event.key)}
 						<li class="border-l-2 border-surface-300 pl-4 py-1">
 							<div class="flex items-center gap-2 flex-wrap">
-								<span class="badge {actionVariant(event.action)}"
-									>{safeTranslate(event.action)}</span
-								>
+								<span class="badge {actionVariant(event.action)}">{safeTranslate(event.action)}</span>
 								<span class="font-semibold">{event.actor ?? m.system()}</span>
 								<span class="text-surface-500 text-sm"
 									>{formatDateOrDateTime(event.timestamp, getLocale())}</span
