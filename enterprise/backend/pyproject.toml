@@ -7,7 +7,7 @@ requires-python = ">=3.14,<4"
 readme = "README.md"
 
 dependencies = [
-    "django>=6.0.3,<7",
+    "django>=6.0.5,<7",
     "python-dotenv>=1.0.1,<2",
     "markdown>=3.10.2,<4",
     "ciso-assistant-community",
