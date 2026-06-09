@@ -378,7 +378,7 @@ def escape_excel_formula(value):
     s = str(value)
     if not s:
         return ""
-    stripped = s.lstrip(" \t\r\n")
+    stripped = s.lstrip()
     if stripped and stripped[0] in ("=", "+", "-", "@"):
         return "'" + s
     return s
