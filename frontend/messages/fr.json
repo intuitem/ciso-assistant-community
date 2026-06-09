@@ -4599,6 +4599,19 @@
 		}
 	],
 	"builderBreakingChangesHint": "Ces modifications peuvent affecter le scoring, la visibilité ou les résultats de conformité dans les audits existants.",
+	"builderFixValidationErrorsBeforePublish": "Certains éléments comportent des erreurs de validation. Corrigez les champs signalés avant de publier.",
+	"builderChangeTypeRequirement": "exigence",
+	"builderChangeTypeQuestion": "question",
+	"builderChangeTypeChoice": "choix de réponse",
+	"builderFieldLabelAssessable": "Évaluable",
+	"builderFieldLabelWeight": "Pondération",
+	"builderFieldLabelImplementationGroups": "Groupes de mise en œuvre",
+	"builderFieldLabelVisibilityExpression": "Condition de visibilité",
+	"builderFieldLabelType": "Type de question",
+	"builderFieldLabelDependsOn": "Affichage conditionnel",
+	"builderFieldLabelAddScore": "Contribution au score",
+	"builderFieldLabelComputeResult": "Compte dans le résultat",
+	"builderFieldLabelSelectImplementationGroups": "Sélectionne des groupes de mise en œuvre",
 	"builderAffectedAudits": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],

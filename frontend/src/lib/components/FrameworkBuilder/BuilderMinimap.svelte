@@ -35,6 +35,11 @@
 	let publishPreview = $state<PublishPreview | null>(null);
 	let loadingPreview = $state(false);
 
+	// Surfaced inside the publish dialog so a backend rejection (e.g. a locked
+	// URN namespace or a server error) is visible instead of the dialog
+	// silently staying open with no feedback.
+	let publishError = $derived($errorsStore.get('publish'));
+
 	let translationProgress = $derived.by(() => {
 		if (!$activeLanguageStore) return null;
 		return builder.getTranslationProgress($activeLanguageStore);
@@ -55,18 +60,63 @@
 		}
 	});
 
+	// Map the backend's internal field/type identifiers (e.g. "add_score",
+	// "visibility_expression", "choice") to human-readable labels so the
+	// breaking-changes list doesn't expose raw column names. Unknown keys fall
+	// back to the raw value rather than hiding the information.
+	function breakingFieldLabel(field: string): string {
+		switch (field) {
+			case 'assessable':
+				return m.builderFieldLabelAssessable();
+			case 'weight':
+				return m.builderFieldLabelWeight();
+			case 'implementation_groups':
+				return m.builderFieldLabelImplementationGroups();
+			case 'visibility_expression':
+				return m.builderFieldLabelVisibilityExpression();
+			case 'type':
+				return m.builderFieldLabelType();
+			case 'depends_on':
+				return m.builderFieldLabelDependsOn();
+			case 'add_score':
+				return m.builderFieldLabelAddScore();
+			case 'compute_result':
+				return m.builderFieldLabelComputeResult();
+			case 'select_implementation_groups':
+				return m.builderFieldLabelSelectImplementationGroups();
+			default:
+				return field;
+		}
+	}
+
+	function breakingTypeLabel(type: string): string {
+		switch (type) {
+			case 'requirement':
+				return m.builderChangeTypeRequirement();
+			case 'question':
+				return m.builderChangeTypeQuestion();
+			case 'choice':
+				return m.builderChangeTypeChoice();
+			default:
+				return type;
+		}
+	}
+
 	async function handlePublish() {
 		publishing = true;
 		try {
-			await builder.publish();
+			const published = await builder.publish();
+			if (!published) {
+				// publish() recorded a 'publish' error; keep the dialog open so
+				// the user sees it (rendered below) instead of nothing happening.
+				return;
+			}
 			publishSuccess = true;
 			confirmPublish = false;
 			publishPreview = null;
 			builder.unsaved.set(false);
 			builder.unpublished.set(false);
 			setTimeout(() => (publishSuccess = false), 3000);
-		} catch {
-			// Error is already in the errors store
 		} finally {
 			publishing = false;
 		}
@@ -359,6 +409,7 @@
 				title={m.builderPublishDraftToLiveTitle()}
 				disabled={loadingPreview}
 				onclick={async () => {
+					builder.clearError('publish');
 					loadingPreview = true;
 					try {
 						publishPreview = await apiPublishDraftPreview(frameworkId);
@@ -469,10 +520,15 @@
 							</div>
 							<ul class="mt-1.5 text-xs text-orange-700 space-y-0.5">
 								{#each publishPreview.breaking_changes as change}
-									<li class="truncate" title="{change.type}: {change.name} ({change.field})">
-										<span class="font-mono">{change.field}</span>
+									<li
+										class="truncate"
+										title="{breakingTypeLabel(change.type)}: {change.name} ({breakingFieldLabel(
+											change.field
+										)})"
+									>
+										<span class="font-medium">{breakingFieldLabel(change.field)}</span>
 										{m.builderChangedOn()}
-										{change.type}
+										{breakingTypeLabel(change.type)}
 										<span class="font-medium">{change.name}</span>
 									</li>
 								{/each}
@@ -515,6 +571,17 @@
 				{/if}
 			</div>
 
+			{#if publishError}
+				<div class="px-5 pb-1">
+					<div
+						class="p-3 bg-red-50 border-l-2 border-red-500 rounded-r text-sm text-red-700"
+						role="alert"
+					>
+						<i class="fa-solid fa-circle-exclamation mr-1"></i>{publishError}
+					</div>
+				</div>
+			{/if}
+
 			<div class="px-5 py-3 border-t border-gray-200 flex justify-end gap-2">
 				<button
 					type="button"
@@ -522,6 +589,7 @@
 					onclick={() => {
 						confirmPublish = false;
 						publishPreview = null;
+						builder.clearError('publish');
 					}}
 				>
 					{m.cancel()}

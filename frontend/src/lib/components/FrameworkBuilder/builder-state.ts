@@ -663,6 +663,7 @@ export interface BuilderStore {
 	unsaved: Writable<boolean>;
 	unpublished: Writable<boolean>;
 	isScrolling: Writable<boolean>;
+	clearError: (key: string) => void;
 
 	addNode: (opts: { parent: string | null; preset?: NodePreset; afterIndex?: number }) => void;
 	deleteNode: (nodeId: string) => void;
@@ -689,7 +690,7 @@ export interface BuilderStore {
 	removeLanguage: (lang: string) => void;
 	setBaseLocale: (locale: string) => void;
 	flushDraft: () => Promise<void>;
-	publish: () => Promise<void>;
+	publish: () => Promise<boolean>;
 	discard: () => Promise<void>;
 	destroy: () => void;
 }
@@ -813,11 +814,15 @@ export function createBuilderState(
 		return validationErrors.length === 0;
 	}
 
-	async function publish() {
+	// Returns true only when the draft was actually published. Every failure
+	// path (save failed, client-side validation failed, backend rejected)
+	// records a 'publish' error and returns false so the caller can keep the
+	// confirmation dialog open and show why, instead of flashing success.
+	async function publish(): Promise<boolean> {
 		const saved = await flushDraft();
 		if (!saved) {
 			setError('publish', m.builderFailedToSaveDraftBeforePublish());
-			return;
+			return false;
 		}
 
 		// Clear previous node- and question-level validation errors so stale
@@ -833,7 +838,8 @@ export function createBuilderState(
 		clearError('publish');
 
 		if (!validateBeforePublish()) {
-			return;
+			setError('publish', m.builderFixValidationErrorsBeforePublish());
+			return false;
 		}
 
 		try {
@@ -842,9 +848,10 @@ export function createBuilderState(
 			// "Live" vs "Draft — nothing live yet") updates without a refresh.
 			framework.update((f) => ({ ...f, editing_version: (f.editing_version ?? 1) + 1 }));
 			clearError('publish');
+			return true;
 		} catch (e) {
 			setError('publish', (e as Error).message);
-			throw e;
+			return false;
 		}
 	}
 
@@ -1708,6 +1715,7 @@ export function createBuilderState(
 		unsaved,
 		unpublished,
 		isScrolling,
+		clearError,
 
 		addNode,
 		deleteNode,
