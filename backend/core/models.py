@@ -7257,7 +7257,12 @@ class ComplianceAssessment(Assessment):
                     else:
                         score = 0
                 else:
-                    score = getattr(ras, score_field) or 0
+                    raw = getattr(ras, score_field)
+                    if raw is None:
+                        if score_field == "score":
+                            continue
+                        raw = 0
+                    score = raw
                 total += score * weight
                 total_weight += weight
             if total_weight == 0:
@@ -7287,8 +7292,11 @@ class ComplianceAssessment(Assessment):
                 else:
                     raw = ra_max
             else:
-                # Legacy semantics: None -> 0 (pulls unscored to min).
-                raw = getattr(ras, score_field) or 0
+                raw = getattr(ras, score_field)
+                if raw is None:
+                    if score_field == "score":
+                        return None
+                    raw = 0
 
             ratio = (raw - ra_min) / ra_range
             return ratio, (ras.requirement.weight or 1)
@@ -7414,7 +7422,13 @@ class ComplianceAssessment(Assessment):
           (only when show_documentation_score is enabled)
         - maturity_score: average of the enabled layers
 
-        Each layer uses the same score_calculation_method (AVG, SUM, AVG_OF_AVG).
+        Each layer uses the same score_calculation_method (AVG, SUM, AVG_OF_AVG)
+        and is computed independently over the SAME row set: an RA must have an
+        actual implementation score to participate. `is_scored=True` with
+        `score is None` is a data inconsistency (the answer-driven path never
+        produces it) and is treated as fully unscored, so it is dropped from
+        both layers, not just the implementation one. A standalone
+        documentation_score on such a row is therefore not aggregated.
 
         When anchor_na_to_target is True, N/A requirements are included with
         their scores replaced by the effective target (target_score or max_score).
@@ -7428,14 +7442,15 @@ class ComplianceAssessment(Assessment):
                 requirement_assessments_scored = [
                     requirement
                     for requirement in prefetched_requirements
-                    if requirement.is_scored
-                    or requirement.result == RequirementAssessment.Result.NOT_APPLICABLE
+                    if requirement.result == RequirementAssessment.Result.NOT_APPLICABLE
+                    or (requirement.is_scored and requirement.score is not None)
                 ]
             else:
                 requirement_assessments_scored = [
                     requirement
                     for requirement in prefetched_requirements
                     if requirement.is_scored
+                    and requirement.score is not None
                     and requirement.result
                     != RequirementAssessment.Result.NOT_APPLICABLE
                 ]
@@ -7447,13 +7462,13 @@ class ComplianceAssessment(Assessment):
             )
             if self.anchor_na_to_target:
                 # Keep N/A items (they'll be anchored to target), but still
-                # exclude non-N/A items that have is_scored=False.
-                qs = qs.exclude(
-                    ~Q(result=RequirementAssessment.Result.NOT_APPLICABLE),
-                    is_scored=False,
+                # exclude non-N/A items that aren't actually scored.
+                qs = qs.filter(
+                    Q(result=RequirementAssessment.Result.NOT_APPLICABLE)
+                    | (Q(is_scored=True) & Q(score__isnull=False))
                 )
             else:
-                qs = qs.exclude(is_scored=False).exclude(
+                qs = qs.filter(is_scored=True, score__isnull=False).exclude(
                     result=RequirementAssessment.Result.NOT_APPLICABLE
                 )
             requirement_assessments_scored = list(qs)
@@ -7501,21 +7516,23 @@ class ComplianceAssessment(Assessment):
         not the CA's max — keeping 100% achievable when every RA is at its max.
         """
         if self.score_calculation_method == self.CalculationMethod.SUM:
-            # Keep this set aligned with _compute_score_for_field's numerator:
-            # when anchor_na_to_target is on, N/A items contribute on the
-            # numerator side, so they must be in the max here too — otherwise
-            # the displayed ratio can exceed 100%.
+            # Keep this set aligned with get_global_score's numerator: rows the
+            # numerator skips (is_scored=False, or is_scored=True with a null
+            # score) must not inflate the denominator. When anchor_na_to_target
+            # is on, N/A items contribute on the numerator side (anchored to
+            # target), so they stay in the max too, otherwise the displayed
+            # ratio can exceed 100%.
             qs = RequirementAssessment.objects.filter(
                 compliance_assessment=self,
                 requirement__assessable=True,
             ).select_related("requirement")
             if self.anchor_na_to_target:
-                qs = qs.exclude(
-                    ~Q(result=RequirementAssessment.Result.NOT_APPLICABLE),
-                    is_scored=False,
+                qs = qs.filter(
+                    Q(result=RequirementAssessment.Result.NOT_APPLICABLE)
+                    | (Q(is_scored=True) & Q(score__isnull=False))
                 )
             else:
-                qs = qs.exclude(is_scored=False).exclude(
+                qs = qs.filter(is_scored=True, score__isnull=False).exclude(
                     result=RequirementAssessment.Result.NOT_APPLICABLE
                 )
             requirement_assessments_scored = qs
