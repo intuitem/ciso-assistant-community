@@ -15,5 +15,5 @@ uv sync
 3. Start the development server with the enterprise settings file
 
 ```bash
-uv run manage.sh runserver
+uv run ./manage.sh runserver
 ```
