@@ -94,7 +94,8 @@ objects:
         Subdomain 1-5 shall also include for the CST, as a minimum: (1) Defining acceptable
         risk levels for the cloud services. (2) Considering data and information classification
         accredited by CST in cybersecurity risk management methodology. (3) Developing
-        cybersecurity risk register for cloud services, and monitoring it'
+        cybersecurity risk register for cloud services, and monitoring it periodically
+        according to the risks.'
       implementation_groups:
       - CST
     - urn: urn:intuitem:risk:req_node:ccc-1-2020:1-3
@@ -213,7 +214,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:1-5
       ref_id: 1-5-P-4
       description: Cybersecurity requirements for change management within the CSP
-        shall be applied and
+        shall be applied and reviewed periodically.
       implementation_groups:
       - CSP
     - urn: urn:intuitem:risk:req_node:ccc-1-2020:2
@@ -301,7 +302,7 @@ objects:
         management, including session authenticity, session lockout, and session timeout
         termination on the cloud. (4) Multi-factor authentication for privileged cloud
         users. (5) Formal process to detect and prevent unauthorized access to cloud
-        (such as'
+        (such as a threshold of unsuccessful login attempts).'
       implementation_groups:
       - CST
     - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-3
@@ -338,7 +339,7 @@ objects:
         \ support. (12) Modern technologies, such as Endpoint Detection and Response\
         \ (EDR) technologies, to ensure that the information servers and devices of\
         \ CSP\u2019s information processing systems and devices of are ready for rapid\
-        \ response"
+        \ response to incidents."
       implementation_groups:
       - CSP
     - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-3-t-1
@@ -454,10 +455,10 @@ objects:
       ref_id: 2-6-T-1
       description: "In addition to subcontrols in the ECC control 2-7-3, the CST shall\
         \ cover the following additional subcontrols for cybersecurity requirements\
-        \ for protecting CST\u2019s data and infor - (1) Exit Strategy to ensure means\
-        \ for secure disposal of data on termination or expiry of the contract with\
-        \ the CSP. (2) Using secure means to export and transfer data and virtual\
-        \ infrastructure."
+        \ for protecting CST\u2019s data and information in cloud computing, as a\
+        \ minimum: (1) Exit Strategy to ensure means for secure disposal of data on\
+        \ termination or expiry of the contract with the CSP. (2) Using secure means\
+        \ to export and transfer data and virtual infrastructure."
       implementation_groups:
       - CST
     - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-7
@@ -509,7 +510,7 @@ objects:
         \ and transfer of CST\u2019s data backups and its mediums, and protecting\
         \ it against damage, amendment or unauthorized access. (2) Securing access,\
         \ storage and transfer of Cloud Technology Stack backups and its mediums,\
-        \ and protecting it against damage, amendment or unau -"
+        \ and protecting it against damage, amendment or unauthorized access."
       implementation_groups:
       - CSP
     - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-9
@@ -614,21 +615,22 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-12
       ref_id: 2-12-P-1
-      description: In addition to subcontrols in the ECC control 2-13-3, the CSP shall
-        cover the following additional subcontrols for cybersecurity requirements
-        for cybersecurity incident and threat (1) Subscribing in authorized and specialized
-        organizations and groups to stay up-to-date on cybersecurity threats, common
-        practices and key know-how. (2) Training for employees and third-party personnel
-        to respond to cybersecurity incidents, in line with their roles and responsibilities.
-        (3) Periodically testing the incident response capability. (4) Root Cause
-        Analysis of cybersecurity incidents and developing plans to address them.
-        (5) Support the CST in cases legal proceedings and forensics, protecting the
-        chain of custody that falls under the management and responsibility of the
-        CSP, in accordance with the related law and regulatory requirements. (6) Real-time
-        reporting to the CST of incidents that may affect CST; if the incident is
-        discovered. (7) Support for CSTs to handle security incidents according to
-        the agreement between the CSP and CST. (8) Measuring and monitoring cybersecurity
-        incident metrics and monitor compliance with contracts and legislative requirements
+      description: 'In addition to subcontrols in the ECC control 2-13-3, the CSP
+        shall cover the following additional subcontrols for cybersecurity requirements
+        for cybersecurity incident and threat management, as a minimum: (1) Subscribing
+        in authorized and specialized organizations and groups to stay up-to-date
+        on cybersecurity threats, common practices and key know-how. (2) Training
+        for employees and third-party personnel to respond to cybersecurity incidents,
+        in line with their roles and responsibilities. (3) Periodically testing the
+        incident response capability. (4) Root Cause Analysis of cybersecurity incidents
+        and developing plans to address them. (5) Support the CST in cases legal proceedings
+        and forensics, protecting the chain of custody that falls under the management
+        and responsibility of the CSP, in accordance with the related law and regulatory
+        requirements. (6) Real-time reporting to the CST of incidents that may affect
+        CST; if the incident is discovered. (7) Support for CSTs to handle security
+        incidents according to the agreement between the CSP and CST. (8) Measuring
+        and monitoring cybersecurity incident metrics and monitor compliance with
+        contracts and legislative requirements'
       implementation_groups:
       - CSP
     - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-13
@@ -664,8 +666,8 @@ objects:
       ref_id: 2-14-P-1
       description: "In addition to subcontrols in the ECC control 2-15-3, the CSP\
         \ shall cover the following additional subcontrols for cybersecurity requirements\
-        \ for web application security, as a (1) Protecting information involved in\
-        \ application service transactions against possible risks (e.g.: incomplete\
+        \ for web application security, as a minimum: (1) Protecting information involved\
+        \ in application service transactions against possible risks (e.g.: incomplete\
         \ transmission, mis-routing, unauthorized message alteration, unauthorized\
         \ disclosure\u2026.)."
       implementation_groups:
@@ -847,7 +849,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-17
       ref_id: 2-17-P-4
       description: Cybersecurity requirements for usage of information and data media
-        within the CSP shall
+        within the CSP shall be applied and reviewed periodically.
       implementation_groups:
       - CSP
     - urn: urn:intuitem:risk:req_node:ccc-1-2020:3
@@ -924,6 +926,6 @@ objects:
         \ \u2022 Level 4: classification level applies to data classified as a (public)\
         \ based on what is issued by the competent authority. Please note that the\
         \ highest level of classification should be adopted when the content of an\
-        \ integrated set"
+        \ integrated set of data includes different levels."
       implementation_groups:
       - CSP
