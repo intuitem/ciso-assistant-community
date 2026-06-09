@@ -107,14 +107,6 @@
 	bind:cachedValue={formDataCache['asset_class']}
 	label={m.assetClass()}
 />
-<TextField
-	{form}
-	field="ref_id"
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-	label={m.refId()}
-/>
-
 <AutocompleteSelect
 	{form}
 	multiple

@@ -224,6 +224,8 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
                             ]
                         }
                     )
+                from core.utils import build_initial_field_visibility
+
                 audit = ComplianceAssessment.objects.create(
                     name=locked.name,
                     framework=audit_data["framework"],
@@ -231,6 +233,9 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
                     selected_implementation_groups=audit_data[
                         "selected_implementation_groups"
                     ],
+                    field_visibility=build_initial_field_visibility(
+                        audit_data["framework"]
+                    ),
                 )
 
                 enclave = Folder.objects.create(
