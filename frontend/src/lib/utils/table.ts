@@ -78,8 +78,7 @@ const CONTENT_TYPE_OPTIONS = [
 
 const YES_NO_UNSET_OPTIONS = [
 	{ label: 'YES', value: 'YES' },
-	{ label: 'NO', value: 'NO' },
-	{ label: '--', value: '--' }
+	{ label: 'NO', value: 'NO' }
 ];
 
 const RISK_STAGE_OPTIONS = [
@@ -230,7 +229,6 @@ export const RISK_ASSESSMENT_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		options: [
-			{ label: '--', value: '--' },
 			{ label: 'planned', value: 'planned' },
 			{ label: 'in_progress', value: 'in_progress' },
 			{ label: 'in_review', value: 'in_review' },
@@ -241,7 +239,8 @@ export const RISK_ASSESSMENT_STATUS_FILTER: ListViewFilterConfig = {
 		optionsValueField: 'value',
 		label: 'status',
 		browserCache: 'force-cache',
-		multiple: true
+		multiple: true,
+		nullable: true
 	}
 };
 
@@ -249,7 +248,6 @@ export const QUANT_RISK_SCENARIO_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		options: [
-			{ label: '--', value: '--' },
 			{ label: 'draft', value: 'draft' },
 			{ label: 'open', value: 'open' },
 			{ label: 'mitigate', value: 'mitigate' },
@@ -260,7 +258,8 @@ export const QUANT_RISK_SCENARIO_STATUS_FILTER: ListViewFilterConfig = {
 		optionsValueField: 'value',
 		label: 'status',
 		browserCache: 'force-cache',
-		multiple: true
+		multiple: true,
+		nullable: true
 	}
 };
 export const RISK_STAGE_FILTER: ListViewFilterConfig = {
@@ -347,7 +346,8 @@ export const RISK_TOLERANCE_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'withinTolerance',
 		options: YES_NO_UNSET_OPTIONS,
-		multiple: false
+		multiple: false,
+		nullable: true
 	}
 };
 
@@ -1240,7 +1240,8 @@ export const EVIDENCE_STATUS_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		browserCache: 'force-cache',
-		multiple: true
+		multiple: true,
+		nullable: true
 	}
 };
 
@@ -1263,7 +1264,8 @@ export const EVIDENCE_OWNER_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'str',
 		optionsValueField: 'id',
 		optionsEndpoint: 'actors',
-		multiple: true
+		multiple: true,
+		nullable: true
 	}
 };
 
