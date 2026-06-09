@@ -324,39 +324,58 @@ class JiraClient(BaseIntegrationClient):
         if field_name == "status":
             return self._get_status_choices(project_key, issue_type)
         if field_name == "priority":
-            return self._get_priority_choices()
+            return self._get_priority_choices(project_key, issue_type)
 
         return self._get_allowed_values_from_createmeta(
             project_key, issue_type, field_name
         )
 
     def _get_status_choices(self, project_key: str, issue_type: str) -> list[dict]:
-        # Use the SDK's public ``statuses()`` so we don't hardcode
-        # ``/rest/api/3/...`` (which 404s on Jira Server/DC where the path is
-        # ``/rest/api/2/...``) and don't reach into ``self.jira._session``.
+        # Scope to the selected project (and issue type) instead of the
+        # instance-wide ``statuses()`` endpoint, which leaks every workflow's
+        # statuses across all projects. ``issue_types_for_project`` hits
+        # ``GET project/{key}/statuses`` and groups statuses by issue type, so
+        # a user can only map to statuses that actually exist in this project's
+        # workflow (otherwise the runtime transition has no valid path).
         try:
-            all_statuses = self.jira.statuses()
+            issue_types = self.jira.issue_types_for_project(project_key)
         except Exception:
             logger.warning(
-                "Failed to fetch Jira statuses",
+                "Failed to fetch Jira statuses for project",
                 project_key=project_key,
+                issue_type=issue_type,
                 exc_info=True,
             )
             raise
 
         statuses: dict[str, str] = {}
-        for status in all_statuses or []:
-            name = getattr(status, "name", None)
-            if name:
-                statuses[name] = name
+        for it in issue_types or []:
+            # When the table pins an issue type, only that issue type's
+            # workflow statuses apply. Without one, union every issue type.
+            if issue_type and getattr(it, "name", None) != issue_type:
+                continue
+            for status in getattr(it, "statuses", []) or []:
+                name = getattr(status, "name", None)
+                if name:
+                    statuses[name] = name
 
         return [
             {"value": value, "label": label}
             for value, label in sorted(statuses.items(), key=lambda kv: kv[1].lower())
         ]
 
-    def _get_priority_choices(self) -> list[dict]:
-        # Same reasoning as ``_get_status_choices``: use the public SDK.
+    def _get_priority_choices(self, project_key: str, issue_type: str) -> list[dict]:
+        # Prefer the project-scoped allowed values from createmeta so we honor
+        # the project's priority scheme rather than the instance-wide
+        # ``priorities()`` list.
+        scoped = self._get_allowed_values_from_createmeta(
+            project_key, issue_type, "priority"
+        )
+        if scoped:
+            return scoped
+
+        # createmeta omits ``priority`` when it isn't on the project's create
+        # screen; fall back to the instance-wide list so the row isn't empty.
         try:
             priorities = self.jira.priorities()
         except Exception:

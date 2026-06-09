@@ -1,4 +1,5 @@
 import pytest
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 from core.models import AppliedControl
 from integrations.models import IntegrationConfiguration
@@ -302,3 +303,100 @@ def test_description_adf_only_when_mapped_to_description_field(dynamic_mapper):
     # Mapped to a custom field, so we keep it as a plain string
     assert remote["customfield_10100"] == "Hello world"
     assert "description" not in remote
+
+
+# Choice scoping tests (status/priority must come from the selected project only)
+
+
+@patch("integrations.itsm.jira.client.JIRA")
+def test_status_choices_scoped_to_project_issue_type(mock_jira, configuration):
+    """Status choices come from the selected project + issue type, not the whole instance."""
+    mock_jira.return_value.issue_types_for_project.return_value = [
+        SimpleNamespace(
+            name="Task",
+            statuses=[
+                SimpleNamespace(name="To Do"),
+                SimpleNamespace(name="In Progress"),
+            ],
+        ),
+        SimpleNamespace(
+            name="Bug",
+            statuses=[SimpleNamespace(name="Triage")],
+        ),
+    ]
+
+    client = JiraClient(configuration)
+    choices = client.get_field_choices("PROJ:Task", "status")
+
+    assert [c["value"] for c in choices] == ["In Progress", "To Do"]
+    mock_jira.return_value.issue_types_for_project.assert_called_once_with("PROJ")
+    # The instance-wide endpoint must NOT be used.
+    mock_jira.return_value.statuses.assert_not_called()
+
+
+@patch("integrations.itsm.jira.client.JIRA")
+def test_status_choices_union_across_issue_types_when_unspecified(
+    mock_jira, configuration
+):
+    """With no issue type pinned, statuses from every issue type are returned (deduped)."""
+    mock_jira.return_value.issue_types_for_project.return_value = [
+        SimpleNamespace(name="Task", statuses=[SimpleNamespace(name="To Do")]),
+        SimpleNamespace(
+            name="Bug",
+            statuses=[SimpleNamespace(name="To Do"), SimpleNamespace(name="Triage")],
+        ),
+    ]
+
+    client = JiraClient(configuration)
+    choices = client.get_field_choices("PROJ", "status")
+
+    assert [c["value"] for c in choices] == ["To Do", "Triage"]
+
+
+@patch("integrations.itsm.jira.client.JIRA")
+def test_priority_choices_scoped_via_createmeta(mock_jira, configuration):
+    """Priority choices respect the project's priority scheme via createmeta allowedValues."""
+    mock_jira.return_value.createmeta.return_value = {
+        "projects": [
+            {
+                "issuetypes": [
+                    {
+                        "name": "Task",
+                        "fields": {
+                            "priority": {
+                                "allowedValues": [
+                                    {"name": "High"},
+                                    {"name": "Low"},
+                                ]
+                            }
+                        },
+                    }
+                ]
+            }
+        ]
+    }
+
+    client = JiraClient(configuration)
+    choices = client.get_field_choices("PROJ:Task", "priority")
+
+    assert [c["value"] for c in choices] == ["High", "Low"]
+    # Instance-wide priorities endpoint must NOT be used when the project scopes them.
+    mock_jira.return_value.priorities.assert_not_called()
+
+
+@patch("integrations.itsm.jira.client.JIRA")
+def test_priority_choices_fall_back_to_instance_when_createmeta_empty(
+    mock_jira, configuration
+):
+    """If createmeta omits priority (not on create screen), fall back to instance priorities."""
+    mock_jira.return_value.createmeta.return_value = {"projects": []}
+    mock_jira.return_value.priorities.return_value = [
+        SimpleNamespace(name="Highest"),
+        SimpleNamespace(name="Medium"),
+    ]
+
+    client = JiraClient(configuration)
+    choices = client.get_field_choices("PROJ:Task", "priority")
+
+    assert [c["value"] for c in choices] == ["Highest", "Medium"]
+    mock_jira.return_value.priorities.assert_called_once()
