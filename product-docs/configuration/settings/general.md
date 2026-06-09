@@ -27,7 +27,7 @@ Instance-wide settings that don't belong to a more specific category. Grouped he
 - **Show warning on external links** — interstitial prompt before opening links that leave the platform.
 - **Enforce MFA** — make multi-factor authentication mandatory for every user account.
 - **Allow assignments to entities** — whether requirements and tasks can be assigned to third-party entities (not just internal users).
-- **Mapping max depth** — limit on how many mapping hops the platform follows when projecting one framework onto another.
+- **Mapping max depth** — how many frameworks a chained mapping path may span when projecting one framework onto another, counted as nodes in the path (2–5, default 3). A value of 3 allows one pivot — A → B → C. See [transitive inference](../../concepts/mappings.md#transitive-inference-pivot-mappings).
 
 ## Retention
 
