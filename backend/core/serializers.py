@@ -2607,6 +2607,23 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
             return sd["scale"]
         return sd
 
+    field_visibility = serializers.SerializerMethodField()
+
+    def get_field_visibility(self, obj):
+        """Return field_visibility with defaults applied.
+
+        If the stored map is empty (e.g. audits created before the field was
+        populated at creation time), fall back to the code defaults merged with
+        the framework template — the same values a newly created CA would get —
+        so the frontend always receives a complete map.
+        """
+        fv = obj.field_visibility
+        if fv:
+            return fv
+        from core.utils import build_initial_field_visibility
+
+        return build_initial_field_visibility(obj.framework)
+
     # Derived booleans, kept in the API for backwards compatibility. The actual
     # storage is `field_visibility`; clients that want to change these should
     # PATCH `field_visibility` directly.
@@ -3047,12 +3064,12 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
         request = self.context.get("request")
         if request and self.instance:
             from core.utils import (
-                get_respondent_filtered_folder_ids,
+                get_auditee_filtered_folder_ids,
                 is_field_editable_by,
             )
 
             ca = self.instance.compliance_assessment
-            respondent_folders = get_respondent_filtered_folder_ids(request.user)
+            respondent_folders = get_auditee_filtered_folder_ids(request.user)
             if respondent_folders and ca.folder_id in respondent_folders:
                 # Cascade through DEFAULT_VISIBILITY so default-hidden keys are
                 # stripped from a respondent's payload even when the CA has an
@@ -3091,9 +3108,9 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
         # Assignment-level and field-level guards for respondent users (auditee or third-party)
         request = self.context.get("request")
         if request and self.instance and compliance_assessment:
-            from core.utils import get_respondent_filtered_folder_ids
+            from core.utils import get_auditee_filtered_folder_ids
 
-            respondent_folders = get_respondent_filtered_folder_ids(request.user)
+            respondent_folders = get_auditee_filtered_folder_ids(request.user)
             if (
                 respondent_folders
                 and compliance_assessment.folder_id in respondent_folders
