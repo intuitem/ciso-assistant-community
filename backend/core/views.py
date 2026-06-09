@@ -11054,28 +11054,51 @@ class RequirementViewSet(BaseModelViewSet):
         )
 
 
+class EvidenceFilterSet(GenericFilterSet):
+    status = NullableChoiceFilter(choices=Evidence.Status.choices)
+
+    def filter_queryset(self, queryset):
+        queryset = super().filter_queryset(queryset)
+        owner_values = self.data.getlist("owner")
+        if not owner_values:
+            return queryset
+        has_null = "--" in owner_values
+        real_actors = Actor.objects.filter(
+            id__in=[v for v in owner_values if v != "--"]
+        )
+        if has_null and real_actors:
+            return queryset.filter(
+                Q(owner__isnull=True) | Q(owner__in=real_actors)
+            ).distinct()
+        elif has_null:
+            return queryset.filter(owner__isnull=True)
+        return queryset.filter(owner__in=real_actors).distinct()
+
+    class Meta:
+        model = Evidence
+        fields = [
+            "folder",
+            "applied_controls",
+            "requirement_assessments",
+            "name",
+            "timeline_entries",
+            "filtering_labels",
+            "findings",
+            "findings_assessments",
+            "genericcollection",
+            "expiry_date",
+            "contracts",
+            "processings",
+        ]
+
+
 class EvidenceViewSet(BaseModelViewSet):
     """
     API endpoint that allows evidences to be viewed or edited.
     """
 
     model = Evidence
-    filterset_fields = [
-        "folder",
-        "applied_controls",
-        "requirement_assessments",
-        "name",
-        "timeline_entries",
-        "filtering_labels",
-        "findings",
-        "findings_assessments",
-        "genericcollection",
-        "owner",
-        "status",
-        "expiry_date",
-        "contracts",
-        "processings",
-    ]
+    filterset_class = EvidenceFilterSet
 
     @action(detail=False, name="Get all evidences owners")
     def owner(self, request):

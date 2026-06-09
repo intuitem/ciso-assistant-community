@@ -144,6 +144,15 @@
 		});
 	}
 
+	function prependNullOption(opts) {
+		if (!nullable || opts.some((o) => o.value === '--')) return opts;
+		return [{ label: '--', value: '--', translatedLabel: '--' }, ...opts];
+	}
+
+	if (nullable) {
+		options = prependNullOption(options);
+	}
+
 	let optionHashmap: Record<string, Option> = {};
 	let _disabled = $state(disabled);
 
@@ -238,7 +247,7 @@
 							// Small dataset with complete response — use eager mode
 							effectiveLazy = false;
 							if (returnedCount > 0) {
-								options = processOptions(items);
+								options = prependNullOption(processOptions(items));
 							}
 							const isRequired = mandatory || $constraints?.required;
 							const hasNoOptions = options.length === 0;
@@ -262,7 +271,7 @@
 					if (response.ok) {
 						const data = await response.json().then((res) => res?.results ?? res);
 						if (data.length > 0) {
-							options = processOptions(data);
+							options = prependNullOption(processOptions(data));
 						}
 						const isRequired = mandatory || $constraints?.required;
 						const hasNoOptions = options.length === 0;
@@ -335,7 +344,7 @@
 						merged.push(opt);
 					}
 				}
-				options = merged;
+				options = prependNullOption(merged);
 			}
 		} catch (error) {
 			console.error(`Error searching ${optionsEndpoint}:`, error);
