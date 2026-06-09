@@ -7436,14 +7436,15 @@ class ComplianceAssessment(Assessment):
                 requirement_assessments_scored = [
                     requirement
                     for requirement in prefetched_requirements
-                    if requirement.is_scored
-                    or requirement.result == RequirementAssessment.Result.NOT_APPLICABLE
+                    if requirement.result == RequirementAssessment.Result.NOT_APPLICABLE
+                    or (requirement.is_scored and requirement.score is not None)
                 ]
             else:
                 requirement_assessments_scored = [
                     requirement
                     for requirement in prefetched_requirements
                     if requirement.is_scored
+                    and requirement.score is not None
                     and requirement.result
                     != RequirementAssessment.Result.NOT_APPLICABLE
                 ]
@@ -7455,13 +7456,13 @@ class ComplianceAssessment(Assessment):
             )
             if self.anchor_na_to_target:
                 # Keep N/A items (they'll be anchored to target), but still
-                # exclude non-N/A items that have is_scored=False.
-                qs = qs.exclude(
-                    ~Q(result=RequirementAssessment.Result.NOT_APPLICABLE),
-                    is_scored=False,
+                # exclude non-N/A items that aren't actually scored.
+                qs = qs.filter(
+                    Q(result=RequirementAssessment.Result.NOT_APPLICABLE)
+                    | (Q(is_scored=True) & Q(score__isnull=False))
                 )
             else:
-                qs = qs.exclude(is_scored=False).exclude(
+                qs = qs.filter(is_scored=True, score__isnull=False).exclude(
                     result=RequirementAssessment.Result.NOT_APPLICABLE
                 )
             requirement_assessments_scored = list(qs)
