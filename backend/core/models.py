@@ -966,6 +966,8 @@ class LibraryUpdater:
 
                 requirement_assessment_objects_to_create = []
                 requirement_assessment_objects_to_update = []
+                # Parallel set for O(1) dedup; `ra not in <list>` is O(N) via Django __eq__.
+                ra_pks_to_update = set()
                 answers_changed_ca_ids = set()
                 requirement_node_objects_to_update = []
                 order_id = 0
@@ -1200,7 +1202,9 @@ class LibraryUpdater:
                                 ra.is_scored = (
                                     new_score is not None and self.strategy != "reset"
                                 )
-                                requirement_assessment_objects_to_update.append(ra)
+                                if ra.pk not in ra_pks_to_update:
+                                    ra_pks_to_update.add(ra.pk)
+                                    requirement_assessment_objects_to_update.append(ra)
 
                             # -------- Strategy application for documentation_score --------
                             if hasattr(ra, "documentation_score"):
@@ -1209,10 +1213,15 @@ class LibraryUpdater:
 
                                 if new_doc_score != old_doc_score:
                                     ra.documentation_score = new_doc_score
-                                    requirement_assessment_objects_to_update.append(ra)
+                                    if ra.pk not in ra_pks_to_update:
+                                        ra_pks_to_update.add(ra.pk)
+                                        requirement_assessment_objects_to_update.append(
+                                            ra
+                                        )
 
                         if questions is None:
-                            if ra not in requirement_assessment_objects_to_update:
+                            if ra.pk not in ra_pks_to_update:
+                                ra_pks_to_update.add(ra.pk)
                                 requirement_assessment_objects_to_update.append(ra)
                             continue
 
@@ -1275,7 +1284,8 @@ class LibraryUpdater:
 
                         if ra_changed:
                             ra.recompute_assessment()
-                            if ra not in requirement_assessment_objects_to_update:
+                            if ra.pk not in ra_pks_to_update:
+                                ra_pks_to_update.add(ra.pk)
                                 requirement_assessment_objects_to_update.append(ra)
 
                     # update threats linked to the requirement_node
@@ -3039,7 +3049,7 @@ class Perimeter(NameDescriptionMixin, FolderMixin):
         verbose_name="Default assignee",
         blank=True,
     )
-    fields_to_check = ["name"]
+    fields_to_check = ["ref_id", "name"]
 
     class Meta:
         verbose_name = _("Perimeter")
@@ -3111,7 +3121,7 @@ class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMi
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
     link = models.URLField(null=True, blank=True, verbose_name=_("Link"))
 
-    fields_to_check = ["name"]
+    fields_to_check = ["ref_id", "name"]
 
     def __str__(self):
         return self.name
@@ -3232,6 +3242,7 @@ class Asset(
     }
 
     SECURITY_OBJECTIVES_SCALES = {
+        "1-3": [1, 2, 3, 3, 3],
         "1-4": [1, 2, 3, 4, 4],
         "1-5": [1, 2, 3, 4, 5],
         "0-3": [0, 1, 2, 3, 3],
@@ -3349,7 +3360,7 @@ class Asset(
         verbose_name=_("DORA Discontinuing Impact"),
     )
 
-    fields_to_check = ["name"]
+    fields_to_check = ["ref_id", "name"]
 
     class Meta:
         verbose_name_plural = _("Assets")
@@ -4803,7 +4814,7 @@ class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         related_name="incidents",
     )
 
-    fields_to_check = ["name", "ref_id"]
+    fields_to_check = ["ref_id"]
 
     class Meta:
         verbose_name = "Incident"
@@ -4877,6 +4888,16 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
             raise ValidationError("Timestamp cannot be in the future.")
         self.folder = self.incident.folder
         super().save(*args, **kwargs)
+        self.touch_incident()
+
+    def delete(self, *args, **kwargs):
+        incident = self.incident
+        super().delete(*args, **kwargs)
+        self.touch_incident(incident)
+
+    def touch_incident(self, incident=None):
+        incident = incident or self.incident
+        Incident.objects.filter(pk=incident.pk).update(updated_at=now())
 
 
 class Comment(AbstractBaseModel, FolderMixin):
@@ -5199,7 +5220,7 @@ class AppliedControl(
         related_name="applied_controls",
     )
 
-    fields_to_check = ["name"]
+    fields_to_check = ["ref_id", "name"]
 
     class Meta:
         verbose_name = _("Applied control")
@@ -5677,7 +5698,7 @@ class Vulnerability(
     )
     is_published = models.BooleanField(_("published"), default=True)
 
-    fields_to_check = ["name"]
+    fields_to_check = ["ref_id", "name"]
 
     def save(self, *args, **kwargs):
         from datetime import date

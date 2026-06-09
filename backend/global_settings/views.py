@@ -291,6 +291,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
     @action(detail=True, name="Get security objective scales")
     def security_objective_scale(self, request):
         choices = {
+            "1-3": "1-3",
             "1-4": "1-4",
             "1-5": "1-5",
             "0-3": "0-3",
