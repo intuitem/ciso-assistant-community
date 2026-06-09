@@ -527,10 +527,6 @@ class RiskMatrixImporter:
     def is_valid(self) -> Union[str, None]:
         if err := validate_ref_id_length(self.risk_matrix_data.get("ref_id")):
             return err
-
-        if missing_fields := self.REQUIRED_FIELDS - set(self.risk_matrix_data.keys()):
-            return "Missing the following fields : {}".format(", ".join(missing_fields))
-
         return None
 
     def import_risk_matrix(self, library_object: LoadedLibrary):
