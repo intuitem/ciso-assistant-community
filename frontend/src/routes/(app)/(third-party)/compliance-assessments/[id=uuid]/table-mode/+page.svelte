@@ -45,6 +45,7 @@
 	import { onMount } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import MappingInferenceView from '$lib/components/ComplianceAssessment/MappingInferenceView.svelte';
 
 	interface Props {
 		data: PageData;
@@ -528,7 +529,15 @@
 														</div>
 													</div>
 												{/if}
-												{#if requirementAssessment.mapping_inference?.result}
+												{console.log(
+													requirementAssessment.mapping_inference,
+													requirementAssessment.mapping_inference?.result,
+													requirementAssessment.mapping_inference.source_requirement_assessments,
+													'PDPDPPDPD'
+												)}
+												{#if requirementAssessment.mapping_inference?.result && requirementAssessment.mapping_inference.source_requirement_assessments && Object.keys(requirementAssessment.mapping_inference.source_requirement_assessments).length > 0}
+													<MappingInferenceView mappingInference={requirementAssessment.mapping_inference} />
+													<!-- {#each Object.values(requirementAssessment.mapping_inference.source_requirement_assessments) as firstSourceRequirementAssessment}
 													<div class="my-2">
 														<p class="font-medium">
 															<i class="fa-solid fa-link"></i>
@@ -543,29 +552,25 @@
 																<p>
 																	<a
 																		class="anchor"
-																		href="/requirement-assessments/{requirementAssessment
-																			.mapping_inference.source_requirement_assessment.id}"
+																		href="/requirement-assessments/{firstSourceRequirementAssessment.id}"
 																	>
-																		{requirementAssessment.mapping_inference
-																			.source_requirement_assessment.str}
+																		{firstSourceRequirementAssessment.str}
 																	</a>
 																</p>
 																<p class="whitespace-pre-line py-1">
 																	<span class="italic">{m.coverageColon()}</span>
 																	<span class="badge h-fit">
 																		{safeTranslate(
-																			requirementAssessment.mapping_inference
-																				.source_requirement_assessment.coverage
+																			firstSourceRequirementAssessment.coverage
 																		)}
 																	</span>
 																</p>
-																{#if requirementAssessment.mapping_inference.source_requirement_assessment.is_scored}
+																{#if firstSourceRequirementAssessment.is_scored}
 																	<p class="whitespace-pre-line py-1">
 																		<span class="italic">{m.scoreSemiColon()}</span>
 																		<span class="badge h-fit">
 																			{safeTranslate(
-																				requirementAssessment.mapping_inference
-																					.source_requirement_assessment.score
+																				firstSourceRequirementAssessment.score
 																			)}
 																		</span>
 																	</p>
@@ -592,6 +597,7 @@
 															</li>
 														</ul>
 													</div>
+												{/each} -->
 												{/if}
 											{/if}
 										</div>

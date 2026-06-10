@@ -36,6 +36,7 @@
 		type ModalStore
 	} from '$lib/components/Modals/stores';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import MappingInferenceView from '$lib/components/ComplianceAssessment/MappingInferenceView.svelte';
 	import {
 		computeRequirementScoreAndResult,
 		formatScoreValue,
@@ -261,12 +262,13 @@
 		validationMethod: 'auto'
 	});
 
-	let mappingInference = $derived({
+	let mappingInference = $derived(data.requirementAssessment.mapping_inference); //TODO: REMOVE AFTER DEBUG (replace by a plain data.requirementAssessment.mapping_inference instead)
+	/* let mappingInference = $derived({
 		sourceRequirementAssessments:
 			data.requirementAssessment.mapping_inference.source_requirement_assessments,
 		result: data.requirementAssessment.mapping_inference.result,
 		annotation: ''
-	});
+	}); */
 
 	let requirementAssessmentsList: string[] = $hideSuggestions;
 
@@ -523,99 +525,7 @@
 					</div>
 				{/if}
 				{#if mappingInference.result}
-					<div class="my-2">
-						<p class="font-medium">
-							<i class="fa-solid fa-link"></i>
-							{m.mappingInference()}
-						</p>
-						<span class="text-xs text-gray-500"
-							><i class="fa-solid fa-circle-info"></i> {m.mappingInferenceHelpText()}</span
-						>
-						<div>
-							<ul class="list-disc ml-4 {!expandedInferences ? 'hidden' : ''}">
-								{#each Object.entries(mappingInference.sourceRequirementAssessments) as [source_urn, source_requirement_assessment]}
-									<li>
-										<p>
-											<a
-												class="anchor"
-												href="/requirement-assessments/{source_requirement_assessment.id}"
-											>
-												{source_requirement_assessment.str}
-											</a>
-										</p>
-										<p class="whitespace-pre-line py-1">
-											<span class="italic">{m.coverageColon()}</span>
-											<span class="badge h-fit">
-												{safeTranslate(source_requirement_assessment.coverage)}
-											</span>
-										</p>
-										<p class="whitespace-pre-line py-1">
-											<span class="italic">{m.framework()}</span>
-											<a
-												class="anchor badge h-fit"
-												href="/frameworks/{source_requirement_assessment.source_framework.id}"
-											>
-												{source_requirement_assessment.source_framework.name}
-											</a>
-										</p>
-										<p class="whitespace-pre-line py-1">
-											<span class="italic">{m.mapping()}</span>
-											{#if source_requirement_assessment.used_mapping_set}
-												<a
-													class="anchor badge h-fit"
-													href="/requirement-mapping-sets/{source_requirement_assessment
-														.used_mapping_set?.id}"
-												>
-													{source_requirement_assessment.used_mapping_set?.name}
-												</a>
-											{:else}
-												<span class="text-gray-500">--</span>
-											{/if}
-										</p>
-										{#if source_requirement_assessment.is_scored}
-											<p class="whitespace-pre-line py-1">
-												<span class="italic">{m.scoreSemiColon()}</span>
-												<span class="badge h-fit">
-													{safeTranslate(source_requirement_assessment.score)}
-												</span>
-											</p>
-										{/if}
-										<p class="whitespace-pre-line py-1">
-											<span class="italic">{m.suggestionColon()}</span>
-											<span
-												class="badge {classesText} h-fit"
-												style="background-color: {complianceResultColorMap[
-													mappingInference.result
-												]};"
-											>
-												{safeTranslate(mappingInference.result)}
-											</span>
-										</p>
-										{#if mappingInference.annotation}
-											<p class="whitespace-pre-line py-1">
-												<span class="italic">{m.annotationColon()}</span>
-												{mappingInference.annotation}
-											</p>
-										{/if}
-									</li>
-								{/each}
-							</ul>
-						</div>
-						<button
-							onclick={() => (expandedInferences = !expandedInferences)}
-							class="m-5 text-blue-800"
-							aria-expanded={expandedInferences}
-						>
-							<i class="{expandedInferences ? 'fas fa-chevron-up' : 'fas fa-chevron-down'} mr-3"
-							></i>
-							{#if expandedInferences}
-								{m.hideInferences()}
-							{:else}
-								{m.showInferences()}
-							{/if}
-							({Object.keys(mappingInference.sourceRequirementAssessments).length})
-						</button>
-					</div>
+					<MappingInferenceView {mappingInference} />
 				{/if}
 			{/if}
 		</div>
