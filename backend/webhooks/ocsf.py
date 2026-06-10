@@ -50,6 +50,11 @@ def log_entry_to_ocsf(log_entry) -> dict:
     model_name = _model_name(log_entry)
     additional = log_entry.additional_data or {}
     src_endpoint = {"ip": log_entry.remote_addr} if log_entry.remote_addr else {}
+    # auditlog stamps every entry in a request with the same correlation id;
+    # surfacing it lets a SIEM group all events from one request.
+    metadata = {"version": OCSF_VERSION, "product": _PRODUCT}
+    if log_entry.cid:
+        metadata["correlation_uid"] = log_entry.cid
     return {
         "activity_id": activity_id,
         "category_uid": _APPLICATION_ACTIVITY_CATEGORY_UID,
@@ -58,7 +63,7 @@ def log_entry_to_ocsf(log_entry) -> dict:
         "severity_id": 1,  # Informational
         "status_id": 1,  # Success
         "time": int(log_entry.timestamp.timestamp() * 1000),
-        "metadata": {"version": OCSF_VERSION, "product": _PRODUCT},
+        "metadata": metadata,
         "actor": _actor(log_entry),
         "api": {
             "operation": _ACTION_VERB.get(log_entry.action, "unknown"),
@@ -90,6 +95,7 @@ def log_entry_to_raw(log_entry) -> dict:
         "actor": _actor(log_entry).get("user", {}),
         "remote_addr": log_entry.remote_addr,
         "folder_id": (log_entry.additional_data or {}).get("folder_id"),
+        "correlation_id": log_entry.cid,
         "timestamp": log_entry.timestamp.isoformat(),
     }
 

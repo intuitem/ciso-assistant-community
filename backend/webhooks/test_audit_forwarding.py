@@ -83,6 +83,26 @@ def test_ocsf_activity_remap_for_update_and_delete(root_folder):
 
 
 @pytest.mark.django_db
+def test_ocsf_surfaces_correlation_id(root_folder):
+    from auditlog.cid import correlation_id
+
+    correlation_id.set("req-abc-123")
+    try:
+        _, le = _create_entry("P-cid", root_folder)
+    finally:
+        correlation_id.set(None)
+    assert le.cid == "req-abc-123"
+    assert log_entry_to_ocsf(le)["metadata"]["correlation_uid"] == "req-abc-123"
+
+
+@pytest.mark.django_db
+def test_ocsf_omits_correlation_uid_when_absent(root_folder):
+    _, le = _create_entry("P-no-cid", root_folder)
+    assert le.cid is None
+    assert "correlation_uid" not in log_entry_to_ocsf(le)["metadata"]
+
+
+@pytest.mark.django_db
 def test_dispatch_selects_unscoped_sink(root_folder):
     ep = _make_audit_sink(root_folder)  # no target_folders -> applies everywhere
     _, le = _create_entry("P-d", root_folder)
