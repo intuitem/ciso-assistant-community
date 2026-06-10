@@ -50,7 +50,7 @@ jobs:
       PUBLIC_BACKEND_API_URL: http://localhost:8000/api
     services:
       postgres:
-        image: postgres:16
+        image: public.ecr.aws/docker/library/postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -248,7 +248,7 @@ jobs:
       PUBLIC_BACKEND_API_URL: http://localhost:8000/api
     services:
       postgres:
-        image: postgres:16
+        image: public.ecr.aws/docker/library/postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
