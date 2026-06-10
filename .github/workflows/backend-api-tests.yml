@@ -51,31 +51,26 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Set up python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      - name: Install uv and set up python ${{ env.PYTHON_VERSION }}
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: "pip"
-
-      - name: Install Poetry
-        run: |
-          pipx install poetry
-          poetry config virtualenvs.in-project true
+          enable-cache: true
 
       - name: Cache Virtualenv
         id: cache-venv
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ env.BACKEND_DIR }}/.venv
-          key: venv-${{ runner.os }}-py${{ env.PYTHON_VERSION }}-${{ hashFiles('backend/poetry.lock') }}
+          key: venv-${{ runner.os }}-py${{ env.PYTHON_VERSION }}-${{ hashFiles('backend/uv.lock') }}
 
       - name: Install dependencies
         working-directory: ${{ env.BACKEND_DIR }}
-        run: poetry install
+        run: uv sync --locked
 
       - name: Run migrations (sqlite)
         working-directory: ${{ env.BACKEND_DIR }}
-        run: poetry run python manage.py migrate
+        run: uv run python manage.py migrate
 
       - name: Upload Database
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -89,7 +84,7 @@ jobs:
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ env.BACKEND_DIR }}/db/prebuilt-pg.sql
-          key: pg-dump-${{ runner.os }}-${{ hashFiles('backend/**/migrations/*.py', 'backend/poetry.lock') }}
+          key: pg-dump-${{ runner.os }}-${{ hashFiles('backend/**/migrations/*.py', 'backend/uv.lock') }}
 
       - name: Run migrations (postgres) and dump
         if: steps.pg-dump-cache.outputs.cache-hit != 'true'
@@ -100,7 +95,7 @@ jobs:
           POSTGRES_PASSWORD: postgres
           PGPASSWORD: postgres
         run: |
-          poetry run python manage.py migrate
+          uv run python manage.py migrate
           pg_dump -h localhost -U postgres -d postgres > db/prebuilt-pg.sql
 
       - name: Upload PG dump
@@ -156,16 +151,11 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Set up python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      - name: Install uv and set up python ${{ env.PYTHON_VERSION }}
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: "pip"
-
-      - name: Install Poetry
-        run: |
-          pipx install poetry
-          poetry config virtualenvs.in-project true
+          enable-cache: true
 
       # Restore the exact venv created in 'setup' job to skip installation
       - name: Restore Virtualenv Cache
@@ -173,11 +163,11 @@ jobs:
         id: cache-venv
         with:
           path: ${{ env.BACKEND_DIR }}/.venv
-          key: venv-${{ runner.os }}-py${{ env.PYTHON_VERSION }}-${{ hashFiles('backend/poetry.lock') }}
+          key: venv-${{ runner.os }}-py${{ env.PYTHON_VERSION }}-${{ hashFiles('backend/uv.lock') }}
 
       - name: Install dependencies
         working-directory: ${{ env.BACKEND_DIR }}
-        run: poetry install
+        run: uv sync --locked
 
       - name: Download Database
         if: matrix.backend == 'sqlite'
@@ -222,7 +212,7 @@ jobs:
             export POSTGRES_PASSWORD=postgres
           fi
           # Use --reuse-db to prevent pytest from destroying/recreating the DB
-          poetry run pytest "$TEST_FILE" --reuse-db --html="pytest-report-${JOB_INDEX}.html" --self-contained-html
+          uv run pytest "$TEST_FILE" --reuse-db --html="pytest-report-${JOB_INDEX}.html" --self-contained-html
 
       - name: Prepare Artifact Name
         if: ${{ !cancelled() }}
