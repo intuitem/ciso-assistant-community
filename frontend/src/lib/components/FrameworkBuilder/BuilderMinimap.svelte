@@ -22,7 +22,8 @@
 		unpublished: unpublishedStore,
 		rootNodes: rootNodesStore,
 		framework: frameworkStore,
-		activeLanguage: activeLanguageStore
+		activeLanguage: activeLanguageStore,
+		publishWarnings: publishWarningsStore
 	} = builder;
 
 	let topOffset = $state(0);
@@ -34,11 +35,21 @@
 	let confirmCopyBase = $state(false);
 	let publishPreview = $state<PublishPreview | null>(null);
 	let loadingPreview = $state(false);
+	// Real reason the preview failed (backend message), shown in the dialog
+	// instead of a generic "could not load preview".
+	let previewError = $state<string | null>(null);
 
 	// Surfaced inside the publish dialog so a backend rejection (e.g. a locked
 	// URN namespace or a server error) is visible instead of the dialog
 	// silently staying open with no feedback.
 	let publishError = $derived($errorsStore.get('publish'));
+
+	function closePublishModal() {
+		confirmPublish = false;
+		publishPreview = null;
+		previewError = null;
+		builder.clearError('publish');
+	}
 
 	let translationProgress = $derived.by(() => {
 		if (!$activeLanguageStore) return null;
@@ -107,13 +118,24 @@
 		try {
 			const published = await builder.publish();
 			if (!published) {
-				// publish() recorded a 'publish' error; keep the dialog open so
-				// the user sees it (rendered below) instead of nothing happening.
+				// publish() recorded a 'publish' error. If the failure is
+				// field-level validation, close the dialog so the highlighted
+				// fields (and the page-level error banner) are visible;
+				// otherwise keep it open and show the error inside (below).
+				const hasFieldErrors = [...$errorsStore.keys()].some(
+					(k) => k.startsWith('node-') || k.startsWith('question-')
+				);
+				if (hasFieldErrors) {
+					confirmPublish = false;
+					publishPreview = null;
+					previewError = null;
+				}
 				return;
 			}
 			publishSuccess = true;
 			confirmPublish = false;
 			publishPreview = null;
+			previewError = null;
 			builder.unsaved.set(false);
 			builder.unpublished.set(false);
 			setTimeout(() => (publishSuccess = false), 3000);
@@ -410,13 +432,16 @@
 				disabled={loadingPreview}
 				onclick={async () => {
 					builder.clearError('publish');
+					previewError = null;
 					loadingPreview = true;
 					try {
 						publishPreview = await apiPublishDraftPreview(frameworkId);
 						confirmPublish = true;
-					} catch {
-						// Fall back to confirmation without preview
+					} catch (e) {
+						// Fall back to confirmation without preview, but show the
+						// real reason so the user isn't confirming blind.
 						publishPreview = null;
+						previewError = (e as Error).message;
 						confirmPublish = true;
 					} finally {
 						loadingPreview = false;
@@ -432,6 +457,32 @@
 			</button>
 		{/if}
 	</div>
+
+	{#if $publishWarningsStore.length > 0}
+		<!-- Non-fatal warnings from the last publish (e.g. URN disambiguation) -->
+		<div
+			class="flex items-start gap-2 px-4 py-2 bg-amber-50 border-t border-amber-200 text-xs text-amber-800"
+			role="status"
+		>
+			<i class="fa-solid fa-triangle-exclamation mt-0.5"></i>
+			<div class="grow space-y-0.5">
+				<span class="font-medium">{m.builderPublishedWithWarnings()}</span>
+				<ul class="list-disc list-inside">
+					{#each $publishWarningsStore as warning}
+						<li>{warning}</li>
+					{/each}
+				</ul>
+			</div>
+			<button
+				type="button"
+				class="shrink-0 text-amber-500 hover:text-amber-700"
+				title={m.cancel()}
+				onclick={() => publishWarningsStore.set([])}
+			>
+				<i class="fa-solid fa-xmark"></i>
+			</button>
+		</div>
+	{/if}
 </div>
 
 {#if confirmPublish}
@@ -439,7 +490,7 @@
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-		onkeydown={(e) => e.key === 'Escape' && (confirmPublish = false)}
+		onkeydown={(e) => e.key === 'Escape' && !publishing && closePublishModal()}
 	>
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<div
@@ -567,6 +618,9 @@
 				{:else}
 					<div class="p-3 bg-gray-50 rounded text-sm text-gray-600">
 						{m.builderCouldNotLoadPreview()}
+						{#if previewError}
+							<p class="mt-1 text-xs text-red-600">{previewError}</p>
+						{/if}
 					</div>
 				{/if}
 			</div>
@@ -586,11 +640,7 @@
 				<button
 					type="button"
 					class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-					onclick={() => {
-						confirmPublish = false;
-						publishPreview = null;
-						builder.clearError('publish');
-					}}
+					onclick={closePublishModal}
 				>
 					{m.cancel()}
 				</button>

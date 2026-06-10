@@ -402,6 +402,9 @@ export function serializeDraft(fw: Framework, rootNodes: BuilderNode[]): DraftJS
 	walk(rootNodes);
 
 	return {
+		// Bumped when the draft shape changes incompatibly; the backend
+		// rejects drafts from a newer schema instead of crashing on them.
+		schema_version: 1,
 		framework_meta: {
 			name: fw.name,
 			description: fw.description,
@@ -663,6 +666,7 @@ export interface BuilderStore {
 	unsaved: Writable<boolean>;
 	unpublished: Writable<boolean>;
 	isScrolling: Writable<boolean>;
+	publishWarnings: Writable<string[]>;
 	clearError: (key: string) => void;
 
 	addNode: (opts: { parent: string | null; preset?: NodePreset; afterIndex?: number }) => void;
@@ -747,6 +751,9 @@ export function createBuilderState(
 	const unpublished = writable(!!draftMarkedDirty);
 	const isScrolling = writable(false);
 	const activeLanguage = writable<string | null>(null);
+	// Non-fatal warnings returned by the last successful publish
+	// (e.g. URN disambiguation). Cleared by the UI when dismissed.
+	const publishWarnings = writable<string[]>([]);
 
 	function markDirty() {
 		unsaved.set(true);
@@ -783,25 +790,32 @@ export function createBuilderState(
 
 	// --- Draft save (explicit, triggered by Save button) ---
 
-	let saveInFlight = false;
+	let currentSave: Promise<boolean> | null = null;
 
 	async function flushDraft(): Promise<boolean> {
-		if (saveInFlight) return false;
-		saveInFlight = true;
-		saving.set(true);
+		// Coalesce concurrent calls: a publish clicked while a Ctrl+S save is
+		// still in flight must await that save's outcome rather than fail.
+		if (currentSave) return currentSave;
+		currentSave = (async () => {
+			saving.set(true);
+			try {
+				const draft = serializeDraft(get(framework), get(rootNodes));
+				(draft as any)._dirty = true; // mark draft as having user changes
+				await apiSaveDraft(frameworkId, draft);
+				unsaved.set(false); // saved to draft, but still unpublished
+				clearError('save-draft');
+				return true;
+			} catch (e) {
+				setError('save-draft', (e as Error).message);
+				return false;
+			} finally {
+				saving.set(false);
+			}
+		})();
 		try {
-			const draft = serializeDraft(get(framework), get(rootNodes));
-			(draft as any)._dirty = true; // mark draft as having user changes
-			await apiSaveDraft(frameworkId, draft);
-			unsaved.set(false); // saved to draft, but still unpublished
-			clearError('save-draft');
-			return true;
-		} catch (e) {
-			setError('save-draft', (e as Error).message);
-			return false;
+			return await currentSave;
 		} finally {
-			saving.set(false);
-			saveInFlight = false;
+			currentSave = null;
 		}
 	}
 
@@ -815,39 +829,41 @@ export function createBuilderState(
 	}
 
 	// Returns true only when the draft was actually published. Every failure
-	// path (save failed, client-side validation failed, backend rejected)
-	// records a 'publish' error and returns false so the caller can keep the
-	// confirmation dialog open and show why, instead of flashing success.
+	// path (save failed, client-side validation failed, backend rejected,
+	// unexpected throw) records a 'publish' error and returns false so the
+	// caller can keep the confirmation dialog open and show why, instead of
+	// flashing success or dying as an unhandled rejection.
 	async function publish(): Promise<boolean> {
-		const saved = await flushDraft();
-		if (!saved) {
-			setError('publish', m.builderFailedToSaveDraftBeforePublish());
-			return false;
-		}
-
-		// Clear previous node- and question-level validation errors so stale
-		// entries (e.g. slider min/max/step errors from the previous attempt)
-		// don't survive a re-validation.
-		errors.update((prev) => {
-			const next = new Map(prev);
-			for (const key of next.keys()) {
-				if (key.startsWith('node-') || key.startsWith('question-')) next.delete(key);
-			}
-			return next;
-		});
-		clearError('publish');
-
-		if (!validateBeforePublish()) {
-			setError('publish', m.builderFixValidationErrorsBeforePublish());
-			return false;
-		}
-
 		try {
-			await apiPublishDraft(frameworkId);
+			const saved = await flushDraft();
+			if (!saved) {
+				setError('publish', m.builderFailedToSaveDraftBeforePublish());
+				return false;
+			}
+
+			// Clear previous node- and question-level validation errors so stale
+			// entries (e.g. slider min/max/step errors from the previous attempt)
+			// don't survive a re-validation.
+			errors.update((prev) => {
+				const next = new Map(prev);
+				for (const key of next.keys()) {
+					if (key.startsWith('node-') || key.startsWith('question-')) next.delete(key);
+				}
+				return next;
+			});
+			clearError('publish');
+
+			if (!validateBeforePublish()) {
+				setError('publish', m.builderFixValidationErrorsBeforePublish());
+				return false;
+			}
+
+			const warnings = await apiPublishDraft(frameworkId);
 			// Reflect the server-side bump locally so reactive status (e.g.,
 			// "Live" vs "Draft — nothing live yet") updates without a refresh.
 			framework.update((f) => ({ ...f, editing_version: (f.editing_version ?? 1) + 1 }));
 			clearError('publish');
+			publishWarnings.set(warnings);
 			return true;
 		} catch (e) {
 			setError('publish', (e as Error).message);
@@ -1715,6 +1731,7 @@ export function createBuilderState(
 		unsaved,
 		unpublished,
 		isScrolling,
+		publishWarnings,
 		clearError,
 
 		addNode,

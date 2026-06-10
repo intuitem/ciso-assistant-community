@@ -4596,6 +4596,7 @@
 	],
 	"builderBreakingChangesHint": "These changes may affect scoring, visibility, or compliance results in existing audits.",
 	"builderFixValidationErrorsBeforePublish": "Some items have validation errors. Fix the highlighted fields before publishing.",
+	"builderPublishedWithWarnings": "Published with warnings:",
 	"builderChangeTypeRequirement": "requirement",
 	"builderChangeTypeQuestion": "question",
 	"builderChangeTypeChoice": "answer choice",

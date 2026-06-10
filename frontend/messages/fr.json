@@ -4600,6 +4600,7 @@
 	],
 	"builderBreakingChangesHint": "Ces modifications peuvent affecter le scoring, la visibilité ou les résultats de conformité dans les audits existants.",
 	"builderFixValidationErrorsBeforePublish": "Certains éléments comportent des erreurs de validation. Corrigez les champs signalés avant de publier.",
+	"builderPublishedWithWarnings": "Publié avec des avertissements :",
 	"builderChangeTypeRequirement": "exigence",
 	"builderChangeTypeQuestion": "question",
 	"builderChangeTypeChoice": "choix de réponse",
