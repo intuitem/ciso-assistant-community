@@ -269,7 +269,7 @@
 								<div class="text-xs text-surface-400 font-mono">{field.key}</div>
 							</div>
 
-							<div class="col-span-1 text-center text-surface-300">→</div>
+							<div class="col-span-1 text-center text-surface-300">↔</div>
 
 							<div class="col-span-6">
 								{#key columns}
@@ -316,7 +316,7 @@
 										<div class="w-1/3 text-sm text-surface-600 truncate" title={choice.label}>
 											{choice.label}
 										</div>
-										<div class="text-surface-300">→</div>
+										<div class="text-surface-300">↔</div>
 
 										<div class="w-2/3">
 											{#key choices}
