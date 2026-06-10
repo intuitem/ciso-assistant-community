@@ -83,7 +83,10 @@
 			<li class="p-2 border-2 border-b-primary-500">
 				<div class="mb-1">
 					{#if source_requirement_assessment.id}
-						<a class="anchor code" href="/requirement-assessments/{source_requirement_assessment.id}">
+						<a
+							class="anchor code"
+							href="/requirement-assessments/{source_requirement_assessment.id}"
+						>
 							{index + 1}. {source_requirement_assessment.str}
 						</a>
 					{:else}
