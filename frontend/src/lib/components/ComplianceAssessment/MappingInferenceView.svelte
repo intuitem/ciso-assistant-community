@@ -42,7 +42,7 @@
 			| 'compliant'
 			| 'not_applicable';
 		annotation?: string | null;
-		source_requirements_assessments: SourceRequirementAssessments;
+		source_requirement_assessments: SourceRequirementAssessments;
 		[key: string]: unknown; // (There are other fields unused by this component)
 	}
 
@@ -52,7 +52,7 @@
 
 	let { mappingInference }: Props = $props();
 
-	let sourceRequirementAssessmentCount = $derived(Object.keys(sourceRequirementAssessments).length);
+	let sourceRequirementAssessmentCount = $derived(Object.keys(mappingInference.source_requirement_assessments).length);
 
 	let expandedInferences = $state(false);
 </script>
