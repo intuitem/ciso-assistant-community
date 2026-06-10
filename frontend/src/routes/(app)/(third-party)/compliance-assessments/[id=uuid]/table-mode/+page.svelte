@@ -536,7 +536,9 @@
 													'PDPDPPDPD'
 												)}
 												{#if requirementAssessment.mapping_inference?.result && requirementAssessment.mapping_inference.source_requirement_assessments && Object.keys(requirementAssessment.mapping_inference.source_requirement_assessments).length > 0}
-													<MappingInferenceView mappingInference={requirementAssessment.mapping_inference} />
+													<MappingInferenceView
+														mappingInference={requirementAssessment.mapping_inference}
+													/>
 													<!-- {#each Object.values(requirementAssessment.mapping_inference.source_requirement_assessments) as firstSourceRequirementAssessment}
 													<div class="my-2">
 														<p class="font-medium">
