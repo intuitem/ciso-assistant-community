@@ -67,7 +67,6 @@
   * [Managing secrets](installation/managing-secrets.md)
   * [Setting up S3](installation/s3.md)
   * [Setting up mailer](installation/mailer.md)
-  * [Infrastructure configuration](installation/infra-config.md)
   * [Prometheus metrics](installation/prometheus-metrics.md)
 * Maintenance
   * [Updating your local instance](installation/updating.md)
@@ -83,6 +82,7 @@
   * [Feature flags](configuration/settings/feature-flags.md)
   * [Vulnerability SLA policy](configuration/settings/vulnerability-sla.md)
   * [Security intelligence feeds](configuration/settings/sec-intel-feeds.md)
+  * [Allowed IP whitelist](configuration/settings/infra-config-allowed-ip.md)
   * [Branding](configuration/settings/branding.md)
   * [Custom templates](configuration/settings/custom-templates.md)
 * [Organization](configuration/organization/README.md)
