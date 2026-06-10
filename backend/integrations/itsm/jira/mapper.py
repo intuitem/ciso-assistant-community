@@ -61,7 +61,7 @@ class JiraFieldMapper(BaseFieldMapper):
     # them, so business rules around immutability survive UI configuration.
     FIELD_MAPPINGS_OPERATIONS = {
         "name": {"pull": {"create"}, "push": {"create", "update"}},
-        "description": {"pull": {"create"}, "push": {"create", "update"}},
+        "description": {"pull": {"create", "update"}, "push": {"create", "update"}},
         "status": {"pull": {"create", "update"}, "push": {"create", "update"}},
         "priority": {"pull": {"create", "update"}, "push": {"create", "update"}},
         "eta": {"pull": {"create", "update"}, "push": {"create", "update"}},

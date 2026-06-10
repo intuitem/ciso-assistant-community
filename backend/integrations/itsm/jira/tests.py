@@ -165,9 +165,9 @@ def test_to_local_pull_update_respects_operations(mapper):
 
     local_data = mapper.to_local(remote_data)
 
-    assert "name" not in local_data
+    assert "name" not in local_data  # Name is not pulled on update
 
-    assert "description" not in local_data
+    assert local_data["description"] == "Remote Description"  # Pulled on update
 
     assert "status" in local_data  # Status is allowed
 
