@@ -482,7 +482,16 @@
 		arr2: string | number | SelectValue[] | null | undefined
 	): boolean {
 		const normalize = (val: string | number | SelectValue[] | null | undefined) => {
-			const arr = Array.isArray(val) ? val : val !== null && val !== undefined ? [val] : [];
+			// Treat '' as "no selection" alongside null/undefined: a non-nullable
+			// select uses default_value '', so an empty selection ([]) and an
+			// empty-string value are equivalent. Without this, arraysEqual([], '')
+			// is false and the value-sync run() keeps re-firing onChange after the
+			// field is cleared, which loops the page (e.g. clearing Target Table).
+			const arr = Array.isArray(val)
+				? val
+				: val !== null && val !== undefined && val !== ''
+					? [val]
+					: [];
 			return arr.map((v) => (v === null || v === undefined ? v : String(v)));
 		};
 
