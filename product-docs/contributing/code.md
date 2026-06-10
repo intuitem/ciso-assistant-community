@@ -16,7 +16,7 @@ CISO Assistant is open source and welcomes patches — bug fixes, performance im
 
 Follow the [Local installation guide](../installation/local.md) to get a development instance running. Briefly:
 
-- **Backend:** Python 3.14+, Poetry 2.0+, run `poetry install` then `manage.py migrate` and `manage.py runserver`.
+- **Backend:** Python 3.14+, uv 0.9+, run `uv sync` then `uv run manage.py migrate` and `uv run manage.py runserver`.
 - **Frontend:** Node 22+, pnpm 9.0+, run `pnpm install` then `pnpm run dev`.
 
 A virtual environment is kept at the repo root (`.venv/`) — you can invoke `.venv/bin/python` directly.
@@ -33,17 +33,17 @@ A virtual environment is kept at the repo root (`.venv/`) — you can invoke `.v
 
 Commit messages and PR titles follow [Conventional Commits](https://www.conventionalcommits.org/). Use lowercase, include a scope where relevant:
 
-| Type | When to use |
-|---|---|
-| `feat` | new user-visible capability |
-| `fix` | bug fix |
-| `chore` | maintenance with no production-code impact |
+| Type       | When to use                                             |
+| ---------- | ------------------------------------------------------- |
+| `feat`     | new user-visible capability                             |
+| `fix`      | bug fix                                                 |
+| `chore`    | maintenance with no production-code impact              |
 | `refactor` | code change that neither fixes a bug nor adds a feature |
-| `perf` | performance-focused refactor |
-| `docs` | documentation update |
-| `test` | adding or updating tests |
-| `ci` | CI configuration changes |
-| `build` | build system or external dependency changes |
+| `perf`     | performance-focused refactor                            |
+| `docs`     | documentation update                                    |
+| `test`     | adding or updating tests                                |
+| `ci`       | CI configuration changes                                |
+| `build`    | build system or external dependency changes             |
 
 A `!` after the type marks a breaking change (`feat!:` or `feat(api)!:`). Breaking changes drive semantic-version bumps, so reviewers will check that the marker is set when it should be.
 
@@ -51,7 +51,7 @@ PRs are squash-merged, so the PR title becomes the squash-commit subject. Review
 
 ## Tests
 
-- Backend: `poetry run pytest` (or `.venv/bin/python -m pytest`) from the `backend/` directory.
+- Backend: `uv run pytest` (or `.venv/bin/python -m pytest`) from the `backend/` directory.
 - Frontend unit: `pnpm run test` from `frontend/`.
 - Frontend e2e: `./tests/e2e-tests.sh` from `frontend/`.
 - For UI changes, also start the dev server and click through the feature you touched — automated tests don't catch every regression.

@@ -2734,10 +2734,15 @@ class RiskMatrixViewSet(BaseModelViewSet):
         viewable_matrices: list[RiskMatrix] = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, RiskMatrix
         )[0]
+        matrices = RiskMatrix.objects.filter(id__in=viewable_matrices)
+
+        risk_assessment_id = request.query_params.get("risk_assessment")
+        if risk_assessment_id:
+            matrices = matrices.filter(riskassessment__id=risk_assessment_id)
+
         undefined = {-1: "--"}
         options = undefined
-        for matrix in RiskMatrix.objects.filter(id__in=viewable_matrices):
-            _choices = {}
+        for matrix in matrices:
             for i, risk in enumerate(matrix.json_definition.get("risk", [])):
                 translations = risk.get("translations")
                 if not isinstance(translations, dict):
@@ -2746,8 +2751,7 @@ class RiskMatrixViewSet(BaseModelViewSet):
 
                 # Use the translated name if available, otherwise fall back to the default name
                 name = translated.get("name") or risk.get("name", "")
-                _choices[risk.get("id", i)] = name
-            options = options | _choices
+                options[i] = name
 
         res = [{"value": k, "label": v} for k, v in options.items()]
         return Response(res)
@@ -6217,12 +6221,25 @@ class ActionPlanBudgetOverview:
         folder_counts: dict = {}
         total_annual_cost = 0.0
         count_with_cost = 0
+        # Raw sums per build/run (cost vs man-days), not amortized/rate-converted
+        build_fixed_total = 0.0
+        build_days_total = 0.0
+        run_fixed_total = 0.0
+        run_days_total = 0.0
 
         for ctrl in controls:
             cost = ActionPlanBudgetOverview._compute_annual_cost(ctrl, daily_rate)
             if cost > 0:
                 count_with_cost += 1
             total_annual_cost += cost
+
+            if ctrl.cost:
+                build_cost = ctrl.cost.get("build", {})
+                run_cost = ctrl.cost.get("run", {})
+                build_fixed_total += _f(build_cost.get("fixed_cost", 0))
+                build_days_total += _f(build_cost.get("people_days", 0))
+                run_fixed_total += _f(run_cost.get("fixed_cost", 0))
+                run_days_total += _f(run_cost.get("people_days", 0))
 
             # by status — keep `status` for backwards-compat; add raw `key` for i18n
             s = ctrl.status or "_unset"
@@ -6371,6 +6388,18 @@ class ActionPlanBudgetOverview:
             "eta_buckets": list(eta_buckets.values()),
             "top_owners": top_owners,
             "top_folders": top_folders,
+            "cost_breakdown": {
+                "build": {
+                    "fixed_cost": round(build_fixed_total, 2),
+                    "fixed_cost_display": fmt(round(build_fixed_total, 2)),
+                    "people_days": round(build_days_total, 2),
+                },
+                "run": {
+                    "fixed_cost": round(run_fixed_total, 2),
+                    "fixed_cost_display": fmt(round(run_fixed_total, 2)),
+                    "people_days": round(run_days_total, 2),
+                },
+            },
         }
 
 
@@ -14354,28 +14383,34 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 else:
                     compliance_percentage = 0
 
-                # Calculate maturity score using weights and score_calculation_method
-                scored_list = [
-                    ra
-                    for ra in assessable_list
-                    if ra.is_scored and ra.result != "not_applicable"
-                ]
+                # Maturity score for the radar slice. Reuse the audit's
+                # configured aggregation so per-RA scale overrides are
+                # normalised the same way as the global score (e.g. a binary
+                # 0..1 requirement contributes 100% at 1, not 1 raw).
+                # Mirror get_global_score's filtering: when anchor_na_to_target
+                # is on, N/A RAs stay in so they anchor to the target; off,
+                # they are excluded along with unscored RAs.
+                # `_compute_score_for_field` returns -1 when nothing is scored.
+                if audit.anchor_na_to_target:
+                    scored_list = [
+                        ra
+                        for ra in assessable_list
+                        if ra.result == "not_applicable" or ra.is_scored
+                    ]
+                else:
+                    scored_list = [
+                        ra
+                        for ra in assessable_list
+                        if ra.is_scored and ra.result != "not_applicable"
+                    ]
                 if scored_list:
-                    weighted_score = sum(
-                        (ra.score or 0) * (ra.requirement.weight or 1)
-                        for ra in scored_list
+                    computed = audit._compute_score_for_field(
+                        scored_list,
+                        None,
+                        "score",
+                        audit.anchor_na_to_target,
                     )
-                    total_weight = sum(ra.requirement.weight or 1 for ra in scored_list)
-                    if (
-                        audit.score_calculation_method
-                        == ComplianceAssessment.CalculationMethod.SUM
-                    ):
-                        maturity_score = weighted_score
-                    else:
-                        # Default to weighted average
-                        maturity_score = (
-                            weighted_score / total_weight if total_weight > 0 else 0
-                        )
+                    maturity_score = 0 if computed == -1 else computed
                 else:
                     maturity_score = 0
 

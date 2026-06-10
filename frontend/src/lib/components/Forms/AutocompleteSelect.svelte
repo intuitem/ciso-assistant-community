@@ -126,7 +126,7 @@
 		optionSnippet = undefined,
 		placeholder = '',
 		lazy = false,
-		lazyLimit = 10,
+		lazyLimit = 20,
 		lazyThreshold = 50,
 		maxVisibleChips: _maxVisibleChips = 3
 	}: Props = $props();
@@ -151,10 +151,10 @@
 
 	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 
-	let selected: typeof options = $state([]);
-	let selectedValues: (string | undefined)[] = $derived(
-		selected.map((item) => item.value || item.label || item)
-	);
+	type SelectValue = string | number | undefined;
+
+	let selected: Option[] = $state([]);
+	let selectedValues: SelectValue[] = $derived(selected.map((item) => item.value));
 	let isInternalUpdate = false;
 	let optionsLoaded = $state(Boolean(options.length));
 	const initialValue = resetForm ? undefined : $value;
@@ -165,9 +165,14 @@
 	// with selected=[] and overwrites $value to [] before onMount restores it — a
 	// race that wipes selections on remount (e.g. when a parent `{#key options}`
 	// block tears the component down on options change).
-	if (initialValue != null && options.length > 0) {
-		const ids = Array.isArray(initialValue) ? initialValue : [initialValue];
-		selected = options.filter((item) => ids.includes(item.value));
+	if (
+		initialValue !== undefined &&
+		initialValue !== null &&
+		initialValue !== '' &&
+		options.length > 0
+	) {
+		const ids = (Array.isArray(initialValue) ? initialValue : [initialValue]).map(String);
+		selected = options.filter((item) => ids.includes(String(item.value)));
 	}
 
 	const multiSelectOptions = {
@@ -271,13 +276,9 @@
 				}
 				optionsLoaded = true;
 			}
-			// After options are loaded, set initial selection using stored initial value
-			if (initialValue) {
-				selected = options.filter((item) =>
-					Array.isArray(initialValue)
-						? initialValue.includes(item.value)
-						: item.value === initialValue
-				);
+			if (initialValue !== undefined && initialValue !== null && initialValue !== '') {
+				const ids = (Array.isArray(initialValue) ? initialValue : [initialValue]).map(String);
+				selected = options.filter((item) => ids.includes(String(item.value)));
 			} else if (options.length === 1 && $constraints?.required) {
 				selected = [options[0]];
 			}
@@ -456,11 +457,17 @@
 
 	$effect(() => {
 		if (!isInternalUpdate && optionsLoaded && $value !== initialValue) {
-			const valueArray = $value ? (Array.isArray($value) ? $value : [$value]) : [];
+			const valueArray = (
+				$value !== undefined && $value !== null && $value !== ''
+					? Array.isArray($value)
+						? $value
+						: [$value]
+					: []
+			).map(String);
 			if (valueArray.length === 0) {
 				selected = [];
 			} else {
-				selected = options.filter((item) => valueArray.includes(item.value));
+				selected = options.filter((item) => valueArray.includes(String(item.value)));
 			}
 		}
 	});
@@ -481,12 +488,12 @@
 	}
 
 	function arraysEqual(
-		arr1: string | (string | undefined)[] | null | undefined,
-		arr2: string | (string | undefined)[] | null | undefined
+		arr1: string | number | SelectValue[] | null | undefined,
+		arr2: string | number | SelectValue[] | null | undefined
 	): boolean {
-		const normalize = (val: string | (string | undefined)[] | null | undefined) => {
-			if (typeof val === 'string') return [val];
-			return val ?? [];
+		const normalize = (val: string | number | SelectValue[] | null | undefined) => {
+			const arr = Array.isArray(val) ? val : val !== null && val !== undefined ? [val] : [];
+			return arr.map((v) => (v === null || v === undefined ? v : String(v)));
 		};
 
 		const a1 = normalize(arr1);

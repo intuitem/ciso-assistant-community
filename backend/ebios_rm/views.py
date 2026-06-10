@@ -958,7 +958,7 @@ class StakeholderViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get chart data")
     def chart_data(self, request):
-        return Response(ecosystem_radar_chart_data(Stakeholder.objects.all()))
+        return Response(ecosystem_radar_chart_data(self.get_queryset()))
 
 
 class StrategicScenarioViewSet(BaseModelViewSet):
