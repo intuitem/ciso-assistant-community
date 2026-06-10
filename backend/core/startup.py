@@ -244,6 +244,7 @@ APPROVER_PERMISSIONS_LIST = [
 ]
 
 ANALYST_PERMISSIONS_LIST = [
+    "view_logentry",
     "add_filteringlabel",
     "view_filteringlabel",
     "view_libraryfilteringlabel",
@@ -604,10 +605,10 @@ ANALYST_PERMISSIONS_LIST = [
     "view_agentaction",
     "change_agentaction",
     "delete_agentaction",
-    "view_objectaudittrail",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
+    "view_logentry",
     "add_filteringlabel",
     "view_filteringlabel",
     "view_libraryfilteringlabel",
@@ -1013,10 +1014,10 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_agentaction",
     "change_agentaction",
     "delete_agentaction",
-    "view_objectaudittrail",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
+    "view_auditlog",
     "add_user",
     "view_user",
     "view_actor",
@@ -1479,7 +1480,6 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_agentaction",
     "change_agentaction",
     "delete_agentaction",
-    "view_objectaudittrail",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [

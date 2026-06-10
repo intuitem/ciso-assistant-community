@@ -3,7 +3,6 @@ from django.utils.formats import date_format
 
 import magic
 import structlog
-from core.permissions import IsAdministrator
 from django.db import models, transaction
 from django.db.models import CharField, Value, Case, When
 from django.db.models.functions import Lower, Cast
@@ -506,13 +505,13 @@ class LogEntryViewSet(
     ]
     filterset_class = LogEntryFilterSet
 
-    permission_classes = (IsAdministrator,)
+    permission_classes = (IsAuthenticated,)
     serializer_class = LogEntrySerializer
 
     def get_queryset(self):
         if not RoleAssignment.is_access_allowed(
             user=self.request.user,
-            perm=Permission.objects.get(codename="view_logentry"),
+            perm=Permission.objects.get(codename="view_auditlog"),
             folder=Folder.get_root_folder(),
         ):
             return LogEntry.objects.none()
@@ -811,7 +810,7 @@ class CustomWordTemplateViewSet(BaseModelViewSet):
         )
 
 
-AUDIT_TRAIL_PERMISSION = "view_objectaudittrail"
+AUDIT_TRAIL_PERMISSION = "view_logentry"
 
 
 def _object_audit_trail_enabled():

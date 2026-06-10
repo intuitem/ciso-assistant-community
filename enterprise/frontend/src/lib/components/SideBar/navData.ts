@@ -528,7 +528,7 @@ export const navData = {
 					name: 'Audit log',
 					fa_icon: 'fa-solid fa-newspaper',
 					href: '/audit-log',
-					permissions: ['view_logentry']
+					permissions: ['view_auditlog']
 				},
 				{
 					name: 'experimental',

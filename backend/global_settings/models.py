@@ -49,7 +49,7 @@ class GlobalSettings(AbstractBaseModel, FolderMixin):
 
     class Meta:
         permissions = [
-            ("view_objectaudittrail", "Can view object audit trails"),
+            ("view_auditlog", "Can access the central audit log"),
         ]
 
     def __str__(self):
