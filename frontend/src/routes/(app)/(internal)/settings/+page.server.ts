@@ -27,6 +27,9 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const featureFlagSettings = await fetch(`${BASE_API_URL}/settings/feature-flags/`).then((res) =>
 		res.json()
 	);
+	const featureFlagDefaults = await fetch(`${BASE_API_URL}/settings/feature-flags/defaults/`)
+		.then((res) => (res.ok ? res.json() : {}))
+		.catch(() => ({}));
 	const webhookEndpoints = await fetch(`${BASE_API_URL}/webhooks/endpoints/`)
 		.then((res) => res.json())
 		.then((res) => res.results);
@@ -117,6 +120,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		generalSettingForm,
 		generalSettingModel,
 		featureFlagSettings,
+		featureFlagDefaults,
 		featureFlagForm,
 		featureFlagModel,
 		vulnerabilitySlaSettings,
