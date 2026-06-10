@@ -1,10 +1,7 @@
 ---
 description: Tips and tricks regarding specific cases
 ---
-
 # Special cases
-
-
 
 ### SELINUX
 
@@ -22,21 +19,21 @@ The `recompute_assessment_results` Django management command realigns stored res
 
 ```sh
 # Preview impact, no writes
-poetry run python manage.py recompute_assessment_results --dry-run
+uv run python manage.py recompute_assessment_results --dry-run
 
 # Apply to all audits, one transaction per batch (default)
-poetry run python manage.py recompute_assessment_results
+uv run python manage.py recompute_assessment_results
 
 # Scope to a single audit
-poetry run python manage.py recompute_assessment_results \
+uv run python manage.py recompute_assessment_results \
     --compliance-assessment <uuid>
 
 # Tune batch size or wrap the full run in one transaction
-poetry run python manage.py recompute_assessment_results --batch-size 1000 --atomic
+uv run python manage.py recompute_assessment_results --batch-size 1000 --atomic
 
 # Skip the post-run CA hooks (metrics + CEL outcomes), e.g. when chaining
 # with another job that will recompute them
-poetry run python manage.py recompute_assessment_results --skip-post-hooks
+uv run python manage.py recompute_assessment_results --skip-post-hooks
 ```
 
 Properties:
