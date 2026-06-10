@@ -52,7 +52,9 @@
 
 	let { mappingInference }: Props = $props();
 
-	let sourceRequirementAssessmentCount = $derived(Object.keys(mappingInference.source_requirement_assessments).length);
+	let sourceRequirementAssessmentCount = $derived(
+		Object.keys(mappingInference.source_requirement_assessments).length
+	);
 
 	let expandedInferences = $state(false);
 </script>
