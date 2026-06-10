@@ -424,6 +424,13 @@ class ChangePasswordView(views.APIView):
             )
         user.set_password(new_password)
         user.save()
+        # Revoke all Knox session tokens except the current one. PATs (PersonalAccessToken) are intentional long-lived tokens — preserve them.
+        current_token = request.META.get("HTTP_AUTHORIZATION", "").split(" ")[-1]
+        current_digest = crypto.hash_token(current_token)
+        AuthToken.objects.filter(user=user).exclude(
+            Q(digest=current_digest)
+            | Q(Exists(PersonalAccessToken.objects.filter(auth_token=OuterRef("pk"))))
+        ).delete()
         return Response(status=status.HTTP_200_OK)
 
 
