@@ -30,6 +30,10 @@ def fix_outdated_mapping_inferences(apps, schema_editor):
 
     for requirement_assessment in RequirementAssessment.objects.all():
         mapping_inference = requirement_assessment.mapping_inference
+        if not isinstance(mapping_inference, dict):
+            # Really defensive programming, we assume `mapping_reference` may not be a `dict` (as nothing enforce it in the field definition after all).
+            mapping_inference = {}
+
         old_field_value = mapping_inference.pop(OUTDATED_FIELD, None)
 
         is_mapping_inference_outdated = old_field_value is not None
