@@ -18,8 +18,6 @@ def fix_outdated_mapping_inferences(apps, schema_editor):
 
     requirement_assessments_to_update = []
 
-    requirement_assessments = list(RequirementAssessment.objects.all())
-
     # The `requirement_assessment_urn` value may be `None` because we made `RequirementNode.urn` nullable (for whatever reason).
     requirement_assessment_id_to_urn: dict[str, Optional[str]] = {
         str(requirement_assessment_id): requirement_assessment_urn
