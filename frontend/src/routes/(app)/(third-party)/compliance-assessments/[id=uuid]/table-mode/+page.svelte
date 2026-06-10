@@ -539,67 +539,6 @@
 													<MappingInferenceView
 														mappingInference={requirementAssessment.mapping_inference}
 													/>
-													<!-- {#each Object.values(requirementAssessment.mapping_inference.source_requirement_assessments) as firstSourceRequirementAssessment}
-													<div class="my-2">
-														<p class="font-medium">
-															<i class="fa-solid fa-link"></i>
-															{m.mappingInference()}
-														</p>
-														<span class="text-xs text-gray-500"
-															><i class="fa-solid fa-circle-info"></i>
-															{m.mappingInferenceHelpText()}</span
-														>
-														<ul class="list-disc ml-4">
-															<li>
-																<p>
-																	<a
-																		class="anchor"
-																		href="/requirement-assessments/{firstSourceRequirementAssessment.id}"
-																	>
-																		{firstSourceRequirementAssessment.str}
-																	</a>
-																</p>
-																<p class="whitespace-pre-line py-1">
-																	<span class="italic">{m.coverageColon()}</span>
-																	<span class="badge h-fit">
-																		{safeTranslate(
-																			firstSourceRequirementAssessment.coverage
-																		)}
-																	</span>
-																</p>
-																{#if firstSourceRequirementAssessment.is_scored}
-																	<p class="whitespace-pre-line py-1">
-																		<span class="italic">{m.scoreSemiColon()}</span>
-																		<span class="badge h-fit">
-																			{safeTranslate(
-																				firstSourceRequirementAssessment.score
-																			)}
-																		</span>
-																	</p>
-																{/if}
-																<p class="whitespace-pre-line py-1">
-																	<span class="italic">{m.suggestionColon()}</span>
-																	<span
-																		class="badge {getClassesText(
-																			requirementAssessment.mapping_inference.result
-																		)} h-fit"
-																		style="background-color: {complianceResultColorMap[
-																			requirementAssessment.mapping_inference.result
-																		]};"
-																	>
-																		{safeTranslate(requirementAssessment.mapping_inference.result)}
-																	</span>
-																</p>
-																{#if requirementAssessment.mapping_inference.annotation}
-																	<p class="whitespace-pre-line py-1">
-																		<span class="italic">{m.annotationColon()}</span>
-																		{requirementAssessment.mapping_inference.annotation}
-																	</p>
-																{/if}
-															</li>
-														</ul>
-													</div>
-												{/each} -->
 												{/if}
 											{/if}
 										</div>
