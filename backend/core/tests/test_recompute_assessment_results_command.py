@@ -230,9 +230,7 @@ class TestRecomputeAssessmentResultsCommand:
         d = command_setup
         _answer(d["ra_result"], d["q1"], d["q1_good"], d["folder"])
         _answer(d["ra_result"], d["q2"], d["q2_good"], d["folder"])
-        _set_stored(
-            d["ra_result"], result=RequirementAssessment.Result.NON_COMPLIANT
-        )
+        _set_stored(d["ra_result"], result=RequirementAssessment.Result.NON_COMPLIANT)
 
         output = self._run(d["ca"], "--dry-run")
 
@@ -247,9 +245,7 @@ class TestRecomputeAssessmentResultsCommand:
         d = command_setup
         _answer(d["ra_result"], d["q1"], d["q1_good"], d["folder"])
         _answer(d["ra_result"], d["q2"], d["q2_good"], d["folder"])
-        _set_stored(
-            d["ra_result"], result=RequirementAssessment.Result.NON_COMPLIANT
-        )
+        _set_stored(d["ra_result"], result=RequirementAssessment.Result.NON_COMPLIANT)
 
         first = self._run(d["ca"])
         assert "changed=1" in first
@@ -260,9 +256,7 @@ class TestRecomputeAssessmentResultsCommand:
     def test_score_only_requirement_is_untouched(self, command_setup):
         """A score-only requirement is out of scope: a manual result is preserved."""
         d = command_setup
-        _set_stored(
-            d["ra_score"], result=RequirementAssessment.Result.COMPLIANT
-        )
+        _set_stored(d["ra_score"], result=RequirementAssessment.Result.COMPLIANT)
 
         self._run(d["ca"])
 
