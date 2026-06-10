@@ -82,9 +82,15 @@
 		{#each Object.entries(mappingInference.source_requirement_assessments) as [source_urn, source_requirement_assessment], index}
 			<li class="p-2 border-2 border-b-primary-500">
 				<div class="mb-1">
-					<a class="anchor code" href="/requirement-assessments/{source_requirement_assessment.id}">
-						{index + 1}. {source_requirement_assessment.str}
-					</a>
+					{#if source_requirement_assessment.id}
+						<a class="anchor code" href="/requirement-assessments/{source_requirement_assessment.id}">
+							{index + 1}. {source_requirement_assessment.str}
+						</a>
+					{:else}
+						<span class="code">
+							{index + 1}. {source_requirement_assessment.str}
+						</span>
+					{/if}
 				</div>
 				<div class="grid grid-cols-[6rem_1fr] items-center">
 					<span class="font-medium">{m.coverageColon()}</span>
