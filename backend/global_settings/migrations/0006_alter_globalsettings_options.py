@@ -12,7 +12,10 @@ class Migration(migrations.Migration):
         migrations.AlterModelOptions(
             name="globalsettings",
             options={
-                "permissions": [("view_auditlog", "Can access the central audit log")]
+                "permissions": [
+                    ("view_central_auditlog", "Can access the central audit log"),
+                    ("view_object_audittrail", "Can view object audit trails"),
+                ]
             },
         ),
     ]

@@ -29,7 +29,7 @@ Filter by **action** and **content type**, and search by **actor** or **folder**
 The **object audit trail** brings that same history to a single object's detail page, so you don't have to scan the instance-wide log to answer "what happened to *this* control?".
 
 {% hint style="info" %}
-Gated by the `object_audit_trail` feature flag (on by default) and the **Can view log entry** permission.
+Gated by the `object_audit_trail` feature flag (on by default) and the **Can view object audit trails** permission.
 {% endhint %}
 
 ### Opening a trail
@@ -48,7 +48,7 @@ All the changes from a single save are grouped into one entry, including related
 
 ### Who can see it
 
-Visibility is governed by the **Can view log entry** permission — distinct from the central **Can access the central audit log** permission above. By default it's granted to the **Analyst**, **Domain manager**, and **Administrator** built-in roles, and you can add it to any custom role.
+Visibility is governed by the **Can view object audit trails** permission — distinct from the central **Can access the central audit log** permission above. By default it's granted to the **Analyst**, **Domain manager**, and **Administrator** built-in roles, and you can add it to any custom role.
 
 The permission is domain-scoped: a user sees an object's trail only when they hold the permission in that object's domain. Read-only **Reader** and **Approver** roles, external respondents (auditees), and third-party users don't get it. Because user accounts live in the global domain, account history is visible only to roles holding the permission there — in practice, administrators.
 

@@ -50,7 +50,7 @@
 		auditedModels = await loadAuditedModels(fetch);
 	});
 
-	const hasPermission = $derived(!!page.data?.user?.permissions?.view_logentry);
+	const hasPermission = $derived(!!page.data?.user?.permissions?.view_object_audittrail);
 	const featureEnabled = $derived(page.data?.featureflags?.object_audit_trail !== false);
 
 	const enabled = $derived(

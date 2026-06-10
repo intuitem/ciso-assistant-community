@@ -511,7 +511,7 @@ class LogEntryViewSet(
     def get_queryset(self):
         if not RoleAssignment.is_access_allowed(
             user=self.request.user,
-            perm=Permission.objects.get(codename="view_auditlog"),
+            perm=Permission.objects.get(codename="view_central_auditlog"),
             folder=Folder.get_root_folder(),
         ):
             return LogEntry.objects.none()
@@ -810,7 +810,7 @@ class CustomWordTemplateViewSet(BaseModelViewSet):
         )
 
 
-AUDIT_TRAIL_PERMISSION = "view_logentry"
+AUDIT_TRAIL_PERMISSION = "view_object_audittrail"
 
 
 def _object_audit_trail_enabled():
