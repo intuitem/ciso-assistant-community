@@ -39,10 +39,11 @@ you save.
 {% endhint %}
 
 {% hint style="info" %}
-**Changes take ~10 minutes to apply.** After you save, allow up to 10 minutes for
-the new rules to take effect — a background job reconciles the allowlist with the
-infrastructure on a 10-minute cycle. There's nothing to configure; just wait
-before testing.
+**On SaaS, changes take ~10 minutes to apply.** After you save, allow up to 10
+minutes for the new rules to take effect — a background job reconciles the
+allowlist with the infrastructure on a 10-minute cycle. There's nothing to
+configure; just wait before testing. On-premises, propagation depends on how you
+wire enforcement (see **Availability** below).
 {% endhint %}
 
 ## Availability
@@ -59,6 +60,29 @@ before testing.
 
   When disabled, the **Infrastructure** tab is hidden and the API endpoint below
   is not registered.
+
+{% hint style="warning" %}
+**On-premises, you have to wire up enforcement yourself.** Enabling the flag only
+*exposes* the allowlist on `/infra-config/` — it does not filter traffic on its
+own (the automatic 10-minute reconciliation mentioned above is specific to CISO
+Assistant SaaS). You are responsible for consuming the endpoint and applying the
+rules in your own infrastructure.
+
+In particular, `/infra-config/` is served at the URL **root**, not under `/api/`.
+The default Caddy configuration only reverse-proxies `/api/*` to the backend and
+everything else to the frontend, so the endpoint is **not reachable through Caddy
+until you add a route for it**. Edit your Caddy configuration to proxy it directly
+to the backend — for example:
+
+```caddyfile
+reverse_proxy /infra-config/* backend:8000
+reverse_proxy /api/* backend:8000
+reverse_proxy /* frontend:3000
+```
+
+Keep `/infra-config/` restricted to your trusted infrastructure (it is
+unauthenticated — see the warning below).
+{% endhint %}
 
 {% hint style="info" %}
 If you rely on API access — for instance the
