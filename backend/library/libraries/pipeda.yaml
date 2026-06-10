@@ -1122,6 +1122,8 @@ objects:
       translations:
         fr:
           name: "Atteinte aux mesures de s\xE9curit\xE9"
+          description: "Exigences obligatoires de notification des atteintes pour les\
+            \ organisations assujetties \xE0 la LPRPDE."
 
     - urn: urn:intuitem:risk:req_node:pipeda:s-10-1-a
       assessable: true
@@ -1186,6 +1188,9 @@ objects:
       translations:
         fr:
           name: "Communication sans connaissance ni consentement"
+          description: "Circonstances limit\xE9es dans lesquelles des renseignements\
+            \ personnels peuvent \xEAtre communiqu\xE9s sans la connaissance ni le\
+            \ consentement de l'individu."
 
     - urn: urn:intuitem:risk:req_node:pipeda:s-7-3-a
       assessable: true
