@@ -1004,6 +1004,26 @@ class Role(NameDescriptionMixin, FolderMixin):
     fields_to_check = ["name"]
 
 
+# Stay well under SQLite's bind-variable limit (999 on old builds, 32766 on
+# modern ones) so a single `field__in=[...]` never overflows. Chunking keeps
+# RBAC resolution working when a principal can reach a very large number of
+# folders/objects (e.g. an admin on an instance with hundreds of thousands of
+# folders).
+_SQL_IN_CHUNK_SIZE = 900
+
+
+def _chunked_in_values_list(queryset, in_field, ids, value_fields):
+    """
+    Run `queryset.filter(in_field=batch).values_list(*value_fields)` over `ids`
+    in batches and yield the rows, so the `IN (...)` clause never exceeds the
+    database's bind-variable limit. Order is not guaranteed.
+    """
+    ids = list(ids)
+    for start in range(0, len(ids), _SQL_IN_CHUNK_SIZE):
+        batch = ids[start : start + _SQL_IN_CHUNK_SIZE]
+        yield from queryset.filter(**{in_field: batch}).values_list(*value_fields)
+
+
 def _iter_assignment_lites_for_user(user: AbstractBaseUser | AnonymousUser):
     """
     Yield AssignmentLite for a user, including via groups, using caches only.
@@ -1306,38 +1326,37 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         if folder_perm_codes:
             folder_ids = list(folder_perm_codes.keys())
+            # Map object_type -> the related folder lookup path. The query is
+            # chunked over folder_ids so a large reachable-folder set never
+            # overflows the database bind-variable limit.
             if hasattr(object_type, "folder"):
-                objects_iter = object_type.objects.filter(
-                    folder_id__in=folder_ids
-                ).values_list("id", "folder_id")
+                folder_path = "folder_id"
             elif object_type is Folder:
-                objects_iter = [(f_id, f_id) for f_id in folder_ids]
+                folder_path = None  # folders are their own "folder"
             elif hasattr(object_type, "risk_assessment"):
-                objects_iter = object_type.objects.filter(
-                    risk_assessment__folder_id__in=folder_ids
-                ).values_list("id", "risk_assessment__folder_id")
+                folder_path = "risk_assessment__folder_id"
             elif hasattr(object_type, "entity"):
-                objects_iter = object_type.objects.filter(
-                    entity__folder_id__in=folder_ids
-                ).values_list("id", "entity__folder_id")
+                folder_path = "entity__folder_id"
             elif hasattr(object_type, "provider_entity"):
-                objects_iter = object_type.objects.filter(
-                    provider_entity__folder_id__in=folder_ids
-                ).values_list("id", "provider_entity__folder_id")
+                folder_path = "provider_entity__folder_id"
             elif hasattr(object_type, "journey"):
-                objects_iter = object_type.objects.filter(
-                    journey__folder_id__in=folder_ids
-                ).values_list("id", "journey__folder_id")
+                folder_path = "journey__folder_id"
             elif hasattr(object_type, "questionnaire_run"):
-                objects_iter = object_type.objects.filter(
-                    questionnaire_run__folder_id__in=folder_ids
-                ).values_list("id", "questionnaire_run__folder_id")
+                folder_path = "questionnaire_run__folder_id"
             elif hasattr(object_type, "agent_run"):
-                objects_iter = object_type.objects.filter(
-                    agent_run__folder_id__in=folder_ids
-                ).values_list("id", "agent_run__folder_id")
+                folder_path = "agent_run__folder_id"
             else:
                 raise NotImplementedError("type not supported")
+
+            if object_type is Folder:
+                objects_iter = ((f_id, f_id) for f_id in folder_ids)
+            else:
+                objects_iter = _chunked_in_values_list(
+                    object_type.objects,
+                    f"{folder_path}__in",
+                    folder_ids,
+                    ("id", folder_path),
+                )
 
             for obj_id, folder_id in objects_iter:
                 perms = folder_perm_codes.get(folder_id, set())
@@ -1369,18 +1388,12 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                     parent_id = state.parent_map.get(parent_id)
 
             if ancestor_ids:
-                if object_type is Folder:
-                    result_view.update(
-                        object_type.objects.filter(
-                            id__in=ancestor_ids, is_published=True
-                        ).values_list("id", flat=True)
-                    )
-                else:
-                    result_view.update(
-                        object_type.objects.filter(
-                            folder_id__in=ancestor_ids, is_published=True
-                        ).values_list("id", flat=True)
-                    )
+                in_field = "id__in" if object_type is Folder else "folder_id__in"
+                published_qs = object_type.objects.filter(is_published=True)
+                for obj_id, in _chunked_in_values_list(
+                    published_qs, in_field, ancestor_ids, ("id",)
+                ):
+                    result_view.add(obj_id)
 
         return (list(result_view), list(result_change), list(result_delete))
 

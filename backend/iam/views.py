@@ -223,16 +223,30 @@ class CurrentUserView(views.APIView):
         user_groups_data = list(request.user.user_groups.values("name", "builtin"))
         user_groups = [(ug["name"], ug["builtin"]) for ug in user_groups_data]
 
-        accessible_domains = RoleAssignment.get_accessible_folder_ids(
-            Folder.get_root_folder(), request.user, Folder.ContentType.DOMAIN
-        )
+        if request.user.is_admin():
+            # Admins implicitly hold every permission on every folder. Expanding
+            # the folder × permission matrix here is pure overhead — on large
+            # instances (hundreds of thousands of folders) it produces multi-GB
+            # responses. The frontend short-circuits permission checks for admins
+            # (see access-control.ts), and the only consumer of accessible_domains
+            # is an "is it empty?" check, so a single sentinel id preserves it.
+            accessible_domains = list(
+                Folder.objects.filter(
+                    content_type=Folder.ContentType.DOMAIN
+                ).values_list("id", flat=True)[:1]
+            )
+            domain_permissions = {}
+        else:
+            accessible_domains = RoleAssignment.get_accessible_folder_ids(
+                Folder.get_root_folder(), request.user, Folder.ContentType.DOMAIN
+            )
 
-        domain_permissions = RoleAssignment.get_permissions_per_folder(
-            principal=request.user, recursive=True
-        )
-        domain_permissions = {
-            k: list(v) for k, v in domain_permissions.items()
-        }  # this what matters
+            domain_permissions = RoleAssignment.get_permissions_per_folder(
+                principal=request.user, recursive=True
+            )
+            domain_permissions = {
+                k: list(v) for k, v in domain_permissions.items()
+            }  # this what matters
 
         res_data = {
             "id": request.user.id,

@@ -156,6 +156,7 @@ from core.models import (
     Terminology,
 )
 from core.serializers import ComplianceAssessmentReadSerializer
+from core.context import focus_folder_id_var
 from core.utils import (
     REWRITABLE_URN_TYPES,
     build_answers_dict,
@@ -802,6 +803,30 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     def get_queryset(self) -> models.query.QuerySet:
         if not self.model:
             return None
+
+        # Admin fast-path: a global admin can reach every object, so skip the
+        # per-folder RBAC resolution entirely. On large instances that
+        # resolution materializes huge ID lists and IN(...) clauses that can
+        # exceed the database's bind-variable limit; returning the unfiltered
+        # queryset lets the DB and pagination do the work instead.
+        #
+        # Only when no focus folder is active: focus mode scopes every query to
+        # a subtree, so we must defer to the normal (now chunked, crash-safe)
+        # path which applies that scoping.
+        user = self.request.user
+        if (
+            focus_folder_id_var.get() is None
+            and getattr(user, "is_authenticated", False)
+            and user.is_admin()
+        ):
+            queryset = self.model.objects.all()
+            field_names = {f.name for f in self.model._meta.get_fields()}
+            if "parent_folder" in field_names:
+                queryset = queryset.select_related("parent_folder")
+            if "filtering_labels" in field_names:
+                queryset = queryset.prefetch_related("filtering_labels")
+            return queryset
+
         object_ids_view = None
         if self.request.method == "GET":
             if q := re.match(
@@ -7506,21 +7531,38 @@ class UserViewSet(BaseModelViewSet):
     search_fields = ["email", "first_name", "last_name"]
 
     def get_queryset(self):
-        # Use base IAM filtering
-        # but ensure current user is always included
-        queryset = super().get_queryset() | User.objects.filter(pk=self.request.user.pk)
+        user = self.request.user
+        is_admin_no_focus = (
+            focus_folder_id_var.get() is None
+            and getattr(user, "is_authenticated", False)
+            and user.is_admin()
+        )
 
-        # Add prefetch for user_groups visibility
-        viewable_user_group_ids = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), self.request.user, UserGroup
-        )[0]
-        return queryset.distinct().prefetch_related(
-            Prefetch(
-                "user_groups",
-                queryset=UserGroup.objects.filter(id__in=viewable_user_group_ids)
-                .select_related("folder")
-                .only("id", "builtin", "name", "folder", "folder__name"),
+        if is_admin_no_focus:
+            # Admins see every user and every group: base get_queryset already
+            # returns User.objects.all(), so the current-user union and the
+            # distinct() (both there to widen/dedupe a folder-scoped set) are
+            # pure overhead at scale. Skip them.
+            queryset = super().get_queryset()
+            visible_groups = UserGroup.objects.select_related("folder").only(
+                "id", "builtin", "name", "folder", "folder__name"
             )
+        else:
+            # Use base IAM filtering but ensure current user is always included
+            queryset = (
+                super().get_queryset() | User.objects.filter(pk=user.pk)
+            ).distinct()
+            viewable_user_group_ids = RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), user, UserGroup
+            )[0]
+            visible_groups = (
+                UserGroup.objects.filter(id__in=viewable_user_group_ids)
+                .select_related("folder")
+                .only("id", "builtin", "name", "folder", "folder__name")
+            )
+
+        return queryset.prefetch_related(
+            Prefetch("user_groups", queryset=visible_groups)
         )
 
     def update(self, request: Request, *args, **kwargs) -> Response:
