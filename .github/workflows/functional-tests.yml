@@ -174,41 +174,28 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Set up python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      - name: Install uv and set up python ${{ env.PYTHON_VERSION }}
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: "pip"
-
-      - name: Install Poetry via pipx
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m pip install --upgrade pip
-          python -m pip install --upgrade pipx
-          python -m pipx ensurepath
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          python -m pipx install poetry
-
-      - name: Configure Poetry virtualenv in project
-        run: poetry config virtualenvs.in-project true
+          enable-cache: true
 
       - name: Cache Virtualenv
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ env.backend-directory }}/.venv
-          key: venv-${{ runner.os }}-py${{ env.PYTHON_VERSION }}-${{ hashFiles('backend/poetry.lock') }}
+          key: venv-${{ runner.os }}-py${{ env.PYTHON_VERSION }}-${{ hashFiles('backend/uv.lock') }}
 
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
-        run: poetry install
+        run: uv sync --locked
 
       - name: Restore PG dump cache
         id: pg-dump-cache
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ env.backend-directory }}/db/prebuilt-pg-community.sql
-          key: pg-dump-community-${{ runner.os }}-${{ hashFiles('backend/**/migrations/*.py', 'backend/poetry.lock') }}
+          key: pg-dump-community-${{ runner.os }}-${{ hashFiles('backend/**/migrations/*.py', 'backend/uv.lock') }}
 
       - name: Run migrations and dump
         if: steps.pg-dump-cache.outputs.cache-hit != 'true'
@@ -216,7 +203,7 @@ jobs:
         env:
           PGPASSWORD: postgres
         run: |
-          poetry run python manage.py migrate
+          uv run python manage.py migrate
           pg_dump -h localhost -U postgres -d postgres > db/prebuilt-pg-community.sql
 
       - name: Upload PG dump
@@ -248,39 +235,28 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Set up python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      - name: Install uv and set up python ${{ env.PYTHON_VERSION }}
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: "pip"
+          enable-cache: true
 
-      - name: Install Poetry via pipx
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m pip install --upgrade pip
-          python -m pip install --upgrade pipx
-          python -m pipx ensurepath
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          python -m pipx install poetry
-
-      - name: Configure Poetry to not use virtualenvs
-        run: poetry config virtualenvs.create false
-
-      - name: Install backend requirements
-        working-directory: ${{ env.backend-directory }}
-        run: poetry install
+      - name: Cache Virtualenv
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ${{ env.enterprise-backend-directory }}/.venv
+          key: venv-${{ runner.os }}-py${{ env.PYTHON_VERSION }}-${{ hashFiles('enterprise/backend/uv.lock') }}
 
       - name: Install enterprise backend requirements
         working-directory: ${{ env.enterprise-backend-directory }}
-        run: poetry install
+        run: uv sync --locked
 
       - name: Restore PG dump cache
         id: pg-dump-cache
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ env.backend-directory }}/db/prebuilt-pg-enterprise.sql
-          key: pg-dump-enterprise-${{ runner.os }}-${{ hashFiles('backend/**/migrations/*.py', 'enterprise/backend/**/migrations/*.py', 'backend/poetry.lock', 'enterprise/backend/poetry.lock') }}
+          key: pg-dump-enterprise-${{ runner.os }}-${{ hashFiles('backend/**/migrations/*.py', 'enterprise/backend/**/migrations/*.py', 'backend/uv.lock', 'enterprise/backend/uv.lock') }}
 
       - name: Run migrations and dump
         if: steps.pg-dump-cache.outputs.cache-hit != 'true'
@@ -288,7 +264,7 @@ jobs:
         env:
           PGPASSWORD: postgres
         run: |
-          poetry run python manage.py migrate
+          uv run --project ../enterprise/backend python manage.py migrate
           pg_dump -h localhost -U postgres -d postgres > db/prebuilt-pg-enterprise.sql
 
       - name: Upload PG dump
@@ -354,38 +330,24 @@ jobs:
           name: community-frontend-build
           path: ${{ env.frontend-directory }}/
 
-      - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      - name: Install uv and set up python ${{ matrix.python-version }}
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "pip"
+          enable-cache: true
 
-      - name: Install Poetry via pipx
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m pip install --upgrade pip
-          python -m pip install --upgrade pipx
-          python -m pipx ensurepath
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          python -m pipx install poetry
-
-      - name: Check Poetry version
-        shell: bash
-        run: poetry --version
-
-      - name: Configure Poetry virtualenv in project
-        run: poetry config virtualenvs.in-project true
+      - name: Check uv version
+        run: uv --version
 
       - name: Cache Virtualenv
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ env.backend-directory }}/.venv
-          key: venv-${{ runner.os }}-py${{ matrix.python-version }}-${{ hashFiles('backend/poetry.lock') }}
+          key: venv-${{ runner.os }}-py${{ matrix.python-version }}-${{ hashFiles('backend/uv.lock') }}
 
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
-        run: poetry install
+        run: uv sync --locked
 
       - name: Setup Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
@@ -454,14 +416,14 @@ jobs:
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
         run: |
-          poetry run python manage.py makemigrations
-          poetry run python manage.py migrate
+          uv run python manage.py makemigrations
+          uv run python manage.py migrate
 
       - name: Start test server
         working-directory: ${{ env.backend-directory }}
         run: |
-          poetry run python manage.py createsuperuser --noinput
-          nohup poetry run python manage.py runserver localhost:8173 &
+          uv run python manage.py createsuperuser --noinput
+          nohup uv run python manage.py runserver localhost:8173 &
 
       - name: Run tests with browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.frontend-directory }}/
@@ -555,36 +517,24 @@ jobs:
           name: enterprise-frontend-build
           path: ${{ env.enterprise-frontend-build-directory }}/
 
-      - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      - name: Install uv and set up python ${{ matrix.python-version }}
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "pip"
+          enable-cache: true
 
-      - name: Install Poetry via pipx
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m pip install --upgrade pip
-          python -m pip install --upgrade pipx
-          python -m pipx ensurepath
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          python -m pipx install poetry
+      - name: Check uv version
+        run: uv --version
 
-      - name: Configure Poetry to not use virtualenvs
-        run: poetry config virtualenvs.create false
-
-      - name: Check Poetry version
-        shell: bash
-        run: poetry --version
-
-      - name: Install backend requirements
-        working-directory: ${{ env.backend-directory }}
-        run: poetry install
+      - name: Cache Virtualenv
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ${{ env.enterprise-backend-directory }}/.venv
+          key: venv-${{ runner.os }}-py${{ matrix.python-version }}-${{ hashFiles('enterprise/backend/uv.lock') }}
 
       - name: Install enterprise backend requirements
         working-directory: ${{ env.enterprise-backend-directory }}
-        run: poetry install
+        run: uv sync --locked
 
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
@@ -657,15 +607,14 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         env:
           SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
-        run: poetry run python manage.py migrate --settings="$SETTINGS_MODULE"
-
+        run: uv run --project ../enterprise/backend python manage.py migrate --settings="$SETTINGS_MODULE"
       - name: Start test server
         working-directory: ${{ env.backend-directory }}
         env:
           SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
         run: |
-          poetry run python manage.py createsuperuser --noinput --settings="$SETTINGS_MODULE"
-          nohup poetry run python manage.py runserver localhost:8173 --settings="$SETTINGS_MODULE" &
+          uv run --project ../enterprise/backend python manage.py createsuperuser --noinput --settings="$SETTINGS_MODULE"
+          nohup uv run --project ../enterprise/backend python manage.py runserver localhost:8173 --settings="$SETTINGS_MODULE" &
 
       - name: Run tests with browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.enterprise-frontend-build-directory }}/

@@ -26,7 +26,7 @@ For the full contribution guide — development environment setup, coding standa
 
 - As major new functionality is added to the project, tests covering that functionality should be added to the automated test suite in the same pull request. This applies to bug fixes too: a regression test guards against the bug coming back.
 - Run the suites locally before opening a PR:
-  - Backend (Django/pytest): `poetry run pytest` (in `backend/`)
+  - Backend (Django/pytest): `uv run pytest` (in `backend/`)
   - Frontend unit tests (Vitest): `pnpm run test` (in `frontend/`)
   - Frontend end-to-end tests (Playwright): `./tests/e2e-tests.sh` (in `frontend/`)
 - These suites also run in CI on every pull request and must pass before a change can be merged.
