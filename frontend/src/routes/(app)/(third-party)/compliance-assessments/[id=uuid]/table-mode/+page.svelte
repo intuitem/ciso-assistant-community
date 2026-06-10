@@ -529,13 +529,7 @@
 														</div>
 													</div>
 												{/if}
-												{console.log(
-													requirementAssessment.mapping_inference,
-													requirementAssessment.mapping_inference?.result,
-													requirementAssessment.mapping_inference.source_requirement_assessments,
-													'PDPDPPDPD'
-												)}
-												{#if requirementAssessment.mapping_inference?.result && requirementAssessment.mapping_inference.source_requirement_assessments && Object.keys(requirementAssessment.mapping_inference.source_requirement_assessments).length > 0}
+												{#if requirementAssessment.mapping_inference?.result}
 													<MappingInferenceView
 														mappingInference={requirementAssessment.mapping_inference}
 													/>
