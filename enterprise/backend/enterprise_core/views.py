@@ -899,6 +899,8 @@ class ObjectAuditTrailView(APIView):
 
     @staticmethod
     def _mask(model_name, changes):
+        # Backstop for rows logged before "password" was excluded at registration
+        # (iam/models.py); current writes never include it.
         if model_name == "user" and isinstance(changes, dict) and "password" in changes:
             return {**changes, "password": ["***", "***"]}
         return changes

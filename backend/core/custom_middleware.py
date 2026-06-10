@@ -23,6 +23,8 @@ class AuditlogMiddleware(middleware.AuditlogMiddleware):
         )
 
     def __call__(self, request):
+        # Reimplements the parent __call__ (cannot super(): it calls set_cid then
+        # get_response in one go, leaving no seam to mint a cid between them).
         # set_cid honors an x-correlation-id header and resets the ContextVar per
         # request; mint one when absent so all audit entries in a request share a cid.
         set_cid(request)

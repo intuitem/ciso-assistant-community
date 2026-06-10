@@ -145,12 +145,12 @@
 		try {
 			const res = await fetch(`/fe-api/audit-trail/${model}/${objectId}`);
 			if (!res.ok) {
-				errorMessage = await res.text();
+				errorMessage = res.status === 403 ? m.permissionDenied() : m.couldNotLoadAuditTrail();
 				return;
 			}
 			entries = await res.json();
 		} catch (e) {
-			errorMessage = String(e);
+			errorMessage = m.couldNotLoadAuditTrail();
 		} finally {
 			loading = false;
 		}
