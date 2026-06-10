@@ -8559,6 +8559,13 @@ class DraftValidationError(Exception):
         super().__init__(message)
 
 
+# Version of the editing_draft JSON shape produced by the frontend builder.
+# Drafts persist in the DB across releases; reject drafts written by a NEWER
+# frontend than this backend understands instead of crashing mid-reconcile.
+# Missing/older versions are tolerated (validation handles their gaps).
+BUILDER_DRAFT_SCHEMA_VERSION = 1
+
+
 class FrameworkViewSet(BaseModelViewSet):
     """
     API endpoint that allows frameworks to be viewed or edited.
@@ -9642,9 +9649,203 @@ class FrameworkViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        framework.editing_draft = editing_draft
-        framework.save(update_fields=["editing_draft", "updated_at"])
+        # Lock the row so a save can't interleave with a publish in progress
+        # (publish clears editing_draft at the end; an unserialized write here
+        # would either be silently discarded or resurrect a published draft).
+        # select_for_update is a no-op on SQLite (database-level write lock)
+        # and a row lock on PostgreSQL.
+        with transaction.atomic():
+            framework = Framework.objects.select_for_update().get(pk=framework.pk)
+            framework.editing_draft = editing_draft
+            framework.save(update_fields=["editing_draft", "updated_at"])
         return Response({"status": "draft_saved"})
+
+    @staticmethod
+    def _validate_draft_structure(draft):
+        """Validate the structural integrity of an editing draft.
+
+        Drafts are client-supplied JSON that persists in the DB across
+        releases, so every assumption the diff/reconcile code makes about
+        their shape must be checked here first. Raises DraftValidationError
+        with an actionable message instead of letting a malformed draft
+        crash deeper with the generic "Failed to publish draft" error.
+        """
+        from core.utils import extract_node_id
+
+        version = draft.get("schema_version", 1)
+        if not isinstance(version, int) or version > BUILDER_DRAFT_SCHEMA_VERSION:
+            raise DraftValidationError(
+                "This draft was created by a newer version of CISO Assistant "
+                "than this server supports. Refresh the page and try again."
+            )
+
+        fw_meta = draft.get("framework_meta", {})
+        fw_name = fw_meta.get("name", "")
+        if not isinstance(fw_name, str) or not fw_name.strip():
+            raise DraftValidationError("Framework name is required.")
+        if len(fw_name) > 200:
+            raise DraftValidationError(
+                f"Framework name is {len(fw_name)} characters (max 200)."
+            )
+        for score_field in ("min_score", "max_score"):
+            score_value = fw_meta.get(score_field)
+            if score_value is not None and not isinstance(score_value, int):
+                raise DraftValidationError(f"{score_field} must be an integer.")
+
+        draft_nodes = draft.get("nodes", [])
+        draft_questions = draft.get("questions", [])
+        draft_choices = draft.get("choices", [])
+
+        def _label(record):
+            for key in ("ref_id", "name", "text", "value"):
+                v = record.get(key)
+                if isinstance(v, str) and v.strip():
+                    return v[:50]
+            return record.get("urn") or "unknown"
+
+        # --- ids: every record needs a unique, valid UUID. The reconcile
+        # code parses these with uuid.UUID() and keys lookup maps on them;
+        # a missing or duplicated id would crash or silently drop a row.
+        parsed_ids_by_kind = {}
+        for kind, records in (
+            ("requirement", draft_nodes),
+            ("question", draft_questions),
+            ("choice", draft_choices),
+        ):
+            seen_ids = set()
+            for record in records:
+                if not isinstance(record, dict):
+                    raise DraftValidationError(
+                        f"Malformed {kind} entry in draft (expected an object). "
+                        "Discard the draft and start editing again."
+                    )
+                try:
+                    parsed = uuid.UUID(str(record.get("id")))
+                except (TypeError, ValueError):
+                    raise DraftValidationError(
+                        f"{kind.capitalize()} '{_label(record)}' has a missing or "
+                        "invalid id. Discard the draft and start editing again."
+                    )
+                if parsed in seen_ids:
+                    raise DraftValidationError(
+                        f"Duplicate {kind} id on '{_label(record)}'. "
+                        "Discard the draft and start editing again."
+                    )
+                seen_ids.add(parsed)
+            parsed_ids_by_kind[kind] = seen_ids
+
+        # --- Cross-collection references: a question must belong to a node
+        # of this draft, a choice to a question of this draft. Dangling
+        # references would hit FK errors during the bulk sync. Wording is
+        # shared with the deeper reconcile-time cross-framework checks.
+        for q in draft_questions:
+            try:
+                parent_id = uuid.UUID(str(q.get("requirement_node_id")))
+            except (TypeError, ValueError):
+                parent_id = None
+            if parent_id not in parsed_ids_by_kind["requirement"]:
+                raise DraftValidationError(
+                    f"Question '{_label(q)}': requirement_node not in this framework."
+                )
+        for c in draft_choices:
+            try:
+                parent_id = uuid.UUID(str(c.get("question_id")))
+            except (TypeError, ValueError):
+                parent_id = None
+            if parent_id not in parsed_ids_by_kind["question"]:
+                raise DraftValidationError(
+                    f"Choice '{_label(c)}': question not in this framework."
+                )
+
+        # --- Duplicate node_id check (CEL identity) ---
+        node_urns = [n.get("urn") for n in draft_nodes if n.get("urn")]
+        node_ids = [extract_node_id(u) for u in node_urns]
+        seen_node_ids: set[str] = set()
+        for nid in node_ids:
+            if nid and nid in seen_node_ids:
+                raise DraftValidationError(
+                    f"Duplicate node_id '{nid}'. Each requirement must have a unique identifier."
+                )
+            if nid:
+                seen_node_ids.add(nid)
+
+        # --- Dangling parent_urn check ---
+        all_node_urns = {n.get("urn") for n in draft_nodes if n.get("urn")}
+        for node in draft_nodes:
+            parent_urn = node.get("parent_urn")
+            if parent_urn and parent_urn not in all_node_urns:
+                raise DraftValidationError(
+                    f"Requirement '{_label(node)}' references a parent that does not exist in this framework."
+                )
+
+        # --- Dangling depends_on check ---
+        all_question_urns = {q.get("urn") for q in draft_questions if q.get("urn")}
+        all_choice_urns = {c.get("urn") for c in draft_choices if c.get("urn")}
+        for q in draft_questions:
+            depends_on = q.get("depends_on")
+            if not depends_on:
+                continue
+            dep_question = depends_on.get("question")
+            if dep_question and dep_question not in all_question_urns:
+                raise DraftValidationError(
+                    f"Question '{_label(q)}' depends on a question that does not exist in this framework."
+                )
+            dep_answers = depends_on.get("answers", [])
+            for ans_urn in dep_answers:
+                if ans_urn and ans_urn not in all_choice_urns:
+                    raise DraftValidationError(
+                        f"Question '{_label(q)}' depends on a choice that does not exist in this framework."
+                    )
+
+        # --- Field lengths. Postgres enforces varchar limits that SQLite
+        # silently ignores, so oversized values must be rejected here or
+        # production publishes crash where dev/tests pass. Only nodes had
+        # these checks before; questions and choices were unguarded.
+        def _check_len(kind, record, field, value, max_len):
+            if isinstance(value, str) and len(value) > max_len:
+                raise DraftValidationError(
+                    f"{kind.capitalize()} '{_label(record)}': {field} is "
+                    f"{len(value)} characters (max {max_len})."
+                )
+
+        for node in draft_nodes:
+            _check_len("requirement", node, "name", node.get("name"), 200)
+            _check_len("requirement", node, "ref_id", node.get("ref_id"), 100)
+            _check_len("requirement", node, "URN", node.get("urn"), 255)
+        for q in draft_questions:
+            urn = q.get("urn")
+            if not isinstance(urn, str) or not urn.strip():
+                raise DraftValidationError(
+                    f"Question '{_label(q)}' has no URN. "
+                    "Discard the draft and start editing again."
+                )
+            _check_len("question", q, "URN", urn, 255)
+            _check_len("question", q, "ref_id", q.get("ref_id"), 100)
+        for c in draft_choices:
+            _check_len("choice", c, "URN", c.get("urn"), 255)
+            _check_len("choice", c, "ref_id", c.get("ref_id"), 100)
+            _check_len("choice", c, "compute_result", c.get("compute_result"), 100)
+            _check_len("choice", c, "color", c.get("color"), 50)
+
+        # --- Duplicate URNs within the draft. Question.urn carries a global
+        # unique constraint; a within-draft duplicate would surface as an
+        # IntegrityError during bulk_create (the generic publish failure).
+        for kind, records in (
+            ("requirement", draft_nodes),
+            ("question", draft_questions),
+            ("choice", draft_choices),
+        ):
+            seen_urns = set()
+            for record in records:
+                u = record.get("urn")
+                if not u:
+                    continue
+                if u in seen_urns:
+                    raise DraftValidationError(
+                        f"Duplicate URN '{u}' on {kind} '{_label(record)}'. "
+                        "Each item must have a unique URN."
+                    )
+                seen_urns.add(u)
 
     @staticmethod
     def _compute_draft_diff(framework, draft):
@@ -9846,7 +10047,25 @@ class FrameworkViewSet(BaseModelViewSet):
                 {"error": "No active draft to preview."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        diff = self._compute_draft_diff(framework, framework.editing_draft)
+        try:
+            self._validate_draft_structure(framework.editing_draft)
+            diff = self._compute_draft_diff(framework, framework.editing_draft)
+        except DraftValidationError as e:
+            logger.warning(
+                "Validation error while previewing draft",
+                framework_id=str(framework.id),
+                error=str(e),
+            )
+            return Response(
+                {"error": e.user_message},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception:
+            logger.exception("Failed to preview draft for framework %s", framework.id)
+            return Response(
+                {"error": "Failed to compute the publish preview."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         return Response(diff)
 
     @action(detail=True, methods=["post"], url_path="publish-draft")
@@ -9854,15 +10073,20 @@ class FrameworkViewSet(BaseModelViewSet):
         """Publish editing_draft → relational DB, snapshot history, bump version."""
         framework = self.get_object()
         self._check_change_permission(request, framework)
-        if framework.editing_draft is None:
-            return Response(
-                {"error": "No active draft to publish."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
 
-        draft = framework.editing_draft
         try:
-            warnings = self._reconcile_draft(framework, draft)
+            # Serialize concurrent publishes/saves on the same framework: the
+            # draft is re-read under a row lock so a save_draft racing with
+            # this publish can neither be silently discarded nor publish a
+            # half-written draft. No-op on SQLite, row lock on PostgreSQL.
+            with transaction.atomic():
+                framework = Framework.objects.select_for_update().get(pk=framework.pk)
+                if framework.editing_draft is None:
+                    return Response(
+                        {"error": "No active draft to publish."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                warnings = self._reconcile_draft(framework, framework.editing_draft)
         except DraftValidationError as e:
             logger.warning(
                 "Validation error while publishing draft",
@@ -9892,84 +10116,82 @@ class FrameworkViewSet(BaseModelViewSet):
         """
         warnings = []
 
-        # --- 0. Pre-validate draft field lengths ---
+        # --- 0. Structural validation (raises DraftValidationError) ---
+        self._validate_draft_structure(draft)
+
         draft_nodes = draft.get("nodes", [])
         draft_questions = draft.get("questions", [])
         draft_choices = draft.get("choices", [])
-
         fw_meta = draft.get("framework_meta", {})
-        fw_name = fw_meta.get("name", "")
-        if not fw_name or not fw_name.strip():
-            raise DraftValidationError("Framework name is required.")
-        if len(fw_name) > 200:
+
+        has_audits = framework.complianceassessment_set.exists()
+
+        # Refuse to wipe a framework that audits depend on: publishing a
+        # draft with no requirement nodes cascades into deleting every
+        # RequirementAssessment and Answer of the existing audits.
+        if (
+            not draft_nodes
+            and has_audits
+            and RequirementNode.objects.filter(framework=framework).exists()
+        ):
             raise DraftValidationError(
-                f"Framework name is {len(fw_name)} characters (max 200)."
+                "This draft contains no requirements; publishing would erase "
+                "all responses in the audits using this framework. Add at "
+                "least one requirement, or delete the audits first."
             )
 
-        for node in draft_nodes:
-            label = node.get("ref_id") or f"position {node.get('order_id', '?')}"
-            name = node.get("name") or ""
-            ref_id = node.get("ref_id") or ""
-            urn = node.get("urn") or ""
-
-            if len(name) > 200:
-                raise DraftValidationError(
-                    f"Requirement '{label}': name is {len(name)} characters (max 200)."
-                )
-            if len(ref_id) > 100:
-                raise DraftValidationError(
-                    f"Requirement '{label}': ref_id is {len(ref_id)} characters (max 100)."
-                )
-            if len(urn) > 255:
-                raise DraftValidationError(
-                    f"Requirement '{label}': URN is {len(urn)} characters (max 255)."
-                )
-
-        # --- 0b. Validate referential integrity ---
-        from core.utils import extract_node_id
-
-        # Duplicate node_id check
-        node_urns = [n.get("urn") for n in draft_nodes if n.get("urn")]
-        node_ids = [extract_node_id(u) for u in node_urns]
-        seen_node_ids: set[str] = set()
-        for nid in node_ids:
-            if nid and nid in seen_node_ids:
-                raise DraftValidationError(
-                    f"Duplicate node_id '{nid}'. Each requirement must have a unique identifier."
-                )
-            if nid:
-                seen_node_ids.add(nid)
-
-        # Dangling parent_urn check
-        all_node_urns = {n.get("urn") for n in draft_nodes if n.get("urn")}
-        for node in draft_nodes:
-            parent_urn = node.get("parent_urn")
-            if parent_urn and parent_urn not in all_node_urns:
-                label = node.get("ref_id") or node.get("name") or "unknown"
-                raise DraftValidationError(
-                    f"Requirement '{label}' references a parent that does not exist in this framework."
-                )
-
-        # Dangling depends_on check
-        all_question_urns = {q.get("urn") for q in draft_questions if q.get("urn")}
-        all_choice_urns = {c.get("urn") for c in draft_choices if c.get("urn")}
-        for q in draft_questions:
-            depends_on = q.get("depends_on")
-            if not depends_on:
-                continue
-            dep_question = depends_on.get("question")
-            if dep_question and dep_question not in all_question_urns:
-                label = q.get("ref_id") or q.get("text", "")[:30] or "unknown"
-                raise DraftValidationError(
-                    f"Question '{label}' depends on a question that does not exist in this framework."
-                )
-            dep_answers = depends_on.get("answers", [])
-            for ans_urn in dep_answers:
-                if ans_urn and ans_urn not in all_choice_urns:
-                    label = q.get("ref_id") or q.get("text", "")[:30] or "unknown"
-                    raise DraftValidationError(
-                        f"Question '{label}' depends on a choice that does not exist in this framework."
-                    )
+        # --- 0b. Lock child URNs while audits exist. The sync below writes
+        # draft URNs onto existing rows, and CEL outcomes / depends_on rules
+        # key on URN stability — the same invariant the namespace/ref_id gate
+        # in 0c protects. Legitimate renames go through framework_meta and
+        # are rewritten *after* this check, so they are not affected.
+        if has_audits:
+            checks = (
+                (
+                    "requirement",
+                    draft_nodes,
+                    dict(
+                        RequirementNode.objects.filter(framework=framework).values_list(
+                            "id", "urn"
+                        )
+                    ),
+                ),
+                (
+                    "question",
+                    draft_questions,
+                    dict(
+                        Question.objects.filter(
+                            requirement_node__framework=framework
+                        ).values_list("id", "urn")
+                    ),
+                ),
+                (
+                    "choice",
+                    draft_choices,
+                    dict(
+                        QuestionChoice.objects.filter(
+                            question__requirement_node__framework=framework
+                        ).values_list("id", "urn")
+                    ),
+                ),
+            )
+            for kind, records, db_urns in checks:
+                for record in records:
+                    rid = uuid.UUID(record["id"])
+                    if rid not in db_urns:
+                        continue
+                    if (record.get("urn") or None) != (db_urns[rid] or None):
+                        label = (
+                            record.get("ref_id")
+                            or record.get("name")
+                            or record.get("text")
+                            or record.get("value")
+                            or str(rid)
+                        )
+                        raise DraftValidationError(
+                            f"Cannot change the URN of existing {kind} '{label}' "
+                            "while a compliance assessment uses this framework."
+                        )
 
         # --- 0c. Apply URN rename (urn_namespace / ref_id) before any sync. ---
         new_namespace_raw = fw_meta.get("urn_namespace")
@@ -9994,34 +10216,62 @@ class FrameworkViewSet(BaseModelViewSet):
             if isinstance(framework.ref_id, str) and framework.ref_id.strip()
             else None
         )
+        current_ref_was_derived = False
         if current_ref is None:
             # The ref_id column can be NULL on frameworks created before it was
             # persisted (or duplicated without copying it over), yet start_editing
             # seeds the draft ref_id from the slug carried by the child URNs
             # (falling back to a slug of the name). Reconstruct that same value
-            # here so a no-op republish doesn't read as a rename and get blocked
-            # by the "compliance assessment uses this framework" guard below.
-            for record in draft_nodes + draft_questions + draft_choices:
-                parts = (record.get("urn") or "").split(":")
-                if (
-                    len(parts) >= 6
-                    and parts[0] == "urn"
-                    and parts[2] == "risk"
-                    and parts[3] in REWRITABLE_URN_TYPES
-                ):
-                    current_ref = parts[4]
+            # from the DB child URNs — the source of truth, not the
+            # client-supplied draft — so a no-op republish doesn't read as a
+            # rename and get blocked by the compliance-assessment guard below.
+            db_urn_sources = (
+                RequirementNode.objects.filter(framework=framework)
+                .order_by("created_at", "id")
+                .values_list("urn", flat=True),
+                Question.objects.filter(requirement_node__framework=framework)
+                .order_by("created_at", "id")
+                .values_list("urn", flat=True),
+                QuestionChoice.objects.filter(
+                    question__requirement_node__framework=framework
+                )
+                .order_by("created_at", "id")
+                .values_list("urn", flat=True),
+            )
+            for urn_source in db_urn_sources:
+                for db_urn in urn_source:
+                    parts = (db_urn or "").split(":")
+                    if (
+                        len(parts) >= 6
+                        and parts[0] == "urn"
+                        and parts[2] == "risk"
+                        and parts[3] in REWRITABLE_URN_TYPES
+                    ):
+                        current_ref = parts[4]
+                        break
+                if current_ref is not None:
                     break
             if current_ref is None:
                 current_ref = self._slugify_framework_name(framework.name, framework.id)
+            current_ref_was_derived = True
 
         ns_changed = bool(new_namespace) and new_namespace != current_namespace
         ref_changed = new_ref_id is not None and new_ref_id != (current_ref or "")
 
         new_urn_namespace = framework.urn_namespace
         new_framework_ref_id = framework.ref_id
+        # Heal historically-empty identity columns on publish so future
+        # publishes stop depending on URN-slug reconstruction: persist the
+        # derived ref_id and the normalized namespace when no rename is asked.
+        if not ref_changed and current_ref_was_derived:
+            new_framework_ref_id = current_ref
+        if not ns_changed and not (
+            isinstance(framework.urn_namespace, str) and framework.urn_namespace.strip()
+        ):
+            new_urn_namespace = current_namespace
 
         if ns_changed or ref_changed:
-            if framework.complianceassessment_set.exists():
+            if has_audits:
                 raise DraftValidationError(
                     "Cannot change URN namespace or ref_id while a compliance assessment uses this framework."
                 )
@@ -10303,6 +10553,15 @@ class FrameworkViewSet(BaseModelViewSet):
                                 c["urn"] = c["urn"].replace(slug_pattern, new_pattern)
                         warnings.append(
                             f"URN namespace collision detected, disambiguated to '{new_slug}'"
+                        )
+                    else:
+                        # Every candidate slug collided too. Proceeding would
+                        # hit the URN unique constraints during the bulk sync
+                        # and surface as an opaque server error.
+                        raise DraftValidationError(
+                            "Some items in this draft have URNs that collide with "
+                            "another framework, and no alternative slug is "
+                            "available. Change the framework's ref_id and try again."
                         )
 
             # --- 3. DELETE (choices → questions → nodes for FK safety) ---
