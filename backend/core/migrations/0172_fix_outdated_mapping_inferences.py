@@ -39,20 +39,10 @@ def fix_outdated_mapping_inferences(apps, schema_editor):
 
             if not isinstance(old_field_value, dict):
                 # Handle non-dict `old_field_value` just in case (makes the code more defensive, this JSONField could contain anything as there's no django validator/db constraint for it.)
-                raise OverflowError
-                continue
+                old_field_value = {}
 
             source_requirement_id = old_field_value.get("id")
-            if source_requirement_id is None:
-                # Make the code more defensive again for the same reason as the one mentionned herebefore.
-                raise OverflowError
-                continue
-
             source_requirement_urn = requirement_assessment_id_to_urn.get(source_requirement_id)
-            if source_requirement_urn is None:
-                # Make the code more defensive again for the same reason as the one mentionned herebefore.
-                # This will erase the mapping_inference pointing to a deleted requirement assessment, i guess that's fine.
-                continue
 
             if source_requirement_urn is not None:
                 # This check makes the code more defensive again for the same reason as the one mentionned herebefore.
