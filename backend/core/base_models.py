@@ -62,6 +62,10 @@ class AbstractBaseModel(models.Model):
         for field in fields_to_check:
             if hasattr(self, field):
                 field_value = getattr(self, field)
+                # Blank/None values are not meaningful identifiers and must not
+                # collide with each other (e.g. an optional ref_id left empty).
+                if field_value is None or field_value == "":
+                    continue
                 model_field = self._meta.get_field(field)
 
                 # Use the appropriate lookup based on the field type
@@ -78,6 +82,9 @@ class AbstractBaseModel(models.Model):
                     filters[f"{field}__exact"] = field_value
                 else:
                     filters[f"{field}__iexact"] = field_value
+
+        if not filters:
+            return True
 
         return not scope.filter(**filters).exists()
 

@@ -1,6 +1,7 @@
 import { handleErrorResponse } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
+import { formatSelectFieldData } from '$lib/utils/load';
 import { m } from '$paraglide/messages';
 import { safeTranslate } from '$lib/utils/i18n';
 import {
@@ -27,6 +28,9 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const featureFlagSettings = await fetch(`${BASE_API_URL}/settings/feature-flags/`).then((res) =>
 		res.json()
 	);
+	const featureFlagDefaults = await fetch(`${BASE_API_URL}/settings/feature-flags/defaults/`)
+		.then((res) => (res.ok ? res.json() : {}))
+		.catch(() => ({}));
 	const webhookEndpoints = await fetch(`${BASE_API_URL}/webhooks/endpoints/`)
 		.then((res) => res.json())
 		.then((res) => res.results);
@@ -48,12 +52,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
 			const url = `${BASE_API_URL}/settings/sso/${selectField.field}/`;
 			const response = await fetch(url);
 			if (response.ok) {
-				selectOptions[selectField.field] = await response.json().then((data) =>
-					Object.entries(data).map(([key, value]) => ({
-						label: value,
-						value: selectField.valueType === 'number' ? parseInt(key) : key
-					}))
-				);
+				const responseData = await response.json();
+				selectOptions[selectField.field] = formatSelectFieldData(responseData, selectField);
 			} else {
 				console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
 			}
@@ -67,12 +67,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
 			const url = `${BASE_API_URL}/settings/feature-flags/feature_flags/`;
 			const response = await fetch(url);
 			if (response.ok) {
-				selectOptions[selectField.field] = await response.json().then((data) =>
-					Object.entries(data).map(([key, value]) => ({
-						label: value,
-						value: selectField.valueType === 'number' ? parseInt(key) : key
-					}))
-				);
+				const responseData = await response.json();
+				selectOptions[selectField.field] = formatSelectFieldData(responseData, selectField);
 			} else {
 				console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
 			}
@@ -85,12 +81,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
 			const url = `${BASE_API_URL}/settings/general/${selectField.field}/`;
 			const response = await fetch(url);
 			if (response.ok) {
-				selectOptions[selectField.field] = await response.json().then((data) =>
-					Object.entries(data).map(([key, value]) => ({
-						label: value,
-						value: selectField.valueType === 'number' ? parseInt(key) : key
-					}))
-				);
+				const responseData = await response.json();
+				selectOptions[selectField.field] = formatSelectFieldData(responseData, selectField);
 			} else {
 				console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
 			}
@@ -136,6 +128,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		generalSettingForm,
 		generalSettingModel,
 		featureFlagSettings,
+		featureFlagDefaults,
 		featureFlagForm,
 		featureFlagModel,
 		vulnerabilitySlaSettings,

@@ -20,7 +20,7 @@ RUN apt-get clean
 
 COPY . .
 
-RUN uv sync --frozen
+RUN uv sync --frozen --no-dev
 
 EXPOSE 8000
 ENTRYPOINT ["uv", "run", "bash", "entrypoint.sh"]
