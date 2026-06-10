@@ -92,16 +92,18 @@
 						{safeTranslate(source_requirement_assessment.coverage)}
 					</span>
 
-					<span class="font-medium">{m.framework()}:</span>
-					<a
-						class="anchor badge py-0 h-fit w-fit"
-						href="/frameworks/{source_requirement_assessment.source_framework.id}"
-					>
-						{source_requirement_assessment.source_framework.name}
-					</a>
+					{#if source_requirement_assessment.source_framework}
+						<span class="font-medium">{m.framework()}:</span>
+						<a
+							class="anchor badge py-0 h-fit w-fit"
+							href="/frameworks/{source_requirement_assessment.source_framework.id}"
+						>
+							{source_requirement_assessment.source_framework.name}
+						</a>
+					{/if}
 
-					<span class="font-medium">{m.mapping()}:</span>
 					{#if source_requirement_assessment.used_mapping_set}
+						<span class="font-medium">{m.mapping()}:</span>
 						<a
 							class="anchor badge py-0 h-fit w-fit"
 							href="/requirement-mapping-sets/{source_requirement_assessment.used_mapping_set?.id}"
