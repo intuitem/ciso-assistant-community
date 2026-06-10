@@ -214,6 +214,11 @@ class JiraFieldMapper(BaseFieldMapper):
         remote_field = self.field_map.get(field)
 
         if field == "status":
+            # ``--`` is AppliedControl.Status.UNDEFINED, the default for a
+            # control with no status set. It has no Jira equivalent, so drop it
+            # rather than attempting a transition to a status named "--".
+            if str(value) == "--":
+                return None
             return self._map_value_to_remote(field, value, default=str(value))
 
         if field == "priority":
@@ -235,20 +240,11 @@ class JiraFieldMapper(BaseFieldMapper):
             return str(value)
 
         if field == "description":
-            text = str(value)
-            if remote_field == "description":
-                # Jira's ``description`` field requires Atlassian Document Format.
-                return {
-                    "type": "doc",
-                    "version": 1,
-                    "content": [
-                        {
-                            "type": "paragraph",
-                            "content": [{"type": "text", "text": text}],
-                        }
-                    ],
-                }
-            return text
+            # The client talks to Jira's REST v2 API, which expects a plain
+            # string for ``description``. Sending ADF (the v3 doc format) is
+            # rejected with HTTP 400 "Operation value must be a string".
+            # Custom text fields likewise take a plain string.
+            return str(value)
 
         if field in self.value_map_to_remote:
             return self._map_value_to_remote(field, value, default=str(value))

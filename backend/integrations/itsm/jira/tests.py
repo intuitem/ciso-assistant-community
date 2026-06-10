@@ -37,10 +37,8 @@ def test_applied_control_to_jira_issue(mock_jira, mapper):
     jira_issue_dict = mapper.to_remote(applied_control)
 
     assert jira_issue_dict["summary"] == "Test Control"
-    assert (
-        jira_issue_dict["description"]["content"][0]["content"][0]["text"]
-        == "Test Description"
-    )
+    # REST v2 expects a plain-string description (not ADF).
+    assert jira_issue_dict["description"] == "Test Description"
     assert jira_issue_dict["status"] == "In Progress"
     assert jira_issue_dict["priority"]["name"] == "High"
 
@@ -294,15 +292,55 @@ def test_status_case_insensitive_fallback(configuration):
     )
 
 
-def test_description_adf_only_when_mapped_to_description_field(dynamic_mapper):
-    """ADF wrapping is reserved for Jira's native description field."""
+def test_description_is_plain_string_for_custom_field(dynamic_mapper):
+    """A description mapped to a custom field is sent as a plain string."""
     applied_control = AppliedControl(folder_id=None, description="Hello world")
 
     remote = dynamic_mapper.to_remote(applied_control)
 
-    # Mapped to a custom field, so we keep it as a plain string
     assert remote["customfield_10100"] == "Hello world"
     assert "description" not in remote
+
+
+def test_native_description_is_plain_string(configuration):
+    """Native ``description`` is a plain string, not ADF (REST v2 rejects ADF)."""
+    mapper = JiraFieldMapper(configuration)
+    applied_control = AppliedControl(folder_id=None, description="Hello world")
+
+    remote = mapper.to_remote(applied_control)
+
+    assert remote["description"] == "Hello world"
+
+
+def test_undefined_status_is_not_pushed(configuration):
+    """The ``--`` (UNDEFINED) status sentinel is dropped instead of pushed."""
+    mapper = JiraFieldMapper(configuration)
+    applied_control = AppliedControl(
+        folder_id=None, name="No status control", status="--"
+    )
+
+    remote = mapper.to_remote(applied_control)
+
+    assert "status" not in remote
+
+
+@patch("integrations.itsm.jira.client.JIRA")
+def test_create_jira_issue_skips_blank_status(mock_jira, configuration):
+    """Creating an issue with an undefined status performs no status transition."""
+    mock_issue = MagicMock()
+    mock_issue.key = "PROJ-200"
+    mock_jira.return_value.create_issue.return_value = mock_issue
+
+    client = JiraClient(configuration)
+    applied_control = AppliedControl(
+        folder_id=None, name="No status control", status="--"
+    )
+
+    issue_key = client.create_remote_object(applied_control)
+
+    assert issue_key == "PROJ-200"
+    mock_jira.return_value.transitions.assert_not_called()
+    mock_jira.return_value.transition_issue.assert_not_called()
 
 
 # Choice scoping tests (status/priority must come from the selected project only)

@@ -120,6 +120,11 @@ class JiraClient(BaseIntegrationClient):
         Helper function to find and execute the correct workflow transition
         to move an issue to a target status.
         """
+        # A blank target (e.g. an unmapped or undefined status) has no workflow
+        # path; skip silently instead of raising on a "--"/"" transition.
+        if not target_status_name or not target_status_name.strip():
+            return
+
         try:
             transitions = self.jira.transitions(remote_id)
 
