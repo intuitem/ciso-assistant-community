@@ -28,7 +28,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 
 from core.views import BaseModelViewSet, GenericFilterSet, RoleFilter
-from core.utils import MAIN_ENTITY_DEFAULT_NAME, get_auditee_filtered_folder_ids
+from core.utils import MAIN_ENTITY_DEFAULT_NAME
 from iam.models import User, Role, UserGroup, RoleAssignment
 from tprm.models import Entity
 
@@ -811,12 +811,28 @@ class CustomWordTemplateViewSet(BaseModelViewSet):
         )
 
 
+AUDIT_TRAIL_PERMISSION = "view_objectaudittrail"
+
+
+def _object_audit_trail_enabled():
+    from global_settings.models import GlobalSettings
+
+    gs = GlobalSettings.objects.filter(name=GlobalSettings.Names.FEATURE_FLAGS).first()
+    flags = gs.value if gs and isinstance(gs.value, dict) else {}
+    return flags.get("object_audit_trail", True) is not False
+
+
 class AuditedModelsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, format=None):
         from auditlog.registry import auditlog
 
+        if (
+            not _object_audit_trail_enabled()
+            or AUDIT_TRAIL_PERMISSION not in request.user.permissions
+        ):
+            return Response([])
         names = sorted(model._meta.model_name for model in auditlog.get_models())
         return Response(names)
 
@@ -837,6 +853,8 @@ class ObjectAuditTrailView(APIView):
                 {"detail": "content_type and object_id are required."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        if not _object_audit_trail_enabled():
+            raise PermissionDenied
         try:
             object_id = UUID(str(raw_object_id))
         except ValueError:
@@ -851,15 +869,13 @@ class ObjectAuditTrailView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
         model_class = content_type.model_class()
-        if not RoleAssignment.is_object_readable(request.user, model_class, object_id):
-            raise PermissionDenied
-
-        # Deny when the user only holds the auditee role on the object's folder:
-        # the trail would otherwise expose raw field changes (bypassing
-        # field_visibility) to respondents/third-party users.
         obj = model_class.objects.filter(pk=object_id).first()
-        folder_id = getattr(obj, "folder_id", None)
-        if folder_id and folder_id in get_auditee_filtered_folder_ids(request.user):
+        folder = getattr(obj, "folder", None) or Folder.get_root_folder()
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename=AUDIT_TRAIL_PERMISSION),
+            folder=folder,
+        ):
             raise PermissionDenied
 
         entries = (

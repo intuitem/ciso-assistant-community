@@ -47,5 +47,10 @@ class GlobalSettings(AbstractBaseModel, FolderMixin):
     # Value of the setting.
     value = models.JSONField(default=dict)
 
+    class Meta:
+        permissions = [
+            ("view_objectaudittrail", "Can view object audit trails"),
+        ]
+
     def __str__(self):
         return self.name

@@ -46,15 +46,11 @@
 		auditedModels = await loadAuditedModels(fetch);
 	});
 
-	const isThirdPartyUser = $derived(page.data?.user?.is_third_party ?? false);
+	const hasPermission = $derived(!!page.data?.user?.permissions?.view_objectaudittrail);
 	const featureEnabled = $derived(page.data?.featureflags?.object_audit_trail !== false);
 
 	const enabled = $derived(
-		featureEnabled &&
-			!isThirdPartyUser &&
-			!!contentType &&
-			!!objectId &&
-			auditedModels.has(contentType)
+		featureEnabled && hasPermission && !!contentType && !!objectId && auditedModels.has(contentType)
 	);
 
 	function openAuditTrail() {

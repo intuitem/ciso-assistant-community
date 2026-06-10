@@ -604,6 +604,7 @@ ANALYST_PERMISSIONS_LIST = [
     "view_agentaction",
     "change_agentaction",
     "delete_agentaction",
+    "view_objectaudittrail",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -1012,6 +1013,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_agentaction",
     "change_agentaction",
     "delete_agentaction",
+    "view_objectaudittrail",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -1477,6 +1479,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_agentaction",
     "change_agentaction",
     "delete_agentaction",
+    "view_objectaudittrail",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
