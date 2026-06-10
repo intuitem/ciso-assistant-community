@@ -49,6 +49,7 @@ dependencies = [
     "qdrant-client>=1.14.2,<2",
     "httpx>=0.28.1,<0.29",
     "sentence-transformers>=5.5.1,<6",
+    "torch>=2.12.0,<3",
     "PyMuPDF>=1.25.5,<2",
     "markdown>=3.10.2,<4",
     "rapidfuzz>=3.14.3,<4",
@@ -67,3 +68,13 @@ dev = [
 [tool.uv]
 package = false
 default-groups = "all"
+
+# Pull torch from the PyTorch CPU index so the CUDA/nvidia wheels (several GB) are
+# never resolved or downloaded. Keeps images small and avoids disk exhaustion in CI.
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
