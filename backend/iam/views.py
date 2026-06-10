@@ -431,7 +431,11 @@ class ChangePasswordView(views.APIView):
             current_digest = crypto.hash_token(current_token)
             AuthToken.objects.filter(user=user).exclude(
                 Q(digest=current_digest)
-                | Q(Exists(PersonalAccessToken.objects.filter(auth_token=OuterRef("pk"))))
+                | Q(
+                    Exists(
+                        PersonalAccessToken.objects.filter(auth_token=OuterRef("pk"))
+                    )
+                )
             ).delete()
         return Response(status=status.HTTP_200_OK)
 
