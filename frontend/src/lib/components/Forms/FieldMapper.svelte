@@ -38,6 +38,7 @@
 				{ value: 'in_progress', label: m.inProgress() },
 				{ value: 'on_hold', label: m.onHold() },
 				{ value: 'active', label: m.active() },
+				{ value: 'degraded', label: m.degraded() },
 				{ value: 'deprecated', label: m.deprecated() }
 			]
 		},

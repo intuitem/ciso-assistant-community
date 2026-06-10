@@ -35,6 +35,7 @@ class JiraFieldMapper(BaseFieldMapper):
             "in_progress": "In Progress",
             "on_hold": "On Hold",
             "active": "Active",
+            "degraded": "Degraded",
             "deprecated": "Closed",
         },
         "priority": {

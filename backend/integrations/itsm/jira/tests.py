@@ -324,6 +324,18 @@ def test_undefined_status_is_not_pushed(configuration):
     assert "status" not in remote
 
 
+def test_degraded_status_round_trips(configuration):
+    """The ``degraded`` status maps to/from Jira via the default value map."""
+    mapper = JiraFieldMapper(configuration)
+
+    applied_control = AppliedControl(folder_id=None, status="degraded")
+    remote = mapper.to_remote(applied_control)
+    assert remote["status"] == "Degraded"
+
+    local = mapper.to_local({"fields": {"status": {"name": "Degraded"}}})
+    assert local["status"] == "degraded"
+
+
 @patch("integrations.itsm.jira.client.JIRA")
 def test_create_jira_issue_skips_blank_status(mock_jira, configuration):
     """Creating an issue with an undefined status performs no status transition."""
