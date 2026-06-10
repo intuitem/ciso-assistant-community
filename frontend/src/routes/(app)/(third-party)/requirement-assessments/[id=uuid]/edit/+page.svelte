@@ -262,13 +262,7 @@
 		validationMethod: 'auto'
 	});
 
-	let mappingInference = $derived(data.requirementAssessment.mapping_inference); //TODO: REMOVE AFTER DEBUG (replace by a plain data.requirementAssessment.mapping_inference instead)
-	/* let mappingInference = $derived({
-		sourceRequirementAssessments:
-			data.requirementAssessment.mapping_inference.source_requirement_assessments,
-		result: data.requirementAssessment.mapping_inference.result,
-		annotation: ''
-	}); */
+	let mappingInference = $derived(data.requirementAssessment.mapping_inference);
 
 	let requirementAssessmentsList: string[] = $hideSuggestions;
 
