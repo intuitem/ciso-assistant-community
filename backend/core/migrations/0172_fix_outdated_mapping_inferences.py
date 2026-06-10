@@ -6,6 +6,7 @@ OUTDATED_FIELD: Final[str] = "source_requirement_assessment"
 NEW_FIELD: Final[str] = "source_requirement_assessments"
 BATCH_SIZE: Final[int] = 100
 
+
 def fix_outdated_mapping_inferences(apps, schema_editor):
     """
     Update all `RequirementAssessment` objects with an outdated `mapping_inference` structure to the the new structure.
@@ -22,8 +23,9 @@ def fix_outdated_mapping_inferences(apps, schema_editor):
     # The `requirement_assessment_urn` value may be `None` because we made `RequirementNode.urn` nullable (for whatever reason).
     requirement_assessment_id_to_urn: dict[str, Optional[str]] = {
         str(requirement_assessment_id): requirement_assessment_urn
-
-        for requirement_assessment_id, requirement_assessment_urn in RequirementAssessment.objects.values_list("id", "requirement__urn")
+        for requirement_assessment_id, requirement_assessment_urn in RequirementAssessment.objects.values_list(
+            "id", "requirement__urn"
+        )
     }
 
     # I am using `.value_list(...)` and the `.all()` iterator to avoid abusive RAM usage (by preventing loading all `RequirementAssessment` in memory at once (at the same time)).
@@ -42,15 +44,16 @@ def fix_outdated_mapping_inferences(apps, schema_editor):
                 old_field_value = {}
 
             source_requirement_id = old_field_value.get("id")
-            source_requirement_urn = requirement_assessment_id_to_urn.get(source_requirement_id)
+            source_requirement_urn = requirement_assessment_id_to_urn.get(
+                source_requirement_id
+            )
 
             if source_requirement_urn is not None:
                 # This check makes the code more defensive again for the same reason as the one mentionned herebefore.
                 # This will erase the source_requirement_assessment if he's not in the codebase anymore, i guess that's fine.
 
                 old_field_value["urn"] = source_requirement_urn
-                new_field_value = { source_requirement_urn: old_field_value }
-
+                new_field_value = {source_requirement_urn: old_field_value}
 
             mapping_inference[NEW_FIELD] = new_field_value
             requirement_assessment.mapping_inference = mapping_inference
@@ -66,7 +69,9 @@ def fix_outdated_mapping_inferences(apps, schema_editor):
                 requirement_assessments_to_update.clear()
 
     if len(requirement_assessments_to_update) > 0:
-        RequirementAssessment.objects.bulk_update(requirement_assessments_to_update, ["mapping_inference"])
+        RequirementAssessment.objects.bulk_update(
+            requirement_assessments_to_update, ["mapping_inference"]
+        )
 
 
 class Migration(migrations.Migration):
