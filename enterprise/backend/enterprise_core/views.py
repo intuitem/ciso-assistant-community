@@ -883,6 +883,12 @@ class ObjectAuditTrailView(APIView):
             .select_related("actor")
             .order_by("-timestamp")[: self.MAX_ENTRIES]
         )
+        fk_models = {
+            f.name: f.related_model
+            for f in model_class._meta.get_fields()
+            if getattr(f, "many_to_one", False) and f.related_model
+        }
+        label_cache = {}
         results = [
             {
                 "id": entry.id,
@@ -891,11 +897,42 @@ class ObjectAuditTrailView(APIView):
                 "actor": (entry.additional_data or {}).get("user_email")
                 or (entry.actor.email if entry.actor else None),
                 "timestamp": entry.timestamp,
-                "changes": self._mask(model_name, entry.changes),
+                "changes": self._mask(
+                    model_name, self._humanize(entry.changes, fk_models, label_cache)
+                ),
             }
             for entry in entries
         ]
         return Response(results)
+
+    @staticmethod
+    def _humanize(changes, fk_models, label_cache):
+        # Replace foreign-key UUIDs with the related object's label when resolvable.
+        if not isinstance(changes, dict):
+            return changes
+        result = {}
+        for field, value in changes.items():
+            if field in fk_models and isinstance(value, list) and len(value) == 2:
+                model = fk_models[field]
+                result[field] = [
+                    ObjectAuditTrailView._label(model, v, label_cache) for v in value
+                ]
+            else:
+                result[field] = value
+        return result
+
+    @staticmethod
+    def _label(model, value, label_cache):
+        if value in (None, "None", ""):
+            return value
+        key = (model, value)
+        if key not in label_cache:
+            try:
+                obj = model.objects.filter(pk=value).first()
+            except Exception:
+                obj = None
+            label_cache[key] = str(obj) if obj is not None else value
+        return label_cache[key]
 
     @staticmethod
     def _mask(model_name, changes):
