@@ -5,9 +5,13 @@
 	function loadAuditedModels(fetchFn: typeof fetch): Promise<Set<string>> {
 		if (!auditedModelsPromise) {
 			auditedModelsPromise = fetchFn('/fe-api/audited-models')
-				.then((res) => (res.ok ? res.json() : []))
+				.then((res) => {
+					if (!res.ok) throw new Error(`HTTP ${res.status}`);
+					return res.json();
+				})
 				.then((names: string[]) => new Set(names))
 				.catch(() => {
+					// Don't cache transient failures: reset so the next mount retries.
 					auditedModelsPromise = null;
 					return new Set<string>();
 				});
