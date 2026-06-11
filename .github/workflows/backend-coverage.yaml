@@ -6,6 +6,7 @@ on:
     branches: ["main"]
     paths:
       - "backend/**"
+      - ".github/workflows/backend-coverage.yaml"
 # Cancel older in-progress runs for the same PR or the same ref (branch)
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -34,7 +35,7 @@ jobs:
       CISO_ASSISTANT_URL: http://127.0.0.1:5173
     services:
       postgres:
-        image: postgres:16
+        image: public.ecr.aws/docker/library/postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres # test credential
@@ -46,30 +47,18 @@ jobs:
       matrix:
         python-version: ["3.14"]
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Install uv and set up python ${{ matrix.python-version }}
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "pip"
-      - name: Install Poetry via pipx
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m pip install --upgrade pip
-          python -m pip install --upgrade pipx
-          python -m pipx ensurepath
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          python -m pipx install poetry
-      - name: Check Poetry version
-        shell: bash
-        run: poetry --version
+          enable-cache: true
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
-        run: poetry install
+        run: uv sync --locked
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
-        run: poetry run python manage.py migrate
+        run: uv run python manage.py migrate
       - name: Run coverage
         working-directory: ${{ env.backend-directory }}
         env:
@@ -79,7 +68,7 @@ jobs:
           set -euo pipefail
           DATABASE_URL="postgres://postgres:postgres@localhost:${PG_PORT}/postgres"
           export DATABASE_URL
-          poetry run coverage run -m pytest --ignore-glob="**/test_api*" --ignore="**/venv/**"
+          uv run coverage run -m pytest --ignore-glob="**/test_api*" --ignore="**/venv/**"
 
       - name: Display coverage report
         working-directory: ${{ env.backend-directory }}
@@ -90,4 +79,4 @@ jobs:
           set -euo pipefail
           DATABASE_URL="postgres://postgres:postgres@localhost:${PG_PORT}/postgres"
           export DATABASE_URL
-          poetry run coverage report
+          uv run coverage report

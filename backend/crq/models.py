@@ -11,6 +11,7 @@ from core.models import (
     Threat,
     Vulnerability,
 )
+from core.utils import format_currency as _fmt_currency, get_global_currency
 from global_settings.models import GlobalSettings
 from iam.models import FolderMixin, User
 from .utils import (
@@ -90,12 +91,7 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         if not self.risk_tolerance or not self.risk_tolerance.get("points"):
             return "Not configured"
 
-        # Get currency from global settings
-        general_settings = GlobalSettings.objects.filter(name="general").first()
-        currency = (
-            general_settings.value.get("currency", "€") if general_settings else "€"
-        )
-
+        currency = get_global_currency()
         points = self.risk_tolerance["points"]
         display_parts = []
 
@@ -106,10 +102,9 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
             loss = point1.get("acceptable_loss")
             if prob is not None:
                 prob_display = f"{prob * 100:.1f}%"
-                if loss is not None:
-                    loss_display = f"{loss:,.0f} {currency}"
-                else:
-                    loss_display = "N/A"
+                loss_display = (
+                    _fmt_currency(loss, currency) if loss is not None else "N/A"
+                )
                 display_parts.append(
                     f"Point 1: {prob_display} probability, {loss_display} acceptable loss"
                 )
@@ -121,10 +116,9 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
             loss = point2.get("acceptable_loss")
             if prob is not None:
                 prob_display = f"{prob * 100:.1f}%"
-                if loss is not None:
-                    loss_display = f"{loss:,.0f} {currency}"
-                else:
-                    loss_display = "N/A"
+                loss_display = (
+                    _fmt_currency(loss, currency) if loss is not None else "N/A"
+                )
                 display_parts.append(
                     f"Point 2: {prob_display} probability, {loss_display} acceptable loss"
                 )
@@ -140,13 +134,7 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         if self.loss_threshold is None:
             return "Not set"
 
-        # Get currency from global settings
-        general_settings = GlobalSettings.objects.filter(name="general").first()
-        currency = (
-            general_settings.value.get("currency", "€") if general_settings else "€"
-        )
-
-        return f"{self.loss_threshold:,.0f} {currency}"
+        return _fmt_currency(self.loss_threshold, get_global_currency())
 
     def generate_risk_tolerance_curve(self):
         """
@@ -565,18 +553,7 @@ class QuantitativeRiskScenario(NameDescriptionMixin, FolderMixin):
 
     def _format_currency(self, value):
         """Helper method to format currency values."""
-        # Get currency from global settings
-        general_settings = GlobalSettings.objects.filter(name="general").first()
-        currency = (
-            general_settings.value.get("currency", "€") if general_settings else "€"
-        )
-
-        if value >= 1_000_000:
-            return f"{value / 1_000_000:.1f}M {currency}"
-        elif value >= 1_000:
-            return f"{value / 1_000:.0f}K {currency}"
-        else:
-            return f"{value:,.0f} {currency}"
+        return _fmt_currency(value, get_global_currency())
 
     @property
     def residual_ale(self):
@@ -830,18 +807,7 @@ class QuantitativeRiskHypothesis(
 
     def _format_currency(self, value):
         """Helper method to format currency values."""
-        # Get currency from global settings
-        general_settings = GlobalSettings.objects.filter(name="general").first()
-        currency = (
-            general_settings.value.get("currency", "€") if general_settings else "€"
-        )
-
-        if value >= 1_000_000:
-            return f"{value / 1_000_000:.1f}M {currency}"
-        elif value >= 1_000:
-            return f"{value / 1_000:.0f}K {currency}"
-        else:
-            return f"{value:,.0f} {currency}"
+        return _fmt_currency(value, get_global_currency())
 
     @property
     def treatment_cost(self):

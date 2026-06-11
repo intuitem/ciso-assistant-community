@@ -124,6 +124,11 @@ class TestLibrariesAuthenticated:
             Framework,
             user_group=test.user_group,
             scope="Global",
+            **(
+                {"fails": True, "expected_status": status.HTTP_403_FORBIDDEN}
+                if test.user_group == "BI-UG-DMA"
+                else {}  # Domain Manager can't delete Global frameworks (i.e. imported frameworks)
+            ),
         )
 
     def test_import_risk_matrix(self, test):

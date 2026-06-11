@@ -1,9 +1,17 @@
 <script lang="ts">
 	import { complianceResultTailwindColorMap } from '$lib/utils/constants';
 	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
+	import Question from '$lib/components/Forms/Question.svelte';
 	import { m } from '$paraglide/messages';
 	import type { PageData } from './$types';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import {
+		getFieldVisibility,
+		hasComputedResult,
+		computeRequirementScoreAndResult,
+		resultBadgeStyle
+	} from '$lib/utils/helpers';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface Props {
 		data: PageData;
@@ -15,6 +23,13 @@
 		data.compliance_assessment.is_locked || data.compliance_assessment.status === 'in_review'
 	);
 
+	// Field visibility for auditor role
+	const complianceAssessment = $derived(data.compliance_assessment);
+	const fieldVis = $derived(getFieldVisibility(complianceAssessment, 'auditor'));
+	const showAnswers = $derived(fieldVis.showAnswers);
+	const showResult = $derived(fieldVis.showResult);
+	const showObservation = $derived(fieldVis.showObservation);
+
 	const possible_options = [
 		{ id: 'not_assessed', label: m.notAssessed() },
 		{ id: 'non_compliant', label: m.nonCompliant() },
@@ -23,41 +38,88 @@
 		{ id: 'not_applicable', label: m.notApplicable() }
 	];
 
-	const requirementAssessments = data.requirement_assessments.filter(
-		(requirement) => requirement.name || requirement.description
-	);
-	let currentIndex = $state(0);
-	let currentRequirementAssessment = $derived(requirementAssessments[currentIndex]);
-
-	let color = $derived(complianceResultTailwindColorMap[currentRequirementAssessment.result]);
-
 	const requirementHashmap = Object.fromEntries(
-		data.requirements.map((requirement) => [requirement.id, requirement])
+		data.requirements.map((requirement: Record<string, any>) => [requirement.id, requirement])
 	);
-	let requirement = $derived(requirementHashmap[currentRequirementAssessment.requirement.id]);
-	let parent = $derived(data.requirements.find((req) => req.urn === requirement.parent_urn));
+
+	// URN-keyed hashmap for O(1) parent lookup
+	const requirementsByUrn = Object.fromEntries(
+		data.requirements
+			.filter((r: Record<string, any>) => r.urn)
+			.map((r: Record<string, any>) => [r.urn, r])
+	);
+
+	// Build unified navigation: assessable items + splash nodes, ordered by order_id
+	type NavItem =
+		| { type: 'assessment'; data: (typeof data.requirement_assessments)[0] }
+		| { type: 'splash'; data: Record<string, any> };
+
+	const assessmentItems: NavItem[] = data.requirement_assessments
+		.filter((ra: Record<string, any>) => ra.name || ra.description)
+		.map((ra: Record<string, any>) => ({ type: 'assessment' as const, data: ra }));
+
+	const splashItems: NavItem[] = data.requirements
+		.filter((r: Record<string, any>) => r.display_mode === 'splash')
+		.map((r: Record<string, any>) => ({ type: 'splash' as const, data: r }));
+
+	// Merge and sort by order_id
+	const navItems: NavItem[] = [...assessmentItems, ...splashItems].sort((a, b) => {
+		const orderA =
+			a.type === 'assessment'
+				? (requirementHashmap[a.data.requirement?.id]?.order_id ?? 0)
+				: (a.data.order_id ?? 0);
+		const orderB =
+			b.type === 'assessment'
+				? (requirementHashmap[b.data.requirement?.id]?.order_id ?? 0)
+				: (b.data.order_id ?? 0);
+		return orderA - orderB;
+	});
+
+	// Only assessable items count for progress
+	const assessableItems = navItems.filter((item) => item.type === 'assessment');
+
+	let currentIndex = $state(0);
+	let currentNavItem = $derived(navItems[currentIndex]);
+	let currentRequirementAssessment = $derived(
+		currentNavItem?.type === 'assessment' ? currentNavItem.data : null
+	);
+	let currentSplashNode = $derived(currentNavItem?.type === 'splash' ? currentNavItem.data : null);
+
+	let color = $derived(
+		currentRequirementAssessment
+			? complianceResultTailwindColorMap[currentRequirementAssessment.result]
+			: undefined
+	);
+
+	let requirement = $derived(
+		currentRequirementAssessment
+			? requirementHashmap[currentRequirementAssessment.requirement?.id]
+			: currentSplashNode
+	);
+	let parent = $derived(
+		requirement?.parent_urn ? (requirementsByUrn[requirement.parent_urn] ?? null) : null
+	);
 
 	let title = $derived(
-		requirement.display_short
+		requirement?.display_short
 			? requirement.display_short
-			: parent.display_short
+			: parent?.display_short
 				? parent.display_short
-				: parent.description
+				: (parent?.description ?? '')
 	);
 
-	// Progress tracking
+	// Progress tracking (only assessable items count)
 	let assessedCount = $derived(
-		requirementAssessments.filter((ra) => ra.result && ra.result !== 'not_assessed').length
+		assessableItems.filter(
+			(item) =>
+				item.type === 'assessment' && item.data.result && item.data.result !== 'not_assessed'
+		).length
 	);
 	let progressPercent = $derived(
-		requirementAssessments.length > 0
-			? Math.round((assessedCount / requirementAssessments.length) * 100)
-			: 0
+		assessableItems.length > 0 ? Math.round((assessedCount / assessableItems.length) * 100) : 0
 	);
 	let currentProgressPercent = $derived(
-		requirementAssessments.length > 0
-			? ((currentIndex + 1) / requirementAssessments.length) * 100
-			: 0
+		navItems.length > 0 ? ((currentIndex + 1) / navItems.length) * 100 : 0
 	);
 
 	// Slide direction for transitions
@@ -67,7 +129,7 @@
 	function nextItem() {
 		flushObservation();
 		slideDirection = 'next';
-		if (currentIndex < requirementAssessments.length - 1) {
+		if (currentIndex < navItems.length - 1) {
 			currentIndex += 1;
 		} else {
 			currentIndex = 0;
@@ -81,18 +143,18 @@
 		if (currentIndex > 0) {
 			currentIndex -= 1;
 		} else {
-			currentIndex = requirementAssessments.length - 1;
+			currentIndex = navItems.length - 1;
 		}
 		transitionKey++;
 	}
 
 	// svelte-ignore state_referenced_locally
-	let result = $state(currentRequirementAssessment.result);
+	let result = $state(currentRequirementAssessment?.result ?? null);
 	// svelte-ignore state_referenced_locally
-	let observation = $state(currentRequirementAssessment.observation ?? '');
+	let observation = $state(currentRequirementAssessment?.observation ?? '');
 	$effect(() => {
-		result = currentRequirementAssessment.result;
-		observation = currentRequirementAssessment.observation ?? '';
+		result = currentRequirementAssessment?.result ?? null;
+		observation = currentRequirementAssessment?.observation ?? '';
 	});
 
 	// Debounce timer for observation saves
@@ -125,6 +187,59 @@
 		observationTimer = setTimeout(() => saveObservation(value), 500);
 	}
 
+	async function saveAnswer(urn: string, newAnswer: any) {
+		if (!currentRequirementAssessment) return;
+		if (!currentRequirementAssessment.answers) currentRequirementAssessment.answers = {};
+		currentRequirementAssessment.answers[urn] = newAnswer;
+		// Optimistic preview from the shared compute helper (kept in sync with
+		// the backend aggregation).
+		const computed = computeRequirementScoreAndResult(
+			currentRequirementAssessment,
+			currentRequirementAssessment.answers
+		);
+		if (computed.result !== null) {
+			currentRequirementAssessment.result = computed.result;
+			result = computed.result;
+		}
+
+		const form = document.getElementById('flashModeForm');
+		const targetRa = currentRequirementAssessment;
+		try {
+			const res = await fetch(form!.action, {
+				method: 'POST',
+				body: JSON.stringify({
+					id: targetRa.id,
+					answers: { [urn]: newAnswer }
+				})
+			});
+			// SvelteKit wraps action responses; the actual API body lives at
+			// `data.body`. If the server recomputed a different result/score
+			// (e.g. due to logic the optimistic preview cannot mirror),
+			// reconcile so the badge matches persisted state.
+			const payload = await res.json().catch(() => null);
+			const apiBody = payload?.data?.body ?? payload?.body ?? null;
+			if (apiBody && targetRa.id === currentRequirementAssessment?.id) {
+				if (apiBody.result !== undefined && apiBody.result !== null) {
+					currentRequirementAssessment.result = apiBody.result;
+					result = apiBody.result;
+				}
+				if (apiBody.score !== undefined) {
+					currentRequirementAssessment.score = apiBody.score;
+				}
+			}
+		} catch (err) {
+			console.error('flash-mode saveAnswer failed', err);
+		}
+	}
+
+	let currentQuestions = $derived(
+		currentRequirementAssessment
+			? (requirementHashmap[currentRequirementAssessment.requirement?.id]?.questions ?? null)
+			: null
+	);
+	let hasQuestions = $derived(currentQuestions != null && Object.keys(currentQuestions).length > 0);
+	let currentHasComputedResult = $derived(hasComputedResult(currentQuestions));
+
 	function updateResult(newResult: string | null) {
 		currentRequirementAssessment.result = newResult;
 		result = newResult;
@@ -145,7 +260,7 @@
 
 	function jumpToItem(index: number) {
 		flushObservation();
-		if (index >= 0 && index < requirementAssessments.length) {
+		if (index >= 0 && index < navItems.length) {
 			slideDirection = index > currentIndex ? 'next' : 'prev';
 			currentIndex = index;
 			showNavigation = false;
@@ -198,7 +313,9 @@
 		not_applicable: '#1e293b'
 	};
 	let accentColor = $derived(
-		resultAccentColorMap[currentRequirementAssessment.result] ?? '#d1d5db'
+		currentSplashNode
+			? '#a855f7'
+			: (resultAccentColorMap[currentRequirementAssessment?.result ?? ''] ?? '#d1d5db')
 	);
 </script>
 
@@ -206,7 +323,7 @@
 
 <div class="flash-mode-container">
 	<div class="flash-card" style="--accent: {accentColor}">
-		{#if currentRequirementAssessment}
+		{#if currentNavItem}
 			<!-- Top bar: back link + progress -->
 			<div class="flash-header">
 				<a href="/compliance-assessments/{data.compliance_assessment.id}" class="back-link">
@@ -217,7 +334,7 @@
 				<div class="header-right">
 					<span class="progress-stat">
 						<i class="fa-solid fa-check text-green-400 text-[10px]"></i>
-						{assessedCount}/{requirementAssessments.length}
+						{assessedCount}/{assessableItems.length}
 					</span>
 					<div class="relative">
 						<button
@@ -227,14 +344,16 @@
 						>
 							<span class="counter-current">{currentIndex + 1}</span>
 							<span class="counter-sep">/</span>
-							<span class="counter-total">{requirementAssessments.length}</span>
+							<span class="counter-total">{navItems.length}</span>
 							<kbd>G</kbd>
 						</button>
 
 						{#if showNavigation}
 							<div class="jump-popover">
 								<div class="jump-popover-inner">
-									<div class="text-xs font-semibold uppercase tracking-wider text-surface-400-600 mb-2">
+									<div
+										class="text-xs font-semibold uppercase tracking-wider text-surface-400-600 mb-2"
+									>
 										Jump to item
 									</div>
 									<div class="flex gap-2">
@@ -243,7 +362,7 @@
 											bind:value={jumpToInput}
 											type="number"
 											min="1"
-											max={requirementAssessments.length}
+											max={navItems.length}
 											placeholder="#"
 											class="jump-input"
 											onkeydown={(e) => {
@@ -293,19 +412,51 @@
 						class:slide-in-right={slideDirection === 'next'}
 						class:slide-in-left={slideDirection === 'prev'}
 					>
-						<div class="content-section-label">{title}</div>
-
-						{#if currentRequirementAssessment.description}
+						{#if currentSplashNode}
+							<!-- Splash screen: full-page markdown -->
+							{#if currentSplashNode.name}
+								<div class="content-section-label flex items-center gap-2">
+									<i class="fa-solid fa-display text-purple-400 text-sm"></i>
+									{currentSplashNode.name}
+								</div>
+							{/if}
 							<div class="content-description">
-								<MarkdownRenderer content={currentRequirementAssessment.description} />
+								<MarkdownRenderer content={currentSplashNode.description} />
 							</div>
-						{/if}
+						{:else if currentRequirementAssessment}
+							<div class="content-section-label flex items-center gap-3 flex-wrap">
+								<span>{title}</span>
+								{#if typeof requirement?.weight === 'number' && Number.isFinite(requirement.weight) && requirement.weight !== 1 && currentRequirementAssessment.assessable}
+									<span class="badge text-sm font-medium bg-indigo-100 text-indigo-800">
+										{m.requirementWeight()}: {requirement.weight}
+									</span>
+								{/if}
+							</div>
 
-						{#if requirement.annotation}
-							<div class="content-annotation">
-								<div class="annotation-bar"></div>
-								<MarkdownRenderer content={requirement.annotation} />
-							</div>
+							{#if currentRequirementAssessment.description}
+								<div class="content-description">
+									<MarkdownRenderer content={currentRequirementAssessment.description} />
+								</div>
+							{/if}
+
+							{#if requirement?.annotation}
+								<div class="content-annotation">
+									<div class="annotation-bar"></div>
+									<MarkdownRenderer content={requirement.annotation} />
+								</div>
+							{/if}
+
+							{#if showAnswers && hasQuestions}
+								<div class="mt-4">
+									<Question
+										questions={currentQuestions}
+										initialValue={currentRequirementAssessment.answers ?? {}}
+										field="answers"
+										disabled={isReadOnly}
+										onChange={saveAnswer}
+									/>
+								</div>
+							{/if}
 						{/if}
 					</div>
 				{/key}
@@ -313,31 +464,43 @@
 
 			<!-- Controls -->
 			<div class="flash-controls">
-				<form id="flashModeForm" action="?/updateRequirementAssessment" method="post">
-					<RadioGroup
-						possibleOptions={possible_options}
-						initialValue={currentRequirementAssessment.result}
-						classes="w-full"
-						colorMap={complianceResultTailwindColorMap}
-						disabled={isReadOnly}
-						field="result"
-						onChange={(newValue) => {
-							const newResult = result === newValue ? 'not_assessed' : newValue;
-							updateResult(newResult);
-						}}
-						key="id"
-						labelKey="label"
-					/>
-				</form>
+				{#if currentRequirementAssessment}
+					<form id="flashModeForm" action="?/updateRequirementAssessment" method="post">
+						{#if showResult}
+							{#if currentHasComputedResult}
+								<span class="badge text-sm font-semibold" style={resultBadgeStyle(result)}>
+									{safeTranslate(result ?? 'not_assessed')}
+								</span>
+							{:else}
+								<RadioGroup
+									possibleOptions={possible_options}
+									initialValue={currentRequirementAssessment.result}
+									classes="w-full"
+									colorMap={complianceResultTailwindColorMap}
+									disabled={isReadOnly}
+									field="result"
+									onChange={(newValue) => {
+										const newResult = result === newValue ? 'not_assessed' : newValue;
+										updateResult(newResult);
+									}}
+									key="id"
+									labelKey="label"
+								/>
+							{/if}
+						{/if}
+					</form>
 
-				<textarea
-					class="observation-textarea"
-					rows="2"
-					placeholder="{m.observation()}..."
-					value={observation}
-					disabled={isReadOnly}
-					oninput={(e) => handleObservationInput(e.currentTarget.value)}
-				></textarea>
+					{#if showObservation}
+						<textarea
+							class="observation-textarea"
+							rows="2"
+							placeholder="{m.observation()}..."
+							value={observation}
+							disabled={isReadOnly}
+							oninput={(e) => handleObservationInput(e.currentTarget.value)}
+						></textarea>
+					{/if}
+				{/if}
 
 				<div class="nav-row">
 					<button class="nav-btn nav-btn-prev" onclick={previousItem}>

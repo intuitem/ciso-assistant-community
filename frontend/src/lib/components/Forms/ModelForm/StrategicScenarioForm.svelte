@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import type { SuperValidated } from 'sveltekit-superforms';
@@ -52,18 +53,11 @@
 		nullable
 	/>
 {/key}
-<AutocompleteSelect
+<FolderTreeSelect
 	{form}
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.folder()}
 	hidden
-/>
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
 />

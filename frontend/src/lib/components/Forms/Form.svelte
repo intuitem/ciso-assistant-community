@@ -2,7 +2,7 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms';
 	import SuperDebug from 'sveltekit-superforms';
-	import type { AnyZodObject } from 'zod';
+	import type { FormDataShape } from '$lib/utils/schemas';
 	// import type { ModalStore } from '@skeletonlabs/skeleton-svelte';
 	// const modalStore: ModalStore = getModalStore();
 
@@ -17,7 +17,7 @@
 	}
 
 	interface Props {
-		data?: SuperValidated<AnyZodObject>;
+		data?: SuperValidated<FormDataShape>;
 		dataType?: 'form' | 'json';
 		invalidateAll?: boolean; // set to false to keep form data using muliple forms on a page
 		validators?: ValidationAdapter<any> | undefined;
@@ -47,20 +47,26 @@
 		validationMethod = 'auto',
 		useFocusTrap = true,
 		debug = false,
-		_form = superForm(data, {
-			dataType: dataType,
-			invalidateAll: invalidateAll,
-			applyAction: applyAction,
-			resetForm: resetForm,
-			validators: validators,
-			onUpdated: ({ form }) => handleFormUpdated({ form, closeModal: true }),
-			onSubmit: onSubmit,
-			taintedMessage: taintedMessage,
-			validationMethod
-		}),
+		_form: passedForm = undefined,
 		children,
 		...rest
 	}: Props = $props();
+
+	// Svelte 5.55.6 (PR sveltejs/svelte#18146) made $props() defaults run as deriveds,
+	// so calling superForm() in the default throws state_unsafe_mutation. Build it here instead.
+	const _form =
+		passedForm ??
+		superForm(data, {
+			dataType,
+			invalidateAll,
+			applyAction,
+			resetForm,
+			validators,
+			onUpdated: ({ form }) => handleFormUpdated({ form, closeModal: true }),
+			onSubmit,
+			taintedMessage,
+			validationMethod
+		});
 
 	const { form, message, tainted, delayed, errors, allErrors, enhance } = _form;
 </script>

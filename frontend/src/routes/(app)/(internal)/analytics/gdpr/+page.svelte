@@ -11,6 +11,34 @@
 	}
 
 	let { data }: Props = $props();
+
+	const BREACH_TYPE_COLORS: Record<string, string> = {
+		privacyDestruction: '#991b1b',
+		privacyLoss: '#ea580c',
+		privacyAlteration: '#ca8a04',
+		privacyUnauthorizedDisclosure: '#7c3aed',
+		privacyUnauthorizedAccess: '#0891b2',
+		privacyOther: '#6b7280'
+	};
+
+	const REQUEST_TYPE_COLORS: Record<string, string> = {
+		deletion: '#2563eb',
+		rectification: '#0ea5e9',
+		access: '#14b8a6',
+		portability: '#22c55e',
+		restriction: '#a855f7',
+		objection: '#f59e0b',
+		other: '#9ca3af'
+	};
+
+	const breachValues = data.data.breach_types || [];
+	const requestValues = data.data.request_types || [];
+	const breachColors = breachValues.map(
+		(v: { localName?: string }) => BREACH_TYPE_COLORS[v.localName ?? ''] ?? '#9ca3af'
+	);
+	const requestColors = requestValues.map(
+		(v: { localName?: string }) => REQUEST_TYPE_COLORS[v.localName ?? ''] ?? '#9ca3af'
+	);
 </script>
 
 <div class="grid grid-cols-12 gap-4">
@@ -55,7 +83,9 @@
 		<DonutChart
 			name="breach_types"
 			title={m.dataBreachesByType()}
-			values={data.data.breach_types || []}
+			values={breachValues}
+			colors={breachColors}
+			orientation="horizontal"
 			height="h-96"
 		/>
 	</div>
@@ -63,7 +93,9 @@
 		<DonutChart
 			name="request_types"
 			title={m.rightRequestsByType()}
-			values={data.data.request_types || []}
+			values={requestValues}
+			colors={requestColors}
+			orientation="horizontal"
 			height="h-96"
 		/>
 	</div>

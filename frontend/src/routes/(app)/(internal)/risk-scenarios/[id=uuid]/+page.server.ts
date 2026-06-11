@@ -5,7 +5,7 @@ import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 import { headData } from '$lib/utils/table';
 import { fail, superValidate } from 'sveltekit-superforms';
 import { z } from 'zod';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { m } from '$paraglide/messages';
 import { error, redirect } from '@sveltejs/kit';
@@ -56,7 +56,7 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 	await Promise.all(
 		['risk_scenarios', 'risk_scenarios_e'].map(async (key) => {
 			const table: TableSource = {
-				head: ['name', 'owner', 'status', 'eta'],
+				head: headData('applied-controls'),
 				body: [],
 				meta: []
 			};

@@ -1,9 +1,11 @@
 <script lang="ts">
 	import Select from '../Select.svelte';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import TextField from '$lib/components/Forms/TextField.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import * as m from '$paraglide/messages.js';
 
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
@@ -30,13 +32,6 @@
 </script>
 
 <TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
-<TextField
 	type="datetime-local"
 	step="1"
 	{form}
@@ -44,6 +39,24 @@
 	label={m.reportedAt()}
 	cacheLock={cacheLocks['reported_at']}
 	bind:cachedValue={formDataCache['reported_at']}
+/>
+<TextField
+	type="datetime-local"
+	step="1"
+	{form}
+	field="occurred_at"
+	label={m.occurredAt()}
+	cacheLock={cacheLocks['occurred_at']}
+	bind:cachedValue={formDataCache['occurred_at']}
+/>
+<TextField
+	type="datetime-local"
+	step="1"
+	{form}
+	field="resolved_at"
+	label={m.resolvedAt()}
+	cacheLock={cacheLocks['resolved_at']}
+	bind:cachedValue={formDataCache['resolved_at']}
 />
 
 <Select
@@ -55,11 +68,9 @@
 	cacheLock={cacheLocks['detection']}
 	bind:cachedValue={formDataCache['detection']}
 />
-<AutocompleteSelect
+<FolderTreeSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
-	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
@@ -98,6 +109,26 @@
 	bind:cachedValue={formDataCache['link']}
 />
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+	<AutocompleteSelect
+		multiple
+		lazy
+		{form}
+		optionsEndpoint="applied-controls"
+		optionsLabelField="auto"
+		optionsExtraFields={[['folder', 'str']]}
+		field="applied_controls"
+		label={m.appliedControls()}
+	/>
+	<AutocompleteSelect
+		multiple
+		lazy
+		{form}
+		optionsEndpoint="task-templates"
+		optionsLabelField="auto"
+		optionsExtraFields={[['folder', 'str']]}
+		field="task_templates"
+		label={m.taskTemplates()}
+	/>
 	<AutocompleteSelect
 		multiple
 		{form}
@@ -168,4 +199,16 @@
 		translateOptions={false}
 		allowUserOptions="append"
 	/>
+	<Select
+		{form}
+		options={[
+			{ label: m.yes(), value: true },
+			{ label: m.no(), value: false }
+		]}
+		field="is_bcp_activated"
+		label={m.isBcpActivated()}
+		cacheLock={cacheLocks['is_bcp_activated']}
+		bind:cachedValue={formDataCache['is_bcp_activated']}
+	/>
+	<MarkdownField {form} field="resolution" label={m.resolution()} />
 </Dropdown>

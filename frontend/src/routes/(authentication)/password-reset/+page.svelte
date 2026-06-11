@@ -5,7 +5,7 @@
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 
 	import { m } from '$paraglide/messages';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import Logo from '$lib/components/Logo/Logo.svelte';
 
 	interface Props {

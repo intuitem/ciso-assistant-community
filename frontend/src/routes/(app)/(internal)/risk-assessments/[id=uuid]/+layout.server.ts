@@ -1,14 +1,13 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import { tableSourceMapper } from '$lib/utils/table';
 import { getModelInfo } from '$lib/utils/crud';
-import { loadValidationFlowFormData } from '$lib/utils/load';
-
+import { loadValidationFlowFormData, formatSelectFieldData } from '$lib/utils/load';
 import { modelSchema } from '$lib/utils/schemas';
 import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 import { superValidate } from 'sveltekit-superforms';
 import { z } from 'zod';
 import type { LayoutServerLoad } from './$types';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { m } from '$paraglide/messages';
@@ -103,12 +102,8 @@ export const load: LayoutServerLoad = async ({ fetch, params, cookies, locals })
 			const url = `${BASE_API_URL}/risk-scenarios/${selectField.field}/`;
 			const response = await fetch(url);
 			if (response.ok) {
-				selectOptions[selectField.field] = await response.json().then((data) =>
-					Object.entries(data).map(([key, value]) => ({
-						label: value,
-						value: selectField.valueType === 'number' ? parseInt(key) : key
-					}))
-				);
+				const responseData = await response.json();
+				selectOptions[selectField.field] = formatSelectFieldData(responseData, selectField);
 			} else {
 				console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
 			}
@@ -122,7 +117,9 @@ export const load: LayoutServerLoad = async ({ fetch, params, cookies, locals })
 	const initialDataDuplicate = {
 		name: risk_assessment.name,
 		description: risk_assessment.description,
-		version: risk_assessment.version
+		version: risk_assessment.version,
+		folder: risk_assessment.folder.id,
+		perimeter: risk_assessment.perimeter?.id
 	};
 
 	const riskAssessmentDuplicateForm = await superValidate(

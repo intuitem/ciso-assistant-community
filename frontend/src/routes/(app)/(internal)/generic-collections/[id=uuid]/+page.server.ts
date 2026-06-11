@@ -2,7 +2,7 @@ import { getModelInfo } from '$lib/utils/crud';
 import { loadDetail } from '$lib/utils/load';
 import type { PageServerLoad } from './$types';
 import { superValidate, message } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { modelSchema } from '$lib/utils/schemas';
 import type { Actions } from '@sveltejs/kit';
 import { nestedDeleteFormAction, defaultWriteFormAction } from '$lib/utils/actions';

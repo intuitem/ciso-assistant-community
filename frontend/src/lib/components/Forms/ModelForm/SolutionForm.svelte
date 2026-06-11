@@ -3,6 +3,7 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import SubcontractingChainEditor from './SubcontractingChainEditor.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
@@ -22,6 +23,13 @@
 		formDataCache = $bindable({}),
 		initialData = {}
 	}: Props = $props();
+
+	const formData = form.form;
+
+	// Resolve the current direct provider (rank 1, implicit) for picker
+	// exclusion + display in the chain editor's locked card. The editor
+	// resolves the label itself from the entity lookup it builds.
+	let directProviderId = $derived(($formData as any).provider_entity ?? null);
 </script>
 
 <AutocompleteSelect
@@ -32,13 +40,6 @@
 	cacheLock={cacheLocks['provider_entity']}
 	bind:cachedValue={formDataCache['provider_entity']}
 	label={m.providerEntity()}
-/>
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
 />
 <Score
 	{form}
@@ -216,4 +217,13 @@
 		cacheLock={cacheLocks['dora_alternative_providers']}
 		bind:cachedValue={formDataCache['dora_alternative_providers']}
 	/>
+</Dropdown>
+
+<Dropdown
+	open={false}
+	style="hover:text-primary-700"
+	icon="fa-solid fa-sitemap"
+	header={m.subcontractingChain()}
+>
+	<SubcontractingChainEditor {form} {directProviderId} />
 </Dropdown>

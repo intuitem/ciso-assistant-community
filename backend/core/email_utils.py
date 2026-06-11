@@ -2,36 +2,111 @@
 Email template utilities for CISO Assistant
 """
 
+import re
 import yaml
+import markdown
 from pathlib import Path
 from string import Template
 from typing import Dict, Optional
 from django.conf import settings
+from django.utils.html import escape as html_escape
 from django.utils.translation import get_language
+from global_settings.models import GlobalSettings
+from iam.models import User
 import structlog
 
 logger = structlog.getLogger(__name__)
 
+
+class MarkdownSafe(str):
+    """
+    A string subclass that signals to render_email_template() that
+    this value already contains Markdown formatting (e.g. links) and
+    should NOT be HTML-escaped before Markdown conversion.
+    """
+
+    pass
+
+
 TEMPLATE_BASE_PATH = Path(__file__).parent / "templates" / "emails"
 
 
-def load_email_template(
-    template_name: str, locale: Optional[str] = None
+def get_locale_for_email(email: str) -> str:
+    """
+    Resolve the preferred locale for a given email address.
+    Looks up the user's preferences, falls back to admin default, then 'en'.
+    """
+    try:
+        user = User.objects.filter(email__iexact=email).first()
+        if user:
+            return user.get_preferences().get("lang", "en")
+    except Exception as e:
+        logger.warning("Failed to resolve user locale for email lookup: %s", e)
+
+    try:
+        general = GlobalSettings.objects.filter(name="general").first()
+        if general and isinstance(general.value, dict):
+            return general.value.get("default_language", "en")
+    except Exception as e:
+        logger.warning("Failed to resolve default language from global settings: %s", e)
+
+    return "en"
+
+
+def _load_custom_email_template(
+    template_name: str, locale: str
 ) -> Optional[Dict[str, str]]:
     """
-    Load email template from YAML file
+    Try to load a custom email template override from the database.
+    Returns None if no active override exists.
+    """
+    try:
+        from core.models import CustomEmailTemplate
+
+        override = CustomEmailTemplate.objects.filter(
+            template_key=template_name,
+            language=locale,
+            is_active=True,
+        ).first()
+        if override:
+            return {"subject": override.subject, "body": override.body}
+    except Exception as e:
+        logger.warning(
+            "Failed to load custom email template override",
+            template=template_name,
+            locale=locale,
+            exc_info=e,
+        )
+    return None
+
+
+def load_email_template(
+    template_name: str,
+    locale: Optional[str] = None,
+    builtin_only: bool = False,
+) -> Optional[Dict[str, str]]:
+    """
+    Load email template, checking for custom overrides first, then falling
+    back to the built-in YAML file.
 
     Args:
         template_name: Name of the template (e.g., 'expired_controls')
         locale: Language code (e.g., 'en', 'fr'). If None, uses current Django language
+        builtin_only: If True, skip custom overrides and load only the built-in YAML file
 
     Returns:
         Dictionary with 'subject' and 'body' keys, or None if not found
     """
     if locale is None:
         locale = get_language() or "en"
-        # Extract language code from locale like 'en-us' -> 'en'
-        locale = locale.split("-")[0].lower()
+    # Normalize locale: 'fr-FR' -> 'fr', '' -> 'en'
+    locale = locale.split("-")[0].lower() or "en"
+
+    # Check for custom override first
+    if not builtin_only:
+        custom = _load_custom_email_template(template_name, locale)
+        if custom:
+            return custom
 
     # Construct file path
     template_file = TEMPLATE_BASE_PATH / locale / f"{template_name}.yaml"
@@ -67,20 +142,58 @@ def load_email_template(
         return None
 
 
+def markdown_to_html(text: str) -> str:
+    """
+    Convert Markdown text to HTML for email bodies.
+
+    Context variables should already be HTML-escaped before substitution
+    into the template. The template body itself is authored by admins
+    (who have change_globalsettings permission), so raw HTML in the
+    template is an accepted trust boundary.
+
+    All <a> links get target="_blank" so they open in a new tab
+    (important for webmail clients, email previews, and embedded iframes).
+    """
+    html = markdown.markdown(
+        text,
+        extensions=["nl2br", "sane_lists"],
+    )
+    # Add target="_blank" with rel="noopener noreferrer" to all <a> tags
+    # - noopener: prevents the opened page from accessing window.opener
+    # - noreferrer: prevents sending the Referer header to the linked page
+    html = re.sub(
+        r"<a(?![^>]*\btarget=)",
+        '<a target="_blank" rel="noopener noreferrer"',
+        html,
+    )
+    return html
+
+
 def render_email_template(
-    template_name: str, context: Dict, locale: Optional[str] = None
+    template_name: str,
+    context: Dict,
+    locale: Optional[str] = None,
+    recipient_email: Optional[str] = None,
 ) -> Dict[str, str]:
     """
-    Render email template with context variables
+    Render email template with context variables.
+
+    Template bodies support Markdown syntax. The returned dict contains:
+    - 'subject': plain text subject line
+    - 'body': plain text body (for email clients that don't support HTML)
+    - 'html_body': HTML body converted from Markdown
 
     Args:
         template_name: Name of the template (e.g., 'expired_controls')
         context: Dictionary of variables to substitute in template
-        locale: Language code. If None, uses current Django language
+        locale: Language code. If None, resolves from recipient_email or uses current Django language
+        recipient_email: Email address of recipient, used to resolve locale from user preferences
 
     Returns:
-        Dictionary with 'subject' and 'body' keys, or empty dict if template not found
+        Dictionary with 'subject', 'body', and 'html_body' keys, or empty dict if template not found
     """
+    if locale is None and recipient_email:
+        locale = get_locale_for_email(recipient_email)
     template_data = load_email_template(template_name, locale)
     if not template_data:
         logger.error(f"Failed to load template {template_name}")
@@ -91,11 +204,21 @@ def render_email_template(
         full_context = get_default_context()
         full_context.update(context)
 
+        # Escape context values for safe HTML embedding.
+        # MarkdownSafe values are already formatted Markdown (e.g. links)
+        # and must NOT be escaped, so the Markdown->HTML pass can convert them.
+        html_context = {
+            k: str(v) if isinstance(v, MarkdownSafe) else html_escape(str(v))
+            for k, v in full_context.items()
+        }
+
         # Use string.Template for safe substitution
         subject = Template(template_data["subject"]).safe_substitute(full_context)
         body = Template(template_data["body"]).safe_substitute(full_context)
+        html_body_raw = Template(template_data["body"]).safe_substitute(html_context)
+        html_body = markdown_to_html(html_body_raw)
 
-        return {"subject": subject, "body": body}
+        return {"subject": subject, "body": body, "html_body": html_body}
     except Exception as e:
         logger.error(f"Error rendering template {template_name}: {str(e)}")
         return {}
@@ -209,23 +332,52 @@ def format_validation_list(validations) -> str:
     return "\n".join(validation_lines)
 
 
-def format_task_node_list(task_nodes) -> str:
+def format_task_node_list(
+    task_nodes, include_description: bool = False
+) -> MarkdownSafe:
     """
-    Format a list of task nodes for email templates
+    Format a list of task nodes for email templates.
+
+    Each task node is rendered as a Markdown link pointing to its detail page,
+    so recipients can click through directly.
 
     Args:
         task_nodes: List of TaskNode objects
+        include_description: If True, include the task template description
+            below each task entry
 
     Returns:
-        Formatted string with task node information
+        MarkdownSafe string with task node information (contains Markdown links)
     """
-    task_lines = []
+    base_url = getattr(settings, "CISO_ASSISTANT_URL", "http://localhost:5173")
+    items = []
     for node in task_nodes:
-        name = node.task_template.name if node.task_template else "Unknown"
+        name = html_escape(node.task_template.name) if node.task_template else "Unknown"
         due_date = node.due_date.strftime("%Y-%m-%d") if node.due_date else "Not set"
-        task_lines.append(f"- {name} (Due: {due_date}, Status: {node.status})")
+        # Recurrent tasks link to the task node (each occurrence is distinct),
+        # non-recurrent tasks link to the task template (the main object).
+        if node.task_template and node.task_template.is_recurrent:
+            node_url = f"{base_url}/task-nodes/{node.id}"
+        else:
+            template_id = node.task_template.id if node.task_template else node.id
+            node_url = f"{base_url}/task-templates/{template_id}"
+        link = (
+            f'<a target="_blank" rel="noopener noreferrer" href="{node_url}">{name}</a>'
+        )
+        item = f"<li>{link}<br>Due: {due_date}<br>Status: {node.status}"
+        if (
+            include_description
+            and node.task_template
+            and node.task_template.description
+        ):
+            # Escape HTML first to prevent injection, then convert Markdown.
+            desc_escaped = html_escape(node.task_template.description.strip())
+            desc_html = markdown_to_html(desc_escaped)
+            item += f"<br>{desc_html}"
+        item += "</li>"
+        items.append(item)
 
-    return "\n".join(task_lines)
+    return MarkdownSafe("<ul>" + "".join(items) + "</ul>")
 
 
 def get_default_context() -> Dict[str, str]:
@@ -265,9 +417,16 @@ def send_templated_notification(
     if not check_email_configuration(recipient_email, []):
         return False
 
-    rendered = render_email_template(template_name, context, locale)
+    rendered = render_email_template(
+        template_name, context, locale=locale, recipient_email=recipient_email
+    )
     if not rendered:
         return False
 
-    send_notification_email(rendered["subject"], rendered["body"], recipient_email)
+    send_notification_email(
+        rendered["subject"],
+        rendered["body"],
+        recipient_email,
+        rendered.get("html_body"),
+    )
     return True

@@ -104,6 +104,14 @@
 			hoverClass: 'hover:border-pink-400 hover:bg-pink-50',
 			label: m.requirementMappingSets()
 		},
+		preset: {
+			type: 'string',
+			field: 'object_type',
+			icon: findIconInSidebar('overview', 'presets', 'fa-solid fa-rocket'),
+			selectedClass: 'bg-gradient-to-r from-cyan-500 to-sky-600 text-white shadow-cyan-200',
+			hoverClass: 'hover:border-cyan-400 hover:bg-cyan-50',
+			label: m.journeys()
+		},
 		is_update: {
 			type: 'boolean',
 			field: 'is_update',

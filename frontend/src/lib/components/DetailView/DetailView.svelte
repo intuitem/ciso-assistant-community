@@ -2,14 +2,17 @@
 	import { page } from '$app/state';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import List from '$lib/components/List/List.svelte';
+	import BatchCreatePersonalDataModal from '$lib/components/Modals/BatchCreatePersonalDataModal.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
+	import RiskAcceptanceModal from '$lib/components/Modals/RiskAcceptanceModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import SelectExistingModal from '$lib/components/Modals/SelectExistingModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { booleanDisplay } from '$lib/utils/boolean-display';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import { type ModelMapEntry, type ReverseForeignKeyField } from '$lib/utils/crud';
 	import { getModelInfo } from '$lib/utils/crud.js';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import { formatDate, formatDateOrDateTime } from '$lib/utils/datetime';
 	import { isURL } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales.js';
@@ -25,6 +28,7 @@
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { getListViewFields } from '$lib/utils/table';
 	import { canPerformAction } from '$lib/utils/access-control';
+	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
@@ -34,14 +38,7 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const defaultExcludes = [
-		'id',
-		'is_published',
-		'localization_dict',
-		'str',
-		'path',
-		'sync_mappings'
-	];
+	const defaultExcludes = ['id', 'is_published', 'str', 'path', 'sync_mappings'];
 
 	interface Props {
 		data: any;
@@ -75,9 +72,12 @@
 			'validation_deadline',
 			'timestamp',
 			'reported_at',
+			'occurred_at',
+			'resolved_at',
 			'due_date',
 			'start_date',
-			'closing_date'
+			'closing_date',
+			'commission_date'
 		],
 		widgets,
 		actions,
@@ -207,6 +207,47 @@
 			type: 'component',
 			component: modalComponent,
 			title: safeTranslate(addExisting.label ?? 'selectExisting')
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalBatchCreate(field: ReverseForeignKeyField, parentId: string): void {
+		if (!field.batchCreate) return;
+		const modalComponent: ModalComponent = {
+			ref: BatchCreatePersonalDataModal,
+			props: {
+				processingId: parentId,
+				urlModel: field.urlModel
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: safeTranslate(field.batchCreate.label ?? 'batchCreate')
+		};
+		modalStore.trigger(modal);
+	}
+	function modalRiskAcceptanceApproval(id: string, name: string, action: string): void {
+		const urlModel = getModelInfo('risk-acceptances').urlModel;
+		const modalComponent: ModalComponent = {
+			ref: RiskAcceptanceModal,
+			props: {
+				_form: {
+					id: id,
+					urlmodel: urlModel,
+					justification: action.includes('revoke') ? (data.data.justification ?? '') : ''
+				},
+				id: id,
+				debug: false,
+				URLModel: urlModel,
+				formAction: action
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.confirmModalTitle(),
+			body: `${m.confirmModalMessage()}: ${name}?`
 		};
 		modalStore.trigger(modal);
 	}
@@ -380,7 +421,7 @@
 				{m.riskAcceptanceNotYetSubmittedMessage()}
 			</div>
 		</div>
-	{:else if data.data.state === 'Submitted' && page.data.user.id === data.data.approver.id}
+	{:else if data.data.state === 'Submitted' && page.data.user.id === data.data.approver?.id}
 		<div
 			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container shadow-sm px-6 py-2 justify-between"
 		>
@@ -390,18 +431,16 @@
 			<div class="flex space-x-2">
 				<button
 					onclick={(_) => {
-						modalConfirm(data.data.id, data.data.name, '?/accept');
+						modalRiskAcceptanceApproval(data.data.id, data.data.name, '?/accept');
 					}}
-					onkeydown={(_) => modalConfirm(data.data.id, data.data.name, '?/accept')}
 					class="btn preset-filled-success-500"
 				>
 					<i class="fas fa-check mr-2"></i> {m.validate()}</button
 				>
 				<button
 					onclick={(_) => {
-						modalConfirm(data.data.id, data.data.name, '?/reject');
+						modalRiskAcceptanceApproval(data.data.id, data.data.name, '?/reject');
 					}}
-					onkeydown={(_) => modalConfirm(data.data.id, data.data.name, '?/reject')}
 					class="btn preset-filled-error-500"
 				>
 					<i class="fas fa-xmark mr-2"></i> {m.reject()}</button
@@ -415,13 +454,12 @@
 			<div class="text-green-900">
 				{m.riskAcceptanceValidatedMessage()}
 			</div>
-			{#if page.data.user.id === data.data.approver.id}
+			{#if page.data.user.id === data.data.approver?.id}
 				<div class="ml-auto whitespace-nowrap">
 					<button
 						onclick={(_) => {
-							modalConfirm(data.data.id, data.data.name, '?/revoke');
+							modalRiskAcceptanceApproval(data.data.id, data.data.name, '?/revoke');
 						}}
-						onkeydown={(_) => modalConfirm(data.data.id, data.data.name, '?/revoke')}
 						class="btn preset-filled-error-500"
 					>
 						<i class="fas fa-xmark mr-2"></i> {m.revoke()}</button
@@ -433,6 +471,17 @@
 
 	<!-- Main content area - modified to use conditional flex layout -->
 	<div class="card shadow-lg bg-surface-50-950 p-4">
+		{#if data.urlModel === 'stakeholders' && data.data?.ebios_rm_study?.id}
+			<div class="mb-4 p-3">
+				<Anchor
+					href={'/ebios-rm/' + data.data.ebios_rm_study.id + '/workshop-3/ecosystem'}
+					class="anchor text-sm"
+				>
+					<i class="fa-solid fa-arrow-left"></i>
+					{m.backToWorkshop()} : {m.ebiosWs3_1()}
+				</Anchor>
+			</div>
+		{/if}
 		{#each data.data?.sync_mappings as syncMapping}
 			<div class="mb-4 p-4 bg-secondary-50 border-l-4 border-secondary-400">
 				<h3 class="font-semibold text-secondary-800 mb-2">
@@ -444,7 +493,7 @@
 					<dd>{syncMapping.remote_id}</dd>
 
 					<dt class="font-medium">{m.lastSynced()}</dt>
-					<dd>{new Date(syncMapping.last_synced_at).toLocaleString(getLocale())}</dd>
+					<dd>{formatDate(new Date(syncMapping.last_synced_at), true, getLocale())}</dd>
 
 					<dt class="font-medium">{m.status()}</dt>
 					<dd>{safeTranslate(syncMapping.sync_status)}</dd>
@@ -597,6 +646,15 @@
 																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
 																		>{safeTranslate(val.str)}</Anchor
 																	>
+																{:else if val.str && (val.str.startsWith('http://') || val.str.startsWith('https://'))}
+																	<a
+																		href={val.str}
+																		target="_blank"
+																		rel="noopener noreferrer"
+																		class="anchor">{val.str}</a
+																	>
+																{:else if val.str && key === 'permissions'}
+																	{val.str}
 																{:else if val.str}
 																	{safeTranslate(val.str)}
 																{:else}
@@ -654,8 +712,11 @@
 												>
 											{:else if ISO_8601_REGEX.test(value) && dateFieldsToFormat.includes(key)}
 												{formatDateOrDateTime(value, getLocale())}
-											{:else if key === 'description' || key === 'observation' || key === 'annotation'}
+											{:else if key === 'description' || key === 'observation' || key === 'annotation' || key === 'justification'}
 												<MarkdownRenderer content={value} />
+											{:else if typeof value === 'boolean'}
+												{@const bd = booleanDisplay(value, key, data.urlModel)}
+												<i class="{bd.icon} {bd.colorClass}"></i>
 											{:else if !['name', 'ref_id'].includes(key) && m[toCamelCase(value.str || value.name)]}
 												{safeTranslate((value.str || value.name) ?? value)}
 											{:else}
@@ -794,6 +855,7 @@
 				{/if}
 			{/if}
 			{@render actions?.()}
+			<AuditTrailButton model={data.urlModel} objectId={data.data?.id} />
 		</div>
 	</div>
 </div>
@@ -860,7 +922,9 @@
 							>
 								{#snippet addButton()}
 									{#if canEditObject && field?.addExisting}
-										<span class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs">
+										<span
+											class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
+										>
 											<button
 												class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
 												data-testid="select-existing-button"
@@ -870,7 +934,23 @@
 												<i class="fa-solid fa-hand-pointer"></i>
 											</button>
 										</span>
-										<span class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs">
+										{#if field?.batchCreate}
+											<span
+												class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
+											>
+												<button
+													class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+													data-testid="batch-create-button"
+													title={safeTranslate(field.batchCreate.label ?? 'batchCreate')}
+													onclick={() => modalBatchCreate(field, data.data.id)}
+												>
+													<i class="fa-solid fa-layer-group"></i>
+												</button>
+											</span>
+										{/if}
+										<span
+											class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
+										>
 											<button
 												class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
 												data-testid="add-button"
@@ -881,6 +961,20 @@
 											</button>
 										</span>
 									{:else}
+										{#if field?.batchCreate}
+											<span
+												class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+											>
+												<button
+													class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+													data-testid="batch-create-button"
+													title={safeTranslate(field.batchCreate.label ?? 'batchCreate')}
+													onclick={() => modalBatchCreate(field, data.data.id)}
+												>
+													<i class="fa-solid fa-layer-group"></i>
+												</button>
+											</span>
+										{/if}
 										<button
 											class="btn preset-filled-primary-500 self-end my-auto"
 											data-testid="add-button"

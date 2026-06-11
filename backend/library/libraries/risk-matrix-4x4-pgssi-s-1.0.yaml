@@ -5,63 +5,115 @@ name: Matrice de risques 4x4 PGSSI-S v1.0
 description: Matrice de risques 4x4 PGSSI-S v1.0
 copyright: Agence du Numérique en Santé
 annotation: https://esante.gouv.fr/produits-services/pgssi-s
-version: 1
+version: 2
 publication_date: 2024-05-11
 provider: ANS
 packager: Ackwa.fr
+translations:
+  de:
+    name: 4x4-Risikomatrix PGSSI-S v1.0
+    description: 4x4-Risikomatrix PGSSI-S v1.0
 objects:
   risk_matrix:
     - urn: urn:ackwa:risk:matrix:risk-matrix-4x4-pgssi-s-1.0
       ref_id: risk-matrix-4x4-pgssi-s-1.0
       name: Matrice de risques 4x4 PGSSI-S v1.0
       description: Matrice de risques 4x4 PGSSI-S v1.0
+      translations:
+        de:
+          name: 4x4-Risikomatrix PGSSI-S v1.0
+          description: 4x4-Risikomatrix PGSSI-S v1.0
       probability:
         - abbreviation: 1
           name: Exceptionnel
           description: Evènement Exceptionnel
           hexcolor: '#02A45A'
+          translations:
+            de:
+              name: Außergewöhnlich
+              description: Außergewöhnliches Ereignis
         - abbreviation: 2
           name: Peu probable
           description: Evènement Peu probable
           hexcolor: '#FFCE02'
+          translations:
+            de:
+              name: Unwahrscheinlich
+              description: Unwahrscheinliches Ereignis
         - abbreviation: 3
           name: Possible
           description: Evènement Possible
           hexcolor: '#FFA600'
+          translations:
+            de:
+              name: Möglich
+              description: Mögliches Ereignis
         - abbreviation: 4
           name: Quasi certain
           description: Evènement Quasi certain
           hexcolor: '#FF1A00'
+          translations:
+            de:
+              name: Nahezu sicher
+              description: Nahezu sicheres Ereignis
       impact:
         - abbreviation: 1
           name: Mineure
           description: Gravité Mineure
           hexcolor: '#02A45A'
+          translations:
+            de:
+              name: Geringfügig
+              description: Geringfügige Auswirkung
         - abbreviation: 2
           name: Significatif
           description: Gravité Significative
           hexcolor: '#FFCE02'
+          translations:
+            de:
+              name: Bedeutend
+              description: Bedeutende Auswirkung
         - abbreviation: 3
           name: Importante
           description: Gravité Importante
           hexcolor: '#FFA600'
+          translations:
+            de:
+              name: Erheblich
+              description: Erhebliche Auswirkung
         - abbreviation: 4
           name: Critique
           description: Gravité Critique
           hexcolor: '#FF1A00'
+          translations:
+            de:
+              name: Kritisch
+              description: Kritische Auswirkung
       risk:
         - abbreviation: 1
           name: Limité
           description: Risque Limité
           hexcolor: "#92d051"
+          translations:
+            de:
+              name: Begrenzt
+              description: Begrenztes Risiko
         - abbreviation: 2
           name: Modéré
           description: Risque Modéré
           hexcolor: "#ffc100"
+          translations:
+            de:
+              name: Moderat
+              description: Moderates Risiko
         - abbreviation: 3
           name: Fort
           description: Risque Fort
           hexcolor: "#ff5d5d"
+          translations:
+            de:
+              name: Hoch
+              description: Hohes Risiko
       grid:
         - - 0
           - 0

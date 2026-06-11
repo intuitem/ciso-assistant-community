@@ -11,6 +11,8 @@
 	import RiskAssessmentForm from './ModelForm/RiskAssessmentForm.svelte';
 	import PerimeterForm from './ModelForm/PerimeterForm.svelte';
 	import ThreatForm from './ModelForm/ThreatForm.svelte';
+	import SecurityAdvisoryForm from './ModelForm/SecurityAdvisoryForm.svelte';
+	import CWEForm from './ModelForm/CWEForm.svelte';
 	import RiskScenarioForm from './ModelForm/RiskScenarioForm.svelte';
 	import AppliedControlsPoliciesForm from './ModelForm/AppliedControlPolicyForm.svelte';
 	import VulnerabilitiesForm from './ModelForm/VulnerabilitiesForm.svelte';
@@ -33,6 +35,8 @@
 	import FolderForm from './ModelForm/FolderForm.svelte';
 	import GeneralSettingsForm from './ModelForm/GeneralSettingForm.svelte';
 	import FeatureFlagsSettingForm from './ModelForm/FeatureFlagsSettingForm.svelte';
+	import VulnerabilitySlaSettingForm from './ModelForm/VulnerabilitySlaSettingForm.svelte';
+	import SecIntelFeedsSettingForm from './ModelForm/SecIntelFeedsSettingForm.svelte';
 	import ProcessingForm from './ModelForm/ProcessingForm.svelte';
 	import PurposeForm from './ModelForm/PurposeForm.svelte';
 	import PersonalDataForm from './ModelForm/PersonalDataForm.svelte';
@@ -71,6 +75,11 @@
 	import EvidenceRevisionForm from './ModelForm/EvidenceRevisionForm.svelte';
 	import GenericCollectionForm from './ModelForm/GenericCollectionForm.svelte';
 	import AccreditationForm from './ModelForm/AccreditationForm.svelte';
+	import ProjectForm from './ModelForm/ProjectForm.svelte';
+	import ResponsibilityMatrixForm from './ModelForm/ResponsibilityMatrixForm.svelte';
+	import ResponsibilityMatrixActivityForm from './ModelForm/ResponsibilityMatrixActivityForm.svelte';
+	import ResponsibilityAssignmentForm from './ModelForm/ResponsibilityAssignmentForm.svelte';
+	import ResponsibilityRoleForm from './ModelForm/ResponsibilityRoleForm.svelte';
 	import MetricDefinitionForm from './ModelForm/MetricDefinitionForm.svelte';
 	import MetricInstanceForm from './ModelForm/MetricInstanceForm.svelte';
 	import CustomMetricSampleForm from './ModelForm/CustomMetricSampleForm.svelte';
@@ -84,11 +93,11 @@
 	import { modelSchema } from '$lib/utils/schemas';
 	import type { ModelInfo, urlModel, CacheLock } from '$lib/utils/types';
 	import { superForm, superValidate, type SuperValidated } from 'sveltekit-superforms';
-	import type { AnyZodObject } from 'zod';
+	import type { FormDataShape } from '$lib/utils/schemas';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import { m } from '$paraglide/messages';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { createModalCache } from '$lib/utils/stores';
 	import FilteringLabelForm from './ModelForm/FilteringLabelForm.svelte';
@@ -98,7 +107,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface Props {
-		form: SuperValidated<AnyZodObject>;
+		form: SuperValidated<FormDataShape>;
 		invalidateAll?: boolean; // set to false to keep form data using muliple forms on a page
 		taintedMessage?: string | boolean;
 		model: ModelInfo;
@@ -140,6 +149,9 @@
 	}: Props = $props();
 
 	const URLModel = model.urlModel as urlModel;
+	const defaultFolderWritePermission =
+		context === 'edit' ? `change_${model.name}` : `add_${model.name}`;
+	setContext('folderTreeDefaultWritePermission', defaultFolderWritePermission);
 
 	function cancel(): void {
 		if (browser) {
@@ -149,7 +161,7 @@
 			if (nextValue) goto(nextValue);
 		}
 	}
-	let shape = $derived(schema.shape || schema._def.schema.shape);
+	let shape = $derived(schema.shape || schema._def?.schema?.shape);
 	let updated_fields = new Set();
 
 	function makeCacheLock(): CacheLock {
@@ -317,7 +329,7 @@
 										name: shouldUpdateName ? r.name : currentData.name,
 										category: r.category,
 										csf_function: r.csf_function,
-										ref_id: r.ref_id
+										ref_id: r.ref_id ?? currentData.ref_id ?? ''
 									};
 								});
 							});
@@ -326,17 +338,40 @@
 			/>
 		{/if}
 		{#if shape.name && !customNameDescription}
-			<TextField
-				{form}
-				field="name"
-				label={m.name()}
-				cacheLock={cacheLocks['name']}
-				bind:cachedValue={formDataCache['name']}
-				data-focusindex="0"
-				oninput={() => {
-					updated_fields.add('name');
-				}}
-			/>
+			{#if shape.ref_id}
+				<div class="grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-4">
+					<TextField
+						{form}
+						field="ref_id"
+						label={m.refId()}
+						cacheLock={cacheLocks['ref_id']}
+						bind:cachedValue={formDataCache['ref_id']}
+					/>
+					<TextField
+						{form}
+						field="name"
+						label={m.name()}
+						cacheLock={cacheLocks['name']}
+						bind:cachedValue={formDataCache['name']}
+						data-focusindex="0"
+						oninput={() => {
+							updated_fields.add('name');
+						}}
+					/>
+				</div>
+			{:else}
+				<TextField
+					{form}
+					field="name"
+					label={m.name()}
+					cacheLock={cacheLocks['name']}
+					bind:cachedValue={formDataCache['name']}
+					data-focusindex="0"
+					oninput={() => {
+						updated_fields.add('name');
+					}}
+				/>
+			{/if}
 		{/if}
 		{#if shape.description && !customNameDescription}
 			<MarkdownField
@@ -376,6 +411,10 @@
 			/>
 		{:else if URLModel === 'threats'}
 			<ThreatForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+		{:else if URLModel === 'security-advisories'}
+			<SecurityAdvisoryForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+		{:else if URLModel === 'cwes'}
+			<CWEForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'risk-scenarios'}
 			<RiskScenarioForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'applied-controls' || URLModel === 'policies'}
@@ -501,6 +540,10 @@
 			<GeneralSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} {...rest} />
 		{:else if URLModel === 'feature-flags'}
 			<FeatureFlagsSettingForm {form} {model} {cacheLocks} {formDataCache} {data} {...rest} />
+		{:else if URLModel === 'vulnerability-sla'}
+			<VulnerabilitySlaSettingForm {form} {model} />
+		{:else if URLModel === 'sec-intel-feeds'}
+			<SecIntelFeedsSettingForm {form} {model} />
 		{:else if URLModel === 'filtering-labels'}
 			<FilteringLabelForm {form} {model} {cacheLocks} {formDataCache} {...rest} />
 		{:else if URLModel === 'business-impact-analysis'}
@@ -789,6 +832,40 @@
 			/>
 		{:else if URLModel === 'accreditations'}
 			<AccreditationForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
+		{:else if URLModel === 'projects'}
+			<ProjectForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
+		{:else if URLModel === 'responsibility-matrices'}
+			<ResponsibilityMatrixForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
+		{:else if URLModel === 'responsibility-matrix-activities'}
+			<ResponsibilityMatrixActivityForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
+		{:else if URLModel === 'responsibility-assignments'}
+			<ResponsibilityAssignmentForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
+		{:else if URLModel === 'responsibility-roles'}
+			<ResponsibilityRoleForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
 		{:else if URLModel === 'metric-definitions'}
 			<MetricDefinitionForm
 				{form}
@@ -823,11 +900,9 @@
 		{:else if URLModel === 'dashboards'}
 			<DashboardForm
 				{form}
-				{model}
 				{cacheLocks}
 				{formDataCache}
 				initialData={{ ...initialData, ...additionalInitialData }}
-				{data}
 				{...rest}
 			/>
 		{:else if URLModel === 'dashboard-widgets'}
@@ -837,7 +912,6 @@
 				{cacheLocks}
 				{formDataCache}
 				initialData={{ ...initialData, ...additionalInitialData }}
-				{data}
 				{object}
 				{...rest}
 			/>
@@ -858,7 +932,6 @@
 				{cacheLocks}
 				{formDataCache}
 				initialData={{ ...initialData, ...additionalInitialData }}
-				{data}
 				{object}
 				{...rest}
 			/>

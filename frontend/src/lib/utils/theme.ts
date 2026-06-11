@@ -29,11 +29,9 @@ async function refreshECharts(resolved: 'light' | 'dark') {
 				const option = instance.getOption();
 				const rendererType = (instance as any)._zr?.painter?.type === 'canvas' ? 'canvas' : 'svg';
 				instance.dispose();
-				const newChart = echarts.init(
-					el as HTMLElement,
-					resolved === 'dark' ? 'dark' : null,
-					{ renderer: rendererType }
-				);
+				const newChart = echarts.init(el as HTMLElement, resolved === 'dark' ? 'dark' : null, {
+					renderer: rendererType
+				});
 				option.backgroundColor = 'transparent';
 				newChart.setOption(option);
 			}

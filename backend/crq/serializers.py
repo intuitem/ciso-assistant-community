@@ -6,6 +6,7 @@ from core.serializers import (
     ActionPlanSerializer,
 )
 from core.models import AppliedControl
+from core.utils import get_global_currency
 
 from .models import (
     QuantitativeRiskHypothesis,
@@ -401,10 +402,7 @@ class QuantitativeRiskHypothesisReadSerializer(BaseModelSerializer):
 
     def get_currency(self, obj):
         """Return currency symbol from global settings"""
-        from global_settings.models import GlobalSettings
-
-        general_settings = GlobalSettings.objects.filter(name="general").first()
-        return general_settings.value.get("currency", "€") if general_settings else "€"
+        return get_global_currency()
 
     loss_threshold = serializers.SerializerMethodField()
     loss_threshold_display = serializers.SerializerMethodField()

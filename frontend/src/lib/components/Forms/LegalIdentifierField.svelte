@@ -34,8 +34,12 @@
 	const identifierTypes = [
 		{ value: 'LEI', label: 'LEI (Legal Entity Identifier)' },
 		{ value: 'EUID', label: 'EUID (European Unique Identifier)' },
+		{ value: 'CRN', label: 'CRN (Company Registration Number)' },
 		{ value: 'DUNS', label: 'DUNS Number' },
+		{ value: 'KBO', label: 'KBO (Kruispuntbank van Ondernemingen — Belgium)' },
 		{ value: 'VAT', label: 'VAT Number' },
+		{ value: 'PNR', label: 'PNR (Passport Number)' },
+		{ value: 'NIN', label: 'NIN (National Identification Number)' },
 		{ value: 'OTHER', label: 'Other' }
 	];
 

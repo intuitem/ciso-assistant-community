@@ -12,7 +12,6 @@ body: |
   - ETA : ${control_eta}
   - Domaine : ${folder_name}
 
-  Connectez-vous à votre portail CISO Assistant pour actualiser et gérer cette mesure :
-  ${ciso_assistant_url}
+  Connectez-vous à votre portail CISO Assistant pour actualiser et gérer cette mesure : [Accéder à CISO Assistant](${ciso_assistant_url})
 
   Merci.

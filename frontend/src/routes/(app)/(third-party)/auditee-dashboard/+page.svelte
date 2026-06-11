@@ -124,7 +124,9 @@
 							</div>
 
 							<div class="flex-1">
-								<div class="flex justify-between items-baseline text-xs text-surface-500-500 mb-1.5">
+								<div
+									class="flex justify-between items-baseline text-xs text-surface-500-500 mb-1.5"
+								>
 									<span>{m.progress()}</span>
 									<span class="font-semibold text-surface-700-300 tabular-nums"
 										>{audit.assessed_requirements}/{audit.total_requirements}</span

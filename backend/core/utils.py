@@ -1,4 +1,5 @@
 import hashlib
+from decimal import Decimal
 from enum import Enum
 
 import json
@@ -15,7 +16,190 @@ import calendar
 from dateutil import relativedelta as rd
 from uuid import UUID
 
+# Re-export so callers can import from a single utils module.
+from .friendly_names import generate_friendly_name  # noqa: F401
+
 logger = structlog.get_logger(__name__)
+
+
+def extract_node_id(urn: str | None) -> str | None:
+    """Extract the node_id (mobile part) from a URN.
+
+    URN format: urn:{org}:risk:{type}:{slug}:{node_id}
+    The node_id is everything after the 5th colon and may contain colons.
+    """
+    if not urn:
+        return None
+    parts = urn.split(":")
+    if len(parts) <= 5:
+        return None
+    node_id = ":".join(parts[5:]).strip()
+    return node_id if node_id else None
+
+
+REWRITABLE_URN_TYPES = {"req_node", "question", "question_choice"}
+
+
+def rewrite_child_urns(draft: dict, new_ns: str, new_slug: str) -> None:
+    """Rewrite segment 1 (namespace) and segment 4 (slug) of every child URN in
+    the draft, in place. Idempotent across slugs.
+
+    URN format: `urn:ns:risk:type:slug:node_id` (6+ segments). Segments 5+
+    (node_id) are preserved so CEL expressions keying off node_id keep
+    resolving. URNs with fewer than 6 segments are left untouched — the
+    rename branch in `_reconcile_draft` rejects drafts that contain such
+    legacy URNs before this helper runs, so encountering one here would be
+    a bug.
+
+    Touches: nodes[*].urn, nodes[*].parent_urn, questions[*].urn,
+    questions[*].depends_on.{question, answers}, choices[*].urn.
+    """
+
+    def sub(u):
+        if not isinstance(u, str):
+            return u
+        parts = u.split(":")
+        if (
+            len(parts) >= 6
+            and parts[0] == "urn"
+            and parts[2] == "risk"
+            and parts[3] in REWRITABLE_URN_TYPES
+        ):
+            parts[1] = new_ns
+            parts[4] = new_slug
+            return ":".join(parts)
+        return u
+
+    for n in draft.get("nodes", []) or []:
+        n["urn"] = sub(n.get("urn"))
+        if n.get("parent_urn"):
+            n["parent_urn"] = sub(n.get("parent_urn"))
+    for q in draft.get("questions", []) or []:
+        q["urn"] = sub(q.get("urn"))
+        dep = q.get("depends_on")
+        if isinstance(dep, dict):
+            if isinstance(dep.get("question"), str):
+                dep["question"] = sub(dep["question"])
+            if isinstance(dep.get("answers"), list):
+                dep["answers"] = [
+                    sub(a) if isinstance(a, str) else a for a in dep["answers"]
+                ]
+    for c in draft.get("choices", []) or []:
+        c["urn"] = sub(c.get("urn"))
+
+
+def resolve_compute_result(compute_result: str | None) -> str | None:
+    """Map a QuestionChoice.compute_result string to a Result value."""
+    if compute_result is None:
+        return None
+    value = compute_result.strip().lower()
+    if value == "":
+        return None
+    if value in ("true", "1", "compliant"):
+        return "compliant"
+    if value in ("false", "0", "non_compliant"):
+        return "non_compliant"
+    if value == "partially_compliant":
+        return "partially_compliant"
+    if value == "not_applicable":
+        return "not_applicable"
+    logger.warning(
+        "Unknown compute_result value ignored", compute_result=compute_result
+    )
+    return None
+
+
+def aggregate_compute_results(resolved_results: list[str | None]) -> str | None:
+    """Aggregate resolved compute_result values: not_applicable is neutral, else worst-wins."""
+    contributing = [r for r in resolved_results if r is not None]
+    if not contributing:
+        return None
+
+    non_na = [r for r in contributing if r != "not_applicable"]
+    if not non_na:
+        return "not_applicable"
+
+    has_compliant = any(r == "compliant" for r in non_na)
+    has_non_compliant = any(r == "non_compliant" for r in non_na)
+    has_partial = any(r == "partially_compliant" for r in non_na)
+
+    if has_partial or (has_compliant and has_non_compliant):
+        return "partially_compliant"
+    if has_non_compliant:
+        return "non_compliant"
+    return "compliant"
+
+
+# Currency formatting conventions: (position, space)
+# position: "before" or "after" the amount
+# space: whether to include a space between symbol and amount
+_CURRENCY_FORMAT = {
+    # Symbol before, no space: $100
+    "$": ("before", False),
+    "£": ("before", False),
+    "¥": ("before", False),
+    "CN¥": ("before", False),
+    "₹": ("before", False),
+    "₩": ("before", False),
+    "A$": ("before", False),
+    "NZ$": ("before", False),
+    "S$": ("before", False),
+    "₺": ("before", False),
+    "NT$": ("before", False),
+    "฿": ("before", False),
+    "MYR": ("before", False),
+    # Symbol before, with space: CHF 100
+    "C$": ("before", True),
+    "CHF": ("before", True),
+    "HK$": ("before", True),
+    "R$": ("before", True),
+    "MX$": ("before", True),
+    "ZAR": ("before", True),
+    # Symbol after, with space: 100 €
+    "€": ("after", True),
+    "SEK": ("after", True),
+    "NOK": ("after", True),
+    "DKK": ("after", True),
+    "PLN": ("after", True),
+    "XPF": ("after", True),
+}
+
+
+def get_global_currency() -> str:
+    """Get the currency from global settings, defaulting to €."""
+    from global_settings.models import GlobalSettings
+
+    general_settings = GlobalSettings.objects.filter(name="general").first()
+    return general_settings.value.get("currency", "€") if general_settings else "€"
+
+
+def format_currency(value, currency: str) -> str:
+    """Format a numeric value with its currency symbol in the correct position.
+
+    Respects per-currency conventions for symbol position (before/after)
+    and spacing. For large values, uses abbreviated forms (K, M, B).
+    """
+    if not currency:
+        return f"{value} *"
+
+    if isinstance(value, (int, float, Decimal)):
+        if value >= 1_000_000_000:
+            formatted = f"{value / 1_000_000_000:.1f}B"
+        elif value >= 1_000_000:
+            formatted = f"{value / 1_000_000:.1f}M"
+        elif value >= 1_000:
+            formatted = f"{value / 1_000:.0f}K"
+        else:
+            formatted = f"{value:,.0f}"
+    else:
+        formatted = str(value)
+
+    position, space = _CURRENCY_FORMAT.get(currency, ("before", True))
+    sep = " " if space else ""
+
+    if position == "after":
+        return f"{formatted}{sep}{currency}"
+    return f"{currency}{sep}{formatted}"
 
 
 def sizeof_json(obj) -> int:
@@ -72,27 +256,233 @@ class UserGroupCodename(Enum):
         return self.value
 
 
-BUILTIN_ROLE_CODENAMES = {
-    str(RoleCodename.ADMINISTRATOR): _("Administrator"),
-    str(RoleCodename.DOMAIN_MANAGER): _("Domain manager"),
-    str(RoleCodename.ANALYST): _("Analyst"),
-    str(RoleCodename.APPROVER): _("Approver"),
-    str(RoleCodename.READER): _("Reader"),
-    str(RoleCodename.THIRD_PARTY_RESPONDENT): _("Third-party respondent"),
-    str(RoleCodename.AUDITEE): _("Auditee"),
+# Translations for builtin role names, following the library localization pattern.
+# Structure: {role_codename: {locale: {"name": translated_name}}}
+# The English name serves as the base; other locales provide translations.
+BUILTIN_ROLE_TRANSLATIONS = {
+    "BI-RL-ADM": {
+        "en": {"name": "Administrator"},
+        "ar": {"name": "المسؤول"},
+        "cs": {"name": "Administrátor"},
+        "da": {"name": "Administrator"},
+        "de": {"name": "Administrator"},
+        "el": {"name": "Διαχειριστής"},
+        "es": {"name": "Administrador"},
+        "et": {"name": "Administraator"},
+        "fr": {"name": "Administrateur"},
+        "hi": {"name": "प्रशासक"},
+        "hr": {"name": "Administrator"},
+        "hu": {"name": "Adminisztrátor"},
+        "id": {"name": "Administrator"},
+        "it": {"name": "Amministratore"},
+        "ko": {"name": "관리자"},
+        "lt": {"name": "Administratorius"},
+        "nl": {"name": "Beheerder"},
+        "pl": {"name": "Administrator"},
+        "pt": {"name": "Administrador"},
+        "ro": {"name": "Administrator"},
+        "sv": {"name": "Administratör"},
+        "tr": {"name": "Yönetici"},
+        "uk": {"name": "Адміністратор"},
+        "ur": {"name": "ایڈمنسٹریٹر"},
+        "zh": {"name": "管理员"},
+    },
+    "BI-RL-DMA": {
+        "en": {"name": "Domain manager"},
+        "ar": {"name": "مدير النطاق"},
+        "cs": {"name": "Správce domény"},
+        "da": {"name": "Domæneansvarlig"},
+        "de": {"name": "Bereichsverantwortlicher"},
+        "el": {"name": "Υπεύθυνος τομέα"},
+        "es": {"name": "Gerente de dominio"},
+        "et": {"name": "Valdkonnahaldur"},
+        "fr": {"name": "Gestionnaire de domaine"},
+        "hi": {"name": "डोमेन प्रबंधक"},
+        "hr": {"name": "Upravitelj domene"},
+        "hu": {"name": "Tartománykezelő"},
+        "id": {"name": "Manajer domain"},
+        "it": {"name": "Gestore del dominio"},
+        "ko": {"name": "도메인 관리자"},
+        "lt": {"name": "Srities vadovas"},
+        "nl": {"name": "Domeinbeheerder"},
+        "pl": {"name": "Menadżer domeny"},
+        "pt": {"name": "Gerente de domínio"},
+        "ro": {"name": "Manager de domeniu"},
+        "sv": {"name": "Domänansvarig"},
+        "tr": {"name": "Etki alanı yöneticisi"},
+        "uk": {"name": "Менеджер домену"},
+        "ur": {"name": "ڈومین مینیجر"},
+        "zh": {"name": "域管理员"},
+    },
+    "BI-RL-ANA": {
+        "en": {"name": "Analyst"},
+        "ar": {"name": "المحلل"},
+        "cs": {"name": "Analytik"},
+        "da": {"name": "Analytiker"},
+        "de": {"name": "Analyst"},
+        "el": {"name": "Αναλυτής"},
+        "es": {"name": "Analista"},
+        "et": {"name": "Analüütik"},
+        "fr": {"name": "Analyste"},
+        "hi": {"name": "विश्लेषक"},
+        "hr": {"name": "Analitičar"},
+        "hu": {"name": "Elemző"},
+        "id": {"name": "Analis"},
+        "it": {"name": "Analista"},
+        "ko": {"name": "분석가"},
+        "lt": {"name": "Analitikas"},
+        "nl": {"name": "Analist"},
+        "pl": {"name": "Analityk"},
+        "pt": {"name": "Analista"},
+        "ro": {"name": "Analist"},
+        "sv": {"name": "Analytiker"},
+        "tr": {"name": "Analist"},
+        "uk": {"name": "Аналітик"},
+        "ur": {"name": "تجزیہ کار"},
+        "zh": {"name": "分析师"},
+    },
+    "BI-RL-APP": {
+        "en": {"name": "Approver"},
+        "ar": {"name": "الموافق"},
+        "cs": {"name": "Schvalovatel"},
+        "da": {"name": "Godkender"},
+        "de": {"name": "Genehmiger"},
+        "el": {"name": "Εγκρίνων"},
+        "es": {"name": "Aprobador"},
+        "et": {"name": "Kinnitaja"},
+        "fr": {"name": "Approbateur"},
+        "hi": {"name": "स्वीकर्ता"},
+        "hr": {"name": "Odobravatelj"},
+        "hu": {"name": "Jóváhagyó"},
+        "id": {"name": "Penyetuju"},
+        "it": {"name": "Approvatore"},
+        "ko": {"name": "승인자"},
+        "lt": {"name": "Tvirtintojas"},
+        "nl": {"name": "Goedkeurder"},
+        "pl": {"name": "Akceptujący"},
+        "pt": {"name": "Aprovador"},
+        "ro": {"name": "Aprobator"},
+        "sv": {"name": "Godkännare"},
+        "tr": {"name": "Onaylayan"},
+        "uk": {"name": "Затверджувач"},
+        "ur": {"name": "منظور کنندہ"},
+        "zh": {"name": "审批者"},
+    },
+    "BI-RL-AUD": {
+        "en": {"name": "Reader"},
+        "ar": {"name": "القارئ"},
+        "cs": {"name": "Čtečka"},
+        "da": {"name": "Læser"},
+        "de": {"name": "Leser"},
+        "el": {"name": "Αναγνώστης"},
+        "es": {"name": "Lector"},
+        "et": {"name": "Lugeja"},
+        "fr": {"name": "Lecteur"},
+        "hi": {"name": "रीडर"},
+        "hr": {"name": "Čitatelj"},
+        "hu": {"name": "Olvasó"},
+        "id": {"name": "Pembaca"},
+        "it": {"name": "Lettore"},
+        "ko": {"name": "열람자"},
+        "lt": {"name": "Skaitytojas"},
+        "nl": {"name": "Lezer"},
+        "pl": {"name": "Czytelnik"},
+        "pt": {"name": "Leitor"},
+        "ro": {"name": "Cititor"},
+        "sv": {"name": "Läsare"},
+        "tr": {"name": "Okuyucu"},
+        "uk": {"name": "Читач"},
+        "ur": {"name": "ریڈر"},
+        "zh": {"name": "阅读者"},
+    },
+    "BI-RL-TPR": {
+        "en": {"name": "Third-party respondent"},
+        "ar": {"name": "المجيب من طرف ثالث"},
+        "cs": {"name": "Respondent třetí strany"},
+        "da": {"name": "Tredjepartsrespondent"},
+        "de": {"name": "Drittanbieter-Befragter"},
+        "el": {"name": "Ερωτώμενος τρίτου μέρους"},
+        "es": {"name": "Encuestado de terceros"},
+        "et": {"name": "Kolmanda osapoole vastaja"},
+        "fr": {"name": "Répondant tiers"},
+        "hi": {"name": "तृतीय-पक्ष प्रतिवादी"},
+        "hr": {"name": "Ispitanik treće strane"},
+        "hu": {"name": "Harmadik fél válaszadója"},
+        "id": {"name": "Responden pihak ketiga"},
+        "it": {"name": "Rispondente di terze parti"},
+        "ko": {"name": "제3자 응답자"},
+        "lt": {"name": "Trečiosios šalies respondentas"},
+        "nl": {"name": "Externe respondent"},
+        "pl": {"name": "Respondent strony trzeciej"},
+        "pt": {"name": "Respondente terceiro"},
+        "ro": {"name": "Respondent terță parte"},
+        "sv": {"name": "Tredjepartsrespondent"},
+        "tr": {"name": "Üçüncü taraf yanıtlayıcı"},
+        "uk": {"name": "Респондент третьої сторони"},
+        "ur": {"name": "فریق ثالث جواب دہندہ"},
+        "zh": {"name": "第三方受访者"},
+    },
+    "BI-RL-ADE": {
+        "en": {"name": "Respondent"},
+        "ar": {"name": "المجيب"},
+        "cs": {"name": "Respondent"},
+        "da": {"name": "Respondent"},
+        "de": {"name": "Befragter"},
+        "el": {"name": "Ερωτώμενος"},
+        "es": {"name": "Encuestado"},
+        "et": {"name": "Vastaja"},
+        "fr": {"name": "Répondant"},
+        "hi": {"name": "प्रतिवादी"},
+        "hr": {"name": "Ispitanik"},
+        "hu": {"name": "Válaszadó"},
+        "id": {"name": "Responden"},
+        "it": {"name": "Rispondente"},
+        "ko": {"name": "응답자"},
+        "lt": {"name": "Respondentas"},
+        "nl": {"name": "Respondent"},
+        "pl": {"name": "Respondent"},
+        "pt": {"name": "Respondente"},
+        "ro": {"name": "Respondent"},
+        "sv": {"name": "Respondent"},
+        "tr": {"name": "Yanıtlayıcı"},
+        "uk": {"name": "Респондент"},
+        "ur": {"name": "جواب دہندہ"},
+        "zh": {"name": "受访者"},
+    },
 }
 
+
+def get_translated_builtin_role_name(role_codename: str) -> str:
+    """Return the translated display name for a builtin role codename.
+
+    Uses the same locale-resolution pattern as library objects:
+    check BUILTIN_ROLE_TRANSLATIONS for the current Django language,
+    fall back to English, then to the raw codename.
+    """
+    from django.utils.translation import get_language
+
+    translations = BUILTIN_ROLE_TRANSLATIONS.get(role_codename, {})
+    lang = get_language() or "en"
+    # Try exact locale, then base language (e.g. "fr-FR" → "fr")
+    locale_trans = translations.get(lang) or translations.get(lang.split("-")[0], {})
+    return locale_trans.get("name") or translations.get("en", {}).get(
+        "name", role_codename
+    )
+
+
 BUILTIN_USERGROUP_CODENAMES = {
-    str(UserGroupCodename.ADMINISTRATOR): _("Administrator"),
-    str(UserGroupCodename.GLOBAL_READER): _("Reader"),
-    str(UserGroupCodename.GLOBAL_APPROVER): _("Approver"),
-    str(UserGroupCodename.GLOBAL_AUDITEE): _("Auditee"),
-    str(UserGroupCodename.DOMAIN_MANAGER): _("Domain manager"),
-    str(UserGroupCodename.ANALYST): _("Analyst"),
-    str(UserGroupCodename.APPROVER): _("Approver"),
-    str(UserGroupCodename.READER): _("Reader"),
-    str(UserGroupCodename.THIRD_PARTY_RESPONDENT): _("Third-party respondent"),
-    str(UserGroupCodename.AUDITEE): _("Auditee"),
+    str(UserGroupCodename.ADMINISTRATOR): str(RoleCodename.ADMINISTRATOR),
+    str(UserGroupCodename.GLOBAL_READER): str(RoleCodename.READER),
+    str(UserGroupCodename.GLOBAL_APPROVER): str(RoleCodename.APPROVER),
+    str(UserGroupCodename.GLOBAL_AUDITEE): str(RoleCodename.AUDITEE),
+    str(UserGroupCodename.DOMAIN_MANAGER): str(RoleCodename.DOMAIN_MANAGER),
+    str(UserGroupCodename.ANALYST): str(RoleCodename.ANALYST),
+    str(UserGroupCodename.APPROVER): str(RoleCodename.APPROVER),
+    str(UserGroupCodename.READER): str(RoleCodename.READER),
+    str(UserGroupCodename.THIRD_PARTY_RESPONDENT): str(
+        RoleCodename.THIRD_PARTY_RESPONDENT
+    ),
+    str(UserGroupCodename.AUDITEE): str(RoleCodename.AUDITEE),
 }
 
 # NOTE: This is set to "Main" now, but will be changed to a unique identifier
@@ -682,70 +1072,255 @@ def _generate_occurrences(template, start_date, end_date):
     return occurrences
 
 
-def _is_question_visible(question, answers):
-    """Check if a question is visible based on depends_on logic."""
-    depends_on = question.get("depends_on")
+def _is_question_visible(question, answers_by_urn, questions_by_urn=None, visited=None):
+    """Check if a question is visible based on depends_on logic.
+
+    Works with Question model objects (new relational models).
+    - question: a Question model instance
+    - answers_by_urn: dict of {question.urn: answer_value}
+    - questions_by_urn: dict of {question.urn: Question} (optional, for lookups)
+    - visited: set of urns already visited (cycle protection)
+    """
+    depends_on = (
+        question.depends_on
+        if hasattr(question, "depends_on")
+        else question.get("depends_on")
+        if isinstance(question, dict)
+        else None
+    )
     if not depends_on:
         return True
 
-    target_answer = answers.get(depends_on["question"])
-    if not target_answer:
+    dep_ref = depends_on.get("question") if isinstance(depends_on, dict) else None
+    if not dep_ref:
+        return True
+
+    # Cycle protection
+    if visited is None:
+        visited = set()
+    q_urn = getattr(question, "urn", None) or (
+        question.get("urn") if isinstance(question, dict) else None
+    )
+    if q_urn:
+        if q_urn in visited:
+            return True
+        visited = visited | {q_urn}
+
+    # Check parent question visibility first (recursive chain)
+    if questions_by_urn:
+        parent_question = questions_by_urn.get(dep_ref)
+        if parent_question and not _is_question_visible(
+            parent_question, answers_by_urn, questions_by_urn, visited
+        ):
+            return False
+
+    target_answer = answers_by_urn.get(dep_ref)
+    # Use explicit None/empty-list check to avoid hiding on falsy values like 0 or False
+    if target_answer is None or (isinstance(target_answer, list) and not target_answer):
         return False
 
-    if depends_on["condition"] == "any":
-        if isinstance(target_answer, list):
-            return any(a in depends_on["answers"] for a in target_answer)
-        return target_answer in depends_on["answers"]
+    condition = depends_on.get("condition", "any")
+    dep_answers = depends_on.get("answers", [])
 
-    if depends_on["condition"] == "all":
+    if condition == "any":
         if isinstance(target_answer, list):
-            return all(a in target_answer for a in depends_on["answers"])
-        return target_answer == depends_on["answers"][0]
+            return any(a in dep_answers for a in target_answer)
+        return target_answer in dep_answers
 
-    return True
+    if condition == "all":
+        if isinstance(target_answer, list):
+            return all(a in target_answer for a in dep_answers)
+        # Single-value answer can only satisfy "all" if there's exactly one expected answer
+        return len(dep_answers) == 1 and target_answer == dep_answers[0]
+
+    return False
+
+
+def build_answers_dict(answers_qs):
+    """Build {question.urn: answer_value} dict from Answer queryset for backward compat.
+
+    For choice-type questions, returns ref_id strings (single choice) or lists
+    of ref_id strings (multiple choice). For other types, returns the raw value.
+    """
+    from core.models import Question
+
+    result = {}
+    for a in answers_qs:
+        if a.question.type == Question.Type.UNIQUE_CHOICE:
+            refs = [c.urn for c in a.selected_choices.all()]
+            result[a.question.urn] = refs[0] if refs else None
+        elif a.question.type == Question.Type.MULTIPLE_CHOICE:
+            result[a.question.urn] = [c.urn for c in a.selected_choices.all()]
+        else:
+            result[a.question.urn] = a.value
+    return result
+
+
+def _build_answer_context(questions_qs, answers_qs):
+    """Build lookup dicts used for question visibility and score computation.
+
+    Returns (selected_choice_pks_by_qid, answers_by_urn, questions_by_urn, has_answer_by_qid).
+    """
+    from core.models import Question
+
+    selected_choice_pks_by_qid = {}
+    answers_by_urn = {}
+    questions_by_urn = {}
+    has_answer_by_qid = {}
+
+    for a in answers_qs:
+        q_type = a.question.type
+        if q_type in (
+            Question.Type.UNIQUE_CHOICE,
+            Question.Type.MULTIPLE_CHOICE,
+        ):
+            pks = {c.id for c in a.selected_choices.all()}
+            selected_choice_pks_by_qid[a.question_id] = pks
+            has_answer_by_qid[a.question_id] = len(pks) > 0
+        else:
+            has_answer_by_qid[a.question_id] = a.value is not None and a.value != ""
+
+        if a.question.urn:
+            answers_by_urn[a.question.urn] = a.get_choice_urns() or a.value
+
+    for q in questions_qs:
+        questions_by_urn[q.urn] = q
+
+    return (
+        selected_choice_pks_by_qid,
+        answers_by_urn,
+        questions_by_urn,
+        has_answer_by_qid,
+    )
 
 
 def update_selected_implementation_groups(compliance_assessment):
     """Recalculate selected IGs based on all visible answers in the assessment."""
+    from core.models import Answer, Question
+
     igs_to_select = set()
 
     requirement_assessments = (
         compliance_assessment.requirement_assessments.select_related(
             "requirement", "requirement__framework"
-        ).all()
+        )
+        .prefetch_related(
+            "answers",
+            "answers__question",
+            "answers__selected_choices",
+            "requirement__questions",
+            "requirement__questions__choices",
+        )
+        .all()
     )
+
     for ra in requirement_assessments:
-        answers = ra.answers or {}
-        if not ra.requirement.questions:
+        questions_qs = ra.requirement.questions.all()
+        if not questions_qs:
             continue
-        for question_urn, question in ra.requirement.questions.items():
-            if not _is_question_visible(question, answers):
+
+        answers_qs = ra.answers.all()
+        (
+            selected_choice_pks_by_qid,
+            answers_by_urn,
+            questions_by_urn,
+            has_answer_by_qid,
+        ) = _build_answer_context(questions_qs, answers_qs)
+
+        for question in questions_qs:
+            if not _is_question_visible(question, answers_by_urn, questions_by_urn):
                 continue
 
-            question_answers = answers.get(question_urn)
-            if not question_answers:
+            if not has_answer_by_qid.get(question.id):
                 continue
-            if not isinstance(question_answers, list):
-                question_answers = [question_answers]
 
-            for choice in question.get("choices", []):
-                if choice["urn"] in question_answers:
-                    igs_to_select.update(choice.get("select_implementation_groups", []))
+            selected_pks = selected_choice_pks_by_qid.get(question.id, set())
+            for choice in question.choices.all():
+                if choice.id in selected_pks:
+                    igs_to_select.update(choice.select_implementation_groups or [])
 
-        for ig in ra.requirement.framework.implementation_groups_definition:
-            if ig.get("default_selected"):
-                igs_to_select.add(ig["ref_id"])
+        if ra.requirement.framework.implementation_groups_definition:
+            for ig in ra.requirement.framework.implementation_groups_definition:
+                if ig.get("default_selected"):
+                    igs_to_select.add(ig["ref_id"])
 
     compliance_assessment.selected_implementation_groups = list(igs_to_select)
     compliance_assessment.save(update_fields=["selected_implementation_groups"])
 
 
+def build_questions_dict(node):
+    """Reconstruct the JSON-format questions dict from relational Question/QuestionChoice models.
+
+    Returns a dict like {urn: {type, text, choices, ...}} or None for unsaved objects
+    or nodes with no questions.
+    """
+    if node.pk is None:
+        return None
+
+    from core.models import Question
+
+    questions_qs = node.questions.all()
+
+    if not questions_qs:
+        return None
+
+    result = {}
+    for question in questions_qs:
+        choices = []
+        for choice in question.choices.all():
+            choice_data = {
+                "urn": choice.urn,
+                "value": choice.value or "",
+            }
+            if choice.add_score is not None:
+                choice_data["add_score"] = choice.add_score
+            if choice.compute_result is not None:
+                resolved = resolve_compute_result(choice.compute_result)
+                if resolved is not None:
+                    choice_data["compute_result"] = resolved
+            if choice.description:
+                choice_data["description"] = choice.description
+            if choice.color:
+                choice_data["color"] = choice.color
+            if choice.select_implementation_groups:
+                choice_data["select_implementation_groups"] = (
+                    choice.select_implementation_groups
+                )
+            if choice.annotation:
+                choice_data["annotation"] = choice.annotation
+            choices.append(choice_data)
+
+        q_data = {
+            "type": question.type,
+            "text": question.text or "",
+            "weight": question.weight,
+        }
+        if question.annotation:
+            q_data["annotation"] = question.annotation
+        if choices:
+            q_data["choices"] = choices
+        if question.depends_on:
+            q_data["depends_on"] = question.depends_on
+        result[question.urn] = q_data
+
+    return result if result else None
+
+
 def _resolve_auditee_role_ids():
-    """Resolve role IDs for auditee + higher roles via IAM snapshot cache."""
+    """Resolve respondent role IDs (auditee + third-party respondent) and the
+    "higher" role IDs (analyst, domain-manager, administrator) via IAM cache.
+
+    Auditee and third-party respondent are synonymous here — both are
+    respondents on an audit and get the scoped, field-stripped view.
+    """
     from iam.cache_builders import get_roles_state
 
     role_id_by_name = get_roles_state().role_id_by_name
-    auditee_id = role_id_by_name.get(RoleCodename.AUDITEE.value)
+    respondent_ids = frozenset(
+        role_id_by_name[rc.value]
+        for rc in (RoleCodename.AUDITEE, RoleCodename.THIRD_PARTY_RESPONDENT)
+        if rc.value in role_id_by_name
+    )
     higher_ids = frozenset(
         role_id_by_name[rc.value]
         for rc in (
@@ -755,11 +1330,12 @@ def _resolve_auditee_role_ids():
         )
         if rc.value in role_id_by_name
     )
-    return auditee_id, higher_ids
+    return respondent_ids, higher_ids
 
 
 def get_auditee_filtered_folder_ids(user) -> set:
-    """Return folder IDs where *user* holds the auditee role but NO higher role.
+    """Return folder IDs where *user* holds a respondent role (auditee or
+    third-party respondent) but NO higher role.
 
     "Higher" means analyst, domain-manager or administrator — any role that
     already grants full access to compliance data. For those folders the
@@ -774,8 +1350,8 @@ def get_auditee_filtered_folder_ids(user) -> set:
         iter_descendant_ids,
     )
 
-    auditee_role_id, higher_role_ids = _resolve_auditee_role_ids()
-    if auditee_role_id is None:
+    respondent_role_ids, higher_role_ids = _resolve_auditee_role_ids()
+    if not respondent_role_ids:
         return set()
 
     state = get_folder_state()
@@ -785,7 +1361,7 @@ def get_auditee_filtered_folder_ids(user) -> set:
 
     for a in _iter_assignment_lites_for_user(user):
         role_id = a.role_id
-        if role_id != auditee_role_id and role_id not in higher_role_ids:
+        if role_id not in respondent_role_ids and role_id not in higher_role_ids:
             continue  # irrelevant role
 
         # expand perimeter folders
@@ -798,9 +1374,103 @@ def get_auditee_filtered_folder_ids(user) -> set:
             for fid in target_ids:
                 folder_roles.setdefault(fid, set()).add(role_id)
 
-    # Return only folders where user is auditee and has NO higher role
+    # Return only folders where user is a respondent and has NO higher role
     return {
         fid
         for fid, role_ids in folder_roles.items()
-        if auditee_role_id in role_ids and role_ids.isdisjoint(higher_role_ids)
+        if role_ids & respondent_role_ids and role_ids.isdisjoint(higher_role_ids)
     }
+
+
+# --- Field Visibility ---
+#
+# The compliance assessment's `field_visibility` is the single source of truth
+# at runtime. It is populated at CA creation from DEFAULT_VISIBILITY merged with
+# the framework's `field_visibility`, and can be edited per-CA from then on.
+#
+# Storage shape: {field_name: {role: 'edit'|'read'|'hidden'}}
+# Roles known today: 'auditor', 'respondent'. Future roles slot in alongside.
+# A missing field key, or a missing role within a field's pair, resolves to 'edit'
+# (matching the "no restriction" default).
+
+EVERYONE_EDIT = {"auditor": "edit", "respondent": "edit"}
+AUDITOR_ONLY = {"auditor": "edit", "respondent": "hidden"}
+AUDITOR_READ_ONLY = {"auditor": "read", "respondent": "hidden"}
+HIDDEN = {"auditor": "hidden", "respondent": "hidden"}
+
+DEFAULT_VISIBILITY = {
+    "score": HIDDEN,
+    "is_scored": HIDDEN,
+    "documentation_score": HIDDEN,
+    "status": AUDITOR_ONLY,
+    "extended_result": AUDITOR_ONLY,
+    # respondent_alignment is only ever populated by the respondent answering
+    # the auto-question. AUDITOR_ONLY would prevent that, so the auditor's
+    # badge would never render — functionally equivalent to HIDDEN. Default
+    # off; auditors who want it explicitly flip to "Auditor + Respondent".
+    "respondent_alignment": HIDDEN,
+}
+
+
+def resolve_visibility_from_overrides(overrides, field_name):
+    """Resolve a field's visibility pair from a raw `field_visibility` dict.
+
+    Shape: {role: 'edit'|'read'|'hidden'}.
+
+    Lookup order:
+      1. Explicit override in `overrides`.
+      2. DEFAULT_VISIBILITY (backstop in case a new field was added in code
+         without a migration to backfill existing CAs).
+      3. EVERYONE_EDIT (truly unknown field).
+
+    Use this when you have a raw dict (e.g. from a queryset `.values()` call).
+    For a model instance, prefer `resolve_field_visibility(ca, field)`.
+    """
+    pair = (overrides or {}).get(field_name)
+    if isinstance(pair, dict):
+        return pair
+    fallback = DEFAULT_VISIBILITY.get(field_name)
+    if isinstance(fallback, dict):
+        return dict(fallback)
+    return dict(EVERYONE_EDIT)
+
+
+def resolve_field_visibility(compliance_assessment, field_name):
+    """Return the per-role visibility pair for a field on a CA instance."""
+    overrides = getattr(compliance_assessment, "field_visibility", None) or {}
+    return resolve_visibility_from_overrides(overrides, field_name)
+
+
+def _role_access(compliance_assessment, field_name, role):
+    pair = resolve_field_visibility(compliance_assessment, field_name)
+    return pair.get(role, "edit")
+
+
+def is_field_visible_to(compliance_assessment, field_name, role):
+    """Whether a field is readable by the given role."""
+    return _role_access(compliance_assessment, field_name, role) != "hidden"
+
+
+def is_field_editable_by(compliance_assessment, field_name, role):
+    """Whether a field is writable by the given role."""
+    return _role_access(compliance_assessment, field_name, role) == "edit"
+
+
+def build_initial_field_visibility(framework):
+    """Build the initial `field_visibility` map for a new CA.
+
+    Layered per-role: code defaults are seeded for every known field, then the
+    framework's overrides are merged on top — but per-role, so a framework that
+    only specifies a single role (e.g. {"score": {"auditor": "edit"}}) does not
+    erase the default value for the other roles.
+    """
+    fw_overrides = getattr(framework, "field_visibility", None) or {}
+    merged = {key: dict(pair) for key, pair in DEFAULT_VISIBILITY.items()}
+    for key, pair in fw_overrides.items():
+        if not isinstance(pair, dict):
+            continue
+        # Ensure the field has a starting pair (DEFAULT_VISIBILITY may not
+        # cover every key the framework configures).
+        merged.setdefault(key, dict(EVERYONE_EDIT))
+        merged[key].update(pair)
+    return merged

@@ -1,7 +1,9 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import ThresholdsEditor from './ThresholdsEditor.svelte';
 	import { formFieldProxy, type SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
@@ -12,7 +14,6 @@
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
-		data?: any;
 		object?: any;
 		debug?: boolean;
 		supportedModels?: Record<string, any>;
@@ -24,7 +25,6 @@
 		cacheLocks = {},
 		formDataCache = $bindable({}),
 		initialData = {},
-		data = {},
 		object = {},
 		debug = false,
 		supportedModels = {}
@@ -34,12 +34,21 @@
 	const { value: targetModelValue } = formFieldProxy(form, 'target_model');
 	const { value: metricKeyValue } = formFieldProxy(form, 'metric_key');
 	const { value: chartTypeValue } = formFieldProxy(form, 'chart_type');
+	const { value: timeRangeValue } = formFieldProxy(form, 'time_range');
+
+	// Detect breakdown metrics so we can hide controls (like thresholds) that only apply to scalars.
+	const isBreakdownMetric = $derived(
+		!!selectedModel &&
+			!!selectedMetricKey &&
+			supportedModels?.[selectedModel]?.[selectedMetricKey]?.type === 'breakdown'
+	);
 
 	// State for builtin metric options
 	let selectedModel = $state<string>(object?.target_content_type_display || '');
 	let selectedMetricKey = $state<string>(object?.metric_key || '');
 	let availableMetrics = $state<Array<{ value: string; label: string; chart_types: string[] }>>([]);
 	let selectedChartType = $state<string>(object?.chart_type || '');
+	let selectedTimeRange = $state<string>(object?.time_range || initialData?.time_range || '');
 
 	// Initialize formDataCache from object for edit mode
 	$effect(() => {
@@ -137,6 +146,23 @@
 		}
 	});
 
+	$effect(() => {
+		if (!selectedTimeRange) {
+			selectedTimeRange =
+				formDataCache['time_range'] ||
+				object?.time_range ||
+				initialData?.time_range ||
+				'last_30_days';
+		}
+	});
+
+	$effect(() => {
+		if (selectedTimeRange) {
+			formDataCache['time_range'] = selectedTimeRange;
+			$timeRangeValue = selectedTimeRange;
+		}
+	});
+
 	// Map model names to translation keys
 	const modelTranslationKeys: Record<string, () => string> = {
 		ComplianceAssessment: m.complianceAssessment,
@@ -198,11 +224,9 @@
 	</div>
 {/if}
 
-<AutocompleteSelect
+<FolderTreeSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
-	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
@@ -298,12 +322,7 @@
 	{#if model.selectOptions?.['time_range']}
 		<div>
 			<label class="text-sm font-semibold" for="time_range">{m.timeRange()}</label>
-			<select
-				id="time_range"
-				name="time_range"
-				class="select"
-				bind:value={formDataCache['time_range']}
-			>
+			<select id="time_range" name="time_range" class="select" bind:value={selectedTimeRange}>
 				{#each model.selectOptions['time_range'] as option}
 					<option value={option.value}>{option.label}</option>
 				{/each}
@@ -322,3 +341,5 @@
 	cacheLock={cacheLocks['show_target']}
 	bind:cachedValue={formDataCache['show_target']}
 />
+
+<ThresholdsEditor {form} {object} chartType={selectedChartType} {isBreakdownMetric} />

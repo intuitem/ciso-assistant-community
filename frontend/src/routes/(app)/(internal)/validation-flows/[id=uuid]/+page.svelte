@@ -8,8 +8,14 @@
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { getLocale } from '$paraglide/runtime.js';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import { canPerformAction } from '$lib/utils/access-control';
 	import { invalidateAll } from '$app/navigation';
+	import { canPerformAction } from '$lib/utils/access-control';
+	import ValidationFlowActionModal from '$lib/components/Modals/ValidationFlowActionModal.svelte';
+	import {
+		getModalStore,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
 
 	interface Props {
 		data: PageData;
@@ -18,7 +24,9 @@
 	let { data }: Props = $props();
 
 	const user = page.data.user;
-	const validation_flow = data.validation_flow;
+	const validation_flow = $derived(data.validation_flow);
+
+	const modalStore: ModalStore = getModalStore();
 
 	const canEdit: boolean = canPerformAction({
 		user,
@@ -27,66 +35,35 @@
 		domain: validation_flow.folder.id
 	});
 
-	// Check if current user is the approver or requester (compare as strings to handle type differences)
 	const isApprover = String(user.id) === String(validation_flow.approver?.id);
 	const isRequester = String(user.id) === String(validation_flow.requester?.id);
 
-	// Modal state
-	let showObservationModal = $state(false);
-	let currentAction = $state<
-		'approve' | 'reject' | 'revoke' | 'drop' | 'request_changes' | 'resubmit' | null
-	>(null);
-	let notes = $state('');
-	let isSubmitting = $state(false);
+	type ActionType = 'approve' | 'reject' | 'revoke' | 'drop' | 'request_changes' | 'resubmit';
 
-	function openObservationModal(
-		action: 'approve' | 'reject' | 'revoke' | 'drop' | 'request_changes' | 'resubmit'
-	) {
-		console.log('Opening modal for action:', action);
-		currentAction = action;
-		notes = ''; // Reset notes for new action
-		showObservationModal = true;
-		console.log('Modal state:', { currentAction, showObservationModal });
-	}
-
-	function closeObservationModal() {
-		showObservationModal = false;
-		currentAction = null;
-	}
-
-	async function handleConfirmAction() {
-		if (!currentAction || isSubmitting) return;
-		isSubmitting = true;
-
-		console.log('Submitting action:', currentAction, 'with notes:', notes);
-
-		const formData = new FormData();
-		formData.append('notes', notes);
-
-		try {
-			const response = await fetch(`?/${currentAction}`, {
-				method: 'POST',
-				body: formData
-			});
-
-			console.log('Response status:', response.status, response.ok);
-
-			if (response.ok) {
-				console.log('Action successful, closing modal and refreshing...');
-				closeObservationModal();
-				// Force a full page reload to update the status and hide buttons
-				window.location.reload();
-			} else {
-				const errorData = await response.text();
-				console.error('Action failed:', response.status, errorData);
-				alert(`Error: ${response.status} - ${errorData}`);
+	function openObservationModal(action: ActionType) {
+		const modal: ModalSettings = {
+			type: 'component',
+			component: {
+				ref: ValidationFlowActionModal,
+				props: {
+					action,
+					onConfirm: async (notes: string) => {
+						const formData = new FormData();
+						formData.append('notes', notes);
+						const response = await fetch(`?/${action}`, {
+							method: 'POST',
+							body: formData
+						});
+						if (!response.ok) {
+							const errorData = await response.text();
+							throw new Error(`${response.status} - ${errorData}`);
+						}
+					},
+					onSuccess: () => invalidateAll()
+				}
 			}
-		} catch (error) {
-			console.error('Error submitting action:', error);
-			alert('An error occurred while submitting the action.');
-		} finally {
-			isSubmitting = false;
-		}
+		};
+		modalStore.trigger(modal);
 	}
 
 	// Helper to convert model field names to display names
@@ -103,7 +80,8 @@
 		policies: m.policies(),
 		processings: m.processings(),
 		accreditations: m.accreditations(),
-		contracts: m.contracts()
+		contracts: m.contracts(),
+		managed_documents: m.managedDocuments()
 	};
 
 	// Get URL model names for links
@@ -120,8 +98,17 @@
 		policies: 'policies',
 		processings: 'processings',
 		accreditations: 'accreditations',
-		contracts: 'contracts'
+		contracts: 'contracts',
+		managed_documents: 'managed-documents'
 	};
+
+	// Resolve the URL for an associated object
+	function getItemHref(key: string, item: any): string {
+		if (key === 'managed_documents' && item.policy?.id) {
+			return `/policies/${item.policy.id}/document`;
+		}
+		return `/${modelUrlNames[key]}/${item.id}`;
+	}
 
 	// Get status color
 	const statusColors: Record<string, string> = {
@@ -310,7 +297,7 @@
 			<div class="space-y-2">
 				<div class="text-sm font-medium text-surface-700-300">{m.approver()}</div>
 				<div class="text-sm text-surface-600-400">
-					{#if validation_flow.approver}
+					{#if validation_flow.approver !== null}
 						{#if validation_flow.approver.first_name || validation_flow.approver.last_name}
 							{validation_flow.approver.first_name}
 							{validation_flow.approver.last_name}
@@ -372,10 +359,7 @@
 									class="border rounded-lg p-3 bg-surface-50-950 hover:bg-surface-100-900 transition"
 								>
 									<div class="flex items-start justify-between gap-2 mb-2">
-										<Anchor
-											href="/{modelUrlNames[key]}/{item.id}"
-											class="anchor text-sm font-medium"
-										>
+										<Anchor href={getItemHref(key, item)} class="anchor text-sm font-medium">
 											{item.str}
 										</Anchor>
 										{#if item.status}
@@ -452,103 +436,6 @@
 					{/if}
 				</div>
 			{/each}
-		</div>
-	</div>
-{/if}
-
-<!-- Observation Modal -->
-{#if showObservationModal}
-	<div
-		class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-		onclick={closeObservationModal}
-	>
-		<div
-			class="card p-6 bg-surface-50-950 shadow-2xl max-w-2xl w-full mx-4"
-			onclick={(e) => e.stopPropagation()}
-		>
-			<div class="flex justify-between items-start mb-4">
-				<h2 class="text-xl font-bold capitalize">
-					{#if currentAction === 'approve'}
-						{m.approve()}
-					{:else if currentAction === 'reject'}
-						{m.reject()}
-					{:else if currentAction === 'revoke'}
-						{m.revoke()}
-					{:else if currentAction === 'drop'}
-						{m.drop()}
-					{:else if currentAction === 'request_changes'}
-						{m.requestChanges()}
-					{:else if currentAction === 'resubmit'}
-						{m.resubmit()}
-					{/if}
-				</h2>
-				<button
-					type="button"
-					class="text-surface-600-400 hover:text-surface-700-300"
-					onclick={closeObservationModal}
-				>
-					<i class="fa-solid fa-times text-xl"></i>
-				</button>
-			</div>
-
-			<div class="space-y-4">
-				<div>
-					<label for="observation" class="block text-sm font-medium text-surface-700-300 mb-2">
-						{m.notes()}
-					</label>
-					<textarea
-						id="observation"
-						bind:value={notes}
-						class="w-full p-3 border border-surface-300-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-						rows="4"
-						placeholder={m.enterYourObservation()}
-					></textarea>
-				</div>
-
-				<div class="flex justify-end space-x-2">
-					<button
-						type="button"
-						class="btn preset-filled-surface-500"
-						onclick={closeObservationModal}
-						disabled={isSubmitting}
-					>
-						{m.cancel()}
-					</button>
-					<button
-						type="button"
-						class="btn {currentAction === 'approve'
-							? 'preset-filled-success-500'
-							: currentAction === 'reject'
-								? 'preset-filled-error-500'
-								: currentAction === 'revoke' || currentAction === 'request_changes'
-									? 'preset-filled-warning-500'
-									: currentAction === 'resubmit'
-										? 'preset-filled-primary-500'
-										: 'preset-filled-surface-500'}"
-						onclick={handleConfirmAction}
-						disabled={isSubmitting}
-					>
-						{#if isSubmitting}
-							<i class="fa-solid fa-spinner fa-spin mr-2"></i>
-						{:else}
-							<i
-								class="fa-solid {currentAction === 'approve'
-									? 'fa-check'
-									: currentAction === 'reject'
-										? 'fa-times'
-										: currentAction === 'revoke'
-											? 'fa-ban'
-											: currentAction === 'drop'
-												? 'fa-trash'
-												: currentAction === 'request_changes'
-													? 'fa-pencil'
-													: 'fa-paper-plane'} mr-2"
-							></i>
-						{/if}
-						{m.confirm()}
-					</button>
-				</div>
-			</div>
 		</div>
 	</div>
 {/if}

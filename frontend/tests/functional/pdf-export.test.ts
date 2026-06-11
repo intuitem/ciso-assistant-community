@@ -105,7 +105,8 @@ test('pdf export works properly for risk assessment', async ({
 			testObjectsData.riskAssessmentsPage.build,
 			testObjectsData.riskAssessmentsPage.dependency
 		);
-		await riskAssessmentsPage.viewItemDetail(testObjectsData.riskAssessmentsPage.build.name);
+		// After creation, the user is redirected to the detail page automatically
+		await page.waitForURL(/\/risk-assessments\/.*/, { timeout: 10_000 });
 	});
 
 	await test.step('test risk assessment export as pdf', async () => {

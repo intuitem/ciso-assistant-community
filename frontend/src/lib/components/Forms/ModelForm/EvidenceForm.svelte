@@ -2,6 +2,7 @@
 	import HiddenInput from '../HiddenInput.svelte';
 	import FileInput from '../FileInput.svelte';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
@@ -71,11 +72,9 @@
 		allowedExtensions={'*'}
 	/>
 {/if}
-<AutocompleteSelect
+<FolderTreeSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL&content_type=EN"
 	field="folder"
-	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
@@ -84,6 +83,7 @@
 		position: 'suffix',
 		classes: 'text-xxs bg-surface-200-800 px-1.5 py-0.5 rounded'
 	}}
+	contentTypes={['DO', 'GL', 'EN']}
 />
 {#if context !== 'edit'}
 	<TextField

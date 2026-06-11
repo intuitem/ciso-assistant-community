@@ -4,7 +4,7 @@ import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, fetch }) => {
 	const body = await request.json();
-	const { preset_id, folder_name, folder_id, create_objects } = body;
+	const { preset_id, folder_name, folder_id, create_objects, apply_feature_flags } = body;
 
 	const headers: Record<string, string> = { 'Content-Type': 'application/json' };
 	const acceptLanguage = request.headers.get('Accept-Language');
@@ -12,10 +12,10 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 		headers['Accept-Language'] = acceptLanguage;
 	}
 
-	const response = await fetch(`${BASE_API_URL}/stored-libraries/${preset_id}/apply/`, {
+	const response = await fetch(`${BASE_API_URL}/presets/${preset_id}/apply/`, {
 		method: 'POST',
 		headers,
-		body: JSON.stringify({ folder_name, folder_id, create_objects })
+		body: JSON.stringify({ folder_name, folder_id, create_objects, apply_feature_flags })
 	});
 
 	if (!response.ok) {

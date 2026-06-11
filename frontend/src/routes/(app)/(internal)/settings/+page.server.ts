@@ -1,18 +1,21 @@
 import { handleErrorResponse } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
+import { formatSelectFieldData } from '$lib/utils/load';
 import { m } from '$paraglide/messages';
 import { safeTranslate } from '$lib/utils/i18n';
 import {
 	FeatureFlagsSchema,
 	GeneralSettingsSchema,
 	SSOSettingsSchema,
+	VulnerabilitySlaSchema,
+	SecIntelFeedsSchema,
 	webhookEndpointSchema
 } from '$lib/utils/schemas';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { message, setError, superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
 
@@ -24,6 +27,9 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const featureFlagSettings = await fetch(`${BASE_API_URL}/settings/feature-flags/`).then((res) =>
 		res.json()
 	);
+	const featureFlagDefaults = await fetch(`${BASE_API_URL}/settings/feature-flags/defaults/`)
+		.then((res) => (res.ok ? res.json() : {}))
+		.catch(() => ({}));
 	const webhookEndpoints = await fetch(`${BASE_API_URL}/webhooks/endpoints/`)
 		.then((res) => res.json())
 		.then((res) => res.results);
@@ -33,18 +39,16 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const ssoModel = getModelInfo('sso-settings');
 	const generalSettingModel = getModelInfo('general-settings');
 	const featureFlagModel = getModelInfo('feature-flags');
+	const vulnerabilitySlaModel = getModelInfo('vulnerability-sla');
+	const secIntelFeedsModel = getModelInfo('sec-intel-feeds');
 
 	if (ssoModel.selectFields) {
 		for (const selectField of ssoModel.selectFields) {
 			const url = `${BASE_API_URL}/settings/sso/${selectField.field}/`;
 			const response = await fetch(url);
 			if (response.ok) {
-				selectOptions[selectField.field] = await response.json().then((data) =>
-					Object.entries(data).map(([key, value]) => ({
-						label: value,
-						value: selectField.valueType === 'number' ? parseInt(key) : key
-					}))
-				);
+				const responseData = await response.json();
+				selectOptions[selectField.field] = formatSelectFieldData(responseData, selectField);
 			} else {
 				console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
 			}
@@ -58,12 +62,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
 			const url = `${BASE_API_URL}/settings/feature-flags/feature_flags/`;
 			const response = await fetch(url);
 			if (response.ok) {
-				selectOptions[selectField.field] = await response.json().then((data) =>
-					Object.entries(data).map(([key, value]) => ({
-						label: value,
-						value: selectField.valueType === 'number' ? parseInt(key) : key
-					}))
-				);
+				const responseData = await response.json();
+				selectOptions[selectField.field] = formatSelectFieldData(responseData, selectField);
 			} else {
 				console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
 			}
@@ -76,12 +76,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
 			const url = `${BASE_API_URL}/settings/general/${selectField.field}/`;
 			const response = await fetch(url);
 			if (response.ok) {
-				selectOptions[selectField.field] = await response.json().then((data) =>
-					Object.entries(data).map(([key, value]) => ({
-						label: value,
-						value: selectField.valueType === 'number' ? parseInt(key) : key
-					}))
-				);
+				const responseData = await response.json();
+				selectOptions[selectField.field] = formatSelectFieldData(responseData, selectField);
 			} else {
 				console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
 			}
@@ -90,11 +86,26 @@ export const load: PageServerLoad = async ({ fetch }) => {
 
 	generalSettingModel.selectOptions = selectOptions;
 
+	const vulnerabilitySlaSettings = await fetch(`${BASE_API_URL}/settings/vulnerability-sla/`).then(
+		(res) => res.json()
+	);
+	const secIntelFeedsSettings = await fetch(`${BASE_API_URL}/settings/sec-intel-feeds/`).then(
+		(res) => res.json()
+	);
+
 	const ssoForm = await superValidate(ssoSettings, zod(SSOSettingsSchema), { errors: false });
 	const generalSettingForm = await superValidate(generalSettings, zod(GeneralSettingsSchema), {
 		errors: false
 	});
 	const featureFlagForm = await superValidate(featureFlagSettings, zod(FeatureFlagsSchema), {
+		errors: false
+	});
+	const vulnerabilitySlaForm = await superValidate(
+		vulnerabilitySlaSettings,
+		zod(VulnerabilitySlaSchema),
+		{ errors: false }
+	);
+	const secIntelFeedsForm = await superValidate(secIntelFeedsSettings, zod(SecIntelFeedsSchema), {
 		errors: false
 	});
 	const webhookEndpointCreateForm = await superValidate(zod(webhookEndpointSchema), {
@@ -109,8 +120,15 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		generalSettingForm,
 		generalSettingModel,
 		featureFlagSettings,
+		featureFlagDefaults,
 		featureFlagForm,
 		featureFlagModel,
+		vulnerabilitySlaSettings,
+		vulnerabilitySlaForm,
+		vulnerabilitySlaModel,
+		secIntelFeedsSettings,
+		secIntelFeedsForm,
+		secIntelFeedsModel,
 		webhookEndpoints,
 		webhookEndpointCreateForm,
 		title: m.settings()
@@ -203,6 +221,54 @@ export const actions: Actions = {
 		if (!response.ok) return handleErrorResponse({ event, response, form });
 
 		setFlash({ type: 'success', message: m.featureFlagSettingsUpdated() }, event);
+
+		return { form };
+	},
+	vulnerabilitySla: async (event) => {
+		const formData = await event.request.formData();
+
+		if (!formData) {
+			return fail(400, { form: null });
+		}
+
+		const schema = VulnerabilitySlaSchema;
+		const form = await superValidate(formData, zod(schema));
+		const endpoint = `${BASE_API_URL}/settings/vulnerability-sla/`;
+
+		const requestInitOptions: RequestInit = {
+			method: 'PUT',
+			body: JSON.stringify(form.data)
+		};
+
+		const response = await event.fetch(endpoint, requestInitOptions);
+
+		if (!response.ok) return handleErrorResponse({ event, response, form });
+
+		setFlash({ type: 'success', message: m.vulnerabilitySlaSettingsUpdated() }, event);
+
+		return { form };
+	},
+	secIntelFeeds: async (event) => {
+		const formData = await event.request.formData();
+
+		if (!formData) {
+			return fail(400, { form: null });
+		}
+
+		const schema = SecIntelFeedsSchema;
+		const form = await superValidate(formData, zod(schema));
+		const endpoint = `${BASE_API_URL}/settings/sec-intel-feeds/`;
+
+		const requestInitOptions: RequestInit = {
+			method: 'PUT',
+			body: JSON.stringify(form.data)
+		};
+
+		const response = await event.fetch(endpoint, requestInitOptions);
+
+		if (!response.ok) return handleErrorResponse({ event, response, form });
+
+		setFlash({ type: 'success', message: m.secIntelFeedsSettingsUpdated() }, event);
 
 		return { form };
 	},

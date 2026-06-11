@@ -10,7 +10,7 @@
 	import { getModelInfo } from '$lib/utils/crud';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { AppliedControlSchema } from '$lib/utils/schemas';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
@@ -88,13 +88,6 @@
 	}
 </script>
 
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
 <Select
 	{form}
 	options={model.selectOptions['severity']}
@@ -156,6 +149,7 @@
 		{#key page.data}
 			<AutocompleteSelect
 				multiple
+				lazy
 				{form}
 				optionsEndpoint="applied-controls"
 				optionsExtraFields={[['folder', 'str']]}
@@ -185,6 +179,7 @@
 	/>
 	<AutocompleteSelect
 		multiple
+		lazy
 		{form}
 		optionsEndpoint="vulnerabilities"
 		optionsExtraFields={[['folder', 'str']]}

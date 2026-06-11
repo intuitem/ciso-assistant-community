@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import Select from '../Select.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
@@ -23,11 +24,9 @@
 	}: Props = $props();
 </script>
 
-<AutocompleteSelect
+<FolderTreeSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
-	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
@@ -86,12 +85,54 @@
 	bind:cachedValue={formDataCache['security_exceptions']}
 	label={m.securityExceptions()}
 />
-<TextField
+<AutocompleteSelect
+	multiple
+	lazy
 	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
+	optionsEndpoint="security-advisories"
+	optionsInfoFields={{
+		fields: [{ field: 'ref_id' }],
+		classes: 'text-blue-500'
+	}}
+	field="security_advisories"
+	label={m.securityAdvisories()}
+/>
+<AutocompleteSelect
+	multiple
+	lazy
+	{form}
+	optionsEndpoint="cwes"
+	optionsInfoFields={{
+		fields: [{ field: 'ref_id' }],
+		classes: 'text-blue-500'
+	}}
+	field="cwes"
+	label={m.cwes()}
+/>
+<TextField
+	type="date"
+	{form}
+	field="detected_at"
+	label={m.detectedAt()}
+	helpText={m.detectedAtHelpText()}
+	cacheLock={cacheLocks['detected_at']}
+	bind:cachedValue={formDataCache['detected_at']}
+/>
+<TextField
+	type="date"
+	{form}
+	field="eta"
+	label={m.eta()}
+	cacheLock={cacheLocks['eta']}
+	bind:cachedValue={formDataCache['eta']}
+/>
+<TextField
+	type="date"
+	{form}
+	field="due_date"
+	label={m.dueDate()}
+	cacheLock={cacheLocks['due_date']}
+	bind:cachedValue={formDataCache['due_date']}
 />
 <AutocompleteSelect
 	multiple

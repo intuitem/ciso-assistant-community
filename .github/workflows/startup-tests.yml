@@ -4,6 +4,14 @@ permissions:
 
 on:
   pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize]
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - "enterprise/**"
+      - "docker-compose-build.yml"
+      - ".github/workflows/startup-tests.yml"
   workflow_dispatch:
 
 # Cancel older in-progress runs for the same PR or the same ref (branch)
@@ -22,7 +30,7 @@ env:
   enterprise-backend-settings-module: enterprise_core.settings
   POSTGRES_VERSION: "16"
   UBUNTU_VERSION: "ubuntu-24.04"
-  PYTHON_VERSION: "3.12"
+  PYTHON_VERSION: "3.14"
 
 jobs:
   startup-functional-test:
@@ -42,7 +50,7 @@ jobs:
       PUBLIC_BACKEND_API_URL: http://localhost:8000/api
     services:
       postgres:
-        image: postgres:16
+        image: public.ecr.aws/docker/library/postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -56,49 +64,65 @@ jobs:
         python-version: ["3.14"]
 
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Install uv and set up python ${{ matrix.python-version }}
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "pip"
-      - uses: actions/setup-node@v4
+          enable-cache: true
+      - name: Check uv version
+        run: uv --version
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
-          node-version: lts/*
-      - name: Install Poetry via pipx
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m pip install --upgrade pip
-          python -m pip install --upgrade pipx
-          python -m pipx ensurepath
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          python -m pipx install poetry
-      - name: Check Poetry version
-        shell: bash
-        run: poetry --version
+          node-version: "24"
+      - name: Cache Virtualenv
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ${{ env.backend-directory }}/.venv
+          key: venv-${{ runner.os }}-py${{ matrix.python-version }}-${{ hashFiles('backend/uv.lock') }}
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
-        run: poetry install
+        run: uv sync --locked
+      - name: Install pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+        with:
+          version: 10
       - name: Install frontend dependencies
         working-directory: ${{ env.frontend-directory }}
+        run: pnpm i --frozen-lockfile
+      - name: Get installed Playwright version
+        working-directory: ${{ env.frontend-directory }}
         run: |
-          npm install -g pnpm
-          pnpm i --frozen-lockfile
+          PLAYWRIGHT_VERSION=$(node -p "require('@playwright/test/package.json').version")
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> "$GITHUB_ENV"
+      - name: Cache playwright binaries
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
       - name: Install Playwright Browsers
         working-directory: ${{ env.frontend-directory }}
-        run: pnpm exec playwright install
+        timeout-minutes: 32
+        run: |
+          for attempt in 1 2 3; do
+            if timeout 600 pnpm exec playwright install; then
+              exit 0
+            fi
+            echo "::warning::Playwright install attempt $attempt failed; retrying in 15s"
+            sleep 15
+          done
+          exit 1
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
-        run: poetry run python manage.py migrate
+        run: uv run python manage.py migrate
       - name: Start test server
         working-directory: ${{ env.backend-directory }}
         run: |
-          poetry run python manage.py createsuperuser --noinput
-          nohup poetry run python manage.py runserver &
+          uv run python manage.py createsuperuser --noinput
+          nohup uv run python manage.py runserver &
       - name: Build frontend
         env:
-          NODE_OPTIONS: "--max-old-space-size=6144"
+          NODE_OPTIONS: "--max-old-space-size=10240"
         working-directory: ${{ env.frontend-directory }}
         run: pnpm run build
       - name: Run tests
@@ -112,7 +136,7 @@ jobs:
         run: |
           SAFE_NAME=$(echo "$BRANCH_NAME" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
           echo "BRANCH_SANITIZED=$SAFE_NAME" >> $GITHUB_ENV
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
           name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}
@@ -127,27 +151,62 @@ jobs:
     env:
       COMPOSE_TEST: True
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
-          node-version: lts/*
+          node-version: "24"
+      - name: Install pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+        with:
+          version: 10
       - name: Install frontend dependencies
         working-directory: ${{ env.frontend-directory }}
+        run: pnpm i --frozen-lockfile
+      - name: Get installed Playwright version
+        working-directory: ${{ env.frontend-directory }}
         run: |
-          npm install -g pnpm
-          pnpm i --frozen-lockfile
+          PLAYWRIGHT_VERSION=$(node -p "require('@playwright/test/package.json').version")
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> "$GITHUB_ENV"
+      - name: Cache playwright binaries
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
       - name: Install Playwright Browsers
         working-directory: ${{ env.frontend-directory }}
-        run: pnpm exec playwright install
+        timeout-minutes: 32
+        run: |
+          for attempt in 1 2 3; do
+            if timeout 600 pnpm exec playwright install; then
+              exit 0
+            fi
+            echo "::warning::Playwright install attempt $attempt failed; retrying in 15s"
+            sleep 15
+          done
+          exit 1
       - name: Build the Docker app
         run: |
           rm -rf db
           mkdir db
           docker compose -f docker-compose-build.yml up -d
+      - name: Wait for migrations to complete
+        run: |
+          echo "Waiting for migrations to complete..."
+          for i in $(seq 1 60); do
+            if docker compose -f docker-compose-build.yml exec -T backend python manage.py migrate --check 2>/dev/null; then
+              echo "Migrations complete after ~$((i * 10))s"
+              break
+            fi
+            if [ "$i" -eq 60 ]; then
+              echo "Migrations did not complete within 600s"
+              docker compose -f docker-compose-build.yml logs backend
+              exit 1
+            fi
+            sleep 10
+          done
       - name: Config the Docker app
         run: |
-          sleep 200 # give the migrations time to finish (included in the up on the previous step)
-          docker compose -f docker-compose-build.yml exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 poetry run python manage.py createsuperuser --noinput && exit 0"
+          docker compose -f docker-compose-build.yml exec -T backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 python manage.py createsuperuser --noinput && exit 0"
       - name: Run tests
         working-directory: ${{ env.frontend-directory }}
         run: |
@@ -189,7 +248,7 @@ jobs:
       PUBLIC_BACKEND_API_URL: http://localhost:8000/api
     services:
       postgres:
-        image: postgres:16
+        image: public.ecr.aws/docker/library/postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -203,55 +262,64 @@ jobs:
         python-version: ["3.14"]
 
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Install uv and set up python ${{ matrix.python-version }}
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "pip"
-      - uses: actions/setup-node@v4
+          enable-cache: true
+      - name: Check uv version
+        run: uv --version
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
-          node-version: lts/*
-      - name: Install Poetry via pipx
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m pip install --upgrade pip
-          python -m pip install --upgrade pipx
-          python -m pipx ensurepath
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          python -m pipx install poetry
-      - name: Configure Poetry to not use virtualenvs
-        run: poetry config virtualenvs.create false
-      - name: Check Poetry version
-        shell: bash
-        run: poetry --version
-      - name: Install backend requirements
-        working-directory: ${{ env.backend-directory }}
-        run: poetry install
+          node-version: "24"
+      - name: Cache Virtualenv
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ${{ env.enterprise-backend-directory }}/.venv
+          key: venv-${{ runner.os }}-py${{ matrix.python-version }}-${{ hashFiles('enterprise/backend/uv.lock') }}
       - name: Install enterprise backend
         working-directory: ${{ env.enterprise-backend-directory }}
-        run: poetry install
+        run: uv sync --locked
       - name: Build enterprise frontend
         working-directory: ${{ env.enterprise-frontend-directory }}
         env:
-          NODE_OPTIONS: "--max-old-space-size=6144"
+          NODE_OPTIONS: "--max-old-space-size=10240"
         run: make
+      - name: Get installed Playwright version
+        working-directory: ${{ env.enterprise-frontend-build-directory }}
+        run: |
+          PLAYWRIGHT_VERSION=$(node -p "require('@playwright/test/package.json').version")
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> "$GITHUB_ENV"
+      - name: Cache playwright binaries
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
       - name: Install Playwright Browsers
         working-directory: ${{ env.enterprise-frontend-build-directory }}
-        run: pnpm exec playwright install
+        timeout-minutes: 32
+        run: |
+          for attempt in 1 2 3; do
+            if timeout 600 pnpm exec playwright install; then
+              exit 0
+            fi
+            echo "::warning::Playwright install attempt $attempt failed; retrying in 15s"
+            sleep 15
+          done
+          exit 1
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
         env:
           SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
-        run: poetry run python manage.py migrate --settings="$SETTINGS_MODULE"
+        run: uv run --project ../enterprise/backend python manage.py migrate --settings="$SETTINGS_MODULE"
       - name: Start test server
         working-directory: ${{ env.backend-directory }}
         env:
           SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
         run: |
-          poetry run python manage.py createsuperuser --noinput --settings="$SETTINGS_MODULE"
-          nohup poetry run python manage.py runserver --settings="$SETTINGS_MODULE" &
+          uv run --project ../enterprise/backend python manage.py createsuperuser --noinput --settings="$SETTINGS_MODULE"
+          nohup uv run --project ../enterprise/backend python manage.py runserver --settings="$SETTINGS_MODULE" &
       - name: Run tests
         working-directory: ${{ env.enterprise-frontend-build-directory }}
         run: pnpm exec playwright test tests/functional/startup.test.ts
@@ -261,7 +329,7 @@ jobs:
         run: |
           SAFE_NAME=$(echo "$BRANCH_NAME" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
           echo "BRANCH_SANITIZED=$SAFE_NAME" >> $GITHUB_ENV
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
           name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}
@@ -275,24 +343,59 @@ jobs:
     env:
       COMPOSE_TEST: True
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
-          node-version: lts/*
+          node-version: "24"
       - name: Install frontend dependencies
         working-directory: ${{ env.enterprise-frontend-directory }}
         run: make pre-build
+      - name: Get installed Playwright version
+        working-directory: ${{ env.enterprise-frontend-build-directory }}
+        run: |
+          PLAYWRIGHT_VERSION=$(node -p "require('@playwright/test/package.json').version")
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> "$GITHUB_ENV"
+      - name: Cache playwright binaries
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
       - name: Install Playwright Browsers
         working-directory: ${{ env.enterprise-frontend-build-directory }}
-        run: pnpm exec playwright install
+        timeout-minutes: 32
+        run: |
+          for attempt in 1 2 3; do
+            if timeout 600 pnpm exec playwright install; then
+              exit 0
+            fi
+            echo "::warning::Playwright install attempt $attempt failed; retrying in 15s"
+            sleep 15
+          done
+          exit 1
       - name: Build the Docker app
         run: docker compose -f enterprise/docker-compose-build.yml up -d
+      - name: Wait for migrations to complete
+        env:
+          SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
+        run: |
+          echo "Waiting for migrations to complete..."
+          for i in $(seq 1 60); do
+            if docker compose -f enterprise/docker-compose-build.yml exec -T backend python manage.py migrate --check --settings="$SETTINGS_MODULE" 2>/dev/null; then
+              echo "Migrations complete after ~$((i * 10))s"
+              break
+            fi
+            if [ "$i" -eq 60 ]; then
+              echo "Migrations did not complete within 600s"
+              docker compose -f enterprise/docker-compose-build.yml logs backend
+              exit 1
+            fi
+            sleep 10
+          done
       - name: Config the Docker app
         env:
           SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
         run: |
-          sleep 200 # give the migrations time to finish (included in the up on the previous step)
-          docker compose -f enterprise/docker-compose-build.yml exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 poetry run python manage.py createsuperuser --noinput --settings="$SETTINGS_MODULE" && exit 0"
+          docker compose -f enterprise/docker-compose-build.yml exec -T backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 python manage.py createsuperuser --noinput --settings="$SETTINGS_MODULE" && exit 0"
       - name: Run tests
         working-directory: ${{ env.frontend-directory }}
         run: |

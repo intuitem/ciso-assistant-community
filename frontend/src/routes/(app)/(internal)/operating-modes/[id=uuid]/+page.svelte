@@ -21,7 +21,7 @@
 		type ModalStore
 	} from '$lib/components/Modals/stores';
 	import { superValidate } from 'sveltekit-superforms';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { modelSchema } from '$lib/utils/schemas';
 	import { createModalCache } from '$lib/utils/stores';
 
@@ -164,7 +164,9 @@
 						>
 							{#snippet addButton()}
 								<div>
-									<span class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs">
+									<span
+										class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
+									>
 										<button
 											class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
 											data-testid="add-button"

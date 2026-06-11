@@ -128,7 +128,7 @@
 			tooltip: {
 				trigger: 'axis',
 				axisPointer: {
-					type: 'shadow-sm'
+					type: 'shadow'
 				},
 				formatter: (params) => {
 					// Find the index of the hovered item and show full name
@@ -138,7 +138,7 @@
 			}
 		};
 
-	option.backgroundColor = 'transparent';
+		option.backgroundColor = 'transparent';
 		chart.setOption(option);
 
 		window.addEventListener('resize', function () {

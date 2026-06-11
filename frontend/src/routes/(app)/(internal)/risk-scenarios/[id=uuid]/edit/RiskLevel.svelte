@@ -64,7 +64,7 @@
 	});
 </script>
 
-<div class="flex flex-col">
+<div class="flex flex-col relative">
 	{#if label !== undefined}
 		<label class="text-sm font-semibold" for={field}>{label}</label>
 	{/if}
@@ -81,6 +81,10 @@
 		<div class="flex font-medium w-32 justify-center p-2 rounded-base bg-surface-300-700">--</div>
 	{/if}
 	{#if helpText}
-		<p class="text-sm text-surface-600-400 w-64">{helpText}</p>
+		<p
+			class="absolute top-full mt-1 text-sm text-surface-600-400 w-80 break-words whitespace-pre-line"
+		>
+			{helpText}
+		</p>
 	{/if}
 </div>

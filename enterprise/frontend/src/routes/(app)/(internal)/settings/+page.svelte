@@ -3,15 +3,30 @@
 	import * as m from '$paraglide/messages';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 	import ClientSettings from './client-settings/+page.svelte';
+	import InfraConfig from './infra-config/+page.svelte';
 	import { goto, preloadData, pushState } from '$app/navigation';
 	import GeneralSettings from '$lib/components/Settings/GeneralSettings.svelte';
 	import SSOSettings from '$lib/components/Settings/SSOSettings.svelte';
 	import FeatureFlagsSettings from '$lib/components/Settings/FeatureFlagsSettings.svelte';
 	import WebhooksSettings from '$lib/components/Settings/WebhooksSettings.svelte';
+	import VulnerabilitySlaSettings from '$lib/components/Settings/VulnerabilitySlaSettings.svelte';
+	import SecIntelFeedsSettings from '$lib/components/Settings/SecIntelFeedsSettings.svelte';
+	import EmailTemplatesSettings from '$lib/components/Settings/EmailTemplatesSettings.svelte';
+	import WordTemplatesSettings from '$lib/components/Settings/WordTemplatesSettings.svelte';
+
+	// Tabs whose content lives in a dedicated sub-route and is preloaded into
+	// page.state instead of being loaded by the main settings page.
+	const PRELOAD_TABS: Record<string, { href: string; stateKey: string }> = {
+		clientSettings: { href: '/settings/client-settings', stateKey: 'clientSettings' },
+		infraConfig: { href: '/settings/infra-config', stateKey: 'infraConfig' }
+	};
 
 	function deriveInitialTab(): string {
 		if (page.state?.settingsTab) return page.state.settingsTab;
-		return page.url.pathname.endsWith('/client-settings') ? 'clientSettings' : 'general';
+		for (const [tab, { href }] of Object.entries(PRELOAD_TABS)) {
+			if (page.url.pathname.endsWith(href.replace('/settings', ''))) return tab;
+		}
+		return 'general';
 	}
 
 	// Use string-based state for the active tab for better readability and maintenance.
@@ -31,20 +46,20 @@
 		group = newValue;
 		const nextState = { ...page.state, settingsTab: newValue };
 
-		// Preserve the special data-loading logic for the Client Settings tab.
-		// This now triggers when the tab with value 'clientSettings' is selected.
-		// We also check if data already exists to prevent redundant network requests.
-		if (newValue === 'clientSettings' && !page.state.clientSettings) {
-			const href = '/settings/client-settings';
-			const result = await preloadData(href);
+		// Tabs backed by a sub-route preload their data into page.state instead of
+		// being loaded by the main settings page. We skip the fetch if data already
+		// exists to prevent redundant network requests.
+		const preload = PRELOAD_TABS[newValue];
+		if (preload && !page.state[preload.stateKey]) {
+			const result = await preloadData(preload.href);
 
 			if (result.type === 'loaded' && result.status === 200) {
 				// Use pushState to update the page store without a full navigation.
 				// This keeps the UI fast and responsive.
-				pushState(href, { ...nextState, clientSettings: result.data });
+				pushState(preload.href, { ...nextState, [preload.stateKey]: result.data });
 			} else {
 				// Fallback to a full navigation if preloading fails for any reason.
-				goto(href, { state: nextState });
+				goto(preload.href, { state: nextState });
 			}
 			return;
 		}
@@ -58,11 +73,17 @@
 </script>
 
 <Tabs value={group} onValueChange={(e) => handleTabChange(e.value)}>
-	<Tabs.List>
+	<Tabs.List class="flex-nowrap overflow-x-auto gap-2">
 		<Tabs.Trigger value="general"><i class="fa-solid fa-globe"></i> {m.general()}</Tabs.Trigger>
 		<Tabs.Trigger value="sso"><i class="fa-solid fa-key"></i> {m.sso()}</Tabs.Trigger>
 		<Tabs.Trigger value="featureFlags"
 			><i class="fa-solid fa-flag"></i> {m.featureFlags()}</Tabs.Trigger
+		>
+		<Tabs.Trigger value="vulnerabilitySla"
+			><i class="fa-solid fa-bug"></i> {m.vulnerabilitySlaPolicy()}</Tabs.Trigger
+		>
+		<Tabs.Trigger value="secIntelFeeds"
+			><i class="fa-solid fa-satellite-dish"></i> {m.secIntelFeeds()}</Tabs.Trigger
 		>
 		{#if page.data?.featureflags?.outgoing_webhooks}
 			<Tabs.Trigger value="webhooks"
@@ -78,12 +99,20 @@
 				></Tabs.Trigger
 			>
 		{/if}
+		<Tabs.Trigger value="emailTemplates"
+			><i class="fa-solid fa-file-lines"></i> {m.templates()}</Tabs.Trigger
+		>
 		<Tabs.Trigger value="integrations"
 			><i class="fa-solid fa-plug"></i> {m.integrations()}</Tabs.Trigger
 		>
 		<Tabs.Trigger value="clientSettings"
 			><i class="fa-solid fa-key"></i> {m.clientSettings()}</Tabs.Trigger
 		>
+		{#if page.data?.featureflags?.infra_config_management}
+			<Tabs.Trigger value="infraConfig"
+				><i class="fa-solid fa-network-wired"></i> {m.infraConfig()}</Tabs.Trigger
+			>
+		{/if}
 		<Tabs.Indicator />
 	</Tabs.List>
 
@@ -96,8 +125,31 @@
 	<Tabs.Content value="featureFlags">
 		<FeatureFlagsSettings {data} />
 	</Tabs.Content>
+	<Tabs.Content value="vulnerabilitySla">
+		<VulnerabilitySlaSettings {data} />
+	</Tabs.Content>
+	<Tabs.Content value="secIntelFeeds">
+		<SecIntelFeedsSettings {data} />
+	</Tabs.Content>
 	<Tabs.Content value="webhooks">
 		<WebhooksSettings {data} allowMultiple />
+	</Tabs.Content>
+	<Tabs.Content value="emailTemplates">
+		<div class="space-y-8">
+			<section>
+				<h3 class="h4 font-semibold mb-4">
+					<i class="fa-solid fa-file-word mr-2"></i>{m.wordTemplates()}
+				</h3>
+				<WordTemplatesSettings />
+			</section>
+			<hr />
+			<section>
+				<h3 class="h4 font-semibold mb-4">
+					<i class="fa-solid fa-envelope mr-2"></i>{m.emailTemplates()}
+				</h3>
+				<EmailTemplatesSettings />
+			</section>
+		</div>
 	</Tabs.Content>
 	<Tabs.Content value="integrations">
 		<div>
@@ -152,4 +204,13 @@
 			<p>Loading client settings...</p>
 		{/if}
 	</Tabs.Content>
+	{#if page.data?.featureflags?.infra_config_management}
+		<Tabs.Content value="infraConfig" class="p-4">
+			{#if page.state.infraConfig}
+				<InfraConfig data={page.state.infraConfig} />
+			{:else}
+				<p>{m.loading()}...</p>
+			{/if}
+		</Tabs.Content>
+	{/if}
 </Tabs>

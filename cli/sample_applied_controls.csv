@@ -1,0 +1,6 @@
+ref_id,name,description,domain,status,category,priority,csf_function,owner
+CTL-001,Endpoint Protection,Deploy and maintain endpoint protection on all workstations,,to_do,technical,2,protect,Desktop Support
+CTL-002,Access Review Policy,Quarterly review of user access rights,,to_do,policy,3,govern,Identity & Access Management
+CTL-003,Firewall Rule Audit,Annual review of firewall rules,,in_progress,process,2,protect,alice@example.com; Firewall Administration
+CTL-004,Security Training,Annual security awareness training for all staff,,active,process,2,protect,Security Awareness & Training
+CTL-005,Incident Response Plan,Maintain and test incident response procedures,,to_do,procedure,1,respond,bob@example.com

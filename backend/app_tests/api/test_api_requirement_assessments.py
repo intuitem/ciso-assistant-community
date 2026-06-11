@@ -116,7 +116,10 @@ class TestRequirementAssessmentsAuthenticated:
                 "folder": test.folder,
                 "compliance_assessment": compliance_assessment,
                 "requirement": RequirementNode.objects.all()[0],
-                "score": None,
+                # `score` intentionally omitted: the CA is created via
+                # .objects.create() without seeding field_visibility, so the
+                # cascade resolves score → DEFAULT_VISIBILITY (HIDDEN) and
+                # the API correctly strips score from the response.
             },
             {
                 "folder": {"id": str(test.folder.id), "str": test.folder.name},
@@ -126,11 +129,15 @@ class TestRequirementAssessmentsAuthenticated:
                     "is_locked": False,
                     "min_score": compliance_assessment.min_score,
                     "max_score": compliance_assessment.max_score,
+                    "scores_definition": compliance_assessment.scores_definition,
+                    "score_calculation_method": compliance_assessment.score_calculation_method,
                     "extended_result_enabled": compliance_assessment.extended_result_enabled,
                     "progress_status_enabled": compliance_assessment.progress_status_enabled,
+                    "field_visibility": compliance_assessment.field_visibility,
                     "name": compliance_assessment.name,
                     "framework": {
                         "implementation_groups_definition": compliance_assessment.framework.implementation_groups_definition,
+                        "field_visibility": compliance_assessment.framework.field_visibility,
                         "str": str(compliance_assessment.framework),
                     },
                 },
@@ -139,7 +146,7 @@ class TestRequirementAssessmentsAuthenticated:
                     "urn": RequirementNode.objects.all()[0].urn,
                     "annotation": RequirementNode.objects.all()[0].annotation,
                     "name": RequirementNode.objects.all()[0].name,
-                    "questions": RequirementNode.objects.all()[0].questions,
+                    "questions": None,
                     "description": RequirementNode.objects.all()[0].description,
                     "typical_evidence": RequirementNode.objects.all()[
                         0
@@ -154,6 +161,13 @@ class TestRequirementAssessmentsAuthenticated:
                     "implementation_groups": RequirementNode.objects.all()[
                         0
                     ].implementation_groups,
+                    "display_mode": RequirementNode.objects.all()[0].display_mode,
+                    "min_score": RequirementNode.objects.all()[0].min_score,
+                    "max_score": RequirementNode.objects.all()[0].max_score,
+                    "scores_definition_ref": RequirementNode.objects.all()[
+                        0
+                    ].scores_definition_ref,
+                    "weight": RequirementNode.objects.all()[0].weight,
                     "parent_requirement": {
                         "str": RequirementNode.objects.all()[0].parent_requirement.get(
                             "str"
@@ -216,11 +230,15 @@ class TestRequirementAssessmentsAuthenticated:
                     "is_locked": False,
                     "min_score": compliance_assessment.min_score,
                     "max_score": compliance_assessment.max_score,
+                    "scores_definition": compliance_assessment.scores_definition,
+                    "score_calculation_method": compliance_assessment.score_calculation_method,
                     "extended_result_enabled": compliance_assessment.extended_result_enabled,
                     "progress_status_enabled": compliance_assessment.progress_status_enabled,
+                    "field_visibility": compliance_assessment.field_visibility,
                     "name": compliance_assessment.name,
                     "framework": {
                         "implementation_groups_definition": compliance_assessment.framework.implementation_groups_definition,
+                        "field_visibility": compliance_assessment.framework.field_visibility,
                         "str": str(compliance_assessment.framework),
                     },
                 }
@@ -235,15 +253,23 @@ class TestRequirementAssessmentsAuthenticated:
 
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
         folder = Folder.objects.create(name="test2")
+        # Seed both CAs with score visible to the auditor so the score field
+        # round-trips through the read serializer's cascade strip.
+        score_auditor_only = {
+            "score": {"auditor": "edit", "respondent": "hidden"},
+            "is_scored": {"auditor": "edit", "respondent": "hidden"},
+        }
         compliance_assessment = ComplianceAssessment.objects.create(
             name="test",
             perimeter=Perimeter.objects.create(name="test", folder=test.folder),
             framework=Framework.objects.all()[0],
+            field_visibility=score_auditor_only,
         )
         compliance_assessment2 = ComplianceAssessment.objects.create(
             name="test2",
             perimeter=Perimeter.objects.create(name="test2", folder=folder),
             framework=Framework.objects.all()[0],
+            field_visibility=score_auditor_only,
         )
         applied_control = AppliedControl.objects.create(name="test", folder=folder)
 
@@ -275,11 +301,15 @@ class TestRequirementAssessmentsAuthenticated:
                     "is_locked": False,
                     "min_score": compliance_assessment.min_score,
                     "max_score": compliance_assessment.max_score,
+                    "scores_definition": compliance_assessment.scores_definition,
+                    "score_calculation_method": compliance_assessment.score_calculation_method,
                     "extended_result_enabled": compliance_assessment.extended_result_enabled,
                     "progress_status_enabled": compliance_assessment.progress_status_enabled,
+                    "field_visibility": compliance_assessment.field_visibility,
                     "name": compliance_assessment.name,
                     "framework": {
                         "implementation_groups_definition": compliance_assessment.framework.implementation_groups_definition,
+                        "field_visibility": compliance_assessment.framework.field_visibility,
                         "str": str(compliance_assessment.framework),
                     },
                 },
@@ -288,7 +318,7 @@ class TestRequirementAssessmentsAuthenticated:
                     "urn": RequirementNode.objects.all()[0].urn,
                     "annotation": RequirementNode.objects.all()[0].annotation,
                     "name": RequirementNode.objects.all()[0].name,
-                    "questions": RequirementNode.objects.all()[0].questions,
+                    "questions": None,
                     "description": RequirementNode.objects.all()[0].description,
                     "typical_evidence": RequirementNode.objects.all()[
                         0
@@ -303,6 +333,13 @@ class TestRequirementAssessmentsAuthenticated:
                     "implementation_groups": RequirementNode.objects.all()[
                         0
                     ].implementation_groups,
+                    "display_mode": RequirementNode.objects.all()[0].display_mode,
+                    "min_score": RequirementNode.objects.all()[0].min_score,
+                    "max_score": RequirementNode.objects.all()[0].max_score,
+                    "scores_definition_ref": RequirementNode.objects.all()[
+                        0
+                    ].scores_definition_ref,
+                    "weight": RequirementNode.objects.all()[0].weight,
                     "parent_requirement": {
                         "str": RequirementNode.objects.all()[0].parent_requirement.get(
                             "str"

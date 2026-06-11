@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import type { SuperForm } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
@@ -26,7 +27,7 @@
 	const formStore = form.form;
 </script>
 
-<AutocompleteSelect
+<FolderTreeSelect
 	{form}
 	field="folder"
 	cacheLock={cacheLocks['folder']}

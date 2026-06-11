@@ -6,7 +6,7 @@
 	import FileInput from '$lib/components/Forms/FileInput.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import { superValidate } from 'sveltekit-superforms';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { tableHandlers } from '$lib/utils/stores';
 	import { getModalStore } from './stores';
 

@@ -201,6 +201,33 @@ def resolve_asset_id(asset_name_or_id: str, folder_id: str = None) -> str:
     return assets[0]["id"]
 
 
+def resolve_asset_class_id(asset_class_name_or_id: str) -> str:
+    """Helper function to resolve asset class name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+    """
+    if "-" in asset_class_name_or_id and len(asset_class_name_or_id) == 36:
+        return asset_class_name_or_id
+
+    res = make_get_request("/asset-class/", params={"name": asset_class_name_or_id})
+
+    if res.status_code != 200:
+        raise ValueError(f"Asset class '{asset_class_name_or_id}' API error {res.status_code}")
+
+    data = res.json()
+    asset_classes = get_paginated_results(data)
+
+    if not asset_classes:
+        raise ValueError(f"Asset class '{asset_class_name_or_id}' not found")
+
+    if len(asset_classes) > 1:
+        class_names = [c["name"] for c in asset_classes[:3]]
+        raise ValueError(
+            f"Ambiguous asset class name '{asset_class_name_or_id}', found {len(asset_classes)}: {class_names}"
+        )
+
+    return str(asset_classes[0]["id"])
+
+
 def resolve_risk_scenario_id(scenario_name_or_id: str) -> str:
     """Helper function to resolve risk scenario name to UUID
     If already a UUID, returns it. If a name, looks it up via API.
@@ -422,6 +449,37 @@ def resolve_library_id(library_urn_or_id: str) -> str:
         )
 
     return str(libraries[0]["id"])
+
+
+def resolve_vulnerability_id(vulnerability_name_or_id: str) -> str:
+    """Helper function to resolve vulnerability name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+    """
+    # Check if it's already a UUID
+    if "-" in vulnerability_name_or_id and len(vulnerability_name_or_id) == 36:
+        return vulnerability_name_or_id
+
+    # Otherwise, look up by name
+    res = make_get_request("/vulnerabilities/", params={"name": vulnerability_name_or_id})
+
+    if res.status_code != 200:
+        raise ValueError(
+            f"Vulnerability '{vulnerability_name_or_id}' API error {res.status_code}"
+        )
+
+    data = res.json()
+    vulnerabilities = get_paginated_results(data)
+
+    if not vulnerabilities:
+        raise ValueError(f"Vulnerability '{vulnerability_name_or_id}' not found")
+
+    if len(vulnerabilities) > 1:
+        vuln_names = [v["name"] for v in vulnerabilities[:3]]
+        raise ValueError(
+            f"Ambiguous vulnerability name '{vulnerability_name_or_id}', found {len(vulnerabilities)}: {vuln_names}"
+        )
+
+    return str(vulnerabilities[0]["id"])
 
 
 def resolve_task_template_id(task_name_or_id: str) -> str:

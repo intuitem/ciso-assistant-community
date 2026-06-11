@@ -7,6 +7,9 @@ from typing import List, Union
 # interesting thread: https://stackoverflow.com/questions/27743711/can-i-speedup-yaml
 from core.models import (
     Framework,
+    Preset,
+    Question,
+    QuestionChoice,
     RequirementMapping,
     RequirementMappingSet,
     StoredLibrary,
@@ -16,6 +19,7 @@ from core.models import (
     ReferenceControl,
     Terminology,
     Threat,
+    _create_questions_from_data,
 )
 from metrology.models import MetricDefinition
 from django.db import transaction
@@ -25,6 +29,30 @@ from django.db.utils import OperationalError
 import structlog
 
 logger = structlog.get_logger(__name__)
+
+
+def upsert_preset_from_stored_library(stored_library: StoredLibrary) -> Preset:
+    """Create/refresh a Preset row from a library-backed preset YAML."""
+    preset_content = stored_library.content.get("preset", {}) or {}
+    journey = preset_content.get("journey", {}) or {}
+    defaults = {
+        "name": stored_library.name,
+        "description": stored_library.description or "",
+        "ref_id": stored_library.ref_id,
+        "version": stored_library.version,
+        "provider": stored_library.provider,
+        "translations": stored_library.translations or {},
+        "profile": preset_content.get("profile", {}) or {},
+        "feature_flags": preset_content.get("feature_flags", {}) or {},
+        "scaffolded_objects": preset_content.get("scaffolded_objects", []) or [],
+        "steps": journey.get("steps", []) or [],
+        "dependencies": list(stored_library.dependencies or []),
+        "folder": Folder.get_root_folder(),
+    }
+    preset, _ = Preset.objects.update_or_create(
+        urn=stored_library.urn, defaults=defaults
+    )
+    return preset
 
 
 def preview_library(framework: dict) -> dict[str, list]:
@@ -51,7 +79,6 @@ def preview_library(framework: dict) -> dict[str, list]:
                     urn=requirement_node["urn"].lower(),
                     parent_urn=parent_urn,
                     order_id=index,
-                    questions=requirement_node.get("questions"),
                 )
             )
     preview["requirement_nodes"] = requirement_nodes_list
@@ -73,8 +100,8 @@ class RequirementNodeImporter:
         parent_urn = self.requirement_data.get("parent_urn")
         if parent_urn:
             parent_urn = parent_urn.lower()
+
         requirement_node = RequirementNode.objects.create(
-            # Should i just inherit the folder from Framework or this is useless ?
             folder=Folder.get_root_folder(),
             framework=framework_object,
             urn=self.requirement_data["urn"].lower(),
@@ -88,20 +115,30 @@ class RequirementNodeImporter:
             name=self.requirement_data.get("name"),
             description=self.requirement_data.get("description"),
             implementation_groups=self.requirement_data.get("implementation_groups"),
+            display_mode=self.requirement_data.get(
+                "display_mode", RequirementNode.DisplayMode.DEFAULT
+            ),
             weight=self.requirement_data.get("weight", 1),
+            min_score=self.requirement_data.get("min_score"),
+            max_score=self.requirement_data.get("max_score"),
+            scores_definition_ref=self.requirement_data.get("scores_definition_ref"),
             locale=framework_object.locale,
             default_locale=framework_object.default_locale,
             translations=self.requirement_data.get("translations", {}),
             is_published=True,
-            questions=self.requirement_data.get("questions"),
         )
+        requirement_node.clean()
+
+        # Create Question + QuestionChoice objects from questions data
+        questions_data = self.requirement_data.get("questions")
+        if questions_data and isinstance(questions_data, dict):
+            _create_questions_from_data(requirement_node, questions_data)
+
         for threat in self.requirement_data.get("threats", []):
             logger.info(
                 f"Parsing the threats for {self.requirement_data.get('ref_id')}"
             )
-            requirement_node.threats.add(
-                Threat.objects.get(urn=threat.lower())
-            )  # URN are not case insensitive in the whole codebase yet, we should fix that and make sure URNs are always transformed into lowercase before being used.
+            requirement_node.threats.add(Threat.objects.get(urn=threat.lower()))
 
         for reference_control in self.requirement_data.get("reference_controls", []):
             logger.info(
@@ -308,6 +345,11 @@ class FrameworkImporter:
                 "minimum score must be less than maximum score and equal or greater than 0."
             )
 
+        # Normalize scores_definition to object format
+        scores_definition = self.framework_data.get("scores_definition")
+        if isinstance(scores_definition, list):
+            scores_definition = {"scale": scores_definition}
+
         framework_object = Framework.objects.create(
             folder=Folder.get_root_folder(),
             library=library_object,
@@ -317,13 +359,14 @@ class FrameworkImporter:
             description=self.framework_data.get("description"),
             min_score=min_score,
             max_score=max_score,
-            scores_definition=self.framework_data.get("scores_definition"),
+            scores_definition=scores_definition,
             implementation_groups_definition=self.framework_data.get(
                 "implementation_groups_definition"
             ),
+            outcomes_definition=self.framework_data.get("outcomes_definition", []),
             provider=library_object.provider,
             locale=library_object.locale,
-            default_locale=library_object.default_locale,  # Change this in the future ?
+            default_locale=library_object.default_locale,
             translations=self.framework_data.get("translations", {}),
             is_published=True,
         )
@@ -517,6 +560,7 @@ class LibraryImporter:
         "frameworks",
         "requirement_mapping_set",  # This field name is deprecated
         "requirement_mapping_sets",
+        "preset",
     ]
     NON_DEPRECATED_OBJECT_FIELDS = [
         field
@@ -901,6 +945,8 @@ class LibraryImporter:
             library_object.dependencies.set(
                 LoadedLibrary.objects.filter(urn__in=dependencies)
             )
+        if self._library.is_preset:
+            upsert_preset_from_stored_library(self._library)
 
     def import_library(self):
         """Main method to import a library."""

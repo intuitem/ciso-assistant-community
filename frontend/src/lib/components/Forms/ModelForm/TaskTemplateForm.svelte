@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import TextField from '../TextField.svelte';
 	import TextArea from '../TextArea.svelte';
 	import Select from '../Select.svelte';
@@ -48,11 +49,9 @@
 	let isScheduleTainted = $derived(scheduleTaintedHandler($scheduleTainted));
 </script>
 
-<AutocompleteSelect
+<FolderTreeSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
-	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
@@ -226,7 +225,6 @@
 	helpText={m.taskTemplateEvidenceHelpText()}
 	field="evidences"
 	label={m.evidences()}
-	allowUserOptions="append"
 	translateOptions={false}
 />
 <AutocompleteSelect
@@ -244,13 +242,6 @@
 	label={m.assignedTo()}
 />
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
-	<TextField
-		{form}
-		field="ref_id"
-		label={m.refId()}
-		cacheLock={cacheLocks['ref_id']}
-		bind:cachedValue={formDataCache['ref_id']}
-	/>
 	<AutocompleteSelect
 		multiple
 		lazy
@@ -321,6 +312,18 @@
 		helpText={m.linkHelpText()}
 		cacheLock={cacheLocks['link']}
 		bind:cachedValue={formDataCache['link']}
+	/>
+	<AutocompleteSelect
+		multiple
+		{form}
+		createFromSelection={true}
+		optionsEndpoint="filtering-labels"
+		optionsLabelField="label"
+		field="filtering_labels"
+		helpText={m.labelsHelpText()}
+		label={m.labels()}
+		translateOptions={false}
+		allowUserOptions="append"
 	/>
 </Dropdown>
 <Checkbox {form} field="enabled" label={m.enabled()} />

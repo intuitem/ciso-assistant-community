@@ -24,7 +24,9 @@
 		"tr",
 		"hr",
 		"zh",
-		"lt"
+		"lt",
+		"ko",
+		"et"
 	],
 	"modules": [
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@4/dist/index.js",

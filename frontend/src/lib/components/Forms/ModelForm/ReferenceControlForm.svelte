@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import Select from '../Select.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
@@ -24,13 +25,6 @@
 	}: Props = $props();
 </script>
 
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
 <Select
 	{form}
 	options={model.selectOptions['category']}
@@ -61,11 +55,9 @@
 	cacheLock={cacheLocks['provider']}
 	bind:cachedValue={formDataCache['provider']}
 />
-<AutocompleteSelect
+<FolderTreeSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
-	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}

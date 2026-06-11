@@ -32,7 +32,7 @@
 			tooltip: {
 				trigger: 'axis',
 				axisPointer: {
-					type: 'shadow-sm'
+					type: 'shadow'
 				},
 				formatter: function (params) {
 					var tar = params[1];
@@ -87,7 +87,7 @@
 		// console.debug(option);
 
 		// use configuration item and data specified to show chart
-	option.backgroundColor = 'transparent';
+		option.backgroundColor = 'transparent';
 		chart.setOption(option);
 
 		window.addEventListener('resize', function () {

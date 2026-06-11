@@ -69,21 +69,22 @@ Alternatively, once you have _Docker_ and _Docker-compose_ installed, on your wo
 
 clone the repo:
 
-```
+```sh
 git clone --single-branch -b main https://github.com/intuitem/ciso-assistant-community.git
 ```
 
 and run the starter script
 
 ```sh
-./docker-compose.sh
+./docker-compose.sh     # Linux/MacOS
+./docker-compose.ps1    # Windows
 ```
 
 If you are looking for other installation options for self-hosting, check the [config builder](./config/) and the [docs](https://intuitem.gitbook.io/ciso-assistant).
 
 > [!NOTE]
 > The docker-compose script uses prebuilt Docker images supporting most of the standard hardware architecture.
-> If you're using **Windows**, Make sure to have [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) installed and trigger the script within a WSL command line. It will feed Docker Desktop on your behalf.
+> If you're using **Windows**, make sure to have [Docker Desktop with WSL2](https://www.docker.com/products/docker-desktop/) installed and trigger the PowerShell script. It will feed Docker Desktop on your behalf.
 
 The docker compose file can be adjusted to pass extra parameters to suit your setup (e.g. Mailer settings).
 
@@ -136,6 +137,10 @@ Here is an illustration of the **decoupling** principle and its advantages:
 
 Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistant>.
 
+## Setting up the local AI engine
+
+Read more here: [AI engine](backend/chat/README.md)
+
 ## Supported frameworks 🐙
 
 1. ISO 27001:2013 & 27001:2022 🌐
@@ -152,7 +157,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 12. DORA (Act, RTS, ITS and GL) 🇪🇺
 13. NIST AI Risk Management Framework 🇺🇸🤖
 14. NIST SP 800-53 rev5 🇺🇸
-15. France LPM/OIV rules 🇫🇷
+15. Règles OIV - Secteur « Activités civiles de l'Etat » (2019) 🇫🇷
 16. CCB CyberFundamentals Framework 🇧🇪
 17. NIST SP-800-66 (HIPAA) 🏥
 18. HDS/HDH 🇫🇷
@@ -186,7 +191,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 46. FBI CJIS 🇺🇸👮
 47. Operational Technology Cybersecurity Controls (OTCC) 🇸🇦
 48. Secure Controls Framework (SCF) 🇺🇸🌐
-49. NCSC Cyber Assessment Framework (CAF) 🇬🇧
+49. NCSC - Cyber Assessment Framework (CAF) v3.2 🇬🇧
 50. California Consumer Privacy Act (CCPA) 🇺🇸
 51. California Consumer Privacy Act Regulations 🇺🇸
 52. NCSC Cyber Essentials 🇬🇧
@@ -246,6 +251,17 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 106. OWASP Top 10 Web - Threat catalog 🐝🌐
 107. OWASP MAS Threat Modelling Guide - Threat catalog 🐝📱
 108. CISA Cybersecurity Performance Goals (CPG) v2.0 🇺🇸
+109. ANSSI : Référentiel Cyber France pour la réglementation NIS2 (ReCyF) 🇫🇷
+110. Cadre Conformité Cyber France (3CF) v3.1 (2026) ✈️🇫🇷
+111. Règles OIV - Secteur « Transport aérien » (2016) ✈️🇫🇷
+112. IEC 62443 series — parts 2-1, 2-4, 3-2, 3-3, 4-1, 4-2 🏭🌐
+113. CER Directive (Critical Entities Resilience) 🇪🇺
+114. EUDI ARF — EU Digital Identity Wallet High-Level Requirements (Annex 2.02) 🇪🇺
+115. UK Defence Standard 05-138 Issue 4 🇬🇧
+116. Référentiel HAS - Certification des établissements de santé pour la qualité des soins 🇫🇷🏥
+117. Personal Data Protection Law (PDPL) 🇸🇦
+118. NCSC - Cyber Assessment Framework (CAF) v4.0 🇬🇧
+119. Algemene Beveiligingseisen voor Rijksoverheidsopdrachten (ABRO) 2026 🇳🇱
 
 ### Community contributions
 
@@ -275,6 +291,15 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 24. RBI Master Direction 2023 - india 🏦🇮🇳
 25. Loi 05-20 relative à la cybersécurité (Maroc) 🇲🇦
 26. Lithuanian NIS2 Cybersecurity Law (Kibernetinio saugumo įstatymas) 🇱🇹
+27. Prestataire d'audit de sécurité des systèmes d'information (PASSI) 🇫🇷
+28. ANS Programme CaRE - Domaine 2 (Continuité et reprise d'activité, sauvegarde) 🇫🇷🏥
+29. ANS HospiConnect HOP'EN2 (Sécurisation de l'accès au SIH) 🇫🇷🏥
+30. Loi n° 09-08 relative à la protection des personnes physiques 🇲🇦
+31. Checklist des exigences de la Loi n° 09-08 🇲🇦
+32. Référentiel des exigences de qualification des prestataires de services cloud ☁️🇲🇦
+33. AI Defense Matrix 🤖🌐
+34. Zero Trust for Operational Technology (ZT OT) 🇺🇸🏭
+35. T.C. CBDDO Bilgi ve İletişim Güvenliği Rehberi (BİGR) 🇹🇷
 
 <br/>
 
@@ -345,13 +370,15 @@ cd ciso-assistant-community
 2. Launch docker-compose script for prebuilt images:
 
 ```sh
-./docker-compose.sh
+./docker-compose.sh     # Linux/MacOS
+./docker-compose.ps1    # Windows
 ```
 
 _Alternatively_, you can use this variant to build the docker images for your specific architecture:
 
 ```sh
-./docker-compose-build.sh
+./docker-compose-build.sh     # Linux/MacOS
+./docker-compose-build.ps1    # Windows
 ```
 
 When asked for, enter your email and password for your superuser.
@@ -362,15 +389,57 @@ For the following executions, use "docker compose up" directly.
 
 ## Setting up CISO Assistant for development
 
+> [!WARNING]
+>
+> ### Important note for Windows users
+>
+> The best working solution for users developing on **Windows** is to use [Ubuntu](https://apps.microsoft.com/detail/9pdxgncfsczv) installed on [WSL2](https://apps.microsoft.com/detail/9p9tqf7mrm4r) (Docker is not required).
+>
+> It is now also possible to run and develop CISO Assistant natively on Windows without WSL2 nor Docker, but it will require some extra steps.
+> Please note that the native running on Windows is still in **EXPERIMENTAL PHASE** and should **NOT** be used if you are unsure of what you are doing, or if you want to ensure stability throughout development.
+> Nevertheless, we would love to hear any suggestions in order to enhance the development experience for Windows users. Please feel free to open an Issue/PR about it!
+
 ### Requirements
 
 - Python 3.14+
 - pip 25.3+
-- poetry 2.0+
+- uv 0.9+
 - node 24+
 - npm 10.2+
 - pnpm 10.30+
 - yaml-cpp (`brew install yaml-cpp libyaml` or `apt install libyaml-cpp-dev`)
+
+<details>
+<summary>[EXPERIMENTAL] Additional requirements for development on Windows without WSL2</summary>
+
+If you want to develop the project without WSL2, you will need to install [MSYS2](https://www.msys2.org/), add the `MSYS2 UCRT64` binaries to your [system PATH environment variable](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_environment_variables?view=powershell-7.6#set-environment-variables-in-the-system-control-panel) (usually, the binaries are in `C:\msys64\ucrt64\bin`) and then install the following dependencies via `pacman` using `MSYS2 UCRT64`.
+
+```sh
+pacman -S mingw-w64-ucrt-x86_64-file mingw-w64-ucrt-x86_64-pango
+```
+
+You will also have to add those 2 system environment variables after installing the dependencies:
+
+```conf
+MAGIC=Full path to the `magic.mgc` file (usually `C:\msys64\ucrt64\share\misc\magic.mgc`)
+WEASYPRINT_DLL_DIRECTORIES=Same path as your MSYS2 UCRT64 binaries
+```
+
+Given that the default encoding on Windows isn't `UTF-8` but `cp1252`, certain python script printing `UTF-8` characters such as emojis may cause the backend crash or malfunction in some cases (e.g. library importation).
+To avoid this issue with this project, enforce the `UTF-8` encoding by adding these 2 user environment variables:
+
+```conf
+PYTHONUTF8=1
+PYTHONIOENCODING=utf-8:replace
+```
+
+> [!NOTE]
+>
+> ### Known issues
+>
+> - The `libmagic` library on Windows (MIME detection) struggles to recognize an Excel file (`.xlsx`) by reading its first `2048` bits as it returns `application/octet-stream` most of the time when importing an Excel library (backend displays the warning message `[warning  ] Invalid MIME type`). This doesn't prevent the Excel file from being imported thanks to the fallback method in `backend/library/views.py:StoredLibraryViewSet.upload_library`.
+
+</details>
 
 ### Running the backend
 
@@ -401,7 +470,8 @@ export EMAIL_HOST_PASSWORD=''
 export DEFAULT_FROM_EMAIL=ciso-assistant@ciso-assistantcloud.com
 export EMAIL_HOST=localhost
 export EMAIL_PORT=1025
-export EMAIL_USE_TLS=True
+export EMAIL_USE_TLS=True  # true for STARTTLS
+export EMAIL_USE_SSL=False # true for SMTPS
 ```
 
 **Other variables**
@@ -416,6 +486,9 @@ export DB_HOST=localhost
 export DB_PORT=5432  # optional, default value is 5432
 
 # CISO Assistant will use filesystem storage backend by default.
+# Only one cloud storage backend can be active at a time (USE_S3 and USE_AZURE are mutually exclusive).
+
+# --- AWS S3 ---
 # You can use a S3 Bucket by declaring these variables
 # The S3 bucket must be created before starting CISO Assistant
 export USE_S3=True
@@ -434,12 +507,33 @@ export AWS_S3_ENDPOINT_URL=<your-bucket-endpoint>  # required for S3-compatible 
 # export AWS_WEB_IDENTITY_TOKEN_FILE=/var/run/secrets/eks.amazonaws.com/serviceaccount/token
 # export AWS_ROLE_ARN=arn:aws:iam::123456789012:role/ciso-assistant-s3-role
 
+# --- Azure Blob Storage ---
+# You can use an Azure Blob Storage container instead of S3.
+# The container must be created before starting CISO Assistant.
+# export USE_AZURE=True
+# export AZURE_CONTAINER=<your-container-name>          # default: ciso-assistant-container
+# export AZURE_CUSTOM_DOMAIN=<your-custom-domain>       # optional, e.g., cdn.example.com
+# export AZURE_LOCATION=<path-prefix>                   # optional, path prefix within the container (e.g., "media")
+
+# Azure Authentication Option 1: Account Key
+# export AZURE_ACCOUNT_NAME=<your-storage-account-name>
+# export AZURE_ACCOUNT_KEY=<your-storage-account-key>
+
+# Azure Authentication Option 2: Connection String
+# export AZURE_CONNECTION_STRING=<your-connection-string>
+
+# Azure Authentication Option 3: Managed Identity (for Azure-hosted deployments)
+# Requires AZURE_ACCOUNT_NAME. The pod/VM's assigned managed identity is used automatically.
+# export AZURE_ACCOUNT_NAME=<your-storage-account-name>
+# export AZURE_USE_MANAGED_IDENTITY=True
+
 # Add a second backup mailer (will be deprecated, not recommended anymore)
 export EMAIL_HOST_RESCUE=<XXX>
 export EMAIL_PORT_RESCUE=587
 export EMAIL_HOST_USER_RESCUE=<XXX>
 export EMAIL_HOST_PASSWORD_RESCUE=<XXX>
 export EMAIL_USE_TLS_RESCUE=True
+export EMAIL_USE_SSL_RESCUE=False
 
 # You can define the email of the first superuser, useful for automation. A mail is sent to the superuser for password initialization
 export CISO_SUPERUSER_EMAIL=<XXX>
@@ -464,14 +558,15 @@ export AUTH_TOKEN_AUTO_REFRESH=True # optional, default value is True. It define
 export AUTH_TOKEN_AUTO_REFRESH_TTL=36000 # optional, default value is 36000 seconds (10 hours). It defines the time to live of the authentication token after auto refresh. You can disable it by setting it to 0.
 ```
 
-3. Install poetry
+3. Install uv
 
-Visit the poetry website for instructions: <https://python-poetry.org/docs/#installation>
+Visit the uv website for instructions: <https://docs.astral.sh/uv/getting-started/installation/>
 
-4. Install required dependencies.
+4. Move to backend and install required dependencies.
 
 ```sh
-poetry install
+cd backend
+uv sync
 ```
 
 5. Recommended: Install the pre-commit hooks.
@@ -504,7 +599,7 @@ pre-commit install
 8. Apply migrations.
 
 ```sh
-poetry run python manage.py migrate
+uv run python manage.py migrate
 ```
 
 9. Create a Django superuser, that will be CISO Assistant administrator.
@@ -512,16 +607,25 @@ poetry run python manage.py migrate
 > If you have set a mailer and CISO_SUPERUSER_EMAIL variable, there's no need to create a Django superuser with `createsuperuser`, as it will be created automatically on first start. You should receive an email with a link to setup your password.
 
 ```sh
-poetry run python manage.py createsuperuser
+uv run python manage.py createsuperuser
 ```
 
 10. Run development server.
 
 ```sh
-poetry run python manage.py runserver
+uv run python manage.py runserver
 ```
 
-11. for Huey (tasks runner)
+<details>
+<summary>[EXPERIMENTAL] How to run development server natively on Windows?</summary>
+
+When running Django's development server natively on Windows, SvelteKit SSR can open enough concurrent API connections to hit the server's small default listen backlog. This may cause intermittent `ECONNREFUSED` / `TypeError: fetch failed` errors in the frontend.
+
+Use the helper scripts documented in [`tools/.windows/README.md`](tools/.windows/README.md) for the native Windows development setup.
+
+</details>
+
+11. For Huey (tasks runner)
 
 - prepare a mailer for testing.
 - run `python manage.py run_huey -w 2 -k process` or equivalent in a separate shell.
@@ -557,11 +661,11 @@ pnpm run dev
 
 All variables in the frontend have handy default values.
 
-If you move the frontend on another host, you should set the following variable: PUBLIC_BACKEND_API_URL. Its default value is <http://localhost:8000/api>.
+If you move the frontend on another host, you should set the following variable: `PUBLIC_BACKEND_API_URL`. Its default value is <http://localhost:8000/api>.
 
-The PUBLIC_BACKEND_API_EXPOSED_URL is necessary for proper functioning of the SSO. It points to the URL of the API as seen from the browser. It should be equal to the concatenation of CISO_ASSISTANT_URL (in the backend) with "/api".
+The `PUBLIC_BACKEND_API_EXPOSED_URL` is necessary for proper functioning of the SSO. It points to the URL of the API as seen from the browser. It should be equal to the concatenation of `CISO_ASSISTANT_URL` (in the backend) with "/api".
 
-When you launch "node server" instead of "pnpm run dev", you need to set the ORIGIN variable to the same value as CISO_ASSISTANT_URL in the backend (e.g. <http://localhost:3000>).
+When you launch "node server" instead of "pnpm run dev", you need to set the ORIGIN variable to the same value as `CISO_ASSISTANT_URL` in the backend (e.g. <http://localhost:3000>).
 
 ### Managing migrations
 
@@ -579,15 +683,15 @@ find . -path "*/migrations/*.pyc"  -delete
 After a change (or a clean), it is necessary to re-generate migration files:
 
 ```sh
-poetry run python manage.py makemigrations
-poetry run python manage.py migrate
+uv run python manage.py makemigrations
+uv run python manage.py migrate
 ```
 
 These migration files should be tracked by version control.
 
 ### Test suite
 
-To run API tests on the backend, simply type "poetry run pytest" in a shell in the backend folder.
+To run API tests on the backend, simply type `uv run pytest` in a shell in the backend folder.
 
 To run functional tests on the frontend, do the following actions:
 
@@ -617,40 +721,33 @@ When using the interactive Swagger UI, simply log in, the token will be automati
 
 ## Setting CISO Assistant for production
 
-The docker-compose-prod.yml highlights a relevant configuration with a Caddy proxy in front of the frontend. It exposes API calls only for SSO. Note that docker-compose.yml exposes the full API, which is not yet recommended for production.
+The docker-compose.yml highlights a relevant configuration with a Caddy proxy in front of the frontend. It exposes API calls only for SSO. Note that docker-compose.yml exposes the full API, which is not yet recommended for production.
 
-Set DJANGO_DEBUG=False for security reason.
-
-> [!NOTE]
-> The frontend cannot infer the host automatically, so you need to either set the ORIGIN variable, or the HOST_HEADER and PROTOCOL_HEADER variables. Please see [the sveltekit doc](https://kit.svelte.dev/docs/adapter-node#environment-variables-origin-protocolheader-hostheader-and-port-header) on this tricky issue. Beware that this approach does not work with "pnpm run dev", which should not be a worry for production.
+Set `DJANGO_DEBUG=False` for security reasons.
 
 > [!NOTE]
-> Caddy needs to receive a SNI header. Therefore, for your public URL (the one declared in CISO_ASSISTANT_URL), you need to use a FQDN, not an IP address, as the SNI is not transmitted by a browser if the host is an IP address. Another tricky issue!
+> The frontend cannot infer the host automatically, so you need to either set the ORIGIN variable, or the `HOST_HEADER` and `PROTOCOL_HEADER` variables. Please see [the sveltekit doc](https://kit.svelte.dev/docs/adapter-node#environment-variables-origin-protocolheader-hostheader-and-port-header) on this tricky issue. Beware that this approach does not work with "pnpm run dev", which should not be a worry for production.
+
+> [!NOTE]
+> Caddy needs to receive a SNI header. Therefore, for your public URL (the one declared in `CISO_ASSISTANT_URL`), you need to use a FQDN, not an IP address, as the SNI is not transmitted by a browser if the host is an IP address. Another tricky issue!
+
+> [!NOTE]
+> The docker-compose template files are now launching the backend, huey and frontend in non-root mode. If you use an old docker-compose.yml file, it is recommended to update it. The containers are compatible with both root and non-root modes.
+
+### Non-root docker containers
+
+docker-compose.yml now relies on a non-root user 1001:1001, which is available in the image. Older deployments are using root user, which is still supported. To transition to non-root, use the following steps in the host:
+
+- docker compose down
+- update the docker-compose.yml file
+- sudo chown -R 1001:1001 db
+- docker compose up -d
 
 ## Supported languages 🌐
 
-1. FR: French
-2. EN: English
-3. AR: Arabic
-4. PT: Portuguese
-5. ES: Spanish
-6. DE: German
-7. NL: Dutch
-8. IT: Italian
-9. PL: Polish
-10. RO: Romanian
-11. HI: Hindi
-12. UR: Urdu
-13. CS: Czech
-14. SV: Swedish
-15. ID: Indonesian
-16. DA: Danish
-17. HU: Hungarian
-18. UK: Ukrainian
-19. EL: Greek
-20. TR: Turkish
-21. HR: Croatian
-22. ZH: Chinese (Simplified)
+[![Translation progress](https://intuitem.github.io/metrics/i18n/progress.svg)](https://intuitem.github.io/metrics/i18n/)
+
+Reference is `en.json`; coverage = share of reference keys present in each locale file. Auto-refreshed daily — full breakdown at the [dashboard](https://intuitem.github.io/metrics/i18n/).
 
 ## Contributors 🤝
 

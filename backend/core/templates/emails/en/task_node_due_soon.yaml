@@ -6,7 +6,6 @@ body: |
 
   ${task_list}
 
-  Please log in to your CISO Assistant portal to review and complete these tasks:
-  ${ciso_assistant_url}
+  Please log in to your CISO Assistant portal to review and complete these tasks: [Go to CISO Assistant](${ciso_assistant_url})
 
   Thank you.

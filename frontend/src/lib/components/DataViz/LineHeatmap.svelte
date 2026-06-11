@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
 	let { data } = $props();
 </script>
 
@@ -15,7 +15,7 @@
 				<div class="text-lg font-bold">
 					{safeTranslate(entry?.impact?.name || 'unknown')}
 				</div>
-				<div>{safeTranslate(entry?.pit) || '-'}</div>
+				<div>{unsafeTranslate(entry?.pit) || '-'}</div>
 			</div>
 		{/each}
 	{/if}

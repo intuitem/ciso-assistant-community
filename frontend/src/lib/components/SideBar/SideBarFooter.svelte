@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { breadcrumbs } from '$lib/utils/breadcrumbs';
 	import { LOCALE_MAP, language, defaultLangLabels } from '$lib/utils/locales';
 	import { m } from '$paraglide/messages';
 	import { getLocale, locales, setLocale } from '$paraglide/runtime';
@@ -124,22 +125,24 @@
 							data-testid="get-started-button"
 							><i class="fa-solid fa-rocket mr-2"></i>{m.getStarted()}</button
 						>
-						<button
-							onclick={() => {
-								openState = false;
-								modalBuildInfo();
-							}}
-							class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-surface-200-800 disabled:text-surface-400-600 text-surface-950-50"
-							data-testid="about-button"
-							><i class="fa-solid fa-circle-info mr-2"></i>{m.aboutCiso()}</button
-						>
+						{#if !page.data?.user?.is_third_party}
+							<button
+								onclick={() => {
+									openState = false;
+									modalBuildInfo();
+								}}
+								class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-surface-200-800 disabled:text-surface-400-600 text-surface-950-50"
+								data-testid="about-button"
+								><i class="fa-solid fa-circle-info mr-2"></i>{m.aboutCiso()}</button
+							>
+						{/if}
 						<a
 							href="https://intuitem.gitbook.io/ciso-assistant"
 							target="_blank"
 							class="unstyled cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-surface-200-800 disabled:text-surface-400-600 text-surface-950-50"
 							data-testid="docs-button"><i class="fa-solid fa-book mr-2"></i>{m.onlineDocs()}</a
 						>
-						<form action="/logout" method="POST">
+						<form action="/logout" method="POST" onsubmit={() => breadcrumbs.clear()}>
 							<button class="w-full" type="submit" data-testid="logout-button">
 								<span
 									class="flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-surface-200-800 disabled:text-surface-400-600 text-surface-950-50"

@@ -125,8 +125,8 @@ The EBA XLS Master Template uses specific type names that differ from the simpli
 | EBA XLS type | This spec's type | Fields using this type |
 |---|---|---|
 | Alphanumerical | Alphanumeric | All free-text fields |
-| Pattern | Auto | b_02.02.0040, b_02.02.0050, b_03.02.0030, b_05.01.0020, b_05.01.0090, b_05.02.0040, b_05.02.0070, b_06.01.0010, b_07.01.0030 |
-| Monetary | Numeric | b_01.02.0110, b_02.01.0050, b_05.01.0070 |
+| Pattern | Auto | b_02.02.0040, b_02.02.0050, b_03.02.0030, b_05.01.0020, b_05.01.0120, b_05.02.0040, b_05.02.0070, b_06.01.0010, b_07.01.0030 |
+| Monetary | Numeric | b_01.02.0110, b_02.01.0050, b_05.01.0100 |
 | Natural number | Numeric (days) / Numeric (in hours) | b_02.02.0100, b_02.02.0110, b_05.02.0050, b_06.01.0080, b_06.01.0090 |
 | Closed set of options | Closed set | All LIST-backed fields |
 | [Yes/No] | Yes/No (LISTBINARY, 2 entries) | b_02.02.0140, b_07.01.0080 |
@@ -155,16 +155,33 @@ The EBA DPM validation framework defines many rules, but only four cause **submi
 
 **Foreign key relationships** between tables:
 
-| Child table | Parent table | FK column(s) |
-|---|---|---|
-| RT.02.02 | RT.02.01 | Contract reference (c0010) |
-| RT.02.03 | RT.02.01 | Contract reference (c0010) |
-| RT.03.01 | RT.02.01 | Contract reference (c0010) |
-| RT.03.02 | RT.02.01 | Contract reference (c0010) |
-| RT.03.03 | RT.02.01 | Contract reference (c0010) |
-| RT.04.01 | RT.02.01 | Contract reference (c0010) |
-| RT.05.02 | RT.02.01 | Contract reference (c0010) |
-| RT.07.01 | RT.02.01 | Contract reference (c0010) |
+| Source table | Source column | Target table | Target column | Description |
+|---|---|---|---|---|
+| B_01.02 | c0060 | B_01.02 | c0010 | Parent entity LEI (self-referential) |
+| B_01.03 | c0020 | B_01.02 | c0010 | Head office LEI of branch |
+| B_02.01 | c0030 | B_02.01 | c0010 | Overarching arrangement ref (self-referential) |
+| B_02.02 | c0010 | B_02.01 | c0010 | Contract reference |
+| B_02.02 | c0020 | B_01.02 | c0010 | Entity LEI |
+| B_02.02 | c0030 | B_05.01 | c0010 | Provider identification code |
+| B_02.02 | c0050 | B_06.01 | c0010 | Function identifier |
+| B_02.03 | c0010 | B_02.01 | c0010 | Intra-group contract reference |
+| B_02.03 | c0020 | B_02.01 | c0010 | Linked third-party contract reference |
+| B_03.01 | c0010 | B_02.01 | c0010 | Contract reference |
+| B_03.01 | c0020 | B_01.02 | c0010 | Entity LEI |
+| B_03.02 | c0010 | B_02.01 | c0010 | Contract reference |
+| B_03.02 | c0020 | B_05.01 | c0010 | Provider identification code |
+| B_03.03 | c0010 | B_02.01 | c0010 | Contract reference |
+| B_03.03 | c0020 | B_01.02 | c0010 | Intra-group provider LEI |
+| B_04.01 | c0010 | B_02.01 | c0010 | Contract reference |
+| B_04.01 | c0020 | B_01.02 | c0010 | Entity LEI |
+| B_05.01 | c0110 | B_05.01 | c0010 | Ultimate parent provider ID (self-referential) |
+| B_05.02 | c0010 | B_02.01 | c0010 | Contract reference |
+| B_05.02 | c0030 | B_05.01 | c0010 | Provider identification code |
+| B_05.02 | c0060 | B_05.01 | c0010 | Sub-contracted recipient ID |
+| B_07.01 | c0010 | B_02.01 | c0010 | Contract reference |
+| B_07.01 | c0020 | B_05.01 | c0010 | Provider identification code |
+| B_07.01 | c0030 | B_01.02 | c0010 | Entity LEI |
+| B_07.01 | c0040 | B_06.01 | c0010 | Function identifier |
 
 ---
 
@@ -298,9 +315,10 @@ The EBA DPM validation framework defines many rules, but only four cause **submi
 #### b_01.02.0060 — LEI of the direct parent undertaking
 
 - Type: Alphanumeric (LEI pattern)
-- Required: Mandatory
+- Required: Conditional — required only for subsidiaries; nullable for ultimate parents and standalone entities.
 - CSV header: `c0060`
 - CISO Assistant field: Entity > Parent entity > Legal Identifiers > LEI
+- FK: references B_01.02 c0010
 
 #### b_01.02.0070 — Date of last update
 
@@ -326,7 +344,7 @@ The EBA DPM validation framework defines many rules, but only four cause **submi
 #### b_01.02.0100 — Currency
 
 - Type: Currency (LISTCURRENCY)
-- Required: Mandatory
+- Required: Conditional — required only when c0110 (total assets) is populated (EBA rule v8803). Nullable otherwise.
 - CSV header: `c0100`
 - CISO Assistant field: Entity > Currency
 - Export: prefixed with `eba_CU:` (e.g. `eba_CU:EUR`)
@@ -334,7 +352,7 @@ The EBA DPM validation framework defines many rules, but only four cause **submi
 #### b_01.02.0110 — Value of total assets
 
 - Type: Numeric
-- Required: Mandatory if the entity is a financial entity
+- Required: Conditional — required unless entity type is branch or natural person. Nullable otherwise.
 - CSV header: `c0110`
 - CISO Assistant field: Entity > Value of total assets (DORA section)
 
@@ -378,7 +396,7 @@ The EBA DPM validation framework defines many rules, but only four cause **submi
 
 ### 4.4 RT.02.01 — Contractual arrangements: general information
 
-> One row per contract linked to solutions associated with business function assets.
+> One row per contract. RT.02.01 lists all ICT contractual arrangements, regardless of whether linked to a solution.
 
 #### b_02.01.0010 — Contractual arrangement reference number
 
@@ -404,9 +422,10 @@ The EBA DPM validation framework defines many rules, but only four cause **submi
 #### b_02.01.0030 — Overarching contractual arrangement reference number
 
 - Type: Alphanumeric
-- Required: Mandatory
+- Required: Conditional — only required when c0020 indicates a subordinate arrangement (`eba_CO:x3`). Nullable otherwise (EBA rule v8805).
 - CSV header: `c0030`
 - CISO Assistant field: Contract > Overarching Contract > Reference ID
+- FK: references B_02.01 c0010 (self-referential)
 
 #### b_02.01.0040 — Currency of the amount
 
@@ -428,6 +447,8 @@ The EBA DPM validation framework defines many rules, but only four cause **submi
 ### 4.5 RT.02.02 — Contractual arrangements: specific information
 
 > One row per contract × solution × business function combination.
+>
+> **Composite primary key**: `(c0010, c0020, c0030, c0050, c0060, c0130, c0150, c0160)` — all 8 columns. See also [Section 3.7](#37-primary-key-fields-and-not-applicable) for key-field handling of c0130, c0150, c0160.
 
 #### b_02.02.0010 — Contractual arrangement reference number
 
@@ -627,12 +648,13 @@ The EBA DPM validation framework defines many rules, but only four cause **submi
 - CSV header: `c0010`
 - CISO Assistant field: Contract (subordinate) > Reference ID
 
-#### b_02.03.0020 — Contractual arrangement linked to RT.02.03.0010
+#### b_02.03.0020 — Linked contractual arrangement with ICT third-party service provider
 
 - Type: Alphanumeric
 - Required: Mandatory
 - CSV header: `c0020`
-- CISO Assistant field: Contract (subordinate) > Overarching Contract > Reference ID
+- CISO Assistant field: Contract > Linked third-party contract reference
+- FK: references B_02.01 c0010
 
 #### b_02.03.0030 — Link
 
@@ -788,18 +810,39 @@ The EBA DPM validation framework defines many rules, but only four cause **submi
 - CSV header: `c0020`
 - CISO Assistant field: — (automatically determined based on identifier type used)
 
-#### b_05.01.0030 — Name of the ICT third-party service provider
+#### b_05.01.0030 — Additional identification code of the third-party service provider
+
+- Type: Numeric (int)
+- Required: Nullable
+- CSV header: `c0030`
+- CISO Assistant field: Entity (provider) > Additional identifier (e.g. EUID)
+
+#### b_05.01.0040 — Type of additional identification code of the third-party service provider
+
+- Type: Alphanumeric
+- Required: Nullable — required when c0030 is populated
+- CSV header: `c0040`
+- CISO Assistant field: — (automatically determined based on additional identifier type)
+
+#### b_05.01.0050 — Legal name of the ICT third-party service provider
 
 - Type: Alphanumeric
 - Required: Mandatory
-- CSV header: `c0030`
+- CSV header: `c0050`
 - CISO Assistant field: Entity (provider) > Name
 
-#### b_05.01.0040 — Type of person of the provider
+#### b_05.01.0060 — Name of the ICT third-party service provider in Latin alphabet
+
+- Type: Alphanumeric
+- Required: Nullable — required only when the legal name (c0050) is not in Latin script
+- CSV header: `c0060`
+- CISO Assistant field: Entity (provider) > Name (Latin alphabet transliteration)
+
+#### b_05.01.0070 — Type of person of the provider
 
 - Type: Closed set (LIST0501040, 2 entries)
 - Required: Mandatory
-- CSV header: `c0040`
+- CSV header: `c0070`
 - CISO Assistant field: Entity (provider) > Person Type (DORA section)
 
 | Code | Label |
@@ -807,42 +850,43 @@ The EBA DPM validation framework defines many rules, but only four cause **submi
 | `eba_CT:x212` | Legal person, excluding individual acting in a business capacity |
 | `eba_CT:x213` | Individual acting in a business capacity |
 
-#### b_05.01.0050 — Country of the provider's headquarters
+#### b_05.01.0080 — Country of the provider's headquarters
 
 - Type: Country (LISTCOUNTRY)
 - Required: Mandatory
-- CSV header: `c0050`
+- CSV header: `c0080`
 - CISO Assistant field: Entity (provider) > Country
 - Export: prefixed with `eba_GA:`
 
-#### b_05.01.0060 — Currency
+#### b_05.01.0090 — Currency of the amount reported
 
 - Type: Currency (LISTCURRENCY)
-- Required: Mandatory if RT.05.01.0070 is reported
-- CSV header: `c0060`
+- Required: Nullable — required when c0100 is populated
+- CSV header: `c0090`
 - CISO Assistant field: Contract / Entity (main) > Currency
 - Export: prefixed with `eba_CU:`. Fallback chain: contract currency → main entity currency → empty.
 
-#### b_05.01.0070 — Total annual expense or estimated cost
+#### b_05.01.0100 — Total annual expense or estimated cost
 
-- Type: Numeric
-- Required: Mandatory if the ICT third-party service provider is a direct ICT third-party service provider
-- CSV header: `c0070`
+- Type: Numeric (money)
+- Required: Nullable — required if the ICT third-party service provider is a direct ICT third-party service provider
+- CSV header: `c0100`
 - CISO Assistant field: — (Auto: sum of `Annual expense` across all contracts with this provider)
 
-#### b_05.01.0080 — Identification code of the provider's ultimate parent undertaking
+#### b_05.01.0110 — Identification code of the provider's ultimate parent undertaking
 
 - Type: Alphanumeric
-- Required: Mandatory if the ICT third-party service provider is not the ultimate parent undertaking
-- CSV header: `c0080`
+- Required: Mandatory
+- CSV header: `c0110`
 - CISO Assistant field: Entity (provider) > Parent entity > Legal Identifiers
+- FK: references B_05.01 c0010 (self-referential)
 - Note: first available identifier of parent entity
 
-#### b_05.01.0090 — Type of code to identify the provider's ultimate parent undertaking
+#### b_05.01.0120 — Type of code to identify the provider's ultimate parent undertaking
 
 - Type: Auto
-- Required: Mandatory if the ICT third-party service provider is not the ultimate parent undertaking
-- CSV header: `c0090`
+- Required: Nullable
+- CSV header: `c0120`
 - CISO Assistant field: — (automatically determined based on identifier type used for parent)
 
 ---
@@ -1277,11 +1321,17 @@ The EBA DPM validation framework defines many rules, but only four cause **submi
 
 #### b_07.01.0110 — Are there alternative ICT third-party service providers identified?
 
-- Type: Closed set (LIST0601050, 3 entries)
+- Type: Closed set (3 entries)
 - Required: Mandatory
 - CSV header: `c0110`
 - CISO Assistant field: Solution > Alternative Providers Identified (DORA Assessment section)
-- Values: see [RT.06.01 b_06.01.0050](#b_06010050--criticality-or-importance-assessment) — same table. Full list in [Appendix A — LIST0601050](#list0601050--yesnoassessment-not-performed).
+- Note: This field uses a 3-value set (not a binary Yes/No). The EBA DPM template defines three valid values:
+
+| Code | Label |
+|---|---|
+| `eba_ZZ:x23` | Yes |
+| `eba_ZZ:x24` | No |
+| `eba_ZZ:x12` | Not applicable |
 
 #### b_07.01.0120 — Identification of alternative ICT TPP
 

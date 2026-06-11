@@ -14,6 +14,7 @@ from global_settings.serializers import (
     FeatureFlagsSerializer as CommunityFeatureFlagSerializer,
 )
 
+from core.models import CustomEmailTemplate, CustomWordTemplate
 from .models import ClientSettings, LogEntryAction
 from auditlog.models import LogEntry
 from global_settings.serializers import (
@@ -177,6 +178,65 @@ class LogEntrySerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "timestamp", "actor", "action", "changes_text"]
 
 
+class CustomEmailTemplateReadSerializer(BaseModelSerializer):
+    class Meta:
+        model = CustomEmailTemplate
+        fields = [
+            "id",
+            "folder",
+            "template_key",
+            "language",
+            "subject",
+            "body",
+            "is_active",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class CustomEmailTemplateWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = CustomEmailTemplate
+        fields = [
+            "id",
+            "template_key",
+            "language",
+            "subject",
+            "body",
+            "is_active",
+        ]
+        read_only_fields = ["id"]
+
+
+class CustomWordTemplateReadSerializer(BaseModelSerializer):
+    file = serializers.SerializerMethodField()
+
+    def get_file(self, obj):
+        if obj.file:
+            return obj.file.name.split("/")[-1]
+        return None
+
+    class Meta:
+        model = CustomWordTemplate
+        fields = [
+            "id",
+            "folder",
+            "template_key",
+            "language",
+            "file",
+            "is_active",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class CustomWordTemplateWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = CustomWordTemplate
+        fields = ["id", "template_key", "language", "is_active"]
+        read_only_fields = ["id"]
+
+
 class FeatureFlagsSerializer(CommunityFeatureFlagSerializer):
     """
     Serializer for managing Feature Flags stored within the 'value' JSON field
@@ -190,4 +250,8 @@ class FeatureFlagsSerializer(CommunityFeatureFlagSerializer):
 
     focus_mode = serializers.BooleanField(
         source="value.focus_mode", required=False, default=False
+    )
+
+    object_audit_trail = serializers.BooleanField(
+        source="value.object_audit_trail", required=False, default=True
     )

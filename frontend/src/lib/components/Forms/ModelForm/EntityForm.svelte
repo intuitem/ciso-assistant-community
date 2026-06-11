@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import NumberField from '$lib/components/Forms/NumberField.svelte';
@@ -51,13 +52,6 @@
 	);
 </script>
 
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
 <Checkbox
 	{form}
 	field="is_active"
@@ -65,11 +59,9 @@
 	cacheLock={cacheLocks['is_active']}
 	bind:cachedValue={formDataCache['is_active']}
 />
-<AutocompleteSelect
+<FolderTreeSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
-	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}

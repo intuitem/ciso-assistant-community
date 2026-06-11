@@ -1,11 +1,14 @@
 FROM python:3.14-slim
 
+# UV_NO_SYNC=1: prevent `uv run` from auto-syncing at runtime (caused startup-docker-compose-test CI to fail);
+#   the venv is built once at image build (uv sync --locked --no-dev)
 ENV PYTHONUNBUFFERED=1 \
   PYTHONDONTWRITEBYTECODE=1 \
-  POETRY_NO_INTERACTION=1 \
-  POETRY_VIRTUALENVS_IN_PROJECT=1 \
-  POETRY_VIRTUALENVS_CREATE=1 \
-  POETRY_CACHE_DIR=/tmp/poetry_cache
+  UV_LINK_MODE=copy \
+  UV_NO_SYNC=1 \
+  PATH="/code/.venv/bin:$PATH"
+
+COPY --from=ghcr.io/astral-sh/uv:0.11.6 /uv /bin/
 
 WORKDIR /code
 
@@ -39,16 +42,21 @@ RUN apt-get update && apt-get install -y \
   && locale-gen ur_PK.UTF-8 \
   && locale-gen cs_CZ.UTF-8 \
   && locale-gen sv_SE.UTF-8 \
-  && locale-gen id_ID.UTF-8 \
-  && pip install --no-cache-dir --upgrade pip poetry==2.2.1
+  && locale-gen id_ID.UTF-8
 
-COPY pyproject.toml poetry.lock ./
+COPY pyproject.toml uv.lock ./
 
-RUN poetry install --no-root \
-  && rm -rf $POETRY_CACHE_DIR
+# torch is pinned to the PyTorch CPU index in pyproject.toml/uv.lock, so the CUDA
+# wheels are never resolved or downloaded — a plain locked sync is enough.
+RUN --mount=type=cache,target=/root/.cache/uv \
+  --mount=type=cache,target=/root/.cache/pip \
+  uv sync --locked --no-dev
 
 #watch out for local files during dev and maintenance of .dockerignore
 COPY . .
 
+RUN groupadd -g 1001 app && useradd -u 1001 -g 1001 -m -s /bin/bash app
+# USER app  # not activated by default to keep compatibility
+
 EXPOSE 8000
-ENTRYPOINT ["poetry", "run", "bash", "startup.sh"]
+ENTRYPOINT ["uv", "run", "bash", "startup.sh"]

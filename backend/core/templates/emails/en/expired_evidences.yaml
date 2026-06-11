@@ -6,7 +6,6 @@ body: |
 
   ${evidence_list}
 
-  Please log in to your CISO Assistant portal to review and update these evidences:
-  ${ciso_assistant_url}
+  Please log in to your CISO Assistant portal to review and update these evidences: [Go to CISO Assistant](${ciso_assistant_url})
 
   Thank you.

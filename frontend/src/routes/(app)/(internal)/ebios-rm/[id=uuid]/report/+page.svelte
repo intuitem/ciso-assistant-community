@@ -3,6 +3,7 @@
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import { isDark } from '$lib/utils/helpers';
 	import { getLocale } from '$paraglide/runtime';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
@@ -251,7 +252,9 @@
 							<div>
 								<span class="font-semibold text-surface-700-300">{m.gravity()}:</span>
 								<span
-									class="ml-2 px-2 py-1 rounded"
+									class="ml-2 px-2 py-1 rounded {isDark(event.gravity.hexcolor)
+										? 'text-white'
+										: ''}"
 									style="background-color: {event.gravity.hexcolor}"
 								>
 									{safeTranslate(event.gravity.name)}
@@ -624,7 +627,9 @@
 								<div>
 									<span class="font-semibold text-surface-700-300">{m.gravity()}:</span>
 									<span
-										class="ml-2 px-2 py-1 rounded"
+										class="ml-2 px-2 py-1 rounded {isDark(scenario.gravity.hexcolor)
+											? 'text-white'
+											: ''}"
 										style="background-color: {scenario.gravity.hexcolor}"
 									>
 										{safeTranslate(scenario.gravity.name)}
@@ -641,17 +646,19 @@
 
 						<!-- Attack Path Flow Text -->
 						{#if scenarioAttackPaths.length > 0}
+							{@const chainFearedEventIds = scenario.focused_feared_event
+								? [scenario.focused_feared_event.id]
+								: (scenario.feared_events?.map((sFe) => sFe.id) ?? [])}
+							{@const chainFearedEvents = reportData.feared_events.filter((fe) =>
+								chainFearedEventIds.includes(fe.id)
+							)}
 							<h4 class="text-md font-semibold text-surface-950-50 mb-3">
 								<i class="fa-solid fa-route mr-2"></i>{m.attackPaths()}
 							</h4>
 							<AttackPathFlowText
 								attackPaths={scenarioAttackPaths}
-								fearedEvents={reportData.feared_events.filter((fe) =>
-									scenario.feared_events?.some((sFe) => sFe.id === fe.id)
-								)}
-								fearedEventsWithAssets={reportData.feared_events.filter((fe) =>
-									scenario.feared_events?.some((sFe) => sFe.id === fe.id)
-								)}
+								fearedEvents={chainFearedEvents}
+								fearedEventsWithAssets={chainFearedEvents}
 							/>
 						{/if}
 					</div>
@@ -729,7 +736,11 @@
 								<div>
 									<span class="font-semibold text-surface-700-300">{m.likelihood()}:</span>
 									<span
-										class="ml-2 px-2 py-1 rounded text-xs font-medium"
+										class="ml-2 px-2 py-1 rounded text-xs font-medium {isDark(
+											opScenario.likelihood.hexcolor
+										)
+											? 'text-white'
+											: ''}"
 										style="background-color: {opScenario.likelihood.hexcolor}"
 									>
 										{safeTranslate(opScenario.likelihood.name)}
@@ -738,7 +749,11 @@
 								<div>
 									<span class="font-semibold text-surface-700-300">{m.gravity()}:</span>
 									<span
-										class="ml-2 px-2 py-1 rounded text-xs font-medium"
+										class="ml-2 px-2 py-1 rounded text-xs font-medium {isDark(
+											opScenario.gravity.hexcolor
+										)
+											? 'text-white'
+											: ''}"
 										style="background-color: {opScenario.gravity.hexcolor}"
 									>
 										{safeTranslate(opScenario.gravity.name)}
@@ -747,7 +762,11 @@
 								<div>
 									<span class="font-semibold text-surface-700-300">{m.riskLevel()}:</span>
 									<span
-										class="ml-2 px-2 py-1 rounded text-xs font-medium"
+										class="ml-2 px-2 py-1 rounded text-xs font-medium {isDark(
+											opScenario.risk_level.hexcolor || '#808080'
+										)
+											? 'text-white'
+											: ''}"
 										style="background-color: {opScenario.risk_level.hexcolor || '#gray'}"
 									>
 										{safeTranslate(opScenario.risk_level.name)}
@@ -822,7 +841,9 @@
 												<div class="text-xs">
 													<span class="font-semibold text-surface-700-300">{m.likelihood()}:</span>
 													<span
-														class="ml-1 px-2 py-0.5 rounded"
+														class="ml-1 px-2 py-0.5 rounded {isDark(mode.likelihood.hexcolor)
+															? 'text-white'
+															: ''}"
 														style="background-color: {mode.likelihood.hexcolor}"
 													>
 														{safeTranslate(mode.likelihood.name)}
@@ -949,7 +970,11 @@
 										<td class="px-4 py-3 text-sm border-r">
 											{#if scenario.inherent_level}
 												<span
-													class="px-2 py-1 rounded text-xs font-medium"
+													class="px-2 py-1 rounded text-xs font-medium {isDark(
+														scenario.inherent_level.hexcolor
+													)
+														? 'text-white'
+														: ''}"
 													style="background-color: {scenario.inherent_level.hexcolor}"
 												>
 													{safeTranslate(scenario.inherent_level.name)}
@@ -962,7 +987,11 @@
 									<td class="px-4 py-3 text-sm border-r">
 										{#if scenario.current_level}
 											<span
-												class="px-2 py-1 rounded text-xs font-medium"
+												class="px-2 py-1 rounded text-xs font-medium {isDark(
+													scenario.current_level.hexcolor
+												)
+													? 'text-white'
+													: ''}"
 												style="background-color: {scenario.current_level.hexcolor}"
 											>
 												{safeTranslate(scenario.current_level.name)}
@@ -974,7 +1003,11 @@
 									<td class="px-4 py-3 text-sm border-r">
 										{#if scenario.residual_level}
 											<span
-												class="px-2 py-1 rounded text-xs font-medium"
+												class="px-2 py-1 rounded text-xs font-medium {isDark(
+													scenario.residual_level.hexcolor
+												)
+													? 'text-white'
+													: ''}"
 												style="background-color: {scenario.residual_level.hexcolor}"
 											>
 												{safeTranslate(scenario.residual_level.name)}
@@ -1118,8 +1151,8 @@
 														{/if}
 													</td>
 													<td class="px-3 py-2 text-sm">
-														{#if control.owner}
-															{control.owner.str}
+														{#if control.owner?.length}
+															{control.owner.map((o) => o.str).join(', ')}
 														{:else}
 															--
 														{/if}
@@ -1208,8 +1241,8 @@
 													{/if}
 												</td>
 												<td class="px-3 py-2 text-sm">
-													{#if control.owner}
-														{control.owner.str}
+													{#if control.owner?.length}
+														{control.owner.map((o) => o.str).join(', ')}
 													{:else}
 														--
 													{/if}
@@ -1288,8 +1321,8 @@
 											{/if}
 										</td>
 										<td class="px-3 py-2 text-sm">
-											{#if control.owner}
-												{control.owner.str}
+											{#if control.owner?.length}
+												{control.owner.map((o) => o.str).join(', ')}
 											{:else}
 												--
 											{/if}

@@ -7,7 +7,8 @@
 
 	import { page } from '$app/state';
 	import { redirectToProvider } from '$lib/allauth.js';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { getSecureRedirect } from '$lib/utils/helpers';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import MfaAuthenticateModal from './mfa/components/MFAAuthenticateModal.svelte';
 	import { m } from '$paraglide/messages';
 	import {
@@ -27,11 +28,13 @@
 	const modalStore: ModalStore = getModalStore();
 
 	function modalMFAAuthenticate(): void {
+		const mfaTypes: string[] = form?.mfaFlow?.types ?? ['totp'];
 		const modalComponent: ModalComponent = {
 			ref: MfaAuthenticateModal,
 			props: {
 				_form: data.mfaAuthenticateForm,
-				formAction: '?/mfaAuthenticate'
+				formAction: '?/mfaAuthenticate',
+				mfaTypes
 			}
 		};
 		const modal: ModalSettings = {
@@ -47,6 +50,16 @@
 	run(() => {
 		form && form.mfaFlow ? modalMFAAuthenticate() : null;
 	});
+
+	function getSSOCallbackURL(callbackURL: string): string {
+		const url = new URL(callbackURL);
+		const next = getSecureRedirect(page.url.searchParams.get('next')) || '/';
+
+		url.pathname = '/sso/authenticate';
+		url.search = '';
+		url.searchParams.set('next', next);
+		return url.toString();
+	}
 </script>
 
 <div
@@ -104,8 +117,11 @@
 			<button
 				class="btn bg-linear-to-l from-violet-800 to-violet-400 text-white font-semibold w-1/2"
 				onclick={() =>
-					redirectToProvider(data.SSOInfo.sp_entity_id, data.SSOInfo.callback_url, 'login')}
-				>{m.loginSSO()}</button
+					redirectToProvider(
+						data.SSOInfo.sp_entity_id,
+						getSSOCallbackURL(data.SSOInfo.callback_url),
+						'login'
+					)}>{m.loginSSO()}</button
 			>
 		{/if}
 	</div>

@@ -114,7 +114,7 @@
 			]
 		};
 
-	option.backgroundColor = 'transparent';
+		option.backgroundColor = 'transparent';
 		chart.setOption(option);
 
 		const resizeHandler = function () {

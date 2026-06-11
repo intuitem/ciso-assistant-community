@@ -8,7 +8,6 @@ body: |
   - Référentiel : ${framework_name}
   - Date d'échéance : ${due_date}
 
-  Veuillez vous connecter à votre portail CISO Assistant pour commencer votre évaluation :
-  ${ciso_assistant_url}
+  Veuillez vous connecter à votre portail CISO Assistant pour commencer votre évaluation : [Accéder à CISO Assistant](${ciso_assistant_url}/auditee-dashboard)
 
   Merci.

@@ -54,7 +54,7 @@ export const navData = {
 					name: 'auditDashboard',
 					fa_icon: 'fa-solid fa-clipboard-check',
 					href: '/auditee-dashboard',
-					permissions: ['view_requirementassignment']
+					permissions: ['view_complianceassessment']
 				},
 				{
 					name: 'presets',
@@ -161,6 +161,16 @@ export const navData = {
 					href: '/threats'
 				},
 				{
+					name: 'securityAdvisories',
+					fa_icon: 'fa-solid fa-shield-virus',
+					href: '/security-advisories'
+				},
+				{
+					name: 'cwes',
+					fa_icon: 'fa-solid fa-bug-slash',
+					href: '/cwes'
+				},
+				{
 					name: 'referenceControls',
 					fa_icon: 'fa-solid fa-gears',
 					href: '/reference-controls'
@@ -221,6 +231,12 @@ export const navData = {
 					name: 'tasks',
 					fa_icon: 'fa-solid fa-note-sticky',
 					href: '/task-templates'
+				},
+				{
+					name: 'tasksReview',
+					fa_icon: 'fa-solid fa-table-columns',
+					href: '/tasks-review',
+					permissions: ['view_appliedcontrol']
 				}
 			]
 		},
@@ -460,6 +476,18 @@ export const navData = {
 					fa_icon: 'fa-solid fa-award',
 					href: '/accreditations',
 					permissions: ['view_accreditation']
+				},
+				{
+					name: 'projects',
+					fa_icon: 'fa-solid fa-diagram-project',
+					href: '/projects',
+					permissions: ['view_project']
+				},
+				{
+					name: 'responsibilityMatrices',
+					fa_icon: 'fa-solid fa-people-arrows',
+					href: '/responsibility-matrices',
+					permissions: ['view_responsibilitymatrix']
 				}
 			]
 		},
@@ -500,7 +528,7 @@ export const navData = {
 					name: 'Audit log',
 					fa_icon: 'fa-solid fa-newspaper',
 					href: '/audit-log',
-					permissions: ['view_logentry']
+					permissions: ['view_central_auditlog']
 				},
 				{
 					name: 'experimental',

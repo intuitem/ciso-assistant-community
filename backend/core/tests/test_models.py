@@ -2,7 +2,7 @@ from uuid import UUID
 from django.core.exceptions import ValidationError
 
 import pytest
-from ciso_assistant.settings import BASE_DIR
+from django.conf import settings
 from test_fixtures import RISK_MATRIX_JSON_DEFINITION
 
 from core.models import (
@@ -35,7 +35,7 @@ from .fixtures import *
 
 User = get_user_model()
 
-SAMPLE_640x480_JPG = BASE_DIR / "app_tests" / "sample_640x480.jpg"
+SAMPLE_640x480_JPG = settings.BASE_DIR / "app_tests" / "sample_640x480.jpg"
 
 
 @pytest.mark.django_db

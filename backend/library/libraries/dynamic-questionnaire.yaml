@@ -6,7 +6,7 @@ description: >
   Ce formulaire illustre l'utilisation des champs add_score, compute_result,
   select_implementation_groups, description et color, ainsi que la logique depends_on.
 copyright: Intuitem
-version: 1
+version: 2
 publication_date: 2025-10-13
 provider: Intuitem
 packager: Intuitem
@@ -40,6 +40,32 @@ objects:
           Ces exigences constituent le socle minimal de conformité.
         implementation_groups:
           - "base"
+
+      # === SPLASH SCREEN: Introduction fondamentaux ===
+      - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:splash_fondamentaux
+        assessable: false
+        display_mode: splash
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:0_fondamentaux
+        ref_id: S1
+        name: "Bienvenue dans le questionnaire"
+        description: |
+          # Évaluation des exigences fondamentales
+
+          Ce questionnaire va vous guider à travers les **exigences de base** en matière de cybersécurité.
+
+          ## Ce que vous allez évaluer
+
+          - **Gouvernance et contrôle d'accès** — Votre politique de gestion des accès
+          - **Sensibilisation** — La formation de vos collaborateurs
+
+          ## Comment répondre
+
+          Pour chaque exigence, sélectionnez la réponse qui correspond le mieux à votre situation actuelle.
+          Les réponses influencent le **score global** et peuvent débloquer des questions complémentaires.
+
+          > **Astuce** : Prenez le temps de consulter les annotations pour chaque exigence,
+          > elles contiennent des informations utiles sur le contexte réglementaire.
 
       # === REQUIREMENT 1 ===
       - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1
@@ -173,6 +199,32 @@ objects:
           Ces exigences visent à renforcer le niveau de sécurité au-delà du socle fondamental.
         implementation_groups:
           - "avance"
+
+      # === SPLASH SCREEN: Introduction avancés ===
+      - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:splash_avances
+        assessable: false
+        display_mode: splash
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:3_avances
+        ref_id: S2
+        name: "Exigences avancées — Supervision et résilience"
+        description: |
+          # Passons aux exigences avancées
+
+          Vous avez complété les exigences fondamentales. Cette section couvre des mesures
+          de sécurité **plus poussées** destinées aux organisations matures.
+
+          ## Thèmes abordés
+
+          | Thème | Description |
+          |-------|-------------|
+          | Supervision | SIEM, journalisation centralisée |
+          | Sauvegardes | Plans de sauvegarde et restauration |
+
+          ## Prérequis
+
+          Ces exigences ne s'appliquent que si le **Groupe Avancé** a été activé
+          lors de vos réponses précédentes.
 
       # === REQUIREMENT 3 ===
       - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:3_avance-1

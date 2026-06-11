@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import HiddenInput from '../HiddenInput.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Select from '../Select.svelte';
@@ -9,7 +10,7 @@
 	import { type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton-svelte';
 	import { onMount } from 'svelte';
 	import { getModelInfo } from '$lib/utils/crud';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { invalidateAll } from '$app/navigation';
 	import { AppliedControlSchema } from '$lib/utils/schemas';
@@ -17,6 +18,7 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { getModalStore } from '$lib/components/Modals/stores';
 	import MarkdownField from '../MarkdownField.svelte';
+	import { formFieldProxy } from 'sveltekit-superforms';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -79,24 +81,28 @@
 		};
 		modalStore.trigger(modal);
 	}
+
+	function getTodayDateString(): string {
+		const today = new Date();
+		const year = today.getFullYear();
+		const month = String(today.getMonth() + 1).padStart(2, '0');
+		const day = String(today.getDate()).padStart(2, '0');
+		return `${year}-${month}-${day}`;
+	}
+
+	const { value: expirationDate } = formFieldProxy(form, 'expiration_date');
+	const today = getTodayDateString();
+
+	let isExpirationDateInPast = $derived(Boolean($expirationDate) && $expirationDate < today);
 </script>
 
 <HiddenInput {form} field="requirement_assessments" />
-<AutocompleteSelect
+<FolderTreeSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
-	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
-/>
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
 />
 <AutocompleteSelect
 	{form}
@@ -155,6 +161,19 @@
 	label={m.expirationDate()}
 	cacheLock={cacheLocks['expiration_date']}
 	bind:cachedValue={formDataCache['expiration_date']}
+/>
+{#if isExpirationDateInPast}
+	<p class="mt-1 text-sm text-orange-600">
+		<i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+		{m.expirationDateIsInThePastWarning()}
+	</p>
+{/if}
+<TextField
+	{form}
+	label={m.link()}
+	field="link"
+	bind:cachedValue={formDataCache['link']}
+	cacheLock={cacheLocks['link']}
 />
 <AutocompleteSelect
 	multiple

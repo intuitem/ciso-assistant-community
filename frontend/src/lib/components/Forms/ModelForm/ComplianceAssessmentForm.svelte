@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import Select from '../Select.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
@@ -10,6 +11,7 @@
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import { page } from '$app/state';
 	import FrameworkResultSnippet from '$lib/components/Snippets/AutocompleteSelect/FrameworkResultSnippet.svelte';
+	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
 
 	interface Props {
 		form: SuperForm<any>;
@@ -30,6 +32,8 @@
 		object = {},
 		context
 	}: Props = $props();
+
+	const formData = form.form;
 
 	let suggestions = $state(false);
 
@@ -81,6 +85,8 @@
 		}
 	}
 
+	let frameworkDefaults = $state<Record<string, any> | null>(null);
+
 	async function handleFrameworkChange(id: string) {
 		if (id) {
 			await fetch(`/frameworks/${id}`)
@@ -94,18 +100,17 @@
 					}));
 					suggestions = r['reference_controls'].length > 0;
 
+					frameworkDefaults = r['effective_field_visibility'] ?? null;
+
 					defaultImplementationGroups = implementation_groups
 						.filter((group) => group.default_selected)
 						.map((group) => group.ref_id);
 
-					// Only apply defaults when creating a new assessment, not when editing
 					if (!object.id) {
-						form.form.update((currentData) => {
-							return {
-								...currentData,
-								selected_implementation_groups: defaultImplementationGroups
-							};
-						});
+						form.form.update((currentData) => ({
+							...currentData,
+							selected_implementation_groups: defaultImplementationGroups
+						}));
 					}
 				});
 		}
@@ -135,11 +140,11 @@
 	/>
 {/if}
 {#key folderKey}
-	<AutocompleteSelect
+	<FolderTreeSelect
 		{form}
-		optionsEndpoint="folders?content_type=DO&content_type=GL"
 		field="folder"
 		cacheLock={cacheLocks['folder']}
+		contentTypes={['DO', 'GL', 'EN']}
 		bind:cachedValue={formDataCache['folder']}
 		label={m.folder()}
 		onChange={handleFolderChange}
@@ -199,18 +204,16 @@
 	/>
 {/if}
 {#if implementationGroupsChoices.length > 0 && !is_dynamic}
-	{#key implementationGroupsChoices}
-		<AutocompleteSelect
-			multiple
-			translateOptions={false}
-			{form}
-			options={implementationGroupsChoices}
-			field="selected_implementation_groups"
-			cacheLock={cacheLocks['selected_implementation_groups']}
-			bind:cachedValue={formDataCache['selected_implementation_groups']}
-			label={m.selectedImplementationGroups()}
-		/>
-	{/key}
+	<AutocompleteSelect
+		multiple
+		translateOptions={false}
+		{form}
+		options={implementationGroupsChoices}
+		field="selected_implementation_groups"
+		cacheLock={cacheLocks['selected_implementation_groups']}
+		bind:cachedValue={formDataCache['selected_implementation_groups']}
+		label={m.selectedImplementationGroups()}
+	/>
 {/if}
 <TextField
 	{form}
@@ -220,19 +223,13 @@
 	cacheLock={cacheLocks['version']}
 	bind:cachedValue={formDataCache['version']}
 />
-<AutocompleteSelect
+<Select
 	{form}
-	multiple
-	optionsEndpoint="actors"
-	optionsLabelField="str"
-	optionsInfoFields={{
-		fields: [{ field: 'type', translate: true }],
-		position: 'prefix'
-	}}
-	field="authors"
-	cacheLock={cacheLocks['authors']}
-	bind:cachedValue={formDataCache['authors']}
-	label={m.authors()}
+	options={model.selectOptions['status']}
+	field="status"
+	label={m.status()}
+	cacheLock={cacheLocks['status']}
+	bind:cachedValue={formDataCache['status']}
 />
 <TextField
 	type="date"
@@ -255,30 +252,17 @@
 				bind:cachedValue={formDataCache['create_applied_controls_from_suggestions']}
 			/>
 		{/if}
-		<Checkbox
-			{form}
-			field="show_documentation_score"
-			label={m.useDocumentationScore()}
-			helpText={m.useDocumentationScoreHelpText()}
-			cacheLock={cacheLocks['show_documentation_score']}
-			bind:cachedValue={formDataCache['show_documentation_score']}
+		<!-- Visibility editor renders for both create and edit. On create, pills
+		     fall back to the framework's `effective_field_visibility` (served by
+		     the backend), so what the user sees always matches what the backend
+		     will save when no explicit override is provided. -->
+		<VisibilityEditor
+			value={$formData.field_visibility}
+			onChange={(next) => form.form.update((d) => ({ ...d, field_visibility: next }))}
+			disabled={object?.is_locked}
+			{frameworkDefaults}
 		/>
-		<Checkbox
-			{form}
-			field="extended_result_enabled"
-			label={m.extendedResultEnabled()}
-			helpText={m.extendedResultEnabledHelpText()}
-			cacheLock={cacheLocks['extended_result_enabled']}
-			bind:cachedValue={formDataCache['extended_result_enabled']}
-		/>
-		<Checkbox
-			{form}
-			field="progress_status_enabled"
-			label={m.progressStatusEnabled()}
-			helpText={m.progressStatusEnabledHelpText()}
-			cacheLock={cacheLocks['progress_status_enabled']}
-			bind:cachedValue={formDataCache['progress_status_enabled']}
-		/>
+
 		<Select
 			{form}
 			options={model.selectOptions['score_calculation_method']}
@@ -289,14 +273,25 @@
 			bind:cachedValue={formDataCache['score_calculation_method']}
 			disableDoubleDash
 		/>
+		<TextField
+			{form}
+			type="number"
+			step="any"
+			field="target_score"
+			label={m.targetScore()}
+			helpText={m.targetScoreHelpText()}
+			cacheLock={cacheLocks['target_score']}
+			bind:cachedValue={formDataCache['target_score']}
+		/>
+		<Checkbox
+			{form}
+			field="anchor_na_to_target"
+			label={m.anchorNaToTarget()}
+			helpText={m.anchorNaToTargetHelpText()}
+			cacheLock={cacheLocks['anchor_na_to_target']}
+			bind:cachedValue={formDataCache['anchor_na_to_target']}
+		/>
 	</div>
-	<TextField
-		{form}
-		field="ref_id"
-		label={m.refId()}
-		cacheLock={cacheLocks['ref_id']}
-		bind:cachedValue={formDataCache['ref_id']}
-	/>
 	<AutocompleteSelect
 		multiple
 		lazy
@@ -324,13 +319,19 @@
 		field="evidences"
 		label={m.evidences()}
 	/>
-	<Select
+	<AutocompleteSelect
 		{form}
-		options={model.selectOptions['status']}
-		field="status"
-		label={m.status()}
-		cacheLock={cacheLocks['status']}
-		bind:cachedValue={formDataCache['status']}
+		multiple
+		optionsEndpoint="actors"
+		optionsLabelField="str"
+		optionsInfoFields={{
+			fields: [{ field: 'type', translate: true }],
+			position: 'prefix'
+		}}
+		field="authors"
+		cacheLock={cacheLocks['authors']}
+		bind:cachedValue={formDataCache['authors']}
+		label={m.authors()}
 	/>
 	<AutocompleteSelect
 		{form}

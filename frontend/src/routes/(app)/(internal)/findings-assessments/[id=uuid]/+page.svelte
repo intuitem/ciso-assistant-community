@@ -90,7 +90,9 @@
 					</span>
 				</Popover.Trigger>
 				<Popover.Positioner>
-					<Popover.Content class="card whitespace-nowrap bg-surface-50-950 py-2 w-fit shadow-lg space-y-1">
+					<Popover.Content
+						class="card whitespace-nowrap bg-surface-50-950 py-2 w-fit shadow-lg space-y-1"
+					>
 						<div>
 							<p class="block px-4 py-2 text-sm text-surface-950-50">{m.findingsAssessment()}</p>
 							<a

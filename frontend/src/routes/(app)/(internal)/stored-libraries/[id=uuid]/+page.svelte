@@ -14,9 +14,12 @@
 	import { Progress } from '@skeletonlabs/skeleton-svelte';
 	import type { ActionResult } from '@sveltejs/kit';
 	import TreeViewItemContent from '../../frameworks/[id=uuid]/TreeViewItemContent.svelte';
+	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
 	let { data } = $props();
 	let loading = $state({ form: false, library: '' });
+	let expandedNodes: string[] = $state([]);
 	const showRisks = true;
 
 	interface LibraryObjects {
@@ -169,17 +172,22 @@
 		</span>
 		<div class="space-y-1">
 			<p class="text-md leading-5 text-surface-700-300">
-				<strong>{m.description()}</strong>: {data.library.description}
+				<strong>{m.description()}</strong>:
 			</p>
+			<MarkdownRenderer content={data.library.description} />
+
 			<p class="text-md leading-5 text-surface-700-300">
 				<strong>{m.provider()}</strong>: {data.library.provider}
 			</p>
+
 			<p class="text-md leading-5 text-surface-700-300">
 				<strong>{m.packager()}</strong>: {data.library.packager}
 			</p>
+
 			<p class="text-md leading-5 text-surface-700-300">
 				<strong>{m.version()}</strong>: {data.library.version}
 			</p>
+
 			{#if data.library.publication_date}
 				<p class="text-md leading-5 text-surface-700-300">
 					<strong>{m.publicationDate()}</strong>: {formatDateOrDateTime(
@@ -200,8 +208,9 @@
 			{/if}
 			{#if data.library.copyright}
 				<p class="text-md leading-5 text-surface-700-300">
-					<strong>{m.copyright()}</strong>: {data.library.copyright}
+					<strong>{m.copyright()}</strong>:
 				</p>
+				<MarkdownRenderer content={data.library.copyright} />
 			{/if}
 			{#if data.library.filtering_labels && data.library.filtering_labels.length > 0}
 				<p class="text-md leading-5 text-surface-700-300">
@@ -293,16 +302,17 @@
 	{/if}
 
 	{#if framework}
-		<h4 class="h4 font-medium">{m.framework()}</h4>
 		{#await data.tree}
 			<span data-testid="loading-field">
 				{m.loading()}...
 			</span>
 		{:then tree}
-			<RecursiveTreeView
-				nodes={transformToTreeView(Object.entries(tree))}
-				hover="hover:bg-initial"
-			/>
+			{@const treeViewNodes = transformToTreeView(Object.entries(tree))}
+			<div class="flex items-center justify-between">
+				<h4 class="h4 font-medium">{m.framework()}</h4>
+				<TreeExpandCollapseToggle nodes={treeViewNodes} bind:expandedNodes />
+			</div>
+			<RecursiveTreeView nodes={treeViewNodes} bind:expandedNodes hover="hover:bg-initial" />
 		{/await}
 	{/if}
 </div>

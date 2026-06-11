@@ -36,7 +36,7 @@ image:
     pullPolicy: Always
   caddy:
     repository: caddy
-    tag: "2.7.6"
+    tag: "2.11.2"
     pullPolicy: IfNotPresent
 
 persistence:

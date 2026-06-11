@@ -1,8 +1,10 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import Select from '../Select.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import ThresholdsEditor from './ThresholdsEditor.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
@@ -13,7 +15,6 @@
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
-		data?: any;
 		object?: any;
 		debug?: boolean;
 	}
@@ -24,7 +25,6 @@
 		cacheLocks = {},
 		formDataCache = $bindable({}),
 		initialData = {},
-		data = {},
 		object = {},
 		debug = false
 	}: Props = $props();
@@ -54,11 +54,9 @@
 	</div>
 {/if}
 
-<AutocompleteSelect
+<FolderTreeSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
-	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
@@ -112,12 +110,12 @@
 		cacheLock={cacheLocks['time_range']}
 		bind:cachedValue={formDataCache['time_range']}
 		label={m.timeRange()}
+		disableDoubleDash={true}
 	/>
 </div>
 
 <!-- Aggregation hidden for now -->
 <input type="hidden" name="aggregation" value={formDataCache['aggregation'] || 'none'} />
-
 <Checkbox
 	{form}
 	field="show_target"
@@ -125,3 +123,5 @@
 	cacheLock={cacheLocks['show_target']}
 	bind:cachedValue={formDataCache['show_target']}
 />
+
+<ThresholdsEditor {form} {object} chartType={formDataCache['chart_type'] ?? object?.chart_type} />

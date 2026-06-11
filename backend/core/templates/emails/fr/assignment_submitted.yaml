@@ -8,7 +8,6 @@ body: |
   - Soumis par : ${actor_names}
   - Exigences évaluées : ${requirement_count}
 
-  Veuillez vous connecter à votre portail CISO Assistant pour examiner la soumission :
-  ${ciso_assistant_url}
+  Veuillez vous connecter à votre portail CISO Assistant pour examiner la soumission : [Accéder à CISO Assistant](${ciso_assistant_url})
 
   Merci.

@@ -36,7 +36,9 @@
 						>
 							{riskItem.name}
 						</td>
-						<td class="col italic pl-3 border-t-4 border-b-4 border-r-4 border-surface-200-800 rounded-r">
+						<td
+							class="col italic pl-3 border-t-4 border-b-4 border-r-4 border-surface-200-800 rounded-r"
+						>
 							{riskItem.description}
 						</td>
 					</tr>

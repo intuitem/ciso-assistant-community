@@ -8,7 +8,7 @@ export class MailContent {
 
 	constructor(public readonly page: Page) {
 		this.content = this.page.frameLocator('#preview-html');
-		this.setPasswordButton = this.content.getByTestId('set-password-btn');
-		this.resetPasswordButton = this.content.getByTestId('reset-password-btn');
+		this.setPasswordButton = this.content.locator('a').filter({ hasText: 'Set my password' });
+		this.resetPasswordButton = this.content.locator('a').filter({ hasText: 'Reset my password' });
 	}
 }

@@ -1,0 +1,221 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:iec-62443-2-4-2023
+locale: en
+ref_id: iec-62443-2-4-2023
+name: "IEC 62443-2-4:2023 \u2014 Security program for IACS service providers (functional-area\
+  \ outline)"
+description: "Outline of IEC 62443-2-4:2023 Edition 2 \u2014 Security for industrial\
+  \ automation and control systems - Part 2-4: Security program requirements for IACS\
+  \ service providers. Targets system integrators and maintenance service providers;\
+  \ basis of the ISASecure ACSSA service-provider scheme. Requirements live in Annex\
+  \ A (normative) Table A.1 with BR (Base Requirement) / RE (Requirement Enhancement)\
+  \ rows. This v0 ships the 12 functional areas SP.01-SP.12 as assessable rows with\
+  \ paraphrased descriptions; BR-level rows are pending full Ed.2 text access. Each\
+  \ functional area is rated on the Maturity Level scale ML 1-4 (aligned with 62443-4-1\
+  \ and 62443-2-1 Ed.2)."
+copyright: IEC - Purchase the standard for the full normative text and Annex A Table
+  A.1.
+version: 1
+publication_date: 2026-04-28
+provider: IEC
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:iec-62443-2-4-2023
+    ref_id: iec-62443-2-4-2023
+    name: "IEC 62443-2-4:2023 \u2014 Security program for IACS service providers (functional-area\
+      \ outline)"
+    description: v0 outline at functional-area granularity in procurement tone (what
+      the service provider does + what the asset owner asks for). Each row corresponds
+      to a SP.aa functional area; BR-level (SP.aa.bb) rows are pending full Ed.2 text
+      access.
+    min_score: 0
+    max_score: 5
+    scores_definition:
+    - score: 0
+      name: Incomplete
+      description: Ad hoc and unknown
+    - score: 1
+      name: Initial
+      description: Unpredictable and reactive
+    - score: 2
+      name: Managed
+      description: Managed on the project level
+    - score: 3
+      name: Defined
+      description: Proactive, rather than reactive
+    - score: 4
+      name: Quantitatively managed
+      description: Measured and controlled
+    - score: 5
+      name: Optimizing
+      description: Stable and flexible
+    implementation_groups_definition:
+    - ref_id: functional_areas
+      name: Functional Areas
+      description: 12 functional areas SP.01-SP.12 (Annex A Table A.1).
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
+      assessable: false
+      depth: 1
+      ref_id: A
+      name: Annex A (normative) - Security requirements
+      description: "Service-provider security capabilities organized by 12 functional\
+        \ areas; each area carries multiple Base Requirements (BRs) and Requirement\
+        \ Enhancements (REs) \u2014 paywalled, not in this v0 outline."
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
+      ref_id: SP.01
+      name: Solution staffing
+      description: 'Service capability: The service provider''s staff working on IACS
+        solutions are competent, screened, and have role-specific cybersecurity training.
+        Asset owner asks: Background-check policy and records, cybersecurity training
+        records, role-competency matrix mapping staff to engagement responsibilities.'
+      implementation_groups:
+      - functional_areas
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
+      ref_id: SP.02
+      name: Assurance
+      description: 'Service capability: The service provider executes its services
+        under documented assurance practices (quality, security, change control, defect
+        tracking). Asset owner asks: Assurance documentation, internal-audit reports,
+        defect-tracking metrics, certifications (e.g. ISASecure, ISO 9001/27001).'
+      implementation_groups:
+      - functional_areas
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
+      ref_id: SP.03
+      name: Architecture
+      description: 'Service capability: The service provider designs IACS architectures
+        aligned with the asset owner''s cybersecurity requirements (62443-3-2 zones
+        and conduits, 62443-3-3 SL-T). Asset owner asks: Architecture-review records,
+        evidence that the design honors the zone-and-conduit model and target Security
+        Levels.'
+      implementation_groups:
+      - functional_areas
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
+      ref_id: SP.04
+      name: Wireless
+      description: 'Service capability: The service provider deploys wireless capabilities
+        under documented secure-wireless practices (authentication, encryption, segregation,
+        rogue-AP detection). Asset owner asks: Wireless deployment standards and configurations;
+        segmentation evidence; protocol/encryption choices.'
+      implementation_groups:
+      - functional_areas
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.05
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
+      ref_id: SP.05
+      name: SIS (Safety Instrumented Systems)
+      description: "Service capability: The service provider handles safety-instrumented\
+        \ systems with heightened controls \u2014 documented separation aligned with\
+        \ the SIL boundary, dual approval (safety + cybersecurity) for any change,\
+        \ testing in a separate environment, reversibility requirements, and coordination\
+        \ with the asset owner's safety lifecycle (IEC 61511 management of change).\
+        \ Asset owner asks: SIS-handling procedures with explicit dual-approval workflow,\
+        \ SIL-aware separation evidence, change-control records, evidence of integration\
+        \ with the asset owner's IEC 61511 MoC."
+      implementation_groups:
+      - functional_areas
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.06
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
+      ref_id: SP.06
+      name: Configuration management
+      description: 'Service capability: The service provider maintains documented
+        configuration management for delivered solutions (inventory, baselines, change
+        control, version tracking). Asset owner asks: Configuration-management plans,
+        baselines, change records, version-control evidence.'
+      implementation_groups:
+      - functional_areas
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.07
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
+      ref_id: SP.07
+      name: Remote access
+      description: 'Service capability: The service provider''s remote-access activities
+        follow asset-owner-approved procedures (authentication, time-bounding, session
+        recording, supervised access). Asset owner asks: Remote-access policy, approved-tool
+        list, session logs, evidence of compliance with the asset owner''s remote-access
+        rules.'
+      implementation_groups:
+      - functional_areas
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.08
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
+      ref_id: SP.08
+      name: Event management
+      description: 'Service capability: The service provider monitors, records, and
+        reports security-relevant events from delivered solutions, integrating with
+        the asset owner''s monitoring where applicable, with a documented incident-handoff
+        procedure (who calls whom, escalation thresholds, contractual response times)
+        coordinating with the asset owner''s IR team. Asset owner asks: Event-management
+        procedures, integration with asset-owner SOC if applicable, IR-handoff runbook
+        with named contacts and contractual response SLAs, joint-exercise records.'
+      implementation_groups:
+      - functional_areas
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.09
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
+      ref_id: SP.09
+      name: Account management
+      description: 'Service capability: The service provider manages accounts (its
+        own and customer-supplied) under documented account-management practices including
+        offboarding SLAs for service-provider personnel. Asset owner asks: Account-management
+        procedures, vendor-account inventory, offboarding records, evidence that departed
+        personnel lose access promptly.'
+      implementation_groups:
+      - functional_areas
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
+      ref_id: SP.10
+      name: Malware protection
+      description: 'Service capability: The service provider''s deployed and operated
+        malware-protection capabilities are documented and operational on every component
+        class. Asset owner asks: Malware-protection approach per component type, signature-update
+        process, scan history.'
+      implementation_groups:
+      - functional_areas
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
+      ref_id: SP.11
+      name: Patch management
+      description: 'Service capability: The service provider qualifies, distributes,
+        and applies patches per documented procedures aligned with the asset owner''s
+        change-control. Asset owner asks: Patch-qualification procedure, patch-status
+        reports, deferred-patch mitigation register, integration with the asset owner''s
+        change-control.'
+      implementation_groups:
+      - functional_areas
+    - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
+      ref_id: SP.12
+      name: Backup/restore
+      description: 'Service capability: The service provider provides backup and restore
+        capabilities for delivered solutions, with documented scope, schedule, verification,
+        and media protection. Asset owner asks: Backup scope and schedule, restoration
+        test records, media handling and protection, recovery-time evidence.'
+      implementation_groups:
+      - functional_areas

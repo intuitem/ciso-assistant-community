@@ -3,7 +3,7 @@ import { fail } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms/server';
 import { setFlash } from 'sveltekit-flash-message/server';
 import type { Actions, PageServerLoad } from './$types';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { m } from '$paraglide/messages';
 

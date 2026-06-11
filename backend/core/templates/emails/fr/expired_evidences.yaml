@@ -6,7 +6,6 @@ body: |
 
   ${evidence_list}
 
-  Veuillez vous connecter à votre portail CISO Assistant pour réviser et mettre à jour ces preuves :
-  ${ciso_assistant_url}
+  Veuillez vous connecter à votre portail CISO Assistant pour réviser et mettre à jour ces preuves : [Accéder à CISO Assistant](${ciso_assistant_url})
 
   Merci.

@@ -1,7 +1,9 @@
+convert_library_version: 'v2 ; Compat Mode: [1] {[< v2] Use legacy URN fallback logic
+  (for requirements without ref_id)}'
 urn: urn:intuitem:risk:library:tisax-v5.1
 locale: en
 ref_id: TISAX v5.1
-name: 'Trusted Information Security Assessment Exchange    '
+name: Trusted Information Security Assessment Exchange (TISAX) v5.1
 description: 'VDA ISA provides the basis for
 
   - a self-assessment to determine the state of information security in an organization
@@ -12,24 +14,22 @@ description: 'VDA ISA provides the basis for
   - a review in accordance with TISAX (Trusted Information Security Assessment Exchange,
   http://enx.com/tisax/)
 
-  Source: https://portal.enx.com/isa5-en.xlsx
-
-  '
+  Source: https://portal.enx.com/isa5-en.xlsx'
 copyright: "Publisher: VERBAND DER AUTOMOBILINDUSTRIE e.\_V. (VDA, German Association\
   \ of the Automotive Industry); Behrenstr.\_35; 10117\_Berlin; www.vda.de\n\xA9 2022\
   \ Verband der Automobilindustrie e.V., Berlin\nThis work has been licensed under\
   \ Creative Commons Attribution - No Derivative Works 4.0 International Public License.\
   \ In addition, You are granted the right to distribute derivatives under certain\
   \ terms."
-version: 1
-publication_date: 2024-06-18
+version: 2
+publication_date: 2026-04-11
 provider: VDA
 packager: intuitem
 objects:
   framework:
     urn: urn:intuitem:risk:framework:tisax-v5.1
     ref_id: TISAX v5.1
-    name: Trusted Information Security Assessment Exchange
+    name: Trusted Information Security Assessment Exchange (TISAX) v5.1
     description: 'VDA ISA provides the basis for
 
       - a self-assessment to determine the state of information security in an organization
@@ -41,9 +41,7 @@ objects:
       - a review in accordance with TISAX (Trusted Information Security Assessment
       Exchange, http://enx.com/tisax/)
 
-      Source: https://portal.enx.com/isa5-en.xlsx
-
-      '
+      Source: https://portal.enx.com/isa5-en.xlsx'
     min_score: 0
     max_score: 5
     scores_definition:
@@ -329,7 +327,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:1.3
       ref_id: 1.3.1
-      description: 'To what extent are information assets identified and recorded? '
+      description: To what extent are information assets identified and recorded?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node24
       assessable: true
       depth: 4
@@ -416,9 +414,7 @@ objects:
         + External IT services and their approval are documented.
 
         + It is verified at regular intervals that only approved external IT services
-        are used.
-
-        '
+        are used.'
       implementation_groups:
       - should
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:1.4
@@ -562,7 +558,7 @@ objects:
         \ is given.\n+ A strategy for an adequate reaction to events of information\
         \ security violations:\n  - This includes escalation procedures, remedial\
         \ actions and communication to relevant internal and external bodies as well\
-        \ as a procedure for deciding whether a cybercriminal attack will be prosecuted. "
+        \ as a procedure for deciding whether a cybercriminal attack will be prosecuted."
       implementation_groups:
       - must
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node46
@@ -865,8 +861,8 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:3.1.3
       name: (must)
-      description: '+ The requirements for the handling of supporting assets (e.g.
-        transport, storage, repair, loss, return, disposal) are determined and fulfilled. '
+      description: + The requirements for the handling of supporting assets (e.g.
+        transport, storage, repair, loss, return, disposal) are determined and fulfilled.
       implementation_groups:
       - must
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node74
@@ -1025,8 +1021,8 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:4.1
       ref_id: 4.1.3
-      description: 'To what extent are user accounts and login information securely
-        managed and applied? '
+      description: To what extent are user accounts and login information securely
+        managed and applied?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node91
       assessable: true
       depth: 4
@@ -1049,7 +1045,7 @@ objects:
         \ following the 1st login   - Requirements for the quality of authentication\
         \ information (e.g. length of password, types of characters to be used).\n\
         + The login information (e.g. passwords) of a personalized user account must\
-        \ be known to the assigned user only. "
+        \ be known to the assigned user only."
       implementation_groups:
       - must
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node92
@@ -1228,7 +1224,7 @@ objects:
         of information are implemented.
 
         + Electronic data exchange is conducted using content or transport encryption
-        according to the respective classification. '
+        according to the respective classification.'
       implementation_groups:
       - should
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node109
@@ -1261,7 +1257,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:5.2
       ref_id: 5.2.1
-      description: 'To what extent are changes managed? '
+      description: To what extent are changes managed?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node113
       assessable: true
       depth: 4
@@ -1363,7 +1359,7 @@ objects:
         \ or altered by users are defined and implemented.\n+ Case-related staff awareness\
         \ measures.\n+ For IT systems operated without the use of malware protection\
         \ software, alternative measures (e.g. special resilience measures, few services,\
-        \ no active users, network isolation) are implemented. "
+        \ no active users, network isolation) are implemented."
       implementation_groups:
       - should
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:5.2.4
@@ -1436,7 +1432,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:5.2
       ref_id: 5.2.5
-      description: 'To what extent are vulnerabilities identified and addressed? '
+      description: To what extent are vulnerabilities identified and addressed?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node128
       assessable: true
       depth: 4
@@ -1507,10 +1503,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:5.2
       ref_id: 5.2.7
-      description: 'To what extent is the network of the organization managed?
-
-
-        '
+      description: To what extent is the network of the organization managed?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node134
       assessable: true
       depth: 4
@@ -1639,8 +1632,8 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:5.3
       ref_id: 5.3.3
-      description: 'To what extent is the return and secure removal of information
-        assets from external IT services regulated? '
+      description: To what extent is the return and secure removal of information
+        assets from external IT services regulated?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node146
       assessable: true
       depth: 4
@@ -1696,11 +1689,8 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:6
       ref_id: 6.1.1
-      description: 'To what extent is information security ensured among contractors
+      description: To what extent is information security ensured among contractors
         and cooperation partners?
-
-
-        '
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node153
       assessable: true
       depth: 3
@@ -1779,7 +1769,7 @@ objects:
         \ supplier evaluation which have already been established by e.g. an existing\
         \ quality management system.\nContractually specified deliverables (e.g. availability\
         \ requirements) should be verified at regular intervals. This can be done\
-        \ by e.g. regular analysis of service reports and SLAs.  "
+        \ by e.g. regular analysis of service reports and SLAs."
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:6.1.2
       assessable: false
       depth: 2
@@ -1861,8 +1851,8 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:7
       ref_id: 7.1.2
-      description: 'To what extent is the protection of personally identifiable data
-        taken into account when implementing information security? '
+      description: To what extent is the protection of personally identifiable data
+        taken into account when implementing information security?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node165
       assessable: true
       depth: 3
@@ -1994,7 +1984,7 @@ objects:
       name: (should)
       description: '+ Sight protection through relevant glass surfaces is ensured.
 
-        + View into defined security areas through open doors/gates/windows is prevented. '
+        + View into defined security areas through open doors/gates/windows is prevented.'
       implementation_groups:
       - should
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node180
@@ -2416,7 +2406,7 @@ objects:
 
         staff-related).
 
-        + Code of conduct in case of special incidents. '
+        + Code of conduct in case of special incidents.'
       implementation_groups:
       - must
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:9
@@ -2488,7 +2478,7 @@ objects:
         \ concerning data protection.  \n+ Implementation of a process for the documentation\
         \ of instructions in terms of data protection legislation.\n+ Ability to implement\
         \ deletion concepts.\n+ Implementation of a procedure for regular review,\
-        \ assessment and evaluation of TOM. "
+        \ assessment and evaluation of TOM."
       implementation_groups:
       - must
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:9.3
@@ -2524,10 +2514,8 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:9
       ref_id: '9.4'
-      description: 'To what extent are the relevant processing procedures documented
+      description: To what extent are the relevant processing procedures documented
         with regard to their admissibility according to data protection law?
-
-        '
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node231
       assessable: true
       depth: 3

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
@@ -72,9 +73,8 @@
 </script>
 
 {#key folderKey}
-	<AutocompleteSelect
+	<FolderTreeSelect
 		{form}
-		optionsEndpoint="folders?content_type=DO&content_type=GL"
 		field="folder"
 		cacheLock={cacheLocks['folder']}
 		bind:cachedValue={formDataCache['folder']}
@@ -97,13 +97,6 @@
 		onChange={handlePerimeterChange}
 	/>
 {/key}
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
 <TextField
 	{form}
 	field="version"

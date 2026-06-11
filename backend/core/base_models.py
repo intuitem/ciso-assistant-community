@@ -50,6 +50,10 @@ class AbstractBaseModel(models.Model):
         for field in fields_to_check:
             if hasattr(self, field):
                 field_value = getattr(self, field)
+                # Blank/None values are not meaningful identifiers and must not
+                # collide with each other (e.g. an optional ref_id left empty).
+                if field_value is None or field_value == "":
+                    continue
                 model_field = self._meta.get_field(field)
 
                 # Use the appropriate lookup based on the field type
@@ -66,6 +70,9 @@ class AbstractBaseModel(models.Model):
                     filters[f"{field}__exact"] = field_value
                 else:
                     filters[f"{field}__iexact"] = field_value
+
+        if not filters:
+            return True
 
         return not scope.filter(**filters).exists()
 
@@ -135,6 +142,42 @@ class NameDescriptionMixin(AbstractBaseModel):
 
     def __str__(self) -> str:
         return self.name
+
+
+class EditableMixin(models.Model):
+    """
+    Mixin for models that support in-place editing with draft isolation.
+
+    - editing_draft: WIP definition (null when no active draft)
+    - editing_version: bumped on each publish
+    - editing_history: list of snapshots [{version, definition, published_at}]
+
+    The model's main content field (e.g. json_definition) is the live/published data.
+    Authors edit via editing_draft. Publishing copies editing_draft → main field,
+    snapshots the previous value into editing_history, and bumps editing_version.
+    """
+
+    editing_draft = models.JSONField(
+        null=True,
+        blank=True,
+        default=None,
+        verbose_name=_("Editing draft"),
+        help_text=_("Work-in-progress definition. Null when no active draft."),
+    )
+    editing_version = models.IntegerField(
+        default=1,
+        verbose_name=_("Editing version"),
+        help_text=_("Incremented on each publish."),
+    )
+    editing_history = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name=_("Editing history"),
+        help_text=_("Snapshots of previous published definitions."),
+    )
+
+    class Meta:
+        abstract = True
 
 
 class ETADueDateMixin(models.Model):

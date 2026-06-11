@@ -1,0 +1,675 @@
+urn: urn:intuitem:risk:preset:nist-csf-2.0-journey
+locale: en
+ref_id: preset-nist-csf-2.0-journey
+name: "NIST CSF 2.0 \u2014 Full Organisational Journey"
+description: "End-to-end cybersecurity programme journey aligned to the NIST Cybersecurity Framework 2.0. Covers all six Functions (Govern, Identify, Protect, Detect, Respond, Recover) with structured risk assessment, asset inventory, compliance assessment, policy creation, and control implementation \u2014 from initial scoping through to continuous improvement."
+version: 1
+provider: Paul Flatt
+packager: Paul Flatt
+translations:
+  fr:
+    name: "NIST CSF 2.0 \u2014 Parcours organisationnel complet"
+    description: "Parcours de programme de cybers\u00e9curit\u00e9 de bout en bout align\u00e9 sur le NIST Cybersecurity Framework 2.0. Couvre les six fonctions avec \u00e9valuation des risques structur\u00e9e, inventaire des actifs, \u00e9valuation de conformit\u00e9, cr\u00e9ation de politiques et mise en \u0153uvre des contr\u00f4les."
+
+dependencies:
+  - urn:intuitem:risk:library:nist-csf-2.0-journey
+  - urn:intuitem:risk:library:risk-matrix-5x5-iso27005
+
+objects:
+  preset:
+    profile:
+      company_size:
+        - sme
+        - large
+        - enterprise
+      industry:
+        - general
+        - critical-infrastructure
+        - financial
+        - healthcare
+        - government
+      region:
+        - global
+      goal: security-programme
+
+    feature_flags:
+      enable:
+        - compliance
+        - metrology
+        - tprm
+        - organisation_issues
+        - organisation_objectives
+        - tasks
+        - follow_up
+
+    scaffolded_objects:
+
+      # --- Organisation issues (GV.OC - Organisational Context) ---
+      - type: organisation_issue
+        name: "Regulatory and legal compliance obligations"
+        description: "Applicable laws, regulations, and contractual obligations imposing cybersecurity requirements on the organisation (e.g. Privacy Act, NZISM, sector-specific regulations, contractual SLAs)."
+        category: legal
+        origin: external
+        status: active
+        translations:
+          fr:
+            name: "Obligations réglementaires et légales"
+            description: "Lois, réglementations et obligations contractuelles imposant des exigences de cybersécurité à l'organisation."
+
+      - type: organisation_issue
+        name: "Evolving cyber threat landscape"
+        description: "External threat environment including ransomware groups, nation-state actors, phishing campaigns, supply chain attacks, and emerging threats relevant to the organisation's sector and geography."
+        category: technology
+        origin: external
+        status: active
+        translations:
+          fr:
+            name: "Paysage des cybermenaces en évolution"
+            description: "Environnement de menaces externes incluant les rançongiciels, acteurs étatiques, hameçonnage, attaques de la chaîne d'approvisionnement et menaces émergentes pertinentes pour le secteur."
+
+      - type: organisation_issue
+        name: "Third-party and supply chain dependencies"
+        description: "Reliance on vendors, managed service providers, cloud platforms, and supply chain partners that introduce cybersecurity risk through trusted access, shared systems, and data processing relationships."
+        category: technology
+        origin: external
+        status: active
+        translations:
+          fr:
+            name: "Dépendances tierces et chaîne d'approvisionnement"
+            description: "Dépendance envers des fournisseurs, prestataires de services managés, plateformes cloud et partenaires qui introduisent des risques cybersécurité."
+
+      - type: organisation_issue
+        name: "Current cybersecurity maturity and capability gaps"
+        description: "Internal assessment of the organisation's existing security practices, tooling, skills, and process maturity that influence CSF programme priorities and implementation sequencing."
+        category: internalProcesses
+        origin: internal
+        status: active
+        translations:
+          fr:
+            name: "Maturit\u00e9 cybers\u00e9curit\u00e9 actuelle et lacunes de capacit\u00e9"
+            description: "\u00c9valuation interne des pratiques de s\u00e9curit\u00e9 existantes, des outils, comp\u00e9tences et maturit\u00e9 des processus qui influencent les priorit\u00e9s du programme CSF."
+
+      - type: organisation_issue
+        name: "Technology and cloud adoption changes"
+        description: "Internal adoption of new technologies including cloud services, SaaS platforms, AI tools, and remote work infrastructure that expand the attack surface and require updated security controls."
+        category: technology
+        origin: internal
+        status: active
+        translations:
+          fr:
+            name: "Changements d\u2019adoption technologique et cloud"
+            description: "Adoption interne de nouvelles technologies incluant les services cloud, plateformes SaaS, outils IA et infrastructure de travail \u00e0 distance qui \u00e9largissent la surface d\u2019attaque."
+
+      - type: organisation_issue
+        name: "Workforce security awareness and culture"
+        description: "The level of security awareness, risk culture, and security behaviour among staff and contractors. Low awareness increases susceptibility to phishing, social engineering, and policy non-compliance."
+        category: humanResources
+        origin: internal
+        status: active
+        translations:
+          fr:
+            name: "Sensibilisation et culture s\u00e9curit\u00e9 du personnel"
+            description: "Niveau de sensibilisation \u00e0 la s\u00e9curit\u00e9, de culture du risque et de comportement s\u00e9curitaire parmi le personnel et les prestataires."
+
+      # --- Organisation objectives (GV.RM - Risk Management Strategy) ---
+      - type: organisation_objective
+        name: "Establish and maintain a cybersecurity governance framework"
+        description: "Define and operationalise cybersecurity roles, responsibilities, policies, and risk appetite across the organisation with documented executive accountability."
+        status: in_progress
+        translations:
+          fr:
+            name: "\u00c9tablir et maintenir un cadre de gouvernance cybers\u00e9curit\u00e9"
+            description: "D\u00e9finir et op\u00e9rationnaliser les r\u00f4les, responsabilit\u00e9s, politiques et app\u00e9tit au risque cybers\u00e9curit\u00e9 avec une responsabilit\u00e9 ex\u00e9cutive document\u00e9e."
+
+      - type: organisation_objective
+        name: "Achieve and maintain acceptable cybersecurity risk levels"
+        description: "Ensure all identified cybersecurity risks are assessed and treated to within the organisation's risk appetite, with residual risks formally accepted by risk owners."
+        status: draft
+        translations:
+          fr:
+            name: "Atteindre et maintenir des niveaux de risque cybers\u00e9curit\u00e9 acceptables"
+            description: "S\u2019assurer que tous les risques cybers\u00e9curit\u00e9 identifi\u00e9s sont \u00e9valu\u00e9s et trait\u00e9s dans les limites de l\u2019app\u00e9tit au risque, avec une acceptation formelle par les propri\u00e9taires de risques."
+
+      - type: organisation_objective
+        name: "Improve detection and response capabilities"
+        description: "Reduce mean time to detect (MTTD) and mean time to respond (MTTR) for cybersecurity incidents through improved monitoring, alerting, and incident response processes."
+        status: draft
+        translations:
+          fr:
+            name: "Am\u00e9liorer les capacit\u00e9s de d\u00e9tection et de r\u00e9ponse"
+            description: "R\u00e9duire le temps moyen de d\u00e9tection et de r\u00e9ponse aux incidents cybers\u00e9curit\u00e9 gr\u00e2ce \u00e0 une surveillance, des alertes et des processus de r\u00e9ponse am\u00e9lior\u00e9s."
+
+      - type: organisation_objective
+        name: "Ensure resilient recovery from cyber incidents"
+        description: "Maintain tested backup and recovery capabilities that meet defined RTO and RPO targets, ensuring the organisation can restore critical operations following a significant cyber incident."
+        status: draft
+        translations:
+          fr:
+            name: "Assurer une reprise r\u00e9siliente apr\u00e8s les incidents cyber"
+            description: "Maintenir des capacit\u00e9s de sauvegarde et de reprise test\u00e9es r\u00e9pondant aux objectifs RTO et RPO d\u00e9finis, permettant la restauration des op\u00e9rations critiques apr\u00e8s un incident majeur."
+
+      - type: organisation_objective
+        name: "Build and sustain a security-aware workforce"
+        description: "Establish a security awareness programme so that all personnel understand their cybersecurity responsibilities, can recognise common threats, and adopt secure behaviours in their daily work."
+        status: draft
+        translations:
+          fr:
+            name: "D\u00e9velopper et maintenir un personnel sensibilis\u00e9 \u00e0 la s\u00e9curit\u00e9"
+            description: "\u00c9tablir un programme de sensibilisation \u00e0 la s\u00e9curit\u00e9 pour que tout le personnel comprenne ses responsabilit\u00e9s cybers\u00e9curit\u00e9 et adopte des comportements s\u00e9curitaires au quotidien."
+
+      # --- Entities ---
+      - type: entity
+        name: "Board and Executive Leadership"
+        description: "Senior decision-makers responsible for setting cybersecurity risk appetite, approving policies, and providing oversight of the organisation's cybersecurity programme. Aligned to GV.RR-01, GV.OC-02."
+        translations:
+          fr:
+            name: "Conseil d\u2019administration et direction g\u00e9n\u00e9rale"
+            description: "D\u00e9cideurs seniors responsables de la d\u00e9finition de l\u2019app\u00e9tit au risque, de l\u2019approbation des politiques et de la surveillance du programme cybers\u00e9curit\u00e9."
+
+      - type: entity
+        name: "Regulators and Government Agencies"
+        description: "Regulatory bodies, government agencies, and national cybersecurity organisations (e.g. CERT NZ, ACSC, sector regulators) that impose compliance obligations and incident reporting requirements. Aligned to GV.OC-03, RS.CO-02."
+        translations:
+          fr:
+            name: "R\u00e9gulateurs et agences gouvernementales"
+            description: "Organismes de r\u00e9glementation, agences gouvernementales et organisations nationales de cybers\u00e9curit\u00e9 imposant des obligations de conformit\u00e9 et des exigences de notification d\u2019incidents."
+
+      - type: entity
+        name: "Customers and End Users"
+        description: "Individuals and organisations that use the organisation's products or services and have expectations regarding the confidentiality, integrity, and availability of their data. Aligned to GV.OC-02, GV.OC-04."
+        translations:
+          fr:
+            name: "Clients et utilisateurs finaux"
+            description: "Individus et organisations utilisant les produits ou services de l\u2019organisation avec des attentes concernant la confidentialit\u00e9, l\u2019int\u00e9grit\u00e9 et la disponibilit\u00e9 de leurs donn\u00e9es."
+
+      - type: entity
+        name: "Managed Service Providers and Key Vendors"
+        description: "Third-party organisations providing managed IT, security, or cloud services that have privileged access to or process data on behalf of the organisation. Aligned to GV.SC-01, GV.SC-07, GV.OC-05."
+        translations:
+          fr:
+            name: "Prestataires de services manag\u00e9s et fournisseurs cl\u00e9s"
+            description: "Organisations tierces fournissant des services IT, de s\u00e9curit\u00e9 ou cloud manag\u00e9s ayant un acc\u00e8s privil\u00e9gi\u00e9 ou traitant des donn\u00e9es au nom de l\u2019organisation."
+
+      - type: entity
+        name: "Cyber Insurers and Legal Counsel"
+        description: "Cyber insurance providers and legal advisors who are engaged during significant incidents, influence risk transfer decisions, and have requirements relating to the organisation's security posture and incident notification. Aligned to GV.RM-04, RS.CO-02."
+        translations:
+          fr:
+            name: "Assureurs cyber et conseil juridique"
+            description: "Prestataires d\u2019assurance cyber et conseillers juridiques engag\u00e9s lors d\u2019incidents significatifs, influençant les d\u00e9cisions de transfert de risque et les exigences de notification d\u2019incidents."
+
+      - type: entity
+        name: "Employees and Contractors"
+        description: "Internal workforce including permanent employees, contractors, and temporary staff who use organisational systems and are subject to cybersecurity policies, awareness training, and acceptable use obligations. Aligned to GV.RR-04, PR.AT-01."
+        translations:
+          fr:
+            name: "Employ\u00e9s et prestataires"
+            description: "Personnel interne incluant les employ\u00e9s permanents, prestataires et personnel temporaire utilisant les syst\u00e8mes de l\u2019organisation et soumis aux politiques cybers\u00e9curit\u00e9 et aux obligations de formation."
+
+      - type: entity
+        name: "Industry and Threat Intelligence Partners"
+        description: "Information sharing and analysis centres (ISACs), sector peers, and threat intelligence providers that share cybersecurity threat data and incident information to improve collective defence. Aligned to ID.RA-02, GV.OC-02."
+        translations:
+          fr:
+            name: "Partenaires sectoriels et de renseignement sur les menaces"
+            description: "Centres de partage et d\u2019analyse d\u2019informations (ISAC), pairs sectoriels et fournisseurs de renseignement sur les menaces partageant des donn\u00e9es pour am\u00e9liorer la d\u00e9fense collective."
+
+      # --- Findings assessments ---
+      - type: findings_assessment
+        name: "Vulnerability Assessment and Penetration Test Findings"
+        category: pentest
+        ref: pentest_findings
+        translations:
+          fr:
+            name: "Constats d\u2019\u00e9valuation des vuln\u00e9rabilit\u00e9s et de tests d\u2019intrusion"
+
+      - type: findings_assessment
+        name: "Detection and Response Capability Findings"
+        category: audit
+        ref: detection_findings
+        translations:
+          fr:
+            name: "Constats sur les capacit\u00e9s de d\u00e9tection et de r\u00e9ponse"
+
+      - type: findings_assessment
+        name: "Business Continuity and Recovery Findings"
+        category: audit
+        ref: bcdr_findings
+        translations:
+          fr:
+            name: "Constats sur la continuit\u00e9 d\u2019activit\u00e9 et la reprise"
+
+      # --- Risk assessment ---
+      - type: risk_assessment
+        name: "NIST CSF 2.0 \u2014 Enterprise Risk Assessment"
+        description: "Structured risk assessment aligned to NIST CSF 2.0 Govern and Identify functions. Evaluates likelihood and impact across the organisation's key asset categories and threat scenarios."
+        risk_matrix: urn:intuitem:risk:library:risk-matrix-5x5-iso27005
+        ref: main_ra
+        translations:
+          fr:
+            name: "NIST CSF 2.0 \u2014 \u00c9valuation des risques d\u2019entreprise"
+            description: "\u00c9valuation des risques structur\u00e9e align\u00e9e sur les fonctions Gouverner et Identifier du NIST CSF 2.0."
+
+      # --- Compliance assessment ---
+      - type: compliance_assessment
+        name: "NIST CSF 2.0 \u2014 Full Framework Assessment"
+        description: "Assessment across all six CSF 2.0 Functions and associated Categories and Subcategories. Produces a maturity baseline and gap analysis for each function."
+        framework: urn:intuitem:risk:library:nist-csf-2.0-journey
+        create_suggested_controls: true
+        ref: csf_audit
+        translations:
+          fr:
+            name: "NIST CSF 2.0 \u2014 \u00c9valuation compl\u00e8te du cadre"
+            description: "\u00c9valuation couvrant les six fonctions du CSF 2.0 et leurs cat\u00e9gories et sous-cat\u00e9gories associ\u00e9es."
+
+      # --- Assets ---
+      - type: asset
+        name: "IT Infrastructure"
+        description: "Servers, network equipment, firewalls, switches, and cloud infrastructure supporting business operations."
+        asset_type: SP
+        ref: asset_infra
+        translations:
+          fr:
+            name: "Infrastructure informatique"
+            description: "Serveurs, \u00e9quipements r\u00e9seau, pare-feux, commutateurs et infrastructure cloud."
+
+      - type: asset
+        name: "Endpoints and User Devices"
+        description: "Laptops, desktops, tablets, and smartphones used by employees and contractors."
+        asset_type: SP
+        ref: asset_endpoints
+        translations:
+          fr:
+            name: "Postes de travail et appareils utilisateurs"
+            description: "Ordinateurs portables, fixes, tablettes et smartphones utilis\u00e9s par les employ\u00e9s et prestataires."
+
+      - type: asset
+        name: "Identity and Access Management Systems"
+        description: "Directory services, SSO platforms, MFA systems, and privileged access management tooling."
+        asset_type: SP
+        ref: asset_iam
+        translations:
+          fr:
+            name: "Syst\u00e8mes de gestion des identit\u00e9s et des acc\u00e8s"
+            description: "Services d\u2019annuaire, SSO, MFA et outils de gestion des acc\u00e8s privil\u00e9gi\u00e9s."
+
+      - type: asset
+        name: "Business Applications"
+        description: "ERP, CRM, finance, HR, and other core business applications — whether on-premises or SaaS."
+        asset_type: SP
+        ref: asset_apps
+        translations:
+          fr:
+            name: "Applications m\u00e9tier"
+            description: "ERP, CRM, finance, RH et autres applications m\u00e9tier essentielles, sur site ou SaaS."
+
+      - type: asset
+        name: "Email and Collaboration Platforms"
+        description: "Email services, messaging, file sharing, and video conferencing platforms (e.g. Microsoft 365, Google Workspace)."
+        asset_type: SP
+        ref: asset_collab
+        translations:
+          fr:
+            name: "Messagerie et plateformes collaboratives"
+            description: "Messagerie, fichiers partag\u00e9s et visioconf\u00e9rence (ex. Microsoft 365, Google Workspace)."
+
+      - type: asset
+        name: "Sensitive and Regulated Data"
+        description: "Personally identifiable information (PII), financial records, intellectual property, regulated data, and other critical information assets."
+        asset_type: PR
+        ref: asset_data
+        translations:
+          fr:
+            name: "Donn\u00e9es sensibles et r\u00e9glement\u00e9es"
+            description: "Donn\u00e9es personnelles, financi\u00e8res, propri\u00e9t\u00e9 intellectuelle, donn\u00e9es r\u00e9glement\u00e9es et autres actifs informationnels critiques."
+
+      - type: asset
+        name: "Operational Technology and IoT"
+        description: "Industrial control systems, building management systems, and Internet of Things devices where applicable."
+        asset_type: SP
+        ref: asset_ot_iot
+        translations:
+          fr:
+            name: "Technologies op\u00e9rationnelles et IoT"
+            description: "Syst\u00e8mes de contr\u00f4le industriel, gestion technique du b\u00e2timent et objets connect\u00e9s le cas \u00e9ch\u00e9ant."
+
+      - type: asset
+        name: "Third-Party and Supply Chain Connections"
+        description: "Vendor integrations, managed service providers, API connections, and supply chain dependencies."
+        asset_type: SP
+        ref: asset_supplychain
+        translations:
+          fr:
+            name: "Tiers et cha\u00eene d\u2019approvisionnement"
+            description: "Int\u00e9grations fournisseurs, prestataires de services manag\u00e9s, connexions API et d\u00e9pendances de la cha\u00eene d\u2019approvisionnement."
+
+      # --- Risk scenarios ---
+      - type: risk_scenario
+        name: "Inadequate cybersecurity governance and accountability"
+        description: "Absence of defined cybersecurity roles, policies, or executive accountability results in uncoordinated security decisions and unmanaged organisational risk."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_infra, asset_data]
+        threat_urns: [urn:intuitem:risk:threat:nist-csf-2.0:t-govern]
+        translations:
+          fr:
+            name: "Gouvernance cybers\u00e9curit\u00e9 insuffisante"
+            description: "L\u2019absence de r\u00f4les, politiques ou responsabilit\u00e9s ex\u00e9cutives d\u00e9finis entra\u00eene des d\u00e9cisions de s\u00e9curit\u00e9 non coordonn\u00e9es."
+
+      - type: risk_scenario
+        name: "Unknown or unmanaged assets exploited"
+        description: "Attackers target shadow IT, unmanaged devices, or undocumented systems that fall outside the organisation's visibility and patch management processes."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_endpoints, asset_infra]
+        threat_urns: [urn:intuitem:risk:threat:nist-csf-2.0:t-identify]
+        translations:
+          fr:
+            name: "Actifs inconnus ou non g\u00e9r\u00e9s exploit\u00e9s"
+            description: "Des attaquants ciblent le shadow IT, les appareils non g\u00e9r\u00e9s ou les syst\u00e8mes non document\u00e9s hors de la visibilit\u00e9 de l\u2019organisation."
+
+      - type: risk_scenario
+        name: "Credential theft via phishing or social engineering"
+        description: "An employee is deceived into disclosing credentials through a phishing email or social engineering attack, granting unauthorised access to business systems."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_collab, asset_iam, asset_apps]
+        threat_urns: [urn:intuitem:risk:threat:nist-csf-2.0:t-protect-phishing]
+        translations:
+          fr:
+            name: "Vol d\u2019identifiants par hame\u00e7onnage ou ing\u00e9nierie sociale"
+            description: "Un employ\u00e9 divulgue ses identifiants via un email d\u2019hame\u00e7onnage ou une attaque d\u2019ing\u00e9nierie sociale."
+
+      - type: risk_scenario
+        name: "Exploitation of unpatched software or systems"
+        description: "Attackers exploit publicly known vulnerabilities in unpatched operating systems, applications, or network devices to achieve initial access or privilege escalation."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_endpoints, asset_infra, asset_apps]
+        threat_urns: [urn:intuitem:risk:threat:nist-csf-2.0:t-protect-vuln]
+        translations:
+          fr:
+            name: "Exploitation de logiciels ou syst\u00e8mes non mis \u00e0 jour"
+            description: "Des attaquants exploitent des vuln\u00e9rabilit\u00e9s connues dans des syst\u00e8mes, applications ou \u00e9quipements r\u00e9seau non corrig\u00e9s."
+
+      - type: risk_scenario
+        name: "Supply chain or third-party compromise"
+        description: "A trusted vendor or managed service provider is compromised, providing attackers with a trusted pathway into the organisation's systems or data."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_supplychain, asset_data]
+        threat_urns: [urn:intuitem:risk:threat:nist-csf-2.0:t-protect-supplychain]
+        translations:
+          fr:
+            name: "Compromission de la cha\u00eene d\u2019approvisionnement ou d\u2019un tiers"
+            description: "Un fournisseur ou prestataire de confiance est compromis, offrant aux attaquants un acc\u00e8s aux syst\u00e8mes ou donn\u00e9es de l\u2019organisation."
+
+      - type: risk_scenario
+        name: "Undetected intrusion and lateral movement"
+        description: "An attacker maintains persistent access and moves laterally across systems for an extended period without triggering detection, escalating privilege and exfiltrating data."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_infra, asset_data, asset_iam]
+        threat_urns: [urn:intuitem:risk:threat:nist-csf-2.0:t-detect-lateral]
+        translations:
+          fr:
+            name: "Intrusion non d\u00e9tect\u00e9e et mouvement lat\u00e9ral"
+            description: "Un attaquant maintient un acc\u00e8s persistant et se d\u00e9place lat\u00e9ralement sans d\u00e9clencher de d\u00e9tection, exfiltrant des donn\u00e9es."
+
+      - type: risk_scenario
+        name: "Ransomware deployment and business disruption"
+        description: "Ransomware is deployed across endpoints and shared storage, encrypting critical business data and causing significant operational disruption and potential data loss."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_endpoints, asset_data, asset_apps]
+        threat_urns: [urn:intuitem:risk:threat:nist-csf-2.0:t-respond-ransomware]
+        translations:
+          fr:
+            name: "D\u00e9ploiement de ran\u00e7ongiciel et perturbation de l\u2019activit\u00e9"
+            description: "Un ran\u00e7ongiciel est d\u00e9ploy\u00e9 sur les postes et le stockage partag\u00e9, chiffrant les donn\u00e9es critiques et provoquant une perturbation op\u00e9rationnelle majeure."
+
+      - type: risk_scenario
+        name: "Failure to recover from a significant cyber incident"
+        description: "Inadequate backup, recovery procedures, or tested business continuity plans result in extended downtime and permanent data loss following a significant cyber incident."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_data, asset_infra, asset_apps]
+        threat_urns: [urn:intuitem:risk:threat:nist-csf-2.0:t-recover-bcdr]
+        translations:
+          fr:
+            name: "Incapacit\u00e9 \u00e0 se remettre d\u2019un incident cyber majeur"
+            description: "Des sauvegardes, proc\u00e9dures de reprise ou plans de continuit\u00e9 inad\u00e9quats entra\u00eenent une indisponibilit\u00e9 prolong\u00e9e et une perte permanente de donn\u00e9es."
+
+      # --- Task templates ---
+      - type: task_template
+        name: "CSF programme governance review"
+        description: "Review cybersecurity programme performance against the Target Profile, assess control effectiveness, and update risk appetite and objectives with senior leadership. Aligned to GV.OV-01, GV.OV-02, GV.OV-03."
+        is_recurrent: true
+        schedule:
+          interval: 6
+          frequency: MONTHLY
+        translations:
+          fr:
+            name: "Revue de gouvernance du programme CSF"
+            description: "Revoir les performances du programme cybers\u00e9curit\u00e9 par rapport au profil cible, \u00e9valuer l\u2019efficacit\u00e9 des contr\u00f4les et mettre \u00e0 jour l\u2019app\u00e9tit au risque avec la direction."
+
+      - type: task_template
+        name: "Risk assessment review"
+        description: "Review and update the cybersecurity risk assessment to account for changes in threats, vulnerabilities, assets, and business context. Aligned to ID.RA-06, ID.IM-03."
+        is_recurrent: true
+        schedule:
+          interval: 1
+          frequency: YEARLY
+        translations:
+          fr:
+            name: "Revue de l\u2019\u00e9valuation des risques"
+            description: "Revoir et mettre \u00e0 jour l\u2019\u00e9valuation des risques cybers\u00e9curit\u00e9 pour tenir compte des \u00e9volutions des menaces, vuln\u00e9rabilit\u00e9s, actifs et contexte m\u00e9tier."
+
+      - type: task_template
+        name: "Access rights review"
+        description: "Review user access rights across all critical systems to ensure least-privilege and timely revocation of unnecessary access. Aligned to PR.AA-05."
+        is_recurrent: true
+        schedule:
+          interval: 3
+          frequency: MONTHLY
+        translations:
+          fr:
+            name: "Revue des droits d\u2019acc\u00e8s"
+            description: "Passer en revue les droits d\u2019acc\u00e8s des utilisateurs sur tous les syst\u00e8mes critiques pour garantir le moindre privil\u00e8ge et la r\u00e9vocation en temps utile des acc\u00e8s inutiles."
+
+      - type: task_template
+        name: "Security awareness training"
+        description: "Deliver cybersecurity awareness training to all personnel, covering current threats, policies, phishing simulations, and expected behaviours. Aligned to PR.AT-01, PR.AT-02."
+        is_recurrent: true
+        schedule:
+          interval: 1
+          frequency: YEARLY
+        translations:
+          fr:
+            name: "Formation de sensibilisation \u00e0 la s\u00e9curit\u00e9"
+            description: "Dispenser une formation de sensibilisation \u00e0 la cybers\u00e9curit\u00e9 \u00e0 tout le personnel, couvrant les menaces actuelles, les politiques, les simulations de phishing et les comportements attendus."
+
+      - type: task_template
+        name: "Vulnerability scan and patch review"
+        description: "Run vulnerability scans across all in-scope systems, review findings against patch timelines, and confirm critical and high vulnerabilities are remediated within defined SLAs. Aligned to ID.RA-01, PR.PS-02."
+        is_recurrent: true
+        schedule:
+          interval: 1
+          frequency: MONTHLY
+        translations:
+          fr:
+            name: "Analyse de vuln\u00e9rabilit\u00e9s et revue des correctifs"
+            description: "Ex\u00e9cuter des analyses de vuln\u00e9rabilit\u00e9s sur tous les syst\u00e8mes dans le p\u00e9rim\u00e8tre, examiner les r\u00e9sultats par rapport aux d\u00e9lais de correction et confirmer la rem\u00e9diation des vuln\u00e9rabilit\u00e9s critiques."
+
+      - type: task_template
+        name: "Business continuity and recovery testing"
+        description: "Test backup restoration, business continuity, and disaster recovery plans to verify they meet RTO/RPO targets and address current cyber incident scenarios. Aligned to RC.RP, PR.DS-11."
+        is_recurrent: true
+        schedule:
+          interval: 1
+          frequency: YEARLY
+        translations:
+          fr:
+            name: "Test de continuit\u00e9 d\u2019activit\u00e9 et de reprise"
+            description: "Tester la restauration des sauvegardes, la continuit\u00e9 d\u2019activit\u00e9 et les plans de reprise apr\u00e8s sinistre pour v\u00e9rifier qu\u2019ils r\u00e9pondent aux objectifs RTO/RPO."
+
+      - type: task_template
+        name: "Incident response tabletop exercise"
+        description: "Conduct a tabletop exercise simulating a significant cyber incident (e.g. ransomware, data breach) to test the incident response plan, communication procedures, and recovery playbooks. Aligned to RS.MA, ID.IM-02."
+        is_recurrent: true
+        schedule:
+          interval: 1
+          frequency: YEARLY
+        translations:
+          fr:
+            name: "Exercice sur table de r\u00e9ponse aux incidents"
+            description: "R\u00e9aliser un exercice sur table simulant un incident cyber majeur (ex. ran\u00e7ongiciel, violation de donn\u00e9es) pour tester le plan de r\u00e9ponse aux incidents et les playbooks de reprise."
+
+      - type: task_template
+        name: "Supply chain and third-party risk review"
+        description: "Review critical supplier security posture, validate contractual security obligations, and reassess third-party risk ratings. Aligned to GV.SC-07, ID.RA-10."
+        is_recurrent: true
+        schedule:
+          interval: 1
+          frequency: YEARLY
+        translations:
+          fr:
+            name: "Revue des risques tiers et cha\u00eene d\u2019approvisionnement"
+            description: "Revoir la posture s\u00e9curit\u00e9 des fournisseurs critiques, valider les obligations contractuelles et r\u00e9\u00e9valuer les niveaux de risque tiers."
+
+    # --- Journey ---
+    journey:
+      steps:
+
+        - key: context_issues
+          title: "Establish organisational context (GV.OC)"
+          description: "Review and complete the pre-created organisational issues covering the internal and external factors that influence your cybersecurity programme \u2014 threat landscape, regulatory obligations, technology changes, and capability gaps."
+          target_model: organisation-issues
+          translations:
+            fr:
+              title: "\u00c9tablir le contexte organisationnel (GV.OC)"
+              description: "Examinez et compl\u00e9tez les enjeux organisationnels pr\u00e9-cr\u00e9\u00e9s couvrant les facteurs internes et externes influençant votre programme cybers\u00e9curit\u00e9."
+
+        - key: objectives
+          title: "Define cybersecurity objectives (GV.RM)"
+          description: "Review and refine the pre-created cybersecurity objectives covering governance, risk management, detection and response, recovery, and workforce awareness. Set measurable targets and assign owners."
+          target_model: organisation-objectives
+          translations:
+            fr:
+              title: "D\u00e9finir les objectifs cybers\u00e9curit\u00e9 (GV.RM)"
+              description: "Examinez et affinez les objectifs cybers\u00e9curit\u00e9 pr\u00e9-cr\u00e9\u00e9s. D\u00e9finissez des cibles mesurables et assignez des responsables."
+
+        - key: interested_parties
+          title: "Identify interested parties (GV.OC-02)"
+          description: "List the stakeholders relevant to your cybersecurity programme \u2014 customers, regulators, suppliers, board, legal counsel \u2014 and document their security expectations and requirements."
+          target_model: entities
+          translations:
+            fr:
+              title: "Identifier les parties int\u00e9ress\u00e9es (GV.OC-02)"
+              description: "Recensez les parties prenantes pertinentes pour votre programme cybers\u00e9curit\u00e9 et documentez leurs attentes et exigences en mati\u00e8re de s\u00e9curit\u00e9."
+
+        - key: roles
+          title: "Define roles and responsibilities (GV.RR)"
+          description: "Assign cybersecurity roles \u2014 CISO, risk owners, security operations, incident response lead, and all staff. Document accountability lines and include cybersecurity responsibilities in personnel descriptions."
+          target_model: actors
+          translations:
+            fr:
+              title: "D\u00e9finir les r\u00f4les et responsabilit\u00e9s (GV.RR)"
+              description: "Attribuez les r\u00f4les cybers\u00e9curit\u00e9 et documentez les lignes de responsabilit\u00e9. Incluez les responsabilit\u00e9s cybers\u00e9curit\u00e9 dans les descriptions de poste."
+
+        - key: governance_policies
+          title: "Write and approve governance policies (GV.PO)"
+          description: "Review all auto-created applied controls from the CSF 2.0 compliance assessment. Filter by CSF Function \u2018Govern\u2019 to focus on governance and policy controls. Assign owners, set completion dates, and document management approval for each governance policy and procedure."
+          target_model: applied-controls
+          translations:
+            fr:
+              title: "R\u00e9diger et approuver les politiques de gouvernance (GV.PO)"
+              description: "Examinez les contr\u00f4les appliqu\u00e9s cr\u00e9\u00e9s automatiquement. Filtrez par fonction CSF \u2018Gouverner\u2019 pour vous concentrer sur les contr\u00f4les de gouvernance et de politique."
+
+        - key: assets
+          title: "Inventory and classify assets (ID.AM)"
+          description: "Review, complete, and classify the pre-created asset inventory. Identify hardware, software, data, and third-party dependencies. Assign business criticality ratings to inform risk prioritisation."
+          target_model: assets
+          translations:
+            fr:
+              title: "Inventorier et classifier les actifs (ID.AM)"
+              description: "Examinez, compl\u00e9tez et classifiez l\u2019inventaire des actifs. Attribuez des niveaux de criticit\u00e9 m\u00e9tier pour informer la priorisation des risques."
+
+        - key: risk_assessment
+          title: "Conduct the enterprise risk assessment (ID.RA)"
+          description: "Work through the pre-created risk scenarios covering all six CSF 2.0 functions. Adjust likelihood and impact ratings to reflect your organisational context, add sector-specific scenarios, and document risk owners."
+          target_model: risk-assessments
+          target_ref: main_ra
+          translations:
+            fr:
+              title: "Mener l\u2019\u00e9valuation des risques d\u2019entreprise (ID.RA)"
+              description: "Parcourez les sc\u00e9narios de risque pr\u00e9-cr\u00e9\u00e9s couvrant les six fonctions du CSF 2.0. Ajustez les niveaux de vraisemblance et d\u2019impact."
+
+        - key: csf_assessment
+          title: "Assess current cybersecurity posture (all functions)"
+          description: "Complete the NIST CSF 2.0 compliance assessment across all six functions. Rate each subcategory against your current implementation tier to establish a gap analysis and maturity baseline."
+          target_model: compliance-assessments
+          target_ref: csf_audit
+          translations:
+            fr:
+              title: "\u00c9valuer la posture cybers\u00e9curit\u00e9 actuelle (toutes fonctions)"
+              description: "Compl\u00e9tez l\u2019\u00e9valuation de conformit\u00e9 NIST CSF 2.0 sur les six fonctions pour \u00e9tablir une analyse des \u00e9carts et une base de maturit\u00e9."
+
+        - key: target_profile
+          title: "Define your target profile"
+          description: "Using the gap analysis from the compliance assessment, define your Target Profile \u2014 the desired implementation tier for each CSF subcategory. Prioritise gaps based on risk findings and business objectives."
+          target_model: compliance-assessments
+          target_ref: csf_audit
+          translations:
+            fr:
+              title: "D\u00e9finir votre profil cible"
+              description: "En utilisant l\u2019analyse des \u00e9carts, d\u00e9finissez votre profil cible \u2014 le niveau d\u2019impl\u00e9mentation souhait\u00e9 pour chaque sous-cat\u00e9gorie. Priorisez les \u00e9carts en fonction de l\u2019\u00e9valuation des risques."
+
+        - key: controls
+          title: "Implement and track security controls (PR, DE, RS, RC)"
+          description: "Review the auto-created controls derived from CSF 2.0 reference controls. Assign owners, set target completion dates, and begin implementing the highest-priority controls."
+          target_model: applied-controls
+          translations:
+            fr:
+              title: "Impl\u00e9menter et suivre les mesures de s\u00e9curit\u00e9 (PR, DE, RS, RC)"
+              description: "Examinez les contr\u00f4les cr\u00e9\u00e9s automatiquement, assignez des responsables, fixez des dates cibles et commencez par les contr\u00f4les prioritaires."
+
+        - key: supply_chain
+          title: "Assess third-party and supply chain risk (GV.SC)"
+          description: "Identify and assess your critical suppliers, managed service providers, and technology vendors. Document supply chain dependencies and review vendor security assurances."
+          target_model: assets
+          translations:
+            fr:
+              title: "\u00c9valuer les risques tiers et cha\u00eene d\u2019approvisionnement (GV.SC)"
+              description: "Identifiez vos fournisseurs critiques et prestataires. Documentez les d\u00e9pendances et examinez les garanties de s\u00e9curit\u00e9 des fournisseurs."
+
+        - key: detection_response
+          title: "Validate detection and response capabilities (DE / RS)"
+          description: "Use this register to track findings from detection and response capability reviews \u2014 logging coverage, alerting, SIEM/MDR validation, incident response plan testing, escalation paths, and containment playbook completeness. Assign owners and track remediation."
+          target_model: findings-assessments
+          target_ref: detection_findings
+          translations:
+            fr:
+              title: "Valider les capacit\u00e9s de d\u00e9tection et de r\u00e9ponse (DE / RS)"
+              description: "Utilisez ce registre pour suivre les constats des revues de capacit\u00e9s de d\u00e9tection et de r\u00e9ponse \u2014 couverture des journaux, alertes, validation SIEM/MDR et tests du plan de r\u00e9ponse aux incidents."
+
+        - key: recovery_bcdr
+          title: "Validate recovery and business continuity (RC)"
+          description: "Use this register to track findings from backup restoration tests, BCDR plan reviews, and tabletop exercises. Document RTO/RPO validation results, gaps identified, and remediation actions required to ensure resilient recovery from cyber incidents."
+          target_model: findings-assessments
+          target_ref: bcdr_findings
+          translations:
+            fr:
+              title: "Valider la reprise et la continuit\u00e9 d\u2019activit\u00e9 (RC)"
+              description: "Utilisez ce registre pour suivre les constats des tests de restauration des sauvegardes, des revues des plans BCDR et des exercices sur table. Documentez les r\u00e9sultats de validation RTO/RPO et les actions de rem\u00e9diation."
+
+        - key: ongoing_tasks
+          title: "Configure recurring programme tasks"
+          description: "Review the periodic task templates \u2014 governance reviews, risk assessment reviews, access reviews, vulnerability scans, awareness training, BCDR testing, tabletop exercises, and supplier reviews \u2014 and adjust schedules to fit your organisation."
+          target_model: task-templates
+          translations:
+            fr:
+              title: "Configurer les t\u00e2ches r\u00e9currentes du programme"
+              description: "Examinez les mod\u00e8les de t\u00e2ches p\u00e9riodiques et ajustez les plannings selon votre organisation."
+
+        - key: continuous_improvement
+          title: "Establish continuous improvement and review cycle (GV.OC)"
+          description: "Schedule periodic reviews of the risk assessment, compliance assessment scores, and control effectiveness. Track progress against your Target Profile over time."
+          target_model: compliance-assessments
+          target_ref: csf_audit
+          translations:
+            fr:
+              title: "\u00c9tablir un cycle d\u2019am\u00e9lioration continue (GV.OC)"
+              description: "Planifiez des r\u00e9visions p\u00e9riodiques de l\u2019\u00e9valuation des risques, des scores de conformit\u00e9 et de l\u2019efficacit\u00e9 des contr\u00f4les. Suivez les progr\u00e8s par rapport \u00e0 votre profil cible."

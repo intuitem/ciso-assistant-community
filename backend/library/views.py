@@ -275,68 +275,6 @@ class StoredLibraryViewSet(BaseModelViewSet):
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
             )
 
-    @action(
-        detail=True,
-        methods=["post"],
-        url_path="apply",
-        parser_classes=[JSONParser],
-    )
-    def apply_preset(self, request, pk):
-        if not RoleAssignment.is_access_allowed(
-            user=request.user,
-            perm=Permission.objects.get(codename="add_loadedlibrary"),
-            folder=Folder.get_root_folder(),
-        ):
-            return Response(status=HTTP_403_FORBIDDEN)
-
-        try:
-            key = "urn" if pk.startswith("urn:") else "id"
-            library = StoredLibrary.objects.get(**{key: pk})
-        except StoredLibrary.DoesNotExist:
-            return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
-
-        if not library.is_preset:
-            return Response(
-                {"error": "This library is not a preset."},
-                status=HTTP_400_BAD_REQUEST,
-            )
-
-        from library.preset_executor import PresetExecutor
-
-        folder_name = request.data.get("folder_name")
-        folder_id = request.data.get("folder_id")
-        create_objects = request.data.get("create_objects", True)
-        try:
-            executor = PresetExecutor(library, request.user, request)
-            journey = executor.apply(
-                folder_name=folder_name,
-                folder_id=folder_id,
-                create_objects=create_objects,
-            )
-            return Response(
-                {"journey_id": str(journey.id)},
-                status=HTTP_201_CREATED,
-            )
-        except (ValidationError, DRFValidationError) as e:
-            logger.error("Failed to apply preset", error=e)
-            if hasattr(e, "detail"):
-                # DRF ValidationError — detail is a dict/list of clean strings
-                detail = e.detail
-            elif hasattr(e, "message_dict"):
-                detail = e.message_dict
-            else:
-                detail = "Validation failed."
-            return Response(
-                {"error": detail},
-                status=HTTP_422_UNPROCESSABLE_ENTITY,
-            )
-        except Exception as e:
-            logger.error("Failed to apply preset", error=e)
-            return Response(
-                {"error": "Failed to apply preset."},
-                status=HTTP_422_UNPROCESSABLE_ENTITY,
-            )
-
     @action(detail=True, methods=["get"])
     def tree(self, request, pk):
         try:
@@ -402,6 +340,9 @@ class StoredLibraryViewSet(BaseModelViewSet):
                 )
                 if not (
                     mime == "text/plain" and attachment.name.endswith((".yaml", ".yml"))
+                ) and not (
+                    mime in ("application/octet-stream", "application/zip")
+                    and attachment.name.endswith(".xlsx")
                 ):
                     return HttpResponse(
                         json.dumps({"error": "invalidFileFormat"}),
@@ -410,10 +351,10 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
             try:
                 if attachment.name.endswith(".xlsx"):
-                    # Validate Excel MIME strictly
-                    if (
-                        mime
-                        != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    if mime not in (
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        "application/octet-stream",
+                        "application/zip",
                     ):
                         return HttpResponse(
                             json.dumps({"error": "invalidFileFormat"}),

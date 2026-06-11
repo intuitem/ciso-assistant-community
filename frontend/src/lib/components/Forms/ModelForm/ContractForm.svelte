@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import NumberField from '$lib/components/Forms/NumberField.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
@@ -27,20 +28,12 @@
 	}: Props = $props();
 </script>
 
-<AutocompleteSelect
+<FolderTreeSelect
 	{form}
 	field="folder"
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
-/>
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
 />
 <AutocompleteSelect
 	{form}
@@ -202,5 +195,12 @@
 		label={m.isIntragroup()}
 		cacheLock={cacheLocks['is_intragroup']}
 		bind:cachedValue={formDataCache['is_intragroup']}
+	/>
+	<Checkbox
+		{form}
+		field="dora_exclude"
+		label={m.doraExclude()}
+		cacheLock={cacheLocks['dora_exclude']}
+		bind:cachedValue={formDataCache['dora_exclude']}
 	/>
 </Dropdown>

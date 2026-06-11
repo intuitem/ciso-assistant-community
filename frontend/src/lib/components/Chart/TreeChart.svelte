@@ -123,7 +123,7 @@
 			]
 		};
 
-	option.backgroundColor = 'transparent';
+		option.backgroundColor = 'transparent';
 		chart_t.setOption(option);
 
 		// Resize after Svelte updates the container height

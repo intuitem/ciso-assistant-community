@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import { superForm } from 'sveltekit-superforms';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import * as m from '$paraglide/messages.js';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
 	import { Accordion } from '@skeletonlabs/skeleton-svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
@@ -29,14 +30,6 @@
 
 	let openAccordionItems = $state([]);
 </script>
-
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
 
 <AutocompleteSelect
 	{form}
@@ -275,11 +268,9 @@
 	</Accordion.Item>
 </Accordion>
 
-<AutocompleteSelect
+<FolderTreeSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
-	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}

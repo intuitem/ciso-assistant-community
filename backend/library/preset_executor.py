@@ -1,7 +1,47 @@
+import re
+
 import structlog
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils.translation import get_language
+
+_PARAM_REF_RE = re.compile(r"^\{\{ref:([A-Za-z0-9_]+)\}\}$")
+
+
+def _resolve_param_refs(params: dict | None, object_refs: dict) -> dict | None:
+    """Substitute {{ref:<name>}} placeholders in target_params with UUIDs from object_refs.
+
+    - A string value matching "{{ref:<name>}}" is replaced with object_refs[<name>],
+      or the key is dropped entirely if the ref is unresolved.
+    - List values have each element substituted the same way; unresolved elements are
+      filtered out, and the key is dropped if the resulting list is empty.
+    - Other values are passed through unchanged.
+    """
+    if not params:
+        return params
+
+    def _sub(value):
+        if isinstance(value, str):
+            m = _PARAM_REF_RE.match(value)
+            if m:
+                resolved = object_refs.get(m.group(1))
+                return resolved if resolved else None
+            return value
+        return value
+
+    result: dict = {}
+    for key, value in params.items():
+        if isinstance(value, list):
+            resolved = [_sub(v) for v in value]
+            resolved = [v for v in resolved if v is not None]
+            if resolved:
+                result[key] = resolved
+        else:
+            resolved = _sub(value)
+            if resolved is not None:
+                result[key] = resolved
+    return result or None
+
 
 from core.models import (
     StoredLibrary,
@@ -18,6 +58,7 @@ from core.models import (
     TaskTemplate,
     OrganisationObjective,
     OrganisationIssue,
+    Preset,
     PresetJourney,
     PresetJourneyStep,
 )
@@ -50,11 +91,19 @@ logger = structlog.get_logger(__name__)
 
 
 class PresetExecutor:
-    """Applies a preset definition, creating all scaffolded objects and a trackable journey."""
+    """Applies a Preset, creating scaffolded objects and a trackable journey."""
 
-    def __init__(self, stored_library: StoredLibrary, user: User, request=None):
-        self._stored_library = stored_library
-        self._preset_content = stored_library.content["preset"]
+    def __init__(self, source, user: User, request=None):
+        if isinstance(source, StoredLibrary):
+            from library.utils import upsert_preset_from_stored_library
+
+            self._preset = upsert_preset_from_stored_library(source)
+        elif isinstance(source, Preset):
+            self._preset = source
+        else:
+            raise TypeError(
+                f"PresetExecutor expects Preset or StoredLibrary, got {type(source).__name__}"
+            )
         self._user = user
         self._request = request
 
@@ -78,14 +127,15 @@ class PresetExecutor:
         folder_name: str | None = None,
         folder_id: str | None = None,
         create_objects: bool = True,
+        apply_feature_flags: bool = True,
     ) -> PresetJourney:
         self._load_dependencies()
-        self._apply_feature_flags()
+        if apply_feature_flags:
+            self._apply_feature_flags()
         if folder_id:
             folder = Folder.objects.get(id=folder_id)
-            # Check for existing journey with the same preset in this folder
             existing_journey = PresetJourney.objects.filter(
-                urn=self._stored_library.urn, folder=folder
+                preset=self._preset, folder=folder
             ).first()
             if existing_journey:
                 raise ValidationError(
@@ -105,30 +155,34 @@ class PresetExecutor:
         else:
             object_refs = {}
 
-        # Resolve translated library name/description
-        locale = get_language() or "en"
-        locale = locale.split("-")[0]
-        lib_translations = self._stored_library.translations or {}
-        locale_tr = lib_translations.get(locale, {})
-        journey_name = locale_tr.get("name", self._stored_library.name)
-        journey_description = locale_tr.get(
-            "description", self._stored_library.description or ""
-        )
+        journey_name, journey_description = self._localized_name_description()
 
         journey = PresetJourney.objects.create(
             name=journey_name,
             description=journey_description,
             folder=folder,
-            urn=self._stored_library.urn,
-            version=self._stored_library.version,
+            preset=self._preset,
+            applied_version=self._preset.version,
             object_refs=object_refs,
             applied_by=self._user,
         )
         self._create_steps(journey, object_refs)
         return journey
 
+    def _localized_name_description(self) -> tuple[str, str]:
+        locale = get_language() or "en"
+        locale = locale.split("-")[0]
+        translations = self._preset.translations or {}
+        locale_tr = translations.get(locale, {}) or {}
+        return (
+            locale_tr.get("name", self._preset.name),
+            locale_tr.get("description", self._preset.description or ""),
+        )
+
     @transaction.atomic
-    def upgrade_journey(self, journey: PresetJourney) -> PresetJourney:
+    def upgrade_journey(
+        self, journey: PresetJourney, apply_feature_flags: bool = True
+    ) -> PresetJourney:
         """Non-destructive upgrade of an existing journey to the current preset version.
 
         - Re-runs dependency loading and feature flags
@@ -136,7 +190,8 @@ class PresetExecutor:
         - Syncs steps: adds new, removes orphaned, updates metadata, preserves user state
         """
         self._load_dependencies()
-        self._apply_feature_flags()
+        if apply_feature_flags:
+            self._apply_feature_flags()
 
         folder = journey.folder
         perimeter = self._create_default_perimeter(folder)
@@ -148,17 +203,8 @@ class PresetExecutor:
 
         self._sync_steps(journey, merged_refs)
 
-        # Update journey metadata
-        locale = get_language() or "en"
-        locale = locale.split("-")[0]
-        lib_translations = self._stored_library.translations or {}
-        locale_tr = lib_translations.get(locale, {})
-
-        journey.name = locale_tr.get("name", self._stored_library.name)
-        journey.description = locale_tr.get(
-            "description", self._stored_library.description or ""
-        )
-        journey.version = self._stored_library.version
+        journey.name, journey.description = self._localized_name_description()
+        journey.applied_version = self._preset.version
         journey.object_refs = merged_refs
         journey.save()
 
@@ -172,7 +218,7 @@ class PresetExecutor:
         - New keys: create new steps with NOT_STARTED status.
         - Removed keys: delete orphaned steps.
         """
-        steps_config = self._preset_content.get("journey", {}).get("steps", [])
+        steps_config = self._preset.steps or []
         existing_steps = {step.key: step for step in journey.steps.all()}
         new_keys = set()
         to_update = []
@@ -186,6 +232,10 @@ class PresetExecutor:
                 resolved_ref if resolved_ref else ("" if target_ref_key else None)
             )
 
+            resolved_params = _resolve_param_refs(
+                step_def.get("target_params"), object_refs
+            )
+
             if key in existing_steps:
                 step = existing_steps[key]
                 step.order = order
@@ -194,6 +244,8 @@ class PresetExecutor:
                 step.translations = step_def.get("translations")
                 step.target_model = step_def.get("target_model")
                 step.target_ref = step_target_ref
+                step.target_url = step_def.get("target_url")
+                step.target_params = resolved_params
                 to_update.append(step)
             else:
                 PresetJourneyStep.objects.create(
@@ -205,6 +257,8 @@ class PresetExecutor:
                     translations=step_def.get("translations"),
                     target_model=step_def.get("target_model"),
                     target_ref=step_target_ref,
+                    target_url=step_def.get("target_url"),
+                    target_params=resolved_params,
                     status=PresetJourneyStep.Status.NOT_STARTED,
                 )
 
@@ -218,6 +272,8 @@ class PresetExecutor:
                     "translations",
                     "target_model",
                     "target_ref",
+                    "target_url",
+                    "target_params",
                 ],
             )
 
@@ -227,7 +283,7 @@ class PresetExecutor:
             journey.steps.filter(key__in=orphaned_keys).delete()
 
     def _load_dependencies(self):
-        dependencies = self._stored_library.dependencies or []
+        dependencies = self._preset.dependencies or []
         for dep_urn in dependencies:
             if LoadedLibrary.objects.filter(urn=dep_urn).exists():
                 continue
@@ -241,7 +297,7 @@ class PresetExecutor:
                 raise
 
     def _apply_feature_flags(self):
-        flags_config = self._preset_content.get("feature_flags")
+        flags_config = self._preset.feature_flags or {}
         if not flags_config:
             return
 
@@ -259,10 +315,14 @@ class PresetExecutor:
             if hasattr(field, "source") and field.source.startswith("value.")
         }
 
+        # Flags that must never be disabled by a preset
+        PROTECTED_FLAGS = {"journeys"}
+
         # Start from current value, then set all known flags to False
         value = dict(settings_obj.value or {})
         for flag in all_flags:
-            value[flag] = False
+            if flag not in PROTECTED_FLAGS:
+                value[flag] = False
 
         # Enable only the flags the preset requests
         for flag in flags_config.get("enable", []):
@@ -274,7 +334,7 @@ class PresetExecutor:
         settings_obj.save()
 
     def _create_folder(self, folder_name: str | None) -> Folder:
-        name = folder_name or self._stored_library.name
+        name = folder_name or self._preset.name
         context = {"request": self._request} if self._request else {}
         folder_data = {
             "content_type": Folder.ContentType.DOMAIN,
@@ -288,9 +348,8 @@ class PresetExecutor:
         return folder
 
     def _create_default_perimeter(self, folder: Folder) -> Perimeter:
-        """Create a default perimeter for the preset's folder, or reuse an existing one."""
         existing = Perimeter.objects.filter(
-            folder=folder, name=self._stored_library.name
+            folder=folder, name=self._preset.name
         ).first()
         if existing:
             return existing
@@ -298,7 +357,7 @@ class PresetExecutor:
         context = {"request": self._request} if self._request else {}
         perimeter_data = {
             "folder": str(folder.id),
-            "name": self._stored_library.name,
+            "name": self._preset.name,
         }
         serializer = PerimeterWriteSerializer(data=perimeter_data, context=context)
         serializer.is_valid(raise_exception=True)
@@ -322,15 +381,79 @@ class PresetExecutor:
         "risk_scenario": RiskScenario,
     }
 
-    def _find_existing(self, folder: Folder, obj_type: str, name: str):
-        """Return an existing object if one with the same name already exists in the folder."""
+    def _find_existing(self, folder: Folder, obj_type: str, item: dict, name: str):
+        """Return a compatible existing object for this preset item, if any.
+
+        Uses type-specific filters beyond just name to avoid false matches
+        (e.g. two compliance assessments with the same name but different frameworks).
+        """
         model_class = self._TYPE_MODEL_MAP.get(obj_type)
         if not model_class:
             return None
-        return model_class.objects.filter(folder=folder, name=name).first()
+        queryset = model_class.objects.filter(folder=folder, name=name)
+
+        if obj_type == "risk_assessment":
+            matrix = self._resolve_library_object(item["risk_matrix"], RiskMatrix)
+            queryset = queryset.filter(risk_matrix=matrix)
+        elif obj_type == "compliance_assessment":
+            framework = self._resolve_library_object(item["framework"], Framework)
+            queryset = queryset.filter(framework=framework)
+        elif obj_type == "ebios_rm_study":
+            matrix = self._resolve_library_object(item["risk_matrix"], RiskMatrix)
+            queryset = queryset.filter(risk_matrix=matrix)
+        elif obj_type == "findings_assessment":
+            queryset = queryset.filter(category=item.get("category", "pentest"))
+        elif obj_type == "metric_instance":
+            metric_def_urn = item.get("metric_definition")
+            metric_def = (
+                MetricDefinition.objects.filter(urn=metric_def_urn).first()
+                if metric_def_urn
+                else None
+            )
+            if not metric_def:
+                return None
+            queryset = queryset.filter(metric_definition=metric_def)
+        elif obj_type == "asset":
+            queryset = queryset.filter(type=item.get("asset_type", "SP"))
+
+        return queryset.first()
+
+    def _find_existing_risk_scenario(self, name: str, risk_assessment_id: str):
+        """Find an existing risk scenario by name within a specific risk assessment."""
+        return RiskScenario.objects.filter(
+            risk_assessment_id=risk_assessment_id, name=name
+        ).first()
+
+    def _backfill_side_effects(
+        self, obj_type: str, obj, item: dict, object_refs: dict
+    ) -> None:
+        """Run idempotent side effects for reused objects.
+
+        When an existing object is reused instead of created, we still need
+        to ensure that dependent objects (requirement assessments, asset links,
+        threat links, etc.) are properly set up.
+        """
+        if obj_type == "compliance_assessment":
+            if not obj.requirement_assessments.exists():
+                obj.create_requirement_assessments()
+            if item.get("create_suggested_controls"):
+                assessments = obj.requirement_assessments.all().prefetch_related(
+                    "requirement__reference_controls"
+                )
+                for ra in assessments:
+                    ra.create_applied_controls_from_suggestions()
+
+        elif obj_type == "risk_scenario":
+            asset_refs = item.get("asset_refs", [])
+            asset_ids = [object_refs[r] for r in asset_refs if r in object_refs]
+            if asset_ids:
+                obj.assets.add(*Asset.objects.filter(id__in=asset_ids))
+            threat_urns = item.get("threat_urns", [])
+            if threat_urns:
+                obj.threats.add(*Threat.objects.filter(urn__in=threat_urns))
 
     def _create_objects(self, folder: Folder, default_perimeter: Perimeter) -> dict:
-        scaffolded = self._preset_content.get("scaffolded_objects", [])
+        scaffolded = self._preset.scaffolded_objects or []
         object_refs = {}
         deferred_scenarios = []
         context = {"request": self._request} if self._request else {}
@@ -341,8 +464,8 @@ class PresetExecutor:
             name = self._tr(item, "name")
             description = self._tr(item, "description")
 
-            # Reuse existing object if one with the same name exists in this folder
-            existing = self._find_existing(folder, obj_type, name)
+            # Reuse existing compatible object if found in this folder
+            existing = self._find_existing(folder, obj_type, item, name)
             if existing:
                 logger.info(
                     "Reusing existing object",
@@ -352,6 +475,7 @@ class PresetExecutor:
                 )
                 if ref:
                     object_refs[ref] = str(existing.id)
+                self._backfill_side_effects(obj_type, existing, item, object_refs)
                 continue
 
             if obj_type == "perimeter":
@@ -383,6 +507,10 @@ class PresetExecutor:
                     "framework": str(framework.id),
                     "name": name,
                 }
+                if item.get("implementation_groups") is not None:
+                    data["selected_implementation_groups"] = item[
+                        "implementation_groups"
+                    ]
                 serializer = ComplianceAssessmentWriteSerializer(
                     data=data, context=context
                 )
@@ -551,18 +679,6 @@ class PresetExecutor:
             name = self._tr(item, "name")
             description = self._tr(item, "description")
 
-            existing = self._find_existing(folder, "risk_scenario", name)
-            if existing:
-                logger.info(
-                    "Reusing existing object",
-                    type="risk_scenario",
-                    name=name,
-                    id=str(existing.id),
-                )
-                if ref:
-                    object_refs[ref] = str(existing.id)
-                continue
-
             ra_ref = item.get("risk_assessment_ref")
             ra_id = object_refs.get(ra_ref) if ra_ref else None
             if not ra_id:
@@ -570,6 +686,21 @@ class PresetExecutor:
                     "Risk scenario skipped: risk_assessment_ref not resolved",
                     name=name,
                     ref=ra_ref,
+                )
+                continue
+
+            # Reuse by matching name + risk_assessment (not just folder + name)
+            existing = self._find_existing_risk_scenario(name, ra_id)
+            if existing:
+                logger.info(
+                    "Reusing existing risk scenario",
+                    name=name,
+                    id=str(existing.id),
+                )
+                if ref:
+                    object_refs[ref] = str(existing.id)
+                self._backfill_side_effects(
+                    "risk_scenario", existing, item, object_refs
                 )
                 continue
 
@@ -608,7 +739,7 @@ class PresetExecutor:
         return model_class.objects.get(library=loaded_lib)
 
     def _create_steps(self, journey: PresetJourney, object_refs: dict):
-        steps_config = self._preset_content.get("journey", {}).get("steps", [])
+        steps_config = self._preset.steps or []
         for order, step_def in enumerate(steps_config):
             target_ref_key = step_def.get("target_ref")
             resolved_ref = object_refs.get(target_ref_key) if target_ref_key else None
@@ -626,5 +757,9 @@ class PresetExecutor:
                 translations=step_def.get("translations"),
                 target_model=step_def.get("target_model"),
                 target_ref=step_target_ref,
+                target_url=step_def.get("target_url"),
+                target_params=_resolve_param_refs(
+                    step_def.get("target_params"), object_refs
+                ),
                 status=PresetJourneyStep.Status.NOT_STARTED,
             )

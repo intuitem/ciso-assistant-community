@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
@@ -101,11 +102,9 @@
 		multiple
 	/>
 {/if}
-<AutocompleteSelect
+<FolderTreeSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
-	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
@@ -146,14 +145,6 @@
 {/if}
 {#if !hasPresetAssessments}
 	<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
-		<TextField
-			{form}
-			field="ref_id"
-			label={m.refId()}
-			cacheLock={cacheLocks['ref_id']}
-			bind:cachedValue={formDataCache['ref_id']}
-			disabled={initialData.ref_id}
-		/>
 		<AutocompleteSelect
 			{form}
 			optionsEndpoint="compliance-assessments"

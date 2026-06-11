@@ -1,0 +1,21 @@
+subject: "Bienvenue sur CISO Assistant !"
+body: |
+  <img src="https://intuitem.com/ciso-assistant.png" alt="CISO Assistant" width="200">
+
+  ## Bienvenue sur CISO Assistant !
+
+  **Votre plateforme de gestion GRC tout-en-un**
+
+  Un accès à CISO Assistant vous a été accordé. Pour commencer, connectez-vous via le lien ci-dessous en utilisant l'authentification SSO :
+
+  [Se connecter à CISO Assistant](${ciso_assistant_url})
+
+  En cas de problème avec le lien, copiez et collez l'URL suivante dans votre navigateur :
+  ${ciso_assistant_url}
+
+  Si vous, ou votre organisation, n'avez pas fait cette demande, vous pouvez simplement ignorer cet email.
+
+  En savoir plus sur CISO Assistant [ici](https://intuitem.com/).
+
+  Cordialement,
+  L'équipe CISO Assistant

@@ -1,5 +1,7 @@
 <script lang="ts">
 	import CalendarHeatmap from '$lib/components/Chart/CalendarHeatmap.svelte';
+	import { getLocale } from '$paraglide/runtime';
+	import { formatDate } from '$lib/utils/datetime';
 
 	const currentYear = new Date().getFullYear();
 	let selectedDate = $state<string | null>(null);
@@ -33,7 +35,10 @@
 		<h3 class="text-lg font-semibold mb-3">Selected Date Info</h3>
 		{#if selectedDate}
 			<div class="space-y-2">
-				<p><span class="font-medium">Date:</span> {new Date(selectedDate).toLocaleDateString()}</p>
+				<p>
+					<span class="font-medium">Date:</span>
+					{formatDate(new Date(selectedDate), false, getLocale())}
+				</p>
 				<p><span class="font-medium">Activity Value:</span> {selectedValue}</p>
 				<p>
 					<span class="font-medium">Day of Week:</span>

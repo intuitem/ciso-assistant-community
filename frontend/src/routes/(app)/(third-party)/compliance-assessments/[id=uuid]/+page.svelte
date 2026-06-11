@@ -18,7 +18,9 @@
 	import TreeViewItemLead from './TreeViewItemLead.svelte';
 
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import ExportModal, { type ExportGroup } from '$lib/components/Modals/ExportModal.svelte';
 
 	import {
 		complianceResultColorMap,
@@ -38,13 +40,23 @@
 
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import { displayScoreColor, darkenColor, getScoreHexColor } from '$lib/utils/helpers';
+	import SuggestControlsModal from '$lib/components/Modals/SuggestControlsModal.svelte';
+	import {
+		displayScoreColor,
+		darkenColor,
+		getScoreHexColor,
+		getFieldVisibility
+	} from '$lib/utils/helpers';
 	import { auditFiltersStore, expandedNodesState } from '$lib/utils/stores';
+	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
 	import { derived } from 'svelte/store';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
 	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
+
+	const CYFUN_2025_FRAMEWORK_URN = 'urn:intuitem:risk:framework:ccb-cyfun2025';
+	const ISO27001_FRAMEWORK_URN_PREFIX = 'urn:intuitem:risk:framework:iso27001';
 
 	interface Props {
 		data: PageData;
@@ -72,6 +84,16 @@
 			model: requirementAssessmentModel.name,
 			domain: data.compliance_assessment.folder.id
 		});
+
+	const viewerRole: 'auditor' | 'respondent' = page.data.user.is_third_party
+		? 'respondent'
+		: 'auditor';
+	const fieldVis = $derived(getFieldVisibility(compliance_assessment, viewerRole));
+	const showAnswers = $derived(fieldVis.showAnswers);
+	const showResult = $derived(fieldVis.showResult);
+	const showExtendedResult = $derived(fieldVis.showExtendedResult);
+	const showStatus = $derived(fieldVis.showStatus);
+	const showScore = $derived(fieldVis.showScore);
 
 	const has_threats = data.threats.total_unique_threats > 0;
 
@@ -220,7 +242,12 @@
 					...node,
 					canEditRequirementAssessment,
 					hasParentNode,
+					showAnswers,
+					showResult,
+					showStatus,
+					showScore,
 					showDocumentationScore: data.compliance_assessment.show_documentation_score,
+					scoringEnabled: data.compliance_assessment.scoring_enabled,
 					scoreCalculationMethod: data.compliance_assessment.score_calculation_method,
 					hidden,
 					selectedStatus
@@ -235,10 +262,16 @@
 					score: node.score,
 					documentationScore: node.documentation_score,
 					isScored: node.is_scored,
+					showResult,
+					showScore,
+					showStatus,
+					scoringEnabled: data.compliance_assessment.scoring_enabled,
 					showDocumentationScore: data.compliance_assessment.show_documentation_score,
 					max_score: node.max_score,
+					min_score: node.min_score ?? 0,
 					progressStatusEnabled: data.compliance_assessment.progress_status_enabled,
 					extendedResultEnabled: data.compliance_assessment.extended_result_enabled,
+					showExtendedResult,
 					extendedResult: node.extended_result,
 					extendedResultColor: extendedResultColorMap[node.extended_result]
 				},
@@ -319,6 +352,113 @@
 		modalStore.trigger(modal);
 	}
 
+	function buildExportGroups(): ExportGroup[] {
+		const ca = data.compliance_assessment;
+		const id = ca.id;
+		const isInternal = !page.data.user.is_third_party;
+		const frameworkUrn = ca.framework?.urn ?? '';
+		// CyFun stays exact: backend cyfun_xlsx (views.py) hardcodes the 2025
+		// sheet layout, so other versions would 400. Bump both when a new CyFun
+		// ships. ISO27001 is prefix-matched — SoA only navigates to a page
+		// whose semantics carry across 27001 versions.
+		const isCyFun = frameworkUrn === CYFUN_2025_FRAMEWORK_URN;
+		const isIso27001 = frameworkUrn.startsWith(ISO27001_FRAMEWORK_URN_PREFIX);
+
+		const auditOptions = [
+			isInternal && {
+				titleKey: 'exportRequirementsData',
+				descriptionKey: 'exportRequirementsDataDesc',
+				format: 'CSV' as const,
+				href: `/compliance-assessments/${id}/export/csv`,
+				testId: 'export-option-csv'
+			},
+			isInternal && {
+				titleKey: 'exportRequirementsWorkbook',
+				descriptionKey: 'exportRequirementsWorkbookDesc',
+				format: 'XLSX' as const,
+				href: `/compliance-assessments/${id}/export/xlsx`,
+				testId: 'export-option-xlsx'
+			},
+			isInternal && {
+				titleKey: 'exportExecutiveSummary',
+				descriptionKey: 'exportExecutiveSummaryDesc',
+				format: 'DOCX' as const,
+				href: `/compliance-assessments/${id}/export/word`,
+				testId: 'export-option-word'
+			},
+			isInternal &&
+				isCyFun && {
+					titleKey: 'exportCyFunAssessment',
+					descriptionKey: 'exportCyFunAssessmentDesc',
+					format: 'XLSX' as const,
+					href: `/compliance-assessments/${id}/export/cyfun-xlsx`,
+					testId: 'export-option-cyfun-xlsx'
+				},
+			{
+				titleKey: 'exportBundleWithEvidences',
+				descriptionKey: 'exportBundleWithEvidencesDesc',
+				format: 'ZIP' as const,
+				href: `/compliance-assessments/${id}/export`,
+				testId: 'export-option-zip'
+			},
+			isInternal &&
+				isIso27001 && {
+					titleKey: 'exportSoaBuilder',
+					descriptionKey: 'exportSoaBuilderDesc',
+					format: 'HTML' as const,
+					href: `/reports/soa?ca=${id}`,
+					kind: 'navigate' as const,
+					testId: 'export-option-soa'
+				}
+		].filter(Boolean);
+
+		const actionPlanOptions = isInternal
+			? [
+					{
+						titleKey: 'exportControlsList',
+						descriptionKey: 'exportControlsListDesc',
+						format: 'CSV' as const,
+						href: `/compliance-assessments/${id}/action-plan/export/csv`,
+						testId: 'export-option-ap-csv'
+					},
+					{
+						titleKey: 'exportControlsWorkbook',
+						descriptionKey: 'exportControlsWorkbookDesc',
+						format: 'XLSX' as const,
+						href: `/compliance-assessments/${id}/action-plan/export/xlsx`,
+						testId: 'export-option-ap-xlsx'
+					},
+					{
+						titleKey: 'exportStatusGroupedReport',
+						descriptionKey: 'exportStatusGroupedReportDesc',
+						format: 'PDF' as const,
+						href: `/compliance-assessments/${id}/action-plan/export/pdf`,
+						testId: 'export-option-ap-pdf'
+					}
+				]
+			: [];
+
+		return [
+			{ titleKey: 'complianceAssessment', options: auditOptions as ExportGroup['options'] },
+			{ titleKey: 'actionPlan', options: actionPlanOptions }
+		];
+	}
+
+	function modalExport(): void {
+		const modalComponent: ModalComponent = {
+			ref: ExportModal,
+			props: {
+				title: m.exportOptionsTitle(),
+				groups: buildExportGroups()
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent
+		};
+		modalStore.trigger(modal);
+	}
+
 	function modalRequestValidation(): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
@@ -360,13 +500,15 @@
 			props: {
 				_form: data.form,
 				id: id,
-				debug: false,
 				URLModel: 'compliance-assessments',
 				formAction: action,
 				bodyComponent: List,
 				bodyProps: {
 					items: Object.values(requirementAssessmentsSync.changes).map(
-						(req) => `${req.str}, ${safeTranslate(req.current)} -> ${safeTranslate(req.new)}`
+						({ str, changes }) =>
+							`${str}: ${changes
+								.map((change) => `${safeTranslate(change.current)} ➡️ ${safeTranslate(change.new)}`)
+								.join(' | ')}`
 					),
 					message: m.theFollowingChangesWillBeApplied()
 				}
@@ -377,9 +519,7 @@
 			component: modalComponent,
 			// Data
 			title: m.syncToAppliedControls(),
-			body: m.syncToAppliedControlsMessage({
-				count: data.compliance_assessment.framework.reference_controls.length //change this
-			}),
+			body: m.syncToAppliedControlsMessage(),
 			response: (r: boolean) => {
 				syncingToActionsIsLoading = r;
 			}
@@ -388,62 +528,75 @@
 	}
 	let createAppliedControlsLoading = $state(false);
 
-	async function modalConfirmCreateSuggestedControls(id: string, name: string, action: string) {
-		let previewItems: string[] = [];
+	async function modalConfirmCreateSuggestedControls(id: string, _name: string, _action: string) {
+		if (createAppliedControlsLoading) return;
+		createAppliedControlsLoading = true;
+		type PreviewItem = { id: string; label: string; status: 'create' | 'reuse' | 'linked' };
+		let previewItems: PreviewItem[] = [];
 		try {
 			const previewResponse = await fetch(
 				`/compliance-assessments/${id}/suggestions/applied-controls?dry_run=true`
 			);
 			if (previewResponse.ok) {
 				const previewData: any[] = await previewResponse.json();
-				previewItems = previewData.map(
-					(control) =>
-						control?.name ||
-						control?.reference_control?.str ||
-						control?.reference_control?.name ||
-						control?.ref_id ||
-						''
-				);
+				const seen = new Set<string>();
+				previewItems = previewData
+					.filter((control) => control?.reference_control?.id)
+					.map((control) => ({
+						id: control.reference_control.id as string,
+						label:
+							control?.name ||
+							control?.reference_control?.str ||
+							control?.reference_control?.name ||
+							control?.ref_id ||
+							'',
+						status: (control?.suggestion_status as 'create' | 'reuse' | 'linked') ?? 'create'
+					}))
+					.filter((item) => {
+						if (seen.has(item.id)) return false;
+						seen.add(item.id);
+						return true;
+					});
 			} else {
 				throw new Error(await previewResponse.text());
 			}
 		} catch (error) {
 			console.error('Unable to fetch suggested controls preview', error);
-			previewItems = data.compliance_assessment.framework.reference_controls.map(
-				(control) =>
-					control?.name ||
-					control?.reference_control?.str ||
-					control?.reference_control?.name ||
-					control?.ref_id ||
-					''
-			);
+			previewItems = data.compliance_assessment.framework.reference_controls
+				.filter((control: any) => control?.id)
+				.map((control: any) => ({
+					id: control.id as string,
+					label:
+						control?.name ||
+						control?.reference_control?.str ||
+						control?.reference_control?.name ||
+						control?.ref_id ||
+						'',
+					status: 'create' as const
+				}));
+		}
+
+		if (previewItems.length === 0) {
+			createAppliedControlsLoading = false;
+			return;
 		}
 
 		const modalComponent: ModalComponent = {
-			ref: ConfirmModal,
+			ref: SuggestControlsModal,
 			props: {
-				_form: data.form,
-				id: id,
-				debug: false,
-				URLModel: 'compliance-assessments',
-				formAction: action,
-				bodyComponent: List,
-				bodyProps: {
-					items: previewItems,
-					message: m.theFollowingControlsWillBeAddedColon()
-				}
+				items: previewItems,
+				endpoint: `/compliance-assessments/${id}/suggestions/applied-controls`
 			}
 		};
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			// Data
 			title: m.suggestControls(),
 			body: m.createAppliedControlsFromSuggestionsConfirmMessage({
-				count: previewItems.length
+				count: previewItems.filter((i) => i.status !== 'linked').length
 			}),
-			response: (r: boolean) => {
-				createAppliedControlsLoading = r;
+			response: () => {
+				createAppliedControlsLoading = false;
 			}
 		};
 		modalStore.trigger(modal);
@@ -452,7 +605,6 @@
 	let tree = $derived(data.tree);
 	let compliance_assessment_donut_values = $derived(data.compliance_assessment_donut_values);
 
-	let exportPopupOpen = $state(false);
 	let filterPopupOpen = $state(false);
 
 	run(() => {
@@ -519,7 +671,7 @@
 					{@const isUpdatableFramework = key === 'framework' && value.has_update}
 					<div class="flex flex-col">
 						<div
-							class="text-sm font-medium text-surface-950-50 capitalize-first"
+							class="text-sm font-medium text-surface-800-200 capitalize-first"
 							data-testid={key.replaceAll('_', '-') + '-field-title'}
 						>
 							{#if isUpdatableFramework}
@@ -604,6 +756,38 @@
 					<div class="font-medium">{m.createdAt()}</div>
 					{formatDateOrDateTime(data.compliance_assessment.created_at, getLocale())}
 				</div>
+				{#if showResult && compliance_assessment.framework.outcomes_definition?.length}
+					<div>
+						<div class="text-sm font-medium text-surface-800-200">{safeTranslate('outcomes')}</div>
+						<div class="flex flex-wrap gap-1.5 mt-1">
+							{#each compliance_assessment.framework.outcomes_definition as rule}
+								{@const isActive =
+									compliance_assessment.computed_outcome &&
+									rule.ref_id in compliance_assessment.computed_outcome}
+								<span
+									class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border"
+									class:font-semibold={isActive}
+									class:text-surface-800-200={isActive}
+									class:bg-surface-50-950={isActive}
+									class:border-surface-300-700={isActive}
+									class:shadow-sm={isActive}
+									class:font-normal={!isActive}
+									class:text-surface-400-600={!isActive}
+									class:bg-surface-100-900={!isActive}
+									class:border-surface-200-800={!isActive}
+									class:opacity-50={!isActive}
+								>
+									<span
+										class="w-2 h-2 rounded-full shrink-0 translate-y-px"
+										style="background-color: {rule.color ?? '#d1d5db'}"
+										class:opacity-40={!isActive}
+									></span>
+									{rule.annotation ?? rule.ref_id}
+								</span>
+							{/each}
+						</div>
+					</div>
+				{/if}
 				{#if page.data?.featureflags?.validation_flows}
 					{#key compliance_assessment.validation_flows}
 						<ValidationFlowsSection validationFlows={compliance_assessment.validation_flows} />
@@ -611,33 +795,38 @@
 				{/if}
 			</div>
 			{#key compliance_assessment_donut_values}
-				{#if data.global_score && data.global_score.score >= 0}
+				{#if showScore && data.global_score && data.global_score.maturity_score >= 0}
 					<div class="w-1/4">
 						<RingProgress
 							name="global_maturity"
-							value={data.global_score.score}
+							value={data.global_score.maturity_score}
 							max={data.global_score.total_max_score}
-							color={getScoreHexColor(data.global_score.score, data.global_score.total_max_score)}
+							color={getScoreHexColor(
+								data.global_score.maturity_score,
+								data.global_score.total_max_score
+							)}
 							strokeWidth={35}
 							fontSize={36}
 							title={m.maturity()}
 						/>
 					</div>
 				{/if}
-				<div class={data.compliance_assessment.extended_result_enabled ? 'w-1/4' : 'w-1/3'}>
-					<DonutChart
-						s_label="Result"
-						name="compliance_result"
-						title={m.compliance()}
-						orientation="horizontal"
-						values={compliance_assessment_donut_values.result.values}
-						colors={compliance_assessment_donut_values.result.values.map(
-							(object) => object.itemStyle.color
-						)}
-						showPercentage={true}
-					/>
-				</div>
-				{#if data.compliance_assessment.extended_result_enabled && compliance_assessment_donut_values.extended_result?.values?.length > 0}
+				{#if showResult}
+					<div class={data.compliance_assessment.extended_result_enabled ? 'w-1/4' : 'w-1/3'}>
+						<DonutChart
+							s_label="Result"
+							name="compliance_result"
+							title={m.compliance()}
+							orientation="horizontal"
+							values={compliance_assessment_donut_values.result.values}
+							colors={compliance_assessment_donut_values.result.values.map(
+								(object) => object.itemStyle.color
+							)}
+							showPercentage={true}
+						/>
+					</div>
+				{/if}
+				{#if showExtendedResult && compliance_assessment_donut_values.extended_result?.values?.length > 0}
 					<div class="w-1/4">
 						<DonutChart
 							s_label="Extended Result"
@@ -652,7 +841,7 @@
 						/>
 					</div>
 				{/if}
-				{#if data.compliance_assessment.progress_status_enabled}
+				{#if showStatus}
 					<div class={data.compliance_assessment.extended_result_enabled ? 'w-1/4' : 'w-1/3'}>
 						<DonutChart
 							s_label="Status"
@@ -668,71 +857,28 @@
 					</div>
 				{/if}
 			{/key}
+			{#if showAnswers && data.compliance_assessment.answers_progress != null}
+				<div class="flex items-center gap-2 text-sm text-surface-600-400 mt-2">
+					<i class="fa-solid fa-clipboard-question text-primary-500"></i>
+					<span>{m.questions()}: {data.compliance_assessment.answers_progress}%</span>
+					<div class="flex-1 bg-surface-200-800 rounded-full h-1.5 max-w-32">
+						<div
+							class="h-1.5 rounded-full bg-primary-400 transition-all"
+							style="width: {data.compliance_assessment.answers_progress}%;"
+						></div>
+					</div>
+				</div>
+			{/if}
 			<div class="flex flex-col space-y-2 ml-4">
 				<div class="flex flex-row space-x-2">
-					<Popover
-						open={exportPopupOpen}
-						onOpenChange={(e) => (exportPopupOpen = e.open)}
-						positioning={{ placement: 'bottom' }}
+					<button
+						type="button"
+						class="btn preset-filled-primary-500 w-full"
+						onclick={modalExport}
+						data-testid="export-button"
 					>
-						<Popover.Trigger class="btn preset-filled-primary-500 w-full">
-							<span data-testid="export-button">
-								<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
-							</span>
-						</Popover.Trigger>
-						<Popover.Positioner>
-							<Popover.Content
-								class="card whitespace-nowrap bg-surface-50-950 py-2 w-fit shadow-lg space-y-1"
-							>
-								<div>
-									<p class="block px-4 py-2 text-sm text-surface-950-50">{m.complianceAssessment()}</p>
-									{#if !page.data.user.is_third_party}
-										<a
-											href="/compliance-assessments/{data.compliance_assessment.id}/export/csv"
-											class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
-											>... {m.asCSV()}</a
-										>
-										<a
-											href="/compliance-assessments/{data.compliance_assessment.id}/export/xlsx"
-											class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
-											>... {m.asXLSX()}</a
-										>
-										<a
-											href="/compliance-assessments/{data.compliance_assessment.id}/export/word"
-											class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
-											>... {m.asWord()}</a
-										>
-									{/if}
-									<a
-										href="/compliance-assessments/{data.compliance_assessment.id}/export"
-										class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
-										>... {m.asZIP()}</a
-									>
-									{#if !page.data.user.is_third_party}
-										<p class="block px-4 py-2 text-sm text-surface-950-50">{m.actionPlan()}</p>
-										<a
-											href="/compliance-assessments/{data.compliance_assessment
-												.id}/action-plan/export/csv"
-											class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
-											>... {m.asCSV()}</a
-										>
-										<a
-											href="/compliance-assessments/{data.compliance_assessment
-												.id}/action-plan/export/xlsx"
-											class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
-											>... {m.asXLSX()}</a
-										>
-										<a
-											href="/compliance-assessments/{data.compliance_assessment
-												.id}/action-plan/export/pdf"
-											class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
-											>... {m.asPDF()}</a
-										>
-									{/if}
-								</div>
-							</Popover.Content>
-						</Popover.Positioner>
-					</Popover>
+						<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+					</button>
 					{#if canEditObject}
 						<Anchor
 							breadcrumbAction="push"
@@ -757,10 +903,15 @@
 						breadcrumbAction="push"
 						><i class="fa-solid fa-file-lines mr-2"></i>{m.evidences()}</Anchor
 					>
+					<AuditTrailButton
+						model="compliance-assessments"
+						objectId={data.compliance_assessment.id}
+					/>
 				{/if}
 				<!-- Power-ups Command Palette Grid -->
 				<div class="pt-3 border-t border-surface-200-800 mt-2 space-y-3">
-					<span class="text-xs font-semibold text-surface-400-600 uppercase tracking-widest select-none"
+					<span
+						class="text-xs font-semibold text-surface-400-600 uppercase tracking-widest select-none"
 						>{m.powerUps()}</span
 					>
 
@@ -903,7 +1054,7 @@
 										data-testid="assignments-button"
 									>
 										<i class="fa-solid fa-user-tag text-green-500 text-base"></i>
-										<span class="text-sm font-medium">{m.assignments?.() ?? 'Assignments'}</span>
+										<span class="text-sm font-medium">{m.assignments()}</span>
 									</Anchor>
 								{/if}
 							</div>
@@ -968,117 +1119,130 @@
 					{/if}
 				</span>
 			</div>
-			<Popover
-				open={filterPopupOpen}
-				onOpenChange={(e) => (filterPopupOpen = e.open)}
-				positioning={{ placement: 'bottom-start' }}
-				autoFocus={false}
-				onPointerDownOutside={() => (filterPopupOpen = false)}
-				closeOnInteractOutside={false}
-			>
-				<Popover.Trigger class="btn preset-filled-primary-500 w-fit">
-					<i class="fa-solid fa-filter mr-2"></i>
-					{m.filters()}
-					{#if filterCount}
-						<span class="text-xs">{filterCount}</span>
-					{/if}
-				</Popover.Trigger>
-				<Popover.Positioner>
-					<Popover.Content
-						class="card p-2 bg-surface-50-950 w-fit shadow-lg space-y-2 border border-surface-200-800 z-10"
-					>
-						<div>
-							<span class="text-sm font-bold">{m.result()}</span>
-							<div class="flex flex-wrap gap-2 text-xs bg-surface-100-900 border-2 p-1 rounded-md">
-								{#each Object.entries(complianceResultColorMap) as [result, color]}
-									<button
-										type="button"
-										onclick={() => toggleResult(result)}
-										class="px-2 py-1 rounded-md font-bold"
-										style="background-color: {selectedResults.includes(result)
-											? color
-											: 'grey'}; color: {selectedResults.includes(result)
-											? result === 'not_applicable'
-												? 'white'
-												: 'black'
-											: 'black'}; opacity: {selectedResults.includes(result) ? 1 : 0.3};"
+			<div class="flex items-center gap-2">
+				{#if treeViewNodes}
+					<TreeExpandCollapseToggle nodes={treeViewNodes} bind:expandedNodes />
+				{/if}
+				<Popover
+					open={filterPopupOpen}
+					onOpenChange={(e) => (filterPopupOpen = e.open)}
+					positioning={{ placement: 'bottom-start' }}
+					autoFocus={false}
+					onPointerDownOutside={() => (filterPopupOpen = false)}
+					closeOnInteractOutside={false}
+				>
+					<Popover.Trigger class="btn preset-filled-primary-500 w-fit">
+						<i class="fa-solid fa-filter mr-2"></i>
+						{m.filters()}
+						{#if filterCount}
+							<span class="text-xs">{filterCount}</span>
+						{/if}
+					</Popover.Trigger>
+					<Popover.Positioner>
+						<Popover.Content
+							class="card p-2 bg-surface-50-950 w-fit shadow-lg space-y-2 border border-surface-200 z-10"
+						>
+							{#if showResult}
+								<div>
+									<span class="text-sm font-bold">{m.result()}</span>
+									<div
+										class="flex flex-wrap gap-2 text-xs bg-surface-200-800 border-2 p-1 rounded-md"
 									>
-										{safeTranslate(result)}
-									</button>
-								{/each}
-							</div>
-						</div>
-						{#if data.compliance_assessment.progress_status_enabled}
+										{#each Object.entries(complianceResultColorMap) as [result, color]}
+											<button
+												type="button"
+												onclick={() => toggleResult(result)}
+												class="px-2 py-1 rounded-md font-bold"
+												style="background-color: {selectedResults.includes(result)
+													? color
+													: 'grey'}; color: {selectedResults.includes(result)
+													? result === 'not_applicable'
+														? 'white'
+														: 'black'
+													: 'black'}; opacity: {selectedResults.includes(result) ? 1 : 0.3};"
+											>
+												{safeTranslate(result)}
+											</button>
+										{/each}
+									</div>
+								</div>
+							{/if}
+							{#if showStatus}
+								<div>
+									<span class="text-sm font-bold">{m.status()}</span>
+									<div
+										class="flex flex-wrap w-fit gap-2 text-xs bg-surface-200-800 border-2 p-1 rounded-md"
+									>
+										{#each Object.entries(complianceStatusColorMap) as [status, color]}
+											<button
+												type="button"
+												onclick={() => toggleStatus(status)}
+												class="px-2 py-1 rounded-md font-bold"
+												style="background-color: {selectedStatus.includes(status)
+													? color + '44'
+													: 'grey'}; color: {selectedStatus.includes(status)
+													? darkenColor(color, 0.3)
+													: 'black'}; opacity: {selectedStatus.includes(status) ? 1 : 0.3};"
+											>
+												{safeTranslate(status)}
+											</button>
+										{/each}
+									</div>
+								</div>
+							{/if}
+							{#if showExtendedResult}
+								<div>
+									<span class="text-sm font-bold">{m.extendedResult()}</span>
+									<div
+										class="flex flex-wrap w-fit gap-2 text-xs bg-surface-200-800 border-2 p-1 rounded-md"
+									>
+										{#each Object.entries(extendedResultColorMap) as [extendedResult, color]}
+											<button
+												type="button"
+												onclick={() => toggleExtendedResult(extendedResult)}
+												class="px-2 py-1 rounded-md font-bold"
+												style="background-color: {selectedExtendedResults.includes(extendedResult)
+													? color
+													: 'grey'}; color: white; opacity: {selectedExtendedResults.includes(
+													extendedResult
+												)
+													? 1
+													: 0.3};"
+											>
+												{safeTranslate(extendedResult)}
+											</button>
+										{/each}
+									</div>
+								</div>
+							{/if}
 							<div>
-								<span class="text-sm font-bold">{m.status()}</span>
-								<div class="flex flex-wrap w-fit gap-2 text-xs bg-surface-100-900 border-2 p-1 rounded-md">
-									{#each Object.entries(complianceStatusColorMap) as [status, color]}
-										<button
-											type="button"
-											onclick={() => toggleStatus(status)}
-											class="px-2 py-1 rounded-md font-bold"
-											style="background-color: {selectedStatus.includes(status)
-												? color + '44'
-												: 'grey'}; color: {selectedStatus.includes(status)
-												? darkenColor(color, 0.3)
-												: 'black'}; opacity: {selectedStatus.includes(status) ? 1 : 0.3};"
-										>
-											{safeTranslate(status)}
-										</button>
-									{/each}
+								<span class="text-sm font-bold">{m.ShowOnlyAssessable()}</span>
+								<div id="toggle" class="flex items-center space-x-4 text-xs ml-auto mr-4">
+									<Switch
+										name="questionnaireToggle"
+										class="flex flex-row items-center justify-center"
+										checked={displayOnlyAssessableNodes}
+										onCheckedChange={(e) => {
+											displayOnlyAssessableNodes = e.checked;
+											auditFiltersStore.setDisplayOnlyAssessableNodes(id, e.checked);
+										}}
+									>
+										<Switch.Control>
+											<Switch.Thumb />
+										</Switch.Control>
+										<Switch.HiddenInput />
+										{#if displayOnlyAssessableNodes}
+											<span class="font-bold text-xs text-primary-500">{m.yes()}</span>
+										{:else}
+											<span class="font-bold text-xs text-surface-600-400">{m.no()}</span>
+										{/if}
+									</Switch>
 								</div>
 							</div>
-						{/if}
-						{#if data.compliance_assessment.extended_result_enabled}
-							<div>
-								<span class="text-sm font-bold">{m.extendedResult()}</span>
-								<div class="flex flex-wrap w-fit gap-2 text-xs bg-surface-100-900 border-2 p-1 rounded-md">
-									{#each Object.entries(extendedResultColorMap) as [extendedResult, color]}
-										<button
-											type="button"
-											onclick={() => toggleExtendedResult(extendedResult)}
-											class="px-2 py-1 rounded-md font-bold"
-											style="background-color: {selectedExtendedResults.includes(extendedResult)
-												? color
-												: 'grey'}; color: white; opacity: {selectedExtendedResults.includes(
-												extendedResult
-											)
-												? 1
-												: 0.3};"
-										>
-											{safeTranslate(extendedResult)}
-										</button>
-									{/each}
-								</div>
-							</div>
-						{/if}
-						<div>
-							<span class="text-sm font-bold">{m.ShowOnlyAssessable()}</span>
-							<div id="toggle" class="flex items-center space-x-4 text-xs ml-auto mr-4">
-								<Switch
-									name="questionnaireToggle"
-									class="flex flex-row items-center justify-center"
-									checked={displayOnlyAssessableNodes}
-									onCheckedChange={(e) => {
-										displayOnlyAssessableNodes = e.checked;
-										auditFiltersStore.setDisplayOnlyAssessableNodes(id, e.checked);
-									}}
-								>
-									<Switch.Control>
-										<Switch.Thumb />
-									</Switch.Control>
-									<Switch.HiddenInput />
-									{#if displayOnlyAssessableNodes}
-										<span class="font-bold text-xs text-primary-500">{m.yes()}</span>
-									{:else}
-										<span class="font-bold text-xs text-surface-600-400">{m.no()}</span>
-									{/if}
-								</Switch>
-							</div>
-						</div>
-					</Popover.Content>
-				</Popover.Positioner>
-			</Popover>
+						</Popover.Content>
+					</Popover.Positioner>
+				</Popover>
+			</div>
 		</div>
 
 		<div class="flex items-center my-2 text-xs space-x-2 text-surface-600-400">
@@ -1099,18 +1263,28 @@
 {#if threatDialogOpen}
 	<dialog
 		bind:this={dialogElement}
-		class="card p-4 bg-surface-50-950 shadow-2xl w-2/3 max-h-3/4 overflow-auto rounded-lg"
+		class="fixed inset-0 m-auto w-[90vw] max-w-5xl h-[85vh] rounded-2xl bg-surface-50-950 shadow-2xl border border-surface-200-800 p-0 overflow-hidden backdrop:bg-black/40"
+		aria-labelledby="threats-dialog-title"
 		onclose={() => (threatDialogOpen = false)}
 	>
-		<div class="flex justify-between items-center mb-4">
-			<h3 class="h3 font-bold capitalize">{m.potentialThreats()}</h3>
-			<button class="btn btn-sm preset-filled-error-500" onclick={closeThreatsDialog}>
+		<div class="flex justify-between items-center px-6 py-4 border-b border-surface-100-900">
+			<h3 id="threats-dialog-title" class="text-lg font-bold text-surface-900-100">
+				{m.potentialThreats()}
+			</h3>
+			<button
+				class="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-surface-200-800 transition-colors text-surface-600-400 hover:text-surface-700-300"
+				aria-label="Close"
+				onclick={closeThreatsDialog}
+			>
 				<i class="fa-solid fa-times"></i>
 			</button>
 		</div>
-
-		<div class="threats-content">
-			<ForceCirclePacking data={data.threats.graph} name="threats_graph" height="h-[600px]" />
+		<div class="p-4 h-[calc(85vh-64px)] overflow-auto">
+			<ForceCirclePacking
+				data={data.threats.graph}
+				name="threats_graph"
+				height="h-[calc(85vh-120px)]"
+			/>
 		</div>
 	</dialog>
 {/if}

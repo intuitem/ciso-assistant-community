@@ -10,7 +10,7 @@
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import { defaults } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms/client';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
 
 	let { data }: { data: PageData } = $props();

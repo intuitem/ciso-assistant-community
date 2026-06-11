@@ -8,6 +8,7 @@
 	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
 	import Score from '$lib/components/Forms/Score.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import SplashCard from '$lib/components/FrameworkBuilder/SplashCard.svelte';
 	import TableMarkdownField from '$lib/components/Forms/TableMarkdownField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import {
@@ -18,9 +19,25 @@
 	} from '$lib/components/Modals/stores';
 	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
 	import { complianceResultColorMap, complianceResultTailwindColorMap } from '$lib/utils/constants';
-	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
+	import {
+		displayScoreColor,
+		formatScoreValue,
+		getFieldVisibility,
+		hasComputedResult,
+		hasComputedScore,
+		resultBadgeStyle,
+		isFieldEditable as isFieldEditableHelper,
+		shouldShowAutoQuestion,
+		buildAutoAlignmentQuestion,
+		alignmentValueFromChoiceUrn,
+		choiceUrnFromAlignmentValue,
+		alignmentColorMap,
+		AUTO_ALIGNMENT_QUESTION_URN
+	} from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
+	import { getLocale } from '$paraglide/runtime';
+	import { formatDate } from '$lib/utils/datetime';
 	import { Accordion, Progress } from '@skeletonlabs/skeleton-svelte';
 	import { superForm, type SuperForm } from 'sveltekit-superforms';
 	import type { ActionData, PageData } from './$types';
@@ -41,23 +58,72 @@
 		{ id: 'compliant', label: m.compliant() },
 		{ id: 'not_applicable', label: m.notApplicable() }
 	];
+
+	const status_options = [
+		{ id: 'to_do', label: m.toDo() },
+		{ id: 'in_progress', label: m.inProgress() },
+		{ id: 'in_review', label: m.inReview() },
+		{ id: 'done', label: m.done() }
+	];
+
+	const extended_result_options = [
+		{ id: 'major_nonconformity', label: m.majorNonconformity() },
+		{ id: 'minor_nonconformity', label: m.minorNonconformity() },
+		{ id: 'observation_sensitive_point', label: m.observationSensitivePoint() },
+		{ id: 'opportunity_for_improvement', label: m.opportunityForImprovement() },
+		{ id: 'good_practice', label: m.goodPractice() }
+	];
 	let requirementAssessments = $derived(data.requirement_assessments);
 	let complianceAssessment = $derived(data.compliance_assessment);
+
+	// Field visibility based on viewer role (respondent if assigned actor, auditor otherwise)
+	const fw = $derived(complianceAssessment.framework);
+	const viewerRole = $derived((data.viewerRole ?? 'respondent') as 'respondent' | 'auditor');
+	const fieldVis = $derived(getFieldVisibility(complianceAssessment, viewerRole));
+	const showAnswers = $derived(fieldVis.showAnswers);
+	const showResult = $derived(fieldVis.showResult);
+	const showScore = $derived(fieldVis.showScore);
+	const showDocumentationScore = $derived(fieldVis.showDocumentationScore);
+	const showObservation = $derived(fieldVis.showObservation);
+	const showAppliedControls = $derived(fieldVis.showAppliedControls);
+	const showEvidences = $derived(fieldVis.showEvidences);
+	const showRespondentAlignment = $derived(fieldVis.showRespondentAlignment);
+	const showComments = $derived(fieldVis.showComments);
+	const showStatus = $derived(fieldVis.showStatus);
+	const showExtendedResult = $derived(fieldVis.showExtendedResult);
 
 	// Single assignment — the URL param (params.id) IS the assignment ID
 	let assignment = $derived(data.assignment);
 	let assignmentStatus = $derived(assignment?.status ?? null);
 
-	let isReadOnly = $derived(
-		complianceAssessment.is_locked ||
-			complianceAssessment.status === 'in_review' ||
-			assignmentStatus === 'draft' ||
-			assignmentStatus === 'submitted' ||
-			assignmentStatus === 'closed'
-	);
+	let isAuditor = $derived(viewerRole === 'auditor');
+
+	function isFieldEditable(fieldName: string): boolean {
+		if (complianceAssessment.is_locked || complianceAssessment.status === 'in_review') return false;
+		if (!isAuditor) {
+			if (
+				assignmentStatus === 'draft' ||
+				assignmentStatus === 'submitted' ||
+				assignmentStatus === 'closed'
+			)
+				return false;
+		}
+		return isFieldEditableHelper(complianceAssessment, fieldName, viewerRole);
+	}
+
+	const canEditResult = $derived(isFieldEditable('result'));
+	const canEditScore = $derived(isFieldEditable('score'));
+	const canEditDocumentationScore = $derived(isFieldEditable('documentation_score'));
+	const canEditObservation = $derived(isFieldEditable('observation'));
+	const canEditAppliedControls = $derived(isFieldEditable('applied_controls'));
+	const canEditEvidences = $derived(isFieldEditable('evidences'));
+	const canEditAnswers = $derived(isFieldEditable('answers'));
+	const canEditAlignment = $derived(isFieldEditable('respondent_alignment'));
+	const canEditStatus = $derived(isFieldEditable('status'));
+	const canEditExtendedResult = $derived(isFieldEditable('extended_result'));
 
 	let canSubmit = $derived(
-		assignmentStatus === 'in_progress' || assignmentStatus === 'changes_requested'
+		!isAuditor && (assignmentStatus === 'in_progress' || assignmentStatus === 'changes_requested')
 	);
 
 	// Get latest observation from the most recent changes_requested event
@@ -97,10 +163,12 @@
 	async function handleSubmitForReview() {
 		if (!assignment || !canSubmit) return;
 
+		const body = m.submitForReviewConfirm();
+
 		const modal: ModalSettings = {
 			type: 'confirm',
 			title: m.submitForReview(),
-			body: m.submitForReviewConfirm(),
+			body,
 			response: async (confirmed: boolean) => {
 				if (!confirmed) return;
 				isSubmitting = true;
@@ -146,29 +214,136 @@
 		)
 	);
 
-	// --- Assessable items only (for prev/next navigation) ---
-	const assessableItems = $derived(requirementAssessments.filter((ra) => ra.assessable));
+	// --- Navigation items: assessable items + splash screen nodes + section headers ---
+	type NavItem =
+		| { type: 'assessment'; data: (typeof requirementAssessments)[0] }
+		| { type: 'splash'; data: Record<string, any> }
+		| { type: 'section'; data: Record<string, any> };
+
+	const assessmentNavItems: NavItem[] = $derived(
+		requirementAssessments
+			.filter((ra) => ra.assessable)
+			.map((ra) => ({ type: 'assessment' as const, data: ra }))
+	);
+
+	const splashNavItems: NavItem[] = $derived(
+		data.requirements
+			.filter((r: Record<string, any>) => r.display_mode === 'splash')
+			.map((r: Record<string, any>) => ({ type: 'splash' as const, data: r }))
+	);
+
+	const navItems: NavItem[] = $derived.by(() => {
+		const sorted = [...assessmentNavItems, ...splashNavItems].sort((a, b) => {
+			const orderA =
+				a.type === 'assessment'
+					? (requirementHashmap[a.data.requirement?.id]?.order_id ?? 0)
+					: (a.data.order_id ?? 0);
+			const orderB =
+				b.type === 'assessment'
+					? (requirementHashmap[b.data.requirement?.id]?.order_id ?? 0)
+					: (b.data.order_id ?? 0);
+			return orderA - orderB;
+		});
+
+		// Insert section headers before groups of items sharing the same parent
+		const seenParents = new Set<string>();
+		const items: NavItem[] = [];
+		for (const item of sorted) {
+			const parentUrn =
+				item.type === 'assessment'
+					? requirementHashmap[item.data.requirement?.id]?.parent_requirement
+					: item.data.parent_requirement;
+			if (parentUrn && !seenParents.has(parentUrn)) {
+				seenParents.add(parentUrn);
+				const parentNode = data.requirements.find(
+					(r: Record<string, any>) => r.id === parentUrn || r.urn === parentUrn
+				);
+				if (parentNode && parentNode.display_mode !== 'splash' && !parentNode.assessable) {
+					items.push({ type: 'section', data: parentNode });
+				}
+			}
+			items.push(item);
+		}
+		return items;
+	});
+
+	const assessableItems = $derived(
+		navItems.filter((item): item is NavItem & { type: 'assessment' } => item.type === 'assessment')
+	);
+
 	let currentIndex = $state(0);
-	const currentItem = $derived(assessableItems[currentIndex]);
+	const currentNavItem = $derived(navItems[currentIndex]);
+	const currentItem = $derived(currentNavItem?.type === 'assessment' ? currentNavItem.data : null);
+	const currentSplashNode = $derived(
+		currentNavItem?.type === 'splash' ? currentNavItem.data : null
+	);
+	const currentSectionNode = $derived(
+		currentNavItem?.type === 'section' ? currentNavItem.data : null
+	);
 
 	function goTo(index: number) {
-		if (index >= 0 && index < assessableItems.length) {
+		if (index >= 0 && index < navItems.length) {
 			currentIndex = index;
-			// Scroll to top of the requirement card
 			const el = document.getElementById('current-requirement');
 			if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 		}
 	}
 
-	// --- Progress ---
+	// --- Progress (question-based when framework has questions, else result-based) ---
+	// Framework-less assessable RAs count as 1 virtual auto-question for both roles,
+	// so respondent and auditor see the same progress.
+	function isFrameworklessAssessableItem(item: { data: Record<string, any> }): boolean {
+		if (!item.data.requirement) return false;
+		const q = item.data.requirement.questions;
+		return (item.data.visible_questions ?? 0) === 0 && (q == null || Object.keys(q).length === 0);
+	}
+	const totalQuestions = $derived(
+		assessableItems.reduce((sum, item) => {
+			const visible = item.data.visible_questions ?? 0;
+			if (isFrameworklessAssessableItem(item)) return sum + 1;
+			return sum + visible;
+		}, 0)
+	);
+	const answeredQuestions = $derived(
+		assessableItems.reduce((sum, item) => {
+			const answered = item.data.answered_questions ?? 0;
+			if (isFrameworklessAssessableItem(item)) {
+				return sum + (item.data.respondent_alignment ? 1 : 0);
+			}
+			return sum + answered;
+		}, 0)
+	);
+	const useQuestionProgress = $derived(showAnswers && totalQuestions > 0);
+
 	const totalAssessable = $derived(assessableItems.length);
 	const assessedCount = $derived(
-		assessableItems.filter((ra) => ra.result !== 'not_assessed').length
+		assessableItems.filter((item) => item.data.result !== 'not_assessed').length
 	);
 	const progressPercent = $derived(
-		totalAssessable > 0 ? Math.round((assessedCount / totalAssessable) * 100) : 0
+		useQuestionProgress
+			? Math.round((answeredQuestions / totalQuestions) * 100)
+			: totalAssessable > 0
+				? Math.round((assessedCount / totalAssessable) * 100)
+				: 0
 	);
-	let submitBlocked = $derived(assessedCount < totalAssessable);
+	let hasUnassessed = $derived(
+		useQuestionProgress ? answeredQuestions < totalQuestions : assessedCount < totalAssessable
+	);
+
+	// Per-requirement question completion status for ToC dots
+	function getQuestionStatus(item: { data: Record<string, any> }): string {
+		const visible = item.data.visible_questions ?? 0;
+		const answered = item.data.answered_questions ?? 0;
+		// Framework-less assessable RA: reflect respondent_alignment state
+		// for both respondent and auditor views so the ToC is accurate for everyone.
+		if (isFrameworklessAssessableItem(item)) {
+			return item.data.respondent_alignment ? '#22c55e' : '#ef4444';
+		}
+		if (visible === 0) return '#22c55e'; // no questions = complete (green)
+		if (answered >= visible) return '#22c55e'; // all answered (green)
+		if (answered > 0) return '#f59e0b'; // partial (amber)
+		return '#d1d5db'; // empty (gray)
+	}
 
 	// --- Update logic (same as table-mode) ---
 	async function updateBulk(
@@ -318,16 +493,13 @@
 		});
 	});
 
-	let accordionItems: Record<string, ['' | 'observation' | 'evidence']> = $state(
+	let accordionItems: Record<string, string[]> = $state(
 		// svelte-ignore state_referenced_locally
 		requirementAssessments.reduce(
 			(acc, requirementAssessment) => {
-				return {
-					...acc,
-					[requirementAssessment.id]: ['']
-				};
+				return { ...acc, [requirementAssessment.id]: [] };
 			},
-			{} as Record<string, ['' | 'observation' | 'evidence']>
+			{} as Record<string, string[]>
 		)
 	);
 
@@ -348,8 +520,24 @@
 
 	// --- ToC items ---
 	const tocSections = $derived(
-		assessableItems.map((ra, index) => {
-			const req = ra.requirement;
+		navItems.map((item, index) => {
+			if (item.type === 'splash') {
+				return {
+					index,
+					id: item.data.id,
+					title: item.data.name || 'Splash',
+					result: '__splash__'
+				};
+			}
+			if (item.type === 'section') {
+				return {
+					index,
+					id: item.data.id,
+					title: item.data.name || 'Section',
+					result: '__section__'
+				};
+			}
+			const req = item.data.requirement;
 			const refId = req?.ref_id ?? '';
 			const name = req?.name ?? '';
 			let title = '';
@@ -364,9 +552,10 @@
 			}
 			return {
 				index,
-				id: ra.id,
+				id: item.data.id,
 				title,
-				result: ra.result
+				result: item.data.result,
+				questionColor: getQuestionStatus(item)
 			};
 		})
 	);
@@ -431,14 +620,14 @@
 			</button>
 		</div>
 		{#if !tocCollapsed}
-			<div class="px-2 py-2 flex flex-wrap gap-1 border-b border-gray-200">
+			<div class="px-2 py-2 flex flex-wrap gap-1 border-b border-surface-200-800">
 				{#each resultCounts as opt}
 					{#if opt.count > 0}
 						<button
 							class="px-2 py-1 text-[10px] rounded transition-colors flex items-center gap-1.5
 								{tocFilterResult === opt.id
-								? 'bg-gray-700 text-white font-semibold'
-								: 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'}"
+								? 'bg-surface-700-300 text-white font-semibold'
+								: 'bg-surface-50-950 text-surface-700-300 hover:bg-surface-200-800 border border-surface-200-800'}"
 							onclick={() => (tocFilterResult = tocFilterResult === opt.id ? null : opt.id)}
 							title={opt.label}
 						>
@@ -453,20 +642,35 @@
 			</div>
 			<nav class="p-2 space-y-0.5">
 				{#each filteredTocSections as section}
-					<button
-						class="w-full text-left px-2 py-1.5 text-xs rounded-md transition-colors truncate flex items-center gap-1.5
-							{section.index === currentIndex
-							? 'bg-primary-100 text-primary-800 font-semibold'
-							: 'text-surface-600-400 hover:bg-surface-100-900'}"
-						onclick={() => goTo(section.index)}
-						title={section.title}
-					>
-						<span
-							class="inline-block w-2 h-2 rounded-full flex-shrink-0"
-							style="background-color: {complianceResultColorMap[section.result] ?? '#d1d5db'};"
-						></span>
-						<span class="truncate">{section.title}</span>
-					</button>
+					{#if section.result === '__section__'}
+						<button
+							class="w-full text-left px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-surface-400-600 mt-2 truncate
+								{section.index === currentIndex ? 'text-primary-700' : ''}"
+							onclick={() => goTo(section.index)}
+							title={section.title}
+						>
+							<span class="truncate">{section.title}</span>
+						</button>
+					{:else}
+						<button
+							class="w-full text-left px-2 py-1.5 text-xs rounded-md transition-colors truncate flex items-center gap-1.5
+								{section.index === currentIndex
+								? 'bg-primary-100 text-primary-800 font-semibold'
+								: 'text-surface-600-400 hover:bg-surface-200-800'}"
+							onclick={() => goTo(section.index)}
+							title={section.title}
+						>
+							<span
+								class="inline-block w-2 h-2 rounded-full flex-shrink-0"
+								style="background-color: {section.result === '__splash__'
+									? '#a855f7'
+									: useQuestionProgress
+										? section.questionColor
+										: (complianceResultColorMap[section.result] ?? '#d1d5db')};"
+							></span>
+							<span class="truncate">{section.title}</span>
+						</button>
+					{/if}
 				{/each}
 			</nav>
 		{/if}
@@ -495,7 +699,7 @@
 					</div>
 				</div>
 				<div class="text-sm text-surface-600-400">
-					{currentIndex + 1} / {totalAssessable}
+					{currentIndex + 1} / {navItems.length}
 				</div>
 			</div>
 			<!-- ETA / Due date -->
@@ -521,16 +725,22 @@
 						style="width: {progressPercent}%; background: linear-gradient(90deg, var(--color-primary-500), var(--color-primary-400));"
 					></div>
 				</div>
-				<span class="text-sm font-medium text-surface-600-400 whitespace-nowrap"
-					>{assessedCount}/{totalAssessable} ({progressPercent}%)</span
-				>
+				<span class="text-sm font-medium text-surface-600-400 whitespace-nowrap">
+					{#if useQuestionProgress}
+						{answeredQuestions}/{totalQuestions} {m.questions()} ({progressPercent}%)
+					{:else}
+						{assessedCount}/{totalAssessable} ({progressPercent}%)
+					{/if}
+				</span>
 			</div>
 		</div>
 
-		<!-- Assignment status banners -->
-		{#if assignmentStatus === 'submitted'}
+		<!-- Assignment status banners (respondent only) -->
+		{#if isAuditor}
+			<!-- Auditors see nothing here -->
+		{:else if assignmentStatus === 'submitted'}
 			<div
-				class="bg-white border border-blue-200 border-l-[3px] border-l-blue-500 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
+				class="bg-surface-50-950 border border-blue-200 border-l-[3px] border-l-blue-500 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
 			>
 				<div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
 					<i class="fa-solid fa-clock text-blue-500 text-sm"></i>
@@ -539,7 +749,7 @@
 			</div>
 		{:else if assignmentStatus === 'closed'}
 			<div
-				class="bg-white border border-green-200 border-l-[3px] border-l-emerald-500 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
+				class="bg-surface-50-950 border border-green-200 border-l-[3px] border-l-emerald-500 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
 			>
 				<div
 					class="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0"
@@ -550,7 +760,7 @@
 			</div>
 		{:else if assignmentStatus === 'changes_requested'}
 			<div
-				class="bg-white border border-red-200 border-l-[3px] border-l-red-500 rounded-lg px-5 py-3 flex flex-col gap-2 shadow-sm"
+				class="bg-surface-50-950 border border-red-200 border-l-[3px] border-l-red-500 rounded-lg px-5 py-3 flex flex-col gap-2 shadow-sm"
 			>
 				<div class="flex items-center gap-3">
 					<div
@@ -568,13 +778,13 @@
 				{/if}
 				{#if assignment?.events?.length > 0}
 					<button
-						class="ml-11 badge bg-gray-100 text-gray-600 text-xs hover:bg-gray-200 cursor-pointer transition-colors"
+						class="ml-11 badge bg-surface-200-800 text-surface-600-400 text-xs hover:bg-surface-200-800 cursor-pointer transition-colors"
 						onclick={openHistoryModal}
 						title={m.viewHistory()}
 					>
 						<i class="fa-solid fa-clock-rotate-left mr-1"></i>
 						{m.eventsHistory()}
-						<span class="badge bg-gray-100 text-gray-500 text-[10px] ml-1"
+						<span class="badge bg-surface-200-800 text-surface-600-400 text-[10px] ml-1"
 							>{assignment.events.length}</span
 						>
 					</button>
@@ -582,34 +792,24 @@
 			</div>
 		{:else if assignmentStatus === 'draft'}
 			<div
-				class="bg-white border border-gray-200 border-l-[3px] border-l-gray-400 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
+				class="bg-surface-50-950 border border-surface-200-800 border-l-[3px] border-l-gray-400 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
 			>
 				<div
-					class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0"
+					class="w-8 h-8 rounded-full bg-surface-200-800 flex items-center justify-center flex-shrink-0"
 				>
-					<i class="fa-solid fa-hourglass text-gray-400 text-sm"></i>
+					<i class="fa-solid fa-hourglass text-surface-400-600 text-sm"></i>
 				</div>
-				<p class="text-sm text-gray-600 font-medium">{m.assignmentAwaitingStart()}</p>
+				<p class="text-sm text-surface-600-400 font-medium">{m.assignmentAwaitingStart()}</p>
 			</div>
 		{/if}
 
 		<!-- Submit for Review button -->
 		{#if canSubmit}
 			<div class="flex flex-col items-end gap-2">
-				{#if submitBlocked}
-					<p class="text-xs text-amber-600 flex items-center gap-1.5">
-						<i class="fa-solid fa-circle-exclamation"></i>
-						{m.incompleteAssessmentWarning({
-							remaining: totalAssessable - assessedCount,
-							total: totalAssessable
-						})}
-					</p>
-				{/if}
 				<button
 					class="btn preset-filled-primary-500"
 					onclick={handleSubmitForReview}
-					disabled={isSubmitting || submitBlocked}
-					title={submitBlocked ? m.incompleteAssessmentError() : ''}
+					disabled={isSubmitting}
 				>
 					{#if isSubmitting}
 						<i class="fa-solid fa-spinner fa-spin mr-2"></i>
@@ -624,7 +824,7 @@
 		<!-- Read-only banner (only for CA-level locks, not assignment-level) -->
 		{#if complianceAssessment.is_locked || complianceAssessment.status === 'in_review'}
 			<div
-				class="bg-white border border-yellow-200 border-l-[3px] border-l-yellow-500 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
+				class="bg-surface-50-950 border border-yellow-200 border-l-[3px] border-l-yellow-500 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
 			>
 				<div
 					class="w-8 h-8 rounded-full bg-yellow-50 flex items-center justify-center flex-shrink-0"
@@ -639,8 +839,27 @@
 			</div>
 		{/if}
 
-		<!-- Current requirement assessment -->
-		{#if currentItem}
+		<!-- Current item: splash screen or requirement assessment -->
+		{#if currentSplashNode}
+			<SplashCard
+				name={currentSplashNode.name}
+				description={currentSplashNode.description}
+				id="current-requirement"
+				class="card bg-surface-50-950 shadow-md"
+			/>
+		{:else if currentSectionNode}
+			<div
+				id="current-requirement"
+				class="card bg-surface-100-900 shadow-sm border-l-4 border-l-gray-400 px-6 py-3"
+			>
+				<h3 class="text-lg font-semibold text-surface-700-300">{currentSectionNode.name}</h3>
+				{#if currentSectionNode.description}
+					<div class="mt-2">
+						<MarkdownRenderer content={currentSectionNode.description} />
+					</div>
+				{/if}
+			</div>
+		{:else if currentItem}
 			{@const requirementAssessment = currentItem}
 			{@const requirement =
 				requirementHashmap[
@@ -705,13 +924,13 @@
 							method="post"
 						>
 							<!-- Questions (if present) -->
-							{#if requirement.questions != null && Object.keys(requirement.questions).length !== 0}
+							{#if showAnswers && requirement.questions != null && Object.keys(requirement.questions).length !== 0}
 								<div class="flex flex-col w-full space-y-2">
 									<Question
 										questions={requirement.questions}
 										initialValue={requirementAssessment.answers}
 										field="answers"
-										disabled={isReadOnly}
+										disabled={!canEditAnswers}
 										onChange={(urn, newAnswer) => {
 											requirementAssessment.answers[urn] = newAnswer;
 											update(requirementAssessment, 'answers', requirementAssessment.answers);
@@ -720,293 +939,385 @@
 								</div>
 							{/if}
 
-							<!-- Result -->
-							<div class="flex flex-col items-center w-full my-2">
-								<p class="flex items-center font-semibold text-purple-600 italic">
-									{m.result()}
-								</p>
-								{#if Object.values(requirement.questions || {}).some((question) => Array.isArray(question.choices) && question.choices.some((choice) => choice.compute_result !== undefined))}
-									<span
-										class="badge text-sm font-semibold"
-										style="background-color: {complianceResultColorMap[
-											requirementAssessment.result
-										] || '#ddd'}"
-									>
-										{safeTranslate(requirementAssessment.result)}
-									</span>
-								{:else}
-									<RadioGroup
-										possibleOptions={result_options}
-										key="id"
-										labelKey="label"
-										field="result"
-										colorMap={complianceResultTailwindColorMap}
-										disabled={isReadOnly}
-										initialValue={requirementAssessment.result}
-										onChange={(newValue) => {
-											const newResult =
-												requirementAssessment.result === newValue ? 'not_assessed' : newValue;
-											requirementAssessment.result = newResult;
-											update(requirementAssessment, 'result');
+							<!-- Auto-alignment question (when no framework questions) -->
+							{#if shouldShowAutoQuestion(requirement, viewerRole, complianceAssessment)}
+								<div class="flex flex-col w-full space-y-2">
+									<Question
+										questions={buildAutoAlignmentQuestion({
+											text: m.areYouAlignedWithThisRequirement(),
+											yes: m.yes(),
+											no: m.no(),
+											inProgress: m.inProgress(),
+											notApplicable: m.notApplicable()
+										})}
+										initialValue={{
+											[AUTO_ALIGNMENT_QUESTION_URN]: choiceUrnFromAlignmentValue(
+												requirementAssessment.respondent_alignment
+											)
+										}}
+										field="respondent_alignment"
+										disabled={!canEditAlignment}
+										onChange={(_urn, choiceUrn) => {
+											const newAlignment = alignmentValueFromChoiceUrn(choiceUrn);
+											requirementAssessment.respondent_alignment = newAlignment;
+											update(requirementAssessment, 'respondent_alignment');
 										}}
 									/>
-								{/if}
-							</div>
+								</div>
+							{/if}
 
-							<!-- Score -->
-							<div
-								class="flex flex-col w-full place-items-center {isReadOnly
-									? 'pointer-events-none opacity-60'
-									: ''}"
-							>
-								{#if Object.values(requirement.questions || {}).some((question) => Array.isArray(question.choices) && question.choices.some((choice) => choice.add_score !== undefined))}
-									<div class="flex flex-row items-center space-x-4">
-										<span class="font-medium">{m.score()}</span>
-										<div class="shrink-0 relative">
-											<Progress
-												value={formatScoreValue(
-													requirementAssessment.score,
-													complianceAssessment.max_score
-												)}
-												min={0}
-												max={100}
-											>
-												<Progress.Circle class="[--size:--spacing(10)]">
-													<Progress.CircleTrack />
-													<Progress.CircleRange
-														class={displayScoreColor(
-															requirementAssessment.score,
-															complianceAssessment.max_score
-														)}
-													/>
-												</Progress.Circle>
-												<div class="absolute inset-0 flex items-center justify-center">
-													<span class="text-xs font-bold">{requirementAssessment.score}</span>
-												</div>
-											</Progress>
-										</div>
-									</div>
-								{:else if requirementAssessment.result !== 'not_applicable'}
-									<Score
-										form={scoreForms[requirementAssessment.id]}
-										min_score={complianceAssessment.min_score}
-										max_score={complianceAssessment.max_score}
-										scores_definition={complianceAssessment.scores_definition}
-										field="score"
-										label={complianceAssessment.show_documentation_score
-											? m.implementationScore()
-											: m.score()}
-										styles="w-full p-1"
-										onChange={(newScore) => {
-											requirementAssessment.score = newScore;
-											updateScore(requirementAssessment);
-										}}
-										disabled={!requirementAssessment.is_scored}
+							<!-- Auditor badge: respondent's alignment answer -->
+							{#if viewerRole === 'auditor' && showRespondentAlignment && requirementAssessment.respondent_alignment}
+								<div class="flex flex-col items-center my-2">
+									<p class="text-xs italic text-surface-600">
+										{m.respondentAnswered()}
+									</p>
+									<span
+										class="badge text-sm font-semibold text-white"
+										style="background-color: {alignmentColorMap[
+											requirementAssessment.respondent_alignment
+										]}"
 									>
-										{#snippet left()}
-											<div>
-												<Checkbox
-													form={isScoredForms[requirementAssessment.id]}
-													field="is_scored"
-													disabled={isReadOnly}
-													label={''}
-													helpText={m.scoringHelpText()}
-													checkboxComponent="switch"
-													classes="h-full flex flex-row items-center justify-center my-1"
-													classesContainer="h-full flex flex-row items-center space-x-4"
-													onChange={async (newValue) => {
-														requirementAssessment.is_scored = newValue;
-														await update(requirementAssessment, 'is_scored');
-													}}
-												/>
-											</div>
-										{/snippet}
-									</Score>
-									{#if complianceAssessment.show_documentation_score}
-										<Score
-											form={docScoreForms[requirementAssessment.id]}
-											min_score={complianceAssessment.min_score}
-											max_score={complianceAssessment.max_score}
-											scores_definition={complianceAssessment.scores_definition}
-											field="documentation_score"
-											label={m.documentationScore()}
-											isDoc={true}
-											styles="w-full p-1"
-											onChange={(newScore) => {
-												requirementAssessment.documentation_score = newScore;
-												updateScore(requirementAssessment);
+										{safeTranslate(requirementAssessment.respondent_alignment)}
+									</span>
+								</div>
+							{/if}
+
+							<!-- Status -->
+							{#if showStatus}
+								<div class="flex flex-col items-center w-full my-2">
+									<p class="flex items-center font-semibold text-purple-600 italic">
+										{m.status()}
+									</p>
+									<RadioGroup
+										possibleOptions={status_options}
+										key="id"
+										labelKey="label"
+										field="status"
+										disabled={!canEditStatus}
+										initialValue={requirementAssessment.status ?? 'to_do'}
+										onChange={(newValue) => {
+											requirementAssessment.status = newValue;
+											update(requirementAssessment, 'status');
+										}}
+									/>
+								</div>
+							{/if}
+
+							<!-- Result -->
+							{#if showResult}
+								<div class="flex flex-col items-center w-full my-2" data-testid="result-field">
+									<p class="flex items-center font-semibold text-purple-600 italic">
+										{m.result()}
+									</p>
+									{#if hasComputedResult(requirement.questions)}
+										<span
+											class="badge text-sm font-semibold"
+											style={resultBadgeStyle(requirementAssessment.result)}
+										>
+											{safeTranslate(requirementAssessment.result)}
+										</span>
+									{:else}
+										<RadioGroup
+											possibleOptions={result_options}
+											key="id"
+											labelKey="label"
+											field="result"
+											colorMap={complianceResultTailwindColorMap}
+											disabled={!canEditResult}
+											initialValue={requirementAssessment.result}
+											onChange={(newValue) => {
+												const newResult =
+													requirementAssessment.result === newValue ? 'not_assessed' : newValue;
+												requirementAssessment.result = newResult;
+												update(requirementAssessment, 'result');
 											}}
-											disabled={!requirementAssessment.is_scored}
 										/>
 									{/if}
-								{/if}
-							</div>
+								</div>
+							{/if}
+
+							<!-- Extended result -->
+							{#if showExtendedResult}
+								<div class="flex flex-col items-center w-full my-2">
+									<p class="flex items-center font-semibold text-purple-600 italic">
+										{m.extendedResult()}
+									</p>
+									<RadioGroup
+										possibleOptions={extended_result_options}
+										key="id"
+										labelKey="label"
+										field="extended_result"
+										disabled={!canEditExtendedResult}
+										initialValue={requirementAssessment.extended_result ?? null}
+										onChange={(newValue) => {
+											const next =
+												requirementAssessment.extended_result === newValue ? null : newValue;
+											requirementAssessment.extended_result = next;
+											update(requirementAssessment, 'extended_result');
+										}}
+									/>
+								</div>
+							{/if}
+
+							<!-- Score -->
+							{#if showScore}
+								<div class="flex flex-col w-full place-items-center">
+									{#if complianceAssessment.scoring_enabled && hasComputedScore(requirement.questions)}
+										{@const raMin =
+											requirementAssessment.effective_min_score ?? complianceAssessment.min_score}
+										{@const raMax =
+											requirementAssessment.effective_max_score ?? complianceAssessment.max_score}
+										<div class="flex flex-row items-center space-x-4">
+											<span class="font-medium">{m.score()}</span>
+											<div class="shrink-0 relative">
+												<Progress
+													value={formatScoreValue(requirementAssessment.score, raMax, false, raMin)}
+													min={0}
+													max={100}
+												>
+													<Progress.Circle class="[--size:--spacing(10)]">
+														<Progress.CircleTrack />
+														<Progress.CircleRange
+															class={displayScoreColor(
+																requirementAssessment.score,
+																raMax,
+																false,
+																raMin
+															)}
+														/>
+													</Progress.Circle>
+													<div class="absolute inset-0 flex items-center justify-center">
+														<span class="text-xs font-bold">{requirementAssessment.score}</span>
+													</div>
+												</Progress>
+											</div>
+										</div>
+									{:else if complianceAssessment.scoring_enabled && requirementAssessment.result !== 'not_applicable'}
+										{@const raMin =
+											requirementAssessment.effective_min_score ?? complianceAssessment.min_score}
+										{@const raMax =
+											requirementAssessment.effective_max_score ?? complianceAssessment.max_score}
+										{@const raScoresDef =
+											requirementAssessment.effective_scores_definition ??
+											complianceAssessment.scores_definition}
+										<Score
+											form={scoreForms[requirementAssessment.id]}
+											min_score={raMin}
+											max_score={raMax}
+											scores_definition={raScoresDef}
+											field="score"
+											label={complianceAssessment.show_documentation_score
+												? m.implementationScore()
+												: m.score()}
+											styles="w-full p-1"
+											onChange={(newScore) => {
+												requirementAssessment.score = newScore;
+												updateScore(requirementAssessment);
+											}}
+											disabled={!canEditScore || !requirementAssessment.is_scored}
+										>
+											{#snippet left()}
+												<div>
+													<Checkbox
+														form={isScoredForms[requirementAssessment.id]}
+														field="is_scored"
+														disabled={!canEditScore}
+														label={''}
+														helpText={m.scoringHelpText()}
+														checkboxComponent="switch"
+														classes="h-full flex flex-row items-center justify-center my-1"
+														classesContainer="h-full flex flex-row items-center space-x-4"
+														onChange={async (newValue) => {
+															requirementAssessment.is_scored = newValue;
+															await update(requirementAssessment, 'is_scored');
+														}}
+													/>
+												</div>
+											{/snippet}
+										</Score>
+										{#if showDocumentationScore}
+											<Score
+												form={docScoreForms[requirementAssessment.id]}
+												min_score={raMin}
+												max_score={raMax}
+												scores_definition={raScoresDef}
+												field="documentation_score"
+												label={m.documentationScore()}
+												isDoc={true}
+												styles="w-full p-1"
+												onChange={(newScore) => {
+													requirementAssessment.documentation_score = newScore;
+													updateScore(requirementAssessment);
+												}}
+												disabled={!canEditDocumentationScore || !requirementAssessment.is_scored}
+											/>
+										{/if}
+									{/if}
+								</div>
+							{/if}
 
 							<Accordion
+								multiple
 								value={accordionItems[requirementAssessment.id]}
 								onValueChange={(e) => (accordionItems[requirementAssessment.id] = e.value)}
 							>
 								<!-- Applied Controls -->
-								<Accordion.Item value="appliedControl">
-									<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
-										<p class="flex flex-1 items-center space-x-2 text-left">
-											<span>{m.appliedControl()}</span>
-											{#if requirementAssessment.applied_controls != null}
-												<span class="badge preset-tonal-primary"
-													>{requirementAssessment.applied_controls.length}</span
-												>
-											{/if}
-										</p>
+								{#if showAppliedControls}
+									<Accordion.Item value="appliedControl">
+										<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+											<p class="flex flex-1 items-center space-x-2 text-left">
+												<span>{m.appliedControl()}</span>
+												{#if requirementAssessment.applied_controls != null}
+													<span class="badge preset-tonal-primary"
+														>{requirementAssessment.applied_controls.length}</span
+													>
+												{/if}
+											</p>
 
-										<Accordion.ItemIndicator
-											class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-											><svg
-												xmlns="http://www.w3.org/2000/svg"
-												width="14px"
-												height="14px"
-												viewBox="0 0 448 512"
-												><path
-													d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-												/></svg
-											></Accordion.ItemIndicator
-										>
-									</Accordion.ItemTrigger>
-									<Accordion.ItemContent>
-										{#if !isReadOnly}
-											<div class="flex flex-row space-x-2 items-center">
-												<button
-													class="btn preset-filled-primary-500 self-start"
-													onclick={() =>
-														modalMeasureCreateForm(requirementAssessment.measureCreateForm)}
-													type="button"
-												>
-													<i class="fa-solid fa-plus mr-2"></i>{m.addAppliedControl()}
-												</button>
-												<button
-													class="btn preset-filled-secondary-500 self-start"
-													type="button"
-													onclick={() =>
-														modalUpdateForm(requirementAssessment, 'selectAppliedControls')}
-												>
-													<i class="fa-solid fa-hand-pointer mr-2"></i>{m.selectAppliedControls()}
-												</button>
+											<Accordion.ItemIndicator
+												class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+												><svg
+													xmlns="http://www.w3.org/2000/svg"
+													width="14px"
+													height="14px"
+													viewBox="0 0 448 512"
+													><path
+														d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+													/></svg
+												></Accordion.ItemIndicator
+											>
+										</Accordion.ItemTrigger>
+										<Accordion.ItemContent>
+											{#if canEditAppliedControls}
+												<div class="flex flex-row space-x-2 items-center">
+													<button
+														class="btn preset-filled-primary-500 self-start"
+														onclick={() =>
+															modalMeasureCreateForm(requirementAssessment.measureCreateForm)}
+														type="button"
+													>
+														<i class="fa-solid fa-plus mr-2"></i>{m.addAppliedControl()}
+													</button>
+													<button
+														class="btn preset-filled-secondary-500 self-start"
+														type="button"
+														onclick={() =>
+															modalUpdateForm(requirementAssessment, 'selectAppliedControls')}
+													>
+														<i class="fa-solid fa-hand-pointer mr-2"></i>{m.selectAppliedControls()}
+													</button>
+												</div>
+											{/if}
+											<div class="flex flex-wrap space-x-2 items-center">
+												{#each requirementAssessment.applied_controls ?? [] as ac}
+													<p class="p-2">
+														<Anchor class="anchor" href="/applied-controls/{ac.id}" label={ac.str}>
+															<i class="fa-solid fa-fire-extinguisher mr-2"></i>{ac.str}
+														</Anchor>
+													</p>
+												{/each}
 											</div>
-										{/if}
-										<div class="flex flex-wrap space-x-2 items-center">
-											{#each requirementAssessment.applied_controls ?? [] as ac}
-												<p class="p-2">
-													<Anchor class="anchor" href="/applied-controls/{ac.id}" label={ac.str}>
-														<i class="fa-solid fa-fire-extinguisher mr-2"></i>{ac.str}
-													</Anchor>
-												</p>
-											{/each}
-										</div>
-									</Accordion.ItemContent>
-								</Accordion.Item>
+										</Accordion.ItemContent>
+									</Accordion.Item>
+								{/if}
 
 								<!-- Evidence -->
-								<Accordion.Item value="evidence">
-									<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
-										<p class="flex flex-1 items-center space-x-2 text-left">
-											<span>{m.evidence()}</span>
-											{#if requirementAssessment.evidences != null}
-												<span class="badge preset-tonal-primary" data-testid="evidence-count"
-													>{requirementAssessment.evidences.length}</span
-												>
-											{/if}
-										</p>
-
-										<Accordion.ItemIndicator
-											class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-											><svg
-												xmlns="http://www.w3.org/2000/svg"
-												width="14px"
-												height="14px"
-												viewBox="0 0 448 512"
-												><path
-													d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-												/></svg
-											></Accordion.ItemIndicator
+								{#if showEvidences}
+									<Accordion.Item value="evidence">
+										<Accordion.ItemTrigger
+											class="flex w-full items-center cursor-pointer"
+											data-testid="evidence-accordion-trigger"
 										>
-									</Accordion.ItemTrigger>
-									<Accordion.ItemContent>
-										{#if !isReadOnly}
-											<div class="flex flex-row space-x-2 items-center">
-												<button
-													class="btn preset-filled-primary-500 self-start"
-													onclick={() =>
-														modalEvidenceCreateForm(requirementAssessment.evidenceCreateForm)}
-													type="button"
-													data-testid="create-evidence-button"
-												>
-													<i class="fa-solid fa-plus mr-2"></i>{m.addEvidence()}
-												</button>
-												<button
-													class="btn preset-filled-secondary-500 self-start"
-													type="button"
-													data-testid="select-evidence-button"
-													onclick={() => modalUpdateForm(requirementAssessment, 'selectEvidences')}
-												>
-													<i class="fa-solid fa-hand-pointer mr-2"></i>{m.selectEvidence()}
-												</button>
-											</div>
-										{/if}
-										<div class="flex flex-wrap space-x-2 items-center">
-											{#each requirementAssessment.evidences ?? [] as evidence}
-												<p class="p-2">
-													<Anchor
-														class="anchor"
-														href="/evidences/{evidence.id}"
-														label={evidence.str}
-														data-testid="evidence-link"
+											<p class="flex flex-1 items-center space-x-2 text-left">
+												<span>{m.evidence()}</span>
+												{#if requirementAssessment.evidences != null}
+													<span class="badge preset-tonal-primary" data-testid="evidence-count"
+														>{requirementAssessment.evidences.length}</span
 													>
-														<i class="fa-solid fa-file-lines mr-2"></i>{evidence.str}
-													</Anchor>
-												</p>
-											{/each}
-										</div>
-									</Accordion.ItemContent>
-								</Accordion.Item>
+												{/if}
+											</p>
 
-								<!-- Observation -->
-								<Accordion.Item value="observation">
-									<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
-										<p class="flex flex-1 text-left">{m.observation()}</p>
-
-										<Accordion.ItemIndicator
-											class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-											><svg
-												xmlns="http://www.w3.org/2000/svg"
-												width="14px"
-												height="14px"
-												viewBox="0 0 448 512"
-												><path
-													d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-												/></svg
-											></Accordion.ItemIndicator
-										>
-									</Accordion.ItemTrigger>
-									<Accordion.ItemContent>
-										<TableMarkdownField
-											bind:value={requirementAssessment.observation}
-											disabled={isReadOnly}
-											onSave={async (newValue) => {
-												await update(requirementAssessment, 'observation');
-												requirementAssessment.observationBuffer = newValue;
-											}}
-										/>
-									</Accordion.ItemContent>
-								</Accordion.Item>
+											<Accordion.ItemIndicator
+												class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+												><svg
+													xmlns="http://www.w3.org/2000/svg"
+													width="14px"
+													height="14px"
+													viewBox="0 0 448 512"
+													><path
+														d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+													/></svg
+												></Accordion.ItemIndicator
+											>
+										</Accordion.ItemTrigger>
+										<Accordion.ItemContent>
+											{#if canEditEvidences}
+												<div class="flex flex-row space-x-2 items-center">
+													<button
+														class="btn preset-filled-primary-500 self-start"
+														onclick={() =>
+															modalEvidenceCreateForm(requirementAssessment.evidenceCreateForm)}
+														type="button"
+														data-testid="create-evidence-button"
+													>
+														<i class="fa-solid fa-plus mr-2"></i>{m.addEvidence()}
+													</button>
+													<button
+														class="btn preset-filled-secondary-500 self-start"
+														type="button"
+														data-testid="select-evidence-button"
+														onclick={() =>
+															modalUpdateForm(requirementAssessment, 'selectEvidences')}
+													>
+														<i class="fa-solid fa-hand-pointer mr-2"></i>{m.selectEvidence()}
+													</button>
+												</div>
+											{/if}
+											<div class="flex flex-wrap space-x-2 items-center">
+												{#each requirementAssessment.evidences ?? [] as evidence}
+													<p class="p-2">
+														<Anchor
+															class="anchor"
+															href="/evidences/{evidence.id}"
+															label={evidence.str}
+															data-testid="evidence-link"
+														>
+															<i class="fa-solid fa-file-lines mr-2"></i>{evidence.str}
+														</Anchor>
+													</p>
+												{/each}
+											</div>
+										</Accordion.ItemContent>
+									</Accordion.Item>
+								{/if}
 							</Accordion>
+
+							<!-- Observation (always visible, never collapsible) -->
+							{#if showObservation}
+								<div class="flex flex-col w-full space-y-1 pt-2">
+									<p class="font-medium text-sm">{m.observation()}</p>
+									<TableMarkdownField
+										bind:value={requirementAssessment.observation}
+										disabled={!canEditObservation}
+										onSave={async (newValue) => {
+											await update(requirementAssessment, 'observation');
+											requirementAssessment.observationBuffer = newValue;
+										}}
+									/>
+								</div>
+							{/if}
 						</form>
 					{/key}
 				{/if}
-				{#if page.data?.featureflags?.comments}
+				{#if page.data?.featureflags?.comments && showComments}
 					<CommentsPanel parentType="requirement_assessment" parentId={requirementAssessment.id} />
 				{/if}
 			</div>
+		{/if}
 
-			<!-- Previous / Next navigation -->
+		<!-- Previous / Next navigation (shown for both splash and assessment items) -->
+		{#if currentSplashNode || currentItem}
 			<div class="flex items-center justify-between card bg-surface-50-950 shadow-sm px-5 py-3">
 				<button
 					class="btn preset-tonal-surface"
@@ -1017,11 +1328,11 @@
 					{m.previous()}
 				</button>
 				<span class="text-sm text-surface-600-400">
-					{currentIndex + 1} / {totalAssessable}
+					{currentIndex + 1} / {navItems.length}
 				</span>
 				<button
 					class="btn preset-filled-primary-500"
-					disabled={currentIndex >= assessableItems.length - 1}
+					disabled={currentIndex >= navItems.length - 1}
 					onclick={() => goTo(currentIndex + 1)}
 				>
 					{m.next()}
@@ -1030,7 +1341,7 @@
 			</div>
 		{:else}
 			<div class="flex flex-col items-center justify-center py-20">
-				<div class="w-16 h-16 rounded-2xl bg-surface-100-900 flex items-center justify-center mb-5">
+				<div class="w-16 h-16 rounded-2xl bg-surface-200-800 flex items-center justify-center mb-5">
 					<i class="fa-solid fa-clipboard-check text-2xl text-surface-300-700"></i>
 				</div>
 				<p class="text-surface-400-600">{m.noAuditAssignments()}</p>
@@ -1044,7 +1355,7 @@
 	<div class="fixed inset-0 bg-black/50 z-40" onclick={closeHistoryModal} role="presentation"></div>
 	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
 		<div
-			class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col"
+			class="bg-surface-50-950 rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col"
 			onclick={(e) => e.stopPropagation()}
 			role="dialog"
 			aria-modal="true"
@@ -1068,7 +1379,7 @@
 			<!-- Content -->
 			<div class="p-4 overflow-y-auto flex-1">
 				<div class="mb-3">
-					<span class="text-sm text-gray-600">
+					<span class="text-sm text-surface-600-400">
 						{complianceAssessment.name}
 					</span>
 				</div>
@@ -1087,9 +1398,9 @@
 												? 'bg-blue-400'
 												: event.event_type === 'in_progress'
 													? 'bg-amber-400'
-													: 'bg-gray-300'}"
+													: 'bg-surface-300-700'}"
 								></div>
-								<div class="w-px flex-1 bg-gray-200 mt-1"></div>
+								<div class="w-px flex-1 bg-surface-200-800 mt-1"></div>
 							</div>
 							<div class="pb-3 flex-1">
 								<div class="flex items-center gap-2 text-sm">
@@ -1103,20 +1414,20 @@
 													? 'bg-blue-100 text-blue-700'
 													: event.event_type === 'in_progress'
 														? 'bg-orange-100 text-orange-700'
-														: 'bg-gray-100 text-gray-700'}"
+														: 'bg-surface-200-800 text-surface-700-300'}"
 									>
 										{safeTranslate(event.event_type)}
 									</span>
-									<span class="text-gray-500 text-xs">
+									<span class="text-surface-600-400 text-xs">
 										{formatEventActor(event.event_actor)}
 									</span>
 								</div>
-								<span class="text-gray-400 text-xs">
-									{new Date(event.created_at).toLocaleString()}
+								<span class="text-surface-400-600 text-xs">
+									{formatDate(new Date(event.created_at), true, getLocale())}
 								</span>
 								{#if event.event_notes}
 									<div
-										class="mt-1.5 text-sm text-gray-700 whitespace-pre-line bg-gray-50 border border-gray-100 rounded-md px-3 py-2"
+										class="mt-1.5 text-sm text-surface-700-300 whitespace-pre-line bg-surface-100-900 border border-surface-100-900 rounded-md px-3 py-2"
 									>
 										{event.event_notes}
 									</div>
@@ -1128,7 +1439,7 @@
 			</div>
 
 			<!-- Footer -->
-			<div class="p-4 border-t bg-gray-50 rounded-b-lg">
+			<div class="p-4 border-t bg-surface-100-900 rounded-b-lg">
 				<button class="btn preset-filled-surface-500 w-full" onclick={closeHistoryModal}>
 					{m.close()}
 				</button>

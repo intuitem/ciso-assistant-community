@@ -9,9 +9,12 @@
 	import type { PageData } from './$types';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { m } from '$paraglide/messages';
+	import { getLocale } from '$paraglide/runtime';
+	import { formatDate } from '$lib/utils/datetime';
 	import TreeViewItemContentSimple from './TreeViewItemContentSimple.svelte';
 	import TreeViewItemLeadSimple from './TreeViewItemLeadSimple.svelte';
 	import { complianceResultColorMap } from '$lib/utils/constants';
+	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { getToastStore } from '$lib/components/Toast/stores';
@@ -106,6 +109,7 @@
 		urn: string;
 		parent_urn?: string;
 		node_content: string;
+		display_mode?: string;
 		assessable: boolean;
 		style: string;
 		children?: Record<string, Node>;
@@ -266,43 +270,45 @@
 		nodes: [string, Node][],
 		hasParentNode: boolean = false
 	): TreeViewNode[] {
-		return nodes.map(([id, node]) => {
-			const nodeId = node.ra_id || id;
-			const assignmentInfo = node.ra_id ? getAssignmentInfo(node.ra_id) : null;
-			const isAssigned = node.ra_id ? assignedRequirementIds.has(node.ra_id) : false;
+		return nodes
+			.filter(([_, node]) => node.display_mode !== 'splash')
+			.map(([id, node]) => {
+				const nodeId = node.ra_id || id;
+				const assignmentInfo = node.ra_id ? getAssignmentInfo(node.ra_id) : null;
+				const isAssigned = node.ra_id ? assignedRequirementIds.has(node.ra_id) : false;
 
-			// Get all assessable descendant IDs for batch selection
-			const childrenIds = node.assessable ? [] : getAssessableDescendantIds(node);
+				// Get all assessable descendant IDs for batch selection
+				const childrenIds = node.assessable ? [] : getAssessableDescendantIds(node);
 
-			// For section nodes, get aggregated assignment info
-			const sectionAssignments = node.assessable ? [] : getSectionAssignments(node);
+				// For section nodes, get aggregated assignment info
+				const sectionAssignments = node.assessable ? [] : getSectionAssignments(node);
 
-			return {
-				id: nodeId,
-				content: TreeViewItemContentSimple,
-				contentProps: {
-					name: node.name,
-					urn: node.urn,
-					node_content: node.node_content,
-					assessable: node.assessable,
-					hasParentNode,
-					assignmentInfo,
-					isAssigned,
-					nodeId: nodeId,
-					childrenIds: childrenIds,
-					sectionAssignments
-				},
-				lead: TreeViewItemLeadSimple,
-				leadProps: {
-					assessable: node.assessable,
-					result: node.result,
-					resultColor: complianceResultColorMap[node.result || 'not_assessed'],
-					isAssigned,
-					assignmentInfo
-				},
-				children: node.children ? transformToTreeView(Object.entries(node.children), true) : []
-			};
-		});
+				return {
+					id: nodeId,
+					content: TreeViewItemContentSimple,
+					contentProps: {
+						name: node.name,
+						urn: node.urn,
+						node_content: node.node_content,
+						assessable: node.assessable,
+						hasParentNode,
+						assignmentInfo,
+						isAssigned,
+						nodeId: nodeId,
+						childrenIds: childrenIds,
+						sectionAssignments
+					},
+					lead: TreeViewItemLeadSimple,
+					leadProps: {
+						assessable: node.assessable,
+						result: node.result,
+						resultColor: complianceResultColorMap[node.result || 'not_assessed'],
+						isAssigned,
+						assignmentInfo
+					},
+					children: node.children ? transformToTreeView(Object.entries(node.children), true) : []
+				};
+			});
 	}
 
 	let treeViewNodes = $derived(transformToTreeView(Object.entries(data.tree)));
@@ -502,24 +508,6 @@
 
 	function handleClearSelection() {
 		$checkedNodesStore = new Set();
-	}
-
-	function expandAll() {
-		function getAllNodeIds(nodes: TreeViewNode[]): string[] {
-			const ids: string[] = [];
-			for (const node of nodes) {
-				if (node.children && node.children.length > 0) {
-					ids.push(node.id);
-					ids.push(...getAllNodeIds(node.children));
-				}
-			}
-			return ids;
-		}
-		expandedNodes = getAllNodeIds(treeViewNodes);
-	}
-
-	function collapseAll() {
-		expandedNodes = [];
 	}
 
 	// Helper to format actor display string
@@ -744,14 +732,7 @@
 					</button>
 				{/if}
 				<div class="flex-1"></div>
-				<button class="btn btn-sm preset-ghost-surface" onclick={expandAll}>
-					<i class="fa-solid fa-expand mr-1"></i>
-					{m.expandAll()}
-				</button>
-				<button class="btn btn-sm preset-ghost-surface" onclick={collapseAll}>
-					<i class="fa-solid fa-compress mr-1"></i>
-					{m.collapseAll()}
-				</button>
+				<TreeExpandCollapseToggle nodes={treeViewNodes} bind:expandedNodes />
 			</div>
 
 			<!-- Implementation Groups quick-select -->
@@ -844,7 +825,8 @@
 						{#key editingAssignmentId}
 							<AutocompleteSelect
 								form={assignmentSuperForm}
-								optionsEndpoint="actors?user__is_third_party=False"
+								optionsEndpoint="actors"
+								optionsDetailedUrlParameters={[['include_third_parties', 'true']]}
 								optionsLabelField="str"
 								optionsInfoFields={{
 									fields: [{ field: 'type', translate: true }],
@@ -916,7 +898,9 @@
 					<h2 class="h4 font-semibold">
 						<i class="fa-solid fa-list text-primary-500 mr-2"></i>
 						{m.existingAssignments()}
-						<span class="badge bg-surface-200-800 text-surface-700-300 ml-2">{assignments.length}</span>
+						<span class="badge bg-surface-200-800 text-surface-700-300 ml-2"
+							>{assignments.length}</span
+						>
 					</h2>
 					{#if !isReadOnly && hasDraftAssignments}
 						<button class="btn btn-sm preset-filled-warning-500" onclick={handleActivateAll}>
@@ -928,7 +912,9 @@
 
 				{#if assignments.length === 0}
 					<div class="flex flex-col items-center justify-center py-10 text-surface-400-600">
-						<div class="w-12 h-12 rounded-xl bg-surface-100-900 flex items-center justify-center mb-3">
+						<div
+							class="w-12 h-12 rounded-xl bg-surface-100-900 flex items-center justify-center mb-3"
+						>
 							<i class="fa-solid fa-folder-open text-lg text-surface-300-700"></i>
 						</div>
 						<p class="text-sm">{m.noAssignmentsYet()}</p>
@@ -1319,7 +1305,7 @@
 									</span>
 								</div>
 								<span class="text-gray-400 text-xs">
-									{new Date(event.created_at).toLocaleString()}
+									{formatDate(new Date(event.created_at), true, getLocale())}
 								</span>
 								{#if event.event_notes}
 									<div
