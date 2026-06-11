@@ -1,4 +1,8 @@
+from uuid import uuid4
+
 from auditlog import middleware
+from auditlog.cid import correlation_id, set_cid
+from auditlog.context import set_extra_data
 from django.utils.functional import SimpleLazyObject
 from auditlog.models import LogEntry
 from django.db.models.signals import post_save
@@ -17,6 +21,18 @@ class AuditlogMiddleware(middleware.AuditlogMiddleware):
         return SimpleLazyObject(
             lambda: middleware.AuditlogMiddleware._get_actor(request)
         )
+
+    def __call__(self, request):
+        # Reimplements the parent __call__ (cannot super(): it calls set_cid then
+        # get_response in one go, leaving no seam to mint a cid between them).
+        # set_cid honors an x-correlation-id header and resets the ContextVar per
+        # request; mint one when absent so all audit entries in a request share a cid.
+        set_cid(request)
+        if correlation_id.get() is None:
+            correlation_id.set(str(uuid4()))
+
+        with set_extra_data(context_data=self.get_extra_data(request)):
+            return self.get_response(request)
 
 
 # Add a post-save signal to add the additional info after the log entry is saved
