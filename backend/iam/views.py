@@ -4,7 +4,7 @@ from datetime import timedelta
 import structlog
 from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model, login, logout
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Q, Exists, OuterRef
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils import timezone
@@ -42,6 +42,20 @@ from .serializers import (
 logger = structlog.get_logger(__name__)
 
 User = get_user_model()
+
+
+def revoke_session_tokens(user) -> None:
+    """Revoke all Knox session tokens for the given user.
+
+    Personal Access Tokens are preserved, deleting them would be an
+    undesired side-effect. This mirrors the pattern used in
+    RevokeOtherSessionsView.
+    Must be called inside a transaction.atomic() block alongside the
+    password-change write so both operations are all-or-nothing.
+    """
+    AuthToken.objects.filter(user=user).exclude(
+        Exists(PersonalAccessToken.objects.filter(auth_token=OuterRef("pk")))
+    ).delete()
 
 
 class LoginView(KnoxLoginView):
@@ -394,8 +408,10 @@ class ResetPasswordConfirmView(views.APIView):
             user is not None and user.is_local
         ):  # Only local user can reset their password.
             if self.token_generator.check_token(user, token):
-                user.set_password(new_password)
-                user.save()
+                with transaction.atomic():
+                    user.set_password(new_password)
+                    user.save()
+                    revoke_session_tokens(user)
                 return Response(status=status.HTTP_200_OK)
         return Response(
             data={"error": "The link is invalid or has expired."},
@@ -422,11 +438,10 @@ class ChangePasswordView(views.APIView):
             raise serializers.ValidationError(
                 "Your old password was entered incorrectly. Please enter it again."
             )
-        user.set_password(new_password)
-        user.save()
-        AuthToken.objects.filter(user=user).exclude(
-            Exists(PersonalAccessToken.objects.filter(auth_token=OuterRef("pk")))
-        ).delete()
+        with transaction.atomic():
+            user.set_password(new_password)
+            user.save()
+            revoke_session_tokens(user)
         return Response(status=status.HTTP_200_OK)
 
 
@@ -447,8 +462,10 @@ class SetPasswordView(views.APIView):
         ):
             new_password = serializer.validated_data.get("new_password")
             user = serializer.validated_data.get("user")
-            user.set_password(new_password)
-            user.save()
+            with transaction.atomic():
+                user.set_password(new_password)
+                user.save()
+                revoke_session_tokens(user)
             try:
                 email_address = EmailAddress.objects.get(user=user, primary=True)
                 email_address.verified = True
