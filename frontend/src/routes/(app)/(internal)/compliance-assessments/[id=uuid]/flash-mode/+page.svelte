@@ -5,7 +5,13 @@
 	import { m } from '$paraglide/messages';
 	import type { PageData } from './$types';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import { getFieldVisibility } from '$lib/utils/helpers';
+	import {
+		getFieldVisibility,
+		hasComputedResult,
+		computeRequirementScoreAndResult,
+		resultBadgeStyle
+	} from '$lib/utils/helpers';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface Props {
 		data: PageData;
@@ -181,18 +187,49 @@
 		observationTimer = setTimeout(() => saveObservation(value), 500);
 	}
 
-	function saveAnswer(urn: string, newAnswer: any) {
+	async function saveAnswer(urn: string, newAnswer: any) {
 		if (!currentRequirementAssessment) return;
 		if (!currentRequirementAssessment.answers) currentRequirementAssessment.answers = {};
 		currentRequirementAssessment.answers[urn] = newAnswer;
+		// Optimistic preview from the shared compute helper (kept in sync with
+		// the backend aggregation).
+		const computed = computeRequirementScoreAndResult(
+			currentRequirementAssessment,
+			currentRequirementAssessment.answers
+		);
+		if (computed.result !== null) {
+			currentRequirementAssessment.result = computed.result;
+			result = computed.result;
+		}
+
 		const form = document.getElementById('flashModeForm');
-		fetch(form!.action, {
-			method: 'POST',
-			body: JSON.stringify({
-				id: currentRequirementAssessment.id,
-				answers: { [urn]: newAnswer }
-			})
-		});
+		const targetRa = currentRequirementAssessment;
+		try {
+			const res = await fetch(form!.action, {
+				method: 'POST',
+				body: JSON.stringify({
+					id: targetRa.id,
+					answers: { [urn]: newAnswer }
+				})
+			});
+			// SvelteKit wraps action responses; the actual API body lives at
+			// `data.body`. If the server recomputed a different result/score
+			// (e.g. due to logic the optimistic preview cannot mirror),
+			// reconcile so the badge matches persisted state.
+			const payload = await res.json().catch(() => null);
+			const apiBody = payload?.data?.body ?? payload?.body ?? null;
+			if (apiBody && targetRa.id === currentRequirementAssessment?.id) {
+				if (apiBody.result !== undefined && apiBody.result !== null) {
+					currentRequirementAssessment.result = apiBody.result;
+					result = apiBody.result;
+				}
+				if (apiBody.score !== undefined) {
+					currentRequirementAssessment.score = apiBody.score;
+				}
+			}
+		} catch (err) {
+			console.error('flash-mode saveAnswer failed', err);
+		}
 	}
 
 	let currentQuestions = $derived(
@@ -201,6 +238,7 @@
 			: null
 	);
 	let hasQuestions = $derived(currentQuestions != null && Object.keys(currentQuestions).length > 0);
+	let currentHasComputedResult = $derived(hasComputedResult(currentQuestions));
 
 	function updateResult(newResult: string | null) {
 		currentRequirementAssessment.result = newResult;
@@ -427,20 +465,26 @@
 				{#if currentRequirementAssessment}
 					<form id="flashModeForm" action="?/updateRequirementAssessment" method="post">
 						{#if showResult}
-							<RadioGroup
-								possibleOptions={possible_options}
-								initialValue={currentRequirementAssessment.result}
-								classes="w-full"
-								colorMap={complianceResultTailwindColorMap}
-								disabled={isReadOnly}
-								field="result"
-								onChange={(newValue) => {
-									const newResult = result === newValue ? 'not_assessed' : newValue;
-									updateResult(newResult);
-								}}
-								key="id"
-								labelKey="label"
-							/>
+							{#if currentHasComputedResult}
+								<span class="badge text-sm font-semibold" style={resultBadgeStyle(result)}>
+									{safeTranslate(result ?? 'not_assessed')}
+								</span>
+							{:else}
+								<RadioGroup
+									possibleOptions={possible_options}
+									initialValue={currentRequirementAssessment.result}
+									classes="w-full"
+									colorMap={complianceResultTailwindColorMap}
+									disabled={isReadOnly}
+									field="result"
+									onChange={(newValue) => {
+										const newResult = result === newValue ? 'not_assessed' : newValue;
+										updateResult(newResult);
+									}}
+									key="id"
+									labelKey="label"
+								/>
+							{/if}
 						{/if}
 					</form>
 

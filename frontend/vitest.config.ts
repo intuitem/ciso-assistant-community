@@ -15,7 +15,8 @@ export default defineConfig({
 			$lib: path.resolve(__dirname, 'src/lib'),
 			$paraglide: path.resolve(__dirname, 'src/paraglide'),
 			'$app/environment': path.resolve(__dirname, 'vitest-mocks/app-environment.ts'),
-			'$app/navigation': path.resolve(__dirname, 'vitest-mocks/app-navigation.ts')
+			'$app/navigation': path.resolve(__dirname, 'vitest-mocks/app-navigation.ts'),
+			'$env/dynamic/public': path.resolve(__dirname, 'vitest-mocks/env-dynamic-public.ts')
 		}
 	}
 });
