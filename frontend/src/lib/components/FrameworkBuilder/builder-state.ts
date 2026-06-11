@@ -8,6 +8,7 @@ import {
 	type DraftJSON
 } from './builder-api';
 import { m } from '$paraglide/messages';
+import { resolveComputeResult } from '$lib/utils/helpers';
 
 // --- Types ---
 
@@ -26,6 +27,18 @@ export function isSliderConfig(
 	config: Record<string, unknown> | null | undefined
 ): config is SliderConfig {
 	return !!config && (config as { widget?: unknown }).widget === 'slider';
+}
+
+/**
+ * Normalize a stored `compute_result` value into one of the four semantic
+ * options the builder UI exposes. Delegates to `resolveComputeResult` so the
+ * builder, the live edit-page compute, and the backend `resolve_compute_result`
+ * all share the same closed set of accepted values (true/false/1/0 legacy
+ * literals plus the four semantic strings). Anything else is dropped to null
+ * so a typo never silently round-trips back to the database.
+ */
+function normalizeComputeResult(value: unknown): string | null {
+	return resolveComputeResult(value);
 }
 
 export interface QuestionChoice {
@@ -384,7 +397,7 @@ export function serializeDraft(fw: Framework, rootNodes: BuilderNode[]): DraftJS
 						value: c.value,
 						annotation: c.annotation,
 						add_score: c.add_score,
-						compute_result: c.compute_result,
+						compute_result: normalizeComputeResult(c.compute_result),
 						order: c.order,
 						description: c.description,
 						color: c.color,
@@ -466,7 +479,7 @@ export function hydrateDraft(
 			value: (c.value ?? null) as string | null,
 			annotation: (c.annotation ?? null) as string | null,
 			add_score: (c.add_score ?? null) as number | null,
-			compute_result: (c.compute_result ?? null) as string | null,
+			compute_result: normalizeComputeResult(c.compute_result),
 			order: (c.order ?? 0) as number,
 			description: (c.description ?? null) as string | null,
 			color: (c.color ?? null) as string | null,
