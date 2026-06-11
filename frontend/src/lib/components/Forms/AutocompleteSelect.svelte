@@ -40,6 +40,7 @@
 		disabled?: boolean;
 		hidden?: boolean;
 		translateOptions?: boolean;
+		enableDoubleDash?: boolean;
 		options?: Option[];
 		optionsEndpoint?: string;
 		optionsDetailedUrlParameters?: [string, string][];
@@ -93,6 +94,7 @@
 		disabled = false,
 		hidden = false,
 		translateOptions = true,
+		enableDoubleDash = false,
 		options = [],
 		optionsEndpoint = '',
 		optionsDetailedUrlParameters = [],
@@ -348,7 +350,7 @@
 	function processOptions(objects: any[]) {
 		const append = (x: string, y: string) => (!y ? x : !x || x == '' ? y : x + ' - ' + y);
 
-		return objects
+		const processed = objects
 			.map((object) => {
 				const mainLabel =
 					optionsLabelField === 'auto'
@@ -429,6 +431,15 @@
 
 				return a.translatedLabel!.toLowerCase().localeCompare(b.translatedLabel!.toLowerCase());
 			});
+
+		// Prepend a "--" (unset) option, unless one is already present
+		if (
+			enableDoubleDash &&
+			!processed.find((o) => new Set(['--', 'undefined']).has(o.label?.toLowerCase())) // pattern from Select.svelte
+		) {
+			return [{ label: '--', value: '--', translatedLabel: '--' }, ...processed];
+		}
+		return processed;
 	}
 
 	function getNestedValue(obj: any, path: string, field = '') {
