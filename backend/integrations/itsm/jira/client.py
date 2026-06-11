@@ -184,11 +184,17 @@ class JiraClient(BaseIntegrationClient):
         if query_params is None:
             query_params = {}
 
-        project_key, _ = self._resolve_target()
+        project_key, issue_type = self._resolve_target()
         if not project_key:
             raise ValueError("Jira project_key/table_name is not configured")
 
         jql_query = f"project = {project_key}"
+        if issue_type:
+            # Scope to the configured issue type so the link picker doesn't
+            # surface issues of other types (e.g. Epics when Task is the
+            # target). Quote the name as it may contain spaces ("User Story").
+            escaped = issue_type.replace('"', '\\"')
+            jql_query += f' AND issuetype = "{escaped}"'
 
         start_at = query_params.get("start_at", 0)
         max_results = query_params.get("max_results", 10000)

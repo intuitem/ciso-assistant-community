@@ -324,6 +324,21 @@ def test_undefined_status_is_not_pushed(configuration):
     assert "status" not in remote
 
 
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_list_remote_objects_filters_by_issue_type(mock_jira, mock_sync, configuration):
+    """Listing linkable issues is scoped to the configured project AND issue type."""
+    mock_jira.return_value.search_issues.return_value = []
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = JiraClient(configuration)
+    client.list_remote_objects()
+
+    jql = mock_jira.return_value.search_issues.call_args[0][0]
+    assert "project = PROJ" in jql
+    assert 'issuetype = "Task"' in jql
+
+
 def test_degraded_status_round_trips(configuration):
     """The ``degraded`` status maps to/from Jira via the default value map."""
     mapper = JiraFieldMapper(configuration)
