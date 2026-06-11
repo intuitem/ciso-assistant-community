@@ -809,28 +809,42 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                             choices[i]["description"] = desc
 
                 # --- Optional: compute_result -----------------------------------------
+                # Accepted values mirror the framework builder UI:
+                #   "compliant", "non_compliant", "partially_compliant", "not_applicable"
+                # Legacy boolean literals are also accepted for backward compatibility:
+                #   "true"  -> compliant
+                #   "false" -> non_compliant
+                # Empty or "/" means the choice does not contribute to the result.
+                LEGACY_COMPUTE_RESULT_MAP = {
+                    "true": "compliant",
+                    "false": "non_compliant",
+                }
+                SEMANTIC_COMPUTE_RESULT_VALUES = {
+                    "compliant",
+                    "non_compliant",
+                    "partially_compliant",
+                    "not_applicable",
+                }
                 compute_lines = _per_choice_lines(
                     data, "compute_result", len(choices), answer_id
                 )
                 if compute_lines:
                     for i, val in enumerate(compute_lines):
                         v = val.lower()
-                        if v not in ("true", "false", "/", ""):
+                        if v in ("/", ""):
+                            continue
+                        if v in LEGACY_COMPUTE_RESULT_MAP:
+                            choices[i]["compute_result"] = LEGACY_COMPUTE_RESULT_MAP[v]
+                        elif v in SEMANTIC_COMPUTE_RESULT_VALUES:
+                            choices[i]["compute_result"] = v
+                        else:
                             raise ValueError(
                                 f"(answers_definition) Invalid compute_result value '{val}' "
-                                f"for answer ID '{answer_id}', choice #{i + 1}. Must be 'true', 'false', '/' (= 'undefined') or empty."
+                                f"for answer ID '{answer_id}', choice #{i + 1}. Must be one of "
+                                f"'compliant', 'non_compliant', 'partially_compliant', "
+                                f"'not_applicable', 'true' (= 'compliant'), 'false' (= 'non_compliant'), "
+                                f"'/' (= 'undefined'), or empty."
                             )
-
-                        # Use Boolean instead of string
-                        if v == "/" or v == "":
-                            v = None
-                        elif v == "true":
-                            v = True
-                        elif v == "false":
-                            v = False
-
-                        if v is not None:
-                            choices[i]["compute_result"] = v
 
                 # --- Optional: add_score ----------------------------------------------
                 score_lines = _per_choice_lines(

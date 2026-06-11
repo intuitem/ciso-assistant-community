@@ -74,6 +74,7 @@ Flags affect what's visible in the sidebar, what appears in CRUD pages, and whic
 
 - **journeys** — preset journeys for bootstrapping new organisations or domains.
 - **comments** — comments on objects.
+- **object_audit_trail** — per-object [audit trail](../../features/audit-log.md#per-object-audit-trail) button on detail pages, gated by the **Can view object audit trails** permission. _PRO._
 - **focus_mode** — UI mode that filters the entire workspace to a single domain. _PRO. Default off._
 
 ## Experimental

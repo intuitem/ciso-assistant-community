@@ -185,20 +185,14 @@
 	);
 
 	export const getBadgeStyles = (answers: any, questions: any) => {
-		if (!answers) {
-			return {
-				backgroundColor: '#fca5a5',
-				color: darkenColor('#fca5a5', 0.6),
-				answeredCount: 0,
-				totalCount: Object.keys(questions || {}).length
-			};
-		}
-		const visibleQuestions = Object.entries(questions || {}).filter(([_, q]) =>
-			isQuestionVisible(q, answers)
+		const questionMap = (questions || {}) as Record<string, any>;
+		const resolvedAnswers = answers ?? {};
+		const visibleQuestions = Object.entries(questionMap).filter(([_, q]) =>
+			isQuestionVisible(q, resolvedAnswers, questionMap)
 		);
 
 		const answeredCount = visibleQuestions.filter(([urn, _]) => {
-			const answer = answers[urn];
+			const answer = resolvedAnswers[urn];
 			if (Array.isArray(answer)) return answer.length > 0;
 			return answer !== null && answer !== undefined && answer !== '';
 		}).length;
