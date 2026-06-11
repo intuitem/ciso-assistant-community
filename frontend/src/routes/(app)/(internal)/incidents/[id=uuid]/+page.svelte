@@ -296,17 +296,20 @@
 						</span>
 					</Popover.Trigger>
 					<Popover.Positioner class="z-50!">
-						<Popover.Content class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1">
+						<Popover.Content
+							class="card whitespace-nowrap bg-surface-50-950 py-2 w-fit shadow-lg space-y-1"
+						>
 							<div>
-								<p class="block px-4 py-2 text-sm text-gray-800">{m.incident()}</p>
+								<p class="block px-4 py-2 text-sm text-surface-800-200">{m.incident()}</p>
 								<a
 									href="/incidents/{data.data.id}/export/md"
-									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+									class="block px-4 py-2 text-sm text-surface-800-200 hover:bg-surface-200-800"
 									>... {m.asMarkdown()}</a
 								>
 								<a
 									href="/incidents/{data.data.id}/export/pdf"
-									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
+									class="block px-4 py-2 text-sm text-surface-800-200 hover:bg-surface-200-800"
+									>... {m.asPDF()}</a
 								>
 							</div>
 						</Popover.Content>
@@ -381,7 +384,7 @@
 										/>
 									</div>
 									<button
-										class="btn bg-gray-300 h-11 w-10"
+										class="btn bg-surface-300-700 h-11 w-10"
 										onclick={(_) => modalEvidenceCreateForm()}
 										type="button"
 										data-testid="add-button-evidence"
@@ -421,7 +424,7 @@
 		{/snippet}
 	</DetailView>
 
-	<div class="card shadow-lg bg-white p-4 space-y-2">
+	<div class="card shadow-lg bg-surface-50-950 p-4 space-y-2">
 		<Tabs value={activeTab} onValueChange={(e) => (activeTab = e.value)}>
 			<Tabs.List>
 				<Tabs.Trigger value="timeline">
@@ -431,7 +434,7 @@
 					<i class="fa-solid fa-file-shield mr-2"></i>{m.doraIncidentReports()}
 					{#if doraRows.length > 0}
 						<span
-							class="ml-2 rounded-full px-2 py-0.5 text-xs preset-tonal-secondary text-gray-700"
+							class="ml-2 rounded-full px-2 py-0.5 text-xs preset-tonal-secondary text-surface-700-300"
 						>
 							{doraRows.length}
 						</span>
@@ -444,7 +447,7 @@
 							<i class="{panel.icon} mr-2"></i>{safeTranslate(panel.labelKey)}
 							{#if related.count !== undefined && related.count > 0}
 								<span
-									class="ml-2 rounded-full px-2 py-0.5 text-xs preset-tonal-secondary text-gray-700"
+									class="ml-2 rounded-full px-2 py-0.5 text-xs preset-tonal-secondary text-surface-700-300"
 								>
 									{related.count}
 								</span>
@@ -470,7 +473,9 @@
 							></div>
 							<div class="flex flex-col">
 								<div class="flex flex-row items-center space-x-3 mb-1">
-									<time class="text-sm font-normal leading-none text-gray-600 dark:text-gray-800">
+									<time
+										class="text-sm font-normal leading-none text-surface-600-400 dark:text-surface-800-200"
+									>
 										{formatDateOrDateTime(meta.timestamp, getLocale())} - {#if meta.author}{meta
 												?.author?.str}{:else}{m.unknownOrDeletedUser()}{/if}</time
 									>
@@ -486,7 +491,7 @@
 										preventDelete={preventDelete(row)}
 									></TableRowActions>
 									{#if formatDateOrDateTime(meta.updated_at, getLocale()) !== formatDateOrDateTime(meta.created_at, getLocale())}
-										<span class="text-xs italic text-gray-500 dark:text-gray-400">
+										<span class="text-xs italic text-surface-600-400 dark:text-surface-400-600">
 											({m.edited()})
 										</span>
 									{/if}
@@ -508,12 +513,16 @@
 											class="bg-primary-50 rounded-lg p-2"
 										/>
 									{:else}
-										<p class="italic text-gray-500 dark:text-gray-400">{m.noObservation()}</p>
+										<p class="italic text-surface-600-400 dark:text-surface-400-600">
+											{m.noObservation()}
+										</p>
 									{/if}
 								</div>
 								{#if meta.evidences && meta.evidences.length > 0}
 									<div class="mb-2">
-										<p class="text-xs font-medium text-gray-700 mb-1">{m.associatedEvidences()}:</p>
+										<p class="text-xs font-medium text-surface-700-300 mb-1">
+											{m.associatedEvidences()}:
+										</p>
 										<div class="flex flex-wrap gap-1">
 											{#each meta.evidences as evidence}
 												<a
@@ -569,7 +578,9 @@
 							>
 								{#snippet addButton()}
 									{#if canEditObject && field?.addExisting}
-										<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+										<span
+											class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
+										>
 											<button
 												class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
 												data-testid="select-existing-{panel.urlmodel}"
@@ -580,7 +591,9 @@
 												<i class="fa-solid fa-hand-pointer"></i>
 											</button>
 										</span>
-										<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+										<span
+											class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
+										>
 											<button
 												class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
 												data-testid="add-button-{panel.urlmodel}"
@@ -603,7 +616,7 @@
 				{#if doraRows.length > 0}
 					<table class="w-full text-sm">
 						<thead>
-							<tr class="border-b text-left text-gray-500">
+							<tr class="border-b text-left text-surface-600-400">
 								<th class="py-2 px-3">{m.incidentSubmission()}</th>
 								<th class="py-2 px-3">{safeTranslate('createdAt')}</th>
 								<th class="py-2 px-3">{safeTranslate('updatedAt')}</th>
@@ -613,7 +626,7 @@
 						<tbody>
 							{#each doraRows as report}
 								<tr
-									class="border-b hover:bg-gray-50 cursor-pointer"
+									class="border-b hover:bg-surface-100-900 cursor-pointer"
 									onclick={(e) => {
 										if (!(e.target as HTMLElement).closest('button')) {
 											window.location.href = `/dora-incident-reports/${report.id}`;
@@ -629,7 +642,9 @@
 												<i class="fa-solid fa-lock text-xs mr-1"></i>{m.submitted()}
 											</span>
 										{:else}
-											<span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded ml-1">
+											<span
+												class="bg-surface-200-800 text-surface-600-400 text-xs px-2 py-1 rounded ml-1"
+											>
 												{m.draft()}
 											</span>
 										{/if}
@@ -656,7 +671,7 @@
 						</tbody>
 					</table>
 				{:else}
-					<p class="text-gray-500 text-sm italic py-4">{m.noResultFound()}</p>
+					<p class="text-surface-600-400 text-sm italic py-4">{m.noResultFound()}</p>
 				{/if}
 			</Tabs.Content>
 		</Tabs>

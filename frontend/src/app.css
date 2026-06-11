@@ -11,7 +11,7 @@
 
 @source './**/*.{html,js,svelte,ts}';
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:is(.dark, .dark *));
 
 /*
   The default border color has changed to `currentcolor` in Tailwind CSS v4,
@@ -27,7 +27,7 @@
 	::before,
 	::backdrop,
 	::file-selector-button {
-		border-color: var(--color-gray-200, currentcolor);
+		border-color: var(--color-surface-200-800, currentcolor);
 	}
 }
 
@@ -62,12 +62,12 @@
 	.select,
 	.multiselect,
 	.textarea {
-		background-color: var(--color-surface-100);
+		background-color: var(--color-surface-100-900);
 	}
 
 	.checkbox,
 	.radio {
-		background-color: var(--color-surface-100);
+		background-color: var(--color-surface-100-900);
 	}
 }
 
@@ -75,6 +75,30 @@
 	[data-popup] {
 		transition: none;
 	}
+}
+
+/* svelte-multiselect dropdown dark mode */
+.dark div.multiselect > ul.options {
+	background-color: var(--color-surface-900);
+	color: var(--color-surface-50);
+}
+.dark div.multiselect > ul.options > li.active {
+	background-color: var(--color-surface-800);
+}
+.dark div.multiselect > ul.options > li:not(.active):hover {
+	background-color: var(--color-surface-800);
+}
+
+/* Tailwind prose dark mode */
+.dark .prose {
+	color: var(--color-surface-50);
+}
+.dark .prose th,
+.dark .prose td {
+	border-color: var(--color-surface-700);
+}
+.dark .prose thead {
+	border-color: var(--color-surface-600);
 }
 
 /* AutocompleteSelect: collapse overflow chips when chip-max-N class is on outerDiv.

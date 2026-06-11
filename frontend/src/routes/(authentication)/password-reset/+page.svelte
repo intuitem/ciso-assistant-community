@@ -15,22 +15,22 @@
 	let { data }: Props = $props();
 </script>
 
-<div class="flex mx-auto justify-center items-center h-screen w-screen bg-slate-200">
+<div class="flex mx-auto justify-center items-center h-screen w-screen bg-surface-200-800">
 	<div class="absolute top-5 left-5">
 		<div class="flex flex-row w-full space-x-4 pb-3">
 			<Logo />
 		</div>
 	</div>
 	<div class="flex items-center justify-center p-10 space-x-4 w-full">
-		<div class="lg:w-1/4 p-6 shadow-lg rounded-lg bg-white">
+		<div class="lg:w-1/4 p-6 shadow-lg rounded-lg bg-surface-50-950">
 			<div id="password_reset" class="flex flex-col items-center space-y-4">
 				<div class="bg-primary-300 px-6 py-5 rounded-full text-3xl">
 					<i class="fa-solid fa-lock"></i>
 				</div>
-				<h3 class="font-bold leading-tight tracking-tight text-gray-900 md:text-2xl">
+				<h3 class="font-bold leading-tight tracking-tight text-surface-950-50 md:text-2xl">
 					{m.forgtPassword()}
 				</h3>
-				<p class="text-center text-gray-600 text-sm">
+				<p class="text-center text-surface-600-400 text-sm">
 					{m.enterYourEmail()}.
 				</p>
 				<div>

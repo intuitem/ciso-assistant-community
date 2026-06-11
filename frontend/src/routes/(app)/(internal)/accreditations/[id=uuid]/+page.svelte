@@ -88,12 +88,12 @@
 
 	// Status color mapping for associated objects (these use raw CharField values, not Terminology)
 	const objectStatusColorMap: Record<string, string> = {
-		planned: 'bg-gray-100 text-gray-600',
+		planned: 'bg-surface-200-800 text-surface-700-300',
 		in_progress: 'bg-blue-100 text-blue-700',
 		in_review: 'bg-amber-100 text-amber-700',
 		done: 'bg-green-100 text-green-700',
 		deprecated: 'bg-red-100 text-red-600',
-		draft: 'bg-gray-100 text-gray-600',
+		draft: 'bg-surface-200-800 text-surface-700-300',
 		missing: 'bg-red-100 text-red-600',
 		approved: 'bg-green-100 text-green-700',
 		rejected: 'bg-red-100 text-red-600',
@@ -103,7 +103,7 @@
 
 	function getObjectStatusColor(status: string | Record<string, string>): string {
 		const key = typeof status === 'string' ? status : status?.str || '';
-		return objectStatusColorMap[key] || 'bg-gray-100 text-gray-600';
+		return objectStatusColorMap[key] || 'bg-surface-200-800 text-surface-700-300';
 	}
 
 	// Get checklist progress from backend
@@ -245,39 +245,39 @@
 </DetailView>
 
 <!-- Accreditation details section -->
-<div class="card bg-white p-6 m-4 shadow-sm">
+<div class="card bg-surface-50-950 p-6 m-4 shadow-sm">
 	<!-- Name and Ref ID -->
 	<div class="mb-6">
 		<h2 class="text-2xl font-semibold">{accreditation.name}</h2>
 		{#if accreditation.ref_id}
-			<p class="text-sm text-gray-500 mt-1">{accreditation.ref_id}</p>
+			<p class="text-sm text-surface-600-400 mt-1">{accreditation.ref_id}</p>
 		{/if}
 	</div>
 
 	<!-- Description and Observation -->
 	<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-		<div class="border-l-2 border-gray-200 pl-4">
-			<h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+		<div class="border-l-2 border-surface-200-800 pl-4">
+			<h3 class="text-xs font-semibold text-surface-600-400 uppercase tracking-wide mb-2">
 				{m.description()}
 			</h3>
-			<div class="prose prose-sm max-w-none text-gray-900">
+			<div class="prose prose-sm max-w-none text-surface-900-100">
 				{#if accreditation.description}
 					<MarkdownRenderer content={accreditation.description} />
 				{:else}
-					<p class="text-gray-400 italic">{m.noDescription()}</p>
+					<p class="text-surface-400-600 italic">{m.noDescription()}</p>
 				{/if}
 			</div>
 		</div>
 
-		<div class="border-l-2 border-gray-200 pl-4">
-			<h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+		<div class="border-l-2 border-surface-200-800 pl-4">
+			<h3 class="text-xs font-semibold text-surface-600-400 uppercase tracking-wide mb-2">
 				{m.observation()}
 			</h3>
-			<div class="prose prose-sm max-w-none text-gray-900">
+			<div class="prose prose-sm max-w-none text-surface-900-100">
 				{#if accreditation.observation}
 					<MarkdownRenderer content={accreditation.observation} />
 				{:else}
-					<p class="text-gray-400 italic">{m.noObservation()}</p>
+					<p class="text-surface-400-600 italic">{m.noObservation()}</p>
 				{/if}
 			</div>
 		</div>
@@ -285,16 +285,16 @@
 
 	<!-- Associated Collection Objects -->
 	{#if collection}
-		<div class="mt-8 pt-6 border-t border-gray-200">
-			<h3 class="text-lg font-semibold text-gray-800 mb-4">{m.associatedObjects()}</h3>
+		<div class="mt-8 pt-6 border-t border-surface-200-800">
+			<h3 class="text-lg font-semibold text-surface-950-50 mb-4">{m.associatedObjects()}</h3>
 
 			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 				{#each collectionSections as section}
 					{@const items = collection[section.key]}
 					{#if items && items.length > 0}
-						<div class="bg-gray-50 rounded-lg p-4">
-							<h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-								<i class="{section.icon} text-gray-400 text-xs"></i>
+						<div class="bg-surface-100-900 rounded-lg p-4">
+							<h4 class="text-sm font-semibold text-surface-700-300 mb-3 flex items-center gap-2">
+								<i class="{section.icon} text-surface-400-600 text-xs"></i>
 								{section.label}
 								<span class="badge preset-tonal-secondary text-xs ml-auto">{items.length}</span>
 							</h4>
@@ -325,7 +325,7 @@
 			</div>
 
 			{#if !collectionSections.some((s) => collection[s.key]?.length > 0)}
-				<p class="text-gray-400 italic text-sm">{m.noAssociatedObjects()}</p>
+				<p class="text-surface-400-600 italic text-sm">{m.noAssociatedObjects()}</p>
 			{/if}
 		</div>
 	{/if}

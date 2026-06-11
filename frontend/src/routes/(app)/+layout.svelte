@@ -32,6 +32,8 @@
 		setGlobalModalStore,
 		setShowWarningExternalLinks
 	} from '$lib/utils/external-links';
+	import { onMount } from 'svelte';
+	import { initThemeFromUser } from '$lib/utils/theme';
 
 	const isMac = browser && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 	const modifierKey = isMac ? '⌘' : 'Ctrl';
@@ -122,6 +124,12 @@
 		}
 	});
 
+	// Apply the theme persisted in the user's server-side preferences (ui.theme).
+	// Falls back to localStorage / system preference when no server value is set.
+	onMount(() => {
+		initThemeFromUser(data.user?.preferences);
+	});
+
 	// Handle login-specific logic
 	run(() => {
 		if (browser) {
@@ -148,7 +156,7 @@
 <div class="overflow-x-clip">
 	<SideBar bind:open={sidebarOpen} {sideBarVisibleItems} />
 	<AppBar
-		class="sticky top-0 z-50 border-b border-slate-200 transition-all duration-300 bg-white w-auto {classesSidebarOpen(
+		class="sticky top-0 z-50 border-b border-surface-200-800 transition-all duration-300 bg-surface-50-950 w-auto pb-2 px-4 {classesSidebarOpen(
 			sidebarOpen
 		)}"
 	>
@@ -161,12 +169,12 @@
 					{safeTranslate(displayTitle)}
 				</div>
 				{#if displayModelName}
-					<div class="text-sm text-slate-500 font-medium">
+					<div class="text-sm text-surface-600-400 font-medium">
 						{safeTranslate(displayModelName)}
 					</div>
 				{/if}
 				{#if displayModelDescription}
-					<div class="text-xs text-slate-400 italic">
+					<div class="text-xs text-surface-600-400 italic">
 						{safeTranslate(displayModelDescription)}
 					</div>
 				{/if}
@@ -214,7 +222,7 @@
 		<ChatWidget />
 	{/if}
 	<main
-		class="min-h-screen p-8 bg-linear-to-br from-violet-100 to-slate-200 transition-all duration-300 {classesSidebarOpen(
+		class="min-h-screen p-8 bg-linear-to-br from-surface-200-800 to-surface-150-850 transition-all duration-300 {classesSidebarOpen(
 			sidebarOpen
 		)}"
 	>

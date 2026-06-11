@@ -351,7 +351,9 @@
 						{#if showNavigation}
 							<div class="jump-popover">
 								<div class="jump-popover-inner">
-									<div class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
+									<div
+										class="text-xs font-semibold uppercase tracking-wider text-surface-400-600 mb-2"
+									>
 										Jump to item
 									</div>
 									<div class="flex gap-2">
@@ -374,7 +376,7 @@
 											<i class="fa-solid fa-arrow-right"></i>
 										</button>
 									</div>
-									<div class="text-[10px] text-gray-400 mt-2">
+									<div class="text-[10px] text-surface-400-600 mt-2">
 										Enter to jump &middot; Esc to close
 									</div>
 								</div>

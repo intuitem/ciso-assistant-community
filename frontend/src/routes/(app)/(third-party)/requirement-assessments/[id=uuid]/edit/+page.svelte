@@ -405,7 +405,7 @@
 		</div>
 	</div>
 {/if}
-<div class="card space-y-2 p-4 bg-white shadow-sm">
+<div class="card space-y-2 p-4 bg-surface-50-950 shadow-sm">
 	<div class="flex justify-between">
 		<div class="flex items-center gap-2">
 			<span class="code left h-min">{data.requirement.urn}</span>
@@ -529,7 +529,7 @@
 							<i class="fa-solid fa-link"></i>
 							{m.mappingInference()}
 						</p>
-						<span class="text-xs text-gray-500"
+						<span class="text-xs text-surface-600-400"
 							><i class="fa-solid fa-circle-info"></i> {m.mappingInferenceHelpText()}</span
 						>
 						<div>
@@ -570,7 +570,7 @@
 													{source_requirement_assessment.used_mapping_set?.name}
 												</a>
 											{:else}
-												<span class="text-gray-500">--</span>
+												<span class="text-surface-600-400">--</span>
 											{/if}
 										</p>
 										{#if source_requirement_assessment.is_scored}
@@ -631,7 +631,7 @@
 		>
 			{#snippet children({ form, data })}
 				{#if canShowAppliedControls || showEvidences || isAuditor}
-					<div class="card shadow-lg bg-white">
+					<div class="card shadow-lg bg-surface-50-950">
 						<Tabs
 							value={group}
 							onValueChange={(e) => {
@@ -668,7 +668,7 @@
 													class="btn self-end shadow-sm
 														{nothingToSuggest
 														? 'bg-emerald-50 border border-emerald-200 text-emerald-700 cursor-not-allowed pointer-events-none'
-														: 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300'}"
+														: 'bg-surface-50-950 border border-surface-200-800 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700'}"
 													type="button"
 													disabled={nothingToSuggest || createAppliedControlsLoading}
 													aria-label={nothingToSuggest
@@ -955,7 +955,7 @@
 					class="flex flex-row justify-between space-x-4 sticky bottom-0 backdrop-blur-sm pt-4 pb-2 border-t border-slate-200"
 				>
 					<button
-						class="btn bg-gray-400 text-white font-semibold w-full"
+						class="btn bg-surface-400-600 text-white font-semibold w-full"
 						type="button"
 						onclick={cancel}>{m.cancel()}</button
 					>

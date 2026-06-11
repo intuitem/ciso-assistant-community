@@ -93,7 +93,7 @@
 
 {#if page.data?.featureflags?.outgoing_webhooks}
 	<div class="flex flex-col gap-6">
-		<span class="text-gray-500">{m.configureOutgoingWebhooks()}</span>
+		<span class="text-surface-600-400">{m.configureOutgoingWebhooks()}</span>
 
 		<div class="flex items-center justify-between">
 			<h3 class="text-base font-semibold flex items-center gap-2">

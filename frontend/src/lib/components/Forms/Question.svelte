@@ -114,7 +114,7 @@
 						{:else if internalAnswers[urn] != null}
 							<p class="text-primary-500 font-semibold">{internalAnswers[urn]}</p>
 						{:else}
-							<p class="text-gray-400 italic">{m.noAnswer()}</p>
+							<p class="text-surface-400-600 italic">{m.noAnswer()}</p>
 						{/if}
 					{:else if question.type === 'unique_choice'}
 						{#if question.config?.widget === 'slider' && question.choices.length >= 2}
@@ -137,8 +137,10 @@
 										type="button"
 										name="question"
 										{disabled}
-										class="shadow-sm p-1 rounded-base border border-gray-300 transition-all duration-150
-											{selected ? 'preset-filled-primary-500 rounded-base' : 'bg-gray-100 rounded-base hover:bg-gray-300'}
+										class="shadow-sm p-1 rounded-base border border-surface-300-700 transition-all duration-150
+											{selected
+											? 'preset-filled-primary-500 rounded-base'
+											: 'bg-surface-100-900 rounded-base hover:bg-surface-300-700'}
 											{disabled ? 'opacity-50 cursor-not-allowed' : ''}"
 										style={selected
 											? `background-color: ${sanitizeColor(option.color) ?? ''}; color: white;`
@@ -183,8 +185,10 @@
 									type="button"
 									name="question"
 									{disabled}
-									class="shadow-sm p-1 rounded-base border border-gray-300 transition-all duration-150
-										{selected ? 'preset-filled-primary-500 rounded-base' : 'bg-gray-100 rounded-base hover:bg-gray-300'}
+									class="shadow-sm p-1 rounded-base border border-surface-300-700 transition-all duration-150
+										{selected
+										? 'preset-filled-primary-500 rounded-base'
+										: 'bg-surface-100-900 rounded-base hover:bg-surface-300-700'}
 										{disabled ? 'opacity-50 cursor-not-allowed' : ''}"
 									style={selected
 										? `background-color: ${sanitizeColor(option.color) ?? ''}; color: white;`
@@ -321,6 +325,6 @@
 	</div>
 
 	{#if helpText}
-		<p class="text-sm text-gray-500">{helpText}</p>
+		<p class="text-sm text-surface-600-400">{helpText}</p>
 	{/if}
 </div>

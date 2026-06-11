@@ -219,9 +219,9 @@
 														<div class="space-y-1.5">
 															{#each error.findings as finding, idx}
 																<div
-																	class="flex items-center gap-2 hover:bg-gray-100 rounded px-2 py-1 transition-colors"
+																	class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
 																>
-																	<span class="text-gray-400 text-xs font-mono min-w-[20px]"
+																	<span class="text-surface-400-600 text-xs font-mono min-w-[20px]"
 																		>{idx + 1}.</span
 																	>
 																	{#if finding.name}
@@ -269,9 +269,9 @@
 														<div class="space-y-1.5">
 															{#each warning.findings as finding, idx}
 																<div
-																	class="flex items-center gap-2 hover:bg-gray-100 rounded px-2 py-1 transition-colors"
+																	class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
 																>
-																	<span class="text-gray-400 text-xs font-mono min-w-[20px]"
+																	<span class="text-surface-400-600 text-xs font-mono min-w-[20px]"
 																		>{idx + 1}.</span
 																	>
 																	{#if finding.name}
@@ -317,9 +317,9 @@
 														<div class="space-y-1.5">
 															{#each info.findings as finding, idx}
 																<div
-																	class="flex items-center gap-2 hover:bg-gray-100 rounded px-2 py-1 transition-colors"
+																	class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
 																>
-																	<span class="text-gray-400 text-xs font-mono min-w-[20px]"
+																	<span class="text-surface-400-600 text-xs font-mono min-w-[20px]"
 																		>{idx + 1}.</span
 																	>
 																	{#if finding.name}
@@ -396,9 +396,9 @@
 														<div class="space-y-1.5">
 															{#each error.findings as finding, idx}
 																<div
-																	class="flex items-center gap-2 hover:bg-gray-100 rounded px-2 py-1 transition-colors"
+																	class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
 																>
-																	<span class="text-gray-400 text-xs font-mono min-w-[20px]"
+																	<span class="text-surface-400-600 text-xs font-mono min-w-[20px]"
 																		>{idx + 1}.</span
 																	>
 																	{#if finding.name}
@@ -446,9 +446,9 @@
 														<div class="space-y-1.5">
 															{#each warning.findings as finding, idx}
 																<div
-																	class="flex items-center gap-2 hover:bg-gray-100 rounded px-2 py-1 transition-colors"
+																	class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
 																>
-																	<span class="text-gray-400 text-xs font-mono min-w-[20px]"
+																	<span class="text-surface-400-600 text-xs font-mono min-w-[20px]"
 																		>{idx + 1}.</span
 																	>
 																	{#if finding.name}
@@ -494,9 +494,9 @@
 														<div class="space-y-1.5">
 															{#each info.findings as finding, idx}
 																<div
-																	class="flex items-center gap-2 hover:bg-gray-100 rounded px-2 py-1 transition-colors"
+																	class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
 																>
-																	<span class="text-gray-400 text-xs font-mono min-w-[20px]"
+																	<span class="text-surface-400-600 text-xs font-mono min-w-[20px]"
 																		>{idx + 1}.</span
 																	>
 																	{#if finding.name}

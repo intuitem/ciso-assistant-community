@@ -183,7 +183,7 @@
 
 <div class="flex flex-col min-h-screen justify-center items-center">
 	<div
-		class="flex flex-col bg-white w-3/4 max-w-4xl h-3/4 min-h-[600px] rounded-xl shadow-xl p-4 border-4 border-primary-500"
+		class="flex flex-col bg-surface-50-950 w-3/4 max-w-4xl h-3/4 min-h-[600px] rounded-xl shadow-xl p-4 border-4 border-primary-500"
 	>
 		{#if currentAppliedControl}
 			<!-- Header -->
@@ -199,7 +199,7 @@
 				</div>
 				<div class="relative">
 					<button
-						class="font-semibold hover:bg-gray-100 px-2 py-1 rounded cursor-pointer border border-transparent hover:border-gray-300 transition-colors flex items-center space-x-1"
+						class="font-semibold hover:bg-surface-100-900 px-2 py-1 rounded cursor-pointer border border-transparent hover:border-surface-300-700 transition-colors flex items-center space-x-1"
 						onclick={() => (showNavigation = !showNavigation)}
 						title="Click to jump to specific item (or press G)"
 					>
@@ -210,7 +210,7 @@
 
 					{#if showNavigation}
 						<div
-							class="absolute top-full right-0 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg p-4 z-10 min-w-64"
+							class="absolute top-full right-0 mt-2 bg-surface-50-950 border border-surface-300-700 rounded-lg shadow-lg p-4 z-10 min-w-64"
 						>
 							<div class="flex flex-col space-y-3">
 								<div class="text-sm font-medium">Jump to item:</div>
@@ -222,7 +222,7 @@
 										min="1"
 										max={appliedControls.length}
 										placeholder="Item number"
-										class="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
+										class="flex-1 px-2 py-1 border border-surface-300-700 rounded text-sm"
 										onkeydown={(e) => {
 											if (e.key === 'Enter') {
 												e.preventDefault();
@@ -237,7 +237,7 @@
 										Go
 									</button>
 								</div>
-								<div class="text-xs text-gray-500">
+								<div class="text-xs text-surface-600-400">
 									Press G to toggle, Enter to jump, Esc to close
 								</div>
 							</div>
@@ -258,7 +258,7 @@
 							{currentAppliedControl.name || 'Unnamed Applied Control'}
 						</button>
 
-						<div class="flex flex-col items-center space-y-1 text-sm text-gray-600">
+						<div class="flex flex-col items-center space-y-1 text-sm text-surface-600-400">
 							{#if currentAppliedControl.folder}
 								<div class="flex items-center space-x-1">
 									<i class="fa-solid fa-folder text-xs"></i>
@@ -279,7 +279,7 @@
 
 					<div class="flex flex-col space-y-4 overflow-y-auto flex-1 w-full max-w-4xl px-4">
 						{#if currentAppliedControl.description}
-							<div class="whitespace-pre-wrap leading-relaxed text-gray-700 text-left">
+							<div class="whitespace-pre-wrap leading-relaxed text-surface-700-300 text-left">
 								<MarkdownRenderer content={currentAppliedControl.description} />
 							</div>
 						{/if}
@@ -378,7 +378,7 @@
 
 				<div class="flex justify-between">
 					<button
-						class="bg-gray-400 text-white px-4 py-2 rounded-sm flex items-center space-x-2"
+						class="bg-surface-400-600 text-white px-4 py-2 rounded-sm flex items-center space-x-2"
 						onclick={previousItem}
 					>
 						<span>{m.previous()}</span>

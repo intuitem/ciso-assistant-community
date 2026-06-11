@@ -658,7 +658,7 @@
 		</div>
 	{/if}
 
-	<div class="flex flex-col card px-6 py-4 bg-white shadow-lg w-full">
+	<div class="flex flex-col card px-6 py-4 bg-surface-50-950 shadow-lg w-full">
 		<div class="flex flex-row justify-between">
 			<div class="flex flex-col space-y-2 whitespace-pre-line w-1/5 pr-1">
 				{#each Object.entries(data.compliance_assessment).filter(([key, value]) => {
@@ -671,7 +671,7 @@
 					{@const isUpdatableFramework = key === 'framework' && value.has_update}
 					<div class="flex flex-col">
 						<div
-							class="text-sm font-medium text-gray-800 capitalize-first"
+							class="text-sm font-medium text-surface-800-200 capitalize-first"
 							data-testid={key.replaceAll('_', '-') + '-field-title'}
 						>
 							{#if isUpdatableFramework}
@@ -685,7 +685,7 @@
 						</div>
 						<ul class="text-sm">
 							<li
-								class="text-gray-600 list-none"
+								class="text-surface-600-400 list-none"
 								data-testid={key.replaceAll('_', '-') + '-field-value'}
 							>
 								{#if value}
@@ -758,7 +758,7 @@
 				</div>
 				{#if showResult && compliance_assessment.framework.outcomes_definition?.length}
 					<div>
-						<div class="text-sm font-medium text-gray-800">{safeTranslate('outcomes')}</div>
+						<div class="text-sm font-medium text-surface-800-200">{safeTranslate('outcomes')}</div>
 						<div class="flex flex-wrap gap-1.5 mt-1">
 							{#each compliance_assessment.framework.outcomes_definition as rule}
 								{@const isActive =
@@ -767,14 +767,14 @@
 								<span
 									class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border"
 									class:font-semibold={isActive}
-									class:text-gray-800={isActive}
-									class:bg-white={isActive}
-									class:border-gray-300={isActive}
+									class:text-surface-800-200={isActive}
+									class:bg-surface-50-950={isActive}
+									class:border-surface-300-700={isActive}
 									class:shadow-sm={isActive}
 									class:font-normal={!isActive}
-									class:text-gray-400={!isActive}
-									class:bg-gray-50={!isActive}
-									class:border-gray-200={!isActive}
+									class:text-surface-400-600={!isActive}
+									class:bg-surface-100-900={!isActive}
+									class:border-surface-200-800={!isActive}
 									class:opacity-50={!isActive}
 								>
 									<span
@@ -858,10 +858,10 @@
 				{/if}
 			{/key}
 			{#if showAnswers && data.compliance_assessment.answers_progress != null}
-				<div class="flex items-center gap-2 text-sm text-gray-600 mt-2">
+				<div class="flex items-center gap-2 text-sm text-surface-600-400 mt-2">
 					<i class="fa-solid fa-clipboard-question text-primary-500"></i>
 					<span>{m.questions()}: {data.compliance_assessment.answers_progress}%</span>
-					<div class="flex-1 bg-gray-200 rounded-full h-1.5 max-w-32">
+					<div class="flex-1 bg-surface-200-800 rounded-full h-1.5 max-w-32">
 						<div
 							class="h-1.5 rounded-full bg-primary-400 transition-all"
 							style="width: {data.compliance_assessment.answers_progress}%;"
@@ -909,8 +909,9 @@
 					/>
 				{/if}
 				<!-- Power-ups Command Palette Grid -->
-				<div class="pt-3 border-t border-gray-200 mt-2 space-y-3">
-					<span class="text-xs font-semibold text-gray-400 uppercase tracking-widest select-none"
+				<div class="pt-3 border-t border-surface-200-800 mt-2 space-y-3">
+					<span
+						class="text-xs font-semibold text-surface-400-600 uppercase tracking-widest select-none"
 						>{m.powerUps()}</span
 					>
 
@@ -918,7 +919,7 @@
 					{#if !data.compliance_assessment.is_locked}
 						<div>
 							<span
-								class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1.5 block"
+								class="text-[11px] font-medium text-surface-400-600 uppercase tracking-wider mb-1.5 block"
 								>{m.modes()}</span
 							>
 							<div class="grid grid-cols-2 gap-2">
@@ -958,12 +959,12 @@
 					{#if !page.data.user.is_third_party}
 						<div>
 							<span
-								class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1.5 block"
+								class="text-[11px] font-medium text-surface-400-600 uppercase tracking-wider mb-1.5 block"
 								>{m.actions()}</span
 							>
 							<div class="grid grid-cols-2 gap-2">
 								<button
-									class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer text-left"
+									class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
 									onclick={() => modalCreateForm()}
 									data-testid="apply-mapping-button"
 								>
@@ -971,7 +972,7 @@
 									<span class="text-sm font-medium">{m.applyMapping()}</span>
 								</button>
 								<button
-									class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer text-left"
+									class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
 									onclick={() => modalCreateCloneForm()}
 									data-testid="clone-audit-button"
 								>
@@ -979,7 +980,7 @@
 									<span class="text-sm font-medium">{m.cloneAudit()}</span>
 								</button>
 								<button
-									class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer text-left"
+									class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
 									onclick={() => modalCompareAudit()}
 									data-testid="compare-audit-button"
 								>
@@ -988,7 +989,7 @@
 								</button>
 								{#if page.data?.featureflags?.validation_flows}
 									<button
-										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer text-left"
+										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
 										onclick={() => modalRequestValidation()}
 										data-testid="request-validation-button"
 									>
@@ -998,7 +999,7 @@
 								{/if}
 								{#if !data.compliance_assessment.is_locked}
 									<button
-										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer text-left"
+										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
 										data-testid="sync-to-actions-button"
 										onclick={async () => {
 											await modalConfirmSyncToActions(
@@ -1022,7 +1023,7 @@
 									</button>
 									{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0}
 										<button
-											class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer text-left"
+											class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
 											onclick={() => {
 												modalConfirmCreateSuggestedControls(
 													data.compliance_assessment.id,
@@ -1049,7 +1050,7 @@
 									<Anchor
 										breadcrumbAction="push"
 										href={`${page.url.pathname}/assignments`}
-										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer text-left"
+										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
 										data-testid="assignments-button"
 									>
 										<i class="fa-solid fa-user-tag text-green-500 text-base"></i>
@@ -1064,7 +1065,7 @@
 					{#if (has_threats || page.data?.featureflags?.advanced_analytics) && !page.data.user.is_third_party}
 						<div>
 							<span
-								class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1.5 block"
+								class="text-[11px] font-medium text-surface-400-600 uppercase tracking-wider mb-1.5 block"
 								>{m.insights()}</span
 							>
 							<div class="grid grid-cols-2 gap-2">
@@ -1108,7 +1109,7 @@
 			</div>
 		</div>
 	</div>
-	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg">
+	<div class="card px-6 py-4 bg-surface-50-950 flex flex-col shadow-lg">
 		<div class="flex flex-row items-center font-semibold justify-between">
 			<div>
 				<span class="h4">{m.associatedRequirements()}</span>
@@ -1139,12 +1140,14 @@
 					</Popover.Trigger>
 					<Popover.Positioner>
 						<Popover.Content
-							class="card p-2 bg-white w-fit shadow-lg space-y-2 border border-surface-200 z-10"
+							class="card p-2 bg-surface-50-950 w-fit shadow-lg space-y-2 border border-surface-200 z-10"
 						>
 							{#if showResult}
 								<div>
 									<span class="text-sm font-bold">{m.result()}</span>
-									<div class="flex flex-wrap gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+									<div
+										class="flex flex-wrap gap-2 text-xs bg-surface-200-800 border-2 p-1 rounded-md"
+									>
 										{#each Object.entries(complianceResultColorMap) as [result, color]}
 											<button
 												type="button"
@@ -1168,7 +1171,7 @@
 								<div>
 									<span class="text-sm font-bold">{m.status()}</span>
 									<div
-										class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md"
+										class="flex flex-wrap w-fit gap-2 text-xs bg-surface-200-800 border-2 p-1 rounded-md"
 									>
 										{#each Object.entries(complianceStatusColorMap) as [status, color]}
 											<button
@@ -1191,7 +1194,7 @@
 								<div>
 									<span class="text-sm font-bold">{m.extendedResult()}</span>
 									<div
-										class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md"
+										class="flex flex-wrap w-fit gap-2 text-xs bg-surface-200-800 border-2 p-1 rounded-md"
 									>
 										{#each Object.entries(extendedResultColorMap) as [extendedResult, color]}
 											<button
@@ -1231,7 +1234,7 @@
 										{#if displayOnlyAssessableNodes}
 											<span class="font-bold text-xs text-primary-500">{m.yes()}</span>
 										{:else}
-											<span class="font-bold text-xs text-gray-500">{m.no()}</span>
+											<span class="font-bold text-xs text-surface-600-400">{m.no()}</span>
 										{/if}
 									</Switch>
 								</div>
@@ -1242,7 +1245,7 @@
 			</div>
 		</div>
 
-		<div class="flex items-center my-2 text-xs space-x-2 text-gray-500">
+		<div class="flex items-center my-2 text-xs space-x-2 text-surface-600-400">
 			<i class="fa-solid fa-diagram-project"></i>
 			<p>{m.mappingInferenceTip()}</p>
 		</div>
@@ -1260,16 +1263,16 @@
 {#if threatDialogOpen}
 	<dialog
 		bind:this={dialogElement}
-		class="fixed inset-0 m-auto w-[90vw] max-w-5xl h-[85vh] rounded-2xl bg-white shadow-2xl border border-gray-200 p-0 overflow-hidden backdrop:bg-black/40"
+		class="fixed inset-0 m-auto w-[90vw] max-w-5xl h-[85vh] rounded-2xl bg-surface-50-950 shadow-2xl border border-surface-200-800 p-0 overflow-hidden backdrop:bg-black/40"
 		aria-labelledby="threats-dialog-title"
 		onclose={() => (threatDialogOpen = false)}
 	>
-		<div class="flex justify-between items-center px-6 py-4 border-b border-gray-100">
-			<h3 id="threats-dialog-title" class="text-lg font-bold text-gray-900">
+		<div class="flex justify-between items-center px-6 py-4 border-b border-surface-100-900">
+			<h3 id="threats-dialog-title" class="text-lg font-bold text-surface-900-100">
 				{m.potentialThreats()}
 			</h3>
 			<button
-				class="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-700"
+				class="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-surface-200-800 transition-colors text-surface-600-400 hover:text-surface-700-300"
 				aria-label="Close"
 				onclick={closeThreatsDialog}
 			>

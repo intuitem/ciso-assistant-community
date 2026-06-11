@@ -180,10 +180,6 @@
 
 	let classesShowInfo = $derived((show: boolean) => (!show ? 'hidden' : ''));
 	let classesShowInfoText = $derived((show: boolean) => (show ? 'text-primary-500' : ''));
-	let classesPercentText = $derived((resultColor: string) =>
-		resultColor === '#000000' ? 'text-white' : ''
-	);
-
 	export const getBadgeStyles = (answers: any, questions: any) => {
 		const questionMap = (questions || {}) as Record<string, any>;
 		const resolvedAnswers = answers ?? {};
@@ -399,7 +395,7 @@
 			<div class="flex max-w-96 grow items-center space-x-2">
 				{#if showResult}
 					<div
-						class="flex max-w-96 grow bg-gray-200 rounded-full overflow-hidden h-4 shrink self-center"
+						class="flex max-w-96 grow bg-surface-200-800 rounded-full overflow-hidden h-4 shrink self-center"
 					>
 						{#each orderedResultPercentages as rp}
 							<div

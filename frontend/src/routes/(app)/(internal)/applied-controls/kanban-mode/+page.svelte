@@ -21,10 +21,10 @@
 		{
 			id: '--',
 			label: '--',
-			color: 'bg-gray-100',
-			borderColor: 'border-gray-300',
+			color: 'bg-surface-200-800',
+			borderColor: 'border-surface-300-700',
 			cardAccent: 'border-l-gray-400',
-			headerText: 'text-gray-600'
+			headerText: 'text-surface-600-400'
 		},
 		{
 			id: 'to_do',
@@ -84,26 +84,26 @@
 
 	// Priority color helper (API returns "P1", "P2", etc.)
 	function getPriorityColor(priority: string | null): string {
-		if (!priority || priority === '--') return 'bg-gray-100 text-gray-600';
+		if (!priority || priority === '--') return 'bg-surface-200-800 text-surface-600-400';
 		const colorMap: Record<string, string> = {
 			P1: 'bg-red-100 text-red-800',
 			P2: 'bg-orange-100 text-orange-800',
 			P3: 'bg-yellow-100 text-yellow-800',
 			P4: 'bg-green-100 text-green-800'
 		};
-		return colorMap[priority] || 'bg-gray-100 text-gray-600';
+		return colorMap[priority] || 'bg-surface-200-800 text-surface-600-400';
 	}
 
 	// Priority flag color helper
 	function getPriorityFlagColor(priority: string | null): string {
-		if (!priority || priority === '--') return 'text-gray-400';
+		if (!priority || priority === '--') return 'text-surface-400-600';
 		const colorMap: Record<string, string> = {
 			P1: 'text-red-500',
 			P2: 'text-orange-500',
 			P3: 'text-yellow-500',
 			P4: 'text-green-500'
 		};
-		return colorMap[priority] || 'text-gray-400';
+		return colorMap[priority] || 'text-surface-400-600';
 	}
 
 	// Effort display helper
@@ -309,7 +309,7 @@
 	const folders = $derived(getUniqueFolders());
 </script>
 
-<div class="flex flex-col h-full min-h-screen bg-gray-50 p-4">
+<div class="flex flex-col h-full min-h-screen bg-surface-100-900 p-4">
 	<!-- Header -->
 	<div class="flex justify-between items-center mb-4">
 		<a
@@ -320,7 +320,7 @@
 			<span>{data.backLabel}</span>
 		</a>
 		<div class="flex items-center space-x-4">
-			<span class="text-sm text-gray-600">
+			<span class="text-sm text-surface-600-400">
 				{appliedControls.length}
 				{m.appliedControls().toLowerCase()}
 			</span>
@@ -329,7 +329,7 @@
 				class="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg border transition-colors
 					{compactMode
 					? 'bg-primary-100 border-primary-300 text-primary-700'
-					: 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}"
+					: 'bg-surface-50-950 border-surface-300-700 text-surface-600-400 hover:bg-surface-100-900'}"
 				onclick={() => (compactMode = !compactMode)}
 				title={compactMode ? m.detailedView() : m.compactView()}
 			>
@@ -343,10 +343,10 @@
 	<div class="flex-1 overflow-auto">
 		<div class="min-w-max">
 			<!-- Column Headers -->
-			<div class="flex sticky top-0 z-10 bg-gray-50 pb-2">
+			<div class="flex sticky top-0 z-10 bg-surface-100-900 pb-2">
 				<div class="w-48 flex-shrink-0 px-2">
 					<!-- Folder column header -->
-					<div class="h-10 flex items-center font-semibold text-gray-700">
+					<div class="h-10 flex items-center font-semibold text-surface-700-300">
 						<i class="fa-solid fa-folder mr-2"></i>
 						{m.domain()}
 					</div>
@@ -359,7 +359,7 @@
 						>
 							<span>{column.label}</span>
 							<span
-								class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 text-xs font-bold rounded-full bg-white/70"
+								class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 text-xs font-bold rounded-full bg-surface-50-950/70"
 							>
 								{count}
 							</span>
@@ -372,24 +372,24 @@
 			{#each folders as folder}
 				{@const isCollapsed = collapsedFolders.has(folder.id)}
 				{@const folderCount = getFolderControlCount(folder.id)}
-				<div class="mb-2 border-b border-gray-200 pb-2">
+				<div class="mb-2 border-b border-surface-200-800 pb-2">
 					<!-- Folder Header Row (clickable to collapse) -->
 					<div class="flex">
 						<div class="w-48 flex-shrink-0 px-2">
 							<button
 								type="button"
-								class="w-full flex items-center gap-2 py-2 font-medium text-gray-700 hover:text-gray-900 text-left group"
+								class="w-full flex items-center gap-2 py-2 font-medium text-surface-700-300 hover:text-surface-900-100 text-left group"
 								onclick={() => toggleFolder(folder.id)}
 							>
 								<i
-									class="fa-solid fa-chevron-right text-xs text-gray-400 group-hover:text-gray-600 transition-transform {isCollapsed
+									class="fa-solid fa-chevron-right text-xs text-surface-400-600 group-hover:text-surface-600-400 transition-transform {isCollapsed
 										? ''
 										: 'rotate-90'}"
 								></i>
 								<span class="truncate" title={folder.str || folder.name}>
 									{folder.str || folder.name}
 								</span>
-								<span class="text-xs text-gray-400 font-normal flex-shrink-0">
+								<span class="text-xs text-surface-400-600 font-normal flex-shrink-0">
 									{folderCount}
 								</span>
 							</button>
@@ -444,7 +444,7 @@
 										{/if}
 
 										{#if controls.length === 0 && !(draggedControl && dragOverStatus === column.id && dragOverFolder === folder.id)}
-											<div class="text-xs text-gray-400 text-center py-4 italic">
+											<div class="text-xs text-surface-400-600 text-center py-4 italic">
 												{m.noControlsInCategory()}
 											</div>
 										{:else}
@@ -454,7 +454,7 @@
 													{#if compactMode}
 														<!-- Compact card -->
 														<div
-															class="bg-white rounded px-2 py-1.5 cursor-move hover:shadow-sm transition-all border border-gray-200 border-l-[3px] {column.cardAccent} {draggedControl?.id ===
+															class="bg-surface-50-950 rounded px-2 py-1.5 cursor-move hover:shadow-sm transition-all border border-surface-200-800 border-l-[3px] {column.cardAccent} {draggedControl?.id ===
 															control.id
 																? 'opacity-40 scale-95'
 																: ''} {overdue ? 'ring-1 ring-red-300' : ''}"
@@ -476,10 +476,11 @@
 																{/if}
 																<a
 																	href="/applied-controls/{control.id}"
-																	class="text-xs text-gray-900 hover:text-primary-600 truncate flex-1"
+																	class="text-xs text-surface-900-100 hover:text-primary-600 truncate flex-1"
 																	title={control.name}
 																>
-																	{#if control.ref_id}<span class="font-mono text-gray-400 mr-1"
+																	{#if control.ref_id}<span
+																			class="font-mono text-surface-400-600 mr-1"
 																			>{control.ref_id}</span
 																		>{/if}{control.name || 'Unnamed Control'}
 																</a>
@@ -489,7 +490,9 @@
 																	></i>
 																{/if}
 																{#if control.progress_field !== null && control.progress_field !== undefined}
-																	<div class="flex-shrink-0 w-10 bg-gray-200 rounded-full h-1.5">
+																	<div
+																		class="flex-shrink-0 w-10 bg-surface-200-800 rounded-full h-1.5"
+																	>
 																		<div
 																			class="h-1.5 rounded-full {control.progress_field >= 100
 																				? 'bg-green-500'
@@ -504,7 +507,7 @@
 																	<div class="flex -space-x-1 flex-shrink-0">
 																		{#each getOwnerInitials(control.owner).slice(0, 2) as owner}
 																			<span
-																				class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gray-200 text-gray-600 text-[9px] font-medium ring-1 ring-white"
+																				class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-surface-200-800 text-surface-600-400 text-[9px] font-medium ring-1 ring-white"
 																				title={owner.name}
 																			>
 																				{owner.initials}
@@ -517,7 +520,7 @@
 													{:else}
 														<!-- Detailed card -->
 														<div
-															class="bg-white rounded-lg shadow-sm p-3 cursor-move hover:shadow-md transition-all border border-gray-200 border-l-[3px] {column.cardAccent} {draggedControl?.id ===
+															class="bg-surface-50-950 rounded-lg shadow-sm p-3 cursor-move hover:shadow-md transition-all border border-surface-200-800 border-l-[3px] {column.cardAccent} {draggedControl?.id ===
 															control.id
 																? 'opacity-40 scale-95'
 																: ''} {overdue ? 'ring-1 ring-red-300' : ''}"
@@ -531,13 +534,13 @@
 															<div class="flex items-start justify-between gap-2 mb-2">
 																<div class="min-w-0">
 																	{#if control.ref_id}
-																		<span class="text-[10px] font-mono text-gray-400"
+																		<span class="text-[10px] font-mono text-surface-400-600"
 																			>{control.ref_id}</span
 																		>
 																	{/if}
 																	<a
 																		href="/applied-controls/{control.id}"
-																		class="font-medium text-sm text-gray-900 hover:text-primary-600 line-clamp-2 block"
+																		class="font-medium text-sm text-surface-900-100 hover:text-primary-600 line-clamp-2 block"
 																		title={control.name}
 																	>
 																		{control.name || 'Unnamed Control'}
@@ -555,7 +558,7 @@
 															</div>
 
 															<!-- Card Details -->
-															<div class="space-y-1.5 text-xs text-gray-600">
+															<div class="space-y-1.5 text-xs text-surface-600-400">
 																<!-- Progress Bar -->
 																{#if control.progress_field !== null && control.progress_field !== undefined}
 																	<div class="flex flex-col space-y-1">
@@ -563,7 +566,7 @@
 																			<span>{m.progress()}</span>
 																			<span class="font-medium">{control.progress_field}%</span>
 																		</div>
-																		<div class="w-full bg-gray-200 rounded-full h-1.5">
+																		<div class="w-full bg-surface-200-800 rounded-full h-1.5">
 																			<div
 																				class="h-1.5 rounded-full transition-all {control.progress_field >=
 																				100
@@ -624,7 +627,7 @@
 																	<div class="flex -space-x-1">
 																		{#each getOwnerInitials(control.owner) as owner}
 																			<span
-																				class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-200 text-gray-600 text-[10px] font-medium ring-1 ring-white"
+																				class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-surface-200-800 text-surface-600-400 text-[10px] font-medium ring-1 ring-white"
 																				title={owner.name}
 																			>
 																				{owner.initials}
@@ -667,9 +670,9 @@
 
 			<!-- Empty state if no folders -->
 			{#if folders.length === 0}
-				<div class="flex items-center justify-center py-12 text-gray-500">
+				<div class="flex items-center justify-center py-12 text-surface-600-400">
 					<div class="text-center">
-						<i class="fa-solid fa-folder-open text-4xl mb-4 text-gray-300"></i>
+						<i class="fa-solid fa-folder-open text-4xl mb-4 text-surface-300-700"></i>
 						<p>{m.noControlsInCategory()}</p>
 					</div>
 				</div>

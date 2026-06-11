@@ -11,8 +11,8 @@
 	let { data }: Props = $props();
 </script>
 
-<div class="bg-white shadow-sm flex flex-col overflow-x-auto">
-	<div class="flex justify-end items-center p-2 border-b border-gray-200">
+<div class="bg-surface-50-950 shadow-sm flex flex-col overflow-x-auto">
+	<div class="flex justify-end items-center p-2 border-b border-surface-200-800">
 		{#if data.hideDomains}
 			<a
 				href="/assets/graph"

@@ -147,7 +147,7 @@
 <div class="flex flex-row h-full gap-3">
 	<!-- Main Calendar -->
 	<div
-		class="flex flex-col rounded-xl bg-white h-full {$showSidePanel
+		class="flex flex-col rounded-xl bg-surface-50-950 h-full {$showSidePanel
 			? 'w-2/3'
 			: 'w-full'} p-3 space-y-2 shadow-lg border border-surface-200"
 	>
@@ -218,9 +218,8 @@
 				<Day {day} {month} {year} info={filteredInfo} {selectedDay} {showSidePanel} {categories} />
 			{/each}
 		</div>
-
 		<!-- Footer -->
-		<div class="flex items-center justify-between bg-surface-50 rounded-lg px-4 py-2">
+		<div class="flex items-center justify-between bg-surface-100-900 rounded-lg px-4 py-2">
 			<a
 				href={currentMonth()}
 				class="flex items-center gap-1.5 text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors px-3 py-1.5 rounded-lg hover:bg-primary-50"
@@ -245,7 +244,7 @@
 	<!-- Side Panel -->
 	{#if $showSidePanel && $selectedDay}
 		<div
-			class="flex flex-col rounded-xl bg-white h-full w-1/3 p-4 space-y-3 shadow-lg border border-surface-200"
+			class="flex flex-col rounded-xl bg-surface-50-950 h-full w-1/3 p-4 space-y-3 shadow-lg border border-surface-200-800"
 			in:fly={{ x: 300, duration: 300 }}
 			out:fly={{ x: 300, duration: 300 }}
 		>
@@ -258,7 +257,7 @@
 				<button
 					onclick={closePanel}
 					aria-label={m.close()}
-					class="text-surface-400 hover:text-surface-600 transition-colors p-1 rounded-lg hover:bg-surface-100"
+					class="text-surface-400 hover:text-surface-600 transition-colors p-1 rounded-lg hover:bg-surface-100-900"
 				>
 					<i class="fas fa-times"></i>
 				</button>
@@ -278,7 +277,7 @@
 										{categoryLabelMap[catKey]?.() ?? catKey}
 									</span>
 									<span
-										class="text-xs font-semibold bg-surface-100 text-surface-600 px-1.5 py-0.5 rounded-full"
+										class="text-xs font-semibold bg-surface-100-900 text-surface-600 px-1.5 py-0.5 rounded-full"
 									>
 										{items.length}
 									</span>
@@ -301,7 +300,7 @@
 														</span>
 														{#if item.status}
 															<span
-																class="shrink-0 text-[10px] font-medium bg-surface-100 text-surface-500 px-1.5 py-0.5 rounded"
+																class="shrink-0 text-[10px] font-medium bg-surface-100-900 text-surface-500 px-1.5 py-0.5 rounded"
 															>
 																{safeTranslate(item.status)}
 															</span>

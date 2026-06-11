@@ -43,7 +43,11 @@
 	const chart_id = `${name}_div`;
 	onMount(async () => {
 		const echarts = await import('echarts');
-		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
+		let chart = echarts.init(
+			document.getElementById(chart_id),
+			document.documentElement.classList.contains('dark') ? 'dark' : null,
+			{ renderer: 'svg' }
+		);
 		const filteredEntries = values
 			.map((item, i) => ({ item, color: colors[i] }))
 			.filter((entry) => entry.item.value > 0);
@@ -87,7 +91,7 @@
 					avoidLabelOverlap: true,
 					itemStyle: {
 						borderRadius: 10,
-						borderColor: '#fff',
+						borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff',
 						borderWidth: 2
 					},
 					label: showPercentage
@@ -147,6 +151,7 @@
 		};
 		// console.debug(option);
 		// use configuration item and data specified to show chart
+		option.backgroundColor = 'transparent';
 		chart.setOption(option);
 		window.addEventListener('resize', function () {
 			chart.resize();

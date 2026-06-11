@@ -62,15 +62,15 @@
 	function getSeverityColor(severity: string): string {
 		switch (severity) {
 			case 'error':
-				return 'text-red-600 bg-red-50 border-red-200';
+				return 'text-red-600 dark:text-red-400 bg-surface-50-950 border-red-200 dark:border-red-800';
 			case 'warning':
-				return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+				return 'text-yellow-600 dark:text-yellow-400 bg-surface-50-950 border-yellow-200 dark:border-yellow-800';
 			case 'info':
-				return 'text-blue-600 bg-blue-50 border-blue-200';
+				return 'text-blue-600 dark:text-blue-400 bg-surface-50-950 border-blue-200 dark:border-blue-800';
 			case 'ok':
-				return 'text-green-600 bg-green-50 border-green-200';
+				return 'text-green-600 dark:text-green-400 bg-surface-50-950 border-green-200 dark:border-green-800';
 			default:
-				return 'text-gray-600 bg-gray-50 border-gray-200';
+				return 'text-surface-600-400 bg-surface-50-950 border-surface-200-800';
 		}
 	}
 
@@ -99,8 +99,8 @@
 	<!-- Header -->
 	<div class="flex items-center justify-between">
 		<div>
-			<h1 class="text-3xl font-bold text-gray-900">DORA Register of Information</h1>
-			<p class="mt-2 text-gray-600">Validation check before generating the report</p>
+			<h1 class="text-3xl font-bold text-surface-950-50">DORA Register of Information</h1>
+			<p class="mt-2 text-surface-600-400">Validation check before generating the report</p>
 		</div>
 		<a href="/reports" class="text-blue-600 hover:text-blue-800 flex items-center gap-2">
 			<i class="fa-solid fa-arrow-left"></i>
@@ -109,31 +109,47 @@
 	</div>
 
 	<!-- Summary Card -->
-	<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-		<h2 class="text-xl font-semibold text-gray-900 mb-4">Validation Summary</h2>
+	<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6">
+		<h2 class="text-xl font-semibold text-surface-950-50 mb-4">Validation Summary</h2>
 		<div class="grid grid-cols-4 gap-4">
-			<div class="text-center p-4 rounded-lg bg-red-50 border border-red-200">
-				<div class="text-3xl font-bold text-red-600">{lintResults.summary.errors}</div>
-				<div class="text-sm text-red-600 mt-1">Errors</div>
+			<div
+				class="text-center p-4 rounded-lg bg-surface-50-950 border border-red-300 dark:border-red-800"
+			>
+				<div class="text-3xl font-bold text-red-600 dark:text-red-400">
+					{lintResults.summary.errors}
+				</div>
+				<div class="text-sm text-red-600 dark:text-red-400 mt-1">Errors</div>
 			</div>
-			<div class="text-center p-4 rounded-lg bg-yellow-50 border border-yellow-200">
-				<div class="text-3xl font-bold text-yellow-600">{lintResults.summary.warnings}</div>
-				<div class="text-sm text-yellow-600 mt-1">Warnings</div>
+			<div
+				class="text-center p-4 rounded-lg bg-surface-50-950 border border-yellow-300 dark:border-yellow-800"
+			>
+				<div class="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
+					{lintResults.summary.warnings}
+				</div>
+				<div class="text-sm text-yellow-600 dark:text-yellow-400 mt-1">Warnings</div>
 			</div>
-			<div class="text-center p-4 rounded-lg bg-blue-50 border border-blue-200">
-				<div class="text-3xl font-bold text-blue-600">{lintResults.summary.info}</div>
-				<div class="text-sm text-blue-600 mt-1">Info</div>
+			<div
+				class="text-center p-4 rounded-lg bg-surface-50-950 border border-blue-300 dark:border-blue-800"
+			>
+				<div class="text-3xl font-bold text-blue-600 dark:text-blue-400">
+					{lintResults.summary.info}
+				</div>
+				<div class="text-sm text-blue-600 dark:text-blue-400 mt-1">Info</div>
 			</div>
-			<div class="text-center p-4 rounded-lg bg-green-50 border border-green-200">
-				<div class="text-3xl font-bold text-green-600">{lintResults.summary.ok}</div>
-				<div class="text-sm text-green-600 mt-1">Passed</div>
+			<div
+				class="text-center p-4 rounded-lg bg-surface-50-950 border border-green-300 dark:border-green-800"
+			>
+				<div class="text-3xl font-bold text-green-600 dark:text-green-400">
+					{lintResults.summary.ok}
+				</div>
+				<div class="text-sm text-green-600 dark:text-green-400 mt-1">Passed</div>
 			</div>
 		</div>
 	</div>
 
 	<!-- Validation Results -->
-	<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-		<h2 class="text-xl font-semibold text-gray-900 mb-4">Validation Details</h2>
+	<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6">
+		<h2 class="text-xl font-semibold text-surface-950-50 mb-4">Validation Details</h2>
 
 		<div class="space-y-3">
 			{#if errors.length > 0}
@@ -157,7 +173,7 @@
 							{#if editUrl}
 								<a
 									href={editUrl}
-									class="flex-shrink-0 px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors flex items-center gap-2"
+									class="flex-shrink-0 px-3 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 bg-surface-100-900 hover:bg-surface-200-800 rounded-md transition-colors flex items-center gap-2"
 								>
 									<i class="fa-solid fa-pencil"></i>
 									Fix
@@ -189,7 +205,7 @@
 							{#if editUrl}
 								<a
 									href={editUrl}
-									class="flex-shrink-0 px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors flex items-center gap-2"
+									class="flex-shrink-0 px-3 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 bg-surface-100-900 hover:bg-surface-200-800 rounded-md transition-colors flex items-center gap-2"
 								>
 									<i class="fa-solid fa-pencil"></i>
 									Review
@@ -255,7 +271,7 @@
 							{#if editUrl}
 								<a
 									href={editUrl}
-									class="flex-shrink-0 px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-800 bg-gray-50 hover:bg-gray-100 rounded-md transition-colors flex items-center gap-2"
+									class="flex-shrink-0 px-3 py-1.5 text-xs font-medium text-surface-600-400 hover:text-surface-950-50 bg-surface-50-950 hover:bg-surface-100-900 rounded-md transition-colors flex items-center gap-2"
 								>
 									<i class="fa-solid fa-eye"></i>
 									View
@@ -364,11 +380,11 @@
 	{/if}
 
 	<!-- Action Buttons -->
-	<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+	<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6">
 		<div class="flex items-center justify-between">
 			<div>
 				{#if canGenerate}
-					<p class="text-sm text-gray-600">
+					<p class="text-sm text-surface-600-400">
 						All validation checks passed. You can now generate the DORA ROI report.
 					</p>
 				{:else}
@@ -380,7 +396,7 @@
 				disabled={!canGenerate}
 				class="px-6 py-3 rounded-lg font-medium transition-colors {canGenerate
 					? 'bg-blue-600 text-white hover:bg-blue-700'
-					: 'bg-gray-300 text-gray-500 cursor-not-allowed'}"
+					: 'bg-surface-300-700 text-surface-600-400 cursor-not-allowed'}"
 			>
 				<i class="fa-solid fa-download mr-2"></i>
 				Generate Report

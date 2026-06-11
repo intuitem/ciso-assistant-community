@@ -10,7 +10,7 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const cBase = 'card bg-surface-50 p-4 w-fit max-w-4xl shadow-xl space-y-4';
+	const cBase = 'card bg-surface-50-950 p-4 w-fit max-w-4xl shadow-xl space-y-4';
 	const cHeaderRow = 'flex items-center justify-between';
 	const cHeader = 'text-2xl font-bold whitespace-pre-line';
 
@@ -112,12 +112,12 @@
 			</div>
 		</div>
 
-		<article class="text-sm text-gray-700 whitespace-pre-line">
+		<article class="text-sm text-surface-700-300 whitespace-pre-line">
 			{$modalStore[0].body ?? '(body missing)'}
 		</article>
 
 		{#if loading}
-			<div class="text-sm text-gray-500">Loading...</div>
+			<div class="text-sm text-surface-600-400">Loading...</div>
 		{:else if errorMsg}
 			<div class="p-3 rounded-md bg-red-50 text-red-900 text-sm border border-red-200">
 				{errorMsg}
@@ -125,22 +125,26 @@
 		{:else if cascadeInfo}
 			{#if cascadeInfo.deleted?.count > 0}
 				<div class="p-3 rounded-md bg-orange-50 border border-orange-200 space-y-2">
-					<div class="text-sm font-semibold text-gray-900">
+					<div class="text-sm font-semibold text-surface-950-50">
 						{m.cascadeDeleteWarning({ count: cascadeInfo.deleted.count })}
 					</div>
 
 					<div class="max-h-64 overflow-y-auto space-y-2">
 						{#each cascadeInfo.deleted.grouped_objects as group (group.model)}
-							<section class="rounded-md border border-surface-300 bg-surface-50 overflow-hidden">
+							<section
+								class="rounded-md border border-surface-300-700 bg-surface-50-950 overflow-hidden"
+							>
 								<button
 									type="button"
-									class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-surface-100 text-sm"
+									class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-surface-100-900 text-sm"
 									aria-controls={`del-${group.model}`}
 									aria-expanded={expanded.has(keyFor('deleted', group.model))}
 									onclick={() => toggle('deleted', group.model)}
 								>
-									<span class="font-medium text-gray-900">{group.verbose_name ?? group.model}</span>
-									<span class="text-xs text-gray-600">
+									<span class="font-medium text-surface-950-50"
+										>{group.verbose_name ?? group.model}</span
+									>
+									<span class="text-xs text-surface-600-400">
 										{group.objects.length}
 									</span>
 								</button>
@@ -148,10 +152,10 @@
 								{#if expanded.has(keyFor('deleted', group.model))}
 									<ul
 										id={`del-${group.model}`}
-										class="px-3 pb-2 text-sm space-y-1 bg-surface-50 border-t border-surface-300"
+										class="px-3 pb-2 text-sm space-y-1 bg-surface-50-950 border-t border-surface-300-700"
 									>
 										{#each group.objects as o (o.id)}
-											<li class="truncate text-gray-700" title={o.name}>
+											<li class="truncate text-surface-700-300" title={o.name}>
 												{o.name}
 											</li>
 										{/each}
@@ -165,25 +169,29 @@
 
 			{#if cascadeInfo.affected?.count > 0}
 				<div class="p-3 rounded-md bg-blue-50 border border-blue-200 space-y-2">
-					<div class="text-sm font-semibold text-gray-900">
+					<div class="text-sm font-semibold text-surface-950-50">
 						{m.cascadeAffectedNotice({ count: cascadeInfo.affected.count })}
 					</div>
-					<p class="text-xs text-gray-600">
+					<p class="text-xs text-surface-600-400">
 						{m.cascadeAffectedHint()}
 					</p>
 
 					<div class="max-h-64 overflow-y-auto space-y-2">
 						{#each cascadeInfo.affected.grouped_objects as group (group.model)}
-							<section class="rounded-md border border-surface-300 bg-surface-50 overflow-hidden">
+							<section
+								class="rounded-md border border-surface-300-700 bg-surface-50-950 overflow-hidden"
+							>
 								<button
 									type="button"
-									class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-surface-100 text-sm"
+									class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-surface-100-900 text-sm"
 									aria-controls={`aff-${group.model}`}
 									aria-expanded={expanded.has(keyFor('affected', group.model))}
 									onclick={() => toggle('affected', group.model)}
 								>
-									<span class="font-medium text-gray-900">{group.verbose_name ?? group.model}</span>
-									<span class="text-xs text-gray-600">
+									<span class="font-medium text-surface-950-50"
+										>{group.verbose_name ?? group.model}</span
+									>
+									<span class="text-xs text-surface-600-400">
 										{group.objects.length}
 									</span>
 								</button>
@@ -191,10 +199,10 @@
 								{#if expanded.has(keyFor('affected', group.model))}
 									<ul
 										id={`aff-${group.model}`}
-										class="px-3 pb-2 text-sm space-y-1 bg-surface-50 border-t border-surface-300"
+										class="px-3 pb-2 text-sm space-y-1 bg-surface-50-950 border-t border-surface-300-700"
 									>
 										{#each group.objects as o (o.id)}
-											<li class="truncate text-gray-700" title={o.name}>
+											<li class="truncate text-surface-700-300" title={o.name}>
 												{o.name}
 											</li>
 										{/each}
@@ -227,7 +235,7 @@
 				<div class="flex flex-row justify-between space-x-4">
 					<button
 						type="button"
-						class="btn bg-gray-400 text-white font-semibold w-full"
+						class="btn bg-surface-400-600 text-white font-semibold w-full"
 						onclick={parent.onClose}
 					>
 						{m.cancel()}
@@ -252,7 +260,7 @@
 			<div class="flex flex-row justify-between space-x-4">
 				<button
 					type="button"
-					class="btn bg-gray-400 text-white font-semibold w-full"
+					class="btn bg-surface-400-600 text-white font-semibold w-full"
 					onclick={parent.onClose}
 				>
 					{m.cancel()}

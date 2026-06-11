@@ -352,8 +352,13 @@
 
 		if (progressChartEl) {
 			progressChart?.dispose?.();
-			progressChart = echarts.init(progressChartEl, null, { renderer: 'svg' });
+			progressChart = echarts.init(
+				progressChartEl,
+				document.documentElement.classList.contains('dark') ? 'dark' : null,
+				{ renderer: 'svg' }
+			);
 			progressChart.setOption({
+				backgroundColor: 'transparent',
 				grid: { left: 40, right: 20, top: 20, bottom: 30 },
 				xAxis: { type: 'category', data: dates, axisLabel: { fontSize: 10 } },
 				yAxis: { type: 'value', min: 0, max: 100, axisLabel: { formatter: '{value}%' } },
@@ -375,7 +380,11 @@
 
 		if (lifecycleChartEl) {
 			lifecycleChart?.dispose?.();
-			lifecycleChart = echarts.init(lifecycleChartEl, null, { renderer: 'svg' });
+			lifecycleChart = echarts.init(
+				lifecycleChartEl,
+				document.documentElement.classList.contains('dark') ? 'dark' : null,
+				{ renderer: 'svg' }
+			);
 			const seriesLabels = [m.status(), m.projectHealth(), m.priority()];
 			const esc = (s: unknown) =>
 				String(s ?? '')
@@ -385,6 +394,7 @@
 					.replace(/"/g, '&quot;')
 					.replace(/'/g, '&#39;');
 			lifecycleChart.setOption({
+				backgroundColor: 'transparent',
 				tooltip: {
 					trigger: 'axis',
 					formatter: (params: any[]) => {

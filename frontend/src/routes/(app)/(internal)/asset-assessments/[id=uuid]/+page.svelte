@@ -33,7 +33,7 @@
 <DetailView {data} disableEdit={isBiaLocked} disableDelete={isBiaLocked}>
 	{#snippet widgets()}
 		<div class="h-full flex flex-col space-y-4">
-			<div class="card p-4 bg-gray-50 shadow-xs grow">
+			<div class="card p-4 bg-surface-50-950 shadow-xs grow">
 				<ObjectivesComparisonTable
 					comparisons={data.asset.security_objectives_comparison}
 					title={m.securityObjectives()}
