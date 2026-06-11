@@ -3138,6 +3138,28 @@ class TestFrameworkBuilderDraftValidation:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "Duplicate URN" in response.data["error"]
 
+    def test_duplicate_node_id_error_names_both_requirements(
+        self, authenticated_client, fw_with_tree
+    ):
+        """The duplicate-node_id error must name the two colliding requirements,
+        not just the bare (UI-invisible) node_id, so the user can locate them."""
+        fw, rn, q, c, folder = fw_with_tree
+        draft = self._start_and_get_draft(authenticated_client, fw)
+        # Second node, distinct id, but a URN colliding on node_id "1". No
+        # ref_id so its label falls back to the (human) name.
+        dup = copy.deepcopy(draft["nodes"][0])
+        dup["id"] = str(uuid.uuid4())
+        dup["ref_id"] = None
+        dup["name"] = "Colliding requirement"
+        draft["nodes"].append(dup)
+
+        response = self._save_and_publish(authenticated_client, fw, draft)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        error = response.data["error"]
+        assert "internal identifier '1'" in error
+        # Both requirement labels appear so support/users can find them.
+        assert "Colliding requirement" in error
+
     def test_publish_rejects_oversized_question_urn(
         self, authenticated_client, fw_with_tree
     ):

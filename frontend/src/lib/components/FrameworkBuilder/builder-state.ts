@@ -241,6 +241,101 @@ export function generateUrn(
 	return `urn:${urnNamespace}:risk:${type}:${slug}:${refId}`;
 }
 
+/**
+ * Extract the node_id (mobile part) from a URN — everything after the 5th
+ * colon. Mirrors the backend `extract_node_id`. node_id is the framework's
+ * internal stable identifier; it must be unique per type within a framework
+ * because CEL context and `parent_urn`/`depends_on` references key on it.
+ */
+export function extractNodeId(urn: string | null | undefined): string | null {
+	if (!urn) return null;
+	const parts = urn.split(':');
+	if (parts.length <= 5) return null;
+	const id = parts.slice(5).join(':').trim();
+	return id || null;
+}
+
+/** Replace the node_id segment of a URN, preserving namespace, type and slug. */
+function withNodeId(urn: string, nodeId: string): string {
+	const parts = urn.split(':');
+	if (parts.length <= 5) return urn;
+	return [...parts.slice(0, 5), nodeId].join(':');
+}
+
+/**
+ * Return a node_id not present in `taken`, appending `-2`, `-3`, … to the
+ * candidate until free. Used so a new item's URN never reuses the frozen
+ * node_id of an item that was renamed or moved.
+ */
+function uniqueNodeId(candidate: string, taken: Set<string>): string {
+	if (!taken.has(candidate)) return candidate;
+	let n = 2;
+	while (taken.has(`${candidate}-${n}`)) n++;
+	return `${candidate}-${n}`;
+}
+
+/** Collect the node_ids currently used by items of a given URN type. */
+function collectNodeIds(
+	roots: BuilderNode[],
+	type: 'req_node' | 'question' | 'question_choice'
+): Set<string> {
+	const ids = new Set<string>();
+	const walk = (list: BuilderNode[]) => {
+		for (const bn of list) {
+			if (type === 'req_node') {
+				const id = extractNodeId(bn.node.urn);
+				if (id) ids.add(id);
+			} else {
+				for (const bq of bn.questions) {
+					if (type === 'question') {
+						const id = extractNodeId(bq.question.urn);
+						if (id) ids.add(id);
+					} else {
+						for (const c of bq.question.choices) {
+							const id = extractNodeId(c.urn);
+							if (id) ids.add(id);
+						}
+					}
+				}
+			}
+			walk(bn.children);
+		}
+	};
+	walk(roots);
+	return ids;
+}
+
+/**
+ * Repair requirement nodes that share a node_id (and therefore a full URN) —
+ * a corruption older drafts can carry because node_ids were frozen at creation
+ * while ref_ids could be renamed and new nodes could regenerate a freed id.
+ *
+ * Runs on the flat node list before the tree is built: the first occurrence
+ * keeps its node_id, later collisions get a fresh unique one. `parent_urn`
+ * references are intentionally left pointing at the shared URN, so any
+ * ambiguous children stay attached to the first occurrence and the renamed
+ * duplicate becomes a standalone node the user can re-place — duplicate URNs
+ * make a precise parent reattachment impossible. Returns true if anything was
+ * changed. Mutates the nodes in place.
+ */
+function repairDuplicateNodeIds(nodes: RequirementNode[]): boolean {
+	const taken = new Set<string>();
+	let changed = false;
+	for (const n of nodes) {
+		const nid = extractNodeId(n.urn);
+		if (!nid || !n.urn) continue;
+		if (taken.has(nid)) {
+			const newNid = uniqueNodeId(nid, taken);
+			taken.add(newNid);
+			n.urn = withNodeId(n.urn, newNid);
+			changed = true;
+		} else {
+			taken.add(nid);
+		}
+	}
+	return changed;
+}
+
 // --- Recursive helpers ---
 
 /** Recursively map over a requirement tree, applying fn to each requirement */
@@ -752,16 +847,25 @@ export function createBuilderState(
 	}
 
 	const framework = writable<Framework>(initialFrameworkData);
+	// Self-heal drafts that carry duplicate node_ids (a corruption from older
+	// builder versions that froze node_ids at creation). Only drafts are
+	// repaired — live relational data is validated at publish time and the
+	// repair would otherwise try to rewrite published URNs. Runs on the flat
+	// list before buildTree (which keys children by parent_urn and would
+	// otherwise duplicate subtrees under colliding URNs). Marked
+	// unsaved/unpublished so it persists on the next save or publish.
+	const didRepairNodeIds = editingDraft ? repairDuplicateNodeIds(initialNodes) : false;
 	const initialRootNodes = buildTree(initialNodes, initialQuestions);
 	const rootNodes = writable<BuilderNode[]>(initialRootNodes);
 	const saving = writable(false);
 	const errors = writable<Map<string, string>>(new Map());
 	const activeSection = writable<string>(initialRootNodes[0]?.node.id ?? '');
 	const hasPendingFlush = writable(false);
-	const unsaved = writable(false); // local edits not yet saved to draft
+	// A node_id repair produces local edits not yet saved to the draft.
+	const unsaved = writable(didRepairNodeIds); // local edits not yet saved to draft
 	// Check if the draft was marked dirty by a prior save-draft call
 	const draftMarkedDirty = editingDraft && (editingDraft as any)._dirty === true;
-	const unpublished = writable(!!draftMarkedDirty);
+	const unpublished = writable(!!draftMarkedDirty || didRepairNodeIds);
 	const isScrolling = writable(false);
 	const activeLanguage = writable<string | null>(null);
 	// Non-fatal warnings returned by the last successful publish
@@ -954,11 +1058,14 @@ export function createBuilderState(
 		const parentRefId = parentBn?.node.ref_id ?? null;
 		const siblingRefIds = siblings.map((s) => s.node.ref_id);
 		const refId = computeRefId(siblingRefIds, parentRefId, parentBn ? 'requirement' : 'section');
+		// node_id must be unique across the whole framework (not just siblings),
+		// otherwise it can clash with a node that was renamed or moved away.
+		const nodeId = uniqueNodeId(refId, collectNodeIds(get(rootNodes), 'req_node'));
 
 		const newId = crypto.randomUUID();
 		const newNode: RequirementNode = {
 			id: newId,
-			urn: generateUrn('req_node', getFwSlug(), refId, getUrnNs()),
+			urn: generateUrn('req_node', getFwSlug(), nodeId, getUrnNs()),
 			ref_id: refId,
 			name: null,
 			description: null,
@@ -1229,7 +1336,8 @@ export function createBuilderState(
 		const parentRefId = req.node.ref_id ?? null;
 		const siblingRefIds = req.questions.map((bq) => bq.question.ref_id);
 		const refId = computeRefId(siblingRefIds, parentRefId, 'question');
-		const urn = generateUrn('question', getFwSlug(), refId, getUrnNs());
+		const nodeId = uniqueNodeId(refId, collectNodeIds(get(rootNodes), 'question'));
+		const urn = generateUrn('question', getFwSlug(), nodeId, getUrnNs());
 
 		const newQuestion: Question = {
 			id: newId,
@@ -1291,10 +1399,11 @@ export function createBuilderState(
 		const parentRefId = q.question.ref_id ?? null;
 		const siblingRefIds = q.question.choices.map((c) => c.ref_id);
 		const refId = computeRefId(siblingRefIds, parentRefId, 'choice');
+		const nodeId = uniqueNodeId(refId, collectNodeIds(get(rootNodes), 'question_choice'));
 
 		const newChoice: QuestionChoice = {
 			id: newId,
-			urn: generateUrn('question_choice', getFwSlug(), refId, getUrnNs()),
+			urn: generateUrn('question_choice', getFwSlug(), nodeId, getUrnNs()),
 			ref_id: refId,
 			value: '',
 			annotation: null,

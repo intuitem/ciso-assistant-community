@@ -9802,16 +9802,24 @@ class FrameworkViewSet(BaseModelViewSet):
                 )
 
         # --- Duplicate node_id check (CEL identity) ---
-        node_urns = [n.get("urn") for n in draft_nodes if n.get("urn")]
-        node_ids = [extract_node_id(u) for u in node_urns]
-        seen_node_ids: set[str] = set()
-        for nid in node_ids:
-            if nid and nid in seen_node_ids:
+        # node_id is the URN's mobile part — an internal identifier the UI does
+        # not surface, so the message names the two requirements that collide
+        # rather than the bare id (which the user can't locate). The builder
+        # auto-repairs this on load; this is the backend safety floor.
+        node_id_labels: dict[str, str] = {}
+        for node in draft_nodes:
+            nid = extract_node_id(node.get("urn"))
+            if not nid:
+                continue
+            if nid in node_id_labels:
                 raise DraftValidationError(
-                    f"Duplicate node_id '{nid}'. Each requirement must have a unique identifier."
+                    f"Two requirements share the internal identifier '{nid}': "
+                    f"'{node_id_labels[nid]}' and '{_label(node)}'. This usually "
+                    "happens after duplicating or moving requirements. Re-open the "
+                    "framework in the builder to repair it automatically, then "
+                    "publish again."
                 )
-            if nid:
-                seen_node_ids.add(nid)
+            node_id_labels[nid] = _label(node)
 
         # --- Dangling parent_urn check ---
         all_node_urns = {n.get("urn") for n in draft_nodes if n.get("urn")}
