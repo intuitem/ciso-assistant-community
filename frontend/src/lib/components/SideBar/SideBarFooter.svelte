@@ -4,7 +4,6 @@
 	import { LOCALE_MAP, language, defaultLangLabels } from '$lib/utils/locales';
 	import { m } from '$paraglide/messages';
 	import { getLocale, locales, setLocale } from '$paraglide/runtime';
-	import ThemeSwitch from '$lib/components/ThemeSwitch/ThemeSwitch.svelte';
 
 	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
 	import { createEventDispatcher, onMount } from 'svelte';
@@ -115,7 +114,6 @@
 								</option>
 							{/each}
 						</select>
-						<ThemeSwitch />
 						<button
 							onclick={() => {
 								openState = false;

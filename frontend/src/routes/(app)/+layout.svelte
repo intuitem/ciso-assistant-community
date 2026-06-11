@@ -32,6 +32,8 @@
 		setGlobalModalStore,
 		setShowWarningExternalLinks
 	} from '$lib/utils/external-links';
+	import { onMount } from 'svelte';
+	import { initThemeFromUser } from '$lib/utils/theme';
 
 	const isMac = browser && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 	const modifierKey = isMac ? '⌘' : 'Ctrl';
@@ -120,6 +122,12 @@
 			setShowWarningExternalLinks(showWarning);
 			interceptExternalLinks();
 		}
+	});
+
+	// Apply the theme persisted in the user's server-side preferences (ui.theme).
+	// Falls back to localStorage / system preference when no server value is set.
+	onMount(() => {
+		initThemeFromUser(data.user?.preferences);
 	});
 
 	// Handle login-specific logic

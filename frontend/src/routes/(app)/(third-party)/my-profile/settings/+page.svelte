@@ -16,6 +16,7 @@
 	} from '$lib/utils/datetime';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
+	import { setTheme, type ThemeMode } from '$lib/utils/theme';
 	import { defaults } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -121,6 +122,20 @@
 		} catch {
 			dateFormat = previous;
 		}
+	}
+
+	const themeOptions: { value: ThemeMode; label: string }[] = [
+		{ value: 'light', label: m.themeLight() },
+		{ value: 'dark', label: m.themeDark() },
+		{ value: 'system', label: m.themeSystem() }
+	];
+
+	let theme = $state((page.data.user?.preferences?.ui?.theme as ThemeMode) ?? 'system');
+
+	// setTheme applies the theme immediately and persists it to the backend (ui.theme).
+	function handleThemeChange(event: Event) {
+		theme = (event.target as HTMLSelectElement).value as ThemeMode;
+		setTheme(theme);
 	}
 	function modalPATCreateForm(): void {
 		const modalComponent: ModalComponent = {
@@ -398,6 +413,26 @@
 			</div>
 			<hr />
 			<div class="flow-root">
+				<dl class="-my-3 divide-y divide-surface-100 text-sm">
+					<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+						<dt class="font-medium">{m.theme()}</dt>
+						<dd class="text-surface-900 sm:col-span-2">
+							<div class="flex flex-col space-y-2 max-w-[40ch]">
+								<p class="text-sm text-surface-800">{m.themeDescription()}</p>
+								<select
+									class="select"
+									data-testid="theme-select"
+									value={theme}
+									onchange={handleThemeChange}
+								>
+									{#each themeOptions as option}
+										<option value={option.value}>{option.label}</option>
+									{/each}
+								</select>
+							</div>
+						</dd>
+					</div>
+				</dl>
 				<dl class="-my-3 divide-y divide-surface-100 text-sm">
 					<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
 						<dt class="font-medium">{m.dateFormat()}</dt>
