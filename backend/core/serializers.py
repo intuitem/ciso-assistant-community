@@ -2591,6 +2591,23 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
             return sd["scale"]
         return sd
 
+    field_visibility = serializers.SerializerMethodField()
+
+    def get_field_visibility(self, obj):
+        """Return field_visibility with defaults applied.
+
+        If the stored map is empty (e.g. audits created before the field was
+        populated at creation time), fall back to the code defaults merged with
+        the framework template — the same values a newly created CA would get —
+        so the frontend always receives a complete map.
+        """
+        fv = obj.field_visibility
+        if fv:
+            return fv
+        from core.utils import build_initial_field_visibility
+
+        return build_initial_field_visibility(obj.framework)
+
     # Derived booleans, kept in the API for backwards compatibility. The actual
     # storage is `field_visibility`; clients that want to change these should
     # PATCH `field_visibility` directly.
@@ -2949,6 +2966,8 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
             "is_locked",
             "min_score",
             "max_score",
+            "scores_definition",
+            "score_calculation_method",
             "progress_status_enabled",
             "extended_result_enabled",
             "field_visibility",
@@ -3031,12 +3050,12 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
         request = self.context.get("request")
         if request and self.instance:
             from core.utils import (
-                get_respondent_filtered_folder_ids,
+                get_auditee_filtered_folder_ids,
                 is_field_editable_by,
             )
 
             ca = self.instance.compliance_assessment
-            respondent_folders = get_respondent_filtered_folder_ids(request.user)
+            respondent_folders = get_auditee_filtered_folder_ids(request.user)
             if respondent_folders and ca.folder_id in respondent_folders:
                 # Cascade through DEFAULT_VISIBILITY so default-hidden keys are
                 # stripped from a respondent's payload even when the CA has an
@@ -3075,9 +3094,9 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
         # Assignment-level and field-level guards for respondent users (auditee or third-party)
         request = self.context.get("request")
         if request and self.instance and compliance_assessment:
-            from core.utils import get_respondent_filtered_folder_ids
+            from core.utils import get_auditee_filtered_folder_ids
 
-            respondent_folders = get_respondent_filtered_folder_ids(request.user)
+            respondent_folders = get_auditee_filtered_folder_ids(request.user)
             if (
                 respondent_folders
                 and compliance_assessment.folder_id in respondent_folders
@@ -3256,18 +3275,20 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                         answer.value = answer_value
                         answer.save(update_fields=["value"])
 
-                # Check if any choice has scoring or result logic
+                # Check if any choice has scoring or result logic. For
+                # compute_result, mirror `resolve_compute_result`: empty strings,
+                # whitespace and unknown values are not actually result-bearing
+                # and should not trigger the compute path.
                 from core.models import QuestionChoice
+                from core.utils import resolve_compute_result
 
-                has_score_or_result = (
-                    QuestionChoice.objects.filter(
-                        question__requirement_node=instance.requirement,
-                    )
-                    .filter(
-                        models.Q(add_score__isnull=False)
-                        | models.Q(compute_result__isnull=False)
-                    )
-                    .exists()
+                choices = QuestionChoice.objects.filter(
+                    question__requirement_node=instance.requirement,
+                ).values_list("add_score", "compute_result")
+
+                has_score_or_result = any(
+                    add_score is not None or resolve_compute_result(cr) is not None
+                    for add_score, cr in choices
                 )
 
                 if has_score_or_result:
@@ -4838,7 +4859,7 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
 
 class TaskNodeReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
-    task_template = FieldsRelatedField(["folder", "id"])
+    task_template = FieldsRelatedField(["folder", "id", "description"])
     folder = FieldsRelatedField()
     name = serializers.SerializerMethodField()
     assigned_to = FieldsRelatedField(many=True)
