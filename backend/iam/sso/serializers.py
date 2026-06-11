@@ -282,6 +282,31 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
             validated_data["settings"] = {}
         validated_data["settings"]["name"] = validated_data.get("provider", "n/a")
 
+        # Preserve the group sync config — it is managed exclusively through
+        # the dedicated `group_sync` action and is not part of this form.
+        existing_group_sync = (
+            (settings_object.value or {}).get("settings", {}).get("group_sync")
+        )
+        if existing_group_sync is not None:
+            validated_data["settings"]["group_sync"] = existing_group_sync
+
         settings_object.value = validated_data
         settings_object.save()
         return instance
+
+
+class GroupSyncConfigSerializer(serializers.Serializer):
+    """
+    Standalone serializer for the IdP group synchronization policy
+    (settings.group_sync). All fields are optional so a PATCH can send
+    a subset; the view merges them into the stored config.
+    """
+
+    enabled = serializers.BooleanField(required=False)
+    authoritative = serializers.BooleanField(required=False)
+    oidc_groups_claim = serializers.CharField(
+        required=False, allow_blank=True, allow_null=True
+    )
+    saml_groups_attribute = serializers.CharField(
+        required=False, allow_blank=True, allow_null=True
+    )

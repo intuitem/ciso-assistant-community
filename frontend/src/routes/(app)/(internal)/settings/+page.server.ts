@@ -7,6 +7,7 @@ import { safeTranslate } from '$lib/utils/i18n';
 import {
 	FeatureFlagsSchema,
 	GeneralSettingsSchema,
+	IdPGroupMappingSchema,
 	SSOSettingsSchema,
 	VulnerabilitySlaSchema,
 	SecIntelFeedsSchema,
@@ -112,6 +113,22 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		errors: false
 	});
 
+	const idpGroupMappings = await fetch(`${BASE_API_URL}/idp-group-mappings/`)
+		.then((res) => res.json())
+		.then((res) => res.results ?? []);
+
+	const idpGroupMappingCreateForm = await superValidate(zod(IdPGroupMappingSchema), {
+		errors: false
+	});
+
+	const groupSyncConfig = await fetch(`${BASE_API_URL}/settings/sso/group_sync/`)
+		.then((res) => (res.ok ? res.json() : {}))
+		.catch(() => ({}));
+
+	const scimTokens = await fetch(`${BASE_API_URL}/iam/scim-token/`)
+		.then((res) => (res.ok ? res.json() : []))
+		.catch(() => []);
+
 	return {
 		ssoSettings,
 		ssoForm,
@@ -131,6 +148,10 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		secIntelFeedsModel,
 		webhookEndpoints,
 		webhookEndpointCreateForm,
+		idpGroupMappings,
+		idpGroupMappingCreateForm,
+		groupSyncConfig,
+		scimTokens,
 		title: m.settings()
 	};
 };
@@ -358,5 +379,80 @@ export const actions: Actions = {
 		);
 
 		return message(deleteForm, { status: res.status });
+	},
+	createIdpGroupMapping: async (event) => {
+		const formData = await event.request.formData();
+		if (!formData) return fail(400, { form: null });
+
+		const form = await superValidate(formData, zod(IdPGroupMappingSchema));
+		if (!form.valid) return fail(400, { form });
+
+		const response = await event.fetch(`${BASE_API_URL}/idp-group-mappings/`, {
+			method: 'POST',
+			body: JSON.stringify(form.data)
+		});
+
+		if (!response.ok) return handleErrorResponse({ event, response, form });
+
+		setFlash({ type: 'success', message: m.idpGroupMappingCreated() }, event);
+		return { form };
+	},
+	deleteIdpGroupMapping: async (event) => {
+		const formData = await event.request.formData();
+		const schema = z.object({ id: z.string() });
+		const deleteForm = await superValidate(formData, zod(schema));
+
+		if (!deleteForm.valid) return message(deleteForm, { status: 400 });
+
+		const res = await event.fetch(`${BASE_API_URL}/idp-group-mappings/${deleteForm.data.id}/`, {
+			method: 'DELETE'
+		});
+
+		if (!res.ok) return message(deleteForm, { status: res.status });
+
+		setFlash({ type: 'success', message: m.idpGroupMappingDeleted() }, event);
+		return message(deleteForm, { status: 200 });
+	},
+	groupSync: async (event) => {
+		const formData = await event.request.formData();
+		const payload = {
+			enabled: formData.get('enabled') === 'true',
+			authoritative: formData.get('authoritative') === 'true',
+			oidc_groups_claim: (formData.get('oidc_groups_claim') as string) || 'groups',
+			saml_groups_attribute: (formData.get('saml_groups_attribute') as string) || 'groups'
+		};
+
+		const response = await event.fetch(`${BASE_API_URL}/settings/sso/group_sync/`, {
+			method: 'PATCH',
+			body: JSON.stringify(payload)
+		});
+
+		if (!response.ok) {
+			return fail(response.status, { error: 'Failed to update group sync configuration' });
+		}
+
+		setFlash({ type: 'success', message: m.groupSyncConfigUpdated() }, event);
+		return { success: true };
+	},
+	generateScimToken: async (event) => {
+		const response = await event.fetch(`${BASE_API_URL}/iam/scim-token/`, {
+			method: 'POST',
+			body: JSON.stringify({ name: 'SCIM provisioning token' })
+		});
+		if (!response.ok) return fail(response.status, { error: 'Failed to generate SCIM token' });
+		const data = await response.json();
+		return { token: data.token, id: data.id, name: data.name };
+	},
+	revokeScimToken: async (event) => {
+		const formData = await event.request.formData();
+		const id = formData.get('id');
+		if (!id) return fail(400, { error: 'Missing token id' });
+		const response = await event.fetch(`${BASE_API_URL}/iam/scim-token/${id}/`, {
+			method: 'DELETE'
+		});
+		if (!response.ok && response.status !== 204)
+			return fail(response.status, { error: 'Failed to revoke SCIM token' });
+		setFlash({ type: 'success', message: m.scimTokenRevoked() }, event);
+		return { success: true };
 	}
 };

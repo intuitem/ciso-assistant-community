@@ -85,6 +85,8 @@ IGNORED_PERMISSION_MODELS = (
     "usergroup",
     "ssosettings",
     "historicalmetric",
+    "idpgroupmapping",
+    "scimtoken",
 )
 
 
@@ -639,6 +641,13 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         blank=True,
         null=True,
         verbose_name=_("Expiry date"),
+    )
+    scim_external_id = models.CharField(
+        max_length=512,
+        blank=True,
+        null=True,
+        unique=True,
+        verbose_name=_("SCIM external ID"),
     )
     objects = CaseInsensitiveUserManager()
 
@@ -1589,6 +1598,82 @@ class PersonalAccessToken(models.Model):
         return f"{self.auth_token.user.email} : {self.name} : {self.auth_token.digest}"
 
 
+# -----------------------------
+# IdP Group Federation
+# -----------------------------
+
+
+class IdPGroupMapping(AbstractBaseModel):
+    """
+    Maps an external IdP group identifier to a local UserGroup.
+    Shared routing table for both SSO group sync (pre_social_login) and SCIM
+    group operations. A mapping with scim_external_id set is owned end-to-end
+    by SCIM; the SSO adapter skips it during JWT-claim sync.
+    """
+
+    external_group_id = models.CharField(
+        max_length=512,
+        unique=True,
+        verbose_name=_("External group identifier"),
+        help_text=_("Group name, UUID, or DN as provided by the IdP"),
+    )
+    user_group = models.ForeignKey(
+        "UserGroup",
+        on_delete=models.CASCADE,
+        related_name="idp_mappings",
+        verbose_name=_("User group"),
+    )
+    scim_external_id = models.CharField(
+        max_length=512,
+        blank=True,
+        null=True,
+        unique=True,
+        verbose_name=_("SCIM external ID"),
+        help_text=_(
+            "Opaque identifier assigned by the SCIM client when this mapping "
+            "is first touched by a SCIM push. Stable join key across renames."
+        ),
+    )
+
+    class Meta:
+        verbose_name = _("IdP group mapping")
+        verbose_name_plural = _("IdP group mappings")
+
+    def __str__(self):
+        return f"{self.external_group_id} -> {self.user_group}"
+
+
+# -----------------------------
+# SCIM Token
+# -----------------------------
+
+
+class SCIMToken(models.Model):
+    """Knox-backed bearer token for SCIM 2.0 provisioning. Admin-only."""
+
+    name = models.CharField(max_length=255, default="SCIM provisioning token")
+    auth_token = models.ForeignKey(
+        AuthToken,
+        on_delete=models.CASCADE,
+        related_name="scim_token",
+    )
+
+    class Meta:
+        verbose_name = "SCIM token"
+        verbose_name_plural = "SCIM tokens"
+
+    @property
+    def created(self):
+        return self.auth_token.created
+
+    @property
+    def digest(self):
+        return self.auth_token.digest
+
+    def __str__(self):
+        return f"{self.name} : {self.auth_token.digest}"
+
+
 common_exclude = ["created_at", "updated_at"]
 auditlog.register(
     User,
@@ -1597,5 +1682,9 @@ auditlog.register(
 )
 auditlog.register(
     Folder,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    IdPGroupMapping,
     exclude_fields=common_exclude,
 )

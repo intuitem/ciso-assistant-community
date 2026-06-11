@@ -115,8 +115,9 @@ from django.template.loader import render_to_string
 from django.utils.functional import Promise
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from iam.models import Folder, RoleAssignment, User, UserGroup
+from iam.models import Folder, IdPGroupMapping, RoleAssignment, User, UserGroup
 from rest_framework import filters, generics, permissions, status, viewsets
+from core.permissions import IsAdministrator
 from django.utils.translation import gettext_lazy as _, get_language
 from rest_framework.decorators import (
     action,
@@ -817,6 +818,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     def get_queryset(self) -> models.query.QuerySet:
         if not self.model:
             return None
+
         object_ids_view = None
         if self.request.method == "GET":
             if q := re.match(
@@ -7712,6 +7714,21 @@ class UserGroupViewSet(BaseModelViewSet):
                 status=status.HTTP_403_FORBIDDEN,
             )
         return super().destroy(request, *args, **kwargs)
+
+
+class IdPGroupMappingViewSet(BaseModelViewSet):
+    """
+    API endpoint for managing IdP group → UserGroup mappings.
+    Admin-only: IdPGroupMapping has no folder, so RBAC object scoping does not apply.
+    """
+
+    model = IdPGroupMapping
+    ordering = ["external_group_id"]
+    filterset_fields = ["user_group"]
+    permission_classes = [permissions.IsAuthenticated, IsAdministrator]
+
+    def get_queryset(self):
+        return IdPGroupMapping.objects.select_related("user_group").all()
 
 
 class RoleAssignmentViewSet(BaseModelViewSet):
