@@ -1922,6 +1922,31 @@ class UserGroupWriteSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
+class _IdPGroupMappingMixin:
+    """
+    IdPGroupMapping has no folder field, so folder-based RBAC does not apply.
+    Access is gated entirely at the ViewSet level (is_admin check in get_queryset).
+    Skip the folder permission check to avoid the root-folder fallback 403.
+    """
+
+    def _check_object_perm(self, instance_or_data, action, *, folder=None):
+        pass
+
+
+class IdPGroupMappingReadSerializer(_IdPGroupMappingMixin, BaseModelSerializer):
+    user_group = FieldsRelatedField()
+
+    class Meta:
+        model = IdPGroupMapping
+        fields = "__all__"
+
+
+class IdPGroupMappingWriteSerializer(_IdPGroupMappingMixin, BaseModelSerializer):
+    class Meta:
+        model = IdPGroupMapping
+        fields = "__all__"
+
+
 class PermissionReadSerializer(BaseModelSerializer):
     content_type = FieldsRelatedField(fields=["id", "app_label", "model"])
     normalized_model = serializers.SerializerMethodField()

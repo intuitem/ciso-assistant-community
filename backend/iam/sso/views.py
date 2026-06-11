@@ -8,10 +8,19 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from structlog import get_logger
 
+from global_settings.models import GlobalSettings
+
 from .models import SSOSettings
 from iam.models import User
 from .oidc.views import oidc_redirect
-from .serializers import SSOSettingsWriteSerializer
+from .serializers import GroupSyncConfigSerializer, SSOSettingsWriteSerializer
+
+GROUP_SYNC_DEFAULTS = {
+    "enabled": False,
+    "authoritative": False,
+    "oidc_groups_claim": "groups",
+    "saml_groups_attribute": "groups",
+}
 
 logger = get_logger(__name__)
 
@@ -94,3 +103,30 @@ class SSOSettingsViewSet(BaseModelViewSet):
     @action(detail=True, name="Get write data")
     def object(self, request, pk=None):
         return Response(SSOSettingsWriteSerializer(self.get_object()).data)
+
+    @action(detail=True, methods=["get", "patch"], name="Group sync configuration")
+    def group_sync(self, request, pk=None):
+        """
+        GET   — return the current IdP group synchronization policy.
+        PATCH — merge the provided keys into settings.group_sync, leaving the
+                rest of the SSO configuration untouched.
+        """
+        settings_object = GlobalSettings.objects.get(name=GlobalSettings.Names.SSO)
+        value = settings_object.value or {}
+        inner = value.get("settings", {})
+        current = {**GROUP_SYNC_DEFAULTS, **inner.get("group_sync", {})}
+
+        if request.method == "GET":
+            return Response(current)
+
+        serializer = GroupSyncConfigSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        current.update(serializer.validated_data)
+
+        inner["group_sync"] = current
+        value["settings"] = inner
+        settings_object.value = value
+        settings_object.save()
+
+        logger.info("idp group_sync config updated", config=current)
+        return Response(current)

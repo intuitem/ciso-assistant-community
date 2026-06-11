@@ -6,6 +6,8 @@
 	import SSOSettings from '$lib/components/Settings/SSOSettings.svelte';
 	import FeatureFlagsSettings from '$lib/components/Settings/FeatureFlagsSettings.svelte';
 	import WebhooksSettings from '$lib/components/Settings/WebhooksSettings.svelte';
+	import IdPGroupMappingsSettings from '$lib/components/Settings/IdPGroupMappingsSettings.svelte';
+	import SCIMSettings from '$lib/components/Settings/SCIMSettings.svelte';
 	import VulnerabilitySlaSettings from '$lib/components/Settings/VulnerabilitySlaSettings.svelte';
 	import SecIntelFeedsSettings from '$lib/components/Settings/SecIntelFeedsSettings.svelte';
 
@@ -14,17 +16,32 @@
 	let group = $state(page.url.searchParams.get('tab') || 'general');
 
 	let { data } = $props();
+
+	// Keep the active tab and the URL in sync. The state initializer above
+	$effect(() => {
+		const tab = page.url.searchParams.get('tab') || 'general';
+		if (tab !== group) group = tab;
+	});
 </script>
 
 <Tabs
 	value={group}
 	onValueChange={(e) => {
 		group = e.value;
+		const url = new URL(page.url);
+		url.searchParams.set('tab', e.value);
+		goto(url, { replaceState: true, noScroll: true, keepFocus: true });
 	}}
 >
 	<Tabs.List class="flex-nowrap overflow-x-auto gap-2">
 		<Tabs.Trigger value="general"><i class="fa-solid fa-globe"></i> {m.general()}</Tabs.Trigger>
 		<Tabs.Trigger value="sso"><i class="fa-solid fa-key"></i> {m.sso()}</Tabs.Trigger>
+		<Tabs.Trigger value="idpGroupMappings"
+			><i class="fa-solid fa-arrows-left-right"></i> {m.idpGroupMappings()}</Tabs.Trigger
+		>
+		<Tabs.Trigger value="scim"
+			><i class="fa-solid fa-cloud-arrow-down"></i> {m.scim()}</Tabs.Trigger
+		>
 		<Tabs.Trigger value="featureFlags"
 			><i class="fa-solid fa-flag"></i> {m.featureFlags()}</Tabs.Trigger
 		>
@@ -55,6 +72,12 @@
 	</Tabs.Content>
 	<Tabs.Content value="sso">
 		<SSOSettings {data} />
+	</Tabs.Content>
+	<Tabs.Content value="idpGroupMappings">
+		<IdPGroupMappingsSettings {data} />
+	</Tabs.Content>
+	<Tabs.Content value="scim">
+		<SCIMSettings {data} />
 	</Tabs.Content>
 	<Tabs.Content value="featureFlags">
 		<FeatureFlagsSettings {data} />

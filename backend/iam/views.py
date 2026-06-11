@@ -30,7 +30,7 @@ from django.conf import settings
 
 from global_settings.models import GlobalSettings
 from core.models import Actor
-from .models import Folder, PersonalAccessToken, Role, RoleAssignment
+from .models import Folder, PersonalAccessToken, Role, RoleAssignment, SCIMToken
 from .serializers import (
     ChangePasswordSerializer,
     LoginSerializer,
@@ -38,6 +38,7 @@ from .serializers import (
     ResetPasswordConfirmSerializer,
     SetPasswordSerializer,
 )
+from core.permissions import IsAdministrator
 
 logger = structlog.get_logger(__name__)
 
@@ -495,3 +496,64 @@ class RevokeOtherSessionsView(views.APIView):
             {"revoked_sessions": deleted_count},
             status=status.HTTP_200_OK,
         )
+
+
+class SCIMTokenViewSet(views.APIView):
+    """
+    GET  /api/iam/scim-token/   — list all SCIM tokens (admin only)
+    POST /api/iam/scim-token/   — create a new SCIM token (admin only)
+    """
+
+    permission_classes = [permissions.IsAuthenticated, IsAdministrator]
+
+    def get(self, request, *args, **kwargs):
+        tokens = SCIMToken.objects.select_related("auth_token").all()
+        data = [
+            {
+                "id": t.id,
+                "name": t.name,
+                "created": t.auth_token.created,
+                "digest": t.auth_token.digest,
+            }
+            for t in tokens
+        ]
+        return Response(data, status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        name = request.data.get("name", "SCIM provisioning token")
+        token_prefix = knox_settings.TOKEN_PREFIX
+        instance, raw_token = get_token_model().objects.create(
+            user=request.user,
+            expiry=None,
+            prefix=token_prefix,
+        )
+        scim_token = SCIMToken.objects.create(auth_token=instance, name=name)
+        return Response(
+            {
+                "id": scim_token.id,
+                "name": scim_token.name,
+                "token": raw_token,
+                "created": instance.created,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class SCIMTokenDeleteView(views.APIView):
+    """
+    DELETE /api/iam/scim-token/{token_id}/  — revoke a SCIM token (admin only)
+    """
+
+    permission_classes = [permissions.IsAuthenticated, IsAdministrator]
+
+    def delete(self, request, token_id, *args, **kwargs):
+        try:
+            scim_token = SCIMToken.objects.select_related("auth_token").get(
+                id=token_id
+            )
+        except SCIMToken.DoesNotExist:
+            return Response(
+                {"error": "Token not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+        scim_token.auth_token.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

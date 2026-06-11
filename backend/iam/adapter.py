@@ -109,6 +109,159 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                         return email
         return None
 
+    @staticmethod
+    def _extract_name_claims(sociallogin):
+        """
+        Pull (first_name, last_name) out of the sociallogin payload, regardless
+        of provider shape. Falls back to '' so JIT user creation never crashes
+        on a sparse IdP.
+        """
+        extra = sociallogin.account.extra_data
+        provider = sociallogin.account.provider
+
+        def _first(value):
+            if isinstance(value, list):
+                return next((v for v in value if isinstance(v, str) and v), "")
+            return value or ""
+
+        if provider == "saml":
+            attrs = extra.get("attributes", {}) or {}
+            first = _first(attrs.get("first_name") or attrs.get("givenName"))
+            last = _first(attrs.get("last_name") or attrs.get("familyName"))
+            return first, last
+
+        for source in (extra.get("userinfo", {}), extra.get("id_token", {}), extra):
+            if not isinstance(source, dict):
+                continue
+            first = source.get("given_name") or source.get("givenName")
+            last = source.get("family_name") or source.get("familyName")
+            if first or last:
+                return first or "", last or ""
+
+            # Some IdPs only emit a combined "name" claim.
+            name = source.get("name")
+            if isinstance(name, str) and name.strip():
+                parts = name.strip().split(None, 1)
+                return parts[0], parts[1] if len(parts) > 1 else ""
+
+        return "", ""
+
+    @staticmethod
+    def _extract_groups_from_sociallogin(sociallogin, oidc_claim, saml_attr):
+        """Return a list of IdP group identifiers from the sociallogin extra_data."""
+        extra = sociallogin.account.extra_data
+        provider = sociallogin.account.provider
+
+        if provider == "saml":
+            attrs = extra.get("attributes", {})
+            raw = attrs.get(saml_attr, [])
+            if isinstance(raw, str):
+                return [raw]
+            return list(raw) if raw else []
+
+        for source in (extra.get("userinfo", {}), extra.get("id_token", {}), extra):
+            raw = source.get(oidc_claim)
+            if raw is not None:
+                return (
+                    [str(raw)] if not isinstance(raw, list) else [str(g) for g in raw]
+                )
+        return []
+
+    @staticmethod
+    def _sync_idp_groups(user, sociallogin):
+        """
+        Sync the user's managed UserGroup memberships from IdP group claims.
+
+        Only UserGroups that have at least one IdPGroupMapping ("managed"
+        groups) are ever touched; all other memberships are left untouched.
+
+        Behavior is governed by two flags under settings.group_sync:
+          - enabled:        master switch. If false, sync is skipped entirely.
+          - authoritative:  if true the IdP is the source of truth — any managed
+                            membership the IdP no longer claims is removed,
+                            including the case where the IdP sends no matching
+                            group at all. If false, sync is additive
+                            (memberships are only added, never removed).
+        """
+        from iam.models import IdPGroupMapping
+        from iam.sso.models import SSOSettings
+
+        extra = sociallogin.account.extra_data
+        logger.debug(
+            "idp_group_sync: extra_data snapshot",
+            provider=sociallogin.account.provider,
+            extra_keys=list(extra.keys()),
+            userinfo_keys=list(extra.get("userinfo", {}).keys()),
+            id_token_keys=list(extra.get("id_token", {}).keys()),
+        )
+
+        try:
+            cfg = (SSOSettings.objects.get().settings or {}).get("group_sync", {})
+        except Exception:
+            return
+
+        if not cfg.get("enabled", False):
+            logger.debug("idp_group_sync: disabled, skipping", user_id=str(user.id))
+            return
+
+        authoritative = cfg.get("authoritative", False)
+        oidc_claim = cfg.get("oidc_groups_claim", "groups")
+        saml_attr = cfg.get("saml_groups_attribute", "groups")
+
+        idp_group_ids = SocialAccountAdapter._extract_groups_from_sociallogin(
+            sociallogin, oidc_claim, saml_attr
+        )
+        logger.info(
+            "idp_group_sync: extracted groups",
+            user_id=str(user.id),
+            oidc_claim=oidc_claim,
+            saml_attr=saml_attr,
+            idp_group_ids=idp_group_ids,
+            authoritative=authoritative,
+            mapping_count=IdPGroupMapping.objects.count(),
+        )
+
+        # Mappings whose scim_external_id is set are SCIM-owned end-to-end —
+        # the JWT path is forbidden from touching them. This is what lets a
+        # SCIM client be the single source of truth on those memberships.
+        jwt_eligible = IdPGroupMapping.objects.filter(scim_external_id__isnull=True)
+        all_managed = set(
+            jwt_eligible.values_list("user_group_id", flat=True).distinct()
+        )
+        desired = (
+            set(
+                jwt_eligible.filter(
+                    external_group_id__in=idp_group_ids
+                ).values_list("user_group_id", flat=True)
+            )
+            if idp_group_ids
+            else set()
+        )
+        current_managed = set(
+            user.user_groups.filter(id__in=all_managed).values_list("id", flat=True)
+        )
+
+        to_add = desired - current_managed
+        # authoritative=True: full reconciliation of managed groups (the IdP's
+        # claim — including "no claim" — wins). authoritative=False: additive
+        # only, never revoke.
+        to_remove = (current_managed - desired) if authoritative else set()
+
+        if to_add:
+            user.user_groups.add(*to_add)
+            logger.info(
+                "idp_group_sync: added groups",
+                user_id=str(user.id),
+                added=[str(g) for g in to_add],
+            )
+        if to_remove:
+            user.user_groups.remove(*to_remove)
+            logger.info(
+                "idp_group_sync: removed groups",
+                user_id=str(user.id),
+                removed=[str(g) for g in to_remove],
+            )
+
     def pre_social_login(self, request, sociallogin):
         extra = sociallogin.account.extra_data
         logger.debug(
@@ -126,7 +279,8 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         if not email_address:
             id_token = extra.get("id_token", {})
             email_address = id_token.get("email") or id_token.get("email_address")
-        # Fallback: check preferred_username / upn (common in Entra ID / Azure AD)
+        # Fallback: check preferred_username / upn (common in IdPs that scope
+        # the OIDC `email` claim and surface the user principal name instead).
         if not email_address:
             for source in [extra, extra.get("userinfo", {}), extra.get("id_token", {})]:
                 candidate = source.get("preferred_username") or source.get("upn")
@@ -177,20 +331,59 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                 provider=sociallogin.account.provider,
                 user_id=str(user.id),
             )
+            self._sync_idp_groups(user, sociallogin)
         except User.DoesNotExist:
-            logger.error(
-                "pre_social_login: user not found",
+            # Just-in-time provisioning: the IdP already authenticated this
+            # person, so we create the local user record on the fly. Group
+            # membership is then driven by _sync_idp_groups below.
+            from iam.models import Folder
+
+            first_name, last_name = self._extract_name_claims(sociallogin)
+            try:
+                from global_settings.models import GlobalSettings
+
+                general = GlobalSettings.objects.filter(name="general").first()
+                default_lang = (
+                    general.value.get("default_language", "en")
+                    if general and isinstance(general.value, dict)
+                    else "en"
+                )
+            except Exception:
+                default_lang = "en"
+
+            user = User(
+                email=email_address.lower(),
+                first_name=first_name,
+                last_name=last_name,
+                is_active=True,
+                is_published=True,
+                keep_local_login=False,
+                folder=Folder.get_root_folder(),
+                preferences={"lang": default_lang},
+            )
+            user.set_unusable_password()
+            user.save()
+
+            try:
+                from allauth.account.models import EmailAddress
+
+                EmailAddress.objects.get_or_create(
+                    user=user,
+                    email=user.email,
+                    defaults={"verified": True, "primary": True},
+                )
+            except Exception:
+                pass
+
+            logger.info(
+                "pre_social_login: JIT user provisioned",
                 provider=sociallogin.account.provider,
+                user_id=str(user.id),
+                email=user.email,
             )
-            logger.debug(
-                "pre_social_login: user not found - check DB for this email",
-                idp_email=email_address,
-                idp_email_repr=repr(email_address),
-                provider=sociallogin.account.provider,
-            )
-            return Response(
-                {"message": "User not found."}, status=HTTP_401_UNAUTHORIZED
-            )
+            sociallogin.user = user
+            sociallogin.connect(request, user)
+            self._sync_idp_groups(user, sociallogin)
 
     def list_apps(self, request, provider=None, client_id=None):
         """SSOSettings's can be setup in the database, or, via

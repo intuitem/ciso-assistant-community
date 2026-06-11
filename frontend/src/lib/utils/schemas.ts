@@ -441,6 +441,11 @@ export const RequirementAssessmentSchema = z.object({
 	nextRequirementAssessmentId: z.string().uuid().optional().nullable()
 });
 
+export const IdPGroupMappingSchema = z.object({
+	external_group_id: z.string().min(1),
+	user_group: z.string().uuid()
+});
+
 export const UserEditSchema = z.object({
 	email: z.string().email(),
 	first_name: z.string().optional(),
@@ -1857,7 +1862,8 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'dashboard-builtin-widgets': DashboardWidgetSchema,
 	teams: teamSchema,
 	'managed-documents': ManagedDocumentSchema,
-	'document-revisions': DocumentRevisionSchema
+	'document-revisions': DocumentRevisionSchema,
+	'idp-group-mappings': IdPGroupMappingSchema
 };
 
 export const modelSchema = (model: string) => {
