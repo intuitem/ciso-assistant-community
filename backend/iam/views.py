@@ -4,7 +4,7 @@ from datetime import timedelta
 import structlog
 from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model, login, logout
-from django.db import models, transaction
+from django.db import transaction
 from django.db.models import Q, Exists, OuterRef
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils import timezone
