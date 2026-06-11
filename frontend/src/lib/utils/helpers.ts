@@ -104,7 +104,8 @@ export function formatScoreValue(
 	if (range <= 0) {
 		return 0;
 	}
-	return ((value - min_score) * 100) / range;
+	const boundedValue = Math.max(min_score, Math.min(max_score, value));
+	return ((boundedValue - min_score) * 100) / range;
 }
 
 export function getSecureRedirect(url: any): string {
