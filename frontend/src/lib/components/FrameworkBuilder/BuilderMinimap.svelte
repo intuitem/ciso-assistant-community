@@ -44,10 +44,17 @@
 	// silently staying open with no feedback.
 	let publishError = $derived($errorsStore.get('publish'));
 
-	function closePublishModal() {
+	// Reset the dialog's local state. Used directly when the 'publish' error
+	// must stay visible in the page banner (validation failure, success flash);
+	// closePublishModal additionally clears it (user-initiated dismiss).
+	function resetPublishModal() {
 		confirmPublish = false;
 		publishPreview = null;
 		previewError = null;
+	}
+
+	function closePublishModal() {
+		resetPublishModal();
 		builder.clearError('publish');
 	}
 
@@ -126,16 +133,12 @@
 					(k) => k.startsWith('node-') || k.startsWith('question-')
 				);
 				if (hasFieldErrors) {
-					confirmPublish = false;
-					publishPreview = null;
-					previewError = null;
+					resetPublishModal();
 				}
 				return;
 			}
 			publishSuccess = true;
-			confirmPublish = false;
-			publishPreview = null;
-			previewError = null;
+			resetPublishModal();
 			builder.unsaved.set(false);
 			builder.unpublished.set(false);
 			setTimeout(() => (publishSuccess = false), 3000);

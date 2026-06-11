@@ -40,6 +40,23 @@ def extract_node_id(urn: str | None) -> str | None:
 REWRITABLE_URN_TYPES = {"req_node", "question", "question_choice"}
 
 
+def extract_urn_slug(urn) -> str | None:
+    """Return the slug (segment 4) of a proper 6+-segment rewritable URN
+    (`urn:ns:risk:type:slug:node_id`), else None. Legacy 5-segment URNs carry
+    a per-node UUID at segment 4 — not a slug — and yield None."""
+    if not isinstance(urn, str):
+        return None
+    parts = urn.split(":")
+    if (
+        len(parts) >= 6
+        and parts[0] == "urn"
+        and parts[2] == "risk"
+        and parts[3] in REWRITABLE_URN_TYPES
+    ):
+        return parts[4]
+    return None
+
+
 def rewrite_child_urns(draft: dict, new_ns: str, new_slug: str) -> None:
     """Rewrite segment 1 (namespace) and segment 4 (slug) of every child URN in
     the draft, in place. Idempotent across slugs.

@@ -160,6 +160,7 @@ from core.utils import (
     REWRITABLE_URN_TYPES,
     build_answers_dict,
     compare_schema_versions,
+    extract_urn_slug,
     get_auditee_filtered_folder_ids,
     resolve_compute_result,
     is_field_visible_to,
@@ -8580,6 +8581,16 @@ class DraftValidationError(Exception):
 BUILDER_DRAFT_SCHEMA_VERSION = 1
 
 
+def _draft_record_label(record) -> str:
+    """Human-readable label for a draft node/question/choice, used in
+    DraftValidationError messages so users can locate the offending item."""
+    for key in ("ref_id", "name", "text", "value"):
+        v = record.get(key)
+        if isinstance(v, str) and v.strip():
+            return v[:50]
+    return record.get("urn") or "unknown"
+
+
 class FrameworkViewSet(BaseModelViewSet):
     """
     API endpoint that allows frameworks to be viewed or edited.
@@ -9590,19 +9601,9 @@ class FrameworkViewSet(BaseModelViewSet):
         seed_ref_id = framework.ref_id
         if not seed_ref_id:
             for record in nodes + questions + choices:
-                u = record.get("urn") or ""
-                parts = u.split(":")
-                # Only proper 6+ segment URNs (`urn:ns:risk:type:slug:node_id`)
-                # carry a slug we can seed from. Legacy 5-segment URNs
-                # (`urn:ns:risk:type:<uuid>`) have a per-node UUID at parts[4]
-                # — not a ref_id — so skip them and fall through to the slug.
-                if (
-                    len(parts) >= 6
-                    and parts[0] == "urn"
-                    and parts[2] == "risk"
-                    and parts[3] in REWRITABLE_URN_TYPES
-                ):
-                    seed_ref_id = parts[4]
+                slug = extract_urn_slug(record.get("urn"))
+                if slug:
+                    seed_ref_id = slug
                     break
             if not seed_ref_id:
                 seed_ref_id = self._slugify_framework_name(framework.name, framework.id)
@@ -9740,12 +9741,7 @@ class FrameworkViewSet(BaseModelViewSet):
         draft_questions = draft.get("questions", [])
         draft_choices = draft.get("choices", [])
 
-        def _label(record):
-            for key in ("ref_id", "name", "text", "value"):
-                v = record.get(key)
-                if isinstance(v, str) and v.strip():
-                    return v[:50]
-            return record.get("urn") or "unknown"
+        _label = _draft_record_label
 
         # --- ids: every record needs a unique, valid UUID. The reconcile
         # code parses these with uuid.UUID() and keys lookup maps on them;
@@ -9882,6 +9878,10 @@ class FrameworkViewSet(BaseModelViewSet):
         # --- Duplicate URNs within the draft. Question.urn carries a global
         # unique constraint; a within-draft duplicate would surface as an
         # IntegrityError during bulk_create (the generic publish failure).
+        # Deliberately ordered AFTER the duplicate-node_id check above: when
+        # two requirements share a full URN they also share a node_id, and the
+        # node_id error is the actionable one (it names both items and points
+        # at the builder's self-repair).
         for kind, records in (
             ("requirement", draft_nodes),
             ("question", draft_questions),
@@ -10215,47 +10215,34 @@ class FrameworkViewSet(BaseModelViewSet):
                 (
                     "requirement",
                     draft_nodes,
-                    dict(
-                        RequirementNode.objects.filter(framework=framework).values_list(
-                            "id", "urn"
-                        )
-                    ),
+                    RequirementNode.objects.filter(framework=framework),
                 ),
                 (
                     "question",
                     draft_questions,
-                    dict(
-                        Question.objects.filter(
-                            requirement_node__framework=framework
-                        ).values_list("id", "urn")
-                    ),
+                    Question.objects.filter(requirement_node__framework=framework),
                 ),
                 (
                     "choice",
                     draft_choices,
-                    dict(
-                        QuestionChoice.objects.filter(
-                            question__requirement_node__framework=framework
-                        ).values_list("id", "urn")
+                    QuestionChoice.objects.filter(
+                        question__requirement_node__framework=framework
                     ),
                 ),
             )
-            for kind, records, db_urns in checks:
+            for kind, records, queryset in checks:
+                if not records:
+                    continue
+                db_urns = dict(queryset.values_list("id", "urn"))
                 for record in records:
                     rid = uuid.UUID(record["id"])
                     if rid not in db_urns:
                         continue
                     if (record.get("urn") or None) != (db_urns[rid] or None):
-                        label = (
-                            record.get("ref_id")
-                            or record.get("name")
-                            or record.get("text")
-                            or record.get("value")
-                            or str(rid)
-                        )
                         raise DraftValidationError(
-                            f"Cannot change the URN of existing {kind} '{label}' "
-                            "while a compliance assessment uses this framework."
+                            f"Cannot change the URN of existing {kind} "
+                            f"'{_draft_record_label(record)}' while a compliance "
+                            "assessment uses this framework."
                         )
 
         # --- 0c. Apply URN rename (urn_namespace / ref_id) before any sync. ---
@@ -10305,14 +10292,8 @@ class FrameworkViewSet(BaseModelViewSet):
             )
             for urn_source in db_urn_sources:
                 for db_urn in urn_source:
-                    parts = (db_urn or "").split(":")
-                    if (
-                        len(parts) >= 6
-                        and parts[0] == "urn"
-                        and parts[2] == "risk"
-                        and parts[3] in REWRITABLE_URN_TYPES
-                    ):
-                        current_ref = parts[4]
+                    current_ref = extract_urn_slug(db_urn)
+                    if current_ref is not None:
                         break
                 if current_ref is not None:
                     break
@@ -10402,15 +10383,8 @@ class FrameworkViewSet(BaseModelViewSet):
 
             current_slug = None
             for n in draft_nodes + draft_questions + draft_choices:
-                u = n.get("urn") or ""
-                parts = u.split(":")
-                if (
-                    len(parts) >= 6
-                    and parts[0] == "urn"
-                    and parts[2] == "risk"
-                    and parts[3] in REWRITABLE_URN_TYPES
-                ):
-                    current_slug = parts[4]
+                current_slug = extract_urn_slug(n.get("urn"))
+                if current_slug:
                     break
             if not current_slug:
                 current_slug = framework.ref_id or self._slugify_framework_name(
