@@ -164,7 +164,7 @@ jobs:
       DB_HOST: localhost
     services:
       postgres:
-        image: postgres:16
+        image: public.ecr.aws/docker/library/postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres # test credential
@@ -225,7 +225,7 @@ jobs:
       LICENSE_SEATS: 999
     services:
       postgres:
-        image: postgres:16
+        image: public.ecr.aws/docker/library/postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres # test credential
@@ -299,7 +299,7 @@ jobs:
       PUBLIC_BACKEND_API_URL: http://localhost:8173/api
     services:
       postgres:
-        image: postgres:16
+        image: public.ecr.aws/docker/library/postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres # test credential
@@ -486,7 +486,7 @@ jobs:
       PUBLIC_BACKEND_API_URL: http://localhost:8173/api
     services:
       postgres:
-        image: postgres:16
+        image: public.ecr.aws/docker/library/postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres

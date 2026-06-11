@@ -35,7 +35,7 @@ jobs:
       CISO_ASSISTANT_URL: http://127.0.0.1:5173
     services:
       postgres:
-        image: postgres:16
+        image: public.ecr.aws/docker/library/postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres # test credential

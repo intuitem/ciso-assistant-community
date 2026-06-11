@@ -28,6 +28,7 @@
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { getListViewFields } from '$lib/utils/table';
 	import { canPerformAction } from '$lib/utils/access-control';
+	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
@@ -854,6 +855,7 @@
 				{/if}
 			{/if}
 			{@render actions?.()}
+			<AuditTrailButton model={data.urlModel} objectId={data.data?.id} />
 		</div>
 	</div>
 </div>
