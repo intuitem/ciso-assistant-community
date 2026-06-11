@@ -136,8 +136,8 @@ class TestScoring:
         assert ra.score == 0
         assert ra.result == "non_compliant"
 
-    def test_no_visible_questions_gives_not_applicable(self, db):
-        """A requirement node with no questions -> not_applicable."""
+    def test_no_questions_preserves_existing_result(self, db):
+        """A requirement node with no questions is treated as manual; recompute is a no-op."""
         folder = Folder.get_root_folder()
         fw = Framework.objects.create(
             name="Empty Q FW",
@@ -169,9 +169,17 @@ class TestScoring:
             folder=folder,
         )
 
+        # Fresh RA: default result is preserved (no auto-NA).
         ra.compute_score_and_result()
         ra.refresh_from_db()
-        assert ra.result == "not_applicable"
+        assert ra.result == "not_assessed"
+
+        # Manually-set result is preserved across recompute.
+        ra.result = "compliant"
+        ra.save(update_fields=["result"])
+        ra.compute_score_and_result()
+        ra.refresh_from_db()
+        assert ra.result == "compliant"
 
     def test_unanswered_questions_gives_not_assessed(self, scoring_setup):
         """When not all visible questions are answered -> not_assessed."""

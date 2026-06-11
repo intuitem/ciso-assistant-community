@@ -8,6 +8,7 @@
 	import type { ListViewFilterConfig } from '$lib/utils/table';
 	import type { RiskMatrixJsonDefinition, RiskScenario } from '$lib/utils/types';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
@@ -374,6 +375,7 @@
 						>
 					{/if}
 				</div>
+				<AuditTrailButton model="risk-assessments" objectId={risk_assessment.id} />
 				<Anchor
 					label={m.actionPlan()}
 					href="/risk-assessments/{risk_assessment.id}/action-plan"

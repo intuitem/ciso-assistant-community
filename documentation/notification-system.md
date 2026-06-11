@@ -71,7 +71,7 @@ HUEY = {
 }
 ```
 
-Worker command: `poetry run python manage.py run_huey -w 2 -k process`
+Worker command: `uv run python manage.py run_huey -w 2 -k process`
 
 ---
 
