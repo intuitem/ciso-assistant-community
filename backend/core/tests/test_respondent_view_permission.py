@@ -3,7 +3,7 @@
 `get_respondent_scoped_folder_ids` returns the folders where a user is shown the
 scoped/stripped *respondent* view. Under the permission model a folder is a
 respondent folder iff the user can access compliance assessments there
-(`view_complianceassessment`) but lacks the full auditor view (`view_audit_full`).
+(`view_complianceassessment`) but lacks the full auditor view (`view_compliance_assessment_full`).
 
 The helper is a thin filter over `RoleAssignment.get_permissions_per_folder`, so we
 stub that to exercise the classification logic directly (no DB / IAM cache needed).
@@ -31,11 +31,11 @@ class TestRespondentFolderClassification:
         assert get_respondent_scoped_folder_ids(object()) == {uuid.UUID(f)}
 
     def test_full_view_grant_excludes_folder(self, monkeypatch):
-        # Auditor-side roles hold view_audit_full → NOT a respondent folder.
+        # Auditor-side roles hold view_compliance_assessment_full → NOT a respondent folder.
         f = str(uuid.uuid4())
         _stub_perms(
             monkeypatch,
-            {f: {"view_complianceassessment", "view_audit_full"}},
+            {f: {"view_complianceassessment", "view_compliance_assessment_full"}},
         )
         assert get_respondent_scoped_folder_ids(object()) == set()
 
@@ -47,17 +47,17 @@ class TestRespondentFolderClassification:
         assert get_respondent_scoped_folder_ids(object()) == set()
 
     def test_dual_hat_full_view_wins(self, monkeypatch):
-        # Reader (view_audit_full) + auditee on the SAME folder → the folder
-        # carries view_audit_full, so the user gets the full view there.
+        # Reader (view_compliance_assessment_full) + auditee on the SAME folder → the folder
+        # carries view_compliance_assessment_full, so the user gets the full view there.
         f = str(uuid.uuid4())
         _stub_perms(
             monkeypatch,
-            {f: {"view_complianceassessment", "view_audit_full"}},
+            {f: {"view_complianceassessment", "view_compliance_assessment_full"}},
         )
         assert get_respondent_scoped_folder_ids(object()) == set()
 
     def test_default_deny_for_custom_role(self, monkeypatch):
-        # A role that grants audit access but was never granted view_audit_full
+        # A role that grants audit access but was never granted view_compliance_assessment_full
         # is treated as a respondent (default-deny) — the key safety property.
         f = str(uuid.uuid4())
         _stub_perms(
@@ -74,7 +74,10 @@ class TestRespondentFolderClassification:
             monkeypatch,
             {
                 respondent: {"view_complianceassessment"},
-                auditor: {"view_complianceassessment", "view_audit_full"},
+                auditor: {
+                    "view_complianceassessment",
+                    "view_compliance_assessment_full",
+                },
                 unrelated: {"view_asset"},
             },
         )

@@ -1306,7 +1306,7 @@ def build_questions_dict(node):
     return result if result else None
 
 
-AUDITOR_VIEW_PERM = "view_audit_full"
+AUDITOR_VIEW_PERM = "view_compliance_assessment_full"
 AUDIT_ACCESS_PERM = "view_complianceassessment"
 
 
@@ -1316,10 +1316,10 @@ def get_respondent_scoped_folder_ids(user) -> set:
 
     A user is a respondent on a folder when they can access compliance
     assessments there (``view_complianceassessment``) but have NOT been granted
-    the full auditor view (``view_audit_full``). This is permission-based and
-    **default-deny**: any role not explicitly granted ``view_audit_full`` is
+    the full auditor view (``view_compliance_assessment_full``). This is permission-based and
+    **default-deny**: any role not explicitly granted ``view_compliance_assessment_full`` is
     treated as a respondent. Auditor-side roles (reader, approver, analyst,
-    domain-manager, administrator) hold ``view_audit_full`` and are therefore
+    domain-manager, administrator) hold ``view_compliance_assessment_full`` and are therefore
     excluded; auditee and third-party respondent do not and are included.
 
     Uses the IAM snapshot caches exclusively (no extra DB queries).

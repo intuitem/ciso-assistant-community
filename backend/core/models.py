@@ -6873,8 +6873,8 @@ class ComplianceAssessment(Assessment):
         verbose_name_plural = _("Compliance assessments")
         permissions = [
             (
-                "view_audit_full",
-                "Can view the full auditor view of an audit (all rows and fields)",
+                "view_compliance_assessment_full",
+                "Can view the full auditor view of a compliance assessment (all rows and fields)",
             ),
         ]
 

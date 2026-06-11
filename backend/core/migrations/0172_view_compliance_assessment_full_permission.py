@@ -1,7 +1,7 @@
-"""Introduce the ``view_audit_full`` permission and backfill existing roles.
+"""Introduce the ``view_compliance_assessment_full`` permission and backfill existing roles.
 
 The auditor-vs-respondent view is now permission-based (default-deny): a principal
-sees the scoped/stripped respondent view unless it holds ``view_audit_full``.
+sees the scoped/stripped respondent view unless it holds ``view_compliance_assessment_full``.
 
 This migration does two things:
   1. Declares the permission on ``ComplianceAssessment`` (Meta options).
@@ -19,11 +19,13 @@ post_migrate signal, which has not run yet while this migration executes.
 from django.db import migrations
 
 RESPONDENT_ROLE_CODENAMES = ("BI-RL-TPR", "BI-RL-ADE")  # third-party, auditee
-PERM_CODENAME = "view_audit_full"
-PERM_NAME = "Can view the full auditor view of an audit (all rows and fields)"
+PERM_CODENAME = "view_compliance_assessment_full"
+PERM_NAME = (
+    "Can view the full auditor view of a compliance assessment (all rows and fields)"
+)
 
 
-def grant_view_audit_full(apps, schema_editor):
+def grant_view_compliance_assessment_full(apps, schema_editor):
     Role = apps.get_model("iam", "Role")
     Permission = apps.get_model("auth", "Permission")
     ContentType = apps.get_model("contenttypes", "ContentType")
@@ -63,5 +65,5 @@ class Migration(migrations.Migration):
                 "verbose_name_plural": "Compliance assessments",
             },
         ),
-        migrations.RunPython(grant_view_audit_full, noop),
+        migrations.RunPython(grant_view_compliance_assessment_full, noop),
     ]
