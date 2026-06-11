@@ -102,7 +102,11 @@ export function formatScoreValue(
 	if (range <= 0) {
 		return 0;
 	}
-	return ((value - min_score) * 100) / range;
+	// Clamp to [0, 100]: a score below the (possibly node-overridden) minimum or
+	// above the maximum would otherwise yield an out-of-range percentage that the
+	// Progress component rejects ("value -25 exceeds the min value 0").
+	const pct = ((value - min_score) * 100) / range;
+	return Math.max(0, Math.min(100, pct));
 }
 
 export function getSecureRedirect(url: any): string {
