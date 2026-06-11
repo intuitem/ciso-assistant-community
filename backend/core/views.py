@@ -161,6 +161,7 @@ from core.utils import (
     build_answers_dict,
     compare_schema_versions,
     get_respondent_scoped_folder_ids,
+    resolve_compute_result,
     is_field_visible_to,
     rewrite_child_urns,
     _generate_occurrences,
@@ -8660,7 +8661,7 @@ class FrameworkViewSet(BaseModelViewSet):
         cas = [ca for ca in all_visible_cas if ca.status in LIVE_STATUSES]
 
         # Per-CA viewer role: respondent unless the user holds the full auditor
-        # view (view_audit_full) on the CA's folder. Computed once per CA.
+        # view (view_compliance_assessment_full) on the CA's folder. Computed once per CA.
         respondent_folders = get_respondent_scoped_folder_ids(request.user)
         ca_viewer_roles = {
             ca.id: (
@@ -9263,8 +9264,9 @@ class FrameworkViewSet(BaseModelViewSet):
                             c_data["description"] = c.description
                         if c.add_score is not None:
                             c_data["add_score"] = c.add_score
-                        if c.compute_result:
-                            c_data["compute_result"] = c.compute_result
+                        resolved_cr = resolve_compute_result(c.compute_result)
+                        if resolved_cr is not None:
+                            c_data["compute_result"] = resolved_cr
                         if c.color:
                             c_data["color"] = c.color
                         if c.select_implementation_groups:
@@ -13976,7 +13978,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 if parent:
                     req._parent_requirement_obj = parent
         # Viewer role: respondent unless the user holds the full auditor view
-        # (view_audit_full) on the CA's folder.
+        # (view_compliance_assessment_full) on the CA's folder.
         respondent_folders = get_respondent_scoped_folder_ids(request.user)
         is_respondent = bool(
             respondent_folders and compliance_assessment.folder_id in respondent_folders
@@ -19088,7 +19090,7 @@ def global_search(request):
         qs = model_class.objects.filter(id__in=accessible_ids)
 
         # ComplianceAssessment has extra respondent scoping: users who lack the
-        # full auditor view (view_audit_full) in a folder can only see
+        # full auditor view (view_compliance_assessment_full) in a folder can only see
         # assessments where they have a requirement assignment. Mirror the logic
         # from ComplianceAssessmentViewSet.
         if model_class is ComplianceAssessment:

@@ -822,7 +822,7 @@ The format for questions and answers json fields will evolve over time. The init
         "urn": "urn:intuitem:risk:framework:example:answer01:choice:1",
         "value": "yes",
         "add_score": 20,
-        "compute_result": true,
+        "compute_result": "compliant",
         "select_implementation_groups": ["1"],
         "description": "Indicates that a formal access control policy is in place", // (optional, to add context if needed without overloading the interface),
         "color": "#28a745" // to be retrieved with the excel cell
@@ -831,7 +831,7 @@ The format for questions and answers json fields will evolve over time. The init
         "urn": "urn:intuitem:risk:framework:example:answer01:choice:2",
         "value": "no",
         "add_score": 0,
-        "compute_result": false,
+        "compute_result": "non_compliant",
         "description": "No policy exists or is documented",
         "color": "#dc3545"
       }
@@ -853,14 +853,14 @@ The format for questions and answers json fields will evolve over time. The init
         "urn": "urn:intuitem:risk:framework:example:answer02:choice:1",
         "value": "yes",
         "add_score": 10,
-        "compute_result": true,
+        "compute_result": "compliant",
         "select_implementation_groups": ["2"]
       },
       {
         "urn": "urn:intuitem:risk:framework:example:answer02:choice:2",
         "value": "no",
         "add_score": 0,
-        "compute_result": false
+        "compute_result": "non_compliant"
       }
     ]
   },
@@ -880,26 +880,26 @@ The format for questions and answers json fields will evolve over time. The init
         "urn": "urn:intuitem:risk:framework:example:answer03:choice:1",
         "value": "Role-based access control",
         "add_score": 5,
-        "compute_result": true
+        "compute_result": "compliant"
       },
       {
         "urn": "urn:intuitem:risk:framework:example:answer03:choice:2",
         "value": "MFA for privileged accounts",
         "add_score": 5,
-        "compute_result": true,
+        "compute_result": "compliant",
         "select_implementation_groups": ["1", "2"]
       },
       {
         "urn": "urn:intuitem:risk:framework:example:answer03:choice:3",
         "value": "Audit logging",
         "add_score": 5,
-        "compute_result": true
+        "compute_result": "compliant"
       },
       {
         "urn": "urn:intuitem:risk:framework:example:answer03:choice:4",
         "value": "None of the above", // or N/A
         "add_score": 0,
-        "compute_result": false
+        "compute_result": "non_compliant"
       }
     ]
   }
@@ -936,17 +936,27 @@ The score cannot be changed manually as long as one choice with add_score is sel
 
 #### Result computing
 
-- compute_result: `<boolean-value>`
+- compute_result: `<string-value>`
 
-If true, this choice contributes to compliance. If false, this choice contributes to non-compliance.
+Each choice can declare the compliance contribution it carries. Accepted values are:
 
-When compute_result is defined for one or several answered questions, the result is calculated based on the following rules:
+- `"compliant"` — the choice contributes to compliance
+- `"non_compliant"` — the choice contributes to non-compliance
+- `"partially_compliant"` — the choice contributes a partial compliance result
+- `"not_applicable"` — **neutral**: the choice is dropped from the aggregation. The requirement is marked `not_applicable` only when every contributing choice resolves to `not_applicable`. To force a whole requirement to `not_applicable` based on one scoping question (e.g. _"Do you process personal data? -> No"_), use `depends_on` so the dependent questions are hidden when the scoping answer is picked.
+- `null` or omitted — the choice is **neutral** and does not contribute to the result
 
-- if all answered questions with compute_result have true values, the result is "compliant"
-- else if at least one answered question with compute_result has a true value, the result is "partially compliant"
-- else, the result is "non compliant".
+Legacy boolean literals are still accepted for backward compatibility with older library YAMLs: `true` is treated as `"compliant"`, `false` as `"non_compliant"`.
 
-To select "not-applicable" result, the user shall not answer any of the questions with compute_result flag.
+When compute_result is defined on one or more selected choices across the answered visible questions of a requirement, the overall result is aggregated as follows:
+
+1. Neutral entries (`null` / omitted, and `"not_applicable"`) are dropped from the pool.
+2. If no contribution remains and at least one of the dropped entries was `"not_applicable"`, the result is `"not_applicable"`.
+3. Otherwise, if the pool contains both `"compliant"` and `"non_compliant"` entries, or any `"partially_compliant"` entry, the result is `"partially_compliant"`.
+4. Otherwise, if the pool contains only `"non_compliant"` entries, the result is `"non_compliant"`.
+5. Otherwise (pool contains only `"compliant"` entries), the result is `"compliant"`.
+
+If no visible question has been answered, or no answered choice contributes a compute_result, the requirement remains `"not_assessed"`.
 
 #### IG piloted selection
 

@@ -88,9 +88,46 @@ def rewrite_child_urns(draft: dict, new_ns: str, new_slug: str) -> None:
         c["urn"] = sub(c.get("urn"))
 
 
-def is_compute_result_truthy(compute_result: str | None) -> bool:
-    """Return True if a QuestionChoice.compute_result value is truthy."""
-    return compute_result is not None and compute_result not in ("false", "0", "")
+def resolve_compute_result(compute_result: str | None) -> str | None:
+    """Map a QuestionChoice.compute_result string to a Result value."""
+    if compute_result is None:
+        return None
+    value = compute_result.strip().lower()
+    if value == "":
+        return None
+    if value in ("true", "1", "compliant"):
+        return "compliant"
+    if value in ("false", "0", "non_compliant"):
+        return "non_compliant"
+    if value == "partially_compliant":
+        return "partially_compliant"
+    if value == "not_applicable":
+        return "not_applicable"
+    logger.warning(
+        "Unknown compute_result value ignored", compute_result=compute_result
+    )
+    return None
+
+
+def aggregate_compute_results(resolved_results: list[str | None]) -> str | None:
+    """Aggregate resolved compute_result values: not_applicable is neutral, else worst-wins."""
+    contributing = [r for r in resolved_results if r is not None]
+    if not contributing:
+        return None
+
+    non_na = [r for r in contributing if r != "not_applicable"]
+    if not non_na:
+        return "not_applicable"
+
+    has_compliant = any(r == "compliant" for r in non_na)
+    has_non_compliant = any(r == "non_compliant" for r in non_na)
+    has_partial = any(r == "partially_compliant" for r in non_na)
+
+    if has_partial or (has_compliant and has_non_compliant):
+        return "partially_compliant"
+    if has_non_compliant:
+        return "non_compliant"
+    return "compliant"
 
 
 # Currency formatting conventions: (position, space)
@@ -1096,7 +1133,7 @@ def _is_question_visible(question, answers_by_urn, questions_by_urn=None, visite
         # Single-value answer can only satisfy "all" if there's exactly one expected answer
         return len(dep_answers) == 1 and target_answer == dep_answers[0]
 
-    return True
+    return False
 
 
 def build_answers_dict(answers_qs):
@@ -1238,9 +1275,9 @@ def build_questions_dict(node):
             if choice.add_score is not None:
                 choice_data["add_score"] = choice.add_score
             if choice.compute_result is not None:
-                choice_data["compute_result"] = is_compute_result_truthy(
-                    choice.compute_result
-                )
+                resolved = resolve_compute_result(choice.compute_result)
+                if resolved is not None:
+                    choice_data["compute_result"] = resolved
             if choice.description:
                 choice_data["description"] = choice.description
             if choice.color:
@@ -1256,6 +1293,7 @@ def build_questions_dict(node):
         q_data = {
             "type": question.type,
             "text": question.text or "",
+            "weight": question.weight,
         }
         if question.annotation:
             q_data["annotation"] = question.annotation

@@ -9,7 +9,8 @@ from core.utils import RoleCodename, UserGroupCodename
 logger = get_logger(__name__)
 
 READER_PERMISSIONS_LIST = [
-    "view_audit_full",
+    "view_compliance_assessment_full",
+    "view_object_audittrail",
     "view_appliedcontrol",
     "view_asset",
     "view_complianceassessment",
@@ -134,7 +135,7 @@ READER_PERMISSIONS_LIST = [
 ]
 
 APPROVER_PERMISSIONS_LIST = [
-    "view_audit_full",
+    "view_compliance_assessment_full",
     "view_perimeter",
     "view_riskassessment",
     "view_appliedcontrol",
@@ -246,7 +247,8 @@ APPROVER_PERMISSIONS_LIST = [
 ]
 
 ANALYST_PERMISSIONS_LIST = [
-    "view_audit_full",
+    "view_compliance_assessment_full",
+    "view_object_audittrail",
     "add_filteringlabel",
     "view_filteringlabel",
     "view_libraryfilteringlabel",
@@ -610,7 +612,8 @@ ANALYST_PERMISSIONS_LIST = [
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
-    "view_audit_full",
+    "view_compliance_assessment_full",
+    "view_object_audittrail",
     "add_filteringlabel",
     "view_filteringlabel",
     "view_libraryfilteringlabel",
@@ -1019,7 +1022,9 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
-    "view_audit_full",
+    "view_central_auditlog",
+    "view_compliance_assessment_full",
+    "view_object_audittrail",
     "add_user",
     "view_user",
     "view_actor",
@@ -1319,7 +1324,6 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_tasknode",
     "change_tasknode",
     "delete_tasknode",
-    "view_logentry",
     # resilience,
     "add_businessimpactanalysis",
     "view_businessimpactanalysis",
