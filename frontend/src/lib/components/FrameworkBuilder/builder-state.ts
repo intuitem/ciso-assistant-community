@@ -806,6 +806,7 @@ export function createBuilderState(
 				clearError('save-draft');
 				return true;
 			} catch (e) {
+				console.error('[FrameworkBuilder] Draft save failed:', e);
 				setError('save-draft', (e as Error).message);
 				return false;
 			} finally {
@@ -866,6 +867,7 @@ export function createBuilderState(
 			publishWarnings.set(warnings);
 			return true;
 		} catch (e) {
+			console.error('[FrameworkBuilder] Publish failed:', e);
 			setError('publish', (e as Error).message);
 			return false;
 		}
@@ -888,6 +890,7 @@ export function createBuilderState(
 			unpublished.set(false);
 			clearError('discard');
 		} catch (e) {
+			console.error('[FrameworkBuilder] Draft discard failed:', e);
 			setError('discard', (e as Error).message);
 			throw e;
 		}

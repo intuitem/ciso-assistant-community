@@ -149,8 +149,10 @@
 		try {
 			await builder.discard();
 			confirmDiscard = false;
-		} catch {
-			// Error is already in the errors store
+		} catch (e) {
+			// The message is already in the errors store; keep the raw error
+			// (with stack) in the console for support diagnostics.
+			console.error('[FrameworkBuilder] Discard failed:', e);
 		} finally {
 			discarding = false;
 		}
@@ -440,6 +442,7 @@
 					} catch (e) {
 						// Fall back to confirmation without preview, but show the
 						// real reason so the user isn't confirming blind.
+						console.error('[FrameworkBuilder] Publish preview failed:', e);
 						publishPreview = null;
 						previewError = (e as Error).message;
 						confirmPublish = true;

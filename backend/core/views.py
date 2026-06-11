@@ -236,6 +236,12 @@ def _validate_and_upload_image(request, attachment_kwargs, *, include_url=False)
         )
     content_type = (uploaded_file.content_type or "").lower()
     if content_type not in ALLOWED_IMAGE_TYPES:
+        logger.warning(
+            "Rejected image upload with disallowed content type",
+            user=str(request.user),
+            claimed_type=content_type,
+            filename=getattr(uploaded_file, "name", None),
+        )
         return Response(
             {"error": "Only PNG, JPEG, GIF, and WebP images are allowed."},
             status=status.HTTP_400_BAD_REQUEST,
@@ -243,6 +249,13 @@ def _validate_and_upload_image(request, attachment_kwargs, *, include_url=False)
     real_mime = magic.from_buffer(uploaded_file.read(2048), mime=True)
     uploaded_file.seek(0)
     if real_mime not in ALLOWED_IMAGE_TYPES:
+        logger.warning(
+            "Rejected image upload whose content does not match its claimed type",
+            user=str(request.user),
+            claimed_type=content_type,
+            real_mime=real_mime,
+            filename=getattr(uploaded_file, "name", None),
+        )
         return Response(
             {"error": f"File content is {real_mime}, not an allowed image type."},
             status=status.HTTP_400_BAD_REQUEST,
@@ -9117,6 +9130,12 @@ class FrameworkViewSet(BaseModelViewSet):
                     new_question.save(update_fields=["depends_on"])
 
             serializer = FrameworkReadSerializer(new_framework)
+            logger.info(
+                "Framework duplicated",
+                source_framework_id=str(source.id),
+                new_framework_id=str(new_framework.id),
+                folder_id=str(folder.id),
+            )
             return Response(serializer.data, status=201)
 
     @action(detail=False, name="Get used frameworks")
@@ -9609,6 +9628,12 @@ class FrameworkViewSet(BaseModelViewSet):
 
         framework.editing_draft = draft
         framework.save(update_fields=["editing_draft", "updated_at"])
+        logger.info(
+            "Framework draft editing started",
+            framework_id=str(framework.id),
+            seed_ref_id=seed_ref_id,
+            **self._draft_stats(draft),
+        )
         return Response(
             {"status": "editing_started", "editing_draft": framework.editing_draft}
         )
@@ -9619,35 +9644,32 @@ class FrameworkViewSet(BaseModelViewSet):
         framework = self.get_object()
         self._check_change_permission(request, framework)
         editing_draft = request.data.get("editing_draft")
-        if editing_draft is None:
+
+        def _reject(message):
+            logger.warning(
+                "Rejected framework draft save",
+                framework_id=str(framework.id),
+                error=message,
+            )
             return Response(
-                {"error": "editing_draft is required."},
+                {"error": message},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        if editing_draft is None:
+            return _reject("editing_draft is required.")
+
         if not isinstance(editing_draft, dict):
-            return Response(
-                {"error": "editing_draft must be a JSON object."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return _reject("editing_draft must be a JSON object.")
         required_keys = {"framework_meta", "nodes", "questions", "choices"}
         missing = required_keys - set(editing_draft.keys())
         if missing:
-            return Response(
-                {"error": f"editing_draft missing required keys: {missing}"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return _reject(f"editing_draft missing required keys: {missing}")
         for list_key in ("nodes", "questions", "choices"):
             if not isinstance(editing_draft.get(list_key), list):
-                return Response(
-                    {"error": f"editing_draft.{list_key} must be a list."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+                return _reject(f"editing_draft.{list_key} must be a list.")
         if not isinstance(editing_draft.get("framework_meta"), dict):
-            return Response(
-                {"error": "editing_draft.framework_meta must be an object."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return _reject("editing_draft.framework_meta must be an object.")
 
         # Lock the row so a save can't interleave with a publish in progress
         # (publish clears editing_draft at the end; an unserialized write here
@@ -9658,7 +9680,27 @@ class FrameworkViewSet(BaseModelViewSet):
             framework = Framework.objects.select_for_update().get(pk=framework.pk)
             framework.editing_draft = editing_draft
             framework.save(update_fields=["editing_draft", "updated_at"])
+        logger.debug(
+            "Framework draft saved",
+            framework_id=str(framework.id),
+            **self._draft_stats(editing_draft),
+        )
         return Response({"status": "draft_saved"})
+
+    @staticmethod
+    def _draft_stats(draft):
+        """Compact draft-shape summary attached to builder log events so a
+        failure report identifies what the draft looked like without dumping
+        its (potentially large and sensitive) content."""
+        if not isinstance(draft, dict):
+            return {"draft_present": False}
+        return {
+            "draft_present": True,
+            "draft_schema_version": draft.get("schema_version", 1),
+            "draft_nodes": len(draft.get("nodes") or []),
+            "draft_questions": len(draft.get("questions") or []),
+            "draft_choices": len(draft.get("choices") or []),
+        }
 
     @staticmethod
     def _validate_draft_structure(draft):
@@ -10047,6 +10089,7 @@ class FrameworkViewSet(BaseModelViewSet):
                 {"error": "No active draft to preview."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        draft_stats = self._draft_stats(framework.editing_draft)
         try:
             self._validate_draft_structure(framework.editing_draft)
             diff = self._compute_draft_diff(framework, framework.editing_draft)
@@ -10055,13 +10098,18 @@ class FrameworkViewSet(BaseModelViewSet):
                 "Validation error while previewing draft",
                 framework_id=str(framework.id),
                 error=str(e),
+                **draft_stats,
             )
             return Response(
                 {"error": e.user_message},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception:
-            logger.exception("Failed to preview draft for framework %s", framework.id)
+            logger.exception(
+                "Failed to preview draft",
+                framework_id=str(framework.id),
+                **draft_stats,
+            )
             return Response(
                 {"error": "Failed to compute the publish preview."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -10074,6 +10122,7 @@ class FrameworkViewSet(BaseModelViewSet):
         framework = self.get_object()
         self._check_change_permission(request, framework)
 
+        draft_stats = {}
         try:
             # Serialize concurrent publishes/saves on the same framework: the
             # draft is re-read under a row lock so a save_draft racing with
@@ -10086,19 +10135,25 @@ class FrameworkViewSet(BaseModelViewSet):
                         {"error": "No active draft to publish."},
                         status=status.HTTP_400_BAD_REQUEST,
                     )
+                draft_stats = self._draft_stats(framework.editing_draft)
                 warnings = self._reconcile_draft(framework, framework.editing_draft)
         except DraftValidationError as e:
             logger.warning(
                 "Validation error while publishing draft",
                 framework_id=str(framework.id),
                 error=str(e),
+                **draft_stats,
             )
             return Response(
                 {"error": e.user_message},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception:
-            logger.exception("Failed to publish draft for framework %s", framework.id)
+            logger.exception(
+                "Failed to publish draft",
+                framework_id=str(framework.id),
+                **draft_stats,
+            )
             return Response(
                 {"error": "Failed to publish draft. Please try again."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -10265,6 +10320,11 @@ class FrameworkViewSet(BaseModelViewSet):
         # derived ref_id and the normalized namespace when no rename is asked.
         if not ref_changed and current_ref_was_derived:
             new_framework_ref_id = current_ref
+            logger.info(
+                "Healing empty framework ref_id with slug derived from child URNs",
+                framework_id=str(framework.id),
+                derived_ref_id=current_ref,
+            )
         if not ns_changed and not (
             isinstance(framework.urn_namespace, str) and framework.urn_namespace.strip()
         ):
@@ -10551,6 +10611,12 @@ class FrameworkViewSet(BaseModelViewSet):
                         for c in draft_choices:
                             if c.get("urn") and slug_pattern in c["urn"]:
                                 c["urn"] = c["urn"].replace(slug_pattern, new_pattern)
+                        logger.warning(
+                            "URN collision during draft publish, slug disambiguated",
+                            framework_id=str(framework.id),
+                            old_slug=current_slug,
+                            new_slug=new_slug,
+                        )
                         warnings.append(
                             f"URN namespace collision detected, disambiguated to '{new_slug}'"
                         )
@@ -11036,6 +11102,22 @@ class FrameworkViewSet(BaseModelViewSet):
                     "updated_at",
                 ]
             )
+
+        logger.info(
+            "Framework draft published",
+            framework_id=str(framework.id),
+            editing_version=framework.editing_version,
+            nodes_total=len(draft_nodes),
+            nodes_created=len(new_node_id_set),
+            nodes_deleted=len(nodes_to_delete),
+            questions_total=len(draft_questions),
+            questions_created=len(new_question_id_set),
+            questions_deleted=len(questions_to_delete),
+            choices_total=len(draft_choices),
+            choices_created=len(new_choice_id_set),
+            choices_deleted=len(choices_to_delete),
+            warnings=warnings,
+        )
         return warnings
 
     @action(detail=True, methods=["post"], url_path="discard-draft")
@@ -11043,8 +11125,14 @@ class FrameworkViewSet(BaseModelViewSet):
         """Discard editing_draft without affecting relational data."""
         framework = self.get_object()
         self._check_change_permission(request, framework)
+        draft_stats = self._draft_stats(framework.editing_draft)
         framework.editing_draft = None
         framework.save(update_fields=["editing_draft", "updated_at"])
+        logger.info(
+            "Framework draft discarded",
+            framework_id=str(framework.id),
+            **draft_stats,
+        )
         return Response({"status": "draft_discarded"})
 
     @action(
