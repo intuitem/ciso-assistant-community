@@ -121,7 +121,11 @@
 
 		import('echarts').then((echarts) => {
 			if (!el.isConnected) return;
-			chart = echarts.init(el, null, { renderer: 'svg' });
+			chart = echarts.init(
+				el,
+				document.documentElement.classList.contains('dark') ? 'dark' : null,
+				{ renderer: 'svg' }
+			);
 			const dates = timeline.map((t: any) => t.date);
 			const hasScores = timeline.some((t: any) => t.score != null && t.score >= 0);
 			const areaSeries = RESULT_KEYS.map((key) => ({
@@ -154,6 +158,7 @@
 				});
 			}
 			chart.setOption({
+				backgroundColor: 'transparent',
 				tooltip: {
 					trigger: 'axis',
 					backgroundColor: '#1e293b',
@@ -165,13 +170,13 @@
 				xAxis: {
 					type: 'category',
 					data: dates,
-					axisLine: { lineStyle: { color: '#e2e8f0' } },
+					axisLine: { lineStyle: { color: 'rgba(148, 163, 184, 0.3)' } },
 					axisLabel: { color: '#94a3b8', fontSize: 10 }
 				},
 				yAxis: [
 					{
 						type: 'value',
-						splitLine: { lineStyle: { color: '#f1f5f9' } },
+						splitLine: { lineStyle: { color: 'rgba(148, 163, 184, 0.2)' } },
 						axisLabel: { color: '#94a3b8', fontSize: 10 }
 					},
 					...(hasScores

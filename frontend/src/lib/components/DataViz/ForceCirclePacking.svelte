@@ -116,7 +116,7 @@
 					formatter: '{b}',
 					show: true,
 					fontSize: 11,
-					color: '#374151'
+					color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151'
 				},
 				draggable: true,
 				roam: true,
@@ -204,8 +204,12 @@
 			return;
 		}
 
-		chart = echarts.init(element);
+		chart = echarts.init(
+			element,
+			document.documentElement.classList.contains('dark') ? 'dark' : null
+		);
 		const options = getChartOptions();
+		options.backgroundColor = 'transparent';
 		chart.setOption(options);
 
 		chart.on('click', (params) => {

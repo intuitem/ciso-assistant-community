@@ -435,6 +435,7 @@
 			]
 		};
 
+		option.backgroundColor = 'transparent';
 		chart.setOption(option);
 
 		window.addEventListener('resize', function () {

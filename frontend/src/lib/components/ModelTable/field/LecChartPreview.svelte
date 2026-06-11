@@ -44,7 +44,11 @@
 
 		// Ensure the container is clean before initializing
 		chartContainer.innerHTML = '';
-		chart = echarts.init(chartContainer, null, { renderer: 'svg' });
+		chart = echarts.init(
+			chartContainer,
+			document.documentElement.classList.contains('dark') ? 'dark' : null,
+			{ renderer: 'svg' }
+		);
 
 		// Filter out zero values for logarithmic x-axis (can't display x=0 on log scale)
 		const nonZeroData = chartData.filter(([x, _]: [number, number]) => x > 0);
@@ -134,6 +138,7 @@
 			]
 		};
 
+		option.backgroundColor = 'transparent';
 		chart.setOption(option);
 	};
 

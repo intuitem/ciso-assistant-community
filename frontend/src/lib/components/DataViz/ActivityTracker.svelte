@@ -13,7 +13,11 @@
 
 	onMount(async () => {
 		const echarts = await import('echarts');
-		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
+		let chart = echarts.init(
+			document.getElementById(chart_id),
+			document.documentElement.classList.contains('dark') ? 'dark' : null,
+			{ renderer: 'svg' }
+		);
 
 		// Dynamically create gauge data from metrics progress
 		const gaugeData = [];
@@ -100,6 +104,7 @@
 		};
 
 		// use configuration item and data specified to show chart
+		option.backgroundColor = 'transparent';
 		chart.setOption(option);
 		window.addEventListener('resize', function () {
 			chart.resize();

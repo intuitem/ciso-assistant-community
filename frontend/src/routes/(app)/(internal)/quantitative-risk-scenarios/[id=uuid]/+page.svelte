@@ -14,7 +14,10 @@
 		if (data.lec?.curves?.length > 0) {
 			//temporary embedded chart for now
 			const echarts = await import('echarts');
-			const chart = echarts.init(document.getElementById('combined-lec-chart'));
+			const chart = echarts.init(
+				document.getElementById('combined-lec-chart'),
+				document.documentElement.classList.contains('dark') ? 'dark' : null
+			);
 
 			const currency = data.lec.currency || '€';
 			const lossThreshold = data.lec.loss_threshold;
@@ -182,6 +185,7 @@
 				series: series
 			};
 
+			option.backgroundColor = 'transparent';
 			chart.setOption(option);
 
 			window.addEventListener('resize', () => chart.resize());

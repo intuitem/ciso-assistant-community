@@ -372,8 +372,12 @@
 			return;
 		}
 
-		chart = echarts.init(element);
+		chart = echarts.init(
+			element,
+			document.documentElement.classList.contains('dark') ? 'dark' : null
+		);
 		const options = getChartOptions();
+		options.backgroundColor = 'transparent';
 		chart.setOption(options);
 
 		chart.on('click', (params) => {
