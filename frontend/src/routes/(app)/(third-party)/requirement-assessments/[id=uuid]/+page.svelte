@@ -18,6 +18,7 @@
 	import { Progress, Tabs } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData } from '../[id=uuid]/$types';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
 	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
 	import { countMasked } from '$lib/utils/related-visibility';
 
@@ -194,6 +195,9 @@
 				</div>
 			{/if}
 		{/if}
+		<div class="ml-auto shrink-0 self-center">
+			<AuditTrailButton model="requirement-assessments" objectId={data.requirementAssessment.id} />
+		</div>
 	</div>
 	{#if data.requirement.description}
 		<div class="font-light text-lg card p-4 preset-tonal-primary">
