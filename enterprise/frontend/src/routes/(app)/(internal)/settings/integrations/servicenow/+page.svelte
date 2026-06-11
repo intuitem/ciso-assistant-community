@@ -219,7 +219,15 @@
 					<p class="text-sm text-surface-500 -mt-3">{m.webhookEndpointUrlHelpText()}</p>
 				{/if}
 				{#if page.data?.config?.id}
-					<FieldMapper {form} integrationId={page.data?.config?.id} />
+					<FieldMapper
+						{form}
+						integrationId={page.data?.config?.id}
+						initialConfig={page.data?.config?.settings}
+						title={m.serviceNowIntegrationMappingsDescription()}
+						description={m.serviceNowIntegrationMappingsHelpText()}
+						remoteFieldLabel={m.serviceNowColumn()}
+						tableHelpText={m.serviceNowTableHelpText()}
+					/>
 				{/if}
 				<button
 					class="text-center btn preset-filled-primary-500 font-semibold w-full"
