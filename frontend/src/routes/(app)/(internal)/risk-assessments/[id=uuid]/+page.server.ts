@@ -25,21 +25,17 @@ export const actions: Actions = {
 	},
 	duplicate: async (event) => {
 		const formData = await event.request.formData();
-
-		if (!formData) return;
-
 		const schema = modelSchema(formData.get('urlmodel') as string);
-		const urlModel = 'risk-assessments';
 
 		const form = await superValidate(formData, zod(schema));
-
-		const endpoint = `${BASE_API_URL}/${urlModel}/${event.params.id}/duplicate/`;
 
 		if (!form.valid) {
 			console.log(form.errors);
 			return fail(400, { form: form });
 		}
 
+		const urlModel = 'risk-assessments';
+		const endpoint = `${BASE_API_URL}/${urlModel}/${event.params.id}/duplicate/`;
 		const requestInitOptions: RequestInit = {
 			method: 'POST',
 			body: JSON.stringify(form.data)
