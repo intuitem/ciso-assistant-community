@@ -7,10 +7,14 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.db import transaction
 
+import django_filters as df
+
 from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     ActionPlanList,
     ActionPlanBudgetOverview,
+    GenericFilterSet,
+    NullableChoiceFilter,
 )
 from core.models import AppliedControl, Folder
 from core.utils import format_currency as _fmt_currency, get_global_currency
@@ -1063,18 +1067,25 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
             )
 
 
+class QuantitativeRiskScenarioFilterSet(GenericFilterSet):
+    status = NullableChoiceFilter(choices=QuantitativeRiskScenario.STATUS_OPTIONS)
+
+    class Meta:
+        model = QuantitativeRiskScenario
+        fields = [
+            "quantitative_risk_study",
+            "assets",
+            "threats",
+            "vulnerabilities",
+            "qualifications",
+            "priority",
+            "is_selected",
+        ]
+
+
 class QuantitativeRiskScenarioViewSet(BaseModelViewSet):
     model = QuantitativeRiskScenario
-    filterset_fields = [
-        "quantitative_risk_study",
-        "assets",
-        "threats",
-        "vulnerabilities",
-        "qualifications",
-        "status",
-        "priority",
-        "is_selected",
-    ]
+    filterset_class = QuantitativeRiskScenarioFilterSet
     search_fields = ["name", "description", "ref_id"]
     ordering = ["-created_at"]
 
