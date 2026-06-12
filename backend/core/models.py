@@ -4523,13 +4523,6 @@ class Evidence(
         super().save(*args, **kwargs)
         self.revisions.update(is_published=self.is_published)
 
-    def delete(self, using=None, keep_parents=False):
-        for rev in self.revisions.all():
-            if rev.attachment:
-                rev.attachment.delete(save=False)
-
-        return super().delete(using=using, keep_parents=keep_parents)
-
     @property
     def last_revision(self):
         return self.revisions.order_by("-version").first() or None
@@ -4615,6 +4608,10 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
 
     fields_to_check = ["evidence", "version"]
 
+    class Meta:
+        verbose_name = _("Evidence Revision")
+        verbose_name_plural = _("Evidence Revisions")
+
     def __str__(self):
         return f"{self.evidence.name} v{self.version}"
 
@@ -4662,7 +4659,6 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
                             if hasattr(self.attachment, "seek"):
                                 self.attachment.seek(0)
                 except Exception as e:
-                    logger = get_logger(__name__)
                     logger.warning(
                         "Failed to compute attachment hash",
                         revision_id=self.pk,
@@ -4676,13 +4672,9 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
 
         super().save(*args, **kwargs)
 
-    def delete(self, using=None, keep_parents=False):
-        if self.attachment:
-            self.attachment.delete(save=False)
-
-        return super().delete(using=using, keep_parents=keep_parents)
-
-    def filename(self):
+    def filename(self) -> str:
+        if not self.attachment:
+            return ""
         return os.path.basename(self.attachment.name)
 
     def get_size(self):
@@ -4698,10 +4690,6 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
             return f"{size / 1024:.1f} KB"
         else:
             return f"{size / 1024 / 1024:.1f} MB"
-
-    class Meta:
-        verbose_name = _("Evidence Revision")
-        verbose_name_plural = _("Evidence Revisions")
 
 
 class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
