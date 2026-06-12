@@ -942,6 +942,18 @@ describe('node_id repair on draft load', () => {
 		expect(get(s.unpublished)).toBe(true);
 	});
 
+	it('restores the original node_id from ref_id when the URN drifted onto a sibling', () => {
+		// Node B's URN was corrupted to A's, but its ref_id "2.2" is intact and
+		// free — the repair must restore ":2.2" (matching the DB row) rather
+		// than mint ":2.1-2", otherwise the publish-time URN lock rejects the
+		// repaired draft on frameworks with audits.
+		const draft = draftWithDuplicateNodeIds();
+		draft.nodes[1].ref_id = '2.2';
+		const s = createBuilderState(makeFramework(), [], [], draft);
+		const beta = get(s.rootNodes).find((r) => r.node.name === 'Beta')!;
+		expect(extractNodeId(beta.node.urn)).toBe('2.2');
+	});
+
 	it('keeps ambiguous children on the first occurrence; duplicate becomes a leaf', () => {
 		const draft = draftWithDuplicateNodeIds();
 		// A child pointing at the shared URN ":2.1" — genuinely ambiguous.

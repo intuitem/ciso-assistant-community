@@ -319,19 +319,34 @@ function collectNodeIds(
  * changed. Mutates the nodes in place.
  */
 function repairDuplicateNodeIds(nodes: RequirementNode[]): boolean {
-	const taken = new Set<string>();
+	// `used` is pre-seeded with every node_id in the draft so a replacement
+	// can never collide with a later legitimate owner of that id.
+	const used = new Set<string>();
+	for (const n of nodes) {
+		const nid = extractNodeId(n.urn);
+		if (nid) used.add(nid);
+	}
+	const seen = new Set<string>();
 	let changed = false;
 	for (const n of nodes) {
 		const nid = extractNodeId(n.urn);
 		if (!nid || !n.urn) continue;
-		if (taken.has(nid)) {
-			const newNid = uniqueNodeId(nid, taken);
-			taken.add(newNid);
-			n.urn = withNodeId(n.urn, newNid);
-			changed = true;
-		} else {
-			taken.add(nid);
+		if (!seen.has(nid)) {
+			seen.add(nid);
+			continue;
 		}
+		// Duplicate. Prefer a node_id derived from the node's own ref_id: in
+		// the common corruption (URN drifted onto a sibling's while the ref_id
+		// stayed intact) this restores the node's ORIGINAL URN — which also
+		// matches the DB row, so the publish-time URN lock for frameworks
+		// with audits doesn't reject the repaired draft as a rename. Only
+		// URN-safe ref_ids qualify; ref_id is otherwise free text.
+		const refId = n.ref_id?.trim() ?? '';
+		const base = /^[A-Za-z0-9._-]+$/.test(refId) ? refId : nid;
+		const newNid = uniqueNodeId(base, used);
+		used.add(newNid);
+		n.urn = withNodeId(n.urn, newNid);
+		changed = true;
 	}
 	return changed;
 }
