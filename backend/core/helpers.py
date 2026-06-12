@@ -240,8 +240,8 @@ def get_compliance_assessment_stats(
 
 
 def get_sorted_requirement_nodes(
-    requirement_nodes: list,
-    requirements_assessed: Optional[list] = None,
+    requirement_nodes: list[RequirementNode],
+    requirements_assessed: Optional[list[RequirementAssessment]] = None,
     max_score: int = 0,
     min_score: int = 0,
 ) -> dict:
@@ -286,7 +286,7 @@ def get_sorted_requirement_nodes(
     for key in children_dict:
         children_dict[key].sort(key=lambda x: x.order_id)
 
-    def get_sorted_requirement_nodes_rec(start: list) -> dict:
+    def get_sorted_requirement_nodes_rec(start: list[RequirementNode]) -> dict:
         """
         Recursive function to build framework groups tree, within get_sorted_requirements_nodes
         start: the initial list

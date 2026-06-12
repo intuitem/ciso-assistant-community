@@ -392,6 +392,7 @@ class ThreatImporter:
             ref_id=self.threat_data["ref_id"],
             name=self.threat_data.get("name"),
             description=self.threat_data.get("description"),
+            annotation=self.threat_data.get("annotation"),
             provider=library_object.provider,
             is_published=True,
             locale=library_object.locale,
