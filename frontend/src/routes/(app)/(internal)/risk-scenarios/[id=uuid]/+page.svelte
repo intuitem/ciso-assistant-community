@@ -13,6 +13,7 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
 	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
 
 	import { goto } from '$app/navigation';
@@ -176,8 +177,8 @@
 				{/if}
 			</div>
 		</div>
-		{#if canEditObject}
-			<div class="flex flex-col space-y-2 sm:my-auto shrink-0">
+		<div class="flex flex-col space-y-2 sm:my-auto shrink-0">
+			{#if canEditObject}
 				<Anchor
 					href={`${page.url.pathname}/edit?next=${page.url.pathname}`}
 					class="btn preset-filled-primary-500 h-fit mt-1"
@@ -206,8 +207,9 @@
 						{m.syncToAppliedControls()}
 					</button>
 				{/if}
-			</div>
-		{/if}
+			{/if}
+			<AuditTrailButton model="risk-scenarios" objectId={data.scenario.id} />
+		</div>
 	</div>
 
 	<div class="flex flex-col sm:flex-row gap-2">

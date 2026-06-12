@@ -265,6 +265,11 @@
 					field: 'chat_mode',
 					label: m.chatMode(),
 					description: m.chatModeDescription()
+				},
+				{
+					field: 'object_audit_trail',
+					label: m.objectAuditTrail(),
+					description: m.objectAuditTrailDescription()
 				}
 			].filter(({ field }) => availableKeys.includes(field))
 		}
