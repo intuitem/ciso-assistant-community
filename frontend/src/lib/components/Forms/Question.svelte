@@ -231,8 +231,8 @@
 									type="button"
 									name="question"
 									{disabled}
-									class="shadow-sm p-1 rounded-base border border-gray-300 transition-all duration-150
-										{selected ? 'preset-filled-primary-500 rounded-base' : 'bg-gray-100 rounded-base hover:bg-gray-300'}
+									class="shadow-sm p-1 rounded-base border border-surface-300-700 transition-all duration-150
+										{selected ? 'preset-filled-primary-500 rounded-base' : 'bg-surface-100-900 rounded-base hover:bg-surface-300-700'}
 										{disabled ? 'opacity-50 cursor-not-allowed' : ''}"
 									onclick={() => {
 										internalAnswers[urn] =

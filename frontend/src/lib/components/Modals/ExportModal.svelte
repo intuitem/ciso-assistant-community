@@ -71,7 +71,7 @@
 				{#if group.options.length > 0}
 					<section>
 						{#if group.titleKey}
-							<h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+							<h3 class="text-xs font-semibold text-surface-600-400 uppercase tracking-wide mb-2">
 								{safeTranslate(group.titleKey)}
 							</h3>
 						{/if}
@@ -82,7 +82,7 @@
 									onclick={handleClick}
 									data-testid={option.testId}
 									aria-label={`${safeTranslate(option.titleKey)} — ${option.format}`}
-									class="group flex flex-col p-3 rounded-container border border-surface-300 bg-white hover:border-primary-500 hover:bg-primary-50/40 hover:shadow-sm transition-colors"
+									class="group flex flex-col p-3 rounded-container border border-surface-300 bg-surface-50-950 hover:border-primary-500 hover:bg-primary-50/40 hover:shadow-sm transition-colors"
 								>
 									<div class="flex items-center gap-2 mb-1">
 										<i
@@ -95,16 +95,16 @@
 										</span>
 										{#if option.kind === 'navigate'}
 											<i
-												class="fa-solid fa-arrow-up-right-from-square ml-auto text-xs text-gray-400"
+												class="fa-solid fa-arrow-up-right-from-square ml-auto text-xs text-surface-500"
 												aria-hidden="true"
 											></i>
 										{/if}
 									</div>
-									<div class="text-sm font-semibold text-gray-900">
+									<div class="text-sm font-semibold text-surface-900-100">
 										{safeTranslate(option.titleKey)}
 									</div>
 									{#if option.descriptionKey}
-										<div class="text-xs text-gray-500 mt-0.5">
+										<div class="text-xs text-surface-600-400 mt-0.5">
 											{safeTranslate(option.descriptionKey)}
 										</div>
 									{/if}

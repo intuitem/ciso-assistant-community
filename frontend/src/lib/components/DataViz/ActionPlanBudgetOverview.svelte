@@ -62,13 +62,13 @@
 </script>
 
 {#if loading}
-	<div class="bg-white p-4 shadow-sm rounded-lg mb-2">
+	<div class="bg-surface-50-950 p-4 shadow-sm rounded-lg mb-2">
 		<div class="animate-pulse space-y-3">
-			<div class="h-4 bg-gray-200 rounded w-1/4"></div>
+			<div class="h-4 bg-surface-200-800 rounded w-1/4"></div>
 			<div class="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4 gap-3">
-				<div class="h-20 bg-gray-100 rounded-lg"></div>
-				<div class="h-20 bg-gray-100 rounded-lg"></div>
-				<div class="h-20 bg-gray-100 rounded-lg"></div>
+				<div class="h-20 bg-surface-100-900 rounded-lg"></div>
+				<div class="h-20 bg-surface-100-900 rounded-lg"></div>
+				<div class="h-20 bg-surface-100-900 rounded-lg"></div>
 			</div>
 		</div>
 	</div>
@@ -76,24 +76,24 @@
 	{#if budgetData.count === 0}
 		<!-- Empty: no controls at all, don't show anything -->
 	{:else if budgetData.count_with_cost === 0}
-		<div class="bg-white p-4 shadow-sm rounded-lg mb-2">
-			<p class="text-sm text-gray-400 italic">{m.noCostDataAvailable()}</p>
+		<div class="bg-surface-50-950 p-4 shadow-sm rounded-lg mb-2">
+			<p class="text-sm text-surface-500 italic">{m.noCostDataAvailable()}</p>
 		</div>
 	{:else}
-		<div class="bg-white p-4 shadow-sm rounded-lg mb-2">
+		<div class="bg-surface-50-950 p-4 shadow-sm rounded-lg mb-2">
 			<button
 				class="flex items-center gap-2 w-full text-left"
 				onclick={() => (collapsed = !collapsed)}
 			>
 				<i
-					class="fa-solid fa-chevron-right text-xs text-gray-400 transition-transform duration-200 {collapsed
+					class="fa-solid fa-chevron-right text-xs text-surface-500 transition-transform duration-200 {collapsed
 						? ''
 						: 'rotate-90'}"
 				></i>
 				<i class="fa-solid fa-coins text-violet-600"></i>
-				<span class="text-lg font-semibold text-gray-800">{m.budgetOverview()}</span>
+				<span class="text-lg font-semibold text-surface-800-200">{m.budgetOverview()}</span>
 				{#if collapsed}
-					<span class="text-sm text-gray-500 ml-2">{budgetData.total_annual_cost_display}</span>
+					<span class="text-sm text-surface-600-400 ml-2">{budgetData.total_annual_cost_display}</span>
 				{/if}
 			</button>
 			{#if !collapsed}
@@ -117,29 +117,29 @@
 						{@const cb = budgetData.cost_breakdown}
 						<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 							{#each [{ leg: cb.build, label: m.buildCosts() }, { leg: cb.run, label: m.runCosts() }] as entry}
-								<div class="border border-gray-200 rounded-lg p-3">
-									<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+								<div class="border border-surface-200-800 rounded-lg p-3">
+									<div class="text-xs font-semibold text-surface-600-400 uppercase tracking-wide mb-2">
 										{entry.label}
 									</div>
 									<div class="flex items-baseline justify-between gap-3">
 										<div class="flex flex-col">
-											<span class="text-xl font-bold text-gray-800 leading-none"
+											<span class="text-xl font-bold text-surface-800-200 leading-none"
 												>{entry.leg.fixed_cost_display}</span
 											>
-											<span class="text-xs text-gray-500 mt-1">{m.fixedCost()}</span>
+											<span class="text-xs text-surface-600-400 mt-1">{m.fixedCost()}</span>
 										</div>
 										<div class="flex flex-col text-right">
-											<span class="text-xl font-bold text-gray-800 leading-none"
+											<span class="text-xl font-bold text-surface-800-200 leading-none"
 												>{entry.leg.people_days.toLocaleString()}</span
 											>
-											<span class="text-xs text-gray-500 mt-1">{m.peopleDays()}</span>
+											<span class="text-xs text-surface-600-400 mt-1">{m.peopleDays()}</span>
 										</div>
 									</div>
 								</div>
 							{/each}
 						</div>
 					{/if}
-					<p class="text-xs text-gray-400 italic">
+					<p class="text-xs text-surface-500 italic">
 						{m.budgetOverviewHint({
 							x: String(budgetData.count_with_cost),
 							y: String(budgetData.count)

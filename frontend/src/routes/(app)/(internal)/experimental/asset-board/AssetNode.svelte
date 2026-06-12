@@ -100,7 +100,7 @@
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-	class="asset-node relative rounded-base border-[1.5px] bg-white px-3 py-2 min-w-[160px] max-w-[220px] select-none shadow-sm {borderClass}"
+	class="asset-node relative rounded-base border-[1.5px] bg-surface-50-950 px-3 py-2 min-w-[160px] max-w-[220px] select-none shadow-sm {borderClass}"
 	onmouseenter={() => (hovered = true)}
 	onmouseleave={() => (hovered = false)}
 >
@@ -138,7 +138,7 @@
 					ondblclick={(e) => e.stopPropagation()}
 					onmousedown={(e) => e.stopPropagation()}
 					disabled={saving}
-					class="nodrag nopan mt-1 w-full text-[12px] font-semibold leading-tight text-surface-900 bg-white border border-primary-400 rounded px-1 py-0.5 outline-none"
+					class="nodrag nopan mt-1 w-full text-[12px] font-semibold leading-tight text-surface-900 bg-surface-50-950 border border-primary-400 rounded px-1 py-0.5 outline-none"
 				/>
 			{:else}
 				<div

@@ -286,18 +286,18 @@
 
 	<!-- Export Options -->
 	{#if availableIdentifiers.length > 0}
-		<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-			<h2 class="text-xl font-semibold text-gray-900 mb-4">Export Options</h2>
+		<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6">
+			<h2 class="text-xl font-semibold text-surface-900-100 mb-4">Export Options</h2>
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 				<!-- Identifier selector -->
 				<div>
-					<label for="identifier-type" class="block text-sm font-medium text-gray-700 mb-2">
+					<label for="identifier-type" class="block text-sm font-medium text-surface-700-300 mb-2">
 						Entity Identifier
 					</label>
 					<select
 						id="identifier-type"
 						bind:value={selectedIdentifierType}
-						class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+						class="w-full rounded-lg border border-surface-300-700 bg-surface-50-950 px-4 py-2.5 text-sm text-surface-900-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
 					>
 						{#each availableIdentifiers as identifier}
 							<option value={identifier.type}>
@@ -305,14 +305,14 @@
 							</option>
 						{/each}
 					</select>
-					<p class="mt-1 text-xs text-gray-500">
+					<p class="mt-1 text-xs text-surface-600-400">
 						Used for ZIP file naming and entity identification in the report.
 					</p>
 				</div>
 
 				<!-- Level selector -->
 				<div>
-					<label class="block text-sm font-medium text-gray-700 mb-2"> Reporting Level </label>
+					<label class="block text-sm font-medium text-surface-700-300 mb-2"> Reporting Level </label>
 					<div class="flex gap-4">
 						<label class="flex items-center gap-2 cursor-pointer">
 							<input
@@ -320,9 +320,9 @@
 								name="level"
 								value="IND"
 								bind:group={selectedLevel}
-								class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+								class="h-4 w-4 text-blue-600 border-surface-300-700 focus:ring-blue-500"
 							/>
-							<span class="text-sm text-gray-700">Individual (IND)</span>
+							<span class="text-sm text-surface-700-300">Individual (IND)</span>
 						</label>
 						<label class="flex items-center gap-2 cursor-pointer">
 							<input
@@ -330,17 +330,17 @@
 								name="level"
 								value="CON"
 								bind:group={selectedLevel}
-								class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+								class="h-4 w-4 text-blue-600 border-surface-300-700 focus:ring-blue-500"
 							/>
-							<span class="text-sm text-gray-700">Consolidated (CON)</span>
+							<span class="text-sm text-surface-700-300">Consolidated (CON)</span>
 						</label>
 					</div>
-					<p class="mt-1 text-xs text-gray-500">Individual or consolidated reporting scope.</p>
+					<p class="mt-1 text-xs text-surface-600-400">Individual or consolidated reporting scope.</p>
 				</div>
 
 				<!-- Naming Convention selector -->
 				<div>
-					<label class="block text-sm font-medium text-gray-700 mb-2"> Naming Convention </label>
+					<label class="block text-sm font-medium text-surface-700-300 mb-2"> Naming Convention </label>
 					<div class="flex gap-4">
 						<label class="flex items-center gap-2 cursor-pointer">
 							<input
@@ -348,9 +348,9 @@
 								name="naming_convention"
 								value="nbb"
 								bind:group={selectedNamingConvention}
-								class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+								class="h-4 w-4 text-blue-600 border-surface-300-700 focus:ring-blue-500"
 							/>
-							<span class="text-sm text-gray-700">NBB format</span>
+							<span class="text-sm text-surface-700-300">NBB format</span>
 						</label>
 						<label class="flex items-center gap-2 cursor-pointer">
 							<input
@@ -358,12 +358,12 @@
 								name="naming_convention"
 								value="eba"
 								bind:group={selectedNamingConvention}
-								class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+								class="h-4 w-4 text-blue-600 border-surface-300-700 focus:ring-blue-500"
 							/>
-							<span class="text-sm text-gray-700">EBA standard</span>
+							<span class="text-sm text-surface-700-300">EBA standard</span>
 						</label>
 					</div>
-					<p class="mt-1 text-xs text-gray-500">
+					<p class="mt-1 text-xs text-surface-600-400">
 						ZIP file naming format expected by your competent authority.
 					</p>
 				</div>
@@ -371,9 +371,9 @@
 
 			<!-- Filename preview -->
 			{#if filenamePreview}
-				<div class="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
-					<div class="text-xs font-medium text-gray-500 mb-1">Filename preview</div>
-					<code class="text-sm text-gray-800 break-all">{filenamePreview}</code>
+				<div class="mt-4 p-3 bg-surface-50-950 rounded-lg border border-surface-200-800">
+					<div class="text-xs font-medium text-surface-600-400 mb-1">Filename preview</div>
+					<code class="text-sm text-surface-800-200 break-all">{filenamePreview}</code>
 				</div>
 			{/if}
 		</div>

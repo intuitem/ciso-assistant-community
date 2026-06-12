@@ -476,7 +476,7 @@
 			/>
 		</label>
 	</div>
-	<div class="text-xs text-gray-600 -mt-4 px-1">
+	<div class="text-xs text-surface-600-400 -mt-4 px-1">
 		Set once by the admin, applies to all evidences. <strong>Lightweight</strong>: every new
 		revision is recorded as <em>approved</em> with the uploader as their own reviewer — no friction
 		added to the simple "refresh once a year" case. <strong>Audit-strict</strong>: new revisions
@@ -484,18 +484,18 @@
 	</div>
 
 	<!-- ───── SIMPLE CASE DEMO ───── -->
-	<section class="border rounded-lg p-4 bg-white space-y-3">
+	<section class="border rounded-lg p-4 bg-surface-50-950 space-y-3">
 		<header class="flex items-center justify-between">
 			<div>
-				<div class="text-xs uppercase tracking-wide text-gray-500">
+				<div class="text-xs uppercase tracking-wide text-surface-600-400">
 					Simple case — single-file evidence
 				</div>
 				<h2 class="font-semibold">Annual Privacy Policy</h2>
 				<div class="mt-1 flex flex-wrap gap-2 text-xs">
-					<span class="px-2 py-0.5 rounded bg-gray-100">
+					<span class="px-2 py-0.5 rounded bg-surface-100-900">
 						<i class="fa-solid fa-user mr-1"></i>Dana Lopez
 					</span>
-					<span class="px-2 py-0.5 rounded bg-gray-100">
+					<span class="px-2 py-0.5 rounded bg-surface-100-900">
 						<i class="fa-solid fa-calendar mr-1"></i>expires 2027-01-15
 					</span>
 					<span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700">Policy</span>
@@ -515,24 +515,24 @@
 						{instanceRequiresReview ? statusLabel.in_review : statusLabel.approved}
 					</span>
 				</div>
-				<div class="text-xs text-gray-600">1 file · 0.4 MB</div>
+				<div class="text-xs text-surface-600-400">1 file · 0.4 MB</div>
 			</div>
 		</header>
 
 		<div class="border rounded text-sm">
 			<div class="px-3 py-2 flex items-center gap-2">
-				<i class="fa-solid fa-file text-gray-400"></i>
+				<i class="fa-solid fa-file text-surface-500"></i>
 				<span class="flex-1 truncate">privacy-policy-2026.pdf</span>
-				<span class="text-xs text-gray-500 tabular-nums">412 KB</span>
-				<span class="text-xs font-mono text-gray-400">8a3c…f201</span>
-				<button class="text-gray-500 hover:text-blue-600" title="Download">
+				<span class="text-xs text-surface-600-400 tabular-nums">412 KB</span>
+				<span class="text-xs font-mono text-surface-500">8a3c…f201</span>
+				<button class="text-surface-600-400 hover:text-blue-600" title="Download">
 					<i class="fa-solid fa-download"></i>
 				</button>
 			</div>
 		</div>
 
 		<div class="flex items-center justify-between">
-			<div class="text-xs text-gray-600 italic">
+			<div class="text-xs text-surface-600-400 italic">
 				1-file evidence: <strong>no inherit/replace dialog</strong>. Clicking
 				<em>Upload new revision</em>
 				opens the file picker directly. Same 2 clicks as today.
@@ -549,35 +549,35 @@
 	</section>
 
 	<!-- ───── BUNDLE CASE DEMO ───── -->
-	<div class="text-xs uppercase tracking-wide text-gray-500 pt-2 border-t">
+	<div class="text-xs uppercase tracking-wide text-surface-600-400 pt-2 border-t">
 		Bundle case — multi-file evidence
 	</div>
 
 	<!-- Evidence header -->
-	<header class="border rounded-lg p-4 bg-white">
+	<header class="border rounded-lg p-4 bg-surface-50-950">
 		<div class="flex items-start justify-between gap-4">
 			<div>
-				<div class="text-xs uppercase tracking-wide text-gray-500">Evidence</div>
+				<div class="text-xs uppercase tracking-wide text-surface-600-400">Evidence</div>
 				<h1 class="text-xl font-semibold">{evidence.name}</h1>
 				<div class="mt-2 flex flex-wrap gap-2 text-xs">
-					<span class="px-2 py-0.5 rounded bg-gray-100">
+					<span class="px-2 py-0.5 rounded bg-surface-100-900">
 						<i class="fa-solid fa-user mr-1"></i>{evidence.owner}
 					</span>
-					<span class="px-2 py-0.5 rounded bg-gray-100">
+					<span class="px-2 py-0.5 rounded bg-surface-100-900">
 						<i class="fa-solid fa-calendar mr-1"></i>expires {evidence.expiry}
 					</span>
 					{#each evidence.labels as l}
 						<span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700">{l}</span>
 					{/each}
 				</div>
-				<div class="mt-3 text-xs text-gray-500">
+				<div class="mt-3 text-xs text-surface-600-400">
 					Owner, expiry and labels are <strong>evidence-level</strong> (durable across revisions).
 					Status, reviewer and approval timestamps are <strong>revision-level</strong>.
 				</div>
 			</div>
 			<div class="text-right text-sm space-y-1">
 				<div class="flex items-center justify-end gap-2">
-					<span class="text-xs uppercase tracking-wide text-gray-500">Current</span>
+					<span class="text-xs uppercase tracking-wide text-surface-600-400">Current</span>
 					<strong class="text-base">v{current.version}</strong>
 					<span
 						class="px-2 py-0.5 rounded border text-xs inline-flex items-center gap-1 {statusStyle[
@@ -588,14 +588,14 @@
 						{statusLabel[displayCurrent.status]}
 					</span>
 				</div>
-				<div class="text-xs text-gray-600">
+				<div class="text-xs text-surface-600-400">
 					{current.files.length} files · {fmtSize(totalSize(current.files))}
 				</div>
-				<div class="font-mono text-xs text-gray-500">
+				<div class="font-mono text-xs text-surface-600-400">
 					manifest {manifestHash(current.files)}
 				</div>
 				{#if displayCurrent.status !== 'approved' && lastApproved}
-					<div class="mt-2 text-xs text-gray-600 border-t pt-1">
+					<div class="mt-2 text-xs text-surface-600-400 border-t pt-1">
 						<i class="fa-solid fa-circle-check text-green-600 mr-1"></i>
 						Last approved: <strong>v{lastApproved.version}</strong>
 						by {lastApproved.reviewedBy} on {lastApproved.reviewedAt}
@@ -611,7 +611,7 @@
 			<button
 				class="px-3 py-2 text-sm border-b-2 -mb-px {tab === t.id
 					? 'border-blue-600 text-blue-700 font-medium'
-					: 'border-transparent text-gray-600 hover:text-gray-900'}"
+					: 'border-transparent text-surface-600-400 hover:text-surface-900-100'}"
 				onclick={() => (tab = t.id as typeof tab)}
 			>
 				<i class="fa-solid {t.icon} mr-1"></i>{t.label}
@@ -636,7 +636,7 @@
 							{statusLabel[displayCurrent.status]}
 						</span>
 					</h2>
-					<div class="text-sm text-gray-600">
+					<div class="text-sm text-surface-600-400">
 						Uploaded {current.uploadedAt} by {current.uploadedBy}
 					</div>
 				</div>
@@ -663,7 +663,7 @@
 			</div>
 
 			{#if current.observation}
-				<div class="text-sm bg-gray-50 border-l-4 border-gray-300 px-3 py-2 italic">
+				<div class="text-sm bg-surface-50-950 border-l-4 border-surface-300-700 px-3 py-2 italic">
 					{current.observation}
 				</div>
 			{/if}
@@ -674,7 +674,7 @@
 						? 'bg-green-50 border-green-400'
 						: displayCurrent.status === 'rejected'
 							? 'bg-red-50 border-red-400'
-							: 'bg-gray-50 border-gray-300'}"
+							: 'bg-surface-50-950 border-surface-300-700'}"
 				>
 					<i class="fa-solid {statusIcon[displayCurrent.status]} mr-1"></i>
 					<strong>{statusLabel[displayCurrent.status]}</strong> by {displayCurrent.reviewedBy} on
@@ -687,7 +687,7 @@
 
 			<div class="border rounded">
 				<table class="w-full text-sm">
-					<thead class="bg-gray-50 text-xs uppercase text-gray-600">
+					<thead class="bg-surface-50-950 text-xs uppercase text-surface-600-400">
 						<tr>
 							<th class="text-left px-3 py-2">File</th>
 							<th class="text-right px-3 py-2">Size</th>
@@ -699,15 +699,15 @@
 						{#each current.files as f}
 							<tr class="border-t">
 								<td class="px-3 py-2">
-									<i class="fa-solid fa-file mr-2 text-gray-400"></i>{f.name}
+									<i class="fa-solid fa-file mr-2 text-surface-500"></i>{f.name}
 								</td>
 								<td class="px-3 py-2 text-right tabular-nums">{fmtSize(f.size)}</td>
-								<td class="px-3 py-2 font-mono text-xs text-gray-600">{short(f.hash)}</td>
+								<td class="px-3 py-2 font-mono text-xs text-surface-600-400">{short(f.hash)}</td>
 								<td class="px-3 py-2 text-right">
-									<button class="text-gray-500 hover:text-blue-600 mx-1" title="Preview">
+									<button class="text-surface-600-400 hover:text-blue-600 mx-1" title="Preview">
 										<i class="fa-solid fa-eye"></i>
 									</button>
-									<button class="text-gray-500 hover:text-blue-600 mx-1" title="Download">
+									<button class="text-surface-600-400 hover:text-blue-600 mx-1" title="Download">
 										<i class="fa-solid fa-download"></i>
 									</button>
 								</td>
@@ -719,7 +719,7 @@
 
 			{#if current.link}
 				<div class="text-sm">
-					<i class="fa-solid fa-link mr-1 text-gray-500"></i>
+					<i class="fa-solid fa-link mr-1 text-surface-600-400"></i>
 					<a href={current.link} class="text-blue-600 hover:underline">{current.link}</a>
 				</div>
 			{/if}
@@ -730,7 +730,7 @@
 	{#if tab === 'history'}
 		<section>
 			<div class="flex items-center justify-between mb-4">
-				<p class="text-sm text-gray-600">
+				<p class="text-sm text-surface-600-400">
 					Each revision is an immutable snapshot. File identity is by name — same name with a new
 					hash is a <em>replacement</em>, not a separate file.
 				</p>
@@ -740,7 +740,7 @@
 				</label>
 			</div>
 
-			<ol class="relative border-l-2 border-gray-200 ml-3 space-y-6">
+			<ol class="relative border-l-2 border-surface-200-800 ml-3 space-y-6">
 				{#each [...revisions].reverse() as rawRev, idx}
 					{@const rev = displayRev(rawRev)}
 					{@const prev = revisions.find((r) => r.version === rev.version - 1) ?? null}
@@ -755,11 +755,11 @@
 									? 'bg-green-500 border-green-500'
 									: rev.status === 'rejected'
 										? 'bg-red-500 border-red-500'
-										: 'bg-white border-gray-400'}"
+										: 'bg-surface-50-950 border-gray-400'}"
 						></span>
 
-						<article class="border rounded-lg bg-white">
-							<header class="flex items-center justify-between px-4 py-2 border-b bg-gray-50">
+						<article class="border rounded-lg bg-surface-50-950">
+							<header class="flex items-center justify-between px-4 py-2 border-b bg-surface-50-950">
 								<div class="flex items-center gap-3 flex-wrap">
 									<h3 class="font-semibold">
 										v{rev.version}
@@ -778,11 +778,11 @@
 										</span>
 									{/if}
 									{#if rev.version === 1}
-										<span class="text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-700">
+										<span class="text-xs px-2 py-0.5 rounded bg-surface-100-900 text-surface-700-300">
 											initial
 										</span>
 									{/if}
-									<span class="text-sm text-gray-500">
+									<span class="text-sm text-surface-600-400">
 										uploaded {rev.uploadedAt} by {rev.uploadedBy}
 									</span>
 								</div>
@@ -796,15 +796,15 @@
 									{#if summary.removed > 0}
 										<span class="text-red-700">−{summary.removed}</span>
 									{/if}
-									<span class="text-gray-400">·</span>
-									<span class="text-gray-500">
+									<span class="text-surface-500">·</span>
+									<span class="text-surface-600-400">
 										{rev.files.length} files · {fmtSize(totalSize(rev.files))}
 									</span>
 								</div>
 							</header>
 
 							{#if rev.observation}
-								<div class="px-4 py-2 text-sm italic text-gray-700 border-b">
+								<div class="px-4 py-2 text-sm italic text-surface-700-300 border-b">
 									<i class="fa-solid fa-quote-left text-gray-300 mr-1"></i>
 									{rev.observation}
 								</div>
@@ -816,7 +816,7 @@
 										? 'bg-green-50 text-green-900'
 										: rev.status === 'rejected'
 											? 'bg-red-50 text-red-900'
-											: 'bg-gray-50 text-gray-700'}"
+											: 'bg-surface-50-950 text-surface-700-300'}"
 								>
 									<i class="fa-solid {statusIcon[rev.status]} mr-1"></i>
 									<strong>{statusLabel[rev.status]}</strong> by
@@ -840,9 +840,9 @@
 												{stateLabel[r.state]}
 											</span>
 											<span class="flex-1 truncate">
-												<i class="fa-solid fa-file mr-1 text-gray-400"></i>{r.name}
+												<i class="fa-solid fa-file mr-1 text-surface-500"></i>{r.name}
 											</span>
-											<span class="text-xs text-gray-500 tabular-nums w-32 text-right">
+											<span class="text-xs text-surface-600-400 tabular-nums w-32 text-right">
 												{#if r.state === 'replaced'}
 													{fmtSize(r.from!.size)} → {fmtSize(r.to!.size)}
 												{:else if r.state === 'removed'}
@@ -851,7 +851,7 @@
 													{fmtSize(r.to!.size)}
 												{/if}
 											</span>
-											<span class="text-xs font-mono text-gray-400 w-28 text-right">
+											<span class="text-xs font-mono text-surface-500 w-28 text-right">
 												{#if r.state === 'replaced'}
 													{short(r.from!.hash)}→{short(r.to!.hash).slice(-4)}
 												{:else if r.state === 'removed'}
@@ -866,14 +866,14 @@
 							</ul>
 
 							<footer
-								class="px-4 py-2 border-t bg-gray-50 flex items-center justify-between text-xs"
+								class="px-4 py-2 border-t bg-surface-50-950 flex items-center justify-between text-xs"
 							>
-								<span class="font-mono text-gray-500">
+								<span class="font-mono text-surface-600-400">
 									manifest {manifestHash(rev.files)}
 								</span>
 								<div class="flex gap-2">
 									<button
-										class="px-2 py-1 rounded border bg-white hover:bg-gray-100"
+										class="px-2 py-1 rounded border bg-surface-50-950 hover:bg-surface-100-900"
 										onclick={() => {
 											tab = 'compare';
 											baseVersion = prev ? prev.version : rev.version;
@@ -882,12 +882,12 @@
 									>
 										<i class="fa-solid fa-code-compare mr-1"></i>Compare to…
 									</button>
-									<button class="px-2 py-1 rounded border bg-white hover:bg-gray-100">
+									<button class="px-2 py-1 rounded border bg-surface-50-950 hover:bg-surface-100-900">
 										<i class="fa-solid fa-download mr-1"></i>Download zip
 									</button>
 									{#if !isCurrent}
 										<button
-											class="px-2 py-1 rounded border bg-white hover:bg-gray-100"
+											class="px-2 py-1 rounded border bg-surface-50-950 hover:bg-surface-100-900"
 											title="Re-publish this revision's files as a new revision (history is preserved)"
 										>
 											<i class="fa-solid fa-rotate-left mr-1"></i>Restore as new revision
@@ -907,8 +907,8 @@
 		<section class="space-y-4">
 			<div class="flex items-end gap-3">
 				<label class="text-sm">
-					<span class="block text-xs text-gray-500 mb-1">Base</span>
-					<select bind:value={baseVersion} class="border rounded px-2 py-1.5 text-sm bg-white">
+					<span class="block text-xs text-surface-600-400 mb-1">Base</span>
+					<select bind:value={baseVersion} class="border rounded px-2 py-1.5 text-sm bg-surface-50-950">
 						{#each revisions as r}
 							<option value={r.version}
 								>v{r.version} — {r.uploadedAt} ({statusLabel[r.status]})</option
@@ -916,10 +916,10 @@
 						{/each}
 					</select>
 				</label>
-				<i class="fa-solid fa-arrow-right text-gray-400 mb-2"></i>
+				<i class="fa-solid fa-arrow-right text-surface-500 mb-2"></i>
 				<label class="text-sm">
-					<span class="block text-xs text-gray-500 mb-1">Target</span>
-					<select bind:value={targetVersion} class="border rounded px-2 py-1.5 text-sm bg-white">
+					<span class="block text-xs text-surface-600-400 mb-1">Target</span>
+					<select bind:value={targetVersion} class="border rounded px-2 py-1.5 text-sm bg-surface-50-950">
 						{#each revisions as r}
 							<option value={r.version}
 								>v{r.version} — {r.uploadedAt} ({statusLabel[r.status]})</option
@@ -927,17 +927,17 @@
 						{/each}
 					</select>
 				</label>
-				<div class="ml-auto text-sm text-gray-600 flex gap-4">
+				<div class="ml-auto text-sm text-surface-600-400 flex gap-4">
 					<span class="text-green-700">+{compareSummary.added} added</span>
 					<span class="text-amber-700">~{compareSummary.replaced} replaced</span>
 					<span class="text-red-700">−{compareSummary.removed} removed</span>
-					<span class="text-gray-500">={compareSummary.unchanged} unchanged</span>
+					<span class="text-surface-600-400">={compareSummary.unchanged} unchanged</span>
 				</div>
 			</div>
 
 			<div class="border rounded">
 				<table class="w-full text-sm">
-					<thead class="bg-gray-50 text-xs uppercase text-gray-600">
+					<thead class="bg-surface-50-950 text-xs uppercase text-surface-600-400">
 						<tr>
 							<th class="text-left px-3 py-2 w-28">State</th>
 							<th class="text-left px-3 py-2">File</th>
@@ -959,12 +959,12 @@
 									</span>
 								</td>
 								<td class="px-3 py-2">
-									<i class="fa-solid fa-file mr-2 text-gray-400"></i>{r.name}
+									<i class="fa-solid fa-file mr-2 text-surface-500"></i>{r.name}
 								</td>
-								<td class="px-3 py-2 text-right tabular-nums text-gray-600">
+								<td class="px-3 py-2 text-right tabular-nums text-surface-600-400">
 									{r.from ? fmtSize(r.from.size) : '—'} → {r.to ? fmtSize(r.to.size) : '—'}
 								</td>
-								<td class="px-3 py-2 text-right font-mono text-xs text-gray-500">
+								<td class="px-3 py-2 text-right font-mono text-xs text-surface-600-400">
 									{r.from ? short(r.from.hash) : '—'} → {r.to ? short(r.to.hash) : '—'}
 								</td>
 							</tr>
@@ -973,7 +973,7 @@
 				</table>
 			</div>
 
-			<div class="text-xs text-gray-500">
+			<div class="text-xs text-surface-600-400">
 				File identity is matched by <strong>name</strong>. A same-name file with a different hash is
 				shown as <em>replaced</em>; a hash-identical match is <em>unchanged</em>. Renames are not
 				detected (would need a heuristic — out of scope here).
@@ -984,7 +984,7 @@
 	<!-- NEW REVISION TAB -->
 	{#if tab === 'new'}
 		<section class="space-y-4">
-			<div class="text-sm text-gray-700">
+			<div class="text-sm text-surface-700-300">
 				This will become <strong>v{current.version + 1}</strong>. By default, all files from v{current.version}
 				are inherited. Untick to remove, click <em>Replace</em> to upload a new version of an
 				existing file (filename is preserved → it shows as <em>replaced</em> in history), or drop new
@@ -993,7 +993,7 @@
 
 			<!-- Inherit / replace / remove list -->
 			<div class="border rounded">
-				<div class="px-3 py-2 bg-gray-50 border-b text-xs uppercase tracking-wide text-gray-600">
+				<div class="px-3 py-2 bg-surface-50-950 border-b text-xs uppercase tracking-wide text-surface-600-400">
 					Files in v{current.version} — choose what carries over
 				</div>
 				<ul class="divide-y text-sm">
@@ -1002,7 +1002,7 @@
 							<span
 								class="font-mono text-xs px-1.5 py-0.5 rounded border w-24 inline-flex items-center justify-center gap-1 {e.action ===
 								'keep'
-									? 'text-gray-600 bg-gray-50 border-gray-200'
+									? 'text-surface-600-400 bg-surface-50-950 border-surface-200-800'
 									: e.action === 'replace'
 										? 'text-amber-700 bg-amber-50 border-amber-200'
 										: 'text-red-700 bg-red-50 border-red-200'}"
@@ -1011,10 +1011,10 @@
 							</span>
 
 							<span class="flex-1 truncate">
-								<i class="fa-solid fa-file mr-1 text-gray-400"></i>{e.name}
+								<i class="fa-solid fa-file mr-1 text-surface-500"></i>{e.name}
 							</span>
 
-							<span class="text-xs text-gray-500 tabular-nums w-32 text-right">
+							<span class="text-xs text-surface-600-400 tabular-nums w-32 text-right">
 								{#if e.action === 'replace'}
 									{fmtSize(e.baseSize)} → {fmtSize(e.newSize!)}
 								{:else}
@@ -1022,7 +1022,7 @@
 								{/if}
 							</span>
 
-							<span class="text-xs font-mono text-gray-400 w-28 text-right">
+							<span class="text-xs font-mono text-surface-500 w-28 text-right">
 								{#if e.action === 'replace'}
 									{short(e.baseHash)}→{short(e.newHash!).slice(-4)}
 								{:else}
@@ -1033,8 +1033,8 @@
 							<div class="flex gap-1">
 								<button
 									class="px-2 py-0.5 text-xs rounded border {e.action === 'keep'
-										? 'bg-gray-100 border-gray-400'
-										: 'bg-white hover:bg-gray-50'}"
+										? 'bg-surface-100-900 border-gray-400'
+										: 'bg-surface-50-950 hover:bg-surface-50-950'}"
 									onclick={() => setAction(idx, 'keep')}
 									title="Carry this file over unchanged"
 								>
@@ -1043,7 +1043,7 @@
 								<button
 									class="px-2 py-0.5 text-xs rounded border {e.action === 'replace'
 										? 'bg-amber-100 border-amber-400'
-										: 'bg-white hover:bg-gray-50'}"
+										: 'bg-surface-50-950 hover:bg-surface-50-950'}"
 									onclick={() => setAction(idx, 'replace')}
 									title="Upload a new file with the same name"
 								>
@@ -1052,7 +1052,7 @@
 								<button
 									class="px-2 py-0.5 text-xs rounded border {e.action === 'remove'
 										? 'bg-red-100 border-red-400'
-										: 'bg-white hover:bg-gray-50'}"
+										: 'bg-surface-50-950 hover:bg-surface-50-950'}"
 									onclick={() => setAction(idx, 'remove')}
 									title="Drop this file from the new revision"
 								>
@@ -1066,17 +1066,17 @@
 
 			<!-- Drop zone for genuinely new files -->
 			<div
-				class="border-2 border-dashed rounded p-4 bg-gray-50"
+				class="border-2 border-dashed rounded p-4 bg-surface-50-950"
 				ondragover={(e) => e.preventDefault()}
 				ondrop={onDrop}
 				role="button"
 				tabindex="0"
 			>
 				<div
-					class="text-xs uppercase tracking-wide text-gray-600 mb-2 flex items-center justify-between"
+					class="text-xs uppercase tracking-wide text-surface-600-400 mb-2 flex items-center justify-between"
 				>
 					<span>Add files</span>
-					<span class="text-gray-400 normal-case">
+					<span class="text-surface-500 normal-case">
 						SHA-256 is computed in your browser — no upload yet.
 					</span>
 				</div>
@@ -1089,12 +1089,12 @@
 								>
 									new
 								</span>
-								<i class="fa-solid fa-file text-gray-400"></i>
+								<i class="fa-solid fa-file text-surface-500"></i>
 								<span class="flex-1 truncate">{a.name}</span>
-								<span class="text-xs text-gray-500 tabular-nums">{fmtSize(a.size)}</span>
-								<span class="text-xs font-mono text-gray-400">{short(a.hash)}</span>
+								<span class="text-xs text-surface-600-400 tabular-nums">{fmtSize(a.size)}</span>
+								<span class="text-xs font-mono text-surface-500">{short(a.hash)}</span>
 								<button
-									class="text-gray-400 hover:text-red-600"
+									class="text-surface-500 hover:text-red-600"
 									onclick={() => (draftAdditions = draftAdditions.filter((_, i) => i !== idx))}
 									title="Remove from the new revision"
 								>
@@ -1108,15 +1108,15 @@
 				{#if hashing.length > 0}
 					<ul class="text-xs space-y-0.5 mb-2 border-t pt-2">
 						{#each hashing as h}
-							<li class="flex items-center gap-2 text-gray-600">
+							<li class="flex items-center gap-2 text-surface-600-400">
 								{#if h.progress === 'hashing'}
 									<i class="fa-solid fa-spinner fa-spin text-blue-500"></i>
 									<span>{h.name}</span>
-									<span class="text-gray-400">hashing…</span>
+									<span class="text-surface-500">hashing…</span>
 								{:else if h.progress === 'duplicate'}
-									<i class="fa-solid fa-equals text-gray-500"></i>
+									<i class="fa-solid fa-equals text-surface-600-400"></i>
 									<span>{h.name}</span>
-									<span class="text-gray-500 italic">
+									<span class="text-surface-600-400 italic">
 										identical to inherited file → nothing to upload
 									</span>
 								{:else if h.progress === 'replaced'}
@@ -1137,12 +1137,12 @@
 
 				<button
 					type="button"
-					class="w-full text-center text-sm text-gray-500 py-3 hover:bg-gray-100 rounded"
+					class="w-full text-center text-sm text-surface-600-400 py-3 hover:bg-surface-100-900 rounded"
 					onclick={() => fileInput?.click()}
 				>
 					<i class="fa-solid fa-cloud-arrow-up text-2xl mb-1 block"></i>
 					Drag files here or click to browse
-					<div class="text-xs mt-1 text-gray-400">
+					<div class="text-xs mt-1 text-surface-500">
 						Same-name as an inherited file? Auto-promoted to Replace. Bit-identical content?
 						Detected and skipped.
 					</div>
@@ -1161,7 +1161,7 @@
 
 			<!-- Observation -->
 			<label class="block text-sm">
-				<span class="text-xs uppercase tracking-wide text-gray-600">Observation</span>
+				<span class="text-xs uppercase tracking-wide text-surface-600-400">Observation</span>
 				<textarea
 					bind:value={draftObservation}
 					rows="2"

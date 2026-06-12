@@ -209,10 +209,10 @@
 
 	<!-- Task Description -->
 	{#if taskNode.task_template.description}
-		<p class="text-gray-700 text-md font-medium tracking-wide">
+		<p class="text-surface-700-300 text-md font-medium tracking-wide">
 			{m.description()}
 		</p>
-		<div class="border rounded-lg p-4 bg-gray-50">
+		<div class="border rounded-lg p-4 bg-surface-50-950">
 			<MarkdownRenderer content={taskNode.task_template.description} />
 		</div>
 	{/if}

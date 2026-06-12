@@ -181,12 +181,12 @@
 					</button>
 					{#if openGroupIndex === index}
 						<div
-							class="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded shadow-lg z-50 min-w-max"
+							class="absolute right-0 top-full mt-1 bg-surface-50-950 border border-surface-200-800 rounded shadow-lg z-50 min-w-max"
 						>
 							{#each action.children as child}
 								<button
 									type="button"
-									class="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+									class="flex items-center gap-2 w-full px-4 py-2 text-sm text-surface-700-300 hover:bg-surface-100-900"
 									onclick={() => triggerAction(child)}
 								>
 									<i class={child.icon}></i>

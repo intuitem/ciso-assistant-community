@@ -151,7 +151,7 @@
 						<i class="fa-solid fa-plus text-success-500 mr-1"></i>
 						{m.suggestionSectionCreate()} ({createItems.length})
 					</p>
-					<p class="text-xs text-gray-500 mb-2">{m.suggestionSectionCreateHelp()}</p>
+					<p class="text-xs text-surface-600-400 mb-2">{m.suggestionSectionCreateHelp()}</p>
 					<ul class="ml-2">
 						{#each createItems as item (item.id)}
 							{@render selectableRow(item)}
@@ -166,7 +166,7 @@
 						<i class="fa-solid fa-link text-warning-500 mr-1"></i>
 						{m.suggestionSectionReuse()} ({reuseItems.length})
 					</p>
-					<p class="text-xs text-gray-500 mb-2">{m.suggestionSectionReuseHelp()}</p>
+					<p class="text-xs text-surface-600-400 mb-2">{m.suggestionSectionReuseHelp()}</p>
 					<ul class="ml-2">
 						{#each reuseItems as item (item.id)}
 							{@render selectableRow(item)}
@@ -178,15 +178,15 @@
 			{#if linkedItems.length > 0}
 				<section class="px-4 py-2 border-t border-surface-300 opacity-70">
 					<p class="font-semibold text-sm mb-1">
-						<i class="fa-solid fa-check text-gray-500 mr-1"></i>
+						<i class="fa-solid fa-check text-surface-600-400 mr-1"></i>
 						{m.suggestionSectionLinked()} ({linkedItems.length})
 					</p>
-					<p class="text-xs text-gray-500 mb-2">{m.suggestionSectionLinkedHelp()}</p>
+					<p class="text-xs text-surface-600-400 mb-2">{m.suggestionSectionLinkedHelp()}</p>
 					<ul class="ml-2">
 						{#each linkedItems as item (item.id)}
 							<li class="py-1">
 								<div class="flex items-center gap-2">
-									<i class="fa-regular fa-circle-check text-gray-500"></i>
+									<i class="fa-regular fa-circle-check text-surface-600-400"></i>
 									<span class="flex-1">{item.label}</span>
 									{@render badge(item.status)}
 								</div>

@@ -668,7 +668,7 @@
 
 	<!-- Info banner -->
 	<div
-		class="bg-white border border-blue-200 border-l-[3px] border-l-blue-400 rounded-lg px-4 py-3 shadow-sm"
+		class="bg-surface-50-950 border border-blue-200 border-l-[3px] border-l-blue-400 rounded-lg px-4 py-3 shadow-sm"
 	>
 		<div class="flex items-start gap-3">
 			<div
@@ -688,7 +688,7 @@
 	<!-- Read-only banner -->
 	{#if isReadOnly}
 		<div
-			class="bg-white border border-yellow-200 border-l-[3px] border-l-yellow-500 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
+			class="bg-surface-50-950 border border-yellow-200 border-l-[3px] border-l-yellow-500 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
 		>
 			<div class="w-8 h-8 rounded-full bg-yellow-50 flex items-center justify-center flex-shrink-0">
 				<i class="fa-solid fa-lock text-yellow-500 text-sm"></i>
@@ -738,7 +738,7 @@
 			<!-- Implementation Groups quick-select -->
 			{#if hasImplementationGroups && !isReadOnly}
 				<div class="flex flex-wrap items-center gap-2 mb-4 pb-4 border-b">
-					<span class="text-xs font-medium text-gray-500 mr-1">
+					<span class="text-xs font-medium text-surface-600-400 mr-1">
 						<i class="fa-solid fa-layer-group mr-1"></i>
 						{m.implementationGroups()}:
 					</span>
@@ -754,7 +754,7 @@
 							<span
 								class="badge text-[10px] ml-1 {availableCount > 0
 									? 'bg-secondary-100 text-secondary-700'
-									: 'bg-gray-100 text-gray-400'}"
+									: 'bg-surface-100-900 text-surface-500'}"
 							>
 								{availableCount}
 							</span>
@@ -1191,7 +1191,7 @@
 	></div>
 	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
 		<div
-			class="bg-white rounded-lg shadow-xl max-w-lg w-full flex flex-col"
+			class="bg-surface-50-950 rounded-lg shadow-xl max-w-lg w-full flex flex-col"
 			onclick={(e) => e.stopPropagation()}
 			role="dialog"
 			aria-modal="true"
@@ -1221,7 +1221,7 @@
 					bind:value={reviewerObservationText}
 				></textarea>
 			</div>
-			<div class="p-4 border-t bg-gray-50 rounded-b-lg flex gap-2">
+			<div class="p-4 border-t bg-surface-50-950 rounded-b-lg flex gap-2">
 				<button
 					class="btn preset-filled-error-500 flex-1"
 					onclick={handleRequestChanges}
@@ -1243,7 +1243,7 @@
 	<div class="fixed inset-0 bg-black/50 z-40" onclick={closeHistoryModal} role="presentation"></div>
 	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
 		<div
-			class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col"
+			class="bg-surface-50-950 rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col"
 			onclick={(e) => e.stopPropagation()}
 			role="dialog"
 			aria-modal="true"
@@ -1267,7 +1267,7 @@
 			<!-- Content -->
 			<div class="p-4 overflow-y-auto flex-1">
 				<div class="mb-3">
-					<span class="text-sm text-gray-600">
+					<span class="text-sm text-surface-600-400">
 						<i class="fa-solid fa-{actorIcon(historyModalAssignment.actor)} mr-1"></i>
 						{formatActors(historyModalAssignment.actor)}
 					</span>
@@ -1287,29 +1287,29 @@
 												? 'bg-blue-400'
 												: event.event_type === 'in_progress'
 													? 'bg-amber-400'
-													: 'bg-gray-300'}"
+													: 'bg-surface-300-700'}"
 								></div>
-								<div class="w-px flex-1 bg-gray-200 mt-1"></div>
+								<div class="w-px flex-1 bg-surface-200-800 mt-1"></div>
 							</div>
 							<div class="pb-3 flex-1">
 								<div class="flex items-center gap-2 text-sm">
 									<span
 										class="font-medium px-1.5 py-0.5 rounded text-xs {assignmentStatusStyle[
 											event.event_type
-										] ?? 'bg-gray-100 text-gray-700'}"
+										] ?? 'bg-surface-100-900 text-surface-700-300'}"
 									>
 										{assignmentStatusLabel[event.event_type]?.() ?? event.event_type}
 									</span>
-									<span class="text-gray-500 text-xs">
+									<span class="text-surface-600-400 text-xs">
 										{formatEventActor(event.event_actor)}
 									</span>
 								</div>
-								<span class="text-gray-400 text-xs">
+								<span class="text-surface-500 text-xs">
 									{formatDate(new Date(event.created_at), true, getLocale())}
 								</span>
 								{#if event.event_notes}
 									<div
-										class="mt-1.5 text-sm text-gray-700 whitespace-pre-line bg-gray-50 border border-gray-100 rounded-md px-3 py-2"
+										class="mt-1.5 text-sm text-surface-700-300 whitespace-pre-line bg-surface-50-950 border border-surface-100-900 rounded-md px-3 py-2"
 									>
 										{event.event_notes}
 									</div>
@@ -1321,7 +1321,7 @@
 			</div>
 
 			<!-- Footer -->
-			<div class="p-4 border-t bg-gray-50 rounded-b-lg">
+			<div class="p-4 border-t bg-surface-50-950 rounded-b-lg">
 				<button class="btn preset-filled-surface-500 w-full" onclick={closeHistoryModal}>
 					{m.close()}
 				</button>

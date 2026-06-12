@@ -351,7 +351,7 @@
 			{#if incidentRef}
 				<div class="flex items-center gap-2 text-sm mb-1">
 					<Anchor
-						class="text-gray-500 hover:text-primary-500 transition-colors"
+						class="text-surface-600-400 hover:text-primary-500 transition-colors"
 						href="/incidents/{incidentRef.id}"
 						prefixCrumbs={[{ label: safeTranslate('incidents'), href: '/incidents' }]}
 					>
@@ -359,7 +359,7 @@
 					</Anchor>
 				</div>
 			{/if}
-			<h1 class="text-2xl font-bold text-gray-900">
+			<h1 class="text-2xl font-bold text-surface-900-100">
 				{mode === 'create' ? safeTranslate('add-doraIncidentReport') : m.doraIncidentReport()}
 			</h1>
 		</div>
@@ -513,7 +513,7 @@
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
 						<div class="space-y-3">
 							<div class="flex items-center justify-between">
-								<h3 class="font-medium text-sm text-gray-600">{m.doraPrimaryContact()}</h3>
+								<h3 class="font-medium text-sm text-surface-600-400">{m.doraPrimaryContact()}</h3>
 								<select
 									class="select text-xs w-auto max-w-48"
 									onchange={(e) => {
@@ -542,7 +542,7 @@
 						</div>
 						<div class="space-y-3">
 							<div class="flex items-center justify-between">
-								<h3 class="font-medium text-sm text-gray-600">{m.doraSecondaryContact()}</h3>
+								<h3 class="font-medium text-sm text-surface-600-400">{m.doraSecondaryContact()}</h3>
 								<select
 									class="select text-xs w-auto max-w-48"
 									onchange={(e) => {
@@ -634,7 +634,7 @@
 						<i class="fa-solid fa-tag"></i>{m.doraIncidentType()}
 					</h2>
 					<fieldset class="space-y-2">
-						<legend class="text-sm font-medium text-gray-700 mb-1"
+						<legend class="text-sm font-medium text-surface-700-300 mb-1"
 							>{m.incidentType()} — {m.incidentSubmission()}</legend
 						>
 						<div class="flex flex-wrap gap-3">
@@ -659,7 +659,7 @@
 
 					{#if hasOtherClassification}
 						<div>
-							<label class="text-sm font-medium text-gray-700" for="otherIncidentClassification"
+							<label class="text-sm font-medium text-surface-700-300" for="otherIncidentClassification"
 								>{m.otherInformation()}</label
 							>
 							<input
@@ -673,7 +673,7 @@
 
 					{#if isCyberIncident}
 						<fieldset class="space-y-2 mt-4">
-							<legend class="text-sm font-medium text-gray-700 mb-1"
+							<legend class="text-sm font-medium text-surface-700-300 mb-1"
 								>{safeTranslate('threatTechniques')}</legend
 							>
 							<div class="flex flex-wrap gap-3">
@@ -698,7 +698,7 @@
 
 						{#if hasOtherTechnique}
 							<div>
-								<label class="text-sm font-medium text-gray-700" for="otherThreatTechniques"
+								<label class="text-sm font-medium text-surface-700-300" for="otherThreatTechniques"
 									>{m.otherInformation()}</label
 								>
 								<input
@@ -711,7 +711,7 @@
 						{/if}
 
 						<div>
-							<label class="text-sm font-medium text-gray-700" for="ioc"
+							<label class="text-sm font-medium text-surface-700-300" for="ioc"
 								>{safeTranslate('indicatorsOfCompromise')}</label
 							>
 							<textarea
@@ -731,7 +731,7 @@
 						<i class="fa-solid fa-list-check"></i>{m.doraClassificationCriteria()}
 					</h2>
 					{#each classificationTypes as criterion, index}
-						<div class="border rounded-lg p-4 space-y-3 bg-gray-50">
+						<div class="border rounded-lg p-4 space-y-3 bg-surface-50-950">
 							<div class="flex justify-between items-center">
 								<select
 									bind:value={criterion.classificationCriterion}
@@ -753,7 +753,7 @@
 
 							{#if criterion.classificationCriterion === 'geographical_spread'}
 								<div>
-									<label class="text-sm font-medium text-gray-700"
+									<label class="text-sm font-medium text-surface-700-300"
 										>{safeTranslate('memberStatesImpactTypeDescription')}</label
 									>
 									<textarea
@@ -764,7 +764,7 @@
 								</div>
 							{:else if criterion.classificationCriterion === 'data_losses'}
 								<div>
-									<label class="text-sm font-medium text-gray-700"
+									<label class="text-sm font-medium text-surface-700-300"
 										>{safeTranslate('dataLossesDescription')}</label
 									>
 									<textarea
@@ -775,7 +775,7 @@
 								</div>
 							{:else if criterion.classificationCriterion === 'reputational_impact'}
 								<div>
-									<label class="text-sm font-medium text-gray-700"
+									<label class="text-sm font-medium text-surface-700-300"
 										>{safeTranslate('reputationalImpactDescription')}</label
 									>
 									<textarea
@@ -786,7 +786,7 @@
 								</div>
 							{:else if criterion.classificationCriterion === 'economic_impact'}
 								<div>
-									<label class="text-sm font-medium text-gray-700"
+									<label class="text-sm font-medium text-surface-700-300"
 										>{safeTranslate('economicImpactMaterialityThreshold')}</label
 									>
 									<input
@@ -815,7 +815,7 @@
 					</h2>
 
 					<fieldset class="space-y-2">
-						<legend class="text-sm font-medium text-gray-700 mb-1"
+						<legend class="text-sm font-medium text-surface-700-300 mb-1"
 							>{m.rootCauseHlClassification()}</legend
 						>
 						<div class="flex flex-wrap gap-3">
@@ -834,20 +834,20 @@
 					</fieldset>
 
 					<fieldset class="space-y-3">
-						<legend class="text-sm font-medium text-gray-700 mb-1"
+						<legend class="text-sm font-medium text-surface-700-300 mb-1"
 							>{m.rootCausesDetailedClassification()}</legend
 						>
 						{#each detailedGroups as [groupName, choices]}
-							<div class="border border-gray-200 rounded-lg overflow-hidden">
+							<div class="border border-surface-200-800 rounded-lg overflow-hidden">
 								<div
-									class="bg-gray-50 px-3 py-2 text-xs font-semibold text-gray-600 uppercase tracking-wide"
+									class="bg-surface-50-950 px-3 py-2 text-xs font-semibold text-surface-600-400 uppercase tracking-wide"
 								>
 									{groupName}
 								</div>
 								<div class="px-3 py-2 flex flex-wrap gap-2">
 									{#each choices as choice}
 										<label
-											class="flex items-center gap-1.5 text-xs bg-white border border-gray-200 px-2.5 py-1.5 rounded-md hover:bg-gray-50 transition-colors cursor-pointer"
+											class="flex items-center gap-1.5 text-xs bg-surface-50-950 border border-surface-200-800 px-2.5 py-1.5 rounded-md hover:bg-surface-50-950 transition-colors cursor-pointer"
 											class:!bg-indigo-50={rootCauseDetailed.includes(choice.value)}
 											class:!border-indigo-300={rootCauseDetailed.includes(choice.value)}
 										>
@@ -867,13 +867,13 @@
 					</fieldset>
 
 					<fieldset class="space-y-2">
-						<legend class="text-sm font-medium text-gray-700 mb-1"
+						<legend class="text-sm font-medium text-surface-700-300 mb-1"
 							>{m.rootCausesAdditionalClassification()}</legend
 						>
 						<div class="flex flex-wrap gap-2">
 							{#each allChoices.rootCauseAdditional as choice}
 								<label
-									class="flex items-center gap-1.5 text-xs bg-white border border-gray-200 px-2.5 py-1.5 rounded-md hover:bg-gray-50 transition-colors cursor-pointer"
+									class="flex items-center gap-1.5 text-xs bg-surface-50-950 border border-surface-200-800 px-2.5 py-1.5 rounded-md hover:bg-surface-50-950 transition-colors cursor-pointer"
 									class:!bg-indigo-50={rootCauseAdditional.includes(choice.value)}
 									class:!border-indigo-300={rootCauseAdditional.includes(choice.value)}
 								>
@@ -923,7 +923,7 @@
 					</label>
 
 					<div>
-						<label class="text-sm font-medium text-gray-700" for="criticalServicesAffected"
+						<label class="text-sm font-medium text-surface-700-300" for="criticalServicesAffected"
 							>{safeTranslate('criticalServicesAffected')}</label
 						>
 						<input
@@ -935,11 +935,11 @@
 					</div>
 
 					<!-- Service Impact -->
-					<div class="border rounded-lg p-4 space-y-3 bg-gray-50">
+					<div class="border rounded-lg p-4 space-y-3 bg-surface-50-950">
 						<h3 class="font-medium text-sm">{m.doraServiceImpact()}</h3>
 						<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 							<div>
-								<label class="text-sm text-gray-700" for="serviceDowntime"
+								<label class="text-sm text-surface-700-300" for="serviceDowntime"
 									>{safeTranslate('serviceDowntime')}</label
 								>
 								<input
@@ -951,7 +951,7 @@
 								/>
 							</div>
 							<div>
-								<label class="text-sm text-gray-700" for="serviceRestoration"
+								<label class="text-sm text-surface-700-300" for="serviceRestoration"
 									>{safeTranslate('serviceRestorationDateTime')}</label
 								>
 								<input
@@ -965,11 +965,11 @@
 					</div>
 
 					<!-- Affected Assets -->
-					<div class="border rounded-lg p-4 space-y-3 bg-gray-50">
+					<div class="border rounded-lg p-4 space-y-3 bg-surface-50-950">
 						<h3 class="font-medium text-sm">{m.doraAffectedAssets()}</h3>
 						<table class="w-full text-sm">
 							<thead>
-								<tr class="text-left text-xs text-gray-500">
+								<tr class="text-left text-xs text-surface-600-400">
 									<th class="py-1 pr-4"></th>
 									<th class="py-1 px-2">{m.number()}</th>
 									<th class="py-1 px-2">{m.percentage()}</th>
@@ -1004,7 +1004,7 @@
 						</table>
 						<div class="grid grid-cols-2 gap-4">
 							<div>
-								<label class="text-sm text-gray-700" for="txValue"
+								<label class="text-sm text-surface-700-300" for="txValue"
 									>{safeTranslate('valueOfAffectedTransactions')}</label
 								>
 								<input
@@ -1020,7 +1020,7 @@
 
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<div>
-							<label class="text-sm text-gray-700" for="affectedFunctionalAreas"
+							<label class="text-sm text-surface-700-300" for="affectedFunctionalAreas"
 								>{safeTranslate('affectedFunctionalAreas')}</label
 							>
 							<input
@@ -1031,7 +1031,7 @@
 							/>
 						</div>
 						<div>
-							<label class="text-sm text-gray-700" for="infraComponents"
+							<label class="text-sm text-surface-700-300" for="infraComponents"
 								>{safeTranslate('isAffectedInfrastructureComponents')}</label
 							>
 							<select
@@ -1049,7 +1049,7 @@
 
 					{#if impactAssessment.isAffectedInfrastructureComponents === 'yes'}
 						<div>
-							<label class="text-sm text-gray-700" for="infraDesc"
+							<label class="text-sm text-surface-700-300" for="infraDesc"
 								>{safeTranslate('affectedInfrastructureComponents')}</label
 							>
 							<textarea
@@ -1107,7 +1107,7 @@
 					</h2>
 
 					<fieldset class="space-y-2">
-						<legend class="text-sm font-medium text-gray-700 mb-1"
+						<legend class="text-sm font-medium text-surface-700-300 mb-1"
 							>{m.reportingToOtherAuthorities()}</legend
 						>
 						<div class="flex flex-wrap gap-3">
@@ -1157,7 +1157,7 @@
 
 			<!-- Sticky Footer -->
 			<div
-				class="sticky bottom-0 z-10 bg-white/95 backdrop-blur-sm border-t border-gray-200 px-6 py-3 shadow-[0_-4px_16px_rgba(0,0,0,0.06)]"
+				class="sticky bottom-0 z-10 bg-surface-50-950/95 backdrop-blur-sm border-t border-surface-200-800 px-6 py-3 shadow-[0_-4px_16px_rgba(0,0,0,0.06)]"
 			>
 				{#if isSubmitted}
 					<div class="flex items-center justify-between">

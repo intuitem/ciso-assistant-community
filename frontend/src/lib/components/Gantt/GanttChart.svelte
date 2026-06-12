@@ -521,7 +521,7 @@
 	<!-- Tooltip -->
 	{#if tooltip}
 		<div
-			class="fixed z-50 bg-white shadow-xl border border-surface-200 rounded-lg px-3 py-2 text-xs pointer-events-none max-w-xs"
+			class="fixed z-50 bg-surface-50-950 shadow-xl border border-surface-200 rounded-lg px-3 py-2 text-xs pointer-events-none max-w-xs"
 			style="left: {tooltip.x + 12}px; top: {tooltip.y - 10}px"
 		>
 			<div class="font-bold text-surface-800 mb-1">{tooltip.item.name}</div>

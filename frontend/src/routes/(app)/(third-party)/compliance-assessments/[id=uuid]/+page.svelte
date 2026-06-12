@@ -941,7 +941,7 @@
 								<Anchor
 									breadcrumbAction="push"
 									href={`${page.url.pathname}/table-mode`}
-									class="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 hover:bg-slate-100 hover:border-slate-200 transition-colors cursor-pointer"
+									class="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-surface-50-950 border border-surface-100-900 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-200-800 transition-colors cursor-pointer"
 									data-testid="table-mode-button"
 								>
 									<div
@@ -1091,7 +1091,7 @@
 									<Anchor
 										breadcrumbAction="push"
 										href={`${page.url.pathname}/advanced-analytics`}
-										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-surface-50-950 border border-surface-200-800 text-surface-700-300 hover:bg-surface-100-900 transition-colors cursor-pointer"
 										data-testid="advanced-analytics-button"
 									>
 										<div

@@ -330,7 +330,7 @@
 													{source_requirement_assessment.used_mapping_set?.name}
 												</a>
 											{:else}
-												<span class="text-gray-500">--</span>
+												<span class="text-surface-600-400">--</span>
 											{/if}
 										</p>
 										<p class="whitespace-pre-line py-1">

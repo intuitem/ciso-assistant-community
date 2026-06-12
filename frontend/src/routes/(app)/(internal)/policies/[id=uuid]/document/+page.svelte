@@ -716,7 +716,7 @@
 	}
 </script>
 
-<div class="flex flex-col h-full -m-8 bg-white min-h-screen">
+<div class="flex flex-col h-full -m-8 bg-surface-50-950 min-h-screen">
 	<!-- Sticky header bar -->
 	<div
 		class="flex items-center justify-between px-6 py-3 border-b border-surface-300 bg-surface-50"
@@ -750,7 +750,7 @@
 						{#if showLocalePicker}
 							<!-- svelte-ignore a11y_no_static_element_interactions -->
 							<div
-								class="absolute top-full left-0 mt-1 bg-white border border-surface-200 rounded-lg shadow-lg z-50 min-w-[180px] py-1"
+								class="absolute top-full left-0 mt-1 bg-surface-50-950 border border-surface-200 rounded-lg shadow-lg z-50 min-w-[180px] py-1"
 								onmouseleave={() => (showLocalePicker = false)}
 							>
 								{#each availableLocales as locale}

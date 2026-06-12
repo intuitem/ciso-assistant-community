@@ -92,7 +92,7 @@
 		{/if}
 
 		{#if page.data?.featureflags?.policy_documents && currentRevisionContent}
-			<div class="card bg-white shadow rounded-lg border mt-4">
+			<div class="card bg-surface-50-950 shadow rounded-lg border mt-4">
 				<div class="p-4 border-b flex items-center justify-between">
 					<div class="flex items-center space-x-3">
 						<h3 class="font-semibold text-lg">
@@ -102,11 +102,11 @@
 						<span
 							class="px-2 py-0.5 rounded-full text-xs font-medium {statusColors[
 								currentRevisionContent.status
-							] || 'bg-gray-100 text-gray-600'}"
+							] || 'bg-surface-100-900 text-surface-600-400'}"
 						>
 							{currentRevisionContent.status_display || currentRevisionContent.status}
 						</span>
-						<span class="text-sm text-gray-500">
+						<span class="text-sm text-surface-600-400">
 							v{currentRevisionContent.version_number}
 						</span>
 					</div>
@@ -122,7 +122,7 @@
 					<MarkdownRenderer content={currentRevisionContent.content} />
 				</div>
 				{#if currentRevisionContent.published_at}
-					<div class="px-4 py-2 border-t text-xs text-gray-400">
+					<div class="px-4 py-2 border-t text-xs text-surface-500">
 						{m.publishedAt()}:
 						{new Date(currentRevisionContent.published_at).toLocaleString(undefined, {
 							year: 'numeric',
@@ -140,9 +140,9 @@
 				{/if}
 			</div>
 		{:else if page.data?.featureflags?.policy_documents && policyDocument === null}
-			<div class="card bg-white shadow rounded-lg border mt-4 p-6 text-center">
+			<div class="card bg-surface-50-950 shadow rounded-lg border mt-4 p-6 text-center">
 				<i class="fa-solid fa-file-circle-plus text-4xl text-gray-300 mb-3"></i>
-				<p class="text-gray-500">{m.noDocumentCreatedYet()}</p>
+				<p class="text-surface-600-400">{m.noDocumentCreatedYet()}</p>
 			</div>
 		{/if}
 	{/snippet}

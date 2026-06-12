@@ -224,27 +224,27 @@
 </script>
 
 {#if loading}
-	<div class="bg-white p-6 shadow-sm rounded-lg">
+	<div class="bg-surface-50-950 p-6 shadow-sm rounded-lg">
 		<div class="animate-pulse space-y-4">
-			<div class="h-5 bg-gray-200 rounded w-1/4"></div>
+			<div class="h-5 bg-surface-200-800 rounded w-1/4"></div>
 			<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-				<div class="h-20 bg-gray-100 rounded-lg"></div>
-				<div class="h-20 bg-gray-100 rounded-lg"></div>
-				<div class="h-20 bg-gray-100 rounded-lg"></div>
+				<div class="h-20 bg-surface-100-900 rounded-lg"></div>
+				<div class="h-20 bg-surface-100-900 rounded-lg"></div>
+				<div class="h-20 bg-surface-100-900 rounded-lg"></div>
 			</div>
 			<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-				<div class="h-64 bg-gray-100 rounded-lg"></div>
-				<div class="h-64 bg-gray-100 rounded-lg"></div>
+				<div class="h-64 bg-surface-100-900 rounded-lg"></div>
+				<div class="h-64 bg-surface-100-900 rounded-lg"></div>
 			</div>
 		</div>
 	</div>
 {:else if error}
-	<div class="bg-white p-6 shadow-sm rounded-lg">
+	<div class="bg-surface-50-950 p-6 shadow-sm rounded-lg">
 		<p class="text-sm text-rose-600">{m.errorLoadingData()}</p>
 	</div>
 {:else if !hasAnyData}
-	<div class="bg-white p-6 shadow-sm rounded-lg">
-		<p class="text-sm text-gray-500 italic">{m.noAnalyticsData()}</p>
+	<div class="bg-surface-50-950 p-6 shadow-sm rounded-lg">
+		<p class="text-sm text-surface-600-400 italic">{m.noAnalyticsData()}</p>
 	</div>
 {:else if data}
 	<div class="space-y-4">
@@ -263,8 +263,8 @@
 
 		<!-- ETA distribution -->
 		{#if etaBars.labels.length > 0}
-			<div class="bg-white rounded-lg shadow-sm p-4">
-				<h3 class="text-lg font-semibold text-gray-900 mb-2">{m.etaDistribution()}</h3>
+			<div class="bg-surface-50-950 rounded-lg shadow-sm p-4">
+				<h3 class="text-lg font-semibold text-surface-900-100 mb-2">{m.etaDistribution()}</h3>
 				<div class="h-64">
 					<BarChart
 						name="appliedControlsAnalyticsEta"
@@ -279,8 +279,8 @@
 		<!-- Dimension donuts -->
 		<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
 			{#if statusValues.length > 0}
-				<div class="bg-white rounded-lg shadow-sm p-4">
-					<h3 class="text-lg font-semibold text-gray-900 mb-2">{m.controlsByStatus()}</h3>
+				<div class="bg-surface-50-950 rounded-lg shadow-sm p-4">
+					<h3 class="text-lg font-semibold text-surface-900-100 mb-2">{m.controlsByStatus()}</h3>
 					<div class="h-72">
 						<DonutChart
 							name="appliedControlsAnalyticsStatus"
@@ -292,8 +292,8 @@
 				</div>
 			{/if}
 			{#if priorityValues.length > 0}
-				<div class="bg-white rounded-lg shadow-sm p-4">
-					<h3 class="text-lg font-semibold text-gray-900 mb-2">{m.controlsByPriority()}</h3>
+				<div class="bg-surface-50-950 rounded-lg shadow-sm p-4">
+					<h3 class="text-lg font-semibold text-surface-900-100 mb-2">{m.controlsByPriority()}</h3>
 					<div class="h-72">
 						<DonutChart
 							name="appliedControlsAnalyticsPriority"
@@ -305,8 +305,8 @@
 				</div>
 			{/if}
 			{#if categoryValues.length > 0}
-				<div class="bg-white rounded-lg shadow-sm p-4">
-					<h3 class="text-lg font-semibold text-gray-900 mb-2">{m.controlsByCategory()}</h3>
+				<div class="bg-surface-50-950 rounded-lg shadow-sm p-4">
+					<h3 class="text-lg font-semibold text-surface-900-100 mb-2">{m.controlsByCategory()}</h3>
 					<div class="h-72">
 						<DonutChart
 							name="appliedControlsAnalyticsCategory"
@@ -318,8 +318,8 @@
 				</div>
 			{/if}
 			{#if csfValues.length > 0}
-				<div class="bg-white rounded-lg shadow-sm p-4">
-					<h3 class="text-lg font-semibold text-gray-900 mb-2">{m.controlsByCsfFunction()}</h3>
+				<div class="bg-surface-50-950 rounded-lg shadow-sm p-4">
+					<h3 class="text-lg font-semibold text-surface-900-100 mb-2">{m.controlsByCsfFunction()}</h3>
 					<div class="h-72">
 						<DonutChart
 							name="appliedControlsAnalyticsCsf"
@@ -335,9 +335,9 @@
 		<!-- Top owners + top folders -->
 		<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
 			{#if data.top_owners.length > 0}
-				<div class="bg-white rounded-lg shadow-sm p-4">
-					<h3 class="text-lg font-semibold text-gray-900 mb-2">{m.topOwners()}</h3>
-					<div class="flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-600 mb-3">
+				<div class="bg-surface-50-950 rounded-lg shadow-sm p-4">
+					<h3 class="text-lg font-semibold text-surface-900-100 mb-2">{m.topOwners()}</h3>
+					<div class="flex flex-wrap gap-x-3 gap-y-1 text-xs text-surface-600-400 mb-3">
 						{#each data.by_status as s (s.key ?? s.status)}
 							<div class="flex items-center gap-1.5">
 								<span
@@ -350,7 +350,7 @@
 					</div>
 					<table class="w-full text-sm">
 						<thead>
-							<tr class="text-left text-xs text-gray-500 border-b">
+							<tr class="text-left text-xs text-surface-600-400 border-b">
 								<th class="py-1">{m.owner()}</th>
 								<th class="py-1">{m.controlsByStatus()}</th>
 								<th class="py-1 text-right">{m.count()}</th>
@@ -364,7 +364,7 @@
 								<tr class="border-b last:border-b-0">
 									<td class="py-1.5">{row.label}</td>
 									<td class="py-1.5 w-1/3">
-										<div class="flex h-2 w-full rounded bg-gray-100">
+										<div class="flex h-2 w-full rounded bg-surface-100-900">
 											{#each row.status_breakdown as seg (seg.key)}
 												{@const pct = (seg.count / row.count) * 100}
 												{@const color = statusColorByKey[seg.key] ?? '#94a3b8'}
@@ -384,7 +384,7 @@
 									</td>
 									<td class="py-1.5 text-right tabular-nums">{row.count}</td>
 									{#if showBudget && data.count_with_cost > 0}
-										<td class="py-1.5 text-right tabular-nums text-gray-600">
+										<td class="py-1.5 text-right tabular-nums text-surface-600-400">
 											{row.total_display}
 										</td>
 									{/if}
@@ -395,11 +395,11 @@
 				</div>
 			{/if}
 			{#if data.top_folders.length > 0}
-				<div class="bg-white rounded-lg shadow-sm p-4">
-					<h3 class="text-lg font-semibold text-gray-900 mb-2">{m.topDomains()}</h3>
+				<div class="bg-surface-50-950 rounded-lg shadow-sm p-4">
+					<h3 class="text-lg font-semibold text-surface-900-100 mb-2">{m.topDomains()}</h3>
 					<table class="w-full text-sm">
 						<thead>
-							<tr class="text-left text-xs text-gray-500 border-b">
+							<tr class="text-left text-xs text-surface-600-400 border-b">
 								<th class="py-1">{m.folder()}</th>
 								<th class="py-1 text-right">{m.count()}</th>
 								{#if showBudget && data.count_with_cost > 0}
@@ -413,7 +413,7 @@
 									<td class="py-1.5">{row.label}</td>
 									<td class="py-1.5 text-right tabular-nums">{row.count}</td>
 									{#if showBudget && data.count_with_cost > 0}
-										<td class="py-1.5 text-right tabular-nums text-gray-600">
+										<td class="py-1.5 text-right tabular-nums text-surface-600-400">
 											{row.total_display}
 										</td>
 									{/if}

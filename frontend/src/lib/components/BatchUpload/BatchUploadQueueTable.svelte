@@ -42,7 +42,7 @@
 {#if entries.length > 0}
 	<div class="border rounded-lg overflow-hidden">
 		<table class="w-full text-sm">
-			<thead class="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
+			<thead class="bg-surface-50-950 text-left text-xs uppercase tracking-wide text-surface-600-400">
 				<tr>
 					<th class="px-3 py-2 font-medium">{m.pathOrName()}</th>
 					<th class="px-3 py-2 font-medium">{m.size()}</th>
@@ -62,10 +62,10 @@
 								<div class="text-xs text-amber-700">→ {entry.renamedTo}</div>
 							{/if}
 						</td>
-						<td class="px-3 py-2 text-gray-600 whitespace-nowrap">{fmtSize(entry.size)}</td>
+						<td class="px-3 py-2 text-surface-600-400 whitespace-nowrap">{fmtSize(entry.size)}</td>
 						<td class="px-3 py-2">
 							{#if entry.status === 'pending'}
-								<span class="text-gray-500"
+								<span class="text-surface-600-400"
 									><i class="fa-regular fa-clock mr-1"></i>{m.pending()}</span
 								>
 							{:else if entry.status === 'uploading'}
@@ -79,7 +79,7 @@
 								</span>
 							{/if}
 						</td>
-						<td class="px-3 py-2 text-xs text-gray-600">
+						<td class="px-3 py-2 text-xs text-surface-600-400">
 							{#if entry.outcome === 'error' && entry.message}
 								<span class="text-red-700">{entry.message}</span>
 							{:else if entry.message}
@@ -92,7 +92,7 @@
 									class="text-indigo-600 hover:underline"
 								>
 									{m.evidence()}
-									{#if entry.version}<span class="text-gray-500">v{entry.version}</span>{/if}
+									{#if entry.version}<span class="text-surface-600-400">v{entry.version}</span>{/if}
 								</a>
 							{/if}
 						</td>
@@ -100,7 +100,7 @@
 							{#if onRemove && entry.status !== 'uploading'}
 								<button
 									type="button"
-									class="text-gray-400 hover:text-red-600"
+									class="text-surface-500 hover:text-red-600"
 									onclick={() => onRemove?.(entry.id)}
 									{disabled}
 									aria-label={m.remove()}

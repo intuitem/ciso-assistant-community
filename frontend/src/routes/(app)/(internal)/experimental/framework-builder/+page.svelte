@@ -100,7 +100,7 @@
 						{#each drafts as framework}
 							<tr class="bg-primary-50">
 								<td class="font-medium">{framework.name}</td>
-								<td class="text-sm text-gray-500 max-w-48 truncate">
+								<td class="text-sm text-surface-600-400 max-w-48 truncate">
 									{framework.description || '—'}
 								</td>
 								<td>
@@ -155,7 +155,7 @@
 						{#each frameworks as framework}
 							<tr>
 								<td class="font-medium">{framework.name}</td>
-								<td class="text-sm text-gray-500 max-w-48 truncate">
+								<td class="text-sm text-surface-600-400 max-w-48 truncate">
 									{framework.description || '—'}
 								</td>
 								<td class="text-sm">{framework.provider || '—'}</td>
@@ -174,7 +174,7 @@
 										</span>
 									{/if}
 									{#if framework.editing_version > 1}
-										<span class="text-xs text-gray-400 ml-1">
+										<span class="text-xs text-surface-500 ml-1">
 											v{framework.editing_version}
 										</span>
 									{/if}
@@ -194,7 +194,7 @@
 				</table>
 			</div>
 		{:else}
-			<p class="text-sm text-gray-400 py-4 text-center">
+			<p class="text-sm text-surface-500 py-4 text-center">
 				No frameworks yet.
 				<a href="/loaded-libraries" class="text-primary-500 hover:underline"
 					>Load some from the library.</a

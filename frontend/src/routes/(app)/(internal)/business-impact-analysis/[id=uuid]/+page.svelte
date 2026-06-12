@@ -75,7 +75,7 @@
 				onOpenChange={(e) => (exportPopupOpen = e.open)}
 				positioning={{ placement: 'bottom' }}
 				triggerBase="btn preset-filled-primary-500 w-full"
-				contentBase="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
+				contentBase="card whitespace-nowrap bg-surface-50-950 py-2 w-fit shadow-lg space-y-1"
 				zIndex="1000"
 			>
 				{#snippet trigger()}
@@ -87,7 +87,7 @@
 					<div>
 						<a
 							href="/business-impact-analysis/{data.data.id}/export/xlsx"
-							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asXLSX()}</a
+							class="block px-4 py-2 text-sm text-surface-800-200 hover:bg-surface-200-800">... {m.asXLSX()}</a
 						>
 					</div>
 				{/snippet}

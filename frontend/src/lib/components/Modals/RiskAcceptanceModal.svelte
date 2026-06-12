@@ -80,7 +80,7 @@
 				<footer class="modal-footer {parent.regionFooter}">
 					<button
 						type="button"
-						class="btn bg-gray-100 shadow-sm {parent.buttonNeutral}"
+						class="btn bg-surface-100-900 shadow-sm {parent.buttonNeutral}"
 						onclick={parent.onClose}
 					>
 						{m.cancel()}

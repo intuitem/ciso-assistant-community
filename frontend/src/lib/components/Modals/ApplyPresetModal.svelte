@@ -100,7 +100,7 @@
 						class="radio"
 						disabled={domains.length === 0}
 					/>
-					<span class="text-sm font-medium" class:text-gray-400={domains.length === 0}>
+					<span class="text-sm font-medium" class:text-surface-500={domains.length === 0}>
 						{m.useExistingDomain()}
 					</span>
 				</label>
@@ -140,7 +140,7 @@
 						<i class="fa-solid fa-cubes text-indigo-600 text-xs"></i>
 						{m.createUnderlyingObjects()}
 					</span>
-					<p class="text-xs text-gray-500 mt-0.5">{m.createUnderlyingObjectsHelp()}</p>
+					<p class="text-xs text-surface-600-400 mt-0.5">{m.createUnderlyingObjectsHelp()}</p>
 				</div>
 			</label>
 
@@ -148,7 +148,7 @@
 			<label
 				class="flex items-start gap-3 p-3 rounded-lg border {canChangeSettings
 					? 'cursor-pointer bg-amber-50 border-amber-200'
-					: 'bg-gray-100 border-gray-200 opacity-60'}"
+					: 'bg-surface-100-900 border-surface-200-800 opacity-60'}"
 			>
 				<input
 					type="checkbox"
@@ -161,7 +161,7 @@
 						<i class="fa-solid fa-sliders text-amber-600 text-xs"></i>
 						{m.applyFeatureFlags()}
 					</span>
-					<p class="text-xs text-gray-500 mt-0.5">{m.applyFeatureFlagsHelp()}</p>
+					<p class="text-xs text-surface-600-400 mt-0.5">{m.applyFeatureFlagsHelp()}</p>
 					{#if !canChangeSettings}
 						<p class="text-xs text-amber-600 mt-1">
 							<i class="fa-solid fa-lock text-[10px] mr-1"></i>

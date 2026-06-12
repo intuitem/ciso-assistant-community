@@ -159,7 +159,7 @@
 			<div class="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-100">
 				<i class="fa-solid fa-route text-indigo-600 text-sm"></i>
 			</div>
-			<h2 class="text-lg font-semibold text-gray-800">{m.recentlyActiveJourneys()}</h2>
+			<h2 class="text-lg font-semibold text-surface-800-200">{m.recentlyActiveJourneys()}</h2>
 			{#if data.journeys.length > 0}
 				<span
 					class="ml-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-100 text-xs font-semibold text-indigo-700"
@@ -177,11 +177,11 @@
 
 		{#if data.journeys.length === 0}
 			<div
-				class="relative overflow-hidden rounded-xl border border-dashed border-gray-300 bg-white/60 p-10 text-center"
+				class="relative overflow-hidden rounded-xl border border-dashed border-surface-300-700 bg-surface-50-950/60 p-10 text-center"
 			>
 				<div class="relative z-10 flex flex-col items-center gap-2">
 					<i class="fa-solid fa-route text-3xl text-gray-300"></i>
-					<p class="text-sm text-gray-400">{m.noActiveJourneys()}</p>
+					<p class="text-sm text-surface-500">{m.noActiveJourneys()}</p>
 				</div>
 			</div>
 		{:else}
@@ -193,11 +193,11 @@
 						href="/journeys/{journey.id}"
 						breadcrumbAction="push"
 						label={journey.name}
-						class="group relative flex flex-col rounded-xl border border-gray-200 bg-white p-5 shadow-sm
+						class="group relative flex flex-col rounded-xl border border-surface-200-800 bg-surface-50-950 p-5 shadow-sm
 							hover:shadow-md hover:border-indigo-200 transition-all duration-200"
 					>
 						<!-- Progress accent bar at top -->
-						<div class="absolute top-0 left-0 right-0 h-1 rounded-t-xl bg-gray-100 overflow-hidden">
+						<div class="absolute top-0 left-0 right-0 h-1 rounded-t-xl bg-surface-100-900 overflow-hidden">
 							<div
 								class="h-full rounded-t-xl transition-all duration-500 ease-out"
 								class:bg-indigo-500={progress < 100}
@@ -210,7 +210,7 @@
 							<div class="flex-1 min-w-0">
 								<div class="flex items-center gap-2 mb-1">
 									<h3
-										class="font-semibold text-gray-800 truncate group-hover:text-indigo-700 transition-colors"
+										class="font-semibold text-surface-800-200 truncate group-hover:text-indigo-700 transition-colors"
 									>
 										{journey.name}
 									</h3>
@@ -232,7 +232,7 @@
 									</span>
 								{/if}
 								{#if journey.description}
-									<p class="text-sm text-gray-400 line-clamp-1">{journey.description}</p>
+									<p class="text-sm text-surface-500 line-clamp-1">{journey.description}</p>
 								{/if}
 							</div>
 
@@ -273,8 +273,8 @@
 						</div>
 
 						<!-- Step summary -->
-						<div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
-							<span class="text-xs text-gray-400">
+						<div class="flex items-center justify-between mt-3 pt-3 border-t border-surface-100-900">
+							<span class="text-xs text-surface-500">
 								{m.stepsCompleted({
 									completed: String(counts.completed),
 									total: String(counts.total)
@@ -305,11 +305,11 @@
 				<div class="flex items-center justify-center w-8 h-8 rounded-lg bg-violet-100">
 					<i class="fa-solid fa-box-open text-violet-600 text-sm"></i>
 				</div>
-				<h2 class="text-lg font-semibold text-gray-800" data-testid="available-templates-heading">
+				<h2 class="text-lg font-semibold text-surface-800-200" data-testid="available-templates-heading">
 					{m.availablePresets()}
 				</h2>
 				<i
-					class="fa-solid fa-chevron-down text-xs text-gray-400 transition-transform duration-200 {presetsCollapsed
+					class="fa-solid fa-chevron-down text-xs text-surface-500 transition-transform duration-200 {presetsCollapsed
 						? '-rotate-90'
 						: ''}"
 				></i>
@@ -322,7 +322,7 @@
 						class="px-3 py-1 rounded-full text-xs font-medium transition-all duration-150 cursor-pointer
 							{activeFilter === 'all'
 							? 'bg-gray-800 text-white shadow-sm'
-							: 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300 hover:text-gray-700'}"
+							: 'bg-surface-50-950 text-surface-600-400 border border-surface-200-800 hover:border-surface-300-700 hover:text-surface-700-300'}"
 						onclick={() => (activeFilter = 'all')}
 					>
 						{m.showAll()}
@@ -332,7 +332,7 @@
 							class="px-3 py-1 rounded-full text-xs font-medium transition-all duration-150 cursor-pointer
 								{activeFilter === region
 								? 'bg-gray-800 text-white shadow-sm'
-								: 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300 hover:text-gray-700'}"
+								: 'bg-surface-50-950 text-surface-600-400 border border-surface-200-800 hover:border-surface-300-700 hover:text-surface-700-300'}"
 							onclick={() => (activeFilter = region)}
 							data-testid="filter-{region}"
 						>
@@ -347,20 +347,20 @@
 		{#if !presetsCollapsed}
 			{#if data.presets.length === 0}
 				<div
-					class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 bg-white/60 p-10 text-center"
+					class="flex flex-col items-center justify-center rounded-xl border border-dashed border-surface-300-700 bg-surface-50-950/60 p-10 text-center"
 				>
 					<i class="fa-solid fa-box-open text-3xl text-gray-300 mb-2"></i>
-					<p class="text-sm text-gray-400">{m.noPresetsAvailable()}</p>
+					<p class="text-sm text-surface-500">{m.noPresetsAvailable()}</p>
 				</div>
 			{:else}
 				<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
 					{#each filteredPresets as preset (preset.id)}
 						{@const isExpanded = expandedPresetId === preset.id}
 						<div
-							class="group flex flex-col rounded-xl border bg-white shadow-sm transition-all duration-200
+							class="group flex flex-col rounded-xl border bg-surface-50-950 shadow-sm transition-all duration-200
 							{isExpanded
 								? 'border-violet-300 shadow-md ring-1 ring-violet-100'
-								: 'border-gray-200 hover:shadow-md hover:border-gray-300'}"
+								: 'border-surface-200-800 hover:shadow-md hover:border-surface-300-700'}"
 							data-testid="preset-card-{preset.id}"
 						>
 							<!-- Card header — always visible -->
@@ -370,13 +370,13 @@
 							>
 								<div class="flex-1 min-w-0">
 									<h3
-										class="font-semibold text-[15px] text-gray-800 leading-tight"
+										class="font-semibold text-[15px] text-surface-800-200 leading-tight"
 										data-testid="preset-name-{preset.id}"
 									>
 										{preset.name}
 									</h3>
 									{#if preset.description}
-										<p class="text-sm text-gray-400 mt-1" class:line-clamp-2={!isExpanded}>
+										<p class="text-sm text-surface-500 mt-1" class:line-clamp-2={!isExpanded}>
 											{preset.description}
 										</p>
 									{/if}
@@ -393,7 +393,7 @@
 									{#each getProfileTags(preset.profile) as tag}
 										{@const flag = REGION_FLAGS[tag]}
 										<span
-											class="inline-flex items-center gap-1 rounded-full bg-gray-50 border border-gray-100 px-2 py-0.5 text-[11px] text-gray-500"
+											class="inline-flex items-center gap-1 rounded-full bg-surface-50-950 border border-surface-100-900 px-2 py-0.5 text-[11px] text-surface-600-400"
 										>
 											{#if flag}{flag}{/if}
 											{tag}
@@ -404,13 +404,13 @@
 
 							<!-- Expanded detail -->
 							{#if isExpanded && preset.scaffolded_objects?.length}
-								<div class="px-4 pb-3 border-t border-gray-100 pt-3">
+								<div class="px-4 pb-3 border-t border-surface-100-900 pt-3">
 									<div class="grid grid-cols-2 gap-x-4 gap-y-1.5">
 										{#each preset.scaffolded_objects as obj}
 											{@const meta = OBJECT_TYPE_META[obj.type]}
 											{#if meta}
-												<div class="flex items-center gap-1.5 text-xs text-gray-500">
-													<i class="fa-solid {meta.icon} w-3.5 text-center text-gray-400"></i>
+												<div class="flex items-center gap-1.5 text-xs text-surface-600-400">
+													<i class="fa-solid {meta.icon} w-3.5 text-center text-surface-500"></i>
 													<span
 														>{obj.count}
 														{meta.label()}{obj.count > 1 ? 's' : ''}</span
@@ -443,7 +443,7 @@
 				</div>
 
 				{#if filteredPresets.length === 0}
-					<div class="flex flex-col items-center py-10 text-gray-400">
+					<div class="flex flex-col items-center py-10 text-surface-500">
 						<i class="fa-solid fa-filter-circle-xmark text-2xl mb-2"></i>
 						<p class="text-sm">{m.noMatchingPresets()}</p>
 					</div>

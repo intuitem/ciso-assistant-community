@@ -41,7 +41,7 @@
 
 {#if summary}
 	<div class="space-y-2">
-		<div class="text-sm text-gray-600">{m.processedNFiles({ count: summary.total })}</div>
+		<div class="text-sm text-surface-600-400">{m.processedNFiles({ count: summary.total })}</div>
 		<div class="grid grid-cols-2 md:grid-cols-4 gap-2">
 			{#each cells as cell}
 				{@const count = summary[cell.key as keyof BatchSummary] ?? 0}

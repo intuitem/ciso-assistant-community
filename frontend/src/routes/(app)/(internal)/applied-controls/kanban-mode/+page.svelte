@@ -606,14 +606,14 @@
 																	<div class="flex flex-wrap gap-1">
 																		{#if control.csf_function}
 																			<span
-																				class="px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px]"
+																				class="px-1.5 py-0.5 bg-surface-100-900 text-surface-600-400 rounded text-[10px]"
 																			>
 																				{control.csf_function}
 																			</span>
 																		{/if}
 																		{#if control.category}
 																			<span
-																				class="px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px]"
+																				class="px-1.5 py-0.5 bg-surface-100-900 text-surface-600-400 rounded text-[10px]"
 																			>
 																				{control.category}
 																			</span>

@@ -114,7 +114,7 @@
 		{#if displayedEndpoint}
 			<div class="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-6">
 				{#if allowMultiple}
-					<div class="card bg-white shadow-lg overflow-hidden">
+					<div class="card bg-surface-50-950 shadow-lg overflow-hidden">
 						{#each data.webhookEndpoints as endpoint, i}
 							{#if i > 0}
 								<hr class="border-surface-200" />
@@ -129,7 +129,7 @@
 									? 'bg-surface-50 border-l-2 border-primary-500'
 									: ''}"
 							>
-								<i class="fa-solid fa-globe text-xs text-gray-400"></i>
+								<i class="fa-solid fa-globe text-xs text-surface-500"></i>
 								<span
 									class="flex-1 truncate {JSON.stringify(displayedEndpoint) ===
 									JSON.stringify(endpoint)
@@ -145,7 +145,7 @@
 						{/each}
 					</div>
 				{/if}
-				<div class="card bg-white shadow-lg lg:col-span-2">
+				<div class="card bg-surface-50-950 shadow-lg lg:col-span-2">
 					<header class="flex items-center justify-between p-4 border-b border-surface-200">
 						<div class="flex items-center gap-2">
 							<h4 class="h4 font-semibold">
@@ -158,7 +158,7 @@
 					</header>
 					<div class="p-4 flex flex-col gap-4">
 						<div class="flex items-center gap-2 text-sm">
-							<i class="fa-solid fa-link text-xs text-gray-400"></i>
+							<i class="fa-solid fa-link text-xs text-surface-500"></i>
 							<a class="anchor truncate" href={displayedEndpoint.url}>
 								{displayedEndpoint.url}
 							</a>

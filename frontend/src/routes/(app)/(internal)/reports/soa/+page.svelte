@@ -122,32 +122,32 @@
 <div class="space-y-6 max-w-4xl mx-auto">
 	<!-- Header -->
 	<div class="flex items-center gap-3">
-		<a href="/reports" class="text-gray-500 hover:text-gray-700 transition-colors">
+		<a href="/reports" class="text-surface-600-400 hover:text-surface-700-300 transition-colors">
 			<i class="fas fa-arrow-left text-lg"></i>
 		</a>
 		<div>
-			<h1 class="text-2xl font-bold text-gray-900">{m.statementOfApplicability()}</h1>
-			<p class="text-sm text-gray-600 mt-1">{m.soaDescription()}</p>
+			<h1 class="text-2xl font-bold text-surface-900-100">{m.statementOfApplicability()}</h1>
+			<p class="text-sm text-surface-600-400 mt-1">{m.soaDescription()}</p>
 		</div>
 	</div>
 
 	<!-- Step 1: Select Compliance Assessment -->
-	<div class="bg-white card border border-gray-200 p-6">
+	<div class="bg-surface-50-950 card border border-surface-200-800 p-6">
 		<div class="flex items-center gap-3 mb-4">
 			<div
 				class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-semibold text-sm"
 			>
 				1
 			</div>
-			<h2 class="text-lg font-semibold text-gray-900">{m.soaSelectCompliance()}</h2>
+			<h2 class="text-lg font-semibold text-surface-900-100">{m.soaSelectCompliance()}</h2>
 		</div>
 
 		{#if data.complianceAssessments.length === 0}
-			<p class="text-gray-500 italic">{m.soaNoComplianceAssessments()}</p>
+			<p class="text-surface-600-400 italic">{m.soaNoComplianceAssessments()}</p>
 		{:else}
 			<select
 				bind:value={selectedComplianceAssessment}
-				class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+				class="w-full px-3 py-2 border border-surface-300-700 rounded-lg bg-surface-50-950 text-surface-900-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 			>
 				<option value="" disabled>{m.soaSelectCompliance()}</option>
 				{#each data.complianceAssessments as ca}
@@ -190,7 +190,7 @@
 					{/if}
 					{#if selectedComplianceData.status}
 						<span
-							class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-50 text-gray-700 border border-gray-200"
+							class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-surface-50-950 text-surface-700-300 border border-surface-200-800"
 						>
 							<i class="fas fa-info-circle mr-1.5"></i>
 							{translateStatus(selectedComplianceData.status)}
@@ -201,8 +201,8 @@
 
 			<!-- Implementation Group Toggles -->
 			{#if implementationGroups.length > 1}
-				<div class="mt-4 pt-4 border-t border-gray-100">
-					<label class="block text-sm font-medium text-gray-700 mb-2">
+				<div class="mt-4 pt-4 border-t border-surface-100-900">
+					<label class="block text-sm font-medium text-surface-700-300 mb-2">
 						{m.implementationGroups()}
 					</label>
 					<div class="flex flex-wrap gap-2">
@@ -214,7 +214,7 @@
 								class="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors
 									{isSelected
 									? 'bg-blue-600 text-white border-blue-600'
-									: 'bg-white text-gray-400 border-gray-300 hover:border-gray-400 line-through'}"
+									: 'bg-surface-50-950 text-surface-500 border-surface-300-700 hover:border-gray-400 line-through'}"
 							>
 								{group.name}
 							</button>
@@ -226,23 +226,23 @@
 	</div>
 
 	<!-- Step 2: Select Risk Assessment(s) -->
-	<div class="bg-white card border border-gray-200 p-6">
+	<div class="bg-surface-50-950 card border border-surface-200-800 p-6">
 		<div class="flex items-center gap-3 mb-4">
 			<div
-				class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center font-semibold text-sm"
+				class="w-8 h-8 rounded-full bg-surface-100-900 text-surface-600-400 flex items-center justify-center font-semibold text-sm"
 			>
 				2
 			</div>
 			<div>
-				<h2 class="text-lg font-semibold text-gray-900">{m.soaSelectRisk()}</h2>
-				<p class="text-xs text-gray-500 mt-0.5">
+				<h2 class="text-lg font-semibold text-surface-900-100">{m.soaSelectRisk()}</h2>
+				<p class="text-xs text-surface-600-400 mt-0.5">
 					{m.soaSelectRiskDescription()}
 				</p>
 			</div>
 		</div>
 
 		{#if data.riskAssessments.length === 0}
-			<p class="text-gray-500 italic">{m.soaNoRiskAssessments()}</p>
+			<p class="text-surface-600-400 italic">{m.soaNoRiskAssessments()}</p>
 		{:else}
 			<div class="space-y-2 max-h-64 overflow-y-auto">
 				{#each data.riskAssessments as ra}
@@ -250,22 +250,22 @@
 						class="flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer
 							{selectedRiskAssessments.includes(ra.id)
 							? 'border-red-300 bg-red-50'
-							: 'border-gray-200 hover:border-gray-300 bg-white'}"
+							: 'border-surface-200-800 hover:border-surface-300-700 bg-surface-50-950'}"
 					>
 						<input
 							type="checkbox"
 							checked={selectedRiskAssessments.includes(ra.id)}
 							onchange={() => toggleRiskAssessment(ra.id)}
-							class="rounded border-gray-300 text-red-600 focus:ring-red-500"
+							class="rounded border-surface-300-700 text-red-600 focus:ring-red-500"
 						/>
 						<div class="flex-1 min-w-0">
-							<span class="text-sm font-medium text-gray-900">{ra.name}</span>
+							<span class="text-sm font-medium text-surface-900-100">{ra.name}</span>
 							{#if ra.risk_matrix?.str}
-								<span class="text-xs text-gray-500 ml-2">({ra.risk_matrix.str})</span>
+								<span class="text-xs text-surface-600-400 ml-2">({ra.risk_matrix.str})</span>
 							{/if}
 						</div>
 						{#if ra.perimeter?.str}
-							<span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded flex-shrink-0">
+							<span class="text-xs text-surface-600-400 bg-surface-100-900 px-2 py-0.5 rounded flex-shrink-0">
 								{ra.perimeter.str}
 							</span>
 						{/if}
@@ -283,7 +283,7 @@
 			class="px-6 py-2.5 rounded-lg font-medium text-white transition-all
 				{selectedComplianceAssessment
 				? 'bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow'
-				: 'bg-gray-300 cursor-not-allowed'}"
+				: 'bg-surface-300-700 cursor-not-allowed'}"
 		>
 			<i class="fas fa-table mr-2"></i>
 			{m.generate()}

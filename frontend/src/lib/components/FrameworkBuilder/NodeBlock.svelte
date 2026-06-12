@@ -290,15 +290,15 @@
 	}}
 >
 	<div
-		class="bg-white rounded-lg shadow-sm border overflow-hidden transition-shadow
+		class="bg-surface-50-950 rounded-lg shadow-sm border overflow-hidden transition-shadow
 		{isFocused ? 'ring-2 ring-blue-400 ring-offset-1' : ''}
-		{isSplash ? 'border-purple-200' : 'border-gray-200'}
+		{isSplash ? 'border-purple-200' : 'border-surface-200-800'}
 		{node.depth > 0 ? 'border-l-4 ' + (isSplash ? 'border-l-purple-400' : depthColor) : ''}"
 	>
 		<!-- Parent breadcrumb for deep nesting -->
 		{#if node.depth >= 3 && node.node.parent_urn}
 			<div class="px-4 pt-2 pb-0">
-				<span class="text-[10px] text-gray-400">
+				<span class="text-[10px] text-surface-500">
 					<i class="fa-solid fa-turn-up fa-rotate-90 mr-1"></i>{m.builderNestedUnder({
 						parent: node.node.parent_urn.split(':').pop()?.slice(0, 12) ?? ''
 					})}
@@ -310,12 +310,12 @@
 		<div
 			class="px-4 pt-2 text-[11px] {isSplash
 				? 'text-purple-400'
-				: 'text-gray-400'} flex items-center"
+				: 'text-surface-500'} flex items-center"
 		>
 			{#if hasChildren}
 				<button
 					type="button"
-					class="inline-flex items-center justify-center w-4 h-4 text-gray-400 hover:text-gray-600 transition-colors mr-1"
+					class="inline-flex items-center justify-center w-4 h-4 text-surface-500 hover:text-surface-600-400 transition-colors mr-1"
 					onclick={() => cardCollapsed.toggle(node.node.id)}
 					title={collapsed ? m.builderExpandChildren() : m.builderCollapseChildren()}
 					aria-label={collapsed ? m.builderExpandChildren() : m.builderCollapseChildren()}
@@ -333,9 +333,9 @@
 		<div
 			class="px-4 py-3 {isSplash
 				? 'border-b border-purple-100'
-				: 'border-b border-gray-100'} flex items-start gap-3 group"
+				: 'border-b border-surface-100-900'} flex items-start gap-3 group"
 		>
-			<span class="cursor-grab text-gray-300 group-hover:text-gray-400 mt-1" data-drag-handle>
+			<span class="cursor-grab text-gray-300 group-hover:text-surface-500 mt-1" data-drag-handle>
 				<i class="fa-solid fa-grip-vertical text-xs"></i>
 			</span>
 
@@ -358,12 +358,12 @@
 							type="text"
 							value={node.node.ref_id ?? ''}
 							placeholder={m.frameworkRefId()}
-							class="w-24 text-xs font-mono bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors text-gray-500"
+							class="w-24 text-xs font-mono bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors text-surface-600-400"
 							onblur={(e) => saveField('ref_id', e.currentTarget.value || null)}
 						/>
 					</div>
 					<div>
-						<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block">
+						<label class="text-[10px] font-semibold uppercase tracking-wider text-surface-500 block">
 							{m.name()}{@render untranslatedMarker('name', node.node.name, lang)}
 						</label>
 						<div class="grid grid-cols-2 gap-3">
@@ -371,7 +371,7 @@
 								type="text"
 								value={node.node.name ?? ''}
 								readonly
-								class="text-sm font-medium bg-transparent border-0 border-b border-transparent py-0.5 text-gray-400 cursor-default"
+								class="text-sm font-medium bg-transparent border-0 border-b border-transparent py-0.5 text-surface-500 cursor-default"
 							/>
 							<input
 								type="text"
@@ -389,7 +389,7 @@
 					{#if node.node.urn}
 						<button
 							type="button"
-							class="inline-flex items-center gap-1 text-[10px] font-mono text-gray-300 hover:text-gray-500 transition-colors truncate max-w-full text-left group/urn"
+							class="inline-flex items-center gap-1 text-[10px] font-mono text-gray-300 hover:text-surface-600-400 transition-colors truncate max-w-full text-left group/urn"
 							onclick={() => urnCopy.copy(node.node.urn ?? '')}
 						>
 							<i
@@ -406,7 +406,7 @@
 					{#if !isSplash}
 						<!-- Description side-by-side -->
 						<div>
-							<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block">
+							<label class="text-[10px] font-semibold uppercase tracking-wider text-surface-500 block">
 								{m.description()}{@render untranslatedMarker(
 									'description',
 									node.node.description,
@@ -444,7 +444,7 @@
 						<!-- Advanced fields toggle (mirrors non-translation mode) -->
 						<button
 							type="button"
-							class="text-[10px] font-medium uppercase tracking-wider text-gray-400 hover:text-gray-600 transition-colors inline-flex items-center gap-1 mt-2"
+							class="text-[10px] font-medium uppercase tracking-wider text-surface-500 hover:text-surface-600-400 transition-colors inline-flex items-center gap-1 mt-2"
 							onclick={() => (showAdvanced = !showAdvanced)}
 							aria-expanded={showAdvanced}
 						>
@@ -464,7 +464,7 @@
 							<!-- Annotation side-by-side -->
 							<div>
 								<label
-									class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block"
+									class="text-[10px] font-semibold uppercase tracking-wider text-surface-500 block"
 								>
 									{m.annotation()}{@render untranslatedMarker(
 										'annotation',
@@ -504,7 +504,7 @@
 							<!-- Typical evidence side-by-side -->
 							<div>
 								<label
-									class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block"
+									class="text-[10px] font-semibold uppercase tracking-wider text-surface-500 block"
 								>
 									{m.typicalEvidence()}{@render untranslatedMarker(
 										'typical_evidence',
@@ -548,11 +548,11 @@
 							type="text"
 							value={node.node.ref_id ?? ''}
 							placeholder={m.frameworkRefId()}
-							class="w-24 text-xs font-mono bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:{isSplash
+							class="w-24 text-xs font-mono bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:{isSplash
 								? 'border-purple-500'
 								: 'border-blue-500'} px-0.5 py-0.5 outline-none focus-visible:ring-2 {isSplash
 								? 'focus-visible:ring-purple-500/40'
-								: 'focus-visible:ring-blue-500/40'} transition-colors text-gray-500"
+								: 'focus-visible:ring-blue-500/40'} transition-colors text-surface-600-400"
 							onblur={(e) => saveField('ref_id', e.currentTarget.value || null)}
 						/>
 						<div class="relative flex-1">
@@ -565,7 +565,7 @@
 										? node.node.description.slice(0, 60) +
 											(node.node.description.length > 60 ? '...' : '')
 										: m.builderNodeNamePlaceholder()}
-								class="w-full text-sm font-medium bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:{isSplash
+								class="w-full text-sm font-medium bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:{isSplash
 									? 'border-purple-500'
 									: 'border-blue-500'} px-0.5 py-0.5 outline-none focus-visible:ring-2 {isSplash
 									? 'focus-visible:ring-purple-500/40'
@@ -586,7 +586,7 @@
 					{#if node.node.urn}
 						<button
 							type="button"
-							class="inline-flex items-center gap-1 text-[10px] font-mono text-gray-300 hover:text-gray-500 transition-colors truncate max-w-full text-left group/urn"
+							class="inline-flex items-center gap-1 text-[10px] font-mono text-gray-300 hover:text-surface-600-400 transition-colors truncate max-w-full text-left group/urn"
 							onclick={() => urnCopy.copy(node.node.urn ?? '')}
 						>
 							<i
@@ -606,14 +606,14 @@
 			<div class="flex items-center gap-2 shrink-0">
 				{#if !isSplash}
 					<label
-						class="flex items-center gap-1.5 text-xs text-gray-400 cursor-pointer hover:text-gray-600 transition-colors"
+						class="flex items-center gap-1.5 text-xs text-surface-500 cursor-pointer hover:text-surface-600-400 transition-colors"
 						title={m.builderAssessableTooltip()}
 					>
 						<input
 							type="checkbox"
 							checked={node.node.assessable}
 							onchange={(e) => saveField('assessable', e.currentTarget.checked)}
-							class="w-4 h-4 rounded border-gray-300 cursor-pointer"
+							class="w-4 h-4 rounded border-surface-300-700 cursor-pointer"
 						/>
 						{m.builderAssessable()}
 					</label>
@@ -621,7 +621,7 @@
 				<select
 					value={node.node.display_mode}
 					onchange={(e) => saveField('display_mode', e.currentTarget.value)}
-					class="text-xs bg-transparent border-b border-gray-200 focus:border-blue-500 outline-none"
+					class="text-xs bg-transparent border-b border-surface-200-800 focus:border-blue-500 outline-none"
 					title={m.builderDisplayMode()}
 				>
 					<option value="default">{m.builderDefaultMode()}</option>
@@ -645,10 +645,10 @@
 					<div class="grid grid-cols-2 gap-4">
 						<!-- Source (read-only preview) -->
 						<div>
-							<span class="text-[10px] text-gray-400 uppercase tracking-wider mb-1 block"
+							<span class="text-[10px] text-surface-500 uppercase tracking-wider mb-1 block"
 								>{m.builderSplashSource()}</span
 							>
-							<div class="min-h-[120px] bg-gray-50 border border-gray-100 rounded-lg px-3 py-2">
+							<div class="min-h-[120px] bg-surface-50-950 border border-surface-100-900 rounded-lg px-3 py-2">
 								{#if splashDescription.trim()}
 									<MarkdownRenderer content={splashDescription} />
 								{:else}
@@ -668,27 +668,27 @@
 								onblur={saveTransDescription}
 								placeholder={m.builderTranslateMarkdown()}
 								rows="6"
-								class="w-full text-sm bg-white border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/20 transition-colors resize-y font-mono"
+								class="w-full text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-3 py-2 outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/20 transition-colors resize-y font-mono"
 							></textarea>
 						</div>
 					</div>
 				{:else}
 					<!-- Normal editing mode: toolbar + textarea or preview -->
 					<div class="flex items-center gap-1 mb-2">
-						<div class="flex rounded-lg border border-gray-200 overflow-hidden">
+						<div class="flex rounded-lg border border-surface-200-800 overflow-hidden">
 							<button
 								class="px-2.5 py-1 text-xs font-medium transition-colors {splashMode === 'edit'
 									? 'bg-purple-500 text-white'
-									: 'bg-gray-50 text-gray-600 hover:bg-gray-100'}"
+									: 'bg-surface-50-950 text-surface-600-400 hover:bg-surface-100-900'}"
 								onclick={() => (splashMode = 'edit')}
 							>
 								<i class="fa-solid fa-pen mr-1 text-[10px]"></i>{m.edit()}
 							</button>
 							<button
-								class="px-2.5 py-1 text-xs font-medium border-l border-gray-200 transition-colors {splashMode ===
+								class="px-2.5 py-1 text-xs font-medium border-l border-surface-200-800 transition-colors {splashMode ===
 								'preview'
 									? 'bg-purple-500 text-white'
-									: 'bg-gray-50 text-gray-600 hover:bg-gray-100'}"
+									: 'bg-surface-50-950 text-surface-600-400 hover:bg-surface-100-900'}"
 								onclick={() => (splashMode = 'preview')}
 							>
 								<i class="fa-solid fa-eye mr-1 text-[10px]"></i>{m.builderPreview()}
@@ -696,51 +696,51 @@
 						</div>
 
 						{#if splashMode === 'edit'}
-							<div class="flex items-center gap-0.5 ml-2 border-l border-gray-200 pl-2">
+							<div class="flex items-center gap-0.5 ml-2 border-l border-surface-200-800 pl-2">
 								<button
-									class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+									class="p-1.5 rounded text-surface-500 hover:text-surface-600-400 hover:bg-surface-100-900 transition-colors"
 									onclick={() => wrapSelection('**', '**')}
 									title={m.builderSplashBold()}
 								>
 									<i class="fa-solid fa-bold text-xs"></i>
 								</button>
 								<button
-									class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+									class="p-1.5 rounded text-surface-500 hover:text-surface-600-400 hover:bg-surface-100-900 transition-colors"
 									onclick={() => wrapSelection('*', '*')}
 									title={m.builderSplashItalic()}
 								>
 									<i class="fa-solid fa-italic text-xs"></i>
 								</button>
 								<button
-									class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+									class="p-1.5 rounded text-surface-500 hover:text-surface-600-400 hover:bg-surface-100-900 transition-colors"
 									onclick={() => insertLinePrefix('# ')}
 									title={m.builderSplashHeading()}
 								>
 									<i class="fa-solid fa-heading text-xs"></i>
 								</button>
 								<button
-									class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+									class="p-1.5 rounded text-surface-500 hover:text-surface-600-400 hover:bg-surface-100-900 transition-colors"
 									onclick={() => insertLinePrefix('- ')}
 									title={m.builderSplashBulletList()}
 								>
 									<i class="fa-solid fa-list-ul text-xs"></i>
 								</button>
 								<button
-									class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+									class="p-1.5 rounded text-surface-500 hover:text-surface-600-400 hover:bg-surface-100-900 transition-colors"
 									onclick={() => insertLinePrefix('1. ')}
 									title={m.builderSplashNumberedList()}
 								>
 									<i class="fa-solid fa-list-ol text-xs"></i>
 								</button>
 								<button
-									class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+									class="p-1.5 rounded text-surface-500 hover:text-surface-600-400 hover:bg-surface-100-900 transition-colors"
 									onclick={() => wrapSelection('[', '](url)')}
 									title={m.builderSplashLink()}
 								>
 									<i class="fa-solid fa-link text-xs"></i>
 								</button>
 								<button
-									class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+									class="p-1.5 rounded text-surface-500 hover:text-surface-600-400 hover:bg-surface-100-900 transition-colors"
 									onclick={() =>
 										insertAtCursor(
 											'\n| Column 1 | Column 2 |\n|----------|----------|\n| Cell     | Cell     |\n'
@@ -750,7 +750,7 @@
 									<i class="fa-solid fa-table text-xs"></i>
 								</button>
 								<button
-									class="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+									class="p-1.5 rounded text-surface-500 hover:text-surface-600-400 hover:bg-surface-100-900 transition-colors"
 									onclick={() => fileInputEl?.click()}
 									title={m.builderSplashInsertImage()}
 									disabled={uploading}
@@ -781,14 +781,14 @@
 							onblur={saveDescription}
 							placeholder={m.builderSplashEditPlaceholder()}
 							rows="6"
-							class="w-full text-sm bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/20 transition-colors resize-y font-mono"
+							class="w-full text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-3 py-2 outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/20 transition-colors resize-y font-mono"
 						></textarea>
 					{:else}
-						<div class="min-h-[120px] bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
+						<div class="min-h-[120px] bg-surface-50-950 border border-surface-200-800 rounded-lg px-4 py-3">
 							{#if splashDescription.trim()}
 								<MarkdownRenderer content={splashDescription} />
 							{:else}
-								<p class="text-sm text-gray-400 italic">
+								<p class="text-sm text-surface-500 italic">
 									{m.builderSplashNoContent()}
 								</p>
 							{/if}
@@ -801,7 +801,7 @@
 			{#if !$activeLanguageStore}
 				<div class="px-4 pt-2 pb-0 space-y-2">
 					<div>
-						<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block">
+						<label class="text-[10px] font-semibold uppercase tracking-wider text-surface-500 block">
 							{m.description()}
 						</label>
 						<textarea
@@ -809,7 +809,7 @@
 							placeholder={m.builderDescriptionOptional()}
 							rows="3"
 							use:autogrowAction
-							class="w-full text-xs text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
+							class="w-full text-xs text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
 							onblur={(e) => saveField('description', e.currentTarget.value || null)}
 						></textarea>
 					</div>
@@ -817,7 +817,7 @@
 					<!-- Advanced fields toggle -->
 					<button
 						type="button"
-						class="text-[10px] font-medium uppercase tracking-wider text-gray-400 hover:text-gray-600 transition-colors inline-flex items-center gap-1"
+						class="text-[10px] font-medium uppercase tracking-wider text-surface-500 hover:text-surface-600-400 transition-colors inline-flex items-center gap-1"
 						onclick={() => (showAdvanced = !showAdvanced)}
 						aria-expanded={showAdvanced}
 					>
@@ -837,7 +837,7 @@
 						<div class="space-y-2 pt-1">
 							<div>
 								<label
-									class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block"
+									class="text-[10px] font-semibold uppercase tracking-wider text-surface-500 block"
 								>
 									{m.annotation()}
 								</label>
@@ -846,14 +846,14 @@
 									placeholder={m.builderAnnotationPlaceholder()}
 									rows="2"
 									use:autogrowAction
-									class="w-full text-xs text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
+									class="w-full text-xs text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
 									onblur={(e) => saveField('annotation', e.currentTarget.value || null)}
 								></textarea>
 							</div>
 							{#if node.node.assessable}
 								<div>
 									<label
-										class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block"
+										class="text-[10px] font-semibold uppercase tracking-wider text-surface-500 block"
 									>
 										{m.typicalEvidence()}
 									</label>
@@ -862,7 +862,7 @@
 										placeholder={m.builderTypicalEvidencePlaceholder()}
 										rows="2"
 										use:autogrowAction
-										class="w-full text-xs text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
+										class="w-full text-xs text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
 										onblur={(e) => saveField('typical_evidence', e.currentTarget.value || null)}
 									></textarea>
 								</div>
@@ -876,8 +876,8 @@
 			     Ancestors can carry IGs (e.g. ISO 27001's annex-a has ['SoA']) and
 			     the audit-tree filter honours them. -->
 			{#if $frameworkStore.implementation_groups_definition && $frameworkStore.implementation_groups_definition.length > 0}
-				<div class="px-4 py-2 border-b border-gray-100">
-					<span class="text-xs text-gray-500 mr-2">{m.builderImplementationGroupsLabel()}</span>
+				<div class="px-4 py-2 border-b border-surface-100-900">
+					<span class="text-xs text-surface-600-400 mr-2">{m.builderImplementationGroupsLabel()}</span>
 					{#each $frameworkStore.implementation_groups_definition as ig}
 						{@const refId = (ig as Record<string, string>).ref_id}
 						{@const selected = (node.node.implementation_groups ?? []).includes(refId)}
@@ -885,7 +885,7 @@
 							type="button"
 							class="text-xs px-2 py-0.5 rounded-full border mr-1 transition-colors {selected
 								? 'bg-blue-100 border-blue-300 text-blue-700'
-								: 'bg-gray-50 border-gray-200 text-gray-400 hover:border-gray-300'}"
+								: 'bg-surface-50-950 border-surface-200-800 text-surface-500 hover:border-surface-300-700'}"
 							onclick={() => {
 								const current = node.node.implementation_groups ?? [];
 								const next = selected ? current.filter((g) => g !== refId) : [...current, refId];
@@ -902,16 +902,16 @@
 		<!-- CEL visibility expression: inside Advanced for default nodes, always-on for splash -->
 		{#if isSplash || showAdvanced}
 			<div class="px-4 py-2 {isSplash ? 'border-t border-purple-100' : ''}">
-				<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block mb-1">
+				<label class="text-[10px] font-semibold uppercase tracking-wider text-surface-500 block mb-1">
 					{m.builderVisibilityExpression()}
 					<span
-						class="text-gray-400 ml-1 normal-case"
+						class="text-surface-500 ml-1 normal-case"
 						title={m.builderVisibilityExpressionTooltip()}>&#9432;</span
 					>
 				</label>
 				<input
 					type="text"
-					class="w-full text-xs px-2 py-1 border border-gray-200 rounded font-mono bg-gray-50 focus:bg-white focus:{isSplash
+					class="w-full text-xs px-2 py-1 border border-surface-200-800 rounded font-mono bg-surface-50-950 focus:bg-surface-50-950 focus:{isSplash
 						? 'border-purple-300'
 						: 'border-blue-300'} focus:outline-none"
 					placeholder={m.builderVisibilityExpressionPlaceholder()}
@@ -946,7 +946,7 @@
 
 				<button
 					type="button"
-					class="w-full py-2 border-2 border-dashed border-gray-200 rounded-lg text-xs text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors"
+					class="w-full py-2 border-2 border-dashed border-surface-200-800 rounded-lg text-xs text-surface-500 hover:text-surface-600-400 hover:border-surface-300-700 transition-colors"
 					onclick={() => builder.addQuestion(node.node.id)}
 				>
 					<i class="fa-solid fa-plus mr-1"></i>{m.builderAddQuestion()}
@@ -967,7 +967,7 @@
 		<AddNodeMenu
 			parent={node.node.id}
 			triggerLabel={m.builderAddChild()}
-			triggerClass="w-full py-1 text-[11px] text-gray-300 hover:text-gray-500 transition-colors"
+			triggerClass="w-full py-1 text-[11px] text-gray-300 hover:text-surface-600-400 transition-colors"
 			onBeforeAdd={() => cardCollapsed.expand(node.node.id)}
 		/>
 	{/if}
@@ -978,7 +978,7 @@
 			parent={parentId}
 			afterIndex={indexWithinParent}
 			triggerLabel={m.builderAddSiblingBelow()}
-			triggerClass="w-full py-1 text-[11px] text-gray-300 hover:text-gray-500 transition-colors"
+			triggerClass="w-full py-1 text-[11px] text-gray-300 hover:text-surface-600-400 transition-colors"
 		/>
 	{/if}
 
@@ -1002,7 +1002,7 @@
 		</div>
 	{/if}
 	{#if node.children.length > 0 && collapsed}
-		<div class="ml-4 mt-1 text-[10px] text-gray-400 italic">
+		<div class="ml-4 mt-1 text-[10px] text-surface-500 italic">
 			{m.builderChildrenHidden({ count: node.children.length })}
 		</div>
 	{/if}

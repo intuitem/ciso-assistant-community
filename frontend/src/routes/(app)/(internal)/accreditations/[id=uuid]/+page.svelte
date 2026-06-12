@@ -152,8 +152,8 @@
 	{#snippet widgets()}
 		<!-- Authority -->
 		{#if accreditation.authority || accreditation.authority_name}
-			<div class="rounded-lg bg-gray-50 p-4 mb-3">
-				<h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+			<div class="rounded-lg bg-surface-50-950 p-4 mb-3">
+				<h4 class="text-xs font-semibold text-surface-600-400 uppercase tracking-wide mb-2">
 					<i class="fa-solid fa-building-columns mr-1"></i>
 					{m.authority()}
 				</h4>
@@ -165,25 +165,25 @@
 						{accreditation.authority.str || accreditation.authority.name}
 					</Anchor>
 					{#if accreditation.authority_name}
-						<p class="text-xs text-gray-500 mt-1">{accreditation.authority_name}</p>
+						<p class="text-xs text-surface-600-400 mt-1">{accreditation.authority_name}</p>
 					{/if}
 				{:else}
-					<p class="text-gray-900 font-medium">{accreditation.authority_name}</p>
+					<p class="text-surface-900-100 font-medium">{accreditation.authority_name}</p>
 				{/if}
 			</div>
 		{/if}
 
 		<!-- Status & Category -->
-		<div class="rounded-lg bg-gray-50 p-4 mb-3 space-y-3">
+		<div class="rounded-lg bg-surface-50-950 p-4 mb-3 space-y-3">
 			<div class="flex items-center justify-between">
-				<span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">{m.status()}</span
+				<span class="text-xs font-semibold text-surface-600-400 uppercase tracking-wide">{m.status()}</span
 				>
 				<span class="badge text-xs font-medium px-2.5 py-0.5 rounded-full preset-tonal-primary">
 					{safeTranslate(accreditation.status)}
 				</span>
 			</div>
 			<div class="flex items-center justify-between">
-				<span class="text-xs font-semibold text-gray-500 uppercase tracking-wide"
+				<span class="text-xs font-semibold text-surface-600-400 uppercase tracking-wide"
 					>{m.category()}</span
 				>
 				<span class="badge text-xs font-medium px-2.5 py-0.5 rounded-full preset-tonal-secondary">
@@ -196,14 +196,14 @@
 		{#if accreditation.checklist}
 			<a
 				href="/compliance-assessments/{accreditation.checklist.id}"
-				class="block rounded-lg bg-gray-50 p-4 mb-3 hover:bg-gray-100 transition-colors duration-200"
+				class="block rounded-lg bg-surface-50-950 p-4 mb-3 hover:bg-surface-100-900 transition-colors duration-200"
 			>
 				<div class="flex items-center justify-between mb-2">
-					<span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+					<span class="text-xs font-semibold text-surface-600-400 uppercase tracking-wide">
 						<i class="fa-solid fa-list-check mr-1"></i>
 						{m.checklistProgress()}
 					</span>
-					<span class="text-sm font-bold text-gray-800">{checklistProgress}%</span>
+					<span class="text-sm font-bold text-surface-800-200">{checklistProgress}%</span>
 				</div>
 				<Progress value={checklistProgress} max={100}>
 					<Progress.Track class="h-2 rounded-full">
@@ -215,8 +215,8 @@
 
 		<!-- Decision Evidence -->
 		{#if accreditation.decision_evidence && accreditation.decision_evidence.length > 0}
-			<div class="rounded-lg bg-gray-50 p-4 mb-3">
-				<h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+			<div class="rounded-lg bg-surface-50-950 p-4 mb-3">
+				<h4 class="text-xs font-semibold text-surface-600-400 uppercase tracking-wide mb-2">
 					<i class="fa-solid fa-file-circle-check mr-1"></i>
 					{m.decisionEvidence()}
 				</h4>

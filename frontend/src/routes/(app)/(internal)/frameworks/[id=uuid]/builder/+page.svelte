@@ -68,7 +68,7 @@
 		<div class="max-w-3xl mx-auto px-4 pt-4">
 			<a
 				href="/frameworks/{data.framework.id}"
-				class="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+				class="text-sm text-surface-600-400 hover:text-surface-700-300 transition-colors"
 			>
 				<i class="fa-solid fa-arrow-left mr-1"></i>{m.builderBackToFramework()}
 			</a>
@@ -80,8 +80,8 @@
 			>
 				<i class="fa-solid fa-lock text-2xl text-amber-600"></i>
 			</div>
-			<h2 class="text-xl font-semibold text-gray-800 mb-2">{m.builderImportedFramework()}</h2>
-			<p class="text-sm text-gray-500 mb-6">
+			<h2 class="text-xl font-semibold text-surface-800-200 mb-2">{m.builderImportedFramework()}</h2>
+			<p class="text-sm text-surface-600-400 mb-6">
 				{m.builderImportedFrameworkDescription()}
 			</p>
 			<button
@@ -99,15 +99,15 @@
 		</div>
 	{:else if draftLoading}
 		<div class="flex items-center justify-center py-32">
-			<i class="fa-solid fa-circle-notch fa-spin text-2xl text-gray-400 mr-3"></i>
-			<span class="text-gray-500">{m.builderLoadingEditor()}</span>
+			<i class="fa-solid fa-circle-notch fa-spin text-2xl text-surface-500 mr-3"></i>
+			<span class="text-surface-600-400">{m.builderLoadingEditor()}</span>
 		</div>
 	{:else if draftError}
 		<div class="max-w-lg mx-auto mt-16 text-center">
 			<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
 				<i class="fa-solid fa-triangle-exclamation text-2xl text-red-600"></i>
 			</div>
-			<h2 class="text-xl font-semibold text-gray-800 mb-2">{m.builderFailedToStartEditor()}</h2>
+			<h2 class="text-xl font-semibold text-surface-800-200 mb-2">{m.builderFailedToStartEditor()}</h2>
 			<p class="text-sm text-red-600 mb-6">{draftError}</p>
 			<a href="/frameworks/{data.framework.id}" class="btn preset-filled-primary-500 px-6">
 				{m.builderBackToFramework()}

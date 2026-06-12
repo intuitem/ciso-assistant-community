@@ -301,7 +301,7 @@
 
 <svelte:window onkeydown={handleGlobalKey} />
 
-<div class="card !p-0 bg-white shadow-lg overflow-visible">
+<div class="card !p-0 bg-surface-50-950 shadow-lg overflow-visible">
 	<BuilderMinimap
 		frameworkId={framework.id}
 		onOpenHelp={() => (helpOpen = true)}
@@ -319,14 +319,14 @@
 					{#if $activeLanguageStore}
 						<div class="grid grid-cols-2 gap-4">
 							<div>
-								<span class="text-[10px] text-gray-400 uppercase tracking-wider"
+								<span class="text-[10px] text-surface-500 uppercase tracking-wider"
 									>{$frameworkStore.locale?.toUpperCase() ?? 'BASE'}</span
 								>
 								<input
 									type="text"
 									value={$frameworkStore.name}
 									readonly
-									class="w-full text-2xl font-bold bg-transparent border-0 border-b-2 border-transparent py-1 text-gray-400 cursor-default"
+									class="w-full text-2xl font-bold bg-transparent border-0 border-b-2 border-transparent py-1 text-surface-500 cursor-default"
 								/>
 								<textarea
 									value={$frameworkStore.description ?? ''}
@@ -382,7 +382,7 @@
 							type="text"
 							value={$frameworkStore.name}
 							placeholder={m.builderFrameworkNamePlaceholder()}
-							class="w-full text-2xl font-bold bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors py-1"
+							class="w-full text-2xl font-bold bg-transparent border-0 border-b-2 border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors py-1"
 							onblur={(e) => {
 								builder.updateFramework({ name: e.currentTarget.value });
 							}}
@@ -391,7 +391,7 @@
 							value={$frameworkStore.description ?? ''}
 							placeholder={m.builderFrameworkDescriptionPlaceholder()}
 							rows="2"
-							class="w-full text-sm text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1"
+							class="w-full text-sm text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1"
 							onblur={(e) => {
 								builder.updateFramework({ description: e.currentTarget.value || null });
 							}}
@@ -400,7 +400,7 @@
 					{#if $frameworkStore.urn}
 						<button
 							type="button"
-							class="inline-flex items-center gap-1 text-xs font-mono text-gray-300 hover:text-gray-500 transition-colors truncate max-w-full text-left group/urn"
+							class="inline-flex items-center gap-1 text-xs font-mono text-gray-300 hover:text-surface-600-400 transition-colors truncate max-w-full text-left group/urn"
 							onclick={() => urnCopy.copy($frameworkStore.urn ?? '')}
 						>
 							<i
@@ -419,39 +419,39 @@
 				</div>
 
 				<!-- Framework Settings (collapsed by default) -->
-				<div class="border border-gray-200 rounded-lg overflow-hidden">
+				<div class="border border-surface-200-800 rounded-lg overflow-hidden">
 					<button
 						type="button"
-						class="w-full flex items-center justify-between px-4 py-2.5 bg-gray-50 hover:bg-gray-100 transition-colors text-left"
+						class="w-full flex items-center justify-between px-4 py-2.5 bg-surface-50-950 hover:bg-surface-100-900 transition-colors text-left"
 						onclick={() => (showSettings = !showSettings)}
 					>
 						<div class="flex items-center gap-2">
 							<i
 								class="fa-solid {showSettings
 									? 'fa-chevron-down'
-									: 'fa-chevron-right'} text-[10px] text-gray-400"
+									: 'fa-chevron-right'} text-[10px] text-surface-500"
 							></i>
-							<span class="text-xs font-semibold text-gray-600 uppercase tracking-wider"
+							<span class="text-xs font-semibold text-surface-600-400 uppercase tracking-wider"
 								>{m.builderFrameworkSettings()}</span
 							>
 							{#if !showSettings}
-								<span class="text-xs text-gray-400">{settingsSummary}</span>
+								<span class="text-xs text-surface-500">{settingsSummary}</span>
 							{/if}
 						</div>
-						<i class="fa-solid fa-gear text-xs text-gray-400"></i>
+						<i class="fa-solid fa-gear text-xs text-surface-500"></i>
 					</button>
 					{#if showSettings}
-						<div class="px-4 py-4 space-y-6 border-t border-gray-200">
+						<div class="px-4 py-4 space-y-6 border-t border-surface-200-800">
 							<!-- Annotation -->
 							<div>
-								<span class="text-xs font-medium text-gray-500 uppercase tracking-wider"
+								<span class="text-xs font-medium text-surface-600-400 uppercase tracking-wider"
 									>{m.annotation()}</span
 								>
 								<textarea
 									value={$frameworkStore.annotation ?? ''}
 									placeholder={m.builderFrameworkAnnotationPlaceholder()}
 									rows="2"
-									class="mt-1 w-full text-sm text-gray-500 bg-transparent border border-gray-200 rounded-lg px-3 py-2 hover:border-gray-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
+									class="mt-1 w-full text-sm text-surface-600-400 bg-transparent border border-surface-200-800 rounded-lg px-3 py-2 hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
 									onblur={(e) => {
 										builder.updateFramework({ annotation: e.currentTarget.value || null });
 									}}
@@ -462,7 +462,7 @@
 							<div>
 								<div class="flex gap-3">
 									<label class="block">
-										<span class="text-xs text-gray-500 uppercase tracking-wider font-medium"
+										<span class="text-xs text-surface-600-400 uppercase tracking-wider font-medium"
 											>{m.builderUrnNamespace()}</span
 										>
 										<input
@@ -470,8 +470,8 @@
 											value={$frameworkStore.urn_namespace ?? 'custom'}
 											placeholder="custom"
 											pattern="[a-zA-Z0-9_-]+"
-											class="mt-1 w-48 text-sm font-mono border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 {lockUrnEdits
-												? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+											class="mt-1 w-48 text-sm font-mono border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 {lockUrnEdits
+												? 'bg-surface-100-900 text-surface-500 cursor-not-allowed'
 												: ''}"
 											readonly={lockUrnEdits}
 											onblur={(e) => {
@@ -483,7 +483,7 @@
 										/>
 									</label>
 									<label class="block">
-										<span class="text-xs text-gray-500 uppercase tracking-wider font-medium"
+										<span class="text-xs text-surface-600-400 uppercase tracking-wider font-medium"
 											>{m.frameworkRefId()}</span
 										>
 										<input
@@ -491,8 +491,8 @@
 											value={$frameworkStore.ref_id ?? ''}
 											placeholder="my-framework"
 											pattern="[a-zA-Z0-9_-]+"
-											class="mt-1 w-48 text-sm font-mono border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 {lockUrnEdits
-												? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+											class="mt-1 w-48 text-sm font-mono border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 {lockUrnEdits
+												? 'bg-surface-100-900 text-surface-500 cursor-not-allowed'
 												: ''}"
 											readonly={lockUrnEdits}
 											onblur={(e) => {
@@ -503,7 +503,7 @@
 										/>
 									</label>
 								</div>
-								<p class="text-[10px] text-gray-400 mt-0.5">
+								<p class="text-[10px] text-surface-500 mt-0.5">
 									{m.urnPreview()}
 									<code
 										>urn:{$frameworkStore.urn_namespace ??
@@ -519,7 +519,7 @@
 							<div class="space-y-1.5">
 								<button
 									type="button"
-									class="flex items-center gap-1.5 text-xs font-medium text-gray-500 uppercase tracking-wider hover:text-gray-700 transition-colors"
+									class="flex items-center gap-1.5 text-xs font-medium text-surface-600-400 uppercase tracking-wider hover:text-surface-700-300 transition-colors"
 									onclick={() => (showScoringSettings = !showScoringSettings)}
 								>
 									<i
@@ -530,14 +530,14 @@
 									{m.builderScoringSettings()}
 								</button>
 								{#if showScoringSettings}
-									<div class="border border-gray-200 rounded-lg bg-gray-50/50 px-3 py-3 space-y-3">
+									<div class="border border-surface-200-800 rounded-lg bg-surface-50-950/50 px-3 py-3 space-y-3">
 										<div class="grid grid-cols-3 gap-3">
 											<label class="block">
-												<span class="text-xs text-gray-500">{m.minScore()}</span>
+												<span class="text-xs text-surface-600-400">{m.minScore()}</span>
 												<input
 													type="number"
 													value={$frameworkStore.min_score}
-													class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+													class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 													onblur={(e) => {
 														builder.updateFramework({
 															min_score: parseInt(e.currentTarget.value) || 0
@@ -546,11 +546,11 @@
 												/>
 											</label>
 											<label class="block">
-												<span class="text-xs text-gray-500">{m.maxScore()}</span>
+												<span class="text-xs text-surface-600-400">{m.maxScore()}</span>
 												<input
 													type="number"
 													value={$frameworkStore.max_score}
-													class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+													class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 													onblur={(e) => {
 														builder.updateFramework({
 															max_score: parseInt(e.currentTarget.value) || 100
@@ -559,10 +559,10 @@
 												/>
 											</label>
 											<label class="block">
-												<span class="text-xs text-gray-500">{m.aggregation()}</span>
+												<span class="text-xs text-surface-600-400">{m.aggregation()}</span>
 												<select
 													value={getAggregation()}
-													class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-white"
+													class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-surface-50-950"
 													onchange={(e) => setAggregation(e.currentTarget.value)}
 												>
 													<option value="average">{m.average()}</option>
@@ -570,15 +570,15 @@
 												</select>
 											</label>
 										</div>
-										<p class="text-xs text-gray-400">
+										<p class="text-xs text-surface-500">
 											{m.builderAggregationHint()}
 										</p>
 
 										<!-- Scale entries editor -->
-										<div class="border-t border-gray-200 pt-3 space-y-2">
+										<div class="border-t border-surface-200-800 pt-3 space-y-2">
 											<button
 												type="button"
-												class="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
+												class="flex items-center gap-1.5 text-xs font-medium text-surface-600-400 hover:text-surface-700-300 transition-colors"
 												onclick={() => (showScalesEditor = !showScalesEditor)}
 											>
 												<i
@@ -594,15 +594,15 @@
 												<div class="space-y-1.5">
 													{#each scaleEntries as entry, idx}
 														<div
-															class="bg-white border border-gray-200 rounded px-2 py-1.5 space-y-1"
+															class="bg-surface-50-950 border border-surface-200-800 rounded px-2 py-1.5 space-y-1"
 														>
 															<div class="flex items-start gap-2">
 																<label class="block w-16 shrink-0">
-																	<span class="text-[10px] text-gray-400">{m.score()}</span>
+																	<span class="text-[10px] text-surface-500">{m.score()}</span>
 																	<input
 																		type="number"
 																		value={entry.score}
-																		class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+																		class="w-full text-sm border border-surface-200-800 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 																		onblur={(e) => {
 																			const entries = [...scaleEntries];
 																			entries[idx].score = parseInt(e.currentTarget.value) || 0;
@@ -611,12 +611,12 @@
 																	/>
 																</label>
 																<label class="block flex-1 min-w-0">
-																	<span class="text-[10px] text-gray-400">{m.name()}</span>
+																	<span class="text-[10px] text-surface-500">{m.name()}</span>
 																	<input
 																		type="text"
 																		value={entry.name}
 																		placeholder={m.builderScaleNamePlaceholder()}
-																		class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+																		class="w-full text-sm border border-surface-200-800 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 																		onblur={(e) => {
 																			const entries = [...scaleEntries];
 																			entries[idx].name = e.currentTarget.value;
@@ -625,12 +625,12 @@
 																	/>
 																</label>
 																<label class="block flex-1 min-w-0">
-																	<span class="text-[10px] text-gray-400">{m.description()}</span>
+																	<span class="text-[10px] text-surface-500">{m.description()}</span>
 																	<input
 																		type="text"
 																		value={entry.description}
 																		placeholder={m.builderScaleDescriptionPlaceholder()}
-																		class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+																		class="w-full text-sm border border-surface-200-800 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 																		onblur={(e) => {
 																			const entries = [...scaleEntries];
 																			entries[idx].description = e.currentTarget.value;
@@ -653,7 +653,7 @@
 															{#if $activeLanguageStore}
 																{@const lang = $activeLanguageStore}
 																<div
-																	class="flex items-start gap-2 pl-16 border-t border-gray-100 pt-1"
+																	class="flex items-start gap-2 pl-16 border-t border-surface-100-900 pt-1"
 																>
 																	<label class="block flex-1 min-w-0">
 																		<span class="text-[10px] text-blue-500"
@@ -760,17 +760,17 @@
 
 							<!-- Languages -->
 							<div class="space-y-1.5">
-								<span class="text-xs font-medium text-gray-500 uppercase tracking-wider"
+								<span class="text-xs font-medium text-surface-600-400 uppercase tracking-wider"
 									>{m.builderLanguagesSection()}</span
 								>
-								<p class="text-xs text-gray-400">
+								<p class="text-xs text-surface-500">
 									{m.builderLanguagesHint()}
 								</p>
 								<div class="flex items-center gap-2 py-1">
-									<span class="text-sm text-gray-600 w-24">{m.builderBaseLanguage()}</span>
+									<span class="text-sm text-surface-600-400 w-24">{m.builderBaseLanguage()}</span>
 									<select
 										value={$frameworkStore.locale ?? 'en'}
-										class="text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-white"
+										class="text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-surface-50-950"
 										onchange={(e) => builder.setBaseLocale(e.currentTarget.value)}
 									>
 										{#each supportedLocales as code}
@@ -779,7 +779,7 @@
 									</select>
 								</div>
 								<div class="space-y-1">
-									<span class="text-xs text-gray-500">{m.builderTargetLanguages()}</span>
+									<span class="text-xs text-surface-600-400">{m.builderTargetLanguages()}</span>
 									<div class="flex flex-wrap gap-1.5">
 										{#each $frameworkStore.available_languages ?? [] as lang}
 											<span
@@ -800,7 +800,7 @@
 										<div class="flex items-center gap-1.5 mt-1">
 											<select
 												bind:value={newLangCode}
-												class="text-xs border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-white"
+												class="text-xs border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-surface-50-950"
 											>
 												<option value="">{m.builderAddLanguagePlaceholder()}</option>
 												{#each addableLocales as code}
@@ -849,7 +849,7 @@
 					<AddNodeMenu
 						parent={null}
 						triggerLabel={m.builderAddTopLevelNode()}
-						triggerClass="w-full py-4 border-2 border-dashed border-gray-200 rounded-lg text-sm text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors"
+						triggerClass="w-full py-4 border-2 border-dashed border-surface-200-800 rounded-lg text-sm text-surface-500 hover:text-surface-600-400 hover:border-surface-300-700 transition-colors"
 					/>
 				{/if}
 
