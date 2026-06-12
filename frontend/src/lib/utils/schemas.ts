@@ -97,7 +97,8 @@ const nameSchema = z
 	.string({
 		error: 'Name is required'
 	})
-	.min(1);
+	.min(1)
+	.max(200);
 
 const descriptionSchema = z.string().optional().nullable();
 
@@ -682,7 +683,8 @@ export const FeatureFlagsSchema = z.object({
 	journeys: z.boolean().optional(),
 	policy_documents: z.boolean().optional(),
 	security_advisories: z.boolean().optional(),
-	cwes: z.boolean().optional()
+	cwes: z.boolean().optional(),
+	object_audit_trail: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
@@ -987,7 +989,7 @@ export const dataBreachSchema = z.object({
 
 export const purposeSchema = z.object({
 	...NameDescriptionMixin,
-	name: z.string().optional(),
+	name: z.string().max(200).optional(),
 	ref_id: z.string().optional().default(''),
 	legal_basis: z.string(),
 	article_9_condition: z.string().optional().nullable(),
@@ -995,21 +997,21 @@ export const purposeSchema = z.object({
 });
 export const dataSubjectSchema = z.object({
 	...NameDescriptionMixin,
-	name: z.string().optional(),
+	name: z.string().max(200).optional(),
 	ref_id: z.string().optional().default(''),
 	category: z.string(),
 	processing: z.string()
 });
 export const dataRecipientSchema = z.object({
 	...NameDescriptionMixin,
-	name: z.string().optional(),
+	name: z.string().max(200).optional(),
 	ref_id: z.string().optional().default(''),
 	category: z.string(),
 	processing: z.string()
 });
 export const dataContractorSchema = z.object({
 	...NameDescriptionMixin,
-	name: z.string().optional(),
+	name: z.string().max(200).optional(),
 	ref_id: z.string().optional().default(''),
 	relationship_type: z.string(),
 	country: z.string(),
@@ -1024,7 +1026,7 @@ export const dataContractorSchema = z.object({
 });
 export const dataTransferSchema = z.object({
 	...NameDescriptionMixin,
-	name: z.string().optional(),
+	name: z.string().max(200).optional(),
 	ref_id: z.string().optional().default(''),
 	country: z.string(),
 	documentation_link: z
@@ -1041,7 +1043,7 @@ export const dataTransferSchema = z.object({
 
 export const personalDataSchema = z.object({
 	...NameDescriptionMixin,
-	name: z.string().optional(),
+	name: z.string().max(200).optional(),
 	category: z.string(),
 	retention: z.string().optional(),
 	deletion_policy: z.string().optional(),
@@ -1513,7 +1515,7 @@ export const TaskNodeSchema = z.object({
 });
 
 export const AuthTokenCreateSchema = z.object({
-	name: z.string().min(1),
+	name: z.string().min(1).max(255),
 	expiry: z.number().positive().min(1).max(365).default(30).optional()
 });
 
@@ -1749,7 +1751,7 @@ export const teamSchema = z.object({
 });
 
 export const ManagedDocumentSchema = z.object({
-	name: z.string().optional().default(''),
+	name: z.string().max(200).optional().default(''),
 	description: z.string().optional().default(''),
 	document_type: z.string().optional().default('policy'),
 	policy: z.string().uuid().optional().nullable(),
