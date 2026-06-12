@@ -1596,6 +1596,16 @@
 	"builderQuestionTypeUniqueChoice": "واحد انتخاب",
 	"builderQuestionTypeMultipleChoice": "متعدد انتخاب",
 	"builderQuestionTypeDate": "تاریخ",
+	"resetMFA": "MFA کو دوبارہ ترتیب دیں",
+	"resetMFA1": "اگر اس صارف کو اپنے دوسرے عنصر تک رسائی نہیں مل رہی تو آپ",
+	"resetMFALinkText": "اس کا MFA دوبارہ ترتیب دے سکتے ہیں",
+	"resetMFA2": "تمام MFA تصدیق کنندگان ہٹا دیے جائیں گے اور صارف کو اگلی لاگ ان پر دوبارہ رجسٹر کرنے کا کہا جائے گا",
+	"resetMFAExplanation": "اس سے {email} کے لیے تمام MFA تصدیق کنندگان (TOTP، WebAuthn، بحالی کوڈز) ہٹا دیے جائیں گے۔ صارف کو اگلی لاگ ان پر MFA دوبارہ ترتیب دینے کا کہا جائے گا۔",
+	"resetMFAWarning": "اس عمل کو واپس نہیں کیا جا سکتا۔ صارف اپنے دوسرے عنصر تک رسائی کھو دے گا جب تک کہ وہ دوبارہ اندراج نہیں کر لیتا۔",
+	"mfaResetSuccessfully": "اس صارف کے لیے MFA دوبارہ ترتیب دیا گیا",
+	"errorResettingMFA": "اس صارف کا MFA دوبارہ ترتیب نہیں دیا جا سکا",
+	"cannotResetOwnMFA": "ایڈمنسٹریٹرز اس اینڈ پوائنٹ سے اپنا MFA دوبارہ ترتیب نہیں دے سکتے — عام MFA ترتیبات کا صفحہ استعمال کریں",
+	"userHasNoMFAEnabled": "اس صارف کا MFA فعال نہیں ہے",
 	"builderChangedOn": "میں تبدیل ہوا",
 	"requirementWeight": "وزن"
 }

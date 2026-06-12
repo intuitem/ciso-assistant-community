@@ -1790,6 +1790,16 @@
 	"builderQuestionTypeUniqueChoice": "Pilihan unik",
 	"builderQuestionTypeMultipleChoice": "Pilihan ganda",
 	"builderQuestionTypeDate": "Tanggal",
+	"resetMFA": "Atur Ulang MFA",
+	"resetMFA1": "Jika pengguna ini kehilangan akses ke faktor keduanya, Anda dapat",
+	"resetMFALinkText": "atur ulang MFA-nya",
+	"resetMFA2": "Semua autentikator MFA akan dihapus dan pengguna akan diminta untuk mendaftar ulang saat masuk berikutnya",
+	"resetMFAExplanation": "Ini akan menghapus semua autentikator MFA (TOTP, WebAuthn, kode pemulihan) untuk {email}. Pengguna akan diminta untuk mendaftarkan ulang MFA saat masuk berikutnya.",
+	"resetMFAWarning": "Tindakan ini tidak dapat dibatalkan. Pengguna akan kehilangan akses ke faktor keduanya hingga mendaftar ulang.",
+	"mfaResetSuccessfully": "MFA telah diatur ulang untuk pengguna ini",
+	"errorResettingMFA": "Tidak dapat mengatur ulang MFA untuk pengguna ini",
+	"cannotResetOwnMFA": "Admin tidak dapat mengatur ulang MFA mereka sendiri dari endpoint ini — gunakan halaman pengaturan MFA standar",
+	"userHasNoMFAEnabled": "Pengguna ini tidak memiliki MFA yang diaktifkan",
 	"builderChangedOn": "diubah pada",
 	"requirementWeight": "Bobot"
 }

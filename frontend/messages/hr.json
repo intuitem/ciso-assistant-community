@@ -4118,6 +4118,16 @@
 	"builderQuestionTypeUniqueChoice": "Jednostruki odabir",
 	"builderQuestionTypeMultipleChoice": "Višestruki odabir",
 	"builderQuestionTypeDate": "Datum",
+	"resetMFA": "Poništi MFA",
+	"resetMFA1": "Ako je ovaj korisnik izgubio pristup svom drugom faktoru, možete",
+	"resetMFALinkText": "poništiti njegov MFA",
+	"resetMFA2": "Svi MFA autentifikatori bit će uklonjeni i korisniku će biti zatraženo da se ponovno registrira pri sljedećoj prijavi",
+	"resetMFAExplanation": "Time će se ukloniti svi MFA autentifikatori (TOTP, WebAuthn, kodovi za oporavak) za {email}. Pri sljedećoj prijavi korisniku će biti zatraženo da ponovno postavi MFA.",
+	"resetMFAWarning": "Ovu radnju nije moguće poništiti. Korisnik će izgubiti pristup svom drugom faktoru dok se ponovno ne registrira.",
+	"mfaResetSuccessfully": "MFA je poništen za ovog korisnika",
+	"errorResettingMFA": "Nije bilo moguće poništiti MFA za ovog korisnika",
+	"cannotResetOwnMFA": "Administratori ne mogu poništiti vlastiti MFA s ove krajnje točke — koristite standardnu stranicu postavki MFA-a",
+	"userHasNoMFAEnabled": "Ovaj korisnik nema omogućen MFA",
 	"builderChangedOn": "promijenjeno u",
 	"requirementWeight": "Težina"
 }

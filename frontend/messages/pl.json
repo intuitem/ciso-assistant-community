@@ -2364,6 +2364,16 @@
 	"builderQuestionTypeUniqueChoice": "Unikalny wybór",
 	"builderQuestionTypeMultipleChoice": "Wielokrotny wybór",
 	"builderQuestionTypeDate": "Data",
+	"resetMFA": "Zresetuj MFA",
+	"resetMFA1": "Jeśli ten użytkownik utracił dostęp do drugiego czynnika, możesz",
+	"resetMFALinkText": "zresetować jego MFA",
+	"resetMFA2": "Wszystkie uwierzytelniacze MFA zostaną usunięte i użytkownik zostanie poproszony o ponowną rejestrację przy następnym logowaniu",
+	"resetMFAExplanation": "Spowoduje to usunięcie wszystkich uwierzytelniaczy MFA (TOTP, WebAuthn, kody odzyskiwania) dla {email}. Użytkownik zostanie poproszony o ponowne skonfigurowanie MFA przy następnym logowaniu.",
+	"resetMFAWarning": "Tej operacji nie można cofnąć. Użytkownik straci dostęp do drugiego czynnika, dopóki nie zarejestruje go ponownie.",
+	"mfaResetSuccessfully": "MFA zostało zresetowane dla tego użytkownika",
+	"errorResettingMFA": "Nie można zresetować MFA tego użytkownika",
+	"cannotResetOwnMFA": "Administratorzy nie mogą resetować własnego MFA przez ten punkt końcowy — użyj zwykłej strony ustawień MFA",
+	"userHasNoMFAEnabled": "Ten użytkownik nie ma włączonego MFA",
 	"builderChangedOn": "zmienione w",
 	"requirementWeight": "Waga"
 }

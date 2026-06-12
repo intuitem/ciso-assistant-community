@@ -447,6 +447,7 @@ export const UserEditSchema = z.object({
 	last_name: z.string().optional(),
 	is_active: z.boolean().optional(),
 	keep_local_login: z.boolean().optional(),
+	has_mfa_enabled: z.boolean().optional(),
 	user_groups: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),
 	expiry_date: z

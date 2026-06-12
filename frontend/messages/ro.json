@@ -1621,6 +1621,16 @@
 	"builderQuestionTypeUniqueChoice": "Alegere unică",
 	"builderQuestionTypeMultipleChoice": "Alegere multiplă",
 	"builderQuestionTypeDate": "Data",
+	"resetMFA": "Resetare MFA",
+	"resetMFA1": "Dacă acest utilizator a pierdut accesul la al doilea factor, puteți",
+	"resetMFALinkText": "reseta MFA-ul său",
+	"resetMFA2": "Toți autentificatorii MFA vor fi eliminați și utilizatorului i se va cere să se înregistreze din nou la următoarea autentificare",
+	"resetMFAExplanation": "Aceasta va elimina toți autentificatorii MFA (TOTP, WebAuthn, coduri de recuperare) pentru {email}. Utilizatorului i se va cere să reconfigureze MFA la următoarea autentificare.",
+	"resetMFAWarning": "Această acțiune nu poate fi anulată. Utilizatorul va pierde accesul la al doilea factor până la reînregistrare.",
+	"mfaResetSuccessfully": "MFA a fost resetat pentru acest utilizator",
+	"errorResettingMFA": "MFA nu a putut fi resetat pentru acest utilizator",
+	"cannotResetOwnMFA": "Administratorii nu își pot reseta propriul MFA prin acest endpoint — folosiți pagina obișnuită de setări MFA",
+	"userHasNoMFAEnabled": "Acest utilizator nu are MFA activat",
 	"builderChangedOn": "modificat în",
 	"requirementWeight": "Pondere"
 }

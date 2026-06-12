@@ -11,6 +11,10 @@
 	}
 
 	let { data }: Props = $props();
+
+	const isAdmin = $derived(Boolean(page.data.user?.is_admin));
+	const isSelf = $derived(page.data.user?.id === data.object.id);
+	const showResetMFA = $derived(isAdmin && !isSelf && data.object.has_mfa_enabled === true);
 </script>
 
 <div class="card bg-white shadow-sm p-4">
@@ -26,6 +30,19 @@
 				class="text-primary-700 hover:text-primary-500"
 				data-testid="set-password-btn">{m.setTemporaryPassword()}</a
 			>. {m.setTemporaryPassword2()}.
+		</p>
+	</div>
+{/if}
+
+{#if showResetMFA}
+	<div class="card bg-white shadow-sm p-4 mt-2">
+		<p class="text-gray-500 text-sm">
+			{m.resetMFA1()}
+			<a
+				href="{page.url.pathname}/reset-mfa"
+				class="text-primary-700 hover:text-primary-500"
+				data-testid="reset-mfa-btn">{m.resetMFALinkText()}</a
+			>. {m.resetMFA2()}.
 		</p>
 	</div>
 {/if}

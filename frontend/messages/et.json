@@ -4840,5 +4840,15 @@
 	"builderQuestionTypeMultipleChoice": "Mitmikvalik",
 	"builderQuestionTypeDate": "Kuupäev",
 	"builderChangedOn": "muudetud",
+	"resetMFA": "Lähtesta MFA",
+	"resetMFA1": "Kui see kasutaja on kaotanud juurdepääsu oma teisele tegurile, saate",
+	"resetMFALinkText": "tema MFA lähtestada",
+	"resetMFA2": "Kõik MFA autentijad eemaldatakse ja kasutajal palutakse järgmisel sisselogimisel uuesti registreeruda",
+	"resetMFAExplanation": "See eemaldab kõik MFA autentijad (TOTP, WebAuthn, taastekoodid) kasutaja {email} jaoks. Kasutajal palutakse järgmisel sisselogimisel MFA uuesti seadistada.",
+	"resetMFAWarning": "Seda toimingut ei saa tagasi võtta. Kasutaja kaotab juurdepääsu oma teisele tegurile, kuni see on uuesti seadistatud.",
+	"mfaResetSuccessfully": "MFA on selle kasutaja jaoks lähtestatud",
+	"errorResettingMFA": "Selle kasutaja MFA-d ei õnnestunud lähtestada",
+	"cannotResetOwnMFA": "Administraatorid ei saa selle lõpp-punkti kaudu oma MFA-d lähtestada — kasutage tavalist MFA seadete lehte",
+	"userHasNoMFAEnabled": "Sellel kasutajal ei ole MFA lubatud",
 	"requirementWeight": "Kaal"
 }

@@ -1907,6 +1907,16 @@
 	"builderQuestionTypeUniqueChoice": "Enkelt valg",
 	"builderQuestionTypeMultipleChoice": "Flere valg",
 	"builderQuestionTypeDate": "Dato",
+	"resetMFA": "Nulstil MFA",
+	"resetMFA1": "Hvis denne bruger har mistet adgang til sin anden faktor, kan du",
+	"resetMFALinkText": "nulstille deres MFA",
+	"resetMFA2": "Alle MFA-godkendere fjernes, og brugeren bliver bedt om at registrere sig igen ved næste login",
+	"resetMFAExplanation": "Dette fjerner alle MFA-godkendere (TOTP, WebAuthn, gendannelseskoder) for {email}. Brugeren bliver bedt om at registrere MFA igen ved næste login.",
+	"resetMFAWarning": "Denne handling kan ikke fortrydes. Brugeren mister adgang til sin anden faktor, indtil den er registreret igen.",
+	"mfaResetSuccessfully": "MFA er nulstillet for denne bruger",
+	"errorResettingMFA": "Kunne ikke nulstille MFA for denne bruger",
+	"cannotResetOwnMFA": "Administratorer kan ikke nulstille deres egen MFA fra dette endepunkt — brug den almindelige MFA-indstillingsside i stedet",
+	"userHasNoMFAEnabled": "Denne bruger har ikke MFA aktiveret",
 	"builderChangedOn": "ændret i",
 	"requirementWeight": "Vægt"
 }

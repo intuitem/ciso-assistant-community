@@ -2852,6 +2852,16 @@
 	"builderQuestionTypeUniqueChoice": "Scelta unica",
 	"builderQuestionTypeMultipleChoice": "Scelta multipla",
 	"builderQuestionTypeDate": "Data",
+	"resetMFA": "Reimposta MFA",
+	"resetMFA1": "Se questo utente ha perso l'accesso al suo secondo fattore, è possibile",
+	"resetMFALinkText": "reimpostare la sua MFA",
+	"resetMFA2": "Tutti i suoi autenticatori MFA verranno rimossi e gli verrà chiesto di registrarsi nuovamente al prossimo accesso",
+	"resetMFAExplanation": "Questo rimuoverà tutti gli autenticatori MFA (TOTP, WebAuthn, codici di ripristino) per {email}. All'utente verrà chiesto di riconfigurare la MFA al prossimo accesso.",
+	"resetMFAWarning": "Questa azione non può essere annullata. L'utente perderà l'accesso al suo secondo fattore fino alla nuova registrazione.",
+	"mfaResetSuccessfully": "La MFA è stata reimpostata per questo utente",
+	"errorResettingMFA": "Impossibile reimpostare la MFA di questo utente",
+	"cannotResetOwnMFA": "Gli amministratori non possono reimpostare la propria MFA da questo endpoint — utilizzare la pagina delle impostazioni MFA",
+	"userHasNoMFAEnabled": "Questo utente non ha la MFA attivata",
 	"builderChangedOn": "modificato in",
 	"requirementWeight": "Peso"
 }

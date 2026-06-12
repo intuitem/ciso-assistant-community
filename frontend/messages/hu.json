@@ -1605,6 +1605,16 @@
 	"builderQuestionTypeUniqueChoice": "Single choice",
 	"builderQuestionTypeMultipleChoice": "Multiple choice",
 	"builderQuestionTypeDate": "Date",
+	"resetMFA": "MFA visszaállítása",
+	"resetMFA1": "Ha ez a felhasználó elvesztette a hozzáférést a második tényezőjéhez, akkor",
+	"resetMFALinkText": "visszaállíthatja az MFA-ját",
+	"resetMFA2": "Minden MFA-hitelesítő eltávolításra kerül, és a felhasználót a következő bejelentkezéskor újra regisztrálnia kell",
+	"resetMFAExplanation": "Ez eltávolítja az összes MFA-hitelesítőt (TOTP, WebAuthn, helyreállítási kódok) a {email} esetében. A felhasználót a következő bejelentkezéskor felkérik az MFA újbóli beállítására.",
+	"resetMFAWarning": "Ez a művelet nem vonható vissza. A felhasználó elveszíti a hozzáférést a második tényezőjéhez, amíg újra nem regisztrálja azt.",
+	"mfaResetSuccessfully": "Az MFA visszaállításra került ennél a felhasználónál",
+	"errorResettingMFA": "Nem sikerült visszaállítani a felhasználó MFA-ját",
+	"cannotResetOwnMFA": "Az adminisztrátorok nem állíthatják vissza saját MFA-jukat ezen a végponton — használja a normál MFA beállítási oldalt",
+	"userHasNoMFAEnabled": "Ennél a felhasználónál nincs engedélyezve az MFA",
 	"builderChangedOn": "módosítva itt:",
 	"requirementWeight": "Súly"
 }

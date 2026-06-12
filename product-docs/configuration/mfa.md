@@ -71,6 +71,29 @@ After enabling MFA, you'll receive a set of recovery codes. These codes are cruc
 
 <figure><img src="../.gitbook/assets/image (32).png" alt=""><figcaption></figcaption></figure>
 
+## Admin recovery: resetting another user's MFA
+
+If a user has lost access to every enrolled second factor (phone wiped, hardware key lost) **and** has no recovery codes left, an administrator can reset their MFA from the user's edit page:
+
+1. Sign in as an administrator and navigate to **Organization → Users**.
+2. Open the affected user and click **Edit**. In the security section of the edit page, click **reset their MFA**.
+
+<figure><img src="../.gitbook/assets/mfa-in-settings.png" alt=""><figcaption><p>The "Reset MFA" link on a user's edit page (visible only to admins, when the target user has MFA enabled).</p></figcaption></figure>
+
+3. On the confirmation page, type the confirmation word shown on screen (the localized word for "yes") and submit.
+
+<figure><img src="../.gitbook/assets/mfa-reset-confirmation.png" alt=""><figcaption><p>The confirmation page requires typing the localized confirmation word shown on screen before the reset can be submitted.</p></figcaption></figure>
+
+All of the user's MFA authenticators (TOTP, WebAuthn credentials, recovery codes) are removed. The user will be prompted to re-enroll MFA on their next login.
+
+{% hint style="warning" %}
+**Audit notes:**
+
+- Every admin reset is logged on the backend (admin id/email, target id/email, number of authenticators removed).
+- Admins cannot reset their *own* MFA through this flow — use the standard MFA settings page (which requires the current second factor) instead. This prevents a hijacked admin session from silently dropping the second factor.
+- Only users in the built-in Global - administrator group can perform the reset.
+{% endhint %}
+
 ## Logging in with MFA
 
 When MFA is enabled, the login flow asks for a second factor after the password. If you've enrolled both a security key and TOTP, the platform prefers the security key prompt by default and offers a "use authenticator app instead" link as a fallback. Either method completes the sign-in.

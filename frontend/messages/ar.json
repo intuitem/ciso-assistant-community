@@ -1600,6 +1600,16 @@
 	"builderQuestionTypeUniqueChoice": "اختيار فريد",
 	"builderQuestionTypeMultipleChoice": "اختيار متعدد",
 	"builderQuestionTypeDate": "التاريخ",
-	"builderChangedOn": "تم التغيير في",
+	"builderChangedOn": "changed on",
+	"resetMFA": "إعادة تعيين MFA",
+	"resetMFA1": "إذا فقد هذا المستخدم الوصول إلى عامله الثاني، يمكنك",
+	"resetMFALinkText": "إعادة تعيين MFA الخاص به",
+	"resetMFA2": "ستتم إزالة جميع مصادقي MFA وسيُطلب من المستخدم التسجيل مرة أخرى عند تسجيل الدخول التالي",
+	"resetMFAExplanation": "سيؤدي هذا إلى إزالة جميع مصادقي MFA (TOTP، WebAuthn، رموز الاسترداد) للمستخدم {email}. ستتم مطالبته بإعادة تسجيل MFA عند تسجيل الدخول التالي.",
+	"resetMFAWarning": "لا يمكن التراجع عن هذا الإجراء. سيفقد المستخدم الوصول إلى عامله الثاني حتى يقوم بالتسجيل مرة أخرى.",
+	"mfaResetSuccessfully": "تمت إعادة تعيين MFA لهذا المستخدم",
+	"errorResettingMFA": "تعذرت إعادة تعيين MFA لهذا المستخدم",
+	"cannotResetOwnMFA": "لا يمكن للمسؤولين إعادة تعيين MFA الخاص بهم من هذه النقطة الطرفية — استخدم صفحة إعدادات MFA العادية",
+	"userHasNoMFAEnabled": "هذا المستخدم لا يملك MFA مفعلة",
 	"requirementWeight": "الوزن"
 }

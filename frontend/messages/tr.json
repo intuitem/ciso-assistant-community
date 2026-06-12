@@ -2357,6 +2357,16 @@
 	"builderQuestionTypeUniqueChoice": "Tek seçim",
 	"builderQuestionTypeMultipleChoice": "Çoktan seçmeli",
 	"builderQuestionTypeDate": "Tarih",
+	"resetMFA": "MFA'yı sıfırla",
+	"resetMFA1": "Bu kullanıcı ikinci faktörüne erişimi kaybettiyse",
+	"resetMFALinkText": "MFA'sını sıfırlayabilirsiniz",
+	"resetMFA2": "Tüm MFA kimlik doğrulayıcıları kaldırılacak ve kullanıcının bir sonraki oturum açışında yeniden kaydolması istenecek",
+	"resetMFAExplanation": "Bu işlem {email} için tüm MFA kimlik doğrulayıcılarını (TOTP, WebAuthn, kurtarma kodları) kaldırır. Kullanıcıdan bir sonraki oturum açışında MFA'yı yeniden kaydetmesi istenecek.",
+	"resetMFAWarning": "Bu işlem geri alınamaz. Kullanıcı, yeniden kaydedene kadar ikinci faktörüne erişimini kaybedecek.",
+	"mfaResetSuccessfully": "Bu kullanıcı için MFA sıfırlandı",
+	"errorResettingMFA": "Bu kullanıcının MFA'sı sıfırlanamadı",
+	"cannotResetOwnMFA": "Yöneticiler bu uç noktadan kendi MFA'larını sıfırlayamaz — bunun yerine standart MFA ayarları sayfasını kullanın",
+	"userHasNoMFAEnabled": "Bu kullanıcının MFA'sı etkin değil",
 	"builderChangedOn": "değiştirildi:",
 	"requirementWeight": "Ağırlık"
 }

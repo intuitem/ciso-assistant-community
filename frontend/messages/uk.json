@@ -2123,6 +2123,16 @@
 	"builderQuestionTypeUniqueChoice": "Single choice",
 	"builderQuestionTypeMultipleChoice": "Multiple choice",
 	"builderQuestionTypeDate": "Дата",
+	"resetMFA": "Скинути MFA",
+	"resetMFA1": "Якщо цей користувач втратив доступ до другого фактора, ви можете",
+	"resetMFALinkText": "скинути його MFA",
+	"resetMFA2": "Усі автентифікатори MFA буде видалено, і користувачеві буде запропоновано зареєструватися знову під час наступного входу",
+	"resetMFAExplanation": "Це видалить усі автентифікатори MFA (TOTP, WebAuthn, коди відновлення) для {email}. Користувачеві буде запропоновано знову зареєструвати MFA під час наступного входу.",
+	"resetMFAWarning": "Цю дію не можна скасувати. Користувач втратить доступ до другого фактора, доки не зареєструється знову.",
+	"mfaResetSuccessfully": "MFA скинуто для цього користувача",
+	"errorResettingMFA": "Не вдалося скинути MFA для цього користувача",
+	"cannotResetOwnMFA": "Адміністратори не можуть скинути власний MFA через цей ендпоінт — використайте звичайну сторінку налаштувань MFA",
+	"userHasNoMFAEnabled": "У цього користувача не ввімкнено MFA",
 	"builderChangedOn": "змінено в",
 	"requirementWeight": "Вага"
 }

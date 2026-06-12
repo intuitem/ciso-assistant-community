@@ -5012,5 +5012,15 @@
 	"scoreRange": "Score range",
 	"scoreScale": "Score scale",
 	"downloadExcelTemplate": "Download Excel template",
-	"frameworkActionsHelp": "The Excel template is meant for third parties or external entities to fill offline, then re-import the results through the {dataWizard}."
+	"frameworkActionsHelp": "The Excel template is meant for third parties or external entities to fill offline, then re-import the results through the {dataWizard}.",
+	"resetMFA": "Reset MFA",
+	"resetMFA1": "If this user has lost access to their second factor, you can",
+	"resetMFALinkText": "reset their MFA",
+	"resetMFA2": "All their MFA authenticators will be removed and they will be prompted to re-enroll on their next login",
+	"resetMFAExplanation": "This will remove all MFA authenticators (TOTP, WebAuthn, recovery codes) for {email}. They will be prompted to re-enroll MFA on their next login.",
+	"resetMFAWarning": "This action cannot be undone. The user will lose access to their second factor until they re-enroll.",
+	"mfaResetSuccessfully": "MFA has been reset for this user",
+	"errorResettingMFA": "Could not reset MFA for this user",
+	"cannotResetOwnMFA": "Admins cannot reset their own MFA from this endpoint — use the normal MFA settings page",
+	"userHasNoMFAEnabled": "This user does not have MFA enabled"
 }
