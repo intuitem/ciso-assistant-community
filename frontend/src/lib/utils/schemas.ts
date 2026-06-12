@@ -1883,9 +1883,9 @@ export const webhookEndpointSchema = z.object({
 export const auditSinkSchema = z.object({
 	...NameDescriptionMixin,
 	id: z.string().optional(),
-	transport: z.enum(['http', 'kafka']).default('http'),
+	transport: z.enum(['http', 'kafka', 'syslog']).default('http'),
 	url: z.string().url().optional().or(z.literal('')),
-	body_format: z.enum(['ocsf', 'raw']).default('ocsf'),
+	body_format: z.enum(['ocsf', 'raw', 'cef', 'leef']).default('ocsf'),
 	// HTTP: JSON of auth headers, parsed server-side.
 	headers: z.string().optional(),
 	// Kafka: assembled server-side into kafka_config {bootstrap_servers, topic, config}.
@@ -1897,6 +1897,10 @@ export const auditSinkSchema = z.object({
 	sasl_mechanism: z.string().optional(),
 	sasl_username: z.string().optional(),
 	sasl_password: z.string().optional(),
+	// Syslog: assembled server-side into syslog_config {host, port, protocol}.
+	syslog_host: z.string().optional(),
+	syslog_port: z.string().optional(),
+	syslog_protocol: z.enum(['tcp', 'udp', 'tls']).default('tcp'),
 	target_folders: z.string().uuid().optional().array().optional(),
 	is_active: z.boolean().default(true)
 });

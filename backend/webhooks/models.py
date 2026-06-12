@@ -40,11 +40,14 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
     class Transport(models.TextChoices):
         HTTP = "http", "HTTP"
         KAFKA = "kafka", "Kafka"
+        SYSLOG = "syslog", "Syslog"
 
     class BodyFormat(models.TextChoices):
         CISO_NATIVE = "ciso_native", "CISO Assistant (HMAC-signed)"
         OCSF = "ocsf", "OCSF"
         RAW = "raw", "Raw LogEntry"
+        CEF = "cef", "CEF"
+        LEEF = "leef", "LEEF"
 
     payload_format = models.CharField(
         verbose_name="Payload Format",
@@ -101,6 +104,12 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
         default=dict,
         blank=True,
         help_text="Kafka transport: {bootstrap_servers, topic, config:{...}}.",
+    )
+
+    syslog_config = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Syslog transport: {host, port, protocol: tcp|udp|tls}.",
     )
 
     secret = models.CharField(

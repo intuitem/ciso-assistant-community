@@ -101,7 +101,14 @@
 								<span class="badge preset-tonal-primary uppercase">{sink.body_format}</span>
 							</div>
 							<span class="text-sm text-gray-500 truncate">
-								{sink.transport === 'kafka' ? sink.kafka_config?.bootstrap_servers : sink.url}
+								{#if sink.transport === 'kafka'}
+									{sink.kafka_config?.bootstrap_servers}
+								{:else if sink.transport === 'syslog'}
+									{sink.syslog_config?.protocol}://{sink.syslog_config?.host}:{sink.syslog_config
+										?.port}
+								{:else}
+									{sink.url}
+								{/if}
 							</span>
 						</div>
 						<div class="flex items-center gap-2 shrink-0">

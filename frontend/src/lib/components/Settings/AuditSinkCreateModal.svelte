@@ -66,7 +66,10 @@
 			security_protocol: sasl.security_protocol ?? 'PLAINTEXT',
 			sasl_mechanism: sasl.sasl_mechanism ?? '',
 			sasl_username: sasl.sasl_plain_username ?? '',
-			sasl_password: sasl.sasl_plain_password ?? ''
+			sasl_password: sasl.sasl_plain_password ?? '',
+			syslog_host: (initialData.syslog_config ?? {}).host ?? '',
+			syslog_port: (initialData.syslog_config ?? {}).port ?? '',
+			syslog_protocol: (initialData.syslog_config ?? {}).protocol ?? 'tcp'
 		}));
 	}
 
@@ -118,7 +121,8 @@
 					label={m.transport()}
 					possibleOptions={[
 						{ label: 'HTTP', value: 'http' },
-						{ label: 'Kafka', value: 'kafka' }
+						{ label: 'Kafka', value: 'kafka' },
+						{ label: 'Syslog', value: 'syslog' }
 					]}
 					labelKey="label"
 					valueKey="value"
@@ -129,7 +133,9 @@
 					label={m.bodyFormat()}
 					possibleOptions={[
 						{ label: 'OCSF', value: 'ocsf' },
-						{ label: m.raw(), value: 'raw' }
+						{ label: m.raw(), value: 'raw' },
+						{ label: 'CEF', value: 'cef' },
+						{ label: 'LEEF', value: 'leef' }
 					]}
 					labelKey="label"
 					valueKey="value"
@@ -181,6 +187,26 @@
 							autocomplete="off"
 						/>
 					</Dropdown>
+				{:else if $transport === 'syslog'}
+					<TextField {form} field="syslog_host" label={m.syslogHost()} autocomplete="off" />
+					<TextField
+						{form}
+						field="syslog_port"
+						label={m.syslogPort()}
+						type="number"
+						placeholder="514"
+						autocomplete="off"
+					/>
+					<Select
+						{form}
+						field="syslog_protocol"
+						label={m.protocol()}
+						options={[
+							{ label: 'TCP', value: 'tcp' },
+							{ label: 'UDP', value: 'udp' },
+							{ label: 'TLS', value: 'tls' }
+						]}
+					/>
 				{:else}
 					<TextField {form} field="url" label={m.url()} autocomplete="off" />
 					<TextField

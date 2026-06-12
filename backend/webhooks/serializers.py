@@ -96,6 +96,7 @@ class AuditSinkSerializer(BaseModelSerializer):
             "body_format",
             "headers",
             "kafka_config",
+            "syslog_config",
             "is_active",
             "target_folders",
             "folder",
