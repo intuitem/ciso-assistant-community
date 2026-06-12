@@ -1882,10 +1882,21 @@ export const webhookEndpointSchema = z.object({
 
 export const auditSinkSchema = z.object({
 	...NameDescriptionMixin,
-	url: z.string().url(),
+	id: z.string().optional(),
+	transport: z.enum(['http', 'kafka']).default('http'),
+	url: z.string().url().optional().or(z.literal('')),
 	body_format: z.enum(['ocsf', 'raw']).default('ocsf'),
-	// JSON object of static auth headers, edited as text and parsed server-side.
+	// HTTP: JSON of auth headers, parsed server-side.
 	headers: z.string().optional(),
+	// Kafka: assembled server-side into kafka_config {bootstrap_servers, topic, config}.
+	bootstrap_servers: z.string().optional(),
+	topic: z.string().optional(),
+	security_protocol: z
+		.enum(['PLAINTEXT', 'SSL', 'SASL_PLAINTEXT', 'SASL_SSL'])
+		.default('PLAINTEXT'),
+	sasl_mechanism: z.string().optional(),
+	sasl_username: z.string().optional(),
+	sasl_password: z.string().optional(),
 	target_folders: z.string().uuid().optional().array().optional(),
 	is_active: z.boolean().default(true)
 });

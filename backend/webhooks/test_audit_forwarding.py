@@ -229,3 +229,56 @@ def test_send_audit_request_uses_static_headers_no_hmac(root_folder):
     sent_headers = post.call_args.kwargs["headers"]
     assert sent_headers["Authorization"] == "Splunk token"  # static auth, not HMAC
     assert not any(h.startswith("webhook-") for h in sent_headers)  # no HMAC envelope
+
+
+@pytest.mark.django_db
+def test_dispatch_routes_to_kafka_transport(root_folder):
+    ep = _make_audit_sink(
+        root_folder,
+        transport=WebhookEndpoint.Transport.KAFKA,
+        kafka_config={"bootstrap_servers": "kafka:9092", "topic": "audit"},
+    )
+    _, le = _create_entry("P-kafka", root_folder)
+    with (
+        patch.object(tasks, "ff_is_enabled", return_value=True),
+        patch.object(tasks, "send_audit_to_kafka") as kafka_send,
+        patch.object(tasks, "send_audit_request") as http_send,
+    ):
+        tasks.dispatch_audit_event.call_local(str(le.pk))
+    assert kafka_send.schedule.call_count == 1
+    http_send.schedule.assert_not_called()
+    assert kafka_send.schedule.call_args.kwargs["args"][0] == str(ep.id)
+
+
+@pytest.mark.django_db
+def test_send_audit_to_kafka_produces(root_folder):
+    ep = _make_audit_sink(
+        root_folder,
+        transport=WebhookEndpoint.Transport.KAFKA,
+        kafka_config={
+            "bootstrap_servers": "kafka:9092",
+            "topic": "audit-topic",
+            "config": {"security_protocol": "SASL_SSL"},
+        },
+    )
+    producer = MagicMock()
+    with patch.object(tasks, "_make_producer", return_value=producer) as make:
+        result = tasks.send_audit_to_kafka.call_local(str(ep.id), {"class_uid": 6003})
+    assert result.startswith("Success")
+    make.assert_called_once()
+    (topic,) = producer.send.call_args.args
+    assert topic == "audit-topic"
+    assert producer.send.call_args.kwargs["value"] == b'{"class_uid":6003}'
+    producer.send.return_value.get.assert_called_once()  # delivery confirmed
+    producer.close.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_send_audit_to_kafka_misconfigured(root_folder):
+    ep = _make_audit_sink(
+        root_folder, transport=WebhookEndpoint.Transport.KAFKA, kafka_config={}
+    )
+    with patch.object(tasks, "_make_producer") as make:
+        result = tasks.send_audit_to_kafka.call_local(str(ep.id), {"class_uid": 6003})
+    assert result.startswith("Misconfigured")
+    make.assert_not_called()

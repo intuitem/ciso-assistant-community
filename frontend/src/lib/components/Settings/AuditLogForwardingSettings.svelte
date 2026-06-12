@@ -37,6 +37,24 @@
 		modalStore.trigger(modal);
 	}
 
+	function modalEdit(sink: Record<string, any>): void {
+		const modalComponent: ModalComponent = {
+			ref: AuditSinkCreateModal,
+			props: {
+				form: data.auditSinkCreateForm,
+				formAction: '?/updateAuditSink',
+				initialData: sink,
+				invalidateAll: true
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.editAuditSink()
+		};
+		modalStore.trigger(modal);
+	}
+
 	function modalReplay(id: string): void {
 		const modalComponent: ModalComponent = {
 			ref: AuditSinkReplayModal,
@@ -82,9 +100,15 @@
 								</span>
 								<span class="badge preset-tonal-primary uppercase">{sink.body_format}</span>
 							</div>
-							<span class="text-sm text-gray-500 truncate">{sink.url}</span>
+							<span class="text-sm text-gray-500 truncate">
+								{sink.transport === 'kafka' ? sink.kafka_config?.bootstrap_servers : sink.url}
+							</span>
 						</div>
 						<div class="flex items-center gap-2 shrink-0">
+							<button class="btn btn-sm preset-tonal-surface" onclick={() => modalEdit(sink)}>
+								<i class="fa-solid fa-pen-to-square mr-1"></i>
+								{m.edit()}
+							</button>
 							<button
 								class="btn btn-sm preset-tonal-secondary"
 								onclick={() => modalReplay(sink.id)}

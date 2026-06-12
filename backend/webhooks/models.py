@@ -91,7 +91,16 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
     )
 
     url = models.URLField(
-        max_length=512, help_text="The consumer URL to send webhook events to."
+        max_length=512,
+        blank=True,
+        default="",
+        help_text="Consumer URL (HTTP transport).",
+    )
+
+    kafka_config = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Kafka transport: {bootstrap_servers, topic, config:{...}}.",
     )
 
     secret = models.CharField(
@@ -123,6 +132,8 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
 
     def clean(self):
         super().clean()
+        if self.transport != self.Transport.HTTP:
+            return
         if getattr(settings, "WEBHOOK_ALLOW_PRIVATE_IPS", False):
             return
         try:
