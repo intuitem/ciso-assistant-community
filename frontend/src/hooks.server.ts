@@ -5,8 +5,13 @@ import { redirect, type Handle, type HandleFetch, type RequestEvent } from '@sve
 import { setFlash } from 'sveltekit-flash-message/server';
 
 import { loadFeatureFlags } from '$lib/feature-flags';
+import { logger, installJsonConsole } from '$lib/server/logger';
 import { paraglideMiddleware } from '$paraglide/server';
 import { defineCustomServerStrategy } from '$paraglide/runtime';
+
+// Runs once at server start. When LOG_FORMAT=json, routes the whole SSR stdout
+// stream (including not-yet-migrated console.* call sites) through JSON output.
+installJsonConsole();
 
 const fallbackLocaleStore = new WeakMap<Request, string>();
 
@@ -47,7 +52,7 @@ async function fetchDefaultLanguage(): Promise<string> {
 			if (typeof language === 'string' && language.length > 0) return language;
 		}
 	} catch (error) {
-		console.error('Unable to fetch default language', error);
+		logger.error('Unable to fetch default language', { error });
 	}
 	return DEFAULT_LANGUAGE;
 }
@@ -87,13 +92,15 @@ async function ensureCsrfToken(event: RequestEvent): Promise<string> {
 				headers: { 'content-type': 'application/json' }
 			});
 			if (!response.ok) {
-				console.error(`CSRF endpoint returned ${response.status}`);
+				logger.error('CSRF endpoint returned an error status', {
+					status: response.status
+				});
 				return csrfToken;
 			}
 			const data = await response.json();
 			const token = data?.csrfToken;
 			if (typeof token !== 'string' || token.length === 0) {
-				console.error('CSRF endpoint returned an invalid token payload');
+				logger.error('CSRF endpoint returned an invalid token payload');
 				return csrfToken;
 			}
 			csrfToken = token;
@@ -104,7 +111,7 @@ async function ensureCsrfToken(event: RequestEvent): Promise<string> {
 				secure: true
 			});
 		} catch (error) {
-			console.error('Unable to fetch CSRF token', error);
+			logger.error('Unable to fetch CSRF token', { error });
 		}
 	}
 	return csrfToken;
@@ -195,7 +202,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 			try {
 				event.locals.featureflags = await featureFlagSettings.json();
 			} catch (e) {
-				console.error('Error fetching feature flags', e);
+				logger.error('Error fetching feature flags', { error: e });
 				event.locals.featureflags = {};
 			}
 		}
