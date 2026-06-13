@@ -32,7 +32,7 @@ LOG_FORMAT=json   # default: plain
 
 The backend and the Huey worker share the same logging configuration, so this one variable covers both. Setting it on the frontend container routes the SvelteKit server process — authentication events, request errors — through the same JSON shape.
 
-The log level defaults to `INFO`, which captures request-level events. Adjust it if you need more or less detail:
+The log level also applies to all three streams and defaults to `INFO`, which captures request-level events. Adjust it if you need more or less detail:
 
 ```bash
 LOG_LEVEL=INFO    # default: INFO. Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
@@ -89,10 +89,10 @@ Sensitive OAuth2 query parameters (`code`, `token`, `id_token`, `access_token`) 
 
 ## Optional: also write the backend log to a file
 
-In addition to standard output, the backend can mirror its logs to a file (always in JSON, regardless of `LOG_FORMAT`):
+In addition to standard output, the backend can mirror its logs to a file. Set `LOG_OUTFILE` to the destination path; the file is always written in JSON, regardless of `LOG_FORMAT`. Leave it empty (the default) to log to stdout only.
 
 ```bash
-LOG_OUTFILE=ciso-assistant.log
+LOG_OUTFILE=/var/log/ciso-assistant/backend.log
 ```
 
 This is useful when a log shipper tails a file rather than the container's stdout.

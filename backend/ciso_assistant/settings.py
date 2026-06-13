@@ -95,7 +95,7 @@ if LOG_OUTFILE:
     LOGGING["handlers"]["file"] = {
         "level": LOG_LEVEL,
         "class": "logging.handlers.WatchedFileHandler",
-        "filename": "ciso-assistant.log",
+        "filename": LOG_OUTFILE,
         "formatter": "json",
     }
     LOGGING["loggers"][""]["handlers"].append("file")

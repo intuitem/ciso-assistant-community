@@ -32,15 +32,23 @@ const nativeConsole = {
 	error: console.error.bind(console)
 };
 
+// Numeric severities mirror Python's logging levels so LOG_LEVEL is honoured
+// identically across the backend, worker and frontend streams.
+const LEVEL_SEVERITY: Record<Level, number> = {
+	debug: 10,
+	info: 20,
+	warning: 30,
+	error: 40,
+	critical: 50
+};
+
 function jsonEnabled(): boolean {
 	return (env.LOG_FORMAT ?? 'plain').toLowerCase() === 'json';
 }
 
-function serializeError(value: unknown): Record<string, unknown> {
-	if (value instanceof Error) {
-		return { exception: value.stack || `${value.name}: ${value.message}` };
-	}
-	return { error: typeof value === 'string' ? value : safeJson(value) };
+function thresholdSeverity(): number {
+	const name = (env.LOG_LEVEL ?? 'INFO').toLowerCase() as Level;
+	return LEVEL_SEVERITY[name] ?? LEVEL_SEVERITY.info;
 }
 
 function safeJson(value: unknown): string {
@@ -51,10 +59,36 @@ function safeJson(value: unknown): string {
 	}
 }
 
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+	if (value === null || typeof value !== 'object') return false;
+	const proto = Object.getPrototypeOf(value);
+	return proto === Object.prototype || proto === null;
+}
+
+function errorToString(value: Error): string {
+	return value.stack || `${value.name}: ${value.message}`;
+}
+
+// Render any Error-valued field as a stack-trace string under `exception`,
+// matching structlog's format_exc_info output on the backend. This keeps a
+// single error schema whether the Error arrived via logger.error('msg', { error })
+// or via a bridged console.error(err) call.
+function normalizeFields(fields?: Record<string, unknown>): Record<string, unknown> | undefined {
+	if (!fields) return undefined;
+	const out: Record<string, unknown> = {};
+	for (const [key, value] of Object.entries(fields)) {
+		if (value instanceof Error) out.exception = errorToString(value);
+		else out[key] = value;
+	}
+	return out;
+}
+
 function emit(level: Level, event: string, fields?: Record<string, unknown>): void {
+	if (LEVEL_SEVERITY[level] < thresholdSeverity()) return;
 	const method = nativeConsole[LEVEL_METHOD[level]];
+	const normalized = normalizeFields(fields);
 	if (!jsonEnabled()) {
-		method(`[${level}] ${event}`, fields && Object.keys(fields).length ? fields : '');
+		method(`[${level}] ${event}`, normalized && Object.keys(normalized).length ? normalized : '');
 		return;
 	}
 	const record: Record<string, unknown> = {
@@ -62,16 +96,9 @@ function emit(level: Level, event: string, fields?: Record<string, unknown>): vo
 		level,
 		logger: 'frontend',
 		event,
-		...fields
+		...normalized
 	};
-	// JSON.stringify renders Error instances as {}; surface name/message/stack instead.
-	method(
-		JSON.stringify(record, (_key, value) =>
-			value instanceof Error
-				? { name: value.name, message: value.message, stack: value.stack }
-				: value
-		)
-	);
+	method(JSON.stringify(record));
 }
 
 export const logger = {
@@ -99,9 +126,12 @@ export function installJsonConsole(): void {
 			let fields: Record<string, unknown> = {};
 			for (const arg of args) {
 				if (arg instanceof Error) {
-					fields = { ...fields, ...serializeError(arg) };
-				} else if (arg && typeof arg === 'object') {
-					fields = { ...fields, ...(arg as Record<string, unknown>) };
+					fields = { ...fields, exception: errorToString(arg) };
+				} else if (isPlainObject(arg)) {
+					fields = { ...fields, ...arg };
+				} else if (typeof arg === 'object' && arg !== null) {
+					// Arrays, Map, Set, Date, etc. don't spread into fields cleanly.
+					messages.push(safeJson(arg));
 				} else {
 					messages.push(String(arg));
 				}
