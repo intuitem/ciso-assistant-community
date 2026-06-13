@@ -344,6 +344,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     outgoing_webhooks = serializers.BooleanField(
         source="value.outgoing_webhooks", required=False, default=False
     )
+    audit_log_forwarding = serializers.BooleanField(
+        source="value.audit_log_forwarding", required=False, default=False
+    )
     metrology = serializers.BooleanField(
         source="value.metrology", required=False, default=True
     )

@@ -56,15 +56,53 @@ class WebhookEndpointSerializer(BaseModelSerializer):
         return bool(obj.secret)
 
     def validate_target_folders(self, value):
-        request = self.context.get("request")
-        if not request and hasattr(request, "user"):
-            raise serializers.ValidationError("Request context with user is required.")
-        user = getattr(request, "user")
-        (viewable_folders_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), user, Folder
+        return _validate_accessible_folders(self.context.get("request"), value)
+
+
+def _validate_accessible_folders(request, value):
+    if not request and hasattr(request, "user"):
+        raise serializers.ValidationError("Request context with user is required.")
+    user = getattr(request, "user")
+    (viewable_folders_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, Folder
+    )
+    if not all(folder.id in viewable_folders_ids for folder in value):
+        raise serializers.ValidationError(
+            "One or more target folders are not accessible by the user."
         )
-        if not all(folder.id in viewable_folders_ids for folder in value):
-            raise serializers.ValidationError(
-                "One or more target folders are not accessible by the user."
-            )
-        return value
+    return value
+
+
+class AuditSinkSerializer(BaseModelSerializer):
+    """
+    Serializer for audit-sink endpoints (kind=AUDIT_SINK): admin-managed
+    destinations that forward the audit log to an external SIEM. No HMAC secret
+    or per-event subscription — the whole audit feed is forwarded in the chosen
+    body_format, authenticated via static headers.
+    """
+
+    target_folders = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Folder.objects.all(), required=False
+    )
+
+    class Meta:
+        model = WebhookEndpoint
+        fields = [
+            "id",
+            "name",
+            "description",
+            "url",
+            "transport",
+            "body_format",
+            "headers",
+            "kafka_config",
+            "syslog_config",
+            "is_active",
+            "target_folders",
+            "folder",
+            "created_at",
+        ]
+        read_only_fields = ["id", "created_at"]
+
+    def validate_target_folders(self, value):
+        return _validate_accessible_folders(self.context.get("request"), value)

@@ -10,7 +10,8 @@ import {
 	SSOSettingsSchema,
 	VulnerabilitySlaSchema,
 	SecIntelFeedsSchema,
-	webhookEndpointSchema
+	webhookEndpointSchema,
+	auditSinkSchema
 } from '$lib/utils/schemas';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -33,6 +34,10 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const webhookEndpoints = await fetch(`${BASE_API_URL}/webhooks/endpoints/`)
 		.then((res) => res.json())
 		.then((res) => res.results);
+
+	const auditSinks = await fetch(`${BASE_API_URL}/webhooks/audit-sinks/`)
+		.then((res) => (res.ok ? res.json() : { results: [] }))
+		.then((res) => res.results ?? []);
 
 	const selectOptions: Record<string, any> = {};
 
@@ -111,6 +116,9 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const webhookEndpointCreateForm = await superValidate(zod(webhookEndpointSchema), {
 		errors: false
 	});
+	const auditSinkCreateForm = await superValidate(zod(auditSinkSchema), {
+		errors: false
+	});
 
 	return {
 		ssoSettings,
@@ -131,9 +139,48 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		secIntelFeedsModel,
 		webhookEndpoints,
 		webhookEndpointCreateForm,
+		auditSinks,
+		auditSinkCreateForm,
 		title: m.settings()
 	};
 };
+
+// Maps the audit-sink form fields onto the backend shape. Throws on invalid
+// headers JSON so callers can surface a field error. Shared by create/update.
+function buildAuditSinkPayload(f: Record<string, any>): Record<string, any> {
+	const payload: Record<string, any> = {
+		name: f.name,
+		description: f.description,
+		transport: f.transport,
+		body_format: f.body_format,
+		is_active: f.is_active,
+		target_folders: f.target_folders,
+		url: '',
+		headers: {},
+		kafka_config: {},
+		syslog_config: {}
+	};
+	if (f.transport === 'kafka') {
+		const config: Record<string, string> = {};
+		if (f.security_protocol) config.security_protocol = f.security_protocol;
+		if (f.sasl_mechanism) config.sasl_mechanism = f.sasl_mechanism;
+		if (f.sasl_username) config.sasl_plain_username = f.sasl_username;
+		if (f.sasl_password) config.sasl_plain_password = f.sasl_password;
+		payload.kafka_config = { bootstrap_servers: f.bootstrap_servers, topic: f.topic, config };
+	} else if (f.transport === 'syslog') {
+		payload.syslog_config = {
+			host: f.syslog_host,
+			port: f.syslog_port,
+			protocol: f.syslog_protocol
+		};
+	} else {
+		payload.url = f.url;
+		if (typeof f.headers === 'string' && f.headers.trim()) {
+			payload.headers = JSON.parse(f.headers);
+		}
+	}
+	return payload;
+}
 
 export const actions: Actions = {
 	sso: async (event) => {
@@ -358,5 +405,122 @@ export const actions: Actions = {
 		);
 
 		return message(deleteForm, { status: res.status });
+	},
+	createAuditSink: async (event) => {
+		const formData = await event.request.formData();
+		if (!formData) {
+			return fail(400, { form: null });
+		}
+
+		const form = await superValidate(formData, zod(auditSinkSchema));
+		if (!form.valid) {
+			return fail(400, { form });
+		}
+
+		let payload;
+		try {
+			payload = buildAuditSinkPayload(form.data);
+		} catch {
+			return setError(form, 'headers', m.invalidJson());
+		}
+
+		const response = await event.fetch(`${BASE_API_URL}/webhooks/audit-sinks/`, {
+			method: 'POST',
+			body: JSON.stringify(payload)
+		});
+
+		if (!response.ok) return handleErrorResponse({ event, response, form });
+
+		setFlash(
+			{ type: 'success', message: m.successfullyCreatedObject({ object: m.auditSink() }) },
+			event
+		);
+		return { form };
+	},
+	updateAuditSink: async (event) => {
+		const form = await superValidate(await event.request.formData(), zod(auditSinkSchema));
+		if (!form.valid || !form.data.id) {
+			return fail(400, { form });
+		}
+
+		let payload;
+		try {
+			payload = buildAuditSinkPayload(form.data);
+		} catch {
+			return setError(form, 'headers', m.invalidJson());
+		}
+
+		const response = await event.fetch(`${BASE_API_URL}/webhooks/audit-sinks/${form.data.id}/`, {
+			method: 'PATCH',
+			body: JSON.stringify(payload)
+		});
+
+		if (!response.ok) return handleErrorResponse({ event, response, form });
+
+		setFlash(
+			{ type: 'success', message: m.successfullyUpdatedObject({ object: m.auditSink() }) },
+			event
+		);
+		return { form };
+	},
+	deleteAuditSink: async (event) => {
+		const formData = await event.request.formData();
+		const schema = z.object({ id: z.string() });
+		const deleteForm = await superValidate(formData, zod(schema));
+		const id = deleteForm.data.id;
+
+		if (!deleteForm.valid) {
+			return message(deleteForm, { status: 400 });
+		}
+
+		const endpoint = `${BASE_API_URL}/webhooks/audit-sinks/${id}/`;
+		const res = await event.fetch(endpoint, { method: 'DELETE' });
+		if (!res.ok) {
+			return message(deleteForm, { status: res.status });
+		}
+		setFlash(
+			{
+				type: 'success',
+				message: m.successfullyDeletedObject({ object: m.auditSink().toLowerCase() })
+			},
+			event
+		);
+		return message(deleteForm, { status: res.status });
+	},
+	replayAuditSink: async (event) => {
+		const formData = await event.request.formData();
+		const id = formData.get('id');
+		const since = formData.get('since');
+		const until = formData.get('until');
+
+		if (!id || !since) {
+			setFlash({ type: 'error', message: m.sinceRequiredIso8601() }, event);
+			return fail(400, {});
+		}
+
+		const body: Record<string, string> = { since: String(since) };
+		if (until) body.until = String(until);
+
+		const endpoint = `${BASE_API_URL}/webhooks/audit-sinks/${id}/replay/`;
+		const response = await event.fetch(endpoint, {
+			method: 'POST',
+			body: JSON.stringify(body)
+		});
+
+		if (!response.ok) {
+			const r = await response.json().catch(() => ({}));
+			setFlash({ type: 'error', message: safeTranslate(r.error ?? 'replayFailed') }, event);
+			return fail(response.status, {});
+		}
+
+		const result = await response.json();
+		setFlash(
+			{
+				type: 'success',
+				message: m.auditReplayScheduled({ count: result.scheduled ?? 0 })
+			},
+			event
+		);
+		return { success: true };
 	}
 };
