@@ -23,7 +23,7 @@ export const POST = async ({ fetch, cookies, locals }) => {
 	cookies.delete('token', { path: '/' });
 	cookies.delete('allauth_session_token', { path: '/' });
 
-	logger.info('User logged out', { user_id: locals.user?.id, email: locals.user?.email });
+	logger.info('User logged out', { user_id: locals.user?.id });
 
 	redirect(302, '/login');
 };
