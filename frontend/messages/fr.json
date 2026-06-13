@@ -4625,14 +4625,14 @@
 	"builderChangeTypeQuestion": "question",
 	"builderChangeTypeChoice": "choix de réponse",
 	"builderFieldLabelAssessable": "Évaluable",
-	"builderFieldLabelWeight": "Pondération",
-	"builderFieldLabelImplementationGroups": "Groupes de mise en œuvre",
+	"builderFieldLabelWeight": "Poids",
+	"builderFieldLabelImplementationGroups": "Groupes d'implémentation",
 	"builderFieldLabelVisibilityExpression": "Condition de visibilité",
 	"builderFieldLabelType": "Type de question",
 	"builderFieldLabelDependsOn": "Affichage conditionnel",
 	"builderFieldLabelAddScore": "Contribution au score",
 	"builderFieldLabelComputeResult": "Compte dans le résultat",
-	"builderFieldLabelSelectImplementationGroups": "Sélectionne des groupes de mise en œuvre",
+	"builderFieldLabelSelectImplementationGroups": "Sélectionne les groupes d'implémentation",
 	"builderAffectedAudits": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],

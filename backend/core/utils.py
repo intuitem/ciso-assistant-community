@@ -53,7 +53,7 @@ def extract_urn_slug(urn) -> str | None:
         and parts[2] == "risk"
         and parts[3] in REWRITABLE_URN_TYPES
     ):
-        return parts[4]
+        return parts[4] or None
     return None
 
 

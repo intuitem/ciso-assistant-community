@@ -816,7 +816,7 @@ export interface BuilderStore {
 	addLanguage: (lang: string) => void;
 	removeLanguage: (lang: string) => void;
 	setBaseLocale: (locale: string) => void;
-	flushDraft: () => Promise<void>;
+	flushDraft: () => Promise<boolean>;
 	publish: () => Promise<boolean>;
 	discard: () => Promise<void>;
 	destroy: () => void;
@@ -987,7 +987,11 @@ export function createBuilderState(
 			clearError('publish');
 
 			if (!validateBeforePublish()) {
-				setError('publish', m.builderFixValidationErrorsBeforePublish());
+				// Keep a specific message (e.g. framework name required) if
+				// validateDraft already set one; only fall back to the generic.
+				if (!get(errors).has('publish')) {
+					setError('publish', m.builderFixValidationErrorsBeforePublish());
+				}
 				return false;
 			}
 

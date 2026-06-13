@@ -2694,7 +2694,13 @@ class TestFrameworkBuilderUrnRename:
 
         # Real flow: start_editing seeds the draft (ref_id taken from URN slug).
         start_url = reverse("frameworks-start-editing", args=[fw.id])
-        assert authenticated_client.post(start_url).status_code == 200
+        start_response = authenticated_client.post(start_url)
+        assert start_response.status_code == 200
+        # Pin the seed itself: start_editing must derive ref_id from the URN slug.
+        assert (
+            start_response.data["editing_draft"]["framework_meta"]["ref_id"]
+            == "legacy-slug"
+        )
 
         # Publish the seeded draft unchanged — must not trip the rename guard.
         publish_url = reverse("frameworks-publish-draft", args=[fw.id])
@@ -3145,11 +3151,14 @@ class TestFrameworkBuilderDraftValidation:
         not just the bare (UI-invisible) node_id, so the user can locate them."""
         fw, rn, q, c, folder = fw_with_tree
         draft = self._start_and_get_draft(authenticated_client, fw)
+        # Give the original a distinct, non-numeric label so the assertions
+        # below can tell it apart from the bare node_id "1".
+        draft["nodes"][0]["ref_id"] = None
+        draft["nodes"][0]["name"] = "Original requirement"
         # Second node, distinct id, but a URN colliding on node_id "1". No
         # ref_id so its label falls back to the (human) name.
         dup = copy.deepcopy(draft["nodes"][0])
         dup["id"] = str(uuid.uuid4())
-        dup["ref_id"] = None
         dup["name"] = "Colliding requirement"
         draft["nodes"].append(dup)
 
@@ -3158,6 +3167,7 @@ class TestFrameworkBuilderDraftValidation:
         error = response.data["error"]
         assert "internal identifier '1'" in error
         # Both requirement labels appear so support/users can find them.
+        assert "Original requirement" in error
         assert "Colliding requirement" in error
 
     def test_publish_rejects_oversized_question_urn(
@@ -3213,6 +3223,45 @@ class TestFrameworkBuilderDraftValidation:
 
         rn.refresh_from_db()
         assert rn.urn == "urn:custom:risk:req_node:validation-fw:1-moved"
+
+    def test_cross_framework_collision_blocked_with_audits(
+        self, authenticated_client, fw_with_tree
+    ):
+        """Auto-disambiguation rewrites every draft URN sharing the slug,
+        including existing audit-referenced rows. It must be refused when
+        audits exist rather than silently breaking URN stability."""
+        fw, rn, q, c, folder = fw_with_tree
+        self._attach_audit(fw, folder)
+        # Another framework already owns the URN a new node would take.
+        other = Framework.objects.create(
+            name="Other FW",
+            folder=folder,
+            is_published=True,
+            urn_namespace="custom",
+            ref_id="validation-fw",
+        )
+        RequirementNode.objects.create(
+            framework=other,
+            urn="urn:custom:risk:req_node:validation-fw:2",
+            ref_id="2",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        draft = self._start_and_get_draft(authenticated_client, fw)
+        new_node = copy.deepcopy(draft["nodes"][0])
+        new_node["id"] = str(uuid.uuid4())
+        new_node["urn"] = "urn:custom:risk:req_node:validation-fw:2"
+        new_node["ref_id"] = "2"
+        new_node["name"] = "New node"
+        draft["nodes"].append(new_node)
+
+        response = self._save_and_publish(authenticated_client, fw, draft)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "collide with another framework" in response.data["error"]
+        # Existing URN untouched.
+        rn.refresh_from_db()
+        assert rn.urn == "urn:custom:risk:req_node:validation-fw:1"
 
     def test_publish_rejects_empty_draft_with_audits(
         self, authenticated_client, fw_with_tree

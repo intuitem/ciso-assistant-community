@@ -10107,7 +10107,7 @@ class FrameworkViewSet(BaseModelViewSet):
             logger.warning(
                 "Validation error while previewing draft",
                 framework_id=str(framework.id),
-                error=str(e),
+                error=e,
                 **draft_stats,
             )
             return Response(
@@ -10151,7 +10151,7 @@ class FrameworkViewSet(BaseModelViewSet):
             logger.warning(
                 "Validation error while publishing draft",
                 framework_id=str(framework.id),
-                error=str(e),
+                error=e,
                 **draft_stats,
             )
             return Response(
@@ -10491,6 +10491,17 @@ class FrameworkViewSet(BaseModelViewSet):
                     )
 
                 if node_collisions or question_collisions or choice_collisions:
+                    # Disambiguation rewrites every draft URN sharing the slug,
+                    # including existing rows' — which would silently break the
+                    # URN stability that audits depend on (section 0b). Refuse
+                    # rather than rewrite when audits exist.
+                    if has_audits:
+                        raise DraftValidationError(
+                            "Some items in this draft have URNs that collide with "
+                            "another framework. This can't be auto-resolved while a "
+                            "compliance assessment uses this framework; change the "
+                            "framework's ref_id and try again."
+                        )
                     # Disambiguate: detect current slug from colliding URNs and
                     # rewrite all draft URNs with a new slug suffix
                     all_collisions = (
