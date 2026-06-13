@@ -11,7 +11,7 @@
 		onChange: (next: VisibilityMap) => void;
 		disabled?: boolean;
 		// Framework's effective_field_visibility — the complete map a new CA
-		// would inherit from this framework (DEFAULT_VISIBILITY ⊕ framework's
+		// would inherit from this framework (DEFAULT_VISIBILITY + framework's
 		// own overrides, computed on the backend). Used as fallback for missing
 		// keys in `value`, so pills on a fresh create form display what the
 		// API will actually save.
@@ -30,6 +30,7 @@
 		answers: m.answers,
 		evidences: m.evidences,
 		applied_controls: m.appliedControls,
+		security_exceptions: m.securityExceptions,
 		respondent_alignment: m.respondentAlignment,
 		comments: m.comments
 	};

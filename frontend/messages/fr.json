@@ -2100,6 +2100,7 @@
 	"cweDescription": "liste de faiblesses de sécurité dans les logiciels (CWE)",
 	"securityExceptions": "Exceptions",
 	"addSecurityException": "Ajouter une exception",
+	"selectSecurityExceptions": "Sélectionner les exceptions",
 	"expirationDate": "Date d'expiration",
 	"expirationDateIsInThePastWarning": "La date d'expiration saisie est dans le passé",
 	"filterBy": "Filtrer par",

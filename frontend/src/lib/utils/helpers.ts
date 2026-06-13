@@ -419,6 +419,7 @@ export const VISIBILITY_FIELDS = [
 	'documentation_score',
 	'applied_controls',
 	'evidences',
+	'security_exceptions',
 	'observation',
 	'comments'
 ] as const;
@@ -430,7 +431,13 @@ export type VisibilityPair = { auditor: RoleAccess; respondent: RoleAccess };
 
 const EDIT_PAIR: VisibilityPair = { auditor: 'edit', respondent: 'edit' };
 
-/** Return the per-role visibility pair for a field. Missing → all roles edit. */
+/**
+ * Return the per-role visibility pair for a field. The backend resolves the
+ * full cascade (stored overrides + framework + DEFAULT_VISIBILITY) before
+ * serializing `field_visibility`, so the map always carries an explicit pair
+ * for every known field. A missing key here means a truly unknown/structural
+ * field, which everyone may edit.
+ */
 export function resolveFieldVisibility(
 	complianceAssessment: Record<string, any> | null | undefined,
 	fieldName: string
@@ -484,6 +491,7 @@ export function getFieldVisibility(
 	showObservation: boolean;
 	showAppliedControls: boolean;
 	showEvidences: boolean;
+	showSecurityExceptions: boolean;
 	showRespondentAlignment: boolean;
 	showComments: boolean;
 	showExtendedResult: boolean;
@@ -497,6 +505,7 @@ export function getFieldVisibility(
 		showObservation: isFieldVisible(complianceAssessment, 'observation', viewerRole),
 		showAppliedControls: isFieldVisible(complianceAssessment, 'applied_controls', viewerRole),
 		showEvidences: isFieldVisible(complianceAssessment, 'evidences', viewerRole),
+		showSecurityExceptions: isFieldVisible(complianceAssessment, 'security_exceptions', viewerRole),
 		showRespondentAlignment: isFieldVisible(
 			complianceAssessment,
 			'respondent_alignment',

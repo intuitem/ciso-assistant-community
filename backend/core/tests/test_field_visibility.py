@@ -71,6 +71,7 @@ class TestResolveFieldVisibility:
         assert DEFAULT_VISIBILITY["documentation_score"] == HIDDEN
         assert DEFAULT_VISIBILITY["extended_result"] == AUDITOR_ONLY
         assert DEFAULT_VISIBILITY["status"] == AUDITOR_ONLY
+        assert DEFAULT_VISIBILITY["security_exceptions"] == AUDITOR_ONLY
         assert DEFAULT_VISIBILITY["respondent_alignment"] == HIDDEN
 
 

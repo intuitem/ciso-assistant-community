@@ -48,6 +48,15 @@
 		field="applied_controls"
 		label={m.appliedControls()}
 	/>
+{:else if context === 'selectSecurityExceptions'}
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="security-exceptions"
+		optionsExtraFields={[['folder', 'str']]}
+		field="security_exceptions"
+		label={m.securityExceptions()}
+	/>
 {:else}
 	<Select
 		{form}

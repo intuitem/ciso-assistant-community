@@ -1,8 +1,13 @@
-import { nestedWriteFormAction } from '$lib/utils/actions';
+import { handleErrorResponse, nestedWriteFormAction } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
-import { error, type Actions } from '@sveltejs/kit';
+import { headData } from '$lib/utils/table';
+import { safeTranslate } from '$lib/utils/i18n';
+import { m } from '$paraglide/messages';
+import { type TableSource } from '@skeletonlabs/skeleton-svelte';
+import { error, fail, type Actions } from '@sveltejs/kit';
+import { setFlash } from 'sveltekit-flash-message/server';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
@@ -57,6 +62,15 @@ export const load = (async ({ fetch, params }) => {
 
 	const evidenceModel = getModelInfo('evidences');
 	const evidenceCreateSchema = modelSchema('evidences');
+
+	const securityExceptionModel = getModelInfo('security-exceptions');
+	const securityExceptionCreateSchema = modelSchema('security-exceptions');
+
+	const tables: Record<string, TableSource> = {};
+	for (const key of ['applied-controls', 'evidences', 'security-exceptions'] as const) {
+		tables[key] = { head: headData(key), body: [], meta: [] };
+	}
+
 	const scoreSchema = z.object({
 		is_scored: z.boolean().optional(),
 		score: z.number().optional().nullable(),
@@ -83,6 +97,17 @@ export const load = (async ({ fetch, params }) => {
 					errors: false
 				}
 			);
+			const securityExceptionInitialData = {
+				requirement_assessments: [requirementAssessment.id],
+				folder: requirementAssessment.folder.id
+			};
+			const securityExceptionCreateForm = await superValidate(
+				securityExceptionInitialData,
+				zod(securityExceptionCreateSchema),
+				{
+					errors: false
+				}
+			);
 			const observationBuffer = requirementAssessment.observation;
 			const scoreForm = await superValidate(
 				{
@@ -104,6 +129,9 @@ export const load = (async ({ fetch, params }) => {
 				}),
 				...(requirementAssessment.applied_controls !== undefined && {
 					applied_controls: requirementAssessment.applied_controls.map((ac) => ac.id)
+				}),
+				...(requirementAssessment.security_exceptions !== undefined && {
+					security_exceptions: requirementAssessment.security_exceptions.map((se) => se.id)
 				})
 			};
 			const updateForm = await superValidate(object, zod(updateSchema), { errors: false });
@@ -111,6 +139,7 @@ export const load = (async ({ fetch, params }) => {
 				...requirementAssessment,
 				measureCreateForm,
 				evidenceCreateForm,
+				securityExceptionCreateForm,
 				observationBuffer,
 				scoreForm,
 				updateForm,
@@ -142,6 +171,8 @@ export const load = (async ({ fetch, params }) => {
 		requirements,
 		measureModel,
 		evidenceModel,
+		securityExceptionModel,
+		tables,
 		assignment,
 		viewerRole: tableMode.viewer_role ?? 'respondent',
 		title: compliance_assessment.name
@@ -170,8 +201,88 @@ export const actions: Actions = {
 	createAppliedControl: async (event) => {
 		return nestedWriteFormAction({ event, action: 'create' });
 	},
+	createSecurityException: async (event) => {
+		const result = await nestedWriteFormAction({ event, action: 'create' });
+		return { form: result.form, newSecurityException: result.form.message.object };
+	},
 	update: async (event) => {
-		return nestedWriteFormAction({ event, action: 'edit' });
+		// Strip fields hidden by field_visibility (the backend GET omits them
+		// for the current viewer role) before PATCHing. Without this the form
+		// sends empty strings the backend rejects (e.g. status: "").
+		const URLModel = 'requirement-assessments';
+		const schema = modelSchema(URLModel);
+		const id = event.url.searchParams.get('id');
+		const endpoint = `${BASE_API_URL}/${URLModel}/${id}/`;
+		const form = await superValidate(event.request, zod(schema));
+
+		if (!form.valid) {
+			console.error(form.errors);
+			return fail(400, { form });
+		}
+
+		const formData: Record<string, any> = { ...form.data };
+
+		let currentRa: Record<string, any>;
+		try {
+			const currentRaResponse = await event.fetch(endpoint);
+			if (!currentRaResponse.ok) {
+				return handleErrorResponse({ event, response: currentRaResponse, form });
+			}
+			currentRa = await currentRaResponse.json();
+		} catch (error) {
+			console.error('Failed to fetch requirement assessment before update', error);
+			return fail(502, { form });
+		}
+
+		const visibilityControlled = [
+			'result',
+			'status',
+			'score',
+			'is_scored',
+			'documentation_score',
+			'observation',
+			'answers',
+			'evidences',
+			'applied_controls',
+			'security_exceptions'
+		];
+		for (const key of visibilityControlled) {
+			if (!(key in currentRa)) {
+				delete formData[key];
+			}
+		}
+		if (!('result' in currentRa)) {
+			delete formData.extended_result;
+		}
+
+		// The detail GET does not honor viewer_role and returns the auditor
+		// view regardless of caller. Strip empty enum values that the zod
+		// schema defaulted to "" so DRF does not reject the PATCH with
+		// "is not a valid choice".
+		for (const key of ['status', 'result', 'extended_result', 'respondent_alignment']) {
+			if (formData[key] === '' || formData[key] === null) {
+				delete formData[key];
+			}
+		}
+
+		const response = await event.fetch(endpoint, {
+			method: 'PATCH',
+			body: JSON.stringify(formData)
+		});
+
+		if (!response.ok) return handleErrorResponse({ event, response, form });
+
+		const object = await response.json();
+		setFlash(
+			{
+				type: 'success',
+				message: m.successfullySavedObject({
+					object: safeTranslate('requirementAssessment').toLowerCase()
+				})
+			},
+			event
+		);
+		return { form, object };
 	},
 	submitAssignment: async (event) => {
 		const endpoint = `${BASE_API_URL}/requirement-assignments/${event.params.id}/set_status/`;

@@ -7,6 +7,7 @@
 	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
 	import Score from '$lib/components/Forms/Score.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import SplashCard from '$lib/components/FrameworkBuilder/SplashCard.svelte';
 	import TableMarkdownField from '$lib/components/Forms/TableMarkdownField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
@@ -45,7 +46,7 @@
 	import { generateTocFromElements, type TocItem } from '$lib/utils/toc';
 	import { onMount } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import { countMasked } from '$lib/utils/related-visibility';
 
 	interface Props {
 		data: PageData;
@@ -105,6 +106,7 @@
 	const showObservation = $derived(fieldVis.showObservation);
 	const showAppliedControls = $derived(fieldVis.showAppliedControls);
 	const showEvidences = $derived(fieldVis.showEvidences);
+	const showSecurityExceptions = $derived(fieldVis.showSecurityExceptions);
 	const showRespondentAlignment = $derived(fieldVis.showRespondentAlignment);
 
 	const hasQuestions = $derived(
@@ -212,8 +214,28 @@
 		modalStore.trigger(modal);
 	}
 
+	function modalSecurityExceptionCreateForm(createform: SuperForm<any>): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: createform,
+				formAction: `${actionPath}?/createSecurityException`,
+				invalidateAll: invalidateAllBool,
+				model: data.securityExceptionModel,
+				debug: false
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: safeTranslate('add-' + data.securityExceptionModel.localName)
+		};
+		modalStore.trigger(modal);
+	}
+
 	let addedMeasure = $state(0);
 	let addedEvidence = $state(0);
+	let addedSecurityException = $state(0);
 
 	const requirementAssessmentScores = Object.fromEntries(
 		// svelte-ignore state_referenced_locally
@@ -295,16 +317,15 @@
 		});
 	});
 
-	const accordionItems: Record<string, ['' | 'observation' | 'evidence']> = $state(
+	const accordionItems: Record<string, string[]> = $state(
 		// svelte-ignore state_referenced_locally
-		requirementAssessments.reduce((acc, requirementAssessment) => {
-			const requirement =
-				requirementHashmap[requirementAssessment.requirement] ?? requirementAssessment;
-			return {
-				...acc,
-				[requirementAssessment.id]: ['']
-			};
-		})
+		requirementAssessments.reduce(
+			(acc, requirementAssessment) => {
+				acc[requirementAssessment.id] = [''];
+				return acc;
+			},
+			{} as Record<string, string[]>
+		)
 	);
 
 	let tocItems: TocItem[] = $state([]);
@@ -1016,46 +1037,62 @@
 																>
 															</Accordion.ItemTrigger>
 															<Accordion.ItemContent>
-																<div class="flex flex-row space-x-2 items-center">
-																	{#if !shallow && !isReadOnly}
-																		<button
-																			class="btn preset-filled-primary-500 self-start"
-																			onclick={() =>
-																				modalMeasureCreateForm(
-																					requirementAssessment.measureCreateForm
-																				)}
-																			type="button"
-																			><i class="fa-solid fa-plus mr-2"
-																			></i>{m.addAppliedControl()}</button
-																		>
-																		<button
-																			class="btn preset-filled-secondary-500 self-start"
-																			type="button"
-																			onclick={() =>
-																				modalUpdateForm(
-																					requirementAssessment,
-																					'selectAppliedControls'
-																				)}
-																			><i class="fa-solid fa-hand-pointer mr-2"
-																			></i>{m.selectAppliedControls()}
-																		</button>
-																	{/if}
-																</div>
-																<div class="flex flex-wrap space-x-2 items-center">
+																{#if accordionItems[requirementAssessment.id]?.includes('appliedControl')}
 																	{#key addedMeasure}
-																		{#each requirementAssessment.applied_controls as ac}
-																			<p class="p-2">
-																				<Anchor
-																					class="anchor"
-																					href="/applied-controls/{ac.id}"
-																					label={ac.str}
-																					><i class="fa-solid fa-fire-extinguisher mr-2"
-																					></i>{ac.str}</Anchor
+																		<ModelTable
+																			source={data.tables['applied-controls']}
+																			URLModel="applied-controls"
+																			baseEndpoint="/applied-controls?requirement_assessments={requirementAssessment.id}"
+																			hideFilters={true}
+																			folderId={requirementAssessment.folder.id}
+																			disableCreate={shallow || isReadOnly}
+																			canSelectObject={!shallow && !isReadOnly}
+																			expectedCount={countMasked(
+																				requirementAssessment.applied_controls
+																			)}
+																		>
+																			{#snippet addButton()}
+																				<span
+																					class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
 																				>
-																			</p>
-																		{/each}
+																					<button
+																						class="inline-block p-3 btn-mini-primary w-12 focus:relative"
+																						data-testid="add-button"
+																						title={m.addAppliedControl()}
+																						aria-label={m.addAppliedControl()}
+																						type="button"
+																						onclick={() =>
+																							modalMeasureCreateForm(
+																								requirementAssessment.measureCreateForm
+																							)}
+																					>
+																						<i class="fa-solid fa-file-circle-plus"></i>
+																					</button>
+																				</span>
+																			{/snippet}
+																			{#snippet selectButton()}
+																				<span
+																					class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+																				>
+																					<button
+																						class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+																						data-testid="select-button"
+																						title={m.selectAppliedControls()}
+																						aria-label={m.selectAppliedControls()}
+																						type="button"
+																						onclick={() =>
+																							modalUpdateForm(
+																								requirementAssessment,
+																								'selectAppliedControls'
+																							)}
+																					>
+																						<i class="fa-solid fa-hand-pointer"></i>
+																					</button>
+																				</span>
+																			{/snippet}
+																		</ModelTable>
 																	{/key}
-																</div>
+																{/if}
 															</Accordion.ItemContent>
 														</Accordion.Item>
 													{/if}
@@ -1098,46 +1135,154 @@
 																>
 															</Accordion.ItemTrigger>
 															<Accordion.ItemContent>
-																<div class="flex flex-row space-x-2 items-center">
-																	{#if !shallow && !isReadOnly}
-																		<button
-																			class="btn preset-filled-primary-500 self-start"
-																			onclick={() =>
-																				modalEvidenceCreateForm(
-																					requirementAssessment.evidenceCreateForm
-																				)}
-																			type="button"
-																			data-testid="create-evidence-button"
-																			><i class="fa-solid fa-plus mr-2"
-																			></i>{m.addEvidence()}</button
-																		>
-																		<button
-																			class="btn preset-filled-secondary-500 self-start"
-																			type="button"
-																			data-testid="select-evidence-button"
-																			onclick={() =>
-																				modalUpdateForm(requirementAssessment, 'selectEvidences')}
-																			><i class="fa-solid fa-hand-pointer mr-2"
-																			></i>{m.selectEvidence()}
-																		</button>
-																	{/if}
-																</div>
-																<div class="flex flex-wrap space-x-2 items-center">
+																{#if accordionItems[requirementAssessment.id]?.includes('evidence')}
 																	{#key addedEvidence}
-																		{#each requirementAssessment.evidences as evidence}
-																			<p class="p-2">
-																				<Anchor
-																					class="anchor"
-																					href="/evidences/{evidence.id}"
-																					label={evidence.str}
-																					data-testid="evidence-link"
-																					><i class="fa-solid fa-file-lines mr-2"
-																					></i>{evidence.str}</Anchor
+																		<ModelTable
+																			source={data.tables['evidences']}
+																			URLModel="evidences"
+																			baseEndpoint="/evidences?requirement_assessments={requirementAssessment.id}"
+																			hideFilters={true}
+																			folderId={requirementAssessment.folder.id}
+																			disableCreate={shallow || isReadOnly}
+																			canSelectObject={!shallow && !isReadOnly}
+																			expectedCount={countMasked(requirementAssessment.evidences)}
+																		>
+																			{#snippet addButton()}
+																				<span
+																					class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
 																				>
-																			</p>
-																		{/each}
+																					<button
+																						class="inline-block p-3 btn-mini-primary w-12 focus:relative"
+																						data-testid="create-evidence-button"
+																						title={m.addEvidence()}
+																						aria-label={m.addEvidence()}
+																						type="button"
+																						onclick={() =>
+																							modalEvidenceCreateForm(
+																								requirementAssessment.evidenceCreateForm
+																							)}
+																					>
+																						<i class="fa-solid fa-file-circle-plus"></i>
+																					</button>
+																				</span>
+																			{/snippet}
+																			{#snippet selectButton()}
+																				<span
+																					class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+																				>
+																					<button
+																						class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+																						data-testid="select-evidence-button"
+																						title={m.selectEvidence()}
+																						aria-label={m.selectEvidence()}
+																						type="button"
+																						onclick={() =>
+																							modalUpdateForm(
+																								requirementAssessment,
+																								'selectEvidences'
+																							)}
+																					>
+																						<i class="fa-solid fa-hand-pointer"></i>
+																					</button>
+																				</span>
+																			{/snippet}
+																		</ModelTable>
 																	{/key}
-																</div>
+																{/if}
+															</Accordion.ItemContent>
+														</Accordion.Item>
+													{/if}
+												{/if}
+
+												{#if showSecurityExceptions}
+													{#if (requirementAssessment.security_exceptions?.length ?? 0) === 0 && shallow}
+														<p class="text-gray-400 italic">{m.securityExceptions()}</p>
+													{:else}
+														<Accordion.Item value="securityException">
+															<Accordion.ItemTrigger
+																class="flex w-full items-center cursor-pointer"
+															>
+																<p class="flex flex-1 items-center space-x-2 text-left">
+																	<span>{m.securityExceptions()}</span>
+																	{#key addedSecurityException}
+																		{#if requirementAssessment.security_exceptions != null}
+																			<span class="badge preset-tonal-primary"
+																				>{requirementAssessment.security_exceptions.length}</span
+																			>
+																		{/if}
+																	{/key}
+																</p>
+
+																<Accordion.ItemIndicator
+																	class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+																	><svg
+																		xmlns="http://www.w3.org/2000/svg"
+																		width="14px"
+																		height="14px"
+																		viewBox="0 0 448 512"
+																		><path
+																			d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+																		/></svg
+																	></Accordion.ItemIndicator
+																>
+															</Accordion.ItemTrigger>
+															<Accordion.ItemContent>
+																{#if accordionItems[requirementAssessment.id]?.includes('securityException')}
+																	{#key addedSecurityException}
+																		<ModelTable
+																			source={data.tables['security-exceptions']}
+																			URLModel="security-exceptions"
+																			baseEndpoint="/security-exceptions?requirement_assessments={requirementAssessment.id}"
+																			hideFilters={true}
+																			folderId={requirementAssessment.folder.id}
+																			disableCreate={shallow || isReadOnly}
+																			canSelectObject={!shallow && !isReadOnly}
+																			expectedCount={countMasked(
+																				requirementAssessment.security_exceptions
+																			)}
+																		>
+																			{#snippet addButton()}
+																				<span
+																					class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+																				>
+																					<button
+																						class="inline-block p-3 btn-mini-primary w-12 focus:relative"
+																						data-testid="add-security-exception-button"
+																						title={m.addSecurityException()}
+																						aria-label={m.addSecurityException()}
+																						type="button"
+																						onclick={() =>
+																							modalSecurityExceptionCreateForm(
+																								requirementAssessment.securityExceptionCreateForm
+																							)}
+																					>
+																						<i class="fa-solid fa-file-circle-plus"></i>
+																					</button>
+																				</span>
+																			{/snippet}
+																			{#snippet selectButton()}
+																				<span
+																					class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+																				>
+																					<button
+																						class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+																						data-testid="select-security-exception-button"
+																						title={m.selectSecurityExceptions()}
+																						aria-label={m.selectSecurityExceptions()}
+																						type="button"
+																						onclick={() =>
+																							modalUpdateForm(
+																								requirementAssessment,
+																								'selectSecurityExceptions'
+																							)}
+																					>
+																						<i class="fa-solid fa-hand-pointer"></i>
+																					</button>
+																				</span>
+																			{/snippet}
+																		</ModelTable>
+																	{/key}
+																{/if}
 															</Accordion.ItemContent>
 														</Accordion.Item>
 													{/if}

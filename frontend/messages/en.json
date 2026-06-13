@@ -2217,6 +2217,7 @@
 	"securityException": "Exception",
 	"securityExceptions": "Exceptions",
 	"addSecurityException": "Add exception",
+	"selectSecurityExceptions": "Select exceptions",
 	"expirationDate": "Expiration date",
 	"expirationDateIsInThePastWarning": "The entered expiration date is in the past",
 	"filterBy": "Filter by",
