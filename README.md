@@ -551,6 +551,11 @@ export ENABLE_SANDBOX=True  # optional, default value is True in production enfi
 # Logging configuration
 export LOG_LEVEL=INFO # optional, default value is INFO. Available options: DEBUG, INFO, WARNING, ERROR, CRITICAL
 export LOG_FORMAT=plain # optional, default value is plain. Available options: json, plain
+# LOG_FORMAT=json emits one JSON object per line (timestamp, level, logger, event, ...),
+# which SIEMs (Splunk, Sentinel, ADX) ingest natively without custom parsing.
+# Set the same LOG_FORMAT=json on the frontend container to get structured JSON
+# from the SvelteKit SSR process (auth events, errors) on the same schema; the
+# backend and huey worker share this setting automatically.
 
 # Authentication options
 export AUTH_TOKEN_TTL=3600 # optional, default value is 3600 seconds (60 minutes). It defines the time to live of the authentication token
