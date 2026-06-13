@@ -34,6 +34,7 @@ Flags affect what's visible in the sidebar, what appears in CRUD pages, and whic
 - **compliance** — compliance assessments (audits). Effectively master switch for the entire compliance pillar.
 - **auditee_mode** — the read-only auditee surface for external assessors. _Default off._
 - **campaigns** — bulk-orchestration of audits across many perimeters. _PRO._
+- **audit_tree_inheritance** — combine an audit's results with parent-domain audits on the same framework. Reveals the **Domain inheritance strategy** [general setting](general.md#domain-tree-audit-inheritance) and the **Combined view** on the [Framework report](../../features/framework-report.md#combined-view-domain-tree-inheritance). _Default off._
 
 ## Resilience
 
