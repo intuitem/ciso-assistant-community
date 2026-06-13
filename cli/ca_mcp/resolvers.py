@@ -1,6 +1,6 @@
 """Helper functions to resolve names to UUIDs"""
 
-from .client import make_get_request, get_paginated_results
+from .client import make_get_request, get_paginated_results, fetch_all_results
 
 
 def resolve_folder_id(folder_name_or_id: str) -> str:
@@ -294,6 +294,46 @@ def resolve_applied_control_id(control_name_or_id: str, folder_id: str = None) -
         )
 
     return controls[0]["id"]
+
+
+def resolve_policy_id(policy_name_or_ref_or_id: str) -> str:
+    """Resolve a policy UUID, ref_id, or name to a UUID."""
+    if "-" in policy_name_or_ref_or_id and len(policy_name_or_ref_or_id) == 36:
+        return policy_name_or_ref_or_id
+
+    policies, error = fetch_all_results(
+        "/policies/", params={"search": policy_name_or_ref_or_id}
+    )
+
+    if error:
+        raise ValueError(f"Policy '{policy_name_or_ref_or_id}' API error: {error}")
+
+    if not policies:
+        raise ValueError(f"Policy '{policy_name_or_ref_or_id}' not found")
+
+    exact_matches = [
+        policy
+        for policy in policies
+        if policy.get("name") == policy_name_or_ref_or_id
+        or policy.get("ref_id") == policy_name_or_ref_or_id
+    ]
+
+    if len(exact_matches) == 1:
+        return str(exact_matches[0]["id"])
+
+    if len(exact_matches) > 1:
+        policy_names = [p.get("name", "N/A") for p in exact_matches[:3]]
+        raise ValueError(
+            f"Ambiguous policy '{policy_name_or_ref_or_id}', found {len(exact_matches)} exact matches: {policy_names}"
+        )
+
+    if len(policies) == 1:
+        return str(policies[0]["id"])
+
+    policy_names = [p.get("name", "N/A") for p in policies[:3]]
+    raise ValueError(
+        f"Ambiguous policy '{policy_name_or_ref_or_id}', found {len(policies)}: {policy_names}. Use the policy UUID or ref_id."
+    )
 
 
 def resolve_requirement_assessment_id(requirement_assessment_id: str) -> str:

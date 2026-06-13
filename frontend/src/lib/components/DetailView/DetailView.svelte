@@ -10,7 +10,11 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { booleanDisplay } from '$lib/utils/boolean-display';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
-	import { type ModelMapEntry, type ReverseForeignKeyField } from '$lib/utils/crud';
+	import {
+		getReverseForeignKeyFieldKey,
+		type ModelMapEntry,
+		type ReverseForeignKeyField
+	} from '$lib/utils/crud';
 	import { getModelInfo } from '$lib/utils/crud.js';
 	import { formatDate, formatDateOrDateTime } from '$lib/utils/datetime';
 	import { isURL } from '$lib/utils/helpers';
@@ -88,9 +92,16 @@
 
 	exclude = [...exclude, ...defaultExcludes];
 
-	const getRelatedModelIndex = (model: ModelMapEntry, relatedModel: Record<string, string>) => {
+	const getRelatedModelIndex = (
+		model: ModelMapEntry,
+		relatedModel: { relationKey?: string; urlModel: string }
+	) => {
 		if (!model.reverseForeignKeyFields) return -1;
-		return model.reverseForeignKeyFields.findIndex((o) => o.urlModel === relatedModel.urlModel);
+		return model.reverseForeignKeyFields.findIndex(
+			(o) =>
+				getReverseForeignKeyFieldKey(o, model.reverseForeignKeyFields) ===
+				(relatedModel.relationKey ?? relatedModel.urlModel)
+		);
 	};
 
 	let filteredData = $derived(
@@ -869,15 +880,18 @@
 			class="w-full"
 		>
 			<Tabs.List class="shrink-0 gap-3">
-				{#each relatedModels as [urlmodel, model]}
+				{#each relatedModels as [relationKey, model]}
+					{@const field = model.field}
 					<Tabs.Trigger
-						value={urlmodel}
+						value={relationKey}
 						class="justify-between w-full rounded-md px-3 py-2 transition-colors
 			       aria-[selected=true]:!bg-gray-200
 			       "
 						data-testid="tabs-control"
 					>
-						{safeTranslate(model.info.localNamePlural)}
+						{field.tabLabel
+							? safeTranslate(field.tabLabel)
+							: safeTranslate(model.info.localNamePlural)}
 						{#if model.count !== undefined && model.count > 0}
 							<span
 								class="ml-2 rounded-full px-2 py-0.5 text-xs
@@ -889,23 +903,22 @@
 					</Tabs.Trigger>
 				{/each}
 			</Tabs.List>
-			{#each relatedModels as [urlmodel, model]}
-				<Tabs.Content value={urlmodel} class="flex-1 min-w-0">
-					{#key urlmodel}
-						{@const field = data.model.reverseForeignKeyFields.find(
-							(item) => item.urlModel === urlmodel
-						)}
+			{#each relatedModels as [relationKey, model]}
+				<Tabs.Content value={relationKey} class="flex-1 min-w-0">
+					{#key relationKey}
+						{@const field = model.field}
 						{@const fieldsToUse =
-							field?.tableFields ||
+							field.tableFields ||
 							getListViewFields({
-								key: urlmodel,
+								key: model.urlModel,
 								featureFlags: page.data?.featureflags
 							}).body.filter((v) => v !== field.field)}
+						{@const fieldHeadings = field.tableHeadings || fieldsToUse}
 						{#if model.table}
 							<ModelTable
 								baseEndpoint={getReverseForeignKeyEndpoint({
 									parentModel: data.model,
-									targetUrlModel: urlmodel,
+									targetUrlModel: model.urlModel,
 									field: field.field,
 									id: data.data.id,
 									endpointUrl: field.endpointUrl
@@ -915,9 +928,10 @@
 								disableEdit={disableEdit || model.disableEdit}
 								disableDelete={disableDelete || model.disableDelete}
 								deleteForm={model.deleteForm}
-								URLModel={urlmodel}
-								expectedCount={getExpectedCount(urlmodel, field)}
+								URLModel={model.urlModel}
+								expectedCount={getExpectedCount(model.urlModel, field)}
 								fields={fieldsToUse}
+								{fieldHeadings}
 								defaultFilters={field.defaultFilters || {}}
 							>
 								{#snippet addButton()}
