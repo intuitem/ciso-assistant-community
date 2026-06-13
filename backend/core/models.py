@@ -6871,6 +6871,12 @@ class ComplianceAssessment(Assessment):
     class Meta:
         verbose_name = _("Compliance assessment")
         verbose_name_plural = _("Compliance assessments")
+        permissions = [
+            (
+                "view_compliance_assessment_full",
+                "Can view the full auditor view of a compliance assessment (all rows and fields)",
+            ),
+        ]
 
     # --- Visibility-derived booleans ---
     # These mirror legacy boolean fields. Storage is `field_visibility` keyed by
