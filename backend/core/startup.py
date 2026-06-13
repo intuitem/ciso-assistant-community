@@ -9,6 +9,7 @@ from core.utils import RoleCodename, UserGroupCodename
 logger = get_logger(__name__)
 
 READER_PERMISSIONS_LIST = [
+    "view_compliance_assessment_full",
     "view_object_audittrail",
     "view_appliedcontrol",
     "view_asset",
@@ -134,6 +135,7 @@ READER_PERMISSIONS_LIST = [
 ]
 
 APPROVER_PERMISSIONS_LIST = [
+    "view_compliance_assessment_full",
     "view_perimeter",
     "view_riskassessment",
     "view_appliedcontrol",
@@ -245,6 +247,7 @@ APPROVER_PERMISSIONS_LIST = [
 ]
 
 ANALYST_PERMISSIONS_LIST = [
+    "view_compliance_assessment_full",
     "view_object_audittrail",
     "add_filteringlabel",
     "view_filteringlabel",
@@ -609,6 +612,7 @@ ANALYST_PERMISSIONS_LIST = [
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
+    "view_compliance_assessment_full",
     "view_object_audittrail",
     "add_filteringlabel",
     "view_filteringlabel",
@@ -1019,6 +1023,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_central_auditlog",
+    "view_compliance_assessment_full",
     "view_object_audittrail",
     "add_user",
     "view_user",
