@@ -214,6 +214,7 @@ test('user can map iso27001-2022 audit to a new csf-1.1 audit', async ({
 		}
 		await page.getByTestId('visibility-score-everyone').click();
 		await page.getByTestId('save-button').click();
+		await complianceAssessmentsPage.isToastVisible('successfully saved', 'i');
 	});
 
 	await test.step('map from into the empty target: changes are applied', async () => {
