@@ -6,14 +6,14 @@ ref_id: NIST-CSF-2.0-Journey
 name: "NIST CSF 2.0 \u2014 Journey Threat and Control Library"
 description: Threat and reference control library supporting the NIST CSF 2.0 organisational
   journey preset. Defines eight threat scenarios aligned to all six CSF 2.0 Functions
-  (Govern, Identify, Protect, Detect, Respond, Recover) and twenty reference controls
+  (Govern, Identify, Protect, Detect, Respond, Recover) and thirty reference controls
   mapped to NIST CSF 2.0 subcategories. Draws on NIST SP 800-30 Rev.1 and MITRE ATT&CK.
 copyright: Threat scenarios and reference controls are original content informed by
   NIST SP 800-30 Rev.1, NIST CSF 2.0, and MITRE ATT&CK. NIST CSF 2.0 framework content
   is public domain per NIST policy. MITRE ATT&CK is used under CC BY 4.0. Packaged
   for use with the intuitem/CISO Assistant platform.
 version: 2
-publication_date: 2026-06-04
+publication_date: 2026-06-14
 provider: NIST CSF
 packager: Paul Flatt
 translations:
@@ -21,7 +21,7 @@ translations:
     name: "NIST CSF 2.0 \u2014 Biblioth\xE8que de menaces et de contr\xF4les du parcours"
     description: "Biblioth\xE8que de menaces et de contr\xF4les de r\xE9f\xE9rence\
       \ supportant le preset de parcours NIST CSF 2.0. D\xE9finit huit sc\xE9narios\
-      \ de menaces et vingt contr\xF4les de r\xE9f\xE9rence align\xE9s sur les sous-cat\xE9\
+      \ de menaces et trente mesures de r\xE9f\xE9rence align\xE9s sur les sous-cat\xE9\
       gories du CSF 2.0."
 objects:
   reference_controls:
@@ -783,6 +783,11 @@ objects:
     name: "NIST CSF v2.0 \u2014 Journey"
     description: NIST Cybersecurity Framework 2.0 with mapped reference controls for
       the organisational journey preset
+    translations:
+      fr:
+        name: "NIST CSF v2.0 \u2014 Parcours"
+        description: "NIST Cybersecurity Framework 2.0 avec les mesures de r\xE9f\xE9\
+          rences pour le parcours organisationnel"
     min_score: 1
     max_score: 4
     scores_definition:
