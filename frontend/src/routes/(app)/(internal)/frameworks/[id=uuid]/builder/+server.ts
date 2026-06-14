@@ -16,7 +16,22 @@ async function proxyFetch(
 	});
 
 	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, await res.json());
+		// The backend may answer with non-JSON (e.g. an HTML error page from a
+		// reverse proxy); don't let the parse failure mask the real status.
+		const raw = await res.text().catch(() => '');
+		let body: unknown;
+		try {
+			body = JSON.parse(raw);
+		} catch {
+			console.error(
+				`[builder proxy] Non-JSON error response from ${url}: status=${res.status}`,
+				raw.slice(0, 500)
+			);
+			// Same {error} shape the backend uses, so the client error handler
+			// extracts the message instead of stringifying the object.
+			body = { error: `Upstream error (HTTP ${res.status}).` };
+		}
+		error(res.status as NumericRange<400, 599>, body as App.Error);
 	}
 
 	if (res.status === 204) {
