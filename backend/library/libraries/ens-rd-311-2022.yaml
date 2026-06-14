@@ -17,7 +17,7 @@ description: "El Esquema Nacional de Seguridad (ENS) es el marco normativo que g
   \nHere is the link of the CCN-STIC Security Guides:\nhttps://www.ccn-cert.cni.es/es/guias.html"
 copyright: "BOLET\xCDN OFICIAL DEL ESTADO"
 version: 3
-publication_date: 2026-06-09
+publication_date: 2026-06-14
 provider: "Ministerio para la Transformaci\xF3n Digital y de la Funci\xF3n P\xFAblica\
   \ - Gobierno de Espa\xF1a"
 packager: intuitem
@@ -54,7 +54,7 @@ objects:
       \ of the CCN-STIC Security Guides:\nhttps://www.ccn-cert.cni.es/es/guias.html"
     translations:
       en:
-        name: National Security Framework - ENS (ROYAL DECREE 311/2022)
+        name: National Security Framework - ENS (Royal Decree 311/2022)
         description: "The National Security Framework (Esquema Nacional de Seguridad,\
           \ ENS) is Spain\u2019s regulatory framework for protecting information and\
           \ electronic services in public administrations. Initially established by\
@@ -119,11 +119,11 @@ objects:
           name: HIGH
           description: 'System security category
 
-            A measure that begins to apply in the MEDIUM category or above.
+            A measure that begins to apply in the HIGH category or require a higher
+            security effort than MEDIUM.
 
-            An information system shall be MEDIUM category if one of its security
-            dimensions reaches the MEDIUM security level and none reaches a higher
-            level of security.'
+            An information system shall be HIGH category if any of its security dimensions
+            reaches the HIGH security level.'
     - ref_id: BAJO
       name: BAJO
       description: "Nivel de las dimensiones de seguridad\nUna medida que se aplica\
@@ -135,11 +135,10 @@ objects:
           name: LOW
           description: 'System security category
 
-            A measure that begins to apply in the MEDIUM category or above.
+            A measure that begins to apply in the BASIC category or above.
 
-            An information system shall be MEDIUM category if one of its security
-            dimensions reaches the MEDIUM security level and none reaches a higher
-            level of security."'
+            An information system shall be BASIC category if one of its security dimensions
+            reaches the BASIC security level and none reaches a higher level of security.'
     - ref_id: MEDIO
       name: MEDIO
       description: "Nivel de las dimensiones de seguridad\nUna medida que se empiezan\
@@ -193,7 +192,7 @@ objects:
       description: Dimensiones de la seguridad
       translations:
         en:
-          name: Accountability
+          name: Traceability
           description: Security dimension
     - ref_id: A
       name: Autenticidad
@@ -209,6 +208,15 @@ objects:
         en:
           name: Availability
           description: Security dimension
+    - ref_id: None
+      name: None
+      description: null
+      translations:
+        en:
+          description: Level of security dimensions A measure that applies to systems
+            of BASIC category or higher An information system shall be of the BASIC
+            category if any of its security dimensions reaches the LOW level, and
+            none reaches a higher level."
     requirement_nodes:
     - urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:cap\xEDtulo-i"
       assessable: false
@@ -228,7 +236,6 @@ objects:
       translations:
         en:
           name: Subject matter and objectives.
-          ref_id: "Article 1 !!!!!!!"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:1.1
       assessable: false
       depth: 3
@@ -5484,7 +5491,7 @@ objects:
       - D
       translations:
         en:
-          description: Information Security Management System, regularly update and
+          description: Information Security Management System, regularly updated and
             approved.
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:op.pl.2:2:3
       assessable: false
@@ -7161,7 +7168,7 @@ objects:
       name: "Refuerzo R3 \u2013 Certificados."
       translations:
         en:
-          name: Reinforcement R3-Certified.
+          name: Reinforcement R3-Certificates
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:op.acc.5.r3.1
       assessable: true
       depth: 7
@@ -7226,7 +7233,7 @@ objects:
       name: "Refuerzo R4 \u2013 Certificados en dispositivo f\xEDsico."
       translations:
         en:
-          name: Reinforcement R4-Certified in physical device.
+          name: Reinforcement R4-Certificates on physical device.
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:op.acc.5.r4.1
       assessable: true
       depth: 7
@@ -7719,7 +7726,7 @@ objects:
       name: "Refuerzo R3 \u2013 Certificados."
       translations:
         en:
-          name: Reinforcement R3-Certified.
+          name: Reinforcement R3-Certificates
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:op.acc.6.r3.1
       assessable: true
       depth: 7
@@ -7764,7 +7771,7 @@ objects:
       name: "Refuerzo R4 \u2013 Certificados en dispositivo f\xEDsico."
       translations:
         en:
-          name: Reinforcement R4-Certified physical device.
+          name: Reinforcement R4-Certificates on physical device.
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:op.acc.6.r4.1
       assessable: true
       depth: 7
