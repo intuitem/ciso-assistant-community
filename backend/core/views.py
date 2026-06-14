@@ -15063,6 +15063,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 is_full_coverage=is_full,
                 same_framework=same_framework,
             )
+
+            # Drop fields hidden on the target audit — writing them would be
+            # overridden by the POST endpoint and showing them in the preview
+            # would create a false diff.
+            for field in list(merged_fields):
+                if not target_audit._auditor_visible(field):
+                    merged_fields.pop(field)
+                    field_changes.pop(field, None)
+
             meaningful = bool(field_changes) or bool(m2m_added)
             if not (merged_fields or meaningful):
                 continue
@@ -15335,15 +15344,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     se_ids = source_ra.get("security_exceptions", [])
                     if se_ids:
                         ra.security_exceptions.add(*se_ids)
-
-            # If the target audit has scoring disabled, a source with scoring on
-            # must not leak is_scored=True onto the mapped RAs. (When scoring
-            # is enabled, is_scored only ever flows alongside a compatible score,
-            # so no realignment is needed in that direction.)
-            if ras_to_update and not target_audit.scoring_enabled:
-                RequirementAssessment.objects.filter(
-                    id__in=[ra.id for ra in ras_to_update],
-                ).update(is_scored=False)
 
         updated_count = sum(1 for d in merge_details if d["meaningful"])
 
