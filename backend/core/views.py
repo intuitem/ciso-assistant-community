@@ -14938,6 +14938,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         is_full_coverage,
         same_framework,
         allowed_scalars=None,
+        observation_allowed=True,
     ):
         """Merge one source RA into one target RA, in memory.
 
@@ -14967,10 +14968,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     field_changes[field] = {"current": current_val, "new": engine_val}
 
         # Observation: append unless the source text is already present (keeps
-        # re-running from the same source idempotent).
+        # re-running from the same source idempotent).  Respect visibility.
         current_obs = current.get("observation") or ""
         engine_obs = source_ra.get("observation") or ""
-        if engine_obs and engine_obs not in current_obs:
+        if observation_allowed and engine_obs and engine_obs not in current_obs:
             merged = (
                 engine_obs if not current_obs else f"{current_obs}\n\n---\n{engine_obs}"
             )
@@ -15058,13 +15059,16 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         target_data = engine.load_audit_fields(target_audit)
         target_ras = target_data.get("requirement_assessments", {})
 
-        # Only merge scalar fields visible on both audits: the source must
-        # expose the data and the target must accept it.
+        # Only merge fields visible on both audits: the source must expose
+        # the data and the target must accept it.
         allowed_scalars = {
             f
             for f in self.SCALAR_DEFAULTS
             if source_audit._auditor_visible(f) and target_audit._auditor_visible(f)
         }
+        observation_allowed = source_audit._auditor_visible(
+            "observation"
+        ) and target_audit._auditor_visible("observation")
 
         merged_target = {}
         merge_details = []
@@ -15081,6 +15085,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 is_full_coverage=is_full,
                 same_framework=same_framework,
                 allowed_scalars=allowed_scalars,
+                observation_allowed=observation_allowed,
             )
             meaningful = bool(field_changes) or bool(m2m_added)
             if not (merged_fields or meaningful):
@@ -15347,7 +15352,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     list(update_fields),
                     batch_size=500,
                 )
-                ras_to_update[0].trigger_compliance_assessment_update_hooks()
                 if update_fields & RequirementAssessment._CEL_RELEVANT_FIELDS:
                     ras_to_update[0]._defer_cel_evaluation()
 
@@ -15370,6 +15374,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     se_ids = source_ra.get("security_exceptions", [])
                     if se_ids:
                         ra.security_exceptions.add(*se_ids)
+
+            if ras_by_urn:
+                next(iter(ras_by_urn.values())).trigger_compliance_assessment_update_hooks()
 
         updated_count = sum(1 for d in merge_details if d["meaningful"])
 
