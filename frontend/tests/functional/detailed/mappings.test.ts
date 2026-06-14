@@ -98,6 +98,8 @@ test('user can map iso27001-2022 audit to a new csf-1.1 audit', async ({
 		await page.waitForURL('/requirement-assessments/**');
 		await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('data-value', '0');
 
+		await page.getByTestId('form-input-result').selectOption('compliant');
+
 		const slider = page.getByTestId('range-slider-input');
 		await expect(slider).toBeVisible();
 		await slider.focus();
