@@ -517,9 +517,10 @@ class TestComplianceAssessmentMapFrom:
             _make_requirement(fw, r)
         source = self._audit(fw)
         target = self._audit(fw)
-        # Scoring is off by default on a bare audit; enable it on the target so
-        # the is_scored/score copy is actually exercised (otherwise the endpoint
-        # correctly forces is_scored=False).
+        # Scoring is hidden by default; enable it on both audits so the
+        # visibility intersection includes score/is_scored.
+        source.scoring_enabled = True
+        source.save()
         target.scoring_enabled = True
         target.save()
 
