@@ -203,6 +203,17 @@ test('user can map iso27001-2022 audit to a new csf-1.1 audit', async ({
 			folder: vars.folderName,
 			framework: vars.framework.name
 		});
+
+		// Enable scoring so the target accepts scored data from the source.
+		await page.getByTestId('edit-button').click();
+		await page.getByText('More').click();
+		for (const spinner of await page.locator('.loading-spinner').all()) {
+			await expect(spinner).not.toBeVisible({
+				timeout: 10_000
+			});
+		}
+		await page.getByTestId('visibility-score-everyone').click();
+		await page.getByTestId('save-button').click();
 	});
 
 	await test.step('map from into the empty target: changes are applied', async () => {
