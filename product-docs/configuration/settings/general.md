@@ -50,3 +50,9 @@ These settings drive the optional AI features (chat mode, agentic workflows, RAG
 ## Analytics
 
 - **Default custom analytics dashboard** — UUID of the dashboard shown by default on the analytics page.
+
+## Domain-tree audit inheritance
+
+Shown only when the **Domain-tree audit inheritance** feature flag is on (under the **Compliance assessments** group).
+
+- **Domain inheritance strategy** — when the same framework is audited at several levels of the domain tree, decides how a child audit combines results with its parent audits. Options: _No inheritance_ (default), _Parent always wins_, _Child always wins_, _Best case (optimistic)_, _Worst case (prudent)_. Scores from a different scale are normalised to the top parent's scale. This one org-wide setting drives the **Combined view** on the [Framework report](../../features/framework-report.md#combined-view-domain-tree-inheritance) and the inheritance panel in [Advanced Analytics](../../features/audit-analytics.md). Leaving it on _No inheritance_ keeps the feature dormant even with the flag enabled.
