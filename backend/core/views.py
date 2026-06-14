@@ -14931,7 +14931,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     }
 
     def _merge_requirement(
-        self, current, source_ra, *, is_full_coverage, same_framework,
+        self,
+        current,
+        source_ra,
+        *,
+        is_full_coverage,
+        same_framework,
         allowed_scalars=None,
     ):
         """Merge one source RA into one target RA, in memory.
@@ -15056,9 +15061,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         # Only merge scalar fields visible on both audits: the source must
         # expose the data and the target must accept it.
         allowed_scalars = {
-            f for f in self.SCALAR_DEFAULTS
-            if source_audit._auditor_visible(f)
-            and target_audit._auditor_visible(f)
+            f
+            for f in self.SCALAR_DEFAULTS
+            if source_audit._auditor_visible(f) and target_audit._auditor_visible(f)
         }
 
         merged_target = {}
