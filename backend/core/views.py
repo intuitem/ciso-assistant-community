@@ -15376,7 +15376,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         ra.security_exceptions.add(*se_ids)
 
             if ras_by_urn:
-                next(iter(ras_by_urn.values())).trigger_compliance_assessment_update_hooks()
+                next(
+                    iter(ras_by_urn.values())
+                ).trigger_compliance_assessment_update_hooks()
 
         updated_count = sum(1 for d in merge_details if d["meaningful"])
 
