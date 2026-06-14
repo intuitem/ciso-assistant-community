@@ -145,14 +145,6 @@
 {/if}
 {#if !hasPresetAssessments}
 	<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
-		<TextField
-			{form}
-			field="ref_id"
-			label={m.refId()}
-			cacheLock={cacheLocks['ref_id']}
-			bind:cachedValue={formDataCache['ref_id']}
-			disabled={initialData.ref_id}
-		/>
 		<AutocompleteSelect
 			{form}
 			optionsEndpoint="compliance-assessments"

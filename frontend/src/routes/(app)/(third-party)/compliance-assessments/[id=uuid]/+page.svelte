@@ -18,6 +18,7 @@
 	import TreeViewItemLead from './TreeViewItemLead.svelte';
 
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ExportModal, { type ExportGroup } from '$lib/components/Modals/ExportModal.svelte';
 
@@ -936,6 +937,10 @@
 						breadcrumbAction="push"
 						><i class="fa-solid fa-file-lines mr-2"></i>{m.evidences()}</Anchor
 					>
+					<AuditTrailButton
+						model="compliance-assessments"
+						objectId={data.compliance_assessment.id}
+					/>
 				{/if}
 				<!-- Power-ups Command Palette Grid -->
 				<div class="pt-3 border-t border-gray-200 mt-2 space-y-3">

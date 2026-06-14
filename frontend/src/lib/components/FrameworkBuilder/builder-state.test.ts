@@ -4,6 +4,7 @@ import {
 	slugifyFrameworkName,
 	computeRefId,
 	generateUrn,
+	extractNodeId,
 	validateDraft,
 	buildTree,
 	serializeDraft,
@@ -844,5 +845,137 @@ describe('question and choice CRUD on top-level requirement nodes', () => {
 		const firstId = get(s.rootNodes)[0].questions[0].question.id;
 		s.reorderQuestions(id, 0, 1);
 		expect(get(s.rootNodes)[0].questions[1].question.id).toBe(firstId);
+	});
+});
+
+describe('extractNodeId', () => {
+	it('returns everything after the 5th colon', () => {
+		expect(extractNodeId('urn:custom:risk:req_node:my-fw:2.1')).toBe('2.1');
+	});
+
+	it('preserves node_ids that themselves contain colons', () => {
+		expect(extractNodeId('urn:custom:risk:question:my-fw:2.1:q1')).toBe('2.1:q1');
+	});
+
+	it('returns null for short or empty URNs', () => {
+		expect(extractNodeId('urn:custom:risk:req_node:my-fw')).toBeNull();
+		expect(extractNodeId(null)).toBeNull();
+		expect(extractNodeId(undefined)).toBeNull();
+	});
+});
+
+describe('node_id uniqueness on creation', () => {
+	it('disambiguates a new node_id that collides with a renamed/moved node', () => {
+		const fw = makeFramework({ urn_namespace: 'custom', ref_id: 'fw' });
+		// Node A's displayed ref_id was renamed to "2.9" but its URN keeps the
+		// frozen node_id "2.1". Node P is the parent a new "2.1" will compute under.
+		const nodeP = makeNode({
+			id: 'p',
+			urn: 'urn:custom:risk:req_node:fw:2',
+			ref_id: '2',
+			parent_urn: null
+		});
+		const nodeA = makeNode({
+			id: 'a',
+			urn: 'urn:custom:risk:req_node:fw:2.1',
+			ref_id: '2.9',
+			parent_urn: null
+		});
+		const s = createBuilderState(fw, [nodeP, nodeA], []);
+		s.addNode({ parent: 'p', preset: 'requirement' });
+		const parent = get(s.rootNodes).find((r) => r.node.id === 'p')!;
+		const child = parent.children[0];
+		// Display ref_id stays the natural "2.1"; the URN node_id is disambiguated.
+		expect(child.node.ref_id).toBe('2.1');
+		expect(extractNodeId(child.node.urn)).toBe('2.1-2');
+	});
+});
+
+describe('node_id repair on draft load', () => {
+	function draftWithDuplicateNodeIds() {
+		return {
+			schema_version: 1,
+			framework_meta: {
+				name: 'F',
+				description: null,
+				min_score: 0,
+				max_score: 100,
+				scores_definition: null,
+				implementation_groups_definition: null,
+				outcomes_definition: null,
+				urn_namespace: 'custom',
+				ref_id: 'fw'
+			},
+			nodes: [
+				{
+					id: 'a',
+					urn: 'urn:custom:risk:req_node:fw:2.1',
+					ref_id: '2.1',
+					name: 'Alpha',
+					parent_urn: null,
+					order_id: 0,
+					assessable: true
+				},
+				{
+					id: 'b',
+					urn: 'urn:custom:risk:req_node:fw:2.1',
+					ref_id: '2.1',
+					name: 'Beta',
+					parent_urn: null,
+					order_id: 1,
+					assessable: true
+				}
+			],
+			questions: [],
+			choices: []
+		};
+	}
+
+	it('gives colliding nodes distinct node_ids and marks the draft unsaved', () => {
+		const s = createBuilderState(makeFramework(), [], [], draftWithDuplicateNodeIds());
+		const roots = get(s.rootNodes);
+		const nodeIds = roots.map((r) => extractNodeId(r.node.urn));
+		expect(nodeIds).toHaveLength(2);
+		expect(new Set(nodeIds).size).toBe(2); // no longer duplicated
+		expect(nodeIds).toContain('2.1'); // first occurrence kept
+		expect(get(s.unsaved)).toBe(true); // repair persists on next save
+		expect(get(s.unpublished)).toBe(true);
+	});
+
+	it('restores the original node_id from ref_id when the URN drifted onto a sibling', () => {
+		// Node B's URN was corrupted to A's, but its ref_id "2.2" is intact and
+		// free — the repair must restore ":2.2" (matching the DB row) rather
+		// than mint ":2.1-2", otherwise the publish-time URN lock rejects the
+		// repaired draft on frameworks with audits.
+		const draft = draftWithDuplicateNodeIds();
+		draft.nodes[1].ref_id = '2.2';
+		const s = createBuilderState(makeFramework(), [], [], draft);
+		const beta = get(s.rootNodes).find((r) => r.node.name === 'Beta')!;
+		expect(extractNodeId(beta.node.urn)).toBe('2.2');
+	});
+
+	it('keeps ambiguous children on the first occurrence; duplicate becomes a leaf', () => {
+		const draft = draftWithDuplicateNodeIds();
+		// A child pointing at the shared URN ":2.1" — genuinely ambiguous.
+		draft.nodes.push({
+			id: 'child',
+			urn: 'urn:custom:risk:req_node:fw:2.1.1',
+			ref_id: '2.1.1',
+			name: 'Child',
+			parent_urn: 'urn:custom:risk:req_node:fw:2.1',
+			order_id: 0,
+			assessable: true
+		});
+		const s = createBuilderState(makeFramework(), [], [], draft);
+		const roots = get(s.rootNodes);
+		const alpha = roots.find((r) => r.node.name === 'Alpha')!;
+		const beta = roots.find((r) => r.node.name === 'Beta')!;
+		// Alpha (first occurrence) keeps node_id "2.1" and the ambiguous child.
+		expect(extractNodeId(alpha.node.urn)).toBe('2.1');
+		expect(alpha.children).toHaveLength(1);
+		expect(alpha.children[0].node.name).toBe('Child');
+		// Beta (duplicate) got a fresh node_id and is now a standalone leaf.
+		expect(extractNodeId(beta.node.urn)).not.toBe('2.1');
+		expect(beta.children).toHaveLength(0);
 	});
 });
