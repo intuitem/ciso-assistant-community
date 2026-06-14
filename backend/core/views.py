@@ -15063,15 +15063,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 is_full_coverage=is_full,
                 same_framework=same_framework,
             )
-
-            # Drop fields hidden on the target audit — writing them would be
-            # overridden by the POST endpoint and showing them in the preview
-            # would create a false diff.
-            for field in list(merged_fields):
-                if not target_audit._auditor_visible(field):
-                    merged_fields.pop(field)
-                    field_changes.pop(field, None)
-
             meaningful = bool(field_changes) or bool(m2m_added)
             if not (merged_fields or meaningful):
                 continue
