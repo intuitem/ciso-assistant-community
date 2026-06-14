@@ -14922,8 +14922,17 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             if (v.get("source_framework") or {}).get("id") == origin_fw_id
         )
 
+    SCALAR_DEFAULTS = {
+        "result": "not_assessed",
+        "status": "to_do",
+        "score": None,
+        "is_scored": False,
+        "documentation_score": None,
+    }
+
     def _merge_requirement(
-        self, current, source_ra, *, is_full_coverage, same_framework
+        self, current, source_ra, *, is_full_coverage, same_framework,
+        allowed_scalars=None,
     ):
         """Merge one source RA into one target RA, in memory.
 
@@ -14931,22 +14940,18 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         - merged_fields: values to write on the target
         - field_changes: before/after pairs for the preview diff
         - m2m_added: count of genuinely-new M2M links, by field
+
+        *allowed_scalars*, when given, restricts the scalar fields that may
+        flow — only fields visible on both source and target should be offered.
         """
-        # Scalar fields and their model defaults. A source value equal to its
-        # default carries no information and never overwrites the target.
-        scalar_defaults = {
-            "result": "not_assessed",
-            "status": "to_do",
-            "score": None,
-            "is_scored": False,
-            "documentation_score": None,
-        }
         merged_fields = {}
         field_changes = {}
 
         # Full coverage copies from source; partial coverage only fills a target
         # still at its default. Either way, only a meaningful source value flows.
-        for field, default in scalar_defaults.items():
+        for field, default in self.SCALAR_DEFAULTS.items():
+            if allowed_scalars is not None and field not in allowed_scalars:
+                continue
             current_val = current.get(field)
             engine_val = source_ra.get(field)
             engine_is_meaningful = engine_val is not None and engine_val != default
@@ -15048,6 +15053,14 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         target_data = engine.load_audit_fields(target_audit)
         target_ras = target_data.get("requirement_assessments", {})
 
+        # Only merge scalar fields visible on both audits: the source must
+        # expose the data and the target must accept it.
+        allowed_scalars = {
+            f for f in self.SCALAR_DEFAULTS
+            if source_audit._auditor_visible(f)
+            and target_audit._auditor_visible(f)
+        }
+
         merged_target = {}
         merge_details = []
 
@@ -15062,6 +15075,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 source_ra,
                 is_full_coverage=is_full,
                 same_framework=same_framework,
+                allowed_scalars=allowed_scalars,
             )
             meaningful = bool(field_changes) or bool(m2m_added)
             if not (merged_fields or meaningful):
