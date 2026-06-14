@@ -77,15 +77,13 @@
 	<div class="modal-map-from-audit {cBase}">
 		<div class="flex items-center justify-between">
 			<header class={cHeader} data-testid="modal-title">{m.mapFromAudit()}</header>
-			<div
-				role="button"
-				tabindex="0"
+			<button
+				type="button"
 				class="flex items-center hover:text-primary-500 cursor-pointer"
 				onclick={parent.onClose}
-				onkeydown={parent.onClose}
 			>
 				<i class="fa-solid fa-xmark"></i>
-			</div>
+			</button>
 		</div>
 		<form method="POST" use:enhance class="space-y-4">
 			<AutocompleteSelect

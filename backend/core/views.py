@@ -15124,10 +15124,18 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         ):
             return None, Response(status=status.HTTP_403_FORBIDDEN)
 
+        try:
+            source_uuid = UUID(source_audit_id)
+        except ValueError:
+            return None, Response(
+                {"error": "Invalid UUID for source_audit_id"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         viewable_objects, _, _ = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, ComplianceAssessment
         )
-        if UUID(source_audit_id) not in viewable_objects:
+        if source_uuid not in viewable_objects:
             return None, Response(
                 {"error": "Permission denied for source audit"},
                 status=status.HTTP_403_FORBIDDEN,
@@ -15295,10 +15303,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
             ras_to_update = []
             update_fields = set()
+            ras_by_urn = {}
 
             for ra in target_ras:
                 urn = ra.requirement.urn
-                fields = merged_target.get(urn, {})
+                if urn not in merged_target:
+                    continue
+                ras_by_urn[urn] = ra
+
+                fields = merged_target[urn]
                 if not fields:
                     continue
 
@@ -15334,10 +15347,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     list(update_fields),
                     batch_size=500,
                 )
+                ras_to_update[0].trigger_compliance_assessment_update_hooks()
+                if update_fields & RequirementAssessment._CEL_RELEVANT_FIELDS:
+                    ras_to_update[0]._defer_cel_evaluation()
 
             mapped_ra_data = mapped_results.get("requirement_assessments", {})
             details_by_urn = {d["urn"]: d for d in merge_details}
-            for ra in ras_to_update:
+            for ra in ras_by_urn.values():
                 urn = ra.requirement.urn
                 source_ra = mapped_ra_data.get(urn, {})
                 detail = details_by_urn.get(urn)

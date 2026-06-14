@@ -605,6 +605,8 @@ class TestComplianceAssessmentMapFrom:
         _make_requirement(fw, "A")
         source = self._audit(fw)
         target = self._audit(fw)
+        source.scoring_enabled = True
+        source.save()
         target.scoring_enabled = False
         target.save()
 
@@ -616,7 +618,9 @@ class TestComplianceAssessmentMapFrom:
 
         resp = self._map_from(authenticated_client, target, source)
         assert resp.status_code == status.HTTP_200_OK, resp.content
-        assert self._ra(target, "A").is_scored is False
+        ta = self._ra(target, "A")
+        assert ta.is_scored is False
+        assert ta.score is None
 
     def test_preview_shape(self, authenticated_client):
         fw = _make_framework()

@@ -27,15 +27,13 @@
 	<div class="modal-mapping-direction {cBase}">
 		<div class="flex items-center justify-between">
 			<header class={cHeader}>{m.applyMapping()}</header>
-			<div
-				role="button"
-				tabindex="0"
+			<button
+				type="button"
 				class="flex items-center hover:text-primary-500 cursor-pointer"
 				onclick={parent.onClose}
-				onkeydown={parent.onClose}
 			>
 				<i class="fa-solid fa-xmark"></i>
-			</div>
+			</button>
 		</div>
 		<div class="grid grid-cols-2 gap-4">
 			<button
