@@ -160,7 +160,8 @@ from core.utils import (
     REWRITABLE_URN_TYPES,
     build_answers_dict,
     compare_schema_versions,
-    get_auditee_filtered_folder_ids,
+    extract_urn_slug,
+    get_respondent_scoped_folder_ids,
     resolve_compute_result,
     is_field_visible_to,
     rewrite_child_urns,
@@ -237,6 +238,12 @@ def _validate_and_upload_image(request, attachment_kwargs, *, include_url=False)
         )
     content_type = (uploaded_file.content_type or "").lower()
     if content_type not in ALLOWED_IMAGE_TYPES:
+        logger.warning(
+            "Rejected image upload with disallowed content type",
+            user=str(request.user),
+            claimed_type=content_type,
+            filename=getattr(uploaded_file, "name", None),
+        )
         return Response(
             {"error": "Only PNG, JPEG, GIF, and WebP images are allowed."},
             status=status.HTTP_400_BAD_REQUEST,
@@ -244,6 +251,13 @@ def _validate_and_upload_image(request, attachment_kwargs, *, include_url=False)
     real_mime = magic.from_buffer(uploaded_file.read(2048), mime=True)
     uploaded_file.seek(0)
     if real_mime not in ALLOWED_IMAGE_TYPES:
+        logger.warning(
+            "Rejected image upload whose content does not match its claimed type",
+            user=str(request.user),
+            claimed_type=content_type,
+            real_mime=real_mime,
+            filename=getattr(uploaded_file, "name", None),
+        )
         return Response(
             {"error": f"File content is {real_mime}, not an allowed image type."},
             status=status.HTTP_400_BAD_REQUEST,
@@ -8560,6 +8574,23 @@ class DraftValidationError(Exception):
         super().__init__(message)
 
 
+# Version of the editing_draft JSON shape produced by the frontend builder.
+# Drafts persist in the DB across releases; reject drafts written by a NEWER
+# frontend than this backend understands instead of crashing mid-reconcile.
+# Missing/older versions are tolerated (validation handles their gaps).
+BUILDER_DRAFT_SCHEMA_VERSION = 1
+
+
+def _draft_record_label(record) -> str:
+    """Human-readable label for a draft node/question/choice, used in
+    DraftValidationError messages so users can locate the offending item."""
+    for key in ("ref_id", "name", "text", "value"):
+        v = record.get(key)
+        if isinstance(v, str) and v.strip():
+            return v[:50]
+    return record.get("urn") or "unknown"
+
+
 class FrameworkViewSet(BaseModelViewSet):
     """
     API endpoint that allows frameworks to be viewed or edited.
@@ -8660,13 +8691,13 @@ class FrameworkViewSet(BaseModelViewSet):
 
         cas = [ca for ca in all_visible_cas if ca.status in LIVE_STATUSES]
 
-        # Per-CA viewer role: respondent if the user is an auditee on the CA's
-        # folder, auditor otherwise. Computed once per CA.
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        # Per-CA viewer role: respondent unless the user holds the full auditor
+        # view (view_compliance_assessment_full) on the CA's folder. Computed once per CA.
+        respondent_folders = get_respondent_scoped_folder_ids(request.user)
         ca_viewer_roles = {
             ca.id: (
                 "respondent"
-                if (auditee_folders and ca.folder_id in auditee_folders)
+                if (respondent_folders and ca.folder_id in respondent_folders)
                 else "auditor"
             )
             for ca in cas
@@ -9111,6 +9142,12 @@ class FrameworkViewSet(BaseModelViewSet):
                     new_question.save(update_fields=["depends_on"])
 
             serializer = FrameworkReadSerializer(new_framework)
+            logger.info(
+                "Framework duplicated",
+                source_framework_id=str(source.id),
+                new_framework_id=str(new_framework.id),
+                folder_id=str(folder.id),
+            )
             return Response(serializer.data, status=201)
 
     @action(detail=False, name="Get used frameworks")
@@ -9564,19 +9601,9 @@ class FrameworkViewSet(BaseModelViewSet):
         seed_ref_id = framework.ref_id
         if not seed_ref_id:
             for record in nodes + questions + choices:
-                u = record.get("urn") or ""
-                parts = u.split(":")
-                # Only proper 6+ segment URNs (`urn:ns:risk:type:slug:node_id`)
-                # carry a slug we can seed from. Legacy 5-segment URNs
-                # (`urn:ns:risk:type:<uuid>`) have a per-node UUID at parts[4]
-                # — not a ref_id — so skip them and fall through to the slug.
-                if (
-                    len(parts) >= 6
-                    and parts[0] == "urn"
-                    and parts[2] == "risk"
-                    and parts[3] in REWRITABLE_URN_TYPES
-                ):
-                    seed_ref_id = parts[4]
+                slug = extract_urn_slug(record.get("urn"))
+                if slug:
+                    seed_ref_id = slug
                     break
             if not seed_ref_id:
                 seed_ref_id = self._slugify_framework_name(framework.name, framework.id)
@@ -9604,6 +9631,12 @@ class FrameworkViewSet(BaseModelViewSet):
 
         framework.editing_draft = draft
         framework.save(update_fields=["editing_draft", "updated_at"])
+        logger.info(
+            "Framework draft editing started",
+            framework_id=str(framework.id),
+            seed_ref_id=seed_ref_id,
+            **self._draft_stats(draft),
+        )
         return Response(
             {"status": "editing_started", "editing_draft": framework.editing_draft}
         )
@@ -9614,39 +9647,257 @@ class FrameworkViewSet(BaseModelViewSet):
         framework = self.get_object()
         self._check_change_permission(request, framework)
         editing_draft = request.data.get("editing_draft")
-        if editing_draft is None:
+
+        def _reject(message):
+            logger.warning(
+                "Rejected framework draft save",
+                framework_id=str(framework.id),
+                error=message,
+            )
             return Response(
-                {"error": "editing_draft is required."},
+                {"error": message},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        if editing_draft is None:
+            return _reject("editing_draft is required.")
+
         if not isinstance(editing_draft, dict):
-            return Response(
-                {"error": "editing_draft must be a JSON object."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return _reject("editing_draft must be a JSON object.")
         required_keys = {"framework_meta", "nodes", "questions", "choices"}
         missing = required_keys - set(editing_draft.keys())
         if missing:
-            return Response(
-                {"error": f"editing_draft missing required keys: {missing}"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return _reject(f"editing_draft missing required keys: {missing}")
         for list_key in ("nodes", "questions", "choices"):
             if not isinstance(editing_draft.get(list_key), list):
-                return Response(
-                    {"error": f"editing_draft.{list_key} must be a list."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+                return _reject(f"editing_draft.{list_key} must be a list.")
         if not isinstance(editing_draft.get("framework_meta"), dict):
-            return Response(
-                {"error": "editing_draft.framework_meta must be an object."},
-                status=status.HTTP_400_BAD_REQUEST,
+            return _reject("editing_draft.framework_meta must be an object.")
+
+        # Lock the row so a save can't interleave with a publish in progress
+        # (publish clears editing_draft at the end; an unserialized write here
+        # would either be silently discarded or resurrect a published draft).
+        # select_for_update is a no-op on SQLite (database-level write lock)
+        # and a row lock on PostgreSQL.
+        with transaction.atomic():
+            framework = Framework.objects.select_for_update().get(pk=framework.pk)
+            framework.editing_draft = editing_draft
+            framework.save(update_fields=["editing_draft", "updated_at"])
+        logger.debug(
+            "Framework draft saved",
+            framework_id=str(framework.id),
+            **self._draft_stats(editing_draft),
+        )
+        return Response({"status": "draft_saved"})
+
+    @staticmethod
+    def _draft_stats(draft):
+        """Compact draft-shape summary attached to builder log events so a
+        failure report identifies what the draft looked like without dumping
+        its (potentially large and sensitive) content."""
+        if not isinstance(draft, dict):
+            return {"draft_present": False}
+        return {
+            "draft_present": True,
+            "draft_schema_version": draft.get("schema_version", 1),
+            "draft_nodes": len(draft.get("nodes") or []),
+            "draft_questions": len(draft.get("questions") or []),
+            "draft_choices": len(draft.get("choices") or []),
+        }
+
+    @staticmethod
+    def _validate_draft_structure(draft):
+        """Validate the structural integrity of an editing draft.
+
+        Drafts are client-supplied JSON that persists in the DB across
+        releases, so every assumption the diff/reconcile code makes about
+        their shape must be checked here first. Raises DraftValidationError
+        with an actionable message instead of letting a malformed draft
+        crash deeper with the generic "Failed to publish draft" error.
+        """
+        from core.utils import extract_node_id
+
+        version = draft.get("schema_version", 1)
+        if not isinstance(version, int) or version > BUILDER_DRAFT_SCHEMA_VERSION:
+            raise DraftValidationError(
+                "This draft was created by a newer version of CISO Assistant "
+                "than this server supports. Refresh the page and try again."
             )
 
-        framework.editing_draft = editing_draft
-        framework.save(update_fields=["editing_draft", "updated_at"])
-        return Response({"status": "draft_saved"})
+        fw_meta = draft.get("framework_meta", {})
+        fw_name = fw_meta.get("name", "")
+        if not isinstance(fw_name, str) or not fw_name.strip():
+            raise DraftValidationError("Framework name is required.")
+        if len(fw_name) > 200:
+            raise DraftValidationError(
+                f"Framework name is {len(fw_name)} characters (max 200)."
+            )
+        for score_field in ("min_score", "max_score"):
+            score_value = fw_meta.get(score_field)
+            if score_value is not None and not isinstance(score_value, int):
+                raise DraftValidationError(f"{score_field} must be an integer.")
+
+        draft_nodes = draft.get("nodes", [])
+        draft_questions = draft.get("questions", [])
+        draft_choices = draft.get("choices", [])
+
+        _label = _draft_record_label
+
+        # --- ids: every record needs a unique, valid UUID. The reconcile
+        # code parses these with uuid.UUID() and keys lookup maps on them;
+        # a missing or duplicated id would crash or silently drop a row.
+        parsed_ids_by_kind = {}
+        for kind, records in (
+            ("requirement", draft_nodes),
+            ("question", draft_questions),
+            ("choice", draft_choices),
+        ):
+            seen_ids = set()
+            for record in records:
+                if not isinstance(record, dict):
+                    raise DraftValidationError(
+                        f"Malformed {kind} entry in draft (expected an object). "
+                        "Discard the draft and start editing again."
+                    )
+                try:
+                    parsed = uuid.UUID(str(record.get("id")))
+                except (TypeError, ValueError):
+                    raise DraftValidationError(
+                        f"{kind.capitalize()} '{_label(record)}' has a missing or "
+                        "invalid id. Discard the draft and start editing again."
+                    )
+                if parsed in seen_ids:
+                    raise DraftValidationError(
+                        f"Duplicate {kind} id on '{_label(record)}'. "
+                        "Discard the draft and start editing again."
+                    )
+                seen_ids.add(parsed)
+            parsed_ids_by_kind[kind] = seen_ids
+
+        # --- Cross-collection references: a question must belong to a node
+        # of this draft, a choice to a question of this draft. Dangling
+        # references would hit FK errors during the bulk sync. Wording is
+        # shared with the deeper reconcile-time cross-framework checks.
+        for q in draft_questions:
+            try:
+                parent_id = uuid.UUID(str(q.get("requirement_node_id")))
+            except (TypeError, ValueError):
+                parent_id = None
+            if parent_id not in parsed_ids_by_kind["requirement"]:
+                raise DraftValidationError(
+                    f"Question '{_label(q)}': requirement_node not in this framework."
+                )
+        for c in draft_choices:
+            try:
+                parent_id = uuid.UUID(str(c.get("question_id")))
+            except (TypeError, ValueError):
+                parent_id = None
+            if parent_id not in parsed_ids_by_kind["question"]:
+                raise DraftValidationError(
+                    f"Choice '{_label(c)}': question not in this framework."
+                )
+
+        # --- Duplicate node_id check (CEL identity) ---
+        # node_id is the URN's mobile part — an internal identifier the UI does
+        # not surface, so the message names the two requirements that collide
+        # rather than the bare id (which the user can't locate). The builder
+        # auto-repairs this on load; this is the backend safety floor.
+        node_id_labels: dict[str, str] = {}
+        for node in draft_nodes:
+            nid = extract_node_id(node.get("urn"))
+            if not nid:
+                continue
+            if nid in node_id_labels:
+                raise DraftValidationError(
+                    f"Two requirements share the internal identifier '{nid}': "
+                    f"'{node_id_labels[nid]}' and '{_label(node)}'. This usually "
+                    "happens after duplicating or moving requirements. Re-open the "
+                    "framework in the builder to repair it automatically, then "
+                    "publish again."
+                )
+            node_id_labels[nid] = _label(node)
+
+        # --- Dangling parent_urn check ---
+        all_node_urns = {n.get("urn") for n in draft_nodes if n.get("urn")}
+        for node in draft_nodes:
+            parent_urn = node.get("parent_urn")
+            if parent_urn and parent_urn not in all_node_urns:
+                raise DraftValidationError(
+                    f"Requirement '{_label(node)}' references a parent that does not exist in this framework."
+                )
+
+        # --- Dangling depends_on check ---
+        all_question_urns = {q.get("urn") for q in draft_questions if q.get("urn")}
+        all_choice_urns = {c.get("urn") for c in draft_choices if c.get("urn")}
+        for q in draft_questions:
+            depends_on = q.get("depends_on")
+            if not depends_on:
+                continue
+            dep_question = depends_on.get("question")
+            if dep_question and dep_question not in all_question_urns:
+                raise DraftValidationError(
+                    f"Question '{_label(q)}' depends on a question that does not exist in this framework."
+                )
+            dep_answers = depends_on.get("answers", [])
+            for ans_urn in dep_answers:
+                if ans_urn and ans_urn not in all_choice_urns:
+                    raise DraftValidationError(
+                        f"Question '{_label(q)}' depends on a choice that does not exist in this framework."
+                    )
+
+        # --- Field lengths. Postgres enforces varchar limits that SQLite
+        # silently ignores, so oversized values must be rejected here or
+        # production publishes crash where dev/tests pass. Only nodes had
+        # these checks before; questions and choices were unguarded.
+        def _check_len(kind, record, field, value, max_len):
+            if isinstance(value, str) and len(value) > max_len:
+                raise DraftValidationError(
+                    f"{kind.capitalize()} '{_label(record)}': {field} is "
+                    f"{len(value)} characters (max {max_len})."
+                )
+
+        for node in draft_nodes:
+            _check_len("requirement", node, "name", node.get("name"), 200)
+            _check_len("requirement", node, "ref_id", node.get("ref_id"), 100)
+            _check_len("requirement", node, "URN", node.get("urn"), 255)
+        for q in draft_questions:
+            urn = q.get("urn")
+            if not isinstance(urn, str) or not urn.strip():
+                raise DraftValidationError(
+                    f"Question '{_label(q)}' has no URN. "
+                    "Discard the draft and start editing again."
+                )
+            _check_len("question", q, "URN", urn, 255)
+            _check_len("question", q, "ref_id", q.get("ref_id"), 100)
+        for c in draft_choices:
+            _check_len("choice", c, "URN", c.get("urn"), 255)
+            _check_len("choice", c, "ref_id", c.get("ref_id"), 100)
+            _check_len("choice", c, "compute_result", c.get("compute_result"), 100)
+            _check_len("choice", c, "color", c.get("color"), 50)
+
+        # --- Duplicate URNs within the draft. Question.urn carries a global
+        # unique constraint; a within-draft duplicate would surface as an
+        # IntegrityError during bulk_create (the generic publish failure).
+        # Deliberately ordered AFTER the duplicate-node_id check above: when
+        # two requirements share a full URN they also share a node_id, and the
+        # node_id error is the actionable one (it names both items and points
+        # at the builder's self-repair).
+        for kind, records in (
+            ("requirement", draft_nodes),
+            ("question", draft_questions),
+            ("choice", draft_choices),
+        ):
+            seen_urns = set()
+            for record in records:
+                u = record.get("urn")
+                if not u:
+                    continue
+                if u in seen_urns:
+                    raise DraftValidationError(
+                        f"Duplicate URN '{u}' on {kind} '{_label(record)}'. "
+                        "Each item must have a unique URN."
+                    )
+                seen_urns.add(u)
 
     @staticmethod
     def _compute_draft_diff(framework, draft):
@@ -9848,7 +10099,31 @@ class FrameworkViewSet(BaseModelViewSet):
                 {"error": "No active draft to preview."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        diff = self._compute_draft_diff(framework, framework.editing_draft)
+        draft_stats = self._draft_stats(framework.editing_draft)
+        try:
+            self._validate_draft_structure(framework.editing_draft)
+            diff = self._compute_draft_diff(framework, framework.editing_draft)
+        except DraftValidationError as e:
+            logger.warning(
+                "Validation error while previewing draft",
+                framework_id=str(framework.id),
+                error=e,
+                **draft_stats,
+            )
+            return Response(
+                {"error": e.user_message},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception:
+            logger.exception(
+                "Failed to preview draft",
+                framework_id=str(framework.id),
+                **draft_stats,
+            )
+            return Response(
+                {"error": "Failed to compute the publish preview."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         return Response(diff)
 
     @action(detail=True, methods=["post"], url_path="publish-draft")
@@ -9856,27 +10131,39 @@ class FrameworkViewSet(BaseModelViewSet):
         """Publish editing_draft → relational DB, snapshot history, bump version."""
         framework = self.get_object()
         self._check_change_permission(request, framework)
-        if framework.editing_draft is None:
-            return Response(
-                {"error": "No active draft to publish."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
 
-        draft = framework.editing_draft
+        draft_stats = {}
         try:
-            warnings = self._reconcile_draft(framework, draft)
+            # Serialize concurrent publishes/saves on the same framework: the
+            # draft is re-read under a row lock so a save_draft racing with
+            # this publish can neither be silently discarded nor publish a
+            # half-written draft. No-op on SQLite, row lock on PostgreSQL.
+            with transaction.atomic():
+                framework = Framework.objects.select_for_update().get(pk=framework.pk)
+                if framework.editing_draft is None:
+                    return Response(
+                        {"error": "No active draft to publish."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                draft_stats = self._draft_stats(framework.editing_draft)
+                warnings = self._reconcile_draft(framework, framework.editing_draft)
         except DraftValidationError as e:
             logger.warning(
                 "Validation error while publishing draft",
                 framework_id=str(framework.id),
-                error=str(e),
+                error=e,
+                **draft_stats,
             )
             return Response(
                 {"error": e.user_message},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception:
-            logger.exception("Failed to publish draft for framework %s", framework.id)
+            logger.exception(
+                "Failed to publish draft",
+                framework_id=str(framework.id),
+                **draft_stats,
+            )
             return Response(
                 {"error": "Failed to publish draft. Please try again."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -9894,84 +10181,69 @@ class FrameworkViewSet(BaseModelViewSet):
         """
         warnings = []
 
-        # --- 0. Pre-validate draft field lengths ---
+        # --- 0. Structural validation (raises DraftValidationError) ---
+        self._validate_draft_structure(draft)
+
         draft_nodes = draft.get("nodes", [])
         draft_questions = draft.get("questions", [])
         draft_choices = draft.get("choices", [])
-
         fw_meta = draft.get("framework_meta", {})
-        fw_name = fw_meta.get("name", "")
-        if not fw_name or not fw_name.strip():
-            raise DraftValidationError("Framework name is required.")
-        if len(fw_name) > 200:
+
+        has_audits = framework.complianceassessment_set.exists()
+
+        # Refuse to wipe a framework that audits depend on: publishing a
+        # draft with no requirement nodes cascades into deleting every
+        # RequirementAssessment and Answer of the existing audits.
+        if (
+            not draft_nodes
+            and has_audits
+            and RequirementNode.objects.filter(framework=framework).exists()
+        ):
             raise DraftValidationError(
-                f"Framework name is {len(fw_name)} characters (max 200)."
+                "This draft contains no requirements; publishing would erase "
+                "all responses in the audits using this framework. Add at "
+                "least one requirement, or delete the audits first."
             )
 
-        for node in draft_nodes:
-            label = node.get("ref_id") or f"position {node.get('order_id', '?')}"
-            name = node.get("name") or ""
-            ref_id = node.get("ref_id") or ""
-            urn = node.get("urn") or ""
-
-            if len(name) > 200:
-                raise DraftValidationError(
-                    f"Requirement '{label}': name is {len(name)} characters (max 200)."
-                )
-            if len(ref_id) > 100:
-                raise DraftValidationError(
-                    f"Requirement '{label}': ref_id is {len(ref_id)} characters (max 100)."
-                )
-            if len(urn) > 255:
-                raise DraftValidationError(
-                    f"Requirement '{label}': URN is {len(urn)} characters (max 255)."
-                )
-
-        # --- 0b. Validate referential integrity ---
-        from core.utils import extract_node_id
-
-        # Duplicate node_id check
-        node_urns = [n.get("urn") for n in draft_nodes if n.get("urn")]
-        node_ids = [extract_node_id(u) for u in node_urns]
-        seen_node_ids: set[str] = set()
-        for nid in node_ids:
-            if nid and nid in seen_node_ids:
-                raise DraftValidationError(
-                    f"Duplicate node_id '{nid}'. Each requirement must have a unique identifier."
-                )
-            if nid:
-                seen_node_ids.add(nid)
-
-        # Dangling parent_urn check
-        all_node_urns = {n.get("urn") for n in draft_nodes if n.get("urn")}
-        for node in draft_nodes:
-            parent_urn = node.get("parent_urn")
-            if parent_urn and parent_urn not in all_node_urns:
-                label = node.get("ref_id") or node.get("name") or "unknown"
-                raise DraftValidationError(
-                    f"Requirement '{label}' references a parent that does not exist in this framework."
-                )
-
-        # Dangling depends_on check
-        all_question_urns = {q.get("urn") for q in draft_questions if q.get("urn")}
-        all_choice_urns = {c.get("urn") for c in draft_choices if c.get("urn")}
-        for q in draft_questions:
-            depends_on = q.get("depends_on")
-            if not depends_on:
-                continue
-            dep_question = depends_on.get("question")
-            if dep_question and dep_question not in all_question_urns:
-                label = q.get("ref_id") or q.get("text", "")[:30] or "unknown"
-                raise DraftValidationError(
-                    f"Question '{label}' depends on a question that does not exist in this framework."
-                )
-            dep_answers = depends_on.get("answers", [])
-            for ans_urn in dep_answers:
-                if ans_urn and ans_urn not in all_choice_urns:
-                    label = q.get("ref_id") or q.get("text", "")[:30] or "unknown"
-                    raise DraftValidationError(
-                        f"Question '{label}' depends on a choice that does not exist in this framework."
-                    )
+        # --- 0b. Lock child URNs while audits exist. The sync below writes
+        # draft URNs onto existing rows, and CEL outcomes / depends_on rules
+        # key on URN stability — the same invariant the namespace/ref_id gate
+        # in 0c protects. Legitimate renames go through framework_meta and
+        # are rewritten *after* this check, so they are not affected.
+        if has_audits:
+            checks = (
+                (
+                    "requirement",
+                    draft_nodes,
+                    RequirementNode.objects.filter(framework=framework),
+                ),
+                (
+                    "question",
+                    draft_questions,
+                    Question.objects.filter(requirement_node__framework=framework),
+                ),
+                (
+                    "choice",
+                    draft_choices,
+                    QuestionChoice.objects.filter(
+                        question__requirement_node__framework=framework
+                    ),
+                ),
+            )
+            for kind, records, queryset in checks:
+                if not records:
+                    continue
+                db_urns = dict(queryset.values_list("id", "urn"))
+                for record in records:
+                    rid = uuid.UUID(record["id"])
+                    if rid not in db_urns:
+                        continue
+                    if (record.get("urn") or None) != (db_urns[rid] or None):
+                        raise DraftValidationError(
+                            f"Cannot change the URN of existing {kind} "
+                            f"'{_draft_record_label(record)}' while a compliance "
+                            "assessment uses this framework."
+                        )
 
         # --- 0c. Apply URN rename (urn_namespace / ref_id) before any sync. ---
         new_namespace_raw = fw_meta.get("urn_namespace")
@@ -9996,15 +10268,61 @@ class FrameworkViewSet(BaseModelViewSet):
             if isinstance(framework.ref_id, str) and framework.ref_id.strip()
             else None
         )
+        current_ref_was_derived = False
+        if current_ref is None:
+            # The ref_id column can be NULL on frameworks created before it was
+            # persisted (or duplicated without copying it over), yet start_editing
+            # seeds the draft ref_id from the slug carried by the child URNs
+            # (falling back to a slug of the name). Reconstruct that same value
+            # from the DB child URNs — the source of truth, not the
+            # client-supplied draft — so a no-op republish doesn't read as a
+            # rename and get blocked by the compliance-assessment guard below.
+            db_urn_sources = (
+                RequirementNode.objects.filter(framework=framework)
+                .order_by("created_at", "id")
+                .values_list("urn", flat=True),
+                Question.objects.filter(requirement_node__framework=framework)
+                .order_by("created_at", "id")
+                .values_list("urn", flat=True),
+                QuestionChoice.objects.filter(
+                    question__requirement_node__framework=framework
+                )
+                .order_by("created_at", "id")
+                .values_list("urn", flat=True),
+            )
+            for urn_source in db_urn_sources:
+                for db_urn in urn_source:
+                    current_ref = extract_urn_slug(db_urn)
+                    if current_ref is not None:
+                        break
+                if current_ref is not None:
+                    break
+            if current_ref is None:
+                current_ref = self._slugify_framework_name(framework.name, framework.id)
+            current_ref_was_derived = True
 
         ns_changed = bool(new_namespace) and new_namespace != current_namespace
         ref_changed = new_ref_id is not None and new_ref_id != (current_ref or "")
 
         new_urn_namespace = framework.urn_namespace
         new_framework_ref_id = framework.ref_id
+        # Heal historically-empty identity columns on publish so future
+        # publishes stop depending on URN-slug reconstruction: persist the
+        # derived ref_id and the normalized namespace when no rename is asked.
+        if not ref_changed and current_ref_was_derived:
+            new_framework_ref_id = current_ref
+            logger.info(
+                "Healing empty framework ref_id with slug derived from child URNs",
+                framework_id=str(framework.id),
+                derived_ref_id=current_ref,
+            )
+        if not ns_changed and not (
+            isinstance(framework.urn_namespace, str) and framework.urn_namespace.strip()
+        ):
+            new_urn_namespace = current_namespace
 
         if ns_changed or ref_changed:
-            if framework.complianceassessment_set.exists():
+            if has_audits:
                 raise DraftValidationError(
                     "Cannot change URN namespace or ref_id while a compliance assessment uses this framework."
                 )
@@ -10065,15 +10383,8 @@ class FrameworkViewSet(BaseModelViewSet):
 
             current_slug = None
             for n in draft_nodes + draft_questions + draft_choices:
-                u = n.get("urn") or ""
-                parts = u.split(":")
-                if (
-                    len(parts) >= 6
-                    and parts[0] == "urn"
-                    and parts[2] == "risk"
-                    and parts[3] in REWRITABLE_URN_TYPES
-                ):
-                    current_slug = parts[4]
+                current_slug = extract_urn_slug(n.get("urn"))
+                if current_slug:
                     break
             if not current_slug:
                 current_slug = framework.ref_id or self._slugify_framework_name(
@@ -10180,6 +10491,17 @@ class FrameworkViewSet(BaseModelViewSet):
                     )
 
                 if node_collisions or question_collisions or choice_collisions:
+                    # Disambiguation rewrites every draft URN sharing the slug,
+                    # including existing rows' — which would silently break the
+                    # URN stability that audits depend on (section 0b). Refuse
+                    # rather than rewrite when audits exist.
+                    if has_audits:
+                        raise DraftValidationError(
+                            "Some items in this draft have URNs that collide with "
+                            "another framework. This can't be auto-resolved while a "
+                            "compliance assessment uses this framework; change the "
+                            "framework's ref_id and try again."
+                        )
                     # Disambiguate: detect current slug from colliding URNs and
                     # rewrite all draft URNs with a new slug suffix
                     all_collisions = (
@@ -10284,8 +10606,23 @@ class FrameworkViewSet(BaseModelViewSet):
                         for c in draft_choices:
                             if c.get("urn") and slug_pattern in c["urn"]:
                                 c["urn"] = c["urn"].replace(slug_pattern, new_pattern)
+                        logger.warning(
+                            "URN collision during draft publish, slug disambiguated",
+                            framework_id=str(framework.id),
+                            old_slug=current_slug,
+                            new_slug=new_slug,
+                        )
                         warnings.append(
                             f"URN namespace collision detected, disambiguated to '{new_slug}'"
+                        )
+                    else:
+                        # Every candidate slug collided too. Proceeding would
+                        # hit the URN unique constraints during the bulk sync
+                        # and surface as an opaque server error.
+                        raise DraftValidationError(
+                            "Some items in this draft have URNs that collide with "
+                            "another framework, and no alternative slug is "
+                            "available. Change the framework's ref_id and try again."
                         )
 
             # --- 3. DELETE (choices → questions → nodes for FK safety) ---
@@ -10760,6 +11097,22 @@ class FrameworkViewSet(BaseModelViewSet):
                     "updated_at",
                 ]
             )
+
+        logger.info(
+            "Framework draft published",
+            framework_id=str(framework.id),
+            editing_version=framework.editing_version,
+            nodes_total=len(draft_nodes),
+            nodes_created=len(new_node_id_set),
+            nodes_deleted=len(nodes_to_delete),
+            questions_total=len(draft_questions),
+            questions_created=len(new_question_id_set),
+            questions_deleted=len(questions_to_delete),
+            choices_total=len(draft_choices),
+            choices_created=len(new_choice_id_set),
+            choices_deleted=len(choices_to_delete),
+            warnings=warnings,
+        )
         return warnings
 
     @action(detail=True, methods=["post"], url_path="discard-draft")
@@ -10767,8 +11120,14 @@ class FrameworkViewSet(BaseModelViewSet):
         """Discard editing_draft without affecting relational data."""
         framework = self.get_object()
         self._check_change_permission(request, framework)
+        draft_stats = self._draft_stats(framework.editing_draft)
         framework.editing_draft = None
         framework.save(update_fields=["editing_draft", "updated_at"])
+        logger.info(
+            "Framework draft discarded",
+            framework_id=str(framework.id),
+            **draft_stats,
+        )
         return Response({"status": "draft_discarded"})
 
     @action(
@@ -12330,11 +12689,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
         qs = super().get_queryset()
 
-        auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
-        if auditee_folders:
+        respondent_folders = get_respondent_scoped_folder_ids(self.request.user)
+        if respondent_folders:
             user_actors = Actor.get_all_for_user(self.request.user)
             qs = qs.filter(
-                ~Q(folder_id__in=auditee_folders)
+                ~Q(folder_id__in=respondent_folders)
                 | Q(requirement_assignments__actor__in=user_actors)
             ).distinct()
 
@@ -13534,8 +13893,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             )
         )
         # Auditee filtering: scope to assigned requirements only
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
-        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+        respondent_folders = get_respondent_scoped_folder_ids(request.user)
+        if respondent_folders and compliance_assessment.folder_id in respondent_folders:
             user_actors = Actor.get_all_for_user(request.user)
             ra_ids = set(
                 RequirementAssignment.objects.filter(
@@ -13691,8 +14050,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             )
         )
         # Auditee filtering: scope to assigned requirements only
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
-        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+        respondent_folders = get_respondent_scoped_folder_ids(request.user)
+        if respondent_folders and compliance_assessment.folder_id in respondent_folders:
             user_actors = Actor.get_all_for_user(request.user)
             ra_ids = set(
                 RequirementAssignment.objects.filter(
@@ -13927,8 +14286,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             )
         )
         # Auditee filtering: scope to assigned requirements only
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
-        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+        respondent_folders = get_respondent_scoped_folder_ids(request.user)
+        if respondent_folders and compliance_assessment.folder_id in respondent_folders:
             user_actors = Actor.get_all_for_user(request.user)
             ra_ids = set(
                 RequirementAssignment.objects.filter(
@@ -13977,12 +14336,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 parent = nodes_by_urn.get(req.parent_urn)
                 if parent:
                     req._parent_requirement_obj = parent
-        # Determine viewer role based on auditee status
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
-        is_auditee = bool(
-            auditee_folders and compliance_assessment.folder_id in auditee_folders
+        # Viewer role: respondent unless the user holds the full auditor view
+        # (view_compliance_assessment_full) on the CA's folder.
+        respondent_folders = get_respondent_scoped_folder_ids(request.user)
+        is_respondent = bool(
+            respondent_folders and compliance_assessment.folder_id in respondent_folders
         )
-        viewer_role = "respondent" if is_auditee else "auditor"
+        viewer_role = "respondent" if is_respondent else "auditor"
 
         requirement_assessments = RequirementAssessmentReadSerializer(
             requirement_assessments_objects,
@@ -14113,9 +14473,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def is_auditee(self, request, pk):
         """Returns whether the current user is an auditee for this compliance assessment."""
         compliance_assessment = self.get_object()
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        respondent_folders = get_respondent_scoped_folder_ids(request.user)
         is_auditee = bool(
-            auditee_folders and compliance_assessment.folder_id in auditee_folders
+            respondent_folders and compliance_assessment.folder_id in respondent_folders
         )
         return Response({"is_auditee": is_auditee})
 
@@ -14715,9 +15075,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         ).select_related("requirement")
 
         # Auditee filtering
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        respondent_folders = get_respondent_scoped_folder_ids(request.user)
         ra_ids = None
-        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+        if respondent_folders and compliance_assessment.folder_id in respondent_folders:
             user_actors = Actor.get_all_for_user(request.user)
             ra_ids = set(
                 RequirementAssignment.objects.filter(
@@ -14850,9 +15210,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         ).select_related("requirement")
 
         # Auditee filtering
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        respondent_folders = get_respondent_scoped_folder_ids(request.user)
         ra_ids = None
-        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+        if respondent_folders and compliance_assessment.folder_id in respondent_folders:
             user_actors = Actor.get_all_for_user(request.user)
             ra_ids = set(
                 RequirementAssignment.objects.filter(
@@ -14861,7 +15221,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 ).values_list("requirement_assessments__id", flat=True)
             )
 
-        # Filter by implementation groups and auditee
+        # Filter by implementation groups and respondent scope
         filtered_ras = []
         for ra in ras:
             if ra_ids is not None and ra.id not in ra_ids:
@@ -14938,9 +15298,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         ).select_related("requirement")
 
         # Auditee filtering
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        respondent_folders = get_respondent_scoped_folder_ids(request.user)
         ra_ids = None
-        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+        if respondent_folders and compliance_assessment.folder_id in respondent_folders:
             user_actors = Actor.get_all_for_user(request.user)
             ra_ids = set(
                 RequirementAssignment.objects.filter(
@@ -15048,9 +15408,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             requirement__assessable=True,
         ).select_related("requirement")
 
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        respondent_folders = get_respondent_scoped_folder_ids(request.user)
         ra_ids = None
-        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+        if respondent_folders and compliance_assessment.folder_id in respondent_folders:
             user_actors = Actor.get_all_for_user(request.user)
             ra_ids = set(
                 RequirementAssignment.objects.filter(
@@ -15162,9 +15522,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         ).select_related("requirement")
 
         # Auditee filtering
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        respondent_folders = get_respondent_scoped_folder_ids(request.user)
         ra_ids = None
-        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+        if respondent_folders and compliance_assessment.folder_id in respondent_folders:
             user_actors = Actor.get_all_for_user(request.user)
             ra_ids = set(
                 RequirementAssignment.objects.filter(
@@ -15349,11 +15709,11 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 "requirement__questions__choices",  # Needed by get_questions_translated
             )
         )
-        auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
-        if auditee_folders:
+        respondent_folders = get_respondent_scoped_folder_ids(self.request.user)
+        if respondent_folders:
             user_actors = Actor.get_all_for_user(self.request.user)
             qs = qs.filter(
-                ~Q(folder_id__in=auditee_folders)
+                ~Q(folder_id__in=respondent_folders)
                 | Q(assignments__actor__in=user_actors)
             ).distinct()
         return qs
@@ -18595,11 +18955,11 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
                 ),
             )
         )
-        auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
-        if auditee_folders:
+        respondent_folders = get_respondent_scoped_folder_ids(self.request.user)
+        if respondent_folders:
             user_actors = Actor.get_all_for_user(self.request.user)
             qs = qs.filter(
-                ~Q(folder_id__in=auditee_folders) | Q(actor__in=user_actors)
+                ~Q(folder_id__in=respondent_folders) | Q(actor__in=user_actors)
             ).distinct()
         return qs
 
@@ -18633,7 +18993,7 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
     # Valid transitions: (from_status, to_status) → config
-    # reviewer_only: auditee-only users are forbidden
+    # reviewer_only: respondents are forbidden
     # actor_only: only assigned actors can perform this transition
     # check_completion: all assessable requirements must be assessed
     # observation: "clear" removes it, "optional" keeps if provided, "required" must be provided
@@ -18686,12 +19046,12 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Reviewer-only check: auditee-only users are forbidden
+        # Reviewer-only check: respondents are forbidden
         if config.get("reviewer_only"):
-            auditee_folders = get_auditee_filtered_folder_ids(request.user)
+            respondent_folders = get_respondent_scoped_folder_ids(request.user)
             if (
-                auditee_folders
-                and assignment.compliance_assessment.folder_id in auditee_folders
+                respondent_folders
+                and assignment.compliance_assessment.folder_id in respondent_folders
             ):
                 return Response(
                     {"error": "Auditee users cannot perform this action."},
@@ -19088,15 +19448,16 @@ def global_search(request):
         )[0]
         qs = model_class.objects.filter(id__in=accessible_ids)
 
-        # ComplianceAssessment has extra auditee scoping: users with only the
-        # auditee role in a folder can only see assessments where they have a
-        # requirement assignment. Mirror the logic from ComplianceAssessmentViewSet.
+        # ComplianceAssessment has extra respondent scoping: users who lack the
+        # full auditor view (view_compliance_assessment_full) in a folder can only see
+        # assessments where they have a requirement assignment. Mirror the logic
+        # from ComplianceAssessmentViewSet.
         if model_class is ComplianceAssessment:
-            auditee_folders = get_auditee_filtered_folder_ids(request.user)
-            if auditee_folders:
+            respondent_folders = get_respondent_scoped_folder_ids(request.user)
+            if respondent_folders:
                 user_actors = Actor.get_all_for_user(request.user)
                 qs = qs.filter(
-                    ~Q(folder_id__in=auditee_folders)
+                    ~Q(folder_id__in=respondent_folders)
                     | Q(requirement_assignments__actor__in=user_actors)
                 ).distinct()
 
