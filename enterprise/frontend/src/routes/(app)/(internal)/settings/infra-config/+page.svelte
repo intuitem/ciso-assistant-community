@@ -108,13 +108,13 @@
 	use:enhance
 	class="flex flex-col gap-6"
 >
-	<span class="text-gray-500">{m.infraConfigDescription()}</span>
+	<span class="text-surface-600-400">{m.infraConfigDescription()}</span>
 
 	<div class="flex flex-col gap-3">
 		<h3 class="text-base font-semibold flex items-center gap-2">
 			<i class="fa-solid fa-network-wired text-sm text-primary-500"></i>
 			{m.allowedIps()}
-			<span class="text-xs font-normal text-gray-400">({allowedIps.length}/{MAX_ALLOWED_IPS})</span>
+			<span class="text-xs font-normal text-surface-500">({allowedIps.length}/{MAX_ALLOWED_IPS})</span>
 		</h3>
 
 		<div class="flex items-start gap-2">
@@ -151,7 +151,7 @@
 		</div>
 
 		{#if allowsAll}
-			<p class="text-warning-700 text-sm flex items-center gap-2">
+			<p class="text-warning-700-300 text-sm flex items-center gap-2">
 				<i class="fa-solid fa-triangle-exclamation"></i>
 				{m.allowsAllIpsWarning()}
 			</p>
@@ -177,7 +177,7 @@
 				{/each}
 			</div>
 		{:else}
-			<p class="text-gray-400 italic">{m.noAllowedIpsYet()}</p>
+			<p class="text-surface-500 italic">{m.noAllowedIpsYet()}</p>
 		{/if}
 	</div>
 

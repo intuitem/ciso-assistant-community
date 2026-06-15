@@ -318,7 +318,9 @@
 								{/if}
 							</div>
 							{#if assessment.version}
-								<span class="badge bg-blue-100 dark:bg-blue-500/15 text-blue-800 dark:text-blue-300 text-xs px-2 py-1 rounded">
+								<span
+									class="badge bg-blue-100 dark:bg-blue-500/15 text-blue-800 dark:text-blue-300 text-xs px-2 py-1 rounded"
+								>
 									v{assessment.version}
 								</span>
 							{/if}
@@ -350,7 +352,9 @@
 						{#if assessment.result_counts}
 							<div class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-3">
 								{#if assessment.result_counts.compliant !== undefined}
-									<div class="bg-success-50-950 border border-success-200-800 rounded p-2 text-center">
+									<div
+										class="bg-success-50-950 border border-success-200-800 rounded p-2 text-center"
+									>
 										<div class="text-2xl font-bold text-success-700-300">
 											{assessment.result_counts.compliant}
 										</div>
@@ -358,7 +362,9 @@
 									</div>
 								{/if}
 								{#if assessment.result_counts.partially_compliant !== undefined}
-									<div class="bg-warning-50-950 border border-warning-200-800 rounded p-2 text-center">
+									<div
+										class="bg-warning-50-950 border border-warning-200-800 rounded p-2 text-center"
+									>
 										<div class="text-2xl font-bold text-warning-700-300">
 											{assessment.result_counts.partially_compliant}
 										</div>
@@ -386,7 +392,9 @@
 									</div>
 								{/if}
 								{#if assessment.result_counts.not_assessed !== undefined}
-									<div class="bg-blue-50 dark:bg-blue-500/15 border border-blue-200 dark:border-blue-500/30 rounded p-2 text-center">
+									<div
+										class="bg-blue-50 dark:bg-blue-500/15 border border-blue-200 dark:border-blue-500/30 rounded p-2 text-center"
+									>
 										<div class="text-2xl font-bold text-blue-700 dark:text-blue-300">
 											{assessment.result_counts.not_assessed}
 										</div>
@@ -530,13 +538,15 @@
 						<div class="flex flex-wrap gap-6 text-sm mb-2">
 							<div class="flex flex-col">
 								<span class="text-xs text-surface-600-400 mb-1">{m.currentCriticality()}</span>
-								<span class="badge bg-blue-100 dark:bg-blue-500/15 text-blue-800 dark:text-blue-300 font-bold text-base px-3 py-1"
+								<span
+									class="badge bg-blue-100 dark:bg-blue-500/15 text-blue-800 dark:text-blue-300 font-bold text-base px-3 py-1"
 									>{stakeholder.current_criticality}</span
 								>
 							</div>
 							<div class="flex flex-col">
 								<span class="text-xs text-surface-600-400 mb-1">{m.residualCriticality()}</span>
-								<span class="badge bg-success-100-900 text-success-800-200 font-bold text-base px-3 py-1"
+								<span
+									class="badge bg-success-100-900 text-success-800-200 font-bold text-base px-3 py-1"
 									>{stakeholder.residual_criticality}</span
 								>
 							</div>
@@ -1083,7 +1093,9 @@
 				<div class="space-y-6">
 					{#each reportData.compliance_action_plans as actionPlan}
 						{#if actionPlan.applied_controls.length > 0}
-							<div class="border border-blue-200 dark:border-blue-500/30 rounded-lg p-4 bg-blue-50 dark:bg-blue-500/15">
+							<div
+								class="border border-blue-200 dark:border-blue-500/30 rounded-lg p-4 bg-blue-50 dark:bg-blue-500/15"
+							>
 								<h3 class="text-lg font-semibold text-blue-900 dark:text-blue-300 mb-3">
 									<i class="fa-solid fa-clipboard-check mr-2"></i>
 									{actionPlan.assessment_name}
@@ -1175,7 +1187,9 @@
 			{#if reportData.stakeholders && reportData.stakeholders.some((s) => s.applied_controls?.length > 0)}
 				<div class="space-y-6 mt-6">
 					{#each reportData.stakeholders.filter((s) => s.applied_controls?.length > 0) as stakeholder}
-						<div class="border border-teal-200 dark:border-teal-500/30 rounded-lg p-4 bg-teal-50 dark:bg-teal-500/15">
+						<div
+							class="border border-teal-200 dark:border-teal-500/30 rounded-lg p-4 bg-teal-50 dark:bg-teal-500/15"
+						>
 							<h3 class="text-lg font-semibold text-teal-900 dark:text-teal-300 mb-3">
 								<i class="fa-solid fa-users mr-2"></i>
 								{stakeholder.entity.str}

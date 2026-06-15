@@ -27,9 +27,9 @@
 	{#snippet widgets()}
 		<div class="h-full flex flex-col space-y-6 p-4">
 			<div class="grid grid-cols-3 gap-4">
-				<div class="bg-white rounded-lg shadow-sm border p-6 col-span-2">
+				<div class="bg-surface-50-950 rounded-lg shadow-sm border p-6 col-span-2">
 					<div class="flex flex-col items-center">
-						<h3 class="text-lg font-semibold text-gray-800 mb-4">
+						<h3 class="text-lg font-semibold text-surface-800-200 mb-4">
 							{m.averageProgress()}
 						</h3>
 						<RingProgress
@@ -40,17 +40,17 @@
 						/>
 					</div>
 				</div>
-				<div class="bg-white rounded-lg shadow-sm border p-6 flex items-center justify-center">
+				<div class="bg-surface-50-950 rounded-lg shadow-sm border p-6 flex items-center justify-center">
 					<div class="flex flex-col items-center text-center">
-						<div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-3">
+						<div class="w-12 h-12 bg-blue-100 dark:bg-blue-500/20 rounded-full flex items-center justify-center mb-3">
 							<i class="fa-solid fa-calendar-days text-blue-600 text-xl"></i>
 						</div>
-						<h3 class="text-lg font-semibold text-gray-800 mb-2">
+						<h3 class="text-lg font-semibold text-surface-800-200 mb-2">
 							{m.daysRemaining()}
 						</h3>
-						<p class="text-3xl font-bold text-gray-900">
+						<p class="text-3xl font-bold text-surface-900-100">
 							{data.metrics.days_remaining}
-							<span class="text-sm font-normal text-gray-500 ml-1">{m.days()}</span>
+							<span class="text-sm font-normal text-surface-600-400 ml-1">{m.days()}</span>
 						</p>
 					</div>
 				</div>

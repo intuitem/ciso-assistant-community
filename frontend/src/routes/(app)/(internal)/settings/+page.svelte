@@ -37,7 +37,13 @@
 		{#if page.data?.featureflags?.outgoing_webhooks}
 			<Tabs.Trigger value="webhooks"
 				><span class="flex flex-row gap-2 items-center ml-0"
-					><svg class="text-surface-950-50" width="20px" height="20px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+					><svg
+						class="text-surface-950-50"
+						width="20px"
+						height="20px"
+						viewBox="0 0 24 24"
+						xmlns="http://www.w3.org/2000/svg"
+					>
 						<title>webhook</title>
 						<rect width="24" height="24" fill="none" />
 						<path

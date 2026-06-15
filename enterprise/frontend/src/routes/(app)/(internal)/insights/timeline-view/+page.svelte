@@ -234,20 +234,20 @@
 	<!-- Toolbar: Zoom + Category filters (always visible) -->
 	<div class="flex flex-wrap items-center gap-4">
 		<!-- Zoom selector -->
-		<div class="flex items-center gap-1 bg-surface-100 rounded-lg p-1">
+		<div class="flex items-center gap-1 bg-surface-100-900 rounded-lg p-1">
 			<span class="text-xs font-semibold text-surface-500 px-2">{m.zoom()}</span>
 			{#each ZOOM_LEVELS as level}
 				<button
 					class="px-3 py-1 text-xs font-medium rounded-md transition-colors {zoom === level.value
-						? 'bg-white shadow-sm text-primary-700'
-						: 'text-surface-500 hover:text-surface-700'}"
+						? 'bg-surface-50-950 shadow-sm text-primary-700'
+						: 'text-surface-500 hover:text-surface-700-300'}"
 					onclick={() => (zoom = level.value as 'weekly' | 'monthly' | 'yearly')}
 				>
 					{level.label}
 				</button>
 			{/each}
 			<button
-				class="px-3 py-1 text-xs font-medium rounded-md text-error-600 hover:bg-error-50 transition-colors"
+				class="px-3 py-1 text-xs font-medium rounded-md text-error-600-400 hover:bg-error-50-950 transition-colors"
 				onclick={() => ganttRef?.scrollToToday()}
 			>
 				<i class="fa-solid fa-crosshairs mr-1"></i>{m.today()}
@@ -263,7 +263,7 @@
 						cat.key
 					)
 						? 'border-transparent text-white'
-						: 'border-surface-300 text-surface-400 bg-white'}"
+						: 'border-surface-300-700 text-surface-500 bg-surface-50-950'}"
 					style={enabledCategories.has(cat.key) ? `background-color: ${cat.color}` : ''}
 					onclick={() => toggleCategory(cat.key)}
 				>
@@ -280,7 +280,7 @@
 			<input
 				type="checkbox"
 				bind:checked={useCreatedAtAsStart}
-				class="w-3.5 h-3.5 rounded border-surface-300 text-primary-600"
+				class="w-3.5 h-3.5 rounded border-surface-300-700 text-primary-600"
 			/>
 			<span class="text-xs text-surface-500">{m.useCreationDateAsStart()}</span>
 		</label>
@@ -288,7 +288,7 @@
 
 	<!-- Await streamed data -->
 	{#await data.ganttData}
-		<div class="flex flex-col items-center justify-center py-24 text-surface-400 gap-4">
+		<div class="flex flex-col items-center justify-center py-24 text-surface-500 gap-4">
 			<i class="fa-solid fa-spinner fa-spin text-4xl text-primary-500"></i>
 			<p class="text-sm">{m.loadingTimelineData()}</p>
 		</div>
@@ -310,10 +310,10 @@
 							class="px-2 py-0.5 text-xs rounded-md border transition-colors {selectedFolders.has(
 								folder.id
 							)
-								? 'bg-primary-100 border-primary-400 text-primary-700'
+								? 'bg-primary-100-900 border-primary-400-600 text-primary-700-300'
 								: selectedFolders.size === 0
-									? 'bg-surface-50 border-surface-200 text-surface-600'
-									: 'bg-white border-surface-200 text-surface-400'}"
+									? 'bg-surface-50-950 border-surface-200-800 text-surface-600-400'
+									: 'bg-surface-50-950 border-surface-200-800 text-surface-500'}"
 							onclick={() => toggleFolder(folder.id)}
 						>
 							{folder.name}
@@ -321,7 +321,7 @@
 					{/each}
 					{#if selectedFolders.size > 0}
 						<button
-							class="px-2 py-0.5 text-xs text-surface-400 hover:text-surface-600"
+							class="px-2 py-0.5 text-xs text-surface-500 hover:text-surface-600-400"
 							onclick={() => (selectedFolders = new Set())}
 						>
 							{m.clear()}
@@ -334,7 +334,7 @@
 		<!-- No-date warning -->
 		{#if noDateCount > 0}
 			<div
-				class="flex items-center gap-2 px-3 py-2 bg-warning-50 border border-warning-200 rounded-lg text-xs text-warning-700"
+				class="flex items-center gap-2 px-3 py-2 bg-warning-50-950 border border-warning-200-800 rounded-lg text-xs text-warning-700-300"
 			>
 				<i class="fa-solid fa-triangle-exclamation"></i>
 				{m.objectsWithNoDateNotShown({ count: noDateCount })}
@@ -343,7 +343,7 @@
 
 		<!-- Chart or empty state -->
 		{#if ganttItems.length === 0}
-			<div class="flex flex-col items-center justify-center py-16 text-surface-400">
+			<div class="flex flex-col items-center justify-center py-16 text-surface-500">
 				<i class="fa-solid fa-chart-gantt text-4xl mb-3"></i>
 				<p class="text-sm">{m.noItemsToDisplayAdjustFilters()}</p>
 			</div>
@@ -352,7 +352,7 @@
 		{/if}
 	{:catch}
 		<div
-			class="flex items-center gap-2 px-3 py-2 bg-error-50 border border-error-200 rounded-lg text-xs text-error-700"
+			class="flex items-center gap-2 px-3 py-2 bg-error-50-950 border border-error-200-800 rounded-lg text-xs text-error-700-300"
 		>
 			<i class="fa-solid fa-circle-exclamation"></i>
 			{m.failedToLoadTimelineData()}

@@ -104,7 +104,7 @@
 		<h2 class="text-xl font-semibold">
 			{m.myAssignments()}
 			{#if filterMode === 'filter' && selectedActorLabels.length > 0}
-				<span class="text-base font-normal text-gray-600">
+				<span class="text-base font-normal text-surface-600-400">
 					- {selectedActorLabels.join(', ')}
 				</span>
 			{/if}
@@ -131,7 +131,7 @@
 		<Dropdown
 			header={m.filterScope()}
 			icon="fa-solid fa-filter"
-			style="bg-white"
+			style="bg-surface-50-950"
 			open={filterMode === 'filter'}
 		>
 			<div class="p-4 space-y-4">

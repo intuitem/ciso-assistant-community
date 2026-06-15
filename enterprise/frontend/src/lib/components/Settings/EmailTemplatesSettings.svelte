@@ -257,7 +257,7 @@
 </script>
 
 <div class="flex flex-col gap-6">
-	<span class="text-gray-500">{m.emailTemplatesDescription()}</span>
+	<span class="text-surface-600-400">{m.emailTemplatesDescription()}</span>
 
 	{#if successMessage}
 		<div class="alert preset-filled-success-500 p-3">
@@ -277,8 +277,8 @@
 		</div>
 	{:else if editingKey}
 		<!-- Edit panel -->
-		<div class="card bg-white shadow-lg">
-			<header class="flex items-center justify-between p-4 border-b border-surface-200">
+		<div class="card bg-surface-50-950 shadow-lg">
+			<header class="flex items-center justify-between p-4 border-b border-surface-200-800">
 				<div class="flex items-center gap-3">
 					<button
 						class="btn btn-sm preset-outlined-surface-500"
@@ -290,7 +290,7 @@
 					</button>
 					<div>
 						<h3 class="h4 font-semibold">{templateName(editingKey)}</h3>
-						<p class="text-sm text-gray-500">{templateDescription(editingKey)}</p>
+						<p class="text-sm text-surface-600-400">{templateDescription(editingKey)}</p>
 					</div>
 				</div>
 				<div class="flex items-center gap-2">
@@ -361,7 +361,7 @@
 							rows="14"
 							bind:value={editBody}
 						></textarea>
-						<p class="text-xs text-gray-500 mt-1">
+						<p class="text-xs text-surface-600-400 mt-1">
 							<i class="fa-brands fa-markdown"></i>
 							{m.markdownSupported()}
 						</p>
@@ -376,7 +376,7 @@
 					</summary>
 					<div class="mt-2 flex flex-wrap gap-2">
 						{#each editVariables as variable}
-							<code class="bg-surface-200 px-2 py-1 rounded text-xs font-mono"
+							<code class="bg-surface-200-800 px-2 py-1 rounded text-xs font-mono"
 								>{'${' + variable + '}'}</code
 							>
 						{/each}
@@ -384,7 +384,7 @@
 				</details>
 			</div>
 
-			<footer class="flex items-center gap-2 p-4 border-t border-surface-200">
+			<footer class="flex items-center gap-2 p-4 border-t border-surface-200-800">
 				<button
 					class="btn preset-filled-primary-500 font-semibold"
 					type="button"
@@ -420,15 +420,15 @@
 						></i>
 						{category.label()}
 					</h3>
-					<p class="text-sm text-gray-500">{category.description()}</p>
+					<p class="text-sm text-surface-600-400">{category.description()}</p>
 				</div>
-				<div class="card bg-white shadow-lg overflow-hidden">
+				<div class="card bg-surface-50-950 shadow-lg overflow-hidden">
 					{#each category.templates as template, i}
 						{@const customLangs = getCustomizedLanguages(template.template_key)}
 						{#if i > 0}
-							<hr class="border-surface-200" />
+							<hr class="border-surface-200-800" />
 						{/if}
-						<div class="flex items-center gap-4 px-4 py-3 hover:bg-surface-50 transition-colors">
+						<div class="flex items-center gap-4 px-4 py-3 hover:bg-surface-100-900 transition-colors">
 							<div class="flex-1 min-w-0">
 								<div class="flex items-center gap-2">
 									<span class="font-medium">{templateName(template.template_key)}</span>
@@ -440,7 +440,7 @@
 										{/each}
 									{/if}
 								</div>
-								<p class="text-sm text-gray-500 truncate">
+								<p class="text-sm text-surface-600-400 truncate">
 									{templateDescription(template.template_key)}
 								</p>
 							</div>
