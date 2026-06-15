@@ -156,6 +156,10 @@ export const actions: Actions = {
 		const URLModel = 'requirement-assessments';
 		const schema = modelSchema(URLModel);
 		const id = event.url.searchParams.get('id');
+		if (!id) {
+			console.error('Missing id parameter in update action');
+			return fail(400, { form: await superValidate(event.request, zod(schema)) });
+		}
 		const endpoint = `${BASE_API_URL}/${URLModel}/${id}/`;
 		const form = await superValidate(event.request, zod(schema));
 
