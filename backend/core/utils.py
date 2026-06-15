@@ -40,6 +40,23 @@ def extract_node_id(urn: str | None) -> str | None:
 REWRITABLE_URN_TYPES = {"req_node", "question", "question_choice"}
 
 
+def extract_urn_slug(urn) -> str | None:
+    """Return the slug (segment 4) of a proper 6+-segment rewritable URN
+    (`urn:ns:risk:type:slug:node_id`), else None. Legacy 5-segment URNs carry
+    a per-node UUID at segment 4 — not a slug — and yield None."""
+    if not isinstance(urn, str):
+        return None
+    parts = urn.split(":")
+    if (
+        len(parts) >= 6
+        and parts[0] == "urn"
+        and parts[2] == "risk"
+        and parts[3] in REWRITABLE_URN_TYPES
+    ):
+        return parts[4] or None
+    return None
+
+
 def rewrite_child_urns(draft: dict, new_ns: str, new_slug: str) -> None:
     """Rewrite segment 1 (namespace) and segment 4 (slug) of every child URN in
     the draft, in place. Idempotent across slugs.
@@ -88,9 +105,46 @@ def rewrite_child_urns(draft: dict, new_ns: str, new_slug: str) -> None:
         c["urn"] = sub(c.get("urn"))
 
 
-def is_compute_result_truthy(compute_result: str | None) -> bool:
-    """Return True if a QuestionChoice.compute_result value is truthy."""
-    return compute_result is not None and compute_result not in ("false", "0", "")
+def resolve_compute_result(compute_result: str | None) -> str | None:
+    """Map a QuestionChoice.compute_result string to a Result value."""
+    if compute_result is None:
+        return None
+    value = compute_result.strip().lower()
+    if value == "":
+        return None
+    if value in ("true", "1", "compliant"):
+        return "compliant"
+    if value in ("false", "0", "non_compliant"):
+        return "non_compliant"
+    if value == "partially_compliant":
+        return "partially_compliant"
+    if value == "not_applicable":
+        return "not_applicable"
+    logger.warning(
+        "Unknown compute_result value ignored", compute_result=compute_result
+    )
+    return None
+
+
+def aggregate_compute_results(resolved_results: list[str | None]) -> str | None:
+    """Aggregate resolved compute_result values: not_applicable is neutral, else worst-wins."""
+    contributing = [r for r in resolved_results if r is not None]
+    if not contributing:
+        return None
+
+    non_na = [r for r in contributing if r != "not_applicable"]
+    if not non_na:
+        return "not_applicable"
+
+    has_compliant = any(r == "compliant" for r in non_na)
+    has_non_compliant = any(r == "non_compliant" for r in non_na)
+    has_partial = any(r == "partially_compliant" for r in non_na)
+
+    if has_partial or (has_compliant and has_non_compliant):
+        return "partially_compliant"
+    if has_non_compliant:
+        return "non_compliant"
+    return "compliant"
 
 
 # Currency formatting conventions: (position, space)
@@ -1096,7 +1150,7 @@ def _is_question_visible(question, answers_by_urn, questions_by_urn=None, visite
         # Single-value answer can only satisfy "all" if there's exactly one expected answer
         return len(dep_answers) == 1 and target_answer == dep_answers[0]
 
-    return True
+    return False
 
 
 def build_answers_dict(answers_qs):
@@ -1238,9 +1292,9 @@ def build_questions_dict(node):
             if choice.add_score is not None:
                 choice_data["add_score"] = choice.add_score
             if choice.compute_result is not None:
-                choice_data["compute_result"] = is_compute_result_truthy(
-                    choice.compute_result
-                )
+                resolved = resolve_compute_result(choice.compute_result)
+                if resolved is not None:
+                    choice_data["compute_result"] = resolved
             if choice.description:
                 choice_data["description"] = choice.description
             if choice.color:
@@ -1256,6 +1310,7 @@ def build_questions_dict(node):
         q_data = {
             "type": question.type,
             "text": question.text or "",
+            "weight": question.weight,
         }
         if question.annotation:
             q_data["annotation"] = question.annotation
@@ -1268,128 +1323,31 @@ def build_questions_dict(node):
     return result if result else None
 
 
-def _resolve_auditee_role_ids():
-    """Resolve role IDs for auditee + higher roles via IAM snapshot cache."""
-    from iam.cache_builders import get_roles_state
-
-    role_id_by_name = get_roles_state().role_id_by_name
-    auditee_id = role_id_by_name.get(RoleCodename.AUDITEE.value)
-    higher_ids = frozenset(
-        role_id_by_name[rc.value]
-        for rc in (
-            RoleCodename.ANALYST,
-            RoleCodename.DOMAIN_MANAGER,
-            RoleCodename.ADMINISTRATOR,
-        )
-        if rc.value in role_id_by_name
-    )
-    return auditee_id, higher_ids
+AUDITOR_VIEW_PERM = "view_compliance_assessment_full"
+AUDIT_ACCESS_PERM = "view_complianceassessment"
 
 
-def _resolve_respondent_role_ids():
-    """Resolve role IDs for respondent roles (auditee + third-party respondent) + higher roles."""
-    from iam.cache_builders import get_roles_state
+def get_respondent_scoped_folder_ids(user) -> set:
+    """Return folder IDs where *user* sees audits as a **respondent** — i.e. the
+    scoped, field-stripped view applies.
 
-    role_id_by_name = get_roles_state().role_id_by_name
-    respondent_ids = frozenset(
-        role_id_by_name[rc.value]
-        for rc in (RoleCodename.AUDITEE, RoleCodename.THIRD_PARTY_RESPONDENT)
-        if rc.value in role_id_by_name
-    )
-    higher_ids = frozenset(
-        role_id_by_name[rc.value]
-        for rc in (
-            RoleCodename.ANALYST,
-            RoleCodename.DOMAIN_MANAGER,
-            RoleCodename.ADMINISTRATOR,
-        )
-        if rc.value in role_id_by_name
-    )
-    return respondent_ids, higher_ids
-
-
-def get_respondent_filtered_folder_ids(user) -> set:
-    """Return folder IDs where *user* holds a respondent role (auditee or third-party
-    respondent) but NO higher role. Mirrors :func:`get_auditee_filtered_folder_ids`
-    but widens the role set so third-party respondents are also guarded.
-    """
-    from iam.models import _iter_assignment_lites_for_user
-    from iam.cache_builders import (
-        get_folder_state,
-        iter_descendant_ids,
-    )
-
-    respondent_role_ids, higher_role_ids = _resolve_respondent_role_ids()
-    if not respondent_role_ids:
-        return set()
-
-    state = get_folder_state()
-    folder_roles: dict[UUID, set] = {}
-
-    for a in _iter_assignment_lites_for_user(user):
-        role_id = a.role_id
-        if role_id not in respondent_role_ids and role_id not in higher_role_ids:
-            continue
-        for pf_id in a.perimeter_folder_ids:
-            if a.is_recursive:
-                target_ids = iter_descendant_ids(state, pf_id, include_start=True)
-            else:
-                target_ids = (pf_id,)
-            for fid in target_ids:
-                folder_roles.setdefault(fid, set()).add(role_id)
-
-    return {
-        fid
-        for fid, role_ids in folder_roles.items()
-        if role_ids & respondent_role_ids and role_ids.isdisjoint(higher_role_ids)
-    }
-
-
-def get_auditee_filtered_folder_ids(user) -> set:
-    """Return folder IDs where *user* holds the auditee role but NO higher role.
-
-    "Higher" means analyst, domain-manager or administrator — any role that
-    already grants full access to compliance data. For those folders the
-    normal queryset is sufficient; only the returned set needs assignment
-    filtering.
+    A user is a respondent on a folder when they can access compliance
+    assessments there (``view_complianceassessment``) but have NOT been granted
+    the full auditor view (``view_compliance_assessment_full``). This is permission-based and
+    **default-deny**: any role not explicitly granted ``view_compliance_assessment_full`` is
+    treated as a respondent. Auditor-side roles (reader, approver, analyst,
+    domain-manager, administrator) hold ``view_compliance_assessment_full`` and are therefore
+    excluded; auditee and third-party respondent do not and are included.
 
     Uses the IAM snapshot caches exclusively (no extra DB queries).
     """
-    from iam.models import _iter_assignment_lites_for_user
-    from iam.cache_builders import (
-        get_folder_state,
-        iter_descendant_ids,
-    )
+    from iam.models import RoleAssignment
 
-    auditee_role_id, higher_role_ids = _resolve_auditee_role_ids()
-    if auditee_role_id is None:
-        return set()
-
-    state = get_folder_state()
-
-    # folder_id -> set of role_ids the user has on that folder
-    folder_roles: dict[UUID, set] = {}
-
-    for a in _iter_assignment_lites_for_user(user):
-        role_id = a.role_id
-        if role_id != auditee_role_id and role_id not in higher_role_ids:
-            continue  # irrelevant role
-
-        # expand perimeter folders
-        for pf_id in a.perimeter_folder_ids:
-            if a.is_recursive:
-                target_ids = iter_descendant_ids(state, pf_id, include_start=True)
-            else:
-                target_ids = (pf_id,)
-
-            for fid in target_ids:
-                folder_roles.setdefault(fid, set()).add(role_id)
-
-    # Return only folders where user is auditee and has NO higher role
+    perms_per_folder = RoleAssignment.get_permissions_per_folder(user, recursive=True)
     return {
-        fid
-        for fid, role_ids in folder_roles.items()
-        if auditee_role_id in role_ids and role_ids.isdisjoint(higher_role_ids)
+        UUID(folder_id)
+        for folder_id, codenames in perms_per_folder.items()
+        if AUDIT_ACCESS_PERM in codenames and AUDITOR_VIEW_PERM not in codenames
     }
 
 
