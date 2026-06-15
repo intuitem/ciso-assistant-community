@@ -9799,23 +9799,44 @@ class FrameworkViewSet(BaseModelViewSet):
 
         # --- Duplicate node_id check (CEL identity) ---
         # node_id is the URN's mobile part — an internal identifier the UI does
-        # not surface, so the message names the two requirements that collide
-        # rather than the bare id (which the user can't locate). The builder
+        # not surface, so the message names the two items that collide rather
+        # than the bare id (which the user can't locate). The builder
         # auto-repairs this on load; this is the backend safety floor.
-        node_id_labels: dict[str, str] = {}
-        for node in draft_nodes:
-            nid = extract_node_id(node.get("urn"))
-            if not nid:
-                continue
-            if nid in node_id_labels:
-                raise DraftValidationError(
-                    f"Two requirements share the internal identifier '{nid}': "
-                    f"'{node_id_labels[nid]}' and '{_label(node)}'. This usually "
-                    "happens after duplicating or moving requirements. Re-open the "
-                    "framework in the builder to repair it automatically, then "
-                    "publish again."
-                )
-            node_id_labels[nid] = _label(node)
+        #
+        # Checked per URN type. Within one type, node_ids must be unique even
+        # when slugs differ: a namespace/ref_id rename forces every child onto
+        # the same slug (rewrite_child_urns), so two items sharing a node_id
+        # under divergent slugs — a mixed-slug draft — would collapse onto one
+        # URN *after* this validation and surface as an opaque IntegrityError.
+        # Catching it here keeps the error actionable. (In a single-slug draft
+        # such a pair already shares a full URN and is caught below.)
+        for kind, records, skip_exact_urn in (
+            ("requirements", draft_nodes, False),
+            ("questions", draft_questions, True),
+            ("choices", draft_choices, True),
+        ):
+            node_id_seen: dict[str, tuple[str, str | None]] = {}
+            for record in records:
+                nid = extract_node_id(record.get("urn"))
+                if not nid:
+                    continue
+                if nid in node_id_seen:
+                    prev_label, prev_urn = node_id_seen[nid]
+                    # An exact-URN duplicate is reported by the dedicated
+                    # duplicate-URN check below with a clearer message; for
+                    # questions/choices only flag the divergent-slug case here
+                    # (same node_id, different full URN) so a rename can't later
+                    # collapse them onto one URN as an opaque IntegrityError.
+                    if skip_exact_urn and record.get("urn") == prev_urn:
+                        continue
+                    raise DraftValidationError(
+                        f"Two {kind} share the internal identifier '{nid}': "
+                        f"'{prev_label}' and '{_label(record)}'. This usually "
+                        "happens after duplicating or moving items. Re-open the "
+                        "framework in the builder to repair it automatically, "
+                        "then publish again."
+                    )
+                node_id_seen[nid] = (_label(record), record.get("urn"))
 
         # --- Dangling parent_urn check ---
         all_node_urns = {n.get("urn") for n in draft_nodes if n.get("urn")}
@@ -10945,9 +10966,15 @@ class FrameworkViewSet(BaseModelViewSet):
                     "implementation_groups_definition",
                     framework.implementation_groups_definition,
                 )
-                framework.outcomes_definition = meta.get(
+                # outcomes_definition is NOT NULL (default []). A draft may carry
+                # an explicit None (hand-crafted / API / a future client bug);
+                # coalesce it so the publish doesn't die on the constraint with an
+                # opaque error. None/absent can only mean "no outcomes", so this
+                # is lossless — a populated value is always a non-None list.
+                _outcomes = meta.get(
                     "outcomes_definition", framework.outcomes_definition
                 )
+                framework.outcomes_definition = [] if _outcomes is None else _outcomes
                 framework.field_visibility = meta.get(
                     "field_visibility", framework.field_visibility
                 )

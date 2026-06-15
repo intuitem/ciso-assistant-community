@@ -8,6 +8,7 @@ import {
 	validateDraft,
 	buildTree,
 	serializeDraft,
+	createBuilderState,
 	type Framework,
 	type BuilderNode,
 	type RequirementNode,
@@ -977,5 +978,215 @@ describe('node_id repair on draft load', () => {
 		// Beta (duplicate) got a fresh node_id and is now a standalone leaf.
 		expect(extractNodeId(beta.node.urn)).not.toBe('2.1');
 		expect(beta.children).toHaveLength(0);
+	});
+});
+
+describe('URN rewrite on namespace / ref_id change', () => {
+	it('rewrites node, question, depends_on and choice URNs when ref_id changes', () => {
+		const fw = makeFramework({ ref_id: 'old', urn_namespace: 'custom' });
+		const node = makeNode({
+			urn: 'urn:custom:risk:req_node:old:1',
+			ref_id: '1',
+			parent_urn: null
+		});
+		const q: Question = {
+			...makeQuestion({ requirement_node: node.id }),
+			urn: 'urn:custom:risk:question:old:1-q1',
+			depends_on: {
+				question: 'urn:custom:risk:question:old:1-q2',
+				answers: ['urn:custom:risk:question_choice:old:1-q2-c1']
+			},
+			choices: [
+				{
+					...makeChoice('c1', 1),
+					urn: 'urn:custom:risk:question_choice:old:1-q1-c1',
+					question: node.id
+				}
+			]
+		};
+		const store = createBuilderState(fw, [node], [q]);
+
+		store.updateFramework({ ref_id: 'new' });
+
+		const root = get(store.rootNodes)[0];
+		expect(root.node.urn).toBe('urn:custom:risk:req_node:new:1');
+		const question = root.questions[0].question;
+		expect(question.urn).toBe('urn:custom:risk:question:new:1-q1');
+		const dep = question.depends_on as { question: string; answers: string[] };
+		expect(dep.question).toBe('urn:custom:risk:question:new:1-q2');
+		expect(dep.answers[0]).toBe('urn:custom:risk:question_choice:new:1-q2-c1');
+		expect(question.choices[0].urn).toBe('urn:custom:risk:question_choice:new:1-q1-c1');
+	});
+
+	it('rewrites the namespace segment too, preserving node_id', () => {
+		const fw = makeFramework({ ref_id: 'fw', urn_namespace: 'custom' });
+		const node = makeNode({
+			urn: 'urn:custom:risk:req_node:fw:1',
+			ref_id: '1',
+			parent_urn: null
+		});
+		const store = createBuilderState(fw, [node], []);
+
+		store.updateFramework({ urn_namespace: 'myorg' });
+
+		expect(get(store.rootNodes)[0].node.urn).toBe('urn:myorg:risk:req_node:fw:1');
+	});
+
+	it('does not rewrite URNs when compliance assessments lock them', () => {
+		const fw = makeFramework({
+			ref_id: 'old',
+			urn_namespace: 'custom',
+			has_compliance_assessments: true
+		});
+		const node = makeNode({
+			urn: 'urn:custom:risk:req_node:old:1',
+			ref_id: '1',
+			parent_urn: null
+		});
+		const store = createBuilderState(fw, [node], []);
+
+		store.updateFramework({ ref_id: 'new' });
+
+		expect(get(store.rootNodes)[0].node.urn).toBe('urn:custom:risk:req_node:old:1');
+	});
+});
+
+describe('duplicate question node_id repair on hydrate', () => {
+	it('de-dupes question node_ids carried by a draft', () => {
+		const draft = {
+			schema_version: 1,
+			framework_meta: {
+				name: 'X',
+				description: null,
+				min_score: 0,
+				max_score: 100,
+				scores_definition: null,
+				implementation_groups_definition: null,
+				outcomes_definition: null,
+				urn_namespace: 'custom',
+				ref_id: 'fw'
+			},
+			nodes: [
+				{
+					id: 'n1',
+					urn: 'urn:custom:risk:req_node:fw:1',
+					ref_id: '1',
+					assessable: true,
+					parent_urn: null,
+					order_id: 0
+				}
+			],
+			questions: [
+				{
+					id: 'q1',
+					urn: 'urn:custom:risk:question:fw:1-q1',
+					ref_id: '1-q1',
+					requirement_node_id: 'n1',
+					type: 'text',
+					order: 0
+				},
+				{
+					id: 'q2',
+					urn: 'urn:custom:risk:question:fw:1-q1', // duplicate node_id
+					ref_id: '1-q2',
+					requirement_node_id: 'n1',
+					type: 'text',
+					order: 1
+				}
+			],
+			choices: []
+		};
+
+		const store = createBuilderState(makeFramework(), [], [], draft as never);
+
+		const urns = get(store.rootNodes)[0].questions.map((bq) => bq.question.urn);
+		expect(new Set(urns).size).toBe(2);
+	});
+});
+
+describe('self-heals legacy (pre-v3.18.0) seeded drafts on load', () => {
+	// Mirrors the exact drafts seeded for manual repro: pre-v3.18.0 the builder
+	// set node_id == ref_id with no dedup, so two questions collide on node_id.
+	const legacyDraft = (questions: Record<string, unknown>[], refId = 'oldfw') => ({
+		schema_version: 1,
+		framework_meta: {
+			name: 'X',
+			description: '',
+			urn_namespace: 'custom',
+			ref_id: refId,
+			min_score: 0,
+			max_score: 100,
+			scores_definition: null,
+			implementation_groups_definition: null,
+			outcomes_definition: null
+		},
+		nodes: [
+			{
+				id: 'n1',
+				urn: 'urn:custom:risk:req_node:oldfw:1',
+				ref_id: '1',
+				name: 'S1',
+				assessable: true,
+				parent_urn: null,
+				order_id: 0
+			}
+		],
+		questions,
+		choices: []
+	});
+
+	it('same-slug exact-duplicate questions get distinct URNs (Duplicate URN repro)', () => {
+		const draft = legacyDraft([
+			{
+				id: 'q1',
+				urn: 'urn:custom:risk:question:oldfw:1-q1',
+				ref_id: '1-q1',
+				requirement_node_id: 'n1',
+				type: 'text',
+				text: 'Q1',
+				order: 0
+			},
+			{
+				id: 'q2',
+				urn: 'urn:custom:risk:question:oldfw:1-q1',
+				ref_id: '1-q1',
+				requirement_node_id: 'n1',
+				type: 'text',
+				text: 'Q2',
+				order: 1
+			}
+		]);
+		const store = createBuilderState(makeFramework(), [], [], draft as never);
+		const urns = get(store.rootNodes)[0].questions.map((bq) => bq.question.urn);
+		expect(new Set(urns).size).toBe(2);
+	});
+
+	it('divergent-slug duplicate node_ids are de-duped so a rename cannot collapse them (opaque repro)', () => {
+		const draft = legacyDraft(
+			[
+				{
+					id: 'q1',
+					urn: 'urn:custom:risk:question:oldfw:1-q1',
+					ref_id: '1-q1',
+					requirement_node_id: 'n1',
+					type: 'text',
+					text: 'Q1',
+					order: 0
+				},
+				{
+					id: 'q2',
+					urn: 'urn:custom:risk:question:other:1-q1',
+					ref_id: '1-q2',
+					requirement_node_id: 'n1',
+					type: 'text',
+					text: 'Q2',
+					order: 1
+				}
+			],
+			'renamedfw'
+		);
+		const store = createBuilderState(makeFramework(), [], [], draft as never);
+		const nodeIds = get(store.rootNodes)[0].questions.map((bq) => extractNodeId(bq.question.urn));
+		expect(new Set(nodeIds).size).toBe(2);
 	});
 });
