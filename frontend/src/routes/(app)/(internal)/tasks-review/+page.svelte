@@ -413,7 +413,7 @@
 										>
 											{getBucketLabel(bucket, granularity)}
 											{#if buckets.length > 12 || startFormatted.year !== endFormatted.year}
-												<div class="text-[10px] text-gray-300 font-normal normal-case">
+												<div class="text-[10px] text-surface-400 font-normal normal-case">
 													{bucket.key.split('-')[0]}
 												</div>
 											{/if}
@@ -552,7 +552,7 @@
 				<div
 					class="text-center py-16 text-surface-500 border border-dashed border-surface-200-800 rounded-xl"
 				>
-					<i class="fa-solid fa-calendar-xmark text-3xl mb-3 text-gray-300"></i>
+					<i class="fa-solid fa-calendar-xmark text-3xl mb-3 text-surface-400"></i>
 					<p>{m.noRecurrentTasksFound()}</p>
 				</div>
 			{/each}

@@ -823,7 +823,7 @@
 				</button>
 				<button
 					type="button"
-					class="btn btn-sm bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+					class="btn btn-sm bg-surface-100-900 text-surface-700-300 hover:bg-surface-200-800 transition-colors"
 					onclick={importFromFile}
 				>
 					<i class="fa-solid fa-file-import mr-1"></i>
@@ -832,7 +832,7 @@
 				{#if matrixId}
 					<button
 						type="button"
-						class="btn btn-sm bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+						class="btn btn-sm bg-surface-100-900 text-surface-700-300 hover:bg-surface-200-800 transition-colors"
 						onclick={exportAsYaml}
 					>
 						<i class="fa-solid fa-file-export mr-1"></i>
@@ -913,7 +913,7 @@
 								: draft.editing_languages || []}
 							<tr class={isActive ? 'bg-primary-50 ring-1 ring-primary-200' : ''}>
 								<td class="font-medium">{isActive ? matrixName : draft.name}</td>
-								<td class="text-sm text-gray-500 max-w-48">
+								<td class="text-sm text-surface-600-400 max-w-48">
 									{isActive ? matrixDescription : draft.description || '—'}
 								</td>
 								<td>
@@ -929,7 +929,7 @@
 								</td>
 								<td class="flex gap-1 flex-wrap">
 									{#each draftLangs as lang}
-										<span class="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">
+										<span class="text-xs text-surface-500 bg-surface-100-900 px-1.5 py-0.5 rounded">
 											{lang}
 										</span>
 									{/each}
@@ -940,7 +940,7 @@
 											<!-- Currently editing this one — show close button -->
 											<button
 												type="button"
-												class="btn btn-sm bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+												class="btn btn-sm bg-surface-100-900 text-surface-600-400 hover:bg-surface-200-800 transition-colors"
 												onclick={() => {
 													matrixId = null;
 													hasUnsavedChanges = false;
@@ -997,7 +997,7 @@
 						{#each matrices.filter((mx) => !existingDrafts.some((d) => d.id === mx.id)) as matrix}
 							<tr class={matrixId === matrix.id ? 'bg-primary-50 ring-1 ring-primary-200' : ''}>
 								<td class="font-medium">{matrix.name}</td>
-								<td class="text-sm text-gray-500 truncate max-w-48">{matrix.description || '—'}</td>
+								<td class="text-sm text-surface-600-400 truncate max-w-48">{matrix.description || '—'}</td>
 								<td>
 									<span class="badge variant-filled-success text-xs">{m.published()}</span>
 									{#if matrix.urn}
@@ -1009,12 +1009,12 @@
 										</span>
 									{/if}
 									{#if matrix.editing_version > 1}
-										<span class="text-xs text-gray-400 ml-1">v{matrix.editing_version}</span>
+										<span class="text-xs text-surface-500 ml-1">v{matrix.editing_version}</span>
 									{/if}
 								</td>
 								<td class="flex gap-1 flex-wrap">
 									{#each matrix.editing_languages || [matrix.locale || 'en'] as lang}
-										<span class="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded"
+										<span class="text-xs text-surface-500 bg-surface-100-900 px-1.5 py-0.5 rounded"
 											>{lang}</span
 										>
 									{/each}
@@ -1049,7 +1049,7 @@
 				</table>
 			</div>
 		{:else}
-			<p class="text-sm text-gray-400 py-4 text-center">
+			<p class="text-sm text-surface-500 py-4 text-center">
 				{@html m.noMatricesYet({
 					link:
 						'<a href="/libraries" class="text-primary-500 hover:underline">' +
@@ -1064,14 +1064,14 @@
 		<!-- Language switcher + editor container -->
 		<div class="card p-4">
 			<!-- Language switcher -->
-			<div class="flex items-center gap-2 flex-wrap pb-3 mb-4 border-b border-gray-200 justify-end">
-				<i class="fa-solid fa-language text-gray-400"></i>
+			<div class="flex items-center gap-2 flex-wrap pb-3 mb-4 border-b border-surface-200-800 justify-end">
+				<i class="fa-solid fa-language text-surface-500"></i>
 				<!-- Base language -->
 				<button
 					type="button"
 					class="px-3 py-1 rounded-full text-sm transition-colors {activeLang === locale
 						? 'bg-primary-500 text-white'
-						: 'bg-gray-100 text-gray-600 hover:bg-gray-200'}"
+						: 'bg-surface-100-900 text-surface-600-400 hover:bg-surface-200-800'}"
 					onclick={() => (activeLang = locale)}
 				>
 					{language[LOCALE_MAP[locale]?.name] ?? locale}
@@ -1083,7 +1083,7 @@
 						class="inline-flex items-center rounded-full text-sm transition-colors {activeLang ===
 						lang
 							? 'bg-primary-500 text-white'
-							: 'bg-gray-100 text-gray-600 hover:bg-gray-200'}"
+							: 'bg-surface-100-900 text-surface-600-400 hover:bg-surface-200-800'}"
 					>
 						<button type="button" class="px-3 py-1" onclick={() => (activeLang = lang)}>
 							{language[LOCALE_MAP[lang]?.name] ?? lang}
@@ -1126,7 +1126,7 @@
 				{/if}
 				<!-- Default locale selector -->
 				{#if usedLanguages().size > 0}
-					<span class="border-l border-gray-300 h-5 mx-1"></span>
+					<span class="border-l border-surface-300-700 h-5 mx-1"></span>
 					<select
 						class="select select-sm text-xs w-auto"
 						value={locale}
@@ -1146,13 +1146,13 @@
 
 			<!-- Metadata -->
 			<div class="mb-4">
-				<h3 class="text-sm font-semibold text-gray-500 mb-2">{m.metadata()}</h3>
+				<h3 class="text-sm font-semibold text-surface-600-400 mb-2">{m.metadata()}</h3>
 				<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 					<div>
 						<label class="label" for="matrix-name">
 							<span
 								>{m.name()}{#if isTranslatingMeta}
-									<span class="text-xs font-normal text-gray-400">({activeLang})</span>{/if}</span
+									<span class="text-xs font-normal text-surface-500">({activeLang})</span>{/if}</span
 							>
 						</label>
 						{#if isTranslatingMeta}
@@ -1169,7 +1169,7 @@
 								placeholder={matrixName || m.matrixNamePlaceholder()}
 							/>
 							{#if matrixName}
-								<span class="text-xs text-gray-400 block mt-0.5 truncate" title={matrixName}>
+								<span class="text-xs text-surface-500 block mt-0.5 truncate" title={matrixName}>
 									↳ {locale}: {matrixName}
 								</span>
 							{/if}
@@ -1187,7 +1187,7 @@
 						<label class="label" for="matrix-desc">
 							<span
 								>{m.description()}{#if isTranslatingMeta}
-									<span class="text-xs font-normal text-gray-400">({activeLang})</span>{/if}</span
+									<span class="text-xs font-normal text-surface-500">({activeLang})</span>{/if}</span
 							>
 						</label>
 						{#if isTranslatingMeta}
@@ -1204,7 +1204,7 @@
 								placeholder={matrixDescription || m.descriptionPlaceholder()}
 							/>
 							{#if matrixDescription}
-								<span class="text-xs text-gray-400 block mt-0.5 truncate" title={matrixDescription}>
+								<span class="text-xs text-surface-500 block mt-0.5 truncate" title={matrixDescription}>
 									↳ {locale}: {matrixDescription}
 								</span>
 							{/if}
@@ -1230,7 +1230,7 @@
 							class="px-4 py-2 text-sm font-medium rounded-t transition-colors
 						{activeTab === tab.id
 								? 'bg-primary-500 text-white'
-								: 'bg-gray-100 text-gray-600 hover:bg-gray-200'}"
+								: 'bg-surface-100-900 text-surface-600-400 hover:bg-surface-200-800'}"
 							onclick={() => (activeTab = tab.id)}
 						>
 							<i class="{tab.icon} mr-1"></i>
@@ -1309,7 +1309,7 @@
 					{/key}
 				</div>
 			{:else}
-				<p class="text-gray-500 text-center py-8">
+				<p class="text-surface-600-400 text-center py-8">
 					{m.invalidMatrix()} — {m.needAtLeast2PerDimension()}
 				</p>
 			{/if}
@@ -1318,9 +1318,9 @@
 		<!-- No matrix selected placeholder -->
 		<div class="card p-8">
 			<div class="text-center space-y-4">
-				<i class="fa-solid fa-table-cells-large text-4xl text-gray-300"></i>
-				<h3 class="text-lg font-semibold text-gray-500">{m.noMatrixSelected()}</h3>
-				<p class="text-sm text-gray-400 max-w-md mx-auto">
+				<i class="fa-solid fa-table-cells-large text-4xl text-surface-400"></i>
+				<h3 class="text-lg font-semibold text-surface-600-400">{m.noMatrixSelected()}</h3>
+				<p class="text-sm text-surface-500 max-w-md mx-auto">
 					{m.noMatrixSelectedHint()}
 				</p>
 			</div>

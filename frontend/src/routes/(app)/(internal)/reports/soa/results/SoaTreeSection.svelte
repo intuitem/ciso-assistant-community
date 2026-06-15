@@ -87,7 +87,7 @@
 				<div class="font-medium">{node.name || ''}</div>
 			{/if}
 			{#if node.description}
-				<div class="text-xs mt-0.5 {isNotApplicable ? 'text-gray-300' : 'text-surface-600-400'}">
+				<div class="text-xs mt-0.5 {isNotApplicable ? 'text-surface-400' : 'text-surface-600-400'}">
 					{node.description}
 				</div>
 			{/if}
@@ -146,7 +146,7 @@
 					{/each}
 				</div>
 			{:else}
-				<span class="text-xs text-gray-300">--</span>
+				<span class="text-xs text-surface-400">--</span>
 			{/if}
 		</td>
 	</tr>

@@ -755,7 +755,7 @@
 									? 'bg-green-500 border-green-500'
 									: rev.status === 'rejected'
 										? 'bg-red-500 border-red-500'
-										: 'bg-surface-50-950 border-gray-400'}"
+										: 'bg-surface-50-950 border-surface-400'}"
 						></span>
 
 						<article class="border rounded-lg bg-surface-50-950">
@@ -805,7 +805,7 @@
 
 							{#if rev.observation}
 								<div class="px-4 py-2 text-sm italic text-surface-700-300 border-b">
-									<i class="fa-solid fa-quote-left text-gray-300 mr-1"></i>
+									<i class="fa-solid fa-quote-left text-surface-400 mr-1"></i>
 									{rev.observation}
 								</div>
 							{/if}
@@ -1033,7 +1033,7 @@
 							<div class="flex gap-1">
 								<button
 									class="px-2 py-0.5 text-xs rounded border {e.action === 'keep'
-										? 'bg-surface-100-900 border-gray-400'
+										? 'bg-surface-100-900 border-surface-400'
 										: 'bg-surface-50-950 hover:bg-surface-50-950'}"
 									onclick={() => setAction(idx, 'keep')}
 									title="Carry this file over unchanged"

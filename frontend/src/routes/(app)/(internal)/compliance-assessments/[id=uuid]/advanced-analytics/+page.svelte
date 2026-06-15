@@ -362,7 +362,7 @@
 							</thead>
 							<tbody>
 								{#each rows as row}
-									<tr class="border-b border-slate-50 {row.inherited ? 'bg-emerald-50/50' : ''}">
+									<tr class="border-b border-surface-100-900 {row.inherited ? 'bg-emerald-50/50' : ''}">
 										<td class="py-2 pr-3">
 											<span class="font-mono text-xs text-surface-500">{row.ref_id ?? ''}</span>
 											{row.name ?? ''}
@@ -382,7 +382,7 @@
 										<td class="py-2 px-3 text-right font-mono">
 											{row.effective_score ?? '—'}
 											{#if row.effective_score != null && row.scale_max != null}
-												<span class="text-[10px] text-slate-300">/ {row.scale_max}</span>
+												<span class="text-[10px] text-surface-400">/ {row.scale_max}</span>
 											{/if}
 										</td>
 										<td class="py-2 pl-3">
@@ -399,7 +399,7 @@
 													{row.inheritance.source.ca_name}
 												</a>
 											{:else}
-												<span class="text-slate-300">—</span>
+												<span class="text-surface-400">—</span>
 											{/if}
 										</td>
 									</tr>
@@ -500,7 +500,7 @@
 								</thead>
 								<tbody>
 									{#each sections as section, i}
-										<tr class="border-t border-slate-50 {i % 2 === 0 ? 'bg-surface-50-950/50' : ''}">
+										<tr class="border-t border-surface-100-900 {i % 2 === 0 ? 'bg-surface-50-950/50' : ''}">
 											<td class="py-2.5 pr-4 text-surface-700-300"
 												>{section.ref_id ? section.ref_id + ' ' : ''}{section.name}</td
 											>
@@ -515,7 +515,7 @@
 															>{section.maturity_score}</span
 														>
 													{:else}
-														<span class="text-slate-300">&mdash;</span>
+														<span class="text-surface-400">&mdash;</span>
 													{/if}
 												</td>
 											{/if}
@@ -526,7 +526,7 @@
 														>{section.implementation_score}</span
 													>
 												{:else}
-													<span class="text-slate-300">&mdash;</span>
+													<span class="text-surface-400">&mdash;</span>
 												{/if}
 											</td>
 											{#if data.compliance_assessment.show_documentation_score}
@@ -537,7 +537,7 @@
 															>{section.documentation_score}</span
 														>
 													{:else}
-														<span class="text-slate-300">&mdash;</span>
+														<span class="text-surface-400">&mdash;</span>
 													{/if}
 												</td>
 											{/if}
@@ -887,7 +887,7 @@
 							</thead>
 							<tbody>
 								{#each groups as group, i}
-									<tr class="border-t border-slate-50 {i % 2 === 0 ? 'bg-surface-50-950/50' : ''}">
+									<tr class="border-t border-surface-100-900 {i % 2 === 0 ? 'bg-surface-50-950/50' : ''}">
 										<td class="py-2.5 pr-4 text-surface-700-300">{group.name || group.ref_id}</td>
 										<td class="py-2.5 pr-4 text-right tabular-nums text-surface-600-400"
 											>{group.total_assessable}</td
@@ -911,7 +911,7 @@
 														>{group.maturity_score}</span
 													>
 												{:else}
-													<span class="text-slate-300">&mdash;</span>
+													<span class="text-surface-400">&mdash;</span>
 												{/if}
 											</td>
 										{/if}
@@ -922,7 +922,7 @@
 													>{group.implementation_score}</span
 												>
 											{:else}
-												<span class="text-slate-300">&mdash;</span>
+												<span class="text-surface-400">&mdash;</span>
 											{/if}
 										</td>
 										{#if data.compliance_assessment.show_documentation_score}
@@ -933,7 +933,7 @@
 														>{group.documentation_score}</span
 													>
 												{:else}
-													<span class="text-slate-300">&mdash;</span>
+													<span class="text-surface-400">&mdash;</span>
 												{/if}
 											</td>
 										{/if}
