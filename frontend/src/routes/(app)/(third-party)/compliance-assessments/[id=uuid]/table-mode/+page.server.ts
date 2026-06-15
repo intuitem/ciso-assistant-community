@@ -149,10 +149,13 @@ export const actions: Actions = {
 		return nestedWriteFormAction({ event, action: 'create' });
 	},
 	update: async (event) => {
-		// Custom update for requirement-assessments that strips fields hidden by
-		// field_visibility before PATCHing. The generic nestedWriteFormAction
-		// would send empty values for fields the viewer never saw, which the
-		// backend rejects (e.g. `status: ""` is not a valid enum choice).
+		// Custom update for requirement-assessments. When a select field is hidden
+		// by field_visibility the viewer never sets it, so zod defaults it to "",
+		// which DRF rejects (e.g. `status: ""` is not a valid enum choice). The
+		// requirements_list endpoint that feeds this form already strips fields the
+		// viewer can't see (with the correct viewer_role), and the backend re-strips
+		// non-editable fields for respondents, so all that's left here is to drop
+		// the empty enum defaults before PATCHing.
 		const URLModel = 'requirement-assessments';
 		const schema = modelSchema(URLModel);
 		const id = event.url.searchParams.get('id');
@@ -170,45 +173,6 @@ export const actions: Actions = {
 
 		const formData: Record<string, any> = { ...form.data };
 
-		let currentRa: Record<string, any>;
-		try {
-			const currentRaResponse = await event.fetch(endpoint);
-			if (!currentRaResponse.ok) {
-				return handleErrorResponse({ event, response: currentRaResponse, form });
-			}
-			currentRa = await currentRaResponse.json();
-		} catch (error) {
-			console.error('Failed to fetch requirement assessment before update', error);
-			return fail(502, { form });
-		}
-
-		const visibilityControlled = [
-			'result',
-			'extended_result',
-			'status',
-			'score',
-			'is_scored',
-			'documentation_score',
-			'observation',
-			'answers',
-			'evidences',
-			'applied_controls'
-		];
-		for (const key of visibilityControlled) {
-			if (!(key in currentRa)) {
-				delete formData[key];
-			}
-		}
-		// extended_result is a qualifier on result; strip it alongside a hidden result.
-		if (!('result' in currentRa)) {
-			delete formData.extended_result;
-		}
-
-		// The detail GET above does not honor viewer_role and returns the
-		// auditor view regardless of caller, so visibility-driven stripping
-		// alone misses fields the respondent never saw but that zod defaulted
-		// to "". Drop empty enum values to avoid DRF "is not a valid choice"
-		// errors on PATCH (e.g. status: "").
 		for (const key of ['status', 'result', 'extended_result', 'respondent_alignment']) {
 			if (formData[key] === '' || formData[key] === null) {
 				delete formData[key];
