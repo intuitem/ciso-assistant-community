@@ -12704,7 +12704,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 target_audit = ComplianceAssessment.objects.select_related(
                     "framework"
                 ).get(id=has_mapping_path_to)
-            except (ComplianceAssessment.DoesNotExist, ValueError):
+            except ComplianceAssessment.DoesNotExist, ValueError:
                 return qs.none()
             from core.mappings.engine import engine
 
