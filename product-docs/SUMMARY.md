@@ -68,6 +68,7 @@
   * [Setting up S3](installation/s3.md)
   * [Setting up mailer](installation/mailer.md)
   * [Prometheus metrics](installation/prometheus-metrics.md)
+  * [Structured logging](installation/structured-logging.md)
 * Maintenance
   * [Updating your local instance](installation/updating.md)
   * [Special cases](installation/special-cases.md)
