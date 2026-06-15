@@ -58,7 +58,7 @@ class SerializerFactory:
                 serializer_module = importlib.import_module(module_name)
                 serializer_class = getattr(serializer_module, serializer_name)
                 return serializer_class
-            except (ModuleNotFoundError, AttributeError):
+            except ModuleNotFoundError, AttributeError:
                 continue
 
         raise ValueError(
@@ -153,7 +153,7 @@ class BaseModelSerializer(serializers.ModelSerializer):
                         root_folder, user, related_model
                     )[0]
                     accessible_cache[related_model] = {str(i) for i in ids}
-                except (NotImplementedError, Permission.DoesNotExist):
+                except NotImplementedError, Permission.DoesNotExist:
                     accessible_cache[related_model] = None
             accessible_ids = accessible_cache[related_model]
             if accessible_ids is None:
@@ -346,7 +346,7 @@ class VulnerabilityReadSerializer(BaseModelSerializer):
         severity_label = obj.get_severity_display()
         try:
             sla_days = int(sla_policy.get(severity_label, 0)) or None
-        except (TypeError, ValueError):
+        except TypeError, ValueError:
             sla_days = None
         if sla_days is not None:
             remaining = (obj.due_date - today).days
