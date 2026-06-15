@@ -47,10 +47,10 @@
 
 	const pertinenceColor: Record<string, string> = {
 		undefined: 'bg-surface-200-800 text-surface-700-300',
-		irrelevant: 'bg-green-200 text-green-700',
-		partially_relevant: 'bg-yellow-200 text-yellow-700',
-		fairly_relevant: 'bg-orange-200 text-orange-700',
-		highly_relevant: 'bg-red-200 text-red-700'
+		irrelevant: 'bg-success-200-800 text-success-700-300',
+		partially_relevant: 'bg-warning-200-800 text-warning-700-300',
+		fairly_relevant: 'bg-orange-200 text-orange-700 dark:text-orange-300',
+		highly_relevant: 'bg-error-200-800 text-error-700-300'
 	};
 
 	function exportPDF() {
@@ -318,7 +318,7 @@
 								{/if}
 							</div>
 							{#if assessment.version}
-								<span class="badge bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+								<span class="badge bg-blue-100 dark:bg-blue-500/15 text-blue-800 dark:text-blue-300 text-xs px-2 py-1 rounded">
 									v{assessment.version}
 								</span>
 							{/if}
@@ -350,29 +350,29 @@
 						{#if assessment.result_counts}
 							<div class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-3">
 								{#if assessment.result_counts.compliant !== undefined}
-									<div class="bg-green-50 border border-green-200 rounded p-2 text-center">
-										<div class="text-2xl font-bold text-green-700">
+									<div class="bg-success-50-950 border border-success-200-800 rounded p-2 text-center">
+										<div class="text-2xl font-bold text-success-700-300">
 											{assessment.result_counts.compliant}
 										</div>
-										<div class="text-xs text-green-600">{safeTranslate('compliant')}</div>
+										<div class="text-xs text-success-600-400">{safeTranslate('compliant')}</div>
 									</div>
 								{/if}
 								{#if assessment.result_counts.partially_compliant !== undefined}
-									<div class="bg-yellow-50 border border-yellow-200 rounded p-2 text-center">
-										<div class="text-2xl font-bold text-yellow-700">
+									<div class="bg-warning-50-950 border border-warning-200-800 rounded p-2 text-center">
+										<div class="text-2xl font-bold text-warning-700-300">
 											{assessment.result_counts.partially_compliant}
 										</div>
-										<div class="text-xs text-yellow-600">
+										<div class="text-xs text-warning-600-400">
 											{safeTranslate('partiallyCompliant')}
 										</div>
 									</div>
 								{/if}
 								{#if assessment.result_counts.non_compliant !== undefined}
-									<div class="bg-red-50 border border-red-200 rounded p-2 text-center">
-										<div class="text-2xl font-bold text-red-700">
+									<div class="bg-error-50-950 border border-error-200-800 rounded p-2 text-center">
+										<div class="text-2xl font-bold text-error-700-300">
 											{assessment.result_counts.non_compliant}
 										</div>
-										<div class="text-xs text-red-600">{safeTranslate('nonCompliant')}</div>
+										<div class="text-xs text-error-600-400">{safeTranslate('nonCompliant')}</div>
 									</div>
 								{/if}
 								{#if assessment.result_counts.not_applicable !== undefined}
@@ -386,8 +386,8 @@
 									</div>
 								{/if}
 								{#if assessment.result_counts.not_assessed !== undefined}
-									<div class="bg-blue-50 border border-blue-200 rounded p-2 text-center">
-										<div class="text-2xl font-bold text-blue-700">
+									<div class="bg-blue-50 dark:bg-blue-500/15 border border-blue-200 dark:border-blue-500/30 rounded p-2 text-center">
+										<div class="text-2xl font-bold text-blue-700 dark:text-blue-300">
 											{assessment.result_counts.not_assessed}
 										</div>
 										<div class="text-xs text-blue-600">{safeTranslate('notAssessed')}</div>
@@ -530,13 +530,13 @@
 						<div class="flex flex-wrap gap-6 text-sm mb-2">
 							<div class="flex flex-col">
 								<span class="text-xs text-surface-600-400 mb-1">{m.currentCriticality()}</span>
-								<span class="badge bg-blue-100 text-blue-800 font-bold text-base px-3 py-1"
+								<span class="badge bg-blue-100 dark:bg-blue-500/15 text-blue-800 dark:text-blue-300 font-bold text-base px-3 py-1"
 									>{stakeholder.current_criticality}</span
 								>
 							</div>
 							<div class="flex flex-col">
 								<span class="text-xs text-surface-600-400 mb-1">{m.residualCriticality()}</span>
-								<span class="badge bg-green-100 text-green-800 font-bold text-base px-3 py-1"
+								<span class="badge bg-success-100-900 text-success-800-200 font-bold text-base px-3 py-1"
 									>{stakeholder.residual_criticality}</span
 								>
 							</div>
@@ -614,10 +614,10 @@
 					{@const scenarioAttackPaths = reportData.attack_paths.filter(
 						(ap) => ap.strategic_scenario.id === scenario.id
 					)}
-					<div class="border-2 border-purple-200 rounded-lg p-4">
+					<div class="border-2 border-purple-200 dark:border-purple-500/30 rounded-lg p-4">
 						<!-- Strategic Scenario -->
-						<div class="bg-purple-50 p-4 rounded-lg mb-4">
-							<h3 class="text-lg font-semibold text-purple-900 mb-2">
+						<div class="bg-purple-50 dark:bg-purple-500/15 p-4 rounded-lg mb-4">
+							<h3 class="text-lg font-semibold text-purple-900 dark:text-purple-300 mb-2">
 								<i class="fa-solid fa-chess-knight mr-2"></i>{scenario.name}
 							</h3>
 							{#if scenario.description}
@@ -671,7 +671,7 @@
 	<div id="workshop-4" class="my-12 scroll-mt-20 workshop-divider">
 		<hr class="border-t-4 border-yellow-600" />
 		<div class="text-center -mt-5 mb-12">
-			<span class="bg-surface-50-950 px-6 py-2 text-xl font-bold text-yellow-600">
+			<span class="bg-surface-50-950 px-6 py-2 text-xl font-bold text-warning-600-400">
 				{m.workshop()} 4 - {m.assessTheRiskScenarios()}
 			</span>
 		</div>
@@ -705,9 +705,9 @@
 								(ss) => ss.id === attackPath.strategic_scenario?.id
 							)
 						: null}
-					<div class="border-2 border-yellow-200 rounded-lg p-4 bg-yellow-50">
+					<div class="border-2 border-warning-200-800 rounded-lg p-4 bg-warning-50-950">
 						<div class="mb-4">
-							<h3 class="text-lg font-semibold text-yellow-900 mb-2">
+							<h3 class="text-lg font-semibold text-warning-900-100 mb-2">
 								<i class="fa-solid fa-gears mr-2"></i>{opScenario.ref_id || m.operationalScenario()}
 							</h3>
 							{#if strategicScenario}
@@ -813,7 +813,7 @@
 
 						<!-- Operating Modes -->
 						{#if opModes.length > 0}
-							<div class="mt-4 pt-4 border-t border-yellow-300">
+							<div class="mt-4 pt-4 border-t border-warning-300-700">
 								<h4 class="text-md font-semibold text-surface-950-50 mb-3">
 									<i class="fa-solid fa-cog mr-2"></i>{m.operatingModes()}
 								</h4>
@@ -822,7 +822,7 @@
 										<div class="bg-surface-50-950 border border-surface-200-800 rounded p-3">
 											<div class="flex items-start gap-2 mb-2">
 												{#if mode.is_selected}
-													<span class="text-green-600 mt-0.5">
+													<span class="text-success-600-400 mt-0.5">
 														<i class="fa-solid fa-check-circle"></i>
 													</span>
 												{:else}
@@ -1083,12 +1083,12 @@
 				<div class="space-y-6">
 					{#each reportData.compliance_action_plans as actionPlan}
 						{#if actionPlan.applied_controls.length > 0}
-							<div class="border border-blue-200 rounded-lg p-4 bg-blue-50">
-								<h3 class="text-lg font-semibold text-blue-900 mb-3">
+							<div class="border border-blue-200 dark:border-blue-500/30 rounded-lg p-4 bg-blue-50 dark:bg-blue-500/15">
+								<h3 class="text-lg font-semibold text-blue-900 dark:text-blue-300 mb-3">
 									<i class="fa-solid fa-clipboard-check mr-2"></i>
 									{actionPlan.assessment_name}
 									{#if actionPlan.framework}
-										<span class="text-sm font-normal text-blue-700">
+										<span class="text-sm font-normal text-blue-700 dark:text-blue-300">
 											({actionPlan.framework})
 										</span>
 									{/if}
@@ -1175,11 +1175,11 @@
 			{#if reportData.stakeholders && reportData.stakeholders.some((s) => s.applied_controls?.length > 0)}
 				<div class="space-y-6 mt-6">
 					{#each reportData.stakeholders.filter((s) => s.applied_controls?.length > 0) as stakeholder}
-						<div class="border border-teal-200 rounded-lg p-4 bg-teal-50">
-							<h3 class="text-lg font-semibold text-teal-900 mb-3">
+						<div class="border border-teal-200 dark:border-teal-500/30 rounded-lg p-4 bg-teal-50 dark:bg-teal-500/15">
+							<h3 class="text-lg font-semibold text-teal-900 dark:text-teal-300 mb-3">
 								<i class="fa-solid fa-users mr-2"></i>
 								{stakeholder.entity.str}
-								<span class="text-sm font-normal text-teal-700">
+								<span class="text-sm font-normal text-teal-700 dark:text-teal-300">
 									({safeTranslate(stakeholder.category)})
 								</span>
 							</h3>
@@ -1262,11 +1262,11 @@
 
 			<!-- Risk Assessment Action Plan -->
 			{#if reportData.risk_action_plan && reportData.risk_action_plan.applied_controls.length > 0}
-				<div class="border border-red-200 rounded-lg p-4 bg-red-50 mt-6">
-					<h3 class="text-lg font-semibold text-red-900 mb-3">
+				<div class="border border-error-200-800 rounded-lg p-4 bg-error-50-950 mt-6">
+					<h3 class="text-lg font-semibold text-error-900-100 mb-3">
 						<i class="fa-solid fa-shield-halved mr-2"></i>
 						{reportData.risk_action_plan.risk_assessment_name}
-						<span class="text-sm font-normal text-red-700">({m.riskAssessment()})</span>
+						<span class="text-sm font-normal text-error-700-300">({m.riskAssessment()})</span>
 					</h3>
 					<div class="overflow-x-auto">
 						<table
