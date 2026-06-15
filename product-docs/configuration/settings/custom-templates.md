@@ -6,6 +6,17 @@ Available on the PRO plan.
 
 Custom templates let you replace the default content CISO Assistant uses for outbound emails and for document exports.
 
+{% hint style="warning" %}
+**Administrators only.** Creating, editing and deleting custom templates is restricted to users with the **Administrator** role. Templates control the wording of system emails and the body of exported documents, so a malicious or careless template could mislead recipients (e.g. a forged password-reset email) or embed inappropriate content in official exports.
+
+Word templates carry additional risk:
+
+- **Template injection** — `.docx` templates are rendered with a Jinja2-based engine. A crafted template can contain expressions that are evaluated on the server, which an attacker could abuse to read data or run unintended logic during export (server-side template injection).
+- **Malicious macros** — `.docx` files can embed VBA macros that execute on the machine of whoever opens the exported document. A booby-trapped template effectively ships malware to every report recipient.
+
+Keep this permission limited to trusted administrators, only upload templates from sources you control, and review any template before activating it.
+{% endhint %}
+
 Two template types live under this setting:
 
 - **Email templates** — the body and subject of system-generated emails (notifications, invitations, password reset, …).
