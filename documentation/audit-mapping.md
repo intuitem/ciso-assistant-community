@@ -77,7 +77,7 @@ The "Map from an audit" flow is backed by these endpoints on `ComplianceAssessme
 - `POST /api/compliance-assessments/{id}/map_from/` with body `{ "source_audit_id": "<uuid>" }`
   Applies the merge in a transaction and returns `{ updated_count, source_audit, source_framework }`.
 
-The shared logic is `ComplianceAssessmentViewSet._compute_map_from_merge` (with `_merge_requirement`, `_is_full_coverage`, `_map_from_sources` helpers); the multi-hop/weakest-link computation is in `core/mappings/engine.py` (`map_audit_results`, `best_mapping_inferences`).
+The shared merge logic lives in `core/mappings/merge.py` (`compute_map_from_merge`, with `merge_requirement`, `is_full_coverage`, `map_from_sources` helpers); the DRF endpoints in `ComplianceAssessmentViewSet` call into it. The multi-hop/weakest-link computation is in `core/mappings/engine.py` (`map_audit_results`, `best_mapping_inferences`).
 
 ## Limitations
 

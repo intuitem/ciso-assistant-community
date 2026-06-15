@@ -438,7 +438,7 @@ S = RequirementAssessment.Status
 @pytest.mark.django_db
 class TestComplianceAssessmentMapFrom:
     """Integration tests for the map-from-audit feature: the merge strategy in
-    ComplianceAssessmentViewSet._compute_map_from_merge plus the `map_from`
+    core.mappings.merge.compute_map_from_merge plus the `map_from`
     (POST) and `map_from_preview` (GET) endpoints and their guards.
 
     Same-framework cases exercise the full-coverage merge path without needing
