@@ -32,7 +32,7 @@ Write-Host "Backend is ready!" -ForegroundColor Green
 
 Write-Host ""
 Write-Host "Creating superuser..." -ForegroundColor Cyan
-docker compose exec backend poetry run python manage.py createsuperuser
+docker compose exec backend uv run python manage.py createsuperuser
 
 Write-Host ""
 Write-Host "Initialization complete!" -ForegroundColor Green

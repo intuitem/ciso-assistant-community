@@ -56,8 +56,9 @@ from .base_models import (
     NameDescriptionMixin,
 )
 from .utils import (
+    aggregate_compute_results,
     camel_case,
-    is_compute_result_truthy,
+    resolve_compute_result,
     sha256,
     update_selected_implementation_groups,
     _is_question_visible,
@@ -2659,9 +2660,9 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
             if choice.add_score is not None:
                 choice_data["add_score"] = choice.add_score
             if choice.compute_result is not None:
-                choice_data["compute_result"] = is_compute_result_truthy(
-                    choice.compute_result
-                )
+                resolved = resolve_compute_result(choice.compute_result)
+                if resolved is not None:
+                    choice_data["compute_result"] = resolved
             if choice.color:
                 choice_data["color"] = choice.color
             if choice.select_implementation_groups:
@@ -2678,6 +2679,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
             q_data = {
                 "type": question.type,
                 "text": q_tr.get("text", question.text or ""),
+                "weight": question.weight,
             }
             if question.annotation:
                 q_data["annotation"] = question.annotation
@@ -3242,6 +3244,7 @@ class Asset(
     }
 
     SECURITY_OBJECTIVES_SCALES = {
+        "1-3": [1, 2, 3, 3, 3],
         "1-4": [1, 2, 3, 4, 4],
         "1-5": [1, 2, 3, 4, 5],
         "0-3": [0, 1, 2, 3, 3],
@@ -4813,7 +4816,7 @@ class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         related_name="incidents",
     )
 
-    fields_to_check = ["name", "ref_id"]
+    fields_to_check = ["ref_id"]
 
     class Meta:
         verbose_name = "Incident"
@@ -4887,6 +4890,16 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
             raise ValidationError("Timestamp cannot be in the future.")
         self.folder = self.incident.folder
         super().save(*args, **kwargs)
+        self.touch_incident()
+
+    def delete(self, *args, **kwargs):
+        incident = self.incident
+        super().delete(*args, **kwargs)
+        self.touch_incident(incident)
+
+    def touch_incident(self, incident=None):
+        incident = incident or self.incident
+        Incident.objects.filter(pk=incident.pk).update(updated_at=now())
 
 
 class Comment(AbstractBaseModel, FolderMixin):
@@ -6858,6 +6871,12 @@ class ComplianceAssessment(Assessment):
     class Meta:
         verbose_name = _("Compliance assessment")
         verbose_name_plural = _("Compliance assessments")
+        permissions = [
+            (
+                "view_compliance_assessment_full",
+                "Can view the full auditor view of a compliance assessment (all rows and fields)",
+            ),
+        ]
 
     # --- Visibility-derived booleans ---
     # These mirror legacy boolean fields. Storage is `field_visibility` keyed by
@@ -7246,7 +7265,12 @@ class ComplianceAssessment(Assessment):
                     else:
                         score = 0
                 else:
-                    score = getattr(ras, score_field) or 0
+                    raw = getattr(ras, score_field)
+                    if raw is None:
+                        if score_field == "score":
+                            continue
+                        raw = 0
+                    score = raw
                 total += score * weight
                 total_weight += weight
             if total_weight == 0:
@@ -7276,8 +7300,11 @@ class ComplianceAssessment(Assessment):
                 else:
                     raw = ra_max
             else:
-                # Legacy semantics: None -> 0 (pulls unscored to min).
-                raw = getattr(ras, score_field) or 0
+                raw = getattr(ras, score_field)
+                if raw is None:
+                    if score_field == "score":
+                        return None
+                    raw = 0
 
             ratio = (raw - ra_min) / ra_range
             return ratio, (ras.requirement.weight or 1)
@@ -7403,7 +7430,13 @@ class ComplianceAssessment(Assessment):
           (only when show_documentation_score is enabled)
         - maturity_score: average of the enabled layers
 
-        Each layer uses the same score_calculation_method (AVG, SUM, AVG_OF_AVG).
+        Each layer uses the same score_calculation_method (AVG, SUM, AVG_OF_AVG)
+        and is computed independently over the SAME row set: an RA must have an
+        actual implementation score to participate. `is_scored=True` with
+        `score is None` is a data inconsistency (the answer-driven path never
+        produces it) and is treated as fully unscored, so it is dropped from
+        both layers, not just the implementation one. A standalone
+        documentation_score on such a row is therefore not aggregated.
 
         When anchor_na_to_target is True, N/A requirements are included with
         their scores replaced by the effective target (target_score or max_score).
@@ -7417,14 +7450,15 @@ class ComplianceAssessment(Assessment):
                 requirement_assessments_scored = [
                     requirement
                     for requirement in prefetched_requirements
-                    if requirement.is_scored
-                    or requirement.result == RequirementAssessment.Result.NOT_APPLICABLE
+                    if requirement.result == RequirementAssessment.Result.NOT_APPLICABLE
+                    or (requirement.is_scored and requirement.score is not None)
                 ]
             else:
                 requirement_assessments_scored = [
                     requirement
                     for requirement in prefetched_requirements
                     if requirement.is_scored
+                    and requirement.score is not None
                     and requirement.result
                     != RequirementAssessment.Result.NOT_APPLICABLE
                 ]
@@ -7436,13 +7470,13 @@ class ComplianceAssessment(Assessment):
             )
             if self.anchor_na_to_target:
                 # Keep N/A items (they'll be anchored to target), but still
-                # exclude non-N/A items that have is_scored=False.
-                qs = qs.exclude(
-                    ~Q(result=RequirementAssessment.Result.NOT_APPLICABLE),
-                    is_scored=False,
+                # exclude non-N/A items that aren't actually scored.
+                qs = qs.filter(
+                    Q(result=RequirementAssessment.Result.NOT_APPLICABLE)
+                    | (Q(is_scored=True) & Q(score__isnull=False))
                 )
             else:
-                qs = qs.exclude(is_scored=False).exclude(
+                qs = qs.filter(is_scored=True, score__isnull=False).exclude(
                     result=RequirementAssessment.Result.NOT_APPLICABLE
                 )
             requirement_assessments_scored = list(qs)
@@ -7490,21 +7524,23 @@ class ComplianceAssessment(Assessment):
         not the CA's max — keeping 100% achievable when every RA is at its max.
         """
         if self.score_calculation_method == self.CalculationMethod.SUM:
-            # Keep this set aligned with _compute_score_for_field's numerator:
-            # when anchor_na_to_target is on, N/A items contribute on the
-            # numerator side, so they must be in the max here too — otherwise
-            # the displayed ratio can exceed 100%.
+            # Keep this set aligned with get_global_score's numerator: rows the
+            # numerator skips (is_scored=False, or is_scored=True with a null
+            # score) must not inflate the denominator. When anchor_na_to_target
+            # is on, N/A items contribute on the numerator side (anchored to
+            # target), so they stay in the max too, otherwise the displayed
+            # ratio can exceed 100%.
             qs = RequirementAssessment.objects.filter(
                 compliance_assessment=self,
                 requirement__assessable=True,
             ).select_related("requirement")
             if self.anchor_na_to_target:
-                qs = qs.exclude(
-                    ~Q(result=RequirementAssessment.Result.NOT_APPLICABLE),
-                    is_scored=False,
+                qs = qs.filter(
+                    Q(result=RequirementAssessment.Result.NOT_APPLICABLE)
+                    | (Q(is_scored=True) & Q(score__isnull=False))
                 )
             else:
-                qs = qs.exclude(is_scored=False).exclude(
+                qs = qs.filter(is_scored=True, score__isnull=False).exclude(
                     result=RequirementAssessment.Result.NOT_APPLICABLE
                 )
             requirement_assessments_scored = qs
@@ -8639,6 +8675,9 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         Does NOT save the model.
         """
         questions_qs = self.requirement.questions.prefetch_related("choices").all()
+        if not questions_qs.exists():
+            return
+
         answers_qs = (
             self.answers.select_related("question")
             .prefetch_related("selected_choices")
@@ -8655,20 +8694,25 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
         total_score = 0
         total_weight = 0
-        resolved = self.get_resolved_scoring()
-        min_score = resolved["min_score"] if resolved["min_score"] is not None else 0
-        max_score = resolved["max_score"] if resolved["max_score"] is not None else 100
+        scoring = self.get_resolved_scoring()
+        min_score = scoring["min_score"] if scoring["min_score"] is not None else 0
+        max_score = scoring["max_score"] if scoring["max_score"] is not None else 100
         results = []
         visible_questions = 0
         answered_visible_questions = 0
         is_score_computed = False
-        is_result_computed = False
+        # Tracks whether the requirement is configured to drive `result` from
+        # questionnaire answers (i.e. at least one choice carries a resolvable
+        # `compute_result`). Set inline during the question pass below.
+        is_result_driven = False
 
         # Determine aggregation method
         scores_def = self.compliance_assessment.scores_definition
         aggregation = None
         if isinstance(scores_def, dict):
-            aggregation = scores_def.get("aggregation")
+            candidate = scores_def.get("aggregation")
+            if candidate in ("sum", "mean"):
+                aggregation = candidate
         if not aggregation:
             if (
                 self.compliance_assessment.score_calculation_method
@@ -8679,6 +8723,16 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 aggregation = "mean"
 
         for question in questions_qs:
+            # Detect result-driven capability across ALL choices (selection /
+            # visibility agnostic). Short-circuits across questions once set.
+            if not is_result_driven:
+                for choice in question.choices.all():
+                    if choice.compute_result is None:
+                        continue
+                    if resolve_compute_result(choice.compute_result) is not None:
+                        is_result_driven = True
+                        break
+
             if not _is_question_visible(question, answers_by_urn, questions_by_urn):
                 continue
 
@@ -8697,8 +8751,9 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                         total_weight += question.weight
 
                     if choice.compute_result is not None:
-                        is_result_computed = True
-                        results.append(is_compute_result_truthy(choice.compute_result))
+                        resolved_cr = resolve_compute_result(choice.compute_result)
+                        if resolved_cr is not None:
+                            results.append(resolved_cr)
 
         if is_score_computed:
             if aggregation == "mean" and total_weight > 0:
@@ -8710,19 +8765,28 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             new_score = None
         new_is_scored = is_score_computed
 
-        # Determine overall result
-        if visible_questions == 0:
-            new_result = self.Result.NOT_APPLICABLE
-        elif answered_visible_questions < visible_questions:
-            new_result = self.Result.NOT_ASSESSED
-        elif not results:
-            new_result = self.Result.NOT_ASSESSED
-        elif all(results):
-            new_result = self.Result.COMPLIANT
-        elif any(results):
-            new_result = self.Result.PARTIALLY_COMPLIANT
-        else:
-            new_result = self.Result.NON_COMPLIANT
+        # `is_result_driven` was set inline during the question pass: True iff
+        # at least one choice carries a resolvable `compute_result`. For
+        # score-only questionnaires (or only-unresolvable values), we must NOT
+        # touch self.result, otherwise a manually-set result would be silently
+        # reset to NOT_ASSESSED on every recompute.
+        new_result = self.result
+        if is_result_driven:
+            if visible_questions == 0:
+                new_result = self.Result.NOT_APPLICABLE
+            elif answered_visible_questions < visible_questions:
+                new_result = self.Result.NOT_ASSESSED
+            elif not results:
+                new_result = self.Result.NOT_ASSESSED
+            else:
+                aggregated = aggregate_compute_results(results)
+                result_map = {
+                    "compliant": self.Result.COMPLIANT,
+                    "partially_compliant": self.Result.PARTIALLY_COMPLIANT,
+                    "non_compliant": self.Result.NON_COMPLIANT,
+                    "not_applicable": self.Result.NOT_APPLICABLE,
+                }
+                new_result = result_map.get(aggregated, self.Result.NOT_ASSESSED)
 
         # Update attributes
         self.score = new_score
