@@ -9038,6 +9038,7 @@ class FrameworkViewSet(BaseModelViewSet):
 
             # Clone requirement nodes
             node_id_map = {}  # old node id -> new node id
+            new_nodes_by_old_id = {}  # old node id -> new RequirementNode
             for node in nodes:
                 old_id = node.id
                 new_node = RequirementNode.objects.create(
@@ -9065,6 +9066,66 @@ class FrameworkViewSet(BaseModelViewSet):
                     target_score=node.target_score,
                 )
                 node_id_map[old_id] = new_node.id
+                new_nodes_by_old_id[old_id] = new_node
+
+            # Carry node reference-control / threat links. Library-backed
+            # objects are shared by reference; inline-owned (library=None) ones
+            # are cloned into the copy so the two frameworks stay independent.
+            rc_clones = {}  # source rc id -> ReferenceControl clone
+            threat_clones = {}  # source threat id -> Threat clone
+
+            def _carry_links(source_objs, clone_cache, model, urn_type, extra_fields):
+                carried = []
+                for obj in source_objs:
+                    if obj.library_id:
+                        carried.append(obj)
+                        continue
+                    clone = clone_cache.get(obj.id)
+                    if clone is None:
+                        # ref_id and name are unique within a folder, and the
+                        # copy shares the source's folder by default, so suffix
+                        # both with the copy's (unique) slug to avoid collisions.
+                        base_ref = obj.ref_id or str(uuid.uuid4())[:8]
+                        new_ref_id = f"{base_ref}-{fw_slug}"[:100]
+                        new_name = f"{obj.name} ({fw_slug})"[:200] if obj.name else None
+                        fields = {
+                            "urn": f"urn:{ns}:risk:{urn_type}:{fw_slug}:{new_ref_id}",
+                            "ref_id": new_ref_id,
+                            "name": new_name,
+                            "description": obj.description,
+                            "annotation": obj.annotation,
+                            "folder_id": folder_id,
+                            "locale": obj.locale,
+                            "default_locale": obj.default_locale,
+                            "translations": obj.translations,
+                            "library": None,
+                            "is_published": obj.is_published,
+                        }
+                        for field in extra_fields:
+                            fields[field] = getattr(obj, field)
+                        clone = model.objects.create(**fields)
+                        clone_cache[obj.id] = clone
+                    carried.append(clone)
+                return carried
+
+            for node in nodes:
+                new_node = new_nodes_by_old_id.get(node.id)
+                if new_node is None:
+                    continue
+                rc_links = _carry_links(
+                    list(node.reference_controls.all()),
+                    rc_clones,
+                    ReferenceControl,
+                    "reference_control",
+                    ("category", "csf_function", "typical_evidence"),
+                )
+                if rc_links:
+                    new_node.reference_controls.set(rc_links)
+                threat_links = _carry_links(
+                    list(node.threats.all()), threat_clones, Threat, "threat", ()
+                )
+                if threat_links:
+                    new_node.threats.set(threat_links)
 
             # Clone questions and choices using the pre-computed ref_ids and URN
             # suffixes. Node_ids are preserved from the source (CEL in
@@ -9216,7 +9277,12 @@ class FrameworkViewSet(BaseModelViewSet):
         # Query all nodes ordered by DFS order
         nodes = list(
             RequirementNode.objects.filter(framework=framework)
-            .prefetch_related("questions", "questions__choices")
+            .prefetch_related(
+                "questions",
+                "questions__choices",
+                "reference_controls__library",
+                "threats__library",
+            )
             .order_by(F("order_id").asc(nulls_last=True))
         )
 
@@ -9236,7 +9302,13 @@ class FrameworkViewSet(BaseModelViewSet):
                 parent_depth = depth_map.get(node.parent_urn, 0)
                 depth_map[node.urn] = parent_depth + 1
 
-        # Build requirement_nodes list
+        # Build requirement_nodes list. While walking the nodes we collect the
+        # control/threat objects they link: library-backed ones are emitted as a
+        # `dependencies` entry (referenced by URN), inline (library=None) ones
+        # are emitted in full under `objects.*`.
+        dependency_urns = set()
+        inline_controls = {}  # urn -> ReferenceControl
+        inline_threats = {}  # urn -> Threat
         requirement_nodes_list = []
         for node in nodes:
             node_data = {
@@ -9274,6 +9346,25 @@ class FrameworkViewSet(BaseModelViewSet):
                 node_data["scores_definition_ref"] = node.scores_definition_ref
             if node.translations:
                 node_data["translations"] = node.translations
+
+            # Reference controls / threats: emit the URN list, and sort each
+            # linked object into the dependency set or the inline objects.
+            node_controls = [c for c in node.reference_controls.all() if c.urn]
+            node_node_threats = [t for t in node.threats.all() if t.urn]
+            if node_controls:
+                node_data["reference_controls"] = [c.urn for c in node_controls]
+                for c in node_controls:
+                    if c.library_id:
+                        dependency_urns.add(c.library.urn)
+                    else:
+                        inline_controls[c.urn] = c
+            if node_node_threats:
+                node_data["threats"] = [t.urn for t in node_node_threats]
+                for t in node_node_threats:
+                    if t.library_id:
+                        dependency_urns.add(t.library.urn)
+                    else:
+                        inline_threats[t.urn] = t
 
             # Build questions dict keyed by URN
             node_questions = node.questions.order_by("order")
@@ -9350,6 +9441,39 @@ class FrameworkViewSet(BaseModelViewSet):
 
         framework_obj["requirement_nodes"] = requirement_nodes_list
 
+        # Inline (library=None) controls/threats are emitted in full so the
+        # exported library is self-contained; the importer resolves the node
+        # URN references against these. Library-backed ones are declared as
+        # dependencies and resolved from their own library on import.
+        objects = {}
+
+        def _serialize_referential(obj, extra_fields=()):
+            entry = {"urn": obj.urn, "ref_id": obj.ref_id, "name": obj.name}
+            for field in ("description", "annotation"):
+                value = getattr(obj, field)
+                if value:
+                    entry[field] = value
+            for field in extra_fields:
+                value = getattr(obj, field)
+                if value:
+                    entry[field] = value
+            if obj.translations:
+                entry["translations"] = obj.translations
+            return entry
+
+        if inline_controls:
+            objects["reference_controls"] = [
+                _serialize_referential(
+                    c, extra_fields=("category", "csf_function", "typical_evidence")
+                )
+                for c in inline_controls.values()
+            ]
+        if inline_threats:
+            objects["threats"] = [
+                _serialize_referential(t) for t in inline_threats.values()
+            ]
+        objects["framework"] = framework_obj
+
         library_data = {
             "urn": f"urn:{framework.urn_namespace or 'custom'}:risk:library:{slug}",
             "locale": framework.locale or "en",
@@ -9359,10 +9483,10 @@ class FrameworkViewSet(BaseModelViewSet):
             "version": 1,
             "provider": framework.provider or "custom",
             "packager": "custom",
-            "objects": {
-                "framework": framework_obj,
-            },
         }
+        if dependency_urns:
+            library_data["dependencies"] = sorted(dependency_urns)
+        library_data["objects"] = objects
 
         # Add translations if present
         if framework.translations:
@@ -9577,6 +9701,57 @@ class FrameworkViewSet(BaseModelViewSet):
             ).values(*choice_fields)
         )
 
+        # Attach each node's reference_control / threat links as URN lists
+        # (same shape as the library YAML). Inline-defined objects — those with
+        # no library, owned by this framework — are also surfaced as top-level
+        # collections so the builder can edit them; library-backed objects are
+        # only referenced by URN and resolved from their library on publish.
+        node_links = {
+            node.id: (
+                sorted(c.urn for c in node.reference_controls.all() if c.urn),
+                sorted(t.urn for t in node.threats.all() if t.urn),
+            )
+            for node in RequirementNode.objects.filter(
+                framework=framework
+            ).prefetch_related("reference_controls", "threats")
+        }
+        for record in nodes:
+            rc_urns, threat_urns = node_links.get(record["id"], ([], []))
+            record["reference_controls"] = rc_urns
+            record["threats"] = threat_urns
+
+        inline_reference_controls = [
+            {
+                "id": c.id,
+                "urn": c.urn,
+                "ref_id": c.ref_id,
+                "name": c.name,
+                "description": c.description,
+                "annotation": c.annotation,
+                "category": c.category,
+                "csf_function": c.csf_function,
+                "typical_evidence": c.typical_evidence,
+                "translations": c.translations,
+            }
+            for c in ReferenceControl.objects.filter(
+                requirements__framework=framework, library__isnull=True
+            ).distinct()
+        ]
+        inline_threats = [
+            {
+                "id": t.id,
+                "urn": t.urn,
+                "ref_id": t.ref_id,
+                "name": t.name,
+                "description": t.description,
+                "annotation": t.annotation,
+                "translations": t.translations,
+            }
+            for t in Threat.objects.filter(
+                requirements__framework=framework, library__isnull=True
+            ).distinct()
+        ]
+
         # Convert UUID fields to strings for JSON serialization
         def stringify_uuids(records):
             for record in records:
@@ -9588,6 +9763,8 @@ class FrameworkViewSet(BaseModelViewSet):
         stringify_uuids(nodes)
         stringify_uuids(questions)
         stringify_uuids(choices)
+        stringify_uuids(inline_reference_controls)
+        stringify_uuids(inline_threats)
 
         # Compute available_languages from existing translations
         available_languages = set()
@@ -9627,6 +9804,8 @@ class FrameworkViewSet(BaseModelViewSet):
             "nodes": nodes,
             "questions": questions,
             "choices": choices,
+            "reference_controls": inline_reference_controls,
+            "threats": inline_threats,
         }
 
         framework.editing_draft = draft
@@ -9898,6 +10077,81 @@ class FrameworkViewSet(BaseModelViewSet):
                         "Each item must have a unique URN."
                     )
                 seen_urns.add(u)
+
+        # --- Per-node reference_control / threat links must be URN lists. The
+        # reconcile iterates them; a bare string would be walked character by
+        # character and corrupt the M2M sync.
+        for node in draft_nodes:
+            for link_field in ("reference_controls", "threats"):
+                value = node.get(link_field)
+                if value is not None and not isinstance(value, list):
+                    raise DraftValidationError(
+                        f"Requirement '{_label(node)}': {link_field} must be a list "
+                        "of URNs."
+                    )
+
+        # --- Inline-defined reference controls and threats. These become custom
+        # referential objects on publish; validate their shape (ids, URNs,
+        # ref_ids, and control category/csf_function) here so a malformed entry
+        # yields an actionable 400 instead of an IntegrityError mid-publish.
+        from library.utils import ReferenceControlImporter
+
+        for kind, records, is_control in (
+            ("reference control", draft.get("reference_controls", []), True),
+            ("threat", draft.get("threats", []), False),
+        ):
+            seen_ids = set()
+            seen_urns = set()
+            for record in records:
+                if not isinstance(record, dict):
+                    raise DraftValidationError(
+                        f"Malformed inline {kind} entry in draft (expected an object)."
+                    )
+                try:
+                    rid = uuid.UUID(str(record.get("id")))
+                except (TypeError, ValueError):
+                    raise DraftValidationError(
+                        f"Inline {kind} '{_label(record)}' has a missing or invalid id."
+                    )
+                if rid in seen_ids:
+                    raise DraftValidationError(
+                        f"Duplicate inline {kind} id on '{_label(record)}'."
+                    )
+                seen_ids.add(rid)
+                urn = record.get("urn")
+                if not isinstance(urn, str) or not urn.strip():
+                    raise DraftValidationError(
+                        f"Inline {kind} '{_label(record)}' has no URN."
+                    )
+                if urn in seen_urns:
+                    raise DraftValidationError(f"Duplicate inline {kind} URN '{urn}'.")
+                seen_urns.add(urn)
+                if not record.get("ref_id"):
+                    raise DraftValidationError(
+                        f"Inline {kind} '{_label(record)}' needs a ref_id."
+                    )
+                _check_len(kind, record, "URN", urn, 255)
+                _check_len(kind, record, "name", record.get("name"), 200)
+                _check_len(kind, record, "ref_id", record.get("ref_id"), 100)
+                if is_control:
+                    category = record.get("category")
+                    if (
+                        category is not None
+                        and category not in ReferenceControlImporter.CATEGORIES
+                    ):
+                        raise DraftValidationError(
+                            f"Inline reference control '{_label(record)}' has an "
+                            f"invalid category '{category}'."
+                        )
+                    csf_function = record.get("csf_function")
+                    if (
+                        csf_function is not None
+                        and csf_function not in ReferenceControlImporter.CSF_FUNCTIONS
+                    ):
+                        raise DraftValidationError(
+                            f"Inline reference control '{_label(record)}' has an "
+                            f"invalid CSF function '{csf_function}'."
+                        )
 
     @staticmethod
     def _compute_draft_diff(framework, draft):
@@ -10173,6 +10427,153 @@ class FrameworkViewSet(BaseModelViewSet):
         if warnings:
             response_data["warnings"] = warnings
         return Response(response_data)
+
+    @staticmethod
+    def _sync_inline_referentials(framework, draft):
+        """Upsert the framework's inline-defined (library=None) reference
+        controls and threats from the draft's top-level collections, and delete
+        those that were dropped.
+
+        Inline objects are custom referential objects living in the framework's
+        folder, keyed by their draft id. Deletion is guarded so a control/threat
+        also linked by another framework is never removed. Runs before the node
+        M2M sync so the new objects resolve there by URN.
+        """
+        specs = (
+            (
+                ReferenceControl,
+                "reference_controls",
+                ("category", "csf_function", "typical_evidence"),
+            ),
+            (Threat, "threats", ()),
+        )
+        for model, key, extra_fields in specs:
+            entries = draft.get(key) or []
+            by_id = {}
+            for entry in entries:
+                eid = uuid.UUID(str(entry["id"]))
+                by_id[eid] = entry
+
+            # A new inline object whose URN already belongs to a *different*
+            # object (e.g. a library control) would hit the global unique
+            # constraint mid-transaction; reject it up front with a clear error.
+            urns = [e["urn"] for e in entries if e.get("urn")]
+            if urns:
+                colliding = list(
+                    model.objects.filter(urn__in=urns)
+                    .exclude(id__in=by_id.keys())
+                    .values_list("urn", flat=True)
+                )
+                if colliding:
+                    raise DraftValidationError(
+                        f"Inline {key.replace('_', ' ')} URN '{colliding[0]}' is "
+                        "already used by another object. Pick a different ref_id."
+                    )
+
+            # Existence is keyed on the draft ids directly (not on current M2M
+            # links): a node deleted earlier in this publish may have already
+            # stripped an inline object's only link, yet the object still lives
+            # in the DB and must be UPDATEd, not re-created under the same PK.
+            existing = model.objects.in_bulk(by_id.keys())
+
+            # Delete owned objects (library-less, linked to this framework) that
+            # the draft dropped — but never one still linked by another framework.
+            for obj in model.objects.filter(
+                library__isnull=True, requirements__framework=framework
+            ).distinct():
+                if (
+                    obj.id not in by_id
+                    and not obj.requirements.exclude(framework=framework).exists()
+                ):
+                    obj.delete()
+
+            for eid, entry in by_id.items():
+                fields = {
+                    "urn": entry.get("urn"),
+                    "ref_id": entry.get("ref_id"),
+                    "name": entry.get("name"),
+                    "description": entry.get("description") or None,
+                    "annotation": entry.get("annotation") or None,
+                    "translations": entry.get("translations") or None,
+                    "folder_id": framework.folder_id,
+                }
+                for field in extra_fields:
+                    fields[field] = entry.get(field) or None
+                if eid in existing:
+                    obj = existing[eid]
+                    obj.library = None
+                    for attr, value in fields.items():
+                        setattr(obj, attr, value)
+                    obj.save()
+                else:
+                    model.objects.create(
+                        id=eid, library=None, is_published=True, **fields
+                    )
+
+    @staticmethod
+    def _sync_node_referentials(framework, draft_nodes):
+        """Set each requirement node's reference_controls / threats M2M from the
+        draft's per-node URN lists (same shape as the library YAML).
+
+        Skips nodes whose links are unchanged so a no-op publish performs no
+        writes, and skips the work entirely when neither the draft nor the DB
+        has any links. Inline-defined objects must already be persisted; their
+        URNs resolve here exactly like library/custom ones. A URN that resolves
+        to nothing is a hard error rather than a silent drop.
+        """
+        desired_by_node = {}
+        all_rc_urns = set()
+        all_threat_urns = set()
+        for node in draft_nodes:
+            rc = [u for u in (node.get("reference_controls") or []) if u]
+            th = [u for u in (node.get("threats") or []) if u]
+            desired_by_node[str(node["id"])] = (rc, th)
+            all_rc_urns.update(rc)
+            all_threat_urns.update(th)
+
+        has_existing = (
+            RequirementNode.objects.filter(
+                framework=framework, reference_controls__isnull=False
+            ).exists()
+            or RequirementNode.objects.filter(
+                framework=framework, threats__isnull=False
+            ).exists()
+        )
+        if not (all_rc_urns or all_threat_urns or has_existing):
+            return
+
+        rc_by_urn = {
+            c.urn: c for c in ReferenceControl.objects.filter(urn__in=all_rc_urns)
+        }
+        threat_by_urn = {
+            t.urn: t for t in Threat.objects.filter(urn__in=all_threat_urns)
+        }
+        missing = (all_rc_urns - set(rc_by_urn)) | (
+            all_threat_urns - set(threat_by_urn)
+        )
+        if missing:
+            raise DraftValidationError(
+                "A requirement links a reference control or threat that does not "
+                f"exist: '{sorted(missing)[0]}'. Define it inline or pick an "
+                "existing one."
+            )
+
+        nodes_by_id = {
+            str(node.id): node
+            for node in RequirementNode.objects.filter(
+                framework=framework
+            ).prefetch_related("reference_controls", "threats")
+        }
+        for node_id, (rc_urns, th_urns) in desired_by_node.items():
+            node = nodes_by_id.get(node_id)
+            if node is None:
+                continue
+            desired_rc = {rc_by_urn[u] for u in rc_urns}
+            desired_th = {threat_by_urn[u] for u in th_urns}
+            if set(node.reference_controls.all()) != desired_rc:
+                node.reference_controls.set(desired_rc)
+            if set(node.threats.all()) != desired_th:
+                node.threats.set(desired_th)
 
     def _reconcile_draft(self, framework, draft):
         """Reconcile the draft JSON into the relational DB within a transaction.
@@ -10748,6 +11149,16 @@ class FrameworkViewSet(BaseModelViewSet):
                     "id", flat=True
                 )
             )
+
+            # --- 5b. Upsert inline-defined reference controls & threats ---
+            self._sync_inline_referentials(framework, draft)
+
+            # --- 5c. Sync node M2M: reference_controls & threats ---
+            # Draft nodes carry control/threat URN lists (same shape as the
+            # library YAML). Resolve them to objects and set the M2M now that
+            # every node and inline object exists. library/custom objects are
+            # looked up by URN; an unresolved URN is rejected.
+            self._sync_node_referentials(framework, draft_nodes)
 
             # --- 6. UPDATE+CREATE questions (with FK validation) ---
             QUESTION_UPDATE_FIELDS = [

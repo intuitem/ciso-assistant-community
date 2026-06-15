@@ -27,6 +27,11 @@ export interface DraftJSON {
 	nodes: Record<string, unknown>[];
 	questions: Record<string, unknown>[];
 	choices: Record<string, unknown>[];
+	// Inline-defined (library-less) reference controls and threats owned by this
+	// framework. Library-backed ones referenced by nodes are not listed here;
+	// nodes carry their URNs and the backend resolves them on publish.
+	reference_controls?: Record<string, unknown>[];
+	threats?: Record<string, unknown>[];
 }
 
 async function handleResponse(res: Response): Promise<unknown> {

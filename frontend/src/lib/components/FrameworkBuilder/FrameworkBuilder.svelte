@@ -4,12 +4,14 @@
 	import {
 		createBuilderState,
 		setBuilderContext,
+		setReferentialCatalogContext,
 		getTranslation,
 		withTranslation,
 		type Framework,
 		type BuilderNode,
 		type RequirementNode,
-		type Question
+		type Question,
+		type ReferentialCatalogEntry
 	} from './builder-state';
 	import type { DraftJSON } from './builder-api';
 	import {
@@ -40,12 +42,25 @@
 		requirementNodes: RequirementNode[];
 		questions: Question[];
 		editingDraft?: DraftJSON | null;
+		referenceControlCatalog?: ReferentialCatalogEntry[];
+		threatCatalog?: ReferentialCatalogEntry[];
 	}
 
-	let { framework, requirementNodes, questions, editingDraft = null }: Props = $props();
+	let {
+		framework,
+		requirementNodes,
+		questions,
+		editingDraft = null,
+		referenceControlCatalog = [],
+		threatCatalog = []
+	}: Props = $props();
 
 	const builder = createBuilderState(framework, requirementNodes, questions, editingDraft);
 	setBuilderContext(builder);
+	setReferentialCatalogContext({
+		referenceControls: referenceControlCatalog,
+		threats: threatCatalog
+	});
 
 	const cardCollapsed = createCollapsedStore(`fw-builder:${framework.id}:cards:collapsed`);
 	setCardCollapsedContext(cardCollapsed);

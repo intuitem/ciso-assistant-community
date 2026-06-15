@@ -4807,6 +4807,13 @@
 	"builderVisibilityExpressionTooltip": "CEL expression that must evaluate to true for this requirement to be visible. Example: requirements[\"urn:...\"].score > 50",
 	"builderVisibilityExpressionPlaceholder": "e.g. requirements[\"urn:...\"].score > 50",
 	"builderImplementationGroupsLabel": "Implementation groups:",
+	"builderReferenceControlsLabel": "Reference controls:",
+	"builderThreatsLabel": "Threats:",
+	"builderAddReferenceControl": "Add reference control",
+	"builderAddThreat": "Add threat",
+	"builderLinkExisting": "Link existing",
+	"builderDefineInline": "Define inline",
+	"builderNoCatalogMatches": "No matches",
 	"builderAddQuestion": "Add question",
 	"builderChildrenHidden": [
 		{

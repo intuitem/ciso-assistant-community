@@ -8,6 +8,7 @@ import {
 	validateDraft,
 	buildTree,
 	serializeDraft,
+	hydrateDraft,
 	type Framework,
 	type BuilderNode,
 	type RequirementNode,
@@ -154,6 +155,8 @@ function makeNode(overrides: Partial<RequirementNode> = {}): RequirementNode {
 		display_mode: 'default',
 		framework: 'fw-1',
 		folder: 'folder-1',
+		reference_controls: [],
+		threats: [],
 		...overrides
 	};
 }
@@ -522,6 +525,62 @@ describe('serializeDraft round-trip', () => {
 		const ids = draft.nodes.map((x) => x.id);
 		expect(new Set(ids).size).toBe(ids.length);
 		expect(ids).toEqual(['n1']);
+	});
+});
+
+describe('reference controls & threats round-trip', () => {
+	it('preserves node links and inline collections through serialize/hydrate', () => {
+		const fw = makeFramework({
+			inline_reference_controls: [
+				{
+					id: 'rc-1',
+					urn: 'urn:custom:risk:reference_control:fw:c1',
+					ref_id: 'C1',
+					name: 'Inline C1',
+					description: null,
+					annotation: null,
+					category: 'policy',
+					csf_function: 'govern',
+					typical_evidence: null,
+					translations: null
+				}
+			],
+			inline_threats: [
+				{
+					id: 't-1',
+					urn: 'urn:custom:risk:threat:fw:t1',
+					ref_id: 'T1',
+					name: 'Inline T1',
+					description: null,
+					annotation: null,
+					translations: null
+				}
+			]
+		});
+		const node = makeNode({
+			parent_urn: null,
+			reference_controls: [
+				'urn:custom:risk:reference_control:fw:c1',
+				'urn:intuitem:risk:function:doc-pol:a.5.1'
+			],
+			threats: ['urn:custom:risk:threat:fw:t1']
+		});
+		const tree = buildTree([node], []);
+
+		const draft = serializeDraft(fw, tree);
+		expect(draft.nodes[0].reference_controls).toEqual(node.reference_controls);
+		expect(draft.nodes[0].threats).toEqual(node.threats);
+		expect(draft.reference_controls).toHaveLength(1);
+		expect(draft.threats).toHaveLength(1);
+
+		const { frameworkPatch, nodes } = hydrateDraft(draft, fw.id);
+		expect(nodes[0].reference_controls).toEqual(node.reference_controls);
+		expect(nodes[0].threats).toEqual(node.threats);
+		expect(frameworkPatch.inline_reference_controls).toHaveLength(1);
+		expect(frameworkPatch.inline_threats).toHaveLength(1);
+		expect(frameworkPatch.inline_reference_controls?.[0].urn).toBe(
+			'urn:custom:risk:reference_control:fw:c1'
+		);
 	});
 });
 
