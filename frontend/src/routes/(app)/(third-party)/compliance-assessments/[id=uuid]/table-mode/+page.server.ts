@@ -187,7 +187,7 @@ export const actions: Actions = {
 			'observation',
 			'answers',
 			'evidences',
-			'applied_controls',
+			'applied_controls'
 		];
 		for (const key of visibilityControlled) {
 			if (!(key in currentRa)) {
