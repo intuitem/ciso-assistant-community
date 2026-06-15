@@ -11,7 +11,7 @@ from core.models import Perimeter
 from iam.models import Folder
 from webhooks import tasks
 from webhooks.models import WebhookEndpoint
-from webhooks.ocsf import build_audit_body, log_entry_to_ocsf
+from webhooks.ocsf import log_entry_to_ocsf
 
 
 @pytest.fixture
@@ -282,78 +282,3 @@ def test_send_audit_to_kafka_misconfigured(root_folder):
         result = tasks.send_audit_to_kafka.call_local(str(ep.id), {"class_uid": 6003})
     assert result.startswith("Misconfigured")
     make.assert_not_called()
-
-
-@pytest.mark.django_db
-def test_cef_body(root_folder):
-    _, le = _create_entry("P-cef", root_folder)
-    body = build_audit_body(le, "cef")
-    assert isinstance(body, str)
-    assert body.startswith("CEF:0|intuitem|CISO Assistant|")
-    assert "act=create" in body
-    assert "cs1Label=object" in body
-    assert "cs3Label=changes" in body
-
-
-@pytest.mark.django_db
-def test_leef_body(root_folder):
-    _, le = _create_entry("P-leef", root_folder)
-    body = build_audit_body(le, "leef")
-    assert isinstance(body, str)
-    assert body.startswith("LEEF:2.0|intuitem|CISO Assistant|")
-    assert "^cat=perimeter" in body
-    assert "act=create" in body
-
-
-@pytest.mark.django_db
-def test_dispatch_routes_to_syslog_transport(root_folder):
-    ep = _make_audit_sink(
-        root_folder,
-        transport=WebhookEndpoint.Transport.SYSLOG,
-        body_format=WebhookEndpoint.BodyFormat.CEF,
-        syslog_config={"host": "siem.example", "protocol": "tcp"},
-    )
-    _, le = _create_entry("P-syslog", root_folder)
-    with (
-        patch.object(tasks, "ff_is_enabled", return_value=True),
-        patch.object(tasks, "send_audit_to_syslog") as syslog_send,
-        patch.object(tasks, "send_audit_request") as http_send,
-        patch.object(tasks, "send_audit_to_kafka") as kafka_send,
-    ):
-        tasks.dispatch_audit_event.call_local(str(le.pk))
-    assert syslog_send.schedule.call_count == 1
-    http_send.schedule.assert_not_called()
-    kafka_send.schedule.assert_not_called()
-    assert syslog_send.schedule.call_args.kwargs["args"][0] == str(ep.id)
-
-
-@pytest.mark.django_db
-@override_settings(WEBHOOK_ALLOW_PRIVATE_IPS=True)
-def test_send_audit_to_syslog_tcp_frames_message(root_folder):
-    ep = _make_audit_sink(
-        root_folder,
-        transport=WebhookEndpoint.Transport.SYSLOG,
-        body_format=WebhookEndpoint.BodyFormat.CEF,
-        syslog_config={"host": "localhost", "port": 1514, "protocol": "tcp"},
-    )
-    sock = MagicMock()
-    with patch("webhooks.tasks.socket.create_connection", return_value=sock) as conn:
-        result = tasks.send_audit_to_syslog.call_local(str(ep.id), "CEF:0|x")
-    assert result.startswith("Success")
-    conn.assert_called_once_with(("localhost", 1514), timeout=15)
-    # PRI = facility 13 * 8 + severity 6 = 110; newline-framed
-    assert sock.sendall.call_args.args[0] == b"<110>CEF:0|x\n"
-    sock.close.assert_called_once()
-
-
-@pytest.mark.django_db
-def test_send_audit_to_syslog_misconfigured(root_folder):
-    ep = _make_audit_sink(
-        root_folder,
-        transport=WebhookEndpoint.Transport.SYSLOG,
-        syslog_config={},
-    )
-    with patch("webhooks.tasks.socket.create_connection") as conn:
-        result = tasks.send_audit_to_syslog.call_local(str(ep.id), "CEF:0|x")
-    assert result.startswith("Misconfigured")
-    conn.assert_not_called()

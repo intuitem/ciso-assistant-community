@@ -60,7 +60,7 @@ class WebhookEndpointSerializer(BaseModelSerializer):
 
 
 def _validate_accessible_folders(request, value):
-    if not request and hasattr(request, "user"):
+    if not request or not hasattr(request, "user"):
         raise serializers.ValidationError("Request context with user is required.")
     user = getattr(request, "user")
     (viewable_folders_ids, _, _) = RoleAssignment.get_accessible_object_ids(
@@ -96,7 +96,6 @@ class AuditSinkSerializer(BaseModelSerializer):
             "body_format",
             "headers",
             "kafka_config",
-            "syslog_config",
             "is_active",
             "target_folders",
             "folder",

@@ -101,13 +101,6 @@ def log_entry_to_raw(log_entry) -> dict:
 
 
 def build_audit_body(log_entry, body_format):
-    # Returns a dict for JSON formats (ocsf/raw) or a str for text formats (cef/leef).
     if body_format == "raw":
         return log_entry_to_raw(log_entry)
-    if body_format in ("cef", "leef"):
-        from .cef import log_entry_to_cef, log_entry_to_leef
-
-        return (log_entry_to_cef if body_format == "cef" else log_entry_to_leef)(
-            log_entry
-        )
     return log_entry_to_ocsf(log_entry)

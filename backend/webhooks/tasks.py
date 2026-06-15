@@ -3,8 +3,6 @@ import hashlib
 import hmac
 import json
 import secrets
-import socket
-import ssl
 import time
 from datetime import datetime, timezone
 
@@ -123,8 +121,6 @@ def _deliver(endpoint, body):
     # Route an audit event to the sink's transport.
     if endpoint.transport == WebhookEndpoint.Transport.KAFKA:
         send_audit_to_kafka.schedule(args=(str(endpoint.id), body), delay=1)
-    elif endpoint.transport == WebhookEndpoint.Transport.SYSLOG:
-        send_audit_to_syslog.schedule(args=(str(endpoint.id), body), delay=1)
     else:
         send_audit_request.schedule(args=(str(endpoint.id), body), delay=1)
 
@@ -168,7 +164,7 @@ def send_audit_request(endpoint_id, body):
         endpoint = WebhookEndpoint.objects.get(id=endpoint_id, is_active=True)
     except WebhookEndpoint.DoesNotExist:
         logger.warning("Audit sink deleted. Task aborted.", endpoint_id=endpoint_id)
-        return
+        return f"Aborted: audit sink {endpoint_id} not found"
 
     json_payload = json.dumps(body, separators=(",", ":"), cls=DjangoJSONEncoder)
     headers = {"Content-Type": "application/json", **(endpoint.headers or {})}
@@ -261,7 +257,7 @@ def send_audit_to_kafka(endpoint_id, body):
         endpoint = WebhookEndpoint.objects.get(id=endpoint_id, is_active=True)
     except WebhookEndpoint.DoesNotExist:
         logger.warning("Audit sink deleted. Task aborted.", endpoint_id=endpoint_id)
-        return
+        return f"Aborted: audit sink {endpoint_id} not found"
 
     cfg = endpoint.kafka_config or {}
     if not cfg.get("bootstrap_servers") or not cfg.get("topic"):
@@ -278,65 +274,3 @@ def send_audit_to_kafka(endpoint_id, body):
     finally:
         producer.close(timeout=5)
     return f"Success: produced audit event to {cfg['topic']}"
-
-
-def _syslog_frame(body) -> bytes:
-    # CEF/LEEF builders return a str; JSON formats return a dict.
-    msg = (
-        body
-        if isinstance(body, str)
-        else json.dumps(body, separators=(",", ":"), cls=DjangoJSONEncoder)
-    )
-    pri = 13 * 8 + 6  # facility 13 (log audit), severity 6 (info)
-    return f"<{pri}>{msg}".encode("utf-8")
-
-
-@db_task(retries=5, retry_delay=60, retry_backoff=2.0)
-def send_audit_to_syslog(endpoint_id, body):
-    try:
-        endpoint = WebhookEndpoint.objects.get(id=endpoint_id, is_active=True)
-    except WebhookEndpoint.DoesNotExist:
-        logger.warning("Audit sink deleted. Task aborted.", endpoint_id=endpoint_id)
-        return
-
-    cfg = endpoint.syslog_config or {}
-    host = cfg.get("host")
-    proto = (cfg.get("protocol") or "tcp").lower()
-    port = int(cfg.get("port") or (6514 if proto == "tls" else 514))
-    if not host:
-        logger.error("Syslog sink misconfigured", endpoint_id=endpoint_id)
-        return f"Misconfigured: {endpoint_id} missing host"
-
-    try:
-        assert_public_url_unless_dev(
-            f"{proto}://{host}:{port}", allowed_schemes=("tcp", "udp", "tls")
-        )
-    except BlockedRequestError:
-        logger.error(
-            "Syslog sink blocked by SSRF guard", endpoint_id=endpoint_id, exc_info=True
-        )
-        return f"Blocked: {endpoint_id} host points to a non-public address"
-
-    frame = _syslog_frame(body)
-    try:
-        if proto == "udp":
-            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            try:
-                sock.sendto(frame, (host, port))
-            finally:
-                sock.close()
-        else:
-            sock = socket.create_connection((host, port), timeout=15)
-            try:
-                if proto == "tls":
-                    sock = ssl.create_default_context().wrap_socket(
-                        sock, server_hostname=host
-                    )
-                sock.sendall(
-                    frame + b"\n"
-                )  # newline framing (RFC 6587 non-transparent)
-            finally:
-                sock.close()
-    except OSError as e:
-        raise Exception(f"Syslog network error for {endpoint_id}: {e}")
-    return f"Success: sent audit event to {proto}://{host}:{port}"

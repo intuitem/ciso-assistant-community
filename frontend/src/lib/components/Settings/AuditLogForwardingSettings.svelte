@@ -103,9 +103,6 @@
 							<span class="text-sm text-gray-500 truncate">
 								{#if sink.transport === 'kafka'}
 									{sink.kafka_config?.bootstrap_servers}
-								{:else if sink.transport === 'syslog'}
-									{sink.syslog_config?.protocol}://{sink.syslog_config?.host}:{sink.syslog_config
-										?.port}
 								{:else}
 									{sink.url}
 								{/if}

@@ -66,10 +66,7 @@
 			security_protocol: sasl.security_protocol ?? 'PLAINTEXT',
 			sasl_mechanism: sasl.sasl_mechanism ?? '',
 			sasl_username: sasl.sasl_plain_username ?? '',
-			sasl_password: sasl.sasl_plain_password ?? '',
-			syslog_host: (initialData.syslog_config ?? {}).host ?? '',
-			syslog_port: (initialData.syslog_config ?? {}).port ?? '',
-			syslog_protocol: (initialData.syslog_config ?? {}).protocol ?? 'tcp'
+			sasl_password: sasl.sasl_plain_password ?? ''
 		}));
 	}
 
@@ -88,20 +85,14 @@
 			<header class={cHeader} data-testid="modal-title">
 				{$modalStore[0].title ?? '(title missing)'}
 			</header>
-			<div
-				role="button"
-				tabindex="0"
+			<button
+				type="button"
 				class="flex items-center hover:text-primary-500 cursor-pointer"
-				onclick={parent.onClose}
-				onkeydown={(e) => {
-					if (e.key === 'Enter' || e.key === ' ') {
-						e.preventDefault();
-						parent.onClose(e);
-					}
-				}}
+				aria-label={m.cancel()}
+				onclick={(event) => parent.onClose(event)}
 			>
 				<i class="fa-solid fa-xmark"></i>
-			</div>
+			</button>
 		</div>
 		<Form
 			class="flex flex-col space-y-3"
@@ -121,8 +112,7 @@
 					label={m.transport()}
 					possibleOptions={[
 						{ label: 'HTTP', value: 'http' },
-						{ label: 'Kafka', value: 'kafka' },
-						{ label: 'Syslog', value: 'syslog' }
+						{ label: 'Kafka', value: 'kafka' }
 					]}
 					labelKey="label"
 					valueKey="value"
@@ -133,9 +123,7 @@
 					label={m.bodyFormat()}
 					possibleOptions={[
 						{ label: 'OCSF', value: 'ocsf' },
-						{ label: m.raw(), value: 'raw' },
-						{ label: 'CEF', value: 'cef' },
-						{ label: 'LEEF', value: 'leef' }
+						{ label: m.raw(), value: 'raw' }
 					]}
 					labelKey="label"
 					valueKey="value"
@@ -187,26 +175,6 @@
 							autocomplete="off"
 						/>
 					</Dropdown>
-				{:else if $transport === 'syslog'}
-					<TextField {form} field="syslog_host" label={m.syslogHost()} autocomplete="off" />
-					<TextField
-						{form}
-						field="syslog_port"
-						label={m.syslogPort()}
-						type="number"
-						placeholder="514"
-						autocomplete="off"
-					/>
-					<Select
-						{form}
-						field="syslog_protocol"
-						label={m.protocol()}
-						options={[
-							{ label: 'TCP', value: 'tcp' },
-							{ label: 'UDP', value: 'udp' },
-							{ label: 'TLS', value: 'tls' }
-						]}
-					/>
 				{:else}
 					<TextField {form} field="url" label={m.url()} autocomplete="off" />
 					<TextField

@@ -157,8 +157,7 @@ function buildAuditSinkPayload(f: Record<string, any>): Record<string, any> {
 		target_folders: f.target_folders,
 		url: '',
 		headers: {},
-		kafka_config: {},
-		syslog_config: {}
+		kafka_config: {}
 	};
 	if (f.transport === 'kafka') {
 		const config: Record<string, string> = {};
@@ -167,12 +166,6 @@ function buildAuditSinkPayload(f: Record<string, any>): Record<string, any> {
 		if (f.sasl_username) config.sasl_plain_username = f.sasl_username;
 		if (f.sasl_password) config.sasl_plain_password = f.sasl_password;
 		payload.kafka_config = { bootstrap_servers: f.bootstrap_servers, topic: f.topic, config };
-	} else if (f.transport === 'syslog') {
-		payload.syslog_config = {
-			host: f.syslog_host,
-			port: f.syslog_port,
-			protocol: f.syslog_protocol
-		};
 	} else {
 		payload.url = f.url;
 		if (typeof f.headers === 'string' && f.headers.trim()) {
