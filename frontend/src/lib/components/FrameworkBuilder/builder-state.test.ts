@@ -1190,3 +1190,95 @@ describe('self-heals legacy (pre-v3.18.0) seeded drafts on load', () => {
 		expect(new Set(nodeIds).size).toBe(2);
 	});
 });
+
+describe('URN rewrite & repair — gap coverage', () => {
+	it('re-slugs children when the name changes and ref_id is empty', () => {
+		const fw = makeFramework({ name: 'Old Name', ref_id: null });
+		const node = makeNode({
+			urn: 'urn:custom:risk:req_node:old-name:1',
+			ref_id: '1',
+			parent_urn: null
+		});
+		const store = createBuilderState(fw, [node], []);
+
+		store.updateFramework({ name: 'New Name' });
+
+		expect(get(store.rootNodes)[0].node.urn).toBe('urn:custom:risk:req_node:new-name:1');
+	});
+
+	it('does not rewrite child URNs when a non-slug field changes', () => {
+		const fw = makeFramework({ ref_id: 'fw' });
+		const node = makeNode({
+			urn: 'urn:custom:risk:req_node:fw:1',
+			ref_id: '1',
+			parent_urn: null
+		});
+		const store = createBuilderState(fw, [node], []);
+
+		store.updateFramework({ description: 'changed' });
+
+		expect(get(store.rootNodes)[0].node.urn).toBe('urn:custom:risk:req_node:fw:1');
+	});
+
+	it('repairs duplicate choice node_ids on hydrate', () => {
+		const draft = {
+			schema_version: 1,
+			framework_meta: {
+				name: 'X',
+				description: '',
+				urn_namespace: 'custom',
+				ref_id: 'fw',
+				min_score: 0,
+				max_score: 100,
+				scores_definition: null,
+				implementation_groups_definition: null,
+				outcomes_definition: []
+			},
+			nodes: [
+				{
+					id: 'n1',
+					urn: 'urn:custom:risk:req_node:fw:1',
+					ref_id: '1',
+					name: 'S',
+					assessable: true,
+					parent_urn: null,
+					order_id: 0
+				}
+			],
+			questions: [
+				{
+					id: 'q1',
+					urn: 'urn:custom:risk:question:fw:1-q1',
+					ref_id: '1-q1',
+					requirement_node_id: 'n1',
+					type: 'unique_choice',
+					text: 'Q',
+					order: 0
+				}
+			],
+			choices: [
+				{
+					id: 'c1',
+					urn: 'urn:custom:risk:question_choice:fw:1-q1-c1',
+					ref_id: '1-q1-c1',
+					question_id: 'q1',
+					value: 'A',
+					order: 0
+				},
+				{
+					id: 'c2',
+					urn: 'urn:custom:risk:question_choice:fw:1-q1-c1', // duplicate node_id
+					ref_id: '1-q1-c2',
+					question_id: 'q1',
+					value: 'B',
+					order: 1
+				}
+			]
+		};
+
+		const store = createBuilderState(makeFramework(), [], [], draft as never);
+
+		const choiceUrns = get(store.rootNodes)[0].questions[0].question.choices.map((c) => c.urn);
+		expect(new Set(choiceUrns).size).toBe(2);
+	});
+});

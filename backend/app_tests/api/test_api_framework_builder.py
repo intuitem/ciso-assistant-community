@@ -3144,6 +3144,22 @@ class TestFrameworkBuilderDraftValidation:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "Duplicate URN" in response.data["error"]
 
+    def test_publish_rejects_duplicate_choice_urn(
+        self, authenticated_client, fw_with_tree
+    ):
+        """An exact-URN duplicate choice must report "Duplicate URN" (the
+        skip-exact-urn guard lets it fall through to the duplicate-URN check),
+        not the divergent-slug "internal identifier" message."""
+        fw, rn, q, c, folder = fw_with_tree
+        draft = self._start_and_get_draft(authenticated_client, fw)
+        dup = copy.deepcopy(draft["choices"][0])
+        dup["id"] = str(uuid.uuid4())  # new choice, same URN
+        draft["choices"].append(dup)
+
+        response = self._save_and_publish(authenticated_client, fw, draft)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Duplicate URN" in response.data["error"]
+
     def test_duplicate_node_id_error_names_both_requirements(
         self, authenticated_client, fw_with_tree
     ):
