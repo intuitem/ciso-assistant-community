@@ -87,7 +87,8 @@
 					<div>
 						<a
 							href="/business-impact-analysis/{data.data.id}/export/xlsx"
-							class="block px-4 py-2 text-sm text-surface-800-200 hover:bg-surface-200-800">... {m.asXLSX()}</a
+							class="block px-4 py-2 text-sm text-surface-800-200 hover:bg-surface-200-800"
+							>... {m.asXLSX()}</a
 						>
 					</div>
 				{/snippet}

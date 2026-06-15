@@ -1042,7 +1042,10 @@
 			>
 				<i class="fa-solid fa-pen-to-square text-blue-400 mt-0.5"></i>
 				<div class="flex-1 min-w-0">
-					<label for="reviewer-comments" class="text-sm font-medium text-blue-700 dark:text-blue-300 block mb-1">
+					<label
+						for="reviewer-comments"
+						class="text-sm font-medium text-blue-700 dark:text-blue-300 block mb-1"
+					>
 						{m.reviewerComments()}
 					</label>
 					<textarea
@@ -1295,7 +1298,11 @@
 									tabindex="0"
 								>
 									<div class="flex items-center justify-between mb-1">
-										<span class="text-sm font-semibold {isActive ? 'text-primary-700 dark:text-primary-300' : ''}">
+										<span
+											class="text-sm font-semibold {isActive
+												? 'text-primary-700 dark:text-primary-300'
+												: ''}"
+										>
 											v{revision.version_number}
 										</span>
 										<span

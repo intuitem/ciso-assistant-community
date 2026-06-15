@@ -203,7 +203,9 @@
 
 	<!-- Collapsible Filters -->
 	{#if filtersExpanded}
-		<div class="bg-surface-50-950/80 border border-surface-200-800 rounded-xl p-4 transition-all duration-200">
+		<div
+			class="bg-surface-50-950/80 border border-surface-200-800 rounded-xl p-4 transition-all duration-200"
+		>
 			<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 items-end">
 				<div>
 					<label
@@ -381,7 +383,9 @@
 
 		<div class="space-y-6">
 			{#each folders as folder}
-				<div class="border border-surface-200-800 rounded-xl overflow-hidden bg-surface-50-950 shadow-sm">
+				<div
+					class="border border-surface-200-800 rounded-xl overflow-hidden bg-surface-50-950 shadow-sm"
+				>
 					<div
 						class="px-5 py-3 border-b border-surface-200-800 bg-gradient-to-r from-surface-50-950 to-surface-100-900 flex items-center gap-3"
 					>
@@ -579,7 +583,9 @@
 				<span>{m.cancelled()}</span>
 			</div>
 			<div class="flex items-center gap-1.5">
-				<div class="w-3 h-3 rounded-sm bg-surface-50-950 border border-dashed border-surface-200-800"></div>
+				<div
+					class="w-3 h-3 rounded-sm bg-surface-50-950 border border-dashed border-surface-200-800"
+				></div>
 				<span>{m.noData()}</span>
 			</div>
 		</div>

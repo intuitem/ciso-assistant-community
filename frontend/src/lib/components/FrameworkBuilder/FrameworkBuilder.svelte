@@ -530,7 +530,9 @@
 									{m.builderScoringSettings()}
 								</button>
 								{#if showScoringSettings}
-									<div class="border border-surface-200-800 rounded-lg bg-surface-50-950/50 px-3 py-3 space-y-3">
+									<div
+										class="border border-surface-200-800 rounded-lg bg-surface-50-950/50 px-3 py-3 space-y-3"
+									>
 										<div class="grid grid-cols-3 gap-3">
 											<label class="block">
 												<span class="text-xs text-surface-600-400">{m.minScore()}</span>
@@ -625,7 +627,8 @@
 																	/>
 																</label>
 																<label class="block flex-1 min-w-0">
-																	<span class="text-[10px] text-surface-500">{m.description()}</span>
+																	<span class="text-[10px] text-surface-500">{m.description()}</span
+																	>
 																	<input
 																		type="text"
 																		value={entry.description}

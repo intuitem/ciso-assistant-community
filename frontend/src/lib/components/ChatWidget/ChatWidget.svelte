@@ -209,7 +209,9 @@
 				{/if}
 			{/if}
 			{#if message.content}
-				<div class="rounded-2xl rounded-tl-sm bg-surface-100-900 px-3.5 py-2.5 text-sm text-surface-800-200">
+				<div
+					class="rounded-2xl rounded-tl-sm bg-surface-100-900 px-3.5 py-2.5 text-sm text-surface-800-200"
+				>
 					<MarkdownRenderer content={message.content} />
 				</div>
 			{/if}
@@ -714,7 +716,9 @@
 							<i class="fa-solid fa-spinner fa-spin text-surface-500"></i>
 						</div>
 					{:else if sessionHistory.length === 0}
-						<div class="px-4 py-6 text-xs text-surface-500 text-center">{m.chatNoConversations()}</div>
+						<div class="px-4 py-6 text-xs text-surface-500 text-center">
+							{m.chatNoConversations()}
+						</div>
 					{:else}
 						{#each sessionHistory as session}
 							<div

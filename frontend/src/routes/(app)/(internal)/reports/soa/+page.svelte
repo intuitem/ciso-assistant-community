@@ -265,7 +265,9 @@
 							{/if}
 						</div>
 						{#if ra.perimeter?.str}
-							<span class="text-xs text-surface-600-400 bg-surface-100-900 px-2 py-0.5 rounded flex-shrink-0">
+							<span
+								class="text-xs text-surface-600-400 bg-surface-100-900 px-2 py-0.5 rounded flex-shrink-0"
+							>
 								{ra.perimeter.str}
 							</span>
 						{/if}

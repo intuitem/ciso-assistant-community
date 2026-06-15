@@ -312,7 +312,9 @@
 
 				<!-- Level selector -->
 				<div>
-					<label class="block text-sm font-medium text-surface-700-300 mb-2"> Reporting Level </label>
+					<label class="block text-sm font-medium text-surface-700-300 mb-2">
+						Reporting Level
+					</label>
 					<div class="flex gap-4">
 						<label class="flex items-center gap-2 cursor-pointer">
 							<input
@@ -335,12 +337,16 @@
 							<span class="text-sm text-surface-700-300">Consolidated (CON)</span>
 						</label>
 					</div>
-					<p class="mt-1 text-xs text-surface-600-400">Individual or consolidated reporting scope.</p>
+					<p class="mt-1 text-xs text-surface-600-400">
+						Individual or consolidated reporting scope.
+					</p>
 				</div>
 
 				<!-- Naming Convention selector -->
 				<div>
-					<label class="block text-sm font-medium text-surface-700-300 mb-2"> Naming Convention </label>
+					<label class="block text-sm font-medium text-surface-700-300 mb-2">
+						Naming Convention
+					</label>
 					<div class="flex gap-4">
 						<label class="flex items-center gap-2 cursor-pointer">
 							<input

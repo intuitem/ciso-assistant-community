@@ -93,7 +93,9 @@
 				<i class="fa-solid fa-coins text-violet-600"></i>
 				<span class="text-lg font-semibold text-surface-800-200">{m.budgetOverview()}</span>
 				{#if collapsed}
-					<span class="text-sm text-surface-600-400 ml-2">{budgetData.total_annual_cost_display}</span>
+					<span class="text-sm text-surface-600-400 ml-2"
+						>{budgetData.total_annual_cost_display}</span
+					>
 				{/if}
 			</button>
 			{#if !collapsed}
@@ -118,7 +120,9 @@
 						<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 							{#each [{ leg: cb.build, label: m.buildCosts() }, { leg: cb.run, label: m.runCosts() }] as entry}
 								<div class="border border-surface-200-800 rounded-lg p-3">
-									<div class="text-xs font-semibold text-surface-600-400 uppercase tracking-wide mb-2">
+									<div
+										class="text-xs font-semibold text-surface-600-400 uppercase tracking-wide mb-2"
+									>
 										{entry.label}
 									</div>
 									<div class="flex items-baseline justify-between gap-3">

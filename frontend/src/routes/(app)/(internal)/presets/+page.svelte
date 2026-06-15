@@ -197,7 +197,9 @@
 							hover:shadow-md hover:border-indigo-200 transition-all duration-200"
 					>
 						<!-- Progress accent bar at top -->
-						<div class="absolute top-0 left-0 right-0 h-1 rounded-t-xl bg-surface-100-900 overflow-hidden">
+						<div
+							class="absolute top-0 left-0 right-0 h-1 rounded-t-xl bg-surface-100-900 overflow-hidden"
+						>
 							<div
 								class="h-full rounded-t-xl transition-all duration-500 ease-out"
 								class:bg-indigo-500={progress < 100}
@@ -273,7 +275,9 @@
 						</div>
 
 						<!-- Step summary -->
-						<div class="flex items-center justify-between mt-3 pt-3 border-t border-surface-100-900">
+						<div
+							class="flex items-center justify-between mt-3 pt-3 border-t border-surface-100-900"
+						>
 							<span class="text-xs text-surface-500">
 								{m.stepsCompleted({
 									completed: String(counts.completed),
@@ -305,7 +309,10 @@
 				<div class="flex items-center justify-center w-8 h-8 rounded-lg bg-violet-100">
 					<i class="fa-solid fa-box-open text-violet-600 text-sm"></i>
 				</div>
-				<h2 class="text-lg font-semibold text-surface-800-200" data-testid="available-templates-heading">
+				<h2
+					class="text-lg font-semibold text-surface-800-200"
+					data-testid="available-templates-heading"
+				>
 					{m.availablePresets()}
 				</h2>
 				<i

@@ -66,7 +66,9 @@
 {#if entries.length > 0}
 	<div class="border rounded-lg overflow-hidden">
 		<table class="w-full text-sm">
-			<thead class="bg-surface-50-950 text-left text-xs uppercase tracking-wide text-surface-600-400">
+			<thead
+				class="bg-surface-50-950 text-left text-xs uppercase tracking-wide text-surface-600-400"
+			>
 				<tr>
 					<th class="px-3 py-2 font-medium">{m.pathOrName()}</th>
 					<th class="px-3 py-2 font-medium">{m.size()}</th>

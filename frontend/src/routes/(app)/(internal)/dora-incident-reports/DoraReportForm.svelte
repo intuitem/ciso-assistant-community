@@ -393,7 +393,8 @@
 			class="bg-amber-50 dark:bg-surface-800 border border-amber-200 dark:border-amber-900 rounded-lg p-4 mb-2 space-y-2"
 		>
 			<div class="flex items-center justify-between">
-				<span class="text-sm font-semibold text-amber-800 dark:text-amber-300">{m.schemaInvalid()}</span
+				<span class="text-sm font-semibold text-amber-800 dark:text-amber-300"
+					>{m.schemaInvalid()}</span
 				>
 				<button
 					class="text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300 text-xs"
@@ -663,8 +664,9 @@
 
 					{#if hasOtherClassification}
 						<div>
-							<label class="text-sm font-medium text-surface-700-300" for="otherIncidentClassification"
-								>{m.otherInformation()}</label
+							<label
+								class="text-sm font-medium text-surface-700-300"
+								for="otherIncidentClassification">{m.otherInformation()}</label
 							>
 							<input
 								id="otherIncidentClassification"

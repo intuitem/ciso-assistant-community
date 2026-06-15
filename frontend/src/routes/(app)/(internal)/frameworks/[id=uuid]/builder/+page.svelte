@@ -80,7 +80,9 @@
 			>
 				<i class="fa-solid fa-lock text-2xl text-amber-600"></i>
 			</div>
-			<h2 class="text-xl font-semibold text-surface-800-200 mb-2">{m.builderImportedFramework()}</h2>
+			<h2 class="text-xl font-semibold text-surface-800-200 mb-2">
+				{m.builderImportedFramework()}
+			</h2>
 			<p class="text-sm text-surface-600-400 mb-6">
 				{m.builderImportedFrameworkDescription()}
 			</p>
@@ -107,7 +109,9 @@
 			<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
 				<i class="fa-solid fa-triangle-exclamation text-2xl text-red-600"></i>
 			</div>
-			<h2 class="text-xl font-semibold text-surface-800-200 mb-2">{m.builderFailedToStartEditor()}</h2>
+			<h2 class="text-xl font-semibold text-surface-800-200 mb-2">
+				{m.builderFailedToStartEditor()}
+			</h2>
 			<p class="text-sm text-red-600 mb-6">{draftError}</p>
 			<a href="/frameworks/{data.framework.id}" class="btn preset-filled-primary-500 px-6">
 				{m.builderBackToFramework()}

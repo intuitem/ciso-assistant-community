@@ -319,7 +319,9 @@
 			{/if}
 			{#if csfValues.length > 0}
 				<div class="bg-surface-50-950 rounded-lg shadow-sm p-4">
-					<h3 class="text-lg font-semibold text-surface-900-100 mb-2">{m.controlsByCsfFunction()}</h3>
+					<h3 class="text-lg font-semibold text-surface-900-100 mb-2">
+						{m.controlsByCsfFunction()}
+					</h3>
 					<div class="h-72">
 						<DonutChart
 							name="appliedControlsAnalyticsCsf"

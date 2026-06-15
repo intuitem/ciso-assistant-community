@@ -363,7 +363,9 @@
 						/>
 					</div>
 					<div>
-						<label class="text-[10px] font-semibold uppercase tracking-wider text-surface-500 block">
+						<label
+							class="text-[10px] font-semibold uppercase tracking-wider text-surface-500 block"
+						>
 							{m.name()}{@render untranslatedMarker('name', node.node.name, lang)}
 						</label>
 						<div class="grid grid-cols-2 gap-3">
@@ -406,7 +408,9 @@
 					{#if !isSplash}
 						<!-- Description side-by-side -->
 						<div>
-							<label class="text-[10px] font-semibold uppercase tracking-wider text-surface-500 block">
+							<label
+								class="text-[10px] font-semibold uppercase tracking-wider text-surface-500 block"
+							>
 								{m.description()}{@render untranslatedMarker(
 									'description',
 									node.node.description,
@@ -648,7 +652,9 @@
 							<span class="text-[10px] text-surface-500 uppercase tracking-wider mb-1 block"
 								>{m.builderSplashSource()}</span
 							>
-							<div class="min-h-[120px] bg-surface-50-950 border border-surface-100-900 rounded-lg px-3 py-2">
+							<div
+								class="min-h-[120px] bg-surface-50-950 border border-surface-100-900 rounded-lg px-3 py-2"
+							>
 								{#if splashDescription.trim()}
 									<MarkdownRenderer content={splashDescription} />
 								{:else}
@@ -784,7 +790,9 @@
 							class="w-full text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-3 py-2 outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/20 transition-colors resize-y font-mono"
 						></textarea>
 					{:else}
-						<div class="min-h-[120px] bg-surface-50-950 border border-surface-200-800 rounded-lg px-4 py-3">
+						<div
+							class="min-h-[120px] bg-surface-50-950 border border-surface-200-800 rounded-lg px-4 py-3"
+						>
 							{#if splashDescription.trim()}
 								<MarkdownRenderer content={splashDescription} />
 							{:else}
@@ -801,7 +809,9 @@
 			{#if !$activeLanguageStore}
 				<div class="px-4 pt-2 pb-0 space-y-2">
 					<div>
-						<label class="text-[10px] font-semibold uppercase tracking-wider text-surface-500 block">
+						<label
+							class="text-[10px] font-semibold uppercase tracking-wider text-surface-500 block"
+						>
 							{m.description()}
 						</label>
 						<textarea
@@ -877,7 +887,9 @@
 			     the audit-tree filter honours them. -->
 			{#if $frameworkStore.implementation_groups_definition && $frameworkStore.implementation_groups_definition.length > 0}
 				<div class="px-4 py-2 border-b border-surface-100-900">
-					<span class="text-xs text-surface-600-400 mr-2">{m.builderImplementationGroupsLabel()}</span>
+					<span class="text-xs text-surface-600-400 mr-2"
+						>{m.builderImplementationGroupsLabel()}</span
+					>
 					{#each $frameworkStore.implementation_groups_definition as ig}
 						{@const refId = (ig as Record<string, string>).ref_id}
 						{@const selected = (node.node.implementation_groups ?? []).includes(refId)}
@@ -902,7 +914,9 @@
 		<!-- CEL visibility expression: inside Advanced for default nodes, always-on for splash -->
 		{#if isSplash || showAdvanced}
 			<div class="px-4 py-2 {isSplash ? 'border-t border-purple-100' : ''}">
-				<label class="text-[10px] font-semibold uppercase tracking-wider text-surface-500 block mb-1">
+				<label
+					class="text-[10px] font-semibold uppercase tracking-wider text-surface-500 block mb-1"
+				>
 					{m.builderVisibilityExpression()}
 					<span
 						class="text-surface-500 ml-1 normal-case"

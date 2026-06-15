@@ -63,7 +63,11 @@
 	<!-- Leaf row -->
 	<tr
 		class="border-b border-surface-200-800 transition-colors print:break-inside-avoid
-			{isNotApplicable ? 'bg-surface-50-950 text-surface-500' : index % 2 === 0 ? 'bg-surface-50-950' : 'bg-surface-50-950'}"
+			{isNotApplicable
+			? 'bg-surface-50-950 text-surface-500'
+			: index % 2 === 0
+				? 'bg-surface-50-950'
+				: 'bg-surface-50-950'}"
 	>
 		<!-- Ref -->
 		<td

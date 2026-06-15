@@ -362,7 +362,11 @@
 							</thead>
 							<tbody>
 								{#each rows as row}
-									<tr class="border-b border-surface-100-900 {row.inherited ? 'bg-emerald-50/50' : ''}">
+									<tr
+										class="border-b border-surface-100-900 {row.inherited
+											? 'bg-emerald-50/50'
+											: ''}"
+									>
 										<td class="py-2 pr-3">
 											<span class="font-mono text-xs text-surface-500">{row.ref_id ?? ''}</span>
 											{row.name ?? ''}
@@ -500,7 +504,11 @@
 								</thead>
 								<tbody>
 									{#each sections as section, i}
-										<tr class="border-t border-surface-100-900 {i % 2 === 0 ? 'bg-surface-50-950/50' : ''}">
+										<tr
+											class="border-t border-surface-100-900 {i % 2 === 0
+												? 'bg-surface-50-950/50'
+												: ''}"
+										>
 											<td class="py-2.5 pr-4 text-surface-700-300"
 												>{section.ref_id ? section.ref_id + ' ' : ''}{section.name}</td
 											>
@@ -887,7 +895,11 @@
 							</thead>
 							<tbody>
 								{#each groups as group, i}
-									<tr class="border-t border-surface-100-900 {i % 2 === 0 ? 'bg-surface-50-950/50' : ''}">
+									<tr
+										class="border-t border-surface-100-900 {i % 2 === 0
+											? 'bg-surface-50-950/50'
+											: ''}"
+									>
 										<td class="py-2.5 pr-4 text-surface-700-300">{group.name || group.ref_id}</td>
 										<td class="py-2.5 pr-4 text-right tabular-nums text-surface-600-400"
 											>{group.total_assessable}</td

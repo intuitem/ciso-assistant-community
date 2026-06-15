@@ -459,7 +459,9 @@
 	<div class="card p-4 bg-surface-50-950">
 		<div class="flex items-start justify-between gap-4 flex-wrap">
 			<div>
-				<div class="text-xs uppercase tracking-wide text-surface-600-400">{m.frameworkReport()}</div>
+				<div class="text-xs uppercase tracking-wide text-surface-600-400">
+					{m.frameworkReport()}
+				</div>
 				<h1 class="text-xl font-semibold">{framework.name}</h1>
 				<div class="text-sm text-surface-600-400 mt-1">
 					{m.frameworkReportSubtitle({
@@ -475,7 +477,9 @@
 					})}
 				</div>
 				{#if totalDetectedCAs > 0}
-					<div class="text-xs text-surface-600-400 mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+					<div
+						class="text-xs text-surface-600-400 mt-1 flex flex-wrap items-center gap-x-2 gap-y-1"
+					>
 						<span>
 							{m.detectedComplianceAssessments({
 								total: totalDetectedCAs,
@@ -518,7 +522,11 @@
 								</thead>
 								<tbody>
 									{#each complianceAssessments as ca}
-										<tr class="border-t {ca.is_counted ? '' : 'bg-surface-100-900/60 text-surface-600-400'}">
+										<tr
+											class="border-t {ca.is_counted
+												? ''
+												: 'bg-surface-100-900/60 text-surface-600-400'}"
+										>
 											<td class="px-3 py-1 text-center">
 												<span
 													class="inline-block w-2 h-2 rounded-full {ca.is_counted
@@ -624,7 +632,9 @@
 	<!-- Filter + view bar -->
 	<div class="card p-3 bg-surface-50-950 flex flex-wrap items-end gap-4">
 		<div>
-			<label class="text-xs text-surface-600-400 block" for="ig-filter">{m.implementationGroup()}</label>
+			<label class="text-xs text-surface-600-400 block" for="ig-filter"
+				>{m.implementationGroup()}</label
+			>
 			<select
 				id="ig-filter"
 				value={igFilter}
@@ -660,7 +670,8 @@
 
 		{#if inheritanceAvailable}
 			<div>
-				<label class="text-xs text-surface-600-400 block" for="apply-inheritance">{m.combinedView()}</label
+				<label class="text-xs text-surface-600-400 block" for="apply-inheritance"
+					>{m.combinedView()}</label
 				>
 				<label class="inline-flex items-center gap-2 text-sm cursor-pointer h-[34px]">
 					<input
@@ -698,7 +709,9 @@
 
 		{#if view === 'domain'}
 			<div>
-				<label class="text-xs text-surface-600-400 block" for="depth">{m.groupByFolderDepth()}</label>
+				<label class="text-xs text-surface-600-400 block" for="depth"
+					>{m.groupByFolderDepth()}</label
+				>
 				<select
 					id="depth"
 					bind:value={domainDepth}
@@ -756,7 +769,9 @@
 	<!-- Main view -->
 	<div class="card bg-surface-50-950 overflow-x-auto">
 		{#if filteredRows.length === 0}
-			<div class="p-6 text-sm text-surface-600-400 italic">{m.noRequirementAssessmentsInScope()}</div>
+			<div class="p-6 text-sm text-surface-600-400 italic">
+				{m.noRequirementAssessmentsInScope()}
+			</div>
 		{:else if view === 'requirement'}
 			<table class="w-full text-sm">
 				<thead class="bg-surface-50-950 text-left">
@@ -863,7 +878,9 @@
 									<tr class="bg-surface-50-950 border-t">
 										<td></td>
 										<td colspan="5" class="px-3 py-2">
-											<div class="text-xs text-surface-600-400 mb-2">{m.perAssessmentBreakdown()}</div>
+											<div class="text-xs text-surface-600-400 mb-2">
+												{m.perAssessmentBreakdown()}
+											</div>
 											<table class="w-full text-xs">
 												<thead>
 													<tr class="text-left text-surface-600-400">

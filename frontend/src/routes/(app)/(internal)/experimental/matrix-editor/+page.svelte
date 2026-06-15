@@ -1005,7 +1005,9 @@
 									: ''}
 							>
 								<td class="font-medium">{matrix.name}</td>
-								<td class="text-sm text-surface-600-400 truncate max-w-48">{matrix.description || '—'}</td>
+								<td class="text-sm text-surface-600-400 truncate max-w-48"
+									>{matrix.description || '—'}</td
+								>
 								<td>
 									<span class="badge variant-filled-success text-xs">{m.published()}</span>
 									{#if matrix.urn}
@@ -1072,7 +1074,9 @@
 		<!-- Language switcher + editor container -->
 		<div class="card p-4">
 			<!-- Language switcher -->
-			<div class="flex items-center gap-2 flex-wrap pb-3 mb-4 border-b border-surface-200-800 justify-end">
+			<div
+				class="flex items-center gap-2 flex-wrap pb-3 mb-4 border-b border-surface-200-800 justify-end"
+			>
 				<i class="fa-solid fa-language text-surface-500"></i>
 				<!-- Base language -->
 				<button
@@ -1160,7 +1164,8 @@
 						<label class="label" for="matrix-name">
 							<span
 								>{m.name()}{#if isTranslatingMeta}
-									<span class="text-xs font-normal text-surface-500">({activeLang})</span>{/if}</span
+									<span class="text-xs font-normal text-surface-500">({activeLang})</span
+									>{/if}</span
 							>
 						</label>
 						{#if isTranslatingMeta}
@@ -1195,7 +1200,8 @@
 						<label class="label" for="matrix-desc">
 							<span
 								>{m.description()}{#if isTranslatingMeta}
-									<span class="text-xs font-normal text-surface-500">({activeLang})</span>{/if}</span
+									<span class="text-xs font-normal text-surface-500">({activeLang})</span
+									>{/if}</span
 							>
 						</label>
 						{#if isTranslatingMeta}
@@ -1212,7 +1218,10 @@
 								placeholder={matrixDescription || m.descriptionPlaceholder()}
 							/>
 							{#if matrixDescription}
-								<span class="text-xs text-surface-500 block mt-0.5 truncate" title={matrixDescription}>
+								<span
+									class="text-xs text-surface-500 block mt-0.5 truncate"
+									title={matrixDescription}
+								>
 									↳ {locale}: {matrixDescription}
 								</span>
 							{/if}

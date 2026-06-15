@@ -425,7 +425,9 @@
 
 		<!-- Footer: search result count -->
 		{#if searchQuery && filteredNodes.length > 0}
-			<div class="px-2 py-1.5 border-t border-surface-100-900 text-[10px] text-surface-500 text-center">
+			<div
+				class="px-2 py-1.5 border-t border-surface-100-900 text-[10px] text-surface-500 text-center"
+			>
 				{m.builderNodesOf({ filtered: filteredNodes.length, total: allEntries.length })}
 			</div>
 		{/if}

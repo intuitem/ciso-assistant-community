@@ -176,7 +176,8 @@
 		<!-- Status & Category -->
 		<div class="rounded-lg bg-surface-50-950 p-4 mb-3 space-y-3">
 			<div class="flex items-center justify-between">
-				<span class="text-xs font-semibold text-surface-600-400 uppercase tracking-wide">{m.status()}</span
+				<span class="text-xs font-semibold text-surface-600-400 uppercase tracking-wide"
+					>{m.status()}</span
 				>
 				<span class="badge text-xs font-medium px-2.5 py-0.5 rounded-full preset-tonal-primary">
 					{safeTranslate(accreditation.status)}

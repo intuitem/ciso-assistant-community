@@ -759,7 +759,9 @@
 						></span>
 
 						<article class="border rounded-lg bg-surface-50-950">
-							<header class="flex items-center justify-between px-4 py-2 border-b bg-surface-50-950">
+							<header
+								class="flex items-center justify-between px-4 py-2 border-b bg-surface-50-950"
+							>
 								<div class="flex items-center gap-3 flex-wrap">
 									<h3 class="font-semibold">
 										v{rev.version}
@@ -778,7 +780,9 @@
 										</span>
 									{/if}
 									{#if rev.version === 1}
-										<span class="text-xs px-2 py-0.5 rounded bg-surface-100-900 text-surface-700-300">
+										<span
+											class="text-xs px-2 py-0.5 rounded bg-surface-100-900 text-surface-700-300"
+										>
 											initial
 										</span>
 									{/if}
@@ -882,7 +886,9 @@
 									>
 										<i class="fa-solid fa-code-compare mr-1"></i>Compare to…
 									</button>
-									<button class="px-2 py-1 rounded border bg-surface-50-950 hover:bg-surface-100-900">
+									<button
+										class="px-2 py-1 rounded border bg-surface-50-950 hover:bg-surface-100-900"
+									>
 										<i class="fa-solid fa-download mr-1"></i>Download zip
 									</button>
 									{#if !isCurrent}
@@ -908,7 +914,10 @@
 			<div class="flex items-end gap-3">
 				<label class="text-sm">
 					<span class="block text-xs text-surface-600-400 mb-1">Base</span>
-					<select bind:value={baseVersion} class="border rounded px-2 py-1.5 text-sm bg-surface-50-950">
+					<select
+						bind:value={baseVersion}
+						class="border rounded px-2 py-1.5 text-sm bg-surface-50-950"
+					>
 						{#each revisions as r}
 							<option value={r.version}
 								>v{r.version} — {r.uploadedAt} ({statusLabel[r.status]})</option
@@ -919,7 +928,10 @@
 				<i class="fa-solid fa-arrow-right text-surface-500 mb-2"></i>
 				<label class="text-sm">
 					<span class="block text-xs text-surface-600-400 mb-1">Target</span>
-					<select bind:value={targetVersion} class="border rounded px-2 py-1.5 text-sm bg-surface-50-950">
+					<select
+						bind:value={targetVersion}
+						class="border rounded px-2 py-1.5 text-sm bg-surface-50-950"
+					>
 						{#each revisions as r}
 							<option value={r.version}
 								>v{r.version} — {r.uploadedAt} ({statusLabel[r.status]})</option
@@ -993,7 +1005,9 @@
 
 			<!-- Inherit / replace / remove list -->
 			<div class="border rounded">
-				<div class="px-3 py-2 bg-surface-50-950 border-b text-xs uppercase tracking-wide text-surface-600-400">
+				<div
+					class="px-3 py-2 bg-surface-50-950 border-b text-xs uppercase tracking-wide text-surface-600-400"
+				>
 					Files in v{current.version} — choose what carries over
 				</div>
 				<ul class="divide-y text-sm">

@@ -1247,7 +1247,8 @@
 				<ul class="text-sm max-h-64 overflow-auto divide-y divide-surface-100-900">
 					{#each previewDeletions as d (d.key)}
 						<li class="px-5 py-2.5 flex items-center justify-between gap-3">
-							<span class="font-mono text-xs bg-surface-100-900 rounded px-1.5 py-0.5">{d.key}</span>
+							<span class="font-mono text-xs bg-surface-100-900 rounded px-1.5 py-0.5">{d.key}</span
+							>
 							<span class="text-xs text-surface-600-400">
 								used in {d.journey_step_count} journey step(s),
 								<span class={d.with_user_state ? 'text-amber-600 font-medium' : ''}>
@@ -1257,7 +1258,9 @@
 						</li>
 					{/each}
 				</ul>
-				<div class="px-5 py-3 bg-surface-50-950 flex justify-end gap-2 border-t border-surface-100-900">
+				<div
+					class="px-5 py-3 bg-surface-50-950 flex justify-end gap-2 border-t border-surface-100-900"
+				>
 					<button
 						type="button"
 						class="text-xs font-medium px-3 py-1.5 rounded-lg text-surface-600-400 hover:bg-surface-200-800 transition-colors"

@@ -211,7 +211,9 @@
 
 	<!-- Results panel -->
 	<aside class="lg:col-span-1 bg-surface-50-950 shadow-sm py-5 px-6 space-y-3 card">
-		<h5 class="font-semibold text-sm uppercase tracking-wide text-surface-600-400">{m.results()}</h5>
+		<h5 class="font-semibold text-sm uppercase tracking-wide text-surface-600-400">
+			{m.results()}
+		</h5>
 		{#if summary}
 			<BatchUploadResults {summary} />
 		{:else}

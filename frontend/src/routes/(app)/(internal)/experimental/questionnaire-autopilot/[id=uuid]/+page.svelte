@@ -1309,7 +1309,9 @@
 				if (e.target === e.currentTarget) closeSuggest();
 			}}
 		>
-			<div class="bg-surface-50-950 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+			<div
+				class="bg-surface-50-950 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"
+			>
 				<div class="px-6 py-4 border-b">
 					<h4 class="font-semibold">Suggest a control to create</h4>
 					<p class="text-xs text-surface-600-400 mt-1">
@@ -1353,7 +1355,9 @@
 							</div>
 						{/if}
 						<div>
-							<label for="d-name" class="block text-xs font-medium text-surface-700-300"> Name * </label>
+							<label for="d-name" class="block text-xs font-medium text-surface-700-300">
+								Name *
+							</label>
 							<input
 								id="d-name"
 								type="text"
@@ -1374,7 +1378,9 @@
 							></textarea>
 						</div>
 						<div>
-							<label for="d-status" class="block text-xs font-medium text-surface-700-300"> Status </label>
+							<label for="d-status" class="block text-xs font-medium text-surface-700-300">
+								Status
+							</label>
 							<select
 								id="d-status"
 								bind:value={suggestDraft.status}

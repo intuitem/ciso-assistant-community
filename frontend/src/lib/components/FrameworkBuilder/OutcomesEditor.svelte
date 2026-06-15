@@ -235,7 +235,9 @@
 		<div
 			class="text-xs text-surface-600-400 bg-surface-50-950 border border-surface-200-800 rounded-lg p-3 font-mono space-y-3"
 		>
-			<div class="font-sans font-semibold text-surface-600-400">{m.builderCelGroupAssessment()}</div>
+			<div class="font-sans font-semibold text-surface-600-400">
+				{m.builderCelGroupAssessment()}
+			</div>
 			<div class="space-y-1 ml-2">
 				<div>
 					<span class="text-surface-700-300">assessment.score_sum</span> — {m.builderCelScoreSum()}
@@ -251,7 +253,9 @@
 				</div>
 			</div>
 
-			<div class="font-sans font-semibold text-surface-600-400 pt-1 border-t border-surface-200-800">
+			<div
+				class="font-sans font-semibold text-surface-600-400 pt-1 border-t border-surface-200-800"
+			>
 				{m.builderCelGroupRequirements()}
 			</div>
 			<div class="space-y-1 ml-2">
@@ -275,7 +279,9 @@
 				</div>
 			</div>
 
-			<div class="font-sans font-semibold text-surface-600-400 pt-1 border-t border-surface-200-800">
+			<div
+				class="font-sans font-semibold text-surface-600-400 pt-1 border-t border-surface-200-800"
+			>
 				{m.builderCelGroupAnswers()}
 			</div>
 			<div class="space-y-1 ml-2">
@@ -299,7 +305,9 @@
 				</div>
 			</div>
 
-			<div class="font-sans font-semibold text-surface-600-400 pt-1 border-t border-surface-200-800">
+			<div
+				class="font-sans font-semibold text-surface-600-400 pt-1 border-t border-surface-200-800"
+			>
 				{m.builderCelGroupOther()}
 			</div>
 			<div class="space-y-1 ml-2">

@@ -628,7 +628,8 @@
 							/>
 						</label>
 						<label class="block">
-							<span class="text-xs font-semibold text-surface-600-400 uppercase">{m.refLink()}</span>
+							<span class="text-xs font-semibold text-surface-600-400 uppercase">{m.refLink()}</span
+							>
 							<input
 								type="url"
 								bind:value={basicsTextDraft.ref_link}
@@ -651,7 +652,9 @@
 							label={m.parentProject()}
 						/>
 						<div class="block">
-							<span class="text-xs font-semibold text-surface-600-400 uppercase">{m.description()}</span>
+							<span class="text-xs font-semibold text-surface-600-400 uppercase"
+								>{m.description()}</span
+							>
 							<div class="mt-1">
 								<MarkdownField label="" bind:value={basicsTextDraft.description} rows={4} />
 							</div>
@@ -693,7 +696,8 @@
 					<span
 						class="badge text-sm font-semibold px-3 py-1 rounded-full self-start {statusColorMap[
 							project.status?.name
-						] ?? 'bg-surface-100-900 text-surface-600-400'}">{safeTranslate(project.status.name)}</span
+						] ?? 'bg-surface-100-900 text-surface-600-400'}"
+						>{safeTranslate(project.status.name)}</span
 					>
 				{:else}
 					<span class="text-surface-500 text-sm italic">—</span>
@@ -708,7 +712,8 @@
 					<span
 						class="badge text-sm font-semibold px-3 py-1 rounded-full self-start {healthColorMap[
 							project.health?.name
-						] ?? 'bg-surface-100-900 text-surface-600-400'}">{safeTranslate(project.health.name)}</span
+						] ?? 'bg-surface-100-900 text-surface-600-400'}"
+						>{safeTranslate(project.health.name)}</span
 					>
 				{:else}
 					<span class="text-surface-500 text-sm italic">—</span>
@@ -1031,12 +1036,17 @@
 			{/if}
 
 			<section class="mb-8">
-				<h3 class="text-md font-semibold text-surface-800-200 border-b border-surface-200-800 pb-1 mb-4">
+				<h3
+					class="text-md font-semibold text-surface-800-200 border-b border-surface-200-800 pb-1 mb-4"
+				>
 					{m.schedule()}
 				</h3>
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 					<div>
-						<label for="sc-start" class="text-xs font-semibold text-surface-600-400 uppercase mb-1 block">
+						<label
+							for="sc-start"
+							class="text-xs font-semibold text-surface-600-400 uppercase mb-1 block"
+						>
 							{m.startDate()}
 						</label>
 						{#if editingSection === 'schedule'}
@@ -1051,7 +1061,10 @@
 						{/if}
 					</div>
 					<div>
-						<label for="sc-end" class="text-xs font-semibold text-surface-600-400 uppercase mb-1 block">
+						<label
+							for="sc-end"
+							class="text-xs font-semibold text-surface-600-400 uppercase mb-1 block"
+						>
 							{m.endDate()}
 						</label>
 						{#if editingSection === 'schedule'}
@@ -1066,7 +1079,10 @@
 						{/if}
 					</div>
 					<div>
-						<label for="sc-eta" class="text-xs font-semibold text-surface-600-400 uppercase mb-1 block">
+						<label
+							for="sc-eta"
+							class="text-xs font-semibold text-surface-600-400 uppercase mb-1 block"
+						>
 							{m.eta()}
 						</label>
 						{#if editingSection === 'schedule'}
@@ -1076,14 +1092,18 @@
 						{/if}
 					</div>
 					<div>
-						<div class="text-xs font-semibold text-surface-600-400 uppercase mb-1">{m.closedAt()}</div>
+						<div class="text-xs font-semibold text-surface-600-400 uppercase mb-1">
+							{m.closedAt()}
+						</div>
 						<span class="text-sm text-surface-900-100">{project.closed_at ?? '--'}</span>
 					</div>
 				</div>
 			</section>
 
 			<section class="mb-8">
-				<h3 class="text-md font-semibold text-surface-800-200 border-b border-surface-200-800 pb-1 mb-4">
+				<h3
+					class="text-md font-semibold text-surface-800-200 border-b border-surface-200-800 pb-1 mb-4"
+				>
 					{m.financials()}
 				</h3>
 				{#if editingSection === 'schedule'}
@@ -1100,7 +1120,9 @@
 							/>
 						</label>
 						<label class="block">
-							<span class="text-xs font-semibold text-surface-600-400 uppercase">{m.actualCost()}</span>
+							<span class="text-xs font-semibold text-surface-600-400 uppercase"
+								>{m.actualCost()}</span
+							>
 							<input
 								type="number"
 								step="0.01"
@@ -1129,13 +1151,17 @@
 							</div>
 						</div>
 						<div>
-							<div class="text-xs font-semibold text-surface-600-400 uppercase">{m.actualCost()}</div>
+							<div class="text-xs font-semibold text-surface-600-400 uppercase">
+								{m.actualCost()}
+							</div>
 							<div class="text-sm text-surface-900-100">
 								{project.actual_cost ?? '--'}{#if project.currency}&nbsp;{project.currency}{/if}
 							</div>
 						</div>
 						<div>
-							<div class="text-xs font-semibold text-surface-600-400 uppercase">{m.remaining()}</div>
+							<div class="text-xs font-semibold text-surface-600-400 uppercase">
+								{m.remaining()}
+							</div>
 							<div
 								class="text-sm font-medium"
 								class:text-surface-900-100={budgetRemaining == null || budgetRemaining >= 0}
@@ -1162,7 +1188,9 @@
 			</section>
 
 			<section>
-				<h3 class="text-md font-semibold text-surface-800-200 border-b border-surface-200-800 pb-1 mb-2">
+				<h3
+					class="text-md font-semibold text-surface-800-200 border-b border-surface-200-800 pb-1 mb-2"
+				>
 					{m.tolerances()}
 				</h3>
 				<p class="text-xs text-surface-600-400 mb-4">{m.tolerancesHelpText()}</p>
@@ -1170,7 +1198,9 @@
 				{#if editingSection === 'schedule'}
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<fieldset class="border border-surface-200-800 rounded p-3">
-							<legend class="text-xs font-semibold text-surface-600-400 uppercase px-1">{m.time()}</legend>
+							<legend class="text-xs font-semibold text-surface-600-400 uppercase px-1"
+								>{m.time()}</legend
+							>
 							<div class="grid grid-cols-2 gap-2 mt-2">
 								<label class="text-xs text-surface-600-400">
 									+ {m.days()}
@@ -1209,7 +1239,9 @@
 							</div>
 						</fieldset>
 						<fieldset class="border border-surface-200-800 rounded p-3">
-							<legend class="text-xs font-semibold text-surface-600-400 uppercase px-1">{m.cost()}</legend>
+							<legend class="text-xs font-semibold text-surface-600-400 uppercase px-1"
+								>{m.cost()}</legend
+							>
 							<div class="grid grid-cols-2 gap-2 mt-2">
 								<label class="text-xs text-surface-600-400">
 									+ %
@@ -1258,7 +1290,8 @@
 							/>
 						</label>
 						<label class="block">
-							<span class="text-xs font-semibold text-surface-600-400 uppercase">{m.quality()}</span>
+							<span class="text-xs font-semibold text-surface-600-400 uppercase">{m.quality()}</span
+							>
 							<input
 								type="text"
 								bind:value={scheduleDraft.tolerances.quality}
@@ -1266,7 +1299,9 @@
 							/>
 						</label>
 						<label class="block">
-							<span class="text-xs font-semibold text-surface-600-400 uppercase">{m.benefits()}</span>
+							<span class="text-xs font-semibold text-surface-600-400 uppercase"
+								>{m.benefits()}</span
+							>
 							<input
 								type="text"
 								bind:value={scheduleDraft.tolerances.benefits}
@@ -1587,12 +1622,15 @@
 						class="relative rounded-lg bg-surface-50-950 border border-surface-200-800 p-4 overflow-hidden shadow-sm"
 					>
 						<div class="absolute top-0 inset-x-0 h-1 bg-primary-500"></div>
-						<div class="text-[10px] font-semibold text-surface-600-400 uppercase tracking-wider mb-2">
+						<div
+							class="text-[10px] font-semibold text-surface-600-400 uppercase tracking-wider mb-2"
+						>
 							{m.progress()}
 						</div>
 						<div class="flex items-baseline gap-2">
 							<span class="text-3xl font-bold text-surface-900-100 tabular-nums leading-none"
-								>{latestSnapshot?.progress ?? 0}<span class="text-lg text-surface-600-400">%</span></span
+								>{latestSnapshot?.progress ?? 0}<span class="text-lg text-surface-600-400">%</span
+								></span
 							>
 						</div>
 						{#if progressDelta7d != null}
@@ -1615,7 +1653,9 @@
 						class="relative rounded-lg bg-surface-50-950 border border-surface-200-800 p-4 overflow-hidden shadow-sm"
 					>
 						<div class="absolute top-0 inset-x-0 h-1 bg-blue-500"></div>
-						<div class="text-[10px] font-semibold text-surface-600-400 uppercase tracking-wider mb-2">
+						<div
+							class="text-[10px] font-semibold text-surface-600-400 uppercase tracking-wider mb-2"
+						>
 							{m.status()}
 						</div>
 						{#if latestSnapshot?.status}
@@ -1642,7 +1682,9 @@
 										? 'bg-red-500'
 										: 'bg-surface-300-700'}"
 						></div>
-						<div class="text-[10px] font-semibold text-surface-600-400 uppercase tracking-wider mb-2">
+						<div
+							class="text-[10px] font-semibold text-surface-600-400 uppercase tracking-wider mb-2"
+						>
 							{m.projectHealth()}
 						</div>
 						{#if latestSnapshot?.health}
@@ -1661,7 +1703,9 @@
 						class="relative rounded-lg bg-surface-50-950 border border-surface-200-800 p-4 overflow-hidden shadow-sm"
 					>
 						<div class="absolute top-0 inset-x-0 h-1 bg-amber-500"></div>
-						<div class="text-[10px] font-semibold text-surface-600-400 uppercase tracking-wider mb-2">
+						<div
+							class="text-[10px] font-semibold text-surface-600-400 uppercase tracking-wider mb-2"
+						>
 							{m.actualCost()}
 						</div>
 						{#if latestSnapshot?.actual_cost != null}

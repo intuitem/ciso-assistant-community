@@ -348,7 +348,10 @@
 					</div>
 
 					<div>
-						<label for="deletion-policy" class="block text-sm font-medium text-surface-700-300 mb-1">
+						<label
+							for="deletion-policy"
+							class="block text-sm font-medium text-surface-700-300 mb-1"
+						>
 							{m.deletionPolicy()}
 						</label>
 						<select

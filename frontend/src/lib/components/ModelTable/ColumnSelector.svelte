@@ -76,7 +76,9 @@
 		{/if}
 	</Popover.Trigger>
 	<Popover.Positioner class="z-50!">
-		<Popover.Content class="card p-2 bg-surface-50-950 w-72 shadow-lg space-y-2 border border-surface-200">
+		<Popover.Content
+			class="card p-2 bg-surface-50-950 w-72 shadow-lg space-y-2 border border-surface-200"
+		>
 			<!-- Render content only when open so column labels don't duplicate page text (breaks exact-text locators). -->
 			{#if open}
 				<div class="flex items-center justify-between gap-2 px-1">

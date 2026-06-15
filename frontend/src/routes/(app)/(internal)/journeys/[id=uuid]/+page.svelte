@@ -237,7 +237,9 @@
 		<!-- Main content -->
 		<div class="flex-1 min-w-0 space-y-4">
 			<!-- Header -->
-			<div class="rounded-lg border border-surface-200-800 bg-surface-50-950 shadow-sm overflow-hidden">
+			<div
+				class="rounded-lg border border-surface-200-800 bg-surface-50-950 shadow-sm overflow-hidden"
+			>
 				<div class="bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-3">
 					<div class="flex items-start gap-3">
 						<a
@@ -356,11 +358,13 @@
 			<!-- Progress bar (four-state) -->
 			<div class="rounded-lg border border-surface-200-800 bg-surface-50-950 p-4 shadow-sm">
 				<div class="flex items-center justify-between mb-2">
-					<span class="font-medium text-sm text-surface-800-200" data-testid="journey-progress-title"
-						>{m.journeyProgress()}</span
+					<span
+						class="font-medium text-sm text-surface-800-200"
+						data-testid="journey-progress-title">{m.journeyProgress()}</span
 					>
-					<span class="text-sm font-mono text-surface-600-400" data-testid="journey-progress-percent"
-						>{data.stats.progress_percent ?? 0}%</span
+					<span
+						class="text-sm font-mono text-surface-600-400"
+						data-testid="journey-progress-percent">{data.stats.progress_percent ?? 0}%</span
 					>
 				</div>
 				<div class="flex h-2.5 rounded-full bg-surface-100-900 overflow-hidden">
@@ -400,7 +404,8 @@
 						{stepCounts.skipped}
 					</span>
 					<span class="flex items-center gap-1.5">
-						<span class="inline-block w-2 h-2 rounded-full bg-surface-100-900 border border-surface-300-700"
+						<span
+							class="inline-block w-2 h-2 rounded-full bg-surface-100-900 border border-surface-300-700"
 						></span>
 						{m.notStarted()}
 						{stepCounts.not_started}
@@ -558,7 +563,9 @@
 
 		<!-- Stats sidebar -->
 		<div class="lg:w-72 shrink-0 space-y-4">
-			<div class="rounded-lg border border-surface-200-800 bg-surface-50-950 p-4 shadow-sm space-y-3">
+			<div
+				class="rounded-lg border border-surface-200-800 bg-surface-50-950 p-4 shadow-sm space-y-3"
+			>
 				<h3 class="font-semibold text-sm text-surface-800-200">{m.stats()}</h3>
 				<div class="space-y-2 text-sm">
 					<div class="flex justify-between">
@@ -577,7 +584,9 @@
 			</div>
 
 			{#if data.stats.compliance && Object.keys(data.stats.compliance).length > 0}
-				<div class="rounded-lg border border-surface-200-800 bg-surface-50-950 p-4 shadow-sm space-y-3">
+				<div
+					class="rounded-lg border border-surface-200-800 bg-surface-50-950 p-4 shadow-sm space-y-3"
+				>
 					<h3 class="font-semibold text-sm text-surface-800-200">{m.compliance()}</h3>
 					{#each Object.entries(data.stats.compliance) as [, info]}
 						{@const compInfo = info as {

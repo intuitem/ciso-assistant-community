@@ -275,7 +275,9 @@
 				{@const questions = currentItem.data.questions}
 				{@const questionsDict = toQuestionDict(questions)}
 				{@const hasQuestions = Object.keys(questionsDict).length > 0}
-				<div class="card bg-surface-50-950 shadow-md border-t-[3px] border-t-orange-400 px-6 py-5 space-y-4">
+				<div
+					class="card bg-surface-50-950 shadow-md border-t-[3px] border-t-orange-400 px-6 py-5 space-y-4"
+				>
 					<h3 class="text-xl font-semibold text-orange-600">
 						{node.ref_id ? `${node.ref_id} - ` : ''}{t(node.translations, 'name', node.name) ||
 							m.builderUntitled()}
