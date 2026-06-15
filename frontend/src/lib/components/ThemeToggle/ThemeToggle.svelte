@@ -9,7 +9,7 @@
 	let isDark = $derived($resolvedTheme === 'dark');
 </script>
 
-<div class="flex items-center gap-1.5" title={m.toggleTheme()}>
+<div class="flex items-center gap-1.5">
 	<i class="fa-solid fa-sun text-xs {isDark ? 'text-surface-500' : 'text-warning-500'}"></i>
 	<Switch
 		name="theme-toggle"
