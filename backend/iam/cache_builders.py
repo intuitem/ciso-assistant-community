@@ -70,7 +70,7 @@ def _cache_tables_ready() -> bool:
     try:
         with connection.cursor() as cursor:
             tables = set(connection.introspection.table_names(cursor))
-    except (OperationalError, ProgrammingError):
+    except OperationalError, ProgrammingError:
         return False
     return CacheVersion._meta.db_table in tables
 
