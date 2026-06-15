@@ -23,56 +23,56 @@
 			label: '--',
 			color: 'bg-surface-200-800',
 			borderColor: 'border-surface-300-700',
-			cardAccent: 'border-l-gray-400',
+			cardAccent: 'border-l-surface-400-600',
 			headerText: 'text-surface-600-400'
 		},
 		{
 			id: 'to_do',
 			label: m.toDo(),
-			color: 'bg-blue-50',
-			borderColor: 'border-blue-300',
+			color: 'bg-blue-50 dark:bg-blue-950/40',
+			borderColor: 'border-blue-300 dark:border-blue-800',
 			cardAccent: 'border-l-blue-400',
-			headerText: 'text-blue-700'
+			headerText: 'text-blue-700 dark:text-blue-300'
 		},
 		{
 			id: 'in_progress',
 			label: m.inProgress(),
-			color: 'bg-violet-50',
-			borderColor: 'border-violet-300',
+			color: 'bg-violet-50 dark:bg-violet-950/40',
+			borderColor: 'border-violet-300 dark:border-violet-800',
 			cardAccent: 'border-l-violet-400',
-			headerText: 'text-violet-700'
+			headerText: 'text-violet-700 dark:text-violet-300'
 		},
 		{
 			id: 'on_hold',
 			label: m.onHold(),
-			color: 'bg-yellow-50',
-			borderColor: 'border-yellow-300',
+			color: 'bg-yellow-50 dark:bg-yellow-950/40',
+			borderColor: 'border-yellow-300 dark:border-yellow-800',
 			cardAccent: 'border-l-yellow-400',
-			headerText: 'text-yellow-700'
+			headerText: 'text-yellow-700 dark:text-yellow-300'
 		},
 		{
 			id: 'active',
 			label: m.active(),
-			color: 'bg-green-50',
-			borderColor: 'border-green-300',
+			color: 'bg-green-50 dark:bg-green-950/40',
+			borderColor: 'border-green-300 dark:border-green-800',
 			cardAccent: 'border-l-green-400',
-			headerText: 'text-green-700'
+			headerText: 'text-green-700 dark:text-green-300'
 		},
 		{
 			id: 'degraded',
 			label: m.degraded(),
-			color: 'bg-orange-50',
-			borderColor: 'border-orange-300',
+			color: 'bg-orange-50 dark:bg-orange-950/40',
+			borderColor: 'border-orange-300 dark:border-orange-800',
 			cardAccent: 'border-l-orange-400',
-			headerText: 'text-orange-700'
+			headerText: 'text-orange-700 dark:text-orange-300'
 		},
 		{
 			id: 'deprecated',
 			label: m.deprecated(),
-			color: 'bg-red-50',
-			borderColor: 'border-red-300',
+			color: 'bg-red-50 dark:bg-red-950/40',
+			borderColor: 'border-red-300 dark:border-red-800',
 			cardAccent: 'border-l-red-400',
-			headerText: 'text-red-700'
+			headerText: 'text-red-700 dark:text-red-300'
 		}
 	];
 
@@ -507,7 +507,7 @@
 																	<div class="flex -space-x-1 flex-shrink-0">
 																		{#each getOwnerInitials(control.owner).slice(0, 2) as owner}
 																			<span
-																				class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-surface-200-800 text-surface-600-400 text-[9px] font-medium ring-1 ring-white"
+																				class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-surface-200-800 text-surface-600-400 text-[9px] font-medium ring-1 ring-surface-50-950"
 																				title={owner.name}
 																			>
 																				{owner.initials}
@@ -627,7 +627,7 @@
 																	<div class="flex -space-x-1">
 																		{#each getOwnerInitials(control.owner) as owner}
 																			<span
-																				class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-surface-200-800 text-surface-600-400 text-[10px] font-medium ring-1 ring-white"
+																				class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-surface-200-800 text-surface-600-400 text-[10px] font-medium ring-1 ring-surface-50-950"
 																				title={owner.name}
 																			>
 																				{owner.initials}
@@ -638,7 +638,7 @@
 																	<div class="flex items-center gap-1.5">
 																		{#if control.control_impact}
 																			<span
-																				class="px-1.5 py-0.5 bg-purple-100 text-purple-700 rounded text-[10px]"
+																				class="px-1.5 py-0.5 bg-purple-100 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 rounded text-[10px]"
 																				title={m.controlImpact()}
 																			>
 																				{getImpactDisplay(control.control_impact)}
@@ -646,7 +646,7 @@
 																		{/if}
 																		{#if control.effort}
 																			<span
-																				class="px-1.5 py-0.5 bg-indigo-100 text-indigo-700 rounded text-[10px]"
+																				class="px-1.5 py-0.5 bg-indigo-100 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 rounded text-[10px]"
 																				title={m.effort()}
 																			>
 																				{getEffortDisplay(control.effort)}

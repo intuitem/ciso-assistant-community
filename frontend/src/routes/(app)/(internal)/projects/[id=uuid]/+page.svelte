@@ -96,9 +96,12 @@
 		project: 'bg-slate-400'
 	};
 	const kindHeaderBgMap: Record<string, string> = {
-		portfolio: 'bg-gradient-to-br from-purple-50/70 via-white to-white',
-		program: 'bg-gradient-to-br from-blue-50/70 via-white to-white',
-		project: 'bg-gradient-to-br from-slate-50/70 via-white to-white'
+		portfolio:
+			'bg-gradient-to-br from-purple-50/70 via-white to-white dark:from-surface-800 dark:via-surface-950 dark:to-surface-950',
+		program:
+			'bg-gradient-to-br from-blue-50/70 via-white to-white dark:from-surface-800 dark:via-surface-950 dark:to-surface-950',
+		project:
+			'bg-gradient-to-br from-slate-50/70 via-white to-white dark:from-surface-800 dark:via-surface-950 dark:to-surface-950'
 	};
 	const priorityColorMap: Record<number, string> = {
 		1: 'bg-red-100 text-red-700',

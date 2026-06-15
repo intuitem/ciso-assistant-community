@@ -68,8 +68,12 @@
 					</div>
 
 					{#if folder.overallCompliance?.values?.length > 0}
-						<div class="px-4 py-3 bg-gradient-to-r from-primary-50 to-primary-100 rounded-b-lg">
-							<p class="text-sm font-semibold text-primary-700 mb-2">{m.globalOverall()}</p>
+						<div
+							class="px-4 py-3 bg-gradient-to-r from-primary-50 to-primary-100 dark:from-surface-800 dark:to-surface-900 rounded-b-lg"
+						>
+							<p class="text-sm font-semibold text-primary-700 dark:text-primary-300 mb-2">
+								{m.globalOverall()}
+							</p>
 							<div class="flex h-6 rounded-lg overflow-hidden shadow-inner">
 								{#each folder.overallCompliance.values.sort((a, b) => REQUIREMENT_ASSESSMENT_STATUS.indexOf(a.name) - REQUIREMENT_ASSESSMENT_STATUS.indexOf(b.name)) as sp}
 									<div
@@ -97,7 +101,7 @@
 									<div>
 										<p class="text-sm font-semibold">{m.name()}</p>
 										<a
-											class="text-blue-600 hover:underline text-lg font-bold"
+											class="text-blue-600 dark:text-blue-400 hover:underline text-lg font-bold"
 											href="/compliance-assessments/{assessment.id}"
 										>
 											{assessment.name}

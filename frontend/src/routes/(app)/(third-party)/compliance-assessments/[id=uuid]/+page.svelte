@@ -927,7 +927,7 @@
 									<Anchor
 										breadcrumbAction="push"
 										href={`${page.url.pathname}/flash-mode`}
-										class="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-200 transition-colors cursor-pointer"
+										class="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-200 dark:bg-surface-800 dark:border-surface-700 dark:text-indigo-300 dark:hover:bg-surface-700 dark:hover:border-surface-600 transition-colors cursor-pointer"
 										data-testid="flash-mode-button"
 									>
 										<div

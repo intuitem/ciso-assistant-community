@@ -39,7 +39,7 @@
 		<label
 			class="flex items-start gap-3 p-3 rounded-lg border cursor-pointer
 				{strategy === opt.value
-				? 'border-indigo-500 bg-indigo-50'
+				? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30'
 				: 'border-surface-200-800 hover:border-surface-300-700'}
 				{disabled ? 'opacity-50 cursor-not-allowed' : ''}"
 		>

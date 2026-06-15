@@ -24,17 +24,41 @@
 
 	const outcomeBadge: Record<BatchOutcome, { label: string; cls: string; icon: string }> = $derived(
 		{
-			created: { label: m.created(), cls: 'bg-green-100 text-green-800', icon: 'fa-circle-plus' },
+			created: {
+				label: m.created(),
+				cls: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200',
+				icon: 'fa-circle-plus'
+			},
 			revision_added: {
 				label: m.revisionAdded(),
-				cls: 'bg-blue-100 text-blue-800',
+				cls: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200',
 				icon: 'fa-code-branch'
 			},
-			replaced: { label: m.replaced(), cls: 'bg-violet-100 text-violet-800', icon: 'fa-rotate' },
-			renamed: { label: m.renamed(), cls: 'bg-amber-100 text-amber-800', icon: 'fa-pen' },
-			skipped: { label: m.skipped(), cls: 'bg-gray-100 text-gray-700', icon: 'fa-forward' },
-			duplicate: { label: m.duplicate(), cls: 'bg-cyan-100 text-cyan-800', icon: 'fa-clone' },
-			error: { label: m.error(), cls: 'bg-red-100 text-red-800', icon: 'fa-triangle-exclamation' }
+			replaced: {
+				label: m.replaced(),
+				cls: 'bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-200',
+				icon: 'fa-rotate'
+			},
+			renamed: {
+				label: m.renamed(),
+				cls: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200',
+				icon: 'fa-pen'
+			},
+			skipped: {
+				label: m.skipped(),
+				cls: 'bg-surface-100-900 text-surface-700-300',
+				icon: 'fa-forward'
+			},
+			duplicate: {
+				label: m.duplicate(),
+				cls: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-200',
+				icon: 'fa-clone'
+			},
+			error: {
+				label: m.error(),
+				cls: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200',
+				icon: 'fa-triangle-exclamation'
+			}
 		}
 	);
 </script>

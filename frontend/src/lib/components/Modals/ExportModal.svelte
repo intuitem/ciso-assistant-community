@@ -56,7 +56,7 @@
 
 {#if $modalStore[0]}
 	<div
-		class="card bg-surface-50 p-6 w-modal max-w-2xl shadow-xl space-y-5"
+		class="card bg-surface-50-950 p-6 w-modal max-w-2xl shadow-xl space-y-5"
 		data-testid="export-modal"
 	>
 		<header class="flex items-center gap-2">

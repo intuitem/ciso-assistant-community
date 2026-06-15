@@ -103,12 +103,12 @@
 	});
 
 	function getStatusColor(status: string | null): string {
-		if (!status) return 'bg-white border border-dashed border-gray-200';
+		if (!status) return 'bg-surface-50-950 border border-dashed border-surface-200-800';
 		if (status === 'completed') return 'bg-green-100 border border-green-300';
 		if (status === 'in_progress') return 'bg-violet-100 border border-violet-300';
 		if (status === 'pending') return 'bg-red-100 border border-red-300';
-		if (status === 'cancelled') return 'bg-gray-100 border border-gray-300';
-		return 'bg-white border border-dashed border-gray-200';
+		if (status === 'cancelled') return 'bg-surface-100-900 border border-surface-300-700';
+		return 'bg-surface-50-950 border border-dashed border-surface-200-800';
 	}
 
 	function applyFilters() {
@@ -383,7 +383,7 @@
 			{#each folders as folder}
 				<div class="border border-surface-200-800 rounded-xl overflow-hidden bg-surface-50-950 shadow-sm">
 					<div
-						class="px-5 py-3 border-b border-surface-200-800 bg-gradient-to-r from-gray-50 to-white flex items-center gap-3"
+						class="px-5 py-3 border-b border-surface-200-800 bg-gradient-to-r from-surface-50-950 to-surface-100-900 flex items-center gap-3"
 					>
 						<div class="w-1 h-5 rounded-full bg-violet-500"></div>
 						<h2 class="text-base font-semibold text-surface-800-200">{folder.folder_name}</h2>
@@ -575,11 +575,11 @@
 				<span>{m.pending()}</span>
 			</div>
 			<div class="flex items-center gap-1.5">
-				<div class="w-3 h-3 rounded-sm bg-gray-100 border border-gray-300"></div>
+				<div class="w-3 h-3 rounded-sm bg-surface-100-900 border border-surface-300-700"></div>
 				<span>{m.cancelled()}</span>
 			</div>
 			<div class="flex items-center gap-1.5">
-				<div class="w-3 h-3 rounded-sm bg-white border border-dashed border-gray-200"></div>
+				<div class="w-3 h-3 rounded-sm bg-surface-50-950 border border-dashed border-surface-200-800"></div>
 				<span>{m.noData()}</span>
 			</div>
 		</div>

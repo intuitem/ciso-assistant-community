@@ -325,7 +325,7 @@
 		{/snippet}
 		{#snippet widgets()}
 			<div
-				class="shadow-xl border-l border-t p-4 rounded-sm bg-linear-to-tl from-slate-50 to-white"
+				class="shadow-xl border-l border-t p-4 rounded-sm bg-linear-to-tl from-slate-50 to-white dark:from-surface-900 dark:to-surface-950"
 				hidden={!canEditObject}
 			>
 				{#if canEditObject}
@@ -510,7 +510,7 @@
 									{#if meta.observation}
 										<MarkdownRenderer
 											content={meta.observation}
-											class="bg-primary-50 rounded-lg p-2"
+											class="bg-primary-50 dark:bg-surface-800 rounded-lg p-2"
 										/>
 									{:else}
 										<p class="italic text-surface-600-400 dark:text-surface-400-600">
@@ -527,7 +527,7 @@
 											{#each meta.evidences as evidence}
 												<a
 													href={`/evidences/${evidence.id}`}
-													class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full hover:bg-blue-200 transition-colors max-w-50"
+													class="inline-flex items-center px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors max-w-50"
 													title={evidence.str}
 												>
 													<i class="fa-solid fa-paperclip mr-1 flex-shrink-0"></i>
@@ -634,11 +634,15 @@
 									}}
 								>
 									<td class="py-2 px-3">
-										<span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+										<span
+											class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs px-2 py-1 rounded"
+										>
 											{safeTranslate(report.incident_submission)}
 										</span>
 										{#if report.is_submitted}
-											<span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded ml-1">
+											<span
+												class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs px-2 py-1 rounded ml-1"
+											>
 												<i class="fa-solid fa-lock text-xs mr-1"></i>{m.submitted()}
 											</span>
 										{:else}

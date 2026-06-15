@@ -51,28 +51,36 @@
 	let lastLoadedAt = $state(currentRevision?.updated_at || '');
 
 	const statusStyles: Record<string, { bg: string; text: string; icon: string }> = {
-		draft: { bg: 'bg-amber-50 border-amber-200', text: 'text-amber-700', icon: 'fa-pen' },
+		draft: {
+			bg: 'bg-amber-50 border-amber-200 dark:bg-amber-500/15 dark:border-amber-500/30',
+			text: 'text-amber-700 dark:text-amber-400',
+			icon: 'fa-pen'
+		},
 		in_review: {
-			bg: 'bg-blue-50 border-blue-200',
-			text: 'text-blue-700',
+			bg: 'bg-blue-50 border-blue-200 dark:bg-blue-500/15 dark:border-blue-500/30',
+			text: 'text-blue-700 dark:text-blue-400',
 			icon: 'fa-magnifying-glass'
 		},
 		change_requested: {
-			bg: 'bg-red-50 border-red-200',
-			text: 'text-red-700',
+			bg: 'bg-red-50 border-red-200 dark:bg-red-500/15 dark:border-red-500/30',
+			text: 'text-red-700 dark:text-red-400',
 			icon: 'fa-rotate-left'
 		},
 		validated: {
-			bg: 'bg-teal-50 border-teal-200',
-			text: 'text-teal-700',
+			bg: 'bg-teal-50 border-teal-200 dark:bg-teal-500/15 dark:border-teal-500/30',
+			text: 'text-teal-700 dark:text-teal-400',
 			icon: 'fa-check-double'
 		},
 		published: {
-			bg: 'bg-emerald-50 border-emerald-200',
-			text: 'text-emerald-700',
+			bg: 'bg-emerald-50 border-emerald-200 dark:bg-emerald-500/15 dark:border-emerald-500/30',
+			text: 'text-emerald-700 dark:text-emerald-400',
 			icon: 'fa-circle-check'
 		},
-		deprecated: { bg: 'bg-gray-50 border-gray-200', text: 'text-gray-500', icon: 'fa-archive' }
+		deprecated: {
+			bg: 'bg-surface-100-900 border-surface-200-800',
+			text: 'text-surface-600-400',
+			icon: 'fa-archive'
+		}
 	};
 
 	function getStatusStyle(s: string) {
@@ -719,7 +727,7 @@
 <div class="flex flex-col h-full -m-8 bg-surface-50-950 min-h-screen">
 	<!-- Sticky header bar -->
 	<div
-		class="flex items-center justify-between px-6 py-3 border-b border-surface-300 bg-surface-50"
+		class="flex items-center justify-between px-6 py-3 border-b border-surface-300-700 bg-surface-50-950"
 	>
 		<div class="flex items-center gap-3">
 			<a
@@ -750,14 +758,14 @@
 						{#if showLocalePicker}
 							<!-- svelte-ignore a11y_no_static_element_interactions -->
 							<div
-								class="absolute top-full left-0 mt-1 bg-surface-50-950 border border-surface-200 rounded-lg shadow-lg z-50 min-w-[180px] py-1"
+								class="absolute top-full left-0 mt-1 bg-surface-50-950 border border-surface-200-800 rounded-lg shadow-lg z-50 min-w-[180px] py-1"
 								onmouseleave={() => (showLocalePicker = false)}
 							>
 								{#each availableLocales as locale}
 									<button
-										class="w-full text-left px-3 py-1.5 text-sm hover:bg-surface-50 flex items-center gap-2 {locale ===
+										class="w-full text-left px-3 py-1.5 text-sm hover:bg-surface-100-900 flex items-center gap-2 {locale ===
 										currentLocale
-											? 'bg-primary-50 text-primary-700'
+											? 'bg-primary-50-950 text-primary-700 dark:text-primary-300'
 											: ''}"
 										onclick={() => switchLocale(locale)}
 									>
@@ -770,7 +778,7 @@
 										{/if}
 									</button>
 								{/each}
-								<div class="border-t border-surface-200 mt-1 pt-1">
+								<div class="border-t border-surface-200-800 mt-1 pt-1">
 									<div class="px-3 py-1.5">
 										<select class="select text-xs w-full py-1" bind:value={newTranslationLocale}>
 											<option value=""
@@ -907,7 +915,7 @@
 			<div class="max-w-3xl w-full">
 				<div class="text-center mb-8">
 					<div
-						class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-surface-100 mb-4"
+						class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-surface-100-900 mb-4"
 					>
 						<i class="fa-solid fa-file-pen text-2xl text-surface-500"></i>
 					</div>
@@ -917,7 +925,7 @@
 
 				{#if addingTranslationLocale}
 					<div
-						class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary-50 text-primary-700 text-sm font-medium mb-2"
+						class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary-50-950 text-primary-700 dark:text-primary-300 text-sm font-medium mb-2"
 					>
 						<i class="fa-solid fa-language"></i>
 						{m.addingTranslation()}
@@ -930,33 +938,33 @@
 
 				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
 					<button
-						class="group card p-5 border-2 border-dashed border-surface-300 hover:border-primary-400 hover:shadow-md transition-all text-left"
+						class="group card p-5 border-2 border-dashed border-surface-300-700 hover:border-primary-400 hover:shadow-md transition-all text-left"
 						onclick={() => createDocument(null, addingTranslationLocale || undefined)}
 					>
 						<div
-							class="w-10 h-10 rounded-lg bg-surface-100 group-hover:bg-primary-100 flex items-center justify-center mb-3 transition-colors"
+							class="w-10 h-10 rounded-lg bg-surface-100-900 group-hover:bg-primary-100 dark:group-hover:bg-primary-500/20 flex items-center justify-center mb-3 transition-colors"
 						>
 							<i
-								class="fa-solid fa-file text-surface-400 group-hover:text-primary-500 transition-colors"
+								class="fa-solid fa-file text-surface-500 group-hover:text-primary-500 transition-colors"
 							></i>
 						</div>
 						<h3 class="font-medium text-sm">{m.startFromScratch()}</h3>
-						<p class="text-xs text-surface-400 mt-1">{m.startWithBlankDocument()}</p>
+						<p class="text-xs text-surface-500 mt-1">{m.startWithBlankDocument()}</p>
 					</button>
 
 					{#each templates as template}
 						<button
-							class="group card p-5 border border-surface-200 hover:border-primary-400 hover:shadow-md transition-all text-left"
+							class="group card p-5 border border-surface-200-800 hover:border-primary-400 hover:shadow-md transition-all text-left"
 							onclick={() => createDocument(template.id, addingTranslationLocale || undefined)}
 						>
 							<div
-								class="w-10 h-10 rounded-lg bg-primary-50 group-hover:bg-primary-100 flex items-center justify-center mb-3 transition-colors"
+								class="w-10 h-10 rounded-lg bg-primary-50-950 group-hover:bg-primary-100 dark:group-hover:bg-primary-500/20 flex items-center justify-center mb-3 transition-colors"
 							>
 								<i class="fa-solid fa-file-lines text-primary-500"></i>
 							</div>
 							<h3 class="font-medium text-sm">{template.title}</h3>
 							{#if template.description}
-								<p class="text-xs text-surface-400 mt-1">{template.description}</p>
+								<p class="text-xs text-surface-500 mt-1">{template.description}</p>
 							{/if}
 						</button>
 					{/each}
@@ -970,10 +978,10 @@
 		<!-- Lock / conflict banners -->
 		{#if lockedBy}
 			<div
-				class="mx-6 mt-4 flex items-center gap-3 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3"
+				class="mx-6 mt-4 flex items-center gap-3 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-500/15 dark:border-amber-500/30 px-4 py-3"
 			>
 				<i class="fa-solid fa-lock text-amber-500"></i>
-				<div class="flex-1 text-sm text-amber-800">
+				<div class="flex-1 text-sm text-amber-800 dark:text-amber-300">
 					{m.userEditingDraft({
 						user: `${lockedBy.first_name || ''} ${lockedBy.last_name || lockedBy.email}`.trim()
 					})}
@@ -991,10 +999,10 @@
 
 		{#if saveConflict}
 			<div
-				class="mx-6 mt-4 flex items-center gap-3 rounded-lg border border-red-300 bg-red-50 px-4 py-3"
+				class="mx-6 mt-4 flex items-center gap-3 rounded-lg border border-red-300 bg-red-50 dark:bg-red-500/15 dark:border-red-500/30 px-4 py-3"
 			>
 				<i class="fa-solid fa-triangle-exclamation text-red-500"></i>
-				<div class="flex-1 text-sm text-red-700">{saveConflict}</div>
+				<div class="flex-1 text-sm text-red-700 dark:text-red-300">{saveConflict}</div>
 				<button
 					class="btn btn-sm preset-tonal-error"
 					onclick={async () => {
@@ -1010,18 +1018,18 @@
 		<!-- Status banners -->
 		{#if currentRevision.status === 'change_requested' && currentRevision.reviewer_comments}
 			<div
-				class="mx-6 mt-4 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3"
+				class="mx-6 mt-4 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 dark:bg-red-500/15 dark:border-red-500/30 px-4 py-3"
 			>
 				<i class="fa-solid fa-comment-dots text-red-400 mt-0.5"></i>
 				<div class="flex-1 min-w-0">
-					<p class="text-sm font-medium text-red-700 mb-1">
+					<p class="text-sm font-medium text-red-700 dark:text-red-300 mb-1">
 						{m.reviewerComments()}
 						{#if currentRevision.reviewer}
 							— {currentRevision.reviewer.first_name || ''}
 							{currentRevision.reviewer.last_name || currentRevision.reviewer.email || ''}
 						{/if}
 					</p>
-					<p class="text-sm text-red-600 whitespace-pre-line">
+					<p class="text-sm text-red-600 dark:text-red-300 whitespace-pre-line">
 						{currentRevision.reviewer_comments}
 					</p>
 				</div>
@@ -1030,11 +1038,11 @@
 
 		{#if isInReview}
 			<div
-				class="mx-6 mt-4 flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3"
+				class="mx-6 mt-4 flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-500/15 dark:border-blue-500/30 px-4 py-3"
 			>
 				<i class="fa-solid fa-pen-to-square text-blue-400 mt-0.5"></i>
 				<div class="flex-1 min-w-0">
-					<label for="reviewer-comments" class="text-sm font-medium text-blue-700 block mb-1">
+					<label for="reviewer-comments" class="text-sm font-medium text-blue-700 dark:text-blue-300 block mb-1">
 						{m.reviewerComments()}
 					</label>
 					<textarea
@@ -1053,11 +1061,11 @@
 			<div class="flex-1 flex flex-col min-w-0">
 				<!-- Tab bar + change summary -->
 				<div class="flex items-center gap-1 mb-3">
-					<div class="flex rounded-lg border border-surface-300 overflow-hidden">
+					<div class="flex rounded-lg border border-surface-300-700 overflow-hidden">
 						<button
 							class="px-3 py-1.5 text-sm font-medium transition-colors {!showPreview && !showDiff
 								? 'bg-primary-500 text-white'
-								: 'bg-surface-50 text-surface-600 hover:bg-surface-100'}"
+								: 'bg-surface-50-950 text-surface-600-400 hover:bg-surface-200-800'}"
 							onclick={() => {
 								showPreview = false;
 								showDiff = false;
@@ -1067,10 +1075,10 @@
 							<i class="fa-solid fa-pen mr-1.5 text-xs"></i>{m.editTab()}
 						</button>
 						<button
-							class="px-3 py-1.5 text-sm font-medium border-l border-surface-300 transition-colors {showPreview &&
+							class="px-3 py-1.5 text-sm font-medium border-l border-surface-300-700 transition-colors {showPreview &&
 							!showDiff
 								? 'bg-primary-500 text-white'
-								: 'bg-surface-50 text-surface-600 hover:bg-surface-100'}"
+								: 'bg-surface-50-950 text-surface-600-400 hover:bg-surface-200-800'}"
 							onclick={() => {
 								showPreview = true;
 								showDiff = false;
@@ -1080,7 +1088,7 @@
 						</button>
 						{#if showDiff}
 							<button
-								class="px-3 py-1.5 text-sm font-medium border-l border-surface-300 bg-primary-500 text-white"
+								class="px-3 py-1.5 text-sm font-medium border-l border-surface-300-700 bg-primary-500 text-white"
 								onclick={() => {
 									showDiff = false;
 								}}
@@ -1092,7 +1100,7 @@
 					</div>
 
 					{#if canEdit && !showPreview && !showDiff}
-						<div class="flex items-center gap-0.5 ml-2 border-l border-surface-200 pl-2">
+						<div class="flex items-center gap-0.5 ml-2 border-l border-surface-200-800 pl-2">
 							<button
 								class="btn btn-sm preset-tonal-surface px-2"
 								onclick={() => wrapSelection('**', '**')}
@@ -1188,10 +1196,10 @@
 				{#if showDiff}
 					{#if editDiffMeta.from_edit && editDiffMeta.to_edit}
 						<div
-							class="flex items-stretch gap-0 mb-2 rounded-lg border border-surface-200 overflow-hidden text-xs"
+							class="flex items-stretch gap-0 mb-2 rounded-lg border border-surface-200-800 overflow-hidden text-xs"
 						>
-							<div class="flex-1 px-3 py-2 bg-red-50/60">
-								<div class="flex items-center gap-1.5 text-red-700">
+							<div class="flex-1 px-3 py-2 bg-red-50/60 dark:bg-red-500/10">
+								<div class="flex items-center gap-1.5 text-red-700 dark:text-red-400">
 									<i class="fa-solid fa-minus-circle text-[10px]"></i>
 									<span class="font-semibold">
 										{editDiffMeta.from_edit.editor?.first_name || ''}
@@ -1200,7 +1208,7 @@
 											'Unknown'}
 									</span>
 								</div>
-								<p class="text-surface-400 mt-0.5">
+								<p class="text-surface-500 mt-0.5">
 									{new Date(editDiffMeta.from_edit.created_at).toLocaleString(undefined, {
 										month: 'short',
 										day: 'numeric',
@@ -1212,11 +1220,11 @@
 									{/if}
 								</p>
 							</div>
-							<div class="flex items-center px-2 bg-surface-100 text-surface-400">
+							<div class="flex items-center px-2 bg-surface-100-900 text-surface-500">
 								<i class="fa-solid fa-arrow-right text-[10px]"></i>
 							</div>
-							<div class="flex-1 px-3 py-2 bg-emerald-50/60">
-								<div class="flex items-center gap-1.5 text-emerald-700">
+							<div class="flex-1 px-3 py-2 bg-emerald-50/60 dark:bg-emerald-500/10">
+								<div class="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
 									<i class="fa-solid fa-plus-circle text-[10px]"></i>
 									<span class="font-semibold">
 										{editDiffMeta.to_edit.editor?.first_name || ''}
@@ -1225,7 +1233,7 @@
 											'Unknown'}
 									</span>
 								</div>
-								<p class="text-surface-400 mt-0.5">
+								<p class="text-surface-500 mt-0.5">
 									{new Date(editDiffMeta.to_edit.created_at).toLocaleString(undefined, {
 										month: 'short',
 										day: 'numeric',
@@ -1241,7 +1249,7 @@
 					{/if}
 					<DiffViewer diff={editDiffResult || diffResult} />
 				{:else if showPreview}
-					<div class="card border border-surface-200 p-6 overflow-auto flex-1 min-h-[500px]">
+					<div class="card border border-surface-200-800 p-6 overflow-auto flex-1 min-h-[500px]">
 						<MarkdownRenderer content={previewContent || content} />
 					</div>
 				{:else}
@@ -1250,7 +1258,7 @@
 						bind:this={textareaEl}
 						onpaste={handlePaste}
 						class="input w-full flex-1 min-h-[500px] resize-y font-mono text-sm leading-relaxed p-4 {!canEdit
-							? 'bg-surface-50 cursor-not-allowed'
+							? 'bg-surface-50-950 cursor-not-allowed'
 							: ''}"
 						disabled={!canEdit}
 						placeholder={m.writeDocumentPlaceholder()}
@@ -1262,10 +1270,10 @@
 			<!-- Version history sidebar -->
 			{#if showVersionHistory}
 				<div class="w-72 flex-shrink-0 flex flex-col">
-					<div class="card border border-surface-200 flex flex-col overflow-hidden flex-1">
-						<div class="px-4 py-3 border-b border-surface-200 bg-surface-50">
+					<div class="card border border-surface-200-800 flex flex-col overflow-hidden flex-1">
+						<div class="px-4 py-3 border-b border-surface-200-800 bg-surface-50-950">
 							<h3 class="text-sm font-semibold flex items-center gap-2">
-								<i class="fa-solid fa-clock-rotate-left text-surface-400"></i>
+								<i class="fa-solid fa-clock-rotate-left text-surface-500"></i>
 								{m.versionHistory()}
 							</h3>
 						</div>
@@ -1277,8 +1285,8 @@
 								<!-- svelte-ignore a11y_no_static_element_interactions -->
 								<div
 									class="w-full text-left px-3 py-2.5 rounded-lg transition-colors cursor-pointer {isActive
-										? 'bg-primary-50 ring-1 ring-primary-200'
-										: 'hover:bg-surface-50'}"
+										? 'bg-primary-50-950 ring-1 ring-primary-200 dark:ring-primary-500/40'
+										: 'hover:bg-surface-100-900'}"
 									onclick={() => loadRevision(revision.id)}
 									onkeydown={(e) => {
 										if (e.key === 'Enter' || e.key === ' ') loadRevision(revision.id);
@@ -1287,7 +1295,7 @@
 									tabindex="0"
 								>
 									<div class="flex items-center justify-between mb-1">
-										<span class="text-sm font-semibold {isActive ? 'text-primary-700' : ''}">
+										<span class="text-sm font-semibold {isActive ? 'text-primary-700 dark:text-primary-300' : ''}">
 											v{revision.version_number}
 										</span>
 										<span
@@ -1303,12 +1311,12 @@
 										</p>
 									{/if}
 									{#if revision.change_summary}
-										<p class="text-xs text-surface-400 mt-0.5 truncate italic">
+										<p class="text-xs text-surface-500 mt-0.5 truncate italic">
 											{revision.change_summary}
 										</p>
 									{/if}
 									<div class="flex items-center justify-between mt-1.5">
-										<p class="text-[10px] text-surface-400">
+										<p class="text-[10px] text-surface-500">
 											{new Date(revision.created_at).toLocaleString(undefined, {
 												month: 'short',
 												day: 'numeric',
@@ -1318,7 +1326,7 @@
 										</p>
 										{#if revision.status === 'draft' || revision.status === 'deprecated'}
 											<button
-												class="text-[10px] text-surface-400 hover:text-red-500 transition-colors p-0.5"
+												class="text-[10px] text-surface-500 hover:text-red-500 transition-colors p-0.5"
 												onclick={(e) => {
 													e.stopPropagation();
 													deleteRevision(revision.id);
@@ -1333,7 +1341,7 @@
 							{/each}
 
 							{#if revisions.length === 0}
-								<div class="text-center py-6 text-surface-400 text-sm">
+								<div class="text-center py-6 text-surface-500 text-sm">
 									<i class="fa-solid fa-inbox text-xl mb-2"></i>
 									<p>{m.noRevisionsYet()}</p>
 								</div>
@@ -1342,9 +1350,9 @@
 
 						<!-- Edit history for current revision -->
 						{#if currentRevision}
-							<div class="border-t border-surface-200">
+							<div class="border-t border-surface-200-800">
 								<button
-									class="w-full flex items-center justify-between px-4 py-2.5 text-xs font-semibold text-surface-500 uppercase tracking-wide hover:bg-surface-50 transition-colors"
+									class="w-full flex items-center justify-between px-4 py-2.5 text-xs font-semibold text-surface-500 uppercase tracking-wide hover:bg-surface-100-900 transition-colors"
 									onclick={() => toggleEditHistory()}
 								>
 									<span class="flex items-center gap-1.5">
@@ -1362,7 +1370,7 @@
 								{#if showEditHistory}
 									<div class="max-h-48 overflow-auto">
 										{#if editHistory.length === 0}
-											<p class="px-4 py-3 text-xs text-surface-400 italic">
+											<p class="px-4 py-3 text-xs text-surface-500 italic">
 												{m.noEditsRecordedYet()}
 											</p>
 										{:else}
@@ -1379,7 +1387,7 @@
 											</div>
 											{#each editHistory as edit}
 												<div
-													class="flex items-center gap-1 px-4 py-2 hover:bg-surface-50 border-t border-surface-100 transition-colors"
+													class="flex items-center gap-1 px-4 py-2 hover:bg-surface-100-900 border-t border-surface-100-900 transition-colors"
 												>
 													<input
 														type="radio"
@@ -1405,7 +1413,7 @@
 														title={m.viewSnapshot()}
 													>
 														<div class="flex items-center justify-between">
-															<span class="text-xs text-surface-600">
+															<span class="text-xs text-surface-600-400">
 																{#if edit.editor}
 																	{edit.editor.first_name || ''}
 																	{edit.editor.last_name || edit.editor.email}
@@ -1413,7 +1421,7 @@
 																	Unknown
 																{/if}
 															</span>
-															<span class="text-[10px] text-surface-400">
+															<span class="text-[10px] text-surface-500">
 																{new Date(edit.created_at).toLocaleString(undefined, {
 																	month: 'short',
 																	day: 'numeric',
@@ -1423,7 +1431,7 @@
 															</span>
 														</div>
 														{#if edit.summary}
-															<p class="text-[10px] text-surface-400 mt-0.5 truncate italic">
+															<p class="text-[10px] text-surface-500 mt-0.5 truncate italic">
 																{edit.summary}
 															</p>
 														{/if}
@@ -1431,7 +1439,7 @@
 												</div>
 											{/each}
 											{#if editHistory.length >= 2}
-												<div class="px-4 py-2 border-t border-surface-100">
+												<div class="px-4 py-2 border-t border-surface-100-900">
 													<button
 														class="btn btn-sm preset-tonal-primary w-full"
 														onclick={() => compareEdits()}
@@ -1450,7 +1458,7 @@
 
 						<!-- Diff comparison -->
 						{#if revisions.length >= 2}
-							<div class="p-3 border-t border-surface-200 bg-surface-50 space-y-2">
+							<div class="p-3 border-t border-surface-200-800 bg-surface-50-950 space-y-2">
 								<h4 class="text-xs font-semibold text-surface-500 uppercase tracking-wide">
 									{m.compareDiff()}
 								</h4>

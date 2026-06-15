@@ -227,16 +227,16 @@
 			class="flex items-center gap-2.5 text-left"
 			onclick={() => (expanded = !expanded)}
 		>
-			<div class="flex items-center justify-center w-7 h-7 rounded-md bg-surface-100">
+			<div class="flex items-center justify-center w-7 h-7 rounded-md bg-surface-100-900">
 				<i class="fa-solid fa-comments text-xs text-surface-500"></i>
 			</div>
-			<h4 class="text-sm font-semibold tracking-tight text-surface-700">
+			<h4 class="text-sm font-semibold tracking-tight text-surface-700-300">
 				{m.comments()}
 			</h4>
 			{#if !loading}
 				<span
 					class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full
-					text-[11px] font-medium bg-surface-100 text-surface-500"
+					text-[11px] font-medium bg-surface-100-900 text-surface-500"
 				>
 					{comments.length}
 				</span>
@@ -253,7 +253,7 @@
 				transition-all duration-150
 				{hideProcessed
 					? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
-					: 'text-surface-400 hover:text-surface-600 hover:bg-surface-50'}"
+					: 'text-surface-400 hover:text-surface-600 hover:bg-surface-100-900'}"
 				onclick={() => (hideProcessed = !hideProcessed)}
 			>
 				<i class="fa-solid {hideProcessed ? 'fa-eye' : 'fa-eye-slash'} text-[10px]"></i>
@@ -296,7 +296,7 @@
 							<div
 								class="relative z-10 flex-shrink-0 w-8 h-8 rounded-full
 							flex items-center justify-center text-[11px] font-semibold
-							ring-2 ring-white transition-transform duration-200
+							ring-2 ring-surface-50-950 transition-transform duration-200
 							group-hover:scale-105 {getAvatarColor(comment.author?.id ?? '')}"
 							>
 								{getInitials(comment.author)}
@@ -306,7 +306,7 @@
 							<div class="flex-1 min-w-0 pt-0.5">
 								<!-- Meta line -->
 								<div class="flex items-center gap-1.5 flex-wrap">
-									<span class="text-[13px] font-medium text-surface-800">
+									<span class="text-[13px] font-medium text-surface-800-200">
 										{getDisplayName(comment.author)}
 									</span>
 									<span class="text-[11px] text-surface-400">
@@ -332,7 +332,7 @@
 								{#if editingId === comment.id}
 									<div class="mt-2 space-y-2">
 										<textarea
-											class="textarea text-sm w-full rounded-xl border-surface-300
+											class="textarea text-sm w-full rounded-xl border-surface-300-700
 										focus:border-primary-400 focus:ring-1 focus:ring-primary-200
 										transition-all duration-200"
 											rows="3"
@@ -350,7 +350,7 @@
 											<button
 												type="button"
 												class="btn btn-sm text-xs rounded-md text-surface-500
-											hover:text-surface-700 hover:bg-surface-100 transition-colors duration-150"
+											hover:text-surface-700-300 hover:bg-surface-100-900 transition-colors duration-150"
 												onclick={cancelEdit}
 											>
 												{m.cancel()}
@@ -359,7 +359,7 @@
 									</div>
 								{:else}
 									<p
-										class="text-[13px] leading-relaxed mt-0.5 text-surface-600
+										class="text-[13px] leading-relaxed mt-0.5 text-surface-600-400
 									whitespace-pre-wrap break-words"
 									>
 										{comment.body}
@@ -418,7 +418,7 @@
 		<div class="mt-4 pt-4 border-t border-surface-200">
 			<div class="composer-box" class:composer-focused={composerFocused}>
 				<textarea
-					class="w-full bg-transparent text-[13px] text-surface-700
+					class="w-full bg-transparent text-[13px] text-surface-700-300
 				placeholder:text-surface-400 resize-none outline-none
 				border-none leading-relaxed"
 					rows="2"
@@ -440,7 +440,7 @@
 					transition-all duration-200
 					{newCommentBody.trim() && !submitting
 							? 'bg-primary-500 text-white shadow-sm shadow-primary-200 hover:bg-primary-600 hover:shadow-md hover:shadow-primary-200 active:scale-[0.97]'
-							: 'bg-surface-100 text-surface-400 cursor-not-allowed'}"
+							: 'bg-surface-100-900 text-surface-400 cursor-not-allowed'}"
 						disabled={submitting || !newCommentBody.trim()}
 						onclick={postComment}
 					>
@@ -461,8 +461,13 @@
 	.comments-panel {
 		padding: 1.25rem;
 		border-radius: 0.75rem;
-		background: white;
+		background: var(--color-surface-50);
 		border: 1px solid var(--color-surface-200);
+	}
+
+	:global(.dark) .comments-panel {
+		background: var(--color-surface-950);
+		border-color: var(--color-surface-800);
 	}
 
 	.comment-entry {
@@ -475,7 +480,11 @@
 	}
 
 	.comment-entry:hover {
-		background-color: var(--color-surface-50);
+		background-color: var(--color-surface-100);
+	}
+
+	:global(.dark) .comment-entry:hover {
+		background-color: var(--color-surface-900);
 	}
 
 	.comment-processed {
@@ -505,6 +514,11 @@
 		color: var(--color-surface-700);
 	}
 
+	:global(.dark) .comment-action-btn:hover {
+		background-color: var(--color-surface-800);
+		color: var(--color-surface-300);
+	}
+
 	.comment-action-btn-danger:hover {
 		background-color: oklch(93% 0.03 25deg);
 		color: var(--color-error-500);
@@ -514,14 +528,23 @@
 		padding: 0.75rem;
 		border-radius: 0.75rem;
 		border: 1px solid var(--color-surface-200);
-		background: var(--color-surface-50);
+		background: var(--color-surface-100);
 		transition: all 0.2s ease;
+	}
+
+	:global(.dark) .composer-box {
+		border-color: var(--color-surface-800);
+		background: var(--color-surface-900);
 	}
 
 	.composer-focused {
 		border-color: var(--color-primary-300);
-		background: white;
+		background: var(--color-surface-50);
 		box-shadow: 0 0 0 3px oklch(92.4% 0.03 290.03deg / 0.4);
+	}
+
+	:global(.dark) .composer-focused {
+		background: var(--color-surface-950);
 	}
 
 	.loading-dot {

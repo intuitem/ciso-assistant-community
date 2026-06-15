@@ -911,7 +911,11 @@
 							{@const draftLangs = isActive
 								? [locale, ...[...usedLanguages()].filter((l) => l !== locale)]
 								: draft.editing_languages || []}
-							<tr class={isActive ? 'bg-primary-50 ring-1 ring-primary-200' : ''}>
+							<tr
+								class={isActive
+									? 'bg-primary-50 dark:bg-primary-900/30 ring-1 ring-primary-200 dark:ring-primary-700'
+									: ''}
+							>
 								<td class="font-medium">{isActive ? matrixName : draft.name}</td>
 								<td class="text-sm text-surface-600-400 max-w-48">
 									{isActive ? matrixDescription : draft.description || '—'}
@@ -995,7 +999,11 @@
 						{/each}
 						<!-- Published matrices without active drafts -->
 						{#each matrices.filter((mx) => !existingDrafts.some((d) => d.id === mx.id)) as matrix}
-							<tr class={matrixId === matrix.id ? 'bg-primary-50 ring-1 ring-primary-200' : ''}>
+							<tr
+								class={matrixId === matrix.id
+									? 'bg-primary-50 dark:bg-primary-900/30 ring-1 ring-primary-200 dark:ring-primary-700'
+									: ''}
+							>
 								<td class="font-medium">{matrix.name}</td>
 								<td class="text-sm text-surface-600-400 truncate max-w-48">{matrix.description || '—'}</td>
 								<td>

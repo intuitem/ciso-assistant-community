@@ -138,14 +138,14 @@
 					ondblclick={(e) => e.stopPropagation()}
 					onmousedown={(e) => e.stopPropagation()}
 					disabled={saving}
-					class="nodrag nopan mt-1 w-full text-[12px] font-semibold leading-tight text-surface-900 bg-surface-50-950 border border-primary-400 rounded px-1 py-0.5 outline-none"
+					class="nodrag nopan mt-1 w-full text-[12px] font-semibold leading-tight text-surface-900-100 bg-surface-50-950 border border-primary-400 rounded px-1 py-0.5 outline-none"
 				/>
 			{:else}
 				<div
 					role="button"
 					tabindex="0"
 					title="Double-click to rename"
-					class="text-[12px] font-semibold leading-tight text-surface-900 mt-1 break-words cursor-text"
+					class="text-[12px] font-semibold leading-tight text-surface-900-100 mt-1 break-words cursor-text"
 					ondblclick={startEdit}
 				>
 					{data.label}
@@ -198,11 +198,11 @@
 	<Handle
 		type="target"
 		position={Position.Top}
-		class="!w-3 !h-3 !bg-surface-50 !border-2 !border-surface-600"
+		class="!w-3 !h-3 !bg-surface-50-950 !border-2 !border-surface-600"
 	/>
 	<Handle
 		type="source"
 		position={Position.Bottom}
-		class="!w-3 !h-3 !bg-surface-50 !border-2 !border-surface-600"
+		class="!w-3 !h-3 !bg-surface-50-950 !border-2 !border-surface-600"
 	/>
 </div>

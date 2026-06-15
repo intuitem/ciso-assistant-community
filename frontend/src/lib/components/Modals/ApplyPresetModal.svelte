@@ -74,12 +74,14 @@
 </script>
 
 {#if $modalStore[0]}
-	<div class="card bg-surface-50 p-4 w-modal shadow-xl space-y-4">
+	<div class="card bg-surface-50-950 p-4 w-modal shadow-xl space-y-4">
 		<header class="text-2xl font-bold">{$modalStore[0].title ?? m.applyPreset()}</header>
 		<article class="whitespace-pre-line">{$modalStore[0].body ?? ''}</article>
 
 		{#if errorMessage}
-			<div class="p-3 rounded-md bg-red-50 border border-red-200 text-sm text-red-700">
+			<div
+				class="p-3 rounded-md bg-red-50 dark:bg-surface-800 border border-red-200 dark:border-red-900 text-sm text-red-700 dark:text-red-300"
+			>
 				{errorMessage}
 			</div>
 		{/if}
@@ -132,7 +134,7 @@
 
 			<!-- Create objects toggle -->
 			<label
-				class="flex items-start gap-3 cursor-pointer p-3 rounded-lg bg-indigo-50 border border-indigo-200"
+				class="flex items-start gap-3 cursor-pointer p-3 rounded-lg bg-indigo-50 dark:bg-surface-800 border border-indigo-200 dark:border-indigo-900"
 			>
 				<input type="checkbox" class="checkbox mt-0.5" bind:checked={createObjects} />
 				<div>
@@ -147,7 +149,7 @@
 			<!-- Apply feature flags toggle -->
 			<label
 				class="flex items-start gap-3 p-3 rounded-lg border {canChangeSettings
-					? 'cursor-pointer bg-amber-50 border-amber-200'
+					? 'cursor-pointer bg-amber-50 dark:bg-surface-800 border-amber-200 dark:border-amber-900'
 					: 'bg-surface-100-900 border-surface-200-800 opacity-60'}"
 			>
 				<input

@@ -427,7 +427,9 @@
 							<div class="content-section-label flex items-center gap-3 flex-wrap">
 								<span>{title}</span>
 								{#if typeof requirement?.weight === 'number' && Number.isFinite(requirement.weight) && requirement.weight !== 1 && currentRequirementAssessment.assessable}
-									<span class="badge text-sm font-medium bg-indigo-100 text-indigo-800">
+									<span
+										class="badge text-sm font-medium bg-indigo-100 text-indigo-800 dark:bg-surface-800 dark:text-indigo-300"
+									>
 										{m.requirementWeight()}: {requirement.weight}
 									</span>
 								{/if}
@@ -529,6 +531,9 @@
 		padding: 1.5rem;
 		background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
 	}
+	:global(.dark) .flash-mode-container {
+		background: linear-gradient(135deg, var(--color-surface-950) 0%, var(--color-surface-900) 100%);
+	}
 
 	.flash-card {
 		display: flex;
@@ -546,6 +551,12 @@
 		border-left: 4px solid var(--accent);
 		transition: border-color 0.3s ease;
 	}
+	:global(.dark) .flash-card {
+		background: var(--color-surface-900);
+		box-shadow:
+			0 1px 3px rgba(0, 0, 0, 0.3),
+			0 8px 24px rgba(0, 0, 0, 0.4);
+	}
 
 	/* ── Header ── */
 	.flash-header {
@@ -554,6 +565,9 @@
 		justify-content: space-between;
 		padding: 0.875rem 1.25rem;
 		border-bottom: 1px solid #f1f5f9;
+	}
+	:global(.dark) .flash-header {
+		border-bottom-color: var(--color-surface-800);
 	}
 
 	.back-link {
@@ -568,6 +582,12 @@
 	}
 	.back-link:hover {
 		color: #334155;
+	}
+	:global(.dark) .back-link {
+		color: var(--color-surface-400);
+	}
+	:global(.dark) .back-link:hover {
+		color: var(--color-surface-200);
 	}
 
 	.header-right {
@@ -600,13 +620,27 @@
 		background: #f1f5f9;
 		border-color: #cbd5e1;
 	}
+	:global(.dark) .counter-btn {
+		border-color: var(--color-surface-700);
+		background: var(--color-surface-800);
+	}
+	:global(.dark) .counter-btn:hover {
+		background: var(--color-surface-700);
+		border-color: var(--color-surface-600);
+	}
 	.counter-current {
 		font-weight: 700;
 		color: #1e293b;
 	}
+	:global(.dark) .counter-current {
+		color: var(--color-surface-100);
+	}
 	.counter-sep {
 		color: #cbd5e1;
 		margin: 0 0.0625rem;
+	}
+	:global(.dark) .counter-sep {
+		color: var(--color-surface-600);
 	}
 	.counter-total {
 		color: #94a3b8;
@@ -621,6 +655,10 @@
 		font-family: inherit;
 		line-height: 1.4;
 	}
+	:global(.dark) .counter-btn kbd {
+		background: var(--color-surface-700);
+		color: var(--color-surface-400);
+	}
 
 	/* ── Progress bar ── */
 	.progress-track {
@@ -628,6 +666,9 @@
 		background: #f1f5f9;
 		position: relative;
 		flex-shrink: 0;
+	}
+	:global(.dark) .progress-track {
+		background: var(--color-surface-800);
 	}
 	.progress-fill-assessed {
 		position: absolute;
@@ -651,6 +692,11 @@
 			0 0 0 2px #fff,
 			0 0 0 3px rgba(59, 130, 246, 0.3);
 	}
+	:global(.dark) .progress-cursor {
+		box-shadow:
+			0 0 0 2px var(--color-surface-900),
+			0 0 0 3px rgba(59, 130, 246, 0.4);
+	}
 
 	/* ── Read-only ── */
 	.readonly-banner {
@@ -665,6 +711,11 @@
 		font-size: 0.8125rem;
 		font-weight: 500;
 		color: #92400e;
+	}
+	:global(.dark) .readonly-banner {
+		background: color-mix(in oklch, #92400e 22%, var(--color-surface-900));
+		border-color: color-mix(in oklch, #fde68a 30%, var(--color-surface-800));
+		color: #fcd34d;
 	}
 
 	/* ── Body / Content ── */
@@ -717,11 +768,17 @@
 		margin-bottom: 1rem;
 		letter-spacing: -0.01em;
 	}
+	:global(.dark) .content-section-label {
+		color: var(--color-surface-100);
+	}
 
 	.content-description {
 		font-size: 0.9375rem;
 		line-height: 1.7;
 		color: #475569;
+	}
+	:global(.dark) .content-description {
+		color: var(--color-surface-300);
 	}
 	.content-description :global(p) {
 		margin-bottom: 0.5rem;
@@ -737,6 +794,10 @@
 		line-height: 1.65;
 		color: #64748b;
 		font-style: italic;
+	}
+	:global(.dark) .content-annotation {
+		background: var(--color-surface-800);
+		color: var(--color-surface-400);
 	}
 	.annotation-bar {
 		position: absolute;
@@ -758,6 +819,10 @@
 		gap: 0.75rem;
 		background: #fafbfc;
 	}
+	:global(.dark) .flash-controls {
+		border-top-color: var(--color-surface-800);
+		background: var(--color-surface-950);
+	}
 
 	.observation-textarea {
 		width: 100%;
@@ -776,6 +841,14 @@
 	}
 	.observation-textarea::placeholder {
 		color: #94a3b8;
+	}
+	:global(.dark) .observation-textarea {
+		border-color: var(--color-surface-700);
+		background: var(--color-surface-900);
+		color: var(--color-surface-200);
+	}
+	:global(.dark) .observation-textarea::placeholder {
+		color: var(--color-surface-500);
 	}
 	.observation-textarea:focus {
 		outline: none;
@@ -827,6 +900,19 @@
 		background: #e2e8f0;
 		color: #94a3b8;
 	}
+	:global(.dark) .nav-btn-prev {
+		background: var(--color-surface-800);
+		color: var(--color-surface-300);
+		border-color: var(--color-surface-700);
+	}
+	:global(.dark) .nav-btn-prev:hover {
+		background: var(--color-surface-700);
+		color: var(--color-surface-100);
+	}
+	:global(.dark) .nav-btn-prev kbd {
+		background: var(--color-surface-700);
+		color: var(--color-surface-400);
+	}
 
 	.nav-btn-next {
 		background: #3b82f6;
@@ -859,6 +945,13 @@
 			0 10px 20px -2px rgba(0, 0, 0, 0.08);
 		min-width: 11rem;
 	}
+	:global(.dark) .jump-popover-inner {
+		background: var(--color-surface-800);
+		border-color: var(--color-surface-700);
+		box-shadow:
+			0 4px 6px -1px rgba(0, 0, 0, 0.3),
+			0 10px 20px -2px rgba(0, 0, 0, 0.4);
+	}
 
 	@keyframes popIn {
 		from {
@@ -879,6 +972,11 @@
 		font-size: 0.8125rem;
 		width: 100%;
 		font-variant-numeric: tabular-nums;
+	}
+	:global(.dark) .jump-input {
+		border-color: var(--color-surface-700);
+		background: var(--color-surface-900);
+		color: var(--color-surface-200);
 	}
 	.jump-input:focus {
 		outline: none;

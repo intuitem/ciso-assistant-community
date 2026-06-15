@@ -49,9 +49,9 @@
 
 	let heatBg = $derived.by(() => {
 		if (totalCount === 0 || isPast) return '';
-		if (totalCount <= 2) return 'bg-primary-50/50';
-		if (totalCount <= 5) return 'bg-primary-50';
-		return 'bg-primary-100/70';
+		if (totalCount <= 2) return 'bg-primary-50/50 dark:bg-primary-900/20';
+		if (totalCount <= 5) return 'bg-primary-50 dark:bg-primary-900/40';
+		return 'bg-primary-100/70 dark:bg-primary-900/60';
 	});
 
 	const categoryLabelMap: Record<string, () => string> = {

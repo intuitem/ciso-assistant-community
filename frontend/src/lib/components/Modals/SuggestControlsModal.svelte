@@ -8,7 +8,7 @@
 	const modalStore: ModalStore = getModalStore();
 	const flash = getFlash(page);
 
-	const cBase = 'card bg-surface-50 p-4 w-modal shadow-xl space-y-4';
+	const cBase = 'card bg-surface-50-950 p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 
 	type SuggestionStatus = 'create' | 'reuse' | 'linked';
@@ -135,9 +135,9 @@
 		<header class={cHeader}>{$modalStore[0].title ?? m.suggestControls()}</header>
 		<article>{$modalStore[0].body ?? ''}</article>
 
-		<div class="max-h-96 overflow-y-auto card bg-surface-100">
+		<div class="max-h-96 overflow-y-auto card bg-surface-100-900">
 			{#if selectableItems.length > 1}
-				<div class="px-4 py-2 border-b border-surface-300 sticky top-0 bg-surface-100">
+				<div class="px-4 py-2 border-b border-surface-300-700 sticky top-0 bg-surface-100-900">
 					<label class="flex items-center gap-2 cursor-pointer font-semibold text-sm">
 						<input type="checkbox" checked={allSelected} onchange={toggleAll} class="checkbox" />
 						{m.selectAll()} ({selectedIds.size}/{selectableItems.length})

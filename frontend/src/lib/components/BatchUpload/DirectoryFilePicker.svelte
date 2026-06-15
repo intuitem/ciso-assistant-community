@@ -104,8 +104,8 @@
 			{disabled
 			? 'opacity-60 cursor-not-allowed border-surface-200-800 bg-surface-50-950'
 			: dragOver
-				? 'border-indigo-500 bg-indigo-50'
-				: 'border-surface-300-700 bg-surface-50-950 hover:border-indigo-400 hover:bg-indigo-50/40 cursor-pointer'}"
+				? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30'
+				: 'border-surface-300-700 bg-surface-50-950 hover:border-indigo-400 hover:bg-indigo-50/40 dark:hover:bg-indigo-900/20 cursor-pointer'}"
 	>
 		<i
 			class="fa-solid {mode === 'files'

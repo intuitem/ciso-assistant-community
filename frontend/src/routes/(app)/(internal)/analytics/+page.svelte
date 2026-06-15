@@ -848,7 +848,7 @@
 						<h2 class="text-xl font-bold text-surface-900-100">{m.complianceAnalytics()}</h2>
 						<a
 							href="/recap"
-							class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 hover:border-blue-300 transition-colors"
+							class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 dark:bg-surface-800 dark:text-blue-400 border border-blue-200 dark:border-surface-700 rounded-lg hover:bg-blue-100 dark:hover:bg-surface-700 hover:border-blue-300 transition-colors"
 						>
 							{m.viewDetailedRecap()}
 							<i class="fas fa-arrow-right text-xs"></i>
@@ -868,7 +868,7 @@
 									>
 										<!-- Framework Header -->
 										<div
-											class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-surface-100-900"
+											class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-surface-800 dark:to-surface-900 px-6 py-4 border-b border-surface-100-900"
 										>
 											<div class="flex justify-between items-center">
 												<div class="flex items-center gap-3">
@@ -1003,7 +1003,7 @@
 							</div>
 						{:else}
 							<div
-								class="text-center py-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-surface-300-700"
+								class="text-center py-16 bg-gradient-to-br from-surface-50-950 to-surface-100-900 rounded-xl border-2 border-dashed border-surface-300-700"
 							>
 								<div class="text-surface-400-600 mb-4">
 									<i class="fas fa-chart-bar text-6xl"></i>
@@ -1228,7 +1228,7 @@
 						</section>
 					{:else}
 						<div
-							class="text-center py-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-surface-300-700"
+							class="text-center py-16 bg-gradient-to-br from-surface-50-950 to-surface-100-900 rounded-xl border-2 border-dashed border-surface-300-700"
 						>
 							<div class="text-surface-400-600 mb-4">
 								<i class="fas fa-exclamation-triangle text-6xl"></i>
@@ -1248,7 +1248,7 @@
 					{/if}
 				{:catch error}
 					<div
-						class="text-center py-16 bg-gradient-to-br from-red-50 to-red-100 rounded-xl border-2 border-dashed border-red-300"
+						class="text-center py-16 bg-gradient-to-br from-red-50 to-red-100 dark:from-surface-800 dark:to-surface-900 rounded-xl border-2 border-dashed border-red-300 dark:border-red-900"
 					>
 						<div class="text-red-400 mb-4">
 							<i class="fas fa-exclamation-triangle text-6xl"></i>
@@ -1268,7 +1268,7 @@
 				{:then [dashboardsList, customDashboard]}
 					{#if (dashboardsList || []).length === 0}
 						<div
-							class="text-center py-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-surface-300-700"
+							class="text-center py-16 bg-gradient-to-br from-surface-50-950 to-surface-100-900 rounded-xl border-2 border-dashed border-surface-300-700"
 						>
 							<div class="text-surface-400-600 mb-4">
 								<i class="fas fa-chart-line text-6xl"></i>
@@ -1327,7 +1327,7 @@
 											role="listbox"
 											class="absolute left-0 top-full mt-2 z-30 w-72 bg-surface-50-950 dark:bg-surface-900 border border-surface-300 dark:border-surface-700 rounded-lg shadow-lg flex flex-col max-h-96"
 										>
-											<div class="p-2 border-b border-surface-200">
+											<div class="p-2 border-b border-surface-200-800">
 												<input
 													type="text"
 													class="input input-sm w-full"
@@ -1349,6 +1349,7 @@
 															aria-selected={d.id === currentSelectionId}
 															class="w-full text-left px-3 py-2 text-sm hover:bg-surface-100 dark:hover:bg-surface-800 flex items-center justify-between gap-2"
 															class:bg-blue-50={d.id === currentSelectionId}
+															class:dark:bg-surface-800={d.id === currentSelectionId}
 															class:font-semibold={d.id === currentSelectionId}
 															onclick={() => {
 																closeDashboardPicker();
@@ -1364,10 +1365,10 @@
 												{/if}
 											</div>
 											{#if currentSelectionId}
-												<div class="border-t border-surface-200 p-2">
+												<div class="border-t border-surface-200-800 p-2">
 													<button
 														type="button"
-														class="w-full text-left px-2 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded inline-flex items-center gap-2"
+														class="w-full text-left px-2 py-1.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-surface-700 rounded inline-flex items-center gap-2"
 														onclick={() => {
 															closeDashboardPicker();
 															handleCustomDashboardChange('');

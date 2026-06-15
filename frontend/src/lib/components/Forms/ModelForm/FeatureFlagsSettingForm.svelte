@@ -405,7 +405,7 @@
 				type="text"
 				bind:value={query}
 				placeholder={m.searchPlaceholder()}
-				class="w-full pl-9 pr-3 py-2 border border-surface-300-700 rounded-lg text-sm focus:ring-primary-500 focus:border-primary-500"
+				class="w-full pl-9 pr-3 py-2 border border-surface-300-700 bg-surface-50-950 rounded-lg text-sm focus:ring-primary-500 focus:border-primary-500"
 			/>
 		</div>
 
