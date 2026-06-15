@@ -74,10 +74,7 @@
 	) {
 		const locale = getLocale();
 		const language = locale.split('-')[0];
-		return (
-			definition.translations?.[language]?.[field] ??
-			definition[field]
-		);
+		return definition.translations?.[language]?.[field] ?? definition[field];
 	}
 </script>
 
