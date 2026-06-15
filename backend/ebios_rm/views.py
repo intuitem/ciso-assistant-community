@@ -5,7 +5,13 @@ import django_filters as df
 import pandas as pd
 from django.http import HttpResponse
 from core.serializers import RiskMatrixReadSerializer
-from core.views import BaseModelViewSet as AbstractBaseModelViewSet, GenericFilterSet
+from core.views import (
+    BaseModelViewSet as AbstractBaseModelViewSet,
+    GenericFilterSet,
+    SmartOrderingFilter,
+)
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
 from core.models import Terminology
 from openpyxl.styles import Alignment
 
@@ -949,9 +955,40 @@ class StakeholderFilter(df.FilterSet):
         return queryset.filter(id__in=ids)
 
 
+class StakeholderOrderingFilter(SmartOrderingFilter):
+    """Order Stakeholders by related object names instead of raw FK PKs (UUIDs).
+
+    ``?ordering=entity`` would otherwise sort on the Entity primary key, which
+    is meaningless to the user. Remap such FK fields to their ``__name`` lookup.
+    """
+
+    field_remap = {
+        "entity": "entity__name",
+        "category": "category__name",
+    }
+
+    def get_ordering(self, request, queryset, view):
+        ordering = super().get_ordering(request, queryset, view)
+        if not ordering:
+            return ordering
+        remapped = []
+        for f in ordering:
+            descending = f.startswith("-")
+            field = f[1:] if descending else f
+            mapped = self.field_remap.get(field, field)
+            remapped.append(f"-{mapped}" if descending else mapped)
+        return remapped
+
+
 class StakeholderViewSet(BaseModelViewSet):
     model = Stakeholder
     filterset_class = StakeholderFilter
+    search_fields = ["entity__name", "category__name"]
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        StakeholderOrderingFilter,
+    ]
 
     @action(detail=False, name="Get category choices")
     def category(self, request):
