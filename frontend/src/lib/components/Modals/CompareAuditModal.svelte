@@ -56,15 +56,13 @@
 	<div class="modal-compare-audit {cBase}">
 		<div class="flex items-center justify-between">
 			<header class={cHeader}>{m.compareToAudit()}</header>
-			<div
-				role="button"
-				tabindex="0"
+			<button
+				type="button"
 				class="flex items-center hover:text-primary-500 cursor-pointer"
 				onclick={parent.onClose}
-				onkeydown={parent.onClose}
 			>
 				<i class="fa-solid fa-xmark"></i>
-			</div>
+			</button>
 		</div>
 		<form method="POST" use:enhance class="space-y-4">
 			<AutocompleteSelect

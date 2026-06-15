@@ -120,6 +120,8 @@
 	import ForceCirclePacking from '$lib/components/DataViz/ForceCirclePacking.svelte';
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 	import CompareAuditModal from '$lib/components/Modals/CompareAuditModal.svelte';
+	import MapFromAuditModal from '$lib/components/Modals/MapFromAuditModal.svelte';
+	import MappingDirectionModal from '$lib/components/Modals/MappingDirectionModal.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 
 	function handleKeydown(event: KeyboardEvent) {
@@ -300,6 +302,24 @@
 
 	const modalStore: ModalStore = getModalStore();
 
+	function modalApplyMapping(): void {
+		// Entry point: let the user pick the mapping direction.
+		// "Map to a framework" creates a new audit; "Map from an audit"
+		// updates the current one.
+		const modalComponent: ModalComponent = {
+			ref: MappingDirectionModal,
+			props: {
+				mapTo: modalCreateForm,
+				mapFrom: modalMapFromAudit
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent
+		};
+		modalStore.trigger(modal);
+	}
+
 	function modalCreateForm(): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
@@ -341,6 +361,20 @@
 	function modalCompareAudit(): void {
 		const modalComponent: ModalComponent = {
 			ref: CompareAuditModal,
+			props: {
+				currentAudit: data.compliance_assessment
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalMapFromAudit(): void {
+		const modalComponent: ModalComponent = {
+			ref: MapFromAuditModal,
 			props: {
 				currentAudit: data.compliance_assessment
 			}
@@ -965,7 +999,7 @@
 							<div class="grid grid-cols-2 gap-2">
 								<button
 									class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
-									onclick={() => modalCreateForm()}
+									onclick={() => modalApplyMapping()}
 									data-testid="apply-mapping-button"
 								>
 									<i class="fa-solid fa-diagram-project text-emerald-500 text-base"></i>

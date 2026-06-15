@@ -2599,7 +2599,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         reference_controls = []
         for control in _reference_controls:
             reference_controls.append(
-                {"str": control.display_long, "urn": control.urn, "id": control.id}
+                {"str": control.display_long, "urn": control.urn, "id": str(control.id)}
             )
         return reference_controls
 
@@ -2609,7 +2609,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         threats = []
         for control in _threats:
             threats.append(
-                {"str": control.display_long, "urn": control.urn, "id": control.id}
+                {"str": control.display_long, "urn": control.urn, "id": str(control.id)}
             )
         return threats
 
@@ -9710,7 +9710,7 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
             return "VAL.000001"
         try:
             suffix = int(last.ref_id.split(".")[1])
-        except (IndexError, ValueError):
+        except IndexError, ValueError:
             # Fallback if existing data is malformed
             suffix = 0
         return f"VAL.{suffix + 1:06d}"
