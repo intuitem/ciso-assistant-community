@@ -180,6 +180,12 @@
 
 	let classesShowInfo = $derived((show: boolean) => (!show ? 'hidden' : ''));
 	let classesShowInfoText = $derived((show: boolean) => (show ? 'text-primary-500' : ''));
+	// Percent text sits on a fixed result-color background, so its color must NOT follow
+	// the light/dark theme (the default would flip to light in dark mode and vanish on
+	// light segments). Force white on the black bg, a fixed-dark surface token otherwise.
+	let classesPercentText = $derived((resultColor: string) =>
+		resultColor === '#000000' ? 'text-white' : 'text-surface-950'
+	);
 	export const getBadgeStyles = (answers: any, questions: any) => {
 		const questionMap = (questions || {}) as Record<string, any>;
 		const resolvedAnswers = answers ?? {};

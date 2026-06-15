@@ -913,7 +913,7 @@
 								: draft.editing_languages || []}
 							<tr
 								class={isActive
-									? 'bg-primary-50 dark:bg-primary-900/30 ring-1 ring-primary-200 dark:ring-primary-700'
+									? 'bg-primary-50-950/30 ring-1 ring-primary-200-800'
 									: ''}
 							>
 								<td class="font-medium">{isActive ? matrixName : draft.name}</td>

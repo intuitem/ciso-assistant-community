@@ -98,7 +98,7 @@
 					</thead>
 					<tbody>
 						{#each drafts as framework}
-							<tr class="bg-primary-50">
+							<tr class="bg-primary-50-950/30 ring-1 ring-primary-200-800">
 								<td class="font-medium">{framework.name}</td>
 								<td class="text-sm text-surface-600-400 max-w-48 truncate">
 									{framework.description || '—'}
