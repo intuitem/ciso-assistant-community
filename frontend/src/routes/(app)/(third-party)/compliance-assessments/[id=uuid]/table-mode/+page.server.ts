@@ -180,6 +180,7 @@ export const actions: Actions = {
 
 		const visibilityControlled = [
 			'result',
+			'extended_result',
 			'status',
 			'score',
 			'is_scored',

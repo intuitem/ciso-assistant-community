@@ -42,6 +42,7 @@ test('field visibility effects: each flag toggles the corresponding donut', asyn
 	logedPage,
 	pages,
 	complianceAssessmentsPage,
+	evidencesPage,
 	page
 }) => {
 	test.slow();
@@ -61,6 +62,18 @@ test('field visibility effects: each flag toggles the corresponding donut', asyn
 		await requiredPage.hasUrl();
 	}
 
+	const hiddenStatusEvidenceName = `${vars.evidenceName} hidden status`;
+	await evidencesPage.goto();
+	await evidencesPage.hasUrl();
+	await evidencesPage.createItem({
+		name: hiddenStatusEvidenceName,
+		description: vars.description,
+		folder: vars.folderName,
+		link: 'https://intuitem.com/'
+	});
+
+	await complianceAssessmentsPage.goto();
+	await complianceAssessmentsPage.hasUrl();
 	await complianceAssessmentsPage.viewItemDetail(
 		testObjectsData.complianceAssessmentsPage.build.name
 	);
@@ -107,6 +120,29 @@ test('field visibility effects: each flag toggles the corresponding donut', asyn
 		await setVisibility(check.field, EVERYONE);
 		await expect(page.locator(check.selector)).toHaveCount(1);
 	}
+
+	await setVisibility('status', HIDDEN);
+	await page.goto(`${auditDetailUrl}/table-mode`);
+
+	const firstRequirementAssessment = page.locator('.table-mode-form').first();
+	await firstRequirementAssessment.getByText(m.evidence()).click();
+	await firstRequirementAssessment.getByTestId('select-evidence-button').click();
+
+	await expect(page.getByTestId('modal-title')).toBeVisible();
+	const evidenceField = page.getByTestId('form-input-evidences');
+	await evidenceField.click();
+	const evidenceOption = evidenceField
+		.getByRole('option', { name: hiddenStatusEvidenceName })
+		.first();
+	if (!(await evidenceOption.isVisible())) {
+		await evidenceField.getByRole('textbox').fill(hiddenStatusEvidenceName);
+	}
+	await expect(evidenceOption).toBeVisible();
+	await evidenceOption.click();
+	await page.getByTestId('save-button').click();
+
+	await expect(page.getByTestId('modal-title')).not.toBeVisible();
+	await expect(firstRequirementAssessment.getByText(hiddenStatusEvidenceName)).toBeVisible();
 });
 
 test.afterAll('cleanup', async ({ browser }) => {
