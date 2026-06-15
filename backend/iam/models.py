@@ -883,9 +883,9 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
     @property
     def is_auditee(self) -> bool:
         """True when the user holds the auditee role on at least one domain."""
-        from core.utils import get_auditee_filtered_folder_ids
+        from core.utils import get_respondent_scoped_folder_ids
 
-        return bool(get_auditee_filtered_folder_ids(self))
+        return bool(get_respondent_scoped_folder_ids(self))
 
     @property
     def has_backup_permission(self) -> bool:
