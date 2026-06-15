@@ -147,8 +147,6 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
             )
 
     def save(self, *args, **kwargs):
-        """
-        On save, ensure a secret exists if one wasn't provided.
-        """
-        self.full_clean()  # Run validation
+        """Run full model validation (clean + field checks) before persisting."""
+        self.full_clean()
         super().save(*args, **kwargs)

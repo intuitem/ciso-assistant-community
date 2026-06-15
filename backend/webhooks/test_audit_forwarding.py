@@ -336,6 +336,39 @@ def test_update_preserves_sasl_password_when_blank(root_folder):
     assert ep.kafka_config["config"]["sasl_plain_password"] == "secret"
 
 
+def test_validate_kafka_requires_bootstrap_and_topic():
+    from rest_framework import serializers as drf
+    from webhooks.serializers import AuditSinkSerializer
+
+    s = AuditSinkSerializer()
+    with pytest.raises(drf.ValidationError):
+        s.validate(
+            {
+                "transport": WebhookEndpoint.Transport.KAFKA,
+                "kafka_config": {"config": {}},
+            }
+        )
+    out = s.validate(
+        {
+            "transport": WebhookEndpoint.Transport.KAFKA,
+            "kafka_config": {"bootstrap_servers": "b:9092", "topic": "t"},
+        }
+    )
+    assert out["transport"] == WebhookEndpoint.Transport.KAFKA
+
+
+def test_validate_headers_rejects_non_string_values():
+    from rest_framework import serializers as drf
+    from webhooks.serializers import AuditSinkSerializer
+
+    s = AuditSinkSerializer()
+    with pytest.raises(drf.ValidationError):
+        s.validate_headers({"X": {"nested": 1}})
+    assert s.validate_headers({"Authorization": "Splunk t"}) == {
+        "Authorization": "Splunk t"
+    }
+
+
 @pytest.mark.django_db
 def test_get_additional_data_survives_cascade_doesnotexist(root_folder):
     # get_additional_data runs in auditlog's synchronous delete receiver; a

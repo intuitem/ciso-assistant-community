@@ -149,3 +149,30 @@ class AuditSinkSerializer(BaseModelSerializer):
 
     def validate_target_folders(self, value):
         return _validate_accessible_folders(self.context.get("request"), value)
+
+    def validate_headers(self, value):
+        # Sent verbatim as HTTP request headers, so only a flat string->string
+        # map is valid; nested objects/arrays would break at send time.
+        if not isinstance(value, dict):
+            raise serializers.ValidationError("Headers must be a JSON object.")
+        if any(not isinstance(v, str) for v in value.values()):
+            raise serializers.ValidationError("Header values must be strings.")
+        return value
+
+    def validate(self, data):
+        data = super().validate(data)
+        transport = data.get("transport") or getattr(self.instance, "transport", None)
+        if transport == WebhookEndpoint.Transport.KAFKA:
+            cfg = (
+                data.get("kafka_config")
+                or getattr(self.instance, "kafka_config", None)
+                or {}
+            )
+            if not cfg.get("bootstrap_servers") or not cfg.get("topic"):
+                raise serializers.ValidationError(
+                    {
+                        "kafka_config": "bootstrap_servers and topic are required "
+                        "for Kafka transport."
+                    }
+                )
+        return data
