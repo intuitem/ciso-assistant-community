@@ -433,9 +433,10 @@
 			});
 
 		// Prepend a "--" (unset) option, unless one is already present
+		const unsetLabels = new Set(['--', 'undefined']); // taken from Select.svelte
 		if (
 			enableDoubleDash &&
-			!processed.find((o) => new Set(['--', 'undefined']).has(o.label?.toLowerCase())) // pattern from Select.svelte
+			!processed.find((o) => unsetLabels.has(o.label?.toLowerCase()) || o.value == null)
 		) {
 			return [{ label: '--', value: '--', translatedLabel: '--' }, ...processed];
 		}

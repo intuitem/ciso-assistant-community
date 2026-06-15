@@ -74,12 +74,11 @@
 		}));
 	}
 
+	const unsetLabels = new Set(['--', 'undefined']); // taken from Select.svelte
+
 	function withDoubleDash(opts: { label: string; value: string }[]) {
 		// Prepend a "--" (unset) option, unless one is already present
-		if (
-			enableDoubleDash &&
-			!opts.find((o) => new Set(['--', 'undefined']).has(o.label?.toLowerCase()))
-		) {
+		if (enableDoubleDash && !opts.find((o) => unsetLabels.has(o.label?.toLowerCase()))) {
 			return [{ label: '--', value: '--' }, ...opts];
 		}
 		return opts;

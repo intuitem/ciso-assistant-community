@@ -34,7 +34,6 @@
 
 	async function changeEffort(newEffort: string | null) {
 		const endpoint = `/applied-controls/${row?.meta?.id}/effort`;
-		// Convert '--' to empty string to clear the field
 		const requestInit = {
 			method: 'PATCH',
 			headers: {
