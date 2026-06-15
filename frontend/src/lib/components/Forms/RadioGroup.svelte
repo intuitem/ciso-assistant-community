@@ -18,6 +18,8 @@
 		valuePath?: string;
 		key: string;
 		labelKey: string;
+		/** 'md' (default) stretches options to fill width; 'sm' is a compact, content-width variant. */
+		size?: 'md' | 'sm';
 	}
 	let {
 		possibleOptions,
@@ -37,7 +39,8 @@
 		field,
 		valuePath = field,
 		key = 'value',
-		labelKey = 'label'
+		labelKey = 'label',
+		size = 'md'
 	}: Props = $props();
 
 	const { value, errors } = form ? formFieldProxy(form, valuePath) : {};
@@ -94,12 +97,22 @@
 		</div>
 	{/if}
 	<div
-		class="p-1 inline-flex gap-1 grow flex-wrap items-center bg-gray-200 border border-gray-400 rounded-md {classes} {disabledClasses}"
+		class="{size === 'sm'
+			? 'p-0.5 gap-0.5'
+			: 'p-1 gap-1 grow'} inline-flex flex-wrap items-center bg-gray-200 border border-gray-400 rounded-md {classes} {disabledClasses}"
 	>
 		{#each labeledOptions as option}
 			{@const color = colorMap[option.id] ?? 'preset-filled-primary-500'}
-			<label class="flex-auto rounded-lg {option[key] === internalValue ? color : ''}">
-				<div class="text-base text-center cursor-pointer px-4 py-1 hover:preset-tonal h-full">
+			<label
+				class="rounded-lg {size === 'sm' ? 'flex-none' : 'flex-auto'} {option[key] === internalValue
+					? color
+					: ''}"
+			>
+				<div
+					class="text-center cursor-pointer hover:preset-tonal h-full {size === 'sm'
+						? 'text-sm px-3 py-0.5'
+						: 'text-base px-4 py-1'}"
+				>
 					<div class="h-0 w-0 overflow-hidden">
 						<input
 							type="radio"
