@@ -16,7 +16,7 @@
 
 	const flash = getFlash(page);
 
-	let options: { label: string; value: string }[] = $state([]);
+	let options: { label: string; value: string | null }[] = $state([]);
 
 	onMount(async () => {
 		const rawOptions = await fetch('/applied-controls/control_impact').then((r) => r.json());
@@ -27,7 +27,7 @@
 		];
 	});
 
-	async function changeImpact(newImpact: string) {
+	async function changeImpact(newImpact: string | null) {
 		const endpoint = `/applied-controls/${row?.meta?.id}/control_impact`;
 		const requestInit = {
 			method: 'PATCH',

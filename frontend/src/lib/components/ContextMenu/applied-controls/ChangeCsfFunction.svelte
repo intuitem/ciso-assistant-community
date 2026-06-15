@@ -21,7 +21,7 @@
 
 	const flash = getFlash(page);
 
-	let options: { label: string; value: string }[] = $state([]);
+	let options: { label: string; value: string | null }[] = $state([]);
 
 	onMount(async () => {
 		const rawOptions = await fetch('/applied-controls/csf_function').then((r) => r.json());
@@ -32,7 +32,7 @@
 		];
 	});
 
-	async function changeCsfFunction(newCsfFunction: string) {
+	async function changeCsfFunction(newCsfFunction: string | null) {
 		const endpoint = `/applied-controls/${row?.meta?.id}/csf_function`;
 		const requestInit = {
 			method: 'PATCH',

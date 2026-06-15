@@ -21,7 +21,7 @@
 
 	const flash = getFlash(page);
 
-	let options: { label: string; value: string }[] = $state([]);
+	let options: { label: string; value: string | null }[] = $state([]);
 
 	onMount(async () => {
 		const rawOptions = await fetch('/applied-controls/priority').then((r) => r.json());
@@ -32,7 +32,7 @@
 		];
 	});
 
-	async function changePriority(newPriority: string) {
+	async function changePriority(newPriority: string | null) {
 		const endpoint = `/applied-controls/${row?.meta?.id}/priority`;
 		const requestInit = {
 			method: 'PATCH',

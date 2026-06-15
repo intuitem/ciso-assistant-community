@@ -21,7 +21,7 @@
 
 	const flash = getFlash(page);
 
-	let options: { label: string; value: string }[] = $state([]);
+	let options: { label: string; value: string | null }[] = $state([]);
 
 	onMount(async () => {
 		const rawOptions = await fetch('/applied-controls/effort').then((r) => r.json());
@@ -32,7 +32,7 @@
 		];
 	});
 
-	async function changeEffort(newEffort: string) {
+	async function changeEffort(newEffort: string | null) {
 		const endpoint = `/applied-controls/${row?.meta?.id}/effort`;
 		// Convert '--' to empty string to clear the field
 		const requestInit = {
