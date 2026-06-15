@@ -143,7 +143,7 @@ class PersonalDataViewSet(BaseModelViewSet):
 
         try:
             processing_uuid = uuid.UUID(str(processing_id))
-        except (ValueError, AttributeError):
+        except ValueError, AttributeError:
             return Response(
                 {"error": "Invalid processing ID"},
                 status=status.HTTP_400_BAD_REQUEST,
