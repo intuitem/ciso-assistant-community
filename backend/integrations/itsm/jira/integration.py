@@ -36,10 +36,25 @@ JIRA_CONFIG_SCHEMA = {
         },
     },
     "settings": {
-        "required": ["project_key"],
+        "required": ["table_name"],
         "properties": {
+            # Composite "<PROJECT_KEY>:<Issue Type Name>" string the
+            # FieldMapper UI writes back. Falls back to the legacy split
+            # ``project_key`` / ``issue_type`` settings for backward compat.
+            "table_name": {
+                "type": "string",
+                "description": "Composite project key and issue type, e.g. 'PROJ:Task'",
+            },
             "project_key": {"type": "string", "description": "Jira project key"},
             "issue_type": {"type": "string", "default": "Task"},
+            "field_map": {
+                "type": "object",
+                "description": "Map of CISO Assistant fields to Jira field IDs",
+            },
+            "value_map": {
+                "type": "object",
+                "description": "Map of CISO Assistant choice values to Jira choice values, keyed by field",
+            },
             "enable_incoming_sync": {"type": "boolean", "default": True},
             "enable_outgoing_sync": {"type": "boolean", "default": True},
             "sync_comments": {"type": "boolean", "default": True},
@@ -134,6 +149,40 @@ class JiraOrchestrator(BaseITSMOrchestrator):
 
     def extract_webhook_event_type(self, payload: dict) -> str:
         return payload.get("webhookEvent")
+
+    def get_interactive_actions(self):
+        return ["get_tables", "get_columns", "get_choices", "suggest_mapping"]
+
+    def execute_action(self, action: str, params: dict):
+        client = self._get_client()
+
+        if action == "get_tables":
+            return client.get_available_tables()
+
+        if action == "get_columns":
+            table = params.get("table_name")
+            if not table:
+                raise ValueError("Parameter 'table_name' is required for get_columns")
+            return client.get_table_columns(table)
+
+        if action == "get_choices":
+            table = params.get("table_name")
+            field = params.get("field_name")
+            if not table or not field:
+                raise ValueError(
+                    "Parameters 'table_name' and 'field_name' are required"
+                )
+            return client.get_field_choices(table, field)
+
+        if action == "suggest_mapping":
+            table = params.get("table_name")
+            if not table:
+                raise ValueError(
+                    "Parameter 'table_name' is required for suggest_mapping"
+                )
+            return self.mapper.suggest_mapping_for_table(table, client)
+
+        raise NotImplementedError(f"Unknown action: {action}")
 
 
 # Register the Jira integration

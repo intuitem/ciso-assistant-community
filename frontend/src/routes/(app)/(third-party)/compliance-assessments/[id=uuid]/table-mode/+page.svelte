@@ -34,6 +34,7 @@
 		alignmentValueFromChoiceUrn,
 		choiceUrnFromAlignmentValue,
 		alignmentColorMap,
+		resultBadgeStyle,
 		AUTO_ALIGNMENT_QUESTION_URN
 	} from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -158,7 +159,7 @@
 			[field]: value
 		});
 
-		if (invalidateAll) {
+		if (invalidateAllBool) {
 			await invalidateAll();
 		}
 
@@ -594,12 +595,10 @@
 																<p class="whitespace-pre-line py-1">
 																	<span class="italic">{m.suggestionColon()}</span>
 																	<span
-																		class="badge {getClassesText(
+																		class="badge h-fit"
+																		style={resultBadgeStyle(
 																			requirementAssessment.mapping_inference.result
-																		)} h-fit"
-																		style="background-color: {complianceResultColorMap[
-																			requirementAssessment.mapping_inference.result
-																		]};"
+																		)}
 																	>
 																		{safeTranslate(requirementAssessment.mapping_inference.result)}
 																	</span>
@@ -674,9 +673,7 @@
 													{#if hasComputedResult(requirementAssessment.requirement.questions)}
 														<span
 															class="badge text-sm font-semibold"
-															style="background-color: {complianceResultColorMap[
-																requirementAssessment.result
-															] || '#ddd'}"
+															style={resultBadgeStyle(requirementAssessment.result)}
 														>
 															{safeTranslate(requirementAssessment.result)}
 														</span>
@@ -710,11 +707,14 @@
 													field="answers"
 													disabled={isReadOnly}
 													{shallow}
-													onChange={(urn, newAnswer) => {
+													onChange={async (urn, newAnswer) => {
 														requirementAssessment.answers[urn] = newAnswer;
-														updateBulk(requirementAssessment, {
+														await updateBulk(requirementAssessment, {
 															answers: { [urn]: newAnswer }
 														});
+														if (invalidateAllBool) {
+															await invalidateAll();
+														}
 													}}
 												/>
 											</div>

@@ -26,6 +26,7 @@
 		getFieldVisibility,
 		hasComputedResult,
 		hasComputedScore,
+		resultBadgeStyle,
 		isFieldEditable as isFieldEditableHelper,
 		shouldShowAutoQuestion,
 		buildAutoAlignmentQuestion,
@@ -1034,9 +1035,7 @@
 									{#if hasComputedResult(requirement.questions)}
 										<span
 											class="badge text-sm font-semibold"
-											style="background-color: {complianceResultColorMap[
-												requirementAssessment.result
-											] || '#ddd'}"
+											style={resultBadgeStyle(requirementAssessment.result)}
 										>
 											{safeTranslate(requirementAssessment.result)}
 										</span>

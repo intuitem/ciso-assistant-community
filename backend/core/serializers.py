@@ -2974,6 +2974,8 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
             "is_locked",
             "min_score",
             "max_score",
+            "scores_definition",
+            "score_calculation_method",
             "progress_status_enabled",
             "extended_result_enabled",
             "field_visibility",
@@ -3056,12 +3058,12 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
         request = self.context.get("request")
         if request and self.instance:
             from core.utils import (
-                get_auditee_filtered_folder_ids,
+                get_respondent_scoped_folder_ids,
                 is_field_editable_by,
             )
 
             ca = self.instance.compliance_assessment
-            respondent_folders = get_auditee_filtered_folder_ids(request.user)
+            respondent_folders = get_respondent_scoped_folder_ids(request.user)
             if respondent_folders and ca.folder_id in respondent_folders:
                 # Cascade through DEFAULT_VISIBILITY so default-hidden keys are
                 # stripped from a respondent's payload even when the CA has an
@@ -3100,9 +3102,9 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
         # Assignment-level and field-level guards for respondent users (auditee or third-party)
         request = self.context.get("request")
         if request and self.instance and compliance_assessment:
-            from core.utils import get_auditee_filtered_folder_ids
+            from core.utils import get_respondent_scoped_folder_ids
 
-            respondent_folders = get_auditee_filtered_folder_ids(request.user)
+            respondent_folders = get_respondent_scoped_folder_ids(request.user)
             if (
                 respondent_folders
                 and compliance_assessment.folder_id in respondent_folders
@@ -3281,18 +3283,20 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                         answer.value = answer_value
                         answer.save(update_fields=["value"])
 
-                # Check if any choice has scoring or result logic
+                # Check if any choice has scoring or result logic. For
+                # compute_result, mirror `resolve_compute_result`: empty strings,
+                # whitespace and unknown values are not actually result-bearing
+                # and should not trigger the compute path.
                 from core.models import QuestionChoice
+                from core.utils import resolve_compute_result
 
-                has_score_or_result = (
-                    QuestionChoice.objects.filter(
-                        question__requirement_node=instance.requirement,
-                    )
-                    .filter(
-                        models.Q(add_score__isnull=False)
-                        | models.Q(compute_result__isnull=False)
-                    )
-                    .exists()
+                choices = QuestionChoice.objects.filter(
+                    question__requirement_node=instance.requirement,
+                ).values_list("add_score", "compute_result")
+
+                has_score_or_result = any(
+                    add_score is not None or resolve_compute_result(cr) is not None
+                    for add_score, cr in choices
                 )
 
                 if has_score_or_result:
@@ -3447,13 +3451,16 @@ class AnswerWriteSerializer(BaseModelSerializer):
                 "⚠️ Cannot modify the answer when the audit is in review."
             )
 
-        # 3. Assignment-level locking for auditee users
+        # 3. Assignment-level locking for respondent users
         request = self.context.get("request")
         if request and requirement_assessment:
-            from core.utils import get_auditee_filtered_folder_ids
+            from core.utils import get_respondent_scoped_folder_ids
 
-            auditee_folders = get_auditee_filtered_folder_ids(request.user)
-            if auditee_folders and requirement_assessment.folder_id in auditee_folders:
+            respondent_folders = get_respondent_scoped_folder_ids(request.user)
+            if (
+                respondent_folders
+                and requirement_assessment.folder_id in respondent_folders
+            ):
                 locked_assignment = requirement_assessment.assignments.filter(
                     status__in=["submitted", "closed"]
                 ).first()

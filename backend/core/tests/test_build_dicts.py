@@ -258,15 +258,16 @@ class TestBuildQuestionsDict:
         result = build_questions_dict(rn)
         assert result is None
 
-    def test_compute_result_boolean_conversion(self, node_with_questions):
+    def test_compute_result_semantic_resolution(self, node_with_questions):
+        """Legacy 'true' / 'false' choices are exported as the resolved semantic values."""
         d = node_with_questions
         result = build_questions_dict(d["rn"])
 
         sc_choices = result["urn:test:qsc"]["choices"]
-        # compute_result="true" -> True
-        assert sc_choices[0]["compute_result"] is True
-        # compute_result="false" -> False
-        assert sc_choices[1]["compute_result"] is False
+        # compute_result="true" -> "compliant"
+        assert sc_choices[0]["compute_result"] == "compliant"
+        # compute_result="false" -> "non_compliant"
+        assert sc_choices[1]["compute_result"] == "non_compliant"
 
 
 @pytest.mark.django_db
