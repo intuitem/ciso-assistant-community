@@ -110,16 +110,20 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Get ecosystem radar chart data")
     def ecosystem_chart_data(self, request, pk):
+        study = self.get_object()
         return Response(
-            ecosystem_radar_chart_data(Stakeholder.objects.filter(ebios_rm_study=pk))
+            ecosystem_radar_chart_data(Stakeholder.objects.filter(ebios_rm_study=study))
         )
 
     @action(detail=True, name="Get ecosystem circular chart data")
     def ecosystem_circular_chart_data(self, request, pk):
         from .helpers import ecosystem_circular_chart_data
 
+        study = self.get_object()
         return Response(
-            ecosystem_circular_chart_data(Stakeholder.objects.filter(ebios_rm_study=pk))
+            ecosystem_circular_chart_data(
+                Stakeholder.objects.filter(ebios_rm_study=study)
+            )
         )
 
     @action(detail=True, name="Get EBIOS RM  study visual analysis")
@@ -757,7 +761,7 @@ class FearedEventViewSet(BaseModelViewSet):
             # Verify study exists
             try:
                 study = EbiosRMStudy.objects.get(id=uuid.UUID(str(study_id)))
-            except (ValueError, AttributeError, EbiosRMStudy.DoesNotExist):
+            except ValueError, AttributeError, EbiosRMStudy.DoesNotExist:
                 return Response(
                     {"error": "EBIOS RM Study not found"},
                     status=http_status.HTTP_404_NOT_FOUND,
@@ -958,7 +962,7 @@ class StakeholderViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get chart data")
     def chart_data(self, request):
-        return Response(ecosystem_radar_chart_data(Stakeholder.objects.all()))
+        return Response(ecosystem_radar_chart_data(self.get_queryset()))
 
 
 class StrategicScenarioViewSet(BaseModelViewSet):
@@ -1183,7 +1187,7 @@ class OperatingModeViewSet(BaseModelViewSet):
 
             try:
                 ea_id = uuid.UUID(str(ea_id))
-            except (ValueError, AttributeError):
+            except ValueError, AttributeError:
                 errors.append(f"Step {i}: invalid elementary_action UUID.")
                 continue
 
@@ -1207,7 +1211,7 @@ class OperatingModeViewSet(BaseModelViewSet):
             for ant_id in antecedent_ids:
                 try:
                     ant_uuid = uuid.UUID(str(ant_id))
-                except (ValueError, AttributeError):
+                except ValueError, AttributeError:
                     errors.append(f"Step {i}: invalid antecedent UUID.")
                     continue
 
