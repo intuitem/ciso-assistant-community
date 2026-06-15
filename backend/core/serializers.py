@@ -58,7 +58,7 @@ class SerializerFactory:
                 serializer_module = importlib.import_module(module_name)
                 serializer_class = getattr(serializer_module, serializer_name)
                 return serializer_class
-            except (ModuleNotFoundError, AttributeError):
+            except ModuleNotFoundError, AttributeError:
                 continue
 
         raise ValueError(
@@ -153,7 +153,7 @@ class BaseModelSerializer(serializers.ModelSerializer):
                         root_folder, user, related_model
                     )[0]
                     accessible_cache[related_model] = {str(i) for i in ids}
-                except (NotImplementedError, Permission.DoesNotExist):
+                except NotImplementedError, Permission.DoesNotExist:
                     accessible_cache[related_model] = None
             accessible_ids = accessible_cache[related_model]
             if accessible_ids is None:
@@ -346,7 +346,7 @@ class VulnerabilityReadSerializer(BaseModelSerializer):
         severity_label = obj.get_severity_display()
         try:
             sla_days = int(sla_policy.get(severity_label, 0)) or None
-        except (TypeError, ValueError):
+        except TypeError, ValueError:
             sla_days = None
         if sla_days is not None:
             remaining = (obj.due_date - today).days
@@ -3050,12 +3050,12 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
         request = self.context.get("request")
         if request and self.instance:
             from core.utils import (
-                get_auditee_filtered_folder_ids,
+                get_respondent_scoped_folder_ids,
                 is_field_editable_by,
             )
 
             ca = self.instance.compliance_assessment
-            respondent_folders = get_auditee_filtered_folder_ids(request.user)
+            respondent_folders = get_respondent_scoped_folder_ids(request.user)
             if respondent_folders and ca.folder_id in respondent_folders:
                 # Cascade through DEFAULT_VISIBILITY so default-hidden keys are
                 # stripped from a respondent's payload even when the CA has an
@@ -3094,9 +3094,9 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
         # Assignment-level and field-level guards for respondent users (auditee or third-party)
         request = self.context.get("request")
         if request and self.instance and compliance_assessment:
-            from core.utils import get_auditee_filtered_folder_ids
+            from core.utils import get_respondent_scoped_folder_ids
 
-            respondent_folders = get_auditee_filtered_folder_ids(request.user)
+            respondent_folders = get_respondent_scoped_folder_ids(request.user)
             if (
                 respondent_folders
                 and compliance_assessment.folder_id in respondent_folders
@@ -3443,13 +3443,16 @@ class AnswerWriteSerializer(BaseModelSerializer):
                 "⚠️ Cannot modify the answer when the audit is in review."
             )
 
-        # 3. Assignment-level locking for auditee users
+        # 3. Assignment-level locking for respondent users
         request = self.context.get("request")
         if request and requirement_assessment:
-            from core.utils import get_auditee_filtered_folder_ids
+            from core.utils import get_respondent_scoped_folder_ids
 
-            auditee_folders = get_auditee_filtered_folder_ids(request.user)
-            if auditee_folders and requirement_assessment.folder_id in auditee_folders:
+            respondent_folders = get_respondent_scoped_folder_ids(request.user)
+            if (
+                respondent_folders
+                and requirement_assessment.folder_id in respondent_folders
+            ):
                 locked_assignment = requirement_assessment.assignments.filter(
                     status__in=["submitted", "closed"]
                 ).first()

@@ -764,7 +764,7 @@ class FearedEventViewSet(BaseModelViewSet):
             # Verify study exists
             try:
                 study = EbiosRMStudy.objects.get(id=uuid.UUID(str(study_id)))
-            except (ValueError, AttributeError, EbiosRMStudy.DoesNotExist):
+            except ValueError, AttributeError, EbiosRMStudy.DoesNotExist:
                 return Response(
                     {"error": "EBIOS RM Study not found"},
                     status=http_status.HTTP_404_NOT_FOUND,
@@ -1190,7 +1190,7 @@ class OperatingModeViewSet(BaseModelViewSet):
 
             try:
                 ea_id = uuid.UUID(str(ea_id))
-            except (ValueError, AttributeError):
+            except ValueError, AttributeError:
                 errors.append(f"Step {i}: invalid elementary_action UUID.")
                 continue
 
@@ -1214,7 +1214,7 @@ class OperatingModeViewSet(BaseModelViewSet):
             for ant_id in antecedent_ids:
                 try:
                     ant_uuid = uuid.UUID(str(ant_id))
-                except (ValueError, AttributeError):
+                except ValueError, AttributeError:
                     errors.append(f"Step {i}: invalid antecedent UUID.")
                     continue
 
