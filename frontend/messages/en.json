@@ -3768,6 +3768,7 @@
 	"bodyFormatHelpText": "OCSF is a vendor-neutral schema understood by most SIEMs. Raw is the native CISO Assistant shape.",
 	"httpHeaders": "HTTP headers",
 	"httpHeadersHelpText": "JSON object of static auth headers (e.g. an Authorization header for a Splunk HEC token).",
+	"leaveBlankToKeepSecret": "A value is already set. Leave blank to keep it, or enter a new one to replace it.",
 	"auditSinkTargetDomainsHelpText": "Limit forwarding to these domains. Leave empty to forward events from all domains.",
 	"replayAuditEvents": "Replay events",
 	"replayAuditEventsHelpText": "Re-send historical audit events to this sink, e.g. to backfill after an outage. Events are read from the database (90-day retention).",

@@ -1,7 +1,7 @@
 from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 from django.urls.base import reverse_lazy
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 import uuid
 
 
@@ -39,8 +39,14 @@ class AbstractBaseModel(models.Model):
         if folder_id is None:
             from iam.models import Folder
 
-            folder = Folder.get_folder(self)
-            folder_id = folder.id if folder else None
+            # Runs in auditlog's synchronous delete receiver: a cascade may have
+            # already removed the FK target get_folder traverses, raising
+            # DoesNotExist. Never let metadata enrichment break the delete.
+            try:
+                folder = Folder.get_folder(self)
+                folder_id = folder.id if folder else None
+            except ObjectDoesNotExist:
+                folder_id = None
         return {"folder_id": str(folder_id) if folder_id else None}
 
     def is_unique_in_scope(self, scope: models.QuerySet, fields_to_check: list) -> bool:

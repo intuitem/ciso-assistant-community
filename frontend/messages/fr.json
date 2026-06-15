@@ -3707,6 +3707,7 @@
 	"bodyFormatHelpText": "OCSF est un schéma indépendant des éditeurs, compris par la plupart des SIEM. Raw correspond au format natif de CISO Assistant.",
 	"httpHeaders": "En-têtes HTTP",
 	"httpHeadersHelpText": "Objet JSON d'en-têtes d'authentification statiques (par ex. un en-tête Authorization pour un jeton Splunk HEC).",
+	"leaveBlankToKeepSecret": "Une valeur est déjà définie. Laissez vide pour la conserver, ou saisissez-en une nouvelle pour la remplacer.",
 	"auditSinkTargetDomainsHelpText": "Limiter le transfert à ces domaines. Laisser vide pour transférer les événements de tous les domaines.",
 	"replayAuditEvents": "Rejouer les événements",
 	"replayAuditEventsHelpText": "Renvoyer les événements d'audit historiques vers cette destination, par ex. pour rattraper une interruption. Les événements sont lus depuis la base (rétention de 90 jours).",

@@ -173,6 +173,7 @@
 							label={m.saslPassword()}
 							type="password"
 							autocomplete="off"
+							helpText={initialData?.has_sasl_password ? m.leaveBlankToKeepSecret() : undefined}
 						/>
 					</Dropdown>
 				{:else}
@@ -182,7 +183,9 @@
 						field="headers"
 						label={m.httpHeaders()}
 						autocomplete="off"
-						helpText={m.httpHeadersHelpText()}
+						helpText={initialData?.has_headers
+							? m.leaveBlankToKeepSecret()
+							: m.httpHeadersHelpText()}
 					/>
 				{/if}
 				<AutocompleteSelect

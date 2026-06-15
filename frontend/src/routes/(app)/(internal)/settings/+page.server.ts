@@ -156,9 +156,10 @@ function buildAuditSinkPayload(f: Record<string, any>): Record<string, any> {
 		is_active: f.is_active,
 		target_folders: f.target_folders,
 		url: '',
-		headers: {},
 		kafka_config: {}
 	};
+	// Secrets (headers, sasl password) are omitted when blank so the backend
+	// preserves/merges the stored value instead of wiping it on edit.
 	if (f.transport === 'kafka') {
 		const config: Record<string, string> = {};
 		if (f.security_protocol) config.security_protocol = f.security_protocol;

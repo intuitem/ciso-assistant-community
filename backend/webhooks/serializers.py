@@ -85,6 +85,12 @@ class AuditSinkSerializer(BaseModelSerializer):
         many=True, queryset=Folder.objects.all(), required=False
     )
 
+    # Auth secrets are write-only: never round-trip them to the client. headers
+    # may carry a SIEM token; the Kafka SASL password lives inside kafka_config.
+    headers = serializers.JSONField(write_only=True, required=False)
+    has_headers = serializers.SerializerMethodField()
+    has_sasl_password = serializers.SerializerMethodField()
+
     class Meta:
         model = WebhookEndpoint
         fields = [
@@ -95,13 +101,51 @@ class AuditSinkSerializer(BaseModelSerializer):
             "transport",
             "body_format",
             "headers",
+            "has_headers",
             "kafka_config",
+            "has_sasl_password",
             "is_active",
             "target_folders",
             "folder",
             "created_at",
         ]
         read_only_fields = ["id", "created_at"]
+
+    def get_has_headers(self, obj):
+        return bool(obj.headers)
+
+    def get_has_sasl_password(self, obj):
+        return bool(
+            (obj.kafka_config or {}).get("config", {}).get("sasl_plain_password")
+        )
+
+    def to_representation(self, instance):
+        # Strip the Kafka SASL password from the rendered kafka_config; the rest
+        # (servers, topic, mechanism, username) is needed for edit prefill.
+        data = super().to_representation(instance)
+        cfg = data.get("kafka_config") or {}
+        inner = cfg.get("config") or {}
+        if inner.get("sasl_plain_password"):
+            inner = {k: v for k, v in inner.items() if k != "sasl_plain_password"}
+            data["kafka_config"] = {**cfg, "config": inner}
+        return data
+
+    def update(self, instance, validated_data):
+        # kafka_config is a single JSON field sent whole on update; if the client
+        # omitted the password (kept blank), carry the stored one over.
+        new_kafka = validated_data.get("kafka_config")
+        if new_kafka is not None:
+            inner = new_kafka.get("config") or {}
+            if not inner.get("sasl_plain_password"):
+                old_pw = (
+                    (instance.kafka_config or {})
+                    .get("config", {})
+                    .get("sasl_plain_password")
+                )
+                if old_pw:
+                    new_kafka["config"] = {**inner, "sasl_plain_password": old_pw}
+                    validated_data["kafka_config"] = new_kafka
+        return super().update(instance, validated_data)
 
     def validate_target_folders(self, value):
         return _validate_accessible_folders(self.context.get("request"), value)

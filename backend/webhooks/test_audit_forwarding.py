@@ -282,3 +282,78 @@ def test_send_audit_to_kafka_misconfigured(root_folder):
         result = tasks.send_audit_to_kafka.call_local(str(ep.id), {"class_uid": 6003})
     assert result.startswith("Misconfigured")
     make.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_serializer_hides_secrets(root_folder):
+    from webhooks.serializers import AuditSinkSerializer
+
+    ep = _make_audit_sink(
+        root_folder,
+        transport=WebhookEndpoint.Transport.KAFKA,
+        headers={"Authorization": "Splunk token"},
+        kafka_config={
+            "bootstrap_servers": "b:9092",
+            "topic": "t",
+            "config": {"sasl_plain_username": "u", "sasl_plain_password": "secret"},
+        },
+    )
+    data = AuditSinkSerializer(ep).data
+    assert "headers" not in data
+    assert data["has_headers"] is True
+    assert data["has_sasl_password"] is True
+    # username kept for prefill, password stripped
+    assert data["kafka_config"]["config"]["sasl_plain_username"] == "u"
+    assert "sasl_plain_password" not in data["kafka_config"]["config"]
+
+
+@pytest.mark.django_db
+def test_update_preserves_sasl_password_when_blank(root_folder):
+    from webhooks.serializers import AuditSinkSerializer
+
+    ep = _make_audit_sink(
+        root_folder,
+        transport=WebhookEndpoint.Transport.KAFKA,
+        kafka_config={
+            "bootstrap_servers": "b:9092",
+            "topic": "t",
+            "config": {"sasl_plain_username": "u", "sasl_plain_password": "secret"},
+        },
+    )
+    serializer = AuditSinkSerializer()
+    serializer.update(
+        ep,
+        {
+            "kafka_config": {
+                "bootstrap_servers": "b:9092",
+                "topic": "t2",
+                "config": {"sasl_plain_username": "u"},
+            }
+        },
+    )
+    ep.refresh_from_db()
+    assert ep.kafka_config["topic"] == "t2"
+    assert ep.kafka_config["config"]["sasl_plain_password"] == "secret"
+
+
+@pytest.mark.django_db
+def test_get_additional_data_survives_cascade_doesnotexist(root_folder):
+    # get_additional_data runs in auditlog's synchronous delete receiver; a
+    # cascade may have removed the FK target get_folder traverses. It must
+    # degrade to folder_id=None instead of raising into the delete.
+    p = Perimeter(name="ghost")
+    p.folder_id = None
+    with patch.object(Folder, "get_folder", side_effect=Folder.DoesNotExist):
+        assert p.get_additional_data() == {"folder_id": None}
+
+
+@pytest.mark.django_db
+def test_update_preserves_headers_when_omitted(root_folder):
+    from webhooks.serializers import AuditSinkSerializer
+
+    ep = _make_audit_sink(root_folder, headers={"Authorization": "Splunk token"})
+    with override_settings(WEBHOOK_ALLOW_PRIVATE_IPS=True):
+        AuditSinkSerializer().update(ep, {"url": "https://siem.example/v2"})
+    ep.refresh_from_db()
+    assert ep.url == "https://siem.example/v2"
+    assert ep.headers == {"Authorization": "Splunk token"}
