@@ -369,7 +369,7 @@
 										onfocus={() => handleButtonFocus(index)}
 										class="toc-link w-full text-left px-2 py-1 rounded transition-colors duration-150
                                                {activeId === item.id
-											? 'bg-primary-100 text-primary-700 font-medium border-l-2 border-primary-500'
+											? 'bg-primary-100-900 text-primary-700-300 font-medium border-l-2 border-primary-500'
 											: 'text-surface-600-400 hover:bg-surface-100-900 hover:text-surface-800-200'}
                                                {focusedIndex === index
 											? 'ring-2 ring-primary-300'
@@ -444,6 +444,10 @@
 		background-color: rgba(255, 255, 255, 0.95);
 	}
 
+	:global(.dark) .toc-content {
+		background-color: rgba(28, 30, 38, 0.95);
+	}
+
 	.toc-link {
 		word-break: break-word;
 		line-height: 1.3;
@@ -451,7 +455,7 @@
 
 	:global(.toc-link mark) {
 		background-color: #fef08a;
-		color: inherit;
+		color: #1e293b;
 		padding: 0 2px;
 		border-radius: 2px;
 	}
@@ -482,5 +486,13 @@
 
 	.toc-nav::-webkit-scrollbar-thumb:hover {
 		background: #94a3b8;
+	}
+
+	:global(.dark) .toc-nav::-webkit-scrollbar-track {
+		background: #2a2d36;
+	}
+
+	:global(.dark) .toc-nav::-webkit-scrollbar-thumb {
+		background: #4b5563;
 	}
 </style>
