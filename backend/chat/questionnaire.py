@@ -945,7 +945,7 @@ def refresh_folder_index(folder_id: str) -> dict:
         try:
             app_label, model_name = model_path.split(".")
             model_class = apps.get_model(app_label, model_name)
-        except (LookupError, ValueError):
+        except LookupError, ValueError:
             continue
         try:
             qs = model_class.objects.filter(folder_id=folder_id_str)
@@ -1910,7 +1910,7 @@ def _critique(
     parsed = _parse_json_response(raw) or {}
     try:
         score = float(parsed.get("score", 0.0))
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         score = 0.0
     score = max(0.0, min(1.0, score))
     issue = (parsed.get("issue") or "").strip()
