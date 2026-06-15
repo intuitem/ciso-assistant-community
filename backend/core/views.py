@@ -15325,7 +15325,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         same_framework = source_audit.framework_id == target_audit.framework_id
 
         with transaction.atomic():
-            target_ras = RequirementAssessment.objects.filter(
+            target_ras = RequirementAssessment.objects.select_related(
+                "requirement"
+            ).filter(
                 compliance_assessment=target_audit,
                 requirement__urn__in=merged_target.keys(),
             )
