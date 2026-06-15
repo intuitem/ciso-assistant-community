@@ -2089,6 +2089,23 @@ class FrameworkReadSerializer(ReferentialSerializer):
     # the backend will actually save.
     effective_field_visibility = serializers.SerializerMethodField()
 
+    implementation_groups_definition = serializers.SerializerMethodField()
+
+    def get_implementation_groups_definition(self, obj):
+        lang = get_language()
+        return [
+            {
+                **{k: v for k, v in group.items() if k != "translations"},
+                "name": group.get("translations", {})
+                .get(lang, {})
+                .get("name", group.get("name", "")),
+                "description": group.get("translations", {})
+                .get(lang, {})
+                .get("description", group.get("description", "")),
+            }
+            for group in (obj.implementation_groups_definition or [])
+        ]
+
     def get_has_editing_draft(self, obj):
         return obj.editing_draft is not None
 
