@@ -239,14 +239,14 @@
 		<div class="p-4 flex flex-col space-y-4">
 			<div class="flex flex-col">
 				<h3 class="h3 font-medium">{m.securitySettings()}</h3>
-				<p class="text-sm text-surface-800">{m.securitySettingsDescription()}</p>
+				<p class="text-sm text-surface-800-200">{m.securitySettingsDescription()}</p>
 			</div>
 			<hr />
 			<div class="flow-root">
-				<dl class="-my-3 divide-y divide-surface-100 text-sm">
+				<dl class="-my-3 divide-y divide-surface-100-900 text-sm">
 					<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
 						<dt class="font-medium">{m.multiFactorAuthentication()}</dt>
-						<dd class="text-surface-900 sm:col-span-2">
+						<dd class="text-surface-900-100 sm:col-span-2">
 							<div class="card p-4 bg-inherit w-fit flex flex-col space-y-3">
 								<div class="flex flex-col space-y-2">
 									<span class="flex flex-row justify-between text-xl">
@@ -259,7 +259,7 @@
 										<h6 class="h6 base-font-color">{m.authenticatorApp()}</h6>
 										<p class="badge h-fit preset-tonal-secondary">{m.recommended()}</p>
 									</span>
-									<p class="text-sm text-surface-800 max-w-[50ch]">
+									<p class="text-sm text-surface-800-200 max-w-[50ch]">
 										{m.authenticatorAppDescription()}
 									</p>
 								</div>
@@ -286,10 +286,10 @@
 						</dd>
 					</div>
 				</dl>
-				<dl class="-my-3 divide-y divide-surface-100 text-sm">
+				<dl class="-my-3 divide-y divide-surface-100-900 text-sm">
 					<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
 						<dt class="font-medium">{m.securityKeys()}</dt>
-						<dd class="text-surface-900 sm:col-span-2">
+						<dd class="text-surface-900-100 sm:col-span-2">
 							<div class="card p-4 bg-inherit w-fit flex flex-col space-y-3">
 								<div class="flex flex-col space-y-2">
 									<span class="flex flex-row justify-between text-xl">
@@ -301,7 +301,7 @@
 									<span class="flex flex-row space-x-2">
 										<h6 class="h6 base-font-color">{m.securityKeys()}</h6>
 									</span>
-									<p class="text-sm text-surface-800 max-w-[50ch]">
+									<p class="text-sm text-surface-800-200 max-w-[50ch]">
 										{m.securityKeyDescription()}
 									</p>
 								</div>
@@ -311,7 +311,7 @@
 											<li class="flex flex-row justify-between items-center card p-3 bg-inherit">
 												<span class="flex flex-col">
 													<p class="font-medium">{credential.name}</p>
-													<p class="text-xs text-surface-600">
+													<p class="text-xs text-surface-600-400">
 														{formatDate(new Date(credential.created_at * 1000), false, getLocale())}
 													</p>
 												</span>
@@ -326,7 +326,7 @@
 										{/each}
 									</ul>
 								{:else}
-									<p class="text-sm text-surface-600">{m.noSecurityKeysRegistered()}</p>
+									<p class="text-sm text-surface-600-400">{m.noSecurityKeysRegistered()}</p>
 								{/if}
 								<div class="flex flex-wrap gap-2">
 									{#if data.webauthnCreationOptions}
@@ -343,10 +343,10 @@
 					</div>
 				</dl>
 				{#if data.patAllowed}
-					<dl class="-my-3 divide-y divide-surface-100 text-sm">
+					<dl class="-my-3 divide-y divide-surface-100-900 text-sm">
 						<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
 							<dt class="font-medium">{m.personalAccessTokens()}</dt>
-							<dd class="text-surface-900 sm:col-span-2">
+							<dd class="text-surface-900-100 sm:col-span-2">
 								<div class="card p-4 bg-inherit w-fit flex flex-col space-y-3">
 									<div class="flex flex-col space-y-2">
 										<span class="flex flex-row justify-between text-xl">
@@ -358,7 +358,7 @@
 										<span class="flex flex-row space-x-2">
 											<h6 class="h6 text-token">{m.personalAccessTokens()}</h6>
 										</span>
-										<p class="text-sm text-surface-800 max-w-[65ch]">
+										<p class="text-sm text-surface-800-200 max-w-[65ch]">
 											{m.personalAccessTokensDescription()}
 										</p>
 										<div class="card p-4 preset-tonal-warning max-w-[65ch]">
@@ -409,16 +409,16 @@
 		<div class="p-4 flex flex-col space-y-4">
 			<div class="flex flex-col">
 				<h3 class="h3 font-medium">{m.preferencesSettings()}</h3>
-				<p class="text-sm text-surface-800">{m.preferencesSettingsDescription()}</p>
+				<p class="text-sm text-surface-800-200">{m.preferencesSettingsDescription()}</p>
 			</div>
 			<hr />
 			<div class="flow-root">
-				<dl class="-my-3 divide-y divide-surface-100 text-sm">
+				<dl class="-my-3 divide-y divide-surface-100-900 text-sm">
 					<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
 						<dt class="font-medium">{m.theme()}</dt>
-						<dd class="text-surface-900 sm:col-span-2">
+						<dd class="text-surface-900-100 sm:col-span-2">
 							<div class="flex flex-col space-y-2 max-w-[40ch]">
-								<p class="text-sm text-surface-800">{m.themeDescription()}</p>
+								<p class="text-sm text-surface-800-200">{m.themeDescription()}</p>
 								<select
 									class="select"
 									data-testid="theme-select"
@@ -433,12 +433,12 @@
 						</dd>
 					</div>
 				</dl>
-				<dl class="-my-3 divide-y divide-surface-100 text-sm">
+				<dl class="-my-3 divide-y divide-surface-100-900 text-sm">
 					<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
 						<dt class="font-medium">{m.dateFormat()}</dt>
-						<dd class="text-surface-900 sm:col-span-2">
+						<dd class="text-surface-900-100 sm:col-span-2">
 							<div class="flex flex-col space-y-2 max-w-[40ch]">
-								<p class="text-sm text-surface-800">{m.dateFormatDescription()}</p>
+								<p class="text-sm text-surface-800-200">{m.dateFormatDescription()}</p>
 								<select
 									class="select"
 									data-testid="date-format-select"
@@ -449,7 +449,7 @@
 										<option value={option.value}>{option.label}</option>
 									{/each}
 								</select>
-								<p class="text-xs text-surface-600">
+								<p class="text-xs text-surface-600-400">
 									{sampleDateForPreference(dateFormat, getLocale())}
 								</p>
 							</div>
