@@ -671,6 +671,7 @@ export const FeatureFlagsSchema = z.object({
 	validation_flows: z.boolean().optional(),
 	focus_mode: z.boolean().optional(),
 	outgoing_webhooks: z.boolean().optional(),
+	audit_log_forwarding: z.boolean().optional(),
 	metrology: z.boolean().optional(),
 	personal_data: z.boolean().optional(),
 	purposes: z.boolean().optional(),
@@ -1877,6 +1878,27 @@ export const webhookEndpointSchema = z.object({
 	secret: z.string().min(1).optional(),
 	target_folders: z.string().uuid().optional().array().optional(),
 	payload_format: z.enum(['thin', 'full']).default('full')
+});
+
+export const auditSinkSchema = z.object({
+	...NameDescriptionMixin,
+	id: z.string().optional(),
+	transport: z.enum(['http', 'kafka']).default('http'),
+	url: z.string().url().optional().or(z.literal('')),
+	body_format: z.enum(['ocsf', 'raw']).default('ocsf'),
+	// HTTP: JSON of auth headers, parsed server-side.
+	headers: z.string().optional(),
+	// Kafka: assembled server-side into kafka_config {bootstrap_servers, topic, config}.
+	bootstrap_servers: z.string().optional(),
+	topic: z.string().optional(),
+	security_protocol: z
+		.enum(['PLAINTEXT', 'SSL', 'SASL_PLAINTEXT', 'SASL_SSL'])
+		.default('PLAINTEXT'),
+	sasl_mechanism: z.string().optional(),
+	sasl_username: z.string().optional(),
+	sasl_password: z.string().optional(),
+	target_folders: z.string().uuid().optional().array().optional(),
+	is_active: z.boolean().default(true)
 });
 
 export const activateTOTPSchema: ZodSchema = z.object({

@@ -354,6 +354,7 @@ dependencies = [
     { name = "humanize" },
     { name = "icecream" },
     { name = "jira" },
+    { name = "kafka-python" },
     { name = "markdown" },
     { name = "matplotlib" },
     { name = "numpy" },
@@ -415,6 +416,7 @@ requires-dist = [
     { name = "humanize", specifier = ">=4.15.0,<5" },
     { name = "icecream", specifier = ">=2.1.8,<3" },
     { name = "jira", specifier = ">=3.10.5,<4" },
+    { name = "kafka-python", specifier = ">=2.0.6,<3" },
     { name = "markdown", specifier = ">=3.10.2,<4" },
     { name = "matplotlib", specifier = ">=3.10.8,<4" },
     { name = "numpy", specifier = ">=2.4.1,<3" },
@@ -1214,6 +1216,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/19/74/a633ee74eb36c44aa6d1095e7cc5569bebf04342ee146178e2d36600708b/jsonschema_specifications-2025.9.1.tar.gz", hash = "sha256:b540987f239e745613c7a9176f3edb72b832a4ac465cf02712288397832b5e8d", size = 32855, upload-time = "2025-09-08T01:34:59.186Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/41/45/1a4ed80516f02155c51f51e8cedb3c1902296743db0bbc66608a0db2814f/jsonschema_specifications-2025.9.1-py3-none-any.whl", hash = "sha256:98802fee3a11ee76ecaca44429fda8a41bff98b00a0f2838151b113f210cc6fe", size = 18437, upload-time = "2025-09-08T01:34:57.871Z" },
+]
+
+[[package]]
+name = "kafka-python"
+version = "2.3.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/c6/7e/9eb4363e5018b71edf77de3d2fbd687f1e3a55d43101138a5b7f2ca56d97/kafka_python-2.3.2.tar.gz", hash = "sha256:2d2469bcabc2551be7eaf7fb512e1241484d358800f2665b90e7e24fea84259d", size = 357589, upload-time = "2026-06-03T22:46:49.022Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4f/db/cfe23cfacc9aabeef59e349aa6c2738d195df1d56ccf8c31362abdd68ddb/kafka_python-2.3.2-py2.py3-none-any.whl", hash = "sha256:e8a5e6f2c4ce13a8041669337038d5125e0e09e6d6f0911902ae5939e5b9595e", size = 326623, upload-time = "2026-06-03T22:46:47.417Z" },
 ]
 
 [[package]]
