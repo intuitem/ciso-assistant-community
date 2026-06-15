@@ -6871,6 +6871,12 @@ class ComplianceAssessment(Assessment):
     class Meta:
         verbose_name = _("Compliance assessment")
         verbose_name_plural = _("Compliance assessments")
+        permissions = [
+            (
+                "view_compliance_assessment_full",
+                "Can view the full auditor view of a compliance assessment (all rows and fields)",
+            ),
+        ]
 
     # --- Visibility-derived booleans ---
     # These mirror legacy boolean fields. Storage is `field_visibility` keyed by
@@ -9704,7 +9710,7 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
             return "VAL.000001"
         try:
             suffix = int(last.ref_id.split(".")[1])
-        except (IndexError, ValueError):
+        except IndexError, ValueError:
             # Fallback if existing data is malformed
             suffix = 0
         return f"VAL.{suffix + 1:06d}"
