@@ -380,7 +380,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
                                     ),
                                     status=HTTP_400_BAD_REQUEST,
                                 )
-                        except (ValueError, TypeError):
+                        except ValueError, TypeError:
                             compat_mode = 0
 
                         # Initialize handler (uses ENABLE_SANDBOX setting automatically)
