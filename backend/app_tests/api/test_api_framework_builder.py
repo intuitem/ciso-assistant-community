@@ -2656,6 +2656,65 @@ class TestFrameworkBuilderUrnRename:
         assert fw.ref_id == "renamable-fw"
         assert rn.urn == "urn:custom:risk:req_node:renamable-fw:1"
 
+    def test_noop_publish_allowed_when_ref_id_column_empty(
+        self, authenticated_client, app_config
+    ):
+        """A framework whose ref_id column is empty (e.g. created before ref_id
+        was persisted, or duplicated without it) but whose child URNs carry a
+        slug must stay republishable when audits exist. start_editing seeds the
+        draft ref_id from the URN slug; reconcile must treat that as the current
+        identity, not a rename, otherwise a no-op republish is wrongly blocked.
+        """
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Legacy FW",
+            folder=folder,
+            is_published=True,
+            urn_namespace="custom",
+            ref_id="",  # the bug condition: ref_id was never persisted
+        )
+        RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:custom:risk:req_node:legacy-slug:1",
+            ref_id="1",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        perimeter = Perimeter.objects.create(name="Perim", folder=folder)
+        ComplianceAssessment.objects.create(
+            name="CA",
+            framework=fw,
+            folder=folder,
+            perimeter=perimeter,
+            is_published=True,
+            min_score=0,
+            max_score=100,
+        )
+
+        # Real flow: start_editing seeds the draft (ref_id taken from URN slug).
+        start_url = reverse("frameworks-start-editing", args=[fw.id])
+        start_response = authenticated_client.post(start_url)
+        assert start_response.status_code == 200
+        # Pin the seed itself: start_editing must derive ref_id from the URN slug.
+        assert (
+            start_response.data["editing_draft"]["framework_meta"]["ref_id"]
+            == "legacy-slug"
+        )
+
+        # Publish the seeded draft unchanged — must not trip the rename guard.
+        publish_url = reverse("frameworks-publish-draft", args=[fw.id])
+        response = authenticated_client.post(publish_url)
+        assert response.status_code == 200, response.data
+
+        fw.refresh_from_db()
+        rn = RequirementNode.objects.get(framework=fw)
+        # No rename happened; the URN slug is preserved.
+        assert rn.urn == "urn:custom:risk:req_node:legacy-slug:1"
+        # The empty ref_id column heals with the derived slug so future
+        # publishes no longer depend on URN reconstruction.
+        assert fw.ref_id == "legacy-slug"
+
     def test_rename_blocked_on_cross_framework_collision(
         self, authenticated_client, fw_tree
     ):
@@ -2990,3 +3049,242 @@ class TestFrameworkBuilderUrnRename:
         ca_after.refresh_from_db()
 
         assert ca_after.computed_outcome == pre_outcome
+
+
+@pytest.mark.django_db
+class TestFrameworkBuilderDraftValidation:
+    """Structural draft validation: malformed drafts must yield actionable
+    400s instead of the generic 'Failed to publish draft' catch-all, and
+    child URNs are locked while compliance assessments exist."""
+
+    @pytest.fixture
+    def fw_with_tree(self, app_config):
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Validation FW",
+            folder=folder,
+            is_published=True,
+            urn_namespace="custom",
+            ref_id="validation-fw",
+        )
+        rn = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:custom:risk:req_node:validation-fw:1",
+            ref_id="1",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        q = Question.objects.create(
+            requirement_node=rn,
+            urn="urn:custom:risk:question:validation-fw:q1",
+            text="Are you compliant?",
+            type="unique_choice",
+            order=0,
+            folder=folder,
+            is_published=True,
+        )
+        c = QuestionChoice.objects.create(
+            question=q,
+            urn="urn:custom:risk:question_choice:validation-fw:c1",
+            value="yes",
+            order=0,
+            folder=folder,
+            is_published=True,
+        )
+        return fw, rn, q, c, folder
+
+    @staticmethod
+    def _start_and_get_draft(client, fw):
+        start_url = reverse("frameworks-start-editing", args=[fw.id])
+        response = client.post(start_url)
+        assert response.status_code == 200
+        return response.data["editing_draft"]
+
+    @staticmethod
+    def _save_and_publish(client, fw, draft):
+        save_url = reverse("frameworks-save-draft", args=[fw.id])
+        response = client.patch(save_url, {"editing_draft": draft}, format="json")
+        assert response.status_code == 200, response.data
+        publish_url = reverse("frameworks-publish-draft", args=[fw.id])
+        return client.post(publish_url)
+
+    @staticmethod
+    def _attach_audit(fw, folder):
+        perimeter = Perimeter.objects.create(name="Perim", folder=folder)
+        return ComplianceAssessment.objects.create(
+            name="CA",
+            framework=fw,
+            folder=folder,
+            perimeter=perimeter,
+            is_published=True,
+            min_score=0,
+            max_score=100,
+        )
+
+    def test_publish_rejects_missing_node_id(self, authenticated_client, fw_with_tree):
+        fw, rn, q, c, folder = fw_with_tree
+        draft = self._start_and_get_draft(authenticated_client, fw)
+        del draft["nodes"][0]["id"]
+
+        response = self._save_and_publish(authenticated_client, fw, draft)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "missing or invalid id" in response.data["error"]
+
+    def test_publish_rejects_duplicate_question_urn(
+        self, authenticated_client, fw_with_tree
+    ):
+        fw, rn, q, c, folder = fw_with_tree
+        draft = self._start_and_get_draft(authenticated_client, fw)
+        dup = copy.deepcopy(draft["questions"][0])
+        dup["id"] = str(uuid.uuid4())  # new question, same URN
+        draft["questions"].append(dup)
+
+        response = self._save_and_publish(authenticated_client, fw, draft)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Duplicate URN" in response.data["error"]
+
+    def test_duplicate_node_id_error_names_both_requirements(
+        self, authenticated_client, fw_with_tree
+    ):
+        """The duplicate-node_id error must name the two colliding requirements,
+        not just the bare (UI-invisible) node_id, so the user can locate them."""
+        fw, rn, q, c, folder = fw_with_tree
+        draft = self._start_and_get_draft(authenticated_client, fw)
+        # Give the original a distinct, non-numeric label so the assertions
+        # below can tell it apart from the bare node_id "1".
+        draft["nodes"][0]["ref_id"] = None
+        draft["nodes"][0]["name"] = "Original requirement"
+        # Second node, distinct id, but a URN colliding on node_id "1". No
+        # ref_id so its label falls back to the (human) name.
+        dup = copy.deepcopy(draft["nodes"][0])
+        dup["id"] = str(uuid.uuid4())
+        dup["name"] = "Colliding requirement"
+        draft["nodes"].append(dup)
+
+        response = self._save_and_publish(authenticated_client, fw, draft)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        error = response.data["error"]
+        assert "internal identifier '1'" in error
+        # Both requirement labels appear so support/users can find them.
+        assert "Original requirement" in error
+        assert "Colliding requirement" in error
+
+    def test_publish_rejects_oversized_question_urn(
+        self, authenticated_client, fw_with_tree
+    ):
+        fw, rn, q, c, folder = fw_with_tree
+        draft = self._start_and_get_draft(authenticated_client, fw)
+        draft["questions"][0]["urn"] = (
+            "urn:custom:risk:question:validation-fw:" + "x" * 300
+        )
+
+        response = self._save_and_publish(authenticated_client, fw, draft)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "max 255" in response.data["error"]
+
+    def test_preview_rejects_malformed_draft(self, authenticated_client, fw_with_tree):
+        """Preview must 400 with a real message on malformed drafts, not 500."""
+        fw, rn, q, c, folder = fw_with_tree
+        draft = self._start_and_get_draft(authenticated_client, fw)
+        draft["nodes"][0]["id"] = "not-a-uuid"
+        save_url = reverse("frameworks-save-draft", args=[fw.id])
+        authenticated_client.patch(save_url, {"editing_draft": draft}, format="json")
+
+        preview_url = reverse("frameworks-publish-draft-preview", args=[fw.id])
+        response = authenticated_client.post(preview_url)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "missing or invalid id" in response.data["error"]
+
+    def test_child_urn_change_blocked_with_audits(
+        self, authenticated_client, fw_with_tree
+    ):
+        fw, rn, q, c, folder = fw_with_tree
+        self._attach_audit(fw, folder)
+        draft = self._start_and_get_draft(authenticated_client, fw)
+        draft["nodes"][0]["urn"] = "urn:custom:risk:req_node:validation-fw:1-moved"
+
+        response = self._save_and_publish(authenticated_client, fw, draft)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Cannot change the URN of existing" in response.data["error"]
+
+        rn.refresh_from_db()
+        assert rn.urn == "urn:custom:risk:req_node:validation-fw:1"
+
+    def test_child_urn_change_allowed_without_audits(
+        self, authenticated_client, fw_with_tree
+    ):
+        fw, rn, q, c, folder = fw_with_tree
+        draft = self._start_and_get_draft(authenticated_client, fw)
+        draft["nodes"][0]["urn"] = "urn:custom:risk:req_node:validation-fw:1-moved"
+
+        response = self._save_and_publish(authenticated_client, fw, draft)
+        assert response.status_code == 200, response.data
+
+        rn.refresh_from_db()
+        assert rn.urn == "urn:custom:risk:req_node:validation-fw:1-moved"
+
+    def test_cross_framework_collision_blocked_with_audits(
+        self, authenticated_client, fw_with_tree
+    ):
+        """Auto-disambiguation rewrites every draft URN sharing the slug,
+        including existing audit-referenced rows. It must be refused when
+        audits exist rather than silently breaking URN stability."""
+        fw, rn, q, c, folder = fw_with_tree
+        self._attach_audit(fw, folder)
+        # Another framework already owns the URN a new node would take.
+        other = Framework.objects.create(
+            name="Other FW",
+            folder=folder,
+            is_published=True,
+            urn_namespace="custom",
+            ref_id="validation-fw",
+        )
+        RequirementNode.objects.create(
+            framework=other,
+            urn="urn:custom:risk:req_node:validation-fw:2",
+            ref_id="2",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        draft = self._start_and_get_draft(authenticated_client, fw)
+        new_node = copy.deepcopy(draft["nodes"][0])
+        new_node["id"] = str(uuid.uuid4())
+        new_node["urn"] = "urn:custom:risk:req_node:validation-fw:2"
+        new_node["ref_id"] = "2"
+        new_node["name"] = "New node"
+        draft["nodes"].append(new_node)
+
+        response = self._save_and_publish(authenticated_client, fw, draft)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "collide with another framework" in response.data["error"]
+        # Existing URN untouched.
+        rn.refresh_from_db()
+        assert rn.urn == "urn:custom:risk:req_node:validation-fw:1"
+
+    def test_publish_rejects_empty_draft_with_audits(
+        self, authenticated_client, fw_with_tree
+    ):
+        fw, rn, q, c, folder = fw_with_tree
+        self._attach_audit(fw, folder)
+        draft = self._start_and_get_draft(authenticated_client, fw)
+        draft["nodes"] = []
+        draft["questions"] = []
+        draft["choices"] = []
+
+        response = self._save_and_publish(authenticated_client, fw, draft)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "would erase" in response.data["error"]
+        assert RequirementNode.objects.filter(framework=fw).exists()
+
+    def test_publish_rejects_draft_from_newer_schema(
+        self, authenticated_client, fw_with_tree
+    ):
+        fw, rn, q, c, folder = fw_with_tree
+        draft = self._start_and_get_draft(authenticated_client, fw)
+        draft["schema_version"] = 99
+
+        response = self._save_and_publish(authenticated_client, fw, draft)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "newer version" in response.data["error"]

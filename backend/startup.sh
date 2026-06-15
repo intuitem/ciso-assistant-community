@@ -15,10 +15,10 @@ while ! python manage.py showmigrations iam >/dev/null; do
   echo "database not ready; waiting"
   sleep 15
 done
-poetry run python manage.py migrate --settings="${DJANGO_SETTINGS_MODULE}"
-poetry run python manage.py storelibraries --settings="${DJANGO_SETTINGS_MODULE}"
+python manage.py migrate --settings="${DJANGO_SETTINGS_MODULE}"
+python manage.py storelibraries --settings="${DJANGO_SETTINGS_MODULE}"
 if [ -n "$DJANGO_SUPERUSER_EMAIL" ]; then
-  poetry run python manage.py createsuperuser --noinput --settings="${DJANGO_SETTINGS_MODULE}"
+  python manage.py createsuperuser --noinput --settings="${DJANGO_SETTINGS_MODULE}"
 fi
 
 # Set default values for Gunicorn configuration

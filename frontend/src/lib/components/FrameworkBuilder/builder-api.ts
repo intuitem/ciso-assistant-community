@@ -7,6 +7,7 @@
  */
 
 export interface DraftJSON {
+	schema_version?: number;
 	framework_meta: {
 		name: string;
 		description: string | null;
@@ -93,14 +94,16 @@ export async function apiPublishDraftPreview(frameworkId: string): Promise<Publi
 	return (await handleResponse(res)) as PublishPreview;
 }
 
-/** Publish draft: POST to reconcile draft into relational DB */
-export async function apiPublishDraft(frameworkId: string): Promise<void> {
+/** Publish draft: POST to reconcile draft into relational DB.
+ * Returns non-fatal warnings from the backend (e.g. URN disambiguation). */
+export async function apiPublishDraft(frameworkId: string): Promise<string[]> {
 	const res = await fetch(`/frameworks/${frameworkId}/builder`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ _action: 'publish-draft' })
 	});
-	await handleResponse(res);
+	const data = (await handleResponse(res)) as { warnings?: string[] } | null;
+	return data?.warnings ?? [];
 }
 
 /** Discard draft: POST to throw away the draft */

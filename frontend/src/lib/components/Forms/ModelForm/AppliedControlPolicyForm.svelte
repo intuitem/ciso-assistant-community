@@ -86,6 +86,16 @@
 </script>
 
 {#if !duplicate}
+	{#if schema.shape.category}
+		<Select
+			{form}
+			options={model.selectOptions?.category}
+			field="category"
+			label={m.category()}
+			cacheLock={cacheLocks['category']}
+			bind:cachedValue={formDataCache['category']}
+		/>
+	{/if}
 	<AutocompleteSelect
 		{form}
 		multiple
@@ -143,13 +153,6 @@
 		icon="fa-solid fa-tasks"
 		header={m.projectManagement()}
 	>
-		<TextField
-			{form}
-			field="ref_id"
-			label={m.refId()}
-			cacheLock={cacheLocks['ref_id']}
-			bind:cachedValue={formDataCache['ref_id']}
-		/>
 		<Select
 			{form}
 			options={model.selectOptions?.priority}
@@ -273,16 +276,6 @@
 		icon="fa-solid fa-project-diagram"
 		header={m.relationships()}
 	>
-		{#if schema.shape.category}
-			<Select
-				{form}
-				options={model.selectOptions?.category}
-				field="category"
-				label={m.category()}
-				cacheLock={cacheLocks['category']}
-				bind:cachedValue={formDataCache['category']}
-			/>
-		{/if}
 		<Select
 			{form}
 			options={model.selectOptions?.csf_function}

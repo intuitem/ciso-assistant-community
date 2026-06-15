@@ -300,13 +300,6 @@
 			bind:cachedValue={formDataCache['anchor_na_to_target']}
 		/>
 	</div>
-	<TextField
-		{form}
-		field="ref_id"
-		label={m.refId()}
-		cacheLock={cacheLocks['ref_id']}
-		bind:cachedValue={formDataCache['ref_id']}
-	/>
 	<AutocompleteSelect
 		multiple
 		lazy

@@ -36,8 +36,11 @@ Most organisations have to demonstrate compliance against multiple frameworks at
 
 A mapping is a directed graph linking assessable nodes of a **source** (SRC) framework to assessable nodes of a **target** (TGT) framework, using the convention from [NIST's OLIR](https://csrc.nist.gov/projects/olir) project.
 
-Each relationship between a SRC node and a TGT node has a **type**:
+Each relationship between a SRC node and a TGT node has a **type**, which is easiest to read as a set relation between what each requirement covers:
 
+![Mapping relationship types as set relations between source and target requirements](<../.gitbook/assets/mapping-set-theory.png>)
+
+- **No relationship** — the two requirements are disjoint; nothing carries over.
 - **Equal** — the two requirements are equivalent in scope and intent.
 - **Subset** — the SRC requirement is contained within (narrower than) the TGT requirement.
 - **Superset** — the SRC requirement contains (is broader than) the TGT requirement.
@@ -54,6 +57,30 @@ Once a mapping library is loaded, it can be applied to an existing audit:
 3. The platform creates a new audit on the target framework and copies over the requirement assessments where the mapping is strong (typically _equal_), leaving the rest to be assessed.
 
 The apply-mapping feature can also clone an audit onto the **same** framework — useful for creating a new revision while keeping the previous one for history.
+
+## Transitive inference (pivot mappings)
+
+You don't need a direct mapping between every pair of frameworks. If the platform holds a mapping from **A → B** and another from **B → C**, it can **chain them automatically** to project an A audit onto C, using B as a *pivot* — even though no one ever authored an A → C crosswalk.
+
+```mermaid
+graph LR
+  A[Framework A<br/>your audit] -->|mapping set| B[Framework B<br/>pivot]
+  B -->|mapping set| C[Framework C<br/>target]
+  A -. inferred A → C .-> C
+  classDef pivot fill:#eef,stroke:#669;
+  classDef inferred stroke-dasharray:5 5;
+  class B pivot;
+```
+
+The mapping engine treats the loaded mapping sets as a directed graph of frameworks and searches for a path between your audit's framework and the target you pick. When you open an audit and choose **Apply mapping**, the list of available targets already includes every framework reachable through the graph — both directly mapped ones and those reachable only through one or more pivots. You select the destination; the chaining happens behind the scenes.
+
+How the chain behaves:
+
+- **Coverage degrades to the weakest hop.** Full-coverage relationships (`equal`, `superset`) chain cleanly. If *any* hop in the path is partial (`subset`, `intersect`), the projected result is marked partial and flagged for manual review — a chain is only as strong as its loosest link.
+- **The best path wins.** When several pivots connect A to C, the engine keeps the path that successfully maps the most requirements, and records which intermediate framework(s) it went through so the projection is auditable.
+- **Depth is bounded.** Chaining is limited by the **Mapping max depth** setting in [General settings](../configuration/settings/general.md) (default **3** nodes — i.e. up to one pivot, A → B → C). Raise it (up to 5) to allow longer chains (A → B → C → D…), at the cost of progressively weaker, more indirect inferences and slower computation.
+
+This is what makes a modest set of crosswalks go a long way: a hub framework such as ISO 27001 or NIST CSF that is mapped to many others effectively becomes a translation pivot between all of them.
 
 ## Loading vs authoring
 

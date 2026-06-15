@@ -1,0 +1,919 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:ccc-1-2020
+locale: en
+ref_id: ccc-1-2020
+name: Cloud Cybersecurity Controls (CCC-1:2020)
+description: 'NCA Cloud Cybersecurity Controls (CCC-1:2020), a modular extension of
+  the Essential Cybersecurity Controls (ECC) for cloud computing. 4 main domains /
+  24 subdomains / 55 main controls. Controls apply to Cloud Service Providers (CSP)
+  and/or Cloud Service Tenants (CST), modelled here as implementation groups. Reference:
+  https://nca.gov.sa'
+copyright: "\xA9 NCA"
+version: 1
+publication_date: 2026-06-09
+provider: NCA
+packager: community
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:ccc-1-2020
+    ref_id: ccc-1-2020
+    name: Cloud Cybersecurity Controls (CCC-1:2020)
+    description: NCA Cloud Cybersecurity Controls (CCC-1:2020). Controls carry a Provider
+      (P) or Tenant (T) marker; CSP controls and CST controls are exposed as implementation
+      groups so a single framework serves both cloud roles.
+    implementation_groups_definition:
+    - ref_id: CSP
+      name: Cloud Service Provider
+      description: Controls applicable to Cloud Service Providers (P marker in the
+        control ID).
+    - ref_id: CST
+      name: Cloud Service Tenant
+      description: Controls applicable to Cloud Service Tenants (T marker in the control
+        ID).
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:1
+      assessable: false
+      depth: 1
+      ref_id: '1'
+      name: Cybersecurity Governance
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:1-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:1
+      ref_id: 1-1
+      name: Cybersecurity Roles and Responsibilities
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:1-1-p-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:1-1
+      ref_id: 1-1-P-1
+      description: "In addition to the ECC control 1-4-1, the Authorizing Official\
+        \ shall also identify, document and approve: (1) Cybersecurity roles and RACI\
+        \ assignment for all stakeholders of the cloud services including Authorizing\
+        \ Official\u2019s roles and responsibilities."
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:1-1-t-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:1-1
+      ref_id: 1-1-T-1
+      description: "In addition to the ECC control 1-4-1, the Authorizing Official\
+        \ shall also identify, document and approve: (1) Cybersecurity roles and RACI\
+        \ assignment for all stakeholders of the cloud services including Authorizing\
+        \ Official\u2019s roles and responsibilities."
+      implementation_groups:
+      - CST
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:1-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:1
+      ref_id: 1-2
+      name: Cybersecurity Risk Management
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:1-2-p-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:1-2
+      ref_id: 1-2-P-1
+      description: 'Cybersecurity risk management methodology mentioned in the ECC
+        Subdomain 1-5, shall also include for the CSP, as a minimum: (1) Defining
+        acceptable risk levels for the cloud services, and clarifying them to the
+        CST if they are related to the CST. (2) Considering data and information classification
+        in cybersecurity risk management methodology. (3) Developing cybersecurity
+        risk register for cloud services, and monitoring it periodically according
+        to the risks.'
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:1-2-t-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:1-2
+      ref_id: 1-2-T-1
+      description: 'Cybersecurity risk management methodology mentioned in the ECC
+        Subdomain 1-5 shall also include for the CST, as a minimum: (1) Defining acceptable
+        risk levels for the cloud services. (2) Considering data and information classification
+        accredited by CST in cybersecurity risk management methodology. (3) Developing
+        cybersecurity risk register for cloud services, and monitoring it periodically
+        according to the risks.'
+      implementation_groups:
+      - CST
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:1-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:1
+      ref_id: 1-3
+      name: Compliance with Cybersecurity Standards, Laws and Regulations
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:1-3-p-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:1-3
+      ref_id: 1-3-P-1
+      description: 'In addition to the ECC control 1-7-1, the CSP legislative and
+        regulatory compliance should include as a minimum with the following requirements:
+        (1) Continuous compliance with all laws, regulations, instructions, decisions,
+        regulatory frameworks and controls, and mandates regarding cybersecurity in
+        KSA.'
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:1-3-t-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:1-3
+      ref_id: 1-3-T-1
+      description: 'In addition to the ECC control 1-7-1, the CST legislative and
+        regulatory compliance should include as a minimum with the following requirements:
+        (1) Continuous or real-time compliance monitoring of the CSP with relevant
+        cybersecurity legislation and contract clauses.'
+      implementation_groups:
+      - CST
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:1-4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:1
+      ref_id: 1-4
+      name: Cybersecurity in Human Resources
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:1-4-p-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:1-4
+      ref_id: 1-4-P-1
+      description: "In addition to subcontrols in the ECC controls 1-9-3 and 1-9-4,\
+        \ the following requirements should be covered prior and during the professional\
+        \ relationship of personnel with the CSP as a minimum: (1) Positions of cybersecurity\
+        \ functions in CSP\u2019s data centers within the KSA must be filled with\
+        \ qualified and suitable Saudi nationals. (2) Screening or vetting candidates\
+        \ of personnel working inside KSA who have access to Cloud Technology Stack,\
+        \ periodically. (3) Cybersecurity policies as a prerequisite to access to\
+        \ Cloud Technology Stack, signed and appropriately approved."
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:1-4-p-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:1-4
+      ref_id: 1-4-P-2
+      description: "In addition to subcontrols in the ECC control 1-9-5, the following\
+        \ requirements should be in place, as a minimum, for the termination/completion\
+        \ of a human resource\u2019s professional relationship with the CSP: (1) Assurance\
+        \ that assets owned by the organization (especially those with security exposure)\
+        \ are accounted for and returned upon termination."
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:1-4-t-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:1-4
+      ref_id: 1-4-T-1
+      description: 'In addition to subcontrols in the ECC control 1-9-3, the following
+        requirements should be covered prior the professional relationship of staff
+        with the CST shall cover, at a minimum: (1) Screening or vetting candidates
+        of personnel with access to Cloud Service sensitive functions (Key Management,
+        Service Administration, Access Control).'
+      implementation_groups:
+      - CST
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:1-5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:1
+      ref_id: 1-5
+      name: Cybersecurity in Change Management
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:1-5-p-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:1-5
+      ref_id: 1-5-P-1
+      description: Cybersecurity requirements for change management within the CSP
+        shall be identified, documented and approved.
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:1-5-p-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:1-5
+      ref_id: 1-5-P-2
+      description: Cybersecurity requirements for change management within the CSP
+        shall be applied.
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:1-5-p-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:1-5
+      ref_id: 1-5-P-3
+      description: 'Cybersecurity for change management in the CSP shall cover, as
+        a minimum: (1) Processes and procedures to securely implement changes (planned
+        works) in production systems, with priority given to cybersecurity observations.
+        (2) Process for the implementation of cybersecurity exceptional changes (e.g.:
+        changes during incident restoration).'
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:1-5-p-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:1-5
+      ref_id: 1-5-P-4
+      description: Cybersecurity requirements for change management within the CSP
+        shall be applied and reviewed periodically.
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: Cybersecurity Defense
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2
+      ref_id: 2-1
+      name: Asset Management
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-1-p-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-1
+      ref_id: 2-1-P-1
+      description: 'In addition to controls in the ECC control 2-1, the CSP shall
+        cover the following additional controls for cybersecurity requirements for
+        cybersecurity event logs and monitoring management, as a minimum: (1) Inventory
+        of all information and technology assets using suitable techniques such as
+        Configuration Management Database (CMDB) or similar capability containing
+        an inventory of all technical assets. (2) Identifying assets owners and involving
+        them in the asset management lifecycle.'
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-1-t-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-1
+      ref_id: 2-1-T-1
+      description: 'In addition to controls in the ECC control 2-1, the CST shall
+        cover the following additional controls for cybersecurity requirements for
+        cybersecurity event logs and monitoring management, as a minimum: (1) Inventory
+        of all cloud services and information and technology assets related to the
+        cloud services.'
+      implementation_groups:
+      - CST
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2
+      ref_id: 2-2
+      name: Identity and Access Management
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-2-p-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-2
+      ref_id: 2-2-P-1
+      description: "In addition to subcontrols in the ECC control 2-2-3, the CSP shall\
+        \ cover the following additional subcontrols for cybersecurity requirements\
+        \ for identity and access management requirements, as a minimum: (1) Identity\
+        \ and access management of generic accounts credentials for accountability\
+        \ cannot be assigned for a specific individual. (2) Secure session management,\
+        \ including session authenticity, session lockout, and session timeout termination.\
+        \ (3) Multi-factor authentication for privileged users, and candidates of\
+        \ personnel with access to Cloud Technology Stack. (4) Formal process to detect\
+        \ and prevent unauthorized access (e.g. unsuccessful login attempt threshold).\
+        \ (5) Utilizing secure methods and algorithms for saving and processing passwords,\
+        \ such as: Secure Hashing functions. (6) Secure management of third party\
+        \ personnel\u2019s accounts. (7) Access control enforced to management systems,\
+        \ administrative consoles. (8) Masking of displayed authentication inputs,\
+        \ especially passwords, to prevent shoulder surfing. (9) Getting CST\u2019\
+        s approval before accessing any CST-related asset by the CSP or CSP\u2019\
+        s third parties. (10) Capability to immediately interrupt a remote access\
+        \ session and prevent any future access for a user. (11) Provision to CSTs\
+        \ of Multi-factor authentication services for privileged cloud users. (12)\
+        \ Assurance of restricted and controlled access to storage systems and means\
+        \ (such as Storage Area Network (SAN))."
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-2-t-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-2
+      ref_id: 2-2-T-1
+      description: 'In addition to subcontrols in the ECC control 2-2-3, the CST shall
+        cover the following additional subcontrols for cybersecurity requirements
+        for identity and access management requirements, as a minimum: (1) Identity
+        and access management for all cloud credentials along their full lifecycle.
+        (2) Confidentiality of cloud user identification, cloud credential and cloud
+        access rights information, including the requirement on users to keep them
+        private (for employed, third party and CST personnel). (3) Secure session
+        management, including session authenticity, session lockout, and session timeout
+        termination on the cloud. (4) Multi-factor authentication for privileged cloud
+        users. (5) Formal process to detect and prevent unauthorized access to cloud
+        (such as a threshold of unsuccessful login attempts).'
+      implementation_groups:
+      - CST
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2
+      ref_id: 2-3
+      name: Information System and Information Processing Facilities Protection
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-3-p-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-3
+      ref_id: 2-3-P-1
+      description: "In addition to subcontrols in the ECC control 2-3-3, the CSP shall\
+        \ cover the following additional subcontrols for cybersecurity requirements\
+        \ for information system and processing facilities protection requirements,\
+        \ as a minimum: (1) Ensuring that all configurations are applied in accordance\
+        \ to CSP\u2019s cybersecurity standards. (2) Assurance of separation and isolation\
+        \ of data, environments and information systems across CSTs, to prevent data\
+        \ commingling. (3) Adopting of cybersecurity principles for technical system\
+        \ configurations adhering to the minimum functionality principle. (4) Ability\
+        \ of the Cloud Technology Stacks to securely handle input validation, exceptions\
+        \ and failure. (5) Full isolation of security functions and applications from\
+        \ other functions and applications in the Cloud Technology Stack. (6) Notification\
+        \ to CSTs with cybersecurity requirements provided by the CSP that are useable\
+        \ by the CST. (7) Detection and prevention of unauthorized changes to softwares,\
+        \ and systems. (8) Complete isolation and protection of multiple guest environments.\
+        \ (9) The community cloud services provided to CSTs (government organizations\
+        \ and CNI organizations) shall be isolated from any other cloud computing\
+        \ provided to organizations outside the scope of work. (10) Provide cloud\
+        \ computing services from within the KSA, including systems used for storage,\
+        \ processing, and disaster recovery centers. (11) Provide cloud computing\
+        \ services from within the KSA, including systems used for monitoring, and\
+        \ support. (12) Modern technologies, such as Endpoint Detection and Response\
+        \ (EDR) technologies, to ensure that the information servers and devices of\
+        \ CSP\u2019s information processing systems and devices of are ready for rapid\
+        \ response to incidents."
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-3-t-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-3
+      ref_id: 2-3-T-1
+      description: 'In addition to subcontrols in the ECC control 2-3-3, the CST shall
+        cover the following additional subcontrols for cybersecurity requirements
+        for information system and processing facilities protection requirements,
+        as a minimum: (1) Verifying that the CSP isolates the community cloud services
+        provided to CSTs (government organizations and CNI organizations) from any
+        other cloud computing provided to organizations outside the scope of work.'
+      implementation_groups:
+      - CST
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2
+      ref_id: 2-4
+      name: Networks Security Management
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-4-p-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-4
+      ref_id: 2-4-P-1
+      description: 'In addition to subcontrols in the ECC control 2-5-3, the CSP shall
+        cover the following additional subcontrols for cybersecurity requirements
+        for networks security management requirements, as a minimum: (1) Monitoring
+        of traffic across the external and internal networks to detect anomalies.
+        (2) Network isolation and protection of Cloud Technology Stack network from
+        other internal and external networks. (3) Protection from denial of service
+        attacks (including Distributed Denial of Service (DDoS)). (4) Protection of
+        data transmitted through the network; from and to the Cloud Technology Stack
+        network using cryptography primitives; for management and administrative access.
+        (5) Access control between different network segments. (6) Isolation between
+        cloud service delivery network, cloud management network and CSP enterprise
+        network.'
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-4-t-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-4
+      ref_id: 2-4-T-1
+      description: 'In addition to subcontrols in the ECC control 2-5-3, the CST shall
+        cover the following additional subcontrols for cybersecurity requirements
+        for networks security management requirements, as a minimum: (1) Protecting
+        the connection channel with CSP.'
+      implementation_groups:
+      - CST
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2
+      ref_id: 2-5
+      name: Mobile Devices Security
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-5-p-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-5
+      ref_id: 2-5-P-1
+      description: 'In addition to subcontrols in the ECC control 2-6-3, the CSP shall
+        cover the following additional subcontrols for cybersecurity requirements
+        for mobile device security, as a minimum: (1) Inventory of all end user and
+        mobile devices. (2) Centralized mobile device security management. (3) Screen
+        locking for end user devices. (4) Data sanitation and secure disposal for
+        end-user devices, especially for those with exposure to the Cloud Technology
+        Stack.'
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-5-t-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-5
+      ref_id: 2-5-T-1
+      description: 'In addition to subcontrols in the ECC control 2-6-3, the CST shall
+        cover the following additional subcontrols for cybersecurity requirements
+        for mobile device security, as a minimum: (1) Data sanitation and secure disposal
+        for end-user devices with access to the cloud services.'
+      implementation_groups:
+      - CST
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2
+      ref_id: 2-6
+      name: Data and Information Protection
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-6-p-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-6
+      ref_id: 2-6-P-1
+      description: "In addition to subcontrols in the ECC control 2-7-3, the CSP shall\
+        \ cover the following additional subcontrols for cybersecurity requirements\
+        \ for data and information protection requirements, as a minimum: (1) Prohibiting\
+        \ the use of Cloud Technology Stack\u2019s data in any environment other than\
+        \ production environment, except after applying strict controls for protecting\
+        \ that data, such as: data masking or data scrambling techniques. (2) Provision\
+        \ to CSTs of securely data storage processes, procedures, and technologies\
+        \ to comply with related legal and regulatory requirements. (3) Disposal of\
+        \ CST\u2019s data should be performed in a secure manner on termination or\
+        \ expiry of the contract with the CSP. (4) Commitment to maintain the confidentiality\
+        \ of the CST\u2019s data and information, according to related legal and regulatory\
+        \ requirements. (5) Providing CSTs with secure means to export and transfer\
+        \ data and virtual infrastructure"
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-6-t-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-6
+      ref_id: 2-6-T-1
+      description: "In addition to subcontrols in the ECC control 2-7-3, the CST shall\
+        \ cover the following additional subcontrols for cybersecurity requirements\
+        \ for protecting CST\u2019s data and information in cloud computing, as a\
+        \ minimum: (1) Exit Strategy to ensure means for secure disposal of data on\
+        \ termination or expiry of the contract with the CSP. (2) Using secure means\
+        \ to export and transfer data and virtual infrastructure."
+      implementation_groups:
+      - CST
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2
+      ref_id: 2-7
+      name: Cryptography
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-7-p-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-7
+      ref_id: 2-7-P-1
+      description: 'In addition to subcontrols in the ECC control 2-8-3, the CSP shall
+        cover the following additional subcontrols for cryptography, as a minimum:
+        (1) Technical mechanisms and cryptographic primitives for strong encryption,
+        in according to the advanced level in the National Cryptographic Standards
+        (NCS-1:2020). (2) Certification authority and issuance capability in a secure
+        manner, or usage of certificates from a trusted certification authority.'
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-7-t-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-7
+      ref_id: 2-7-T-1
+      description: 'In addition to subcontrols in the ECC control 2-8-3, the CST shall
+        cover the following additional subcontrols for cryptography, as a minimum:
+        (1) Technical mechanisms and cryptographic primitives for strong encryption,
+        in according to the advanced level in the National Cryptographic Standards
+        (NCS-1:2020). (2) Encryption of data and information transferred to or transferred
+        out of the cloud according to the relevant law and regulatory requirements.'
+      implementation_groups:
+      - CST
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2
+      ref_id: 2-8
+      name: Backup and Recovery Management
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-8-p-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-8
+      ref_id: 2-8-P-1
+      description: "In addition to subcontrols in the ECC control 2-9-3, the CSP shall\
+        \ cover the following additional subcontrols for cybersecurity requirements\
+        \ for backup and recovery management, as a minimum: (1) Securing access, storage\
+        \ and transfer of CST\u2019s data backups and its mediums, and protecting\
+        \ it against damage, amendment or unauthorized access. (2) Securing access,\
+        \ storage and transfer of Cloud Technology Stack backups and its mediums,\
+        \ and protecting it against damage, amendment or unauthorized access."
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2
+      ref_id: 2-9
+      name: Vulnerabilities Management
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-9-p-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-9
+      ref_id: 2-9-P-1
+      description: 'In addition to subcontrols in the ECC control 2-10-3, the CSP
+        shall cover the following additional subcontrols for cybersecurity requirements
+        for vulnerability management requirements, as a minimum: (1) Assessing and
+        remediating vulnerabilities on external components of Cloud Technology Stack
+        at least once every month, and at least once every three months for internal
+        components of Cloud Technology Stack. (2) Notification to CSTs of identified
+        vulnerabilities that may affecting them, and safeguards in place.'
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-9-t-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-9
+      ref_id: 2-9-T-1
+      description: 'In addition to subcontrols in the ECC control 2-10-3, the CST
+        shall cover the following additional subcontrols for cybersecurity requirements
+        for vulnerability management requirements, as a minimum: (1) Assessing and
+        remediating vulnerabilities cloud services and at least once every three months.
+        (2) Management of CSP-notified vulnerabilities safeguards in place.'
+      implementation_groups:
+      - CST
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2
+      ref_id: 2-10
+      name: Penetration Testing
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-10-p-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-10
+      ref_id: 2-10-P-1
+      description: 'In addition to subcontrols in the ECC control 2-11-3, the CSP
+        shall cover the following additional subcontrols for cybersecurity requirements
+        for penetration testing, as a minimum: (1) Scope of penetration tests must
+        cover Cloud Technology Stack and must be conducted at least once every six
+        months.'
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-11
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2
+      ref_id: 2-11
+      name: Cybersecurity Event Logs and Monitoring Management
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-11-p-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-11
+      ref_id: 2-11-P-1
+      description: 'In addition to subcontrols in the ECC control 2-12-3, the CSP
+        shall cover the following additional subcontrols for cybersecurity requirements
+        for cybersecurity event logs and monitoring management, as a minimum: (1)
+        Activating and protecting event logs and audit trails of Cloud Technology
+        Stack. (2) Activating and collecting of login attempts history. (3) Activating
+        and protecting all event logs of activities and operations performed by the
+        CSP at the tenant level in order to support forensic analysis. (4) Protecting
+        cybersecurity event logs from alteration, disclosure, destruction and unauthorized
+        access and unauthorized release, in accordance with regulatory, or law requirements.
+        (5) Continuous cybersecurity events monitoring using SIEM technique covering
+        the full Cloud Technology Stack. (6) Reviewing cybersecurity event logs and
+        audit trails periodically, covering CSP events in the Cloud Technology Stack.
+        (7) Automated monitoring and logging of remote access sessions event logs.
+        (8) Secure handling of user-related data found in the audit trails and the
+        cybersecurity event logs.'
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-11-t-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-11
+      ref_id: 2-11-T-1
+      description: 'In addition to subcontrols in the ECC control 2-12-3, the CST
+        shall cover the following additional subcontrols for cybersecurity requirements
+        for cybersecurity event logs and monitoring management, as a minimum: (1)
+        Activating and collecting of login event logs, and cybersecurity event logs
+        on assets related to cloud services. (2) Monitoring shall include all activated
+        cybersecurity logs on the cloud services of the CST.'
+      implementation_groups:
+      - CST
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-12
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2
+      ref_id: 2-12
+      name: Cybersecurity Incident and Threat Management
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-12-p-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-12
+      ref_id: 2-12-P-1
+      description: 'In addition to subcontrols in the ECC control 2-13-3, the CSP
+        shall cover the following additional subcontrols for cybersecurity requirements
+        for cybersecurity incident and threat management, as a minimum: (1) Subscribing
+        in authorized and specialized organizations and groups to stay up-to-date
+        on cybersecurity threats, common practices and key know-how. (2) Training
+        for employees and third-party personnel to respond to cybersecurity incidents,
+        in line with their roles and responsibilities. (3) Periodically testing the
+        incident response capability. (4) Root Cause Analysis of cybersecurity incidents
+        and developing plans to address them. (5) Support the CST in cases legal proceedings
+        and forensics, protecting the chain of custody that falls under the management
+        and responsibility of the CSP, in accordance with the related law and regulatory
+        requirements. (6) Real-time reporting to the CST of incidents that may affect
+        CST; if the incident is discovered. (7) Support for CSTs to handle security
+        incidents according to the agreement between the CSP and CST. (8) Measuring
+        and monitoring cybersecurity incident metrics and monitor compliance with
+        contracts and legislative requirements'
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-13
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2
+      ref_id: 2-13
+      name: Physical Security
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-13-p-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-13
+      ref_id: 2-13-P-1
+      description: "In addition to subcontrols in the ECC control 2-14-3, the CSP\
+        \ shall cover the following additional subcontrols for cybersecurity requirements\
+        \ for physical security, as a minimum: (1) Continual monitoring of access\
+        \ to CSP\u2019s sites and buildings. (2) Preventing unauthorized access to\
+        \ devices in the Cloud Technology Stack. (3) Disposal of cloud infrastructure\
+        \ hardware, in particular, storage equipment (external or internal), by adopting\
+        \ relevant legislation and best practices."
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-14
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2
+      ref_id: 2-14
+      name: Web Application Security
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-14-p-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-14
+      ref_id: 2-14-P-1
+      description: "In addition to subcontrols in the ECC control 2-15-3, the CSP\
+        \ shall cover the following additional subcontrols for cybersecurity requirements\
+        \ for web application security, as a minimum: (1) Protecting information involved\
+        \ in application service transactions against possible risks (e.g.: incomplete\
+        \ transmission, mis-routing, unauthorized message alteration, unauthorized\
+        \ disclosure\u2026.)."
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-15
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2
+      ref_id: 2-15
+      name: Key Management
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-15-p-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-15
+      ref_id: 2-15-P-1
+      description: Cybersecurity requirements for key management process within the
+        CSP shall be identified, documented and approved.
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-15-p-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-15
+      ref_id: 2-15-P-2
+      description: Cybersecurity requirements for key management process within the
+        CSP shall be applied.
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-15-p-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-15
+      ref_id: 2-15-P-3
+      description: 'In addition to the ECC subcontrol 2-8-3-2, cybersecurity requirements
+        for key management within the CSP shall cover, at minimum, the following:
+        (1) Ensure well-defined ownership for cryptographic keys. (2) A secure cryptographic
+        key retrieval mechanism in case of cryptographic key lost (such as backup
+        of keys and enforcement of trusted key storage, strictly external to cloud).
+        (3) Activating and monitoring of all audit trails of keys.'
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-15-p-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-15
+      ref_id: 2-15-P-4
+      description: Cybersecurity requirements for key management within the CSP shall
+        be reviewed periodically.
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-15-t-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-15
+      ref_id: 2-15-T-1
+      description: Cybersecurity requirements for key management within the CST shall
+        be identified, documented and approved.
+      implementation_groups:
+      - CST
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-15-t-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-15
+      ref_id: 2-15-T-2
+      description: Cybersecurity requirements for key management within the CST shall
+        applied.
+      implementation_groups:
+      - CST
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-15-t-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-15
+      ref_id: 2-15-T-3
+      description: 'In addition to the ECC subcontrol 2-8-3-2, cybersecurity requirements
+        for key management within the CST shall cover, at minimum, the following:
+        (1) Ensure well-defined ownership for cryptographic keys. (2) A secure data
+        retrieval mechanism in case of cryptographic encryption key lost (such as
+        backup of keys and enforcement of trusted key storage, strictly external to
+        cloud).'
+      implementation_groups:
+      - CST
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-15-t-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-15
+      ref_id: 2-15-T-4
+      description: Cybersecurity requirements for key management within the CST shall
+        be applied and reviewed periodically.
+      implementation_groups:
+      - CST
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-16
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2
+      ref_id: 2-16
+      name: System Development Security
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-16-p-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-16
+      ref_id: 2-16-P-1
+      description: Cybersecurity requirements for system development within the CSP
+        shall be identified, documented and approved.
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-16-p-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-16
+      ref_id: 2-16-P-2
+      description: Cybersecurity requirements for system development within the CSP
+        shall be applied.
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-16-p-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-16
+      ref_id: 2-16-P-3
+      description: 'Cybersecurity requirements for system development within the CSP
+        shall include as a minimum the following controls along the development lifecycle:
+        (1) Considering cybersecurity requirements of the Cloud Technology Stack and
+        relevant systems in the design and implementation of the cloud computing services.
+        (2) Protecting system development environments, testing environments (including
+        data used in testing environment), and integration platforms.'
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-16-p-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-16
+      ref_id: 2-16-P-4
+      description: Cybersecurity requirements for system development within the CSP
+        shall be applied and reviewed periodically.
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-17
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2
+      ref_id: 2-17
+      name: Storage Media Security
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-17-p-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-17
+      ref_id: 2-17-P-1
+      description: Cybersecurity requirements for usage of information and data media
+        within the CSP shall be identified, documented and approved.
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-17-p-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-17
+      ref_id: 2-17-P-2
+      description: Cybersecurity requirements for usage of information and data media
+        within the CSP shall be applied.
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-17-p-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-17
+      ref_id: 2-17-P-3
+      description: 'Cybersecurity requirements for usage of information and data media
+        within the CSP shall cover, at minimum, the following: (1) Enforcement of
+        sanitization of media, prior to disposal or reuse. (2) Using secure means
+        when disposing of media. (3) Provision to maintain confidentiality and integrity
+        of data on removable media. (4) Human readable labelling of media, to explain
+        its classification and the sensitivity of the information it contains. (5)
+        Controlled and physically secure storage of removable media. (6) Restriction
+        and control of usage of portable media inside the Cloud Technology Stack.'
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:2-17-p-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:2-17
+      ref_id: 2-17-P-4
+      description: Cybersecurity requirements for usage of information and data media
+        within the CSP shall be applied and reviewed periodically.
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: Cybersecurity Resilience
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:3-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:3
+      ref_id: 3-1
+      name: Cybersecurity Resilience Aspects of Business Continuity Management (BCM)
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:3-1-p-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:3-1
+      ref_id: 3-1-P-1
+      description: 'In addition to subcontrols in the ECC control 3-1-3, the CSP shall
+        cover the following additional subcontrols for cybersecurity requirements
+        for cybersecurity resilience aspects of business continuity management, as
+        a minimum: (1) Developing and implementing disaster recovery and business
+        continuity procedures in a secure manner. (2) Developing and implementing
+        procedures to ensure resilience and continuity of cybersecurity systems dedicated
+        to the protection of Cloud Technology Stack.'
+      implementation_groups:
+      - CSP
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:3-1-t-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:3-1
+      ref_id: 3-1-T-1
+      description: 'In addition to subcontrols in the ECC control 3-1-3, the CST shall
+        cover the following additional subcontrols for cybersecurity requirements
+        for cybersecurity resilience aspects of business continuity management, as
+        a minimum: (1) Developing and implementing disaster recovery and business
+        continuity procedures related to cloud computing, in a secure manner.'
+      implementation_groups:
+      - CST
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Third-Party Cybersecurity
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:4-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:4
+      ref_id: 4-1
+      name: Supply Chain and Third-Party Cybersecurity
+    - urn: urn:intuitem:risk:req_node:ccc-1-2020:4-1-p-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccc-1-2020:4-1
+      ref_id: 4-1-P-1
+      description: 'In addition to implementing the ECC controls 4-1-2 and 4-1-3,
+        the CSP shall cover the following additional subcontrols for third-party cybersecurity
+        requirements, as a minimum: (1) Ensure that the CSP fulfills NCA''s requests
+        to remove software or services, provided by third-party providers that may
+        be considered a cybersecurity threat to national organizations, from the marketplace
+        provided to CSTs. (2) Requirement to provide security documentation for any
+        equipment or services from suppliers and third-party providers. (3) Third
+        party providers compliant with law and regulatory requirements relevant to
+        their scope. (4) Risk management and security governance on third-party providers
+        as part of general cybersecurity risk management and governance.'
+      implementation_groups:
+      - CSP
