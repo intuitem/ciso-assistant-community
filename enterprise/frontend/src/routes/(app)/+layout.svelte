@@ -2,6 +2,7 @@
 	import { run } from 'svelte/legacy';
 
 	import CommandPalette from '$lib/components/CommandPalette/CommandPalette.svelte';
+	import ThemeToggle from '$lib/components/ThemeToggle/ThemeToggle.svelte';
 	import ChatWidget from '$lib/components/ChatWidget/ChatWidget.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { AppBar } from '@skeletonlabs/skeleton-svelte';
@@ -200,6 +201,7 @@
 					{/if}
 				</div>
 				<div class="flex items-center gap-3 shrink-0">
+					<ThemeToggle />
 					<button
 						onclick={() => commandPalette?.toggle()}
 						class="flex items-center gap-2 shrink-0 rounded-lg border border-surface-200-800 bg-surface-100-900/80 px-3 py-1.5

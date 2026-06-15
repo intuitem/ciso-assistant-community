@@ -26,6 +26,7 @@
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 
 	import CommandPalette from '$lib/components/CommandPalette/CommandPalette.svelte';
+	import ThemeToggle from '$lib/components/ThemeToggle/ThemeToggle.svelte';
 	import ChatWidget from '$lib/components/ChatWidget/ChatWidget.svelte';
 	import {
 		interceptExternalLinks,
@@ -180,6 +181,7 @@
 				{/if}
 			</div>
 			<div class="flex items-center gap-2">
+				<ThemeToggle />
 				{#if !data?.user?.is_third_party}
 					<button
 						onclick={() => commandPalette?.toggle()}
