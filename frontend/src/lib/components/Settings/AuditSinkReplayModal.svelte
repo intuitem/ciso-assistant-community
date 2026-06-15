@@ -32,9 +32,10 @@
 			action={formAction}
 			class="flex flex-col space-y-3"
 			use:enhance={() => {
-				return async ({ update }) => {
+				return async ({ result, update }) => {
 					await update();
-					if (parent && typeof parent.onConfirm === 'function') parent.onConfirm();
+					if (result.type === 'success' && typeof parent?.onConfirm === 'function')
+						parent.onConfirm();
 				};
 			}}
 		>
