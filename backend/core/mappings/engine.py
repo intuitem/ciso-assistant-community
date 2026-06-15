@@ -246,6 +246,33 @@ class MappingEngine:
 
         return coverage
 
+    def get_source_framework_urns(
+        self, target_urn: str, max_depth: int = 3
+    ) -> set[str]:
+        """Return all framework URNs that can reach *target_urn* via mapping
+        paths (reverse BFS on the framework_mappings graph).
+
+        The target framework itself is always included (same-framework mapping).
+        """
+        reverse_graph: defaultdict[str, list[str]] = defaultdict(list)
+        for src, targets in self.framework_mappings.items():
+            for tgt in targets:
+                reverse_graph[tgt].append(src)
+
+        reachable: set[str] = {target_urn}
+        queue: deque[tuple[str, int]] = deque([(target_urn, 0)])
+
+        while queue:
+            current, depth = queue.popleft()
+            if depth >= max_depth - 1:
+                continue
+            for predecessor in reverse_graph.get(current, []):
+                if predecessor not in reachable:
+                    reachable.add(predecessor)
+                    queue.append((predecessor, depth + 1))
+
+        return reachable
+
     def all_paths_from(self, source_urn, max_depth=None):
         """
         Breadth-first search returning shortest paths from a source to all reachable targets.

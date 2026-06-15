@@ -92,6 +92,7 @@
 				label={m.selectSourceAudit()}
 				optionsEndpoint="compliance-assessments"
 				optionsSelf={{ id: currentAudit.id }}
+				optionsDetailedUrlParameters={[['has_mapping_path_to', currentAudit.id]]}
 				optionsLabelField="auto"
 				optionsExtraFields={[['folder', 'str']]}
 				optionsInfoFields={{

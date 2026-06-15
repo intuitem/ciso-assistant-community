@@ -12697,6 +12697,30 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 | Q(requirement_assignments__actor__in=user_actors)
             ).distinct()
 
+        # Filter to audits whose framework has a mapping path to a target audit.
+        has_mapping_path_to = self.request.query_params.get("has_mapping_path_to")
+        if has_mapping_path_to:
+            try:
+                target_audit = ComplianceAssessment.objects.select_related(
+                    "framework"
+                ).get(id=has_mapping_path_to)
+            except (ComplianceAssessment.DoesNotExist, ValueError):
+                return qs.none()
+            from core.mappings.engine import engine
+
+            max_depth = get_mapping_max_depth()
+            source_urns = engine.get_source_framework_urns(
+                target_audit.framework.urn, max_depth
+            )
+            source_fw_ids = [
+                engine.frameworks[urn]["id"]
+                for urn in source_urns
+                if urn in engine.frameworks
+            ]
+            qs = qs.filter(framework_id__in=source_fw_ids).exclude(
+                id=has_mapping_path_to
+            )
+
         return qs
 
     def _get_optimized_object_data(self, queryset):
