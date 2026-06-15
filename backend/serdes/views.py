@@ -453,7 +453,7 @@ class FullRestoreView(APIView):
                                 header = json.loads(block_data[:i].decode("utf-8"))
                                 header_end = i
                                 break
-                            except (json.JSONDecodeError, UnicodeDecodeError):
+                            except json.JSONDecodeError, UnicodeDecodeError:
                                 continue
 
                         if not header:
@@ -898,7 +898,7 @@ class BatchUploadAttachmentsView(APIView):
                             header = json.loads(block_data[:i].decode("utf-8"))
                             header_end = i
                             break
-                        except (json.JSONDecodeError, UnicodeDecodeError):
+                        except json.JSONDecodeError, UnicodeDecodeError:
                             continue
 
                     if not header:
