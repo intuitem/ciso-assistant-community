@@ -119,12 +119,12 @@
 		{#if loading}
 			<div class="text-sm text-surface-600-400">Loading...</div>
 		{:else if errorMsg}
-			<div class="p-3 rounded-md bg-red-50 text-red-900 text-sm border border-red-200">
+			<div class="p-3 rounded-md bg-error-50-950 text-error-900-100 text-sm border border-error-200-800">
 				{errorMsg}
 			</div>
 		{:else if cascadeInfo}
 			{#if cascadeInfo.deleted?.count > 0}
-				<div class="p-3 rounded-md bg-orange-50 border border-orange-200 space-y-2">
+				<div class="p-3 rounded-md bg-orange-50 dark:bg-orange-500/15 border border-orange-200 dark:border-orange-500/30 space-y-2">
 					<div class="text-sm font-semibold text-surface-950-50">
 						{m.cascadeDeleteWarning({ count: cascadeInfo.deleted.count })}
 					</div>
@@ -168,7 +168,7 @@
 			{/if}
 
 			{#if cascadeInfo.affected?.count > 0}
-				<div class="p-3 rounded-md bg-blue-50 border border-blue-200 space-y-2">
+				<div class="p-3 rounded-md bg-blue-50 dark:bg-blue-500/15 border border-blue-200 dark:border-blue-500/30 space-y-2">
 					<div class="text-sm font-semibold text-surface-950-50">
 						{m.cascadeAffectedNotice({ count: cascadeInfo.affected.count })}
 					</div>
@@ -216,7 +216,7 @@
 		{/if}
 
 		<div class="space-y-2">
-			<p class="text-sm font-medium text-red-600">{m.confirmYes()}</p>
+			<p class="text-sm font-medium text-error-600-400">{m.confirmYes()}</p>
 			<input
 				type="text"
 				data-testid="delete-prompt-confirm-textfield"

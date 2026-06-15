@@ -90,12 +90,12 @@
 		{#if loading}
 			<div class="text-sm text-surface-600-400">Loading...</div>
 		{:else if errorMsg}
-			<div class="p-4 bg-red-50 text-red-900 text-sm">
+			<div class="p-4 bg-error-50-950 text-error-900-100 text-sm">
 				{errorMsg}
 			</div>
 		{:else if cascadeInfo}
 			{#if cascadeInfo.deleted?.count > 0}
-				<div class="p-4 bg-orange-50 border-l-2 border-orange-400">
+				<div class="p-4 bg-orange-50 dark:bg-orange-500/15 border-l-2 border-orange-400">
 					<div class="text-sm font-medium text-surface-950-50 mb-3">
 						{m.cascadeDeleteWarning({ count: cascadeInfo.deleted.count })}
 					</div>
@@ -137,7 +137,7 @@
 			{/if}
 
 			{#if cascadeInfo.affected?.count > 0}
-				<div class="p-4 bg-blue-50 border-l-2 border-blue-400">
+				<div class="p-4 bg-blue-50 dark:bg-blue-500/15 border-l-2 border-blue-400">
 					<div class="text-sm font-medium text-surface-950-50 mb-1">
 						{m.cascadeAffectedNotice({ count: cascadeInfo.affected.count })}
 					</div>
