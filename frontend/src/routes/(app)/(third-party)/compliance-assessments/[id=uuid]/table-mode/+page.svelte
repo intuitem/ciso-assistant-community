@@ -575,10 +575,7 @@
 															<li>
 																<p class="whitespace-pre-line py-1">
 																	<span class="italic">{m.suggestionColon()}</span>
-																	<span
-																		class="badge h-fit"
-																		style={resultBadgeStyle(mi.result)}
-																	>
+																	<span class="badge h-fit" style={resultBadgeStyle(mi.result)}>
 																		{safeTranslate(mi.result)}
 																	</span>
 																</p>
