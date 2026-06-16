@@ -529,7 +529,13 @@
 														</div>
 													</div>
 												{/if}
-												{#if requirementAssessment.mapping_inference?.result}
+												{@const mi = requirementAssessment.mapping_inference}
+												{@const sourceEntries = mi?.source_requirement_assessments
+													? Object.values(mi.source_requirement_assessments)
+													: mi?.source_requirement_assessment
+														? [mi.source_requirement_assessment]
+														: []}
+												{#if mi?.result}
 													<div class="my-2">
 														<p class="font-medium">
 															<i class="fa-solid fa-link"></i>
@@ -540,52 +546,46 @@
 															{m.mappingInferenceHelpText()}</span
 														>
 														<ul class="list-disc ml-4">
-															<li>
-																<p>
-																	<a
-																		class="anchor"
-																		href="/requirement-assessments/{requirementAssessment
-																			.mapping_inference.source_requirement_assessment.id}"
-																	>
-																		{requirementAssessment.mapping_inference
-																			.source_requirement_assessment.str}
-																	</a>
-																</p>
-																<p class="whitespace-pre-line py-1">
-																	<span class="italic">{m.coverageColon()}</span>
-																	<span class="badge h-fit">
-																		{safeTranslate(
-																			requirementAssessment.mapping_inference
-																				.source_requirement_assessment.coverage
-																		)}
-																	</span>
-																</p>
-																{#if requirementAssessment.mapping_inference.source_requirement_assessment.is_scored}
+															{#each sourceEntries as source_ra}
+																<li>
+																	<p>
+																		<a
+																			class="anchor"
+																			href="/requirement-assessments/{source_ra.id}"
+																		>
+																			{source_ra.str}
+																		</a>
+																	</p>
 																	<p class="whitespace-pre-line py-1">
-																		<span class="italic">{m.scoreSemiColon()}</span>
+																		<span class="italic">{m.coverageColon()}</span>
 																		<span class="badge h-fit">
-																			{safeTranslate(
-																				requirementAssessment.mapping_inference
-																					.source_requirement_assessment.score
-																			)}
+																			{safeTranslate(source_ra.coverage)}
 																		</span>
 																	</p>
-																{/if}
+																	{#if source_ra.is_scored}
+																		<p class="whitespace-pre-line py-1">
+																			<span class="italic">{m.scoreSemiColon()}</span>
+																			<span class="badge h-fit">
+																				{safeTranslate(source_ra.score)}
+																			</span>
+																		</p>
+																	{/if}
+																</li>
+															{/each}
+															<li>
 																<p class="whitespace-pre-line py-1">
 																	<span class="italic">{m.suggestionColon()}</span>
 																	<span
 																		class="badge h-fit"
-																		style={resultBadgeStyle(
-																			requirementAssessment.mapping_inference.result
-																		)}
+																		style={resultBadgeStyle(mi.result)}
 																	>
-																		{safeTranslate(requirementAssessment.mapping_inference.result)}
+																		{safeTranslate(mi.result)}
 																	</span>
 																</p>
-																{#if requirementAssessment.mapping_inference.annotation}
+																{#if mi.annotation}
 																	<p class="whitespace-pre-line py-1">
 																		<span class="italic">{m.annotationColon()}</span>
-																		{requirementAssessment.mapping_inference.annotation}
+																		{mi.annotation}
 																	</p>
 																{/if}
 															</li>
