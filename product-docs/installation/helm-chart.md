@@ -74,13 +74,13 @@ Notes:
 
 - To point at an **external** Qdrant instead of the bundled one, leave `qdrant.enabled: false` and set `QDRANT_URL` through `backend.env` and `backend.huey.env`.
 - The **LLM provider** (Ollama or any OpenAI-compatible endpoint, model, base URL) is configured from the in-app **Settings → Chat/AI** section, not from the chart. LLM inference is heavy; point it at a GPU-backed endpoint.
-- The Qdrant collection and the indexes are **not** created automatically. After the pods are up, run the indexing commands once from the backend pod:
+- The Qdrant collection and the indexes are **not** created automatically. After the pods are up, run the indexing commands once from the backend pod (`init_qdrant` creates the collection, `index_objects` indexes your existing risk/control/asset records, `index_libraries` indexes the framework libraries):
 
   ```sh
-  kubectl exec -n ciso-assistant deploy/ciso-assistant-release-backend -c backend -- \
-    uv run python manage.py init_qdrant
-  kubectl exec -n ciso-assistant deploy/ciso-assistant-release-backend -c backend -- \
-    uv run python manage.py index_libraries --sync
+  POD="deploy/ciso-assistant-release-backend"
+  kubectl exec -n ciso-assistant $POD -c backend -- uv run python manage.py init_qdrant
+  kubectl exec -n ciso-assistant $POD -c backend -- uv run python manage.py index_objects
+  kubectl exec -n ciso-assistant $POD -c backend -- uv run python manage.py index_libraries --sync
   ```
 
 ## Custom CA certificates
@@ -103,9 +103,19 @@ global:
     mountPath: /etc/ssl/extra-certs
 ```
 
+The backend init container writes the merged bundle to an `emptyDir`. If you also harden the pod to run as a non-root user (`global.securityContext.runAsNonRoot` / per-component `runAsUser`), set an `fsGroup` so that user can write the volume:
+
+```yaml
+global:
+  securityContext:
+    fsGroup: 1001
+```
+
 ## Network policy
 
-To restrict pod traffic, enable the bundled `NetworkPolicy` and pass your own ingress/egress rules. The policy selects all pods of the release by default.
+To restrict pod traffic, enable the bundled `NetworkPolicy` and pass your own ingress/egress rules. The policy selects all pods of the release by default, so your rules must also allow the **internal** flows the app relies on: the frontend BFF calls the backend (`PUBLIC_BACKEND_API_URL`) server-side, and the backend reaches Qdrant. Forgetting these blocks the app even though the ingress controller can reach it.
+
+Replace `ciso-assistant-release` below with your Helm release name.
 
 ```yaml
 networkPolicy:
@@ -113,6 +123,12 @@ networkPolicy:
   policyTypes:
     - Ingress
   ingress:
+    # internal traffic between CISO Assistant pods (frontend -> backend, backend -> qdrant)
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: ciso-assistant-release
+    # the ingress controller reaching the frontend and backend
     - from:
         - namespaceSelector:
             matchLabels:
