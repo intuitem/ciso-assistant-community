@@ -144,7 +144,7 @@ Expects a dict with "context", "image", "imagePullPolicy" and optional "security
   imagePullPolicy: {{ .imagePullPolicy }}
   command: ["/bin/sh", "-c"]
   args:
-    - cat /etc/ssl/certs/ca-certificates.crt "/tmp/extra-certs-src/{{ $ctx.Values.global.extraCerts.fileName }}" > {{ $bundle | quote }}
+    - set -e; cat /etc/ssl/certs/ca-certificates.crt "/tmp/extra-certs-src/{{ $ctx.Values.global.extraCerts.fileName }}" > {{ $bundle | quote }}
   volumeMounts:
     - name: extra-certs-src
       mountPath: /tmp/extra-certs-src
