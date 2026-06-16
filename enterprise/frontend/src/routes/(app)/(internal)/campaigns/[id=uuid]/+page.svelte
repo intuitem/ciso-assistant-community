@@ -40,9 +40,13 @@
 						/>
 					</div>
 				</div>
-				<div class="bg-surface-50-950 rounded-lg shadow-sm border p-6 flex items-center justify-center">
+				<div
+					class="bg-surface-50-950 rounded-lg shadow-sm border p-6 flex items-center justify-center"
+				>
 					<div class="flex flex-col items-center text-center">
-						<div class="w-12 h-12 bg-blue-100 dark:bg-blue-500/20 rounded-full flex items-center justify-center mb-3">
+						<div
+							class="w-12 h-12 bg-blue-100 dark:bg-blue-500/20 rounded-full flex items-center justify-center mb-3"
+						>
 							<i class="fa-solid fa-calendar-days text-blue-600 text-xl"></i>
 						</div>
 						<h3 class="text-lg font-semibold text-surface-800-200 mb-2">

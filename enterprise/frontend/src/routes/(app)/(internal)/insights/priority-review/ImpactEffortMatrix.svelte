@@ -130,7 +130,9 @@
 			? 'bg-blue-50 border-blue-200 dark:bg-blue-500/15 dark:border-blue-500/30'
 			: 'bg-surface-50-950 border-surface-200-800'} border rounded flex items-center justify-between"
 	>
-		<span class="text-sm {selectedCell ? 'text-blue-800 dark:text-blue-300' : 'text-surface-600-400'}">
+		<span
+			class="text-sm {selectedCell ? 'text-blue-800 dark:text-blue-300' : 'text-surface-600-400'}"
+		>
 			{#if selectedCell}
 				{m.showingItemsWith()}
 				{m.controlImpact()}: {selectedCell.impact}, {m.effort()}: {selectedCell.effort}

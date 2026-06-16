@@ -291,9 +291,13 @@
 							<div class="flex items-center gap-3 flex-1 min-w-0">
 								{#if selectedModelInfo}
 									<div class="flex-1 min-w-0">
-										<p class="font-medium text-surface-900-100 truncate">{selectedModelInfo.label}</p>
+										<p class="font-medium text-surface-900-100 truncate">
+											{selectedModelInfo.label}
+										</p>
 										{#if selectedModelInfo.description}
-											<p class="text-xs text-surface-600-400 truncate">{selectedModelInfo.description}</p>
+											<p class="text-xs text-surface-600-400 truncate">
+												{selectedModelInfo.description}
+											</p>
 										{/if}
 									</div>
 								{/if}
@@ -323,7 +327,9 @@
 							onclick={(e) => e.stopPropagation()}
 						>
 							<!-- Search Input -->
-							<div class="p-3 border-b border-surface-200-800 sticky top-0 bg-surface-50-950 rounded-t-lg">
+							<div
+								class="p-3 border-b border-surface-200-800 sticky top-0 bg-surface-50-950 rounded-t-lg"
+							>
 								<input
 									type="text"
 									placeholder={m.searchPlaceholder()}

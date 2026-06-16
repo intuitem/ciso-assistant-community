@@ -114,7 +114,9 @@
 		<h3 class="text-base font-semibold flex items-center gap-2">
 			<i class="fa-solid fa-network-wired text-sm text-primary-500"></i>
 			{m.allowedIps()}
-			<span class="text-xs font-normal text-surface-500">({allowedIps.length}/{MAX_ALLOWED_IPS})</span>
+			<span class="text-xs font-normal text-surface-500"
+				>({allowedIps.length}/{MAX_ALLOWED_IPS})</span
+			>
 		</h3>
 
 		<div class="flex items-start gap-2">

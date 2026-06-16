@@ -428,7 +428,9 @@
 						{#if i > 0}
 							<hr class="border-surface-200-800" />
 						{/if}
-						<div class="flex items-center gap-4 px-4 py-3 hover:bg-surface-100-900 transition-colors">
+						<div
+							class="flex items-center gap-4 px-4 py-3 hover:bg-surface-100-900 transition-colors"
+						>
 							<div class="flex-1 min-w-0">
 								<div class="flex items-center gap-2">
 									<span class="font-medium">{templateName(template.template_key)}</span>

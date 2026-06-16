@@ -175,7 +175,10 @@
 					])
 				]}
 				<div class="ml-4">
-					<dt class="font-medium text-surface-900-100" data-testid="{field.replace('_', '-')}-field-title">
+					<dt
+						class="font-medium text-surface-900-100"
+						data-testid="{field.replace('_', '-')}-field-title"
+					>
 						{safeTranslate(field)}
 					</dt>
 					<span class="flex flex-row h-full border-l border-surface-50-950 border-dashed">
