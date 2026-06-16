@@ -12,13 +12,13 @@ CISO Assistant can forward its [audit log](../features/audit-log.md) — every c
 
 It reuses the hardened [outgoing webhooks](webhooks.md) delivery pipeline (async workers, retries, SSRF protection), but is configured separately as a set of **audit sinks** managed by administrators.
 
-### When to use it
+## When to use it
 
 - **Centralised monitoring.** Feed governance activity into Splunk, Elastic, Microsoft Sentinel, or any SIEM alongside the rest of your security telemetry.
 - **Tamper-evident retention.** Archive the audit trail outside the application, beyond CISO Assistant's own 90-day retention window.
 - **Detection & alerting.** Trigger SOC rules on sensitive changes (e.g. a control marked inactive, a user role changed).
 
-### How it works
+## How it works
 
 ```mermaid
 flowchart LR
@@ -32,14 +32,14 @@ Every recorded change is fanned out to each active audit sink whose domain scope
 
 ***
 
-### Transports
+## Transports
 
 Choose a **Transport** per sink:
 
 - **HTTP** — POST each event as JSON to a collector URL (Splunk HEC, Elastic, Sumo Logic, etc.). Authentication is carried by static **HTTP headers**.
 - **Kafka** — produce each event to a **Topic** on your own broker, or to a managed bus such as Azure Event Hubs (Kafka endpoint). Connection and SASL settings live under **Security & authentication**.
 
-### Event formats
+## Event formats
 
 Choose an **Event format** per sink:
 
@@ -48,7 +48,7 @@ Choose an **Event format** per sink:
 
 ***
 
-### Setting up an audit sink
+## Setting up an audit sink
 
 1. Enable **Audit log forwarding** under **Settings → Feature flags**.
 2. Open the **Audit log forwarding** tab in **Settings** and click **Add audit sink**.
@@ -61,13 +61,13 @@ Choose an **Event format** per sink:
 
 Audit sinks are administrator-managed and apply instance-wide; they are not owner-scoped like integration webhooks.
 
-#### Secrets
+### Secrets
 
 Authentication secrets — the HTTP headers and the Kafka SASL password — are write-only. They are never returned to the browser after saving. When editing an existing sink, those fields show *"A value is already set. Leave blank to keep it, or enter a new one to replace it."* — leave them blank to keep the stored value.
 
 ***
 
-### Backfilling with replay
+## Backfilling with replay
 
 If a sink was unreachable during an outage, use **Replay events** on the sink to re-send historical events. Pick a **From** date and an optional **To** date; matching events are read from the database and re-queued for delivery.
 
@@ -75,9 +75,9 @@ Replay is bounded by the audit log's retention (90 days) and capped per run; ver
 
 ***
 
-### Technical reference
+## Technical reference
 
-#### OCSF payload
+### OCSF payload
 
 Each event maps to an OCSF API Activity event (`class_uid` 6003, `category_uid` 6). `activity_id` reflects the action — Create → 1, Update → 3, Delete → 4 — and `type_uid` is `class_uid * 100 + activity_id`.
 
@@ -110,7 +110,7 @@ Each event maps to an OCSF API Activity event (`class_uid` 6003, `category_uid` 
 
 The field-level diff and the originating domain (`folder_id`) ride in `unmapped` — the OCSF-sanctioned place for vendor data. `metadata.correlation_uid` is the request correlation id: a single user action that produces several log entries (the object plus each many-to-many change) shares one `correlation_uid`, so a SIEM can group them.
 
-#### Raw payload
+### Raw payload
 
 ```json
 {
@@ -129,13 +129,13 @@ The field-level diff and the originating domain (`folder_id`) ride in `unmapped`
 
 ***
 
-### Operational details
+## Operational details
 
-- **Delivery & retries.** HTTP delivery treats any `2xx` as success; other statuses, redirects, or timeouts are retried (roughly 5 times over ~15 minutes with exponential backoff) before the event is dropped. Kafka delivery retries on producer errors. Forwarding is best-effort — replay is the backstop for gaps.
+- **Delivery & retries.** HTTP delivery treats any `2xx` as success. `4xx`/`5xx` responses and network errors or timeouts are retried — up to 5 times with exponential backoff (60s, then doubling, ~30 minutes total) — before the event is dropped. Redirects (`3xx`) are **not** followed and count as a terminal failure (no retry). Kafka delivery retries on producer errors. Forwarding is best-effort — replay is the backstop for gaps.
 - **Egress safety.** Every HTTP sink URL is validated to point at a public host (no private, loopback, or internal addresses) at save time and again at send time; redirects are not followed.
 - **SaaS.** Forwarding is pure egress to a destination you own — a SIEM collector URL or a Kafka broker you operate. CISO Assistant runs no per-tenant infrastructure for this.
 
-### Related
+## Related
 
 - [Audit log](../features/audit-log.md) — the source record being forwarded.
 - [Outgoing webhooks](webhooks.md) — the delivery pipeline this reuses, for per-object event subscriptions.
