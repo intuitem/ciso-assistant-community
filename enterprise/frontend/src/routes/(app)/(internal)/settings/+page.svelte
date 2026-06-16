@@ -13,6 +13,7 @@
 	import SecIntelFeedsSettings from '$lib/components/Settings/SecIntelFeedsSettings.svelte';
 	import EmailTemplatesSettings from '$lib/components/Settings/EmailTemplatesSettings.svelte';
 	import WordTemplatesSettings from '$lib/components/Settings/WordTemplatesSettings.svelte';
+	import AuditLogForwardingSettings from '$lib/components/Settings/AuditLogForwardingSettings.svelte';
 
 	// Tabs whose content lives in a dedicated sub-route and is preloaded into
 	// page.state instead of being loaded by the main settings page.
@@ -99,6 +100,11 @@
 				></Tabs.Trigger
 			>
 		{/if}
+		{#if page.data?.featureflags?.audit_log_forwarding}
+			<Tabs.Trigger value="auditLogForwarding"
+				><i class="fa-solid fa-shield-halved"></i> {m.auditLogForwarding()}</Tabs.Trigger
+			>
+		{/if}
 		<Tabs.Trigger value="emailTemplates"
 			><i class="fa-solid fa-file-lines"></i> {m.templates()}</Tabs.Trigger
 		>
@@ -133,6 +139,9 @@
 	</Tabs.Content>
 	<Tabs.Content value="webhooks">
 		<WebhooksSettings {data} allowMultiple />
+	</Tabs.Content>
+	<Tabs.Content value="auditLogForwarding">
+		<AuditLogForwardingSettings {data} />
 	</Tabs.Content>
 	<Tabs.Content value="emailTemplates">
 		<div class="space-y-8">

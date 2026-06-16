@@ -35,7 +35,7 @@
 <SuperForm
 	class="flex flex-col space-y-3"
 	data={data?.form}
-	dataType="form"
+	dataType="json"
 	validators={zod(webhookEndpointSchema)}
 >
 	{#snippet children({ form })}

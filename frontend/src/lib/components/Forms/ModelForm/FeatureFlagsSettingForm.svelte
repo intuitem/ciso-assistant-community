@@ -252,6 +252,11 @@
 					description: m.webhooksDescription()
 				},
 				{
+					field: 'audit_log_forwarding',
+					label: m.auditLogForwarding(),
+					description: m.auditLogForwardingDescription()
+				},
+				{
 					field: 'comments',
 					label: m.comments(),
 					description: m.commentsDescription()
