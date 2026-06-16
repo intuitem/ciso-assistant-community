@@ -461,7 +461,9 @@
 							>
 								<span>{getTitle(requirementAssessment)}</span>
 								{#if typeof requirementAssessment.requirement?.weight === 'number' && Number.isFinite(requirementAssessment.requirement.weight) && requirementAssessment.requirement.weight !== 1 && requirementAssessment.assessable}
-									<span class="badge text-xs font-medium bg-indigo-100 dark:bg-indigo-500/20 text-indigo-800 dark:text-indigo-300">
+									<span
+										class="badge text-xs font-medium bg-indigo-100 dark:bg-indigo-500/20 text-indigo-800 dark:text-indigo-300"
+									>
 										{m.requirementWeight()}: {requirementAssessment.requirement.weight}
 									</span>
 								{/if}
