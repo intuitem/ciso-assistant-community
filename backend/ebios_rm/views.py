@@ -964,7 +964,7 @@ class StakeholderOrderingFilter(SmartOrderingFilter):
 
     field_remap = {
         "entity": "entity__name",
-        "category": "category__name",
+        # "category": "category__name",  # Not useful now : Terminology uses int PK, so insertion order is stable enough
     }
 
     def get_ordering(self, request, queryset, view):
