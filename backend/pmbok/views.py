@@ -5,8 +5,11 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from rest_framework.filters import SearchFilter
+
 from core.constants import CURRENCY_CHOICES
 from core.views import BaseModelViewSet
+from custom_fields.filters import CustomFieldFilterBackend, CustomFieldSearchFilter
 from pmbok.models import (
     GenericCollection,
     Accreditation,
@@ -77,6 +80,10 @@ class AccreditationViewSet(BaseModelViewSet):
 class ProjectViewSet(BaseModelViewSet):
     model = Project
     serializers_module = "pmbok.serializers"
+    filter_backends = [
+        CustomFieldSearchFilter if backend is SearchFilter else backend
+        for backend in BaseModelViewSet.filter_backends
+    ] + [CustomFieldFilterBackend]
     filterset_fields = [
         "folder",
         "kind",
