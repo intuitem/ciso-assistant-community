@@ -78,9 +78,9 @@ Notes:
 
   ```sh
   kubectl exec -n ciso-assistant deploy/ciso-assistant-release-backend -c backend -- \
-    python manage.py init_qdrant
+    uv run python manage.py init_qdrant
   kubectl exec -n ciso-assistant deploy/ciso-assistant-release-backend -c backend -- \
-    python manage.py index_libraries --sync
+    uv run python manage.py index_libraries --sync
   ```
 
 ## Custom CA certificates
