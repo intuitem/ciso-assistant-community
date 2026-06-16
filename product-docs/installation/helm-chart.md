@@ -126,6 +126,14 @@ helm upgrade ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 
 If you pinned `global.image.tag`, bump it in `custom.yaml` before running `upgrade`. Without a pin, the deployment will pick up whichever appVersion the chart points to.
 
+### Backward compatibility
+
+Chart upgrades are normally additive: new capabilities ship as new values keys, and existing keys are not removed or renamed within a major chart version, so your current `custom.yaml` keeps working as-is. New features are **opt-in and off by default** — if you don't set their keys, nothing changes in that area.
+
+When a breaking change to the values shape is unavoidable, it is released under a new **major chart version** and the required migration steps are documented in the release notes. Read them before upgrading across a major version.
+
+The main thing to manage on upgrade is the **application version**. If you did not pin `global.image.tag`, the images move to the chart's `appVersion` on the next `helm upgrade`. Pin the tag to the version you tested and review the [release notes](https://github.com/intuitem/ciso-assistant-community/releases) for the range you're crossing. Database migrations run automatically on backend startup, so no manual schema step is needed.
+
 ## Uninstall
 
 ```sh
