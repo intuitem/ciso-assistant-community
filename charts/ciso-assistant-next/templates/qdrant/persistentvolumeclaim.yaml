@@ -1,0 +1,18 @@
+{{- if and .Values.qdrant.enabled .Values.qdrant.persistence.enabled (not .Values.qdrant.persistence.existingClaim) }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "ciso-assistant.fullname" . }}-qdrant
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ciso-assistant.labels" (dict "context" . "component" "qdrant") | nindent 4 }}
+spec:
+  accessModes:
+    - {{ .Values.qdrant.persistence.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.qdrant.persistence.size }}
+  {{- if .Values.qdrant.persistence.storageClass }}
+  storageClassName: {{ .Values.qdrant.persistence.storageClass }}
+  {{- end }}
+{{- end }}

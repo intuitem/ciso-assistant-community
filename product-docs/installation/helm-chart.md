@@ -35,7 +35,7 @@ The chart lives at `oci://ghcr.io/intuitem/helm-charts/ce/ciso-assistant`. Sourc
 
    The chart README in the repository carries the full values table (`charts/ciso-assistant-next/README.md`) — refer to it for every key with its default and description.
 
-3. **Pin the appVersion** to a published release if you want predictable upgrades. Set `global.image.tag` in `custom.yaml` to the version you tested against (e.g. `v3.16.5`). Leaving it empty pins to the chart's `appVersion`, which moves with the chart.
+3. **Pin the appVersion** to a published release if you want predictable upgrades. Set `global.image.tag` in `custom.yaml` to the version you tested against (e.g. `v3.18.1`). Leaving it empty pins to the chart's `appVersion`, which moves with the chart.
 
 4. **Create a namespace and install**:
 
@@ -54,6 +54,67 @@ kubectl get ingress -n ciso-assistant
 ```
 
 The backend pod runs migrations on startup; allow it ~30s before checking the frontend.
+
+## AI assistant (chat / RAG)
+
+The in-product AI assistant needs two things wired in the chart: the `ENABLE_CHAT` flag on the backend and a reachable [Qdrant](https://qdrant.tech/) vector database for retrieval-augmented generation.
+
+```yaml
+backend:
+  config:
+    chat:
+      enabled: true        # sets ENABLE_CHAT on the backend and Huey worker
+qdrant:
+  enabled: true            # deploys a bundled Qdrant and injects QDRANT_URL
+  persistence:
+    enabled: true          # otherwise storage is ephemeral (emptyDir)
+```
+
+Notes:
+
+- To point at an **external** Qdrant instead of the bundled one, leave `qdrant.enabled: false` and set `QDRANT_URL` through `backend.env` and `backend.huey.env`.
+- The **LLM provider** (Ollama or any OpenAI-compatible endpoint, model, base URL) is configured from the in-app **Settings → Chat/AI** section, not from the chart. LLM inference is heavy; point it at a GPU-backed endpoint.
+- The Qdrant collection and the indexes are **not** created automatically. After the pods are up, run the indexing commands once from the backend pod:
+
+  ```sh
+  kubectl exec -n ciso-assistant deploy/ciso-assistant-release-backend -c backend -- \
+    python manage.py init_qdrant
+  kubectl exec -n ciso-assistant deploy/ciso-assistant-release-backend -c backend -- \
+    python manage.py index_libraries --sync
+  ```
+
+## Custom CA certificates
+
+If your pods need to trust an internal CA (for SMTP, SSO, or any outbound TLS service signed by a private authority), mount the certificate from an existing secret on all pods. The chart wires both trust stores: `SSL_CERT_FILE` / `REQUESTS_CA_BUNDLE` (Python backend and Huey) and `NODE_EXTRA_CA_CERTS` (Node frontend).
+
+```sh
+kubectl create secret generic my-ca -n ciso-assistant --from-file=ca.crt=./internal-ca.crt
+```
+
+```yaml
+global:
+  extraCerts:
+    enabled: true
+    secretName: my-ca
+    fileName: ca.crt
+    mountPath: /etc/ssl/extra-certs
+```
+
+## Network policy
+
+To restrict pod traffic, enable the bundled `NetworkPolicy` and pass your own ingress/egress rules. The policy selects all pods of the release by default.
+
+```yaml
+networkPolicy:
+  enabled: true
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+```
 
 ## Upgrade
 

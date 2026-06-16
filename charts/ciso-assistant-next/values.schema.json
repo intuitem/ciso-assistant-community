@@ -16,6 +16,15 @@
                 "config": {
                     "type": "object",
                     "properties": {
+                        "chat": {
+                            "type": "object",
+                            "properties": {
+                                "enabled": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "additionalProperties": false
+                        },
                         "databaseType": {
                             "type": "string"
                         },
@@ -354,6 +363,24 @@
                 "extraAllowedHosts": {
                     "type": "string"
                 },
+                "extraCerts": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "fileName": {
+                            "type": "string"
+                        },
+                        "mountPath": {
+                            "type": "string"
+                        },
+                        "secretName": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
+                },
                 "image": {
                     "type": "object",
                     "properties": {
@@ -434,6 +461,28 @@
         "nameOverride": {
             "type": "string"
         },
+        "networkPolicy": {
+            "type": "object",
+            "properties": {
+                "egress": {
+                    "type": "array"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "ingress": {
+                    "type": "array"
+                },
+                "podSelector": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "policyTypes": {
+                    "type": "array"
+                }
+            },
+            "additionalProperties": false
+        },
         "postgresql": {
             "type": "object",
             "properties": {
@@ -487,6 +536,113 @@
                 }
             },
             "additionalProperties": true
+        },
+        "qdrant": {
+            "type": "object",
+            "properties": {
+                "affinity": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "annotations": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "containerSecurityContext": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "env": {
+                    "type": "array"
+                },
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "imagePullPolicy": {
+                            "type": "string"
+                        },
+                        "registry": {
+                            "type": "string"
+                        },
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "imagePullSecrets": {
+                    "type": "array"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "nodeSelector": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "persistence": {
+                    "type": "object",
+                    "properties": {
+                        "accessMode": {
+                            "type": "string"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "existingClaim": {
+                            "type": "string"
+                        },
+                        "size": {
+                            "type": "string"
+                        },
+                        "storageClass": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "podAnnotations": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "replicas": {
+                    "type": "integer"
+                },
+                "resources": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "service": {
+                    "type": "object",
+                    "properties": {
+                        "annotations": {
+                            "type": "object",
+                            "additionalProperties": true
+                        },
+                        "labels": {
+                            "type": "object",
+                            "additionalProperties": true
+                        },
+                        "port": {
+                            "type": "integer"
+                        },
+                        "portName": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "tolerations": {
+                    "type": "array"
+                }
+            },
+            "additionalProperties": false
         },
         "serviceAccount": {
             "type": "object",

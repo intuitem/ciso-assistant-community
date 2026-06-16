@@ -46,11 +46,12 @@ spec:
           - name: HOST_HEADER
             value: x-forwarded-host
           - name: PUBLIC_BACKEND_API_URL
-            value: http://{{ include "ciso-assistant.fullname" . }}-backend/api
+            value: {{ include "ciso-assistant.backendApiUrl" . }}
           - name: PUBLIC_BACKEND_API_EXPOSED_URL
             value: {{ template "ciso-assistant.url" . }}/api
           - name: BODY_SIZE_LIMIT
             value: {{ .Values.frontend.config.bodySizeLimit | quote }}
+          {{- include "ciso-assistant.extraCerts.env" . | nindent 10 }}
         ports:
           - name: http
             containerPort: 3000
@@ -58,9 +59,12 @@ spec:
         {{- if and .Values.frontend.extraVolumeMounts (not .Values.frontend.extraVolumes) }}
           {{- fail "frontend.extraVolumeMounts can't be set without frontend.extraVolumes" }}
         {{- end }}
-        {{- with .Values.frontend.extraVolumeMounts }}
+        {{- if or .Values.global.extraCerts.enabled .Values.frontend.extraVolumeMounts }}
         volumeMounts:
+          {{- include "ciso-assistant.extraCerts.volumeMount" . | nindent 10 }}
+          {{- with .Values.frontend.extraVolumeMounts }}
           {{- toYaml . | nindent 10 }}
+          {{- end }}
         {{- end }}
         {{- if .Values.frontend.resources }}
         resources:
@@ -82,7 +86,10 @@ spec:
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.frontend.extraVolumes }}
+      {{- if or .Values.global.extraCerts.enabled .Values.frontend.extraVolumes }}
       volumes:
+        {{- include "ciso-assistant.extraCerts.volume" . | nindent 8 }}
+        {{- with .Values.frontend.extraVolumes }}
         {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- end }}

@@ -1,6 +1,6 @@
 # ciso-assistant
 
-![Version: 0.10.5](https://img.shields.io/badge/Version-0.10.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v3.17.3](https://img.shields.io/badge/AppVersion-v3.17.3-informational?style=flat-square)
+![Version: 0.11.0](https://img.shields.io/badge/Version-0.11.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v3.18.1](https://img.shields.io/badge/AppVersion-v3.18.1-informational?style=flat-square)
 
 A Helm chart for CISO Assistant k8s's deployment
 
@@ -49,6 +49,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 |-----|------|---------|-------------|
 | backend.affinity | object | `{}` | Affinity rules for backend |
 | backend.annotations | object | `{}` | Backend deployment annotations |
+| backend.config.chat.enabled | bool | `false` | Enable the AI assistant / chat feature (sets ENABLE_CHAT) |
 | backend.config.databaseType | string | `"sqlite"` | Set the database type (sqlite, pgsql or externalPgsql) # Note: PostgreSQL database configuration at `postgresql` or `externalPgsql` section |
 | backend.config.djangoDebug | bool | `false` | Enable Django debug mode |
 | backend.config.djangoExistingSecretKey | string | `""` | Name of an existing secret resource containing the django secret in a 'django-secret-key' key |
@@ -129,6 +130,10 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | global.commonLabels | object | `{}` | Labels to add to all deployed objects |
 | global.domain | string | `"octopus.foo.bar"` | Default domain used by all components # Used for ingresses, certificates, environnement vars, etc. |
 | global.extraAllowedHosts | string | `""` | Extra allowed hosts (comma separated, without spaces) |
+| global.extraCerts.enabled | bool | `false` | Mount an extra CA certificate bundle on all pods |
+| global.extraCerts.fileName | string | `"ca.crt"` | Key inside the secret (also the file name once mounted) |
+| global.extraCerts.mountPath | string | `"/etc/ssl/extra-certs"` | Directory where the certificate is mounted |
+| global.extraCerts.secretName | string | `""` | Name of an existing secret holding the CA certificate |
 | global.image.imagePullPolicy | string | `"IfNotPresent"` | If defined, a imagePullPolicy applied to all CISO Assistant deployments |
 | global.image.registry | string | `"ghcr.io"` | If defined, a registry applied to all CISO Assistant deployments |
 | global.image.tag | string | `""` | Overrides the global CISO Assistant image tag whose default is the chart appVersion |
@@ -147,12 +152,42 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | ingress.tls.enabled | bool | `false` | Enable TLS for the ingress |
 | ingress.tls.existingSecret | string | `""` | Use existing TLS secret |
 | nameOverride | string | `"ciso-assistant"` | Provide a name in place of `ciso-assistant` |
+| networkPolicy.egress | list | `[]` | Egress rules (raw Kubernetes NetworkPolicy `egress` entries) |
+| networkPolicy.enabled | bool | `false` | Create a NetworkPolicy for CISO Assistant pods |
+| networkPolicy.ingress | list | `[]` | Ingress rules (raw Kubernetes NetworkPolicy `ingress` entries) |
+| networkPolicy.podSelector | object | all pods of this release | Pod selector the policy applies to |
+| networkPolicy.policyTypes | list | `["Ingress"]` | Policy types to enable (Ingress and/or Egress) |
 | postgresql.enabled | bool | `false` | Enable to deploy PostgreSQL. |
 | postgresql.global.postgresql.auth.database | string | `"ciso-assistant"` | Database name |
 | postgresql.global.postgresql.auth.password | string | `""` | Database user account password # Note: if not set, it will be dynamically generated |
 | postgresql.global.postgresql.auth.postgresPassword | string | `""` | Super-user postgres account password # Note: if not set, it will be dynamically generated |
 | postgresql.global.postgresql.auth.username | string | `"ciso-assistant"` | Database username |
 | postgresql.primary.persistence.size | string | `"5Gi"` | PostgreSQL persistant volume size (default 8Gi). |
+| qdrant.affinity | object | `{}` | Affinity rules for Qdrant |
+| qdrant.annotations | object | `{}` | Qdrant deployment annotations |
+| qdrant.containerSecurityContext | object | `{}` | Toggle and define container-level security context |
+| qdrant.enabled | bool | `false` | Deploy the bundled Qdrant vector database (needed for the AI assistant / RAG) |
+| qdrant.env | list | `[]` | Environment variables to pass to Qdrant |
+| qdrant.image.imagePullPolicy | string | `"IfNotPresent"` | Image pull policy for Qdrant |
+| qdrant.image.registry | string | `"docker.io"` | Registry to use for Qdrant |
+| qdrant.image.repository | string | `"qdrant/qdrant"` | Repository to use for Qdrant |
+| qdrant.image.tag | string | `"v1.14.0"` | Tag to use for Qdrant |
+| qdrant.imagePullSecrets | list | `[]` (defaults to global.imagePullSecrets) | Secrets with credentials to pull images from a private registry |
+| qdrant.name | string | `"qdrant"` | Qdrant container name |
+| qdrant.nodeSelector | object | `{}` | Default node selector for Qdrant |
+| qdrant.persistence.accessMode | string | `"ReadWriteOnce"` | Qdrant persistant volume accessMode |
+| qdrant.persistence.enabled | bool | `false` | Enable Qdrant storage persistence |
+| qdrant.persistence.existingClaim | string | `""` | Name of an existing PersistentVolumeClaim for Qdrant |
+| qdrant.persistence.size | string | `"5Gi"` | Qdrant persistant volume size |
+| qdrant.persistence.storageClass | string | `""` | Qdrant persistant volume storageClass |
+| qdrant.podAnnotations | object | `{}` | Qdrant pod annotations |
+| qdrant.replicas | int | `1` | The number of Qdrant pods to run |
+| qdrant.resources | object | `{}` | Resources for Qdrant |
+| qdrant.service.annotations | object | `{}` | Qdrant service annotations |
+| qdrant.service.labels | object | `{}` | Qdrant service labels |
+| qdrant.service.port | int | `6333` | Qdrant service http port |
+| qdrant.service.portName | string | `"http"` | Qdrant service port name |
+| qdrant.tolerations | list | `[]` | Default tolerations for Qdrant |
 | serviceAccount.annotations | object | `{}` | Annotations applied to created service account |
 | serviceAccount.automountServiceAccountToken | bool | `true` | Automount API credentials for the Service Account |
 | serviceAccount.create | bool | `false` | Create a service account for CISO Assistant |
