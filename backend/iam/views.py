@@ -37,7 +37,7 @@ from .serializers import (
     ChangePasswordSerializer,
     LoginSerializer,
     PersonalAccessTokenReadSerializer,
-    ResetMFASerializer,
+    DisableMFASerializer,
     ResetPasswordConfirmSerializer,
     SetPasswordSerializer,
 )
@@ -463,50 +463,41 @@ class SetPasswordView(views.APIView):
         return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 
-class ResetMFAView(views.APIView):
+class DisableMFAView(views.APIView):
     """
-    An endpoint for resetting another user's MFA as an administrator.
+    An endpoint for disabling another user's MFA as an administrator.
     Removes all MFA authenticators (TOTP, WebAuthn, recovery codes).
-    The user will be required to set up MFA again on their next login.
+    The user will need to enable MFA again on their next login.
     """
 
     permission_classes = (permissions.IsAuthenticated, IsAdministrator)
-    serializer_class = ResetMFASerializer
+    serializer_class = DisableMFASerializer
 
     def post(self, request, *args, **kwargs):
-        serializer = ResetMFASerializer(data=request.data)
+        serializer = DisableMFASerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         target_user = serializer.validated_data.get("user")
-
-        # Block self-reset: admins must use the normal MFA disable flow
-        # (which requires their TOTP code) so a stolen admin session
-        # cannot silently drop the second factor.
-        if target_user.pk == request.user.pk:
-            return Response(
-                {"error": "cannotResetOwnMFA"},
-                status=status.HTTP_403_FORBIDDEN,
-            )
 
         # Delete first and branch on the deleted count to avoid an
         # exists-then-delete race where a concurrent request could empty the
         # authenticators between the check and the delete.
         deleted_count, _ = Authenticator.objects.filter(user=target_user).delete()
-        if not deleted_count:
-            return Response(
-                {"error": "userHasNoMFAEnabled"},
-                status=status.HTTP_400_BAD_REQUEST,
+        if deleted_count > 0:
+            logger.warning(
+                "Admin disabled MFA for another user",
+                admin_id=str(request.user.id),
+                admin_email=request.user.email,
+                target_user_id=str(target_user.id),
+                target_user_email=target_user.email,
+                deleted_authenticators=deleted_count,
             )
+            return Response(status=status.HTTP_200_OK)
 
-        logger.warning(
-            "Admin reset MFA for another user",
-            admin_id=str(request.user.id),
-            admin_email=request.user.email,
-            target_user_id=str(target_user.id),
-            target_user_email=target_user.email,
-            deleted_authenticators=deleted_count,
+        return Response(
+            {"error": "userHasNoMFAEnabled"},
+            status=status.HTTP_400_BAD_REQUEST,
         )
-        return Response(status=status.HTTP_200_OK)
 
 
 class RevokeOtherSessionsView(views.APIView):

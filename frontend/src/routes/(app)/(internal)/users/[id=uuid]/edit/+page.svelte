@@ -14,7 +14,7 @@
 
 	const isAdmin = $derived(Boolean(page.data.user?.is_admin));
 	const isSelf = $derived(page.data.user?.id === data.object.id);
-	const showResetMFA = $derived(isAdmin && !isSelf && data.object.has_mfa_enabled === true);
+	const showDisableMFA = $derived(isAdmin && !isSelf && data.object.has_mfa_enabled);
 </script>
 
 <div class="card bg-white shadow-sm p-4">
@@ -34,15 +34,15 @@
 	</div>
 {/if}
 
-{#if showResetMFA}
+{#if showDisableMFA}
 	<div class="card bg-white shadow-sm p-4 mt-2">
 		<p class="text-gray-500 text-sm">
-			{m.resetMFA1()}
+			{m.disableMFA1()}
 			<a
-				href="{page.url.pathname}/reset-mfa"
+				href="{page.url.pathname}/disable-mfa"
 				class="text-primary-700 hover:text-primary-500"
-				data-testid="reset-mfa-btn">{m.resetMFALinkText()}</a
-			>. {m.resetMFA2()}.
+				data-testid="disable-mfa-btn">{m.disableMFALinkText()}</a
+			>. {m.disableMFA2()}.
 		</p>
 	</div>
 {/if}

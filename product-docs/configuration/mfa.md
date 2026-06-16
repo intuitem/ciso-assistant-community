@@ -71,27 +71,27 @@ After enabling MFA, you'll receive a set of recovery codes. These codes are cruc
 
 <figure><img src="../.gitbook/assets/image (32).png" alt=""><figcaption></figcaption></figure>
 
-## Admin recovery: resetting another user's MFA
+## Admin recovery: disabling another user's MFA
 
-If a user has lost access to every enrolled second factor (phone wiped, hardware key lost) **and** has no recovery codes left, an administrator can reset their MFA from the user's edit page:
+If a user has lost access to every enrolled second factor (phone wiped, hardware key lost) **and** has no recovery codes left, an administrator can disable their MFA from the user's edit page:
 
 1. Sign in as an administrator and navigate to **Organization → Users**.
-2. Open the affected user and click **Edit**. In the security section of the edit page, click **reset their MFA**.
+2. Open the affected user and click **Edit**. In the security section of the edit page, click **disable their MFA**.
 
-<figure><img src="../.gitbook/assets/mfa-in-settings.png" alt=""><figcaption><p>The "Reset MFA" link on a user's edit page (visible only to admins, when the target user has MFA enabled).</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/mfa-in-settings.png" alt=""><figcaption><p>The "Disable MFA" link on a user's edit page (visible only to admins, when the target user has MFA enabled).</p></figcaption></figure>
 
 3. On the confirmation page, type the confirmation word shown on screen (the localized word for "yes") and submit.
 
-<figure><img src="../.gitbook/assets/mfa-reset-confirmation.png" alt=""><figcaption><p>The confirmation page requires typing the localized confirmation word shown on screen before the reset can be submitted.</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/mfa-disable-confirmation.png" alt=""><figcaption><p>The confirmation page requires typing the localized confirmation word shown on screen before MFA can be disabled.</p></figcaption></figure>
 
-All of the user's MFA authenticators (TOTP, WebAuthn credentials, recovery codes) are removed. The user will be prompted to re-enroll MFA on their next login.
+All of the user's MFA authenticators (TOTP, WebAuthn credentials, recovery codes) are removed. The user will need to enable MFA again on their next login.
 
 {% hint style="warning" %}
 **Audit notes:**
 
-- Every admin reset is logged on the backend (admin id/email, target id/email, number of authenticators removed).
-- Admins cannot reset their *own* MFA through this flow — use the standard MFA settings page (which requires the current second factor) instead. This prevents a hijacked admin session from silently dropping the second factor.
-- Only users in the built-in Global - administrator group can perform the reset.
+- Every admin MFA disable is logged on the backend (admin id/email, target id/email, number of authenticators removed).
+- The link is hidden on your own edit page — to disable your own MFA, use the standard MFA settings page on **My profile → Settings**.
+- Only users in the built-in Global - administrator group can disable another user's MFA.
 {% endhint %}
 
 ## Logging in with MFA

@@ -11,7 +11,7 @@
 	let userInput = $state('');
 
 	const yes = $derived(m.yes().toLowerCase());
-	const canConfirm = $derived(!!userInput && userInput.trim().toLowerCase() === yes);
+	const canConfirm = $derived(userInput.trim().toLowerCase() === yes);
 </script>
 
 <div class="flex w-full h-full items-center justify-center">
@@ -19,9 +19,9 @@
 		<div class="bg-error-300 px-6 py-5 rounded-full text-3xl">
 			<i class="fa-solid fa-shield-halved"></i>
 		</div>
-		<h2 class="text-xl font-bold">{m.resetMFA()}</h2>
+		<h2 class="text-xl font-bold">{m.disableMFA()}</h2>
 		<p class="text-red-600 text-sm font-semibold text-center">
-			{m.resetMFAWarning()}
+			{m.disableMFAWarning()}
 		</p>
 
 		<form method="POST" use:enhance class="flex flex-col w-full space-y-3">
@@ -29,7 +29,7 @@
 				<span class="text-sm font-medium text-red-600">{m.confirmYes()}</span>
 				<input
 					type="text"
-					data-testid="reset-mfa-confirm-textfield"
+					data-testid="disable-mfa-confirm-textfield"
 					bind:value={userInput}
 					placeholder={m.confirmYesPlaceHolder()}
 					class="input w-full"
@@ -46,11 +46,11 @@
 				</a>
 				<button
 					type="submit"
-					data-testid="reset-mfa-submit-button"
+					data-testid="disable-mfa-submit-button"
 					class="btn bg-red-600 hover:bg-red-700 text-white font-semibold w-full disabled:opacity-50 disabled:cursor-not-allowed"
 					disabled={!canConfirm}
 				>
-					{m.resetMFA()}
+					{m.disableMFA()}
 				</button>
 			</div>
 		</form>

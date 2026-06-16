@@ -129,9 +129,9 @@ class PersonalAccessTokenReadSerializer(serializers.ModelSerializer):
         fields = ["name", "user", "created", "expiry", "digest"]
 
 
-class ResetMFASerializer(serializers.Serializer):
+class DisableMFASerializer(serializers.Serializer):
     """
-    Serializer for resetting another user's MFA as an administrator.
+    Serializer for disabling another user's MFA as an administrator.
     """
 
     user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
