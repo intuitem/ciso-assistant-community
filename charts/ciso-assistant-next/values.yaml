@@ -18,17 +18,19 @@ global:
   # -- Extra allowed hosts (comma separated, without spaces)
   extraAllowedHosts: ""
 
-  ## Extra CA certificates mounted on every pod (backend, Huey and frontend)
-  ## Mounts the certificate from an existing secret and wires both runtime trust
-  ## stores: SSL_CERT_FILE / REQUESTS_CA_BUNDLE (Python) and NODE_EXTRA_CA_CERTS (Node).
+  ## Extra CA certificate trusted by every pod (backend, Huey and frontend).
+  ## Provide only your CA in the secret: trust is added on top of the system roots,
+  ## not replaced, so public CAs keep working. For Python (backend/Huey) an init
+  ## container merges the system bundle with your CA; for Node (frontend) it is set
+  ## via the additive NODE_EXTRA_CA_CERTS.
   extraCerts:
-    # -- Mount an extra CA certificate bundle on all pods
+    # -- Trust an extra CA certificate on all pods (added to the default roots, not replacing them)
     enabled: false
     # -- Name of an existing secret holding the CA certificate
     secretName: ""
     # -- Key inside the secret (also the file name once mounted)
     fileName: ca.crt
-    # -- Directory where the certificate is mounted
+    # -- Directory where the certificate / merged bundle is mounted
     mountPath: /etc/ssl/extra-certs
 
   # Default image used by all components

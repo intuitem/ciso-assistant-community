@@ -130,9 +130,9 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | global.commonLabels | object | `{}` | Labels to add to all deployed objects |
 | global.domain | string | `"octopus.foo.bar"` | Default domain used by all components # Used for ingresses, certificates, environnement vars, etc. |
 | global.extraAllowedHosts | string | `""` | Extra allowed hosts (comma separated, without spaces) |
-| global.extraCerts.enabled | bool | `false` | Mount an extra CA certificate bundle on all pods |
+| global.extraCerts.enabled | bool | `false` | Trust an extra CA certificate on all pods (added to the default roots, not replacing them) |
 | global.extraCerts.fileName | string | `"ca.crt"` | Key inside the secret (also the file name once mounted) |
-| global.extraCerts.mountPath | string | `"/etc/ssl/extra-certs"` | Directory where the certificate is mounted |
+| global.extraCerts.mountPath | string | `"/etc/ssl/extra-certs"` | Directory where the certificate / merged bundle is mounted |
 | global.extraCerts.secretName | string | `""` | Name of an existing secret holding the CA certificate |
 | global.image.imagePullPolicy | string | `"IfNotPresent"` | If defined, a imagePullPolicy applied to all CISO Assistant deployments |
 | global.image.registry | string | `"ghcr.io"` | If defined, a registry applied to all CISO Assistant deployments |

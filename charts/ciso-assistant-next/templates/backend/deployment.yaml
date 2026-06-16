@@ -35,6 +35,14 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.global.extraCerts.enabled }}
+      initContainers:
+        {{- include "ciso-assistant.extraCerts.initContainer" (dict
+            "context" .
+            "image" (printf "%s/%s:%s" (default .Values.global.image.registry .Values.backend.image.registry) .Values.backend.image.repository (default (include "ciso-assistant.defaultTag" .) .Values.backend.image.tag))
+            "imagePullPolicy" (default .Values.global.image.imagePullPolicy .Values.backend.image.imagePullPolicy)
+            "securityContext" .Values.backend.containerSecurityContext) | nindent 8 }}
+      {{- end }}
       containers:
       - name: {{ .Values.backend.name }}
         image: {{ default .Values.global.image.registry .Values.backend.image.registry }}/{{ .Values.backend.image.repository }}:{{ default (include "ciso-assistant.defaultTag" .) .Values.backend.image.tag }}
@@ -144,7 +152,7 @@ spec:
           - name: QDRANT_URL
             value: {{ include "ciso-assistant.qdrantUrl" . }}
           {{- end }}
-          {{- include "ciso-assistant.extraCerts.env" . | nindent 10 }}
+          {{- include "ciso-assistant.extraCerts.pythonEnv" . | nindent 10 }}
         ports:
           - name: http
             containerPort: 8000
@@ -163,7 +171,7 @@ spec:
           {{- if and .Values.backend.extraVolumeMounts (not .Values.backend.extraVolumes) }}
             {{- fail "backend.extraVolumeMounts can't be set without backend.extraVolumes" }}
           {{- end }}
-          {{- include "ciso-assistant.extraCerts.volumeMount" . | nindent 10 }}
+          {{- include "ciso-assistant.extraCerts.backendVolumeMount" . | nindent 10 }}
           {{- with .Values.backend.extraVolumeMounts }}
             {{- toYaml . | nindent 10 }}
           {{- end }}
@@ -289,7 +297,7 @@ spec:
           - name: QDRANT_URL
             value: {{ include "ciso-assistant.qdrantUrl" . }}
           {{- end }}
-          {{- include "ciso-assistant.extraCerts.env" . | nindent 10 }}
+          {{- include "ciso-assistant.extraCerts.pythonEnv" . | nindent 10 }}
         volumeMounts:
           - name: tmp-data
             mountPath: /tmp
@@ -300,7 +308,7 @@ spec:
           {{- if and .Values.backend.huey.extraVolumeMounts (not .Values.backend.extraVolumes) }}
             {{- fail "backend.huey.extraVolumeMounts can't be set without backend.extraVolumes" }}
           {{- end }}
-          {{- include "ciso-assistant.extraCerts.volumeMount" . | nindent 10 }}
+          {{- include "ciso-assistant.extraCerts.backendVolumeMount" . | nindent 10 }}
           {{- with .Values.backend.huey.extraVolumeMounts }}
             {{- toYaml . | nindent 10 }}
           {{- end }}
@@ -346,7 +354,7 @@ spec:
             claimName: {{ include "ciso-assistant.fullname" . }}-localstorage
             {{- end }}
         {{- end }}
-        {{- include "ciso-assistant.extraCerts.volume" . | nindent 8 }}
+        {{- include "ciso-assistant.extraCerts.backendVolumes" . | nindent 8 }}
         {{- with .Values.backend.extraVolumes }}
           {{- toYaml . | nindent 8 }}
         {{- end }}

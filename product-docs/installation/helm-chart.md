@@ -85,7 +85,10 @@ Notes:
 
 ## Custom CA certificates
 
-If your pods need to trust an internal CA (for SMTP, SSO, or any outbound TLS service signed by a private authority), mount the certificate from an existing secret on all pods. The chart wires both trust stores: `SSL_CERT_FILE` / `REQUESTS_CA_BUNDLE` (Python backend and Huey) and `NODE_EXTRA_CA_CERTS` (Node frontend).
+If your pods need to trust an internal CA (for SMTP, SSO, or any outbound TLS service signed by a private authority), provide **just your CA** in a secret. Trust is added on top of the default roots, not replaced, so public CAs keep working:
+
+- Backend and Huey (Python): an init container concatenates the system CA bundle with your CA into a shared bundle, and `SSL_CERT_FILE` / `REQUESTS_CA_BUNDLE` point at it.
+- Frontend (Node): `NODE_EXTRA_CA_CERTS` points at your CA, which Node adds to its built-in roots.
 
 ```sh
 kubectl create secret generic my-ca -n ciso-assistant --from-file=ca.crt=./internal-ca.crt

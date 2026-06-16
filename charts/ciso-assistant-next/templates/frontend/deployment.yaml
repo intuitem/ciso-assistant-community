@@ -51,7 +51,7 @@ spec:
             value: {{ template "ciso-assistant.url" . }}/api
           - name: BODY_SIZE_LIMIT
             value: {{ .Values.frontend.config.bodySizeLimit | quote }}
-          {{- include "ciso-assistant.extraCerts.env" . | nindent 10 }}
+          {{- include "ciso-assistant.extraCerts.nodeEnv" . | nindent 10 }}
         ports:
           - name: http
             containerPort: 3000
@@ -61,7 +61,7 @@ spec:
         {{- end }}
         {{- if or .Values.global.extraCerts.enabled .Values.frontend.extraVolumeMounts }}
         volumeMounts:
-          {{- include "ciso-assistant.extraCerts.volumeMount" . | nindent 10 }}
+          {{- include "ciso-assistant.extraCerts.frontendVolumeMount" . | nindent 10 }}
           {{- with .Values.frontend.extraVolumeMounts }}
           {{- toYaml . | nindent 10 }}
           {{- end }}
@@ -88,7 +88,7 @@ spec:
       {{- end }}
       {{- if or .Values.global.extraCerts.enabled .Values.frontend.extraVolumes }}
       volumes:
-        {{- include "ciso-assistant.extraCerts.volume" . | nindent 8 }}
+        {{- include "ciso-assistant.extraCerts.frontendVolume" . | nindent 8 }}
         {{- with .Values.frontend.extraVolumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
