@@ -478,7 +478,10 @@
                     "additionalProperties": true
                 },
                 "policyTypes": {
-                    "type": "array"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             },
             "additionalProperties": false
