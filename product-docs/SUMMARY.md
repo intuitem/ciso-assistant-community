@@ -187,6 +187,7 @@
 * [API reference](integrations/api.md)
 * [Generating a PAT](integrations/pat.md)
 * [Outgoing webhooks](integrations/webhooks.md)
+* [Audit log forwarding](integrations/audit-log-forwarding.md)
 * [MCP setup guide](integrations/mcp.md)
 * [Third-party integrations](integrations/third-party/README.md)
   * [Jira](integrations/third-party/jira.md)
