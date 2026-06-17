@@ -185,10 +185,10 @@
 	--color-surface-400: oklch(70.4% 0.04 256.788);
 	--color-surface-500: oklch(55.4% 0.046 257.417);
 	--color-surface-600: oklch(44.6% 0.043 257.281);
-	--color-surface-700: oklch(37.2% 0.03 263);
-	--color-surface-800: oklch(30% 0.03 263);
-	--color-surface-900: oklch(25% 0.03 263);
-	--color-surface-950: oklch(20% 0.03 263);
+	--color-surface-700: oklch(37.2% 0.044 257.287);
+	--color-surface-800: oklch(27.9% 0.041 260.031);
+	--color-surface-900: oklch(20.8% 0.042 265.755);
+	--color-surface-950: oklch(12.9% 0.042 264.695);
 	--color-surface-contrast-dark: var(--color-surface-950);
 	--color-surface-contrast-light: var(--color-surface-50);
 	--color-surface-contrast-50: var(--color-surface-contrast-dark);
@@ -211,6 +211,11 @@
   Tune the chroma values up/down to taste.
 */
 [data-theme='cisotheme'].dark {
+	--color-surface-700: oklch(37.2% 0.03 263);
+	--color-surface-800: oklch(30% 0.03 263);
+	--color-surface-900: oklch(25% 0.03 263);
+	--color-surface-950: oklch(20% 0.03 263);
+
 	/* links: lighter for readability on dark surfaces, only lightly softened */
 	--anchor-font-color-dark: var(--color-primary-300);
 	--color-primary-300: oklch(66.79% 0.12 284.15deg);

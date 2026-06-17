@@ -22,12 +22,15 @@ function resolveTheme(mode: ThemeMode): 'light' | 'dark' {
 async function refreshECharts(resolved: 'light' | 'dark') {
 	try {
 		const echarts = await import('echarts');
-		// Find all ECharts containers and re-init with new theme
-		document.querySelectorAll('[_echarts_instance_]').forEach((el) => {
+		// Find all ECharts containers and re-init with new theme.
+		// Charts tagged data-theme-managed handle their own theme refresh via
+		// mountThemeAwareChart (echartsTheme.ts) — skip them to avoid a double dispose.
+		document.querySelectorAll('[_echarts_instance_]:not([data-theme-managed])').forEach((el) => {
 			const instance = echarts.getInstanceByDom(el as HTMLElement);
 			if (instance) {
 				const option = instance.getOption();
-				const rendererType = (instance as any)._zr?.painter?.type === 'canvas' ? 'canvas' : 'svg';
+				const rendererType =
+					(instance.getZr() as any)?.painter?.type === 'canvas' ? 'canvas' : 'svg';
 				instance.dispose();
 				const newChart = echarts.init(el as HTMLElement, resolved === 'dark' ? 'dark' : null, {
 					renderer: rendererType

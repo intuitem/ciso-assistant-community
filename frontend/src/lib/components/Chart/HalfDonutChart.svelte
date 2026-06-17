@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
+	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
 	import { safeTranslate } from '$lib/utils/i18n';
 
 	import { level } from '$paraglide/messages';
@@ -36,47 +37,41 @@
 		}
 	}
 	const chart_id = `${name}_div`;
-	onMount(async () => {
-		const echarts = await import('echarts');
-		let chart = echarts.init(
-			document.getElementById(chart_id),
-			document.documentElement.classList.contains('dark') ? 'dark' : null,
-			{ renderer: 'svg' }
-		);
-
-		// specify chart configuration item and data
-		var option = {
-			title: {
-				subtext: title
-			},
-			tooltip: {
-				trigger: 'item'
-			},
-			series: [
-				{
-					name: level(),
-					type: 'pie',
-					radius: ['40%', '70%'],
-					center: ['50%', '70%'],
-					// adjust the start and end angle
-					startAngle: 180,
-					endAngle: 360,
-					minShowLabelAngle: 1,
-					data: values,
-					color: colors
-				}
-			]
+	onMount(() => {
+		let dispose: (() => void) | undefined;
+		let active = true;
+		(async () => {
+			const echarts = await import('echarts');
+			if (!active) return;
+			const el = document.getElementById(chart_id);
+			if (!el) return;
+			dispose = mountThemeAwareChart(echarts, el, () => ({
+				title: {
+					subtext: title
+				},
+				tooltip: {
+					trigger: 'item'
+				},
+				series: [
+					{
+						name: level(),
+						type: 'pie',
+						radius: ['40%', '70%'],
+						center: ['50%', '70%'],
+						// adjust the start and end angle
+						startAngle: 180,
+						endAngle: 360,
+						minShowLabelAngle: 1,
+						data: values,
+						color: colors
+					}
+				]
+			}));
+		})();
+		return () => {
+			active = false;
+			dispose?.();
 		};
-
-		// console.debug(option);
-
-		// use configuration item and data specified to show chart
-		option.backgroundColor = 'transparent';
-		chart.setOption(option);
-
-		window.addEventListener('resize', function () {
-			chart.resize();
-		});
 	});
 </script>
 
