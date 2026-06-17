@@ -8,7 +8,6 @@ import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
-import { z } from 'zod';
 import type { ModelInfo } from '$lib/utils/types';
 import type { PageServerLoad } from './$types';
 
@@ -34,11 +33,6 @@ export const load = (async ({ fetch, params }) => {
 
 	const evidenceModel = getModelInfo('evidences');
 	const evidenceCreateSchema = modelSchema('evidences');
-	const scoreSchema = z.object({
-		is_scored: z.boolean().optional(),
-		score: z.number().optional().nullable(),
-		documentation_score: z.number().optional().nullable()
-	});
 	const requirement_assessments = await Promise.all(
 		tableMode.requirement_assessments.map(async (requirementAssessment) => {
 			// TODO: merge initial data ?
@@ -61,14 +55,6 @@ export const load = (async ({ fetch, params }) => {
 				}
 			);
 			const observationBuffer = requirementAssessment.observation;
-			const scoreForm = await superValidate(
-				{
-					is_scored: requirementAssessment.is_scored,
-					score: requirementAssessment.score,
-					documentation_score: requirementAssessment.documentation_score
-				},
-				zod(scoreSchema)
-			);
 			const updateSchema = modelSchema('requirement-assessments');
 			const updatedModel: ModelInfo = getModelInfo('requirement-assessments');
 			const object = {
@@ -89,7 +75,6 @@ export const load = (async ({ fetch, params }) => {
 				measureCreateForm,
 				evidenceCreateForm,
 				observationBuffer,
-				scoreForm,
 				updateForm,
 				updatedModel,
 				object

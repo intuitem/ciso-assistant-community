@@ -84,7 +84,13 @@
 
 	// Initialize hide suggestion state
 	let hideSuggestionHashmap: Record<string, boolean> = $state({});
-	let requirementAssessments = $derived(data.requirement_assessments);
+	// Local reactive copy so optimistic field edits (result/status/score/observation)
+	// update the UI without a full invalidateAll. Re-synced whenever `data` is reloaded
+	// (e.g. after a questionnaire answer that the backend recomputes).
+	let requirementAssessments = $state(data.requirement_assessments);
+	$effect(() => {
+		requirementAssessments = data.requirement_assessments;
+	});
 	let complianceAssessment = $derived(data.compliance_assessment);
 
 	let isReadOnly = $derived(
@@ -181,14 +187,21 @@
 		return res;
 	}
 
-	// Function to update requirement assessments
-	async function update(requirementAssessment: Record<string, any>, field: string) {
+	// Function to update requirement assessments.
+	// `refresh` forces a reload only when the backend recomputes derived fields from
+	// the change (e.g. answers / respondent alignment -> result/score). Direct edits
+	// (result/status/score/observation) update reactively, so they skip invalidateAll.
+	async function update(
+		requirementAssessment: Record<string, any>,
+		field: string,
+		{ refresh = false }: { refresh?: boolean } = {}
+	) {
 		const value = requirementAssessment[field];
 		await updateBulk(requirementAssessment, {
 			[field]: value
 		});
 
-		if (invalidateAllBool) {
+		if (refresh && invalidateAllBool) {
 			await invalidateAll();
 		}
 
@@ -1042,7 +1055,9 @@
 													onChange={(_urn, choiceUrn) => {
 														const newAlignment = alignmentValueFromChoiceUrn(choiceUrn);
 														requirementAssessment.respondent_alignment = newAlignment;
-														update(requirementAssessment, 'respondent_alignment');
+														update(requirementAssessment, 'respondent_alignment', {
+															refresh: true
+														});
 													}}
 												/>
 											</div>
@@ -1163,9 +1178,10 @@
 														{/if}
 													{:else}
 														<TableMarkdownField
-															bind:value={requirementAssessment.observation}
+															value={requirementAssessment.observation}
 															disabled={isReadOnly}
 															onSave={async (newValue) => {
+																requirementAssessment.observation = newValue;
 																await update(requirementAssessment, 'observation');
 																requirementAssessment.observationBuffer = newValue;
 															}}
