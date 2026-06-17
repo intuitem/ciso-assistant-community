@@ -774,12 +774,18 @@ class AssetReadSerializer(AssetWriteSerializer):
         """
         Gets comparison of security objectives vs capabilities with verdict.
         """
+        optimized_data = self.context.get("optimized_data")
+        if optimized_data and "security_objectives_comparison" in optimized_data:
+            return optimized_data["security_objectives_comparison"].get(obj.id, [])
         return obj.get_security_objectives_comparison()
 
     def get_recovery_objectives_comparison(self, obj):
         """
         Gets comparison of recovery objectives vs capabilities with verdict.
         """
+        optimized_data = self.context.get("optimized_data")
+        if optimized_data and "recovery_objectives_comparison" in optimized_data:
+            return optimized_data["recovery_objectives_comparison"].get(obj.id, [])
         return obj.get_recovery_objectives_comparison()
 
 
@@ -1429,6 +1435,37 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
             if sync_mappings:
                 ret["sync_mappings"] = sync_mappings
         return ret
+
+
+class AppliedControlBulkReadSerializer(AppliedControlReadSerializer):
+    """Like AppliedControlReadSerializer but reads daily_rate from context to
+    avoid a per-row GlobalSettings query, and drops sync_mappings (internal
+    integration state, irrelevant to a bulk pull) to avoid a per-row query."""
+
+    annual_cost = serializers.SerializerMethodField()
+    annual_cost_display = serializers.SerializerMethodField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # instance-level so the metaclass doesn't register it as a field
+        self._annual_cost_repr = serializers.DecimalField(
+            max_digits=12, decimal_places=2, read_only=True
+        )
+
+    def get_annual_cost(self, obj):
+        value = obj.compute_annual_cost(self.context.get("daily_rate"))
+        return self._annual_cost_repr.to_representation(value)
+
+    def get_annual_cost_display(self, obj):
+        annual_cost = obj.compute_annual_cost(self.context.get("daily_rate"))
+        if annual_cost == 0:
+            return ""
+        currency = self.get_currency(obj)
+        return AppliedControl._stringify_cost(f"{annual_cost:,.2f}", currency)
+
+    def to_representation(self, instance):
+        # skip Write/Read.to_representation, which query SyncMapping per row
+        return super(AppliedControlWriteSerializer, self).to_representation(instance)
 
 
 class AppliedControlListSerializer(BaseModelSerializer):

@@ -2003,6 +2003,8 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
         dro_obj_results = {}
         sec_cap_results = {}
         rec_cap_results = {}
+        sec_obj_cmp_results = {}
+        rec_obj_cmp_results = {}
         descendant_results = {}
 
         for asset in initial_assets:
@@ -2057,6 +2059,22 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                 rec_cap_results[asset.id] = self._format_disaster_recovery_objectives(
                     rec_cap
                 )
+                # feed the model methods the values already computed here so they
+                # skip their per-asset graph traversal
+                sec_obj_cmp_results[asset.id] = (
+                    asset.get_security_objectives_comparison(
+                        security_objectives={"objectives": sec_obj},
+                        security_capabilities={"objectives": sec_cap},
+                    )
+                )
+                rec_obj_cmp_results[asset.id] = (
+                    asset.get_recovery_objectives_comparison(
+                        disaster_recovery_objectives={"objectives": dro_obj},
+                        recovery_capabilities={"objectives": rec_cap},
+                        display_objectives_list=dro_obj_results[asset.id],
+                        display_capabilities_list=rec_cap_results[asset.id],
+                    )
+                )
 
         optimized_data.update(
             {
@@ -2064,6 +2082,8 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                 "disaster_recovery_objectives": dro_obj_results,
                 "security_capabilities": sec_cap_results,
                 "recovery_capabilities": rec_cap_results,
+                "security_objectives_comparison": sec_obj_cmp_results,
+                "recovery_objectives_comparison": rec_obj_cmp_results,
                 "descendants": descendant_results,
             }
         )
@@ -2126,6 +2146,33 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
         page = self.paginate_queryset(qs)
         objects = page if page is not None else qs
         serializer = AssetAutocompleteSerializer(objects, many=True)
+        data = serializer.data
+        field_models = self._get_fieldsrelated_map(serializer)
+        if field_models:
+            allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
+            data = self._filter_related_fields(data, field_models, allowed_ids)
+        if page is not None:
+            return self.get_paginated_response(data)
+        return Response(data)
+
+    @action(detail=False, methods=["get"], url_path="full")
+    def full(self, request):
+        """Full-detail read of all assets in one paginated request
+        (AssetReadSerializer), avoiding N+1 per-id detail fetches. Graph work is
+        computed once for the page via _get_optimized_object_data."""
+        from core.serializers import AssetReadSerializer
+
+        qs = self.filter_queryset(self.get_queryset()).prefetch_related(
+            "solutions", "applied_controls"
+        )
+        page = self.paginate_queryset(qs)
+        objects = page if page is not None else qs
+
+        optimized_data = self._get_optimized_object_data(objects)
+        context = self.get_serializer_context()
+        context["optimized_data"] = optimized_data
+
+        serializer = AssetReadSerializer(objects, many=True, context=context)
         data = serializer.data
         field_models = self._get_fieldsrelated_map(serializer)
         if field_models:
@@ -5246,6 +5293,38 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
         page = self.paginate_queryset(qs)
         objects = page if page is not None else qs
         serializer = AppliedControlAutocompleteSerializer(objects, many=True)
+        data = serializer.data
+        field_models = self._get_fieldsrelated_map(serializer)
+        if field_models:
+            allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
+            data = self._filter_related_fields(data, field_models, allowed_ids)
+        if page is not None:
+            return self.get_paginated_response(data)
+        return Response(data)
+
+    @action(detail=False, methods=["get"], url_path="full")
+    def full(self, request):
+        """Full-detail read of all applied controls in one paginated request
+        (AppliedControlReadSerializer), avoiding N+1 per-id detail fetches."""
+        from core.serializers import AppliedControlBulkReadSerializer
+
+        qs = self.filter_queryset(self.get_queryset()).prefetch_related(
+            "risk_scenarios"
+        )
+        page = self.paginate_queryset(qs)
+        objects = page if page is not None else qs
+
+        general_settings = GlobalSettings.objects.filter(name="general").first()
+        daily_rate = (
+            general_settings.value.get("daily_rate", 500) if general_settings else 500
+        )
+
+        context = self.get_serializer_context()
+        context["daily_rate"] = daily_rate
+
+        serializer = AppliedControlBulkReadSerializer(
+            objects, many=True, context=context
+        )
         data = serializer.data
         field_models = self._get_fieldsrelated_map(serializer)
         if field_models:
