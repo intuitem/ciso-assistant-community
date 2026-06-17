@@ -905,16 +905,39 @@ class QuantitativeRiskHypothesis(
         return roc
 
     @property
+    def _treatment_cost_issue(self):
+        """
+        Explain why treatment cost is non-positive (and thus ROSI cannot be
+        computed). Returns an i18n key (translated on the frontend via
+        safeTranslate) or None when the treatment cost is positive.
+        """
+        cost = self.treatment_cost
+        if cost > 0:
+            return None
+
+        if cost < 0:
+            return "rosiNegativeCost"
+
+        # cost == 0
+        has_added = self.added_applied_controls.exists()
+        if not has_added:
+            if self.existing_applied_controls.exists():
+                return "rosiBaselineControlsWarning"
+            return "rosiNoAddedControls"
+
+        return "rosiAddedControlsNoCost"
+
+    @property
     def roc_display(self):
         """
-        Returns a human-readable format of the ROC.
+        Returns an i18n key or a formatted percentage; resolved on the frontend
+        via safeTranslate (which passes the percentage through unchanged).
         """
         roc_value = self.roc
         if roc_value is None:
             if self.risk_stage != "residual":
-                return "N/A (no residual hypothesis)"
-            else:
-                return "Insufficient data"
+                return "rocNotApplicable"
+            return self._treatment_cost_issue or "rocInsufficientData"
 
         # Format as percentage
         return f"{roc_value * 100:.0f}%"
@@ -941,7 +964,7 @@ class QuantitativeRiskHypothesis(
         Returns a detailed explanation of the ROC calculation with specific values.
         """
         if self.risk_stage != "residual":
-            return "ROSI calculation only available for residual hypotheses"
+            return "rosiOnlyResidual"
 
         # Find the current hypothesis in the same scenario
         current_hypothesis = self.quantitative_risk_scenario.hypotheses.filter(
@@ -949,20 +972,20 @@ class QuantitativeRiskHypothesis(
         ).first()
 
         if not current_hypothesis:
-            return "Cannot calculate ROSI: No current hypothesis found for comparison."
+            return "rosiNoCurrentHypothesis"
 
         # Get ALEs
         current_ale = current_hypothesis.ale
         residual_ale = self.ale
 
         if current_ale is None or residual_ale is None:
-            return "Cannot calculate ROSI: Missing ALE data from simulation results."
+            return "rosiMissingAle"
 
         # Get treatment cost
         treatment_cost = self.treatment_cost
 
         if treatment_cost <= 0:
-            return "Cannot calculate ROC: Treatment cost must be positive."
+            return self._treatment_cost_issue
 
         # Calculate components
         risk_reduction = current_ale - residual_ale
