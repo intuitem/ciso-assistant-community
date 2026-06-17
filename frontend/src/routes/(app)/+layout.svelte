@@ -164,7 +164,7 @@
 		<div class="flex items-start justify-between px-4">
 			<div>
 				<div
-					class="text-2xl font-bold pb-1 bg-linear-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
+					class="text-2xl font-bold pb-1 bg-linear-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent dark:from-tertiary-400 dark:via-primary-300 dark:to-secondary-400"
 					id="page-title"
 				>
 					{safeTranslate(displayTitle)}
@@ -200,10 +200,10 @@
 				{#if data?.user?.is_admin}
 					<button
 						onclick={() => getStartedTrigger.set(true)}
-						class="shrink-0 px-3 py-1.5 rounded-full bg-violet-500 text-white text-xs font-semibold shadow-lg
-			ring-2 ring-violet-400 ring-offset-2 transition-all duration-300 hover:bg-violet-600
-			hover:ring-violet-300 hover:ring-offset-violet-100 hover:shadow-violet-500/50
-			focus:outline-hidden focus:ring-violet-500 cursor-pointer"
+						class="shrink-0 px-3 py-1.5 rounded-full bg-primary-500 text-primary-contrast-500 text-xs font-semibold shadow-md
+			ring-1 ring-primary-300/80 ring-offset-1 ring-offset-surface-50 transition-all duration-200 hover:bg-primary-600
+			hover:ring-primary-200 hover:shadow-primary-500/20 focus:outline-hidden focus:ring-2 focus:ring-primary-400
+			dark:bg-primary-600 dark:text-primary-50 dark:ring-primary-300/70 dark:ring-offset-surface-950 dark:hover:bg-primary-500 cursor-pointer"
 					>
 						<i class="fa-solid fa-rocket mr-1"></i>
 						{m.getStarted()}

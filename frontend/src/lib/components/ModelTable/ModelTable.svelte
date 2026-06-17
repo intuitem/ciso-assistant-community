@@ -753,7 +753,10 @@
 					onPointerDownOutside={() => (openState = false)}
 					closeOnInteractOutside={false}
 				>
-					<Popover.Trigger class="btn preset-filled-primary-500 h-9 inline-flex items-center">
+					<Popover.Trigger
+						class="btn h-9 inline-flex items-center bg-primary-500 text-primary-contrast-500 hover:bg-primary-600
+						dark:bg-primary-700 dark:text-primary-100 dark:hover:bg-primary-600 dark:border dark:border-primary-400/25"
+					>
 						<i class="fa-solid fa-filter mr-2"></i>
 						{m.filters()}
 						{#if filterCount}
@@ -967,7 +970,10 @@
 																			{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
 																		{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship' && key !== 'nature'}
 																			{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key.replace(/_/g, '-')}/${val.id}`}
-																			<Anchor href={itemHref} class="anchor" stopPropagation
+																			<Anchor
+																				href={itemHref}
+																				class="anchor dark:text-secondary-400/80 dark:hover:text-secondary-300"
+																				stopPropagation
 																				>{safeTranslate(val.str)}</Anchor
 																			>
 																		{:else if val.str}
@@ -1010,7 +1016,7 @@
 																<Anchor
 																	breadcrumbAction="push"
 																	href={itemHref}
-																	class="anchor"
+																	class="anchor dark:text-secondary-400/80 dark:hover:text-secondary-300"
 																	stopPropagation
 																	>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
 																		'-'
@@ -1020,7 +1026,7 @@
 																<Anchor
 																	breadcrumbAction="push"
 																	href={itemHref}
-																	class="anchor"
+																	class="anchor dark:text-secondary-400/80 dark:hover:text-secondary-300"
 																	stopPropagation>{safeTranslate(value.str)}</Anchor
 																>
 															{/if}

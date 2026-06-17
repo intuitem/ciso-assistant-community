@@ -64,7 +64,7 @@
 					<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
 						<SideBarCategory {item} />
 						<Accordion.ItemIndicator
-							class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90 text-primary-700-300"
+							class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90 text-primary-700-400 dark:text-primary-300"
 						>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"

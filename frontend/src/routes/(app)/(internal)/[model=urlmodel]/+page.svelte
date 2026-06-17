@@ -211,7 +211,8 @@
 						<div class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs">
 							{#if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments', 'qualifications'].includes(URLModel)}
 								<button
-									class="inline-block p-3 btn-mini-primary w-12 focus:relative"
+									class="inline-block p-3 w-12 focus:relative text-gray-50 bg-violet-600 hover:bg-violet-500
+									dark:bg-primary-700 dark:text-primary-100 dark:hover:bg-primary-600 dark:border dark:border-primary-400/25"
 									data-testid="add-button"
 									id="add-button"
 									title={safeTranslate('add-' + data.model.localName)}
@@ -221,7 +222,8 @@
 								</button>
 								{#if ['applied-controls', 'assets', 'incidents', 'security-exceptions', 'risk-scenarios', 'processings', 'task-templates', 'entities', 'solutions', 'contracts'].includes(URLModel)}
 									<button
-										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
+										class="inline-block p-3 w-12 focus:relative text-gray-50 bg-sky-500 hover:bg-sky-400
+										dark:bg-secondary-800 dark:text-secondary-100 dark:hover:bg-secondary-700 dark:border dark:border-secondary-400/25"
 										title={m.exportButton()}
 										data-testid="export-button"
 										onclick={modalExport}

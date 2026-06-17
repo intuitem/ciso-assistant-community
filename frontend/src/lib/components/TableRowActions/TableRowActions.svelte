@@ -50,7 +50,7 @@
 		identifierField = 'id',
 		preventDelete = false,
 		preventEdit = false,
-		baseClass = 'space-x-2 whitespace-nowrap flex flex-row items-center text-xl text-surface-700-300 justify-end',
+		baseClass = 'space-x-2 whitespace-nowrap flex flex-row items-center text-xl text-surface-600-400 justify-end',
 		hasBody = false,
 		head,
 		body,
@@ -178,7 +178,7 @@
 			<Anchor
 				breadcrumbAction="push"
 				href={detailURL}
-				class="unstyled cursor-pointer hover:text-primary-500"
+				class="unstyled cursor-pointer opacity-80 transition-colors hover:text-secondary-400 hover:opacity-100"
 				data-testid="tablerow-detail-button"><i class="fa-solid fa-eye"></i></Anchor
 			>
 		{/if}
@@ -188,7 +188,7 @@
 				label={m.edit()}
 				href={editURL}
 				stopPropagation
-				class="unstyled cursor-pointer hover:text-primary-500"
+				class="unstyled cursor-pointer opacity-80 transition-colors hover:text-secondary-400 hover:opacity-100"
 				data-testid="tablerow-edit-button"><i class="fa-solid fa-pen-to-square"></i></Anchor
 			>
 		{/if}
@@ -204,7 +204,7 @@
 						modalConfirmDelete(row.meta.id, row);
 						stopPropagation(e);
 					}}
-					class="cursor-pointer hover:text-primary-500"
+					class="cursor-pointer opacity-80 transition-colors hover:text-tertiary-400 hover:opacity-100"
 					aria-label={m.delete()}
 					data-testid="tablerow-delete-button"><i class="fa-solid fa-trash"></i></button
 				>
@@ -219,7 +219,7 @@
 						modalConfirmDelete(row.meta.id, row);
 						stopPropagation(e);
 					}}
-					class="cursor-pointer hover:text-primary-500"
+					class="cursor-pointer opacity-80 transition-colors hover:text-tertiary-400 hover:opacity-100"
 					aria-label={m.delete()}
 					data-testid="tablerow-delete-button"><i class="fa-solid fa-trash"></i></button
 				>
