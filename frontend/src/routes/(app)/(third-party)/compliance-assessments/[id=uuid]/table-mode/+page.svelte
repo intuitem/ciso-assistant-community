@@ -128,6 +128,11 @@
 		return result;
 	}
 
+	// Underlying requirement node (carries urn / parent_urn / ref_id ...).
+	function getNode(ra: Record<string, any>) {
+		return ra?.requirement && typeof ra.requirement === 'object' ? ra.requirement : ra;
+	}
+
 	// Reference id shown as a compact chip in front of an assessable requirement.
 	function getRefId(requirementAssessment: Record<string, any>) {
 		const requirement =
@@ -301,15 +306,82 @@
 
 	// Per-requirement fold state for the card body. The header (result / status /
 	// score) stays visible and editable even while the body is collapsed.
-	let expandedRA: Record<string, boolean> = $state({});
-	let allExpanded = $state(false);
+	let expandedRA: Record<string, boolean> = $state(
+		// svelte-ignore state_referenced_locally
+		// Bodies start expanded so reading needs no click; collapsing is the opt-in densifier.
+		requirementAssessments.reduce(
+			(acc, ra) => {
+				acc[ra.id] = true;
+				return acc;
+			},
+			{} as Record<string, boolean>
+		)
+	);
+	let allExpanded = $state(true);
 	function toggleRA(id: string) {
 		expandedRA[id] = !expandedRA[id];
 	}
+	// Section structure derived from the real tree (urn / parent_urn), not ref_id:
+	// per-row ancestor headings, nesting depth, and assessable count under each heading.
+	const sectionInfo = $derived.by(() => {
+		// urn -> parent_urn for the whole framework tree.
+		const parentByUrn: Record<string, string | null> = {};
+		for (const item of data.requirements ?? []) {
+			const n = getNode(item);
+			if (n?.urn) parentByUrn[n.urn] = n.parent_urn ?? null;
+		}
+		// urn of each row + urn -> row id for heading rows (the collapsible ones).
+		const urnByIndex = requirementAssessments.map((ra) => getNode(ra)?.urn ?? null);
+		const headingIdByUrn: Record<string, string> = {};
+		requirementAssessments.forEach((ra, idx) => {
+			const urn = urnByIndex[idx];
+			if (!urn) return;
+			if (!(urn in parentByUrn)) parentByUrn[urn] = getNode(ra)?.parent_urn ?? null;
+			const isSplash = ra.display_mode === 'splash' || ra.requirement?.display_mode === 'splash';
+			if (!ra.assessable && !isSplash) headingIdByUrn[urn] = ra.id;
+		});
+
+		const counts: Record<string, number> = {};
+		const rows = requirementAssessments.map((ra, idx) => {
+			const isSplash = ra.display_mode === 'splash' || ra.requirement?.display_mode === 'splash';
+			const ancestors: string[] = [];
+			let parent = urnByIndex[idx] ? parentByUrn[urnByIndex[idx] as string] : null;
+			let guard = 0;
+			while (parent && guard++ < 100) {
+				if (headingIdByUrn[parent]) ancestors.push(headingIdByUrn[parent]);
+				parent = parentByUrn[parent] ?? null;
+			}
+			if (ra.assessable) for (const id of ancestors) counts[id] = (counts[id] ?? 0) + 1;
+			return {
+				id: ra.id,
+				depth: ancestors.length + 1,
+				isHeading: !ra.assessable && !isSplash,
+				ancestors
+			};
+		});
+		return { rows, counts };
+	});
+
+	// Collapsed sections hide every row nested under them (sections start expanded).
+	let collapsedSections: Record<string, boolean> = $state({});
+	function toggleSectionCollapse(id: string) {
+		collapsedSections[id] = !collapsedSections[id];
+	}
+	function isRowVisible(index: number) {
+		const row = sectionInfo.rows[index];
+		return !row || row.ancestors.every((id) => !collapsedSections[id]);
+	}
+
 	function setAllExpanded(expanded: boolean) {
 		for (const ra of requirementAssessments) {
 			expandedRA[ra.id] = expanded;
 		}
+		// Expanding clears all section collapses; collapsing folds every section.
+		const next: Record<string, boolean> = {};
+		if (!expanded) {
+			for (const row of sectionInfo.rows) if (row.isHeading) next[row.id] = true;
+		}
+		collapsedSections = next;
 		allExpanded = expanded;
 	}
 
@@ -631,450 +703,483 @@
 		{/if}
 		<ul data-testid="requirement-assessments" class="space-y-3">
 			{#each requirementAssessments as requirementAssessment, i}
-				<li class="list-none">
-					{#if requirementAssessment.display_mode === 'splash' || requirementAssessment.requirement?.display_mode === 'splash'}
-						<!-- Splash screen node: full-width markdown block -->
-						<div class="my-4">
-							<SplashCard
-								name={requirementAssessment.name ?? requirementAssessment.requirement?.name}
-								description={requirementAssessment.description ??
-									requirementAssessment.requirement?.description}
-								id="requirement-{requirementAssessment.id}"
-							/>
-						</div>
-					{:else if !requirementAssessment.assessable}
-						<!-- Section heading node: centered divider title (TOC anchor) -->
-						<span
-							class="relative flex justify-center py-4"
-							id="requirement-{requirementAssessment.id}"
-							data-toc
-							data-toc-title={getTitle(requirementAssessment)}
-							data-toc-level="0"
-						>
-							<div
-								class="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-linear-to-r from-transparent via-gray-400 to-transparent opacity-75"
-							></div>
-							<span
-								class="relative z-10 bg-white px-6 text-orange-600 font-semibold text-lg inline-flex items-center gap-3"
-							>
-								{getTitle(requirementAssessment)}
-							</span>
-						</span>
-						{#if requirementAssessment.requirement.description}
-							<div class="text-sm text-surface-600 text-center max-w-3xl mx-auto pb-2">
-								<MarkdownRenderer content={requirementAssessment.requirement.description} />
+				{@const row = sectionInfo.rows[i]}
+				{#if isRowVisible(i)}
+					<li class="list-none">
+						{#if requirementAssessment.display_mode === 'splash' || requirementAssessment.requirement?.display_mode === 'splash'}
+							<!-- Splash screen node: full-width markdown block -->
+							<div class="my-4">
+								<SplashCard
+									name={requirementAssessment.name ?? requirementAssessment.requirement?.name}
+									description={requirementAssessment.description ??
+										requirementAssessment.requirement?.description}
+									id="requirement-{requirementAssessment.id}"
+								/>
 							</div>
-						{/if}
-					{:else}
-						<!-- Assessable requirement: compact card -->
-						<div
-							class="card border border-surface-200 rounded-xl p-4 space-y-3 shadow-sm"
-							id="requirement-{requirementAssessment.id}"
-							data-toc
-							data-toc-title={getTitle(requirementAssessment)}
-							data-toc-level="0"
-						>
-							<form
-								id="tableModeForm-{requirementAssessment.id}"
-								action="{actionPath}?/updateRequirementAssessment"
-								method="post"
-								class="flex flex-col gap-3 table-mode-form"
+						{:else if !requirementAssessment.assessable}
+							<!-- Section heading node: collapsible section bar (TOC anchor) -->
+							{@const collapsed = !!collapsedSections[requirementAssessment.id]}
+							{@const sectionCount = sectionInfo.counts[requirementAssessment.id] ?? 0}
+							<div
+								id="requirement-{requirementAssessment.id}"
+								data-toc
+								data-toc-title={getTitle(requirementAssessment)}
+								data-toc-level="0"
+								class="mt-2"
+								style="margin-left: {(row.depth - 1) * 0.75}rem"
 							>
-								<!-- Row A: foldable title -->
-								<div class="flex items-center gap-3 flex-wrap">
-									<button
-										type="button"
-										class="flex items-center gap-2 text-left min-w-0"
-										onclick={() => toggleRA(requirementAssessment.id)}
-										aria-expanded={!!expandedRA[requirementAssessment.id]}
+								<button
+									type="button"
+									onclick={() => toggleSectionCollapse(requirementAssessment.id)}
+									aria-expanded={!collapsed}
+									class="flex w-full items-center gap-2 rounded-lg border border-orange-200 border-l-4 border-l-orange-400 bg-orange-50/60 px-3 py-2 text-left transition-colors hover:bg-orange-100/70"
+								>
+									<i
+										class="fa-solid fa-chevron-down text-orange-500 text-xs transition-transform {collapsed
+											? '-rotate-90'
+											: ''}"
+									></i>
+									{#if getRefId(requirementAssessment)}
+										<span class="shrink-0 font-semibold text-sm text-orange-600"
+											>{getRefId(requirementAssessment)}</span
+										>
+									{/if}
+									<span
+										class="font-semibold text-orange-800 {row.depth > 1 ? 'text-sm' : 'text-base'}"
+										>{getDisplayTitle(requirementAssessment)}</span
 									>
-										{#if !shallow}
-											<i
-												class="fa-solid fa-chevron-right text-surface-400 text-sm transition-transform {expandedRA[
-													requirementAssessment.id
-												]
-													? 'rotate-90'
-													: ''}"
-											></i>
-										{/if}
-										{#if getRefId(requirementAssessment)}
-											<span class="badge preset-tonal-secondary font-medium shrink-0"
-												>{getRefId(requirementAssessment)}</span
-											>
-										{/if}
-										<span class="min-w-0 font-semibold text-base text-surface-900">
-											{getDisplayTitle(requirementAssessment)}
-										</span>
-										{#if typeof requirementAssessment.requirement?.weight === 'number' && Number.isFinite(requirementAssessment.requirement.weight) && requirementAssessment.requirement.weight !== 1}
-											<span
-												class="badge text-xs font-medium bg-indigo-100 text-indigo-800 shrink-0"
-											>
-												{m.requirementWeight()}: {requirementAssessment.requirement.weight}
-											</span>
-										{/if}
-									</button>
-
-									{#if viewerRole === 'auditor' && showRespondentAlignment && requirementAssessment.respondent_alignment}
-										<span class="flex flex-col items-end shrink-0 ml-auto">
-											<span class="text-xs italic text-surface-500">{m.respondentAnswered()}</span>
-											<span
-												class="badge text-sm font-semibold text-white"
-												style="background-color: {alignmentColorMap[
-													requirementAssessment.respondent_alignment
-												]}"
-											>
-												{safeTranslate(requirementAssessment.respondent_alignment)}
-											</span>
+									{#if sectionCount > 0}
+										<span
+											class="badge preset-tonal-secondary text-xs ml-auto shrink-0"
+											title={m.requirements()}
+										>
+											{sectionCount}
 										</span>
 									{/if}
-								</div>
-
-								<!-- Row B: result / status / score, aligned under the name (editable while collapsed) -->
-								{#if (!questionnaireMode && showResult) || (!shallow && complianceAssessment.scoring_enabled)}
-									<div class="flex flex-wrap items-center gap-x-6 gap-y-3 pl-7">
-										{#if !questionnaireMode && showResult}
-											{#if hasComputedResult(requirementAssessment.requirement.questions)}
-												<span
-													class="badge text-sm font-semibold w-fit"
-													style={resultBadgeStyle(requirementAssessment.result)}
-												>
-													{safeTranslate(requirementAssessment.result)}
-												</span>
-											{:else}
-												<SegmentedControl
-													options={result_options}
-													value={requirementAssessment.result}
-													colorMap={complianceResultTailwindColorMap}
-													disabled={isReadOnly}
-													size="sm"
-													ariaLabel={m.result()}
-													onChange={(newValue) => {
-														const newResult =
-															requirementAssessment.result === newValue ? 'not_assessed' : newValue;
-														requirementAssessment.result = newResult;
-														update(requirementAssessment, 'result');
-													}}
-												/>
-											{/if}
-											{#if complianceAssessment.progress_status_enabled}
-												<SegmentedControl
-													options={status_options}
-													value={requirementAssessment.status}
-													colorMap={complianceStatusTailwindColorMap}
-													disabled={isReadOnly}
-													size="sm"
-													ariaLabel={m.status()}
-													onChange={(newValue) => {
-														const newStatus =
-															requirementAssessment.status === newValue ? 'to_do' : newValue;
-														requirementAssessment.status = newStatus;
-														update(requirementAssessment, 'status');
-													}}
-												/>
-											{/if}
-										{/if}
-										{@render scoreSlot(requirementAssessment)}
+								</button>
+								{#if requirementAssessment.requirement.description && !collapsed}
+									<div class="text-sm text-surface-600 px-3 pt-1.5">
+										<MarkdownRenderer content={requirementAssessment.requirement.description} />
 									</div>
 								{/if}
+							</div>
+						{:else}
+							<!-- Assessable requirement: compact card -->
+							<div
+								class="card border border-surface-200 rounded-xl p-4 space-y-3 shadow-sm"
+								id="requirement-{requirementAssessment.id}"
+								data-toc
+								data-toc-title={getTitle(requirementAssessment)}
+								data-toc-level="0"
+							>
+								<form
+									id="tableModeForm-{requirementAssessment.id}"
+									action="{actionPath}?/updateRequirementAssessment"
+									method="post"
+									class="flex flex-col gap-3 table-mode-form"
+								>
+									<!-- Row A: foldable title -->
+									<div class="flex items-center gap-3 flex-wrap">
+										<button
+											type="button"
+											class="flex items-center gap-2 text-left min-w-0"
+											onclick={() => toggleRA(requirementAssessment.id)}
+											aria-expanded={!!expandedRA[requirementAssessment.id]}
+										>
+											{#if !shallow}
+												<i
+													class="fa-solid fa-chevron-right text-surface-400 text-sm transition-transform {expandedRA[
+														requirementAssessment.id
+													]
+														? 'rotate-90'
+														: ''}"
+												></i>
+											{/if}
+											{#if getRefId(requirementAssessment)}
+												<span class="badge preset-tonal-secondary font-medium shrink-0"
+													>{getRefId(requirementAssessment)}</span
+												>
+											{/if}
+											<span class="min-w-0 font-semibold text-base text-surface-900">
+												{getDisplayTitle(requirementAssessment)}
+											</span>
+											{#if typeof requirementAssessment.requirement?.weight === 'number' && Number.isFinite(requirementAssessment.requirement.weight) && requirementAssessment.requirement.weight !== 1}
+												<span
+													class="badge text-xs font-medium bg-indigo-100 text-indigo-800 shrink-0"
+												>
+													{m.requirementWeight()}: {requirementAssessment.requirement.weight}
+												</span>
+											{/if}
+										</button>
 
-								{#if shallow || expandedRA[requirementAssessment.id]}
-									<!-- Description -->
+										{#if viewerRole === 'auditor' && showRespondentAlignment && requirementAssessment.respondent_alignment}
+											<span class="flex flex-col items-end shrink-0 ml-auto">
+												<span class="text-xs italic text-surface-500">{m.respondentAnswered()}</span
+												>
+												<span
+													class="badge text-sm font-semibold text-white"
+													style="background-color: {alignmentColorMap[
+														requirementAssessment.respondent_alignment
+													]}"
+												>
+													{safeTranslate(requirementAssessment.respondent_alignment)}
+												</span>
+											</span>
+										{/if}
+									</div>
+
+									<!-- Row B: result / status / score, aligned under the name (editable while collapsed) -->
+									{#if (!questionnaireMode && showResult) || (!shallow && complianceAssessment.scoring_enabled)}
+										<div class="flex flex-wrap items-center gap-x-6 gap-y-3 pl-7">
+											{#if !questionnaireMode && showResult}
+												{#if hasComputedResult(requirementAssessment.requirement.questions)}
+													<span
+														class="badge text-sm font-semibold w-fit"
+														style={resultBadgeStyle(requirementAssessment.result)}
+													>
+														{safeTranslate(requirementAssessment.result)}
+													</span>
+												{:else}
+													<SegmentedControl
+														options={result_options}
+														value={requirementAssessment.result}
+														colorMap={complianceResultTailwindColorMap}
+														disabled={isReadOnly}
+														size="sm"
+														ariaLabel={m.result()}
+														onChange={(newValue) => {
+															const newResult =
+																requirementAssessment.result === newValue
+																	? 'not_assessed'
+																	: newValue;
+															requirementAssessment.result = newResult;
+															update(requirementAssessment, 'result');
+														}}
+													/>
+												{/if}
+												{#if complianceAssessment.progress_status_enabled}
+													<SegmentedControl
+														options={status_options}
+														value={requirementAssessment.status}
+														colorMap={complianceStatusTailwindColorMap}
+														disabled={isReadOnly}
+														size="sm"
+														ariaLabel={m.status()}
+														onChange={(newValue) => {
+															const newStatus =
+																requirementAssessment.status === newValue ? 'to_do' : newValue;
+															requirementAssessment.status = newStatus;
+															update(requirementAssessment, 'status');
+														}}
+													/>
+												{/if}
+											{/if}
+											{@render scoreSlot(requirementAssessment)}
+										</div>
+									{/if}
+
+									<!-- Description: always visible, even when the body is collapsed -->
 									{#if requirementAssessment.requirement.description}
 										<div class="text-sm text-surface-700" data-testid="description">
 											<MarkdownRenderer content={requirementAssessment.requirement.description} />
 										</div>
 									{/if}
 
-									<!-- Additional information (annotation / typical evidence / mapping inference) -->
-									{#if requirementAssessment.requirement.annotation || requirementAssessment.requirement.typical_evidence || requirementAssessment.mapping_inference?.result}
-										<div class="card p-3 preset-tonal-secondary text-sm cursor-auto w-full">
-											<h2 class="font-medium text-sm flex flex-row justify-between items-center">
-												<span>
-													<i class="fa-solid fa-circle-info mr-2"></i>{m.additionalInformation()}
-												</span>
-												<button
-													type="button"
-													onclick={() => toggleSuggestion(requirementAssessment.id)}
-												>
-													{#if !hideSuggestionHashmap[requirementAssessment.id]}
-														<i class="fa-solid fa-eye"></i>
-													{:else}
-														<i class="fa-solid fa-eye-slash"></i>
+									{#if shallow || expandedRA[requirementAssessment.id]}
+										<!-- Additional information (annotation / typical evidence / mapping inference) -->
+										{#if requirementAssessment.requirement.annotation || requirementAssessment.requirement.typical_evidence || requirementAssessment.mapping_inference?.result}
+											<div class="card p-3 preset-tonal-secondary text-sm cursor-auto w-full">
+												<h2 class="font-medium text-sm flex flex-row justify-between items-center">
+													<span>
+														<i class="fa-solid fa-circle-info mr-2"></i>{m.additionalInformation()}
+													</span>
+													<button
+														type="button"
+														onclick={() => toggleSuggestion(requirementAssessment.id)}
+													>
+														{#if !hideSuggestionHashmap[requirementAssessment.id]}
+															<i class="fa-solid fa-eye"></i>
+														{:else}
+															<i class="fa-solid fa-eye-slash"></i>
+														{/if}
+													</button>
+												</h2>
+												{#if !hideSuggestionHashmap[requirementAssessment.id]}
+													{#if requirementAssessment.requirement.annotation}
+														<div class="my-2">
+															<p class="font-medium">
+																<i class="fa-solid fa-pencil"></i>
+																{m.annotation()}
+															</p>
+															<div class="py-1">
+																<MarkdownRenderer
+																	content={requirementAssessment.requirement.annotation}
+																/>
+															</div>
+														</div>
 													{/if}
-												</button>
-											</h2>
-											{#if !hideSuggestionHashmap[requirementAssessment.id]}
-												{#if requirementAssessment.requirement.annotation}
-													<div class="my-2">
-														<p class="font-medium">
-															<i class="fa-solid fa-pencil"></i>
-															{m.annotation()}
-														</p>
-														<div class="py-1">
-															<MarkdownRenderer
-																content={requirementAssessment.requirement.annotation}
-															/>
+													{#if requirementAssessment.requirement.typical_evidence}
+														<div class="my-2">
+															<p class="font-medium">
+																<i class="fa-solid fa-pencil"></i>
+																{m.typicalEvidence()}
+															</p>
+															<div class="py-1">
+																<MarkdownRenderer
+																	content={requirementAssessment.requirement.typical_evidence}
+																/>
+															</div>
 														</div>
-													</div>
-												{/if}
-												{#if requirementAssessment.requirement.typical_evidence}
-													<div class="my-2">
-														<p class="font-medium">
-															<i class="fa-solid fa-pencil"></i>
-															{m.typicalEvidence()}
-														</p>
-														<div class="py-1">
-															<MarkdownRenderer
-																content={requirementAssessment.requirement.typical_evidence}
-															/>
-														</div>
-													</div>
-												{/if}
-												{#if requirementAssessment.mapping_inference?.result}
-													<div class="my-2">
-														<p class="font-medium">
-															<i class="fa-solid fa-link"></i>
-															{m.mappingInference()}
-														</p>
-														<span class="text-xs text-gray-500"
-															><i class="fa-solid fa-circle-info"></i>
-															{m.mappingInferenceHelpText()}</span
-														>
-														<ul class="list-disc ml-4">
-															<li>
-																<p>
-																	<a
-																		class="anchor"
-																		href="/requirement-assessments/{requirementAssessment
-																			.mapping_inference.source_requirement_assessment.id}"
-																	>
-																		{requirementAssessment.mapping_inference
-																			.source_requirement_assessment.str}
-																	</a>
-																</p>
-																<p class="whitespace-pre-line py-1">
-																	<span class="italic">{m.coverageColon()}</span>
-																	<span class="badge h-fit">
-																		{safeTranslate(
-																			requirementAssessment.mapping_inference
-																				.source_requirement_assessment.coverage
-																		)}
-																	</span>
-																</p>
-																{#if requirementAssessment.mapping_inference.source_requirement_assessment.is_scored}
+													{/if}
+													{#if requirementAssessment.mapping_inference?.result}
+														<div class="my-2">
+															<p class="font-medium">
+																<i class="fa-solid fa-link"></i>
+																{m.mappingInference()}
+															</p>
+															<span class="text-xs text-gray-500"
+																><i class="fa-solid fa-circle-info"></i>
+																{m.mappingInferenceHelpText()}</span
+															>
+															<ul class="list-disc ml-4">
+																<li>
+																	<p>
+																		<a
+																			class="anchor"
+																			href="/requirement-assessments/{requirementAssessment
+																				.mapping_inference.source_requirement_assessment.id}"
+																		>
+																			{requirementAssessment.mapping_inference
+																				.source_requirement_assessment.str}
+																		</a>
+																	</p>
 																	<p class="whitespace-pre-line py-1">
-																		<span class="italic">{m.scoreSemiColon()}</span>
+																		<span class="italic">{m.coverageColon()}</span>
 																		<span class="badge h-fit">
 																			{safeTranslate(
 																				requirementAssessment.mapping_inference
-																					.source_requirement_assessment.score
+																					.source_requirement_assessment.coverage
 																			)}
 																		</span>
 																	</p>
-																{/if}
-																<p class="whitespace-pre-line py-1">
-																	<span class="italic">{m.suggestionColon()}</span>
-																	<span
-																		class="badge h-fit"
-																		style={resultBadgeStyle(
-																			requirementAssessment.mapping_inference.result
-																		)}
-																	>
-																		{safeTranslate(requirementAssessment.mapping_inference.result)}
-																	</span>
-																</p>
-																{#if requirementAssessment.mapping_inference.annotation}
+																	{#if requirementAssessment.mapping_inference.source_requirement_assessment.is_scored}
+																		<p class="whitespace-pre-line py-1">
+																			<span class="italic">{m.scoreSemiColon()}</span>
+																			<span class="badge h-fit">
+																				{safeTranslate(
+																					requirementAssessment.mapping_inference
+																						.source_requirement_assessment.score
+																				)}
+																			</span>
+																		</p>
+																	{/if}
 																	<p class="whitespace-pre-line py-1">
-																		<span class="italic">{m.annotationColon()}</span>
-																		{requirementAssessment.mapping_inference.annotation}
+																		<span class="italic">{m.suggestionColon()}</span>
+																		<span
+																			class="badge h-fit"
+																			style={resultBadgeStyle(
+																				requirementAssessment.mapping_inference.result
+																			)}
+																		>
+																			{safeTranslate(
+																				requirementAssessment.mapping_inference.result
+																			)}
+																		</span>
 																	</p>
-																{/if}
-															</li>
-														</ul>
-													</div>
+																	{#if requirementAssessment.mapping_inference.annotation}
+																		<p class="whitespace-pre-line py-1">
+																			<span class="italic">{m.annotationColon()}</span>
+																			{requirementAssessment.mapping_inference.annotation}
+																		</p>
+																	{/if}
+																</li>
+															</ul>
+														</div>
+													{/if}
 												{/if}
-											{/if}
-										</div>
-									{/if}
+											</div>
+										{/if}
 
-									<!-- Questions / auto-alignment -->
-									{#if showAnswers && requirementAssessment.requirement.questions != null && Object.keys(requirementAssessment.requirement.questions).length !== 0}
-										<div class="flex flex-col w-full space-y-2">
-											<Question
-												questions={requirementAssessment.requirement.questions}
-												initialValue={requirementAssessment.answers}
-												field="answers"
-												disabled={isReadOnly}
-												{shallow}
-												onChange={async (urn, newAnswer) => {
-													requirementAssessment.answers[urn] = newAnswer;
-													await updateBulk(requirementAssessment, {
-														answers: { [urn]: newAnswer }
-													});
-													if (invalidateAllBool) {
-														await invalidateAll();
-													}
-												}}
-											/>
-										</div>
-									{/if}
-									<!-- Auto-alignment question (when no framework questions) -->
-									{#if shouldShowAutoQuestion(requirementAssessment.requirement, viewerRole, complianceAssessment)}
-										<div class="flex flex-col w-full space-y-2">
-											<Question
-												questions={buildAutoAlignmentQuestion({
-													text: m.areYouAlignedWithThisRequirement(),
-													yes: m.yes(),
-													no: m.no(),
-													inProgress: m.inProgress(),
-													notApplicable: m.notApplicable()
-												})}
-												initialValue={{
-													[AUTO_ALIGNMENT_QUESTION_URN]: choiceUrnFromAlignmentValue(
-														requirementAssessment.respondent_alignment
-													)
-												}}
-												field="respondent_alignment"
-												disabled={isReadOnly}
-												onChange={(_urn, choiceUrn) => {
-													const newAlignment = alignmentValueFromChoiceUrn(choiceUrn);
-													requirementAssessment.respondent_alignment = newAlignment;
-													update(requirementAssessment, 'respondent_alignment');
-												}}
-											/>
-										</div>
-									{/if}
-									<div class="flex flex-col gap-3">
-										<!-- Related objects: controls / evidences -->
-										{#if shallow}
-											{#if showAppliedControls}
-												{#if requirementAssessment.applied_controls.length === 0}
-													<p class="text-surface-400 italic text-sm">{m.noAppliedControlYet()}</p>
-												{:else}
-													<div class="flex flex-wrap gap-x-4 gap-y-1 items-center">
-														{#each requirementAssessment.applied_controls as item}
-															<Anchor
-																class="anchor"
-																href="/applied-controls/{item.id}"
-																label={item.str}
-															>
-																<i class="fa-solid fa-fire-extinguisher mr-2"></i>{item.str}
-															</Anchor>
-														{/each}
-													</div>
-												{/if}
-											{/if}
-											{#if showEvidences}
-												{#if requirementAssessment.evidences.length === 0}
-													<p class="text-surface-400 italic text-sm" data-testid="no-evidence">
-														{m.noEvidences()}
-													</p>
-												{:else}
-													<div class="flex flex-wrap gap-x-4 gap-y-1 items-center">
-														{#each requirementAssessment.evidences as item}
-															<Anchor
-																class="anchor"
-																href="/evidences/{item.id}"
-																label={item.str}
-																data-testid="evidence-link"
-															>
-																<i class="fa-solid fa-file-lines mr-2"></i>{item.str}
-															</Anchor>
-														{/each}
-													</div>
-												{/if}
-											{/if}
-										{:else}
-											<div class="flex flex-wrap gap-2 items-center">
-												{#if showAppliedControls}
-													{@render chip({
-														raId: requirementAssessment.id,
-														key: 'appliedControl',
-														icon: 'fa-fire-extinguisher',
-														label: m.appliedControl(),
-														count: requirementAssessment.applied_controls.length
+										<!-- Questions / auto-alignment -->
+										{#if showAnswers && requirementAssessment.requirement.questions != null && Object.keys(requirementAssessment.requirement.questions).length !== 0}
+											<div class="flex flex-col w-full space-y-2">
+												<Question
+													questions={requirementAssessment.requirement.questions}
+													initialValue={requirementAssessment.answers}
+													field="answers"
+													disabled={isReadOnly}
+													{shallow}
+													onChange={async (urn, newAnswer) => {
+														requirementAssessment.answers[urn] = newAnswer;
+														await updateBulk(requirementAssessment, {
+															answers: { [urn]: newAnswer }
+														});
+														if (invalidateAllBool) {
+															await invalidateAll();
+														}
+													}}
+												/>
+											</div>
+										{/if}
+										<!-- Auto-alignment question (when no framework questions) -->
+										{#if shouldShowAutoQuestion(requirementAssessment.requirement, viewerRole, complianceAssessment)}
+											<div class="flex flex-col w-full space-y-2">
+												<Question
+													questions={buildAutoAlignmentQuestion({
+														text: m.areYouAlignedWithThisRequirement(),
+														yes: m.yes(),
+														no: m.no(),
+														inProgress: m.inProgress(),
+														notApplicable: m.notApplicable()
 													})}
+													initialValue={{
+														[AUTO_ALIGNMENT_QUESTION_URN]: choiceUrnFromAlignmentValue(
+															requirementAssessment.respondent_alignment
+														)
+													}}
+													field="respondent_alignment"
+													disabled={isReadOnly}
+													onChange={(_urn, choiceUrn) => {
+														const newAlignment = alignmentValueFromChoiceUrn(choiceUrn);
+														requirementAssessment.respondent_alignment = newAlignment;
+														update(requirementAssessment, 'respondent_alignment');
+													}}
+												/>
+											</div>
+										{/if}
+										<div class="flex flex-col gap-3">
+											<!-- Related objects: controls / evidences -->
+											{#if shallow}
+												{#if showAppliedControls}
+													{#if requirementAssessment.applied_controls.length === 0}
+														<p class="text-surface-400 italic text-sm">{m.noAppliedControlYet()}</p>
+													{:else}
+														<div class="flex flex-wrap gap-x-4 gap-y-1 items-center">
+															{#each requirementAssessment.applied_controls as item}
+																<Anchor
+																	class="anchor"
+																	href="/applied-controls/{item.id}"
+																	label={item.str}
+																>
+																	<i class="fa-solid fa-fire-extinguisher mr-2"></i>{item.str}
+																</Anchor>
+															{/each}
+														</div>
+													{/if}
 												{/if}
 												{#if showEvidences}
-													{@render chip({
-														raId: requirementAssessment.id,
-														key: 'evidence',
-														icon: 'fa-file-lines',
-														label: m.evidence(),
-														count: requirementAssessment.evidences.length,
-														countTestId: 'evidence-count',
-														triggerTestId: 'evidence-accordion-trigger'
+													{#if requirementAssessment.evidences.length === 0}
+														<p class="text-surface-400 italic text-sm" data-testid="no-evidence">
+															{m.noEvidences()}
+														</p>
+													{:else}
+														<div class="flex flex-wrap gap-x-4 gap-y-1 items-center">
+															{#each requirementAssessment.evidences as item}
+																<Anchor
+																	class="anchor"
+																	href="/evidences/{item.id}"
+																	label={item.str}
+																	data-testid="evidence-link"
+																>
+																	<i class="fa-solid fa-file-lines mr-2"></i>{item.str}
+																</Anchor>
+															{/each}
+														</div>
+													{/if}
+												{/if}
+											{:else}
+												<div class="flex flex-wrap gap-2 items-center">
+													{#if showAppliedControls}
+														{@render chip({
+															raId: requirementAssessment.id,
+															key: 'appliedControl',
+															icon: 'fa-fire-extinguisher',
+															label: m.appliedControl(),
+															count: requirementAssessment.applied_controls.length
+														})}
+													{/if}
+													{#if showEvidences}
+														{@render chip({
+															raId: requirementAssessment.id,
+															key: 'evidence',
+															icon: 'fa-file-lines',
+															label: m.evidence(),
+															count: requirementAssessment.evidences.length,
+															countTestId: 'evidence-count',
+															triggerTestId: 'evidence-accordion-trigger'
+														})}
+													{/if}
+												</div>
+
+												{#if showAppliedControls && isSectionOpen(requirementAssessment.id, 'appliedControl')}
+													{@render detailPanel({
+														items: requirementAssessment.applied_controls,
+														hrefBase: '/applied-controls',
+														itemIcon: 'fa-fire-extinguisher',
+														emptyLabel: m.noAppliedControlYet(),
+														createLabel: m.addAppliedControl(),
+														selectLabel: m.selectAppliedControls(),
+														onCreate: () =>
+															modalMeasureCreateForm(requirementAssessment.measureCreateForm),
+														onSelect: () =>
+															modalUpdateForm(requirementAssessment, 'selectAppliedControls')
 													})}
 												{/if}
-											</div>
 
-											{#if showAppliedControls && isSectionOpen(requirementAssessment.id, 'appliedControl')}
-												{@render detailPanel({
-													items: requirementAssessment.applied_controls,
-													hrefBase: '/applied-controls',
-													itemIcon: 'fa-fire-extinguisher',
-													emptyLabel: m.noAppliedControlYet(),
-													createLabel: m.addAppliedControl(),
-													selectLabel: m.selectAppliedControls(),
-													onCreate: () =>
-														modalMeasureCreateForm(requirementAssessment.measureCreateForm),
-													onSelect: () =>
-														modalUpdateForm(requirementAssessment, 'selectAppliedControls')
-												})}
-											{/if}
-
-											{#if showEvidences && isSectionOpen(requirementAssessment.id, 'evidence')}
-												{@render detailPanel({
-													items: requirementAssessment.evidences,
-													hrefBase: '/evidences',
-													itemIcon: 'fa-file-lines',
-													emptyLabel: m.noEvidences(),
-													createLabel: m.addEvidence(),
-													selectLabel: m.selectEvidence(),
-													createTestId: 'create-evidence-button',
-													selectTestId: 'select-evidence-button',
-													linkTestId: 'evidence-link',
-													onCreate: () =>
-														modalEvidenceCreateForm(requirementAssessment.evidenceCreateForm),
-													onSelect: () => modalUpdateForm(requirementAssessment, 'selectEvidences')
-												})}
-											{/if}
-										{/if}
-
-										<!-- Observation: always at the end of the unfolded body -->
-										{#if showObservation}
-											<div class="space-y-1">
-												<p class="text-sm font-medium text-surface-600">
-													<i class="fa-solid fa-comment-dots mr-1 text-surface-500"
-													></i>{m.observation()}
-												</p>
-												{#if shallow}
-													{#if requirementAssessment.observation}
-														<MarkdownRenderer
-															content={requirementAssessment.observation}
-															class="text-primary-500"
-														/>
-													{:else}
-														<p class="text-surface-400 italic text-sm">{m.noObservation()}</p>
-													{/if}
-												{:else}
-													<TableMarkdownField
-														bind:value={requirementAssessment.observation}
-														disabled={isReadOnly}
-														onSave={async (newValue) => {
-															await update(requirementAssessment, 'observation');
-															requirementAssessment.observationBuffer = newValue;
-														}}
-													/>
+												{#if showEvidences && isSectionOpen(requirementAssessment.id, 'evidence')}
+													{@render detailPanel({
+														items: requirementAssessment.evidences,
+														hrefBase: '/evidences',
+														itemIcon: 'fa-file-lines',
+														emptyLabel: m.noEvidences(),
+														createLabel: m.addEvidence(),
+														selectLabel: m.selectEvidence(),
+														createTestId: 'create-evidence-button',
+														selectTestId: 'select-evidence-button',
+														linkTestId: 'evidence-link',
+														onCreate: () =>
+															modalEvidenceCreateForm(requirementAssessment.evidenceCreateForm),
+														onSelect: () =>
+															modalUpdateForm(requirementAssessment, 'selectEvidences')
+													})}
 												{/if}
-											</div>
-										{/if}
-									</div>
-								{/if}
-							</form>
-						</div>
-					{/if}
-				</li>
+											{/if}
+
+											<!-- Observation: always at the end of the unfolded body -->
+											{#if showObservation}
+												<div class="space-y-1">
+													<p class="text-sm font-medium text-surface-600">
+														<i class="fa-solid fa-comment-dots mr-1 text-surface-500"
+														></i>{m.observation()}
+													</p>
+													{#if shallow}
+														{#if requirementAssessment.observation}
+															<MarkdownRenderer
+																content={requirementAssessment.observation}
+																class="text-primary-500"
+															/>
+														{:else}
+															<p class="text-surface-400 italic text-sm">{m.noObservation()}</p>
+														{/if}
+													{:else}
+														<TableMarkdownField
+															bind:value={requirementAssessment.observation}
+															disabled={isReadOnly}
+															onSave={async (newValue) => {
+																await update(requirementAssessment, 'observation');
+																requirementAssessment.observationBuffer = newValue;
+															}}
+														/>
+													{/if}
+												</div>
+											{/if}
+										</div>
+									{/if}
+								</form>
+							</div>
+						{/if}
+					</li>
+				{/if}
 			{/each}
 		</ul>
 	</div>
