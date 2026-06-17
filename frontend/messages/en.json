@@ -1058,6 +1058,7 @@
 	"rosiMissingAle": "ROSI needs simulation results (ALE) for the current and residual hypotheses.",
 	"rocNotApplicable": "N/A",
 	"rocInsufficientData": "Insufficient data",
+	"rosiCalculationExplanation": "ROSI calculation:\n• Current ALE: {currentAle}\n• Residual ALE: {residualAle}\n• Risk reduction: {riskReduction}\n• Treatment cost: {treatmentCost}\n• Net benefit: {netBenefit}\n• ROSI = Net benefit ÷ Treatment cost = {rosi}\n\nFormula: ROSI = (Current ALE − Residual ALE − Treatment cost) ÷ Treatment cost",
 	"ebiosRmBaseline": "Foundations",
 	"createAuditFromBaseline": "Apply a mapping",
 	"cloneAudit": "Clone audit",

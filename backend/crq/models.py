@@ -961,10 +961,12 @@ class QuantitativeRiskHypothesis(
     @property
     def roc_calculation_explanation(self):
         """
-        Returns a detailed explanation of the ROC calculation with specific values.
+        Returns the ROSI explanation as an i18n descriptor {"key", "params"},
+        rendered on the frontend via safeTranslate. Numbers are pre-formatted
+        here; the prose lives in the message catalog.
         """
         if self.risk_stage != "residual":
-            return "rosiOnlyResidual"
+            return {"key": "rosiOnlyResidual"}
 
         # Find the current hypothesis in the same scenario
         current_hypothesis = self.quantitative_risk_scenario.hypotheses.filter(
@@ -972,41 +974,37 @@ class QuantitativeRiskHypothesis(
         ).first()
 
         if not current_hypothesis:
-            return "rosiNoCurrentHypothesis"
+            return {"key": "rosiNoCurrentHypothesis"}
 
         # Get ALEs
         current_ale = current_hypothesis.ale
         residual_ale = self.ale
 
         if current_ale is None or residual_ale is None:
-            return "rosiMissingAle"
+            return {"key": "rosiMissingAle"}
 
         # Get treatment cost
         treatment_cost = self.treatment_cost
 
         if treatment_cost <= 0:
-            return self._treatment_cost_issue
+            return {"key": self._treatment_cost_issue}
 
         # Calculate components
         risk_reduction = current_ale - residual_ale
         net_benefit = risk_reduction - treatment_cost
         roc_value = net_benefit / treatment_cost
 
-        # Format values without losing precision
-        roc_percentage = f"{roc_value * 100:.1f}%"
-
-        explanation = (
-            f"ROSI Calculation:\n"
-            f"• Current ALE: {current_ale:,.2f}\n"
-            f"• Residual ALE: {residual_ale:,.2f}\n"
-            f"• Risk Reduction: {risk_reduction:,.2f}\n"
-            f"• Treatment Cost: {treatment_cost:,.2f}\n"
-            f"• Net Benefit: {net_benefit:,.2f}\n"
-            f"• ROSI = Net Benefit ÷ Treatment Cost = {roc_percentage}\n\n"
-            f"Formula: ROSI = (Current ALE - Residual ALE - Treatment Cost) ÷ Treatment Cost"
-        )
-
-        return explanation
+        return {
+            "key": "rosiCalculationExplanation",
+            "params": {
+                "currentAle": current_ale,
+                "residualAle": residual_ale,
+                "riskReduction": risk_reduction,
+                "treatmentCost": treatment_cost,
+                "netBenefit": net_benefit,
+                "rosi": roc_value,
+            },
+        }
 
     def save(self, *args, **kwargs):
         """
