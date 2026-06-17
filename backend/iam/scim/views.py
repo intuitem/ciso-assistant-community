@@ -502,31 +502,42 @@ class SCIMGroupViewSet(ViewSet):
             operations_count=len(operations),
         )
 
+        # Coalesce member ops: an IdP can send thousands of single-member
+        # "add" ops in one PATCH (one per user). Accumulate them and apply a
+        # single bulk add / remove instead of one DB round-trip per op. A
+        # full-member "replace" (or "remove members" with no value) resets the
+        # SCIM membership, so it takes precedence over accumulated adds/removes.
+        add_ids: list[str] = []
+        remove_ids: list[str] = []
+        replace_ids: list[str] | None = None
+
         for op in operations:
             op_type = op.get("op", "").lower()
             path = op.get("path", "")
             value = op.get("value")
 
             if op_type == "add" and path == "members":
-                gm.scim_add_members(idp_group, _member_ids(value or []))
+                add_ids.extend(_member_ids(value or []))
             elif op_type == "remove":
                 if path == "members":
-                    # Two flavors per RFC 7644 §3.5.2.2:
-                    #   - {"op":"remove","path":"members"} with no value → remove ALL
-                    #   - {"op":"remove","path":"members","value":[{"value":"uuid"}]}
-                    #     → remove only the listed members
+                    # RFC 7644 §3.5.2.2: no value → remove ALL (a reset);
+                    # with a value → remove only the listed members.
                     if value:
-                        gm.scim_remove_members(idp_group, _member_ids(value))
+                        remove_ids.extend(_member_ids(value))
                     else:
-                        gm.scim_set_members(idp_group, [])
+                        replace_ids = []
+                        add_ids.clear()
+                        remove_ids.clear()
                 else:
                     # Filter selector path, e.g. members[value eq "uuid"]
                     uid = _extract_member_filter_id(path)
                     if uid:
-                        gm.scim_remove_members(idp_group, [uid])
+                        remove_ids.append(uid)
             elif op_type == "replace":
                 if path == "members":
-                    gm.scim_set_members(idp_group, _member_ids(value or []))
+                    replace_ids = _member_ids(value or [])
+                    add_ids.clear()
+                    remove_ids.clear()
                 elif path == "displayName" and value:
                     # IdP renamed the group. Only the label changes; the
                     # IdPGroup PK (the SCIM id) is the stable reference.
@@ -537,9 +548,16 @@ class SCIMGroupViewSet(ViewSet):
                         idp_group.external_group_id = value["displayName"]
                         idp_group.save(update_fields=["external_group_id"])
                     if "members" in value:
-                        gm.scim_set_members(
-                            idp_group, _member_ids(value["members"] or [])
-                        )
+                        replace_ids = _member_ids(value["members"] or [])
+                        add_ids.clear()
+                        remove_ids.clear()
+
+        if replace_ids is not None:
+            gm.scim_set_members(idp_group, replace_ids)
+        if remove_ids:
+            gm.scim_remove_members(idp_group, remove_ids)
+        if add_ids:
+            gm.scim_add_members(idp_group, add_ids)
 
         return _scim_response(scim_group_to_dict(idp_group, request))
 

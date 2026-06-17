@@ -105,16 +105,56 @@ def backfill_route(mapping):
 
 @transaction.atomic
 def scim_add_members(idp_group, user_ids):
-    mappings = list(idp_group.mappings.select_related("user_group"))
+    """Add SCIM-channel members across all of the IdP group's routes.
+
+    Bulk path: an IdP can push thousands of members in one PATCH, so this
+    avoids per-user round-trips. Source rows are written first (so the manual
+    stamping in the m2m_changed receiver is skipped), then the M2M edges are
+    inserted straight through the join table and the groups cache is
+    invalidated once — the receiver's per-pair work would otherwise dominate.
+    """
+    mappings = list(idp_group.mappings.all())
     if not mappings or not user_ids:
         return
-    users = User.objects.in_bulk(user_ids)
-    for user_id in user_ids:
-        user = users.get(user_id)
-        if user is None:
-            continue
-        for mapping in mappings:
-            grant(user, mapping.user_group, mapping, Channel.SCIM)
+    # filter() coerces the string ids SCIM sends and drops unknown users.
+    valid_ids = list(User.objects.filter(id__in=user_ids).values_list("id", flat=True))
+    if not valid_ids:
+        return
+    group_ids = {m.user_group_id for m in mappings}
+
+    GroupMembershipSource.objects.bulk_create(
+        [
+            GroupMembershipSource(
+                user_id=uid,
+                user_group_id=m.user_group_id,
+                source=m,
+                channel=Channel.SCIM,
+            )
+            for uid in valid_ids
+            for m in mappings
+        ],
+        ignore_conflicts=True,  # unique constraint dedups re-pushes
+    )
+
+    Through = User.user_groups.through
+    existing = set(
+        Through.objects.filter(
+            user_id__in=valid_ids, usergroup_id__in=group_ids
+        ).values_list("user_id", "usergroup_id")
+    )
+    new_edges = [
+        Through(user_id=uid, usergroup_id=gid)
+        for uid in valid_ids
+        for gid in group_ids
+        if (uid, gid) not in existing
+    ]
+    if new_edges:
+        Through.objects.bulk_create(new_edges, ignore_conflicts=True)
+        # bulk_create bypasses m2m_changed; invalidate the IAM groups cache
+        # ourselves (provenance is already written above, so no manual stamp).
+        from iam.cache_builders import invalidate_groups_cache
+
+        invalidate_groups_cache()
 
 
 @transaction.atomic
