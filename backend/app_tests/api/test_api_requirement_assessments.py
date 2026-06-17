@@ -150,12 +150,18 @@ class TestRequirementAssessmentsAuthenticated:
                         0
                     ].typical_evidence,
                     "ref_id": RequirementNode.objects.all()[0].ref_id,
-                    "associated_reference_controls": RequirementNode.objects.all()[
-                        0
-                    ].associated_reference_controls,
-                    "associated_threats": RequirementNode.objects.all()[
-                        0
-                    ].associated_threats,
+                    "associated_reference_controls": [
+                        {**rc, "id": str(rc["id"])}
+                        for rc in RequirementNode.objects.all()[
+                            0
+                        ].associated_reference_controls
+                    ],
+                    "associated_threats": [
+                        {**threat, "id": str(threat["id"])}
+                        for threat in RequirementNode.objects.all()[
+                            0
+                        ].associated_threats
+                    ],
                     "implementation_groups": RequirementNode.objects.all()[
                         0
                     ].implementation_groups,
@@ -318,12 +324,18 @@ class TestRequirementAssessmentsAuthenticated:
                         0
                     ].typical_evidence,
                     "ref_id": RequirementNode.objects.all()[0].ref_id,
-                    "associated_reference_controls": RequirementNode.objects.all()[
-                        0
-                    ].associated_reference_controls,
-                    "associated_threats": RequirementNode.objects.all()[
-                        0
-                    ].associated_threats,
+                    "associated_reference_controls": [
+                        {**rc, "id": str(rc["id"])}
+                        for rc in RequirementNode.objects.all()[
+                            0
+                        ].associated_reference_controls
+                    ],
+                    "associated_threats": [
+                        {**threat, "id": str(threat["id"])}
+                        for threat in RequirementNode.objects.all()[
+                            0
+                        ].associated_threats
+                    ],
                     "implementation_groups": RequirementNode.objects.all()[
                         0
                     ].implementation_groups,

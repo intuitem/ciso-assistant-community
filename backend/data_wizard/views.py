@@ -1,3 +1,5 @@
+import csv
+import csv
 import io
 import logging
 import structlog
@@ -157,6 +159,21 @@ def is_excel_file(file: io.BytesIO) -> bool:
     is_excel = file_data == ZIP_MAGIC_NUMBER
     file.seek(0)
     return is_excel
+
+
+def read_csv_file(file: io.BytesIO) -> pd.DataFrame:
+    """Read a CSV, detecting the delimiter among ``, ; \\t |`` (defaults to comma).
+
+    Avoids pandas' ``sep=None`` sniffing, which treats any character as a
+    candidate and misreads single-column files (e.g. picking ``n`` in ``name``).
+    """
+    sample = file.read(8192).decode("utf-8-sig", errors="replace")
+    file.seek(0)
+    try:
+        sep = csv.Sniffer().sniff(sample, delimiters=",;\t|").delimiter
+    except csv.Error:
+        sep = ","
+    return pd.read_csv(file, sep=sep).fillna("")
 
 
 def normalize_datetime_columns(df: pd.DataFrame) -> pd.DataFrame:
@@ -2877,9 +2894,7 @@ class LoadFileView(APIView):
                     else:
                         # CSV: flat single-sheet import of task templates only
                         file_type = RecordFileType.CSV
-                        df = pd.read_csv(record_file, sep=None, engine="python").fillna(
-                            ""
-                        )
+                        df = read_csv_file(record_file)
                         base_context = BaseContext(
                             request,
                             folders_map=folders_map,
@@ -2902,9 +2917,7 @@ class LoadFileView(APIView):
                         ).fillna("")
                     else:
                         file_type = RecordFileType.CSV
-                        df = pd.read_csv(record_file, sep=None, engine="python").fillna(
-                            ""
-                        )
+                        df = read_csv_file(record_file)
 
                     try:
                         df = normalize_df_columns(df)

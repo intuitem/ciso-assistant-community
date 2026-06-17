@@ -84,8 +84,8 @@
 			id: 'TaskTemplate',
 			label: m.taskTemplates(),
 			description: m.taskTemplatesDescription()
-    },
-    {
+		},
+		{
 			id: 'EbiosRMStudyEgerieXML',
 			label: m.ebiosRMStudyEgerieXML(),
 			description: m.ebiosRMStudyEgerieXMLDescription()
