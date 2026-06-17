@@ -4,6 +4,7 @@
 	import TextField from '../TextField.svelte';
 	import NumberField from '../NumberField.svelte';
 	import FolderTreeSelect from '../FolderTreeSelect.svelte';
+	import NestedTranslationField from '../NestedTranslationField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import { formFieldProxy } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
@@ -37,17 +38,39 @@
 	const { value: fieldType } = formFieldProxy(form, 'field_type');
 	const isChoice = $derived($fieldType === 'choice' || $fieldType === 'multi_choice');
 
-	// Inline choices editor, synced into form.data.choices for submission.
-	const { value: choicesValue } = formFieldProxy(form, 'choices');
-	let choices: { value: string; label: string; order: number }[] = $state(
-		Array.isArray($choicesValue) ? $choicesValue : []
+	// Definition-level translations {locale: {label, help_text}}, synced for submission.
+	const { value: translationsValue } = formFieldProxy(form, 'translations');
+	let translations: Record<string, Record<string, string>> = $state(
+		($translationsValue as any) || {}
 	);
 	$effect(() => {
-		$choicesValue = choices;
+		$translationsValue = $state.snapshot(translations);
+	});
+
+	const translationSubfields = [
+		{ key: 'label', label: m.label() },
+		{ key: 'help_text', label: m.helpText() }
+	];
+
+	// Inline choices editor, synced into form.data.choices for submission.
+	const { value: choicesValue } = formFieldProxy(form, 'choices');
+	type ChoiceRow = {
+		value: string;
+		label: string;
+		order: number;
+		translations: Record<string, Record<string, string>>;
+	};
+	let choices: ChoiceRow[] = $state(
+		Array.isArray($choicesValue)
+			? $choicesValue.map((c: any) => ({ translations: {}, ...c }))
+			: []
+	);
+	$effect(() => {
+		$choicesValue = $state.snapshot(choices);
 	});
 
 	function addChoice() {
-		choices = [...choices, { value: '', label: '', order: choices.length }];
+		choices = [...choices, { value: '', label: '', order: choices.length, translations: {} }];
 	}
 	function removeChoice(i: number) {
 		choices = choices.filter((_, idx) => idx !== i).map((c, idx) => ({ ...c, order: idx }));
@@ -100,6 +123,8 @@
 	bind:cachedValue={formDataCache['help_text']}
 />
 
+<NestedTranslationField bind:value={translations} subfields={translationSubfields} />
+
 <Select
 	{form}
 	options={model.selectOptions['field_type'] ?? []}
@@ -126,28 +151,29 @@
 			<p class="text-sm text-surface-500 italic">{m.noChoiceAdded()}</p>
 		{/if}
 		{#each choices as choice, i (i)}
-			<div class="flex gap-2 items-end">
-				<label class="flex-1 text-xs">
-					{m.value()}
-					<input
-						type="text"
-						class="input"
-						bind:value={choice.value}
-						placeholder="gold"
-					/>
-				</label>
-				<label class="flex-1 text-xs">
-					{m.label()}
-					<input type="text" class="input" bind:value={choice.label} placeholder="Gold" />
-				</label>
-				<button
-					type="button"
-					class="btn-icon variant-soft-error"
-					onclick={() => removeChoice(i)}
-					title={m.delete()}
-				>
-					<i class="fa-solid fa-trash"></i>
-				</button>
+			<div class="border rounded-container-token p-2 bg-surface-100-800-token space-y-2">
+				<div class="flex gap-2 items-end">
+					<label class="flex-1 text-xs">
+						{m.value()}
+						<input type="text" class="input" bind:value={choice.value} placeholder="gold" />
+					</label>
+					<label class="flex-1 text-xs">
+						{m.label()}
+						<input type="text" class="input" bind:value={choice.label} placeholder="Gold" />
+					</label>
+					<button
+						type="button"
+						class="btn-icon variant-soft-error"
+						onclick={() => removeChoice(i)}
+						title={m.delete()}
+					>
+						<i class="fa-solid fa-trash"></i>
+					</button>
+				</div>
+				<NestedTranslationField
+					bind:value={choice.translations}
+					subfields={[{ key: 'label', label: m.label() }]}
+				/>
 			</div>
 		{/each}
 	</div>

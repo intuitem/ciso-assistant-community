@@ -1567,7 +1567,8 @@ export const CustomFieldDefinitionSchema = z.object({
 			z.object({
 				value: z.string().min(1),
 				label: z.string().min(1),
-				order: z.number().default(0)
+				order: z.number().default(0),
+				translations: z.record(z.string(), z.any()).optional()
 			})
 		)
 		.optional()
