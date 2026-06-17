@@ -5077,5 +5077,6 @@
 	"scoreRange": "Score range",
 	"scoreScale": "Score scale",
 	"downloadExcelTemplate": "Download Excel template",
-	"frameworkActionsHelp": "The Excel template is meant for third parties or external entities to fill offline, then re-import the results through the {dataWizard}."
+	"frameworkActionsHelp": "The Excel template is meant for third parties or external entities to fill offline, then re-import the results through the {dataWizard}.",
+	"decisionNotes": "Decision notes"
 }

@@ -524,6 +524,8 @@ class RiskAssessmentReadSerializer(AssessmentReadSerializer):
             "id",
             "ref_id",
             "status",
+            "request_notes",
+            "last_event_notes",
             {"approver": ["id", "email", "first_name", "last_name"]},
         ],
         source="validationflow_set",
@@ -1737,6 +1739,8 @@ class PolicyReadSerializer(AppliedControlReadSerializer):
             "id",
             "ref_id",
             "status",
+            "request_notes",
+            "last_event_notes",
             {"approver": ["id", "email", "first_name", "last_name"]},
         ],
         source="validationflow_set",
@@ -2551,6 +2555,8 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
             "id",
             "ref_id",
             "status",
+            "request_notes",
+            "last_event_notes",
             {"approver": ["id", "email", "first_name", "last_name"]},
         ],
         source="validationflow_set",
@@ -4110,6 +4116,98 @@ class SecurityExceptionWriteSerializer(BaseModelSerializer):
         many=True, queryset=Asset.objects.all(), required=False
     )
 
+    def create(self, validated_data):
+        owner_data = validated_data.get("owners", [])
+        security_exception = super().create(validated_data)
+
+        # Notify newly assigned owners
+        if owner_data:
+            self._send_assignment_notifications(
+                security_exception, [actor.id for actor in owner_data]
+            )
+
+        return security_exception
+
+    def update(self, instance, validated_data):
+        old_owner_ids = set(instance.owners.values_list("id", flat=True))
+        old_status = instance.status
+
+        updated_instance = super().update(instance, validated_data)
+
+        new_owner_ids = set(updated_instance.owners.values_list("id", flat=True))
+
+        # Notify only newly assigned owners
+        newly_assigned_ids = new_owner_ids - old_owner_ids
+        if newly_assigned_ids:
+            self._send_assignment_notifications(
+                updated_instance, list(newly_assigned_ids)
+            )
+
+        # Notify owners and approver on status change
+        if updated_instance.status != old_status:
+            self._send_status_notification(updated_instance)
+
+        return updated_instance
+
+    def _send_assignment_notifications(self, security_exception, owner_ids):
+        """Send assignment notifications to the specified owners"""
+        if not owner_ids:
+            return
+
+        try:
+            from core.models import Actor
+            from .tasks import send_security_exception_assignment_notification
+
+            assigned_actors = Actor.objects.filter(id__in=owner_ids)
+            assigned_emails = []
+            for actor in assigned_actors:
+                assigned_emails.extend(actor.get_emails())
+
+            if assigned_emails:
+                send_security_exception_assignment_notification(
+                    security_exception.id, assigned_emails
+                )
+        except Exception as e:
+            logger.error(
+                f"Failed to send SecurityException assignment notification: {str(e)}"
+            )
+
+    def _send_status_notification(self, security_exception):
+        """Notify owners and approver when the status changes"""
+        try:
+            from .tasks import send_security_exception_status_notification
+
+            recipient_emails = []
+            for owner in security_exception.owners.all():
+                recipient_emails.extend(owner.get_emails())
+            if security_exception.approver and security_exception.approver.email:
+                recipient_emails.append(security_exception.approver.email)
+
+            if not recipient_emails:
+                return
+
+            request = self.context.get("request")
+            actor_name = "System"
+            if request and getattr(request, "user", None):
+                user = request.user
+                actor_name = (
+                    f"{user.first_name} {user.last_name}".strip()
+                    if (user.first_name or user.last_name)
+                    else user.email
+                )
+
+            exception_id = security_exception.id
+            new_status = security_exception.get_status_display()
+            transaction.on_commit(
+                lambda: send_security_exception_status_notification(
+                    exception_id, new_status, actor_name, recipient_emails
+                )
+            )
+        except Exception as e:
+            logger.error(
+                f"Failed to send SecurityException status notification: {str(e)}"
+            )
+
     class Meta:
         model = SecurityException
         fields = "__all__"
@@ -4129,6 +4227,8 @@ class SecurityExceptionReadSerializer(BaseModelSerializer):
             "id",
             "ref_id",
             "status",
+            "request_notes",
+            "last_event_notes",
             {"approver": ["id", "email", "first_name", "last_name"]},
         ],
         source="validationflow_set",
@@ -4223,6 +4323,8 @@ class FindingsAssessmentReadSerializer(AssessmentReadSerializer):
             "id",
             "ref_id",
             "status",
+            "request_notes",
+            "last_event_notes",
             {"approver": ["id", "email", "first_name", "last_name"]},
         ],
         source="validationflow_set",
