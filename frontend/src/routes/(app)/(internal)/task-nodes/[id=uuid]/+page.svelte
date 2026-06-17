@@ -332,7 +332,7 @@
 					}}
 					class="px-4 py-0.5 rounded-lg text-md border
 			{taskNode.status === 'pending'
-						? 'bg-amber-500 text-white border-amber-600'
+						? 'bg-amber-500 dark:bg-amber-600 text-white border-amber-600'
 						: 'bg-surface-50-950 border-surface-300-700 text-surface-700-300 hover:bg-amber-50'}"
 				>
 					{m.pending()}
@@ -344,7 +344,7 @@
 					}}
 					class="px-4 py-0.5 rounded-lg text-md border
 			{taskNode.status === 'in_progress'
-						? 'bg-blue-500 text-white border-blue-600'
+						? 'bg-blue-500 dark:bg-blue-600 text-white border-blue-600'
 						: 'bg-surface-50-950 border-surface-300-700 text-surface-700-300 hover:bg-blue-50'}"
 				>
 					{m.inProgress()}

@@ -432,7 +432,7 @@
 			<!-- Publish button (hidden until draft is saved) -->
 			<button
 				type="button"
-				class="shrink-0 text-xs text-white font-medium px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors flex items-center gap-1.5"
+				class="shrink-0 text-xs text-white font-medium px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 transition-colors flex items-center gap-1.5"
 				title={m.builderPublishDraftToLiveTitle()}
 				disabled={loadingPreview}
 				onclick={async () => {
@@ -652,7 +652,7 @@
 				</button>
 				<button
 					type="button"
-					class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+					class="px-4 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-700 rounded-lg hover:bg-blue-700"
 					disabled={publishing}
 					onclick={handlePublish}
 				>

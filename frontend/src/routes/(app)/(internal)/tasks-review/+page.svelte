@@ -193,7 +193,7 @@
 				<span>{m.filters()}</span>
 				{#if activeFilterCount > 0}
 					<span
-						class="inline-flex items-center justify-center w-4 h-4 text-[9px] font-bold rounded-full bg-violet-600 text-white"
+						class="inline-flex items-center justify-center w-4 h-4 text-[9px] font-bold rounded-full bg-violet-600 dark:bg-violet-700 text-white"
 						>{activeFilterCount}</span
 					>
 				{/if}
@@ -336,7 +336,7 @@
 						disabled={!filtersValid}
 						class="flex-1 px-3 py-1.5 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-1 transition-all duration-150
 							{filtersValid
-							? 'bg-violet-600 text-white hover:bg-violet-500'
+							? 'bg-violet-600 text-white hover:bg-violet-500 dark:bg-violet-700 dark:hover:bg-violet-600'
 							: 'bg-surface-300-700 text-surface-600-400 cursor-not-allowed'}"
 					>
 						{m.refresh()}

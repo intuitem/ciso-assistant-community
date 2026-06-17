@@ -542,7 +542,7 @@
 					New revision auto-approves on upload.
 				{/if}
 			</div>
-			<button class="px-3 py-1.5 rounded bg-blue-600 text-white text-sm">
+			<button class="px-3 py-1.5 rounded bg-blue-600 dark:bg-blue-700 text-white text-sm">
 				<i class="fa-solid fa-cloud-arrow-up mr-1"></i>Upload new revision
 			</button>
 		</div>
@@ -641,7 +641,7 @@
 					</div>
 				</div>
 				<div class="flex gap-2">
-					<button class="px-3 py-1.5 rounded bg-blue-600 text-white text-sm">
+					<button class="px-3 py-1.5 rounded bg-blue-600 dark:bg-blue-700 text-white text-sm">
 						<i class="fa-solid fa-download mr-1"></i>Download all (zip)
 					</button>
 					<button class="px-3 py-1.5 rounded border text-sm">
@@ -1252,7 +1252,7 @@
 
 			<div class="flex justify-end gap-2">
 				<button class="px-3 py-1.5 rounded border text-sm">Cancel</button>
-				<button class="px-3 py-1.5 rounded bg-blue-600 text-white text-sm">
+				<button class="px-3 py-1.5 rounded bg-blue-600 dark:bg-blue-700 text-white text-sm">
 					<i class="fa-solid fa-check mr-1"></i>
 					Create v{current.version + 1}
 					{instanceRequiresReview ? '(in_review)' : '(auto-approved)'}

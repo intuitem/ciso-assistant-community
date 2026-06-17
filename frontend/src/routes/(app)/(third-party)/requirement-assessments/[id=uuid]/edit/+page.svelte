@@ -410,7 +410,9 @@
 		<div class="flex items-center gap-2">
 			<span class="code left h-min">{data.requirement.urn}</span>
 			{#if data.requirementAssessment.assessable && typeof data.requirement.weight === 'number' && Number.isFinite(data.requirement.weight) && data.requirement.weight !== 1}
-				<span class="badge h-fit bg-indigo-100 text-indigo-800">
+				<span
+					class="badge h-fit bg-indigo-100 text-indigo-800 dark:bg-indigo-500/20 dark:text-indigo-300"
+				>
 					{m.requirementWeight()}: {data.requirement.weight}
 				</span>
 			{/if}
@@ -424,7 +426,7 @@
 	{#if data.requirement?.implementation_groups?.length > 0}
 		<div class="mb-2">
 			{#each data.requirement.implementation_groups as ig}
-				<span class="badge bg-blue-100 mr-2">
+				<span class="badge bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300 mr-2">
 					{getImplementationGroupName(ig)}
 				</span>
 			{/each}

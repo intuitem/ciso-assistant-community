@@ -246,13 +246,13 @@
 {#snippet userMessage(message: ChatMessage)}
 	<div class="group flex flex-row-reverse gap-2.5">
 		<div
-			class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-600 text-white"
+			class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-600 dark:bg-violet-700 text-white"
 		>
 			<i class="fa-solid fa-user text-xs"></i>
 		</div>
 		<div class="flex max-w-[80%] flex-col items-end">
 			<div
-				class="whitespace-pre-wrap rounded-2xl rounded-tr-sm bg-violet-600 px-3.5 py-2.5 text-sm text-white"
+				class="whitespace-pre-wrap rounded-2xl rounded-tr-sm bg-violet-600 dark:bg-violet-700 px-3.5 py-2.5 text-sm text-white"
 			>
 				{message.content}
 			</div>
@@ -386,7 +386,7 @@
 				<button
 					onclick={() => confirmAction(message.id)}
 					disabled={selectedCount === 0}
-					class="rounded-lg bg-violet-600 px-3 py-1.5 text-[11px] font-medium text-white transition-colors hover:bg-violet-700 disabled:opacity-40"
+					class="rounded-lg bg-violet-600 dark:bg-violet-700 px-3 py-1.5 text-[11px] font-medium text-white transition-colors hover:bg-violet-700 disabled:opacity-40"
 				>
 					<i class="fa-solid fa-check mr-1"></i>{m.chatConfirm()}{selectedCount < pa.items.length
 						? ` (${selectedCount})`
@@ -479,7 +479,7 @@
 			<button
 				transition:fly={{ y: 10, duration: 150 }}
 				onclick={scrollToBottom}
-				class="flex items-center gap-1.5 rounded-full bg-violet-600 px-3 py-1.5 text-xs text-white shadow-lg transition-colors hover:bg-violet-700"
+				class="flex items-center gap-1.5 rounded-full bg-violet-600 dark:bg-violet-700 px-3 py-1.5 text-xs text-white shadow-lg transition-colors hover:bg-violet-700"
 			>
 				<i class="fa-solid fa-arrow-down text-[10px]"></i>
 				{m.chatScrollToBottom()}
@@ -541,7 +541,7 @@
 					onclick={stopStreaming}
 					class="flex {compact
 						? 'h-10 w-10'
-						: 'h-11 w-11'} shrink-0 items-center justify-center rounded-xl bg-red-500 text-white transition-colors hover:bg-red-600"
+						: 'h-11 w-11'} shrink-0 items-center justify-center rounded-xl bg-red-500 dark:bg-red-600 text-white transition-colors hover:bg-red-600"
 					aria-label="Stop"
 				>
 					<i class="fa-solid fa-stop text-sm"></i>
@@ -552,7 +552,7 @@
 					disabled={!inputText.trim()}
 					class="flex {compact
 						? 'h-10 w-10'
-						: 'h-11 w-11'} shrink-0 items-center justify-center rounded-xl bg-violet-600 text-white transition-colors hover:bg-violet-700 disabled:opacity-40"
+						: 'h-11 w-11'} shrink-0 items-center justify-center rounded-xl bg-violet-600 dark:bg-violet-700 text-white transition-colors hover:bg-violet-700 disabled:opacity-40"
 				>
 					<i class="fa-solid fa-paper-plane text-sm"></i>
 				</button>

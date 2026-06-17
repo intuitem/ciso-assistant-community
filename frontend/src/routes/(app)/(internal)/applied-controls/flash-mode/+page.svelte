@@ -191,7 +191,7 @@
 				<div class="">
 					<a
 						href={data.backUrl}
-						class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+						class="flex items-center space-x-2 text-primary-800-300 hover:text-primary-600-400"
 					>
 						<i class="fa-solid fa-arrow-left"></i>
 						<p class="">{data.backLabel}</p>
@@ -231,7 +231,7 @@
 										}}
 									/>
 									<button
-										class="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+										class="px-3 py-1 bg-blue-500 dark:bg-blue-600 text-white rounded text-sm hover:bg-blue-600"
 										onclick={handleJumpSubmit}
 									>
 										Go

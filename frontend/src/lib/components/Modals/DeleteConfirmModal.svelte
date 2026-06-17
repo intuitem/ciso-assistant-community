@@ -195,7 +195,7 @@
 				<input type="hidden" name="urlmodel" value={URLModel} />
 				<input type="hidden" name="id" value={id} />
 				<button
-					class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700"
+					class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
 					data-testid="delete-confirm-button"
 					type="submit"
 					onclick={parent.onClose}

@@ -90,7 +90,7 @@
 		<div class="flex flex-col gap-2 items-center">
 			<a
 				href="#workshop-1"
-				class="w-10 h-10 flex items-center justify-center rounded-lg bg-pink-600 hover:bg-pink-700 text-white font-bold transition-colors"
+				class="w-10 h-10 flex items-center justify-center rounded-lg bg-pink-600 hover:bg-pink-700 dark:bg-pink-700 dark:hover:bg-pink-800 text-white font-bold transition-colors"
 				title="{m.workshop()} 1"
 			>
 				1
@@ -104,7 +104,7 @@
 			</a>
 			<a
 				href="#workshop-3"
-				class="w-10 h-10 flex items-center justify-center rounded-lg bg-teal-500 hover:bg-teal-600 text-white font-bold transition-colors"
+				class="w-10 h-10 flex items-center justify-center rounded-lg bg-teal-500 hover:bg-teal-600 dark:bg-teal-600 dark:hover:bg-teal-700 text-white font-bold transition-colors"
 				title="{m.workshop()} 3"
 			>
 				3
@@ -118,7 +118,7 @@
 			</a>
 			<a
 				href="#workshop-5"
-				class="w-10 h-10 flex items-center justify-center rounded-lg bg-red-500 hover:bg-red-600 text-white font-bold transition-colors"
+				class="w-10 h-10 flex items-center justify-center rounded-lg bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 text-white font-bold transition-colors"
 				title="{m.workshop()} 5"
 			>
 				5
@@ -131,7 +131,7 @@
 		<Anchor
 			breadcrumbAction="push"
 			href={`/ebios-rm/${study.id}`}
-			class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+			class="flex items-center space-x-2 text-primary-800-300 hover:text-primary-600-400"
 		>
 			<i class="fa-solid fa-arrow-left"></i>
 			<p>{m.backToStudy()}</p>
@@ -268,7 +268,8 @@
 										<Anchor
 											href={`/assets/${asset.id}`}
 											label={asset.str}
-											class="space-x-2 text-primary-800 hover:text-primary-600">{asset.str}</Anchor
+											class="space-x-2 text-primary-800-300 hover:text-primary-600-400"
+											>{asset.str}</Anchor
 										>
 									{/each}
 								</div>
@@ -489,7 +490,7 @@
 										<Anchor
 											href={`/feared-events/${fearedEvent.id}`}
 											label={fearedEvent.name}
-											class="space-x-2 text-primary-800 hover:text-primary-600"
+											class="space-x-2 text-primary-800-300 hover:text-primary-600-400"
 											>{fearedEvent.name}</Anchor
 										>
 									{/each}
@@ -791,7 +792,8 @@
 										<Anchor
 											href={`/threats/${threat.id}`}
 											label={threat.str}
-											class="space-x-2 text-primary-800 hover:text-primary-600">{threat.str}</Anchor
+											class="space-x-2 text-primary-800-300 hover:text-primary-600-400"
+											>{threat.str}</Anchor
 										>
 									{/each}
 								</div>
@@ -970,7 +972,7 @@
 									<td class="px-4 py-3 text-sm font-medium border-r">
 										<a
 											href="/risk-scenarios/{scenario.id}"
-											class="text-primary-600 hover:text-primary-800 hover:underline"
+											class="text-primary-600 hover:text-primary-800-300 hover:underline"
 										>
 											{scenario.ref_id || '--'}
 										</a>
@@ -1139,7 +1141,7 @@
 													<td class="px-3 py-2 text-sm text-surface-950-50">
 														<Anchor
 															href="/applied-controls/{control.id}"
-															class="text-primary-600 hover:text-primary-800 hover:underline"
+															class="text-primary-600 hover:text-primary-800-300 hover:underline"
 														>
 															{control.name}
 														</Anchor>
@@ -1231,7 +1233,7 @@
 												<td class="px-3 py-2 text-sm text-surface-950-50">
 													<Anchor
 														href="/applied-controls/{control.id}"
-														class="text-primary-600 hover:text-primary-800 hover:underline"
+														class="text-primary-600 hover:text-primary-800-300 hover:underline"
 													>
 														{control.str}
 													</Anchor>
@@ -1311,7 +1313,7 @@
 										<td class="px-3 py-2 text-sm text-surface-950-50">
 											<Anchor
 												href="/applied-controls/{control.id}"
-												class="text-primary-600 hover:text-primary-800 hover:underline"
+												class="text-primary-600 hover:text-primary-800-300 hover:underline"
 											>
 												{control.name}
 											</Anchor>

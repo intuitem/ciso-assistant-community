@@ -250,7 +250,7 @@
 					<button
 						type="submit"
 						data-testid="delete-prompt-confirm-button"
-						class="btn bg-red-600 hover:bg-red-700 text-white font-semibold w-full disabled:opacity-50 disabled:cursor-not-allowed"
+						class="btn bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 text-white font-semibold w-full disabled:opacity-50 disabled:cursor-not-allowed"
 						onclick={parent.onConfirm}
 						disabled={!canConfirm}
 					>
@@ -273,7 +273,7 @@
 				</button>
 
 				<button
-					class="btn bg-red-600 hover:bg-red-700 text-white font-semibold w-full disabled:opacity-50 disabled:cursor-not-allowed"
+					class="btn bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 text-white font-semibold w-full disabled:opacity-50 disabled:cursor-not-allowed"
 					type="button"
 					onclick={parent.onConfirm}
 					disabled={!canConfirm}

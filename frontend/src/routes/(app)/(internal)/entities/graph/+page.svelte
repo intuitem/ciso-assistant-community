@@ -16,7 +16,7 @@
 			<i class="fa-solid fa-diagram-project mr-2"></i>
 			{m.entitiesGraph()}
 		</h1>
-		<a href="/entities" class="text-primary-800 hover:text-primary-500 cursor-pointer">
+		<a href="/entities" class="text-primary-800-300 hover:text-primary-500 cursor-pointer">
 			<i class="fa-solid fa-arrow-left mr-2"></i>
 			{m.backToTable()}
 		</a>

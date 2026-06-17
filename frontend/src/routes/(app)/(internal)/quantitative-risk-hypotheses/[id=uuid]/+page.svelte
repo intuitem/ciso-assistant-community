@@ -64,7 +64,7 @@
 							} else if (result.data?.success) {
 								toastStore.trigger({
 									message: 'Simulation completed successfully!',
-									background: 'bg-green-500 text-white',
+									background: 'bg-green-500 dark:bg-green-600 text-white',
 									autohide: true,
 									timeout: 2000
 								});
@@ -75,7 +75,7 @@
 			>
 				<button
 					type="submit"
-					class="btn bg-pink-500 text-white h-fit"
+					class="btn bg-pink-500 dark:bg-pink-600 text-white h-fit"
 					disabled={simulationIsLoading}
 				>
 					<span class="mr-2">

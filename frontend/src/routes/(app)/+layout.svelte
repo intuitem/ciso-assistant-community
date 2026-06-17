@@ -200,7 +200,7 @@
 				{#if data?.user?.is_admin}
 					<button
 						onclick={() => getStartedTrigger.set(true)}
-						class="shrink-0 px-3 py-1.5 rounded-full bg-violet-500 text-white text-xs font-semibold shadow-lg
+						class="shrink-0 px-3 py-1.5 rounded-full bg-violet-500 dark:bg-violet-600 text-white text-xs font-semibold shadow-lg
 			ring-2 ring-violet-400 ring-offset-2 transition-all duration-300 hover:bg-violet-600
 			hover:ring-violet-300 hover:ring-offset-violet-100 hover:shadow-violet-500/50
 			focus:outline-hidden focus:ring-violet-500 cursor-pointer"

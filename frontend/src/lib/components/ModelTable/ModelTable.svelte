@@ -615,7 +615,10 @@
 	}
 
 	let classesHexBackgroundText = $derived((backgroundHexColor: string) => {
-		return isDark(backgroundHexColor) ? 'text-white' : '';
+		// The badge background is a fixed hex color, so the text must be a fixed color too
+		// (not theme-dependent), otherwise it turns light in dark mode and vanishes on a
+		// light-colored badge. White on dark backgrounds, fixed dark surface otherwise.
+		return isDark(backgroundHexColor) ? 'text-white' : 'text-surface-950';
 	});
 
 	const tail_render = $derived(tail);
@@ -905,7 +908,7 @@
 								onkeydown={(e) => onRowKeydown(e, rowIndex)}
 								oncontextmenu={() => (contextMenuOpenRow = row)}
 								aria-rowindex={rowIndex + 1}
-								class="hover:preset-tonal-primary even:bg-surface-100-900 cursor-pointer"
+								class="hover:bg-surface-200-800 even:bg-surface-100-900 cursor-pointer"
 							>
 								{#if hasBatchActions}
 									<td

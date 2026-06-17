@@ -401,7 +401,7 @@
 				onclick={handleGenerateReport}
 				disabled={!canGenerate}
 				class="px-6 py-3 rounded-lg font-medium transition-colors {canGenerate
-					? 'bg-blue-600 text-white hover:bg-blue-700'
+					? 'bg-blue-600 dark:bg-blue-700 text-white hover:bg-blue-700'
 					: 'bg-surface-300-700 text-surface-600-400 cursor-not-allowed'}"
 			>
 				<i class="fa-solid fa-download mr-2"></i>

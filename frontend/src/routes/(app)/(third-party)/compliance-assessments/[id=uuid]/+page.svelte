@@ -965,7 +965,7 @@
 										data-testid="flash-mode-button"
 									>
 										<div
-											class="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-500 text-white shrink-0"
+											class="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-500 dark:bg-indigo-600 text-white shrink-0"
 										>
 											<i class="fa-solid fa-bolt text-sm"></i>
 										</div>
@@ -1109,7 +1109,7 @@
 										onclick={openThreatsDialog}
 									>
 										<div
-											class="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-500 text-white shrink-0"
+											class="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-500 dark:bg-amber-600 text-white shrink-0"
 										>
 											<i class="fa-solid fa-triangle-exclamation text-sm"></i>
 										</div>
@@ -1129,7 +1129,7 @@
 										data-testid="advanced-analytics-button"
 									>
 										<div
-											class="flex items-center justify-center w-8 h-8 rounded-lg bg-orange-500 text-white shrink-0"
+											class="flex items-center justify-center w-8 h-8 rounded-lg bg-orange-500 dark:bg-orange-600 text-white shrink-0"
 										>
 											<i class="fa-solid fa-chart-line text-sm"></i>
 										</div>

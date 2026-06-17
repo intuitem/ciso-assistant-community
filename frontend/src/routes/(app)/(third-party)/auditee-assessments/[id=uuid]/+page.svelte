@@ -655,7 +655,7 @@
 						<button
 							class="w-full text-left px-2 py-1.5 text-xs rounded-md transition-colors truncate flex items-center gap-1.5
 								{section.index === currentIndex
-								? 'bg-primary-100 text-primary-800 font-semibold'
+								? 'bg-primary-100 text-primary-800-300 font-semibold'
 								: 'text-surface-600-400 hover:bg-surface-200-800'}"
 							onclick={() => goTo(section.index)}
 							title={section.title}
@@ -684,7 +684,7 @@
 				<div class="flex items-center space-x-3">
 					<a
 						href="/auditee-dashboard"
-						class="text-primary-600 hover:text-primary-800"
+						class="text-primary-600 hover:text-primary-800-300"
 						title={m.auditDashboard()}
 					>
 						<i class="fa-solid fa-arrow-left"></i>

@@ -385,7 +385,7 @@
 				{m.cancel()}
 			</button>
 			<button
-				class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
+				class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 disabled:opacity-50"
 				disabled={!canSubmit}
 				onclick={handleSubmit}
 			>

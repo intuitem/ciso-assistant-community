@@ -81,7 +81,7 @@
 		<div class="flex items-center justify-between w-full">
 			<a
 				href="/ebios-rm/{operationalScenario.ebios_rm_study.id}"
-				class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+				class="flex items-center space-x-2 text-primary-800-300 hover:text-primary-600-400"
 			>
 				<i class="fa-solid fa-arrow-left"></i>
 				<p class="">{m.goBackToEbiosRmStudy()}</p>
@@ -147,7 +147,7 @@
 							<i class="fa-solid fa-chess text-3xl text-amber-600"></i>
 							<a
 								href="/strategic-scenarios/{operationalScenario.strategic_scenario.id}"
-								class="badge text-white bg-amber-500 hover:bg-amber-600"
+								class="badge text-white bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700"
 								>{operationalScenario.strategic_scenario.name}</a
 							>
 							{#if operationalScenario.strategic_scenario.description}
@@ -168,7 +168,7 @@
 							<i class="fa-solid fa-route text-3xl text-teal-600"></i>
 							<a
 								href="/attack-paths/{operationalScenario.attack_path.id}"
-								class="badge text-white bg-teal-500 hover:bg-teal-600"
+								class="badge text-white bg-teal-500 hover:bg-teal-600 dark:bg-teal-600 dark:hover:bg-teal-700"
 								>{operationalScenario.attack_path.name}</a
 							>
 							{#if operationalScenario.attack_path.description}
@@ -185,7 +185,7 @@
 					>
 						<h4 class="font-semibold text-surface-600-400">{m.riskOrigin()}</h4>
 						<i class="fa-solid fa-skull-crossbones text-3xl"></i>
-						<p class="badge whitespace-normal text-white bg-red-500 capitalize">
+						<p class="badge whitespace-normal text-white bg-red-500 dark:bg-red-600 capitalize">
 							{safeTranslate(operationalScenario.ro_to.risk_origin.str)}
 						</p>
 					</div>
@@ -195,7 +195,7 @@
 						<h4 class="font-semibold text-surface-600-400">{m.stakeholders()}</h4>
 						<i class="fa-solid fa-globe text-3xl"></i>
 						{#each operationalScenario.stakeholders as stakeholder}
-							<p class="badge whitespace-normal text-white bg-violet-500">
+							<p class="badge whitespace-normal text-white bg-violet-500 dark:bg-violet-600">
 								<a class="anchor text-white" href="/stakeholders/{stakeholder.id}"
 									>{stakeholder.str}</a
 								>
@@ -209,7 +209,7 @@
 					>
 						<h4 class="font-semibold text-surface-600-400">{m.targetObjective()}</h4>
 						<i class="fa-solid fa-bullseye text-3xl"></i>
-						<p class="badge whitespace-normal text-white bg-blue-500 break-all">
+						<p class="badge whitespace-normal text-white bg-blue-500 dark:bg-blue-600 break-all">
 							{operationalScenario.ro_to.target_objective}
 						</p>
 					</div>

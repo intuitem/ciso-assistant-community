@@ -415,7 +415,7 @@
 					<p class="text-xs text-surface-500">{m.builderNoMatchingNodes()}</p>
 					<button
 						onclick={clearSearch}
-						class="mt-1 text-xs text-primary-600 hover:text-primary-800 underline"
+						class="mt-1 text-xs text-primary-600 hover:text-primary-800-300 underline"
 					>
 						{m.clearSearch()}
 					</button>

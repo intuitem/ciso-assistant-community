@@ -32,16 +32,16 @@
 }
 
 @utility btn-mini-primary {
-	@apply text-gray-50 bg-violet-600 hover:bg-violet-500;
+	@apply text-gray-50 bg-violet-600 hover:bg-violet-500 dark:bg-violet-700 dark:hover:bg-violet-600;
 }
 @utility btn-mini-secondary {
-	@apply text-gray-50 bg-pink-500 hover:bg-pink-400;
+	@apply text-gray-50 bg-pink-500 hover:bg-pink-400 dark:bg-pink-600 dark:hover:bg-pink-500;
 }
 @utility btn-mini-tertiary {
-	@apply text-gray-50 bg-sky-500 hover:bg-sky-400;
+	@apply text-gray-50 bg-sky-500 hover:bg-sky-400 dark:bg-sky-600 dark:hover:bg-sky-500;
 }
 @utility btn-mini-quaternary {
-	@apply text-gray-50 bg-teal-500 hover:bg-teal-400;
+	@apply text-gray-50 bg-teal-500 hover:bg-teal-400 dark:bg-teal-600 dark:hover:bg-teal-500;
 }
 
 @layer utilities {

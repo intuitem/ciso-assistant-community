@@ -333,20 +333,23 @@
 		</div>
 		<div class="flex items-center gap-2">
 			<button
-				class="btn bg-indigo-500 hover:bg-indigo-600 text-white"
+				class="btn bg-indigo-500 hover:bg-indigo-600 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white"
 				onclick={openAddBuiltinWidgetModal}
 			>
 				<i class="fa-solid fa-chart-simple"></i>
 				{m.addBuiltinWidget()}
 			</button>
 			<button
-				class="btn bg-violet-500 hover:bg-violet-600 text-white"
+				class="btn bg-violet-500 hover:bg-violet-600 dark:bg-violet-600 dark:hover:bg-violet-700 text-white"
 				onclick={openAddCustomWidgetModal}
 			>
 				<i class="fa-solid fa-sliders"></i>
 				{m.addCustomWidget()}
 			</button>
-			<button class="btn bg-teal-500 hover:bg-teal-600 text-white" onclick={openAddTextWidgetModal}>
+			<button
+				class="btn bg-teal-500 hover:bg-teal-600 dark:bg-teal-600 dark:hover:bg-teal-700 text-white"
+				onclick={openAddTextWidgetModal}
+			>
 				<i class="fa-solid fa-font"></i>
 				{m.addTextWidget()}
 			</button>

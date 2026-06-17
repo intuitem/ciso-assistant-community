@@ -44,14 +44,14 @@
 			</Anchor>
 			<Anchor
 				href={`${page.url.pathname}/executive-summary`}
-				class="btn bg-emerald-500 hover:bg-emerald-600 text-white h-fit"
+				class="btn bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white h-fit"
 				breadcrumbAction="push"
 			>
 				<i class="fa-solid fa-chart-line mr-2"></i>{m.executiveSummary()}
 			</Anchor>
 			<Anchor
 				href={`${page.url.pathname}/key-metrics`}
-				class="btn bg-amber-500 hover:bg-amber-600 text-white h-fit"
+				class="btn bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700 text-white h-fit"
 				breadcrumbAction="push"
 			>
 				<i class="fa-solid fa-chart-simple mr-2"></i>{m.keyMetrics()}
@@ -114,7 +114,7 @@
 										background:
 											summary?.failed_simulations > 0
 												? 'bg-yellow-500 text-white'
-												: 'bg-green-500 text-white',
+												: 'bg-green-500 dark:bg-green-600 text-white',
 										autohide: true,
 										timeout: 4000
 									});
@@ -141,7 +141,7 @@
 			>
 				<button
 					type="submit"
-					class="btn bg-violet-500 hover:bg-violet-600 text-white h-fit disabled:opacity-50 disabled:cursor-not-allowed"
+					class="btn bg-violet-500 hover:bg-violet-600 dark:bg-violet-600 dark:hover:bg-violet-700 text-white h-fit disabled:opacity-50 disabled:cursor-not-allowed"
 					disabled={retriggerIsLoading}
 					title="Retrigger all simulations for this study including hypotheses, portfolio data, and risk tolerance curve"
 				>

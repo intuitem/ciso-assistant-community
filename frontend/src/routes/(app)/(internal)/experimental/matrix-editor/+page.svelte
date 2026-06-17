@@ -870,7 +870,7 @@
 					</button>
 					<button
 						type="button"
-						class="btn btn-sm bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-50"
+						class="btn btn-sm bg-green-600 dark:bg-green-700 text-white hover:bg-green-700 transition-colors disabled:opacity-50"
 						onclick={publishMatrix}
 						disabled={publishing}
 					>

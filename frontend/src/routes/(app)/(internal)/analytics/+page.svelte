@@ -1014,7 +1014,7 @@
 								</div>
 								<a
 									href="/compliance-assessments"
-									class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+									class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 transition-colors"
 								>
 									<i class="fas fa-plus text-sm"></i>
 									{m.createAssessment()}
@@ -1239,7 +1239,7 @@
 							</div>
 							<a
 								href="/incidents"
-								class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+								class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 transition-colors"
 							>
 								<i class="fas fa-plus text-sm"></i>
 								{m.createIncident()}
@@ -1279,7 +1279,7 @@
 							</div>
 							<a
 								href="/dashboards"
-								class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+								class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 transition-colors"
 							>
 								<i class="fas fa-plus text-sm"></i>
 								{m.createDashboard()}

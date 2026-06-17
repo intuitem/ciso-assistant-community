@@ -101,10 +101,10 @@
 
 	// Severity colors for visual consistency (using lowercase keys)
 	const severityColors: Record<string, string> = {
-		critical: 'bg-red-500 text-white border-red-600 hover:bg-red-600',
-		high: 'bg-orange-500 text-white border-orange-600 hover:bg-orange-600',
+		critical: 'bg-red-500 dark:bg-red-600 text-white border-red-600 hover:bg-red-600',
+		high: 'bg-orange-500 dark:bg-orange-600 text-white border-orange-600 hover:bg-orange-600',
 		medium: 'bg-yellow-500 text-white border-yellow-600 hover:bg-yellow-600',
-		low: 'bg-blue-500 text-white border-blue-600 hover:bg-blue-600',
+		low: 'bg-blue-500 dark:bg-blue-600 text-white border-blue-600 hover:bg-blue-600',
 		info: 'bg-surface-400-600 text-white border-surface-600-400 hover:bg-surface-600-400',
 		undefined: 'bg-surface-50-9500 text-white border-surface-600-400 hover:bg-surface-600-400'
 	};
@@ -123,11 +123,12 @@
 	// Status colors based on vulnerability lifecycle (using raw status values)
 	const statusColors: Record<string, string> = {
 		potential: 'bg-yellow-500 text-white border-yellow-600 hover:bg-yellow-600',
-		exploitable: 'bg-red-500 text-white border-red-600 hover:bg-red-600',
-		mitigated: 'bg-blue-500 text-white border-blue-600 hover:bg-blue-600',
-		fixed: 'bg-green-500 text-white border-green-600 hover:bg-green-600',
-		not_exploitable: 'bg-teal-500 text-white border-teal-600 hover:bg-teal-600',
-		unaffected: 'bg-emerald-500 text-white border-emerald-600 hover:bg-emerald-600',
+		exploitable: 'bg-red-500 dark:bg-red-600 text-white border-red-600 hover:bg-red-600',
+		mitigated: 'bg-blue-500 dark:bg-blue-600 text-white border-blue-600 hover:bg-blue-600',
+		fixed: 'bg-green-500 dark:bg-green-600 text-white border-green-600 hover:bg-green-600',
+		not_exploitable: 'bg-teal-500 dark:bg-teal-600 text-white border-teal-600 hover:bg-teal-600',
+		unaffected:
+			'bg-emerald-500 dark:bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-600',
 		'--': 'bg-surface-50-9500 text-white border-surface-600-400 hover:bg-surface-600-400'
 	};
 
@@ -158,7 +159,7 @@
 				<div class="flex gap-2">
 					<button
 						onclick={selectAllSeverities}
-						class="text-xs px-3 py-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium shadow-sm"
+						class="text-xs px-3 py-1.5 bg-blue-500 dark:bg-blue-600 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium shadow-sm"
 					>
 						{m.selectAll()}
 					</button>
@@ -202,7 +203,7 @@
 				<div class="flex gap-2">
 					<button
 						onclick={selectAllStatuses}
-						class="text-xs px-3 py-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium shadow-sm"
+						class="text-xs px-3 py-1.5 bg-blue-500 dark:bg-blue-600 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium shadow-sm"
 					>
 						{m.selectAll()}
 					</button>

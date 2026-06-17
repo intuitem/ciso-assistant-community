@@ -436,7 +436,7 @@
 										type="button"
 										class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium
 										transition-all duration-150 cursor-pointer
-										bg-violet-600 text-white hover:bg-violet-700 active:bg-violet-800 shadow-sm"
+										bg-violet-600 dark:bg-violet-700 text-white hover:bg-violet-700 active:bg-violet-800 shadow-sm"
 										data-testid="preset-apply-{preset.id}"
 										onclick={() => applyPreset(preset.id, preset.name)}
 									>

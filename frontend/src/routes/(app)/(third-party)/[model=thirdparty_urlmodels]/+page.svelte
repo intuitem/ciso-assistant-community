@@ -58,7 +58,7 @@
 								{#if ['applied-controls', 'assets'].includes(URLModel)}
 									<a
 										href="{URLModel}/export/"
-										class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 w-12 focus:relative"
+										class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 dark:bg-pink-600 dark:hover:bg-pink-500 w-12 focus:relative"
 										title={m.exportButton()}
 										data-testid="export-button"><i class="fa-solid fa-download mr-2"></i></a
 									>
@@ -66,7 +66,7 @@
 							{:else if URLModel === 'risk-matrices'}
 								<a
 									href="/libraries?object_type=risk_matrix"
-									class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 w-12 focus:relative"
+									class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 dark:bg-pink-600 dark:hover:bg-pink-500 w-12 focus:relative"
 									data-testid="add-button"
 									id="add-button"
 									title={m.importMatrices()}><i class="fa-solid fa-file-import mr-2"></i></a
@@ -74,7 +74,7 @@
 							{:else if URLModel === 'frameworks'}
 								<a
 									href="/libraries?object_type=frameworks"
-									class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 w-12 focus:relative"
+									class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 dark:bg-pink-600 dark:hover:bg-pink-500 w-12 focus:relative"
 									data-testid="add-button"
 									id="add-button"
 									title={m.importFrameworks()}><i class="fa-solid fa-file-import mr-2"></i></a
@@ -82,7 +82,7 @@
 							{:else if URLModel === 'requirement-mapping-sets'}
 								<a
 									href="/libraries?object_type=requirement_mapping_set"
-									class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 w-12 focus:relative"
+									class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 dark:bg-pink-600 dark:hover:bg-pink-500 w-12 focus:relative"
 									data-testid="add-button"
 									id="add-button"
 									title={m.importMappings()}><i class="fa-solid fa-file-import mr-2"></i></a
@@ -90,7 +90,7 @@
 							{:else if URLModel === 'risk-matrices'}
 								<a
 									href="/libraries?object_type=risk_matrices"
-									class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 w-12 focus:relative"
+									class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 dark:bg-pink-600 dark:hover:bg-pink-500 w-12 focus:relative"
 									data-testid="add-button"
 									id="add-button"
 									title={m.importMatrices()}><i class="fa-solid fa-file-import mr-2"></i></a
@@ -98,7 +98,7 @@
 							{:else if URLModel === 'frameworks'}
 								<a
 									href="/libraries?object_type=frameworks"
-									class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 w-12 focus:relative"
+									class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 dark:bg-pink-600 dark:hover:bg-pink-500 w-12 focus:relative"
 									data-testid="add-button"
 									id="add-button"
 									title={m.importFrameworks()}><i class="fa-solid fa-file-import mr-2"></i></a
@@ -106,7 +106,7 @@
 							{:else if URLModel === 'requirement-mapping-sets'}
 								<a
 									href="/libraries?object_type=requirement_mapping_sets"
-									class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 w-12 focus:relative"
+									class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 dark:bg-pink-600 dark:hover:bg-pink-500 w-12 focus:relative"
 									data-testid="add-button"
 									id="add-button"
 									title={m.importMappings()}><i class="fa-solid fa-file-import mr-2"></i></a

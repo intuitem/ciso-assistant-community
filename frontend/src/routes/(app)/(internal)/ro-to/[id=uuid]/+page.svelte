@@ -54,7 +54,7 @@
 			<Anchor
 				href="/ebios-rm/{roto.ebios_rm_study.id}"
 				label={roto.ebios_rm_study.str}
-				class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+				class="flex items-center space-x-2 text-primary-800-300 hover:text-primary-600-400"
 			>
 				<i class="fa-solid fa-arrow-left"></i>
 				<p class="">{m.goBackToEbiosRmStudy()}</p>

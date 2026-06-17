@@ -17,7 +17,7 @@
 			<a
 				href="/assets/graph"
 				data-sveltekit-reload
-				class="text-primary-800 hover:text-primary-500 cursor-pointer text-sm"
+				class="text-primary-800-300 hover:text-primary-500 cursor-pointer text-sm"
 			>
 				<i class="fa-solid fa-eye mr-1"></i>
 				{m.showDomains()}
@@ -26,7 +26,7 @@
 			<a
 				href="/assets/graph?hideDomains=true"
 				data-sveltekit-reload
-				class="text-primary-800 hover:text-primary-500 cursor-pointer text-sm"
+				class="text-primary-800-300 hover:text-primary-500 cursor-pointer text-sm"
 			>
 				<i class="fa-solid fa-eye-slash mr-1"></i>
 				{m.hideDomains()}

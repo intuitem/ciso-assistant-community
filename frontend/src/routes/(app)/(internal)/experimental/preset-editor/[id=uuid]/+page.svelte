@@ -746,7 +746,7 @@
 					class="shrink-0 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors inline-flex items-center gap-1.5 {dirty ||
 					publishing
 						? 'bg-violet-300 text-white cursor-not-allowed'
-						: 'bg-violet-600 text-white hover:bg-violet-700'}"
+						: 'bg-violet-600 dark:bg-violet-700 text-white hover:bg-violet-700'}"
 					disabled={dirty || publishing}
 					onclick={publishPreview}
 					title={dirty ? 'Save the draft first' : 'Publish the draft'}
@@ -1270,7 +1270,7 @@
 					</button>
 					<button
 						type="button"
-						class="text-xs font-medium px-3 py-1.5 rounded-lg bg-violet-600 text-white hover:bg-violet-700 transition-colors inline-flex items-center gap-1.5"
+						class="text-xs font-medium px-3 py-1.5 rounded-lg bg-violet-600 dark:bg-violet-700 text-white hover:bg-violet-700 transition-colors inline-flex items-center gap-1.5"
 						onclick={publishConfirmed}
 					>
 						<i class="fa-solid fa-rocket text-[10px]"></i> Confirm publish

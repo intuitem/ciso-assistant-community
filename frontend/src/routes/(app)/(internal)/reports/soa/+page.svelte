@@ -213,7 +213,7 @@
 								onclick={() => toggleImplementationGroup(group.ref_id)}
 								class="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors
 									{isSelected
-									? 'bg-blue-600 text-white border-blue-600'
+									? 'bg-blue-600 dark:bg-blue-700 text-white border-blue-600'
 									: 'bg-surface-50-950 text-surface-500 border-surface-300-700 hover:border-gray-400 line-through'}"
 							>
 								{group.name}
@@ -249,7 +249,7 @@
 					<label
 						class="flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer
 							{selectedRiskAssessments.includes(ra.id)
-							? 'border-red-300 bg-red-50'
+							? 'border-red-300 bg-red-50 dark:border-red-500/40 dark:bg-red-500/15'
 							: 'border-surface-200-800 hover:border-surface-300-700 bg-surface-50-950'}"
 					>
 						<input
