@@ -15,6 +15,7 @@
 	} from '$lib/components/Modals/stores';
 	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
 	import {
+		complianceResultColorMap,
 		complianceResultTailwindColorMap,
 		complianceStatusTailwindColorMap
 	} from '$lib/utils/constants';
@@ -34,9 +35,7 @@
 	import { m } from '$paraglide/messages';
 	import { Switch } from '@skeletonlabs/skeleton-svelte';
 	import type { Actions, PageData } from './$types';
-	import TableOfContents from '$lib/components/TableOfContents/TableOfContents.svelte';
-	import { type TocItem } from '$lib/utils/toc';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
@@ -397,65 +396,66 @@
 		allExpanded = expanded;
 	}
 
-	let tocItems: TocItem[] = $state([]);
 	let showToc = $state(true);
 
 	// Offset (px) so the page header sticks just below the app's sticky AppBar,
 	// whose height is dynamic (title, breadcrumbs, sidebar state).
 	let stickyTop = $state(0);
-	// Generate TOC items from requirement assessments - only include title nodes
-	$effect(() => {
-		if (requirementAssessments.length > 0) {
-			tocItems = requirementAssessments
-				.filter((ra) => {
-					// Only include non-assessable nodes, non empty title and depth <= 4
-					const requirement = requirementHashmap[ra.requirement] ?? ra;
-					if (ra.assessable || requirement.assessable) return false;
+	// Header height so the TOC column can stick right below the (sticky) page header.
+	let headerHeight = $state(0);
 
-					const refId = requirement.ref_id ?? requirement.requirement?.ref_id;
-					const name = requirement.name;
+	// --- Table of contents (left column, toggled from the header) ---
+	let tocCollapsed = $state(false);
+	let tocFilterResult = $state<string | null>(null);
 
-					const hasRefId = refId && refId.trim();
-					const hasName = name && name.trim();
-					if (!hasRefId && !hasName) return false;
+	const tocSections = $derived(
+		requirementAssessments.map((ra, index) => {
+			const row = sectionInfo.rows[index];
+			const isSplash = ra.display_mode === 'splash' || ra.requirement?.display_mode === 'splash';
+			return {
+				id: ra.id,
+				title: getDisplayTitle(ra) || getTitle(ra) || `#${index + 1}`,
+				refId: getRefId(ra),
+				result: isSplash ? '__splash__' : row?.isHeading ? '__section__' : ra.result,
+				isSection: !!row?.isHeading,
+				depth: row?.depth ?? 1,
+				ancestors: row?.ancestors ?? []
+			};
+		})
+	);
+	const resultCounts = $derived(
+		result_options.map((opt) => ({
+			...opt,
+			count: tocSections.filter((s) => s.result === opt.value).length
+		}))
+	);
+	const filteredTocSections = $derived(
+		tocFilterResult ? tocSections.filter((s) => s.result === tocFilterResult) : tocSections
+	);
 
-					if (refId) {
-						const parts = refId.split('.');
-						if (parts.length > 4) return false;
-					}
+	// Compact score formatting for the header analytics.
+	function fmtScore(v: number | null | undefined) {
+		return v == null ? '--' : Math.round(Number(v) * 10) / 10;
+	}
 
-					return true;
-				})
-				.map((ra, index) => {
-					const requirement = requirementHashmap[ra.requirement] ?? ra;
+	// Audit progress analytics (assessable requirements only).
+	const assessableTotal = $derived(
+		tocSections.filter((s) => s.result !== '__section__' && s.result !== '__splash__').length
+	);
+	const assessedCount = $derived(
+		tocSections.filter(
+			(s) => s.result !== '__section__' && s.result !== '__splash__' && s.result !== 'not_assessed'
+		).length
+	);
 
-					// Safely access ref_id and name
-					const refId = requirement.ref_id ?? requirement.requirement?.ref_id;
-					const name = requirement.name;
-
-					let title = '';
-					if (name && name.trim()) {
-						title = name.trim();
-					} else if (refId && refId.trim()) {
-						title = refId.trim();
-					} else {
-						title = `Section ${index + 1}`;
-					}
-
-					let level = 0;
-					if (refId && refId.trim()) {
-						const parts = refId.split('.');
-						level = Math.max(0, parts.length - 1);
-					}
-
-					return {
-						id: `requirement-${ra.id}`,
-						title: title,
-						level: Math.min(level, 4)
-					};
-				});
-		}
-	});
+	// Scroll to a requirement, expanding any collapsed parent section first.
+	async function goToRequirement(item: { id: string; ancestors: string[] }) {
+		for (const sectionId of item.ancestors) collapsedSections[sectionId] = false;
+		await tick();
+		document
+			.getElementById(`requirement-${item.id}`)
+			?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+	}
 	onMount(() => {
 		// Show TOC only if there are more than 3 requirements
 		showToc = requirementAssessments.length > 3;
@@ -640,560 +640,710 @@
 {/snippet}
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
-	<TableOfContents
-		items={tocItems}
-		isVisible={showToc}
-		position="right"
-		className="hidden lg:block"
-	/>
 	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg w-full h-full space-y-3">
-		{#if !questionnaireOnly}
-			<div
-				class="sticky z-20 p-2 card bg-white items-center justify-between flex flex-row w-full gap-4"
-				style="top: {stickyTop}px"
-			>
-				<a
-					href="/compliance-assessments/{complianceAssessment.id}"
-					class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
-					data-testid="back-to-audit"
+			{#if !questionnaireOnly}
+				<div
+					class="sticky z-20 -mx-6 flex flex-col gap-2 border-b border-surface-200 bg-white/80 px-6 py-2.5 backdrop-blur"
+					style="top: {stickyTop}px"
+					bind:clientHeight={headerHeight}
 				>
-					<i class="fa-solid fa-arrow-left"></i>
-					<p>{m.goBackToAudit()} {complianceAssessment.name}</p>
-				</a>
-				<div class="flex items-center gap-4">
-					{#if !shallow}
-						<button
-							type="button"
-							class="btn btn-sm preset-tonal-surface"
-							onclick={() => setAllExpanded(!allExpanded)}
+					<!-- Row 1: navigation + global controls -->
+					<div class="flex flex-row items-center justify-between gap-4">
+						<a
+							href="/compliance-assessments/{complianceAssessment.id}"
+							class="flex items-center space-x-2 text-primary-800 hover:text-primary-600 min-w-0"
+							data-testid="back-to-audit"
 						>
-							<i class="fa-solid {allExpanded ? 'fa-compress' : 'fa-expand'} mr-2"></i>
-							{allExpanded ? m.collapseAll() : m.expandAll()}
-						</button>
-					{/if}
-					{#if !hasQuestions}
-						<div class="flex items-center justify-center space-x-4">
-							{#if questionnaireMode}
-								<p class="font-bold text-sm">{m.assessmentMode()}</p>
-							{:else}
-								<p class="font-bold text-sm text-green-500">{m.assessmentMode()}</p>
+							<i class="fa-solid fa-arrow-left"></i>
+							<p class="truncate">{m.goBackToAudit()} {complianceAssessment.name}</p>
+						</a>
+						<div class="flex items-center gap-4 shrink-0">
+							{#if !shallow}
+								<button
+									type="button"
+									class="btn btn-sm preset-tonal-surface"
+									onclick={() => setAllExpanded(!allExpanded)}
+								>
+									<i class="fa-solid {allExpanded ? 'fa-compress' : 'fa-expand'} mr-2"></i>
+									{allExpanded ? m.collapseAll() : m.expandAll()}
+								</button>
 							{/if}
-							<Switch
-								name="questionnaireToggle"
-								class="flex flex-row items-center justify-center"
-								onCheckedChange={(e) => {
-									questionnaireMode = e.checked;
-								}}
-							>
-								<Switch.Control>
-									<Switch.Thumb />
-								</Switch.Control>
-								<Switch.HiddenInput />
-								{#if questionnaireMode}
-									<p class="font-bold text-sm text-primary-500">{m.questionnaireMode()}</p>
-								{:else}
-									<p class="font-bold text-sm">{m.questionnaireMode()}</p>
-								{/if}
-							</Switch>
+							{#if !hasQuestions}
+								<div class="flex items-center justify-center space-x-4">
+									{#if questionnaireMode}
+										<p class="font-bold text-sm">{m.assessmentMode()}</p>
+									{:else}
+										<p class="font-bold text-sm text-green-500">{m.assessmentMode()}</p>
+									{/if}
+									<Switch
+										name="questionnaireToggle"
+										class="flex flex-row items-center justify-center"
+										onCheckedChange={(e) => {
+											questionnaireMode = e.checked;
+										}}
+									>
+										<Switch.Control>
+											<Switch.Thumb />
+										</Switch.Control>
+										<Switch.HiddenInput />
+										{#if questionnaireMode}
+											<p class="font-bold text-sm text-primary-500">{m.questionnaireMode()}</p>
+										{:else}
+											<p class="font-bold text-sm">{m.questionnaireMode()}</p>
+										{/if}
+									</Switch>
+								</div>
+							{/if}
+						</div>
+					</div>
+
+					<!-- Row 2: TOC toggle + audit progress analytics -->
+					{#if (!shallow && showToc) || assessableTotal > 0}
+						<div class="flex items-center gap-4 flex-wrap border-t border-surface-100 pt-2">
+							{#if !shallow && showToc}
+								<button
+									type="button"
+									class="btn btn-sm preset-tonal-surface shrink-0"
+									onclick={() => (tocCollapsed = !tocCollapsed)}
+									aria-pressed={!tocCollapsed}
+								>
+									<i class="fa-solid {tocCollapsed ? 'fa-list' : 'fa-angles-left'} mr-2"></i>
+									{m.tableOfContents()}
+								</button>
+							{/if}
+							{#if assessableTotal > 0}
+								<div class="flex flex-1 items-center gap-3 min-w-[200px]">
+									<span class="text-xs font-medium text-surface-500 shrink-0">
+										{m.progress()}: {assessedCount}/{assessableTotal}
+									</span>
+									<div
+										class="flex flex-1 h-5 overflow-hidden rounded-sm border border-surface-200 bg-surface-100"
+										role="img"
+										aria-label="{m.progress()}: {assessedCount}/{assessableTotal}"
+									>
+										{#each resultCounts as opt}
+											{#if opt.count > 0}
+												{@const pct = (opt.count / assessableTotal) * 100}
+												<div
+													class="flex h-full items-center justify-center overflow-hidden"
+													style="width: {pct}%; background-color: {complianceResultColorMap[opt.value] ??
+														'#d1d5db'}; color: {opt.value === 'not_applicable' ? '#ffffff' : '#1f2937'}"
+													title="{opt.label}: {opt.count} ({Math.round(pct)}%)"
+												>
+													{#if pct >= 9}
+														<span class="text-[10px] font-semibold leading-none">{Math.round(pct)}%</span>
+													{/if}
+												</div>
+											{/if}
+										{/each}
+									</div>
+								</div>
+							{/if}
+							{#if complianceAssessment.scoring_enabled}
+								<div class="flex items-center gap-2 shrink-0 text-xs font-medium">
+									<span
+										class="inline-flex items-center gap-1 rounded-md bg-surface-100 px-2 py-1 text-surface-700"
+									>
+										{m.score()}:
+										<span class="font-semibold">{fmtScore(data.scores?.implementation_score)}</span>
+										{#if data.scores?.max_score}<span class="text-surface-400"
+												>/{data.scores.max_score}</span
+											>{/if}
+									</span>
+									{#if complianceAssessment.show_documentation_score}
+										<span
+											class="inline-flex items-center gap-1 rounded-md bg-surface-100 px-2 py-1 text-surface-700"
+										>
+											{m.documentationScore()}:
+											<span class="font-semibold">{fmtScore(data.scores?.documentation_score)}</span>
+											{#if data.scores?.max_score}<span class="text-surface-400"
+													>/{data.scores.max_score}</span
+												>{/if}
+										</span>
+									{/if}
+								</div>
+							{/if}
 						</div>
 					{/if}
 				</div>
-			</div>
-		{/if}
-		<!-- Read-only banner -->
-		{#if isReadOnly}
-			<div
-				class="card bg-yellow-50 border border-yellow-300 px-5 py-3 flex items-center space-x-3 my-2"
-			>
-				<i class="fa-solid fa-lock text-yellow-600 text-lg"></i>
-				<p class="text-yellow-800 font-medium">
-					{complianceAssessment.is_locked
-						? m.lockedAssessmentMessage()
-						: m.assessmentInReviewMessage()}
-				</p>
-			</div>
-		{/if}
-		<ul data-testid="requirement-assessments" class="space-y-3">
-			{#each requirementAssessments as requirementAssessment, i}
-				{@const row = sectionInfo.rows[i]}
-				{#if isRowVisible(i)}
-					<li class="list-none">
-						{#if requirementAssessment.display_mode === 'splash' || requirementAssessment.requirement?.display_mode === 'splash'}
-							<!-- Splash screen node: full-width markdown block -->
-							<div class="my-4">
-								<SplashCard
-									name={requirementAssessment.name ?? requirementAssessment.requirement?.name}
-									description={requirementAssessment.description ??
-										requirementAssessment.requirement?.description}
-									id="requirement-{requirementAssessment.id}"
-								/>
-							</div>
-						{:else if !requirementAssessment.assessable}
-							<!-- Section heading node: collapsible section bar (TOC anchor) -->
-							{@const collapsed = !!collapsedSections[requirementAssessment.id]}
-							{@const sectionCount = sectionInfo.counts[requirementAssessment.id] ?? 0}
-							<div
-								id="requirement-{requirementAssessment.id}"
-								data-toc
-								data-toc-title={getTitle(requirementAssessment)}
-								data-toc-level="0"
-								class="mt-2"
-								style="margin-left: {(row.depth - 1) * 0.75}rem"
-							>
-								<button
-									type="button"
-									onclick={() => toggleSectionCollapse(requirementAssessment.id)}
-									aria-expanded={!collapsed}
-									class="flex w-full items-center gap-2 rounded-lg border border-orange-200 border-l-4 border-l-orange-400 bg-orange-50/60 px-3 py-2 text-left transition-colors hover:bg-orange-100/70"
-								>
-									<i
-										class="fa-solid fa-chevron-down text-orange-500 text-xs transition-transform {collapsed
-											? '-rotate-90'
-											: ''}"
-									></i>
-									{#if getRefId(requirementAssessment)}
-										<span class="shrink-0 font-semibold text-sm text-orange-600"
-											>{getRefId(requirementAssessment)}</span
-										>
-									{/if}
-									<span
-										class="font-semibold text-orange-800 {row.depth > 1 ? 'text-sm' : 'text-base'}"
-										>{getDisplayTitle(requirementAssessment)}</span
-									>
-									{#if sectionCount > 0}
-										<span
-											class="badge preset-tonal-secondary text-xs ml-auto shrink-0"
-											title={m.requirements()}
-										>
-											{sectionCount}
-										</span>
-									{/if}
-								</button>
-								{#if requirementAssessment.requirement.description && !collapsed}
-									<div class="text-sm text-surface-600 px-3 pt-1.5">
-										<MarkdownRenderer content={requirementAssessment.requirement.description} />
-									</div>
-								{/if}
-							</div>
-						{:else}
-							<!-- Assessable requirement: compact card -->
-							<div
-								class="card border border-surface-200 rounded-xl p-4 space-y-3 shadow-sm"
-								id="requirement-{requirementAssessment.id}"
-								data-toc
-								data-toc-title={getTitle(requirementAssessment)}
-								data-toc-level="0"
-							>
-								<form
-									id="tableModeForm-{requirementAssessment.id}"
-									action="{actionPath}?/updateRequirementAssessment"
-									method="post"
-									class="flex flex-col gap-3 table-mode-form"
-								>
-									<!-- Row A: foldable title -->
-									<div class="flex items-center gap-3 flex-wrap">
+			{/if}
+			<!-- Read-only banner -->
+			{#if isReadOnly}
+				<div
+					class="card bg-yellow-50 border border-yellow-300 px-5 py-3 flex items-center space-x-3 my-2"
+				>
+					<i class="fa-solid fa-lock text-yellow-600 text-lg"></i>
+					<p class="text-yellow-800 font-medium">
+						{complianceAssessment.is_locked
+							? m.lockedAssessmentMessage()
+							: m.assessmentInReviewMessage()}
+					</p>
+				</div>
+			{/if}
+			<div class="flex flex-row items-start gap-4">
+				{#if !shallow && !questionnaireOnly && showToc && !tocCollapsed}
+					<!-- Table of contents column (child of the card, toggled from the header) -->
+					<nav
+						class="hidden lg:block w-64 shrink-0 self-start sticky overflow-y-auto border-r border-surface-200 pr-2"
+						style="top: {stickyTop + headerHeight}px; max-height: calc(100vh - {stickyTop +
+							headerHeight}px - 1rem)"
+					>
+						{#if showResult}
+							<div class="flex flex-wrap gap-1 pb-2 mb-1 border-b border-surface-200">
+								{#each resultCounts as opt}
+									{#if opt.count > 0}
 										<button
 											type="button"
-											class="flex items-center gap-2 text-left min-w-0"
-											onclick={() => toggleRA(requirementAssessment.id)}
-											aria-expanded={!!expandedRA[requirementAssessment.id]}
+											class="px-2 py-1 text-[10px] rounded transition-colors flex items-center gap-1.5 {tocFilterResult ===
+											opt.value
+												? 'bg-surface-700 text-white font-semibold'
+												: 'bg-white text-surface-700 hover:bg-surface-100 border border-surface-200'}"
+											onclick={() =>
+												(tocFilterResult = tocFilterResult === opt.value ? null : opt.value)}
+											title={opt.label}
 										>
-											{#if !shallow}
-												<i
-													class="fa-solid fa-chevron-right text-surface-400 text-sm transition-transform {expandedRA[
-														requirementAssessment.id
-													]
-														? 'rotate-90'
-														: ''}"
-												></i>
-											{/if}
-											{#if getRefId(requirementAssessment)}
-												<span class="badge preset-tonal-secondary font-medium shrink-0"
-													>{getRefId(requirementAssessment)}</span
-												>
-											{/if}
-											<span class="min-w-0 font-semibold text-base text-surface-900">
-												{getDisplayTitle(requirementAssessment)}
-											</span>
-											{#if typeof requirementAssessment.requirement?.weight === 'number' && Number.isFinite(requirementAssessment.requirement.weight) && requirementAssessment.requirement.weight !== 1}
-												<span
-													class="badge text-xs font-medium bg-indigo-100 text-indigo-800 shrink-0"
-												>
-													{m.requirementWeight()}: {requirementAssessment.requirement.weight}
-												</span>
-											{/if}
+											<span
+												class="inline-block w-1.5 h-1.5 rounded-full"
+												style="background-color: {complianceResultColorMap[opt.value] ?? '#d1d5db'}"
+											></span>
+											{opt.count}
 										</button>
-
-										{#if viewerRole === 'auditor' && showRespondentAlignment && requirementAssessment.respondent_alignment}
-											<span class="flex flex-col items-end shrink-0 ml-auto">
-												<span class="text-xs italic text-surface-500">{m.respondentAnswered()}</span
-												>
-												<span
-													class="badge text-sm font-semibold text-white"
-													style="background-color: {alignmentColorMap[
-														requirementAssessment.respondent_alignment
-													]}"
-												>
-													{safeTranslate(requirementAssessment.respondent_alignment)}
-												</span>
+									{/if}
+								{/each}
+							</div>
+						{/if}
+						<div class="space-y-0.5">
+							{#each filteredTocSections as section}
+								{#if section.isSection}
+									<button
+										type="button"
+										class="w-full text-left py-1 text-[10px] font-bold uppercase tracking-wide text-surface-400 mt-2 truncate hover:text-primary-700"
+										style="padding-left: {0.25 + (section.depth - 1) * 0.5}rem"
+										onclick={() => goToRequirement(section)}
+										title={section.title}
+									>
+										{section.refId ? `${section.refId} ` : ''}{section.title}
+									</button>
+								{:else}
+									<button
+										type="button"
+										class="w-full text-left py-1.5 pr-2 text-xs rounded-md transition-colors truncate flex items-center gap-1.5 text-surface-600 hover:bg-surface-100"
+										style="padding-left: {0.25 + (section.depth - 1) * 0.5}rem"
+										onclick={() => goToRequirement(section)}
+										title={section.title}
+									>
+										<span
+											class="inline-block w-2 h-2 rounded-full flex-shrink-0"
+											style="background-color: {section.result === '__splash__'
+												? '#a855f7'
+												: (complianceResultColorMap[section.result] ?? '#d1d5db')}"
+										></span>
+										<span class="truncate"
+											>{section.refId ? `${section.refId} ` : ''}{section.title}</span
+										>
+									</button>
+								{/if}
+							{/each}
+						</div>
+					</nav>
+				{/if}
+				<ul data-testid="requirement-assessments" class="flex-1 min-w-0 space-y-3">
+					{#each requirementAssessments as requirementAssessment, i}
+					{@const row = sectionInfo.rows[i]}
+					{#if isRowVisible(i)}
+						<li class="list-none">
+							{#if requirementAssessment.display_mode === 'splash' || requirementAssessment.requirement?.display_mode === 'splash'}
+								<!-- Splash screen node: full-width markdown block -->
+								<div class="my-4">
+									<SplashCard
+										name={requirementAssessment.name ?? requirementAssessment.requirement?.name}
+										description={requirementAssessment.description ??
+											requirementAssessment.requirement?.description}
+										id="requirement-{requirementAssessment.id}"
+									/>
+								</div>
+							{:else if !requirementAssessment.assessable}
+								<!-- Section heading node: collapsible section bar (TOC anchor) -->
+								{@const collapsed = !!collapsedSections[requirementAssessment.id]}
+								{@const sectionCount = sectionInfo.counts[requirementAssessment.id] ?? 0}
+								<div
+									id="requirement-{requirementAssessment.id}"
+									data-toc
+									data-toc-title={getTitle(requirementAssessment)}
+									data-toc-level="0"
+									class="mt-2"
+									style="margin-left: {(row.depth - 1) * 0.75}rem"
+									style:scroll-margin-top="{stickyTop + 64}px"
+								>
+									<button
+										type="button"
+										onclick={() => toggleSectionCollapse(requirementAssessment.id)}
+										aria-expanded={!collapsed}
+										class="flex w-full items-center gap-2 rounded-lg border border-orange-200 border-l-4 border-l-orange-400 bg-orange-50/60 px-3 py-2 text-left transition-colors hover:bg-orange-100/70"
+									>
+										<i
+											class="fa-solid fa-chevron-down text-orange-500 text-xs transition-transform {collapsed
+												? '-rotate-90'
+												: ''}"
+										></i>
+										{#if getRefId(requirementAssessment)}
+											<span class="shrink-0 font-semibold text-sm text-orange-600"
+												>{getRefId(requirementAssessment)}</span
+											>
+										{/if}
+										<span
+											class="font-semibold text-orange-800 {row.depth > 1
+												? 'text-sm'
+												: 'text-base'}">{getDisplayTitle(requirementAssessment)}</span
+										>
+										{#if sectionCount > 0}
+											<span
+												class="badge preset-tonal-secondary text-xs ml-auto shrink-0"
+												title={m.requirements()}
+											>
+												{sectionCount}
 											</span>
 										{/if}
-									</div>
-
-									<!-- Row B: result / status / score, aligned under the name (editable while collapsed) -->
-									{#if (!questionnaireMode && showResult) || (!shallow && complianceAssessment.scoring_enabled)}
-										<div class="flex flex-wrap items-center gap-x-6 gap-y-3 pl-7">
-											{#if !questionnaireMode && showResult}
-												{#if hasComputedResult(requirementAssessment.requirement.questions)}
-													<span
-														class="badge text-sm font-semibold w-fit"
-														style={resultBadgeStyle(requirementAssessment.result)}
-													>
-														{safeTranslate(requirementAssessment.result)}
-													</span>
-												{:else}
-													<SegmentedControl
-														options={result_options}
-														value={requirementAssessment.result}
-														colorMap={complianceResultTailwindColorMap}
-														disabled={isReadOnly}
-														size="sm"
-														ariaLabel={m.result()}
-														onChange={(newValue) => {
-															const newResult =
-																requirementAssessment.result === newValue
-																	? 'not_assessed'
-																	: newValue;
-															requirementAssessment.result = newResult;
-															update(requirementAssessment, 'result');
-														}}
-													/>
-												{/if}
-												{#if complianceAssessment.progress_status_enabled}
-													<SegmentedControl
-														options={status_options}
-														value={requirementAssessment.status}
-														colorMap={complianceStatusTailwindColorMap}
-														disabled={isReadOnly}
-														size="sm"
-														ariaLabel={m.status()}
-														onChange={(newValue) => {
-															const newStatus =
-																requirementAssessment.status === newValue ? 'to_do' : newValue;
-															requirementAssessment.status = newStatus;
-															update(requirementAssessment, 'status');
-														}}
-													/>
-												{/if}
-											{/if}
-											{@render scoreSlot(requirementAssessment)}
-										</div>
-									{/if}
-
-									<!-- Description: always visible, even when the body is collapsed -->
-									{#if requirementAssessment.requirement.description}
-										<div class="text-sm text-surface-700" data-testid="description">
+									</button>
+									{#if requirementAssessment.requirement.description && !collapsed}
+										<div class="text-sm text-surface-600 px-3 pt-1.5">
 											<MarkdownRenderer content={requirementAssessment.requirement.description} />
 										</div>
 									{/if}
-
-									{#if shallow || expandedRA[requirementAssessment.id]}
-										<!-- Additional information (annotation / typical evidence / mapping inference) -->
-										{#if requirementAssessment.requirement.annotation || requirementAssessment.requirement.typical_evidence || requirementAssessment.mapping_inference?.result}
-											<div class="card p-3 preset-tonal-secondary text-sm cursor-auto w-full">
-												<h2 class="font-medium text-sm flex flex-row justify-between items-center">
-													<span>
-														<i class="fa-solid fa-circle-info mr-2"></i>{m.additionalInformation()}
-													</span>
-													<button
-														type="button"
-														onclick={() => toggleSuggestion(requirementAssessment.id)}
+								</div>
+							{:else}
+								<!-- Assessable requirement: compact card -->
+								<div
+									class="card border border-surface-200 rounded-xl p-4 space-y-3 shadow-sm"
+									id="requirement-{requirementAssessment.id}"
+									data-toc
+									data-toc-title={getTitle(requirementAssessment)}
+									data-toc-level="0"
+									style:scroll-margin-top="{stickyTop + 64}px"
+								>
+									<form
+										id="tableModeForm-{requirementAssessment.id}"
+										action="{actionPath}?/updateRequirementAssessment"
+										method="post"
+										class="flex flex-col gap-3 table-mode-form"
+									>
+										<!-- Row A: foldable title -->
+										<div class="flex items-center gap-3 flex-wrap">
+											<button
+												type="button"
+												class="flex items-center gap-2 text-left min-w-0"
+												onclick={() => toggleRA(requirementAssessment.id)}
+												aria-expanded={!!expandedRA[requirementAssessment.id]}
+											>
+												{#if !shallow}
+													<i
+														class="fa-solid fa-chevron-right text-surface-400 text-sm transition-transform {expandedRA[
+															requirementAssessment.id
+														]
+															? 'rotate-90'
+															: ''}"
+													></i>
+												{/if}
+												{#if getRefId(requirementAssessment)}
+													<span class="badge preset-tonal-secondary font-medium shrink-0"
+														>{getRefId(requirementAssessment)}</span
 													>
-														{#if !hideSuggestionHashmap[requirementAssessment.id]}
-															<i class="fa-solid fa-eye"></i>
-														{:else}
-															<i class="fa-solid fa-eye-slash"></i>
-														{/if}
-													</button>
-												</h2>
-												{#if !hideSuggestionHashmap[requirementAssessment.id]}
-													{#if requirementAssessment.requirement.annotation}
-														<div class="my-2">
-															<p class="font-medium">
-																<i class="fa-solid fa-pencil"></i>
-																{m.annotation()}
-															</p>
-															<div class="py-1">
-																<MarkdownRenderer
-																	content={requirementAssessment.requirement.annotation}
-																/>
-															</div>
-														</div>
-													{/if}
-													{#if requirementAssessment.requirement.typical_evidence}
-														<div class="my-2">
-															<p class="font-medium">
-																<i class="fa-solid fa-pencil"></i>
-																{m.typicalEvidence()}
-															</p>
-															<div class="py-1">
-																<MarkdownRenderer
-																	content={requirementAssessment.requirement.typical_evidence}
-																/>
-															</div>
-														</div>
-													{/if}
-													{#if requirementAssessment.mapping_inference?.result}
-														<div class="my-2">
-															<p class="font-medium">
-																<i class="fa-solid fa-link"></i>
-																{m.mappingInference()}
-															</p>
-															<span class="text-xs text-gray-500"
-																><i class="fa-solid fa-circle-info"></i>
-																{m.mappingInferenceHelpText()}</span
-															>
-															<ul class="list-disc ml-4">
-																<li>
-																	<p>
-																		<a
-																			class="anchor"
-																			href="/requirement-assessments/{requirementAssessment
-																				.mapping_inference.source_requirement_assessment.id}"
-																		>
-																			{requirementAssessment.mapping_inference
-																				.source_requirement_assessment.str}
-																		</a>
-																	</p>
-																	<p class="whitespace-pre-line py-1">
-																		<span class="italic">{m.coverageColon()}</span>
-																		<span class="badge h-fit">
-																			{safeTranslate(
-																				requirementAssessment.mapping_inference
-																					.source_requirement_assessment.coverage
-																			)}
-																		</span>
-																	</p>
-																	{#if requirementAssessment.mapping_inference.source_requirement_assessment.is_scored}
-																		<p class="whitespace-pre-line py-1">
-																			<span class="italic">{m.scoreSemiColon()}</span>
-																			<span class="badge h-fit">
-																				{safeTranslate(
-																					requirementAssessment.mapping_inference
-																						.source_requirement_assessment.score
-																				)}
-																			</span>
-																		</p>
-																	{/if}
-																	<p class="whitespace-pre-line py-1">
-																		<span class="italic">{m.suggestionColon()}</span>
-																		<span
-																			class="badge h-fit"
-																			style={resultBadgeStyle(
-																				requirementAssessment.mapping_inference.result
-																			)}
-																		>
-																			{safeTranslate(
-																				requirementAssessment.mapping_inference.result
-																			)}
-																		</span>
-																	</p>
-																	{#if requirementAssessment.mapping_inference.annotation}
-																		<p class="whitespace-pre-line py-1">
-																			<span class="italic">{m.annotationColon()}</span>
-																			{requirementAssessment.mapping_inference.annotation}
-																		</p>
-																	{/if}
-																</li>
-															</ul>
-														</div>
-													{/if}
 												{/if}
-											</div>
-										{/if}
+												<span class="min-w-0 font-semibold text-base text-surface-900">
+													{getDisplayTitle(requirementAssessment)}
+												</span>
+												{#if typeof requirementAssessment.requirement?.weight === 'number' && Number.isFinite(requirementAssessment.requirement.weight) && requirementAssessment.requirement.weight !== 1}
+													<span
+														class="badge text-xs font-medium bg-indigo-100 text-indigo-800 shrink-0"
+													>
+														{m.requirementWeight()}: {requirementAssessment.requirement.weight}
+													</span>
+												{/if}
+											</button>
 
-										<!-- Questions / auto-alignment -->
-										{#if showAnswers && requirementAssessment.requirement.questions != null && Object.keys(requirementAssessment.requirement.questions).length !== 0}
-											<div class="flex flex-col w-full space-y-2">
-												<Question
-													questions={requirementAssessment.requirement.questions}
-													initialValue={requirementAssessment.answers}
-													field="answers"
-													disabled={isReadOnly}
-													{shallow}
-													onChange={async (urn, newAnswer) => {
-														requirementAssessment.answers[urn] = newAnswer;
-														await updateBulk(requirementAssessment, {
-															answers: { [urn]: newAnswer }
-														});
-														if (invalidateAllBool) {
-															await invalidateAll();
-														}
-													}}
-												/>
-											</div>
-										{/if}
-										<!-- Auto-alignment question (when no framework questions) -->
-										{#if shouldShowAutoQuestion(requirementAssessment.requirement, viewerRole, complianceAssessment)}
-											<div class="flex flex-col w-full space-y-2">
-												<Question
-													questions={buildAutoAlignmentQuestion({
-														text: m.areYouAlignedWithThisRequirement(),
-														yes: m.yes(),
-														no: m.no(),
-														inProgress: m.inProgress(),
-														notApplicable: m.notApplicable()
-													})}
-													initialValue={{
-														[AUTO_ALIGNMENT_QUESTION_URN]: choiceUrnFromAlignmentValue(
+											{#if viewerRole === 'auditor' && showRespondentAlignment && requirementAssessment.respondent_alignment}
+												<span class="flex flex-col items-end shrink-0 ml-auto">
+													<span class="text-xs italic text-surface-500"
+														>{m.respondentAnswered()}</span
+													>
+													<span
+														class="badge text-sm font-semibold text-white"
+														style="background-color: {alignmentColorMap[
 															requirementAssessment.respondent_alignment
-														)
-													}}
-													field="respondent_alignment"
-													disabled={isReadOnly}
-													onChange={(_urn, choiceUrn) => {
-														const newAlignment = alignmentValueFromChoiceUrn(choiceUrn);
-														requirementAssessment.respondent_alignment = newAlignment;
-														update(requirementAssessment, 'respondent_alignment', {
-															refresh: true
-														});
-													}}
-												/>
+														]}"
+													>
+														{safeTranslate(requirementAssessment.respondent_alignment)}
+													</span>
+												</span>
+											{/if}
+										</div>
+
+										<!-- Description: always visible, even when the body is collapsed -->
+										{#if requirementAssessment.requirement.description}
+											<div class="text-sm text-surface-700" data-testid="description">
+												<MarkdownRenderer content={requirementAssessment.requirement.description} />
 											</div>
 										{/if}
-										<div class="flex flex-col gap-3">
-											<!-- Related objects: controls / evidences -->
-											{#if shallow}
-												{#if showAppliedControls}
-													{#if requirementAssessment.applied_controls.length === 0}
-														<p class="text-surface-400 italic text-sm">{m.noAppliedControlYet()}</p>
-													{:else}
-														<div class="flex flex-wrap gap-x-4 gap-y-1 items-center">
-															{#each requirementAssessment.applied_controls as item}
-																<Anchor
-																	class="anchor"
-																	href="/applied-controls/{item.id}"
-																	label={item.str}
-																>
-																	<i class="fa-solid fa-fire-extinguisher mr-2"></i>{item.str}
-																</Anchor>
-															{/each}
-														</div>
-													{/if}
-												{/if}
-												{#if showEvidences}
-													{#if requirementAssessment.evidences.length === 0}
-														<p class="text-surface-400 italic text-sm" data-testid="no-evidence">
-															{m.noEvidences()}
-														</p>
-													{:else}
-														<div class="flex flex-wrap gap-x-4 gap-y-1 items-center">
-															{#each requirementAssessment.evidences as item}
-																<Anchor
-																	class="anchor"
-																	href="/evidences/{item.id}"
-																	label={item.str}
-																	data-testid="evidence-link"
-																>
-																	<i class="fa-solid fa-file-lines mr-2"></i>{item.str}
-																</Anchor>
-															{/each}
-														</div>
-													{/if}
-												{/if}
-											{:else}
-												<div class="flex flex-wrap gap-2 items-center">
-													{#if showAppliedControls}
-														{@render chip({
-															raId: requirementAssessment.id,
-															key: 'appliedControl',
-															icon: 'fa-fire-extinguisher',
-															label: m.appliedControl(),
-															count: requirementAssessment.applied_controls.length
-														})}
-													{/if}
-													{#if showEvidences}
-														{@render chip({
-															raId: requirementAssessment.id,
-															key: 'evidence',
-															icon: 'fa-file-lines',
-															label: m.evidence(),
-															count: requirementAssessment.evidences.length,
-															countTestId: 'evidence-count',
-															triggerTestId: 'evidence-accordion-trigger'
-														})}
-													{/if}
-												</div>
 
-												{#if showAppliedControls && isSectionOpen(requirementAssessment.id, 'appliedControl')}
-													{@render detailPanel({
-														items: requirementAssessment.applied_controls,
-														hrefBase: '/applied-controls',
-														itemIcon: 'fa-fire-extinguisher',
-														emptyLabel: m.noAppliedControlYet(),
-														createLabel: m.addAppliedControl(),
-														selectLabel: m.selectAppliedControls(),
-														onCreate: () => modalMeasureCreateForm(requirementAssessment),
-														onSelect: () =>
-															modalUpdateForm(requirementAssessment, 'selectAppliedControls')
-													})}
-												{/if}
-
-												{#if showEvidences && isSectionOpen(requirementAssessment.id, 'evidence')}
-													{@render detailPanel({
-														items: requirementAssessment.evidences,
-														hrefBase: '/evidences',
-														itemIcon: 'fa-file-lines',
-														emptyLabel: m.noEvidences(),
-														createLabel: m.addEvidence(),
-														selectLabel: m.selectEvidence(),
-														createTestId: 'create-evidence-button',
-														selectTestId: 'select-evidence-button',
-														linkTestId: 'evidence-link',
-														onCreate: () => modalEvidenceCreateForm(requirementAssessment),
-														onSelect: () =>
-															modalUpdateForm(requirementAssessment, 'selectEvidences')
-													})}
-												{/if}
-											{/if}
-
-											<!-- Observation: always at the end of the unfolded body -->
-											{#if showObservation}
-												<div class="space-y-1">
-													<p class="text-sm font-medium text-surface-600">
-														<i class="fa-solid fa-comment-dots mr-1 text-surface-500"
-														></i>{m.observation()}
-													</p>
-													{#if shallow}
-														{#if requirementAssessment.observation}
-															<MarkdownRenderer
-																content={requirementAssessment.observation}
-																class="text-primary-500"
-															/>
-														{:else}
-															<p class="text-surface-400 italic text-sm">{m.noObservation()}</p>
-														{/if}
+										<!-- Row B: result / status / score, aligned under the name (editable while collapsed) -->
+										{#if (!questionnaireMode && showResult) || (!shallow && complianceAssessment.scoring_enabled)}
+											<div class="flex flex-wrap items-start gap-x-6 gap-y-3 pl-7">
+												{#if !questionnaireMode && showResult}
+													<div class="flex flex-col gap-1">
+														<span class="text-xs font-semibold text-surface-500 italic">{m.result()}</span>
+													{#if hasComputedResult(requirementAssessment.requirement.questions)}
+														<span
+															class="badge text-sm font-semibold w-fit"
+															style={resultBadgeStyle(requirementAssessment.result)}
+														>
+															{safeTranslate(requirementAssessment.result)}
+														</span>
 													{:else}
-														<TableMarkdownField
-															value={requirementAssessment.observation}
+														<SegmentedControl
+															options={result_options}
+															value={requirementAssessment.result}
+															colorMap={complianceResultTailwindColorMap}
 															disabled={isReadOnly}
-															onSave={async (newValue) => {
-																requirementAssessment.observation = newValue;
-																await update(requirementAssessment, 'observation');
-																requirementAssessment.observationBuffer = newValue;
+															size="sm"
+															ariaLabel={m.result()}
+															onChange={(newValue) => {
+																const newResult =
+																	requirementAssessment.result === newValue
+																		? 'not_assessed'
+																		: newValue;
+																requirementAssessment.result = newResult;
+																update(requirementAssessment, 'result');
 															}}
 														/>
 													{/if}
+													</div>
+													{#if complianceAssessment.progress_status_enabled}
+														<div class="flex flex-col gap-1">
+															<span class="text-xs font-semibold text-surface-500 italic">{m.status()}</span>
+														<SegmentedControl
+															options={status_options}
+															value={requirementAssessment.status}
+															colorMap={complianceStatusTailwindColorMap}
+															disabled={isReadOnly}
+															size="sm"
+															ariaLabel={m.status()}
+															onChange={(newValue) => {
+																const newStatus =
+																	requirementAssessment.status === newValue ? 'to_do' : newValue;
+																requirementAssessment.status = newStatus;
+																update(requirementAssessment, 'status');
+															}}
+														/>
+													</div>
+													{/if}
+												{/if}
+												{@render scoreSlot(requirementAssessment)}
+											</div>
+										{/if}
+
+										{#if shallow || expandedRA[requirementAssessment.id]}
+											<!-- Additional information (annotation / typical evidence / mapping inference) -->
+											{#if requirementAssessment.requirement.annotation || requirementAssessment.requirement.typical_evidence || requirementAssessment.mapping_inference?.result}
+												<div class="card p-3 preset-tonal-secondary text-sm cursor-auto w-full">
+													<h2
+														class="font-medium text-sm flex flex-row justify-between items-center"
+													>
+														<span>
+															<i class="fa-solid fa-circle-info mr-2"
+															></i>{m.additionalInformation()}
+														</span>
+														<button
+															type="button"
+															onclick={() => toggleSuggestion(requirementAssessment.id)}
+														>
+															{#if !hideSuggestionHashmap[requirementAssessment.id]}
+																<i class="fa-solid fa-eye"></i>
+															{:else}
+																<i class="fa-solid fa-eye-slash"></i>
+															{/if}
+														</button>
+													</h2>
+													{#if !hideSuggestionHashmap[requirementAssessment.id]}
+														{#if requirementAssessment.requirement.annotation}
+															<div class="my-2">
+																<p class="font-medium">
+																	<i class="fa-solid fa-pencil"></i>
+																	{m.annotation()}
+																</p>
+																<div class="py-1">
+																	<MarkdownRenderer
+																		content={requirementAssessment.requirement.annotation}
+																	/>
+																</div>
+															</div>
+														{/if}
+														{#if requirementAssessment.requirement.typical_evidence}
+															<div class="my-2">
+																<p class="font-medium">
+																	<i class="fa-solid fa-pencil"></i>
+																	{m.typicalEvidence()}
+																</p>
+																<div class="py-1">
+																	<MarkdownRenderer
+																		content={requirementAssessment.requirement.typical_evidence}
+																	/>
+																</div>
+															</div>
+														{/if}
+														{#if requirementAssessment.mapping_inference?.result}
+															<div class="my-2">
+																<p class="font-medium">
+																	<i class="fa-solid fa-link"></i>
+																	{m.mappingInference()}
+																</p>
+																<span class="text-xs text-gray-500"
+																	><i class="fa-solid fa-circle-info"></i>
+																	{m.mappingInferenceHelpText()}</span
+																>
+																<ul class="list-disc ml-4">
+																	<li>
+																		<p>
+																			<a
+																				class="anchor"
+																				href="/requirement-assessments/{requirementAssessment
+																					.mapping_inference.source_requirement_assessment.id}"
+																			>
+																				{requirementAssessment.mapping_inference
+																					.source_requirement_assessment.str}
+																			</a>
+																		</p>
+																		<p class="whitespace-pre-line py-1">
+																			<span class="italic">{m.coverageColon()}</span>
+																			<span class="badge h-fit">
+																				{safeTranslate(
+																					requirementAssessment.mapping_inference
+																						.source_requirement_assessment.coverage
+																				)}
+																			</span>
+																		</p>
+																		{#if requirementAssessment.mapping_inference.source_requirement_assessment.is_scored}
+																			<p class="whitespace-pre-line py-1">
+																				<span class="italic">{m.scoreSemiColon()}</span>
+																				<span class="badge h-fit">
+																					{safeTranslate(
+																						requirementAssessment.mapping_inference
+																							.source_requirement_assessment.score
+																					)}
+																				</span>
+																			</p>
+																		{/if}
+																		<p class="whitespace-pre-line py-1">
+																			<span class="italic">{m.suggestionColon()}</span>
+																			<span
+																				class="badge h-fit"
+																				style={resultBadgeStyle(
+																					requirementAssessment.mapping_inference.result
+																				)}
+																			>
+																				{safeTranslate(
+																					requirementAssessment.mapping_inference.result
+																				)}
+																			</span>
+																		</p>
+																		{#if requirementAssessment.mapping_inference.annotation}
+																			<p class="whitespace-pre-line py-1">
+																				<span class="italic">{m.annotationColon()}</span>
+																				{requirementAssessment.mapping_inference.annotation}
+																			</p>
+																		{/if}
+																	</li>
+																</ul>
+															</div>
+														{/if}
+													{/if}
 												</div>
 											{/if}
-										</div>
-									{/if}
-								</form>
-							</div>
-						{/if}
-					</li>
-				{/if}
-			{/each}
-		</ul>
+
+											<!-- Questions / auto-alignment -->
+											{#if showAnswers && requirementAssessment.requirement.questions != null && Object.keys(requirementAssessment.requirement.questions).length !== 0}
+												<div class="flex flex-col w-full space-y-2">
+													<Question
+														questions={requirementAssessment.requirement.questions}
+														initialValue={requirementAssessment.answers}
+														field="answers"
+														disabled={isReadOnly}
+														{shallow}
+														onChange={async (urn, newAnswer) => {
+															requirementAssessment.answers[urn] = newAnswer;
+															await updateBulk(requirementAssessment, {
+																answers: { [urn]: newAnswer }
+															});
+															if (invalidateAllBool) {
+																await invalidateAll();
+															}
+														}}
+													/>
+												</div>
+											{/if}
+											<!-- Auto-alignment question (when no framework questions) -->
+											{#if shouldShowAutoQuestion(requirementAssessment.requirement, viewerRole, complianceAssessment)}
+												<div class="flex flex-col w-full space-y-2">
+													<Question
+														questions={buildAutoAlignmentQuestion({
+															text: m.areYouAlignedWithThisRequirement(),
+															yes: m.yes(),
+															no: m.no(),
+															inProgress: m.inProgress(),
+															notApplicable: m.notApplicable()
+														})}
+														initialValue={{
+															[AUTO_ALIGNMENT_QUESTION_URN]: choiceUrnFromAlignmentValue(
+																requirementAssessment.respondent_alignment
+															)
+														}}
+														field="respondent_alignment"
+														disabled={isReadOnly}
+														onChange={(_urn, choiceUrn) => {
+															const newAlignment = alignmentValueFromChoiceUrn(choiceUrn);
+															requirementAssessment.respondent_alignment = newAlignment;
+															update(requirementAssessment, 'respondent_alignment', {
+																refresh: true
+															});
+														}}
+													/>
+												</div>
+											{/if}
+											<div class="flex flex-col gap-3">
+												<!-- Related objects: controls / evidences -->
+												{#if shallow}
+													{#if showAppliedControls}
+														{#if requirementAssessment.applied_controls.length === 0}
+															<p class="text-surface-400 italic text-sm">
+																{m.noAppliedControlYet()}
+															</p>
+														{:else}
+															<div class="flex flex-wrap gap-x-4 gap-y-1 items-center">
+																{#each requirementAssessment.applied_controls as item}
+																	<Anchor
+																		class="anchor"
+																		href="/applied-controls/{item.id}"
+																		label={item.str}
+																	>
+																		<i class="fa-solid fa-fire-extinguisher mr-2"></i>{item.str}
+																	</Anchor>
+																{/each}
+															</div>
+														{/if}
+													{/if}
+													{#if showEvidences}
+														{#if requirementAssessment.evidences.length === 0}
+															<p class="text-surface-400 italic text-sm" data-testid="no-evidence">
+																{m.noEvidences()}
+															</p>
+														{:else}
+															<div class="flex flex-wrap gap-x-4 gap-y-1 items-center">
+																{#each requirementAssessment.evidences as item}
+																	<Anchor
+																		class="anchor"
+																		href="/evidences/{item.id}"
+																		label={item.str}
+																		data-testid="evidence-link"
+																	>
+																		<i class="fa-solid fa-file-lines mr-2"></i>{item.str}
+																	</Anchor>
+																{/each}
+															</div>
+														{/if}
+													{/if}
+												{:else}
+													<div class="flex flex-wrap gap-2 items-center">
+														{#if showAppliedControls}
+															{@render chip({
+																raId: requirementAssessment.id,
+																key: 'appliedControl',
+																icon: 'fa-fire-extinguisher',
+																label: m.appliedControl(),
+																count: requirementAssessment.applied_controls.length
+															})}
+														{/if}
+														{#if showEvidences}
+															{@render chip({
+																raId: requirementAssessment.id,
+																key: 'evidence',
+																icon: 'fa-file-lines',
+																label: m.evidence(),
+																count: requirementAssessment.evidences.length,
+																countTestId: 'evidence-count',
+																triggerTestId: 'evidence-accordion-trigger'
+															})}
+														{/if}
+													</div>
+
+													{#if showAppliedControls && isSectionOpen(requirementAssessment.id, 'appliedControl')}
+														{@render detailPanel({
+															items: requirementAssessment.applied_controls,
+															hrefBase: '/applied-controls',
+															itemIcon: 'fa-fire-extinguisher',
+															emptyLabel: m.noAppliedControlYet(),
+															createLabel: m.addAppliedControl(),
+															selectLabel: m.selectAppliedControls(),
+															onCreate: () => modalMeasureCreateForm(requirementAssessment),
+															onSelect: () =>
+																modalUpdateForm(requirementAssessment, 'selectAppliedControls')
+														})}
+													{/if}
+
+													{#if showEvidences && isSectionOpen(requirementAssessment.id, 'evidence')}
+														{@render detailPanel({
+															items: requirementAssessment.evidences,
+															hrefBase: '/evidences',
+															itemIcon: 'fa-file-lines',
+															emptyLabel: m.noEvidences(),
+															createLabel: m.addEvidence(),
+															selectLabel: m.selectEvidence(),
+															createTestId: 'create-evidence-button',
+															selectTestId: 'select-evidence-button',
+															linkTestId: 'evidence-link',
+															onCreate: () => modalEvidenceCreateForm(requirementAssessment),
+															onSelect: () =>
+																modalUpdateForm(requirementAssessment, 'selectEvidences')
+														})}
+													{/if}
+												{/if}
+
+												<!-- Observation: always at the end of the unfolded body -->
+												{#if showObservation}
+													<div class="space-y-1">
+														<p class="text-sm font-medium text-surface-600">
+															<i class="fa-solid fa-comment-dots mr-1 text-surface-500"
+															></i>{m.observation()}
+														</p>
+														{#if shallow}
+															{#if requirementAssessment.observation}
+																<MarkdownRenderer
+																	content={requirementAssessment.observation}
+																	class="text-primary-500"
+																/>
+															{:else}
+																<p class="text-surface-400 italic text-sm">{m.noObservation()}</p>
+															{/if}
+														{:else}
+															<TableMarkdownField
+																value={requirementAssessment.observation}
+																disabled={isReadOnly}
+																onSave={async (newValue) => {
+																	requirementAssessment.observation = newValue;
+																	await update(requirementAssessment, 'observation');
+																	requirementAssessment.observationBuffer = newValue;
+																}}
+															/>
+														{/if}
+													</div>
+												{/if}
+											</div>
+										{/if}
+									</form>
+								</div>
+							{/if}
+						</li>
+					{/if}
+				{/each}
+			</ul>
+		</div>
 	</div>
 </div>
