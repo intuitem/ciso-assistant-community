@@ -664,6 +664,7 @@ export const FeatureFlagsSchema = z.object({
 	organisation_issues: z.boolean().optional(),
 	quantitative_risk_studies: z.boolean().optional(),
 	terminologies: z.boolean().optional(),
+	custom_fields: z.boolean().optional(),
 	bia: z.boolean().optional(),
 	project_management: z.boolean().optional(),
 	contracts: z.boolean().optional(),

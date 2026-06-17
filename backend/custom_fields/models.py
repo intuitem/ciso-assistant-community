@@ -226,7 +226,7 @@ class CustomFieldValue(AbstractBaseModel):
 
     definition = models.ForeignKey(
         CustomFieldDefinition,
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
         related_name="values",
         verbose_name=_("definition"),
     )

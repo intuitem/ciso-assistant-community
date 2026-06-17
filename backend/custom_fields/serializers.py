@@ -108,6 +108,8 @@ class CustomFieldsSerializerMixin(serializers.ModelSerializer):
     definitions applicable to the (prospective) folder, then applied after save.
     """
 
+    FLAGGED_FIELDS = {"custom_fields": "custom_fields"}
+
     custom_fields = serializers.SerializerMethodField()
 
     def get_custom_fields(self, obj) -> dict:

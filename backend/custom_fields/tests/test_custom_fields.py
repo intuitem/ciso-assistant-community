@@ -162,6 +162,15 @@ def test_choice_validation(root, project_ct):
         p.set_custom_field(ch, "platinum")
 
 
+def test_deleting_definition_cascades_values(root, project_ct):
+    txt = make_def(project_ct, root, "note", FieldType.TEXT)
+    p = Project.objects.create(name="P", folder=root)
+    p.set_custom_field(txt, "hello")
+    assert CustomFieldValue.objects.filter(definition=txt).count() == 1
+    txt.delete()  # must not raise ProtectedError
+    assert CustomFieldValue.objects.filter(object_id=p.pk).count() == 0
+
+
 def test_multi_choice_multiple_rows(root, project_ct):
     mc = make_def(project_ct, root, "tags", FieldType.MULTI_CHOICE)
     for v in ("a", "b", "c"):

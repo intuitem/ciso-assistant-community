@@ -1,7 +1,10 @@
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
 
 from core.views import BaseModelViewSet
+from global_settings.utils import ff_is_enabled
 from iam.models import Folder
 
 from .models import CustomFieldDefinition, FieldType
@@ -14,8 +17,17 @@ class CustomFieldDefinitionViewSet(BaseModelViewSet):
     search_fields = ["key", "label"]
     ordering = ["order", "key"]
 
+    def initial(self, request, *args, **kwargs):
+        super().initial(request, *args, **kwargs)
+        # Reads degrade to an empty list when the feature is off (see get_queryset);
+        # writes are rejected.
+        if request.method not in SAFE_METHODS and not ff_is_enabled("custom_fields"):
+            raise PermissionDenied("Custom fields are not enabled.")
+
     def get_queryset(self):
         queryset = super().get_queryset()
+        if not ff_is_enabled("custom_fields"):
+            return queryset.none()
         params = self.request.query_params
 
         model = params.get("model")

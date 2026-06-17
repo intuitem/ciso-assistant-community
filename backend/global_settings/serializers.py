@@ -328,6 +328,10 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     terminologies = serializers.BooleanField(
         source="value.terminologies", required=False, default=True
     )
+    # TEMP: dev-only. Restrict to enterprise (PRO) later — see project-custom-fields.
+    custom_fields = serializers.BooleanField(
+        source="value.custom_fields", required=False, default=False
+    )
     bia = serializers.BooleanField(source="value.bia", required=False, default=True)
     project_management = serializers.BooleanField(
         source="value.project_management", required=False, default=False

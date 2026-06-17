@@ -4,6 +4,7 @@
 	import Checkbox from './Checkbox.svelte';
 	import Select from './Select.svelte';
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
+	import { page } from '$app/state';
 	import { m } from '$paraglide/messages';
 
 	interface Choice {
@@ -30,6 +31,8 @@
 
 	let { form, model, folderId = undefined }: Props = $props();
 
+	const enabled = $derived(page.data?.featureflags?.custom_fields === true);
+
 	let definitions: Definition[] = $state([]);
 
 	// Ensure the nested container exists before any field proxy writes into it.
@@ -49,7 +52,7 @@
 	}
 
 	$effect(() => {
-		load(folderId);
+		if (enabled) load(folderId);
 	});
 
 	const choiceOptions = (def: Definition) =>

@@ -247,6 +247,11 @@
 					description: m.riskOriginHelpText()
 				},
 				{
+					field: 'custom_fields',
+					label: m.customFields(),
+					description: m.customFieldsDescription()
+				},
+				{
 					field: 'outgoing_webhooks',
 					label: m.webhooks(),
 					description: m.webhooksDescription()

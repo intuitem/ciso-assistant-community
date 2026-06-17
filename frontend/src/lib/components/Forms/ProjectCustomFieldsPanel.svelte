@@ -3,6 +3,7 @@
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
 	import { m } from '$paraglide/messages';
+	import { page } from '$app/state';
 	import CustomFieldsSection from './CustomFieldsSection.svelte';
 
 	interface Choice {
@@ -27,6 +28,8 @@
 	}
 
 	let { endpoint, model, folderId = undefined, values = {}, onSaved = () => {} }: Props = $props();
+
+	const enabled = $derived(page.data?.featureflags?.custom_fields === true);
 
 	let definitions: Definition[] = $state([]);
 	let editing = $state(false);
@@ -56,7 +59,7 @@
 
 	$effect(() => {
 		void folderId;
-		load();
+		if (enabled) load();
 	});
 
 	function startEdit() {

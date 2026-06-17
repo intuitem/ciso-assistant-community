@@ -951,6 +951,7 @@
 	"secret": "Secret",
 	"key": "Clé",
 	"customFields": "Champs personnalisés",
+	"customFieldsDescription": "Définir des champs typés et filtrables sur les objets (actuellement les projets).",
 	"customField": "Champ personnalisé",
 	"addCustomField": "Ajouter un champ personnalisé",
 	"fieldType": "Type de champ",

@@ -1,6 +1,7 @@
 import pytest
 from rest_framework import status
 
+from global_settings.models import GlobalSettings
 from iam.models import Folder
 
 CF_URL = "/api/custom-fields/"
@@ -10,6 +11,14 @@ PROJECTS_URL = "/api/pmbok/projects/"
 @pytest.mark.django_db
 class TestCustomFieldsAPI:
     """End-to-end HTTP coverage through the real router + RBAC stack."""
+
+    @pytest.fixture(autouse=True)
+    def enable_custom_fields(self, authenticated_client):
+        gs, _ = GlobalSettings.objects.get_or_create(
+            name=GlobalSettings.Names.FEATURE_FLAGS, defaults={"value": {}}
+        )
+        gs.value = {**(gs.value or {}), "custom_fields": True}
+        gs.save()
 
     def _make_choice_def(self, client, folder_id, key="tier"):
         return client.post(
@@ -103,6 +112,19 @@ class TestCustomFieldsAPI:
         )
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
         assert "custom_fields" in resp.json()
+
+    def test_disabled_flag_gates_access(self, authenticated_client):
+        root = Folder.get_root_folder()
+        self._make_choice_def(authenticated_client, str(root.id))
+        gs = GlobalSettings.objects.get(name=GlobalSettings.Names.FEATURE_FLAGS)
+        gs.value = {**gs.value, "custom_fields": False}
+        gs.save()
+        # reads degrade to an empty list (no hard error), writes are forbidden
+        listing = authenticated_client.get(CF_URL)
+        assert listing.status_code == status.HTTP_200_OK
+        assert listing.json()["results"] == []
+        create = self._make_choice_def(authenticated_client, str(root.id), key="nope")
+        assert create.status_code == status.HTTP_403_FORBIDDEN
 
     def test_for_folder_resolution(self, authenticated_client):
         root = Folder.get_root_folder()
