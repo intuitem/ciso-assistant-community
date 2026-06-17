@@ -461,7 +461,7 @@
 		<div class="text-center text-gray-500 py-12">{m.noFeatureFlagsMatch()}</div>
 	{/if}
 
-	{#each filteredGroups as group}
+	{#each filteredGroups as group (group.category)}
 		{@const groupFields = group.fields.map((f) => f.field)}
 		{@const groupEnabled = groupFields.filter((f) => $formData[f]).length}
 		<div class="bg-white shadow-sm rounded-xl p-6 border border-gray-200">
@@ -496,7 +496,7 @@
 				class="grid gap-4"
 				style="grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); grid-auto-rows: 1fr;"
 			>
-				{#each group.fields as { field, label, description }}
+				{#each group.fields as { field, label, description } (field)}
 					<BackgroundCheckbox
 						{form}
 						{field}
