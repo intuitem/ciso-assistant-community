@@ -202,7 +202,7 @@
 						: 'text-gray-500'}"
 					onclick={() => (tab = 'existing')}
 				>
-					{m.builderLinkExisting()}
+					{isControl ? m.builderLinkExistingControl() : m.builderLinkExistingThreat()}
 				</button>
 				<button
 					type="button"
@@ -211,7 +211,7 @@
 						: 'text-gray-500'}"
 					onclick={() => (tab = 'inline')}
 				>
-					{m.builderDefineInline()}
+					{isControl ? m.builderDefineInlineControl() : m.builderDefineInlineThreat()}
 				</button>
 			</div>
 
