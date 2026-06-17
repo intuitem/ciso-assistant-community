@@ -175,10 +175,13 @@
 					])
 				]}
 				<div class="ml-4">
-					<dt class="font-medium text-gray-900" data-testid="{field.replace('_', '-')}-field-title">
+					<dt
+						class="font-medium text-surface-900-100"
+						data-testid="{field.replace('_', '-')}-field-title"
+					>
 						{safeTranslate(field)}
 					</dt>
-					<span class="flex flex-row h-full border-l border-gray-50 border-dashed">
+					<span class="flex flex-row h-full border-l border-surface-50-950 border-dashed">
 						<div class="w-full">
 							{#each allKeys as subKey}
 								{@const subLog = {

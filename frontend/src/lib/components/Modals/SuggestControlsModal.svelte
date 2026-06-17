@@ -8,7 +8,7 @@
 	const modalStore: ModalStore = getModalStore();
 	const flash = getFlash(page);
 
-	const cBase = 'card bg-surface-50 p-4 w-modal shadow-xl space-y-4';
+	const cBase = 'card bg-surface-50-950 p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 
 	type SuggestionStatus = 'create' | 'reuse' | 'linked';
@@ -135,9 +135,9 @@
 		<header class={cHeader}>{$modalStore[0].title ?? m.suggestControls()}</header>
 		<article>{$modalStore[0].body ?? ''}</article>
 
-		<div class="max-h-96 overflow-y-auto card bg-surface-100">
+		<div class="max-h-96 overflow-y-auto card bg-surface-100-900">
 			{#if selectableItems.length > 1}
-				<div class="px-4 py-2 border-b border-surface-300 sticky top-0 bg-surface-100">
+				<div class="px-4 py-2 border-b border-surface-300-700 sticky top-0 bg-surface-100-900">
 					<label class="flex items-center gap-2 cursor-pointer font-semibold text-sm">
 						<input type="checkbox" checked={allSelected} onchange={toggleAll} class="checkbox" />
 						{m.selectAll()} ({selectedIds.size}/{selectableItems.length})
@@ -151,7 +151,7 @@
 						<i class="fa-solid fa-plus text-success-500 mr-1"></i>
 						{m.suggestionSectionCreate()} ({createItems.length})
 					</p>
-					<p class="text-xs text-gray-500 mb-2">{m.suggestionSectionCreateHelp()}</p>
+					<p class="text-xs text-surface-600-400 mb-2">{m.suggestionSectionCreateHelp()}</p>
 					<ul class="ml-2">
 						{#each createItems as item (item.id)}
 							{@render selectableRow(item)}
@@ -166,7 +166,7 @@
 						<i class="fa-solid fa-link text-warning-500 mr-1"></i>
 						{m.suggestionSectionReuse()} ({reuseItems.length})
 					</p>
-					<p class="text-xs text-gray-500 mb-2">{m.suggestionSectionReuseHelp()}</p>
+					<p class="text-xs text-surface-600-400 mb-2">{m.suggestionSectionReuseHelp()}</p>
 					<ul class="ml-2">
 						{#each reuseItems as item (item.id)}
 							{@render selectableRow(item)}
@@ -178,15 +178,15 @@
 			{#if linkedItems.length > 0}
 				<section class="px-4 py-2 border-t border-surface-300 opacity-70">
 					<p class="font-semibold text-sm mb-1">
-						<i class="fa-solid fa-check text-gray-500 mr-1"></i>
+						<i class="fa-solid fa-check text-surface-600-400 mr-1"></i>
 						{m.suggestionSectionLinked()} ({linkedItems.length})
 					</p>
-					<p class="text-xs text-gray-500 mb-2">{m.suggestionSectionLinkedHelp()}</p>
+					<p class="text-xs text-surface-600-400 mb-2">{m.suggestionSectionLinkedHelp()}</p>
 					<ul class="ml-2">
 						{#each linkedItems as item (item.id)}
 							<li class="py-1">
 								<div class="flex items-center gap-2">
-									<i class="fa-regular fa-circle-check text-gray-500"></i>
+									<i class="fa-regular fa-circle-check text-surface-600-400"></i>
 									<span class="flex-1">{item.label}</span>
 									{@render badge(item.status)}
 								</div>

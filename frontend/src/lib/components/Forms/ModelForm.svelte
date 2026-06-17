@@ -948,11 +948,11 @@
 			/>
 		{/if}
 		<div
-			class="flex flex-row justify-between space-x-4 sticky bottom-0 backdrop-blur-sm pt-4 pb-2 border-t border-slate-200"
+			class="flex flex-row justify-between space-x-4 sticky bottom-0 backdrop-blur-sm pt-4 pb-2 border-t border-surface-200-800"
 		>
 			{#if closeModal}
 				<button
-					class="btn bg-gray-400 text-white font-semibold w-full"
+					class="btn bg-surface-400-600 text-white font-semibold w-full"
 					data-testid="cancel-button"
 					type="button"
 					onclick={(event) => {
@@ -985,7 +985,7 @@
 			{:else}
 				{#if cancelButton}
 					<button
-						class="btn bg-gray-400 text-white font-semibold w-full"
+						class="btn bg-surface-400-600 text-white font-semibold w-full"
 						data-testid="cancel-button"
 						type="button"
 						onclick={cancel}>{m.cancel()}</button
