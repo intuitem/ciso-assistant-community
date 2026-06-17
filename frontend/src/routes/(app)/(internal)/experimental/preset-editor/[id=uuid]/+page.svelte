@@ -532,9 +532,9 @@
 {#snippet scaffoldFields(scaffold: Scaffold, idx: number)}
 	{#if scaffold.type === 'compliance_assessment'}
 		<label class="flex flex-col gap-1 text-sm md:col-span-2">
-			<span class="text-xs text-gray-600">Framework</span>
+			<span class="text-xs text-surface-600-400">Framework</span>
 			<select
-				class="text-sm bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+				class="text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
 				value={scaffold.framework ?? ''}
 				onchange={(e) =>
 					updateScaffoldByIndex(idx, { framework: (e.target as HTMLSelectElement).value })}
@@ -549,14 +549,14 @@
 			{@const fw = selectedFramework(scaffold.framework)}
 			{#if fw?.implementation_groups_definition?.length}
 				<div class="md:col-span-2">
-					<span class="text-xs text-gray-600 block mb-1.5">Implementation groups</span>
+					<span class="text-xs text-surface-600-400 block mb-1.5">Implementation groups</span>
 					<div class="flex flex-wrap gap-1.5">
 						{#each fw.implementation_groups_definition as ig (ig.ref_id)}
 							{@const checked = scaffold.implementation_groups?.includes(ig.ref_id)}
 							<label
 								class="inline-flex items-center gap-1.5 text-xs rounded-full px-2.5 py-1 border transition-colors cursor-pointer {checked
 									? 'bg-blue-50 border-blue-300 text-blue-700'
-									: 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'}"
+									: 'bg-surface-50-950 border-surface-200-800 text-surface-600-400 hover:border-surface-300-700'}"
 							>
 								<input
 									type="checkbox"
@@ -582,9 +582,9 @@
 		{/if}
 	{:else if scaffold.type === 'risk_assessment' || scaffold.type === 'business_impact_analysis' || scaffold.type === 'ebios_rm_study'}
 		<label class="flex flex-col gap-1 text-sm md:col-span-2">
-			<span class="text-xs text-gray-600">Risk matrix</span>
+			<span class="text-xs text-surface-600-400">Risk matrix</span>
 			<select
-				class="text-sm bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+				class="text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
 				value={scaffold.risk_matrix ?? ''}
 				onchange={(e) =>
 					updateScaffoldByIndex(idx, { risk_matrix: (e.target as HTMLSelectElement).value })}
@@ -597,9 +597,9 @@
 		</label>
 	{:else if scaffold.type === 'findings_assessment'}
 		<label class="flex flex-col gap-1 text-sm">
-			<span class="text-xs text-gray-600">Category</span>
+			<span class="text-xs text-surface-600-400">Category</span>
 			<select
-				class="text-sm bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+				class="text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
 				value={scaffold.category ?? 'pentest'}
 				onchange={(e) =>
 					updateScaffoldByIndex(idx, { category: (e.target as HTMLSelectElement).value })}
@@ -611,9 +611,9 @@
 		</label>
 	{:else if scaffold.type === 'asset'}
 		<label class="flex flex-col gap-1 text-sm">
-			<span class="text-xs text-gray-600">Asset type</span>
+			<span class="text-xs text-surface-600-400">Asset type</span>
 			<select
-				class="text-sm bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+				class="text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
 				value={scaffold.asset_type ?? 'SP'}
 				onchange={(e) =>
 					updateScaffoldByIndex(idx, { asset_type: (e.target as HTMLSelectElement).value })}
@@ -642,18 +642,18 @@
 {:else if !draft}
 	<div class="p-6 text-red-700">Failed to load draft.</div>
 {:else}
-	<div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+	<div class="bg-surface-50-950 rounded-lg shadow-sm border border-surface-200-800 overflow-hidden">
 		<!-- Sticky toolbar -->
-		<div class="sticky top-0 z-40 bg-white border-b border-gray-200 px-4 py-2.5">
+		<div class="sticky top-0 z-40 bg-surface-50-950 border-b border-surface-200-800 px-4 py-2.5">
 			<div class="flex items-center gap-3 flex-wrap">
 				<a
 					href="/experimental/preset-editor"
-					class="text-sm text-gray-400 hover:text-gray-600 transition-colors shrink-0"
+					class="text-sm text-surface-500 hover:text-surface-600-400 transition-colors shrink-0"
 					title="Back to preset list"
 				>
 					<i class="fa-solid fa-arrow-left"></i>
 				</a>
-				<div class="h-4 w-px bg-gray-200 shrink-0"></div>
+				<div class="h-4 w-px bg-surface-200-800 shrink-0"></div>
 
 				<!-- Status pill -->
 				{#if dirty}
@@ -674,7 +674,7 @@
 					</span>
 				{:else}
 					<span
-						class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 inline-flex items-center gap-1"
+						class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-surface-100-900 text-surface-600-400 inline-flex items-center gap-1"
 						title="Nothing has been published yet."
 					>
 						<i class="fa-solid fa-file-lines text-[10px]"></i>
@@ -698,7 +698,7 @@
 						? 'bg-gray-400 text-white cursor-wait'
 						: dirty
 							? 'bg-gray-700 text-white hover:bg-gray-800'
-							: 'bg-gray-100 text-gray-400 cursor-not-allowed'}"
+							: 'bg-surface-100-900 text-surface-500 cursor-not-allowed'}"
 					disabled={!dirty || saving || publishing}
 					onclick={save}
 					title="Save draft"
@@ -722,7 +722,7 @@
 					</button>
 					<button
 						type="button"
-						class="shrink-0 text-xs text-gray-500 px-2 py-1 hover:text-gray-700"
+						class="shrink-0 text-xs text-surface-600-400 px-2 py-1 hover:text-surface-700-300"
 						onclick={() => (confirmDiscard = false)}
 					>
 						Cancel
@@ -730,7 +730,7 @@
 				{:else}
 					<button
 						type="button"
-						class="shrink-0 text-xs font-medium px-3 py-1.5 rounded-lg text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors inline-flex items-center gap-1.5"
+						class="shrink-0 text-xs font-medium px-3 py-1.5 rounded-lg text-surface-600-400 hover:text-red-600 hover:bg-red-50 transition-colors inline-flex items-center gap-1.5"
 						onclick={() => (confirmDiscard = true)}
 						disabled={saving || publishing}
 						title="Discard the current draft"
@@ -746,7 +746,7 @@
 					class="shrink-0 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors inline-flex items-center gap-1.5 {dirty ||
 					publishing
 						? 'bg-violet-300 text-white cursor-not-allowed'
-						: 'bg-violet-600 text-white hover:bg-violet-700'}"
+						: 'bg-violet-600 dark:bg-violet-700 text-white hover:bg-violet-700'}"
 					disabled={dirty || publishing}
 					onclick={publishPreview}
 					title={dirty ? 'Save the draft first' : 'Publish the draft'}
@@ -776,13 +776,13 @@
 					type="text"
 					bind:value={draft.journey_meta.name}
 					placeholder="Preset name"
-					class="w-full text-2xl font-bold bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors py-1"
+					class="w-full text-2xl font-bold bg-transparent border-0 border-b-2 border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors py-1"
 				/>
 				<textarea
 					bind:value={draft.journey_meta.description}
 					placeholder="Preset description (optional)"
 					rows="2"
-					class="w-full text-sm text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1"
+					class="w-full text-sm text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1"
 				></textarea>
 			</div>
 
@@ -790,8 +790,8 @@
 			<section class="space-y-4">
 				<div class="flex items-end justify-between">
 					<div>
-						<h2 class="text-base font-semibold text-gray-800">Steps</h2>
-						<p class="text-xs text-gray-500 mt-0.5">
+						<h2 class="text-base font-semibold text-surface-800-200">Steps</h2>
+						<p class="text-xs text-surface-600-400 mt-0.5">
 							A preset is a sequence of steps. Each step can scaffold objects, point to a model or
 							URL, or both.
 						</p>
@@ -807,10 +807,10 @@
 
 				{#if draft.steps.length === 0}
 					<div
-						class="border-2 border-dashed border-gray-200 rounded-lg p-10 text-center text-sm text-gray-400"
+						class="border-2 border-dashed border-surface-200-800 rounded-lg p-10 text-center text-sm text-surface-500"
 					>
 						<i class="fa-solid fa-list-check text-3xl mb-3 text-gray-300 block"></i>
-						No steps yet. Click <span class="font-medium text-gray-600">Add step</span> to begin.
+						No steps yet. Click <span class="font-medium text-surface-600-400">Add step</span> to begin.
 					</div>
 				{/if}
 
@@ -851,19 +851,19 @@
 						]}
 						{@const depthColor = stepBorders[i % stepBorders.length]}
 						<div
-							class="bg-white rounded-lg shadow-sm border border-gray-200 border-l-4 {depthColor} overflow-hidden"
+							class="bg-surface-50-950 rounded-lg shadow-sm border border-surface-200-800 border-l-4 {depthColor} overflow-hidden"
 						>
 							<!-- Header -->
-							<div class="flex items-start gap-3 p-4 border-b border-gray-100">
+							<div class="flex items-start gap-3 p-4 border-b border-surface-100-900">
 								<div class="flex flex-col items-center gap-1 shrink-0 mt-1">
 									<span
-										class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-700 text-xs font-semibold"
+										class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-surface-100-900 text-surface-700-300 text-xs font-semibold"
 									>
 										{i + 1}
 									</span>
 									<button
 										type="button"
-										class="w-6 h-6 inline-flex items-center justify-center rounded text-xs text-gray-400 hover:text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+										class="w-6 h-6 inline-flex items-center justify-center rounded text-xs text-surface-500 hover:text-surface-700-300 hover:bg-surface-100-900 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
 										onclick={() => moveStep(i, -1)}
 										disabled={i === 0}
 										title="Move up"
@@ -873,7 +873,7 @@
 									</button>
 									<button
 										type="button"
-										class="w-6 h-6 inline-flex items-center justify-center rounded text-xs text-gray-400 hover:text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+										class="w-6 h-6 inline-flex items-center justify-center rounded text-xs text-surface-500 hover:text-surface-700-300 hover:bg-surface-100-900 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
 										onclick={() => moveStep(i, 1)}
 										disabled={i === draft.steps.length - 1}
 										title="Move down"
@@ -887,7 +887,7 @@
 										type="text"
 										value={step.title}
 										placeholder="Step name"
-										class="w-full text-base font-semibold bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors py-0.5"
+										class="w-full text-base font-semibold bg-transparent border-0 border-b-2 border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors py-0.5"
 										oninput={(e) =>
 											setStepField(i, { title: (e.target as HTMLInputElement).value })}
 									/>
@@ -895,16 +895,16 @@
 										value={step.description ?? ''}
 										placeholder="Description (optional)"
 										rows="2"
-										class="w-full text-sm text-gray-600 bg-transparent border-0 border-b border-transparent hover:border-gray-200 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-0.5"
+										class="w-full text-sm text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-200-800 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-0.5"
 										oninput={(e) =>
 											setStepField(i, { description: (e.target as HTMLTextAreaElement).value })}
 									></textarea>
 									<div class="flex items-center gap-2 text-xs">
-										<span class="text-gray-400 font-mono">ref_id</span>
+										<span class="text-surface-500 font-mono">ref_id</span>
 										<input
 											type="text"
 											value={step.key}
-											class="font-mono text-xs bg-gray-50 border border-gray-200 rounded px-2 py-0.5 focus:bg-white focus:border-blue-400 outline-none transition-colors min-w-0 flex-1 max-w-xs"
+											class="font-mono text-xs bg-surface-50-950 border border-surface-200-800 rounded px-2 py-0.5 focus:bg-surface-50-950 focus:border-blue-400 outline-none transition-colors min-w-0 flex-1 max-w-xs"
 											oninput={(e) =>
 												setStepField(i, { key: (e.target as HTMLInputElement).value })}
 										/>
@@ -912,7 +912,7 @@
 								</div>
 								<button
 									type="button"
-									class="w-8 h-8 inline-flex items-center justify-center rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+									class="w-8 h-8 inline-flex items-center justify-center rounded-lg text-surface-500 hover:text-red-600 hover:bg-red-50 transition-colors"
 									onclick={() => removeStep(i)}
 									title="Remove step"
 									aria-label="Remove step"
@@ -924,22 +924,22 @@
 							<!-- Body: pointer + scaffolded objects -->
 							<div class="px-4 pb-4 pt-3 flex flex-col gap-4">
 								<!-- Pointer -->
-								<div class="bg-gray-50/60 border border-gray-100 rounded-lg p-3">
+								<div class="bg-surface-50-950/60 border border-surface-100-900 rounded-lg p-3">
 									<div
-										class="text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5"
+										class="text-[11px] font-medium text-surface-600-400 uppercase tracking-wider mb-2 flex items-center gap-1.5"
 									>
 										<i class="fa-solid fa-arrow-right-to-bracket text-[10px]"></i>
-										Pointer<span class="text-gray-400 normal-case font-normal tracking-normal">
+										Pointer<span class="text-surface-500 normal-case font-normal tracking-normal">
 											— where the step takes the user</span
 										>
 									</div>
 									<div
-										class="inline-flex rounded-lg border border-gray-200 bg-white overflow-hidden text-xs mb-3"
+										class="inline-flex rounded-lg border border-surface-200-800 bg-surface-50-950 overflow-hidden text-xs mb-3"
 									>
 										<label
 											class="px-3 py-1.5 cursor-pointer transition-colors {ptrMode === 'none'
 												? 'bg-gray-700 text-white'
-												: 'text-gray-600 hover:bg-gray-50'}"
+												: 'text-surface-600-400 hover:bg-surface-50-950'}"
 										>
 											<input
 												type="radio"
@@ -951,10 +951,10 @@
 											None
 										</label>
 										<label
-											class="px-3 py-1.5 cursor-pointer border-l border-gray-200 transition-colors {ptrMode ===
+											class="px-3 py-1.5 cursor-pointer border-l border-surface-200-800 transition-colors {ptrMode ===
 											'model'
 												? 'bg-gray-700 text-white'
-												: 'text-gray-600 hover:bg-gray-50'}"
+												: 'text-surface-600-400 hover:bg-surface-50-950'}"
 										>
 											<input
 												type="radio"
@@ -966,10 +966,10 @@
 											<i class="fa-solid fa-list-ul mr-1 text-[10px]"></i> Model
 										</label>
 										<label
-											class="px-3 py-1.5 cursor-pointer border-l border-gray-200 transition-colors {ptrMode ===
+											class="px-3 py-1.5 cursor-pointer border-l border-surface-200-800 transition-colors {ptrMode ===
 											'url'
 												? 'bg-gray-700 text-white'
-												: 'text-gray-600 hover:bg-gray-50'}"
+												: 'text-surface-600-400 hover:bg-surface-50-950'}"
 										>
 											<input
 												type="radio"
@@ -986,9 +986,9 @@
 										{@const crossCands = crossStepCandidates(step)}
 										<div class="space-y-3">
 											<label class="flex flex-col gap-1">
-												<span class="text-xs text-gray-600">Model</span>
+												<span class="text-xs text-surface-600-400">Model</span>
 												<select
-													class="text-sm bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+													class="text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
 													value={step.target_model ?? ''}
 													onchange={(e) =>
 														changeTargetModel(i, (e.target as HTMLSelectElement).value || null)}
@@ -1002,11 +1002,11 @@
 											{#if seedType}
 												<div>
 													<div
-														class="text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5"
+														class="text-[11px] font-medium text-surface-600-400 uppercase tracking-wider mb-2 flex items-center gap-1.5"
 													>
 														<i class="fa-solid fa-cubes text-[10px]"></i>
 														Objects to create
-														<span class="text-gray-400 normal-case font-normal tracking-normal">
+														<span class="text-surface-500 normal-case font-normal tracking-normal">
 															— created on apply; pick one to focus the step on it
 														</span>
 													</div>
@@ -1015,7 +1015,7 @@
 													<label
 														class="flex items-center gap-2 text-xs px-3 py-2 rounded-lg border {!step.target_ref
 															? 'border-blue-300 bg-blue-50 text-blue-800'
-															: 'border-gray-200 hover:bg-gray-50'} cursor-pointer mb-2"
+															: 'border-surface-200-800 hover:bg-surface-50-950'} cursor-pointer mb-2"
 													>
 														<input
 															type="radio"
@@ -1031,9 +1031,9 @@
 															{@const idx = indexOfScaffold(scaffold)}
 															{@const focused = step.target_ref === scaffold.ref}
 															<div
-																class="bg-white border rounded-lg p-3 {focused
+																class="bg-surface-50-950 border rounded-lg p-3 {focused
 																	? 'border-blue-300 shadow-sm'
-																	: 'border-gray-200'}"
+																	: 'border-surface-200-800'}"
 															>
 																<div class="flex items-center gap-2 mb-2">
 																	<input
@@ -1050,16 +1050,16 @@
 																			}
 																		}}
 																	/>
-																	<span class="text-xs text-gray-500"
+																	<span class="text-xs text-surface-600-400"
 																		>{focused ? 'Scaffold and open' : 'Scaffold'}</span
 																	>
 																	<span
-																		class="ml-auto text-[10px] uppercase text-gray-400 tracking-wider"
+																		class="ml-auto text-[10px] uppercase text-surface-500 tracking-wider"
 																		>{safeTranslate(scaffold.type)}</span
 																	>
 																	<button
 																		type="button"
-																		class="w-7 h-7 inline-flex items-center justify-center rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+																		class="w-7 h-7 inline-flex items-center justify-center rounded-lg text-surface-500 hover:text-red-600 hover:bg-red-50 transition-colors"
 																		onclick={() => removeScaffoldByIndex(idx)}
 																		title="Remove object"
 																		aria-label="Remove object"
@@ -1069,9 +1069,9 @@
 																</div>
 																<div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
 																	<label class="flex flex-col gap-1">
-																		<span class="text-xs text-gray-600">Name</span>
+																		<span class="text-xs text-surface-600-400">Name</span>
 																		<input
-																			class="text-sm bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+																			class="text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
 																			type="text"
 																			value={scaffold.name ?? ''}
 																			oninput={(e) =>
@@ -1081,9 +1081,9 @@
 																		/>
 																	</label>
 																	<label class="flex flex-col gap-1">
-																		<span class="text-xs text-gray-600">ref_id</span>
+																		<span class="text-xs text-surface-600-400">ref_id</span>
 																		<input
-																			class="text-sm font-mono bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+																			class="text-sm font-mono bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
 																			type="text"
 																			value={scaffold.ref ?? ''}
 																			oninput={(e) =>
@@ -1093,9 +1093,9 @@
 																		/>
 																	</label>
 																	<label class="flex flex-col gap-1 md:col-span-2">
-																		<span class="text-xs text-gray-600">Description</span>
+																		<span class="text-xs text-surface-600-400">Description</span>
 																		<textarea
-																			class="text-sm bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors resize-y"
+																			class="text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors resize-y"
 																			rows="2"
 																			value={scaffold.description ?? ''}
 																			oninput={(e) =>
@@ -1124,11 +1124,11 @@
 
 											{#if crossCands.length > 0}
 												<label class="flex flex-col gap-1">
-													<span class="text-xs text-gray-600"
+													<span class="text-xs text-surface-600-400"
 														>Or open a scaffold from another step</span
 													>
 													<select
-														class="text-sm bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+														class="text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
 														value={crossCands.some((c) => c.ref === step.target_ref)
 															? step.target_ref
 															: ''}
@@ -1148,11 +1148,11 @@
 									{:else if ptrMode === 'url'}
 										<div class="space-y-3">
 											<label class="flex flex-col gap-1">
-												<span class="text-xs text-gray-600"
+												<span class="text-xs text-surface-600-400"
 													>URL (path, e.g. /reports/soa/results)</span
 												>
 												<input
-													class="text-sm bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors font-mono"
+													class="text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors font-mono"
 													type="text"
 													value={step.target_url ?? ''}
 													oninput={(e) =>
@@ -1163,10 +1163,10 @@
 											</label>
 											<div>
 												<div class="flex items-center justify-between mb-1.5">
-													<span class="text-xs text-gray-600">Params</span>
+													<span class="text-xs text-surface-600-400">Params</span>
 													<button
 														type="button"
-														class="text-xs text-gray-500 hover:text-blue-600 transition-colors inline-flex items-center gap-1"
+														class="text-xs text-surface-600-400 hover:text-blue-600 transition-colors inline-flex items-center gap-1"
 														onclick={() => {
 															const rows = paramsToRows(step.target_params);
 															rows.push({ k: '', v: '' });
@@ -1179,7 +1179,7 @@
 												{#each paramsToRows(step.target_params) as row, ri (ri)}
 													<div class="flex gap-2 mb-1.5">
 														<input
-															class="flex-1 text-sm bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors font-mono"
+															class="flex-1 text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors font-mono"
 															placeholder="key"
 															value={row.k}
 															oninput={(e) => {
@@ -1189,7 +1189,7 @@
 															}}
 														/>
 														<input
-															class="flex-1 text-sm bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+															class="flex-1 text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
 															placeholder="value (comma-separated for lists)"
 															value={row.v}
 															oninput={(e) => {
@@ -1200,7 +1200,7 @@
 														/>
 														<button
 															type="button"
-															class="w-8 h-8 inline-flex items-center justify-center rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+															class="w-8 h-8 inline-flex items-center justify-center rounded-lg text-surface-500 hover:text-red-600 hover:bg-red-50 transition-colors"
 															onclick={() => {
 																const rows = paramsToRows(step.target_params).filter(
 																	(_, x) => x !== ri
@@ -1229,26 +1229,27 @@
 
 	{#if showPreview}
 		<div class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" role="dialog">
-			<div class="bg-white rounded-lg shadow-xl max-w-lg w-full overflow-hidden">
-				<div class="px-5 py-4 border-b border-gray-100 flex items-center gap-3">
+			<div class="bg-surface-50-950 rounded-lg shadow-xl max-w-lg w-full overflow-hidden">
+				<div class="px-5 py-4 border-b border-surface-100-900 flex items-center gap-3">
 					<div
 						class="w-9 h-9 rounded-full bg-amber-100 inline-flex items-center justify-center shrink-0"
 					>
 						<i class="fa-solid fa-triangle-exclamation text-amber-600"></i>
 					</div>
 					<div>
-						<h3 class="font-semibold text-gray-800">Confirm publish</h3>
-						<p class="text-xs text-gray-500 mt-0.5">
+						<h3 class="font-semibold text-surface-800-200">Confirm publish</h3>
+						<p class="text-xs text-surface-600-400 mt-0.5">
 							The following step ref_ids will be removed. Existing journeys with state on these
 							steps will lose that state on next upgrade.
 						</p>
 					</div>
 				</div>
-				<ul class="text-sm max-h-64 overflow-auto divide-y divide-gray-100">
+				<ul class="text-sm max-h-64 overflow-auto divide-y divide-surface-100-900">
 					{#each previewDeletions as d (d.key)}
 						<li class="px-5 py-2.5 flex items-center justify-between gap-3">
-							<span class="font-mono text-xs bg-gray-100 rounded px-1.5 py-0.5">{d.key}</span>
-							<span class="text-xs text-gray-500">
+							<span class="font-mono text-xs bg-surface-100-900 rounded px-1.5 py-0.5">{d.key}</span
+							>
+							<span class="text-xs text-surface-600-400">
 								used in {d.journey_step_count} journey step(s),
 								<span class={d.with_user_state ? 'text-amber-600 font-medium' : ''}>
 									{d.with_user_state} with user state
@@ -1257,17 +1258,19 @@
 						</li>
 					{/each}
 				</ul>
-				<div class="px-5 py-3 bg-gray-50 flex justify-end gap-2 border-t border-gray-100">
+				<div
+					class="px-5 py-3 bg-surface-50-950 flex justify-end gap-2 border-t border-surface-100-900"
+				>
 					<button
 						type="button"
-						class="text-xs font-medium px-3 py-1.5 rounded-lg text-gray-600 hover:bg-gray-200 transition-colors"
+						class="text-xs font-medium px-3 py-1.5 rounded-lg text-surface-600-400 hover:bg-surface-200-800 transition-colors"
 						onclick={() => (showPreview = false)}
 					>
 						Cancel
 					</button>
 					<button
 						type="button"
-						class="text-xs font-medium px-3 py-1.5 rounded-lg bg-violet-600 text-white hover:bg-violet-700 transition-colors inline-flex items-center gap-1.5"
+						class="text-xs font-medium px-3 py-1.5 rounded-lg bg-violet-600 dark:bg-violet-700 text-white hover:bg-violet-700 transition-colors inline-flex items-center gap-1.5"
 						onclick={publishConfirmed}
 					>
 						<i class="fa-solid fa-rocket text-[10px]"></i> Confirm publish

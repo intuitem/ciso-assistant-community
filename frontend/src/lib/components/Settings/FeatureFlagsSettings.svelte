@@ -7,7 +7,7 @@
 </script>
 
 <div>
-	<span class="text-gray-500 block mb-6">{m.configureFeatureFlags()}</span>
+	<span class="text-surface-600-400 block mb-6">{m.configureFeatureFlags()}</span>
 	<ModelForm
 		form={data.featureFlagForm}
 		schema={FeatureFlagsSchema}

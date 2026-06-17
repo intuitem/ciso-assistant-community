@@ -54,16 +54,16 @@
 </script>
 
 <div
-	class="card px-6 py-4 bg-white flex flex-col justify-center items-center shadow-lg w-full rounded-lg"
+	class="card px-6 py-4 bg-surface-50-950 flex flex-col justify-center items-center shadow-lg w-full rounded-lg"
 >
 	{#if data.requirementAssessments.length > 0}
 		{@const firstAssessment = data.requirementAssessments[0]}
 		<div class="flex flex-col text-center pt-2 pb-4">
 			{#if firstAssessment?.name}
-				<span class="text-2xl font-black text-gray-800">{firstAssessment.name}</span>
+				<span class="text-2xl font-black text-surface-800-200">{firstAssessment.name}</span>
 			{/if}
 			{#if firstAssessment?.description}
-				<div class="text-gray-600 blockquote">
+				<div class="text-surface-600-400 blockquote">
 					<MarkdownRenderer content={firstAssessment.description} />
 				</div>
 			{/if}
@@ -80,21 +80,21 @@
 					<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
 						<i class="fa-solid fa-sitemap text-primary-500 mr-2"></i>
 						<div class="flex flex-row flex-1 space-x-4 items-center text-left">
-							<span class="font-bold text-lg text-gray-800">{domain.name}</span>
+							<span class="font-bold text-lg text-surface-800-200">{domain.name}</span>
 
 							<!-- Compliance section -->
 							<div>
 								<div class="flex items-center space-x-2 text-sm">
-									<p class="text-gray-600">{m.compliantRequirementsSemiColon()}</p>
+									<p class="text-surface-600-400">{m.compliantRequirementsSemiColon()}</p>
 									<span class="font-bold text-green-500">
 										{domain.compliance_result.compliance_percentage}%
 									</span>
-									<span class="text-sm ml-2 text-gray-600">
+									<span class="text-sm ml-2 text-surface-600-400">
 										({domain.compliance_result.compliant_count} / {domain.compliance_result
 											.total_count})
 									</span>
 								</div>
-								<div class="h-2 bg-gray-200 rounded-full mt-2">
+								<div class="h-2 bg-surface-200-800 rounded-full mt-2">
 									<div
 										class="h-full bg-green-500 rounded-full"
 										style="width: {domain.compliance_result.compliance_percentage}%;"
@@ -105,16 +105,16 @@
 							<!-- Progress section -->
 							<div>
 								<div class="flex items-center space-x-2 text-sm">
-									<p class="text-gray-600">{m.requirementsProgressionSemiColon()}</p>
+									<p class="text-surface-600-400">{m.requirementsProgressionSemiColon()}</p>
 									<span class="font-bold text-blue-500">
 										{domain.assessment_progress.assessment_completion_rate}%
 									</span>
-									<span class="text-sm ml-2 text-gray-600">
+									<span class="text-sm ml-2 text-surface-600-400">
 										({domain.assessment_progress.assessed_count} / {domain.assessment_progress
 											.total_count})
 									</span>
 								</div>
-								<div class="h-2 bg-gray-200 rounded-full mt-2">
+								<div class="h-2 bg-surface-200-800 rounded-full mt-2">
 									<div
 										class="h-full bg-blue-500 rounded-full"
 										style="width: {domain.assessment_progress.assessment_completion_rate}%;"
@@ -143,8 +143,8 @@
 								{@const requirementAssessment = findRequirementAssessment(assessment.id)}
 
 								{#if requirementAssessment}
-									<div class="flex flex-col p-4 bg-gray-100 shadow-md rounded-lg space-y-2">
-										<span class="font-bold text-lg text-gray-800">
+									<div class="flex flex-col p-4 bg-surface-100-900 shadow-md rounded-lg space-y-2">
+										<span class="font-bold text-lg text-surface-800-200">
 											<i class="fa-solid fa-cubes mr-2 text-primary-500"></i>
 											{perimeter.name}
 										</span>
@@ -154,7 +154,7 @@
 												<div class="flex w-full items-center justify-between space-x-4">
 													<button
 														aria-label="Previous assessment"
-														class="px-4 bg-gray-200 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500"
+														class="px-4 bg-surface-200-800 rounded hover:bg-surface-300-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
 														onclick={() => updateCurrentIndex(domainIndex, perimeterIndex, -1)}
 													>
 														<i class="fa-solid fa-arrow-left"></i>
@@ -166,13 +166,13 @@
 														label={assessment.name}
 														class="font-semibold text-lg text-primary-500 whitespace-nowrap text-ellipsis overflow-hidden"
 													>
-														<i class="fa-solid fa-list-check mr-2 text-gray-800"></i>
+														<i class="fa-solid fa-list-check mr-2 text-surface-800-200"></i>
 														{assessment.name} - {assessment.version}
 													</Anchor>
 
 													<button
 														aria-label="Next assessment"
-														class="px-4 bg-gray-200 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500"
+														class="px-4 bg-surface-200-800 rounded hover:bg-surface-300-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
 														onclick={() => updateCurrentIndex(domainIndex, perimeterIndex, 1)}
 													>
 														<i class="fa-solid fa-arrow-right"></i>
@@ -186,7 +186,7 @@
 														label={assessment.name}
 														class="font-semibold text-lg text-primary-500 whitespace-nowrap text-ellipsis overflow-hidden"
 													>
-														<i class="fa-solid fa-list-check mr-2 text-gray-800"></i>
+														<i class="fa-solid fa-list-check mr-2 text-surface-800-200"></i>
 														{assessment.name} - {assessment.version}
 													</Anchor>
 												</div>
@@ -197,7 +197,7 @@
 												breadcrumbAction="push"
 												href={`/requirement-assessments/${requirementAssessment.id}?next=${page.url.pathname}`}
 												label={requirementAssessment.name}
-												class="flex flex-col items-center justify-center space-y-2 border w-full h-full p-2 rounded-lg bg-gray-200 shadow-md hover:border-2"
+												class="flex flex-col items-center justify-center space-y-2 border w-full h-full p-2 rounded-lg bg-surface-200-800 shadow-md hover:border-2"
 												style="border-color: {complianceResultColorMap[
 													requirementAssessment.result
 												]};
@@ -293,7 +293,7 @@
 		<div class="flex flex-col items-center justify-center h-full">
 			<div class="text-center">
 				<h1 class="text-2xl font-bold">{m.noRequirementFound()}</h1>
-				<p class="text-gray-500">{m.noAuditForTheFramework()}</p>
+				<p class="text-surface-600-400">{m.noAuditForTheFramework()}</p>
 			</div>
 		</div>
 	{/if}

@@ -76,12 +76,12 @@
 	let group = $state(Object.keys(data.relatedModels)[0]);
 </script>
 
-<div class="card p-4 bg-white shadow-lg">
+<div class="card p-4 bg-surface-50-950 shadow-lg">
 	<div class="flex flex-col space-y-4 items-center">
 		<div class="flex items-center justify-between w-full">
 			<a
 				href="/ebios-rm/{operationalScenario.ebios_rm_study.id}"
-				class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+				class="flex items-center space-x-2 text-primary-800-300 hover:text-primary-600-400"
 			>
 				<i class="fa-solid fa-arrow-left"></i>
 				<p class="">{m.goBackToEbiosRmStudy()}</p>
@@ -118,22 +118,24 @@
 			class="relative p-4 space-y-4 rounded-md w-full flex flex-col items-center justify-center
                 {activeActivity === 'one'
 				? 'border-2 border-primary-500'
-				: 'border-2 border-gray-300 border-dashed'}"
+				: 'border-2 border-surface-300-700 border-dashed'}"
 		>
 			<span
-				class="absolute -top-3 bg-white font-bold {activeActivity === 'one'
+				class="absolute -top-3 bg-surface-50-950 font-bold {activeActivity === 'one'
 					? 'text-primary-500'
-					: 'text-gray-500'}">{m.activityOne()}</span
+					: 'text-surface-600-400'}">{m.activityOne()}</span
 			>
 			<h1
-				class="font-bold text-xl {activeActivity === 'one' ? 'text-primary-500' : 'text-gray-500'}"
+				class="font-bold text-xl {activeActivity === 'one'
+					? 'text-primary-500'
+					: 'text-surface-600-400'}"
 			>
 				{m.ebiosWs4_1()}
 			</h1>
 			{#if operationalScenario.operating_modes_description}
-				<p class="text-gray-600">{operationalScenario.operating_modes_description}</p>
+				<p class="text-surface-600-400">{operationalScenario.operating_modes_description}</p>
 			{:else}
-				<p class="text-gray-600">{m.noDescription()}</p>
+				<p class="text-surface-600-400">{m.noDescription()}</p>
 			{/if}
 			<div class="flex flex-col space-y-2 items-center">
 				<div class="flex items-center gap-4">
@@ -141,36 +143,36 @@
 						<div
 							class="flex flex-col space-y-2 p-4 bg-amber-100 border-amber-400 border rounded-md shadow-xs text-center min-w-48"
 						>
-							<h4 class="font-semibold text-gray-600">{m.strategicScenario()}</h4>
+							<h4 class="font-semibold text-surface-600-400">{m.strategicScenario()}</h4>
 							<i class="fa-solid fa-chess text-3xl text-amber-600"></i>
 							<a
 								href="/strategic-scenarios/{operationalScenario.strategic_scenario.id}"
-								class="badge text-white bg-amber-500 hover:bg-amber-600"
+								class="badge text-white bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700"
 								>{operationalScenario.strategic_scenario.name}</a
 							>
 							{#if operationalScenario.strategic_scenario.description}
-								<p class="text-sm text-gray-600 italic">
+								<p class="text-sm text-surface-600-400 italic">
 									{operationalScenario.strategic_scenario.description}
 								</p>
 							{/if}
 						</div>
 					{/if}
 					{#if operationalScenario.strategic_scenario && operationalScenario.attack_path}
-						<i class="fa-solid fa-arrow-right text-2xl text-gray-400"></i>
+						<i class="fa-solid fa-arrow-right text-2xl text-surface-400-600"></i>
 					{/if}
 					{#if operationalScenario.attack_path}
 						<div
 							class="flex flex-col space-y-2 p-4 bg-teal-100 border-teal-400 border rounded-md shadow-xs text-center min-w-48"
 						>
-							<h4 class="font-semibold text-gray-600">{m.attackPath()}</h4>
+							<h4 class="font-semibold text-surface-600-400">{m.attackPath()}</h4>
 							<i class="fa-solid fa-route text-3xl text-teal-600"></i>
 							<a
 								href="/attack-paths/{operationalScenario.attack_path.id}"
-								class="badge text-white bg-teal-500 hover:bg-teal-600"
+								class="badge text-white bg-teal-500 hover:bg-teal-600 dark:bg-teal-600 dark:hover:bg-teal-700"
 								>{operationalScenario.attack_path.name}</a
 							>
 							{#if operationalScenario.attack_path.description}
-								<p class="text-sm text-gray-600 italic">
+								<p class="text-sm text-surface-600-400 italic">
 									{operationalScenario.attack_path.description}
 								</p>
 							{/if}
@@ -181,40 +183,40 @@
 					<div
 						class="flex flex-col space-y-4 p-4 bg-red-200 border-red-400 border rounded-md shadow-xs text-center"
 					>
-						<h4 class="font-semibold text-gray-600">{m.riskOrigin()}</h4>
+						<h4 class="font-semibold text-surface-600-400">{m.riskOrigin()}</h4>
 						<i class="fa-solid fa-skull-crossbones text-3xl"></i>
-						<p class="badge whitespace-normal text-white bg-red-500 capitalize">
+						<p class="badge whitespace-normal text-white bg-red-500 dark:bg-red-600 capitalize">
 							{safeTranslate(operationalScenario.ro_to.risk_origin.str)}
 						</p>
 					</div>
 					<div
 						class="flex flex-col space-y-4 p-4 bg-violet-200 border-violet-400 border rounded-md shadow-xs text-center"
 					>
-						<h4 class="font-semibold text-gray-600">{m.stakeholders()}</h4>
+						<h4 class="font-semibold text-surface-600-400">{m.stakeholders()}</h4>
 						<i class="fa-solid fa-globe text-3xl"></i>
 						{#each operationalScenario.stakeholders as stakeholder}
-							<p class="badge whitespace-normal text-white bg-violet-500">
+							<p class="badge whitespace-normal text-white bg-violet-500 dark:bg-violet-600">
 								<a class="anchor text-white" href="/stakeholders/{stakeholder.id}"
 									>{stakeholder.str}</a
 								>
 							</p>
 						{:else}
-							<p class="text-gray-500 italic">{m.noStakeholders()}</p>
+							<p class="text-surface-600-400 italic">{m.noStakeholders()}</p>
 						{/each}
 					</div>
 					<div
 						class="flex flex-col space-y-4 p-4 bg-blue-200 border-blue-400 border rounded-md shadow-xs text-center"
 					>
-						<h4 class="font-semibold text-gray-600">{m.targetObjective()}</h4>
+						<h4 class="font-semibold text-surface-600-400">{m.targetObjective()}</h4>
 						<i class="fa-solid fa-bullseye text-3xl"></i>
-						<p class="badge whitespace-normal text-white bg-blue-500 break-all">
+						<p class="badge whitespace-normal text-white bg-blue-500 dark:bg-blue-600 break-all">
 							{operationalScenario.ro_to.target_objective}
 						</p>
 					</div>
 				</div>
 			</div>
-			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-xs">
-				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
+			<div class="w-full p-4 bg-surface-50-950 border rounded-md shadow-xs">
+				<h3 class="font-semibold text-lg text-surface-700-300 flex items-center space-x-2">
 					<i class="fa-solid fa-biohazard text-red-500"></i>
 					<span>{m.threats()}</span>
 				</h3>
@@ -224,7 +226,7 @@
 						<span>{m.objectsNotVisible({ count: countMasked(operationalScenario.threats) })}</span>
 					</div>
 				{/if}
-				<ul class="list-disc list-inside text-gray-600">
+				<ul class="list-disc list-inside text-surface-600-400">
 					{#if operationalScenario.threats?.length}
 						{#each operationalScenario.threats as threat}
 							{#if threat.id && threat.str}
@@ -237,7 +239,7 @@
 				</ul>
 			</div>
 			{#if Object.keys(data.relatedModels).length > 0}
-				<div class="card shadow-lg mt-8 bg-white w-full">
+				<div class="card shadow-lg mt-8 bg-surface-50-950 w-full">
 					<Tabs
 						value={group}
 						onValueChange={(e) => {
@@ -268,7 +270,7 @@
 										{#snippet addButton()}
 											<div>
 												<span
-													class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+													class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
 												>
 													<button
 														class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
@@ -293,20 +295,22 @@
 			class="relative p-4 space-y-4 rounded-md w-full flex flex-col items-center
                 {activeActivity === 'two'
 				? 'border-2 border-primary-500'
-				: 'border-2 border-gray-300 border-dashed'}"
+				: 'border-2 border-surface-300-700 border-dashed'}"
 		>
 			<span
-				class="absolute -top-3 bg-white font-bold {activeActivity === 'two'
+				class="absolute -top-3 bg-surface-50-950 font-bold {activeActivity === 'two'
 					? 'text-primary-500'
-					: 'text-gray-500'}">{m.activityTwo()}</span
+					: 'text-surface-600-400'}">{m.activityTwo()}</span
 			>
 			<h1
-				class="font-bold text-xl {activeActivity === 'two' ? 'text-primary-500' : 'text-gray-500'}"
+				class="font-bold text-xl {activeActivity === 'two'
+					? 'text-primary-500'
+					: 'text-surface-600-400'}"
 			>
 				{m.ebiosWs4_2()}
 			</h1>
 			<div
-				class="flex items-center w-full p-4 bg-gray-50 border rounded-md shadow-xs space-x-4 justify-between"
+				class="flex items-center w-full p-4 bg-surface-50-950 border rounded-md shadow-xs space-x-4 justify-between"
 			>
 				<div
 					style="background-color: {operationalScenario.likelihood.hexcolor}"
@@ -319,7 +323,7 @@
 						positioning={{ placement: 'bottom' }}
 					>
 						<Popover.Trigger>
-							<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
+							<h3 class="font-semibold text-lg text-surface-700-300 flex items-center space-x-2">
 								{#if operationalScenario.likelihood.description}
 									<i class="fa-solid fa-dice text-black opacity-75"></i>
 								{/if}
@@ -331,7 +335,7 @@
 						<Popover.Positioner>
 							<Popover.Content class="max-w-sm">
 								<div
-									class="card bg-black text-gray-200 p-4 z-20"
+									class="card bg-black text-surface-200-800 p-4 z-20"
 									style="color: {operationalScenario.likelihood.hexcolor}"
 								>
 									<p data-testid="likelihood-description" class="font-semibold">
@@ -354,7 +358,7 @@
 						positioning={{ placement: 'bottom' }}
 					>
 						<Popover.Trigger>
-							<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
+							<h3 class="font-semibold text-lg text-surface-700-300 flex items-center space-x-2">
 								{#if operationalScenario.gravity.description}
 									<i class="fa-solid fa-bomb text-black opacity-75"></i>
 								{/if}
@@ -366,7 +370,7 @@
 						<Popover.Positioner>
 							<Popover.Content class="max-w-sm">
 								<div
-									class="card bg-black text-gray-200 p-4 z-20"
+									class="card bg-black text-surface-200-800 p-4 z-20"
 									style="color: {operationalScenario.gravity.hexcolor}"
 								>
 									<p data-testid="gravity-description" class="font-semibold">
@@ -389,7 +393,7 @@
 						positioning={{ placement: 'bottom' }}
 					>
 						<Popover.Trigger>
-							<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
+							<h3 class="font-semibold text-lg text-surface-700-300 flex items-center space-x-2">
 								{#if operationalScenario.risk_level.description}
 									<i class="fa-solid fa-circle-radiation text-black opacity-75"></i>
 								{/if}
@@ -401,7 +405,7 @@
 						<Popover.Positioner>
 							<Popover.Content class="max-w-sm">
 								<div
-									class="card bg-black text-gray-200 p-4 z-20"
+									class="card bg-black text-surface-200-800 p-4 z-20"
 									style="color: {operationalScenario.risk_level.hexcolor}"
 								>
 									<p data-testid="riskLevel-description" class="font-semibold">
@@ -413,15 +417,15 @@
 					</Popover>
 				</div>
 			</div>
-			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-xs">
-				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
-					<i class="fa-solid fa-eye text-gray-500 opacity-75"></i>
+			<div class="w-full p-4 bg-surface-50-950 border rounded-md shadow-xs">
+				<h3 class="font-semibold text-lg text-surface-700-300 flex items-center space-x-2">
+					<i class="fa-solid fa-eye text-surface-600-400 opacity-75"></i>
 					<span>{m.justification()}</span>
 				</h3>
 				{#if operationalScenario.justification}
-					<p class="text-gray-600">{operationalScenario.justification}</p>
+					<p class="text-surface-600-400">{operationalScenario.justification}</p>
 				{:else}
-					<p class="text-gray-600">{m.noJustification()}</p>
+					<p class="text-surface-600-400">{m.noJustification()}</p>
 				{/if}
 			</div>
 		</div>

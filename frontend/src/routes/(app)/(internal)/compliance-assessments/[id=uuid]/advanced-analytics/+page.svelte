@@ -121,7 +121,11 @@
 
 		import('echarts').then((echarts) => {
 			if (!el.isConnected) return;
-			chart = echarts.init(el, null, { renderer: 'svg' });
+			chart = echarts.init(
+				el,
+				document.documentElement.classList.contains('dark') ? 'dark' : null,
+				{ renderer: 'svg' }
+			);
 			const dates = timeline.map((t: any) => t.date);
 			const hasScores = timeline.some((t: any) => t.score != null && t.score >= 0);
 			const areaSeries = RESULT_KEYS.map((key) => ({
@@ -154,6 +158,7 @@
 				});
 			}
 			chart.setOption({
+				backgroundColor: 'transparent',
 				tooltip: {
 					trigger: 'axis',
 					backgroundColor: '#1e293b',
@@ -165,13 +170,13 @@
 				xAxis: {
 					type: 'category',
 					data: dates,
-					axisLine: { lineStyle: { color: '#e2e8f0' } },
+					axisLine: { lineStyle: { color: 'rgba(148, 163, 184, 0.3)' } },
 					axisLabel: { color: '#94a3b8', fontSize: 10 }
 				},
 				yAxis: [
 					{
 						type: 'value',
-						splitLine: { lineStyle: { color: '#f1f5f9' } },
+						splitLine: { lineStyle: { color: 'rgba(148, 163, 184, 0.2)' } },
 						axisLabel: { color: '#94a3b8', fontSize: 10 }
 					},
 					...(hasScores
@@ -239,14 +244,14 @@
 	</div>
 
 	<!-- Compliance Over Time -->
-	<section class="rounded-xl border border-slate-200 bg-white overflow-hidden">
-		<div class="border-b border-slate-100 px-6 py-4 flex items-center gap-2.5">
+	<section class="rounded-xl border border-surface-200-800 bg-surface-50-950 overflow-hidden">
+		<div class="border-b border-surface-100-900 px-6 py-4 flex items-center gap-2.5">
 			<span
 				class="flex items-center justify-center w-7 h-7 rounded-md bg-violet-50 text-violet-500"
 			>
 				<i class="fa-solid fa-timeline text-xs"></i>
 			</span>
-			<h2 class="text-sm font-semibold text-slate-800 tracking-tight">
+			<h2 class="text-sm font-semibold text-surface-800-200 tracking-tight">
 				{m.complianceOverTime()}
 			</h2>
 		</div>
@@ -258,7 +263,7 @@
 				{#if timeline && timeline.length > 0}
 					<div class="h-72" use:initTimelineChart={timeline}></div>
 				{:else}
-					<div class="flex flex-col items-center justify-center py-12 text-slate-400">
+					<div class="flex flex-col items-center justify-center py-12 text-surface-500">
 						<i class="fa-solid fa-chart-area text-3xl mb-2 opacity-30"></i>
 						<p class="text-sm">{m.nothingToShowYet()}</p>
 					</div>
@@ -276,11 +281,11 @@
 			{@const dist = distFromRows(rows)}
 			{@const total = rows.length}
 			{@const inheritedCount = rows.filter((r) => r.inherited).length}
-			<section class="rounded-xl border border-slate-200 bg-white overflow-hidden">
+			<section class="rounded-xl border border-surface-200-800 bg-surface-50-950 overflow-hidden">
 				<button
 					type="button"
 					onclick={() => (combinedOpen = !combinedOpen)}
-					class="w-full border-b border-slate-100 px-6 py-4 flex items-center gap-2.5 cursor-pointer hover:bg-slate-50 transition-colors"
+					class="w-full border-b border-surface-100-900 px-6 py-4 flex items-center gap-2.5 cursor-pointer hover:bg-surface-50-950 transition-colors"
 					aria-expanded={combinedOpen}
 				>
 					<span
@@ -288,12 +293,12 @@
 					>
 						<i class="fa-solid fa-code-branch text-xs"></i>
 					</span>
-					<h2 class="text-sm font-semibold text-slate-800 tracking-tight">
+					<h2 class="text-sm font-semibold text-surface-800-200 tracking-tight">
 						{m.combinedView()}
 					</h2>
-					<span class="text-xs text-slate-400">{strategyLabel(combined.strategy)}</span>
+					<span class="text-xs text-surface-500">{strategyLabel(combined.strategy)}</span>
 					<i
-						class="fa-solid fa-chevron-down text-xs text-slate-400 ml-auto transition-transform {combinedOpen
+						class="fa-solid fa-chevron-down text-xs text-surface-500 ml-auto transition-transform {combinedOpen
 							? ''
 							: '-rotate-90'}"
 					></i>
@@ -302,23 +307,23 @@
 					<!-- Split progress bar: effective results across ALL requirements (every IG) -->
 					<div>
 						<div class="flex items-center justify-between mb-2">
-							<p class="text-xs text-slate-500">
+							<p class="text-xs text-surface-600-400">
 								{m.combinedResults()} ({total})
 							</p>
-							<span class="text-xs text-slate-500 inline-flex items-center gap-1.5">
+							<span class="text-xs text-surface-600-400 inline-flex items-center gap-1.5">
 								<span class="inline-block w-2 h-2 rounded-full bg-emerald-200"></span>
 								{m.inheritedRequirements()}:
-								<strong class="text-slate-700">{inheritedCount}</strong>
+								<strong class="text-surface-700-300">{inheritedCount}</strong>
 								/ {total}
 							</span>
 						</div>
-						<div class="flex w-full h-6 rounded-md overflow-hidden bg-slate-100">
+						<div class="flex w-full h-6 rounded-md overflow-hidden bg-surface-100-900">
 							{#each RESULT_KEYS as k, i}
 								{@const v = dist[k] ?? 0}
 								{#if v > 0}
 									{@const pct = (v / total) * 100}
 									<div
-										class="h-full flex items-center justify-center text-[10px] font-medium text-slate-700/80"
+										class="h-full flex items-center justify-center text-[10px] font-medium text-surface-700-300/80"
 										style="width:{pct}%; background:{RESULT_COLORS[i]}"
 										title="{safeTranslate(k)}: {v} ({Math.round(pct)}%)"
 									>
@@ -327,7 +332,7 @@
 								{/if}
 							{/each}
 						</div>
-						<div class="flex flex-wrap gap-x-4 gap-y-1 mt-3 text-xs text-slate-600">
+						<div class="flex flex-wrap gap-x-4 gap-y-1 mt-3 text-xs text-surface-600-400">
 							{#each RESULT_KEYS as k, i}
 								{@const v = dist[k] ?? 0}
 								{#if v > 0}
@@ -337,7 +342,7 @@
 											style="background:{RESULT_COLORS[i]}"
 										></span>
 										{safeTranslate(k)}
-										<span class="text-slate-400">{v} ({Math.round((v / total) * 100)}%)</span>
+										<span class="text-surface-500">{v} ({Math.round((v / total) * 100)}%)</span>
 									</span>
 								{/if}
 							{/each}
@@ -348,7 +353,7 @@
 					<div class="overflow-x-auto">
 						<table class="w-full text-sm">
 							<thead>
-								<tr class="text-left text-slate-500 border-b border-slate-100">
+								<tr class="text-left text-surface-600-400 border-b border-surface-100-900">
 									<th class="py-2 pr-3">{m.requirement()}</th>
 									<th class="py-2 px-3">{m.effectiveResult()}</th>
 									<th class="py-2 px-3 text-right">{m.score()}</th>
@@ -357,9 +362,13 @@
 							</thead>
 							<tbody>
 								{#each rows as row}
-									<tr class="border-b border-slate-50 {row.inherited ? 'bg-emerald-50/50' : ''}">
+									<tr
+										class="border-b border-surface-100-900 {row.inherited
+											? 'bg-emerald-50/50'
+											: ''}"
+									>
 										<td class="py-2 pr-3">
-											<span class="font-mono text-xs text-slate-400">{row.ref_id ?? ''}</span>
+											<span class="font-mono text-xs text-surface-500">{row.ref_id ?? ''}</span>
 											{row.name ?? ''}
 										</td>
 										<td class="py-2 px-3">
@@ -377,7 +386,7 @@
 										<td class="py-2 px-3 text-right font-mono">
 											{row.effective_score ?? '—'}
 											{#if row.effective_score != null && row.scale_max != null}
-												<span class="text-[10px] text-slate-300">/ {row.scale_max}</span>
+												<span class="text-[10px] text-surface-400">/ {row.scale_max}</span>
 											{/if}
 										</td>
 										<td class="py-2 pl-3">
@@ -388,13 +397,13 @@
 													title={inhPathTitle(row.inheritance)}
 												>
 													<i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-													<span class="text-slate-400"
+													<span class="text-surface-500"
 														>{row.inheritance.source.folder_name ?? '—'} ·</span
 													>
 													{row.inheritance.source.ca_name}
 												</a>
 											{:else}
-												<span class="text-slate-300">—</span>
+												<span class="text-surface-400">—</span>
 											{/if}
 										</td>
 									</tr>
@@ -408,12 +417,12 @@
 	{/await}
 
 	<!-- Compliance by Section -->
-	<section class="rounded-xl border border-slate-200 bg-white overflow-hidden">
-		<div class="border-b border-slate-100 px-6 py-4 flex items-center gap-2.5">
+	<section class="rounded-xl border border-surface-200-800 bg-surface-50-950 overflow-hidden">
+		<div class="border-b border-surface-100-900 px-6 py-4 flex items-center gap-2.5">
 			<span class="flex items-center justify-center w-7 h-7 rounded-md bg-blue-50 text-blue-500">
 				<i class="fa-solid fa-layer-group text-xs"></i>
 			</span>
-			<h2 class="text-sm font-semibold text-slate-800 tracking-tight">
+			<h2 class="text-sm font-semibold text-surface-800-200 tracking-tight">
 				{m.complianceBySection()}
 			</h2>
 		</div>
@@ -443,7 +452,7 @@
 						{@const showDocRadar =
 							data.compliance_assessment.show_documentation_score &&
 							scoredSections.some((s: any) => s.documentation_score !== null)}
-						<div class="mt-5 border-t border-slate-100 pt-5">
+						<div class="mt-5 border-t border-surface-100-900 pt-5">
 							<div class="grid {showDocRadar ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'} gap-5">
 								<div class="h-[400px]">
 									<RadarChart
@@ -478,10 +487,10 @@
 						</div>
 					{/if}
 					{#if data.compliance_assessment.scoring_enabled && sections.some((s: any) => s.scored_count > 0)}
-						<div class="mt-5 border-t border-slate-100 pt-5">
+						<div class="mt-5 border-t border-surface-100-900 pt-5">
 							<table class="w-full text-sm">
 								<thead>
-									<tr class="text-[11px] uppercase tracking-wider text-slate-400">
+									<tr class="text-[11px] uppercase tracking-wider text-surface-500">
 										<th class="pb-2 pr-4 text-left font-medium">{m.section()}</th>
 										<th class="pb-2 pr-4 text-right font-medium">{m.assessable()}</th>
 										{#if data.compliance_assessment.show_documentation_score}
@@ -495,11 +504,15 @@
 								</thead>
 								<tbody>
 									{#each sections as section, i}
-										<tr class="border-t border-slate-50 {i % 2 === 0 ? 'bg-slate-50/50' : ''}">
-											<td class="py-2.5 pr-4 text-slate-700"
+										<tr
+											class="border-t border-surface-100-900 {i % 2 === 0
+												? 'bg-surface-50-950/50'
+												: ''}"
+										>
+											<td class="py-2.5 pr-4 text-surface-700-300"
 												>{section.ref_id ? section.ref_id + ' ' : ''}{section.name}</td
 											>
-											<td class="py-2.5 pr-4 text-right tabular-nums text-slate-500"
+											<td class="py-2.5 pr-4 text-right tabular-nums text-surface-600-400"
 												>{section.total_assessable}</td
 											>
 											{#if data.compliance_assessment.show_documentation_score}
@@ -510,7 +523,7 @@
 															>{section.maturity_score}</span
 														>
 													{:else}
-														<span class="text-slate-300">&mdash;</span>
+														<span class="text-surface-400">&mdash;</span>
 													{/if}
 												</td>
 											{/if}
@@ -521,7 +534,7 @@
 														>{section.implementation_score}</span
 													>
 												{:else}
-													<span class="text-slate-300">&mdash;</span>
+													<span class="text-surface-400">&mdash;</span>
 												{/if}
 											</td>
 											{#if data.compliance_assessment.show_documentation_score}
@@ -532,7 +545,7 @@
 															>{section.documentation_score}</span
 														>
 													{:else}
-														<span class="text-slate-300">&mdash;</span>
+														<span class="text-surface-400">&mdash;</span>
 													{/if}
 												</td>
 											{/if}
@@ -543,7 +556,7 @@
 						</div>
 					{/if}
 				{:else}
-					<div class="flex flex-col items-center justify-center py-12 text-slate-400">
+					<div class="flex flex-col items-center justify-center py-12 text-surface-500">
 						<i class="fa-solid fa-layer-group text-3xl mb-2 opacity-30"></i>
 						<p class="text-sm">{m.nothingToShowYet()}</p>
 					</div>
@@ -557,14 +570,14 @@
 	<!-- Coverage Row: Controls + Evidence side by side -->
 	<div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
 		<!-- Controls Coverage -->
-		<section class="rounded-xl border border-slate-200 bg-white overflow-hidden">
-			<div class="border-b border-slate-100 px-6 py-4 flex items-center gap-2.5">
+		<section class="rounded-xl border border-surface-200-800 bg-surface-50-950 overflow-hidden">
+			<div class="border-b border-surface-100-900 px-6 py-4 flex items-center gap-2.5">
 				<span
 					class="flex items-center justify-center w-7 h-7 rounded-md bg-emerald-50 text-emerald-500"
 				>
 					<i class="fa-solid fa-shield-halved text-xs"></i>
 				</span>
-				<h2 class="text-sm font-semibold text-slate-800 tracking-tight">
+				<h2 class="text-sm font-semibold text-surface-800-200 tracking-tight">
 					{m.controlsCoverage()}
 				</h2>
 			</div>
@@ -581,13 +594,13 @@
 						</div>
 						<div class="flex-1 space-y-2">
 							<div class="flex items-center justify-between text-sm">
-								<span class="text-slate-500">{m.requirementsWithControls()}</span>
+								<span class="text-surface-600-400">{m.requirementsWithControls()}</span>
 								<span class="font-semibold text-emerald-600 tabular-nums"
 									>{coverage.with_controls}</span
 								>
 							</div>
 							<div class="flex items-center justify-between text-sm">
-								<span class="text-slate-500">{m.requirementsWithoutControls()}</span>
+								<span class="text-surface-600-400">{m.requirementsWithoutControls()}</span>
 								<span class="font-semibold text-red-400 tabular-nums"
 									>{coverage.without_controls}</span
 								>
@@ -607,21 +620,21 @@
 					</div>
 					<!-- Status distribution inline -->
 					{#if Object.keys(coverage.control_status_distribution).length > 0}
-						<div class="border-t border-slate-100 pt-4">
-							<p class="text-[11px] uppercase tracking-wider text-slate-400 font-medium mb-3">
+						<div class="border-t border-surface-100-900 pt-4">
+							<p class="text-[11px] uppercase tracking-wider text-surface-500 font-medium mb-3">
 								{safeTranslate('controlStatusDistribution')}
 							</p>
 							<div class="flex flex-wrap gap-2">
 								{#each Object.entries(coverage.control_status_distribution) as [status, count]}
 									<span
-										class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-600"
+										class="inline-flex items-center gap-1.5 rounded-full border border-surface-200-800 bg-surface-50-950 px-3 py-1 text-xs text-surface-600-400"
 									>
 										<span
 											class="w-2 h-2 rounded-full"
 											style="background-color: {controlStatusColors[status] || '#9ca3af'}"
 										></span>
 										{safeTranslate(status)}
-										<span class="font-semibold text-slate-800">{count}</span>
+										<span class="font-semibold text-surface-800-200">{count}</span>
 									</span>
 								{/each}
 							</div>
@@ -634,12 +647,12 @@
 		</section>
 
 		<!-- Evidence Coverage -->
-		<section class="rounded-xl border border-slate-200 bg-white overflow-hidden">
-			<div class="border-b border-slate-100 px-6 py-4 flex items-center gap-2.5">
+		<section class="rounded-xl border border-surface-200-800 bg-surface-50-950 overflow-hidden">
+			<div class="border-b border-surface-100-900 px-6 py-4 flex items-center gap-2.5">
 				<span class="flex items-center justify-center w-7 h-7 rounded-md bg-sky-50 text-sky-500">
 					<i class="fa-solid fa-file-circle-check text-xs"></i>
 				</span>
-				<h2 class="text-sm font-semibold text-slate-800 tracking-tight">
+				<h2 class="text-sm font-semibold text-surface-800-200 tracking-tight">
 					{m.evidenceCoverage()}
 				</h2>
 			</div>
@@ -655,12 +668,12 @@
 						</div>
 						<div class="flex-1 space-y-2">
 							<div class="flex items-center justify-between text-sm">
-								<span class="text-slate-500">{m.requirementsWithEvidence()}</span>
+								<span class="text-surface-600-400">{m.requirementsWithEvidence()}</span>
 								<span class="font-semibold text-sky-600 tabular-nums">{coverage.with_evidence}</span
 								>
 							</div>
 							<div class="flex items-center justify-between text-sm">
-								<span class="text-slate-500">{m.requirementsWithoutEvidence()}</span>
+								<span class="text-surface-600-400">{m.requirementsWithoutEvidence()}</span>
 								<span class="font-semibold text-red-400 tabular-nums"
 									>{coverage.without_evidence}</span
 								>
@@ -679,23 +692,23 @@
 					</div>
 					<!-- Evidence type pills -->
 					{#if coverage.with_evidence > 0}
-						<div class="border-t border-slate-100 pt-4">
+						<div class="border-t border-surface-100-900 pt-4">
 							<div class="flex flex-wrap gap-2">
 								<span
-									class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-600"
+									class="inline-flex items-center gap-1.5 rounded-full border border-surface-200-800 bg-surface-50-950 px-3 py-1 text-xs text-surface-600-400"
 								>
 									<span class="w-2 h-2 rounded-full bg-blue-400"></span>
 									{m.directEvidence()}
-									<span class="font-semibold text-slate-800"
+									<span class="font-semibold text-surface-800-200"
 										>{coverage.direct_only + coverage.both}</span
 									>
 								</span>
 								<span
-									class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-600"
+									class="inline-flex items-center gap-1.5 rounded-full border border-surface-200-800 bg-surface-50-950 px-3 py-1 text-xs text-surface-600-400"
 								>
 									<span class="w-2 h-2 rounded-full bg-amber-400"></span>
 									{m.indirectEvidence()}
-									<span class="font-semibold text-slate-800"
+									<span class="font-semibold text-surface-800-200"
 										>{coverage.indirect_only + coverage.both}</span
 									>
 								</span>
@@ -704,21 +717,21 @@
 					{/if}
 					<!-- Evidence status distribution -->
 					{#if Object.keys(coverage.evidence_status_distribution || {}).length > 0}
-						<div class="border-t border-slate-100 pt-4">
-							<p class="text-[11px] uppercase tracking-wider text-slate-400 font-medium mb-3">
+						<div class="border-t border-surface-100-900 pt-4">
+							<p class="text-[11px] uppercase tracking-wider text-surface-500 font-medium mb-3">
 								{safeTranslate('evidenceStatusDistribution')}
 							</p>
 							<div class="flex flex-wrap gap-2">
 								{#each Object.entries(coverage.evidence_status_distribution) as [status, count]}
 									<span
-										class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-600"
+										class="inline-flex items-center gap-1.5 rounded-full border border-surface-200-800 bg-surface-50-950 px-3 py-1 text-xs text-surface-600-400"
 									>
 										<span
 											class="w-2 h-2 rounded-full"
 											style="background-color: {evidenceStatusColors[status] || '#9ca3af'}"
 										></span>
 										{safeTranslate(status)}
-										<span class="font-semibold text-slate-800">{count}</span>
+										<span class="font-semibold text-surface-800-200">{count}</span>
 									</span>
 								{/each}
 							</div>
@@ -736,14 +749,14 @@
 		<!-- Threats Overview -->
 		{#await data.stream.threats then threatsData}
 			{#if threatsData.total_unique_threats > 0}
-				<section class="rounded-xl border border-slate-200 bg-white overflow-hidden">
-					<div class="border-b border-slate-100 px-6 py-4 flex items-center gap-2.5">
+				<section class="rounded-xl border border-surface-200-800 bg-surface-50-950 overflow-hidden">
+					<div class="border-b border-surface-100-900 px-6 py-4 flex items-center gap-2.5">
 						<span
 							class="flex items-center justify-center w-7 h-7 rounded-md bg-amber-50 text-amber-500"
 						>
 							<i class="fa-solid fa-triangle-exclamation text-xs"></i>
 						</span>
-						<h2 class="text-sm font-semibold text-slate-800 tracking-tight">
+						<h2 class="text-sm font-semibold text-surface-800-200 tracking-tight">
 							{m.threatsOverview()}
 						</h2>
 						<span
@@ -775,14 +788,14 @@
 		<!-- Exceptions Overview -->
 		{#await data.stream.exceptions then exceptionsData}
 			{#if exceptionsData.total > 0}
-				<section class="rounded-xl border border-slate-200 bg-white overflow-hidden">
-					<div class="border-b border-slate-100 px-6 py-4 flex items-center gap-2.5">
+				<section class="rounded-xl border border-surface-200-800 bg-surface-50-950 overflow-hidden">
+					<div class="border-b border-surface-100-900 px-6 py-4 flex items-center gap-2.5">
 						<span
 							class="flex items-center justify-center w-7 h-7 rounded-md bg-purple-50 text-purple-500"
 						>
 							<i class="fa-solid fa-file-shield text-xs"></i>
 						</span>
-						<h2 class="text-sm font-semibold text-slate-800 tracking-tight">
+						<h2 class="text-sm font-semibold text-surface-800-200 tracking-tight">
 							{m.exceptionsOverview()}
 						</h2>
 						<span
@@ -804,7 +817,7 @@
 										}))}
 									/>
 								{:else}
-									<div class="flex items-center justify-center h-full text-sm text-slate-400">
+									<div class="flex items-center justify-center h-full text-sm text-surface-500">
 										{m.nothingToShowYet()}
 									</div>
 								{/if}
@@ -819,7 +832,7 @@
 										title={safeTranslate('severity')}
 									/>
 								{:else}
-									<div class="flex items-center justify-center h-full text-sm text-slate-400">
+									<div class="flex items-center justify-center h-full text-sm text-surface-500">
 										{m.nothingToShowYet()}
 									</div>
 								{/if}
@@ -832,14 +845,14 @@
 	</div>
 
 	<!-- Implementation Groups Breakdown -->
-	<section class="rounded-xl border border-slate-200 bg-white overflow-hidden">
-		<div class="border-b border-slate-100 px-6 py-4 flex items-center gap-2.5">
+	<section class="rounded-xl border border-surface-200-800 bg-surface-50-950 overflow-hidden">
+		<div class="border-b border-surface-100-900 px-6 py-4 flex items-center gap-2.5">
 			<span
 				class="flex items-center justify-center w-7 h-7 rounded-md bg-orange-50 text-orange-500"
 			>
 				<i class="fa-solid fa-cubes text-xs"></i>
 			</span>
-			<h2 class="text-sm font-semibold text-slate-800 tracking-tight">
+			<h2 class="text-sm font-semibold text-surface-800-200 tracking-tight">
 				{m.implementationGroupsBreakdown()}
 			</h2>
 		</div>
@@ -864,10 +877,10 @@
 							seriesNames={RESULT_KEYS.map((k) => safeTranslate(k))}
 						/>
 					</div>
-					<div class="mt-5 border-t border-slate-100 pt-5">
+					<div class="mt-5 border-t border-surface-100-900 pt-5">
 						<table class="w-full text-sm">
 							<thead>
-								<tr class="text-[11px] uppercase tracking-wider text-slate-400">
+								<tr class="text-[11px] uppercase tracking-wider text-surface-500">
 									<th class="pb-2 pr-4 text-left font-medium">{m.name()}</th>
 									<th class="pb-2 pr-4 text-right font-medium">{m.assessable()}</th>
 									<th class="pb-2 pr-4 text-right font-medium">{m.progress()}</th>
@@ -882,14 +895,18 @@
 							</thead>
 							<tbody>
 								{#each groups as group, i}
-									<tr class="border-t border-slate-50 {i % 2 === 0 ? 'bg-slate-50/50' : ''}">
-										<td class="py-2.5 pr-4 text-slate-700">{group.name || group.ref_id}</td>
-										<td class="py-2.5 pr-4 text-right tabular-nums text-slate-500"
+									<tr
+										class="border-t border-surface-100-900 {i % 2 === 0
+											? 'bg-surface-50-950/50'
+											: ''}"
+									>
+										<td class="py-2.5 pr-4 text-surface-700-300">{group.name || group.ref_id}</td>
+										<td class="py-2.5 pr-4 text-right tabular-nums text-surface-600-400"
 											>{group.total_assessable}</td
 										>
 										<td class="py-2.5 pr-4 text-right">
-											<div class="inline-flex items-center gap-1.5 text-xs text-slate-600">
-												<div class="w-12 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+											<div class="inline-flex items-center gap-1.5 text-xs text-surface-600-400">
+												<div class="w-12 h-1.5 rounded-full bg-surface-100-900 overflow-hidden">
 													<div
 														class="h-full rounded-full bg-indigo-400"
 														style="width: {group.progress_percent}%"
@@ -906,7 +923,7 @@
 														>{group.maturity_score}</span
 													>
 												{:else}
-													<span class="text-slate-300">&mdash;</span>
+													<span class="text-surface-400">&mdash;</span>
 												{/if}
 											</td>
 										{/if}
@@ -917,7 +934,7 @@
 													>{group.implementation_score}</span
 												>
 											{:else}
-												<span class="text-slate-300">&mdash;</span>
+												<span class="text-surface-400">&mdash;</span>
 											{/if}
 										</td>
 										{#if data.compliance_assessment.show_documentation_score}
@@ -928,7 +945,7 @@
 														>{group.documentation_score}</span
 													>
 												{:else}
-													<span class="text-slate-300">&mdash;</span>
+													<span class="text-surface-400">&mdash;</span>
 												{/if}
 											</td>
 										{/if}
@@ -938,7 +955,7 @@
 						</table>
 					</div>
 				{:else}
-					<div class="flex flex-col items-center justify-center py-12 text-slate-400">
+					<div class="flex flex-col items-center justify-center py-12 text-surface-500">
 						<i class="fa-solid fa-cubes text-3xl mb-2 opacity-30"></i>
 						<p class="text-sm">{m.noImplementationGroups()}</p>
 					</div>
@@ -950,12 +967,12 @@
 	</section>
 
 	<!-- Mapping Projection -->
-	<section class="rounded-xl border border-slate-200 bg-white overflow-hidden">
-		<div class="border-b border-slate-100 px-6 py-4 flex items-center gap-2.5">
+	<section class="rounded-xl border border-surface-200-800 bg-surface-50-950 overflow-hidden">
+		<div class="border-b border-surface-100-900 px-6 py-4 flex items-center gap-2.5">
 			<span class="flex items-center justify-center w-7 h-7 rounded-md bg-rose-50 text-rose-500">
 				<i class="fa-solid fa-diagram-project text-xs"></i>
 			</span>
-			<h2 class="text-sm font-semibold text-slate-800 tracking-tight">
+			<h2 class="text-sm font-semibold text-surface-800-200 tracking-tight">
 				{m.mappingProjection()}
 			</h2>
 		</div>
@@ -966,10 +983,10 @@
 				{#if frameworks && frameworks.length > 0}
 					<div class="space-y-3">
 						{#each frameworks as fw}
-							<div class="rounded-lg border border-slate-100 bg-slate-50/50 p-4">
+							<div class="rounded-lg border border-surface-100-900 bg-surface-50-950/50 p-4">
 								<div class="flex items-center justify-between mb-2.5">
-									<span class="text-sm font-medium text-slate-700">{fw.str}</span>
-									<span class="text-[11px] text-slate-400 tabular-nums font-medium"
+									<span class="text-sm font-medium text-surface-700-300">{fw.str}</span>
+									<span class="text-[11px] text-surface-500 tabular-nums font-medium"
 										>{fw.assessable_requirements_count} {m.assessable()}</span
 									>
 								</div>
@@ -1003,7 +1020,7 @@
 						{/each}
 					</div>
 				{:else}
-					<div class="flex flex-col items-center justify-center py-12 text-slate-400">
+					<div class="flex flex-col items-center justify-center py-12 text-surface-500">
 						<i class="fa-solid fa-diagram-project text-3xl mb-2 opacity-30"></i>
 						<p class="text-sm">{m.noMappingTargets()}</p>
 					</div>
