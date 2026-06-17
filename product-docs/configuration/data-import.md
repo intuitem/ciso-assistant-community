@@ -517,7 +517,7 @@ Reference controls can be bundled also as a library.
 
 Adding entities, solutions and contracts go through the same file to be able to keep consistent relationships. Each concept needs to be on a separate tab of the excel sheet.<br>
 
-{% file src="../.gitbook/assets/third_parties_ecosystem_template (1).xlsx" %}
+{% file src="../.gitbook/assets/third_parties_ecosystem_template.xlsx" %}
 
 The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Contracts"
 
@@ -565,6 +565,16 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 * `euid`
 * `vat`
 * `duns`
+
+#### Representatives
+
+* `email` <mark style="color:$danger;">\*</mark>
+* `first_name`
+* `last_name`
+* `description` 
+* `phone`
+* `role`
+* `provider_entity_ref_id`
 
 ## Processings
 
