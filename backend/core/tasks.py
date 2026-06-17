@@ -10,6 +10,7 @@ from core.models import (
     RequirementAssignment,
     RiskAssessment,
     RiskScenario,
+    SecurityException,
     TaskNode,
     TaskTemplate,
     ValidationFlow,
@@ -280,6 +281,101 @@ def check_evidences_expired():
             days = max(days_list)
 
         send_notification_email_expired_evidence(owner_email, evidences, days=days)
+
+
+# Security exceptions in a terminal state should not trigger expiry reminders.
+SECURITY_EXCEPTION_TERMINAL_STATUSES = [
+    SecurityException.Status.RESOLVED,
+    SecurityException.Status.EXPIRED,
+    SecurityException.Status.DEPRECATED,
+]
+
+
+def _group_security_exceptions_by_owner(security_exceptions):
+    """Group security exceptions by each owner's email address."""
+    owner_exceptions = defaultdict(list)
+    for exception in security_exceptions:
+        for owner in exception.owners.all():
+            for email in owner.get_emails():
+                owner_exceptions[email].append(exception)
+    return owner_exceptions
+
+
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="7", minute="15"))
+def check_security_exceptions_expiring_in_month():
+    """Check for SecurityExceptions expiring in 30 days"""
+    target_date = date.today() + timedelta(days=30)
+    exceptions_expiring_soon = (
+        SecurityException.objects.filter(expiration_date=target_date)
+        .exclude(status__in=SECURITY_EXCEPTION_TERMINAL_STATUSES)
+        .prefetch_related("owners")
+    )
+
+    for owner_email, exceptions in _group_security_exceptions_by_owner(
+        exceptions_expiring_soon
+    ).items():
+        send_security_exception_expiring_soon_notification(
+            owner_email, exceptions, days=30
+        )
+
+
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="7", minute="20"))
+def check_security_exceptions_expiring_in_week():
+    """Check for SecurityExceptions expiring in 7 days"""
+    target_date = date.today() + timedelta(days=7)
+    exceptions_expiring_soon = (
+        SecurityException.objects.filter(expiration_date=target_date)
+        .exclude(status__in=SECURITY_EXCEPTION_TERMINAL_STATUSES)
+        .prefetch_related("owners")
+    )
+
+    for owner_email, exceptions in _group_security_exceptions_by_owner(
+        exceptions_expiring_soon
+    ).items():
+        send_security_exception_expiring_soon_notification(
+            owner_email, exceptions, days=7
+        )
+
+
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="7", minute="25"))
+def check_security_exceptions_expiring_tomorrow():
+    """Check for SecurityExceptions expiring in 1 day"""
+    target_date = date.today() + timedelta(days=1)
+    exceptions_expiring_tomorrow = (
+        SecurityException.objects.filter(expiration_date=target_date)
+        .exclude(status__in=SECURITY_EXCEPTION_TERMINAL_STATUSES)
+        .prefetch_related("owners")
+    )
+
+    for owner_email, exceptions in _group_security_exceptions_by_owner(
+        exceptions_expiring_tomorrow
+    ).items():
+        send_security_exception_expiring_soon_notification(
+            owner_email, exceptions, days=1
+        )
+
+
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="7", minute="30"))
+def check_security_exceptions_expired():
+    """Check for expired SecurityExceptions"""
+    expired_exceptions = (
+        SecurityException.objects.filter(expiration_date__lt=date.today())
+        .exclude(status__in=SECURITY_EXCEPTION_TERMINAL_STATUSES)
+        .prefetch_related("owners")
+    )
+
+    for owner_email, exceptions in _group_security_exceptions_by_owner(
+        expired_exceptions
+    ).items():
+        days_list = [(date.today() - exc.expiration_date).days for exc in exceptions]
+        days = max(days_list) if days_list else 0
+        send_notification_email_expired_security_exception(
+            owner_email, exceptions, days=days
+        )
 
 
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
@@ -947,6 +1043,155 @@ def send_evidence_expiring_soon_notification(owner_email, evidences, days):
         logger.error(
             f"Failed to render {template_name} email template for {owner_email}"
         )
+
+
+@task()
+def send_security_exception_expiring_soon_notification(
+    owner_email, security_exceptions, days
+):
+    """Send notification when SecurityException is expiring soon"""
+    if not check_email_configuration(owner_email, security_exceptions):
+        return
+
+    from .email_utils import render_email_template, format_security_exception_list
+
+    context = {
+        "exception_count": len(security_exceptions),
+        "exception_list": format_security_exception_list(security_exceptions),
+        "days_remaining": days,
+    }
+
+    template_name = "security_exception_expiring_soon"
+    rendered = render_email_template(
+        template_name, context, recipient_email=owner_email
+    )
+    if rendered:
+        send_notification_email(
+            rendered["subject"],
+            rendered["body"],
+            owner_email,
+            rendered.get("html_body"),
+        )
+    else:
+        logger.error(
+            f"Failed to render {template_name} email template for {owner_email}"
+        )
+
+
+@task()
+def send_notification_email_expired_security_exception(
+    owner_email, security_exceptions, days=0
+):
+    """Send notification for expired SecurityExceptions"""
+    if not check_email_configuration(owner_email, security_exceptions):
+        return
+
+    from .email_utils import render_email_template, format_security_exception_list
+
+    context = {
+        "exception_count": len(security_exceptions),
+        "exception_list": format_security_exception_list(security_exceptions),
+        "expired_since": days,
+    }
+
+    template_name = "expired_security_exceptions"
+    rendered = render_email_template(
+        template_name, context, recipient_email=owner_email
+    )
+    if rendered:
+        send_notification_email(
+            rendered["subject"],
+            rendered["body"],
+            owner_email,
+            rendered.get("html_body"),
+        )
+    else:
+        logger.error(
+            f"Failed to render {template_name} email template for {owner_email}"
+        )
+
+
+@task()
+def send_security_exception_assignment_notification(exception_id, assigned_user_emails):
+    """Send notification when a SecurityException is assigned to owners"""
+    if not assigned_user_emails:
+        return
+
+    try:
+        security_exception = SecurityException.objects.get(id=exception_id)
+    except SecurityException.DoesNotExist:
+        logger.error(f"SecurityException with id {exception_id} not found")
+        return
+
+    from .email_utils import render_email_template
+
+    context = {
+        "exception_name": security_exception.name,
+        "exception_description": security_exception.description
+        or "No description provided",
+        "exception_ref_id": security_exception.ref_id or "N/A",
+        "exception_severity": security_exception.get_severity_display(),
+        "exception_status": security_exception.get_status_display(),
+        "expiration_date": security_exception.expiration_date.strftime("%Y-%m-%d")
+        if security_exception.expiration_date
+        else "Not set",
+        "folder_name": security_exception.folder.name
+        if security_exception.folder
+        else "Default",
+    }
+
+    for email in assigned_user_emails:
+        if email and check_email_configuration(email, [security_exception]):
+            rendered = render_email_template(
+                "security_exception_assignment", context, recipient_email=email
+            )
+            if rendered:
+                send_notification_email(
+                    rendered["subject"],
+                    rendered["body"],
+                    email,
+                    rendered.get("html_body"),
+                )
+
+
+@task()
+def send_security_exception_status_notification(
+    exception_id, new_status, actor_name, recipient_emails
+):
+    """Send notification when a SecurityException's status changes"""
+    if not recipient_emails:
+        return
+
+    try:
+        security_exception = SecurityException.objects.get(id=exception_id)
+    except SecurityException.DoesNotExist:
+        logger.error(f"SecurityException with id {exception_id} not found")
+        return
+
+    from .email_utils import render_email_template
+
+    context = {
+        "exception_name": security_exception.name,
+        "exception_ref_id": security_exception.ref_id or "N/A",
+        "new_status": new_status,
+        "actor_name": actor_name,
+        "folder_name": security_exception.folder.name
+        if security_exception.folder
+        else "Default",
+    }
+
+    for email in set(recipient_emails):
+        if email and check_email_configuration(email, [security_exception]):
+            rendered = render_email_template(
+                "security_exception_status_changed", context, recipient_email=email
+            )
+            if rendered:
+                send_notification_email(
+                    rendered["subject"],
+                    rendered["body"],
+                    email,
+                    rendered.get("html_body"),
+                )
 
 
 @task()
