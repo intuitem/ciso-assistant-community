@@ -115,7 +115,15 @@ from django.template.loader import render_to_string
 from django.utils.functional import Promise
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from iam.models import Folder, IdPGroupMapping, RoleAssignment, User, UserGroup
+from iam.models import (
+    Folder,
+    IdPGroup,
+    IdPGroupMapping,
+    RoleAssignment,
+    User,
+    UserGroup,
+)
+from iam import group_membership as gm
 from rest_framework import filters, generics, permissions, status, viewsets
 from core.permissions import IsAdministrator
 from django.utils.translation import gettext_lazy as _, get_language
@@ -7716,19 +7724,49 @@ class UserGroupViewSet(BaseModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
+class IdPGroupViewSet(BaseModelViewSet):
+    """
+    API endpoint for managing external IdP groups (the SCIM Group identity).
+    Admin-only: IdPGroup has no folder, so RBAC object scoping does not apply.
+    """
+
+    model = IdPGroup
+    ordering = ["external_group_id"]
+    permission_classes = [permissions.IsAuthenticated, IsAdministrator]
+
+    def get_queryset(self):
+        return IdPGroup.objects.all()
+
+    def perform_destroy(self, instance):
+        # Cascade its routes + their membership sources, then reconcile edges.
+        gm.delete_idp_group(instance)
+
+
 class IdPGroupMappingViewSet(BaseModelViewSet):
     """
-    API endpoint for managing IdP group → UserGroup mappings.
+    API endpoint for managing IdP group → UserGroup routes (many-to-many).
     Admin-only: IdPGroupMapping has no folder, so RBAC object scoping does not apply.
     """
 
     model = IdPGroupMapping
-    ordering = ["external_group_id"]
-    filterset_fields = ["user_group"]
+    ordering = ["idp_group__external_group_id"]
+    filterset_fields = ["idp_group", "user_group"]
     permission_classes = [permissions.IsAuthenticated, IsAdministrator]
 
     def get_queryset(self):
-        return IdPGroupMapping.objects.select_related("user_group").all()
+        return IdPGroupMapping.objects.select_related(
+            "idp_group", "user_group"
+        ).all()
+
+    def perform_create(self, serializer):
+        instance = super().perform_create(serializer)
+        gm.backfill_route(instance)
+        return instance
+
+    def perform_destroy(self, instance):
+        # Drop this route's membership sources + reconcile edges, then delete.
+        gm.revoke_mapping(instance)
+        super().perform_destroy(instance)
 
 
 class RoleAssignmentViewSet(BaseModelViewSet):

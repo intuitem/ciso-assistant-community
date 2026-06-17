@@ -183,6 +183,7 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                             group at all. If false, sync is additive
                             (memberships are only added, never removed).
         """
+        from iam import group_membership as gm
         from iam.models import IdPGroupMapping
         from iam.sso.models import SSOSettings
 
@@ -221,46 +222,17 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             mapping_count=IdPGroupMapping.objects.count(),
         )
 
-        # Mappings whose scim_external_id is set are SCIM-owned end-to-end —
-        # the JWT path is forbidden from touching them. This is what lets a
-        # SCIM client be the single source of truth on those memberships.
-        jwt_eligible = IdPGroupMapping.objects.filter(scim_external_id__isnull=True)
-        all_managed = set(
-            jwt_eligible.values_list("user_group_id", flat=True).distinct()
+        # Reconcile the user's SSO-channel memberships through the provenance
+        # side-table. Additive always; when authoritative, SSO rows for routes
+        # the IdP no longer claims are removed. Manual and SCIM memberships are
+        # never touched, so each provisioning channel owns only its own rows.
+        gm.sync_sso_user(user, idp_group_ids, authoritative)
+        logger.info(
+            "idp_group_sync: reconciled",
+            user_id=str(user.id),
+            authoritative=authoritative,
+            claimed=idp_group_ids,
         )
-        desired = (
-            set(
-                jwt_eligible.filter(
-                    external_group_id__in=idp_group_ids
-                ).values_list("user_group_id", flat=True)
-            )
-            if idp_group_ids
-            else set()
-        )
-        current_managed = set(
-            user.user_groups.filter(id__in=all_managed).values_list("id", flat=True)
-        )
-
-        to_add = desired - current_managed
-        # authoritative=True: full reconciliation of managed groups (the IdP's
-        # claim — including "no claim" — wins). authoritative=False: additive
-        # only, never revoke.
-        to_remove = (current_managed - desired) if authoritative else set()
-
-        if to_add:
-            user.user_groups.add(*to_add)
-            logger.info(
-                "idp_group_sync: added groups",
-                user_id=str(user.id),
-                added=[str(g) for g in to_add],
-            )
-        if to_remove:
-            user.user_groups.remove(*to_remove)
-            logger.info(
-                "idp_group_sync: removed groups",
-                user_id=str(user.id),
-                removed=[str(g) for g in to_remove],
-            )
 
     def pre_social_login(self, request, sociallogin):
         extra = sociallogin.account.extra_data

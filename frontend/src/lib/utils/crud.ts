@@ -871,13 +871,25 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		filters: []
 	},
+	'idp-groups': {
+		name: 'idpgroup',
+		localName: 'idpGroup',
+		localNamePlural: 'idpGroups',
+		verboseName: 'IdP group',
+		verboseNamePlural: 'IdP groups',
+		foreignKeyFields: [],
+		filters: []
+	},
 	'idp-group-mappings': {
 		name: 'idpgroupmapping',
 		localName: 'idpGroupMapping',
 		localNamePlural: 'idpGroupMappings',
 		verboseName: 'IdP group mapping',
 		verboseNamePlural: 'IdP group mappings',
-		foreignKeyFields: [{ field: 'user_group', urlModel: 'user-groups' }],
+		foreignKeyFields: [
+			{ field: 'idp_group', urlModel: 'idp-groups' },
+			{ field: 'user_group', urlModel: 'user-groups' }
+		],
 		filters: []
 	},
 	'role-assignments': {

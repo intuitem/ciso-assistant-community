@@ -8,6 +8,10 @@ correct Content-Type header.
 
 import re
 
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
 SCIM_USER_SCHEMA = "urn:ietf:params:scim:schemas:core:2.0:User"
 SCIM_GROUP_SCHEMA = "urn:ietf:params:scim:schemas:core:2.0:Group"
 SCIM_LIST_SCHEMA = "urn:ietf:params:scim:api:messages:2.0:ListResponse"
@@ -45,33 +49,38 @@ def scim_user_to_dict(user, request):
     }
 
 
-def scim_group_to_dict(mapping, request):
+def scim_group_to_dict(idp_group, request):
     """
-    Serialize a SCIM Group resource from an IdPGroupMapping.
+    Serialize a SCIM Group resource from an IdPGroup.
 
-    The mapping is the bridge between the IdP-side identity (external_group_id
-    + scim_external_id) and the CISO-side UserGroup. SCIM clients see the
-    IdP-side label as displayName, never the local UserGroup.name.
+    The IdPGroup is the external-side identity (external_group_id +
+    scim_external_id); its PK is the stable SCIM id. Members are the users the
+    SCIM client provisioned through this group's routes (channel="scim"),
+    deduplicated across the fan-out. SCIM clients see the IdP-side label as
+    displayName, never a local UserGroup.name.
     """
-    group = mapping.user_group
     base_url = request.build_absolute_uri("/").rstrip("/")
-    location = f"{base_url}/api/scim/v2/Groups/{group.id}"
+    location = f"{base_url}/api/scim/v2/Groups/{idp_group.id}"
+    member_users = User.objects.filter(
+        group_membership_sources__source__idp_group=idp_group,
+        group_membership_sources__channel="scim",
+    ).distinct()
     members = []
-    for user in group.user_set.all():
+    for user in member_users:
         user_location = f"{base_url}/api/scim/v2/Users/{user.id}"
         members.append(
             {"value": str(user.id), "display": str(user), "$ref": user_location}
         )
     return {
         "schemas": [SCIM_GROUP_SCHEMA],
-        "id": str(group.id),
-        "externalId": mapping.scim_external_id or None,
-        "displayName": mapping.external_group_id,
+        "id": str(idp_group.id),
+        "externalId": idp_group.scim_external_id or None,
+        "displayName": idp_group.external_group_id,
         "members": members,
         "meta": {
             "resourceType": "Group",
-            "created": _format_dt(getattr(group, "created_at", None)),
-            "lastModified": _format_dt(getattr(group, "updated_at", None)),
+            "created": _format_dt(getattr(idp_group, "created_at", None)),
+            "lastModified": _format_dt(getattr(idp_group, "updated_at", None)),
             "location": location,
         },
     }

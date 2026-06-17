@@ -85,7 +85,9 @@ IGNORED_PERMISSION_MODELS = (
     "usergroup",
     "ssosettings",
     "historicalmetric",
+    "idpgroup",
     "idpgroupmapping",
+    "groupmembershipsource",
     "scimtoken",
 )
 
@@ -1603,12 +1605,15 @@ class PersonalAccessToken(models.Model):
 # -----------------------------
 
 
-class IdPGroupMapping(AbstractBaseModel):
+class IdPGroup(AbstractBaseModel):
     """
-    Maps an external IdP group identifier to a local UserGroup.
-    Shared routing table for both SSO group sync (pre_social_login) and SCIM
-    group operations. A mapping with scim_external_id set is owned end-to-end
-    by SCIM; the SSO adapter skips it during JWT-claim sync.
+    Identity of an external IdP group — the SCIM "Group" resource.
+
+    Its PK is the SCIM Group id the IdP stores and echoes on every subsequent
+    PATCH/PUT/DELETE, so it must stay stable across renames and re-targeting.
+    One IdP group routes to many UserGroups (and many IdP groups may route to
+    the same UserGroup) via IdPGroupMapping; the membership fan-out is recorded
+    in GroupMembershipSource.
     """
 
     external_group_id = models.CharField(
@@ -1617,12 +1622,6 @@ class IdPGroupMapping(AbstractBaseModel):
         verbose_name=_("External group identifier"),
         help_text=_("Group name, UUID, or DN as provided by the IdP"),
     )
-    user_group = models.ForeignKey(
-        "UserGroup",
-        on_delete=models.CASCADE,
-        related_name="idp_mappings",
-        verbose_name=_("User group"),
-    )
     scim_external_id = models.CharField(
         max_length=512,
         blank=True,
@@ -1630,17 +1629,105 @@ class IdPGroupMapping(AbstractBaseModel):
         unique=True,
         verbose_name=_("SCIM external ID"),
         help_text=_(
-            "Opaque identifier assigned by the SCIM client when this mapping "
-            "is first touched by a SCIM push. Stable join key across renames."
+            "Opaque identifier assigned by the SCIM client the first time the "
+            "IdP pushes this group."
         ),
+    )
+
+    class Meta:
+        verbose_name = _("IdP group")
+        verbose_name_plural = _("IdP groups")
+
+    def __str__(self):
+        return self.external_group_id
+
+
+class IdPGroupMapping(AbstractBaseModel):
+    """
+    Route from an external IdP group to a CISO UserGroup. Many-to-many: one
+    IdP group may map to several UserGroups and several IdP groups may map to
+    the same UserGroup. Shared routing table for SSO group sync
+    (pre_social_login) and SCIM group operations.
+    """
+
+    idp_group = models.ForeignKey(
+        IdPGroup,
+        on_delete=models.CASCADE,
+        related_name="mappings",
+        verbose_name=_("IdP group"),
+    )
+    user_group = models.ForeignKey(
+        "UserGroup",
+        on_delete=models.CASCADE,
+        related_name="idp_mappings",
+        verbose_name=_("User group"),
     )
 
     class Meta:
         verbose_name = _("IdP group mapping")
         verbose_name_plural = _("IdP group mappings")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["idp_group", "user_group"],
+                name="unique_idp_group_user_group",
+            )
+        ]
 
     def __str__(self):
-        return f"{self.external_group_id} -> {self.user_group}"
+        return f"{self.idp_group} -> {self.user_group}"
+
+
+class GroupMembershipSource(AbstractBaseModel):
+    """
+    Records WHY a user belongs to a UserGroup. A user_groups M2M edge exists
+    iff at least one GroupMembershipSource backs it. The invariant is kept by
+    the helpers in iam.group_membership (federation: sso/scim) and the
+    m2m_changed receiver in iam.apps (manual edits). A null source with channel
+    "manual" marks a hand-managed membership that federation reconciliation
+    must never remove.
+    """
+
+    class Channel(models.TextChoices):
+        MANUAL = "manual", _("Manual")
+        SSO = "sso", _("SSO")
+        SCIM = "scim", _("SCIM")
+
+    user = models.ForeignKey(
+        "User",
+        on_delete=models.CASCADE,
+        related_name="group_membership_sources",
+    )
+    user_group = models.ForeignKey(
+        "UserGroup",
+        on_delete=models.CASCADE,
+        related_name="membership_sources",
+    )
+    source = models.ForeignKey(
+        IdPGroupMapping,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="membership_sources",
+        verbose_name=_("Source mapping"),
+    )
+    channel = models.CharField(
+        max_length=16,
+        choices=Channel.choices,
+        default=Channel.MANUAL,
+    )
+
+    class Meta:
+        verbose_name = _("Group membership source")
+        verbose_name_plural = _("Group membership sources")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "user_group", "source", "channel"],
+                name="unique_group_membership_source",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.user} ∈ {self.user_group} ({self.channel})"
 
 
 # -----------------------------
@@ -1682,6 +1769,10 @@ auditlog.register(
 )
 auditlog.register(
     Folder,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    IdPGroup,
     exclude_fields=common_exclude,
 )
 auditlog.register(

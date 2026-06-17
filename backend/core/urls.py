@@ -58,6 +58,7 @@ router.register(r"teams", TeamViewSet, basename="teams")
 
 router.register(r"users", UserViewSet, basename="users")
 router.register(r"user-groups", UserGroupViewSet, basename="user-groups")
+router.register(r"idp-groups", IdPGroupViewSet, basename="idp-groups")
 router.register(
     r"idp-group-mappings", IdPGroupMappingViewSet, basename="idp-group-mappings"
 )

@@ -57,6 +57,7 @@ export const URL_MODEL = [
 	'teams',
 	'users',
 	'user-groups',
+	'idp-groups',
 	'idp-group-mappings',
 	'roles',
 	'role-assignments',

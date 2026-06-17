@@ -8,9 +8,11 @@
 	} from '$lib/components/Modals/stores';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import IdPGroupMappingCreateModal from '../../../routes/(app)/(internal)/settings/idp-group-mappings/IdPGroupMappingCreateModal.svelte';
+	import IdPGroupCreateModal from '../../../routes/(app)/(internal)/settings/idp-group-mappings/IdPGroupCreateModal.svelte';
 	import { defaults } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
+	import { IdPGroupSchema, IdPGroupMappingSchema } from '$lib/utils/schemas';
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 
@@ -33,12 +35,80 @@
 
 	const ssoEnabled = $derived(data.ssoSettings?.is_enabled ?? false);
 
-	function modalCreateForm(): void {
+	// Group the routes (IdPGroupMapping rows) by their parent IdP group.
+	const routesByGroup = $derived.by(() => {
+		const map: Record<string, any[]> = {};
+		for (const mapping of data.idpGroupMappings ?? []) {
+			const groupId = mapping.idp_group?.id ?? mapping.idp_group;
+			(map[groupId] ??= []).push(mapping);
+		}
+		return map;
+	});
+
+	function modalCreateIdpGroup(): void {
+		const modalComponent: ModalComponent = {
+			ref: IdPGroupCreateModal,
+			props: {
+				form: data.idpGroupCreateForm,
+				formAction: '?/createIdpGroup',
+				invalidateAll: true
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.createIdpGroup()
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalEditIdpGroup(group: any): void {
+		const modalComponent: ModalComponent = {
+			ref: IdPGroupCreateModal,
+			props: {
+				form: defaults(
+					{ id: group.id, external_group_id: group.external_group_id },
+					zod(IdPGroupSchema)
+				),
+				formAction: '?/updateIdpGroup',
+				invalidateAll: true
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.editIdpGroup()
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalConfirmDeleteIdpGroup(group: any): void {
+		const modalComponent: ModalComponent = {
+			ref: DeleteConfirmModal,
+			props: {
+				_form: defaults({ id: group.id }, zod(z.object({ id: z.string() }))),
+				id: group.id,
+				debug: false,
+				URLModel: 'idp-groups',
+				formAction: '?/deleteIdpGroup'
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.deleteModalTitle(),
+			body: m.deleteModalMessage({ name: String(group.external_group_id ?? '') })
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalCreateRoute(group: any): void {
 		const modalComponent: ModalComponent = {
 			ref: IdPGroupMappingCreateModal,
 			props: {
-				form: data.idpGroupMappingCreateForm,
+				form: defaults({ idp_group: group.id }, zod(IdPGroupMappingSchema)),
 				formAction: '?/createIdpGroupMapping',
+				idpGroupLocked: true,
 				invalidateAll: true
 			}
 		};
@@ -50,15 +120,12 @@
 		modalStore.trigger(modal);
 	}
 
-	function modalConfirmDelete(
-		id: string,
-		row: { [key: string]: string | number | boolean | null }
-	): void {
+	function modalConfirmDeleteRoute(mapping: any): void {
 		const modalComponent: ModalComponent = {
 			ref: DeleteConfirmModal,
 			props: {
-				_form: defaults({ id }, zod(z.object({ id: z.string() }))),
-				id,
+				_form: defaults({ id: mapping.id }, zod(z.object({ id: z.string() }))),
+				id: mapping.id,
 				debug: false,
 				URLModel: 'idp-group-mappings',
 				formAction: '?/deleteIdpGroupMapping'
@@ -68,7 +135,7 @@
 			type: 'component',
 			component: modalComponent,
 			title: m.deleteModalTitle(),
-			body: m.deleteModalMessage({ name: String(row.external_group_id ?? '') })
+			body: m.deleteModalMessage({ name: String(mapping.user_group?.str ?? '') })
 		};
 		modalStore.trigger(modal);
 	}
@@ -166,48 +233,80 @@
 	<div class="flex items-center justify-between">
 		<h3 class="text-base font-semibold flex items-center gap-2">
 			<i class="fa-solid fa-arrows-left-right text-sm text-primary-500"></i>
-			{m.idpGroupMappings()}
+			{m.idpGroups()}
 		</h3>
-		<button class="btn btn-sm preset-filled-primary-500" onclick={modalCreateForm}>
+		<button class="btn btn-sm preset-filled-primary-500" onclick={modalCreateIdpGroup}>
 			<i class="fa-solid fa-plus mr-1"></i>
-			{m.createIdpGroupMapping()}
+			{m.createIdpGroup()}
 		</button>
 	</div>
 
-	{#if data.idpGroupMappings?.length > 0}
-		<div class="card bg-white shadow overflow-hidden">
-			<table class="table w-full text-sm">
-				<thead class="bg-surface-50">
-					<tr>
-						<th class="px-4 py-2 text-left font-medium text-gray-600">{m.externalGroupId()}</th>
-						<th class="px-4 py-2 text-left font-medium text-gray-600">{m.userGroup()}</th>
-						<th class="px-4 py-2"></th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each data.idpGroupMappings as mapping, i}
-						{#if i > 0}
-							<tr><td colspan="3"><hr class="border-surface-100" /></td></tr>
-						{/if}
-						<tr>
-							<td class="px-4 py-2 font-mono text-xs">{mapping.external_group_id}</td>
-							<td class="px-4 py-2">{mapping.user_group?.str ?? mapping.user_group}</td>
-							<td class="px-4 py-2 text-right">
-								<button
-									aria-label={m.delete()}
-									class="btn btn-sm preset-filled-error-500 cursor-pointer"
-									data-testid="tablerow-delete-button"
-									onclick={() => modalConfirmDelete(mapping.id, mapping)}
+	{#if data.idpGroups?.length > 0}
+		<div class="flex flex-col gap-3">
+			{#each data.idpGroups as group}
+				{@const routes = routesByGroup[group.id] ?? []}
+				<div class="card bg-white shadow overflow-hidden">
+					<div class="flex items-center justify-between px-4 py-3 bg-surface-50">
+						<div class="flex items-center gap-2 min-w-0">
+							<i class="fa-solid fa-users-rectangle text-sm text-primary-500"></i>
+							<span class="font-mono text-sm truncate">{group.external_group_id}</span>
+							{#if group.scim_external_id}
+								<span class="badge preset-tonal-secondary text-xs" title={group.scim_external_id}
+									>SCIM</span
 								>
-									<i class="fa-solid fa-trash text-xs"></i>
-								</button>
-							</td>
-						</tr>
-					{/each}
-				</tbody>
-			</table>
+							{/if}
+						</div>
+						<div class="flex items-center gap-1 shrink-0">
+							<button
+								class="btn btn-sm preset-filled-primary-500 cursor-pointer"
+								onclick={() => modalCreateRoute(group)}
+							>
+								<i class="fa-solid fa-plus text-xs mr-1"></i>
+								{m.createIdpGroupMapping()}
+							</button>
+							<button
+								aria-label={m.edit()}
+								class="btn-icon btn-sm preset-tonal cursor-pointer"
+								onclick={() => modalEditIdpGroup(group)}
+							>
+								<i class="fa-solid fa-pen text-xs"></i>
+							</button>
+							<button
+								aria-label={m.delete()}
+								class="btn-icon btn-sm preset-filled-error-500 cursor-pointer"
+								data-testid="tablerow-delete-button"
+								onclick={() => modalConfirmDeleteIdpGroup(group)}
+							>
+								<i class="fa-solid fa-trash text-xs"></i>
+							</button>
+						</div>
+					</div>
+
+					{#if routes.length > 0}
+						<ul class="divide-y divide-surface-100">
+							{#each routes as mapping}
+								<li class="flex items-center justify-between px-4 py-2 text-sm">
+									<span class="flex items-center gap-2">
+										<i class="fa-solid fa-arrow-right text-xs text-gray-400"></i>
+										{mapping.user_group?.str ?? mapping.user_group}
+									</span>
+									<button
+										aria-label={m.delete()}
+										class="btn-icon btn-sm preset-tonal-error cursor-pointer"
+										onclick={() => modalConfirmDeleteRoute(mapping)}
+									>
+										<i class="fa-solid fa-xmark text-xs"></i>
+									</button>
+								</li>
+							{/each}
+						</ul>
+					{:else}
+						<p class="px-4 py-3 text-gray-400 text-xs italic">{m.noIdpGroupMappings()}</p>
+					{/if}
+				</div>
+			{/each}
 		</div>
 	{:else}
-		<p class="text-gray-400 text-sm italic">{m.noIdpGroupMappings()}</p>
+		<p class="text-gray-400 text-sm italic">{m.noIdpGroups()}</p>
 	{/if}
 </div>

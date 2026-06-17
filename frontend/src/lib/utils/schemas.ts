@@ -441,8 +441,14 @@ export const RequirementAssessmentSchema = z.object({
 	nextRequirementAssessmentId: z.string().uuid().optional().nullable()
 });
 
+export const IdPGroupSchema = z.object({
+	id: z.string().uuid().optional(),
+	external_group_id: z.string().min(1)
+});
+
 export const IdPGroupMappingSchema = z.object({
-	external_group_id: z.string().min(1),
+	id: z.string().uuid().optional(),
+	idp_group: z.string().uuid(),
 	user_group: z.string().uuid()
 });
 
@@ -1864,7 +1870,8 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	teams: teamSchema,
 	'managed-documents': ManagedDocumentSchema,
 	'document-revisions': DocumentRevisionSchema,
-	'idp-group-mappings': IdPGroupMappingSchema
+	'idp-group-mappings': IdPGroupMappingSchema,
+	'idp-groups': IdPGroupSchema
 };
 
 export const modelSchema = (model: string) => {

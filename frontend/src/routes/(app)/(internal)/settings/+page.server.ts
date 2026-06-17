@@ -7,6 +7,7 @@ import { safeTranslate } from '$lib/utils/i18n';
 import {
 	FeatureFlagsSchema,
 	GeneralSettingsSchema,
+	IdPGroupSchema,
 	IdPGroupMappingSchema,
 	SSOSettingsSchema,
 	VulnerabilitySlaSchema,
@@ -113,9 +114,17 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		errors: false
 	});
 
+	const idpGroups = await fetch(`${BASE_API_URL}/idp-groups/`)
+		.then((res) => res.json())
+		.then((res) => res.results ?? []);
+
 	const idpGroupMappings = await fetch(`${BASE_API_URL}/idp-group-mappings/`)
 		.then((res) => res.json())
 		.then((res) => res.results ?? []);
+
+	const idpGroupCreateForm = await superValidate(zod(IdPGroupSchema), {
+		errors: false
+	});
 
 	const idpGroupMappingCreateForm = await superValidate(zod(IdPGroupMappingSchema), {
 		errors: false
@@ -148,7 +157,9 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		secIntelFeedsModel,
 		webhookEndpoints,
 		webhookEndpointCreateForm,
+		idpGroups,
 		idpGroupMappings,
+		idpGroupCreateForm,
 		idpGroupMappingCreateForm,
 		groupSyncConfig,
 		scimTokens,
@@ -379,6 +390,56 @@ export const actions: Actions = {
 		);
 
 		return message(deleteForm, { status: res.status });
+	},
+	createIdpGroup: async (event) => {
+		const formData = await event.request.formData();
+		if (!formData) return fail(400, { form: null });
+
+		const form = await superValidate(formData, zod(IdPGroupSchema));
+		if (!form.valid) return fail(400, { form });
+
+		const response = await event.fetch(`${BASE_API_URL}/idp-groups/`, {
+			method: 'POST',
+			body: JSON.stringify(form.data)
+		});
+
+		if (!response.ok) return handleErrorResponse({ event, response, form });
+
+		setFlash({ type: 'success', message: m.idpGroupCreated() }, event);
+		return { form };
+	},
+	updateIdpGroup: async (event) => {
+		const formData = await event.request.formData();
+		if (!formData) return fail(400, { form: null });
+
+		const form = await superValidate(formData, zod(IdPGroupSchema));
+		if (!form.valid) return fail(400, { form });
+
+		const response = await event.fetch(`${BASE_API_URL}/idp-groups/${form.data.id}/`, {
+			method: 'PUT',
+			body: JSON.stringify(form.data)
+		});
+
+		if (!response.ok) return handleErrorResponse({ event, response, form });
+
+		setFlash({ type: 'success', message: m.idpGroupUpdated() }, event);
+		return { form };
+	},
+	deleteIdpGroup: async (event) => {
+		const formData = await event.request.formData();
+		const schema = z.object({ id: z.string() });
+		const deleteForm = await superValidate(formData, zod(schema));
+
+		if (!deleteForm.valid) return message(deleteForm, { status: 400 });
+
+		const res = await event.fetch(`${BASE_API_URL}/idp-groups/${deleteForm.data.id}/`, {
+			method: 'DELETE'
+		});
+
+		if (!res.ok) return message(deleteForm, { status: res.status });
+
+		setFlash({ type: 'success', message: m.idpGroupDeleted() }, event);
+		return message(deleteForm, { status: 200 });
 	},
 	createIdpGroupMapping: async (event) => {
 		const formData = await event.request.formData();

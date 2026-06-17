@@ -21,7 +21,8 @@ from rest_framework.parsers import JSONParser
 from rest_framework.renderers import JSONRenderer
 from rest_framework.viewsets import ViewSet
 
-from iam.models import Folder, IdPGroupMapping
+from iam import group_membership as gm
+from iam.models import Folder, IdPGroup
 
 from .permissions import IsSCIMToken
 from .schema_definitions import (
@@ -369,10 +370,10 @@ class SCIMUserViewSet(ViewSet):
 
 class SCIMGroupViewSet(ViewSet):
     """
-    SCIM Group endpoints. All operations route through IdPGroupMapping —
-    SCIM never creates UserGroups directly. The mapping table is the bridge
-    between the IdP-side identity and the CISO-side UserGroup; an admin
-    must define the mapping before a SCIM client can push the group.
+    SCIM Group endpoints. A SCIM Group is an IdPGroup (the external-side
+    identity); its routes (IdPGroupMapping) fan members out to one or more
+    CISO UserGroups. SCIM never creates UserGroups directly — an admin must
+    define the IdP group and its routes in CISO before the client pushes it.
     """
 
     authentication_classes = [SCIMTokenAuthentication]
@@ -388,11 +389,7 @@ class SCIMGroupViewSet(ViewSet):
         except (TypeError, ValueError):
             start_index, count = 1, 100
 
-        # Only mappings actively bound to a SCIM client (scim_external_id set)
-        # are visible to SCIM list/read. Unbound mappings are JWT-only.
-        qs = IdPGroupMapping.objects.filter(
-            scim_external_id__isnull=False
-        ).select_related("user_group").prefetch_related("user_group__user_set")
+        qs = IdPGroup.objects.all().order_by("external_group_id")
 
         if filter_str:
             attr, value = parse_filter(filter_str)
@@ -401,14 +398,14 @@ class SCIMGroupViewSet(ViewSet):
             elif attr == "externalid":
                 qs = qs.filter(scim_external_id=value)
             elif attr == "id":
-                qs = qs.filter(user_group__id=value)
+                qs = qs.filter(id=value)
             else:
                 qs = qs.none()
 
         total = qs.count()
         offset = start_index - 1
         page = list(qs[offset: offset + count])
-        resources = [scim_group_to_dict(m, request) for m in page]
+        resources = [scim_group_to_dict(g, request) for g in page]
         return _scim_response(
             scim_list_response(resources, total, start_index, len(resources))
         )
@@ -427,58 +424,52 @@ class SCIMGroupViewSet(ViewSet):
 
         external_id = data.get("externalId")
 
-        # Mapping lookup: stable SCIM ID first (rename-safe), then display name.
-        mapping = None
+        # Resolve the IdP group: stable SCIM id first (rename-safe), then label.
+        idp_group = None
         if external_id:
-            mapping = IdPGroupMapping.objects.filter(
-                scim_external_id=external_id
-            ).first()
-        if mapping is None:
-            mapping = IdPGroupMapping.objects.filter(
-                external_group_id=display_name
-            ).first()
+            idp_group = IdPGroup.objects.filter(scim_external_id=external_id).first()
+        if idp_group is None:
+            idp_group = IdPGroup.objects.filter(external_group_id=display_name).first()
 
-        if mapping is None:
+        if idp_group is None:
             logger.warning(
-                "SCIM: group push rejected (no mapping configured)",
+                "SCIM: group push rejected (no IdP group configured)",
                 display_name=display_name,
                 external_id=external_id,
             )
             return _scim_error_response(
-                f"No mapping configured for external group '{display_name}'. "
-                f"Create the IdP group mapping in CISO Assistant before "
-                f"pushing this group from the IdP.",
+                f"No IdP group configured for '{display_name}'. Create the IdP "
+                f"group and its mappings in CISO Assistant before pushing this "
+                f"group from the IdP.",
                 400,
                 "invalidValue",
             )
 
-        # Bind the stable SCIM identifier on first contact. From now on the
-        # IdP can rename external_group_id freely; the join key won't drift.
-        if external_id and not mapping.scim_external_id:
-            mapping.scim_external_id = external_id
-            mapping.save(update_fields=["scim_external_id"])
+        # Bind the IdP's opaque id on first contact. From now on the IdP can
+        # rename the group freely; the SCIM id is this row's stable PK.
+        if external_id and not idp_group.scim_external_id:
+            idp_group.scim_external_id = external_id
+            idp_group.save(update_fields=["scim_external_id"])
 
-        _apply_group_members_add(mapping.user_group, data.get("members", []))
+        gm.scim_add_members(idp_group, _member_ids(data.get("members", [])))
         logger.info(
-            "SCIM: group push routed via mapping",
-            mapping_id=str(mapping.id),
-            external_group_id=mapping.external_group_id,
-            user_group_id=str(mapping.user_group.id),
+            "SCIM: group push routed",
+            idp_group_id=str(idp_group.id),
+            external_group_id=idp_group.external_group_id,
             external_id=external_id,
         )
-        # 200 on idempotent hit, 201 if scim_external_id was just bound.
-        return _scim_response(scim_group_to_dict(mapping, request), 201)
+        return _scim_response(scim_group_to_dict(idp_group, request), 201)
 
     def retrieve(self, request, pk=None):
-        mapping = _get_scim_mapping_by_group_pk(pk)
-        if mapping is None:
+        idp_group = _get_idp_group_by_pk(pk)
+        if idp_group is None:
             return _scim_error_response(f"Group {pk} not found", 404)
-        return _scim_response(scim_group_to_dict(mapping, request))
+        return _scim_response(scim_group_to_dict(idp_group, request))
 
     def update(self, request, pk=None):
-        """PUT — full replace. Members list becomes the new membership."""
-        mapping = _get_scim_mapping_by_group_pk(pk)
-        if mapping is None:
+        """PUT — full replace. The members list becomes the new membership."""
+        idp_group = _get_idp_group_by_pk(pk)
+        if idp_group is None:
             return _scim_error_response(f"Group {pk} not found", 404)
         try:
             data = json.loads(request.body)
@@ -486,18 +477,16 @@ class SCIMGroupViewSet(ViewSet):
             return _scim_error_response("Invalid JSON body", 400, "invalidSyntax")
 
         display_name = data.get("displayName")
-        if display_name and display_name != mapping.external_group_id:
-            mapping.external_group_id = display_name
-            mapping.save(update_fields=["external_group_id"])
+        if display_name and display_name != idp_group.external_group_id:
+            idp_group.external_group_id = display_name
+            idp_group.save(update_fields=["external_group_id"])
 
-        group = mapping.user_group
-        group.user_set.clear()
-        _apply_group_members_add(group, data.get("members", []) or [])
-        return _scim_response(scim_group_to_dict(mapping, request))
+        gm.scim_set_members(idp_group, _member_ids(data.get("members", []) or []))
+        return _scim_response(scim_group_to_dict(idp_group, request))
 
     def partial_update(self, request, pk=None):
-        mapping = _get_scim_mapping_by_group_pk(pk)
-        if mapping is None:
+        idp_group = _get_idp_group_by_pk(pk)
+        if idp_group is None:
             return _scim_error_response(f"Group {pk} not found", 404)
         try:
             data = json.loads(request.body)
@@ -513,68 +502,59 @@ class SCIMGroupViewSet(ViewSet):
             operations_count=len(operations),
         )
 
-        group = mapping.user_group
-
         for op in operations:
             op_type = op.get("op", "").lower()
             path = op.get("path", "")
             value = op.get("value")
 
             if op_type == "add" and path == "members":
-                _apply_group_members_add(group, value or [])
+                gm.scim_add_members(idp_group, _member_ids(value or []))
             elif op_type == "remove":
                 if path == "members":
                     # Two flavors per RFC 7644 §3.5.2.2:
                     #   - {"op":"remove","path":"members"} with no value → remove ALL
-                    #   - {"op":"remove","path":"members","value":[{"value":"uuid"},...]}
+                    #   - {"op":"remove","path":"members","value":[{"value":"uuid"}]}
                     #     → remove only the listed members
                     if value:
-                        _apply_group_members_remove(group, value)
+                        gm.scim_remove_members(idp_group, _member_ids(value))
                     else:
-                        group.user_set.clear()
+                        gm.scim_set_members(idp_group, [])
                 else:
                     # Filter selector path, e.g. members[value eq "uuid"]
                     uid = _extract_member_filter_id(path)
                     if uid:
-                        try:
-                            group.user_set.remove(User.objects.get(id=uid))
-                        except User.DoesNotExist:
-                            pass
+                        gm.scim_remove_members(idp_group, [uid])
             elif op_type == "replace":
                 if path == "members":
-                    group.user_set.clear()
-                    _apply_group_members_add(group, value or [])
+                    gm.scim_set_members(idp_group, _member_ids(value or []))
                 elif path == "displayName" and value:
-                    # IdP renamed the group. Update the mapping label;
-                    # scim_external_id stays as the stable join key.
-                    mapping.external_group_id = value
-                    mapping.save(update_fields=["external_group_id"])
+                    # IdP renamed the group. Only the label changes; the
+                    # IdPGroup PK (the SCIM id) is the stable reference.
+                    idp_group.external_group_id = value
+                    idp_group.save(update_fields=["external_group_id"])
                 elif isinstance(value, dict):
                     if "displayName" in value:
-                        mapping.external_group_id = value["displayName"]
-                        mapping.save(update_fields=["external_group_id"])
+                        idp_group.external_group_id = value["displayName"]
+                        idp_group.save(update_fields=["external_group_id"])
                     if "members" in value:
-                        group.user_set.clear()
-                        _apply_group_members_add(group, value["members"] or [])
+                        gm.scim_set_members(
+                            idp_group, _member_ids(value["members"] or [])
+                        )
 
-        return _scim_response(scim_group_to_dict(mapping, request))
+        return _scim_response(scim_group_to_dict(idp_group, request))
 
     def destroy(self, request, pk=None):
         """
-        SCIM DELETE — release the group from SCIM management without
-        destroying the CISO-side UserGroup. We null scim_external_id so the
-        mapping reverts to JWT-only mode; existing memberships are preserved.
+        SCIM DELETE — remove the IdP group entirely: its routes and the
+        memberships it provisioned are dropped. A hand-added membership of the
+        same user to the same UserGroup survives (it is a separate manual
+        source).
         """
-        mapping = _get_scim_mapping_by_group_pk(pk)
-        if mapping is None:
+        idp_group = _get_idp_group_by_pk(pk)
+        if idp_group is None:
             return _scim_error_response(f"Group {pk} not found", 404)
-        mapping.scim_external_id = None
-        mapping.save(update_fields=["scim_external_id"])
-        logger.info(
-            "SCIM: group released from SCIM management",
-            group_id=pk,
-            mapping_id=str(mapping.id),
-        )
+        gm.delete_idp_group(idp_group)
+        logger.info("SCIM: group deleted", group_id=pk)
         return JsonResponse({}, status=204)
 
 
@@ -589,23 +569,22 @@ def _get_user_by_pk(pk):
         return None
 
 
-def _get_scim_mapping_by_group_pk(pk):
-    """
-    Resolve the SCIM-active IdPGroupMapping for a given UserGroup primary key.
-
-    A UserGroup may have several mappings, but only one with a non-null
-    scim_external_id is SCIM-bound at any time. Returns None if the UserGroup
-    is unknown or is not currently managed via SCIM.
-    """
+def _get_idp_group_by_pk(pk):
+    """Resolve the IdPGroup behind a SCIM Group id (the IdPGroup's own PK)."""
     try:
-        return (
-            IdPGroupMapping.objects.select_related("user_group")
-            .prefetch_related("user_group__user_set")
-            .filter(user_group_id=pk, scim_external_id__isnull=False)
-            .first()
-        )
-    except (ValueError, IdPGroupMapping.DoesNotExist):
+        return IdPGroup.objects.filter(id=pk).first()
+    except (ValueError, IdPGroup.DoesNotExist):
         return None
+
+
+def _member_ids(members):
+    """Extract user ids from a SCIM members array ([{"value": "<id>"}, ...])."""
+    ids = []
+    for member in members:
+        uid = member.get("value") if isinstance(member, dict) else member
+        if uid:
+            ids.append(str(uid))
+    return ids
 
 
 def _update_user_from_scim_data(user, data):
@@ -689,26 +668,6 @@ def _apply_user_replace_path(user, path, value):
         # Since we only persist one email, any such update writes user.email.
         if value:
             user.email = value
-
-
-def _apply_group_members_add(group, members):
-    for member in members:
-        uid = member.get("value")
-        if uid:
-            try:
-                group.user_set.add(User.objects.get(id=uid))
-            except (User.DoesNotExist, ValueError):
-                pass
-
-
-def _apply_group_members_remove(group, members):
-    for member in members:
-        uid = member.get("value") if isinstance(member, dict) else member
-        if uid:
-            try:
-                group.user_set.remove(User.objects.get(id=uid))
-            except (User.DoesNotExist, ValueError):
-                pass
 
 
 _MEMBER_FILTER_RE = re.compile(

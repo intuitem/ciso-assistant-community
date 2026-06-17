@@ -1,8 +1,8 @@
 <script lang="ts">
 	import Form from '$lib/components/Forms/Form.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import TextField from '$lib/components/Forms/TextField.svelte';
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
-	import { IdPGroupMappingSchema } from '$lib/utils/schemas';
+	import { IdPGroupSchema } from '$lib/utils/schemas';
 	import { m } from '$paraglide/messages';
 	import { onMount, tick } from 'svelte';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
@@ -15,16 +15,10 @@
 		parent: any;
 		form: any;
 		formAction?: string;
-		idpGroupLocked?: boolean;
 	}
 
 	const modalStore: ModalStore = getModalStore();
-	let {
-		parent,
-		form,
-		formAction = '?/createIdpGroupMapping',
-		idpGroupLocked = true
-	}: Props = $props();
+	let { parent, form, formAction = '?/createIdpGroup' }: Props = $props();
 
 	onMount(async () => {
 		await tick();
@@ -34,7 +28,7 @@
 
 	const _form = superForm(form, {
 		dataType: 'json',
-		validators: zod(IdPGroupMappingSchema),
+		validators: zod(IdPGroupSchema),
 		validationMethod: 'onsubmit',
 		onUpdated: async ({ form }) => {
 			if (form.valid && parent && typeof parent.onConfirm === 'function') {
@@ -70,23 +64,16 @@
 			{_form}
 			data={form}
 			dataType="json"
-			validators={zod(IdPGroupMappingSchema)}
+			validators={zod(IdPGroupSchema)}
 			action={formAction}
 		>
 			{#snippet children({ form })}
-				<AutocompleteSelect
+				<TextField
 					{form}
-					field="idp_group"
-					label={m.idpGroup()}
-					optionsEndpoint="idp-groups"
-					hidden={idpGroupLocked}
-				/>
-				<AutocompleteSelect
-					{form}
-					field="user_group"
-					label={m.userGroup()}
-					optionsEndpoint="user-groups"
+					field="external_group_id"
+					label={m.externalGroupId()}
 					data-focusindex="0"
+					helpText="The group name, UUID or DN exactly as sent by your IdP"
 				/>
 				<div class="flex flex-row justify-between space-x-4">
 					<button

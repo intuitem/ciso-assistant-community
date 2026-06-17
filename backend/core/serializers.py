@@ -1922,18 +1922,32 @@ class UserGroupWriteSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
-class _IdPGroupMappingMixin:
+class _FolderlessAdminMixin:
     """
-    IdPGroupMapping has no folder field, so folder-based RBAC does not apply.
-    Access is gated entirely at the ViewSet level (is_admin check in get_queryset).
-    Skip the folder permission check to avoid the root-folder fallback 403.
+    IdPGroup / IdPGroupMapping have no folder field, so folder-based RBAC does
+    not apply. Access is gated entirely at the ViewSet level (admin-only). Skip
+    the folder permission check to avoid the root-folder fallback 403.
     """
 
     def _check_object_perm(self, instance_or_data, action, *, folder=None):
         pass
 
 
-class IdPGroupMappingReadSerializer(_IdPGroupMappingMixin, BaseModelSerializer):
+class IdPGroupReadSerializer(_FolderlessAdminMixin, BaseModelSerializer):
+    class Meta:
+        model = IdPGroup
+        fields = "__all__"
+
+
+class IdPGroupWriteSerializer(_FolderlessAdminMixin, BaseModelSerializer):
+    class Meta:
+        model = IdPGroup
+        # scim_external_id is bound by the SCIM client, never edited by an admin.
+        fields = ["external_group_id"]
+
+
+class IdPGroupMappingReadSerializer(_FolderlessAdminMixin, BaseModelSerializer):
+    idp_group = FieldsRelatedField()
     user_group = FieldsRelatedField()
 
     class Meta:
@@ -1941,10 +1955,10 @@ class IdPGroupMappingReadSerializer(_IdPGroupMappingMixin, BaseModelSerializer):
         fields = "__all__"
 
 
-class IdPGroupMappingWriteSerializer(_IdPGroupMappingMixin, BaseModelSerializer):
+class IdPGroupMappingWriteSerializer(_FolderlessAdminMixin, BaseModelSerializer):
     class Meta:
         model = IdPGroupMapping
-        fields = "__all__"
+        fields = ["idp_group", "user_group"]
 
 
 class PermissionReadSerializer(BaseModelSerializer):

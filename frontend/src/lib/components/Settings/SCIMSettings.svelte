@@ -40,7 +40,10 @@
 		</h3>
 		<div class="flex items-center gap-2">
 			<code class="bg-gray-100 rounded px-3 py-1 text-sm flex-1 break-all">{scimEndpoint}</code>
-			<button class="btn btn-sm preset-outlined-surface-500" onclick={() => copyToClipboard(scimEndpoint)}>
+			<button
+				class="btn btn-sm preset-outlined-surface-500"
+				onclick={() => copyToClipboard(scimEndpoint)}
+			>
 				<i class="fa-solid fa-copy mr-1"></i>
 				{m.copy()}
 			</button>
@@ -64,7 +67,10 @@
 					{copied ? m.copied() : m.copy()}
 				</button>
 			</div>
-			<button class="btn btn-sm preset-outlined-surface-500 self-start" onclick={() => (newToken = null)}>
+			<button
+				class="btn btn-sm preset-outlined-surface-500 self-start"
+				onclick={() => (newToken = null)}
+			>
 				{m.close()}
 			</button>
 		</div>
@@ -113,7 +119,9 @@
 					{#each scimTokens as token (token.id)}
 						<tr class="border-t border-gray-100">
 							<td class="px-4 py-2">{token.name}</td>
-							<td class="px-4 py-2 text-xs text-gray-500">{new Date(token.created).toLocaleString()}</td>
+							<td class="px-4 py-2 text-xs text-gray-500"
+								>{new Date(token.created).toLocaleString()}</td
+							>
 							<td class="px-4 py-2 font-mono text-xs text-gray-500">{token.digest.slice(-8)}</td>
 							<td class="px-4 py-2 text-right">
 								<form

@@ -39,8 +39,7 @@
 		<Tabs.Trigger value="idpGroupMappings"
 			><i class="fa-solid fa-arrows-left-right"></i> {m.idpGroupMappings()}</Tabs.Trigger
 		>
-		<Tabs.Trigger value="scim"
-			><i class="fa-solid fa-cloud-arrow-down"></i> {m.scim()}</Tabs.Trigger
+		<Tabs.Trigger value="scim"><i class="fa-solid fa-cloud-arrow-down"></i> {m.scim()}</Tabs.Trigger
 		>
 		<Tabs.Trigger value="featureFlags"
 			><i class="fa-solid fa-flag"></i> {m.featureFlags()}</Tabs.Trigger
