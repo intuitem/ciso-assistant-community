@@ -5274,6 +5274,7 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             "objectives",  # ManyToManyField to OrganisationObjective
             "assets",  # ManyToManyField used in table
             "security_exceptions",  # Serialized as FieldsRelatedField
+            "incidents",  # Serialized as FieldsRelatedField
         )
 
     def get_serializer_class(self, **kwargs):
@@ -5314,13 +5315,8 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
         page = self.paginate_queryset(qs)
         objects = page if page is not None else qs
 
-        general_settings = GlobalSettings.objects.filter(name="general").first()
-        daily_rate = (
-            general_settings.value.get("daily_rate", 500) if general_settings else 500
-        )
-
         context = self.get_serializer_context()
-        context["daily_rate"] = daily_rate
+        context["daily_rate"] = GlobalSettings.get_daily_rate()
 
         serializer = AppliedControlBulkReadSerializer(
             objects, many=True, context=context
@@ -6296,11 +6292,7 @@ class ActionPlanBudgetOverview:
 
         # Single DB hit for daily_rate instead of N hits via ctrl.annual_cost
         _f = ActionPlanBudgetOverview._safe_float
-        general_settings = GlobalSettings.objects.filter(name="general").first()
-        daily_rate = _f(
-            general_settings.value.get("daily_rate", 500) if general_settings else 500,
-            500,
-        )
+        daily_rate = _f(GlobalSettings.get_daily_rate(), 500)
 
         currency = get_global_currency()
         fmt = lambda v: format_currency(v, currency)

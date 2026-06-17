@@ -3,18 +3,18 @@
 
 The `list` endpoint returns a lightweight serializer that drops per-row fields.
 Full fidelity comes either from the detail endpoint one object per call
-(MODE=detail, fetched concurrently) or from the bulk `/{resource}/full/`
-endpoint in a single request (MODE=bulk). Set CISO_RESOURCE to any model that
+(--mode detail, fetched concurrently) or from the bulk `/{resource}/full/`
+endpoint in a single request (--mode bulk). --resource can be any model that
 exposes a `/full/` action (e.g. applied-controls, assets).
 
-Usage:
-    export CISO_API_BASE="https://localhost:8443/api"
-    export CISO_PAT="your-personal-access-token"
-    export CISO_RESOURCE="applied-controls"   # or "assets"
-    export CISO_MODE="bulk"                    # or "detail"
-    python pull_full.py
+Dev-only utility: --ca-bundle defaults to "false" (TLS verification off) for
+localhost. Point it at a CA bundle before using against any real host.
+
+Every flag also reads from an env var, so `export CISO_* ...; python pull_full.py`
+still works; the flag wins when both are set. Run with --help for the full list.
 """
 
+import argparse
 import json
 import os
 import sys
@@ -23,32 +23,59 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import requests
 
-BASE = os.environ.get("CISO_API_BASE", "http://localhost:8000/api")
-PAT = os.environ.get("CISO_PAT", "")
-VERIFY = os.environ.get("CISO_CA_BUNDLE", "false")  # path to CA bundle, or "false"
-# url model to pull, e.g. "applied-controls" or "assets" (both expose /full/)
-RESOURCE = os.environ.get("CISO_RESOURCE", "applied-controls")
-OUTPUT = os.environ.get("CISO_OUTPUT", f"{RESOURCE.replace('-', '_')}_full.json")
-WORKERS = int(os.environ.get("CISO_WORKERS", "4"))
-# "detail" = N+1 per-id fetches; "bulk" = single /{resource}/full/ endpoint
-MODE = os.environ.get("CISO_MODE", "detail")
+# Set by main() from parsed args, used by the worker functions below.
+BASE = RESOURCE = OUTPUT = MODE = ""
+WORKERS = 4
+session = None
 
-if not PAT:
-    sys.exit("CISO_PAT is not set; export your Personal Access Token first.")
 
-# Normalize VERIFY: "false" -> False, "true" -> True, else treat as CA bundle path
-if VERIFY.lower() == "false":
-    VERIFY = False
-elif VERIFY.lower() == "true":
-    VERIFY = True
-
-session = requests.Session()
-session.headers.update({"Authorization": f"Token {PAT}"})
-session.verify = VERIFY
-# reuse connections across threads (keep-alive + reused TLS handshake)
-adapter = requests.adapters.HTTPAdapter(pool_connections=WORKERS, pool_maxsize=WORKERS)
-session.mount("https://", adapter)
-session.mount("http://", adapter)
+def build_parser():
+    p = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p.add_argument(
+        "--base",
+        default=os.environ.get("CISO_API_BASE", "http://localhost:8000/api"),
+        help="API base URL [env CISO_API_BASE]",
+    )
+    p.add_argument(
+        "--pat",
+        default=os.environ.get("CISO_PAT", ""),
+        help="Personal Access Token; prefer the env var to keep it out of "
+        "shell history [env CISO_PAT]",
+    )
+    p.add_argument(
+        "--resource",
+        default=os.environ.get("CISO_RESOURCE", "applied-controls"),
+        help="url model exposing /full/, e.g. applied-controls, assets "
+        "[env CISO_RESOURCE]",
+    )
+    p.add_argument(
+        "--mode",
+        choices=["detail", "bulk"],
+        default=os.environ.get("CISO_MODE", "detail"),
+        help="detail = N+1 per-id fetches (concurrent); bulk = single "
+        "/full/ request [env CISO_MODE]",
+    )
+    p.add_argument(
+        "--workers",
+        type=int,
+        default=int(os.environ.get("CISO_WORKERS", "4")),
+        help="concurrent workers for detail mode [env CISO_WORKERS]",
+    )
+    p.add_argument(
+        "--output",
+        default=os.environ.get("CISO_OUTPUT", ""),
+        help="output JSON path (default: <resource>_full.json) [env CISO_OUTPUT]",
+    )
+    p.add_argument(
+        "--ca-bundle",
+        default=os.environ.get("CISO_CA_BUNDLE", "false"),
+        help='TLS: CA bundle path, "true", or "false" (dev, no verify) '
+        "[env CISO_CA_BUNDLE]",
+    )
+    return p
 
 
 def get_all_ids(limit=5000):
@@ -118,7 +145,7 @@ def run_detail():
     return results, elapsed, t_ids
 
 
-def main():
+def run():
     t_start = time.perf_counter()
     t_ids = None
 
@@ -150,6 +177,38 @@ def main():
         print(f"  bulk fetch    : {t_fetch:.3f}s for {n} records", file=sys.stderr)
         print(f"                  {throughput:.0f} records/s", file=sys.stderr)
     print(f"  total         : {t_total:.3f}s", file=sys.stderr)
+
+
+def main():
+    args = build_parser().parse_args()
+    if not args.pat:
+        sys.exit("PAT not set; pass --pat or export CISO_PAT.")
+
+    global BASE, RESOURCE, OUTPUT, WORKERS, MODE, session
+    BASE = args.base
+    RESOURCE = args.resource
+    OUTPUT = args.output or f"{RESOURCE.replace('-', '_')}_full.json"
+    WORKERS = args.workers
+    MODE = args.mode
+
+    # Normalize: "false" -> False, "true" -> True, else treat as CA bundle path
+    verify = args.ca_bundle
+    if verify.lower() == "false":
+        verify = False
+    elif verify.lower() == "true":
+        verify = True
+
+    session = requests.Session()
+    session.headers.update({"Authorization": f"Token {args.pat}"})
+    session.verify = verify
+    # reuse connections across threads (keep-alive + reused TLS handshake)
+    adapter = requests.adapters.HTTPAdapter(
+        pool_connections=WORKERS, pool_maxsize=WORKERS
+    )
+    session.mount("https://", adapter)
+    session.mount("http://", adapter)
+
+    run()
 
 
 if __name__ == "__main__":

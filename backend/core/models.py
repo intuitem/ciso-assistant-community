@@ -5363,12 +5363,7 @@ class AppliedControl(
 
         # Get daily rate from global settings unless provided by the caller
         if daily_rate is None:
-            general_settings = GlobalSettings.objects.filter(name="general").first()
-            daily_rate = (
-                general_settings.value.get("daily_rate", 500)
-                if general_settings
-                else 500
-            )
+            daily_rate = GlobalSettings.get_daily_rate()
 
         # Calculate annual cost
         annual_cost = 0
