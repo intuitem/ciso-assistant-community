@@ -17,7 +17,7 @@ description: "Il Framework Nazionale per la Cybersecurity e la Data Protection, 
   \ in losing corresponding information."
 copyright: ACN
 version: 3
-publication_date: 2026-06-16
+publication_date: 2026-06-17
 provider: ACN
 packager: matteo.palli
 objects:
@@ -39,14 +39,8 @@ objects:
     - ref_id: E
       name: Essenziali
       description: Misure di sicurezza di base per i soggetti essenziali
-    - ref_id: REQUISITI
-      name: Requisiti
-      description: null
     - ref_id: REQ
       name: Requisiti non NIS
-      description: null
-    - ref_id: CONTROLLI
-      name: Controlli
       description: null
     - ref_id: IREQ
       name: Requisiti importanti
@@ -85,7 +79,6 @@ objects:
       description: "La missione dell'organizzazione \xE8 compresa e informa la gestione\
         \ del rischio di cybersecurity."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.oc-02
       assessable: true
@@ -96,7 +89,6 @@ objects:
         e aspettative riguardo la gestione del rischio di cybersecurity sono comprese
         e considerate.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.oc-03
       assessable: true
@@ -107,7 +99,6 @@ objects:
         \ compresi gli obblighi in materia di privacy e libert\xE0 civili, sono compresi\
         \ e gestiti."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.oc-04
       assessable: true
@@ -120,7 +111,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.oc-04.1
@@ -133,7 +123,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.oc-05
@@ -144,7 +133,6 @@ objects:
       description: "I risultati, le capacit\xE0 e i servizi dai quali l'organizzazione\
         \ dipende sono compresi e comunicati."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rm
       assessable: false
@@ -163,7 +151,6 @@ objects:
       description: Gli obiettivi di gestione del rischio sono stabiliti e accettati
         dagli stakeholder dell'organizzazione.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rm-02
       assessable: true
@@ -173,7 +160,6 @@ objects:
       description: Le dichiarazioni sulla tolleranza e la propensione al rischio sono
         stabilite, comunicate e mantenute.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rm-03
       assessable: true
@@ -185,7 +171,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rm-03.1
@@ -201,7 +186,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rm-04
@@ -212,7 +196,6 @@ objects:
       description: "\xC8 stabilita e comunicata la direzione strategica che descrive\
         \ le opzioni appropriate di risposta al rischio."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rm-05
       assessable: true
@@ -223,7 +206,6 @@ objects:
         per il rischio di cybersecurity, incluso il rischio derivante dai fornitori
         e da altre terze parti.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rm-06
       assessable: true
@@ -233,7 +215,6 @@ objects:
       description: "\xC8 stabilito e comunicato un metodo standardizzato per calcolare,\
         \ documentare, categorizzare e prioritizzare i rischi di cybersecurity."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rm-07
       assessable: true
@@ -243,7 +224,6 @@ objects:
       description: "Le opportunit\xE0 strategiche (i.e. i rischi positivi) sono caratterizzate\
         \ e incluse nelle discussioni sul rischio di cybersecurity dell'organizzazione."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rr
       assessable: false
@@ -263,7 +243,6 @@ objects:
         (accountable) per il rischio di cybersecurity e promuovono una cultura consapevole
         del rischio, etica e in continuo miglioramento.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rr-02
       assessable: true
@@ -276,7 +255,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rr-02.1
@@ -291,7 +269,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rr-02.2
@@ -305,7 +282,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rr-02.3
@@ -320,7 +296,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rr-02.4
@@ -336,7 +311,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rr-03
@@ -348,7 +322,6 @@ objects:
         \ di gestione del rischio di cybersecurity, ai ruoli, alle responsabilit\xE0\
         \ e alle politiche."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rr-04
       assessable: true
@@ -359,7 +332,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rr-04.1
@@ -374,7 +346,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rr-04.2
@@ -389,7 +360,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rr-04.3
@@ -402,7 +372,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rr-04.4
@@ -417,7 +386,6 @@ objects:
         prevedendo clausole in materia di riservatezza).
       implementation_groups:
       - E
-      - CONTROLLI
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rr-04.5
       assessable: true
@@ -428,7 +396,6 @@ objects:
         adottate e documentate le procedure in relazione al punto GV.RR-04.4.
       implementation_groups:
       - E
-      - CONTROLLI
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:dp-gv.rr-05
       assessable: true
@@ -439,7 +406,6 @@ objects:
         \ trattamento e la protezione dei dati personali sono stabiliti, comunicati,\
         \ compresi e applicati."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po
       assessable: false
@@ -460,7 +426,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1
@@ -482,7 +447,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.2
@@ -496,7 +460,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.3
@@ -509,7 +472,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-02
@@ -523,7 +485,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-02.1
@@ -539,7 +500,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-02.2
@@ -553,7 +513,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-02.3
@@ -565,7 +524,6 @@ objects:
         \ riesame di cui al punto GV.PO-02.1."
       implementation_groups:
       - E
-      - CONTROLLI
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.ov
       assessable: false
@@ -584,7 +542,6 @@ objects:
       description: I risultati della strategia di gestione del rischio di cybersecurity
         sono revisionati per informare e adeguare la strategia e la direzione.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.ov-02
       assessable: true
@@ -594,7 +551,6 @@ objects:
       description: "La strategia di gestione del rischio di cybersecurity \xE8 revisionata\
         \ e adeguata per garantire la copertura dei requisiti e dei rischi dell'organizzazione."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.ov-03
       assessable: true
@@ -604,7 +560,6 @@ objects:
       description: Le prestazioni relative alla gestione del rischio di cybersecurity
         dell'organizzazione sono valutate e revisionate per gli adeguamenti necessari.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc
       assessable: false
@@ -626,7 +581,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-01.1
@@ -648,7 +602,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-01.2
@@ -680,7 +633,6 @@ objects:
         \ sicurezza lungo la catena di fornitura."
       implementation_groups:
       - E
-      - CONTROLLI
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-02
       assessable: true
@@ -693,7 +645,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-02.1
@@ -708,7 +659,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-02.2
@@ -722,7 +672,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-03
@@ -734,7 +683,6 @@ objects:
         \ \xE8 integrata nella gestione del rischio dell'organizzazione e di cybersecurity,\
         \ nella valutazione del rischio e nei processi di miglioramento."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-04
       assessable: true
@@ -746,7 +694,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-04.1
@@ -761,7 +708,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-05
@@ -775,7 +721,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-05.1
@@ -791,7 +736,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-06
@@ -802,7 +746,6 @@ objects:
       description: Pianificazione e due diligence sono svolte per ridurre i rischi
         prima di intraprendere rapporti formali con i fornitori o altre terze parti.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-07
       assessable: true
@@ -815,7 +758,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-07.1
@@ -835,7 +777,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-07.2
@@ -848,7 +789,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-08
@@ -859,7 +799,6 @@ objects:
       description: "I fornitori e le altre terze parti rilevanti sono inclusi nelle\
         \ attivit\xE0 di pianificazione, risposta e ripristino relative agli incidenti."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-09
       assessable: true
@@ -871,7 +810,6 @@ objects:
         e le loro prestazioni sono monitorate durante l'intero ciclo di vita dei prodotti
         e dei servizi tecnologici.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-10
       assessable: true
@@ -882,7 +820,6 @@ objects:
         \ di approvvigionamento includono le disposizioni per le attivit\xE0 da svolgere\
         \ dopo la conclusione di un accordo di partnership o di servizio."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id
       assessable: false
@@ -909,7 +846,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.am-01.1
@@ -924,7 +860,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.am-02
@@ -937,7 +872,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.am-02.1
@@ -952,7 +886,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.am-03
@@ -964,7 +897,6 @@ objects:
         e dei flussi di dati di rete interni ed esterni, autorizzati dall'organizzazione.
       implementation_groups:
       - E
-      - REQUISITI
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.am-03.1
       assessable: true
@@ -976,7 +908,6 @@ objects:
         \ da attori interni al soggetto NIS."
       implementation_groups:
       - E
-      - CONTROLLI
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.am-04
       assessable: true
@@ -987,7 +918,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.am-04.1
@@ -1000,7 +930,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.am-05
@@ -1011,7 +940,6 @@ objects:
       description: "Gli asset sono prioritizzati in base alla categorizzazione, alla\
         \ criticit\xE0, alle risorse e all'impatto sulla missione."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.am-07
       assessable: true
@@ -1021,7 +949,6 @@ objects:
       description: Sono mantenuti gli inventari dei dati e dei relativi metadati per
         selezionati tipi di dati.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.am-08
       assessable: true
@@ -1031,7 +958,6 @@ objects:
       description: I sistemi, l'hardware, il software, i servizi e i dati sono gestiti
         durante il loro intero ciclo di vita.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:dp-id.am-09
       assessable: true
@@ -1040,7 +966,6 @@ objects:
       ref_id: DP-ID.AM-09
       description: I trattamenti di dati personali sono identificati e catalogati
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra
       assessable: false
@@ -1060,7 +985,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-01.1
@@ -1074,7 +998,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-01.2
@@ -1090,7 +1013,6 @@ objects:
         \ vulnerability assessment e/o penetration test."
       implementation_groups:
       - E
-      - CONTROLLI
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-01.3
       assessable: true
@@ -1103,7 +1025,6 @@ objects:
         \ vulnerabilit\xE0 rilevate e il relativo livello di impatto sulla sicurezza."
       implementation_groups:
       - E
-      - CONTROLLI
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-02
       assessable: true
@@ -1113,7 +1034,6 @@ objects:
       description: Le informazioni di cyber threat intelligence sono ricevute da forum
         e fonti di condivisione delle informazioni.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-03
       assessable: true
@@ -1123,7 +1043,6 @@ objects:
       description: Le minacce interne ed esterne all'organizzazione sono identificate
         e registrate.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-04
       assessable: true
@@ -1133,7 +1052,6 @@ objects:
       description: "I potenziali impatti e le probabilit\xE0 di sfruttamento delle\
         \ vulnerabilit\xE0 da parte delle minacce sono identificati e registrati."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-05
       assessable: true
@@ -1146,7 +1064,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-05.1
@@ -1163,7 +1080,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-05.2
@@ -1178,7 +1094,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-05.3
@@ -1191,7 +1106,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-05.4
@@ -1204,7 +1118,6 @@ objects:
         \ risolte e gli impatti conseguenti ad eventuali incidenti."
       implementation_groups:
       - E
-      - CONTROLLI
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-06
       assessable: true
@@ -1216,7 +1129,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-06.1
@@ -1234,7 +1146,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-06.2
@@ -1250,7 +1161,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-06.3
@@ -1264,7 +1174,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-07
@@ -1275,7 +1184,6 @@ objects:
       description: Le modifiche e le eccezioni sono gestite, valutate per il loro
         impatto sul rischio, registrate e tracciate.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-08
       assessable: true
@@ -1287,7 +1195,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-08.1
@@ -1302,7 +1209,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-08.2
@@ -1318,7 +1224,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-08.3
@@ -1336,7 +1241,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-08.4
@@ -1349,7 +1253,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-08.5
@@ -1361,7 +1264,6 @@ objects:
         dei fornitori del software ritenuto critico.
       implementation_groups:
       - E
-      - CONTROLLI
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-09
       assessable: true
@@ -1371,7 +1273,6 @@ objects:
       description: "L'autenticit\xE0 e l'integrit\xE0 di hardware e software sono\
         \ valutate prima dell'acquisizione e dell'uso."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-10
       assessable: true
@@ -1380,7 +1281,6 @@ objects:
       ref_id: ID.RA-10
       description: I fornitori critici sono valutati prima dell'acquisizione.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:dp-id.ra-11
       assessable: true
@@ -1390,7 +1290,6 @@ objects:
       description: Viene effettuata una valutazione di impatto sulla protezione dei
         dati personali.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.im
       assessable: false
@@ -1410,7 +1309,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.im-01.1
@@ -1426,7 +1324,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.im-01.2
@@ -1439,7 +1336,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.im-01.3
@@ -1453,7 +1349,6 @@ objects:
         \ e i relativi metodi di valutazione."
       implementation_groups:
       - E
-      - CONTROLLI
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.im-01.4
       assessable: true
@@ -1465,7 +1360,6 @@ objects:
         \ di cui al punto ID.IM-01.3."
       implementation_groups:
       - E
-      - CONTROLLI
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.im-02
       assessable: true
@@ -1476,7 +1370,6 @@ objects:
         di sicurezza, compresi quelli effettuati in coordinamento con i fornitori
         e le terze parti interessate.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.im-03
       assessable: true
@@ -1486,7 +1379,6 @@ objects:
       description: "Sono identificati miglioramenti dall'esecuzione di processi, procedure\
         \ e attivit\xE0 operativi."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.im-04
       assessable: true
@@ -1498,7 +1390,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.im-04.1
@@ -1515,7 +1406,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.im-04.2
@@ -1535,7 +1425,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.im-04.3
@@ -1552,7 +1441,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.im-04.4
@@ -1565,7 +1453,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.im-04.5
@@ -1580,7 +1467,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:dp-id.dm
@@ -1598,7 +1484,6 @@ objects:
       ref_id: DP-ID.DM-01
       description: "Il ciclo di vita dei dati \xE8 definito e documentato."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:dp-id.dm-02
       assessable: true
@@ -1608,7 +1493,6 @@ objects:
       description: Sono definiti, implementati e documentati i processi riguardanti
         l'informazione dell'interessato in merito al trattamento dei dati.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:dp-id.dm-03
       assessable: true
@@ -1618,7 +1502,6 @@ objects:
       description: Sono definiti, implementati e documentati i processi di raccolta
         e revoca del consenso dell'interessato al trattamento di dati.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:dp-id.dm-04
       assessable: true
@@ -1628,7 +1511,6 @@ objects:
       description: Sono definiti, implementati e documentati i processi per l'esercizio
         dei diritti (accesso, rettifica, cancellazione, ecc.) dell'interessato.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:dp-id.dm-05
       assessable: true
@@ -1638,7 +1520,6 @@ objects:
       description: Sono definiti, implementati e documentati i processi di trasferimento
         dei dati in ambito internazionale.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr
       assessable: false
@@ -1666,7 +1547,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-01.1
@@ -1682,7 +1562,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-01.2
@@ -1696,7 +1575,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-01.3
@@ -1710,7 +1588,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-01.4
@@ -1724,7 +1601,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-02
@@ -1735,7 +1611,6 @@ objects:
       description: "Le identit\xE0 sono verificate e associate alle credenziali in\
         \ base al contesto delle interazioni."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-03
       assessable: true
@@ -1746,7 +1621,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-03.1
@@ -1762,7 +1636,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-03.2
@@ -1776,7 +1649,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-03.3
@@ -1789,7 +1661,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-04
@@ -1799,7 +1670,6 @@ objects:
       ref_id: PR.AA-04
       description: "Le asserzioni di identit\xE0 sono protette, trasmesse e verificate."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-05
       assessable: true
@@ -1812,7 +1682,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-05.1
@@ -1826,7 +1695,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-05.2
@@ -1840,7 +1708,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-05.3
@@ -1853,7 +1720,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-06
@@ -1866,7 +1732,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-06.1
@@ -1879,7 +1744,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-06.2
@@ -1892,7 +1756,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.at
@@ -1915,7 +1778,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.at-01.1
@@ -1932,7 +1794,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.at-01.2
@@ -1945,7 +1806,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.at-01.3
@@ -1959,7 +1819,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.at-02
@@ -1972,7 +1831,6 @@ objects:
         i pertinenti compiti tenendo conto dei rischi di cybersecurity.
       implementation_groups:
       - E
-      - REQUISITI
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.at-02.1
       assessable: true
@@ -1988,7 +1846,6 @@ objects:
         \ tenere in caso di eventi rilevanti per la sicurezza."
       implementation_groups:
       - E
-      - CONTROLLI
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.at-02.2
       assessable: true
@@ -2000,7 +1857,6 @@ objects:
         \ contenuti e l'elenco delle verifiche svolte laddove previste."
       implementation_groups:
       - E
-      - CONTROLLI
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds
       assessable: false
@@ -2021,7 +1877,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds-01.1
@@ -2038,7 +1893,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds-01.2
@@ -2053,7 +1907,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds-01.3
@@ -2066,7 +1919,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds-02
@@ -2079,7 +1931,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds-02.1
@@ -2096,7 +1947,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds-02.2
@@ -2109,7 +1959,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds-10
@@ -2120,7 +1969,6 @@ objects:
       description: "La riservatezza, l'integrit\xE0 e la disponibilit\xE0 dei dati\
         \ in uso (data-in-use) sono protette."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds-11
       assessable: true
@@ -2131,7 +1979,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds-11.1
@@ -2147,7 +1994,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds-11.2
@@ -2160,7 +2006,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds-11.3
@@ -2173,7 +2018,6 @@ objects:
         \ mediante adeguata protezione fisica dei supporti ovvero mediante cifratura."
       implementation_groups:
       - E
-      - CONTROLLI
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds-11.4
       assessable: true
@@ -2185,7 +2029,6 @@ objects:
         \ ripristino."
       implementation_groups:
       - E
-      - CONTROLLI
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds-11.5
       assessable: true
@@ -2196,7 +2039,6 @@ objects:
         adottate e documentate le procedure in relazione ai punti PR.DS-11.3 e PR.DS-11.4.
       implementation_groups:
       - E
-      - CONTROLLI
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps
       assessable: false
@@ -2216,7 +2058,6 @@ objects:
       description: Sono stabilite e applicate pratiche di gestione della configurazione.
       implementation_groups:
       - E
-      - REQUISITI
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-01.1
       assessable: true
@@ -2228,7 +2069,6 @@ objects:
         sicure (hardened).
       implementation_groups:
       - E
-      - CONTROLLI
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-01.2
       assessable: true
@@ -2239,7 +2079,6 @@ objects:
         adottate e documentate le procedure in relazione al punto PR.PS-01.1.
       implementation_groups:
       - E
-      - CONTROLLI
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-02
       assessable: true
@@ -2250,7 +2089,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-02.1
@@ -2264,7 +2102,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-02.2
@@ -2279,7 +2116,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-02.3
@@ -2292,7 +2128,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-02.4
@@ -2306,7 +2141,6 @@ objects:
         \ in ambiente di test prima dell\u2019effettivo impiego in ambiente operativo."
       implementation_groups:
       - E
-      - CONTROLLI
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-02.5
       assessable: true
@@ -2317,7 +2151,6 @@ objects:
         adottate e documentate le procedure in relazione al punto PR.PS-02.4.
       implementation_groups:
       - E
-      - CONTROLLI
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-03
       assessable: true
@@ -2327,7 +2160,6 @@ objects:
       description: "L'hardware \xE8 mantenuto, sostituito e rimosso in base al rischio."
       implementation_groups:
       - E
-      - REQUISITI
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-03.1
       assessable: true
@@ -2339,7 +2171,6 @@ objects:
         atti alla memorizzazione di dati in modo sicuro.
       implementation_groups:
       - E
-      - CONTROLLI
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-03.2
       assessable: true
@@ -2350,7 +2181,6 @@ objects:
         \ uno o pi\xF9 registri delle manutenzioni effettuate sull'hardware."
       implementation_groups:
       - E
-      - CONTROLLI
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-04
       assessable: true
@@ -2362,7 +2192,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-04.1
@@ -2375,7 +2204,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-04.2
@@ -2390,7 +2218,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-04.3
@@ -2404,7 +2231,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-04.4
@@ -2417,7 +2243,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-05
@@ -2427,7 +2252,6 @@ objects:
       ref_id: PR.PS-05
       description: Sono impedite l'installazione ed esecuzione di software non autorizzato.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-06
       assessable: true
@@ -2439,7 +2263,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-06.1
@@ -2452,7 +2275,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ir
@@ -2474,7 +2296,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ir-01.1
@@ -2488,7 +2309,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ir-01.2
@@ -2502,7 +2322,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ir-01.3
@@ -2515,7 +2334,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ir-01.4
@@ -2529,7 +2347,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ir-02
@@ -2540,7 +2357,6 @@ objects:
       description: Gli asset tecnologici dell'organizzazione sono protetti dalle minacce
         ambientali.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ir-03
       assessable: true
@@ -2551,7 +2367,6 @@ objects:
         in situazioni normali e avverse.
       implementation_groups:
       - E
-      - REQUISITI
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ir-03.1
       assessable: true
@@ -2562,7 +2377,6 @@ objects:
         misura ID.RA-05, sono utilizzati sistemi di comunicazione di emergenza protetti.
       implementation_groups:
       - E
-      - CONTROLLI
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ir-03.2
       assessable: true
@@ -2573,7 +2387,6 @@ objects:
         adottate e documentate le procedure in relazione al punto PR.IR-03.1.
       implementation_groups:
       - E
-      - CONTROLLI
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ir-04
       assessable: true
@@ -2583,7 +2396,6 @@ objects:
       description: "\xC8 mantenuta un'adeguata capacit\xE0 di risorse per garantire\
         \ la disponibilit\xE0."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de
       assessable: false
@@ -2610,7 +2422,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.cm-01.1
@@ -2624,7 +2435,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.cm-01.2
@@ -2638,7 +2448,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.cm-01.3
@@ -2651,7 +2460,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.cm-01.4
@@ -2664,7 +2472,6 @@ objects:
         inclusa la posta elettronica).
       implementation_groups:
       - E
-      - CONTROLLI
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.cm-01.5
       assessable: true
@@ -2679,7 +2486,6 @@ objects:
         \ di sicurezza informatica."
       implementation_groups:
       - E
-      - CONTROLLI
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.cm-01.6
       assessable: true
@@ -2692,7 +2498,6 @@ objects:
         privilegi concessi.
       implementation_groups:
       - E
-      - CONTROLLI
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.cm-01.7
       assessable: true
@@ -2704,7 +2509,6 @@ objects:
         e DE.CM-01.6.
       implementation_groups:
       - E
-      - CONTROLLI
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.cm-02
       assessable: true
@@ -2714,7 +2518,6 @@ objects:
       description: "L'ambiente fisico \xE8 monitorato per individuare eventi potenzialmente\
         \ avversi."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.cm-03
       assessable: true
@@ -2724,7 +2527,6 @@ objects:
       description: "L'attivit\xE0 del personale e l'utilizzo della tecnologia, sono\
         \ monitorati per individuare eventi potenzialmente avversi."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.cm-06
       assessable: true
@@ -2734,7 +2536,6 @@ objects:
       description: "Le attivit\xE0 e i servizi dei fornitori di servizi esterni sono\
         \ monitorati per individuare eventi potenzialmente avversi."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.cm-09
       assessable: true
@@ -2746,7 +2547,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.cm-09.1
@@ -2760,7 +2560,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.cm-09.2
@@ -2773,7 +2572,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.ae
@@ -2793,7 +2591,6 @@ objects:
       description: "Gli eventi potenzialmente avversi sono analizzati per meglio comprenderne\
         \ le attivit\xE0 associate."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.ae-03
       assessable: true
@@ -2802,7 +2599,6 @@ objects:
       ref_id: DE.AE-03
       description: "Le informazioni sono correlate da pi\xF9 fonti."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.ae-04
       assessable: true
@@ -2811,7 +2607,6 @@ objects:
       ref_id: DE.AE-04
       description: L'impatto e la portata stimati degli eventi avversi sono compresi.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.ae-06
       assessable: true
@@ -2821,7 +2616,6 @@ objects:
       description: Le informazioni sugli eventi avversi sono fornite al personale
         e agli strumenti autorizzati.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.ae-07
       assessable: true
@@ -2831,7 +2625,6 @@ objects:
       description: La cyber threat intelligence e le altre informazioni contestuali
         sono integrate nell'analisi.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.ae-08
       assessable: true
@@ -2841,7 +2634,6 @@ objects:
       description: Gli incidenti sono dichiarati quando gli eventi avversi soddisfano
         i criteri definiti per gli incidenti.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs
       assessable: false
@@ -2867,7 +2659,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-01.1
@@ -2889,7 +2680,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-01.2
@@ -2902,7 +2692,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-01.3
@@ -2917,7 +2706,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-02
@@ -2927,7 +2715,6 @@ objects:
       ref_id: RS.MA-02
       description: I report sugli incidenti sono sottoposti a triage e convalidati.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-03
       assessable: true
@@ -2936,7 +2723,6 @@ objects:
       ref_id: RS.MA-03
       description: Gli incidenti sono categorizzati e prioritizzati.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-04
       assessable: true
@@ -2947,7 +2733,6 @@ objects:
         \ con risorse crescenti) o elevati (passati in gestione a un livello superiore)\
         \ a seconda delle necessit\xE0."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-05
       assessable: true
@@ -2956,7 +2741,6 @@ objects:
       ref_id: RS.MA-05
       description: Sono applicati i criteri per l'avvio del ripristino dagli incidenti.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.an
       assessable: false
@@ -2974,7 +2758,6 @@ objects:
       description: "\xC8 eseguita un'analisi per stabilire cosa \xE8 avvenuto durante\
         \ un incidente e la causa principale dell'incidente."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.an-06
       assessable: true
@@ -2984,7 +2767,6 @@ objects:
       description: "Le azioni eseguite durante un'investigazione sono registrate e\
         \ l'integrit\xE0 e la provenienza delle registrazioni sono preservate."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.an-07
       assessable: true
@@ -2994,7 +2776,6 @@ objects:
       description: "I dati e i metadati degli incidenti sono raccolti e la loro integrit\xE0\
         \ e provenienza sono preservate."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.an-08
       assessable: true
@@ -3003,7 +2784,6 @@ objects:
       ref_id: RS.AN-08
       description: "La magnitudo di un incidente \xE8 stimata e convalidata."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.co
       assessable: false
@@ -3022,7 +2802,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.co-02.1
@@ -3044,7 +2823,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.co-02.2
@@ -3058,7 +2836,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.co-03
@@ -3069,7 +2846,6 @@ objects:
       description: Le informazioni sono condivise con gli stakeholder interni ed esterni
         designati.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:dp-rs.co-06
       assessable: true
@@ -3080,7 +2856,6 @@ objects:
         \ sono documentati ed eventualmente vengono informate le autorit\xE0 di riferimento\
         \ e gli interessati."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.mi
       assessable: false
@@ -3097,7 +2872,6 @@ objects:
       ref_id: RS.MI-01
       description: Gli incidenti vengono contenuti.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.mi-02
       assessable: true
@@ -3106,7 +2880,6 @@ objects:
       ref_id: RS.MI-02
       description: Gli incidenti vengono eradicati.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc
       assessable: false
@@ -3133,7 +2906,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - REQUISITI
       - IREQ
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.rp-01.1
@@ -3149,7 +2921,6 @@ objects:
       implementation_groups:
       - I
       - E
-      - CONTROLLI
       - ICONT
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.rp-02
@@ -3160,7 +2931,6 @@ objects:
       description: Le azioni di ripristino sono selezionate, contestualizzate, prioritizzate
         e eseguite.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.rp-03
       assessable: true
@@ -3170,7 +2940,6 @@ objects:
       description: "L'integrit\xE0 dei backup e delle altre risorse di ripristino\
         \ \xE8 verificata prima che siano utilizzati per il ripristino."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.rp-04
       assessable: true
@@ -3181,7 +2950,6 @@ objects:
         del rischio di cybersecurity sono considerate per stabilire le norme operative
         post-incidente.
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.rp-05
       assessable: true
@@ -3191,7 +2959,6 @@ objects:
       description: "L'integrit\xE0 degli asset ripristinati \xE8 verificata, i sistemi\
         \ e i servizi sono ripristinati e lo stato operativo normale viene confermato."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.rp-06
       assessable: true
@@ -3202,7 +2969,6 @@ objects:
         \ sulla base di criteri definiti e la documentazione relativa all'incidente\
         \ \xE8 completata."
       implementation_groups:
-      - REQUISITI
       - REQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.co
       assessable: false
@@ -3222,7 +2988,6 @@ objects:
         \ designati."
       implementation_groups:
       - E
-      - REQUISITI
       - EREQ
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.co-03.1
       assessable: true
@@ -3234,7 +2999,6 @@ objects:
         \ NIS, le attivit\xE0 di ripristino a seguito di un incidente."
       implementation_groups:
       - E
-      - CONTROLLI
       - ECONT
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.co-04
       assessable: true
@@ -3244,5 +3008,4 @@ objects:
       description: "Gli aggiornamenti pubblici sul ripristino dagli incidenti sono\
         \ condivisi utilizzando modalit\xE0 e messaggi approvati."
       implementation_groups:
-      - REQUISITI
       - REQ
