@@ -33,7 +33,6 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import { Switch } from '@skeletonlabs/skeleton-svelte';
-	import { type SuperForm } from 'sveltekit-superforms';
 	import type { Actions, PageData } from './$types';
 	import TableOfContents from '$lib/components/TableOfContents/TableOfContents.svelte';
 	import { type TocItem } from '$lib/utils/toc';
@@ -217,14 +216,18 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	function modalMeasureCreateForm(createform: SuperForm<any>): void {
+	function modalMeasureCreateForm(requirementAssessment: Record<string, any>): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
 			props: {
-				form: createform,
+				form: data.measureCreateForm,
 				formAction: `${actionPath}?/createAppliedControl`,
 				invalidateAll: invalidateAllBool,
 				model: data.measureModel,
+				additionalInitialData: {
+					requirement_assessments: [requirementAssessment.id],
+					folder: requirementAssessment.folder.id
+				},
 				debug: false
 			}
 		};
@@ -236,14 +239,18 @@
 		modalStore.trigger(modal);
 	}
 
-	function modalEvidenceCreateForm(createform: SuperForm<any>): void {
+	function modalEvidenceCreateForm(requirementAssessment: Record<string, any>): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
 			props: {
-				form: createform,
+				form: data.evidenceCreateForm,
 				formAction: `${actionPath}?/createEvidence`,
 				invalidateAll: invalidateAllBool,
 				model: data.evidenceModel,
+				additionalInitialData: {
+					requirement_assessments: [requirementAssessment.id],
+					folder: requirementAssessment.folder.id
+				},
 				debug: false
 			}
 		};
@@ -1134,8 +1141,7 @@
 														emptyLabel: m.noAppliedControlYet(),
 														createLabel: m.addAppliedControl(),
 														selectLabel: m.selectAppliedControls(),
-														onCreate: () =>
-															modalMeasureCreateForm(requirementAssessment.measureCreateForm),
+														onCreate: () => modalMeasureCreateForm(requirementAssessment),
 														onSelect: () =>
 															modalUpdateForm(requirementAssessment, 'selectAppliedControls')
 													})}
@@ -1152,8 +1158,7 @@
 														createTestId: 'create-evidence-button',
 														selectTestId: 'select-evidence-button',
 														linkTestId: 'evidence-link',
-														onCreate: () =>
-															modalEvidenceCreateForm(requirementAssessment.evidenceCreateForm),
+														onCreate: () => modalEvidenceCreateForm(requirementAssessment),
 														onSelect: () =>
 															modalUpdateForm(requirementAssessment, 'selectEvidences')
 													})}
