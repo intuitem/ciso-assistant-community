@@ -251,7 +251,7 @@ Read more here: [AI engine](backend/chat/README.md)
 106. OWASP Top 10 Web - Threat catalog 🐝🌐
 107. OWASP MAS Threat Modelling Guide - Threat catalog 🐝📱
 108. CISA Cybersecurity Performance Goals (CPG) v2.0 🇺🇸
-109. ANSSI : Référentiel Cyber France pour la réglmentation NIS2 (ReCyF) 🇫🇷
+109. ANSSI : Référentiel Cyber France pour la réglementation NIS2 (ReCyF) 🇫🇷
 110. Cadre Conformité Cyber France (3CF) v3.1 (2026) ✈️🇫🇷
 111. Règles OIV - Secteur « Transport aérien » (2016) ✈️🇫🇷
 112. IEC 62443 series — parts 2-1, 2-4, 3-2, 3-3, 4-1, 4-2 🏭🌐
@@ -261,6 +261,7 @@ Read more here: [AI engine](backend/chat/README.md)
 116. Référentiel HAS - Certification des établissements de santé pour la qualité des soins 🇫🇷🏥
 117. Personal Data Protection Law (PDPL) 🇸🇦
 118. NCSC - Cyber Assessment Framework (CAF) v4.0 🇬🇧
+119. Algemene Beveiligingseisen voor Rijksoverheidsopdrachten (ABRO) 2026 🇳🇱
 
 ### Community contributions
 
@@ -389,19 +390,20 @@ For the following executions, use "docker compose up" directly.
 ## Setting up CISO Assistant for development
 
 > [!WARNING]
+>
 > ### Important note for Windows users
+>
 > The best working solution for users developing on **Windows** is to use [Ubuntu](https://apps.microsoft.com/detail/9pdxgncfsczv) installed on [WSL2](https://apps.microsoft.com/detail/9p9tqf7mrm4r) (Docker is not required).
 >
 > It is now also possible to run and develop CISO Assistant natively on Windows without WSL2 nor Docker, but it will require some extra steps.
 > Please note that the native running on Windows is still in **EXPERIMENTAL PHASE** and should **NOT** be used if you are unsure of what you are doing, or if you want to ensure stability throughout development.
 > Nevertheless, we would love to hear any suggestions in order to enhance the development experience for Windows users. Please feel free to open an Issue/PR about it!
 
-
 ### Requirements
 
 - Python 3.14+
 - pip 25.3+
-- poetry 2.0+
+- uv 0.9+
 - node 24+
 - npm 10.2+
 - pnpm 10.30+
@@ -417,25 +419,27 @@ pacman -S mingw-w64-ucrt-x86_64-file mingw-w64-ucrt-x86_64-pango
 ```
 
 You will also have to add those 2 system environment variables after installing the dependencies:
+
 ```conf
 MAGIC=Full path to the `magic.mgc` file (usually `C:\msys64\ucrt64\share\misc\magic.mgc`)
 WEASYPRINT_DLL_DIRECTORIES=Same path as your MSYS2 UCRT64 binaries
 ```
 
-
 Given that the default encoding on Windows isn't `UTF-8` but `cp1252`, certain python script printing `UTF-8` characters such as emojis may cause the backend crash or malfunction in some cases (e.g. library importation).
 To avoid this issue with this project, enforce the `UTF-8` encoding by adding these 2 user environment variables:
+
 ```conf
 PYTHONUTF8=1
 PYTHONIOENCODING=utf-8:replace
 ```
 
 > [!NOTE]
+>
 > ### Known issues
+>
 > - The `libmagic` library on Windows (MIME detection) struggles to recognize an Excel file (`.xlsx`) by reading its first `2048` bits as it returns `application/octet-stream` most of the time when importing an Excel library (backend displays the warning message `[warning  ] Invalid MIME type`). This doesn't prevent the Excel file from being imported thanks to the fallback method in `backend/library/views.py:StoredLibraryViewSet.upload_library`.
 
 </details>
-
 
 ### Running the backend
 
@@ -547,6 +551,11 @@ export ENABLE_SANDBOX=True  # optional, default value is True in production enfi
 # Logging configuration
 export LOG_LEVEL=INFO # optional, default value is INFO. Available options: DEBUG, INFO, WARNING, ERROR, CRITICAL
 export LOG_FORMAT=plain # optional, default value is plain. Available options: json, plain
+# LOG_FORMAT=json emits one JSON object per line (timestamp, level, logger, event, ...),
+# which SIEMs (Splunk, Sentinel, ADX) ingest natively without custom parsing.
+# Set the same LOG_FORMAT=json on the frontend container to get structured JSON
+# from the SvelteKit SSR process (auth events, errors) on the same schema; the
+# backend and huey worker share this setting automatically.
 
 # Authentication options
 export AUTH_TOKEN_TTL=3600 # optional, default value is 3600 seconds (60 minutes). It defines the time to live of the authentication token
@@ -554,25 +563,15 @@ export AUTH_TOKEN_AUTO_REFRESH=True # optional, default value is True. It define
 export AUTH_TOKEN_AUTO_REFRESH_TTL=36000 # optional, default value is 36000 seconds (10 hours). It defines the time to live of the authentication token after auto refresh. You can disable it by setting it to 0.
 ```
 
-3. Install poetry
+3. Install uv
 
-Visit the poetry website for instructions: <https://python-poetry.org/docs/#installation>
+Visit the uv website for instructions: <https://docs.astral.sh/uv/getting-started/installation/>
 
-<details>
-<summary>[EXPERIMENTAL] How to install Poetry natively on Windows?</summary>
-
-```shell
-python -m pip install --user pipx
-pipx install poetry
-```
-
-</details>
-
-
-4. Install required dependencies.
+4. Move to backend and install required dependencies.
 
 ```sh
-poetry install
+cd backend
+uv sync
 ```
 
 5. Recommended: Install the pre-commit hooks.
@@ -605,7 +604,7 @@ pre-commit install
 8. Apply migrations.
 
 ```sh
-poetry run python manage.py migrate
+uv run python manage.py migrate
 ```
 
 9. Create a Django superuser, that will be CISO Assistant administrator.
@@ -613,13 +612,13 @@ poetry run python manage.py migrate
 > If you have set a mailer and CISO_SUPERUSER_EMAIL variable, there's no need to create a Django superuser with `createsuperuser`, as it will be created automatically on first start. You should receive an email with a link to setup your password.
 
 ```sh
-poetry run python manage.py createsuperuser
+uv run python manage.py createsuperuser
 ```
 
 10. Run development server.
 
 ```sh
-poetry run python manage.py runserver
+uv run python manage.py runserver
 ```
 
 <details>
@@ -689,15 +688,15 @@ find . -path "*/migrations/*.pyc"  -delete
 After a change (or a clean), it is necessary to re-generate migration files:
 
 ```sh
-poetry run python manage.py makemigrations
-poetry run python manage.py migrate
+uv run python manage.py makemigrations
+uv run python manage.py migrate
 ```
 
 These migration files should be tracked by version control.
 
 ### Test suite
 
-To run API tests on the backend, simply type `poetry run pytest` in a shell in the backend folder.
+To run API tests on the backend, simply type `uv run pytest` in a shell in the backend folder.
 
 To run functional tests on the frontend, do the following actions:
 
@@ -743,6 +742,7 @@ Set `DJANGO_DEBUG=False` for security reasons.
 ### Non-root docker containers
 
 docker-compose.yml now relies on a non-root user 1001:1001, which is available in the image. Older deployments are using root user, which is still supported. To transition to non-root, use the following steps in the host:
+
 - docker compose down
 - update the docker-compose.yml file
 - sudo chown -R 1001:1001 db

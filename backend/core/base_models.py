@@ -1,7 +1,7 @@
 from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 from django.urls.base import reverse_lazy
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 import uuid
 
 
@@ -31,6 +31,24 @@ class AbstractBaseModel(models.Model):
     def __str__(self) -> str:
         return self.name if hasattr(self, "name") and self.name else str(self.id)
 
+    def get_additional_data(self) -> dict:
+        # Attached to every django-auditlog LogEntry at creation (create/update/
+        # delete and m2m). Runs with the instance in memory, so the folder is
+        # captured even on delete — used to scope audit events forwarded to SIEMs.
+        folder_id = getattr(self, "folder_id", None)
+        if folder_id is None:
+            from iam.models import Folder
+
+            # Runs in auditlog's synchronous delete receiver: a cascade may have
+            # already removed the FK target get_folder traverses, raising
+            # DoesNotExist. Never let metadata enrichment break the delete.
+            try:
+                folder = Folder.get_folder(self)
+                folder_id = folder.id if folder else None
+            except ObjectDoesNotExist:
+                folder_id = None
+        return {"folder_id": str(folder_id) if folder_id else None}
+
     def is_unique_in_scope(self, scope: models.QuerySet, fields_to_check: list) -> bool:
         """
         Checks if the object is unique in the given scope based on the given fields.
@@ -50,6 +68,10 @@ class AbstractBaseModel(models.Model):
         for field in fields_to_check:
             if hasattr(self, field):
                 field_value = getattr(self, field)
+                # Blank/None values are not meaningful identifiers and must not
+                # collide with each other (e.g. an optional ref_id left empty).
+                if field_value is None or field_value == "":
+                    continue
                 model_field = self._meta.get_field(field)
 
                 # Use the appropriate lookup based on the field type
@@ -66,6 +88,9 @@ class AbstractBaseModel(models.Model):
                     filters[f"{field}__exact"] = field_value
                 else:
                     filters[f"{field}__iexact"] = field_value
+
+        if not filters:
+            return True
 
         return not scope.filter(**filters).exists()
 

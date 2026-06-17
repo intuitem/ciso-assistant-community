@@ -945,7 +945,7 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
 
             try:
                 folder = Folder.objects.get(id=uuid.UUID(str(folder_id)))
-            except (ValueError, AttributeError, Folder.DoesNotExist):
+            except ValueError, AttributeError, Folder.DoesNotExist:
                 return Response(
                     {"error": "Folder not found"},
                     status=status.HTTP_404_NOT_FOUND,

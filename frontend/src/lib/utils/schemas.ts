@@ -97,7 +97,8 @@ const nameSchema = z
 	.string({
 		error: 'Name is required'
 	})
-	.min(1);
+	.min(1)
+	.max(200);
 
 const descriptionSchema = z.string().optional().nullable();
 
@@ -670,6 +671,7 @@ export const FeatureFlagsSchema = z.object({
 	validation_flows: z.boolean().optional(),
 	focus_mode: z.boolean().optional(),
 	outgoing_webhooks: z.boolean().optional(),
+	audit_log_forwarding: z.boolean().optional(),
 	metrology: z.boolean().optional(),
 	personal_data: z.boolean().optional(),
 	purposes: z.boolean().optional(),
@@ -682,7 +684,8 @@ export const FeatureFlagsSchema = z.object({
 	journeys: z.boolean().optional(),
 	policy_documents: z.boolean().optional(),
 	security_advisories: z.boolean().optional(),
-	cwes: z.boolean().optional()
+	cwes: z.boolean().optional(),
+	object_audit_trail: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
@@ -987,7 +990,7 @@ export const dataBreachSchema = z.object({
 
 export const purposeSchema = z.object({
 	...NameDescriptionMixin,
-	name: z.string().optional(),
+	name: z.string().max(200).optional(),
 	ref_id: z.string().optional().default(''),
 	legal_basis: z.string(),
 	article_9_condition: z.string().optional().nullable(),
@@ -995,21 +998,21 @@ export const purposeSchema = z.object({
 });
 export const dataSubjectSchema = z.object({
 	...NameDescriptionMixin,
-	name: z.string().optional(),
+	name: z.string().max(200).optional(),
 	ref_id: z.string().optional().default(''),
 	category: z.string(),
 	processing: z.string()
 });
 export const dataRecipientSchema = z.object({
 	...NameDescriptionMixin,
-	name: z.string().optional(),
+	name: z.string().max(200).optional(),
 	ref_id: z.string().optional().default(''),
 	category: z.string(),
 	processing: z.string()
 });
 export const dataContractorSchema = z.object({
 	...NameDescriptionMixin,
-	name: z.string().optional(),
+	name: z.string().max(200).optional(),
 	ref_id: z.string().optional().default(''),
 	relationship_type: z.string(),
 	country: z.string(),
@@ -1024,7 +1027,7 @@ export const dataContractorSchema = z.object({
 });
 export const dataTransferSchema = z.object({
 	...NameDescriptionMixin,
-	name: z.string().optional(),
+	name: z.string().max(200).optional(),
 	ref_id: z.string().optional().default(''),
 	country: z.string(),
 	documentation_link: z
@@ -1041,7 +1044,7 @@ export const dataTransferSchema = z.object({
 
 export const personalDataSchema = z.object({
 	...NameDescriptionMixin,
-	name: z.string().optional(),
+	name: z.string().max(200).optional(),
 	category: z.string(),
 	retention: z.string().optional(),
 	deletion_policy: z.string().optional(),
@@ -1512,7 +1515,7 @@ export const TaskNodeSchema = z.object({
 });
 
 export const AuthTokenCreateSchema = z.object({
-	name: z.string().min(1),
+	name: z.string().min(1).max(255),
 	expiry: z.number().positive().min(1).max(365).default(30).optional()
 });
 
@@ -1748,7 +1751,7 @@ export const teamSchema = z.object({
 });
 
 export const ManagedDocumentSchema = z.object({
-	name: z.string().optional().default(''),
+	name: z.string().max(200).optional().default(''),
 	description: z.string().optional().default(''),
 	document_type: z.string().optional().default('policy'),
 	policy: z.string().uuid().optional().nullable(),
@@ -1875,6 +1878,27 @@ export const webhookEndpointSchema = z.object({
 	secret: z.string().min(1).optional(),
 	target_folders: z.string().uuid().optional().array().optional(),
 	payload_format: z.enum(['thin', 'full']).default('full')
+});
+
+export const auditSinkSchema = z.object({
+	...NameDescriptionMixin,
+	id: z.string().optional(),
+	transport: z.enum(['http', 'kafka']).default('http'),
+	url: z.string().url().optional().or(z.literal('')),
+	body_format: z.enum(['ocsf', 'raw']).default('ocsf'),
+	// HTTP: JSON of auth headers, parsed server-side.
+	headers: z.string().optional(),
+	// Kafka: assembled server-side into kafka_config {bootstrap_servers, topic, config}.
+	bootstrap_servers: z.string().optional(),
+	topic: z.string().optional(),
+	security_protocol: z
+		.enum(['PLAINTEXT', 'SSL', 'SASL_PLAINTEXT', 'SASL_SSL'])
+		.default('PLAINTEXT'),
+	sasl_mechanism: z.string().optional(),
+	sasl_username: z.string().optional(),
+	sasl_password: z.string().optional(),
+	target_folders: z.string().uuid().optional().array().optional(),
+	is_active: z.boolean().default(true)
 });
 
 export const activateTOTPSchema: ZodSchema = z.object({

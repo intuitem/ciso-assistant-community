@@ -1,6 +1,7 @@
 import { getSecureRedirect } from '$lib/utils/helpers';
 
 import { ALLAUTH_API_URL, BASE_API_URL } from '$lib/utils/constants';
+import { logger } from '$lib/server/logger';
 import { loginSchema } from '$lib/utils/schemas';
 import type { LoginRequestBody } from '$lib/utils/types';
 import { fail, redirect, type Actions } from '@sveltejs/kit';
@@ -65,7 +66,7 @@ export const actions: Actions = {
 		const res = await fetch(endpoint, requestInitOptions).then((res) => res.json());
 
 		if (res.status !== 200) {
-			console.error('Login failed:', res.status);
+			logger.warning('Login failed', { status: res.status });
 			if (res.errors) {
 				res.errors.forEach((error) => {
 					setError(form, error.param, error.code);
@@ -139,7 +140,7 @@ export const actions: Actions = {
 		const response = await event.fetch(endpoint, requestInitOptions).then((res) => res.json());
 
 		if (response.status !== 200) {
-			console.error('Could not authenticate using TOTP:', response.status);
+			logger.warning('Could not authenticate using TOTP', { status: response.status });
 			if (Object.hasOwn(response, 'errors')) {
 				response.errors.forEach((error) => {
 					setError(form, error.param, error.code);
@@ -195,7 +196,7 @@ export const actions: Actions = {
 		}
 
 		if (response.status !== 200) {
-			console.error('Could not authenticate using WebAuthn');
+			logger.warning('Could not authenticate using WebAuthn', { status: response.status });
 			return fail(response.status, { error: 'WebAuthn authentication failed' });
 		}
 

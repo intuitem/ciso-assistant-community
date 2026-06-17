@@ -251,3 +251,11 @@ class FeatureFlagsSerializer(CommunityFeatureFlagSerializer):
     focus_mode = serializers.BooleanField(
         source="value.focus_mode", required=False, default=False
     )
+
+    audit_log_forwarding = serializers.BooleanField(
+        source="value.audit_log_forwarding", required=False, default=False
+    )
+
+    object_audit_trail = serializers.BooleanField(
+        source="value.object_audit_trail", required=False, default=True
+    )
