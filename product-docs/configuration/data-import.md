@@ -540,6 +540,9 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 * `trust`  (Interger in \[1,4])
 * `domain` <mark style="color:$danger;">\*</mark>
 
+> [!NOTE]
+> Conflict detection: by `name` + `folder`
+
 #### Solutions
 
 * `ref_id`
@@ -547,6 +550,9 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 * `description`
 * `provider_entity_ref_id` <mark style="color:$danger;">\*</mark>
 * `criticality`  (Integer in \[1,4])
+
+> [!NOTE]
+> Conflict detection: by `name` + `folder`
 
 #### Contracts
 
@@ -566,6 +572,9 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 * `vat`
 * `duns`
 
+> [!NOTE]
+> Conflict detection: by `name` + `folder`
+
 #### Representatives
 
 * `email` <mark style="color:$danger;">\*</mark>
@@ -575,6 +584,9 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 * `phone`
 * `role`
 * `provider_entity_ref_id`
+
+> [!NOTE]
+> Conflict detection: by `email`
 
 ## Processings
 
