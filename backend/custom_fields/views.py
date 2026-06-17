@@ -41,5 +41,5 @@ class CustomFieldDefinitionViewSet(BaseModelViewSet):
     @action(detail=False, name="Get field type choices")
     def field_type(self, request):
         return Response(
-            [{"value": v, "label": label} for v, label in FieldType.choices]
+            [{"value": v, "label": str(label)} for v, label in FieldType.choices]
         )

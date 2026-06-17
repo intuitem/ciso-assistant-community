@@ -1546,6 +1546,34 @@ export const KillChainSchema = z.object({
 	folder: z.string()
 });
 
+export const CustomFieldDefinitionSchema = z.object({
+	model: z.string().optional(),
+	key: z
+		.string()
+		.min(1)
+		.regex(/^[a-z0-9_]+$/, { message: 'Use lowercase letters, digits and underscores only.' }),
+	label: z.string().min(1),
+	help_text: z.string().optional().default(''),
+	field_type: z.string().min(1),
+	required: z.boolean().default(false),
+	visible: z.boolean().default(true),
+	searchable: z.boolean().default(false),
+	filterable: z.boolean().default(true),
+	order: z.number().default(0),
+	folder: z.string(),
+	choices: z
+		.array(
+			z.object({
+				value: z.string().min(1),
+				label: z.string().min(1),
+				order: z.number().default(0)
+			})
+		)
+		.optional()
+		.default([]),
+	translations: z.record(z.string(), z.any()).optional()
+});
+
 export const TerminologySchema = z.object({
 	...NameDescriptionMixin,
 	field_path: z.string().min(1),
@@ -1630,7 +1658,8 @@ export const ProjectSchema = z.object({
 	parent_project: z.string().uuid().optional().nullable(),
 	tolerances: z.record(z.string(), z.unknown()).optional(),
 	observation: z.string().optional().nullable(),
-	filtering_labels: z.array(z.string().uuid().optional()).optional()
+	filtering_labels: z.array(z.string().uuid().optional()).optional(),
+	custom_fields: z.record(z.string(), z.any()).optional()
 });
 
 export const ResponsibilityRoleSchema = z.object({
@@ -1841,6 +1870,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'quantitative-risk-scenarios': quantitativeRiskScenarioSchema,
 	'quantitative-risk-hypotheses': quantitativeRiskHypothesisSchema,
 	terminologies: TerminologySchema,
+	'custom-fields': CustomFieldDefinitionSchema,
 	roles: RoleSchema,
 	'generic-collections': GenericCollectionSchema,
 	accreditations: AccreditationSchema,

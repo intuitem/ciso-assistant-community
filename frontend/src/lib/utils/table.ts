@@ -2799,6 +2799,13 @@ export const listViewFields = {
 		head: ['name', 'abbreviation'],
 		body: ['name', 'abbreviation']
 	},
+	'custom-fields': {
+		head: ['key', 'label', 'fieldType', 'required', 'domain'],
+		body: ['key', 'label', 'field_type', 'required', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER
+		}
+	},
 	terminologies: {
 		head: ['field_path', 'name', 'description', 'translations', 'is_visible'],
 		body: ['field_path', 'name', 'description', 'translations', 'is_visible'],

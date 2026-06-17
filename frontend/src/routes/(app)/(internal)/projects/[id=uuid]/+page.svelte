@@ -10,6 +10,7 @@
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import SliderInput from '$lib/components/Forms/SliderInput.svelte';
+	import ProjectCustomFieldsPanel from '$lib/components/Forms/ProjectCustomFieldsPanel.svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -939,6 +940,14 @@
 					{/if}
 				</div>
 			</div>
+
+			<ProjectCustomFieldsPanel
+				endpoint={page.url.pathname}
+				model="pmbok.project"
+				folderId={project.folder?.id}
+				values={project.custom_fields}
+				onSaved={invalidateAll}
+			/>
 		</Tabs.Content>
 		<Tabs.Content value="charter" class="p-6">
 			<div class="flex justify-end mb-4">

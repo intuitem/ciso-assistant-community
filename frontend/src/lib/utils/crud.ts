@@ -2573,6 +2573,29 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'is_selected' }
 		]
 	},
+	'custom-fields': {
+		name: 'customfielddefinition',
+		localName: 'customField',
+		localNamePlural: 'customFields',
+		verboseName: 'Custom field',
+		verboseNamePlural: 'Custom fields',
+		selectFields: [{ field: 'field_type' }],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+		],
+		detailViewFields: [
+			{ field: 'key' },
+			{ field: 'label' },
+			{ field: 'field_type' },
+			{ field: 'required' },
+			{ field: 'visible' },
+			{ field: 'searchable' },
+			{ field: 'filterable' },
+			{ field: 'order' },
+			{ field: 'folder' },
+			{ field: 'help_text' }
+		]
+	},
 	terminologies: {
 		name: 'terminology',
 		localName: 'terminology',
