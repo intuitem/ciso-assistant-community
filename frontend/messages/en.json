@@ -1571,6 +1571,7 @@
 	"advancedAnalyticsLockedTooltip": "Advanced Analytics is disabled. Enable it in Settings > Feature Flags.",
 	"complianceBySection": "Compliance by Section",
 	"controlsCoverage": "Controls Coverage",
+	"controlCatalogue": "Control catalogue",
 	"requirementsWithControls": "With controls",
 	"requirementsWithoutControls": "Without controls",
 	"coveragePercent": "Coverage",

@@ -309,6 +309,7 @@ CLICA includes Model Context Protocol (MCP) integration for use with Claude Desk
 
 - `get_risk_scenarios()`: Retrieve risk scenarios from CISO Assistant
 - `get_applied_controls()`: Retrieve applied controls/action plan
+- `get_policy_control_catalogue(policy)`: Retrieve the derived Applied Control catalogue for a policy
 - `get_audits_progress()`: Retrieve compliance assessment progress
 
 ## Examples

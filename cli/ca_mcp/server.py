@@ -10,6 +10,7 @@ from .tools.read_tools import (
     get_risk_scenarios,
     get_risk_scenario,
     get_applied_controls,
+    get_policy_control_catalogue,
     get_audits_progress,
     get_folders,
     get_perimeters,
@@ -138,6 +139,7 @@ from .tools.ebios_rm_tools import (
 mcp.tool()(get_risk_scenarios)
 mcp.tool()(get_risk_scenario)
 mcp.tool()(get_applied_controls)
+mcp.tool()(get_policy_control_catalogue)
 mcp.tool()(get_audits_progress)
 mcp.tool()(get_folders)
 mcp.tool()(get_perimeters)

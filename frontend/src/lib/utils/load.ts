@@ -1,10 +1,12 @@
 import { BASE_API_URL, UUID_REGEX } from '$lib/utils/constants';
 import {
 	getModelInfo,
+	getReverseForeignKeyFieldKey,
 	urlParamModelVerboseName,
 	type ModelMapEntry,
 	type SelectField,
-	type SelectFieldData
+	type SelectFieldData,
+	type ReverseForeignKeyField
 } from '$lib/utils/crud';
 import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 
@@ -128,7 +130,9 @@ export const loadDetail = async ({ event, model, id }) => {
 	const data = await res.json();
 
 	type RelatedModel = {
+		relationKey: string;
 		urlModel: urlModel;
+		field: ReverseForeignKeyField;
 		info: ModelMapEntry;
 		table: TableSource;
 		deleteForm: SuperValidated<FormDataShape>;
@@ -138,9 +142,7 @@ export const loadDetail = async ({ event, model, id }) => {
 		count?: number;
 	};
 
-	type RelatedModels = {
-		[K in urlModel]: RelatedModel;
-	};
+	type RelatedModels = Record<string, RelatedModel>;
 
 	const form = await superValidate(zod(z.object({ id: z.string().uuid() })));
 
@@ -164,7 +166,10 @@ export const loadDetail = async ({ event, model, id }) => {
 						})
 				)
 				.map(async (e) => {
-					const tableFieldsRef = listViewFields[e.urlModel];
+					const relationKey = getReverseForeignKeyFieldKey(e, model.reverseForeignKeyFields ?? []);
+					const tableFieldsRef = e.tableFields
+						? { head: e.tableHeadings ?? e.tableFields, body: e.tableFields }
+						: listViewFields[e.urlModel];
 					const tableFields = {
 						head: [...tableFieldsRef.head],
 						body: [...tableFieldsRef.body]
@@ -259,8 +264,10 @@ export const loadDetail = async ({ event, model, id }) => {
 							})
 						);
 					}
-					relatedModels[e.urlModel] = {
+					relatedModels[relationKey] = {
+						relationKey,
 						urlModel,
+						field: e,
 						info,
 						table,
 						deleteForm,
@@ -278,8 +285,12 @@ export const loadDetail = async ({ event, model, id }) => {
 	if (model.reverseForeignKeyFields) {
 		await Promise.all(
 			model.reverseForeignKeyFields
-				.filter((e) => relatedModels[e.urlModel])
+				.filter((e) => {
+					const relationKey = getReverseForeignKeyFieldKey(e, model.reverseForeignKeyFields ?? []);
+					return relatedModels[relationKey];
+				})
 				.map(async (e) => {
+					const relationKey = getReverseForeignKeyFieldKey(e, model.reverseForeignKeyFields ?? []);
 					try {
 						let countUrl: string;
 						if (e.endpointUrl?.startsWith('./')) {
@@ -294,7 +305,7 @@ export const loadDetail = async ({ event, model, id }) => {
 						if (countRes.ok) {
 							const countData = await countRes.json();
 							if (typeof countData.count === 'number') {
-								relatedModels[e.urlModel].count = countData.count;
+								relatedModels[relationKey].count = countData.count;
 							}
 						}
 					} catch {

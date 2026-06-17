@@ -277,3 +277,168 @@ class TestMCPErrorHandling:
             mock_rprint.assert_called_once()
             args, kwargs = mock_rprint.call_args
             assert "check credentials" in str(args[0])
+
+
+class _MockResponse:
+    def __init__(self, payload, status_code=200, text="OK"):
+        self._payload = payload
+        self.status_code = status_code
+        self.text = text
+
+    def json(self):
+        return self._payload
+
+
+class TestPolicyControlCatalogueMCP:
+    def test_resolve_policy_id_returns_uuid_without_api_lookup(self):
+        from ca_mcp.resolvers import resolve_policy_id
+
+        policy_id = "11111111-1111-1111-1111-111111111111"
+
+        assert resolve_policy_id(policy_id) == policy_id
+
+    def test_resolve_policy_id_exact_ref_id_and_name(self, monkeypatch):
+        from ca_mcp import resolvers
+
+        policies = [
+            {"id": "policy-a", "name": "Policy A", "ref_id": "POL-A"},
+            {"id": "policy-b", "name": "Policy B", "ref_id": "POL-B"},
+        ]
+
+        def fake_fetch_all_results(endpoint, params=None):
+            assert endpoint == "/policies/"
+            assert params == {"search": "POL-A"}
+            return policies, None
+
+        monkeypatch.setattr(resolvers, "fetch_all_results", fake_fetch_all_results)
+
+        assert resolvers.resolve_policy_id("POL-A") == "policy-a"
+
+        def fake_fetch_all_results_by_name(endpoint, params=None):
+            assert endpoint == "/policies/"
+            assert params == {"search": "Policy B"}
+            return policies, None
+
+        monkeypatch.setattr(
+            resolvers, "fetch_all_results", fake_fetch_all_results_by_name
+        )
+
+        assert resolvers.resolve_policy_id("Policy B") == "policy-b"
+
+    def test_resolve_policy_id_rejects_ambiguity(self, monkeypatch):
+        from ca_mcp import resolvers
+
+        def fake_fetch_all_results(endpoint, params=None):
+            return [
+                {"id": "policy-a", "name": "Policy", "ref_id": "POL"},
+                {"id": "policy-b", "name": "Policy", "ref_id": "POL"},
+            ], None
+
+        monkeypatch.setattr(resolvers, "fetch_all_results", fake_fetch_all_results)
+
+        with pytest.raises(ValueError, match="Ambiguous policy"):
+            resolvers.resolve_policy_id("POL")
+
+    @pytest.mark.asyncio
+    async def test_get_policy_control_catalogue_passes_bounded_request_params(
+        self, monkeypatch
+    ):
+        from ca_mcp import resolvers
+        from ca_mcp.tools import read_tools
+
+        calls = []
+
+        monkeypatch.setattr(resolvers, "resolve_policy_id", lambda policy: "policy-id")
+        monkeypatch.setattr(
+            read_tools,
+            "fetch_all_results",
+            lambda *args, **kwargs: pytest.fail("should not fetch all pages"),
+        )
+
+        def fake_make_get_request(endpoint, params=None):
+            calls.append((endpoint, params))
+            return _MockResponse(
+                {
+                    "count": 10,
+                    "next": (
+                        "https://example.test/api/policies/policy-id/"
+                        "control-catalogue/?offset=2"
+                    ),
+                    "results": [
+                        {
+                            "id": "ctrl-a",
+                            "ref_id": "CTRL-A",
+                            "name": "Alpha Control",
+                            "status": "active",
+                            "category": "Technical",
+                            "csf_function": "Identify",
+                            "owner": [{"str": "Owner A"}],
+                            "folder": {"str": "Domain A"},
+                            "eta": "2026-01-01",
+                        },
+                        {
+                            "id": "ctrl-b",
+                            "ref_id": "CTRL-B",
+                            "name": "Beta Control",
+                            "status": "to_do",
+                            "category": "Process",
+                            "csf_function": "Protect",
+                            "owner": [],
+                            "folder": {"str": "Domain A"},
+                            "eta": None,
+                        },
+                    ],
+                }
+            )
+
+        monkeypatch.setattr(read_tools, "make_get_request", fake_make_get_request)
+
+        result = await read_tools.get_policy_control_catalogue(
+            "POL-A", search="control", ordering="-ref_id", limit=2
+        )
+
+        assert calls == [
+            (
+                "/policies/policy-id/control-catalogue/",
+                {"limit": 2, "search": "control", "ordering": "-ref_id"},
+            )
+        ]
+        assert (
+            "|UUID|Ref|Name|Status|Category|CSF Function|Owner|Domain|ETA|"
+            in result
+        )
+        assert "CTRL-A" in result
+        assert "CTRL-B" in result
+        assert "Found 10 policy control catalogue rows" in result
+        assert "showing first 2" in result
+
+    @pytest.mark.asyncio
+    async def test_get_policy_control_catalogue_caps_limit(self, monkeypatch):
+        from ca_mcp import resolvers
+        from ca_mcp.tools import read_tools
+
+        calls = []
+
+        monkeypatch.setattr(resolvers, "resolve_policy_id", lambda policy: "policy-id")
+
+        def fake_make_get_request(endpoint, params=None):
+            calls.append((endpoint, params))
+            return _MockResponse(
+                {
+                    "count": 1,
+                    "results": [
+                        {
+                            "id": "ctrl-a",
+                            "ref_id": "CTRL-A",
+                            "name": "Alpha Control",
+                            "folder": {"str": "Domain A"},
+                        }
+                    ],
+                }
+            )
+
+        monkeypatch.setattr(read_tools, "make_get_request", fake_make_get_request)
+
+        await read_tools.get_policy_control_catalogue("POL-A", limit=999)
+
+        assert calls == [("/policies/policy-id/control-catalogue/", {"limit": 500})]

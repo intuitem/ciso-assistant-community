@@ -3,7 +3,7 @@
 import json
 import sys
 from rich import print as rprint
-from ..client import make_get_request, get_paginated_results
+from ..client import make_get_request, get_paginated_results, fetch_all_results
 from ..utils.response_formatter import (
     success_response,
     error_response,
@@ -216,6 +216,108 @@ async def get_applied_controls(folder: str = None):
             result,
             "get_applied_controls",
             "Use this table to answer the user's question about applied controls",
+        )
+    except Exception as e:
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
+        )
+
+
+def _markdown_cell(value):
+    return (
+        str(value if value not in (None, "") else "--")
+        .replace("\n", " ")
+        .replace("|", "\\|")
+    )
+
+
+def _markdown_list(value):
+    if not value:
+        return "--"
+    if not isinstance(value, list):
+        return _markdown_cell(value)
+    return ", ".join(
+        _markdown_cell(item.get("str", item) if isinstance(item, dict) else item)
+        for item in value
+    )
+
+
+async def get_policy_control_catalogue(
+    policy: str,
+    search: str = None,
+    ordering: str = None,
+    limit: int = 100,
+):
+    """List the derived Control Catalogue for a policy.
+
+    Args:
+        policy: Policy UUID, ref_id, or name
+        search: Optional search term for catalogue rows
+        ordering: Optional ordering field, e.g. ref_id or -ref_id
+        limit: Maximum rows to display in the MCP response
+    """
+    try:
+        from ..resolvers import resolve_policy_id
+
+        policy_id = resolve_policy_id(policy)
+        display_limit = max(1, min(int(limit or 100), 500))
+        params = {"limit": display_limit}
+        filters = {"policy": policy}
+
+        if search:
+            params["search"] = search
+            filters["search"] = search
+
+        if ordering:
+            params["ordering"] = ordering
+            filters["ordering"] = ordering
+
+        res = make_get_request(
+            f"/policies/{policy_id}/control-catalogue/", params=params
+        )
+
+        if res.status_code != 200:
+            return http_error_response(res.status_code, res.text)
+
+        data = res.json()
+        controls = get_paginated_results(data)
+
+        if not controls:
+            return empty_response("policy control catalogue rows", filters)
+
+        total_count = (
+            data.get("count", len(controls)) if isinstance(data, dict) else len(controls)
+        )
+
+        result = f"Found {total_count} policy control catalogue rows"
+        if filters:
+            result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
+        if total_count > len(controls):
+            result += f"; showing first {len(controls)}"
+        result += "\n\n"
+        result += "|UUID|Ref|Name|Status|Category|CSF Function|Owner|Domain|ETA|\n"
+        result += "|---|---|---|---|---|---|---|---|---|\n"
+
+        for control in controls:
+            result += (
+                f"|{_markdown_cell(control.get('id'))}"
+                f"|{_markdown_cell(control.get('ref_id'))}"
+                f"|{_markdown_cell(control.get('name'))}"
+                f"|{_markdown_cell(control.get('status'))}"
+                f"|{_markdown_cell(control.get('category'))}"
+                f"|{_markdown_cell(control.get('csf_function'))}"
+                f"|{_markdown_list(control.get('owner'))}"
+                f"|{_markdown_cell((control.get('folder') or {}).get('str'))}"
+                f"|{_markdown_cell(control.get('eta'))}|\n"
+            )
+
+        return success_response(
+            result,
+            "get_policy_control_catalogue",
+            "Use this table to answer questions about the policy-level Control Catalogue. Use update_applied_control only if the user explicitly asks to edit a listed control.",
         )
     except Exception as e:
         return error_response(
