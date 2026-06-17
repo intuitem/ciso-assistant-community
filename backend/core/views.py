@@ -16208,6 +16208,40 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
             )
         )
 
+    def _get_optimized_object_data(self, queryset):
+        """
+        Extends the base optimization to batch-fetch source and target framework libraries
+        for all mapping sets on the current page in a single query, avoiding N+1 queries in the serializer.
+        """
+        optimized_data = super()._get_optimized_object_data(queryset)
+        objects = list(queryset)
+        if not objects:
+            return optimized_data
+
+        # Collect all source/target URNs referenced by this page.
+        urns = set()
+        for obj in objects:
+            mapping_set = obj.content.get(
+                "requirement_mapping_sets",
+                [obj.content.get("requirement_mapping_set", {})],
+            )[0]
+            urns.add(mapping_set.get("source_framework_urn", ""))
+            urns.add(mapping_set.get("target_framework_urn", ""))
+        urns.discard("")
+
+        # Single query for all referenced framework libraries.
+        framework_libs = StoredLibrary.objects.filter(
+            content__framework__urn__in=list(urns),
+            content__framework__isnull=False,
+            content__requirement_mapping_set__isnull=True,
+            content__requirement_mapping_sets__isnull=True,
+        )
+        optimized_data["framework_map"] = {
+            lib.content["framework"]["urn"]: lib.content["framework"]
+            for lib in framework_libs
+        }
+        return optimized_data
+
     @action(detail=False, name="Get provider choices")
     def provider(self, request):
         providers = set(
