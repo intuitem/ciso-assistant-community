@@ -8,6 +8,7 @@
 		type ReferentialCatalogEntry
 	} from './builder-state';
 	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface Props {
 		node: BuilderNode;
@@ -23,8 +24,10 @@
 	const isControl = kind === 'reference_controls';
 	const inlineKey = isControl ? 'inline_reference_controls' : 'inline_threats';
 	const urnType = isControl ? 'reference_control' : 'threat';
-	// Reference-control categories, matching ReferenceControl.CATEGORY on the backend.
+	// Reference-control category / CSF function choices, matching
+	// ReferenceControl.CATEGORY and ReferenceControl.CSF_FUNCTION on the backend.
 	const CATEGORIES = ['policy', 'process', 'technical', 'physical', 'procedure'];
+	const CSF_FUNCTIONS = ['govern', 'identify', 'protect', 'detect', 'respond', 'recover'];
 
 	let adding = $state(false);
 	let tab: 'existing' | 'inline' = $state('existing');
@@ -32,6 +35,9 @@
 	let newRefId = $state('');
 	let newName = $state('');
 	let newCategory = $state('');
+	let newCsfFunction = $state('');
+	let newDescription = $state('');
+	let newAnnotation = $state('');
 
 	const currentUrns = $derived((node.node[kind] ?? []) as string[]);
 	const catalogEntries = $derived(
@@ -91,16 +97,19 @@
 			urn,
 			ref_id: refId,
 			name: newName.trim() || null,
-			description: null,
-			annotation: null,
+			description: newDescription.trim() || null,
+			annotation: newAnnotation.trim() || null,
 			translations: null,
-			...(isControl ? { category: newCategory || null, csf_function: null } : {})
+			...(isControl ? { category: newCategory || null, csf_function: newCsfFunction || null } : {})
 		};
 		builder.updateFramework({ [inlineKey]: [...inlineEntries, entry] });
 		addUrn(urn);
 		newRefId = '';
 		newName = '';
 		newCategory = '';
+		newCsfFunction = '';
+		newDescription = '';
+		newAnnotation = '';
 		adding = false;
 	}
 </script>
@@ -185,38 +194,65 @@
 					{/each}
 				</ul>
 			{:else}
-				<div class="flex flex-wrap gap-1 items-center">
-					<input
-						type="text"
-						class="text-xs px-2 py-1 border border-gray-200 rounded w-24"
-						placeholder={m.refId()}
-						bind:value={newRefId}
-					/>
-					<input
-						type="text"
-						class="text-xs px-2 py-1 border border-gray-200 rounded flex-1 min-w-32"
-						placeholder={m.name()}
-						bind:value={newName}
-					/>
-					{#if isControl}
-						<select
-							class="text-xs px-2 py-1 border border-gray-200 rounded"
-							bind:value={newCategory}
+				<div class="space-y-1">
+					<div class="flex flex-wrap gap-1 items-center">
+						<input
+							type="text"
+							class="text-xs px-2 py-1 border border-gray-200 rounded w-24"
+							placeholder={m.refId()}
+							bind:value={newRefId}
+						/>
+						<input
+							type="text"
+							class="text-xs px-2 py-1 border border-gray-200 rounded flex-1 min-w-32"
+							placeholder={m.name()}
+							bind:value={newName}
+						/>
+						{#if isControl}
+							<select
+								class="text-xs px-2 py-1 border border-gray-200 rounded"
+								title={m.category()}
+								bind:value={newCategory}
+							>
+								<option value="">{m.category()}: —</option>
+								{#each CATEGORIES as cat}
+									<option value={cat}>{safeTranslate(cat)}</option>
+								{/each}
+							</select>
+							<select
+								class="text-xs px-2 py-1 border border-gray-200 rounded"
+								title={m.csfFunction()}
+								bind:value={newCsfFunction}
+							>
+								<option value="">{m.csfFunction()}: —</option>
+								{#each CSF_FUNCTIONS as fn}
+									<option value={fn}>{safeTranslate(fn)}</option>
+								{/each}
+							</select>
+						{/if}
+					</div>
+					<textarea
+						class="w-full text-xs px-2 py-1 border border-gray-200 rounded"
+						rows="2"
+						placeholder={m.description()}
+						bind:value={newDescription}
+					></textarea>
+					<textarea
+						class="w-full text-xs px-2 py-1 border border-gray-200 rounded"
+						rows="2"
+						placeholder={m.annotation()}
+						bind:value={newAnnotation}
+					></textarea>
+					<div class="flex justify-end">
+						<button
+							type="button"
+							class="text-xs px-2 py-1 rounded bg-blue-600 text-white disabled:opacity-50"
+							disabled={!newRefId.trim()}
+							onclick={createInline}
 						>
-							<option value="">—</option>
-							{#each CATEGORIES as cat}
-								<option value={cat}>{cat}</option>
-							{/each}
-						</select>
-					{/if}
-					<button
-						type="button"
-						class="text-xs px-2 py-1 rounded bg-blue-600 text-white disabled:opacity-50"
-						disabled={!newRefId.trim()}
-						onclick={createInline}
-					>
-						{m.create()}
-					</button>
+							{m.create()}
+						</button>
+					</div>
 				</div>
 			{/if}
 		</div>

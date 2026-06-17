@@ -3526,6 +3526,7 @@ class TestFrameworkBuilderControlsThreats:
                 "ref_id": "C1",
                 "name": "Inline control",
                 "description": "Defined in the builder",
+                "annotation": "Control annotation",
                 "category": "policy",
                 "csf_function": "govern",
             }
@@ -3536,6 +3537,8 @@ class TestFrameworkBuilderControlsThreats:
                 "urn": th_urn,
                 "ref_id": "T1",
                 "name": "Inline threat",
+                "description": "Threat description",
+                "annotation": "Threat annotation",
             }
         ]
         draft["nodes"][0]["reference_controls"] = [rc_urn]
@@ -3547,10 +3550,14 @@ class TestFrameworkBuilderControlsThreats:
         rc = ReferenceControl.objects.get(urn=rc_urn)
         assert rc.library_id is None
         assert rc.folder_id == fw.folder_id
+        assert rc.description == "Defined in the builder"
+        assert rc.annotation == "Control annotation"
         assert rc.category == "policy"
         assert rc.csf_function == "govern"
         th = Threat.objects.get(urn=th_urn)
         assert th.library_id is None
+        assert th.description == "Threat description"
+        assert th.annotation == "Threat annotation"
 
         rn.refresh_from_db()
         assert set(rn.reference_controls.values_list("urn", flat=True)) == {rc_urn}
@@ -3713,7 +3720,9 @@ class TestFrameworkBuilderControlsThreats:
             ref_id="IRC",
             urn="urn:custom:risk:reference_control:controls-fw:irc",
             description="desc",
+            annotation="ann",
             category="technical",
+            csf_function="protect",
             folder=folder,
         )
         rn.reference_controls.set([rc])
@@ -3730,6 +3739,9 @@ class TestFrameworkBuilderControlsThreats:
         emitted = {c["urn"]: c for c in data["objects"]["reference_controls"]}
         assert rc.urn in emitted
         assert emitted[rc.urn]["category"] == "technical"
+        assert emitted[rc.urn]["csf_function"] == "protect"
+        assert emitted[rc.urn]["description"] == "desc"
+        assert emitted[rc.urn]["annotation"] == "ann"
 
     def test_export_inline_round_trips_through_import(
         self, authenticated_client, builder_fw

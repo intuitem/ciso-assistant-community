@@ -1341,3 +1341,53 @@ describe('URN rewrite & repair — gap coverage', () => {
 		expect(new Set(choiceUrns).size).toBe(2);
 	});
 });
+
+describe('inline object field round-trip (pass 1: description, annotation, csf_function)', () => {
+	it('serialize/hydrate preserves description, annotation and csf_function', () => {
+		const fw = makeFramework({
+			inline_reference_controls: [
+				{
+					id: 'rc-1',
+					urn: 'urn:custom:risk:reference_control:fw:c1',
+					ref_id: 'C1',
+					name: 'Inline C1',
+					description: 'a description',
+					annotation: 'an annotation',
+					category: 'policy',
+					csf_function: 'govern',
+					typical_evidence: null,
+					translations: null
+				}
+			],
+			inline_threats: [
+				{
+					id: 't-1',
+					urn: 'urn:custom:risk:threat:fw:t1',
+					ref_id: 'T1',
+					name: 'Inline T1',
+					description: 'threat desc',
+					annotation: 'threat ann',
+					translations: null
+				}
+			]
+		});
+
+		const draft = serializeDraft(fw, []);
+		const rc = (draft.reference_controls ?? [])[0] as Record<string, unknown>;
+		expect(rc.description).toBe('a description');
+		expect(rc.annotation).toBe('an annotation');
+		expect(rc.csf_function).toBe('govern');
+		const th = (draft.threats ?? [])[0] as Record<string, unknown>;
+		expect(th.description).toBe('threat desc');
+		expect(th.annotation).toBe('threat ann');
+
+		const { frameworkPatch } = hydrateDraft(draft, fw.id);
+		const hrc = frameworkPatch.inline_reference_controls?.[0];
+		expect(hrc?.description).toBe('a description');
+		expect(hrc?.annotation).toBe('an annotation');
+		expect(hrc?.csf_function).toBe('govern');
+		const hth = frameworkPatch.inline_threats?.[0];
+		expect(hth?.description).toBe('threat desc');
+		expect(hth?.annotation).toBe('threat ann');
+	});
+});
