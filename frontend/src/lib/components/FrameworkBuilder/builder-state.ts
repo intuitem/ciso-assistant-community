@@ -115,7 +115,9 @@ export interface InlineReferential {
 	// Reference-control only.
 	category?: string | null;
 	csf_function?: string | null;
-	typical_evidence?: string | null;
+	// Reference-control only. A JSONField on the backend: real YAML uses both a
+	// single string and a list of evidence items (doc-pol), so accept both.
+	typical_evidence?: string | string[] | null;
 }
 
 export interface OutcomeRule {

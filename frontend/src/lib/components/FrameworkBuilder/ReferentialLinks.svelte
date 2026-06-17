@@ -9,6 +9,7 @@
 	} from './builder-state';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { tick } from 'svelte';
 
 	interface Props {
 		node: BuilderNode;
@@ -38,6 +39,8 @@
 	let newCsfFunction = $state('');
 	let newDescription = $state('');
 	let newAnnotation = $state('');
+	// Typical evidence as discrete items (doc-pol list shape).
+	let newTypicalEvidence = $state<string[]>([]);
 
 	const currentUrns = $derived((node.node[kind] ?? []) as string[]);
 	const catalogEntries = $derived(
@@ -81,6 +84,41 @@
 		builder.updateNode(node.node.id, { [kind]: currentUrns.filter((u) => u !== urn) });
 	}
 
+	let evidenceListEl: HTMLDivElement | undefined = $state();
+
+	function addEvidence() {
+		newTypicalEvidence = [...newTypicalEvidence, ''];
+	}
+
+	function removeEvidence(index: number) {
+		newTypicalEvidence = newTypicalEvidence.filter((_, i) => i !== index);
+	}
+
+	// Enter on a non-empty input adds the next one; Backspace on an empty input
+	// deletes the row. Mirrors the question-choice editor.
+	async function handleEvidenceKeydown(e: KeyboardEvent, index: number) {
+		const input = e.currentTarget as HTMLInputElement;
+		const focusLast = async () => {
+			await tick();
+			const inputs = evidenceListEl?.querySelectorAll<HTMLInputElement>('.evidence-item-input');
+			inputs?.[inputs.length - 1]?.focus();
+		};
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			if (!input.value.trim()) return;
+			addEvidence();
+			await focusLast();
+		} else if (e.key === 'Backspace' && !input.value) {
+			e.preventDefault();
+			removeEvidence(index);
+			await tick();
+			const inputs = evidenceListEl?.querySelectorAll<HTMLInputElement>('.evidence-item-input');
+			if (inputs && inputs.length > 0) {
+				inputs[Math.min(index, inputs.length - 1)]?.focus();
+			}
+		}
+	}
+
 	function frameworkSlug(): string {
 		const fw = $frameworkStore;
 		return fw.ref_id && fw.ref_id.length > 0 ? fw.ref_id : slugifyFrameworkName(fw.name, fw.id);
@@ -92,6 +130,8 @@
 		const ns = $frameworkStore.urn_namespace || 'custom';
 		const suffix = refId.toLowerCase().replace(/[^a-z0-9._-]+/g, '-');
 		const urn = `urn:${ns}:risk:${urnType}:${frameworkSlug()}:${suffix}`;
+		// Trimmed, non-empty evidence items → list (matches doc-pol); null if none.
+		const evidence = newTypicalEvidence.map((item) => item.trim()).filter(Boolean);
 		const entry: InlineReferential = {
 			id: crypto.randomUUID(),
 			urn,
@@ -100,7 +140,13 @@
 			description: newDescription.trim() || null,
 			annotation: newAnnotation.trim() || null,
 			translations: null,
-			...(isControl ? { category: newCategory || null, csf_function: newCsfFunction || null } : {})
+			...(isControl
+				? {
+						category: newCategory || null,
+						csf_function: newCsfFunction || null,
+						typical_evidence: evidence.length ? evidence : null
+					}
+				: {})
 		};
 		builder.updateFramework({ [inlineKey]: [...inlineEntries, entry] });
 		addUrn(urn);
@@ -110,6 +156,7 @@
 		newCsfFunction = '';
 		newDescription = '';
 		newAnnotation = '';
+		newTypicalEvidence = [];
 		adding = false;
 	}
 </script>
@@ -243,6 +290,36 @@
 						placeholder={m.annotation()}
 						bind:value={newAnnotation}
 					></textarea>
+					{#if isControl}
+						<div class="space-y-1" bind:this={evidenceListEl}>
+							{#each newTypicalEvidence as _item, i (i)}
+								<div class="flex items-center gap-1">
+									<input
+										type="text"
+										class="evidence-item-input flex-1 text-xs px-2 py-1 border border-gray-200 rounded"
+										placeholder={m.typicalEvidence()}
+										bind:value={newTypicalEvidence[i]}
+										onkeydown={(e) => handleEvidenceKeydown(e, i)}
+									/>
+									<button
+										type="button"
+										class="text-gray-400 hover:text-red-500"
+										aria-label={m.remove()}
+										onclick={() => removeEvidence(i)}
+									>
+										<i class="fa-solid fa-xmark"></i>
+									</button>
+								</div>
+							{/each}
+							<button
+								type="button"
+								class="text-xs text-blue-600 hover:text-blue-800"
+								onclick={addEvidence}
+							>
+								<i class="fa-solid fa-plus mr-1"></i>{m.builderAddTypicalEvidence()}
+							</button>
+						</div>
+					{/if}
 					<div class="flex justify-end">
 						<button
 							type="button"

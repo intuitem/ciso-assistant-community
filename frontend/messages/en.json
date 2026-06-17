@@ -4865,6 +4865,7 @@
 	"builderLinkExisting": "Link existing",
 	"builderDefineInline": "Define inline",
 	"builderNoCatalogMatches": "No matches",
+	"builderAddTypicalEvidence": "Add typical evidence",
 	"builderAddQuestion": "Add question",
 	"builderChildrenHidden": [
 		{

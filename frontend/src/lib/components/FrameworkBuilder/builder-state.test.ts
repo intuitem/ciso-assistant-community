@@ -1391,3 +1391,35 @@ describe('inline object field round-trip (pass 1: description, annotation, csf_f
 		expect(hth?.annotation).toBe('threat ann');
 	});
 });
+
+describe('inline reference control typical_evidence (pass 2: list support)', () => {
+	it('serialize/hydrate preserves typical_evidence as a list', () => {
+		const fw = makeFramework({
+			inline_reference_controls: [
+				{
+					id: 'rc-1',
+					urn: 'urn:custom:risk:reference_control:fw:c1',
+					ref_id: 'C1',
+					name: 'C1',
+					description: null,
+					annotation: null,
+					category: 'policy',
+					csf_function: null,
+					typical_evidence: ['Signed document', 'Review records'],
+					translations: null
+				}
+			],
+			inline_threats: []
+		});
+
+		const draft = serializeDraft(fw, []);
+		const rc = (draft.reference_controls ?? [])[0] as Record<string, unknown>;
+		expect(rc.typical_evidence).toEqual(['Signed document', 'Review records']);
+
+		const { frameworkPatch } = hydrateDraft(draft, fw.id);
+		expect(frameworkPatch.inline_reference_controls?.[0].typical_evidence).toEqual([
+			'Signed document',
+			'Review records'
+		]);
+	});
+});

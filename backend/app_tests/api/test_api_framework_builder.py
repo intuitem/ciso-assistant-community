@@ -3529,6 +3529,7 @@ class TestFrameworkBuilderControlsThreats:
                 "annotation": "Control annotation",
                 "category": "policy",
                 "csf_function": "govern",
+                "typical_evidence": ["Signed document", "Review records"],
             }
         ]
         draft["threats"] = [
@@ -3554,6 +3555,7 @@ class TestFrameworkBuilderControlsThreats:
         assert rc.annotation == "Control annotation"
         assert rc.category == "policy"
         assert rc.csf_function == "govern"
+        assert rc.typical_evidence == ["Signed document", "Review records"]
         th = Threat.objects.get(urn=th_urn)
         assert th.library_id is None
         assert th.description == "Threat description"
@@ -3723,6 +3725,7 @@ class TestFrameworkBuilderControlsThreats:
             annotation="ann",
             category="technical",
             csf_function="protect",
+            typical_evidence=["Signed document", "Review records"],
             folder=folder,
         )
         rn.reference_controls.set([rc])
@@ -3742,6 +3745,11 @@ class TestFrameworkBuilderControlsThreats:
         assert emitted[rc.urn]["csf_function"] == "protect"
         assert emitted[rc.urn]["description"] == "desc"
         assert emitted[rc.urn]["annotation"] == "ann"
+        # JSONField list survives the YAML export as a list.
+        assert emitted[rc.urn]["typical_evidence"] == [
+            "Signed document",
+            "Review records",
+        ]
 
     def test_export_inline_round_trips_through_import(
         self, authenticated_client, builder_fw
@@ -3760,6 +3768,7 @@ class TestFrameworkBuilderControlsThreats:
             ref_id="IRC",
             urn="urn:custom:risk:reference_control:controls-fw:irc",
             category="policy",
+            typical_evidence=["Signed document", "Review records"],
             folder=folder,
         )
         threat = Threat.objects.create(
@@ -3793,3 +3802,6 @@ class TestFrameworkBuilderControlsThreats:
             rc_urn
         }
         assert set(imported.threats.values_list("urn", flat=True)) == {threat_urn}
+        # The list-form typical_evidence survives export → import unchanged.
+        imported_rc = ReferenceControl.objects.get(urn=rc_urn)
+        assert imported_rc.typical_evidence == ["Signed document", "Review records"]
