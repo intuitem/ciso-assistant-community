@@ -239,7 +239,7 @@
 			{#each ZOOM_LEVELS as level}
 				<button
 					class="px-3 py-1 text-xs font-medium rounded-md transition-colors {zoom === level.value
-						? 'bg-surface-50-950 shadow-sm text-primary-700'
+						? 'bg-surface-50-950 shadow-sm text-primary-700-300'
 						: 'text-surface-500 hover:text-surface-700-300'}"
 					onclick={() => (zoom = level.value as 'weekly' | 'monthly' | 'yearly')}
 				>

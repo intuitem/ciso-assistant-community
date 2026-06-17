@@ -271,23 +271,23 @@
 
 <div class="gantt-wrapper relative">
 	<div
-		class="border border-surface-300 rounded-lg overflow-auto"
+		class="border border-surface-300-700 rounded-lg overflow-auto"
 		style="max-height: 80vh"
 		bind:this={scrollContainer}
 	>
 		<!-- Total width = label column + chart width -->
 		<div style="width: {LABEL_WIDTH + chartWidth}px">
 			<!-- Sticky header row -->
-			<div class="sticky top-0 z-10 flex border-b border-surface-300">
+			<div class="sticky top-0 z-10 flex border-b border-surface-300-700">
 				<!-- Top-left corner: "Items" label -->
 				<div
-					class="sticky left-0 z-20 shrink-0 bg-surface-100 border-r border-surface-300 flex items-end px-2 text-xs font-semibold text-surface-500"
+					class="sticky left-0 z-20 shrink-0 bg-surface-100-900 border-r border-surface-300-700 flex items-end px-2 text-xs font-semibold text-surface-500"
 					style="width: {LABEL_WIDTH}px; height: {HEADER_HEIGHT}px"
 				>
 					{m.items()}
 				</div>
 				<!-- Date header -->
-				<svg width={chartWidth} height={HEADER_HEIGHT} class="block shrink-0 bg-surface-100">
+				<svg width={chartWidth} height={HEADER_HEIGHT} class="block shrink-0 bg-surface-100-900">
 					{#each gridMarks as mark}
 						<line
 							x1={mark.x}
@@ -333,7 +333,7 @@
 			<div class="flex">
 				<!-- Sticky label column -->
 				<div
-					class="sticky left-0 z-[5] shrink-0 bg-surface-50 border-r border-surface-300"
+					class="sticky left-0 z-[5] shrink-0 bg-surface-50-950 border-r border-surface-300-700"
 					style="width: {LABEL_WIDTH}px"
 				>
 					{#each rows as row, i}
@@ -345,7 +345,7 @@
 							title={row.label}
 						>
 							{#if row.kind === 'folder-header'}
-								<span class="text-xs font-bold text-surface-700 uppercase tracking-wide">
+								<span class="text-xs font-bold text-surface-700-300 uppercase tracking-wide">
 									<i class="fa-solid fa-folder text-primary-500 mr-1"></i>
 									{row.label}
 								</span>
@@ -356,7 +356,7 @@
 							{:else if row.item}
 								<a
 									href={row.item.href}
-									class="text-xs text-surface-700 hover:text-primary-600 hover:underline truncate"
+									class="text-xs text-surface-700-300 hover:text-primary-600 hover:underline truncate"
 									title={row.label}
 								>
 									{row.label}
@@ -521,10 +521,10 @@
 	<!-- Tooltip -->
 	{#if tooltip}
 		<div
-			class="fixed z-50 bg-surface-50-950 shadow-xl border border-surface-200 rounded-lg px-3 py-2 text-xs pointer-events-none max-w-xs"
+			class="fixed z-50 bg-surface-50-950 shadow-xl border border-surface-200-800 rounded-lg px-3 py-2 text-xs pointer-events-none max-w-xs"
 			style="left: {tooltip.x + 12}px; top: {tooltip.y - 10}px"
 		>
-			<div class="font-bold text-surface-800 mb-1">{tooltip.item.name}</div>
+			<div class="font-bold text-surface-800-200 mb-1">{tooltip.item.name}</div>
 			<div class="text-surface-500">
 				<span
 					class="inline-block w-2 h-2 rounded-full mr-1"

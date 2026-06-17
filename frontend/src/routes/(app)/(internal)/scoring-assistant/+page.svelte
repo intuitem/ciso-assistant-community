@@ -4,6 +4,7 @@
 	import type { RiskMatrixJsonDefinition } from '$lib/utils/types';
 	import Selector from './selector.svelte';
 	import { average, forms } from './utils';
+	import { isDark } from '$lib/utils/helpers';
 	import { m } from '$paraglide/messages';
 
 	let { data, risk_matrices = data.risk_matrices } = $props();
@@ -240,7 +241,13 @@
 							id="risk_label"
 							style="background-color: {labels.risk.hexcolor}"
 						>
-							<p class="overflow-clip">{labels.risk.name}</p></span
+							<p
+								class="overflow-clip {labels.risk.hexcolor && isDark(labels.risk.hexcolor)
+									? 'text-white'
+									: 'text-surface-950'}"
+							>
+								{labels.risk.name}
+							</p></span
 						>
 						<i class="fas fa-arrow-alt-circle-left"></i>
 					</div>

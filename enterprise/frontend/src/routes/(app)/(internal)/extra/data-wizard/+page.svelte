@@ -497,7 +497,7 @@
 						<select
 							id="folder"
 							name="folder"
-							class="w-full px-4 py-2.5 border-2 border-surface-300-700 rounded-lg text-surface-900-100 text-sm hover:border-rose-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-colors"
+							class="w-full px-4 py-2.5 border-2 border-surface-300-700 bg-surface-50-950 rounded-lg text-surface-900-100 text-sm hover:border-rose-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-colors"
 						>
 							{#each data.data.folders as folder}
 								<option value={folder.id}>{folder.name}</option>
@@ -521,7 +521,7 @@
 						<select
 							id="perimeter"
 							name="perimeter"
-							class="w-full px-4 py-2.5 border-2 border-surface-300-700 rounded-lg text-surface-900-100 text-sm hover:border-rose-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-colors"
+							class="w-full px-4 py-2.5 border-2 border-surface-300-700 bg-surface-50-950 rounded-lg text-surface-900-100 text-sm hover:border-rose-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-colors"
 						>
 							{#each data.data.perimeters as perimeter}
 								<option value={perimeter.id}>{perimeter.name}</option>
@@ -545,7 +545,7 @@
 						<select
 							id="framework"
 							name="framework"
-							class="w-full px-4 py-2.5 border-2 border-surface-300-700 rounded-lg text-surface-900-100 text-sm hover:border-rose-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-colors"
+							class="w-full px-4 py-2.5 border-2 border-surface-300-700 bg-surface-50-950 rounded-lg text-surface-900-100 text-sm hover:border-rose-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-colors"
 						>
 							{#each data.data.frameworks as framework}
 								<option value={framework.id}>{framework.name}</option>
@@ -569,7 +569,7 @@
 						<select
 							id="matrix"
 							name="matrix"
-							class="w-full px-4 py-2.5 border-2 border-surface-300-700 rounded-lg text-surface-900-100 text-sm hover:border-rose-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-colors"
+							class="w-full px-4 py-2.5 border-2 border-surface-300-700 bg-surface-50-950 rounded-lg text-surface-900-100 text-sm hover:border-rose-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-colors"
 						>
 							{#each data.data.risk_matrices || [] as matrix}
 								<option value={matrix.id}>{matrix.name}</option>

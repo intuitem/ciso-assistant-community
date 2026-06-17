@@ -63,6 +63,8 @@
 	.multiselect,
 	.textarea {
 		background-color: var(--color-surface-100-900);
+		/* adaptive text so native field values stay readable in dark mode */
+		color: var(--color-surface-950-50);
 	}
 
 	.checkbox,
