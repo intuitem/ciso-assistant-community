@@ -1465,7 +1465,7 @@ class AppliedControlBulkReadSerializer(AppliedControlReadSerializer):
 
     def to_representation(self, instance):
         # skip Write/Read.to_representation, which query SyncMapping per row
-        return super(AppliedControlWriteSerializer, self).to_representation(instance)
+        return BaseModelSerializer.to_representation(self, instance)
 
 
 class AppliedControlListSerializer(BaseModelSerializer):

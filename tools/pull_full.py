@@ -33,6 +33,9 @@ WORKERS = int(os.environ.get("CISO_WORKERS", "4"))
 # "detail" = N+1 per-id fetches; "bulk" = single /{resource}/full/ endpoint
 MODE = os.environ.get("CISO_MODE", "detail")
 
+if not PAT:
+    sys.exit("CISO_PAT is not set; export your Personal Access Token first.")
+
 # Normalize VERIFY: "false" -> False, "true" -> True, else treat as CA bundle path
 if VERIFY.lower() == "false":
     VERIFY = False
