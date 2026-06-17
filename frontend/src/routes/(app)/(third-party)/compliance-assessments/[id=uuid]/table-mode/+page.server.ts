@@ -33,14 +33,20 @@ export const load = (async ({ fetch, params }) => {
 	const evidenceModel = getModelInfo('evidences');
 	const evidenceCreateSchema = modelSchema('evidences');
 
-	// Shared, empty create forms. The RA-specific links (requirement_assessments,
-	// folder) are injected client-side via additionalInitialData when the modal opens,
-	// instead of building one create form per requirement assessment.
-	const measureCreateForm = await superValidate(zod(measureCreateSchema), { errors: false });
-	const evidenceCreateForm = await superValidate(zod(evidenceCreateSchema), { errors: false });
-
 	const requirement_assessments = await Promise.all(
 		tableMode.requirement_assessments.map(async (requirementAssessment) => {
+			// The requirement_assessments link is a non-rendered field, so it must be
+			// baked into the form data here (it can't be passed via additionalInitialData).
+			const linkInitialData = {
+				requirement_assessments: [requirementAssessment.id],
+				folder: requirementAssessment.folder.id
+			};
+			const measureCreateForm = await superValidate(linkInitialData, zod(measureCreateSchema), {
+				errors: false
+			});
+			const evidenceCreateForm = await superValidate(linkInitialData, zod(evidenceCreateSchema), {
+				errors: false
+			});
 			const observationBuffer = requirementAssessment.observation;
 			const updateSchema = modelSchema('requirement-assessments');
 			const updatedModel: ModelInfo = getModelInfo('requirement-assessments');
@@ -59,6 +65,8 @@ export const load = (async ({ fetch, params }) => {
 			const updateForm = await superValidate(object, zod(updateSchema), { errors: false });
 			return {
 				...requirementAssessment,
+				measureCreateForm,
+				evidenceCreateForm,
 				observationBuffer,
 				updateForm,
 				updatedModel,
@@ -90,8 +98,6 @@ export const load = (async ({ fetch, params }) => {
 		requirements,
 		measureModel,
 		evidenceModel,
-		measureCreateForm,
-		evidenceCreateForm,
 		viewerRole: tableMode.viewer_role ?? 'auditor',
 		title: m.tableMode()
 	};

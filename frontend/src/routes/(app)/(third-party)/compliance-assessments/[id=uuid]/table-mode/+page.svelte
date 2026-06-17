@@ -220,14 +220,10 @@
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
 			props: {
-				form: data.measureCreateForm,
+				form: requirementAssessment.measureCreateForm,
 				formAction: `${actionPath}?/createAppliedControl`,
 				invalidateAll: invalidateAllBool,
 				model: data.measureModel,
-				additionalInitialData: {
-					requirement_assessments: [requirementAssessment.id],
-					folder: requirementAssessment.folder.id
-				},
 				debug: false
 			}
 		};
@@ -243,14 +239,10 @@
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
 			props: {
-				form: data.evidenceCreateForm,
+				form: requirementAssessment.evidenceCreateForm,
 				formAction: `${actionPath}?/createEvidence`,
 				invalidateAll: invalidateAllBool,
 				model: data.evidenceModel,
-				additionalInitialData: {
-					requirement_assessments: [requirementAssessment.id],
-					folder: requirementAssessment.folder.id
-				},
 				debug: false
 			}
 		};
