@@ -65,6 +65,10 @@ class CustomFieldDefinitionWriteSerializer(BaseModelSerializer):
             data["content_type"] = _resolve_content_type(model)
         elif self.instance is not None:
             data["content_type"] = self.instance.content_type
+        else:
+            raise serializers.ValidationError(
+                {"model": "This field is required (e.g. 'pmbok.project')."}
+            )
 
         field_type = data.get("field_type", getattr(self.instance, "field_type", None))
         if "choices" in data and field_type not in (
