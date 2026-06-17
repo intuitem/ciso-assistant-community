@@ -5,6 +5,7 @@ from decimal import Decimal
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from django.utils import translation
 from rest_framework.request import Request
 from rest_framework.test import APIRequestFactory
 
@@ -160,6 +161,20 @@ def test_choice_validation(root, project_ct):
     assert p.custom_fields["tier"] == "gold"
     with pytest.raises(ValueError):
         p.set_custom_field(ch, "platinum")
+
+
+def test_label_localized_resolves_per_language(root, project_ct):
+    d = make_def(project_ct, root, "crit", FieldType.TEXT)
+    d.label = "Criticality"
+    d.help_text = "Business criticality"
+    d.translations = {"fr": {"label": "Criticité", "help_text": "Criticité métier"}}
+    d.save()
+    with translation.override("fr"):
+        assert d.label_localized == "Criticité"
+        assert d.help_text_localized == "Criticité métier"
+    with translation.override("en"):
+        assert d.label_localized == "Criticality"  # falls back to base
+        assert d.help_text_localized == "Business criticality"
 
 
 def test_deleting_definition_cascades_values(root, project_ct):

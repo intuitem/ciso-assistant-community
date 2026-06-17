@@ -126,6 +126,36 @@ class TestCustomFieldsAPI:
         create = self._make_choice_def(authenticated_client, str(root.id), key="nope")
         assert create.status_code == status.HTTP_403_FORBIDDEN
 
+    def test_translations_round_trip(self, authenticated_client):
+        root = Folder.get_root_folder()
+        resp = authenticated_client.post(
+            CF_URL,
+            {
+                "model": "pmbok.project",
+                "key": "crit",
+                "label": "Criticality",
+                "field_type": "choice",
+                "folder": str(root.id),
+                "translations": {
+                    "fr": {"label": "Criticité", "help_text": "Criticité métier"}
+                },
+                "choices": [
+                    {
+                        "value": "high",
+                        "label": "High",
+                        "translations": {"fr": {"label": "Élevé"}},
+                    }
+                ],
+            },
+            format="json",
+        )
+        assert resp.status_code == status.HTTP_201_CREATED, resp.content
+        detail = authenticated_client.get(f"{CF_URL}{resp.json()['id']}/").json()
+        assert detail["translations"] == {
+            "fr": {"label": "Criticité", "help_text": "Criticité métier"}
+        }
+        assert detail["choices"][0]["translations"] == {"fr": {"label": "Élevé"}}
+
     def test_for_folder_resolution(self, authenticated_client):
         root = Folder.get_root_folder()
         domain = Folder.objects.create(name="Domain A", parent_folder=root)
