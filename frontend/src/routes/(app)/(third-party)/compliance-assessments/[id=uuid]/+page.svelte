@@ -18,6 +18,7 @@
 	import TreeViewItemLead from './TreeViewItemLead.svelte';
 
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ExportModal, { type ExportGroup } from '$lib/components/Modals/ExportModal.svelte';
 
@@ -119,6 +120,8 @@
 	import ForceCirclePacking from '$lib/components/DataViz/ForceCirclePacking.svelte';
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 	import CompareAuditModal from '$lib/components/Modals/CompareAuditModal.svelte';
+	import MapFromAuditModal from '$lib/components/Modals/MapFromAuditModal.svelte';
+	import MappingDirectionModal from '$lib/components/Modals/MappingDirectionModal.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 
 	function handleKeydown(event: KeyboardEvent) {
@@ -299,6 +302,24 @@
 
 	const modalStore: ModalStore = getModalStore();
 
+	function modalApplyMapping(): void {
+		// Entry point: let the user pick the mapping direction.
+		// "Map to a framework" creates a new audit; "Map from an audit"
+		// updates the current one.
+		const modalComponent: ModalComponent = {
+			ref: MappingDirectionModal,
+			props: {
+				mapTo: modalCreateForm,
+				mapFrom: modalMapFromAudit
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent
+		};
+		modalStore.trigger(modal);
+	}
+
 	function modalCreateForm(): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
@@ -340,6 +361,20 @@
 	function modalCompareAudit(): void {
 		const modalComponent: ModalComponent = {
 			ref: CompareAuditModal,
+			props: {
+				currentAudit: data.compliance_assessment
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalMapFromAudit(): void {
+		const modalComponent: ModalComponent = {
+			ref: MapFromAuditModal,
 			props: {
 				currentAudit: data.compliance_assessment
 			}
@@ -902,6 +937,10 @@
 						breadcrumbAction="push"
 						><i class="fa-solid fa-file-lines mr-2"></i>{m.evidences()}</Anchor
 					>
+					<AuditTrailButton
+						model="compliance-assessments"
+						objectId={data.compliance_assessment.id}
+					/>
 				{/if}
 				<!-- Power-ups Command Palette Grid -->
 				<div class="pt-3 border-t border-gray-200 mt-2 space-y-3">
@@ -959,7 +998,7 @@
 							<div class="grid grid-cols-2 gap-2">
 								<button
 									class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer text-left"
-									onclick={() => modalCreateForm()}
+									onclick={() => modalApplyMapping()}
 									data-testid="apply-mapping-button"
 								>
 									<i class="fa-solid fa-diagram-project text-emerald-500 text-base"></i>

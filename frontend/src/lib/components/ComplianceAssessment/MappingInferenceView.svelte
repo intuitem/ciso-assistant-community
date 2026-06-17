@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as m from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { complianceResultColorMap } from '$lib/utils/constants';
+	import { resultBadgeStyle } from '$lib/utils/helpers';
 
 	interface SourceFramework {
 		id: string;
@@ -121,8 +121,6 @@
 						>
 							{source_requirement_assessment.used_mapping_set?.name}
 						</a>
-					{:else}
-						<span class="text-gray-500">--</span>
 					{/if}
 
 					{#if source_requirement_assessment.is_scored}
@@ -133,10 +131,7 @@
 					{/if}
 
 					<span class="font-medium">{m.suggestionColon()}</span>
-					<span
-						class="badge py-0 h-fit w-fit"
-						style="background-color: {complianceResultColorMap[mappingInference.result]};"
-					>
+					<span class="badge py-0 h-fit w-fit" style={resultBadgeStyle(mappingInference.result)}>
 						{safeTranslate(mappingInference.result)}
 					</span>
 

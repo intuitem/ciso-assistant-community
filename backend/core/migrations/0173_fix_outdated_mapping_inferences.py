@@ -78,7 +78,7 @@ def fix_outdated_mapping_inferences(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0171_requirementnode_score_and_target_score"),
+        ("core", "0172_view_compliance_assessment_full_permission"),
     ]
 
     operations = [
