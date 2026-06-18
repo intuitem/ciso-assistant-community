@@ -73,7 +73,7 @@
 <DetailView {data} />
 
 {#if data.data.attachment}
-	<div class="card mt-8 px-6 py-4 bg-white flex flex-col shadow-lg space-y-4">
+	<div class="card mt-8 px-6 py-4 bg-surface-50-950 flex flex-col shadow-lg space-y-4">
 		<div class="flex flex-row justify-between">
 			<h4 class="h4 font-semibold" data-testid="attachment-name-title">
 				{data.data.attachment}
