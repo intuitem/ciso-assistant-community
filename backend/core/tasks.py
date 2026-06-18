@@ -292,13 +292,21 @@ SECURITY_EXCEPTION_TERMINAL_STATUSES = [
 
 
 def _group_security_exceptions_by_owner(security_exceptions):
-    """Group security exceptions by each owner's email address."""
-    owner_exceptions = defaultdict(list)
+    """Group security exceptions by each owner's email address.
+
+    Several owners can resolve to the same email, so dedupe per recipient to
+    avoid duplicate rows and an inflated count in the reminder email.
+    """
+    owner_exceptions = defaultdict(dict)
     for exception in security_exceptions:
         for owner in exception.owners.all():
             for email in owner.get_emails():
-                owner_exceptions[email].append(exception)
-    return owner_exceptions
+                if email:
+                    owner_exceptions[email][exception.id] = exception
+    return {
+        email: list(exceptions.values())
+        for email, exceptions in owner_exceptions.items()
+    }
 
 
 # @db_periodic_task(crontab(minute="*/1"))  # for testing

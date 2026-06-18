@@ -4163,9 +4163,15 @@ class SecurityExceptionWriteSerializer(BaseModelSerializer):
             for actor in assigned_actors:
                 assigned_emails.extend(actor.get_emails())
 
-            if assigned_emails:
-                send_security_exception_assignment_notification(
-                    security_exception.id, assigned_emails
+            # Dedupe (several actors can resolve to the same email) and defer until
+            # the transaction commits, so a rollback doesn't send spurious emails.
+            unique_emails = list(dict.fromkeys(filter(None, assigned_emails)))
+            if unique_emails:
+                exception_id = security_exception.id
+                transaction.on_commit(
+                    lambda: send_security_exception_assignment_notification(
+                        exception_id, unique_emails
+                    )
                 )
         except Exception as e:
             logger.error(
