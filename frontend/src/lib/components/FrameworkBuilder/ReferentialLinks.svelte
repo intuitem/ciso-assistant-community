@@ -3,6 +3,7 @@
 		getBuilderContext,
 		getReferentialCatalogContext,
 		slugifyFrameworkName,
+		inlineCopyFromCatalogEntry,
 		type BuilderNode,
 		type InlineReferential,
 		type ReferentialCatalogEntry
@@ -78,6 +79,27 @@
 	function addUrn(urn: string) {
 		if (currentUrns.includes(urn)) return;
 		builder.updateNode(node.node.id, { [kind]: [...currentUrns, urn] });
+	}
+
+	// Picking an existing instance object: reference it only if it comes from a
+	// builtin library (present in any target instance); otherwise copy it into
+	// this framework as an inline object so the export stays self-contained.
+	function pickExisting(entry: ReferentialCatalogEntry) {
+		if (entry.referenceable) {
+			addUrn(entry.urn);
+			return;
+		}
+		const copy = inlineCopyFromCatalogEntry(entry, {
+			urnType,
+			namespace: $frameworkStore.urn_namespace || 'custom',
+			slug: frameworkSlug(),
+			isControl
+		});
+		// Deterministic URN dedups repeated picks of the same source into one copy.
+		if (!inlineEntries.some((e) => e.urn === copy.urn)) {
+			builder.updateFramework({ [inlineKey]: [...inlineEntries, copy] });
+		}
+		addUrn(copy.urn);
 	}
 
 	function removeUrn(urn: string) {
@@ -224,16 +246,23 @@
 				/>
 				<ul class="max-h-40 overflow-y-auto">
 					{#each linkableEntries as entry (entry.urn)}
+						{@const lib =
+							entry.library && typeof entry.library === 'object'
+								? (entry.library.name ?? entry.library.str)
+								: entry.library}
 						<li>
 							<button
 								type="button"
-								class="w-full text-left text-xs px-2 py-1 hover:bg-blue-50 rounded"
-								onclick={() => addUrn(entry.urn)}
+								class="w-full text-left text-xs px-2 py-1 hover:bg-blue-50 rounded flex items-center justify-between gap-2"
+								onclick={() => pickExisting(entry)}
 							>
 								<span class="font-medium">{entry.ref_id ?? entry.name ?? entry.urn}</span>
 								{#if entry.ref_id && entry.name}<span class="text-gray-500">
 										— {entry.name}</span
 									>{/if}
+								<span class="shrink-0 text-[10px] text-gray-400">
+									{entry.referenceable && lib ? lib : m.builderWillBeCopied()}
+								</span>
 							</button>
 						</li>
 					{:else}

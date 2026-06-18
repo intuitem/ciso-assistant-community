@@ -4868,6 +4868,7 @@
 	"builderDefineInlineThreat": "Define inline",
 	"builderNoCatalogMatches": "No matches",
 	"builderAddTypicalEvidence": "Add typical evidence",
+	"builderWillBeCopied": "copy",
 	"builderAddQuestion": "Add question",
 	"builderChildrenHidden": [
 		{

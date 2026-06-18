@@ -10,6 +10,7 @@ import {
 	serializeDraft,
 	hydrateDraft,
 	createBuilderState,
+	inlineCopyFromCatalogEntry,
 	type Framework,
 	type BuilderNode,
 	type RequirementNode,
@@ -1421,5 +1422,72 @@ describe('inline reference control typical_evidence (pass 2: list support)', () 
 			'Signed document',
 			'Review records'
 		]);
+	});
+});
+
+describe('inlineCopyFromCatalogEntry (copy picked existing object)', () => {
+	it('clones a reference control entry into a framework-owned inline object', () => {
+		const entry = {
+			id: 'src-1',
+			urn: 'urn:intuitem:risk:function:doc-pol:a.5.1',
+			ref_id: 'A.5.1',
+			name: 'Policies',
+			description: 'desc',
+			annotation: 'ann',
+			category: 'policy',
+			csf_function: 'govern',
+			typical_evidence: ['Signed doc', 'Review'],
+			translations: { fr: { name: 'Politiques' } },
+			referenceable: false
+		};
+		const copy = inlineCopyFromCatalogEntry(entry, {
+			urnType: 'reference_control',
+			namespace: 'custom',
+			slug: 'fw',
+			isControl: true
+		});
+		expect(copy.urn).toBe('urn:custom:risk:reference_control:fw:a.5.1');
+		expect(copy.ref_id).toBe('A.5.1');
+		expect(copy.name).toBe('Policies');
+		expect(copy.description).toBe('desc');
+		expect(copy.annotation).toBe('ann');
+		expect(copy.category).toBe('policy');
+		expect(copy.csf_function).toBe('govern');
+		expect(copy.typical_evidence).toEqual(['Signed doc', 'Review']);
+		expect(copy.translations).toEqual({ fr: { name: 'Politiques' } });
+	});
+
+	it('omits control-only fields when copying a threat', () => {
+		const entry = {
+			id: 't',
+			urn: 'urn:x:risk:threat:lib:t1',
+			ref_id: 'T1',
+			name: 'Threat',
+			description: 'd',
+			referenceable: false
+		};
+		const copy = inlineCopyFromCatalogEntry(entry, {
+			urnType: 'threat',
+			namespace: 'custom',
+			slug: 'fw',
+			isControl: false
+		});
+		expect(copy.urn).toBe('urn:custom:risk:threat:fw:t1');
+		expect(copy.name).toBe('Threat');
+		expect(copy.category).toBeUndefined();
+		expect(copy.csf_function).toBeUndefined();
+		expect(copy.typical_evidence).toBeUndefined();
+	});
+
+	it('mints a ref_id when the source has none', () => {
+		const entry = { id: 'x', urn: 'urn:x', ref_id: null, name: 'No ref', referenceable: false };
+		const copy = inlineCopyFromCatalogEntry(entry, {
+			urnType: 'reference_control',
+			namespace: 'custom',
+			slug: 'fw',
+			isControl: true
+		});
+		expect(copy.ref_id?.startsWith('imported-')).toBe(true);
+		expect(copy.urn).toContain(':reference_control:fw:imported-');
 	});
 });

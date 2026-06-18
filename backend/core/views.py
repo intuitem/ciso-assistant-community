@@ -1854,6 +1854,13 @@ class ThreatViewSet(BaseModelViewSet):
         )
         return Response({p: p for p in providers})
 
+    @action(detail=False, methods=["get"], url_path="builder-catalog")
+    def builder_catalog(self, request):
+        """Threats the framework builder can attach: full copyable fields plus
+        `referenceable`. RBAC-scoped via the viewset queryset."""
+        qs = self.get_queryset().select_related("library").order_by("name")
+        return Response(ThreatBuilderCatalogSerializer(qs, many=True).data)
+
     @action(detail=False, name="Get threats count")
     def threats_count(self, request):
         folder_id = request.query_params.get("folder", None)
@@ -2663,6 +2670,13 @@ class ReferenceControlViewSet(BaseModelViewSet):
     @action(detail=False, name="Get function choices")
     def csf_function(self, request):
         return Response(dict(ReferenceControl.CSF_FUNCTION))
+
+    @action(detail=False, methods=["get"], url_path="builder-catalog")
+    def builder_catalog(self, request):
+        """Reference controls the framework builder can attach: full copyable
+        fields plus `referenceable`. RBAC-scoped via the viewset queryset."""
+        qs = self.get_queryset().select_related("library").order_by("name")
+        return Response(ReferenceControlBuilderCatalogSerializer(qs, many=True).data)
 
     @staticmethod
     def _get_syncable_applied_controls(
@@ -9350,19 +9364,26 @@ class FrameworkViewSet(BaseModelViewSet):
 
             # Reference controls / threats: emit the URN list, and sort each
             # linked object into the dependency set or the inline objects.
+            # Only BUILTIN libraries are referenced via `dependencies` — they
+            # ship with every instance, so the link resolves on import. Anything
+            # else (custom objects, or objects from a non-builtin library) is
+            # embedded by value so the exported library stays self-contained.
+            def _is_referenceable(obj):
+                return bool(obj.library_id) and obj.library.builtin
+
             node_controls = [c for c in node.reference_controls.all() if c.urn]
             node_node_threats = [t for t in node.threats.all() if t.urn]
             if node_controls:
                 node_data["reference_controls"] = [c.urn for c in node_controls]
                 for c in node_controls:
-                    if c.library_id:
+                    if _is_referenceable(c):
                         dependency_urns.add(c.library.urn)
                     else:
                         inline_controls[c.urn] = c
             if node_node_threats:
                 node_data["threats"] = [t.urn for t in node_node_threats]
                 for t in node_node_threats:
-                    if t.library_id:
+                    if _is_referenceable(t):
                         dependency_urns.add(t.library.urn)
                     else:
                         inline_threats[t.urn] = t

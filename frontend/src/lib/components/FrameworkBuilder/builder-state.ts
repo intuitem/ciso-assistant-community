@@ -2084,20 +2084,64 @@ export function getBuilderContext(): BuilderStore {
 
 /**
  * A catalog entry the node picker can link: any existing reference control or
- * threat in scope. `library` is set for library-backed objects (referenced as a
- * dependency on export) and null for custom/inline ones.
+ * threat in scope. `referenceable` is true only for objects from a builtin
+ * library (carried as a dependency on export); everything else is copied into
+ * the framework as an inline object, so the full field set is included to clone.
  */
 export interface ReferentialCatalogEntry {
 	id: string;
 	urn: string;
 	ref_id: string | null;
 	name: string | null;
-	library?: { id: string; str?: string } | string | null;
+	description?: string | null;
+	annotation?: string | null;
+	category?: string | null;
+	csf_function?: string | null;
+	typical_evidence?: string | string[] | null;
+	translations?: Translations | null;
+	library?: { id: string; name?: string; str?: string } | string | null;
+	referenceable?: boolean;
 }
 
 export interface ReferentialCatalog {
 	referenceControls: ReferentialCatalogEntry[];
 	threats: ReferentialCatalogEntry[];
+}
+
+/**
+ * Clone a picked catalog entry into a framework-owned inline object, minting a
+ * framework URN. Used when the picked object can't travel as a library
+ * dependency (custom, or from a non-builtin library), so it must be embedded by
+ * value on export. The URN is deterministic in (namespace, slug, ref_id) so
+ * repeated picks of the same source dedup to one copy.
+ */
+export function inlineCopyFromCatalogEntry(
+	entry: ReferentialCatalogEntry,
+	opts: {
+		urnType: 'reference_control' | 'threat';
+		namespace: string;
+		slug: string;
+		isControl: boolean;
+	}
+): InlineReferential {
+	const refId = entry.ref_id?.trim() || `imported-${crypto.randomUUID().slice(0, 8)}`;
+	const suffix = refId.toLowerCase().replace(/[^a-z0-9._-]+/g, '-');
+	return {
+		id: crypto.randomUUID(),
+		urn: `urn:${opts.namespace}:risk:${opts.urnType}:${opts.slug}:${suffix}`,
+		ref_id: refId,
+		name: entry.name ?? null,
+		description: entry.description ?? null,
+		annotation: entry.annotation ?? null,
+		translations: entry.translations ?? null,
+		...(opts.isControl
+			? {
+					category: entry.category ?? null,
+					csf_function: entry.csf_function ?? null,
+					typical_evidence: entry.typical_evidence ?? null
+				}
+			: {})
+	};
 }
 
 const CATALOG_CONTEXT_KEY = Symbol('framework-builder-catalog');

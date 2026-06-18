@@ -3678,11 +3678,11 @@ class TestFrameworkBuilderControlsThreats:
         inline_urns = {c["urn"] for c in draft["reference_controls"]}
         assert inline_urns == {inline_rc.urn}
 
-    def test_export_yaml_library_object_becomes_dependency(
+    def test_export_yaml_builtin_library_object_becomes_dependency(
         self, authenticated_client, builder_fw
     ):
-        """A library-backed control is emitted as a node URN + dependency, never
-        inlined into objects."""
+        """A control from a BUILTIN library is emitted as a node URN + dependency
+        (the library is guaranteed present in any target instance), never inlined."""
         fw, rn, folder = builder_fw
         lib = LoadedLibrary.objects.create(
             urn="urn:intuitem:risk:library:doc-pol",
@@ -3690,6 +3690,7 @@ class TestFrameworkBuilderControlsThreats:
             version=1,
             folder=folder,
             locale="en",
+            builtin=True,
         )
         rc = ReferenceControl.objects.create(
             name="Library RC",
@@ -3710,6 +3711,116 @@ class TestFrameworkBuilderControlsThreats:
         assert node["reference_controls"] == [rc.urn]
         assert lib.urn in data["dependencies"]
         assert "reference_controls" not in data["objects"]
+
+    def test_export_yaml_non_builtin_library_object_embedded(
+        self, authenticated_client, builder_fw
+    ):
+        """A control from a NON-builtin library can't be relied on in the target,
+        so it is embedded by value under objects.* (not a dangling dependency)."""
+        fw, rn, folder = builder_fw
+        lib = LoadedLibrary.objects.create(
+            urn="urn:acme:risk:library:custom-lib",
+            name="custom-lib",
+            version=1,
+            folder=folder,
+            locale="en",
+            builtin=False,
+        )
+        rc = ReferenceControl.objects.create(
+            name="Custom-lib RC",
+            ref_id="CLRC",
+            urn="urn:acme:risk:function:custom-lib:clrc",
+            description="from a non-builtin library",
+            folder=folder,
+            library=lib,
+        )
+        rn.reference_controls.set([rc])
+
+        response = authenticated_client.get(
+            reverse("frameworks-export-yaml", args=[fw.id])
+        )
+        assert response.status_code == 200
+        data = yaml.safe_load(response.content)
+
+        node = data["objects"]["framework"]["requirement_nodes"][0]
+        assert node["reference_controls"] == [rc.urn]
+        assert not data.get("dependencies")
+        emitted = {c["urn"]: c for c in data["objects"]["reference_controls"]}
+        assert rc.urn in emitted
+        assert emitted[rc.urn]["description"] == "from a non-builtin library"
+
+    def test_builder_catalog_referenceable_and_fields(
+        self, authenticated_client, builder_fw
+    ):
+        """The builder catalog flags only builtin-library objects as
+        referenceable, and exposes the full copyable field set (incl.
+        typical_evidence + translations) the picker needs to clone."""
+        fw, rn, folder = builder_fw
+        builtin_lib = LoadedLibrary.objects.create(
+            urn="urn:intuitem:risk:library:doc-pol",
+            name="doc-pol",
+            version=1,
+            folder=folder,
+            locale="en",
+            builtin=True,
+        )
+        custom_lib = LoadedLibrary.objects.create(
+            urn="urn:acme:risk:library:custom-lib",
+            name="custom-lib",
+            version=1,
+            folder=folder,
+            locale="en",
+            builtin=False,
+        )
+        builtin_rc = ReferenceControl.objects.create(
+            name="Builtin RC",
+            ref_id="BRC",
+            urn="urn:intuitem:risk:function:doc-pol:brc",
+            folder=folder,
+            library=builtin_lib,
+        )
+        nonbuiltin_rc = ReferenceControl.objects.create(
+            name="Custom-lib RC",
+            ref_id="NLRC",
+            urn="urn:acme:risk:function:custom-lib:nlrc",
+            folder=folder,
+            library=custom_lib,
+        )
+        custom_rc = ReferenceControl.objects.create(
+            name="Custom RC",
+            ref_id="CRC",
+            description="desc",
+            typical_evidence=["E1", "E2"],
+            translations={"fr": {"name": "RC perso"}},
+            folder=folder,
+        )
+
+        resp = authenticated_client.get(reverse("reference-controls-builder-catalog"))
+        assert resp.status_code == 200
+        by_id = {str(e["id"]): e for e in resp.data}
+        assert by_id[str(builtin_rc.id)]["referenceable"] is True
+        assert by_id[str(nonbuiltin_rc.id)]["referenceable"] is False
+        entry = by_id[str(custom_rc.id)]
+        assert entry["referenceable"] is False
+        assert entry["typical_evidence"] == ["E1", "E2"]
+        assert entry["translations"] == {"fr": {"name": "RC perso"}}
+
+        # Threats catalog exposes referenceable too.
+        builtin_threat = Threat.objects.create(
+            name="Builtin Threat",
+            ref_id="BT",
+            urn="urn:intuitem:risk:threat:doc-pol:bt",
+            folder=folder,
+            library=builtin_lib,
+        )
+        custom_threat = Threat.objects.create(
+            name="Custom Threat", ref_id="CT", folder=folder
+        )
+        tresp = authenticated_client.get(reverse("threats-builder-catalog"))
+        assert tresp.status_code == 200
+        tby_id = {str(e["id"]): e for e in tresp.data}
+        assert tby_id[str(builtin_threat.id)]["referenceable"] is True
+        assert tby_id[str(custom_threat.id)]["referenceable"] is False
 
     def test_export_yaml_inline_object_emitted_in_objects(
         self, authenticated_client, builder_fw

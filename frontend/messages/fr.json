@@ -4865,6 +4865,7 @@
 	"builderDefineInlineThreat": "Définir une nouvelle menace",
 	"builderNoCatalogMatches": "Aucune correspondance",
 	"builderAddTypicalEvidence": "Ajouter une preuve typique",
+	"builderWillBeCopied": "copie",
 	"builderAddQuestion": "Ajouter une question",
 	"builderChildrenHidden": [
 		{
