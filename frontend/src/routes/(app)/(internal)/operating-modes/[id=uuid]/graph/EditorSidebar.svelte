@@ -27,10 +27,10 @@
 	];
 
 	const STAGE_COLORS: Record<number, string> = {
-		0: 'border-pink-400 bg-pink-50',
-		1: 'border-violet-400 bg-violet-50',
-		2: 'border-orange-400 bg-orange-50',
-		3: 'border-red-400 bg-red-50'
+		0: 'border-pink-400 bg-pink-50 dark:bg-pink-950/40',
+		1: 'border-violet-400 bg-violet-50 dark:bg-violet-950/40',
+		2: 'border-orange-400 bg-orange-50 dark:bg-orange-950/40',
+		3: 'border-red-400 bg-red-50 dark:bg-red-950/40'
 	};
 
 	function getStageNumber(attackStage: string | number): number {
@@ -75,16 +75,18 @@
 	}
 </script>
 
-<div class="w-64 bg-surface-50 border-r border-surface-200 flex flex-col h-full overflow-hidden">
-	<div class="p-3 border-b border-surface-200">
+<div
+	class="w-64 bg-surface-50-950 border-r border-surface-200-800 flex flex-col h-full overflow-hidden"
+>
+	<div class="p-3 border-b border-surface-200-800">
 		<div class="flex items-center justify-between mb-2">
-			<h3 class="text-sm font-semibold text-surface-700">
+			<h3 class="text-sm font-semibold text-surface-700-300">
 				{m.elementaryActions()}
 			</h3>
 			{#if onCreateAction}
 				<button
 					type="button"
-					class="btn-mini-primary w-7 h-7 flex items-center justify-center rounded-base"
+					class="preset-filled-primary-500 w-7 h-7 flex items-center justify-center rounded-base"
 					title={safeTranslate('add-elementary-action')}
 					onclick={onCreateAction}
 				>
@@ -105,7 +107,7 @@
 			{@const actions = groupedActions()[stageConfig.stage] ?? []}
 			<div>
 				<button
-					class="w-full flex items-center justify-between px-2 py-1.5 text-xs font-semibold text-surface-600 hover:bg-surface-100 rounded-base"
+					class="w-full flex items-center justify-between px-2 py-1.5 text-xs font-semibold text-surface-600-400 hover:bg-surface-100-900 rounded-base"
 					onclick={() => toggleStage(stageConfig.stage)}
 				>
 					<span class="flex items-center gap-1.5">
@@ -113,11 +115,11 @@
 						{safeTranslate(stageConfig.key)}
 					</span>
 					<span class="flex items-center gap-1">
-						<span class="text-surface-400">{actions.length}</span>
+						<span class="text-surface-500">{actions.length}</span>
 						<i
 							class="fa-solid fa-chevron-{collapsedStages.has(stageConfig.stage)
 								? 'right'
-								: 'down'} text-[10px] text-surface-400"
+								: 'down'} text-[10px] text-surface-500"
 						></i>
 					</span>
 				</button>
@@ -129,7 +131,7 @@
 							<div
 								class="flex items-center gap-2 px-2 py-1.5 rounded-base border text-xs
 									{isPlaced
-									? 'border-surface-200 bg-surface-100 text-surface-400 cursor-not-allowed opacity-50'
+									? 'border-surface-200-800 bg-surface-100-900 text-surface-500 cursor-not-allowed opacity-50'
 									: STAGE_COLORS[stageConfig.stage] + ' cursor-grab hover:shadow-sm'}"
 								draggable={!isPlaced}
 								ondragstart={(e) => {
@@ -147,7 +149,7 @@
 							</div>
 						{/each}
 						{#if actions.length === 0}
-							<p class="text-xs text-surface-400 px-2 italic">{m.noResultFound()}</p>
+							<p class="text-xs text-surface-500 px-2 italic">{m.noResultFound()}</p>
 						{/if}
 					</div>
 				{/if}

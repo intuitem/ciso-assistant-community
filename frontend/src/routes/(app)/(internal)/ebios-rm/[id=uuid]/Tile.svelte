@@ -90,7 +90,7 @@
 										href={step.href}
 										prefixCrumbs={[{ label: safeTranslate(`ebiosWs${workshop}`) }]}
 										label={safeTranslate(`ebiosWs${workshop}_${getStepNumber(i)}`)}
-										class="hover:text-purple-800"
+										class="hover:text-primary-800-200"
 										data-testid="workshop-{workshop}-step-{getStepNumber(i)}-link"
 									>
 										<span

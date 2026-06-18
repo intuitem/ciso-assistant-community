@@ -289,7 +289,7 @@
 			{#snippet addRiskAnalysis()}
 				<div>
 					<button
-						class="flex flex-col text-left hover:text-purple-800"
+						class="flex flex-col text-left hover:text-primary-800-200"
 						onclick={handleActivityOneClick}
 					>
 						{#if data.data.meta.workshops[4].steps[0].status == 'done'}

@@ -191,7 +191,7 @@
 				<div class="">
 					<a
 						href={data.backUrl}
-						class="flex items-center space-x-2 text-primary-800-300 hover:text-primary-600-400"
+						class="flex items-center space-x-2 text-primary-800-200 hover:text-primary-600-400"
 					>
 						<i class="fa-solid fa-arrow-left"></i>
 						<p class="">{data.backLabel}</p>

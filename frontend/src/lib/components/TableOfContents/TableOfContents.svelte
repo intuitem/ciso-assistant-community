@@ -402,7 +402,7 @@
 							<p>{m.noResultsFound()}</p>
 							<button
 								onclick={clearSearch}
-								class="mt-2 text-primary-600 hover:text-primary-800-300 underline text-xs"
+								class="mt-2 text-primary-600 hover:text-primary-800-200 underline text-xs"
 								aria-label={m.clearSearch()}
 							>
 								{m.clearSearch()}

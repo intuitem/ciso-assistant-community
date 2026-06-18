@@ -49,7 +49,7 @@
 			<!-- Header area -->
 			<div class="flex items-start gap-4 mb-6">
 				<div
-					class="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-violet-200"
+					class="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg"
 				>
 					<i class="fa-solid fa-shield-halved text-white text-xl"></i>
 				</div>
@@ -82,7 +82,7 @@
 							<div
 								class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center transition-transform duration-200 group-hover:scale-110
 								{isPreset
-									? 'bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white shadow-md shadow-violet-200'
+									? 'bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white shadow-md'
 									: i === 1
 										? 'bg-amber-100 text-amber-600'
 										: 'bg-surface-100-900 text-surface-600-400'}"

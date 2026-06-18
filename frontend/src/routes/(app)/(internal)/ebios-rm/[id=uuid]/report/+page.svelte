@@ -131,7 +131,7 @@
 		<Anchor
 			breadcrumbAction="push"
 			href={`/ebios-rm/${study.id}`}
-			class="flex items-center space-x-2 text-primary-800-300 hover:text-primary-600-400"
+			class="flex items-center space-x-2 text-primary-800-200 hover:text-primary-600-400"
 		>
 			<i class="fa-solid fa-arrow-left"></i>
 			<p>{m.backToStudy()}</p>
@@ -254,7 +254,7 @@
 								<span
 									class="ml-2 px-2 py-1 rounded {isDark(event.gravity.hexcolor)
 										? 'text-white'
-										: ''}"
+										: 'text-surface-950'}"
 									style="background-color: {event.gravity.hexcolor}"
 								>
 									{safeTranslate(event.gravity.name)}
@@ -268,7 +268,7 @@
 										<Anchor
 											href={`/assets/${asset.id}`}
 											label={asset.str}
-											class="space-x-2 text-primary-800-300 hover:text-primary-600-400"
+											class="space-x-2 text-primary-800-200 hover:text-primary-600-400"
 											>{asset.str}</Anchor
 										>
 									{/each}
@@ -490,7 +490,7 @@
 										<Anchor
 											href={`/feared-events/${fearedEvent.id}`}
 											label={fearedEvent.name}
-											class="space-x-2 text-primary-800-300 hover:text-primary-600-400"
+											class="space-x-2 text-primary-800-200 hover:text-primary-600-400"
 											>{fearedEvent.name}</Anchor
 										>
 									{/each}
@@ -640,7 +640,7 @@
 									<span
 										class="ml-2 px-2 py-1 rounded {isDark(scenario.gravity.hexcolor)
 											? 'text-white'
-											: ''}"
+											: 'text-surface-950'}"
 										style="background-color: {scenario.gravity.hexcolor}"
 									>
 										{safeTranslate(scenario.gravity.name)}
@@ -751,7 +751,7 @@
 											opScenario.likelihood.hexcolor
 										)
 											? 'text-white'
-											: ''}"
+											: 'text-surface-950'}"
 										style="background-color: {opScenario.likelihood.hexcolor}"
 									>
 										{safeTranslate(opScenario.likelihood.name)}
@@ -764,7 +764,7 @@
 											opScenario.gravity.hexcolor
 										)
 											? 'text-white'
-											: ''}"
+											: 'text-surface-950'}"
 										style="background-color: {opScenario.gravity.hexcolor}"
 									>
 										{safeTranslate(opScenario.gravity.name)}
@@ -777,7 +777,7 @@
 											opScenario.risk_level.hexcolor || '#808080'
 										)
 											? 'text-white'
-											: ''}"
+											: 'text-surface-950'}"
 										style="background-color: {opScenario.risk_level.hexcolor || '#gray'}"
 									>
 										{safeTranslate(opScenario.risk_level.name)}
@@ -792,7 +792,7 @@
 										<Anchor
 											href={`/threats/${threat.id}`}
 											label={threat.str}
-											class="space-x-2 text-primary-800-300 hover:text-primary-600-400"
+											class="space-x-2 text-primary-800-200 hover:text-primary-600-400"
 											>{threat.str}</Anchor
 										>
 									{/each}
@@ -855,7 +855,7 @@
 													<span
 														class="ml-1 px-2 py-0.5 rounded {isDark(mode.likelihood.hexcolor)
 															? 'text-white'
-															: ''}"
+															: 'text-surface-950'}"
 														style="background-color: {mode.likelihood.hexcolor}"
 													>
 														{safeTranslate(mode.likelihood.name)}
@@ -972,7 +972,7 @@
 									<td class="px-4 py-3 text-sm font-medium border-r">
 										<a
 											href="/risk-scenarios/{scenario.id}"
-											class="text-primary-600 hover:text-primary-800-300 hover:underline"
+											class="text-primary-600 hover:text-primary-800-200 hover:underline"
 										>
 											{scenario.ref_id || '--'}
 										</a>
@@ -986,7 +986,7 @@
 														scenario.inherent_level.hexcolor
 													)
 														? 'text-white'
-														: ''}"
+														: 'text-surface-950'}"
 													style="background-color: {scenario.inherent_level.hexcolor}"
 												>
 													{safeTranslate(scenario.inherent_level.name)}
@@ -1003,7 +1003,7 @@
 													scenario.current_level.hexcolor
 												)
 													? 'text-white'
-													: ''}"
+													: 'text-surface-950'}"
 												style="background-color: {scenario.current_level.hexcolor}"
 											>
 												{safeTranslate(scenario.current_level.name)}
@@ -1019,7 +1019,7 @@
 													scenario.residual_level.hexcolor
 												)
 													? 'text-white'
-													: ''}"
+													: 'text-surface-950'}"
 												style="background-color: {scenario.residual_level.hexcolor}"
 											>
 												{safeTranslate(scenario.residual_level.name)}
@@ -1141,7 +1141,7 @@
 													<td class="px-3 py-2 text-sm text-surface-950-50">
 														<Anchor
 															href="/applied-controls/{control.id}"
-															class="text-primary-600 hover:text-primary-800-300 hover:underline"
+															class="text-primary-600 hover:text-primary-800-200 hover:underline"
 														>
 															{control.name}
 														</Anchor>
@@ -1233,7 +1233,7 @@
 												<td class="px-3 py-2 text-sm text-surface-950-50">
 													<Anchor
 														href="/applied-controls/{control.id}"
-														class="text-primary-600 hover:text-primary-800-300 hover:underline"
+														class="text-primary-600 hover:text-primary-800-200 hover:underline"
 													>
 														{control.str}
 													</Anchor>
@@ -1313,7 +1313,7 @@
 										<td class="px-3 py-2 text-sm text-surface-950-50">
 											<Anchor
 												href="/applied-controls/{control.id}"
-												class="text-primary-600 hover:text-primary-800-300 hover:underline"
+												class="text-primary-600 hover:text-primary-800-200 hover:underline"
 											>
 												{control.name}
 											</Anchor>

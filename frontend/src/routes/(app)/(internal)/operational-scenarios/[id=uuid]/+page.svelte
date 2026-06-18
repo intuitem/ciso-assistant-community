@@ -6,6 +6,7 @@
 	import { Popover } from '@skeletonlabs/skeleton-svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { canPerformAction } from '$lib/utils/access-control';
+	import { isDark } from '$lib/utils/helpers';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { countMasked } from '$lib/utils/related-visibility';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
@@ -81,7 +82,7 @@
 		<div class="flex items-center justify-between w-full">
 			<a
 				href="/ebios-rm/{operationalScenario.ebios_rm_study.id}"
-				class="flex items-center space-x-2 text-primary-800-300 hover:text-primary-600-400"
+				class="flex items-center space-x-2 text-primary-800-200 hover:text-primary-600-400"
 			>
 				<i class="fa-solid fa-arrow-left"></i>
 				<p class="">{m.goBackToEbiosRmStudy()}</p>
@@ -97,9 +98,13 @@
 				>
 				<p class="flex items-center">
 					{#if operationalScenario.is_selected}
-						<span class="badge bg-green-200 text-green-700">{m.selected()}</span>
+						<span class="badge bg-green-200 text-green-700 dark:bg-green-500/20 dark:text-green-300"
+							>{m.selected()}</span
+						>
 					{:else}
-						<span class="badge bg-red-200 text-red-700">{m.notSelected()}</span>
+						<span class="badge bg-red-200 text-red-700 dark:bg-red-500/20 dark:text-red-300"
+							>{m.notSelected()}</span
+						>
 					{/if}
 				</p>
 			</div>
@@ -141,7 +146,7 @@
 				<div class="flex items-center gap-4">
 					{#if operationalScenario.strategic_scenario}
 						<div
-							class="flex flex-col space-y-2 p-4 bg-amber-100 border-amber-400 border rounded-md shadow-xs text-center min-w-48"
+							class="flex flex-col space-y-2 p-4 bg-amber-100 border-amber-400 dark:bg-amber-900 dark:border-amber-700 border rounded-md shadow-xs text-center min-w-48"
 						>
 							<h4 class="font-semibold text-surface-600-400">{m.strategicScenario()}</h4>
 							<i class="fa-solid fa-chess text-3xl text-amber-600"></i>
@@ -162,7 +167,7 @@
 					{/if}
 					{#if operationalScenario.attack_path}
 						<div
-							class="flex flex-col space-y-2 p-4 bg-teal-100 border-teal-400 border rounded-md shadow-xs text-center min-w-48"
+							class="flex flex-col space-y-2 p-4 bg-teal-100 border-teal-400 dark:bg-teal-900 dark:border-teal-700 border rounded-md shadow-xs text-center min-w-48"
 						>
 							<h4 class="font-semibold text-surface-600-400">{m.attackPath()}</h4>
 							<i class="fa-solid fa-route text-3xl text-teal-600"></i>
@@ -181,7 +186,7 @@
 				</div>
 				<div class="grid grid-cols-3 gap-12 items-center">
 					<div
-						class="flex flex-col space-y-4 p-4 bg-red-200 border-red-400 border rounded-md shadow-xs text-center"
+						class="flex flex-col space-y-4 p-4 bg-red-200 border-red-400 dark:bg-red-900 dark:border-red-700 border rounded-md shadow-xs text-center"
 					>
 						<h4 class="font-semibold text-surface-600-400">{m.riskOrigin()}</h4>
 						<i class="fa-solid fa-skull-crossbones text-3xl"></i>
@@ -190,7 +195,7 @@
 						</p>
 					</div>
 					<div
-						class="flex flex-col space-y-4 p-4 bg-violet-200 border-violet-400 border rounded-md shadow-xs text-center"
+						class="flex flex-col space-y-4 p-4 bg-violet-200 dark:bg-violet-900 border-violet-400 border rounded-md shadow-xs text-center"
 					>
 						<h4 class="font-semibold text-surface-600-400">{m.stakeholders()}</h4>
 						<i class="fa-solid fa-globe text-3xl"></i>
@@ -205,7 +210,7 @@
 						{/each}
 					</div>
 					<div
-						class="flex flex-col space-y-4 p-4 bg-blue-200 border-blue-400 border rounded-md shadow-xs text-center"
+						class="flex flex-col space-y-4 p-4 bg-blue-200 border-blue-400 dark:bg-blue-900 dark:border-blue-700 border rounded-md shadow-xs text-center"
 					>
 						<h4 class="font-semibold text-surface-600-400">{m.targetObjective()}</h4>
 						<i class="fa-solid fa-bullseye text-3xl"></i>
@@ -314,7 +319,11 @@
 			>
 				<div
 					style="background-color: {operationalScenario.likelihood.hexcolor}"
-					class="flex flex-col items-center justify-center border rounded-md p-4 font-semibold w-full"
+					class="flex flex-col items-center justify-center border rounded-md p-4 font-semibold w-full {isDark(
+						operationalScenario.likelihood.hexcolor
+					)
+						? 'text-white'
+						: 'text-surface-950'}"
 				>
 					<Popover
 						open={likelihoodPopupOpen}
@@ -323,7 +332,7 @@
 						positioning={{ placement: 'bottom' }}
 					>
 						<Popover.Trigger>
-							<h3 class="font-semibold text-lg text-surface-700-300 flex items-center space-x-2">
+							<h3 class="font-semibold text-lg flex items-center space-x-2">
 								{#if operationalScenario.likelihood.description}
 									<i class="fa-solid fa-dice text-black opacity-75"></i>
 								{/if}
@@ -349,7 +358,11 @@
 				<i class="fa-solid fa-xmark"></i>
 				<div
 					style="background-color: {operationalScenario.gravity.hexcolor}"
-					class="flex flex-col items-center justify-center border rounded-md p-4 font-semibold w-full"
+					class="flex flex-col items-center justify-center border rounded-md p-4 font-semibold w-full {isDark(
+						operationalScenario.gravity.hexcolor
+					)
+						? 'text-white'
+						: 'text-surface-950'}"
 				>
 					<Popover
 						open={gravityPopupOpen}
@@ -358,7 +371,7 @@
 						positioning={{ placement: 'bottom' }}
 					>
 						<Popover.Trigger>
-							<h3 class="font-semibold text-lg text-surface-700-300 flex items-center space-x-2">
+							<h3 class="font-semibold text-lg flex items-center space-x-2">
 								{#if operationalScenario.gravity.description}
 									<i class="fa-solid fa-bomb text-black opacity-75"></i>
 								{/if}
@@ -384,7 +397,11 @@
 				<i class="fa-solid fa-equals"></i>
 				<div
 					style="background-color: {operationalScenario.risk_level.hexcolor}"
-					class="flex flex-col items-center justify-center border rounded-md p-4 font-semibold w-full"
+					class="flex flex-col items-center justify-center border rounded-md p-4 font-semibold w-full {isDark(
+						operationalScenario.risk_level.hexcolor
+					)
+						? 'text-white'
+						: 'text-surface-950'}"
 				>
 					<Popover
 						open={riskLevelPopupOpen}
@@ -393,7 +410,7 @@
 						positioning={{ placement: 'bottom' }}
 					>
 						<Popover.Trigger>
-							<h3 class="font-semibold text-lg text-surface-700-300 flex items-center space-x-2">
+							<h3 class="font-semibold text-lg flex items-center space-x-2">
 								{#if operationalScenario.risk_level.description}
 									<i class="fa-solid fa-circle-radiation text-black opacity-75"></i>
 								{/if}

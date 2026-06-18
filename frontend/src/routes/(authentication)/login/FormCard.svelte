@@ -92,7 +92,7 @@
 					<div class="flex flex-row justify-end">
 						<a
 							href="/password-reset"
-							class="flex items-center space-x-2 text-primary-800-300 hover:text-primary-600-400"
+							class="flex items-center space-x-2 text-primary-800-200 hover:text-primary-600-400"
 							data-testid="forgot-password-btn"
 						>
 							<p class="">{m.forgtPassword()}?</p>

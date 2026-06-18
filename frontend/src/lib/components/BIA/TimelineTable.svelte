@@ -141,7 +141,9 @@
 										       {!isImpactChange(entry, i) ? 'border-left: none;' : ''}"
 									>
 										{#if isImpactChange(entry, i)}
-											<div class="font-medium">{entry.data[point].name || '--'}</div>
+											<div class="font-medium text-surface-950">
+												{entry.data[point].name || '--'}
+											</div>
 										{/if}
 									</td>
 								{/each}
