@@ -166,7 +166,7 @@ class LogEntrySerializer(serializers.ModelSerializer):
             return None
         try:
             path = get_folder_path(uuid.UUID(str(folder_id)))
-        except (ValueError, KeyError, CacheNotReadyError):
+        except ValueError, KeyError, CacheNotReadyError:
             return None
         return "/".join(f.name for f in path) or None
 
