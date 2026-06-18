@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -64,6 +65,7 @@
 	let columns = $state([]);
 	let choicesCache = $state({}); // Key: "table:field", Value: Option[]
 	let isLoadingColumns = $state(false);
+	let isRefreshing = $state(false);
 
 	let activeChoiceFields = $derived(
 		LOCAL_FIELDS.filter((f) => f.type === 'choice' && fieldMap[f.key])
@@ -146,6 +148,24 @@
 		choicesCache[cacheKey] = rawChoices.map((c) => ({ value: c.value, label: c.label }));
 	}
 
+	// Force the backend to re-pull the remote schema (tables/columns/choices)
+	// in case it changed provider-side, then reload the dropdowns from the
+	// freshly cached data. Synchronous: the user waits behind a spinner.
+	async function refreshSchema() {
+		if (!integrationId || isRefreshing) return;
+		isRefreshing = true;
+		const result = await fetchRpc('refresh_schema');
+		if (result !== null) {
+			// Drop component-local caches so reloads read the refreshed data.
+			columns = [];
+			choicesCache = {};
+			await loadTables();
+			if (selectedTable) await loadColumns(selectedTable);
+			toastStore.trigger({ message: m.schemaRefreshed(), preset: 'success' });
+		}
+		isRefreshing = false;
+	}
+
 	onMount(() => {
 		if (integrationId) loadTables();
 		if (selectedTable) loadColumns(selectedTable);
@@ -218,11 +238,28 @@
 </script>
 
 <div class="p-6 max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-surface-200">
-	<div class="mb-8 border-b border-surface-100 pb-4">
-		<h2 class="text-xl font-bold text-surface-800">
-			{title}
-		</h2>
-		<p class="text-sm text-surface-500 mt-1">{description}</p>
+	<div class="mb-8 border-b border-surface-100 pb-4 flex justify-between items-start gap-4">
+		<div>
+			<h2 class="text-xl font-bold text-surface-800">
+				{title}
+			</h2>
+			<p class="text-sm text-surface-500 mt-1">{description}</p>
+		</div>
+		{#if integrationId}
+			<button
+				type="button"
+				class="btn preset-tonal-secondary shrink-0 flex items-center gap-2"
+				disabled={isRefreshing}
+				onclick={refreshSchema}
+			>
+				{#if isRefreshing}
+					<LoadingSpinner />
+				{:else}
+					<i class="fa-solid fa-rotate"></i>
+				{/if}
+				{m.refreshSchema()}
+			</button>
+		{/if}
 	</div>
 
 	<section class="mb-8">

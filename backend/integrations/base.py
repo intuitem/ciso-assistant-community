@@ -205,6 +205,15 @@ class BaseSyncOrchestrator(ABC):
             f"Action '{action}' is not supported by this integration."
         )
 
+    def refresh_schema(self) -> list:
+        """Re-fetch and cache the remote schema.
+
+        Default is a no-op so the generic 'refresh schema' button in the UI is
+        harmless for providers that don't cache schema. Providers that do
+        (ServiceNow) override this.
+        """
+        return []
+
     def push_changes(
         self, local_object: models.Model, changed_fields: list[str]
     ) -> bool:
