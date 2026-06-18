@@ -115,7 +115,7 @@
 					<col class="w-[38%]" /><!-- Implementation -->
 				</colgroup>
 				<thead class="sticky top-0 z-10 print:static">
-					<tr class="bg-gray-800 text-white border-b-2 border-gray-900">
+					<tr class="bg-surface-200-800 text-surface-900-100 border-b-2 border-surface-300-700">
 						<th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider">
 							{m.ref()}
 						</th>
@@ -147,7 +147,7 @@
 		<div
 			class="bg-surface-50-950 card border border-surface-200-800 overflow-hidden print:break-before-page print:border-none print:shadow-none"
 		>
-			<div class="px-4 py-3 bg-red-50 border-b border-red-200">
+			<div class="px-4 py-3 bg-red-50 dark:bg-red-950 border-b border-red-200 dark:border-red-800">
 				<div class="flex items-center gap-2">
 					<i class="fas fa-shield-halved text-red-600"></i>
 					<h2 class="text-lg font-semibold text-surface-900-100">{m.additionalControls()}</h2>
@@ -164,7 +164,7 @@
 						<col class="w-[35%]" /><!-- Implementation -->
 					</colgroup>
 					<thead class="sticky top-0 z-10 print:static">
-						<tr class="bg-gray-800 text-white border-b-2 border-gray-900">
+						<tr class="bg-surface-200-800 text-surface-900-100 border-b-2 border-surface-300-700">
 							<th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider">
 								Ref
 							</th>
