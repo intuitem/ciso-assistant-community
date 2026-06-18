@@ -2,7 +2,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { getModalStore, type ModalStore } from './stores';
 
-	const cBase = 'card bg-surface-50 p-4 w-modal shadow-xl space-y-4';
+	const cBase = 'card bg-surface-50-950 p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 
 	const modalStore: ModalStore = getModalStore();

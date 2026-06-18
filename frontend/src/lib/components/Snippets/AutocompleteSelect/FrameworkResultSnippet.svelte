@@ -40,7 +40,7 @@
 
 <span class="w-full">
 	{option.label}
-	<div class="flex grow bg-gray-200 rounded-md overflow-hidden h-4 shrink self-center">
+	<div class="flex grow bg-surface-200-800 rounded-md overflow-hidden h-4 shrink self-center">
 		{#each orderedResultPercentages as rp}
 			<div
 				class="flex flex-col justify-center overflow-hidden text-xs text-center {complianceResultTailwindColorMap[
