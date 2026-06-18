@@ -160,7 +160,17 @@
 			columns = [];
 			choicesCache = {};
 			await loadTables();
-			if (selectedTable) await loadColumns(selectedTable);
+			if (selectedTable) {
+				await loadColumns(selectedTable);
+				// Repopulate choice lists explicitly rather than relying on the
+				// reactive $effect to re-fire (table/field_map are unchanged here).
+				await Promise.all(
+					activeChoiceFields.map((f) => {
+						const remoteField = fieldMap[f.key];
+						return remoteField ? loadChoices(selectedTable, remoteField) : undefined;
+					})
+				);
+			}
 			toastStore.trigger({ message: m.schemaRefreshed(), preset: 'success' });
 		}
 		isRefreshing = false;

@@ -38,6 +38,11 @@ class ServiceNowOrchestrator(BaseITSMOrchestrator):
     client_class = ServiceNowClient
     mapper_class = ServiceNowFieldMapper
 
+    # Local AppliedControl fields the frontend treats as choice/enum fields and
+    # therefore loads remote choice lists for. Kept in sync with LOCAL_FIELDS in
+    # FieldMapper.svelte so warming covers exactly what the page fetches.
+    CHOICE_LOCAL_FIELDS = {"status", "priority"}
+
     def _get_mapper(self):
         return ServiceNowFieldMapper(self.configuration)
 
@@ -123,25 +128,32 @@ class ServiceNowOrchestrator(BaseITSMOrchestrator):
             cache.save(update_fields=["choices", "fetched_at", "updated_at"])
         return cache.choices[key]
 
-    def refresh_schema(self) -> list[dict]:
-        """Force re-fetch the page-load set (tables + configured table columns +
-        mapped-field choices) and overwrite the cache. Returns the fresh tables.
+    def refresh_schema(self, force: bool = True) -> list[dict]:
+        """Fetch the page-load set (tables + configured table columns +
+        mapped choice-field choices) into the cache. Returns the tables.
+
+        force=True (the manual refresh button) re-fetches everything and
+        overwrites the cache. force=False (startup warming) only fills gaps,
+        so a restart with an already-populated cache costs no live calls.
         """
-        tables = self._cached_tables(force=True)
+        tables = self._cached_tables(force=force)
 
         table = self.configuration.settings.get("table_name")
         if table:
-            self._cached_columns(table, force=True)
+            self._cached_columns(table, force=force)
 
+            # Warm choices for every mapped choice field, mirroring what the
+            # page loads (any choice-type field with a field_map entry) rather
+            # than only fields the user has already value-mapped.
             field_map = self.configuration.settings.get("field_map", {}) or {}
-            value_map = self.configuration.settings.get("value_map", {}) or {}
-            for local_field in value_map:
-                remote_field = field_map.get(local_field)
-                if remote_field:
-                    self._cached_choices(table, remote_field, force=True)
+            for local_field, remote_field in field_map.items():
+                if local_field in self.CHOICE_LOCAL_FIELDS and remote_field:
+                    self._cached_choices(table, remote_field, force=force)
 
         logger.info(
-            "Refreshed ServiceNow schema cache", config_id=str(self.configuration.id)
+            "Refreshed ServiceNow schema cache",
+            config_id=str(self.configuration.id),
+            force=force,
         )
         return tables
 

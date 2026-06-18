@@ -46,8 +46,11 @@ def warm_servicenow_schema_cache():
     """Pre-fetch ServiceNow schema (tables, columns, choices) into the DB cache
     so the integration settings page loads without live ServiceNow latency.
 
-    Enqueued on Huey consumer startup. Each config is isolated so one failure
-    (bad credentials, network) doesn't abort the rest.
+    Enqueued on Huey consumer startup. Populate-if-empty (force=False) so a
+    restart with an already-populated cache costs no live calls, and the
+    once-per-worker enqueue from on_startup is a cheap no-op after the first.
+    Each config is isolated so one failure (bad credentials, network) doesn't
+    abort the rest.
     """
     configs = IntegrationConfiguration.objects.filter(
         is_active=True, provider__name="servicenow"
@@ -55,7 +58,7 @@ def warm_servicenow_schema_cache():
     for config in configs:
         try:
             orchestrator = IntegrationRegistry.get_orchestrator(config)
-            orchestrator.refresh_schema()
+            orchestrator.refresh_schema(force=False)
             logger.info("Warmed ServiceNow schema cache", config_id=str(config.id))
         except Exception as e:
             logger.error(

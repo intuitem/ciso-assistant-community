@@ -123,3 +123,52 @@ def test_refresh_schema_overwrites_stale_cache(servicenow_config):
     assert cache.columns["incident"] == [{"name": "state", "label": "State"}]
     assert cache.choices["incident:state"] == [{"value": "1", "label": "New"}]
     assert cache.fetched_at is not None
+
+
+def test_warm_populate_skips_client_when_cache_already_populated(servicenow_config):
+    """Startup warming (force=False) does no live calls when the cache is full,
+    so per-worker re-enqueues and restarts stay cheap."""
+    IntegrationSchemaCache.objects.create(
+        configuration=servicenow_config,
+        tables=[{"name": "incident", "label": "Incident"}],
+        columns={"incident": [{"name": "state", "label": "State"}]},
+        choices={"incident:state": [{"value": "1", "label": "New"}]},
+    )
+    client = _mock_client()
+    orchestrator = _orchestrator(servicenow_config, client)
+
+    orchestrator.refresh_schema(force=False)
+
+    client.get_available_tables.assert_not_called()
+    client.get_table_columns.assert_not_called()
+    client.get_field_choices.assert_not_called()
+
+
+def test_warm_populate_fills_empty_cache(servicenow_config):
+    """force=False still populates a cold cache."""
+    client = _mock_client()
+    orchestrator = _orchestrator(servicenow_config, client)
+
+    orchestrator.refresh_schema(force=False)
+
+    client.get_available_tables.assert_called_once()
+    client.get_table_columns.assert_called_once_with("incident")
+    client.get_field_choices.assert_called_once_with("incident", "state")
+
+
+def test_refresh_warms_choice_fields_via_field_map_not_value_map(servicenow_config):
+    """Choices are warmed for mapped choice-type fields even with an empty
+    value_map, and non-choice mapped fields are not fetched."""
+    servicenow_config.settings = {
+        "table_name": "incident",
+        "field_map": {"status": "state", "name": "short_description"},
+        "value_map": {},
+    }
+    servicenow_config.save()
+    client = _mock_client()
+    orchestrator = _orchestrator(servicenow_config, client)
+
+    orchestrator.execute_action("refresh_schema", {})
+
+    # 'status' is a choice field -> warmed; 'name' is not -> skipped.
+    client.get_field_choices.assert_called_once_with("incident", "state")
