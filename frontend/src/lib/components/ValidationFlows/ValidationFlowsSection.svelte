@@ -137,14 +137,14 @@
 								{getApproverName(validation_flow.approver)}
 							</div>
 							{#if validation_flow.request_notes}
-								<div class="text-sm text-gray-600 mt-1">
+								<div class="text-sm text-surface-600-400 mt-1">
 									<i class="fa-solid fa-note-sticky mr-1"></i>
 									<span class="font-medium">{m.requestNotes()}:</span>
 									<span class="whitespace-pre-line">{validation_flow.request_notes}</span>
 								</div>
 							{/if}
 							{#if validation_flow.last_event_notes && validation_flow.status !== 'submitted'}
-								<div class="text-sm text-gray-600 mt-1">
+								<div class="text-sm text-surface-600-400 mt-1">
 									<i class="fa-solid fa-comment-dots mr-1"></i>
 									<span class="font-medium">{m.decisionNotes()}:</span>
 									<span class="whitespace-pre-line">{validation_flow.last_event_notes}</span>
