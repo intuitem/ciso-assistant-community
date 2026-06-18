@@ -67,7 +67,7 @@
 	}
 
 	let classesText = $derived(
-		complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : ''
+		complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : 'text-gray-900'
 	);
 
 	// Effective scale falls back to the CA bounds when the RA has no override.
@@ -105,7 +105,7 @@
 	let group = $state(pickDefaultTab());
 </script>
 
-<div class="card space-y-2 p-4 bg-white shadow-sm">
+<div class="card space-y-2 p-4 bg-surface-50-950 shadow-sm">
 	<div class="flex flex-row space-x-2 items-center">
 		<code class="code">{data.requirement.urn}</code>
 		{#if showStatus}
@@ -367,8 +367,10 @@
 		<CommentsPanel parentType="requirement_assessment" parentId={data.requirementAssessment.id} />
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
-		<button class="btn bg-gray-400 text-white font-semibold w-full" type="button" onclick={cancel}
-			>{m.back()}</button
+		<button
+			class="btn bg-surface-400-600 text-white font-semibold w-full"
+			type="button"
+			onclick={cancel}>{m.back()}</button
 		>
 	</div>
 </div>

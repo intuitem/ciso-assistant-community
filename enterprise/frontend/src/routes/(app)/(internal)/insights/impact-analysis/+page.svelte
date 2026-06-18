@@ -9,7 +9,7 @@
 	let { data }: Props = $props();
 </script>
 
-<div class="bg-white shadow flex overflow-x-auto">
+<div class="bg-surface-50-950 shadow flex overflow-x-auto">
 	<div class="w-full h-screen">
 		<GraphExplorer title="Mapping Explorer" initLayout="circular" data={data.data} />
 	</div>

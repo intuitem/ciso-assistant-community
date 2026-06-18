@@ -96,9 +96,12 @@
 		project: 'bg-slate-400'
 	};
 	const kindHeaderBgMap: Record<string, string> = {
-		portfolio: 'bg-gradient-to-br from-purple-50/70 via-white to-white',
-		program: 'bg-gradient-to-br from-blue-50/70 via-white to-white',
-		project: 'bg-gradient-to-br from-slate-50/70 via-white to-white'
+		portfolio:
+			'bg-gradient-to-br from-purple-50/70 via-white to-white dark:from-surface-800 dark:via-surface-950 dark:to-surface-950',
+		program:
+			'bg-gradient-to-br from-blue-50/70 via-white to-white dark:from-surface-800 dark:via-surface-950 dark:to-surface-950',
+		project:
+			'bg-gradient-to-br from-slate-50/70 via-white to-white dark:from-surface-800 dark:via-surface-950 dark:to-surface-950'
 	};
 	const priorityColorMap: Record<number, string> = {
 		1: 'bg-red-100 text-red-700',
@@ -352,8 +355,13 @@
 
 		if (progressChartEl) {
 			progressChart?.dispose?.();
-			progressChart = echarts.init(progressChartEl, null, { renderer: 'svg' });
+			progressChart = echarts.init(
+				progressChartEl,
+				document.documentElement.classList.contains('dark') ? 'dark' : null,
+				{ renderer: 'svg' }
+			);
 			progressChart.setOption({
+				backgroundColor: 'transparent',
 				grid: { left: 40, right: 20, top: 20, bottom: 30 },
 				xAxis: { type: 'category', data: dates, axisLabel: { fontSize: 10 } },
 				yAxis: { type: 'value', min: 0, max: 100, axisLabel: { formatter: '{value}%' } },
@@ -375,7 +383,11 @@
 
 		if (lifecycleChartEl) {
 			lifecycleChart?.dispose?.();
-			lifecycleChart = echarts.init(lifecycleChartEl, null, { renderer: 'svg' });
+			lifecycleChart = echarts.init(
+				lifecycleChartEl,
+				document.documentElement.classList.contains('dark') ? 'dark' : null,
+				{ renderer: 'svg' }
+			);
 			const seriesLabels = [m.status(), m.projectHealth(), m.priority()];
 			const esc = (s: unknown) =>
 				String(s ?? '')
@@ -385,6 +397,7 @@
 					.replace(/"/g, '&quot;')
 					.replace(/'/g, '&#39;');
 			lifecycleChart.setOption({
+				backgroundColor: 'transparent',
 				tooltip: {
 					trigger: 'axis',
 					formatter: (params: any[]) => {
@@ -538,7 +551,7 @@
 	let progressValue = $derived(project.progress ?? 0);
 </script>
 
-<div class="card bg-white shadow-sm m-4">
+<div class="card bg-surface-50-950 shadow-sm m-4">
 	<div class="h-1 rounded-t-container-token {kindStripeMap[project.kind] ?? 'bg-slate-400'}"></div>
 
 	<div class="px-8 pt-6 pb-5 {kindHeaderBgMap[project.kind] ?? ''}">
@@ -549,22 +562,22 @@
 						<span
 							class="badge text-sm font-semibold px-3 py-1 rounded-full {kindColorMap[
 								project.kind
-							] ?? 'bg-gray-100 text-gray-700'}"
+							] ?? 'bg-surface-100-900 text-surface-700-300'}"
 							title={safeTranslate(project.kind)}
 						>
 							<i class="{kindIconMap[project.kind] ?? 'fa-solid fa-clipboard-list'} mr-1.5"></i>
 							{safeTranslate(project.kind)}
 						</span>
-						<h1 class="text-3xl font-bold text-gray-900 truncate">{project.name}</h1>
+						<h1 class="text-3xl font-bold text-surface-900-100 truncate">{project.name}</h1>
 						{#if project.ref_id}
 							<span
-								class="text-xs font-mono text-gray-600 bg-white/70 border border-gray-200 px-2 py-0.5 rounded"
+								class="text-xs font-mono text-surface-600-400 bg-surface-50-950/70 border border-surface-200-800 px-2 py-0.5 rounded"
 								>{project.ref_id}</span
 							>
 						{/if}
 						<button
 							onclick={startBasicsEdit}
-							class="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-primary-600"
+							class="opacity-0 group-hover:opacity-100 transition-opacity text-surface-500 hover:text-primary-600"
 							aria-label={m.edit()}
 							title={m.edit()}
 						>
@@ -576,14 +589,14 @@
 							href={project.ref_link}
 							target="_blank"
 							rel="noopener noreferrer"
-							class="text-primary-600 hover:text-primary-800 hover:underline text-sm inline-flex items-center gap-1 mt-2"
+							class="text-primary-600 hover:text-primary-800-300 hover:underline text-sm inline-flex items-center gap-1 mt-2"
 						>
 							<i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
 							{project.ref_link}
 						</a>
 					{/if}
 					{#if project.description}
-						<div class="prose prose-sm max-w-3xl text-gray-700 mt-3">
+						<div class="prose prose-sm max-w-3xl text-surface-700-300 mt-3">
 							<MarkdownRenderer content={project.description} />
 						</div>
 					{/if}
@@ -597,7 +610,7 @@
 							disableDoubleDash={true}
 						/>
 						<label class="block">
-							<span class="text-xs font-semibold text-gray-500 uppercase">{m.name()}</span>
+							<span class="text-xs font-semibold text-surface-600-400 uppercase">{m.name()}</span>
 							<input
 								type="text"
 								bind:value={basicsTextDraft.name}
@@ -606,7 +619,7 @@
 							/>
 						</label>
 						<label class="block">
-							<span class="text-xs font-semibold text-gray-500 uppercase">{m.refId()}</span>
+							<span class="text-xs font-semibold text-surface-600-400 uppercase">{m.refId()}</span>
 							<input
 								type="text"
 								maxlength="100"
@@ -615,7 +628,8 @@
 							/>
 						</label>
 						<label class="block">
-							<span class="text-xs font-semibold text-gray-500 uppercase">{m.refLink()}</span>
+							<span class="text-xs font-semibold text-surface-600-400 uppercase">{m.refLink()}</span
+							>
 							<input
 								type="url"
 								bind:value={basicsTextDraft.ref_link}
@@ -638,7 +652,9 @@
 							label={m.parentProject()}
 						/>
 						<div class="block">
-							<span class="text-xs font-semibold text-gray-500 uppercase">{m.description()}</span>
+							<span class="text-xs font-semibold text-surface-600-400 uppercase"
+								>{m.description()}</span
+							>
 							<div class="mt-1">
 								<MarkdownField label="" bind:value={basicsTextDraft.description} rows={4} />
 							</div>
@@ -670,107 +686,109 @@
 			<div class="card preset-tonal-error p-3 mt-3 text-sm">{errorMessage}</div>
 		{/if}
 	</div>
-	<div class="px-8 py-4 border-t border-gray-200">
+	<div class="px-8 py-4 border-t border-surface-200-800">
 		<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
 			<div class="flex flex-col gap-1.5">
-				<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
+				<div class="text-[10px] font-semibold text-surface-600-400 uppercase tracking-wider">
 					{m.status()}
 				</div>
 				{#if project.status}
 					<span
 						class="badge text-sm font-semibold px-3 py-1 rounded-full self-start {statusColorMap[
 							project.status?.name
-						] ?? 'bg-gray-100 text-gray-600'}">{safeTranslate(project.status.name)}</span
+						] ?? 'bg-surface-100-900 text-surface-600-400'}"
+						>{safeTranslate(project.status.name)}</span
 					>
 				{:else}
-					<span class="text-gray-400 text-sm italic">—</span>
+					<span class="text-surface-500 text-sm italic">—</span>
 				{/if}
 			</div>
 
 			<div class="flex flex-col gap-1.5">
-				<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
+				<div class="text-[10px] font-semibold text-surface-600-400 uppercase tracking-wider">
 					{m.projectHealth()}
 				</div>
 				{#if project.health}
 					<span
 						class="badge text-sm font-semibold px-3 py-1 rounded-full self-start {healthColorMap[
 							project.health?.name
-						] ?? 'bg-gray-100 text-gray-600'}">{safeTranslate(project.health.name)}</span
+						] ?? 'bg-surface-100-900 text-surface-600-400'}"
+						>{safeTranslate(project.health.name)}</span
 					>
 				{:else}
-					<span class="text-gray-400 text-sm italic">—</span>
+					<span class="text-surface-500 text-sm italic">—</span>
 				{/if}
 			</div>
 
 			<div class="flex flex-col gap-1.5">
-				<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
+				<div class="text-[10px] font-semibold text-surface-600-400 uppercase tracking-wider">
 					{m.priority()}
 				</div>
 				{#if project.priority}
 					<span
 						class="badge text-sm font-semibold px-3 py-1 rounded-full self-start {priorityColorMap[
 							project.priority
-						] ?? 'bg-gray-100 text-gray-600'}">P{project.priority}</span
+						] ?? 'bg-surface-100-900 text-surface-600-400'}">P{project.priority}</span
 					>
 				{:else}
-					<span class="text-gray-400 text-sm italic">—</span>
+					<span class="text-surface-500 text-sm italic">—</span>
 				{/if}
 			</div>
 
 			<div class="flex flex-col gap-1.5">
-				<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
+				<div class="text-[10px] font-semibold text-surface-600-400 uppercase tracking-wider">
 					{m.progress()}
 				</div>
 				<div class="flex items-center gap-3">
-					<span class="text-lg font-bold text-gray-900 tabular-nums leading-none"
+					<span class="text-lg font-bold text-surface-900-100 tabular-nums leading-none"
 						>{progressValue}%</span
 					>
-					<div class="grow h-2 rounded-full bg-gray-200 overflow-hidden">
+					<div class="grow h-2 rounded-full bg-surface-200-800 overflow-hidden">
 						<div class="h-full bg-primary-500 transition-all" style="width: {progressValue}%"></div>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
-	<div class="px-8 py-3 bg-gray-50 border-t border-gray-200">
+	<div class="px-8 py-3 bg-surface-50-950 border-t border-surface-200-800">
 		<div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
 			<div>
-				<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
+				<div class="text-[10px] font-semibold text-surface-600-400 uppercase tracking-wider mb-1">
 					{m.owner()}
 				</div>
 				{#if project.owner}
-					<span class="text-gray-900 truncate block">{project.owner.str}</span>
+					<span class="text-surface-900-100 truncate block">{project.owner.str}</span>
 				{:else}
-					<span class="text-gray-400 italic">—</span>
+					<span class="text-surface-500 italic">—</span>
 				{/if}
 			</div>
 			<div>
-				<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
+				<div class="text-[10px] font-semibold text-surface-600-400 uppercase tracking-wider mb-1">
 					{m.sponsor()}
 				</div>
 				{#if project.sponsor}
-					<span class="text-gray-900 truncate block">{project.sponsor.str}</span>
+					<span class="text-surface-900-100 truncate block">{project.sponsor.str}</span>
 				{:else}
-					<span class="text-gray-400 italic">—</span>
+					<span class="text-surface-500 italic">—</span>
 				{/if}
 			</div>
 			<div>
-				<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
+				<div class="text-[10px] font-semibold text-surface-600-400 uppercase tracking-wider mb-1">
 					{m.parentProject()}
 				</div>
 				{#if project.parent_project}
 					<Anchor
 						href="/projects/{project.parent_project.id}"
-						class="text-primary-600 hover:text-primary-800 hover:underline truncate block"
+						class="text-primary-600 hover:text-primary-800-300 hover:underline truncate block"
 					>
 						{project.parent_project.str}
 					</Anchor>
 				{:else}
-					<span class="text-gray-400 italic">—</span>
+					<span class="text-surface-500 italic">—</span>
 				{/if}
 			</div>
 			<div>
-				<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
+				<div class="text-[10px] font-semibold text-surface-600-400 uppercase tracking-wider mb-1">
 					{m.subProjects()}
 				</div>
 				{#if project.sub_projects && project.sub_projects.length > 0}
@@ -778,59 +796,59 @@
 						{#each project.sub_projects as sub}
 							<Anchor
 								href="/projects/{sub.id}"
-								class="text-xs px-2 py-0.5 bg-white border border-gray-200 rounded-full text-gray-700 hover:bg-gray-100 hover:border-gray-300 truncate max-w-[10rem]"
+								class="text-xs px-2 py-0.5 bg-surface-50-950 border border-surface-200-800 rounded-full text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 truncate max-w-[10rem]"
 							>
 								{sub.str}
 							</Anchor>
 						{/each}
 					</div>
 				{:else}
-					<span class="text-gray-400 italic">—</span>
+					<span class="text-surface-500 italic">—</span>
 				{/if}
 			</div>
 		</div>
 	</div>
 	<Tabs value={activeTab} onValueChange={(e) => (activeTab = e.value)} class="w-full">
-		<Tabs.List class="border-b border-gray-200 px-4">
+		<Tabs.List class="border-b border-surface-200-800 px-4">
 			<Tabs.Trigger
 				value="overview"
-				class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
+				class="px-4 py-3 text-sm font-medium text-surface-600-400 hover:text-surface-700-300 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
 			>
 				<i class="fa-solid fa-gauge-high mr-2"></i>{m.overview()}
 			</Tabs.Trigger>
 			<Tabs.Trigger
 				value="charter"
-				class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
+				class="px-4 py-3 text-sm font-medium text-surface-600-400 hover:text-surface-700-300 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
 			>
 				<i class="fa-solid fa-file-contract mr-2"></i>{m.charter()}
 			</Tabs.Trigger>
 			<Tabs.Trigger
 				value="schedule"
-				class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
+				class="px-4 py-3 text-sm font-medium text-surface-600-400 hover:text-surface-700-300 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
 			>
 				<i class="fa-solid fa-calendar mr-2"></i>{m.tracking()}
 			</Tabs.Trigger>
 			{#if !isPortfolio}<Tabs.Trigger
 					value="scope"
-					class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
+					class="px-4 py-3 text-sm font-medium text-surface-600-400 hover:text-surface-700-300 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
 				>
 					<i class="fa-solid fa-bullseye mr-2"></i>{m.scope()}
 				</Tabs.Trigger>{/if}
 			<Tabs.Trigger
 				value="linked"
-				class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
+				class="px-4 py-3 text-sm font-medium text-surface-600-400 hover:text-surface-700-300 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
 			>
 				<i class="fa-solid fa-link mr-2"></i>{m.linked()}
 			</Tabs.Trigger>
 			<Tabs.Trigger
 				value="people"
-				class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
+				class="px-4 py-3 text-sm font-medium text-surface-600-400 hover:text-surface-700-300 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
 			>
 				<i class="fa-solid fa-users mr-2"></i>{m.people()}
 			</Tabs.Trigger>
 			<Tabs.Trigger
 				value="analytics"
-				class="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
+				class="px-4 py-3 text-sm font-medium text-surface-600-400 hover:text-surface-700-300 border-b-2 border-transparent transition-colors aria-[selected=true]:!text-primary-700 aria-[selected=true]:!border-primary-500"
 			>
 				<i class="fa-solid fa-chart-line mr-2"></i>{m.analytics()}
 			</Tabs.Trigger>
@@ -874,10 +892,10 @@
 							label={m.status()}
 						/>
 					{:else}
-						<div class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
+						<div class="text-xs font-semibold text-surface-600-400 uppercase mb-1 block">
 							{m.status()}
 						</div>
-						<span class="text-sm text-gray-900"
+						<span class="text-sm text-surface-900-100"
 							>{project.status ? safeTranslate(project.status.name) : '--'}</span
 						>
 					{/if}
@@ -892,10 +910,10 @@
 							label={m.projectHealth()}
 						/>
 					{:else}
-						<div class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
+						<div class="text-xs font-semibold text-surface-600-400 uppercase mb-1 block">
 							{m.projectHealth()}
 						</div>
-						<span class="text-sm text-gray-900"
+						<span class="text-sm text-surface-900-100"
 							>{project.health ? safeTranslate(project.health.name) : '--'}</span
 						>
 					{/if}
@@ -911,17 +929,17 @@
 							label={m.priority()}
 						/>
 					{:else}
-						<div class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
+						<div class="text-xs font-semibold text-surface-600-400 uppercase mb-1 block">
 							{m.priority()}
 						</div>
-						<span class="text-sm text-gray-900"
+						<span class="text-sm text-surface-900-100"
 							>{project.priority ? `P${project.priority}` : '--'}</span
 						>
 					{/if}
 				</div>
 
 				<div>
-					<label class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
+					<label class="text-xs font-semibold text-surface-600-400 uppercase mb-1 block">
 						{m.progress()}
 					</label>
 					{#if editingSection === 'overview'}
@@ -935,7 +953,7 @@
 							onChange={(v) => (overviewProgressDraft = typeof v === 'number' ? v : null)}
 						/>
 					{:else}
-						<span class="text-sm text-gray-900">{progressValue}%</span>
+						<span class="text-sm text-surface-900-100">{progressValue}%</span>
 					{/if}
 				</div>
 			</div>
@@ -971,18 +989,18 @@
 
 			<div class="space-y-6">
 				{#each charterFields as section}
-					<div class="border-l-2 border-gray-200 pl-4">
-						<h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+					<div class="border-l-2 border-surface-200-800 pl-4">
+						<h3 class="text-xs font-semibold text-surface-600-400 uppercase tracking-wide mb-2">
 							{section.label}
 						</h3>
 						{#if editingSection === 'charter'}
 							<MarkdownField label="" bind:value={charterDraft[section.key]} rows={4} />
 						{:else if project[section.key]}
-							<div class="prose prose-sm max-w-none text-gray-900">
+							<div class="prose prose-sm max-w-none text-surface-900-100">
 								<MarkdownRenderer content={project[section.key]} />
 							</div>
 						{:else}
-							<p class="text-gray-400 italic text-sm">--</p>
+							<p class="text-surface-500 italic text-sm">--</p>
 						{/if}
 					</div>
 				{/each}
@@ -1018,12 +1036,17 @@
 			{/if}
 
 			<section class="mb-8">
-				<h3 class="text-md font-semibold text-gray-800 border-b border-gray-200 pb-1 mb-4">
+				<h3
+					class="text-md font-semibold text-surface-800-200 border-b border-surface-200-800 pb-1 mb-4"
+				>
 					{m.schedule()}
 				</h3>
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 					<div>
-						<label for="sc-start" class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
+						<label
+							for="sc-start"
+							class="text-xs font-semibold text-surface-600-400 uppercase mb-1 block"
+						>
 							{m.startDate()}
 						</label>
 						{#if editingSection === 'schedule'}
@@ -1034,11 +1057,14 @@
 								class="input w-full"
 							/>
 						{:else}
-							<span class="text-sm text-gray-900">{project.start_date ?? '--'}</span>
+							<span class="text-sm text-surface-900-100">{project.start_date ?? '--'}</span>
 						{/if}
 					</div>
 					<div>
-						<label for="sc-end" class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
+						<label
+							for="sc-end"
+							class="text-xs font-semibold text-surface-600-400 uppercase mb-1 block"
+						>
 							{m.endDate()}
 						</label>
 						{#if editingSection === 'schedule'}
@@ -1049,34 +1075,41 @@
 								class="input w-full"
 							/>
 						{:else}
-							<span class="text-sm text-gray-900">{project.end_date ?? '--'}</span>
+							<span class="text-sm text-surface-900-100">{project.end_date ?? '--'}</span>
 						{/if}
 					</div>
 					<div>
-						<label for="sc-eta" class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
+						<label
+							for="sc-eta"
+							class="text-xs font-semibold text-surface-600-400 uppercase mb-1 block"
+						>
 							{m.eta()}
 						</label>
 						{#if editingSection === 'schedule'}
 							<input id="sc-eta" type="date" bind:value={scheduleDraft.eta} class="input w-full" />
 						{:else}
-							<span class="text-sm text-gray-900">{project.eta ?? '--'}</span>
+							<span class="text-sm text-surface-900-100">{project.eta ?? '--'}</span>
 						{/if}
 					</div>
 					<div>
-						<div class="text-xs font-semibold text-gray-500 uppercase mb-1">{m.closedAt()}</div>
-						<span class="text-sm text-gray-900">{project.closed_at ?? '--'}</span>
+						<div class="text-xs font-semibold text-surface-600-400 uppercase mb-1">
+							{m.closedAt()}
+						</div>
+						<span class="text-sm text-surface-900-100">{project.closed_at ?? '--'}</span>
 					</div>
 				</div>
 			</section>
 
 			<section class="mb-8">
-				<h3 class="text-md font-semibold text-gray-800 border-b border-gray-200 pb-1 mb-4">
+				<h3
+					class="text-md font-semibold text-surface-800-200 border-b border-surface-200-800 pb-1 mb-4"
+				>
 					{m.financials()}
 				</h3>
 				{#if editingSection === 'schedule'}
 					<div class="grid grid-cols-1 md:grid-cols-3 gap-3">
 						<label class="block">
-							<span class="text-xs font-semibold text-gray-500 uppercase">
+							<span class="text-xs font-semibold text-surface-600-400 uppercase">
 								{m.expectedBudget()}
 							</span>
 							<input
@@ -1087,7 +1120,9 @@
 							/>
 						</label>
 						<label class="block">
-							<span class="text-xs font-semibold text-gray-500 uppercase">{m.actualCost()}</span>
+							<span class="text-xs font-semibold text-surface-600-400 uppercase"
+								>{m.actualCost()}</span
+							>
 							<input
 								type="number"
 								step="0.01"
@@ -1104,28 +1139,32 @@
 						/>
 					</div>
 				{:else if project.budget == null && project.actual_cost == null}
-					<span class="text-sm text-gray-400 italic">--</span>
+					<span class="text-sm text-surface-500 italic">--</span>
 				{:else}
 					<div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
 						<div>
-							<div class="text-xs font-semibold text-gray-500 uppercase">
+							<div class="text-xs font-semibold text-surface-600-400 uppercase">
 								{m.expectedBudget()}
 							</div>
-							<div class="text-sm text-gray-900">
+							<div class="text-sm text-surface-900-100">
 								{project.budget ?? '--'}{#if project.currency}&nbsp;{project.currency}{/if}
 							</div>
 						</div>
 						<div>
-							<div class="text-xs font-semibold text-gray-500 uppercase">{m.actualCost()}</div>
-							<div class="text-sm text-gray-900">
+							<div class="text-xs font-semibold text-surface-600-400 uppercase">
+								{m.actualCost()}
+							</div>
+							<div class="text-sm text-surface-900-100">
 								{project.actual_cost ?? '--'}{#if project.currency}&nbsp;{project.currency}{/if}
 							</div>
 						</div>
 						<div>
-							<div class="text-xs font-semibold text-gray-500 uppercase">{m.remaining()}</div>
+							<div class="text-xs font-semibold text-surface-600-400 uppercase">
+								{m.remaining()}
+							</div>
 							<div
 								class="text-sm font-medium"
-								class:text-gray-900={budgetRemaining == null || budgetRemaining >= 0}
+								class:text-surface-900-100={budgetRemaining == null || budgetRemaining >= 0}
 								class:text-red-600={budgetRemaining != null && budgetRemaining < 0}
 							>
 								{budgetRemaining ?? '--'}{#if project.currency}&nbsp;{project.currency}{/if}
@@ -1134,13 +1173,13 @@
 					</div>
 					{#if project.budget != null && Number(project.budget) > 0}
 						<div class="flex items-center gap-2">
-							<div class="grow h-2 rounded-full bg-gray-200 overflow-hidden">
+							<div class="grow h-2 rounded-full bg-surface-200-800 overflow-hidden">
 								<div
 									class="h-full {budgetBarColor} transition-all"
 									style="width: {Math.min(budgetSpentPct, 100)}%"
 								></div>
 							</div>
-							<span class="text-xs text-gray-700 shrink-0 tabular-nums">
+							<span class="text-xs text-surface-700-300 shrink-0 tabular-nums">
 								{budgetSpentPct.toFixed(0)}%
 							</span>
 						</div>
@@ -1149,17 +1188,21 @@
 			</section>
 
 			<section>
-				<h3 class="text-md font-semibold text-gray-800 border-b border-gray-200 pb-1 mb-2">
+				<h3
+					class="text-md font-semibold text-surface-800-200 border-b border-surface-200-800 pb-1 mb-2"
+				>
 					{m.tolerances()}
 				</h3>
-				<p class="text-xs text-gray-500 mb-4">{m.tolerancesHelpText()}</p>
+				<p class="text-xs text-surface-600-400 mb-4">{m.tolerancesHelpText()}</p>
 
 				{#if editingSection === 'schedule'}
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-						<fieldset class="border border-gray-200 rounded p-3">
-							<legend class="text-xs font-semibold text-gray-500 uppercase px-1">{m.time()}</legend>
+						<fieldset class="border border-surface-200-800 rounded p-3">
+							<legend class="text-xs font-semibold text-surface-600-400 uppercase px-1"
+								>{m.time()}</legend
+							>
 							<div class="grid grid-cols-2 gap-2 mt-2">
-								<label class="text-xs text-gray-600">
+								<label class="text-xs text-surface-600-400">
 									+ {m.days()}
 									<input
 										type="number"
@@ -1176,7 +1219,7 @@
 										class="input w-full mt-1"
 									/>
 								</label>
-								<label class="text-xs text-gray-600">
+								<label class="text-xs text-surface-600-400">
 									− {m.days()}
 									<input
 										type="number"
@@ -1195,10 +1238,12 @@
 								</label>
 							</div>
 						</fieldset>
-						<fieldset class="border border-gray-200 rounded p-3">
-							<legend class="text-xs font-semibold text-gray-500 uppercase px-1">{m.cost()}</legend>
+						<fieldset class="border border-surface-200-800 rounded p-3">
+							<legend class="text-xs font-semibold text-surface-600-400 uppercase px-1"
+								>{m.cost()}</legend
+							>
 							<div class="grid grid-cols-2 gap-2 mt-2">
-								<label class="text-xs text-gray-600">
+								<label class="text-xs text-surface-600-400">
 									+ %
 									<input
 										type="number"
@@ -1216,7 +1261,7 @@
 										class="input w-full mt-1"
 									/>
 								</label>
-								<label class="text-xs text-gray-600">
+								<label class="text-xs text-surface-600-400">
 									− %
 									<input
 										type="number"
@@ -1237,7 +1282,7 @@
 							</div>
 						</fieldset>
 						<label class="block">
-							<span class="text-xs font-semibold text-gray-500 uppercase">{m.scope()}</span>
+							<span class="text-xs font-semibold text-surface-600-400 uppercase">{m.scope()}</span>
 							<input
 								type="text"
 								bind:value={scheduleDraft.tolerances.scope}
@@ -1245,7 +1290,8 @@
 							/>
 						</label>
 						<label class="block">
-							<span class="text-xs font-semibold text-gray-500 uppercase">{m.quality()}</span>
+							<span class="text-xs font-semibold text-surface-600-400 uppercase">{m.quality()}</span
+							>
 							<input
 								type="text"
 								bind:value={scheduleDraft.tolerances.quality}
@@ -1253,7 +1299,9 @@
 							/>
 						</label>
 						<label class="block">
-							<span class="text-xs font-semibold text-gray-500 uppercase">{m.benefits()}</span>
+							<span class="text-xs font-semibold text-surface-600-400 uppercase"
+								>{m.benefits()}</span
+							>
 							<input
 								type="text"
 								bind:value={scheduleDraft.tolerances.benefits}
@@ -1261,7 +1309,7 @@
 							/>
 						</label>
 						<label class="block">
-							<span class="text-xs font-semibold text-gray-500 uppercase">{m.risk()}</span>
+							<span class="text-xs font-semibold text-surface-600-400 uppercase">{m.risk()}</span>
 							<input
 								type="text"
 								bind:value={scheduleDraft.tolerances.risk}
@@ -1272,33 +1320,33 @@
 				{:else}
 					{@const t = project.tolerances ?? {}}
 					{#if !t || Object.keys(t).length === 0}
-						<p class="text-gray-400 italic text-sm">--</p>
+						<p class="text-surface-500 italic text-sm">--</p>
 					{:else}
 						<dl class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
 							{#if t.time}
-								<div class="border-l-2 border-gray-200 pl-3">
-									<dt class="text-xs font-semibold text-gray-500 uppercase">{m.time()}</dt>
-									<dd class="text-gray-900">
+								<div class="border-l-2 border-surface-200-800 pl-3">
+									<dt class="text-xs font-semibold text-surface-600-400 uppercase">{m.time()}</dt>
+									<dd class="text-surface-900-100">
 										+{t.time.plus_days ?? 0} / −{t.time.minus_days ?? 0}
 										{m.days()}
 									</dd>
 								</div>
 							{/if}
 							{#if t.cost}
-								<div class="border-l-2 border-gray-200 pl-3">
-									<dt class="text-xs font-semibold text-gray-500 uppercase">{m.cost()}</dt>
-									<dd class="text-gray-900">
+								<div class="border-l-2 border-surface-200-800 pl-3">
+									<dt class="text-xs font-semibold text-surface-600-400 uppercase">{m.cost()}</dt>
+									<dd class="text-surface-900-100">
 										+{t.cost.plus_pct ?? 0}% / −{t.cost.minus_pct ?? 0}%
 									</dd>
 								</div>
 							{/if}
 							{#each ['scope', 'quality', 'benefits', 'risk'] as k}
 								{#if t[k]}
-									<div class="border-l-2 border-gray-200 pl-3">
-										<dt class="text-xs font-semibold text-gray-500 uppercase">
+									<div class="border-l-2 border-surface-200-800 pl-3">
+										<dt class="text-xs font-semibold text-surface-600-400 uppercase">
 											{safeTranslate(k)}
 										</dt>
-										<dd class="text-gray-900">{t[k]}</dd>
+										<dd class="text-surface-900-100">{t[k]}</dd>
 									</div>
 								{/if}
 							{/each}
@@ -1338,18 +1386,18 @@
 
 				<div class="space-y-6">
 					{#each scopeFields as section}
-						<div class="border-l-2 border-gray-200 pl-4">
-							<h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+						<div class="border-l-2 border-surface-200-800 pl-4">
+							<h3 class="text-xs font-semibold text-surface-600-400 uppercase tracking-wide mb-2">
 								{section.label}
 							</h3>
 							{#if editingSection === 'scope'}
 								<MarkdownField label="" bind:value={scopeDraft[section.key]} rows={4} />
 							{:else if project[section.key]}
-								<div class="prose prose-sm max-w-none text-gray-900">
+								<div class="prose prose-sm max-w-none text-surface-900-100">
 									<MarkdownRenderer content={project[section.key]} />
 								</div>
 							{:else}
-								<p class="text-gray-400 italic text-sm">--</p>
+								<p class="text-surface-500 italic text-sm">--</p>
 							{/if}
 						</div>
 					{/each}
@@ -1398,18 +1446,18 @@
 							label={m.linkedCollection()}
 						/>
 					{:else}
-						<div class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
+						<div class="text-xs font-semibold text-surface-600-400 uppercase mb-1 block">
 							{m.linkedCollection()}
 						</div>
 						{#if project.linked_collection}
 							<Anchor
 								href="/generic-collections/{project.linked_collection.id}"
-								class="text-primary-600 hover:text-primary-800 hover:underline text-sm"
+								class="text-primary-600 hover:text-primary-800-300 hover:underline text-sm"
 							>
 								{project.linked_collection.str}
 							</Anchor>
 						{:else}
-							<span class="text-gray-400 text-sm">--</span>
+							<span class="text-surface-500 text-sm">--</span>
 						{/if}
 					{/if}
 				</div>
@@ -1426,7 +1474,7 @@
 							label={m.responsibilityMatrices()}
 						/>
 					{:else}
-						<div class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
+						<div class="text-xs font-semibold text-surface-600-400 uppercase mb-1 block">
 							{m.responsibilityMatrices()}
 						</div>
 						{#if project.responsibility_matrices && project.responsibility_matrices.length > 0}
@@ -1435,7 +1483,7 @@
 									<li class="text-sm">
 										<Anchor
 											href="/responsibility-matrices/{matrix.id}"
-											class="text-primary-600 hover:text-primary-800 hover:underline"
+											class="text-primary-600 hover:text-primary-800-300 hover:underline"
 										>
 											{matrix.str}
 										</Anchor>
@@ -1443,7 +1491,7 @@
 								{/each}
 							</ul>
 						{:else}
-							<span class="text-gray-400 text-sm italic">{m.noResponsibilityMatrices()}</span>
+							<span class="text-surface-500 text-sm italic">{m.noResponsibilityMatrices()}</span>
 						{/if}
 					{/if}
 				</div>
@@ -1463,21 +1511,21 @@
 							allowUserOptions="append"
 						/>
 					{:else}
-						<div class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
+						<div class="text-xs font-semibold text-surface-600-400 uppercase mb-1 block">
 							{m.labels()}
 						</div>
 						{#if project.filtering_labels && project.filtering_labels.length > 0}
 							<div class="flex flex-wrap gap-1.5">
 								{#each project.filtering_labels as label}
 									<span
-										class="badge text-xs font-medium px-2 py-0.5 rounded bg-gray-100 text-gray-700 border border-gray-200"
+										class="badge text-xs font-medium px-2 py-0.5 rounded bg-surface-100-900 text-surface-700-300 border border-surface-200-800"
 									>
 										{label.str}
 									</span>
 								{/each}
 							</div>
 						{:else}
-							<span class="text-gray-400 text-sm italic">--</span>
+							<span class="text-surface-500 text-sm italic">--</span>
 						{/if}
 					{/if}
 				</div>
@@ -1529,11 +1577,11 @@
 							helpText={m.projectOwnerHelpText()}
 						/>
 					{:else}
-						<div class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
+						<div class="text-xs font-semibold text-surface-600-400 uppercase mb-1 block">
 							{m.owner()}
 						</div>
-						<p class="text-xs text-gray-500 mb-2">{m.projectOwnerHelpText()}</p>
-						<span class="text-sm text-gray-900">{project.owner?.str ?? '--'}</span>
+						<p class="text-xs text-surface-600-400 mb-2">{m.projectOwnerHelpText()}</p>
+						<span class="text-sm text-surface-900-100">{project.owner?.str ?? '--'}</span>
 					{/if}
 				</div>
 
@@ -1553,33 +1601,36 @@
 							helpText={m.projectSponsorHelpText()}
 						/>
 					{:else}
-						<div class="text-xs font-semibold text-gray-500 uppercase mb-1 block">
+						<div class="text-xs font-semibold text-surface-600-400 uppercase mb-1 block">
 							{m.sponsor()}
 						</div>
-						<p class="text-xs text-gray-500 mb-2">{m.projectSponsorHelpText()}</p>
-						<span class="text-sm text-gray-900">{project.sponsor?.str ?? '--'}</span>
+						<p class="text-xs text-surface-600-400 mb-2">{m.projectSponsorHelpText()}</p>
+						<span class="text-sm text-surface-900-100">{project.sponsor?.str ?? '--'}</span>
 					{/if}
 				</div>
 			</div>
 		</Tabs.Content>
 		<Tabs.Content value="analytics" class="p-6">
 			{#if snapshots.length === 0}
-				<div class="text-center py-12 text-gray-400">
+				<div class="text-center py-12 text-surface-500">
 					<i class="fa-solid fa-chart-line text-3xl mb-3"></i>
 					<p class="text-sm">{m.noSnapshotsYet()}</p>
 				</div>
 			{:else}
 				<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
 					<div
-						class="relative rounded-lg bg-white border border-gray-200 p-4 overflow-hidden shadow-sm"
+						class="relative rounded-lg bg-surface-50-950 border border-surface-200-800 p-4 overflow-hidden shadow-sm"
 					>
 						<div class="absolute top-0 inset-x-0 h-1 bg-primary-500"></div>
-						<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2">
+						<div
+							class="text-[10px] font-semibold text-surface-600-400 uppercase tracking-wider mb-2"
+						>
 							{m.progress()}
 						</div>
 						<div class="flex items-baseline gap-2">
-							<span class="text-3xl font-bold text-gray-900 tabular-nums leading-none"
-								>{latestSnapshot?.progress ?? 0}<span class="text-lg text-gray-500">%</span></span
+							<span class="text-3xl font-bold text-surface-900-100 tabular-nums leading-none"
+								>{latestSnapshot?.progress ?? 0}<span class="text-lg text-surface-600-400">%</span
+								></span
 							>
 						</div>
 						{#if progressDelta7d != null}
@@ -1591,34 +1642,36 @@
 									<i class="fa-solid fa-arrow-trend-down text-red-600"></i>
 									<span class="text-red-600 tabular-nums">{progressDelta7d}</span>
 								{:else}
-									<i class="fa-solid fa-minus text-gray-400"></i>
-									<span class="text-gray-500 tabular-nums">0</span>
+									<i class="fa-solid fa-minus text-surface-500"></i>
+									<span class="text-surface-600-400 tabular-nums">0</span>
 								{/if}
-								<span class="text-gray-400">{m.last7Days()}</span>
+								<span class="text-surface-500">{m.last7Days()}</span>
 							</div>
 						{/if}
 					</div>
 					<div
-						class="relative rounded-lg bg-white border border-gray-200 p-4 overflow-hidden shadow-sm"
+						class="relative rounded-lg bg-surface-50-950 border border-surface-200-800 p-4 overflow-hidden shadow-sm"
 					>
 						<div class="absolute top-0 inset-x-0 h-1 bg-blue-500"></div>
-						<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2">
+						<div
+							class="text-[10px] font-semibold text-surface-600-400 uppercase tracking-wider mb-2"
+						>
 							{m.status()}
 						</div>
 						{#if latestSnapshot?.status}
 							<span
 								class="badge text-sm font-semibold px-3 py-1 rounded-full {statusColorMap[
 									latestSnapshot.status
-								] ?? 'bg-gray-100 text-gray-600'}"
+								] ?? 'bg-surface-100-900 text-surface-600-400'}"
 							>
 								{safeTranslate(latestSnapshot.status)}
 							</span>
 						{:else}
-							<span class="text-gray-400 italic text-sm">—</span>
+							<span class="text-surface-500 italic text-sm">—</span>
 						{/if}
 					</div>
 					<div
-						class="relative rounded-lg bg-white border border-gray-200 p-4 overflow-hidden shadow-sm"
+						class="relative rounded-lg bg-surface-50-950 border border-surface-200-800 p-4 overflow-hidden shadow-sm"
 					>
 						<div
 							class="absolute top-0 inset-x-0 h-1 {latestSnapshot?.health === 'green'
@@ -1627,65 +1680,69 @@
 									? 'bg-amber-500'
 									: latestSnapshot?.health === 'red'
 										? 'bg-red-500'
-										: 'bg-gray-300'}"
+										: 'bg-surface-300-700'}"
 						></div>
-						<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2">
+						<div
+							class="text-[10px] font-semibold text-surface-600-400 uppercase tracking-wider mb-2"
+						>
 							{m.projectHealth()}
 						</div>
 						{#if latestSnapshot?.health}
 							<span
 								class="badge text-sm font-semibold px-3 py-1 rounded-full {healthColorMap[
 									latestSnapshot.health
-								] ?? 'bg-gray-100 text-gray-600'}"
+								] ?? 'bg-surface-100-900 text-surface-600-400'}"
 							>
 								{safeTranslate(latestSnapshot.health)}
 							</span>
 						{:else}
-							<span class="text-gray-400 italic text-sm">—</span>
+							<span class="text-surface-500 italic text-sm">—</span>
 						{/if}
 					</div>
 					<div
-						class="relative rounded-lg bg-white border border-gray-200 p-4 overflow-hidden shadow-sm"
+						class="relative rounded-lg bg-surface-50-950 border border-surface-200-800 p-4 overflow-hidden shadow-sm"
 					>
 						<div class="absolute top-0 inset-x-0 h-1 bg-amber-500"></div>
-						<div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2">
+						<div
+							class="text-[10px] font-semibold text-surface-600-400 uppercase tracking-wider mb-2"
+						>
 							{m.actualCost()}
 						</div>
 						{#if latestSnapshot?.actual_cost != null}
 							<div class="flex items-baseline gap-1">
-								<span class="text-3xl font-bold text-gray-900 tabular-nums leading-none">
+								<span class="text-3xl font-bold text-surface-900-100 tabular-nums leading-none">
 									{latestSnapshot.actual_cost}
 								</span>
 								{#if latestSnapshot.currency}
-									<span class="text-sm text-gray-500">{latestSnapshot.currency}</span>
+									<span class="text-sm text-surface-600-400">{latestSnapshot.currency}</span>
 								{/if}
 							</div>
 							{#if latestSnapshot.budget}
-								<div class="text-xs text-gray-500 mt-2 tabular-nums">
+								<div class="text-xs text-surface-600-400 mt-2 tabular-nums">
 									of {latestSnapshot.budget}
 									{latestSnapshot.currency ?? ''}
 								</div>
 							{/if}
 						{:else}
-							<span class="text-gray-400 italic text-sm">—</span>
+							<span class="text-surface-500 italic text-sm">—</span>
 						{/if}
 					</div>
 				</div>
 				<div class="mb-6">
-					<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+					<div class="text-xs font-semibold text-surface-600-400 uppercase tracking-wide mb-2">
 						{m.lifecycle()} — {m.timeline()}
 					</div>
 					<div bind:this={lifecycleChartEl} style="width: 100%; height: 320px;"></div>
 				</div>
 				<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 					<div>
-						<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+						<div class="text-xs font-semibold text-surface-600-400 uppercase tracking-wide mb-2">
 							{m.progress()}
 						</div>
 						<div bind:this={progressChartEl} style="width: 100%; height: 240px;"></div>
 					</div>
 					<div>
-						<div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+						<div class="text-xs font-semibold text-surface-600-400 uppercase tracking-wide mb-2">
 							{m.financials()}
 						</div>
 						<div bind:this={budgetChartEl} style="width: 100%; height: 240px;"></div>

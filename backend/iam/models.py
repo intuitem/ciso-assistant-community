@@ -717,6 +717,10 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             prefs["lang"] = default_lang
         if prefs.get("date_format") not in self.DATE_FORMATS:
             prefs["date_format"] = "auto"
+        ui = prefs.get("ui") if isinstance(prefs.get("ui"), dict) else {}
+        if ui.get("theme") not in ("light", "dark", "system"):
+            ui["theme"] = "system"
+        prefs["ui"] = ui
         return prefs
 
     # Maps Django HTML template names to YAML template keys

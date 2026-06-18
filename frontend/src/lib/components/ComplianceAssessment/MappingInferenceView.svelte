@@ -80,7 +80,7 @@
 		<i class="fa-solid fa-link"></i>
 		{m.mappingInference()}
 	</p>
-	<span class="text-xs text-gray-500"
+	<span class="text-xs text-surface-600-400"
 		><i class="fa-solid fa-circle-info"></i> {m.mappingInferenceHelpText()}</span
 	>
 	<button
