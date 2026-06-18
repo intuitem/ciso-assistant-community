@@ -147,22 +147,22 @@
 <div class="flex flex-row h-full gap-3">
 	<!-- Main Calendar -->
 	<div
-		class="flex flex-col rounded-xl bg-white h-full {$showSidePanel
+		class="flex flex-col rounded-xl bg-surface-50-950 h-full {$showSidePanel
 			? 'w-2/3'
-			: 'w-full'} p-3 space-y-2 shadow-lg border border-surface-200"
+			: 'w-full'} p-3 space-y-2 shadow-lg border border-surface-200-800"
 	>
 		<!-- Header -->
-		<div class="flex items-center justify-between bg-surface-50 rounded-lg px-6 py-3">
+		<div class="flex items-center justify-between bg-surface-50-950 rounded-lg px-6 py-3">
 			<a
 				href={prevMonth(year, month)}
 				aria-label={m.previous()}
-				class="text-surface-500 hover:text-primary-600 transition-colors p-2 rounded-lg hover:bg-surface-100"
+				class="text-surface-500 hover:text-primary-600 transition-colors p-2 rounded-lg hover:bg-surface-100-900"
 			>
 				<i class="fas fa-chevron-left"></i>
 			</a>
 			{#key month}
 				<h2
-					class="text-2xl font-semibold text-surface-800 tracking-wide"
+					class="text-2xl font-semibold text-surface-800-200 tracking-wide"
 					in:fly={{ delay: 100, duration: 300 }}
 				>
 					{monthNames[month - 1]}, {year}
@@ -171,7 +171,7 @@
 			<a
 				href={nextMonth(year, month)}
 				aria-label={m.next()}
-				class="text-surface-500 hover:text-primary-600 transition-colors p-2 rounded-lg hover:bg-surface-100"
+				class="text-surface-500 hover:text-primary-600 transition-colors p-2 rounded-lg hover:bg-surface-100-900"
 			>
 				<i class="fas fa-chevron-right"></i>
 			</a>
@@ -183,8 +183,8 @@
 				<button
 					class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition-all cursor-pointer
 					{visibleCategories[key]
-						? 'border-surface-200 bg-surface-100 text-surface-700'
-						: 'border-surface-200 bg-transparent text-surface-400 line-through opacity-50'}"
+						? 'border-surface-200-800 bg-surface-100-900 text-surface-700-300'
+						: 'border-surface-200-800 bg-transparent text-surface-500 line-through opacity-50'}"
 					aria-pressed={visibleCategories[key]}
 					onclick={() => toggleCategory(key)}
 				>
@@ -218,12 +218,11 @@
 				<Day {day} {month} {year} info={filteredInfo} {selectedDay} {showSidePanel} {categories} />
 			{/each}
 		</div>
-
 		<!-- Footer -->
-		<div class="flex items-center justify-between bg-surface-50 rounded-lg px-4 py-2">
+		<div class="flex items-center justify-between bg-surface-100-900 rounded-lg px-4 py-2">
 			<a
 				href={currentMonth()}
-				class="flex items-center gap-1.5 text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors px-3 py-1.5 rounded-lg hover:bg-primary-50"
+				class="flex items-center gap-1.5 text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors px-3 py-1.5 rounded-lg hover:bg-primary-50 dark:hover:bg-surface-800"
 			>
 				<i class="fas fa-calendar-day"></i>
 				{m.today()}
@@ -245,20 +244,20 @@
 	<!-- Side Panel -->
 	{#if $showSidePanel && $selectedDay}
 		<div
-			class="flex flex-col rounded-xl bg-white h-full w-1/3 p-4 space-y-3 shadow-lg border border-surface-200"
+			class="flex flex-col rounded-xl bg-surface-50-950 h-full w-1/3 p-4 space-y-3 shadow-lg border border-surface-200-800"
 			in:fly={{ x: 300, duration: 300 }}
 			out:fly={{ x: 300, duration: 300 }}
 		>
 			<!-- Panel Header -->
-			<div class="flex justify-between items-center pb-2 border-b border-surface-100">
-				<h2 class="text-lg font-semibold text-surface-800">
+			<div class="flex justify-between items-center pb-2 border-b border-surface-100-900">
+				<h2 class="text-lg font-semibold text-surface-800-200">
 					{$selectedDay.day}
 					{monthNames[$selectedDay.month - 1]}, {$selectedDay.year}
 				</h2>
 				<button
 					onclick={closePanel}
 					aria-label={m.close()}
-					class="text-surface-400 hover:text-surface-600 transition-colors p-1 rounded-lg hover:bg-surface-100"
+					class="text-surface-500 hover:text-surface-700-300 transition-colors p-1 rounded-lg hover:bg-surface-100-900"
 				>
 					<i class="fas fa-times"></i>
 				</button>
@@ -274,11 +273,11 @@
 							<Accordion.Item value={catKey}>
 								<Accordion.ItemTrigger class="flex items-center gap-2 py-2 cursor-pointer">
 									<span class="inline-block w-3 h-3 rounded-full {cat.dotClass}"></span>
-									<span class="font-medium text-sm text-surface-700">
+									<span class="font-medium text-sm text-surface-700-300">
 										{categoryLabelMap[catKey]?.() ?? catKey}
 									</span>
 									<span
-										class="text-xs font-semibold bg-surface-100 text-surface-600 px-1.5 py-0.5 rounded-full"
+										class="text-xs font-semibold bg-surface-100-900 text-surface-600 px-1.5 py-0.5 rounded-full"
 									>
 										{items.length}
 									</span>
@@ -301,7 +300,7 @@
 														</span>
 														{#if item.status}
 															<span
-																class="shrink-0 text-[10px] font-medium bg-surface-100 text-surface-500 px-1.5 py-0.5 rounded"
+																class="shrink-0 text-[10px] font-medium bg-surface-100-900 text-surface-500 px-1.5 py-0.5 rounded"
 															>
 																{safeTranslate(item.status)}
 															</span>

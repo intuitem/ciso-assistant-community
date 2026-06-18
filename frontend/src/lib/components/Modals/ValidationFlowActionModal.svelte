@@ -63,7 +63,7 @@
 </script>
 
 {#if $modalStore[0]}
-	<div class="card bg-surface-50 p-6 w-full max-w-3xl shadow-xl space-y-5">
+	<div class="card bg-surface-50-950 p-6 w-full max-w-3xl shadow-xl space-y-5">
 		<header class="flex justify-between items-center">
 			<h2 class="text-xl font-bold capitalize">{actionTitles[action]}</h2>
 			<button

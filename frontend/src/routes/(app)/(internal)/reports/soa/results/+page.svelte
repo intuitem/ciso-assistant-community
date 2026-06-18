@@ -45,13 +45,13 @@
 		<div class="flex items-center gap-3">
 			<a
 				href="/reports/soa"
-				class="text-gray-500 hover:text-gray-700 transition-colors no-print"
+				class="text-surface-600-400 hover:text-surface-700-300 transition-colors no-print"
 				title={m.backToSelection()}
 			>
 				<i class="fas fa-arrow-left text-lg"></i>
 			</a>
 			<div>
-				<h1 class="text-2xl font-bold text-gray-900">{m.statementOfApplicability()}</h1>
+				<h1 class="text-2xl font-bold text-surface-900-100">{m.statementOfApplicability()}</h1>
 				<div class="flex flex-wrap gap-2 mt-1.5">
 					{#if metadata.compliance_assessment?.name}
 						<span
@@ -94,7 +94,7 @@
 		</div>
 		<button
 			onclick={exportPDF}
-			class="no-print flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
+			class="no-print flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-surface-50-950 border border-surface-300-700 text-surface-700-300 hover:bg-surface-50-950 transition-colors shadow-sm"
 		>
 			<i class="fas fa-file-pdf"></i>
 			PDF
@@ -103,7 +103,7 @@
 
 	<!-- SoA Table -->
 	<div
-		class="bg-white card border border-gray-200 overflow-hidden print:border-none print:shadow-none"
+		class="bg-surface-50-950 card border border-surface-200-800 overflow-hidden print:border-none print:shadow-none"
 	>
 		<div class="overflow-x-auto">
 			<table class="w-full table-fixed border-collapse">
@@ -145,14 +145,14 @@
 	<!-- Additional Controls from Risk Treatment -->
 	{#if additionalControls.length > 0}
 		<div
-			class="bg-white card border border-gray-200 overflow-hidden print:break-before-page print:border-none print:shadow-none"
+			class="bg-surface-50-950 card border border-surface-200-800 overflow-hidden print:break-before-page print:border-none print:shadow-none"
 		>
 			<div class="px-4 py-3 bg-red-50 border-b border-red-200">
 				<div class="flex items-center gap-2">
 					<i class="fas fa-shield-halved text-red-600"></i>
-					<h2 class="text-lg font-semibold text-gray-900">{m.additionalControls()}</h2>
+					<h2 class="text-lg font-semibold text-surface-900-100">{m.additionalControls()}</h2>
 				</div>
-				<p class="text-xs text-gray-600 mt-1 ml-7">{m.riskTreatmentControlsDescription()}</p>
+				<p class="text-xs text-surface-600-400 mt-1 ml-7">{m.riskTreatmentControlsDescription()}</p>
 			</div>
 			<div class="overflow-x-auto">
 				<table class="w-full table-fixed border-collapse">
@@ -188,20 +188,20 @@
 						{#each additionalControls as ac, i}
 							{@const statusBadge = getStatusBadge(ac.status)}
 							<tr
-								class="border-b border-gray-200 transition-colors {i % 2 === 0
-									? 'bg-white'
-									: 'bg-slate-50'}"
+								class="border-b border-surface-200-800 transition-colors {i % 2 === 0
+									? 'bg-surface-50-950'
+									: 'bg-surface-50-950'}"
 							>
 								<!-- Ref -->
-								<td class="px-3 py-2 text-xs font-mono text-gray-600 align-top">
+								<td class="px-3 py-2 text-xs font-mono text-surface-600-400 align-top">
 									{ac.reference_control?.ref_id || ''}
 								</td>
 								<!-- Reference Control -->
 								<td class="px-3 py-2 text-sm align-top overflow-hidden">
 									{#if ac.reference_control}
-										<div class="font-medium text-gray-900">{ac.reference_control.name}</div>
+										<div class="font-medium text-surface-900-100">{ac.reference_control.name}</div>
 										{#if ac.reference_control.description}
-											<div class="text-xs text-gray-500 mt-0.5">
+											<div class="text-xs text-surface-600-400 mt-0.5">
 												{ac.reference_control.description}
 											</div>
 										{/if}
@@ -210,17 +210,17 @@
 									{/if}
 								</td>
 								<!-- Justification -->
-								<td class="px-3 py-2 text-sm text-gray-600 align-top overflow-hidden">
+								<td class="px-3 py-2 text-sm text-surface-600-400 align-top overflow-hidden">
 									<span class="break-words">{ac.observation || ''}</span>
 								</td>
 								<!-- Risk Coverage -->
 								<td class="px-3 py-2 text-center align-top">
 									{#if ac.risk_scenarios?.length > 0}
-										<span class="text-sm font-semibold text-gray-700">
+										<span class="text-sm font-semibold text-surface-700-300">
 											{ac.risk_scenarios.length}
 										</span>
 									{:else}
-										<span class="text-xs text-gray-400">--</span>
+										<span class="text-xs text-surface-500">--</span>
 									{/if}
 								</td>
 								<!-- Implementation -->
@@ -235,7 +235,7 @@
 										>
 											{statusBadge.label}
 										</span>
-										<span class="text-xs text-gray-700 break-words">
+										<span class="text-xs text-surface-700-300 break-words">
 											{ac.ref_id ? `${ac.ref_id} ` : ''}{ac.name}
 										</span>
 									</Anchor>
