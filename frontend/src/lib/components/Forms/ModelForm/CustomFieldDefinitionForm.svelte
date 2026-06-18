@@ -64,9 +64,7 @@
 		translations: Record<string, Record<string, string>>;
 	};
 	let choices: ChoiceRow[] = $state(
-		Array.isArray($choicesValue)
-			? $choicesValue.map((c: any) => ({ translations: {}, ...c }))
-			: []
+		Array.isArray($choicesValue) ? $choicesValue.map((c: any) => ({ translations: {}, ...c })) : []
 	);
 	$effect(() => {
 		$choicesValue = $state.snapshot(choices);
@@ -142,11 +140,7 @@
 	<div class="border rounded-container-token p-3 space-y-2 bg-surface-50">
 		<div class="flex items-center justify-between">
 			<span class="text-sm font-semibold">{m.choices()}</span>
-			<button
-				type="button"
-				class="btn btn-sm variant-soft-primary"
-				onclick={addChoice}
-			>
+			<button type="button" class="btn btn-sm variant-soft-primary" onclick={addChoice}>
 				<i class="fa-solid fa-plus mr-1"></i>{m.addChoice()}
 			</button>
 		</div>
@@ -185,7 +179,12 @@
 <div class="flex flex-wrap gap-x-6 gap-y-2">
 	<Checkbox {form} field="required" label={m.required()} />
 	<Checkbox {form} field="visible" label={m.visible()} />
-	<Checkbox {form} field="searchable" label={m.searchable()} helpText={m.customFieldSearchableHelpText()} />
+	<Checkbox
+		{form}
+		field="searchable"
+		label={m.searchable()}
+		helpText={m.customFieldSearchableHelpText()}
+	/>
 	<Checkbox {form} field="filterable" label={m.filterable()} />
 </div>
 
