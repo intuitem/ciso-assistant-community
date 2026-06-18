@@ -99,6 +99,13 @@ class ProjectViewSet(BaseModelViewSet):
     search_fields = ["name", "description", "ref_id", "purpose", "objectives"]
     ordering = ["created_at"]
 
+    def get_queryset(self):
+        # Prefetch custom field values so the serializer's custom_fields dict
+        # doesn't trigger one query per row.
+        return (
+            super().get_queryset().prefetch_related("custom_field_values__definition")
+        )
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get Project priority choices")
     def priority(self, request):

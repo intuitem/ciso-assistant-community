@@ -891,7 +891,7 @@
 
 <CustomFieldsDisplay
 	urlModel={data.urlModel}
-	folderId={data.data?.folder?.id}
+	folderId={data.data?.folder?.id ?? data.data?.folder}
 	values={data.data?.custom_fields}
 />
 

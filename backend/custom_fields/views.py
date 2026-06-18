@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import SAFE_METHODS
@@ -42,7 +43,10 @@ class CustomFieldDefinitionViewSet(BaseModelViewSet):
         # folder: global ones plus those owned by an ancestor-or-self folder.
         for_folder = params.get("for_folder")
         if for_folder:
-            folder = Folder.objects.filter(pk=for_folder).first()
+            try:
+                folder = Folder.objects.filter(pk=for_folder).first()
+            except ValueError, ValidationError:
+                return queryset.none()
             folder_ids = {Folder.get_root_folder_id()}
             if folder is not None:
                 folder_ids |= CustomFieldDefinition._ancestor_or_self_ids(folder)

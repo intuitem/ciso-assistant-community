@@ -78,6 +78,14 @@
 	function removeChoice(i: number) {
 		choices = choices.filter((_, idx) => idx !== i).map((c, idx) => ({ ...c, order: idx }));
 	}
+
+	// Drop values that don't apply to the selected type so a type switch doesn't submit
+	// stale choices / searchable for an incompatible type.
+	const { value: searchableValue } = formFieldProxy(form, 'searchable');
+	$effect(() => {
+		if (!isChoice && choices.length) choices = [];
+		if (!isTextBacked && $searchableValue) $searchableValue = false;
+	});
 </script>
 
 {#if !isEdit}

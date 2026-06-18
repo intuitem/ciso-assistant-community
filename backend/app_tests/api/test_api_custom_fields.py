@@ -234,7 +234,7 @@ class TestCustomFieldsAPI:
             },
             format="json",
         )
-        hit = authenticated_client.post(
+        create = authenticated_client.post(
             "/api/assets/",
             {
                 "name": "srv1",
@@ -243,7 +243,9 @@ class TestCustomFieldsAPI:
                 "custom_fields": {"os": "ubuntu linux"},
             },
             format="json",
-        ).json()["id"]
+        )
+        assert create.status_code == status.HTTP_201_CREATED, create.content
+        hit = create.json()["id"]
         authenticated_client.post(
             "/api/assets/",
             {"name": "srv2", "folder": str(root.id), "type": "PR"},

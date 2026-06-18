@@ -50,6 +50,8 @@ class CustomFieldsMixin(models.Model):
         clears the field. Choice values are validated against the definition.
         """
         content_type = ContentType.objects.get_for_model(self.__class__)
+        if definition.content_type_id != content_type.id:
+            raise ValueError("Custom field definition model does not match host model.")
         base = self.custom_field_values.filter(definition=definition)
 
         if definition.field_type == FieldType.MULTI_CHOICE:

@@ -31,6 +31,13 @@
 
 	const enabled = $derived(page.data?.featureflags?.custom_fields === true);
 
+	// Local copy so read mode reflects a successful save even if the parent
+	// doesn't refresh the `values` prop.
+	let displayedValues: Record<string, any> = $state({ ...values });
+	$effect(() => {
+		displayedValues = { ...values };
+	});
+
 	let definitions: Definition[] = $state([]);
 	let editing = $state(false);
 	let saving = $state(false);
@@ -63,7 +70,7 @@
 	});
 
 	function startEdit() {
-		form.form.set({ custom_fields: { ...values } });
+		form.form.set({ custom_fields: { ...displayedValues } });
 		error = '';
 		editing = true;
 	}
@@ -85,6 +92,7 @@
 				return;
 			}
 			editing = false;
+			displayedValues = { ...$formData.custom_fields };
 			onSaved();
 		} catch (e) {
 			error = m.error();
@@ -145,7 +153,7 @@
 						<dt class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
 							{def.label_localized}
 						</dt>
-						<dd class="text-sm text-gray-900">{displayValue(def, values?.[def.key])}</dd>
+						<dd class="text-sm text-gray-900">{displayValue(def, displayedValues?.[def.key])}</dd>
 					</div>
 				{/each}
 			</dl>

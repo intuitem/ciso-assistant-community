@@ -1,4 +1,5 @@
 from django.contrib.contenttypes.models import ContentType
+from django.db import transaction
 from rest_framework import serializers
 
 from core.serializer_fields import FieldsRelatedField
@@ -72,6 +73,15 @@ class CustomFieldDefinitionWriteSerializer(BaseModelSerializer):
             )
 
         field_type = data.get("field_type", getattr(self.instance, "field_type", None))
+        if (
+            self.instance is not None
+            and "field_type" in data
+            and data["field_type"] != self.instance.field_type
+            and self.instance.values.exists()
+        ):
+            raise serializers.ValidationError(
+                {"field_type": "Cannot change field type while values exist."}
+            )
         if data.get("choices") and field_type not in (
             FieldType.CHOICE,
             FieldType.MULTI_CHOICE,
@@ -90,10 +100,16 @@ class CustomFieldDefinitionWriteSerializer(BaseModelSerializer):
         return data
 
     def _sync_choices(self, definition, choices):
-        definition.choices.all().delete()
-        CustomFieldChoice.objects.bulk_create(
-            CustomFieldChoice(definition=definition, **choice) for choice in choices
-        )
+        values = [choice["value"] for choice in choices]
+        if len(values) != len(set(values)):
+            raise serializers.ValidationError(
+                {"choices": "Duplicate choice values are not allowed."}
+            )
+        with transaction.atomic():
+            definition.choices.all().delete()
+            CustomFieldChoice.objects.bulk_create(
+                CustomFieldChoice(definition=definition, **choice) for choice in choices
+            )
 
     def create(self, validated_data):
         choices = validated_data.pop("choices", None)
@@ -159,7 +175,10 @@ class CustomFieldsSerializerMixin(serializers.ModelSerializer):
                 errors[key] = "Unknown custom field for this object."
                 continue
             try:
-                cleaned.append((definition, self._clean_one(definition, value)))
+                cleaned_value = self._clean_one(definition, value)
+                if definition.required and cleaned_value in (None, []):
+                    raise ValueError("This field is required.")
+                cleaned.append((definition, cleaned_value))
             except ValueError as exc:
                 errors[key] = str(exc)
 

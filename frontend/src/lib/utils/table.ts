@@ -104,6 +104,7 @@ export function buildCustomFieldFilters(
 ): Record<string, ListViewFilterConfig> {
 	const filters: Record<string, ListViewFilterConfig> = {};
 	for (const def of defs ?? []) {
+		if (def.filterable === false) continue;
 		if (def.field_type === 'choice' || def.field_type === 'multi_choice') {
 			filters[`cf__${def.key}__in`] = {
 				component: AutocompleteSelect,

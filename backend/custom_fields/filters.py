@@ -99,6 +99,6 @@ class CustomFieldSearchFilter(SearchFilter):
             definition__in=searchable,
             value_text__icontains=term,
         ).values_list("object_id", flat=True)
-        if not cf_ids:
+        if not cf_ids.exists():
             return base
-        return (base | queryset.filter(pk__in=list(cf_ids))).distinct()
+        return (base | queryset.filter(pk__in=cf_ids)).distinct()

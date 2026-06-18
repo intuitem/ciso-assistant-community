@@ -1549,34 +1549,49 @@ export const KillChainSchema = z.object({
 	folder: z.string()
 });
 
-export const CustomFieldDefinitionSchema = z.object({
-	model: z.string().optional(),
-	key: z
-		.string()
-		.min(1)
-		.regex(/^[a-z0-9_]+$/, { message: 'Use lowercase letters, digits and underscores only.' }),
-	label: z.string().min(1),
-	help_text: z.string().optional().default(''),
-	field_type: z.string().min(1),
-	required: z.boolean().default(false),
-	visible: z.boolean().default(true),
-	searchable: z.boolean().default(false),
-	filterable: z.boolean().default(true),
-	order: z.number().default(0),
-	folder: z.string(),
-	choices: z
-		.array(
-			z.object({
-				value: z.string().min(1),
-				label: z.string().min(1),
-				order: z.number().default(0),
-				translations: z.record(z.string(), z.any()).optional()
-			})
-		)
-		.optional()
-		.default([]),
-	translations: z.record(z.string(), z.any()).optional()
-});
+export const CustomFieldDefinitionSchema = z
+	.object({
+		model: z.string().optional(),
+		key: z
+			.string()
+			.min(1)
+			.regex(/^[a-z0-9_]+$/, {
+				message: 'Use lowercase letters, digits and underscores only.'
+			}),
+		label: z.string().min(1),
+		help_text: z.string().optional().default(''),
+		field_type: z.enum(['text', 'number', 'date', 'boolean', 'choice', 'multi_choice']),
+		required: z.boolean().default(false),
+		visible: z.boolean().default(true),
+		searchable: z.boolean().default(false),
+		filterable: z.boolean().default(true),
+		order: z.number().default(0),
+		folder: z.string(),
+		choices: z
+			.array(
+				z.object({
+					value: z.string().min(1),
+					label: z.string().min(1),
+					order: z.number().default(0),
+					translations: z.record(z.string(), z.any()).optional()
+				})
+			)
+			.optional()
+			.default([]),
+		translations: z.record(z.string(), z.any()).optional()
+	})
+	.superRefine((data, ctx) => {
+		if (
+			(data.field_type === 'choice' || data.field_type === 'multi_choice') &&
+			data.choices.length === 0
+		) {
+			ctx.addIssue({
+				code: 'custom',
+				path: ['choices'],
+				message: 'At least one choice is required for choice fields.'
+			});
+		}
+	});
 
 export const TerminologySchema = z.object({
 	...NameDescriptionMixin,

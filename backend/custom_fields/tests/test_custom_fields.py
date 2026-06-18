@@ -91,8 +91,8 @@ def test_coerce_value_invalid(field_type, raw):
 # definitions on multiple host scopes + key collision
 # --------------------------------------------------------------------------- #
 def test_for_object_resolves_global_and_ancestor_scopes(root, domain, project_ct):
-    g = make_def(project_ct, root, "global_field", FieldType.TEXT)
-    d = make_def(project_ct, domain, "domain_field", FieldType.TEXT)
+    make_def(project_ct, root, "global_field", FieldType.TEXT)
+    make_def(project_ct, domain, "domain_field", FieldType.TEXT)
 
     in_domain = Project.objects.create(name="P1", folder=domain)
     in_root = Project.objects.create(name="P2", folder=root)
