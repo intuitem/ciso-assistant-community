@@ -288,7 +288,7 @@
 								{/if}
 								{#if URLModel === 'security-advisories'}
 									<button
-										class="inline-block p-3 w-12 focus:relative bg-blue-50 hover:bg-blue-100"
+										class="inline-block p-3 w-12 focus:relative bg-blue-50 dark:bg-blue-500 hover:bg-blue-100 dark:hover:bg-blue-600"
 										title={m.syncKev()}
 										aria-label={m.syncKev()}
 										data-testid="sync-kev-button"
@@ -320,7 +320,7 @@
 										}}>🇺🇸</button
 									>
 									<button
-										class="inline-block p-3 w-12 focus:relative bg-yellow-50 hover:bg-yellow-100"
+										class="inline-block p-3 w-12 focus:relative bg-yellow-50 dark:bg-amber-400 hover:bg-yellow-100 dark:hover:bg-amber-500"
 										title={m.syncEuvd()}
 										aria-label={m.syncEuvd()}
 										data-testid="sync-euvd-button"
