@@ -788,7 +788,7 @@ class AssetReadSerializer(AssetWriteSerializer):
         return obj.get_recovery_objectives_comparison()
 
 
-class AssetListSerializer(BaseModelSerializer):
+class AssetListSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
     """
     Lightweight serializer for the assets list view.
 
@@ -825,6 +825,7 @@ class AssetListSerializer(BaseModelSerializer):
             "parent_assets",
             "security_objectives",
             "disaster_recovery_objectives",
+            "custom_fields",
             "created_at",
             "updated_at",
         ]

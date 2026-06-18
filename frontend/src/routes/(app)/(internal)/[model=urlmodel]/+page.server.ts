@@ -6,7 +6,6 @@ import {
 	urlParamModelSelectFields
 } from '$lib/utils/crud';
 import { formatSelectFieldData } from '$lib/utils/load';
-import { CUSTOM_FIELD_HOST_MODELS } from '$lib/utils/customFields';
 import { modelSchema } from '$lib/utils/schemas';
 import type { ModelInfo } from '$lib/utils/types';
 import { type Actions } from '@sveltejs/kit';
@@ -54,19 +53,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		model['folderImportModel'] = { urlModel: 'folders-import' };
 	}
 
-	// Custom-field definitions drive dynamic table filters for host models.
-	let customFields: any[] = [];
-	const contentType = CUSTOM_FIELD_HOST_MODELS[URLModel];
-	if (contentType) {
-		const cfResponse = await fetch(
-			`${BASE_API_URL}/custom-fields/?model=${contentType}&filterable=true`
-		);
-		if (cfResponse.ok) {
-			customFields = (await cfResponse.json()).results ?? [];
-		}
-	}
-
-	return { createForm, deleteForm, model, URLModel, customFields };
+	return { createForm, deleteForm, model, URLModel };
 };
 
 export const actions: Actions = {

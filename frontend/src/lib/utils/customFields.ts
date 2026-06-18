@@ -19,5 +19,7 @@ export interface CustomFieldDef {
 	label_localized: string;
 	help_text_localized?: string;
 	field_type: string;
+	visible?: boolean;
+	filterable?: boolean;
 	choices: CustomFieldChoice[];
 }
