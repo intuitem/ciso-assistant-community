@@ -98,7 +98,11 @@
 		}
 
 		const echarts = await import('echarts');
-		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
+		let chart = echarts.init(
+			document.getElementById(chart_id),
+			document.documentElement.classList.contains('dark') ? 'dark' : null,
+			{ renderer: 'svg' }
+		);
 
 		const { mu, sigma } = calculateLognormalParams(lowerBound, upperBound);
 
@@ -253,6 +257,7 @@
 			]
 		};
 
+		option.backgroundColor = 'transparent';
 		chart.setOption(option);
 
 		window.addEventListener('resize', function () {

@@ -50,7 +50,11 @@
 
 	onMount(async () => {
 		const echarts = await import('echarts');
-		chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
+		chart = echarts.init(
+			document.getElementById(chart_id),
+			document.documentElement.classList.contains('dark') ? 'dark' : null,
+			{ renderer: 'svg' }
+		);
 
 		const maturityGroups = data.maturity_groups || ['<4', '4-5', '6-7', '>7'];
 		const chartData = data[type] || {};
@@ -253,6 +257,7 @@
 			]
 		};
 
+		option.backgroundColor = 'transparent';
 		chart.setOption(option);
 
 		// Use ResizeObserver to handle container size changes (including initial flex layout)

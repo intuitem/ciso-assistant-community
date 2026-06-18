@@ -58,7 +58,7 @@
 	</div>
 {:then counts}
 	<div class="grid grid-cols-12 gap-4 p-2">
-		<div class="col-span-7 bg-linear-to-br from-pink-200 to-pink-50 p-2 rounded">
+		<div class="col-span-7 bg-surface-50-950 border border-surface-200-800 p-2 rounded">
 			<div class="font-bold mb-2">
 				<i class="fa-solid fa-fire-extinguisher mr-2"></i>{m.appliedControls()}
 				{#if counts.appliedControls > 0}
@@ -86,7 +86,7 @@
 			<ActivityTracker metrics={data.data.metrics} />
 		</div>
 		{#if showEmptySections || counts.tasks > 0}
-			<div class="col-span-6 bg-linear-to-br from-violet-200 to-violet-50 p-2 rounded">
+			<div class="col-span-6 bg-surface-50-950 border border-surface-200-800 p-2 rounded">
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-note-sticky mr-2"></i>{m.tasks()}
 					{#if counts.tasks > 0}
@@ -110,7 +110,7 @@
 			</div>
 		{/if}
 		{#if showEmptySections || counts.complianceAssessments > 0}
-			<div class="col-span-6 bg-linear-to-br from-blue-200 to-blue-50 p-2 rounded">
+			<div class="col-span-6 bg-surface-50-950 border border-surface-200-800 p-2 rounded">
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-certificate mr-2"></i>{m.complianceAssessments()}
 					{#if counts.complianceAssessments > 0}
@@ -135,7 +135,7 @@
 			</div>
 		{/if}
 		{#if showEmptySections || counts.riskAssessments > 0}
-			<div class="col-span-6 bg-linear-to-br from-blue-200 to-blue-50 p-2 rounded">
+			<div class="col-span-6 bg-surface-50-950 border border-surface-200-800 p-2 rounded">
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-magnifying-glass-chart mr-2"></i>{m.riskAssessments()}
 					{#if counts.riskAssessments > 0}
@@ -159,7 +159,7 @@
 			</div>
 		{/if}
 		{#if showEmptySections || counts.riskScenarios > 0}
-			<div class="col-span-6 bg-linear-to-br from-violet-200 to-violet-50 p-2 rounded">
+			<div class="col-span-6 bg-surface-50-950 border border-surface-200-800 p-2 rounded">
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-clone mr-2"></i>{m.riskScenarios()}
 					{#if counts.riskScenarios > 0}
@@ -184,7 +184,7 @@
 			</div>
 		{/if}
 		{#if showEmptySections || counts.incidents > 0}
-			<div class="col-span-6 bg-linear-to-br from-violet-200 to-violet-50 p-2 rounded">
+			<div class="col-span-6 bg-surface-50-950 border border-surface-200-800 p-2 rounded">
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-bug mr-2"></i>{m.incidents()}
 					{#if counts.incidents > 0}
@@ -209,7 +209,7 @@
 			</div>
 		{/if}
 		{#if showEmptySections || counts.securityExceptions > 0}
-			<div class="col-span-6 bg-linear-to-br from-blue-200 to-blue-50 p-2 rounded">
+			<div class="col-span-6 bg-surface-50-950 border border-surface-200-800 p-2 rounded">
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-circle-exclamation mr-2"></i>{m.securityExceptions()}
 					{#if counts.securityExceptions > 0}
@@ -234,7 +234,7 @@
 			</div>
 		{/if}
 		{#if showEmptySections || counts.findingsAssessments > 0}
-			<div class="col-span-6 bg-linear-to-br from-blue-200 to-blue-50 p-2 rounded">
+			<div class="col-span-6 bg-surface-50-950 border border-surface-200-800 p-2 rounded">
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-clipboard-list mr-2"></i>{m.findingsAssessments()}
 					{#if counts.findingsAssessments > 0}
@@ -258,7 +258,7 @@
 			</div>
 		{/if}
 		{#if (showEmptySections || counts.validationFlows > 0) && data.featureflags?.validation_flows}
-			<div class="col-span-6 bg-linear-to-br from-orange-200 to-orange-50 p-2 rounded">
+			<div class="col-span-6 bg-surface-50-950 border border-surface-200-800 p-2 rounded">
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-check-circle mr-2"></i>{m.validationFlows()}
 					{#if counts.validationFlows > 0}
@@ -283,7 +283,7 @@
 			</div>
 		{/if}
 		{#if showEmptySections || counts.findings > 0}
-			<div class="col-span-6 bg-linear-to-br from-violet-200 to-violet-50 p-2 rounded">
+			<div class="col-span-6 bg-surface-50-950 border border-surface-200-800 p-2 rounded">
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-triangle-exclamation mr-2"></i>{m.findings()}
 					{#if counts.findings > 0}
@@ -307,7 +307,7 @@
 			</div>
 		{/if}
 		{#if showEmptySections || counts.organisationObjectives > 0}
-			<div class="col-span-6 bg-linear-to-br from-green-200 to-green-50 p-2 rounded">
+			<div class="col-span-6 bg-surface-50-950 border border-surface-200-800 p-2 rounded">
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-bullseye mr-2"></i>{m.organisationObjectives()}
 					{#if counts.organisationObjectives > 0}
@@ -332,7 +332,7 @@
 			</div>
 		{/if}
 		{#if showEmptySections || counts.rightRequests > 0}
-			<div class="col-span-6 bg-linear-to-br from-orange-200 to-orange-50 p-2 rounded">
+			<div class="col-span-6 bg-surface-50-950 border border-surface-200-800 p-2 rounded">
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-user-shield mr-2"></i>{m.rightRequests()}
 					{#if counts.rightRequests > 0}
@@ -357,7 +357,7 @@
 			</div>
 		{/if}
 		{#if showEmptySections || counts.metricInstances > 0}
-			<div class="col-span-6 bg-linear-to-br from-teal-200 to-teal-50 p-2 rounded">
+			<div class="col-span-6 bg-surface-50-950 border border-surface-200-800 p-2 rounded">
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-chart-line mr-2"></i>{m.metricInstances()}
 					{#if counts.metricInstances > 0}
