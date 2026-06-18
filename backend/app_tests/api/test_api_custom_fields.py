@@ -65,6 +65,23 @@ class TestCustomFieldsAPI:
         )
         assert resp.status_code == status.HTTP_201_CREATED, resp.content
 
+    def test_searchable_rejected_on_non_text_type(self, authenticated_client):
+        root = Folder.get_root_folder()
+        resp = authenticated_client.post(
+            CF_URL,
+            {
+                "model": "core.asset",
+                "key": "cost",
+                "label": "Cost",
+                "field_type": "number",
+                "searchable": True,
+                "folder": str(root.id),
+            },
+            format="json",
+        )
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+        assert "searchable" in resp.json()
+
     def test_create_definition_without_model_is_400(self, authenticated_client):
         resp = authenticated_client.post(
             CF_URL,
@@ -202,6 +219,39 @@ class TestCustomFieldsAPI:
         assert detail.json()["custom_fields"] == {"sensitivity": "high"}
         filtered = authenticated_client.get("/api/assets/", {"cf__sensitivity": "high"})
         assert asset_id in {a["id"] for a in filtered.json()["results"]}
+
+    def test_search_matches_searchable_custom_field(self, authenticated_client):
+        root = Folder.get_root_folder()
+        authenticated_client.post(
+            CF_URL,
+            {
+                "model": "core.asset",
+                "key": "os",
+                "label": "OS",
+                "field_type": "text",
+                "searchable": True,
+                "folder": str(root.id),
+            },
+            format="json",
+        )
+        hit = authenticated_client.post(
+            "/api/assets/",
+            {
+                "name": "srv1",
+                "folder": str(root.id),
+                "type": "PR",
+                "custom_fields": {"os": "ubuntu linux"},
+            },
+            format="json",
+        ).json()["id"]
+        authenticated_client.post(
+            "/api/assets/",
+            {"name": "srv2", "folder": str(root.id), "type": "PR"},
+            format="json",
+        )
+        result = authenticated_client.get("/api/assets/", {"search": "ubuntu"})
+        ids = {a["id"] for a in result.json()["results"]}
+        assert hit in ids and len(ids) == 1
 
     def test_applied_control_host_round_trip(self, authenticated_client):
         root = Folder.get_root_folder()

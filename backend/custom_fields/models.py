@@ -32,6 +32,11 @@ TYPE_TO_COLUMN = {
     FieldType.MULTI_CHOICE: "value_text",
 }
 
+# Only value_text-backed types can be searched (search scans value_text).
+SEARCHABLE_TYPES = frozenset(
+    t for t, col in TYPE_TO_COLUMN.items() if col == "value_text"
+)
+
 
 def coerce_value(field_type: str, raw):
     """Coerce a raw input to the python value stored in the typed column.

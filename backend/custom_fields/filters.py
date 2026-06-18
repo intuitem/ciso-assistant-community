@@ -1,6 +1,8 @@
 from django.contrib.contenttypes.models import ContentType
 from rest_framework.filters import BaseFilterBackend, SearchFilter
 
+from global_settings.utils import ff_is_enabled
+
 from .models import CustomFieldDefinition, CustomFieldValue, coerce_value
 
 # Dotless prefix so the key is a flat (non-nested) field name on the frontend
@@ -76,17 +78,25 @@ class CustomFieldSearchFilter(SearchFilter):
 
     The default model-field search and the custom-field search are OR-ed so an
     object surfaces if either matches the term.
+
+    Native search is never penalised: the extra value scan runs only when there is
+    a search term, the feature is enabled, and the model actually has at least one
+    searchable custom field. Otherwise this returns the default search result as-is.
     """
 
     def filter_queryset(self, request, queryset, view):
         base = super().filter_queryset(request, queryset, view)
         term = " ".join(self.get_search_terms(request)).strip()
-        if not term:
+        if not term or not ff_is_enabled("custom_fields"):
             return base
         content_type = ContentType.objects.get_for_model(queryset.model)
+        searchable = CustomFieldDefinition.objects.filter(
+            content_type=content_type, searchable=True
+        )
+        if not searchable.exists():
+            return base
         cf_ids = CustomFieldValue.objects.filter(
-            content_type=content_type,
-            definition__searchable=True,
+            definition__in=searchable,
             value_text__icontains=term,
         ).values_list("object_id", flat=True)
         if not cf_ids:

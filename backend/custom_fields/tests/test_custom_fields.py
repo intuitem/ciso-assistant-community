@@ -17,8 +17,17 @@ from custom_fields.models import (
     FieldType,
     coerce_value,
 )
+from global_settings.models import GlobalSettings
 from iam.models import Folder
 from pmbok.models import Project
+
+
+def _enable_custom_fields():
+    gs, _ = GlobalSettings.objects.get_or_create(
+        name=GlobalSettings.Names.FEATURE_FLAGS, defaults={"value": {}}
+    )
+    gs.value = {**(gs.value or {}), "custom_fields": True}
+    gs.save()
 
 
 @pytest.fixture
@@ -264,7 +273,22 @@ def test_filter_bad_input_returns_empty(root, project_ct):
 # --------------------------------------------------------------------------- #
 # search
 # --------------------------------------------------------------------------- #
+class _SearchView:
+    search_fields = ["name"]
+
+
+def _search(term):
+    backend = CustomFieldSearchFilter()
+    request = Request(APIRequestFactory().get("/", {"search": term}))
+    return set(
+        backend.filter_queryset(
+            request, Project.objects.all(), _SearchView()
+        ).values_list("name", flat=True)
+    )
+
+
 def test_search_includes_searchable_custom_text(root, project_ct):
+    _enable_custom_fields()
     notes = make_def(project_ct, root, "notes", FieldType.TEXT, searchable=True)
     secret = make_def(project_ct, root, "secret", FieldType.TEXT, searchable=False)
 
@@ -273,12 +297,20 @@ def test_search_includes_searchable_custom_text(root, project_ct):
     hit.set_custom_field(notes, "contains needle here")
     miss.set_custom_field(secret, "also has needle but not searchable")
 
-    backend = CustomFieldSearchFilter()
-    request = Request(APIRequestFactory().get("/", {"search": "needle"}))
+    names = _search("needle")
+    assert (
+        "alpha" in names and "beta" not in names
+    )  # matched via searchable custom value
+    # the non-searchable field's value must not surface its object
+    assert _search("not searchable") == set()
 
-    class _View:
-        search_fields = ["name"]
 
-    result = backend.filter_queryset(request, Project.objects.all(), _View())
-    names = set(result.values_list("name", flat=True))
-    assert "alpha" in names and "beta" not in names
+def test_search_unaffected_without_searchable_fields(root, project_ct):
+    # No searchable definitions → custom-field search short-circuits to native search.
+    _enable_custom_fields()
+    notes = make_def(project_ct, root, "notes", FieldType.TEXT, searchable=False)
+    p = Project.objects.create(name="alpha", folder=root)
+    p.set_custom_field(notes, "contains needle here")
+
+    assert _search("needle") == set()  # native name search only, custom value ignored
+    assert _search("alpha") == {"alpha"}

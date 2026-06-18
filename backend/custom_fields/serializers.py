@@ -6,6 +6,7 @@ from core.serializers import BaseModelSerializer
 from iam.models import Folder
 
 from .models import (
+    SEARCHABLE_TYPES,
     CustomFieldChoice,
     CustomFieldDefinition,
     FieldType,
@@ -77,6 +78,14 @@ class CustomFieldDefinitionWriteSerializer(BaseModelSerializer):
         ):
             raise serializers.ValidationError(
                 {"choices": "Choices are only allowed for choice fields."}
+            )
+
+        searchable = data.get("searchable", getattr(self.instance, "searchable", False))
+        if searchable and field_type not in SEARCHABLE_TYPES:
+            raise serializers.ValidationError(
+                {
+                    "searchable": "Only text, choice and multiple-choice fields can be searchable."
+                }
             )
         return data
 
