@@ -17,7 +17,7 @@
 	}
 
 	interface MappedRequirementAssessmentInfo {
-		urn: string;
+		urn?: string;
 		id: string | null;
 		str: string | null;
 		is_scored: boolean | null;
@@ -27,14 +27,19 @@
 		used_mapping_set?: UsedMappingSet;
 	}
 
-	type RequirementAssessmentURN = string;
+	type SourceRequirementAssessmentSingular = {
+		source_requirement_assessment: MappedRequirementAssessmentInfo;
+	};
 
-	type SourceRequirementAssessments = Record<
-		RequirementAssessment,
-		MappedRequirementAssessmentInfo
-	>;
+	type SourceRequirementAssessmentMany = {
+		source_requirement_assessments: Record<RequirementAssessment, MappedRequirementAssessmentInfo>;
+	};
 
-	interface MappingInference {
+	type SourceRequirementData =
+		| SourceRequirementAssessmentSingular
+		| SourceRequirementAssessmentMany;
+
+	type MappingInference = {
 		result:
 			| 'not_assessed'
 			| 'partially_compliant'
@@ -42,9 +47,8 @@
 			| 'compliant'
 			| 'not_applicable';
 		annotation?: string | null;
-		source_requirement_assessments: SourceRequirementAssessments;
 		[key: string]: unknown; // (There are other fields unused by this component)
-	}
+	} & SourceRequirementData;
 
 	interface Props {
 		mappingInference: MappingInference;
@@ -52,9 +56,21 @@
 
 	let { mappingInference }: Props = $props();
 
-	let sourceRequirementAssessmentCount = $derived(
-		Object.keys(mappingInference.source_requirement_assessments).length
-	);
+	let sourceRequirementAssessmentCount = $derived.by(() => {
+		if (mappingInference.source_requirement_assessments !== undefined) {
+			return Object.keys(mappingInference.source_requirement_assessments).length;
+		} else {
+			return 1;
+		}
+	});
+
+	let sourceRequirementList = $derived.by(() => {
+		if (mappingInference.source_requirement_assessments !== undefined) {
+			return mappingInference.source_requirement_assessments;
+		} else {
+			return [mappingInference.source_requirement_assessment];
+		}
+	});
 
 	let expandedInferences = $state(false);
 </script>
@@ -81,7 +97,7 @@
 		({sourceRequirementAssessmentCount})
 	</button>
 	<ol class="ml-0 {!expandedInferences ? 'hidden' : ''}">
-		{#each Object.entries(mappingInference.source_requirement_assessments) as [source_urn, source_requirement_assessment], index}
+		{#each sourceRequirementList as source_requirement_assessment, index}
 			<li class="p-2 border-2 border-b-primary-500">
 				<div class="mb-1">
 					{#if source_requirement_assessment.id}
