@@ -192,7 +192,7 @@
 					helpText={m.defaultLanguageHelpText()}
 				/>
 				<hr class="my-2" />
-				<p class="text-sm text-gray-500">{m.forceLanguageHelpText()}</p>
+				<p class="text-sm text-surface-600-400">{m.forceLanguageHelpText()}</p>
 				<button
 					type="button"
 					class="btn preset-filled-warning-500 text-sm"
@@ -337,8 +337,8 @@
 					/>
 				</div>
 				<div class="flex-1">
-					<div class="relative w-full h-64 max-w-md bg-white rounded-lg shadow-md p-4">
-						<!-- Point d'origine -->
+					<div class="relative w-full h-64 max-w-md bg-surface-50-950 rounded-lg shadow-md p-4">
+						<!-- Point d’origine -->
 						<div class={`absolute ${horizontalAxisPos} left-8 w-2 h-2 bg-black rounded-full`}></div>
 
 						<!-- Axe horizontal -->

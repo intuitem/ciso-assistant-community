@@ -39,7 +39,7 @@
 	{#snippet widgets()}
 		<div class="h-full flex flex-col space-y-4">
 			<!-- Current Value -->
-			<div class="card p-4 bg-white shadow-sm">
+			<div class="card p-4 bg-surface-50-950 shadow-sm">
 				<h3 class="text-lg font-semibold mb-3">{m.currentValue()}</h3>
 				<div class="text-3xl font-bold text-primary-600">
 					{metricInstance?.current_value || 'N/A'}
@@ -47,7 +47,7 @@
 			</div>
 
 			<!-- Sample Timeline Chart -->
-			<div class="card p-4 bg-white shadow-sm">
+			<div class="card p-4 bg-surface-50-950 shadow-sm">
 				<h3 class="text-lg font-semibold mb-3">{m.sampleTimeline()}</h3>
 				{#key samples.length}
 					<MetricSampleChart {samples} {metricDefinition} height="h-80" />

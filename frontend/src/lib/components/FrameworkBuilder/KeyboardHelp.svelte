@@ -49,17 +49,17 @@
 		onkeydown={(e) => e.key === 'Escape' && onClose()}
 	>
 		<div
-			class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 overflow-hidden"
+			class="bg-surface-50-950 rounded-xl shadow-2xl max-w-md w-full mx-4 overflow-hidden"
 			onclick={(e) => e.stopPropagation()}
 			role="document"
 		>
-			<div class="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
-				<h3 id="keyboard-help-title" class="text-lg font-semibold text-gray-900">
+			<div class="px-5 py-4 border-b border-surface-200-800 flex items-center justify-between">
+				<h3 id="keyboard-help-title" class="text-lg font-semibold text-surface-900-100">
 					{m.builderKeyboardShortcuts()}
 				</h3>
 				<button
 					type="button"
-					class="text-gray-400 hover:text-gray-600 transition-colors"
+					class="text-surface-500 hover:text-surface-600-400 transition-colors"
 					aria-label={m.close()}
 					onclick={onClose}
 				>
@@ -71,24 +71,24 @@
 				{#each groups as g}
 					<div>
 						<div class="flex items-baseline justify-between mb-2">
-							<h4 class="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+							<h4 class="text-[11px] font-semibold uppercase tracking-wider text-surface-600-400">
 								{g.title}
 							</h4>
 							{#if g.hint}
-								<span class="text-[11px] text-gray-400">{g.hint}</span>
+								<span class="text-[11px] text-surface-500">{g.hint}</span>
 							{/if}
 						</div>
 						<dl class="space-y-2">
 							{#each g.shortcuts as s}
 								<div class="flex items-center justify-between gap-6">
-									<dt class="text-gray-600">{s.label}</dt>
+									<dt class="text-surface-600-400">{s.label}</dt>
 									<dd class="flex items-center gap-1 shrink-0">
 										{#each s.keys as k, i}
 											{#if i > 0}
-												<span class="text-gray-300 text-xs">+</span>
+												<span class="text-surface-300-700 text-xs">+</span>
 											{/if}
 											<kbd
-												class="inline-flex items-center justify-center min-w-[1.75rem] px-1.5 py-0.5 text-xs font-mono font-medium text-gray-700 bg-gray-100 border border-gray-200 rounded"
+												class="inline-flex items-center justify-center min-w-[1.75rem] px-1.5 py-0.5 text-xs font-mono font-medium text-surface-700-300 bg-surface-100-900 border border-surface-200-800 rounded"
 											>
 												{k}
 											</kbd>

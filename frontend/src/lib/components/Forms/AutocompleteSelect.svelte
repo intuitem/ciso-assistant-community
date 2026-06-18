@@ -693,7 +693,7 @@
 				}
 			)}
 			{...multiSelectOptions}
-			outerDivClass="!input !bg-surface-100 !px-2 !flex {overflowCssClass}"
+			outerDivClass="!input !bg-surface-100-900 !px-2 !flex {overflowCssClass}"
 			disabled={_disabled}
 			allowEmpty={true}
 			{allowUserOptions}
@@ -808,6 +808,6 @@
 		{/if}
 	</div>
 	{#if helpText}
-		<p class="text-sm text-gray-500 whitespace-pre-line">{helpText}</p>
+		<p class="text-sm text-surface-600-400 whitespace-pre-line">{helpText}</p>
 	{/if}
 </div>

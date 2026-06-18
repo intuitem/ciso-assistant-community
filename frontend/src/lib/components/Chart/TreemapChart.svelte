@@ -51,6 +51,7 @@
 
 	function createOption(data: any) {
 		return {
+			backgroundColor: 'transparent',
 			toolbox: {
 				show: true,
 				feature: {
@@ -114,7 +115,11 @@
 	onMount(async () => {
 		if (tree.length === 0) return;
 		echarts = await import('echarts');
-		chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
+		chart = echarts.init(
+			document.getElementById(chart_id),
+			document.documentElement.classList.contains('dark') ? 'dark' : null,
+			{ renderer: 'svg' }
+		);
 
 		if (translatedTree?.length > 0) {
 			chart.setOption(createOption(translatedTree));
@@ -148,7 +153,7 @@
 
 {#if tree.length === 0}
 	<div class="flex flex-col justify-center items-center h-full">
-		<span class="text-center text-gray-600">{m.noDataAvailable()}</span>
+		<span class="text-center text-surface-600-400">{m.noDataAvailable()}</span>
 	</div>
 {:else}
 	<div id={chart_id} class="{width} {height} {classesContainer}"></div>
