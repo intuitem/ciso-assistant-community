@@ -39,7 +39,7 @@
 
 {#if $modalStore[0]}
 	<div
-		class="relative overflow-hidden rounded-2xl bg-white shadow-2xl"
+		class="relative overflow-hidden rounded-2xl bg-surface-50-950 shadow-2xl"
 		style="width: min(540px, 92vw);"
 	>
 		<!-- Decorative top band -->
@@ -54,10 +54,10 @@
 					<i class="fa-solid fa-shield-halved text-white text-xl"></i>
 				</div>
 				<div class="min-w-0">
-					<h2 class="text-xl font-bold text-gray-900 leading-tight">
+					<h2 class="text-xl font-bold text-surface-900-100 leading-tight">
 						{$modalStore[0].title ?? m.firstTimeLoginModalTitle()}
 					</h2>
-					<p class="text-sm text-gray-500 mt-1">
+					<p class="text-sm text-surface-600-400 mt-1">
 						{m.firstTimeLoginModalDescription()}
 					</p>
 				</div>
@@ -75,7 +75,7 @@
 						class="group w-full text-left rounded-xl border-2 p-4 transition-all duration-200
 							{isPreset
 							? 'border-violet-200 bg-gradient-to-r from-violet-50 to-fuchsia-50 hover:border-violet-400 hover:shadow-md hover:shadow-violet-100'
-							: 'border-gray-150 bg-white hover:border-gray-300 hover:bg-gray-50'}
+							: 'border-gray-150 bg-surface-50-950 hover:border-surface-300-700 hover:bg-surface-50-950'}
 							{loadingAction !== null && !isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}"
 					>
 						<div class="flex items-center gap-4">
@@ -85,7 +85,7 @@
 									? 'bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white shadow-md shadow-violet-200'
 									: i === 1
 										? 'bg-amber-100 text-amber-600'
-										: 'bg-gray-100 text-gray-500'}"
+										: 'bg-surface-100-900 text-surface-600-400'}"
 							>
 								{#if isLoading}
 									<i class="fa-solid fa-spinner fa-spin text-lg"></i>
@@ -96,12 +96,12 @@
 							<div class="flex-1 min-w-0">
 								<div
 									class="font-semibold text-sm leading-tight
-									{isPreset ? 'text-violet-900' : 'text-gray-800'}"
+									{isPreset ? 'text-violet-900' : 'text-surface-800-200'}"
 								>
 									{action.label}
 								</div>
 								{#if action.description}
-									<div class="text-xs text-gray-500 mt-0.5 leading-relaxed">
+									<div class="text-xs text-surface-600-400 mt-0.5 leading-relaxed">
 										{action.description}
 									</div>
 								{/if}
@@ -129,7 +129,7 @@
 		<div class="px-8 pb-6 pt-2 flex justify-end">
 			<button
 				onclick={parent.onClose}
-				class="text-sm text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+				class="text-sm text-surface-500 hover:text-surface-600-400 transition-colors cursor-pointer"
 			>
 				{m.skipForNow()}
 			</button>

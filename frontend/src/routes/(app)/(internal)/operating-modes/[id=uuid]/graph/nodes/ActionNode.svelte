@@ -35,7 +35,7 @@
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-	class="action-node relative font-semibold rounded-base border-[1.5px] px-3 py-2 min-w-[140px] max-w-[180px] text-center select-none bg-white {stageClass.border}"
+	class="action-node relative font-semibold rounded-base border-[1.5px] px-3 py-2 min-w-[140px] max-w-[180px] text-center select-none bg-surface-50-950 {stageClass.border}"
 	onmouseenter={() => (hovered = true)}
 	onmouseleave={() => (hovered = false)}
 >

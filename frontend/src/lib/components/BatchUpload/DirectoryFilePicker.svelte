@@ -69,12 +69,12 @@
 
 <div class="space-y-2">
 	<!-- Mode toggle: low-emphasis segmented control so it doesn't fight the dropzone for attention -->
-	<div class="inline-flex rounded-md border border-gray-200 p-0.5 bg-gray-50 text-sm">
+	<div class="inline-flex rounded-md border border-surface-200-800 p-0.5 bg-surface-50-950 text-sm">
 		<button
 			type="button"
 			class="px-3 py-1 rounded transition-colors {mode === 'files'
-				? 'bg-white text-gray-900 shadow-sm'
-				: 'text-gray-600 hover:text-gray-900'}"
+				? 'bg-surface-50-950 text-surface-900-100 shadow-sm'
+				: 'text-surface-600-400 hover:text-surface-900-100'}"
 			onclick={() => (mode = 'files')}
 			{disabled}
 		>
@@ -83,8 +83,8 @@
 		<button
 			type="button"
 			class="px-3 py-1 rounded transition-colors {mode === 'directory'
-				? 'bg-white text-gray-900 shadow-sm'
-				: 'text-gray-600 hover:text-gray-900'}"
+				? 'bg-surface-50-950 text-surface-900-100 shadow-sm'
+				: 'text-surface-600-400 hover:text-surface-900-100'}"
 			onclick={() => (mode = 'directory')}
 			{disabled}
 		>
@@ -102,21 +102,21 @@
 		tabindex={disabled ? -1 : 0}
 		class="flex flex-col items-center justify-center gap-1.5 px-4 py-6 border-2 border-dashed rounded-lg transition-colors
 			{disabled
-			? 'opacity-60 cursor-not-allowed border-gray-200 bg-gray-50'
+			? 'opacity-60 cursor-not-allowed border-surface-200-800 bg-surface-50-950'
 			: dragOver
-				? 'border-indigo-500 bg-indigo-50'
-				: 'border-gray-300 bg-gray-50 hover:border-indigo-400 hover:bg-indigo-50/40 cursor-pointer'}"
+				? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30'
+				: 'border-surface-300-700 bg-surface-50-950 hover:border-indigo-400 hover:bg-indigo-50/40 dark:hover:bg-indigo-900/20 cursor-pointer'}"
 	>
 		<i
 			class="fa-solid {mode === 'files'
 				? 'fa-file-arrow-up'
-				: 'fa-folder-tree'} text-2xl text-gray-400"
+				: 'fa-folder-tree'} text-2xl text-surface-500"
 		></i>
-		<span class="text-sm font-medium text-gray-700">
+		<span class="text-sm font-medium text-surface-700-300">
 			{mode === 'files' ? m.clickToPickFiles() : m.clickToPickDirectory()}
 		</span>
 		{#if mode === 'directory'}
-			<span class="text-xs text-gray-500">{m.directoryPickerHelp()}</span>
+			<span class="text-xs text-surface-600-400">{m.directoryPickerHelp()}</span>
 		{/if}
 	</label>
 

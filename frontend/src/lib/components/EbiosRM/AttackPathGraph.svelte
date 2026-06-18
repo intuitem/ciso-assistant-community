@@ -407,7 +407,7 @@
 	const nodeLabel = () => '';
 </script>
 
-<div class="chart bg-white rounded-lg shadow-sm">
+<div class="chart bg-surface-50-950 rounded-lg shadow-sm">
 	<VisSingleContainer data={processedData} {height}>
 		<VisGraph
 			{nodeShape}

@@ -57,17 +57,17 @@
 
 <div class="space-y-3">
 	<div class="flex items-center">
-		<div class="flex font-semibold text-sm text-gray-500 -rotate-90 whitespace-nowrap mr-1">
+		<div class="flex font-semibold text-sm text-surface-600-400 -rotate-90 whitespace-nowrap mr-1">
 			← {m.probability()}
 		</div>
 		<div class="overflow-x-auto flex-1">
 			<table class="table table-compact border-collapse">
 				<thead>
 					<tr>
-						<th class="bg-gray-100 border border-gray-300 text-center w-28"></th>
+						<th class="bg-surface-100-900 border border-surface-300-700 text-center w-28"></th>
 						{#each impactLevels as impact}
 							<th
-								class="border border-gray-300 text-center p-2 min-w-20"
+								class="border border-surface-300-700 text-center p-2 min-w-20"
 								style="background-color: {impact.hexcolor}; color: {isDark(impact.hexcolor)
 									? 'white'
 									: 'black'}"
@@ -85,7 +85,7 @@
 						{@const isBottomHalf = displayIdx >= displayRows.length / 2}
 						<tr>
 							<td
-								class="border border-gray-300 text-center p-2 font-semibold"
+								class="border border-surface-300-700 text-center p-2 font-semibold"
 								style="background-color: {prob.hexcolor}; color: {isDark(prob.hexcolor)
 									? 'white'
 									: 'black'}"
@@ -97,7 +97,7 @@
 							{#each impactLevels as _, colIdx}
 								{@const riskLevel = getRiskLevel(grid[rowIdx]?.[colIdx] ?? 0)}
 								<td
-									class="border border-gray-300 text-center p-0 cursor-pointer hover:opacity-80 transition-opacity focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-1"
+									class="border border-surface-300-700 text-center p-0 cursor-pointer hover:opacity-80 transition-opacity focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-1"
 									style="background-color: {riskLevel?.hexcolor ?? '#ccc'}; color: {isDark(
 										riskLevel?.hexcolor ?? '#ccc'
 									)
@@ -120,7 +120,7 @@
 										</span>
 										<!-- Dropdown on hover (flips upward for bottom rows) -->
 										<div
-											class="hidden group-hover:block absolute left-0 z-10 bg-white shadow-lg rounded border min-w-24 {isBottomHalf
+											class="hidden group-hover:block absolute left-0 z-10 bg-surface-50-950 shadow-lg rounded border min-w-24 {isBottomHalf
 												? 'bottom-full'
 												: 'top-full'}"
 										>
@@ -149,10 +149,10 @@
 			</table>
 		</div>
 	</div>
-	<div class="flex justify-center text-sm font-semibold text-gray-500 mt-1">
+	<div class="flex justify-center text-sm font-semibold text-surface-600-400 mt-1">
 		{m.impact()} →
 	</div>
-	<p class="text-xs text-gray-400 text-center mt-2">
+	<p class="text-xs text-surface-500 text-center mt-2">
 		<i class="fa-solid fa-circle-info mr-1"></i>{m.clickToCycle()}
 	</p>
 </div>
