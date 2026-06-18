@@ -3712,11 +3712,13 @@ class TestFrameworkBuilderControlsThreats:
         assert lib.urn in data["dependencies"]
         assert "reference_controls" not in data["objects"]
 
-    def test_export_yaml_non_builtin_library_object_embedded(
+    def test_export_yaml_non_builtin_library_object_remitted_and_embedded(
         self, authenticated_client, builder_fw
     ):
         """A control from a NON-builtin library can't be relied on in the target,
-        so it is embedded by value under objects.* (not a dangling dependency)."""
+        so it is embedded by value under objects.* — and re-minted to a
+        framework-owned URN so it can never collide with the source library's
+        object on re-import."""
         fw, rn, folder = builder_fw
         lib = LoadedLibrary.objects.create(
             urn="urn:acme:risk:library:custom-lib",
@@ -3743,11 +3745,115 @@ class TestFrameworkBuilderControlsThreats:
         data = yaml.safe_load(response.content)
 
         node = data["objects"]["framework"]["requirement_nodes"][0]
-        assert node["reference_controls"] == [rc.urn]
+        # URN is re-minted into the framework's own namespace/slug, not the
+        # source library's URN.
+        emitted_urn = "urn:custom:risk:reference_control:controls-fw:clrc"
+        assert node["reference_controls"] == [emitted_urn]
+        assert rc.urn not in node["reference_controls"]
         assert not data.get("dependencies")
         emitted = {c["urn"]: c for c in data["objects"]["reference_controls"]}
-        assert rc.urn in emitted
-        assert emitted[rc.urn]["description"] == "from a non-builtin library"
+        assert emitted_urn in emitted
+        assert rc.urn not in emitted
+        assert emitted[emitted_urn]["description"] == "from a non-builtin library"
+
+    def test_export_non_builtin_object_round_trips_into_fresh_instance(
+        self, authenticated_client, builder_fw
+    ):
+        """The portability gate: a framework embedding a NON-builtin library
+        object exports + re-imports into a clean instance (no dependency on the
+        source library), and the imported node links the re-minted control."""
+        fw, rn, folder = builder_fw
+        lib = LoadedLibrary.objects.create(
+            urn="urn:acme:risk:library:custom-lib",
+            name="custom-lib",
+            version=1,
+            folder=folder,
+            locale="en",
+            builtin=False,
+        )
+        rc = ReferenceControl.objects.create(
+            name="Custom-lib RC",
+            ref_id="CLRC",
+            urn="urn:acme:risk:function:custom-lib:clrc",
+            folder=folder,
+            library=lib,
+        )
+        rn.reference_controls.set([rc])
+
+        response = authenticated_client.get(
+            reverse("frameworks-export-yaml", args=[fw.id])
+        )
+        assert response.status_code == 200
+        content = response.content
+
+        # Clean target instance: drop the framework AND the source library.
+        fw.delete()
+        lib.delete()  # cascades the library control
+        assert not ReferenceControl.objects.filter(urn=rc.urn).exists()
+
+        stored, error = StoredLibrary.store_library_content(content)
+        assert error is None, f"Exported YAML failed to store: {error}"
+        load_error = stored.load()
+        assert load_error is None, f"Exported YAML failed to load: {load_error}"
+
+        emitted_urn = "urn:custom:risk:reference_control:controls-fw:clrc"
+        imported_rc = ReferenceControl.objects.get(urn=emitted_urn)
+        imported_node = RequirementNode.objects.get(
+            urn="urn:custom:risk:req_node:controls-fw:1"
+        )
+        assert imported_rc in imported_node.reference_controls.all()
+
+    def test_export_remints_distinct_objects_sharing_a_ref_id(
+        self, authenticated_client, builder_fw
+    ):
+        """Two embedded objects that share a ref_id get distinct framework-owned
+        URNs (collision-suffixed) — neither is silently dropped."""
+        fw, rn, folder = builder_fw
+        lib_a = LoadedLibrary.objects.create(
+            urn="urn:acme:risk:library:lib-a",
+            name="lib-a",
+            version=1,
+            folder=folder,
+            locale="en",
+            builtin=False,
+        )
+        lib_b = LoadedLibrary.objects.create(
+            urn="urn:acme:risk:library:lib-b",
+            name="lib-b",
+            version=1,
+            folder=folder,
+            locale="en",
+            builtin=False,
+        )
+        rc_a = ReferenceControl.objects.create(
+            name="A",
+            ref_id="DUP",
+            urn="urn:acme:risk:function:lib-a:dup",
+            folder=folder,
+            library=lib_a,
+        )
+        rc_b = ReferenceControl.objects.create(
+            name="B",
+            ref_id="DUP",
+            urn="urn:acme:risk:function:lib-b:dup",
+            folder=folder,
+            library=lib_b,
+        )
+        rn.reference_controls.set([rc_a, rc_b])
+
+        response = authenticated_client.get(
+            reverse("frameworks-export-yaml", args=[fw.id])
+        )
+        assert response.status_code == 200
+        data = yaml.safe_load(response.content)
+
+        node = data["objects"]["framework"]["requirement_nodes"][0]
+        emitted = [c["urn"] for c in data["objects"]["reference_controls"]]
+        assert set(node["reference_controls"]) == {
+            "urn:custom:risk:reference_control:controls-fw:dup",
+            "urn:custom:risk:reference_control:controls-fw:dup-2",
+        }
+        assert sorted(emitted) == sorted(set(node["reference_controls"]))
 
     def test_builder_catalog_referenceable_and_fields(
         self, authenticated_client, builder_fw

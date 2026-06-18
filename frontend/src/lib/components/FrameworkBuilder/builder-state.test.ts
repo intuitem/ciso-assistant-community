@@ -1446,7 +1446,8 @@ describe('inlineCopyFromCatalogEntry (copy picked existing object)', () => {
 			slug: 'fw',
 			isControl: true
 		});
-		expect(copy.urn).toBe('urn:custom:risk:reference_control:fw:a.5.1');
+		// URN is framework-owned, ref_id-based, with a source-derived suffix.
+		expect(copy.urn).toMatch(/^urn:custom:risk:reference_control:fw:a\.5\.1-[0-9a-f]{8}$/);
 		expect(copy.ref_id).toBe('A.5.1');
 		expect(copy.name).toBe('Policies');
 		expect(copy.description).toBe('desc');
@@ -1472,7 +1473,7 @@ describe('inlineCopyFromCatalogEntry (copy picked existing object)', () => {
 			slug: 'fw',
 			isControl: false
 		});
-		expect(copy.urn).toBe('urn:custom:risk:threat:fw:t1');
+		expect(copy.urn).toMatch(/^urn:custom:risk:threat:fw:t1-[0-9a-f]{8}$/);
 		expect(copy.name).toBe('Threat');
 		expect(copy.category).toBeUndefined();
 		expect(copy.csf_function).toBeUndefined();
@@ -1489,5 +1490,48 @@ describe('inlineCopyFromCatalogEntry (copy picked existing object)', () => {
 		});
 		expect(copy.ref_id?.startsWith('imported-')).toBe(true);
 		expect(copy.urn).toContain(':reference_control:fw:imported-');
+	});
+
+	it('mints distinct URNs for two different sources sharing a ref_id', () => {
+		const opts = {
+			urnType: 'reference_control' as const,
+			namespace: 'custom',
+			slug: 'fw',
+			isControl: true
+		};
+		const a = inlineCopyFromCatalogEntry(
+			{ id: 'a', urn: 'urn:libA:risk:function:lib-a:ac-1', ref_id: 'AC-1', name: 'A' },
+			opts
+		);
+		const b = inlineCopyFromCatalogEntry(
+			{ id: 'b', urn: 'urn:libB:risk:function:lib-b:ac-1', ref_id: 'AC-1', name: 'B' },
+			opts
+		);
+		expect(a.urn).not.toBe(b.urn);
+	});
+
+	it('mints a stable URN for the same source (dedups across sessions)', () => {
+		const opts = {
+			urnType: 'reference_control' as const,
+			namespace: 'custom',
+			slug: 'fw',
+			isControl: true
+		};
+		const entry = { id: 'a', urn: 'urn:libA:risk:function:lib-a:ac-1', ref_id: 'AC-1', name: 'A' };
+		expect(inlineCopyFromCatalogEntry(entry, opts).urn).toBe(
+			inlineCopyFromCatalogEntry(entry, opts).urn
+		);
+	});
+
+	it('falls back to the source id when the entry has no URN (custom object)', () => {
+		const opts = {
+			urnType: 'reference_control' as const,
+			namespace: 'custom',
+			slug: 'fw',
+			isControl: true
+		};
+		const a = inlineCopyFromCatalogEntry({ id: 'id-1', urn: '', ref_id: 'X', name: 'A' }, opts);
+		const b = inlineCopyFromCatalogEntry({ id: 'id-2', urn: '', ref_id: 'X', name: 'B' }, opts);
+		expect(a.urn).not.toBe(b.urn);
 	});
 });

@@ -9283,11 +9283,16 @@ class FrameworkViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"], url_path="export-yaml")
     def export_yaml(self, request, pk=None):
         """Export a framework as a library-compatible YAML file."""
+        from core.utils import extract_node_id
+
         framework = self.get_object()
 
         slug = framework.ref_id or self._slugify_framework_name(
             framework.name, framework.id
         )
+
+        def _urn_suffix(text):
+            return re.sub(r"[^a-z0-9._-]+", "-", (text or "").lower()).strip("-")
 
         # Query all nodes ordered by DFS order
         nodes = list(
@@ -9317,13 +9322,73 @@ class FrameworkViewSet(BaseModelViewSet):
                 parent_depth = depth_map.get(node.parent_urn, 0)
                 depth_map[node.urn] = parent_depth + 1
 
-        # Build requirement_nodes list. While walking the nodes we collect the
-        # control/threat objects they link: library-backed ones are emitted as a
-        # `dependencies` entry (referenced by URN), inline (library=None) ones
-        # are emitted in full under `objects.*`.
+        # Decide how each linked control/threat is emitted, and (for embedded
+        # ones) pin the URN the export will use. The exported library must be
+        # importable into ANY instance, so the only URNs allowed to appear are:
+        #   - a BUILTIN library's URN, referenced via `dependencies` (builtin
+        #     libraries ship with every instance, so the link always resolves);
+        #   - framework-owned URNs (urn:{ns}:risk:{type}:{slug}:…) for everything
+        #     embedded under `objects.*`.
+        # Anything else (a custom object, or one from a NON-builtin library that
+        # reached the framework by reference, e.g. via Duplicate) is re-minted to
+        # a collision-free framework-owned URN so re-import can never clash with a
+        # same-URN object already present in the target instance.
+        fw_ns = framework.urn_namespace or "custom"
         dependency_urns = set()
-        inline_controls = {}  # urn -> ReferenceControl
-        inline_threats = {}  # urn -> Threat
+
+        def _partition_referentials(objs_by_urn, type_token):
+            """Return (rewrite, embedded): a {source_urn -> emitted_urn} map and a
+            {emitted_urn -> object} map of the objects to inline. Populates
+            dependency_urns for builtin-library objects."""
+            owned_prefix = f"urn:{fw_ns}:risk:{type_token}:{slug}:"
+            rewrite = {}
+            embedded = {}
+            used = set()
+            foreign = []
+            for urn in sorted(objs_by_urn):
+                obj = objs_by_urn[urn]
+                if obj.library_id and obj.library.builtin:
+                    rewrite[urn] = urn
+                    dependency_urns.add(obj.library.urn)
+                elif urn.startswith(owned_prefix):
+                    rewrite[urn] = urn
+                    embedded[urn] = obj
+                    used.add(urn[len(owned_prefix) :])
+                else:
+                    foreign.append((urn, obj))
+            for urn, obj in foreign:
+                base = (
+                    _urn_suffix(obj.ref_id)
+                    or _urn_suffix(extract_node_id(urn))
+                    or "object"
+                )
+                suffix = base
+                i = 2
+                while suffix in used:
+                    suffix = f"{base}-{i}"
+                    i += 1
+                used.add(suffix)
+                new_urn = f"{owned_prefix}{suffix}"
+                rewrite[urn] = new_urn
+                embedded[new_urn] = obj
+            return rewrite, embedded
+
+        control_objs = {}
+        threat_objs = {}
+        for node in nodes:
+            for c in node.reference_controls.all():
+                if c.urn:
+                    control_objs.setdefault(c.urn, c)
+            for t in node.threats.all():
+                if t.urn:
+                    threat_objs.setdefault(t.urn, t)
+        control_rewrite, embedded_controls = _partition_referentials(
+            control_objs, "reference_control"
+        )
+        threat_rewrite, embedded_threats = _partition_referentials(
+            threat_objs, "threat"
+        )
+
         requirement_nodes_list = []
         for node in nodes:
             node_data = {
@@ -9362,31 +9427,17 @@ class FrameworkViewSet(BaseModelViewSet):
             if node.translations:
                 node_data["translations"] = node.translations
 
-            # Reference controls / threats: emit the URN list, and sort each
-            # linked object into the dependency set or the inline objects.
-            # Only BUILTIN libraries are referenced via `dependencies` — they
-            # ship with every instance, so the link resolves on import. Anything
-            # else (custom objects, or objects from a non-builtin library) is
-            # embedded by value so the exported library stays self-contained.
-            def _is_referenceable(obj):
-                return bool(obj.library_id) and obj.library.builtin
-
+            # Reference controls / threats: emit the (possibly re-minted) URN
+            # list. The partition above already routed each linked object to a
+            # dependency or to the embedded-objects map.
             node_controls = [c for c in node.reference_controls.all() if c.urn]
-            node_node_threats = [t for t in node.threats.all() if t.urn]
+            node_threats = [t for t in node.threats.all() if t.urn]
             if node_controls:
-                node_data["reference_controls"] = [c.urn for c in node_controls]
-                for c in node_controls:
-                    if _is_referenceable(c):
-                        dependency_urns.add(c.library.urn)
-                    else:
-                        inline_controls[c.urn] = c
-            if node_node_threats:
-                node_data["threats"] = [t.urn for t in node_node_threats]
-                for t in node_node_threats:
-                    if _is_referenceable(t):
-                        dependency_urns.add(t.library.urn)
-                    else:
-                        inline_threats[t.urn] = t
+                node_data["reference_controls"] = [
+                    control_rewrite[c.urn] for c in node_controls
+                ]
+            if node_threats:
+                node_data["threats"] = [threat_rewrite[t.urn] for t in node_threats]
 
             # Build questions dict keyed by URN
             node_questions = node.questions.order_by("order")
@@ -9469,8 +9520,8 @@ class FrameworkViewSet(BaseModelViewSet):
         # dependencies and resolved from their own library on import.
         objects = {}
 
-        def _serialize_referential(obj, extra_fields=()):
-            entry = {"urn": obj.urn, "ref_id": obj.ref_id, "name": obj.name}
+        def _serialize_referential(obj, emit_urn, extra_fields=()):
+            entry = {"urn": emit_urn, "ref_id": obj.ref_id, "name": obj.name}
             for field in ("description", "annotation"):
                 value = getattr(obj, field)
                 if value:
@@ -9483,16 +9534,19 @@ class FrameworkViewSet(BaseModelViewSet):
                 entry["translations"] = obj.translations
             return entry
 
-        if inline_controls:
+        if embedded_controls:
             objects["reference_controls"] = [
                 _serialize_referential(
-                    c, extra_fields=("category", "csf_function", "typical_evidence")
+                    c,
+                    emit_urn,
+                    extra_fields=("category", "csf_function", "typical_evidence"),
                 )
-                for c in inline_controls.values()
+                for emit_urn, c in embedded_controls.items()
             ]
-        if inline_threats:
+        if embedded_threats:
             objects["threats"] = [
-                _serialize_referential(t) for t in inline_threats.values()
+                _serialize_referential(t, emit_urn)
+                for emit_urn, t in embedded_threats.items()
             ]
         objects["framework"] = framework_obj
 

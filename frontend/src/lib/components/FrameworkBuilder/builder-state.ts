@@ -269,6 +269,20 @@ export function generateUrn(
 }
 
 /**
+ * Deterministic short hash (FNV-1a, 32-bit) rendered as 8 hex chars. Used to
+ * derive a source-unique, session-stable suffix when minting URNs for copied
+ * catalog objects. Not cryptographic — only needs to separate distinct sources.
+ */
+function stableHash(input: string): string {
+	let h = 0x811c9dc5;
+	for (let i = 0; i < input.length; i++) {
+		h ^= input.charCodeAt(i);
+		h = Math.imul(h, 0x01000193);
+	}
+	return (h >>> 0).toString(16).padStart(8, '0');
+}
+
+/**
  * Extract the node_id (mobile part) from a URN — everything after the 5th
  * colon. Mirrors the backend `extract_node_id`. node_id is the framework's
  * internal stable identifier; it must be unique per type within a framework
@@ -2125,7 +2139,14 @@ export function inlineCopyFromCatalogEntry(
 	}
 ): InlineReferential {
 	const refId = entry.ref_id?.trim() || `imported-${crypto.randomUUID().slice(0, 8)}`;
-	const suffix = refId.toLowerCase().replace(/[^a-z0-9._-]+/g, '-');
+	const base = refId.toLowerCase().replace(/[^a-z0-9._-]+/g, '-');
+	// Disambiguate the minted URN by source: two distinct catalog entries that
+	// happen to share a ref_id must not collapse to the same framework URN (which
+	// would silently drop one on the dedup-by-URN guard). Hashing the source's
+	// stable identity keeps the same source mapping to the same copy — even
+	// across editing sessions — while separating different sources.
+	const sourceKey = entry.urn || entry.id || refId;
+	const suffix = `${base}-${stableHash(String(sourceKey))}`;
 	return {
 		id: crypto.randomUUID(),
 		urn: `urn:${opts.namespace}:risk:${opts.urnType}:${opts.slug}:${suffix}`,
