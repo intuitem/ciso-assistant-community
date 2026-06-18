@@ -43,7 +43,7 @@
 
 	<div class="flex items-center gap-2">
 		{#if data.iconClass}
-			<i class="{data.iconClass} text-[11px] text-surface-500"></i>
+			<i class="{data.iconClass} text-[11px] text-surface-900-100"></i>
 		{/if}
 		<span class="text-[11px] leading-tight text-surface-900-100 text-wrap">{data.label}</span>
 	</div>
