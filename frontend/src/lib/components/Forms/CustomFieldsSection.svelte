@@ -62,8 +62,7 @@
 	// Expanded by default only when there's something the user must see:
 	// a required field, or values already set (edit mode). Otherwise collapsed.
 	const startOpen = $derived(
-		definitions.some((d) => d.required) ||
-			Object.keys(form?.data?.custom_fields ?? {}).length > 0
+		definitions.some((d) => d.required) || Object.keys(form?.data?.custom_fields ?? {}).length > 0
 	);
 </script>
 
@@ -71,57 +70,57 @@
 	<Dropdown open={startOpen} icon="fa-solid fa-sliders" header={m.customFields()} style="">
 		<div class="space-y-3 pt-2">
 			{#each definitions as def (def.id)}
-			{@const path = `custom_fields.${def.key}`}
-			{#if def.field_type === 'text'}
-				<TextField
-					{form}
-					field={path}
-					label={def.label_localized}
-					helpText={def.help_text_localized}
-					required={def.required}
-				/>
-			{:else if def.field_type === 'number'}
-				<NumberField
-					{form}
-					field={path}
-					label={def.label_localized}
-					helpText={def.help_text_localized}
-					required={def.required}
-				/>
-			{:else if def.field_type === 'date'}
-				<TextField
-					{form}
-					type="date"
-					field={path}
-					label={def.label_localized}
-					helpText={def.help_text_localized}
-					required={def.required}
-				/>
-			{:else if def.field_type === 'boolean'}
-				<Checkbox
-					{form}
-					field={path}
-					label={def.label_localized}
-					helpText={def.help_text_localized}
-				/>
-			{:else if def.field_type === 'choice'}
-				<Select
-					{form}
-					field={path}
-					options={choiceOptions(def)}
-					label={def.label_localized}
-					helpText={def.help_text_localized}
-				/>
-			{:else if def.field_type === 'multi_choice'}
-				<AutocompleteSelect
-					{form}
-					multiple
-					field={path}
-					options={choiceOptions(def)}
-					label={def.label_localized}
-					helpText={def.help_text_localized}
-				/>
-			{/if}
+				{@const path = `custom_fields.${def.key}`}
+				{#if def.field_type === 'text'}
+					<TextField
+						{form}
+						field={path}
+						label={def.label_localized}
+						helpText={def.help_text_localized}
+						required={def.required}
+					/>
+				{:else if def.field_type === 'number'}
+					<NumberField
+						{form}
+						field={path}
+						label={def.label_localized}
+						helpText={def.help_text_localized}
+						required={def.required}
+					/>
+				{:else if def.field_type === 'date'}
+					<TextField
+						{form}
+						type="date"
+						field={path}
+						label={def.label_localized}
+						helpText={def.help_text_localized}
+						required={def.required}
+					/>
+				{:else if def.field_type === 'boolean'}
+					<Checkbox
+						{form}
+						field={path}
+						label={def.label_localized}
+						helpText={def.help_text_localized}
+					/>
+				{:else if def.field_type === 'choice'}
+					<Select
+						{form}
+						field={path}
+						options={choiceOptions(def)}
+						label={def.label_localized}
+						helpText={def.help_text_localized}
+					/>
+				{:else if def.field_type === 'multi_choice'}
+					<AutocompleteSelect
+						{form}
+						multiple
+						field={path}
+						options={choiceOptions(def)}
+						label={def.label_localized}
+						helpText={def.help_text_localized}
+					/>
+				{/if}
 			{/each}
 		</div>
 	</Dropdown>

@@ -2,7 +2,6 @@
 	import type { PageData } from './$types';
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import ObjectivesComparisonTable from '$lib/components/Assets/ObjectivesComparisonTable.svelte';
-	import CustomFieldsDisplay from '$lib/components/Forms/CustomFieldsDisplay.svelte';
 	import { m } from '$paraglide/messages';
 
 	interface Props {
@@ -32,11 +31,3 @@
 		</div>
 	{/snippet}
 </DetailView>
-
-<div class="mt-4">
-	<CustomFieldsDisplay
-		model="core.asset"
-		folderId={data.data.folder?.id}
-		values={data.data.custom_fields}
-	/>
-</div>

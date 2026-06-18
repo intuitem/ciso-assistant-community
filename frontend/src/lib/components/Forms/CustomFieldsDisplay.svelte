@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
+	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 
 	interface Choice {
 		value: string;
@@ -15,14 +16,24 @@
 	}
 
 	interface Props {
-		model: string;
+		/** url model slug of the host (e.g. 'assets', 'applied-controls') */
+		urlModel: string;
 		folderId?: string;
 		values?: Record<string, any>;
 	}
 
-	let { model, folderId = undefined, values = {} }: Props = $props();
+	let { urlModel, folderId = undefined, values = {} }: Props = $props();
 
-	const enabled = $derived(page.data?.featureflags?.custom_fields === true);
+	// Custom-field host url models → their backend app_label.model.
+	// Mirrors the explicit opt-in set of CustomFieldsMixin hosts on the backend.
+	const HOST_MODELS: Record<string, string> = {
+		assets: 'core.asset',
+		'applied-controls': 'core.appliedcontrol',
+		policies: 'core.appliedcontrol'
+	};
+	const model = $derived(HOST_MODELS[urlModel]);
+
+	const enabled = $derived(page.data?.featureflags?.custom_fields === true && Boolean(model));
 	let definitions: Definition[] = $state([]);
 
 	async function load() {
@@ -58,20 +69,28 @@
 		}
 		return String(raw);
 	}
+
+	// Expanded by default only when there are values to show.
+	const hasValues = $derived(
+		Object.values(values ?? {}).some(
+			(v) => v !== null && v !== '' && !(Array.isArray(v) && v.length === 0)
+		)
+	);
 </script>
 
 {#if definitions.length}
-	<div class="card p-4 shadow-lg bg-white">
-		<h3 class="text-lg font-semibold mb-3">{m.customFields()}</h3>
-		<dl class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
-			{#each definitions as def (def.id)}
-				<div class="border-l-2 border-gray-200 pl-4">
-					<dt class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-						{def.label_localized}
-					</dt>
-					<dd class="text-sm text-gray-900">{displayValue(def, values?.[def.key])}</dd>
-				</div>
-			{/each}
-		</dl>
+	<div class="card p-4 shadow-lg bg-white mt-8">
+		<Dropdown open={hasValues} icon="fa-solid fa-sliders" header={m.customFields()} style="">
+			<dl class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 pt-2">
+				{#each definitions as def (def.id)}
+					<div class="border-l-2 border-gray-200 pl-4">
+						<dt class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+							{def.label_localized}
+						</dt>
+						<dd class="text-sm text-gray-900">{displayValue(def, values?.[def.key])}</dd>
+					</div>
+				{/each}
+			</dl>
+		</Dropdown>
 	</div>
 {/if}
