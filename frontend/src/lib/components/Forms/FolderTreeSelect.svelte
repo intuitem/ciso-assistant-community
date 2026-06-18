@@ -388,7 +388,9 @@
 												? 'text-indigo-500'
 												: 'text-surface-500'}"
 										></i>
-										<span class="truncate text-sm font-semibold text-indigo-700 dark:text-indigo-300">
+										<span
+											class="truncate text-sm font-semibold text-indigo-700 dark:text-indigo-300"
+										>
 											{result.node.name}
 										</span>
 										{#if $value === String(result.node.uuid)}
