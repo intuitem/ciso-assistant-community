@@ -81,8 +81,8 @@
 	let previewDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 	let previewAbortController: AbortController | null = null;
 
-	const cBase = 'card bg-white p-6 w-modal-wide max-w-4xl space-y-5';
-	const cHeader = 'text-xl font-medium text-gray-900';
+	const cBase = 'card bg-surface-50-950 p-6 w-modal-wide max-w-4xl space-y-5';
+	const cHeader = 'text-xl font-medium text-surface-900-100';
 
 	onMount(async () => {
 		try {
@@ -267,13 +267,13 @@
 			{entryMode === 'replace' ? m.replaceWith() : m.mergeAppliedControls()}
 		</header>
 		{#if entryMode === 'replace'}
-			<p class="text-sm text-gray-600">{m.replaceWithDescription()}</p>
+			<p class="text-sm text-surface-600-400">{m.replaceWithDescription()}</p>
 			{#if sources.length === 1}
-				<div class="rounded border border-gray-200 bg-gray-50 px-3 py-2 text-sm">
-					<span class="text-gray-500">{m.replacing()}:</span>
-					<span class="font-medium text-gray-900">{sources[0].name}</span>
+				<div class="rounded border border-surface-200-800 bg-surface-50-950 px-3 py-2 text-sm">
+					<span class="text-surface-600-400">{m.replacing()}:</span>
+					<span class="font-medium text-surface-900-100">{sources[0].name}</span>
 					{#if sources[0].folderName}
-						<span class="text-gray-400">— {sources[0].folderName}</span>
+						<span class="text-surface-500">— {sources[0].folderName}</span>
 					{/if}
 				</div>
 			{/if}
@@ -287,10 +287,10 @@
 		</div>
 
 		{#if loadingSources}
-			<div class="text-sm text-gray-500">{m.loading()}…</div>
+			<div class="text-sm text-surface-600-400">{m.loading()}…</div>
 		{:else}
 			<section class="space-y-2">
-				<h3 class="text-sm font-semibold text-gray-700">{m.selectTargetControl()}</h3>
+				<h3 class="text-sm font-semibold text-surface-700-300">{m.selectTargetControl()}</h3>
 				<div class="space-y-2">
 					{#if sources.length > 1}
 						<label class="flex items-start gap-2 cursor-pointer">
@@ -298,7 +298,7 @@
 							<div class="flex-1">
 								<div class="text-sm font-medium">{m.useSelectedControlAsTarget()}</div>
 								<select
-									class="select w-full border border-gray-300 rounded px-3 py-1.5 mt-1 text-sm"
+									class="select w-full border border-surface-300-700 rounded px-3 py-1.5 mt-1 text-sm"
 									bind:value={selectedSourceId}
 									disabled={targetMode !== 'selected'}
 								>
@@ -317,7 +317,7 @@
 								<div class="text-sm font-medium">{m.createNewMergedControl()}</div>
 								<input
 									type="text"
-									class="input w-full border border-gray-300 rounded px-3 py-1.5 text-sm"
+									class="input w-full border border-surface-300-700 rounded px-3 py-1.5 text-sm"
 									placeholder={m.name()}
 									value={$formStore.name}
 									oninput={(e) =>
@@ -370,12 +370,12 @@
 				</div>
 			</section>
 
-			<section class="space-y-2 border-t border-gray-200 pt-4">
+			<section class="space-y-2 border-t border-surface-200-800 pt-4">
 				<div class="flex items-center gap-2">
-					<h3 class="text-sm font-semibold text-gray-700">{m.previewRewireCounts()}</h3>
+					<h3 class="text-sm font-semibold text-surface-700-300">{m.previewRewireCounts()}</h3>
 					{#if previewLoading}
 						<i
-							class="fa-solid fa-spinner animate-spin text-slate-400 text-xs"
+							class="fa-solid fa-spinner animate-spin text-surface-500 text-xs"
 							aria-label="refreshing"
 						></i>
 					{/if}
@@ -389,11 +389,11 @@
 							: ''}"
 					>
 						<div>
-							<div class="font-medium text-gray-600 mb-1">{m.previewRewireCounts()}</div>
+							<div class="font-medium text-surface-600-400 mb-1">{m.previewRewireCounts()}</div>
 							<ul class="space-y-0.5">
 								{#each Object.entries(preview.rewired_preview ?? {}) as [k, v]}
 									{#if Number(v) > 0}
-										<li class="text-gray-700">
+										<li class="text-surface-700-300">
 											<span>{safeTranslate(k)}</span>: <strong>{v}</strong>
 										</li>
 									{/if}
@@ -401,11 +401,11 @@
 							</ul>
 						</div>
 						<div>
-							<div class="font-medium text-gray-600 mb-1">{m.previewUnionedM2M()}</div>
+							<div class="font-medium text-surface-600-400 mb-1">{m.previewUnionedM2M()}</div>
 							<ul class="space-y-0.5">
 								{#each Object.entries(preview.unioned_m2m_preview ?? {}) as [k, v]}
 									{#if Number(v) > 0}
-										<li class="text-gray-700">
+										<li class="text-surface-700-300">
 											<span>{safeTranslate(k)}</span>: +<strong>{v}</strong>
 										</li>
 									{/if}
@@ -423,12 +423,12 @@
 			</section>
 
 			{#if mdConflict}
-				<section class="space-y-2 border-t border-gray-200 pt-4">
-					<h3 class="text-sm font-semibold text-gray-700">
+				<section class="space-y-2 border-t border-surface-200-800 pt-4">
+					<h3 class="text-sm font-semibold text-surface-700-300">
 						<i class="fa-solid fa-file-lines text-amber-600"></i>
 						{m.managedDocumentConflict()}
 					</h3>
-					<p class="text-sm text-gray-600">{m.managedDocumentConflictHelp()}</p>
+					<p class="text-sm text-surface-600-400">{m.managedDocumentConflictHelp()}</p>
 					<div class="space-y-1">
 						{#each mdConflict.candidates as doc}
 							<label class="flex items-center gap-2 cursor-pointer text-sm">
@@ -441,7 +441,7 @@
 			{/if}
 		{/if}
 
-		<div class="space-y-1 border-t border-gray-200 pt-4">
+		<div class="space-y-1 border-t border-surface-200-800 pt-4">
 			<label for="merge-confirm-input" class="text-sm font-medium text-red-600">
 				{m.confirmYes()}
 			</label>
@@ -449,7 +449,7 @@
 				id="merge-confirm-input"
 				type="text"
 				data-testid="merge-confirm-input"
-				class="input w-full border border-gray-300 rounded px-3 py-1.5 text-sm"
+				class="input w-full border border-surface-300-700 rounded px-3 py-1.5 text-sm"
 				bind:value={confirmPhrase}
 				placeholder={m.confirmYesPlaceHolder()}
 				autocomplete="off"
@@ -459,7 +459,7 @@
 		<footer class="flex gap-3 justify-end pt-4">
 			<button
 				type="button"
-				class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
+				class="px-4 py-2 text-sm font-medium text-surface-700-300 bg-surface-50-950 border border-surface-300-700 hover:bg-surface-50-950"
 				onclick={parent.onClose}
 				disabled={submitting}
 			>
@@ -467,7 +467,7 @@
 			</button>
 			<button
 				type="button"
-				class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+				class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 disabled:opacity-50 disabled:cursor-not-allowed"
 				disabled={!canConfirm}
 				onclick={handleConfirm}
 				data-testid="merge-confirm-button"

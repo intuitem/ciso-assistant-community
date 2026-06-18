@@ -12,7 +12,7 @@
 	let { data, form }: Props = $props();
 </script>
 
-<div class="lg:relative h-screen bg-slate-200">
+<div class="lg:relative h-screen bg-surface-200-800">
 	<div class="lg:absolute top-5 lg:left-5 flex justify-center">
 		<div class="flex justify-center flex-row max-w-48 space-x-4 pb-3">
 			<Logo />

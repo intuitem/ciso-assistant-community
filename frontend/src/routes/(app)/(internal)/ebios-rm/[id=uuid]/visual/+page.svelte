@@ -45,14 +45,14 @@
 	<Anchor
 		breadcrumbAction="push"
 		href={`/ebios-rm/${page.params.id}`}
-		class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+		class="flex items-center space-x-2 text-primary-800-300 hover:text-primary-600-400"
 	>
 		<i class="fa-solid fa-arrow-left"></i>
 		<p>{m.goBackToEbiosRmStudy()}</p>
 	</Anchor>
 </div>
 
-<div class="bg-white shadow-sm flex overflow-x-auto">
+<div class="bg-surface-50-950 shadow-sm flex overflow-x-auto">
 	<div class="w-full h-screen">
 		<GraphExplorer
 			title="Visual Analysis (beta)"

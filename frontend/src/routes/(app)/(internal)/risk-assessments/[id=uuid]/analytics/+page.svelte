@@ -33,7 +33,11 @@
 
 		import('echarts').then((echarts) => {
 			if (!el.isConnected) return;
-			chart = echarts.init(el, null, { renderer: 'svg' });
+			chart = echarts.init(
+				el,
+				document.documentElement.classList.contains('dark') ? 'dark' : null,
+				{ renderer: 'svg' }
+			);
 
 			const { timeline, colors } = params;
 			const dates = timeline.map((t: any) => t.date);
@@ -61,6 +65,7 @@
 			}));
 
 			chart.setOption({
+				backgroundColor: 'transparent',
 				tooltip: {
 					trigger: 'axis',
 					backgroundColor: '#1e293b',
@@ -72,12 +77,12 @@
 				xAxis: {
 					type: 'category',
 					data: dates,
-					axisLine: { lineStyle: { color: '#e2e8f0' } },
+					axisLine: { lineStyle: { color: 'rgba(148, 163, 184, 0.3)' } },
 					axisLabel: { color: '#94a3b8', fontSize: 10 }
 				},
 				yAxis: {
 					type: 'value',
-					splitLine: { lineStyle: { color: '#f1f5f9' } },
+					splitLine: { lineStyle: { color: 'rgba(148, 163, 184, 0.2)' } },
 					axisLabel: { color: '#94a3b8', fontSize: 10 }
 				},
 				series
@@ -102,27 +107,27 @@
 		<Anchor
 			href="/risk-assessments/{data.risk_assessment.id}"
 			breadcrumbAction="pop"
-			class="flex items-center justify-center w-9 h-9 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors text-gray-600"
+			class="flex items-center justify-center w-9 h-9 rounded-lg bg-surface-100-900 hover:bg-surface-200-800 transition-colors text-surface-600-400"
 		>
 			<i class="fa-solid fa-arrow-left text-sm"></i>
 		</Anchor>
 		<div>
-			<h1 class="text-xl font-bold text-gray-900">{m.analytics()}</h1>
-			<p class="text-sm text-gray-500">
+			<h1 class="text-xl font-bold text-surface-900-100">{m.analytics()}</h1>
+			<p class="text-sm text-surface-600-400">
 				{data.risk_assessment.name} - {data.risk_assessment.version}
 			</p>
 		</div>
 	</div>
 
 	<!-- Risk Levels Over Time -->
-	<section class="rounded-xl border border-slate-200 bg-white overflow-hidden">
-		<div class="border-b border-slate-100 px-6 py-4 flex items-center gap-2.5">
+	<section class="rounded-xl border border-surface-200-800 bg-surface-50-950 overflow-hidden">
+		<div class="border-b border-surface-100-900 px-6 py-4 flex items-center gap-2.5">
 			<span
-				class="flex items-center justify-center w-7 h-7 rounded-md bg-violet-50 text-violet-500"
+				class="flex items-center justify-center w-7 h-7 rounded-md bg-violet-500/10 text-violet-500"
 			>
 				<i class="fa-solid fa-timeline text-xs"></i>
 			</span>
-			<h2 class="text-sm font-semibold text-slate-800 tracking-tight">
+			<h2 class="text-sm font-semibold text-surface-800-200 tracking-tight">
 				{m.riskLevelsOverTime()}
 			</h2>
 		</div>
@@ -139,7 +144,7 @@
 						}}
 					></div>
 				{:else}
-					<div class="flex flex-col items-center justify-center py-12 text-slate-400">
+					<div class="flex flex-col items-center justify-center py-12 text-surface-500">
 						<i class="fa-solid fa-chart-area text-3xl mb-2 opacity-30"></i>
 						<p class="text-sm">{m.nothingToShowYet()}</p>
 					</div>
@@ -158,8 +163,8 @@
 		<!-- Row 1: Threat Radar + Treatment Distribution -->
 		<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 			<!-- Threat Radar / Bar -->
-			<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-				<h3 class="text-lg font-semibold text-gray-900 mb-2">{m.threatsBreakdown()}</h3>
+			<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-4">
+				<h3 class="text-lg font-semibold text-surface-900-100 mb-2">{m.threatsBreakdown()}</h3>
 				{#if analytics.threats?.labels?.length > 0}
 					{#if analytics.threats.labels.length <= 10}
 						<div class="h-80">
@@ -186,15 +191,15 @@
 						</div>
 					{/if}
 				{:else}
-					<div class="h-80 flex items-center justify-center text-gray-500">
+					<div class="h-80 flex items-center justify-center text-surface-600-400">
 						<p>{m.noThreatsMapped()}</p>
 					</div>
 				{/if}
 			</div>
 
 			<!-- Treatment Distribution -->
-			<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-				<h3 class="text-lg font-semibold text-gray-900 mb-2">{m.treatmentDistribution()}</h3>
+			<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-4">
+				<h3 class="text-lg font-semibold text-surface-900-100 mb-2">{m.treatmentDistribution()}</h3>
 				{#if analytics.treatment?.labels?.length > 0}
 					{@const treatmentValues = analytics.treatment.labels.map((label, i) => ({
 						name: label,
@@ -208,7 +213,7 @@
 						/>
 					</div>
 				{:else}
-					<div class="h-80 flex items-center justify-center text-gray-500">
+					<div class="h-80 flex items-center justify-center text-surface-600-400">
 						<p>{m.noDataAvailable()}</p>
 					</div>
 				{/if}
@@ -218,8 +223,8 @@
 		<!-- Row 2: Strength of Knowledge + Assets at Risk -->
 		<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 			<!-- Strength of Knowledge -->
-			<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-				<h3 class="text-lg font-semibold text-gray-900 mb-2">{m.strengthOfKnowledge()}</h3>
+			<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-4">
+				<h3 class="text-lg font-semibold text-surface-900-100 mb-2">{m.strengthOfKnowledge()}</h3>
 				{#if analytics.strength_of_knowledge?.labels?.length > 0}
 					{@const sokValues = analytics.strength_of_knowledge.labels.map((label, i) => ({
 						name: label,
@@ -233,15 +238,15 @@
 						/>
 					</div>
 				{:else}
-					<div class="h-80 flex items-center justify-center text-gray-500">
+					<div class="h-80 flex items-center justify-center text-surface-600-400">
 						<p>{m.noDataAvailable()}</p>
 					</div>
 				{/if}
 			</div>
 
 			<!-- Assets at Risk -->
-			<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-				<h3 class="text-lg font-semibold text-gray-900 mb-2">{m.assetsAtRisk()}</h3>
+			<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-4">
+				<h3 class="text-lg font-semibold text-surface-900-100 mb-2">{m.assetsAtRisk()}</h3>
 				{#if analytics.assets?.labels?.length > 0}
 					<div class="h-80">
 						<BarChart
@@ -252,7 +257,7 @@
 						/>
 					</div>
 				{:else}
-					<div class="h-80 flex items-center justify-center text-gray-500">
+					<div class="h-80 flex items-center justify-center text-surface-600-400">
 						<p>{m.noDataAvailable()}</p>
 					</div>
 				{/if}
