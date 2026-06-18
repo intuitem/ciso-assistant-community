@@ -13,6 +13,8 @@ removed here in code, only once the last source backing it is gone — that is
 what lets two IdP groups feed the same UserGroup and survive deleting one.
 """
 
+from collections import defaultdict
+
 from django.contrib.auth import get_user_model
 from django.db import transaction
 
@@ -33,78 +35,36 @@ def grant(user, user_group, mapping, channel):
 def _reconcile_edges(pairs):
     """
     Drop every (user, group) M2M edge in `pairs` that no longer has any source.
-    Uses `.remove()` (not a raw through delete) so cache-invalidation signals
-    still fire. `pairs` is an iterable of (user_id, user_group_id).
+    `pairs` is an iterable of (user_id, user_group_id).
+
+    Bulk path: one query finds which candidate pairs still have a backing
+    source, then the orphaned edges are deleted straight through the join table
+    (one delete per distinct group). That bypasses m2m_changed, so the groups
+    cache is invalidated explicitly — the per-pair signal walk would otherwise
+    dominate when a large route is removed.
     """
-    orphaned = {}
-    for user_id, group_id in set(pairs):
-        if not GroupMembershipSource.objects.filter(
-            user_id=user_id, user_group_id=group_id
-        ).exists():
-            orphaned.setdefault(user_id, []).append(group_id)
+    pairs = set(pairs)
+    if not pairs:
+        return
+    user_ids = {u for u, _ in pairs}
+    group_ids = {g for _, g in pairs}
+    still_backed = set(
+        GroupMembershipSource.objects.filter(
+            user_id__in=user_ids, user_group_id__in=group_ids
+        ).values_list("user_id", "user_group_id")
+    )
+    orphaned = pairs - still_backed
     if not orphaned:
         return
-    users = User.objects.in_bulk(orphaned.keys())
-    for user_id, group_ids in orphaned.items():
-        user = users.get(user_id)
-        if user is not None:
-            user.user_groups.remove(*group_ids)
-
-@transaction.atomic
-def backfill_route(mapping):
-    """
-    A new route was added to an IdP group: grant its existing federated members
-    (known from the group's other routes) into the new target, under the same
-    channel. This makes a re-point (add the new route, then drop the old one)
-    migrate members immediately. Manual memberships (null source) are skipped.
-    """
-    existing = list(
-        GroupMembershipSource.objects.filter(source__idp_group=mapping.idp_group)
-        .exclude(source=mapping)
-        .values("user_id", "channel")
-        .distinct()
-    )
-    if not existing:
-        return
-
-    valid_user_ids = set(
-        User.objects.filter(id__in={e["user_id"] for e in existing}).values_list(
-            "id", flat=True
-        )
-    )
-    if not valid_user_ids:
-        return
-
-    GroupMembershipSource.objects.bulk_create(
-        [
-            GroupMembershipSource(
-                user_id=entry["user_id"],
-                user_group_id=mapping.user_group_id,
-                source=mapping,
-                channel=entry["channel"],
-            )
-            for entry in existing
-            if entry["user_id"] in valid_user_ids
-        ],
-        ignore_conflicts=True,
-    )
-
+    by_group = defaultdict(list)
+    for user_id, group_id in orphaned:
+        by_group[group_id].append(user_id)
     Through = User.user_groups.through
-    existing_edges = set(
-        Through.objects.filter(
-            user_id__in=valid_user_ids, usergroup_id=mapping.user_group_id
-        ).values_list("user_id", "usergroup_id")
-    )
-    new_edges = [
-        Through(user_id=uid, usergroup_id=mapping.user_group_id)
-        for uid in valid_user_ids
-        if (uid, mapping.user_group_id) not in existing_edges
-    ]
-    if new_edges:
-        Through.objects.bulk_create(new_edges, ignore_conflicts=True)
-        from iam.cache_builders import invalidate_groups_cache
+    for group_id, uids in by_group.items():
+        Through.objects.filter(usergroup_id=group_id, user_id__in=uids).delete()
+    from iam.cache_builders import invalidate_groups_cache
 
-        invalidate_groups_cache()
+    invalidate_groups_cache()
 
 
 @transaction.atomic

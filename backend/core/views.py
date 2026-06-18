@@ -7758,11 +7758,6 @@ class IdPGroupMappingViewSet(BaseModelViewSet):
             "idp_group", "user_group"
         ).all()
 
-    def perform_create(self, serializer):
-        instance = super().perform_create(serializer)
-        gm.backfill_route(instance)
-        return instance
-
     def perform_destroy(self, instance):
         # Drop this route's membership sources + reconcile edges, then delete.
         gm.revoke_mapping(instance)
