@@ -4,6 +4,7 @@
 	import Checkbox from './Checkbox.svelte';
 	import Select from './Select.svelte';
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
+	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import { page } from '$app/state';
 	import { m } from '$paraglide/messages';
 
@@ -57,12 +58,19 @@
 
 	const choiceOptions = (def: Definition) =>
 		def.choices.map((c) => ({ label: c.label_localized, value: c.value }));
+
+	// Expanded by default only when there's something the user must see:
+	// a required field, or values already set (edit mode). Otherwise collapsed.
+	const startOpen = $derived(
+		definitions.some((d) => d.required) ||
+			Object.keys(form?.data?.custom_fields ?? {}).length > 0
+	);
 </script>
 
 {#if definitions.length}
-	<div class="space-y-3 border-t border-surface-300 pt-3 mt-3">
-		<span class="text-sm font-semibold">{m.customFields()}</span>
-		{#each definitions as def (def.id)}
+	<Dropdown open={startOpen} icon="fa-solid fa-sliders" header={m.customFields()} style="">
+		<div class="space-y-3 pt-2">
+			{#each definitions as def (def.id)}
 			{@const path = `custom_fields.${def.key}`}
 			{#if def.field_type === 'text'}
 				<TextField
@@ -114,6 +122,7 @@
 					helpText={def.help_text_localized}
 				/>
 			{/if}
-		{/each}
-	</div>
+			{/each}
+		</div>
+	</Dropdown>
 {/if}
