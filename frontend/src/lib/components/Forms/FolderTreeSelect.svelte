@@ -327,7 +327,7 @@
 							></i>
 							<input
 								type="text"
-								class="w-full pl-6 pr-2 py-1 text-sm border border-surface-200-800 rounded focus:outline-none focus:ring-1 focus:ring-indigo-300"
+								class="w-full pl-6 pr-2 py-1 text-sm border border-surface-200-800 bg-surface-50-950 text-surface-900-100 rounded focus:outline-none focus:ring-1 focus:ring-indigo-300"
 								placeholder={m.searchPlaceholder()}
 								bind:value={searchQuery}
 								bind:this={searchInputEl}
@@ -366,8 +366,8 @@
 									type="button"
 									role="option"
 									aria-selected={$value === String(result.node.uuid)}
-									class="w-full px-2 py-1.5 text-left hover:bg-indigo-50 rounded transition-colors
-										{$value === String(result.node.uuid) ? 'bg-indigo-100' : ''}"
+									class="w-full px-2 py-1.5 text-left hover:bg-indigo-50 dark:hover:bg-indigo-950 rounded transition-colors
+										{$value === String(result.node.uuid) ? 'bg-indigo-100 dark:bg-indigo-900' : ''}"
 									onclick={(e) => {
 										e.stopPropagation();
 										handleSelect(String(result.node.uuid), result.node.name, result.path);
@@ -388,7 +388,7 @@
 												? 'text-indigo-500'
 												: 'text-surface-500'}"
 										></i>
-										<span class="truncate text-sm font-semibold text-indigo-700">
+										<span class="truncate text-sm font-semibold text-indigo-700 dark:text-indigo-300">
 											{result.node.name}
 										</span>
 										{#if $value === String(result.node.uuid)}
