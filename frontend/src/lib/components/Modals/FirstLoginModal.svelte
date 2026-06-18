@@ -74,7 +74,7 @@
 						disabled={loadingAction !== null}
 						class="group w-full text-left rounded-xl border-2 p-4 transition-all duration-200
 							{isPreset
-							? 'border-violet-200 bg-gradient-to-r from-violet-50 to-fuchsia-50 hover:border-violet-400 hover:shadow-md hover:shadow-violet-100'
+							? 'border-violet-200 bg-gradient-to-r from-violet-50 to-fuchsia-50 hover:border-violet-400 hover:shadow-md hover:shadow-violet-100 dark:border-violet-500/30 dark:from-violet-500/15 dark:to-fuchsia-500/15 dark:hover:border-violet-400/60 dark:hover:shadow-violet-900/30'
 							: 'border-gray-150 bg-surface-50-950 hover:border-surface-300-700 hover:bg-surface-50-950'}
 							{loadingAction !== null && !isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}"
 					>
@@ -96,7 +96,7 @@
 							<div class="flex-1 min-w-0">
 								<div
 									class="font-semibold text-sm leading-tight
-									{isPreset ? 'text-violet-900' : 'text-surface-800-200'}"
+									{isPreset ? 'text-violet-900 dark:text-violet-200' : 'text-surface-800-200'}"
 								>
 									{action.label}
 								</div>
@@ -114,7 +114,7 @@
 						{#if isPreset}
 							<div class="mt-2 ml-14">
 								<span
-									class="inline-block text-[10px] font-semibold tracking-wide uppercase text-violet-500 bg-violet-100 px-2 py-0.5 rounded-full"
+									class="inline-block text-[10px] font-semibold tracking-wide uppercase text-violet-500 dark:text-violet-300 bg-violet-100 dark:bg-violet-500/15 px-2 py-0.5 rounded-full"
 								>
 									{m.recommended()}
 								</span>
