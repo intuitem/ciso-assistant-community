@@ -34,7 +34,7 @@
 	let URLModel = $derived(data.URLModel);
 	// Static (per-model) filters merged with dynamic custom-field filters.
 	const tableFilters = $derived({
-		...(listViewFields[URLModel]?.filters ?? {}),
+		...listViewFields[URLModel]?.filters,
 		...buildCustomFieldFilters((data.customFields ?? []).filter((d) => d.filterable))
 	});
 	let pullCatalogOpen = $state(false);

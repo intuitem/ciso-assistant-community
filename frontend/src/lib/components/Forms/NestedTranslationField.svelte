@@ -38,7 +38,7 @@
 	}
 
 	function setField(loc: string, key: string, v: string) {
-		value = { ...value, [loc]: { ...(value[loc] ?? {}), [key]: v } };
+		value = { ...value, [loc]: { ...value[loc], [key]: v } };
 	}
 </script>
 
