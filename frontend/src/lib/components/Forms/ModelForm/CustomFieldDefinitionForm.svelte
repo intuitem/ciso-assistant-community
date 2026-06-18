@@ -32,8 +32,11 @@
 
 	const isEdit = $derived(Boolean(object?.id));
 
-	// Only Project is wired to custom fields for now.
-	const modelOptions = [{ label: m.project(), value: 'pmbok.project' }];
+	const modelOptions = [
+		{ label: m.project(), value: 'pmbok.project' },
+		{ label: m.asset(), value: 'core.asset' },
+		{ label: m.appliedControl(), value: 'core.appliedcontrol' }
+	];
 
 	const { value: fieldType } = formFieldProxy(form, 'field_type');
 	const isChoice = $derived($fieldType === 'choice' || $fieldType === 'multi_choice');

@@ -48,6 +48,23 @@ class TestCustomFieldsAPI:
         assert detail["label_localized"] == "Tier"
         assert {c["value"] for c in detail["choices"]} == {"gold", "silver"}
 
+    def test_text_field_with_empty_choices_is_accepted(self, authenticated_client):
+        # the frontend schema defaults `choices` to [] even for non-choice fields
+        root = Folder.get_root_folder()
+        resp = authenticated_client.post(
+            CF_URL,
+            {
+                "model": "core.asset",
+                "key": "sensitivity",
+                "label": "Sensitivity",
+                "field_type": "text",
+                "folder": str(root.id),
+                "choices": [],
+            },
+            format="json",
+        )
+        assert resp.status_code == status.HTTP_201_CREATED, resp.content
+
     def test_create_definition_without_model_is_400(self, authenticated_client):
         resp = authenticated_client.post(
             CF_URL,
@@ -155,6 +172,63 @@ class TestCustomFieldsAPI:
             "fr": {"label": "Criticité", "help_text": "Criticité métier"}
         }
         assert detail["choices"][0]["translations"] == {"fr": {"label": "Élevé"}}
+
+    def test_asset_host_round_trip_and_filter(self, authenticated_client):
+        root = Folder.get_root_folder()
+        authenticated_client.post(
+            CF_URL,
+            {
+                "model": "core.asset",
+                "key": "sensitivity",
+                "label": "Sensitivity",
+                "field_type": "text",
+                "folder": str(root.id),
+            },
+            format="json",
+        )
+        create = authenticated_client.post(
+            "/api/assets/",
+            {
+                "name": "Server",
+                "folder": str(root.id),
+                "type": "PR",
+                "custom_fields": {"sensitivity": "high"},
+            },
+            format="json",
+        )
+        assert create.status_code == status.HTTP_201_CREATED, create.content
+        asset_id = create.json()["id"]
+        detail = authenticated_client.get(f"/api/assets/{asset_id}/")
+        assert detail.json()["custom_fields"] == {"sensitivity": "high"}
+        filtered = authenticated_client.get("/api/assets/", {"cf.sensitivity": "high"})
+        assert asset_id in {a["id"] for a in filtered.json()["results"]}
+
+    def test_applied_control_host_round_trip(self, authenticated_client):
+        root = Folder.get_root_folder()
+        authenticated_client.post(
+            CF_URL,
+            {
+                "model": "core.appliedcontrol",
+                "key": "vendor",
+                "label": "Vendor",
+                "field_type": "text",
+                "folder": str(root.id),
+            },
+            format="json",
+        )
+        create = authenticated_client.post(
+            "/api/applied-controls/",
+            {
+                "name": "AC",
+                "folder": str(root.id),
+                "custom_fields": {"vendor": "acme"},
+            },
+            format="json",
+        )
+        assert create.status_code == status.HTTP_201_CREATED, create.content
+        cid = create.json()["id"]
+        detail = authenticated_client.get(f"/api/applied-controls/{cid}/")
+        assert detail.json()["custom_fields"] == {"vendor": "acme"}
 
     def test_for_folder_resolution(self, authenticated_client):
         root = Folder.get_root_folder()

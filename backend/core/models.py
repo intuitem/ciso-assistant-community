@@ -36,6 +36,7 @@ from structlog import get_logger
 from django.utils.timezone import now
 
 from iam.models import Folder, FolderMixin, PublishInRootFolderMixin, User
+from custom_fields.host import CustomFieldsMixin
 
 from library.helpers import (
     get_referential_translation,
@@ -3165,7 +3166,11 @@ class AssetCapability(ReferentialObjectMixin, I18nObjectMixin):
 
 
 class Asset(
-    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
+    NameDescriptionMixin,
+    FolderMixin,
+    PublishInRootFolderMixin,
+    FilteringLabelMixin,
+    CustomFieldsMixin,
 ):
     class Type(models.TextChoices):
         """
@@ -5019,7 +5024,11 @@ def _get_default_applied_control_cost():
 
 
 class AppliedControl(
-    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
+    NameDescriptionMixin,
+    FolderMixin,
+    PublishInRootFolderMixin,
+    FilteringLabelMixin,
+    CustomFieldsMixin,
 ):
     class Status(models.TextChoices):
         TO_DO = "to_do", _("To do")

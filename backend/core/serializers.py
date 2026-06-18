@@ -206,6 +206,11 @@ class BaseModelSerializer(serializers.ModelSerializer):
         model: models.Model
 
 
+# Imported after BaseModelSerializer to avoid a circular import:
+# custom_fields.serializers imports BaseModelSerializer from this module.
+from custom_fields.serializers import CustomFieldsSerializerMixin  # noqa: E402
+
+
 class ReferentialSerializer(BaseModelSerializer):
     name = serializers.CharField(source="get_name_translated")
     description = serializers.CharField(
@@ -571,7 +576,7 @@ class AssetCapabilityWriteSerializer(AssetCapabilityReadSerializer):
     pass
 
 
-class AssetWriteSerializer(BaseModelSerializer):
+class AssetWriteSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
     ebios_rm_studies = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=EbiosRMStudy.objects.all(),
@@ -1203,7 +1208,7 @@ class RiskScenarioImportExportSerializer(BaseModelSerializer):
         ]
 
 
-class AppliedControlWriteSerializer(BaseModelSerializer):
+class AppliedControlWriteSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
     findings = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Finding.objects.all()
     )

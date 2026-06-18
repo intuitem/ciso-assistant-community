@@ -280,7 +280,8 @@ export const AppliedControlSchema = z.object({
 	observation: z.string().optional().nullable(),
 	integration_config: z.string().optional().nullable(),
 	remote_object_id: z.string().optional().nullable(),
-	create_remote_object: z.boolean().optional().default(false)
+	create_remote_object: z.boolean().optional().default(false),
+	custom_fields: z.record(z.string(), z.any()).optional()
 });
 
 export const AppliedControlDuplicateSchema = z.object({
@@ -414,7 +415,8 @@ export const AssetSchema = z.object({
 	dora_licenced_activity: z.string().optional().nullable(),
 	dora_criticality_assessment: z.string().default('eba_BT:x21'),
 	dora_criticality_justification: z.string().optional().nullable(),
-	dora_discontinuing_impact: z.string().default('eba_ZZ:x799')
+	dora_discontinuing_impact: z.string().default('eba_ZZ:x799'),
+	custom_fields: z.record(z.string(), z.any()).optional()
 });
 
 export const FilteringLabelSchema = z.object({

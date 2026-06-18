@@ -71,7 +71,7 @@ class CustomFieldDefinitionWriteSerializer(BaseModelSerializer):
             )
 
         field_type = data.get("field_type", getattr(self.instance, "field_type", None))
-        if "choices" in data and field_type not in (
+        if data.get("choices") and field_type not in (
             FieldType.CHOICE,
             FieldType.MULTI_CHOICE,
         ):

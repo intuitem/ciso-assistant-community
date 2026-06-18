@@ -3,6 +3,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
+	import CustomFieldsDisplay from '$lib/components/Forms/CustomFieldsDisplay.svelte';
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
 	import type { ModalComponent, ModalSettings } from '@skeletonlabs/skeleton-svelte';
@@ -69,6 +70,14 @@
 		{/if}
 	{/snippet}
 </DetailView>
+
+<div class="mt-4">
+	<CustomFieldsDisplay
+		model="core.appliedcontrol"
+		folderId={data.data.folder?.id}
+		values={data.data.custom_fields}
+	/>
+</div>
 
 {#if page.data?.featureflags?.comments}
 	<div class="mt-4">

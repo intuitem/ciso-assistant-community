@@ -10,7 +10,9 @@
 	import { m } from '$paraglide/messages';
 	import { onMount } from 'svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
+	import { formFieldProxy } from 'sveltekit-superforms';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import CustomFieldsSection from '../CustomFieldsSection.svelte';
 	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import Duration from '../Duration.svelte';
 	import RadioGroup from '../RadioGroup.svelte';
@@ -36,6 +38,8 @@
 		object = {},
 		data = {}
 	}: Props = $props();
+
+	const { value: folderId } = formFieldProxy(form, 'folder');
 
 	type SecurityObjectiveScale = keyof typeof SECURITY_OBJECTIVE_SCALE_MAP;
 	const scale: SecurityObjectiveScale = page.data.settings.security_objective_scale;
@@ -368,3 +372,5 @@
 		hidden
 	/>
 {/if}
+
+<CustomFieldsSection {form} model="core.asset" folderId={$folderId} />
