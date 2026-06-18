@@ -50,6 +50,62 @@ def _reconcile_edges(pairs):
         if user is not None:
             user.user_groups.remove(*group_ids)
 
+@transaction.atomic
+def backfill_route(mapping):
+    """
+    A new route was added to an IdP group: grant its existing federated members
+    (known from the group's other routes) into the new target, under the same
+    channel. This makes a re-point (add the new route, then drop the old one)
+    migrate members immediately. Manual memberships (null source) are skipped.
+    """
+    existing = list(
+        GroupMembershipSource.objects.filter(source__idp_group=mapping.idp_group)
+        .exclude(source=mapping)
+        .values("user_id", "channel")
+        .distinct()
+    )
+    if not existing:
+        return
+
+    valid_user_ids = set(
+        User.objects.filter(id__in={e["user_id"] for e in existing}).values_list(
+            "id", flat=True
+        )
+    )
+    if not valid_user_ids:
+        return
+
+    GroupMembershipSource.objects.bulk_create(
+        [
+            GroupMembershipSource(
+                user_id=entry["user_id"],
+                user_group_id=mapping.user_group_id,
+                source=mapping,
+                channel=entry["channel"],
+            )
+            for entry in existing
+            if entry["user_id"] in valid_user_ids
+        ],
+        ignore_conflicts=True,
+    )
+
+    Through = User.user_groups.through
+    existing_edges = set(
+        Through.objects.filter(
+            user_id__in=valid_user_ids, usergroup_id=mapping.user_group_id
+        ).values_list("user_id", "usergroup_id")
+    )
+    new_edges = [
+        Through(user_id=uid, usergroup_id=mapping.user_group_id)
+        for uid in valid_user_ids
+        if (uid, mapping.user_group_id) not in existing_edges
+    ]
+    if new_edges:
+        Through.objects.bulk_create(new_edges, ignore_conflicts=True)
+        from iam.cache_builders import invalidate_groups_cache
+
+        invalidate_groups_cache()
+
 
 @transaction.atomic
 def revoke_mapping(mapping, channel=None):
@@ -74,30 +130,6 @@ def delete_idp_group(idp_group):
     )
     idp_group.delete()  # cascades mappings -> their GroupMembershipSource rows
     _reconcile_edges(pairs)
-
-
-@transaction.atomic
-def backfill_route(mapping):
-    """
-    A new route was added to an IdP group: grant its existing federated members
-    (known from the group's other routes) into the new target, under the same
-    channel. This makes a re-point (add the new route, then drop the old one)
-    migrate members immediately. Manual memberships (null source) are skipped.
-    """
-    existing = list(
-        GroupMembershipSource.objects.filter(source__idp_group=mapping.idp_group)
-        .exclude(source=mapping)
-        .values("user_id", "channel")
-        .distinct()
-    )
-    if not existing:
-        return
-    users = User.objects.in_bulk({e["user_id"] for e in existing})
-    for entry in existing:
-        user = users.get(entry["user_id"])
-        if user is not None:
-            grant(user, mapping.user_group, mapping, entry["channel"])
-
 
 # ---------------------------------------------------------------------------
 # SCIM channel (members of an IdP group, fanned out over all its routes)
