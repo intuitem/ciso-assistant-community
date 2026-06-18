@@ -3,7 +3,10 @@ from rest_framework.filters import BaseFilterBackend, SearchFilter
 
 from .models import CustomFieldDefinition, CustomFieldValue, coerce_value
 
-PREFIX = "cf."
+# Dotless prefix so the key is a flat (non-nested) field name on the frontend
+# filter form (superforms treats "." as a nested path). Reads like a Django lookup:
+# cf__<key>, cf__<key>__in, cf__<key>__gte, ...
+PREFIX = "cf__"
 LOOKUPS = {"exact", "in", "gte", "lte", "gt", "lt", "icontains"}
 TEXT_ONLY_LOOKUPS = {"icontains"}
 

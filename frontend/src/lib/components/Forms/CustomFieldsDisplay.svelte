@@ -2,6 +2,7 @@
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import { CUSTOM_FIELD_HOST_MODELS } from '$lib/utils/customFields';
 
 	interface Choice {
 		value: string;
@@ -24,14 +25,7 @@
 
 	let { urlModel, folderId = undefined, values = {} }: Props = $props();
 
-	// Custom-field host url models → their backend app_label.model.
-	// Mirrors the explicit opt-in set of CustomFieldsMixin hosts on the backend.
-	const HOST_MODELS: Record<string, string> = {
-		assets: 'core.asset',
-		'applied-controls': 'core.appliedcontrol',
-		policies: 'core.appliedcontrol'
-	};
-	const model = $derived(HOST_MODELS[urlModel]);
+	const model = $derived(CUSTOM_FIELD_HOST_MODELS[urlModel]);
 
 	const enabled = $derived(page.data?.featureflags?.custom_fields === true && Boolean(model));
 	let definitions: Definition[] = $state([]);

@@ -111,7 +111,7 @@ class TestCustomFieldsAPI:
             },
             format="json",
         )
-        filtered = authenticated_client.get(PROJECTS_URL, {"cf.tier": "gold"})
+        filtered = authenticated_client.get(PROJECTS_URL, {"cf__tier": "gold"})
         names = {p["name"] for p in filtered.json()["results"]}
         assert names == {"Gold project"}
 
@@ -200,7 +200,7 @@ class TestCustomFieldsAPI:
         asset_id = create.json()["id"]
         detail = authenticated_client.get(f"/api/assets/{asset_id}/")
         assert detail.json()["custom_fields"] == {"sensitivity": "high"}
-        filtered = authenticated_client.get("/api/assets/", {"cf.sensitivity": "high"})
+        filtered = authenticated_client.get("/api/assets/", {"cf__sensitivity": "high"})
         assert asset_id in {a["id"] for a in filtered.json()["results"]}
 
     def test_applied_control_host_round_trip(self, authenticated_client):

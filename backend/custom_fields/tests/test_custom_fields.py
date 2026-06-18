@@ -218,7 +218,7 @@ def test_filter_two_fields_and_across_rows(root, project_ct):
     p2.set_custom_field(crit, "high")
     p2.set_custom_field(owner, "bob")
 
-    result = _filtered({"cf.crit": "high", "cf.owner": "alice"})
+    result = _filtered({"cf__crit": "high", "cf__owner": "alice"})
     assert list(result.values_list("name", flat=True)) == ["P1"]
 
 
@@ -228,7 +228,7 @@ def test_filter_number_gte(root, project_ct):
     pricey = Project.objects.create(name="pricey", folder=root)
     cheap.set_custom_field(cost, 100)
     pricey.set_custom_field(cost, 5000)
-    result = _filtered({"cf.cost__gte": "1000"})
+    result = _filtered({"cf__cost__gte": "1000"})
     assert list(result.values_list("name", flat=True)) == ["pricey"]
 
 
@@ -242,7 +242,7 @@ def test_filter_multi_choice_in_matches_any(root, project_ct):
     pa.set_custom_field(mc, ["a"])
     pb.set_custom_field(mc, ["b"])
     pc.set_custom_field(mc, ["c"])
-    result = _filtered({"cf.tags__in": "a,b"})
+    result = _filtered({"cf__tags__in": "a,b"})
     assert set(result.values_list("name", flat=True)) == {"pa", "pb"}
 
 
@@ -251,14 +251,14 @@ def test_filter_text_icontains(root, project_ct):
     p = Project.objects.create(name="P", folder=root)
     p.set_custom_field(owner, "Alice Cooper")
     assert list(
-        _filtered({"cf.owner__icontains": "cooper"}).values_list("name", flat=True)
+        _filtered({"cf__owner__icontains": "cooper"}).values_list("name", flat=True)
     ) == ["P"]
 
 
 def test_filter_bad_input_returns_empty(root, project_ct):
     make_def(project_ct, root, "cost", FieldType.NUMBER)
     Project.objects.create(name="P", folder=root)
-    assert _filtered({"cf.cost__gte": "not-a-number"}).count() == 0
+    assert _filtered({"cf__cost__gte": "not-a-number"}).count() == 0
 
 
 # --------------------------------------------------------------------------- #
