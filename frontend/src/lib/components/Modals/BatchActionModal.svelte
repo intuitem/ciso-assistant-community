@@ -160,7 +160,7 @@
 								{@const opt = options.find((o) => o.value === val)}
 								{#if opt}
 									<span
-										class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-100 text-primary-800-300 text-xs"
+										class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-100 text-primary-800-200 text-xs"
 									>
 										{translateOption(opt)}
 										<button

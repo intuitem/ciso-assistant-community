@@ -171,6 +171,7 @@
 * [Control Plan](features/control-plan.md)
 * [Action plans](features/action-plans.md)
 * [Working with tables](features/working-with-tables.md)
+* [Custom fields](features/custom-fields.md)
 * [Command palette](features/command-palette.md)
 * [Universal search](features/search.md)
 * [My assignments](features/my-assignments.md)

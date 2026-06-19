@@ -36,6 +36,7 @@ from structlog import get_logger
 from django.utils.timezone import now
 
 from iam.models import Folder, FolderMixin, PublishInRootFolderMixin, User
+from custom_fields.host import CustomFieldsMixin
 
 from library.helpers import (
     get_referential_translation,
@@ -3165,7 +3166,11 @@ class AssetCapability(ReferentialObjectMixin, I18nObjectMixin):
 
 
 class Asset(
-    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
+    NameDescriptionMixin,
+    FolderMixin,
+    PublishInRootFolderMixin,
+    FilteringLabelMixin,
+    CustomFieldsMixin,
 ):
     class Type(models.TextChoices):
         """
@@ -3954,22 +3959,27 @@ class Asset(
         self.full_clean()
         return super().save(*args, **kwargs)
 
-    def get_security_objectives_comparison(self) -> list[dict]:
+    def get_security_objectives_comparison(
+        self, security_objectives=None, security_capabilities=None
+    ) -> list[dict]:
         """
         Compare security objectives (expectation) vs capabilities (reality) using RAW values.
         Returns a list of dicts with: objective, expectation, reality, verdict.
         Verdict is True if objective is met, False if not met, None if cannot be determined.
+
+        Callers may pass security_objectives/capabilities (as {"objectives": {...}})
+        to skip the per-asset graph traversal.
         """
         # Read raw JSON structures (no display/scales)
         so = (
-            self.get_security_objectives()
-            if hasattr(self, "get_security_objectives")
-            else self.security_objectives
+            security_objectives
+            if security_objectives is not None
+            else self.get_security_objectives()
         )
         sc = (
-            self.get_security_capabilities()
-            if hasattr(self, "get_security_capabilities")
-            else self.security_capabilities
+            security_capabilities
+            if security_capabilities is not None
+            else self.get_security_capabilities()
         )
 
         so_obj = (so or {}).get("objectives", {}) or {}
@@ -4011,23 +4021,32 @@ class Asset(
 
         return result
 
-    def get_recovery_objectives_comparison(self) -> list[dict]:
+    def get_recovery_objectives_comparison(
+        self,
+        disaster_recovery_objectives=None,
+        recovery_capabilities=None,
+        display_objectives_list=None,
+        display_capabilities_list=None,
+    ) -> list[dict]:
         """
         Compare recovery objectives (expectation) vs capabilities (reality).
         Returns list with objective, expectation, reality, and verdict.
         Compares raw seconds numerically, outputs formatted display strings.
         Verdict is True if objective is met, False if not met, None if cannot be determined.
+
+        Callers may pass the raw ({"objectives": {...}}) and display ([{"str": ...}])
+        inputs to skip the per-asset graph traversal.
         """
 
         dr_src = (
-            self.get_disaster_recovery_objectives()
-            if hasattr(self, "get_disaster_recovery_objectives")
-            else (getattr(self, "disaster_recovery_objectives", {}) or {})
+            disaster_recovery_objectives
+            if disaster_recovery_objectives is not None
+            else self.get_disaster_recovery_objectives()
         )
         rc_src = (
-            self.get_recovery_capabilities()
-            if hasattr(self, "get_recovery_capabilities")
-            else (getattr(self, "recovery_capabilities", {}) or {})
+            recovery_capabilities
+            if recovery_capabilities is not None
+            else self.get_recovery_capabilities()
         )
 
         def _normalize_seconds(source: dict) -> dict[str, int]:
@@ -4082,9 +4101,15 @@ class Asset(
             return parsed
 
         display_objectives = _parse_display(
-            self.get_disaster_recovery_objectives_display()
+            display_objectives_list
+            if display_objectives_list is not None
+            else self.get_disaster_recovery_objectives_display()
         )
-        display_capabilities = _parse_display(self.get_recovery_capabilities_display())
+        display_capabilities = _parse_display(
+            display_capabilities_list
+            if display_capabilities_list is not None
+            else self.get_recovery_capabilities_display()
+        )
 
         for item in result:
             key = item["objective"].lower()
@@ -5019,7 +5044,11 @@ def _get_default_applied_control_cost():
 
 
 class AppliedControl(
-    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
+    NameDescriptionMixin,
+    FolderMixin,
+    PublishInRootFolderMixin,
+    FilteringLabelMixin,
+    CustomFieldsMixin,
 ):
     class Status(models.TextChoices):
         TO_DO = "to_do", _("To do")
@@ -5330,6 +5359,10 @@ class AppliedControl(
     @property
     def annual_cost(self):
         """Returns the annualized cost as a numeric value"""
+        return self.compute_annual_cost()
+
+    def compute_annual_cost(self, daily_rate=None):
+        """Annualized cost. Pass daily_rate to skip the per-control GlobalSettings lookup."""
         if not self.cost:
             return 0
 
@@ -5337,11 +5370,9 @@ class AppliedControl(
         run_cost = self.cost.get("run", {})
         amortization_period = self.cost.get("amortization_period", 1)
 
-        # Get daily rate from global settings
-        general_settings = GlobalSettings.objects.filter(name="general").first()
-        daily_rate = (
-            general_settings.value.get("daily_rate", 500) if general_settings else 500
-        )
+        # Get daily rate from global settings unless provided by the caller
+        if daily_rate is None:
+            daily_rate = GlobalSettings.get_daily_rate()
 
         # Calculate annual cost
         annual_cost = 0
