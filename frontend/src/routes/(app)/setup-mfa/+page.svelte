@@ -109,9 +109,9 @@
 						/>
 
 						<div class="flex items-center justify-center w-full space-x-2">
-							<hr class="w-32 bg-gray-200 border-0" />
-							<span class="text-gray-600 text-sm">{m.or()}</span>
-							<hr class="w-32 bg-gray-200 border-0" />
+							<hr class="w-32 bg-surface-200-800 border-0" />
+							<span class="text-surface-600-400 text-sm">{m.or()}</span>
+							<hr class="w-32 bg-surface-200-800 border-0" />
 						</div>
 
 						<div>

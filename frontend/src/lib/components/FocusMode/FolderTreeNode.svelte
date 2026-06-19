@@ -95,7 +95,7 @@
 						e.stopPropagation();
 						isExpanded = !isExpanded;
 					}}
-					class="flex-shrink-0 w-5 h-6 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-transform duration-150 {isExpanded
+					class="flex-shrink-0 w-5 h-6 flex items-center justify-center text-surface-500 hover:text-surface-600-400 transition-transform duration-150 {isExpanded
 						? 'rotate-90'
 						: ''}"
 				>
@@ -111,10 +111,10 @@
 				aria-selected={isSelected}
 				class="flex-1 flex items-center gap-1.5 px-1.5 py-1 text-left rounded text-sm min-w-0 transition-colors
 				{isSelected
-					? 'bg-indigo-100 text-indigo-700'
+					? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300'
 					: isSelectable
-						? 'text-slate-700 hover:bg-indigo-50 cursor-pointer'
-						: 'text-slate-400 cursor-not-allowed'}"
+						? 'text-surface-700-300 hover:bg-indigo-50 dark:hover:bg-indigo-950 cursor-pointer'
+						: 'text-surface-500 cursor-not-allowed'}"
 				title={node.name}
 				onclick={(e) => {
 					e.stopPropagation();
@@ -125,7 +125,7 @@
 				<i
 					class="fa-solid fa-folder flex-shrink-0 text-xs {isSelected
 						? 'text-indigo-500'
-						: 'text-slate-400'}"
+						: 'text-surface-500'}"
 				></i>
 				<span class="truncate">{node.name}</span>
 				{#if isSelected}
@@ -135,7 +135,7 @@
 		</div>
 
 		{#if isExpanded && sortedChildren.length > 0}
-			<ul class="list-none p-0 m-0 {depth === 5 ? 'border-l border-slate-200 ml-3' : ''}">
+			<ul class="list-none p-0 m-0 {depth === 5 ? 'border-l border-surface-200-800 ml-3' : ''}">
 				{#each sortedChildren as child (child.uuid ?? child.name)}
 					<FolderTreeNode
 						node={child}

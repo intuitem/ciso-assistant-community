@@ -52,13 +52,13 @@
 			onkeydown={(e) => e.key === 'Escape' && (open = false)}
 		></div>
 		<div
-			class="fixed z-30 bg-white rounded-lg shadow-lg border border-gray-200 p-2 grid grid-cols-2 gap-1 w-56"
+			class="fixed z-30 bg-surface-50-950 rounded-lg shadow-lg border border-surface-200-800 p-2 grid grid-cols-2 gap-1 w-56"
 			style="top: {menuPos.top}px; left: {menuPos.left}px"
 		>
 			{#each QUESTION_TYPES as type (type.value)}
 				<button
 					type="button"
-					class="flex items-center gap-2 px-3 py-2 rounded-md text-sm hover:bg-gray-50 transition-colors {currentVariant ===
+					class="flex items-center gap-2 px-3 py-2 rounded-md text-sm hover:bg-surface-50-950 transition-colors {currentVariant ===
 					type.value
 						? 'ring-2 ring-blue-500 ring-offset-1'
 						: ''}"
@@ -67,7 +67,7 @@
 					<span class="w-7 h-7 rounded flex items-center justify-center {type.color}">
 						<i class="fa-solid {type.icon} text-xs"></i>
 					</span>
-					<span class="text-gray-700 font-medium">{type.label}</span>
+					<span class="text-surface-700-300 font-medium">{type.label}</span>
 				</button>
 			{/each}
 		</div>

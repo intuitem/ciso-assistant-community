@@ -36,7 +36,7 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const cBase = 'card bg-surface-50 p-4 w-modal shadow-xl space-y-4';
+	const cBase = 'card bg-surface-50-950 p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 
 	let entries: AuditEntry[] = $state([]);
@@ -171,7 +171,7 @@
 			{:else}
 				<ul class="space-y-6">
 					{#each events as event (event.key)}
-						<li class="border-l-2 border-surface-300 pl-4 py-1">
+						<li class="border-l-2 border-surface-300-700 pl-4 py-1">
 							<div class="flex items-center gap-2 flex-wrap">
 								<span class="badge {actionVariant(event.action)}"
 									>{safeTranslate(event.action)}</span
@@ -185,15 +185,15 @@
 								<div class="mt-3 space-y-2 text-sm">
 									{#each event.changes as change (change.field)}
 										<div class="grid grid-cols-[10rem_minmax(0,1fr)] gap-x-3 gap-y-0.5 items-start">
-											<div class="font-medium text-surface-600 break-words">
+											<div class="font-medium text-surface-600-400 break-words">
 												{safeTranslate(change.field)}
 											</div>
 											<div class="flex flex-wrap items-start gap-x-2 gap-y-1 min-w-0">
-												<span class="text-error-700 whitespace-pre-wrap break-words min-w-0"
+												<span class="text-error-700-300 whitespace-pre-wrap break-words min-w-0"
 													>{fmt(change.from)}</span
 												>
 												<span class="text-surface-400 shrink-0">→</span>
-												<span class="text-success-700 whitespace-pre-wrap break-words min-w-0"
+												<span class="text-success-700-300 whitespace-pre-wrap break-words min-w-0"
 													>{fmt(change.to)}</span
 												>
 											</div>

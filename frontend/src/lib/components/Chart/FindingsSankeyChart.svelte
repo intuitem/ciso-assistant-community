@@ -51,7 +51,11 @@
 
 	onMount(async () => {
 		const echarts = await import('echarts');
-		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
+		let chart = echarts.init(
+			document.getElementById(chart_id),
+			document.documentElement.classList.contains('dark') ? 'dark' : null,
+			{ renderer: 'svg' }
+		);
 
 		const option = {
 			title: {
@@ -70,10 +74,10 @@
 						// For links/flows, get node names by index
 						const sourceNode = translatedNodes[params.data.source];
 						const targetNode = translatedNodes[params.data.target];
-						return `${sourceNode.name} → ${targetNode.name}<br/>Count: ${params.value}`;
+						return `${sourceNode.name} → ${targetNode.name}<br/>${safeTranslate('count')}: ${params.value}`;
 					} else {
 						// For nodes, show the node name and its total count
-						return `${params.name}<br/>Count: ${params.value}`;
+						return `${params.name}<br/>${safeTranslate('count')}: ${params.value}`;
 					}
 				}
 			},
@@ -117,6 +121,7 @@
 			]
 		};
 
+		option.backgroundColor = 'transparent';
 		chart.setOption(option);
 
 		const resizeHandler = function () {

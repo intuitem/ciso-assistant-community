@@ -206,6 +206,11 @@ class BaseModelSerializer(serializers.ModelSerializer):
         model: models.Model
 
 
+# Imported after BaseModelSerializer to avoid a circular import:
+# custom_fields.serializers imports BaseModelSerializer from this module.
+from custom_fields.serializers import CustomFieldsSerializerMixin  # noqa: E402
+
+
 class ReferentialSerializer(BaseModelSerializer):
     name = serializers.CharField(source="get_name_translated")
     description = serializers.CharField(
@@ -571,7 +576,7 @@ class AssetCapabilityWriteSerializer(AssetCapabilityReadSerializer):
     pass
 
 
-class AssetWriteSerializer(BaseModelSerializer):
+class AssetWriteSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
     ebios_rm_studies = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=EbiosRMStudy.objects.all(),
@@ -774,16 +779,22 @@ class AssetReadSerializer(AssetWriteSerializer):
         """
         Gets comparison of security objectives vs capabilities with verdict.
         """
+        optimized_data = self.context.get("optimized_data")
+        if optimized_data and "security_objectives_comparison" in optimized_data:
+            return optimized_data["security_objectives_comparison"].get(obj.id, [])
         return obj.get_security_objectives_comparison()
 
     def get_recovery_objectives_comparison(self, obj):
         """
         Gets comparison of recovery objectives vs capabilities with verdict.
         """
+        optimized_data = self.context.get("optimized_data")
+        if optimized_data and "recovery_objectives_comparison" in optimized_data:
+            return optimized_data["recovery_objectives_comparison"].get(obj.id, [])
         return obj.get_recovery_objectives_comparison()
 
 
-class AssetListSerializer(BaseModelSerializer):
+class AssetListSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
     """
     Lightweight serializer for the assets list view.
 
@@ -820,6 +831,7 @@ class AssetListSerializer(BaseModelSerializer):
             "parent_assets",
             "security_objectives",
             "disaster_recovery_objectives",
+            "custom_fields",
             "created_at",
             "updated_at",
         ]
@@ -1203,7 +1215,7 @@ class RiskScenarioImportExportSerializer(BaseModelSerializer):
         ]
 
 
-class AppliedControlWriteSerializer(BaseModelSerializer):
+class AppliedControlWriteSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
     findings = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Finding.objects.all()
     )
@@ -1429,6 +1441,37 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
             if sync_mappings:
                 ret["sync_mappings"] = sync_mappings
         return ret
+
+
+class AppliedControlBulkReadSerializer(AppliedControlReadSerializer):
+    """Like AppliedControlReadSerializer but reads daily_rate from context to
+    avoid a per-row GlobalSettings query, and drops sync_mappings (internal
+    integration state, irrelevant to a bulk pull) to avoid a per-row query."""
+
+    annual_cost = serializers.SerializerMethodField()
+    annual_cost_display = serializers.SerializerMethodField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # instance-level so the metaclass doesn't register it as a field
+        self._annual_cost_repr = serializers.DecimalField(
+            max_digits=12, decimal_places=2, read_only=True
+        )
+
+    def get_annual_cost(self, obj):
+        value = obj.compute_annual_cost(self.context.get("daily_rate"))
+        return self._annual_cost_repr.to_representation(value)
+
+    def get_annual_cost_display(self, obj):
+        annual_cost = obj.compute_annual_cost(self.context.get("daily_rate"))
+        if annual_cost == 0:
+            return ""
+        currency = self.get_currency(obj)
+        return AppliedControl._stringify_cost(f"{annual_cost:,.2f}", currency)
+
+    def to_representation(self, instance):
+        # skip Write/Read.to_representation, which query SyncMapping per row
+        return BaseModelSerializer.to_representation(self, instance)
 
 
 class AppliedControlListSerializer(BaseModelSerializer):
@@ -2105,6 +2148,11 @@ class FrameworkReadSerializer(ReferentialSerializer):
     # the backend will actually save.
     effective_field_visibility = serializers.SerializerMethodField()
 
+    implementation_groups_definition = serializers.SerializerMethodField()
+
+    def get_implementation_groups_definition(self, obj):
+        return obj.get_implementation_groups_definition_translated()
+
     def get_has_editing_draft(self, obj):
         return obj.editing_draft is not None
 
@@ -2139,6 +2187,9 @@ class FrameworkWriteSerializer(FrameworkReadSerializer):
     )
     # reference_controls is a read-only property on Framework, not a writable DB field.
     reference_controls = serializers.ListField(required=False, read_only=True)
+    implementation_groups_definition = serializers.JSONField(
+        required=False, allow_null=True
+    )
 
     def create(self, validated_data):
         # Strip any non-model fields that leak through from the read serializer

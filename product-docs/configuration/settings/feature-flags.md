@@ -64,8 +64,10 @@ Flags affect what's visible in the sidebar, what appears in CRUD pages, and whic
 ## Integrations and automation
 
 - **outgoing_webhooks** — outgoing webhooks. _Default off._
+- **audit_log_forwarding** — [forward the audit log](../../integrations/audit-log-forwarding.md) to an external SIEM over HTTP or Kafka. _PRO. Default off._
 - **chat_mode** — the in-product chat assistant. _Default off; only visible when `ENABLE_CHAT` is set on the instance._
 - **terminologies** — organisation-specific label overrides.
+- **custom_fields** — org-defined typed fields on objects (Projects, Assets, Applied controls); see [Custom fields](../../features/custom-fields.md). _PRO. Default off._
 
 ## Project management
 
