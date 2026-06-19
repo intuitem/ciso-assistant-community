@@ -668,7 +668,7 @@
 																			type="text"
 																			value={getTranslation(entry.translations, lang, 'name')}
 																			placeholder={m.builderTranslateName()}
-																			class="input w-full text-sm border border-blue-100 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+																			class="input w-full text-sm border border-blue-100 dark:border-blue-900/40 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 																			onblur={(e) => {
 																				const entries = [...scaleEntries];
 																				entries[idx].translations = withTranslation(
@@ -695,7 +695,7 @@
 																				'description'
 																			)}
 																			placeholder={m.builderTranslateDescription()}
-																			class="input w-full text-sm border border-blue-100 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+																			class="input w-full text-sm border border-blue-100 dark:border-blue-900/40 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 																			onblur={(e) => {
 																				const entries = [...scaleEntries];
 																				entries[idx].translations = withTranslation(

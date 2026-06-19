@@ -334,7 +334,7 @@
 						<Popover.Trigger>
 							<h3 class="font-semibold text-lg flex items-center space-x-2">
 								{#if operationalScenario.likelihood.description}
-									<i class="fa-solid fa-dice text-black opacity-75"></i>
+									<i class="fa-solid fa-dice opacity-75"></i>
 								{/if}
 								<span>{m.likelihood()}</span>
 							</h3>
@@ -373,7 +373,7 @@
 						<Popover.Trigger>
 							<h3 class="font-semibold text-lg flex items-center space-x-2">
 								{#if operationalScenario.gravity.description}
-									<i class="fa-solid fa-bomb text-black opacity-75"></i>
+									<i class="fa-solid fa-bomb opacity-75"></i>
 								{/if}
 								<span>{m.gravity()}</span>
 							</h3>
@@ -412,7 +412,7 @@
 						<Popover.Trigger>
 							<h3 class="font-semibold text-lg flex items-center space-x-2">
 								{#if operationalScenario.risk_level.description}
-									<i class="fa-solid fa-circle-radiation text-black opacity-75"></i>
+									<i class="fa-solid fa-circle-radiation opacity-75"></i>
 								{/if}
 								<span>{m.riskLevel()}</span>
 							</h3>

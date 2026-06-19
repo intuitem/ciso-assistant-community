@@ -34,8 +34,36 @@
 		}
 	}
 
+	// The report must always export in light mode. Dropping `.dark` while printing forces
+	// both surface pairings (via color-scheme) and dark: utilities to render light.
+	let printWasDark = false;
+	let printForced = false;
+	function forceLightForPrint() {
+		if (printForced) return;
+		printForced = true;
+		printWasDark = document.documentElement.classList.contains('dark');
+		if (printWasDark) document.documentElement.classList.remove('dark');
+	}
+	function restoreThemeAfterPrint() {
+		if (!printForced) return;
+		printForced = false;
+		if (printWasDark) document.documentElement.classList.add('dark');
+	}
+
+	$effect(() => {
+		const handlePrint = () => forceLightForPrint();
+		const handleAfterPrint = () => restoreThemeAfterPrint();
+		window.addEventListener('beforeprint', handlePrint);
+		window.addEventListener('afterprint', handleAfterPrint);
+		return () => {
+			window.removeEventListener('beforeprint', handlePrint);
+			window.removeEventListener('afterprint', handleAfterPrint);
+		};
+	});
+
 	function exportPDF() {
-		window.print();
+		forceLightForPrint();
+		setTimeout(() => window.print(), 100);
 	}
 </script>
 

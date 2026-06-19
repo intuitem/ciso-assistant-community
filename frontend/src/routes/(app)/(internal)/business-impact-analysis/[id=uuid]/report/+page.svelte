@@ -16,12 +16,30 @@
 		data: PageData;
 	}
 
+	// The report must always export in light mode. Dropping `.dark` while printing forces
+	// both surface pairings (via color-scheme) and dark: utilities to render light.
+	let printWasDark = false;
+	let printForced = false;
+	function forceLightForPrint() {
+		if (printForced) return;
+		printForced = true;
+		printWasDark = document.documentElement.classList.contains('dark');
+		if (printWasDark) document.documentElement.classList.remove('dark');
+	}
+	function restoreThemeAfterPrint() {
+		if (!printForced) return;
+		printForced = false;
+		if (printWasDark) document.documentElement.classList.add('dark');
+	}
+
 	$effect(() => {
 		const handlePrint = () => {
 			document.documentElement.classList.add('is-printing');
+			forceLightForPrint();
 		};
 		const handleAfterPrint = () => {
 			document.documentElement.classList.remove('is-printing');
+			restoreThemeAfterPrint();
 		};
 		window.addEventListener('beforeprint', handlePrint);
 		window.addEventListener('afterprint', handleAfterPrint);
@@ -41,7 +59,10 @@
 	const scaleMap = SECURITY_OBJECTIVE_SCALE_MAP[scale];
 
 	function exportPDF() {
-		window.print();
+		// Flip to light first so theme-managed ECharts re-render (animation-free) in light
+		// before the print snapshot, then print. beforeprint also flips; both are idempotent.
+		forceLightForPrint();
+		setTimeout(() => window.print(), 200);
 	}
 
 	// Helper function to apply scale transformation
