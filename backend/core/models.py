@@ -2433,6 +2433,13 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
         verbose_name = _("Framework")
         verbose_name_plural = _("Frameworks")
 
+    def get_implementation_groups_definition_translated(self):
+        import copy
+
+        return update_translations_in_object(
+            copy.deepcopy(self.implementation_groups_definition or [])
+        )
+
     def is_deletable(self) -> bool:
         """
         Returns True if the framework can be deleted
@@ -7611,7 +7618,7 @@ class ComplianceAssessment(Assessment):
 
         return [
             group.get("name")
-            for group in framework.implementation_groups_definition
+            for group in framework.get_implementation_groups_definition_translated()
             if group.get("ref_id") in self.selected_implementation_groups
         ]
 
