@@ -83,14 +83,17 @@
 	const linkableEntries = $derived.by(() => {
 		const linked = new Set(currentUrns);
 		const term = search.trim().toLowerCase();
+		// Custom (library-less) objects have no URN — they're still pickable: a
+		// pick copies them into the framework by value (see pickExisting). Only
+		// hide entries already linked by URN.
 		return catalogEntries
-			.filter((e) => e.urn && !linked.has(e.urn))
+			.filter((e) => !(e.urn && linked.has(e.urn)))
 			.filter(
 				(e) =>
 					!term ||
 					(e.name ?? '').toLowerCase().includes(term) ||
 					(e.ref_id ?? '').toLowerCase().includes(term) ||
-					e.urn.toLowerCase().includes(term)
+					(e.urn ?? '').toLowerCase().includes(term)
 			)
 			.slice(0, 50);
 	});
@@ -342,7 +345,7 @@
 						bind:value={search}
 					/>
 					<ul class="max-h-40 overflow-y-auto">
-						{#each linkableEntries as entry (entry.urn)}
+						{#each linkableEntries as entry (entry.id)}
 							{@const lib =
 								entry.library && typeof entry.library === 'object'
 									? (entry.library.name ?? entry.library.str)
