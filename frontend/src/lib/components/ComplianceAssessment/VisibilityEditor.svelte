@@ -155,15 +155,15 @@
 
 <div class="space-y-1">
 	<h3 class="font-semibold text-sm">{m.fieldVisibility()}</h3>
-	<p class="text-xs text-gray-500 mb-2">{m.fieldVisibilityHelpText()}</p>
+	<p class="text-xs text-surface-600-400 mb-2">{m.fieldVisibilityHelpText()}</p>
 	<div class="max-w-xl">
 		{#each visibleFields as field}
 			{@const pill = pillFor(field)}
 			{@const label = FIELD_LABELS[field]?.() ?? field}
 			<div class="flex items-center justify-between gap-3 py-1">
-				<span class="text-sm text-gray-700">{label}</span>
+				<span class="text-sm text-surface-700-300">{label}</span>
 				<div
-					class="inline-flex shrink-0 rounded-md border border-gray-200 bg-gray-50 p-0.5"
+					class="inline-flex shrink-0 rounded-md border border-surface-200-800 bg-surface-50-950 p-0.5"
 					role="radiogroup"
 					aria-label={label}
 				>
@@ -179,7 +179,7 @@
 							class="px-2.5 py-0.5 text-xs font-medium rounded border transition-colors disabled:opacity-50 disabled:cursor-not-allowed {pill ===
 							option.v
 								? `${option.activeClass} shadow-sm`
-								: 'text-gray-600 hover:text-gray-900 border-transparent'}"
+								: 'text-surface-600-400 hover:text-surface-900-100 border-transparent'}"
 						>
 							{option.label()}
 						</button>

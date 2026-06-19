@@ -50,14 +50,14 @@
 </script>
 
 <div class="flex flex-col space-y-4">
-	<div class="card p-4 bg-white shadow-lg">
+	<div class="card p-4 bg-surface-50-950 shadow-lg">
 		<div class="flex items-center justify-between mb-4">
 			<div class="flex flex-col">
 				<div class="h4 font-bold">
 					<i class="fa-solid fa-code-compare mr-2"></i>
 					{m.complianceAssessmentComparison()}
 				</div>
-				<div class="text-sm text-gray-600 mt-1">
+				<div class="text-sm text-surface-600-400 mt-1">
 					<span class="font-medium">{m.framework()}:</span>
 					{data.framework.str}
 				</div>
@@ -72,8 +72,8 @@
 		</div>
 	</div>
 
-	<div class="card bg-white shadow-lg">
-		<div class="grid grid-cols-2 divide-x divide-gray-200">
+	<div class="card bg-surface-50-950 shadow-lg">
+		<div class="grid grid-cols-2 divide-x divide-surface-200-800">
 			<!-- Left side: Base Audit -->
 			<div class="p-6 space-y-4">
 				<div class="flex items-center justify-between mb-4">
@@ -89,9 +89,9 @@
 
 				{#each fieldsToCompare as field}
 					<div class="flex flex-col">
-						<div class="text-sm font-medium text-gray-600">{safeTranslate(field.key)}</div>
+						<div class="text-sm font-medium text-surface-600-400">{safeTranslate(field.key)}</div>
 						{#if field.format === 'markdown'}
-							<div class="text-base text-gray-900">
+							<div class="text-base text-surface-950-50">
 								{#if data.baseAudit[field.key]}
 									<MarkdownRenderer content={data.baseAudit[field.key]} />
 								{:else}
@@ -99,7 +99,7 @@
 								{/if}
 							</div>
 						{:else}
-							<div class="text-base font-semibold text-gray-900">
+							<div class="text-base font-semibold text-surface-950-50">
 								{getFieldValue(data.baseAudit, field)}
 							</div>
 						{/if}
@@ -122,9 +122,9 @@
 
 				{#each fieldsToCompare as field}
 					<div class="flex flex-col">
-						<div class="text-sm font-medium text-gray-600">{safeTranslate(field.key)}</div>
+						<div class="text-sm font-medium text-surface-600-400">{safeTranslate(field.key)}</div>
 						{#if field.format === 'markdown'}
-							<div class="text-base text-gray-900">
+							<div class="text-base text-surface-950-50">
 								{#if data.compareAudit[field.key]}
 									<MarkdownRenderer content={data.compareAudit[field.key]} />
 								{:else}
@@ -132,7 +132,7 @@
 								{/if}
 							</div>
 						{:else}
-							<div class="text-base font-semibold text-gray-900">
+							<div class="text-base font-semibold text-surface-950-50">
 								{getFieldValue(data.compareAudit, field)}
 							</div>
 						{/if}
@@ -143,14 +143,14 @@
 	</div>
 
 	<!-- Maturity & Compliance Scores Comparison -->
-	<div class="card bg-white shadow-lg">
-		<div class="px-6 py-4 border-b border-gray-200">
+	<div class="card bg-surface-50-950 shadow-lg">
+		<div class="px-6 py-4 border-b border-surface-200-800">
 			<h2 class="h4 font-bold">
 				<i class="fa-solid fa-chart-line mr-2"></i>
 				{m.scoresAndMetrics()}
 			</h2>
 		</div>
-		<div class="grid grid-cols-2 divide-x divide-gray-200">
+		<div class="grid grid-cols-2 divide-x divide-surface-200-800">
 			<!-- Left: Base Audit Scores -->
 			<div class="p-6">
 				<div class="flex flex-col items-center space-y-4">
@@ -169,9 +169,9 @@
 								title={m.maturity()}
 							/>
 						{:else}
-							<span class="text-sm font-medium text-gray-400 mb-2">{m.maturity()}</span>
+							<span class="text-sm font-medium text-surface-400-600 mb-2">{m.maturity()}</span>
 							<div class="flex items-center justify-center size-40">
-								<p class="text-gray-400 text-sm text-center">--</p>
+								<p class="text-surface-400-600 text-sm text-center">--</p>
 							</div>
 						{/if}
 					</div>
@@ -225,9 +225,9 @@
 								title={m.maturity()}
 							/>
 						{:else}
-							<span class="text-sm font-medium text-gray-400 mb-2">{m.maturity()}</span>
+							<span class="text-sm font-medium text-surface-400-600 mb-2">{m.maturity()}</span>
 							<div class="flex items-center justify-center size-40">
-								<p class="text-gray-400 text-sm text-center">--</p>
+								<p class="text-surface-400-600 text-sm text-center">--</p>
 							</div>
 						{/if}
 					</div>
@@ -266,8 +266,8 @@
 	</div>
 
 	<!-- Radar Charts Comparison -->
-	<div class="card bg-white shadow-lg">
-		<div class="px-6 py-4 border-b border-gray-200">
+	<div class="card bg-surface-50-950 shadow-lg">
+		<div class="px-6 py-4 border-b border-surface-200-800">
 			<h2 class="h4 font-bold">
 				<i class="fa-solid fa-chart-radar mr-2"></i>
 				{m.radarComparisonByTopLevel()}
@@ -288,7 +288,7 @@
 						height="h-full"
 					/>
 				</div>
-				<p class="text-xs text-gray-500 text-center mt-2">
+				<p class="text-xs text-surface-600-400 text-center mt-2">
 					<i class="fa-solid fa-info-circle mr-1"></i>
 					{m.complianceIncludesCompliantAndPartiallyCompliant()}
 				</p>
@@ -313,13 +313,13 @@
 
 	<!-- Differences Table -->
 	{#if data.differences && data.differences.length > 0}
-		<div class="card bg-white shadow-lg">
-			<div class="px-6 py-4 border-b border-gray-200">
+		<div class="card bg-surface-50-950 shadow-lg">
+			<div class="px-6 py-4 border-b border-surface-200-800">
 				<h2 class="h4 font-bold">
 					<i class="fa-solid fa-code-compare mr-2"></i>
 					{m.requirementDifferences()}
 				</h2>
-				<p class="text-sm text-gray-600 mt-1">
+				<p class="text-sm text-surface-600-400 mt-1">
 					{data.differences.length}
 					{data.differences.length === 1 ? m.requirement() : m.requirements()}
 					{m.withDifferences()}
@@ -328,41 +328,41 @@
 			<div class="overflow-x-auto">
 				<table class="table-auto w-full">
 					<thead>
-						<tr class="bg-gray-50">
+						<tr class="bg-surface-50-950">
 							<th
-								class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider"
+								class="px-6 py-3 text-left text-xs font-medium text-surface-700-300 uppercase tracking-wider"
 							>
 								{m.requirement()}
 							</th>
 							<th
-								class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider"
+								class="px-6 py-3 text-left text-xs font-medium text-surface-700-300 uppercase tracking-wider"
 							>
 								{m.baseAudit()}
 							</th>
 							<th
-								class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider"
+								class="px-6 py-3 text-left text-xs font-medium text-surface-700-300 uppercase tracking-wider"
 							>
 								{m.comparisonAudit()}
 							</th>
 						</tr>
 					</thead>
-					<tbody class="divide-y divide-gray-200">
+					<tbody class="divide-y divide-surface-200-800">
 						{#each data.differences as diff}
-							<tr class="hover:bg-gray-50">
+							<tr class="hover:bg-surface-50-950">
 								<td class="px-6 py-4">
 									<div class="flex flex-col">
 										{#if diff.requirement.ref_id}
 											<span class="font-semibold text-sm">{diff.requirement.ref_id}</span>
 										{/if}
 										{#if diff.requirement.name}
-											<span class="text-sm text-gray-900">{diff.requirement.name}</span>
+											<span class="text-sm text-surface-950-50">{diff.requirement.name}</span>
 										{/if}
 									</div>
 								</td>
 								<td class="px-6 py-4">
 									<div class="flex flex-col space-y-1">
 										<div class="flex items-center space-x-2">
-											<span class="text-xs text-gray-500">{m.result()}:</span>
+											<span class="text-xs text-surface-600-400">{m.result()}:</span>
 											<span
 												class="badge text-xs"
 												style="background-color: {diff.base.result === 'compliant'
@@ -382,7 +382,7 @@
 										</div>
 										{#if diff.base.score !== null && diff.base.score !== undefined}
 											<div class="flex items-center space-x-2">
-												<span class="text-xs text-gray-500">{m.score()}:</span>
+												<span class="text-xs text-surface-600-400">{m.score()}:</span>
 												<span class="text-xs font-medium">{diff.base.score}</span>
 											</div>
 										{/if}
@@ -391,7 +391,7 @@
 								<td class="px-6 py-4">
 									<div class="flex flex-col space-y-1">
 										<div class="flex items-center space-x-2">
-											<span class="text-xs text-gray-500">{m.result()}:</span>
+											<span class="text-xs text-surface-600-400">{m.result()}:</span>
 											<span
 												class="badge text-xs"
 												style="background-color: {diff.compare.result === 'compliant'
@@ -411,7 +411,7 @@
 										</div>
 										{#if diff.compare.score !== null && diff.compare.score !== undefined}
 											<div class="flex items-center space-x-2">
-												<span class="text-xs text-gray-500">{m.score()}:</span>
+												<span class="text-xs text-surface-600-400">{m.score()}:</span>
 												<span class="text-xs font-medium">{diff.compare.score}</span>
 											</div>
 										{/if}
