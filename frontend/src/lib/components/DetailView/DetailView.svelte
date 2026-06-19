@@ -8,6 +8,7 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import SelectExistingModal from '$lib/components/Modals/SelectExistingModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import CustomFieldsDisplay from '$lib/components/Forms/CustomFieldsDisplay.svelte';
 	import { booleanDisplay } from '$lib/utils/boolean-display';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import { type ModelMapEntry, type ReverseForeignKeyField } from '$lib/utils/crud';
@@ -887,6 +888,12 @@
 		</div>
 	</div>
 </div>
+
+<CustomFieldsDisplay
+	urlModel={data.urlModel}
+	folderId={data.data?.folder?.id ?? data.data?.folder}
+	values={data.data?.custom_fields}
+/>
 
 {#if relatedModels.length > 0 && displayModelTable}
 	<div class="card shadow-lg mt-8 bg-surface-50-950 px-2 py-6">
