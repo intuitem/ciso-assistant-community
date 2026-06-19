@@ -559,7 +559,7 @@
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-	class="flex h-full bg-surface-50 rounded-base overflow-hidden border border-surface-200"
+	class="flex h-full bg-surface-50-950 rounded-base overflow-hidden border border-surface-200-800"
 	class:editor-mode={!readonly}
 >
 	{#if !readonly}
@@ -612,7 +612,7 @@
 							</button>
 							{#if showHelp}
 								<p
-									class="text-xs bg-surface-100 text-surface-700 border border-surface-300 rounded-base px-3 py-2 max-w-xs leading-relaxed"
+									class="text-xs bg-surface-100-900 text-surface-700-300 border border-surface-300-700 rounded-base px-3 py-2 max-w-xs leading-relaxed"
 									transition:slide={{ duration: 200 }}
 								>
 									{m.graphEditorHelp()}

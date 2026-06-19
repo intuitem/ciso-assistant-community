@@ -7,7 +7,7 @@
 	let closeModal = true;
 
 	// Base Classes
-	const cBase = 'card bg-surface-50 p-4 w-fit max-w-4xl shadow-xl space-y-4';
+	const cBase = 'card bg-surface-50-950 p-4 w-fit max-w-4xl shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold whitespace-pre-line';
 
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
@@ -70,15 +70,13 @@
 			<header class={cHeader} data-testid="modal-title">
 				{$modalStore[0].title ?? '(title missing)'}
 			</header>
-			<div
-				role="button"
-				tabindex="0"
+			<button
+				type="button"
 				class="flex items-center hover:text-primary-500 cursor-pointer"
 				onclick={parent.onClose}
-				onkeydown={parent.onClose}
 			>
 				<i class="fa-solid fa-xmark"></i>
-			</div>
+			</button>
 		</div>
 		<ModelForm
 			{form}

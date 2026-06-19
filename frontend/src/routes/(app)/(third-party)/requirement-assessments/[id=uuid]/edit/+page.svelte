@@ -39,7 +39,8 @@
 	import {
 		computeRequirementScoreAndResult,
 		formatScoreValue,
-		displayScoreColor
+		displayScoreColor,
+		resultBadgeStyle
 	} from '$lib/utils/helpers';
 
 	interface Props {
@@ -404,12 +405,14 @@
 		</div>
 	</div>
 {/if}
-<div class="card space-y-2 p-4 bg-white shadow-sm">
+<div class="card space-y-2 p-4 bg-surface-50-950 shadow-sm">
 	<div class="flex justify-between">
 		<div class="flex items-center gap-2">
 			<span class="code left h-min">{data.requirement.urn}</span>
 			{#if data.requirementAssessment.assessable && typeof data.requirement.weight === 'number' && Number.isFinite(data.requirement.weight) && data.requirement.weight !== 1}
-				<span class="badge h-fit bg-indigo-100 text-indigo-800">
+				<span
+					class="badge h-fit bg-indigo-100 text-indigo-800 dark:bg-indigo-500/20 dark:text-indigo-300"
+				>
 					{m.requirementWeight()}: {data.requirement.weight}
 				</span>
 			{/if}
@@ -423,7 +426,7 @@
 	{#if data.requirement?.implementation_groups?.length > 0}
 		<div class="mb-2">
 			{#each data.requirement.implementation_groups as ig}
-				<span class="badge bg-blue-100 mr-2">
+				<span class="badge bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300 mr-2">
 					{getImplementationGroupName(ig)}
 				</span>
 			{/each}
@@ -528,7 +531,7 @@
 							<i class="fa-solid fa-link"></i>
 							{m.mappingInference()}
 						</p>
-						<span class="text-xs text-gray-500"
+						<span class="text-xs text-surface-600-400"
 							><i class="fa-solid fa-circle-info"></i> {m.mappingInferenceHelpText()}</span
 						>
 						<div>
@@ -569,7 +572,7 @@
 													{source_requirement_assessment.used_mapping_set?.name}
 												</a>
 											{:else}
-												<span class="text-gray-500">--</span>
+												<span class="text-surface-600-400">--</span>
 											{/if}
 										</p>
 										{#if source_requirement_assessment.is_scored}
@@ -630,7 +633,7 @@
 		>
 			{#snippet children({ form, data })}
 				{#if canShowAppliedControls || showEvidences || isAuditor}
-					<div class="card shadow-lg bg-white">
+					<div class="card shadow-lg bg-surface-50-950">
 						<Tabs
 							value={group}
 							onValueChange={(e) => {
@@ -667,7 +670,7 @@
 													class="btn self-end shadow-sm
 														{nothingToSuggest
 														? 'bg-emerald-50 border border-emerald-200 text-emerald-700 cursor-not-allowed pointer-events-none'
-														: 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300'}"
+														: 'bg-surface-50-950 border border-surface-200-800 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700'}"
 													type="button"
 													disabled={nothingToSuggest || createAppliedControlsLoading}
 													aria-label={nothingToSuggest
@@ -848,9 +851,7 @@
 									<span class="font-medium">{m.result()}</span>
 									<span
 										class="badge text-sm font-semibold"
-										style="background-color: {complianceResultColorMap[
-											computedResult || 'not_assessed'
-										] || '#ddd'}"
+										style={resultBadgeStyle(computedResult || 'not_assessed')}
 									>
 										{safeTranslate(computedResult || 'not_assessed')}
 									</span>
@@ -953,10 +954,10 @@
 					{/if}
 				</div>
 				<div
-					class="flex flex-row justify-between space-x-4 sticky bottom-0 backdrop-blur-sm pt-4 pb-2 border-t border-slate-200"
+					class="flex flex-row justify-between space-x-4 sticky bottom-0 backdrop-blur-sm pt-4 pb-2 border-t border-surface-200-800"
 				>
 					<button
-						class="btn bg-gray-400 text-white font-semibold w-full"
+						class="btn bg-surface-400-600 text-white font-semibold w-full"
 						type="button"
 						onclick={cancel}>{m.cancel()}</button
 					>

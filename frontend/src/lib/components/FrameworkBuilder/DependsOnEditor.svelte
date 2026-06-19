@@ -55,7 +55,7 @@
 		type="button"
 		class="text-xs font-medium {active
 			? 'text-amber-600'
-			: 'text-gray-400 hover:text-gray-600'} transition-colors"
+			: 'text-surface-500 hover:text-surface-600-400'} transition-colors"
 		onclick={toggle}
 	>
 		<i class="fa-solid {active ? 'fa-link-slash' : 'fa-link'} mr-1"></i>
@@ -68,7 +68,7 @@
 				<span class="text-xs text-amber-700 font-medium">{m.builderShowWhenThisQuestion()}</span>
 				<select
 					value={dependsOn.question}
-					class="w-full text-sm border border-amber-200 rounded px-2 py-1 mt-1 outline-none focus:border-amber-400 bg-white"
+					class="w-full text-sm border border-amber-200 rounded px-2 py-1 mt-1 outline-none focus:border-amber-400 bg-surface-50-950"
 					onchange={(e) => {
 						dependsOn.question = e.currentTarget.value;
 						dependsOn.answers = [];
@@ -91,7 +91,7 @@
 								type="button"
 								class="text-xs px-2 py-0.5 rounded-full border transition-colors {isSelected
 									? 'bg-amber-200 border-amber-400 text-amber-800'
-									: 'bg-white border-amber-200 text-amber-600 hover:border-amber-300'}"
+									: 'bg-surface-50-950 border-amber-200 text-amber-600 hover:border-amber-300'}"
 								onclick={() => toggleAnswer(choice.urn ?? '')}
 							>
 								{choice.value || choice.ref_id || m.builderUntitled()}
@@ -104,7 +104,7 @@
 					<span class="text-xs text-amber-700 font-medium">{m.builderMatch()}</span>
 					<select
 						value={dependsOn.condition}
-						class="text-xs border border-amber-200 rounded px-2 py-0.5 outline-none bg-white"
+						class="text-xs border border-amber-200 rounded px-2 py-0.5 outline-none bg-surface-50-950"
 						onchange={(e) => {
 							dependsOn.condition = e.currentTarget.value as 'any' | 'all';
 							save();

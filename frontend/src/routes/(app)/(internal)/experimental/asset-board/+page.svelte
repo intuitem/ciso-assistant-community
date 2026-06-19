@@ -24,12 +24,12 @@
 </script>
 
 <div class="flex flex-col h-[calc(100vh-9rem)]">
-	<div class="flex items-center gap-3 mb-3 bg-white shadow-sm rounded-base p-3">
-		<h4 class="font-bold text-surface-800">
+	<div class="flex items-center gap-3 mb-3 bg-surface-50-950 shadow-sm rounded-base p-3">
+		<h4 class="font-bold text-surface-800-200">
 			<i class="fa-solid fa-diagram-project mr-2"></i>Asset whiteboard
 		</h4>
 		<span
-			class="text-xs text-surface-500 px-2 py-0.5 rounded bg-surface-100 border border-surface-200"
+			class="text-xs text-surface-500 px-2 py-0.5 rounded bg-surface-100-900 border border-surface-200-800"
 		>
 			experimental
 		</span>
@@ -39,7 +39,7 @@
 			id="board-folder"
 			bind:value={selectedFolderId}
 			onchange={handleFolderChange}
-			class="rounded-lg border-gray-300 text-gray-700 sm:text-sm"
+			class="rounded-lg border-surface-300-700 text-surface-700-300 sm:text-sm"
 		>
 			<option value="">Select a domain</option>
 			{#each data.folders as folder}
@@ -60,7 +60,7 @@
 			{/key}
 		{:else}
 			<div
-				class="h-full flex items-center justify-center bg-surface-50 rounded-base border border-dashed border-surface-300 text-surface-500"
+				class="h-full flex items-center justify-center bg-surface-50-950 rounded-base border border-dashed border-surface-300-700 text-surface-500"
 			>
 				<div class="text-center">
 					<i class="fa-solid fa-diagram-project text-4xl mb-3 text-surface-300"></i>

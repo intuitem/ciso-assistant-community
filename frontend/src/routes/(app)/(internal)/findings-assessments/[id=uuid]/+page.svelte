@@ -90,21 +90,25 @@
 					</span>
 				</Popover.Trigger>
 				<Popover.Positioner>
-					<Popover.Content class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1">
+					<Popover.Content
+						class="card whitespace-nowrap bg-surface-50-950 py-2 w-fit shadow-lg space-y-1"
+					>
 						<div>
-							<p class="block px-4 py-2 text-sm text-gray-800">{m.findingsAssessment()}</p>
+							<p class="block px-4 py-2 text-sm text-surface-950-50">{m.findingsAssessment()}</p>
 							<a
 								href="/findings-assessments/{data.data.id}/export/xlsx"
-								class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asXLSX()}</a
+								class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
+								>... {m.asXLSX()}</a
 							>
 							<a
 								href="/findings-assessments/{data.data.id}/export/md"
-								class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+								class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
 								>... {m.asMarkdown()}</a
 							>
 							<a
 								href="/findings-assessments/{data.data.id}/export/pdf"
-								class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
+								class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
+								>... {m.asPDF()}</a
 							>
 						</div>
 					</Popover.Content>
@@ -117,7 +121,7 @@
 			>
 			{#if !findings_assessment?.is_locked && page.data?.featureflags?.validation_flows}
 				<button
-					class="btn text-gray-100 bg-linear-to-r from-orange-500 to-amber-500 h-fit"
+					class="btn text-white bg-linear-to-r from-orange-500 to-amber-500 h-fit"
 					onclick={() => modalRequestValidation()}
 					data-testid="request-validation-button"
 				>
@@ -131,17 +135,17 @@
 	{#snippet widgets()}
 		{#key form}
 			<div class="h-full flex flex-col space-y-4">
-				<div class="card p-4 bg-gray-50 shadow-xs">
+				<div class="card p-4 bg-surface-50-950 shadow-xs">
 					<h3 class="text-lg font-semibold mb-2">{m.summary()}</h3>
 					<div class="grid grid-cols-2 gap-2">
 						<div class="rounded-lg bg-primary-100 p-3 text-center">
-							<p class="text-xs font-medium text-primary-800">Total</p>
+							<p class="text-xs font-medium text-primary-800-300">Total</p>
 							<p class="text-xl font-bold text-primary-900" data-testid="summary-total">
 								{data.findings_metrics.raw_metrics.total_count || 'N/A'}
 							</p>
 						</div>
 						<div class="rounded-lg bg-primary-100 p-3 text-center">
-							<p class="text-xs font-medium text-primary-800">{m.followUpUnresolvedHigh()}</p>
+							<p class="text-xs font-medium text-primary-800-300">{m.followUpUnresolvedHigh()}</p>
 							<!--                                                                          hoc = high or critical -->
 							<p class="text-xl font-bold text-primary-900" data-testid="summary-unresolved-hoc">
 								{data.findings_metrics.raw_metrics.unresolved_important_count || 'N/A'}
@@ -150,20 +154,23 @@
 					</div>
 				</div>
 
-				<div class="card p-2 bg-gray-50 shadow-xs flex-1 flex flex-row gap-2" use:resizeObserver>
+				<div
+					class="card p-2 bg-surface-50-950 shadow-xs flex-1 flex flex-row gap-2"
+					use:resizeObserver
+				>
 					{#key chartKey}
 						<div class="flex-1 min-h-0 min-w-0">
 							<HalfDonutChart
 								name="current_h"
 								title={m.severity()}
-								classesContainer="card p-2 bg-white h-full"
+								classesContainer="card p-2 bg-surface-50-950 h-full"
 								values={data.findings_metrics.severity_chart_data}
 								colors={data.findings_metrics.severity_chart_data.map((object) => object.color)}
 							/>
 						</div>
 						<div class="flex-1 min-h-0 min-w-0">
 							<DonutChart
-								classesContainer="card p-2 bg-white h-full"
+								classesContainer="card p-2 bg-surface-50-950 h-full"
 								name="f_treatment_progress"
 								title={m.progress()}
 								values={data.findings_metrics.status_chart_data.values}

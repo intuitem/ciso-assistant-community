@@ -809,28 +809,42 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                             choices[i]["description"] = desc
 
                 # --- Optional: compute_result -----------------------------------------
+                # Accepted values mirror the framework builder UI:
+                #   "compliant", "non_compliant", "partially_compliant", "not_applicable"
+                # Legacy boolean literals are also accepted for backward compatibility:
+                #   "true"  -> compliant
+                #   "false" -> non_compliant
+                # Empty or "/" means the choice does not contribute to the result.
+                LEGACY_COMPUTE_RESULT_MAP = {
+                    "true": "compliant",
+                    "false": "non_compliant",
+                }
+                SEMANTIC_COMPUTE_RESULT_VALUES = {
+                    "compliant",
+                    "non_compliant",
+                    "partially_compliant",
+                    "not_applicable",
+                }
                 compute_lines = _per_choice_lines(
                     data, "compute_result", len(choices), answer_id
                 )
                 if compute_lines:
                     for i, val in enumerate(compute_lines):
                         v = val.lower()
-                        if v not in ("true", "false", "/", ""):
+                        if v in ("/", ""):
+                            continue
+                        if v in LEGACY_COMPUTE_RESULT_MAP:
+                            choices[i]["compute_result"] = LEGACY_COMPUTE_RESULT_MAP[v]
+                        elif v in SEMANTIC_COMPUTE_RESULT_VALUES:
+                            choices[i]["compute_result"] = v
+                        else:
                             raise ValueError(
                                 f"(answers_definition) Invalid compute_result value '{val}' "
-                                f"for answer ID '{answer_id}', choice #{i + 1}. Must be 'true', 'false', '/' (= 'undefined') or empty."
+                                f"for answer ID '{answer_id}', choice #{i + 1}. Must be one of "
+                                f"'compliant', 'non_compliant', 'partially_compliant', "
+                                f"'not_applicable', 'true' (= 'compliant'), 'false' (= 'non_compliant'), "
+                                f"'/' (= 'undefined'), or empty."
                             )
-
-                        # Use Boolean instead of string
-                        if v == "/" or v == "":
-                            v = None
-                        elif v == "true":
-                            v = True
-                        elif v == "false":
-                            v = False
-
-                        if v is not None:
-                            choices[i]["compute_result"] = v
 
                 # --- Optional: add_score ----------------------------------------------
                 score_lines = _per_choice_lines(
@@ -842,7 +856,7 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                             try:
                                 score_to_add = int(val)
                                 choices[i]["add_score"] = score_to_add
-                            except (TypeError, ValueError):
+                            except TypeError, ValueError:
                                 raise ValueError(
                                     f"(answers_definition) Invalid add_score value '{val}' "
                                     f"for answer ID '{answer_id}', choice #{i + 1}. Must be an integer"
@@ -1121,7 +1135,7 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                     if (w := int(data["weight"])) <= 0:
                         raise ValueError
                     node["weight"] = w
-                except (TypeError, ValueError):
+                except TypeError, ValueError:
                     raise ValueError(
                         f"(framework) Invalid weight at row #{row[0].row}: {data['weight']}. Must be a strictly positive integer."
                     )
@@ -1136,7 +1150,7 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                 ):
                     try:
                         node[int_field] = int(data[int_field])
-                    except (TypeError, ValueError):
+                    except TypeError, ValueError:
                         raise ValueError(
                             f"(framework) Invalid {int_field} at row #{row[0].row}: "
                             f"{data[int_field]}. Must be an integer."
@@ -1277,7 +1291,7 @@ def _handle_metric_definitions(obj, library, compat_mode, verbose):
         if "default_target" in data and data["default_target"] is not None:
             try:
                 entry["default_target"] = float(data["default_target"])
-            except (TypeError, ValueError):
+            except TypeError, ValueError:
                 raise ValueError(
                     f"(metric_definitions) Invalid default_target '{data['default_target']}' at row #{row[0].row}. Must be a number."
                 )

@@ -18,7 +18,7 @@
 </script>
 
 {#if page.data.user.is_admin}
-	<div class="card bg-white p-6 w-full max-w-lg shadow-xl space-y-4 rounded-xl">
+	<div class="card bg-surface-50-950 p-6 w-full max-w-lg shadow-xl space-y-4 rounded-xl">
 		<div class="flex items-center justify-between">
 			<header class="flex items-center gap-3">
 				<div
@@ -26,23 +26,23 @@
 				>
 					<i class="fa-solid fa-file-circle-plus text-lg"></i>
 				</div>
-				<h3 class="text-xl font-bold text-gray-800">
+				<h3 class="text-xl font-bold text-surface-950-50">
 					{m.customExternalLibrary()}
 				</h3>
 			</header>
 			<button
 				type="button"
-				class="flex items-center justify-center w-8 h-8 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+				class="flex items-center justify-center w-8 h-8 rounded-md text-surface-400-600 hover:text-surface-600-400 hover:bg-surface-100-900 transition-colors"
 				onclick={parent.onClose}
 				aria-label="Close"
 			>
 				<i class="fa-solid fa-xmark"></i>
 			</button>
 		</div>
-		<p class="text-sm text-gray-500">{m.libraryAddHelpText()}</p>
-		<hr class="border-gray-200" />
+		<p class="text-sm text-surface-600-400">{m.libraryAddHelpText()}</p>
+		<hr class="border-surface-200-800" />
 		{#await superValidate(zod(LibraryUploadSchema))}
-			<p class="text-gray-500">{m.loadingLibraryUploadButton()}...</p>
+			<p class="text-surface-600-400">{m.loadingLibraryUploadButton()}...</p>
 		{:then form}
 			<SuperForm
 				class="flex flex-col space-y-4"

@@ -286,7 +286,7 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
         if isinstance(self.value, str):
             try:
                 value_dict = json.loads(self.value)
-            except (json.JSONDecodeError, TypeError):
+            except json.JSONDecodeError, TypeError:
                 return None
         else:
             value_dict = self.value
@@ -308,7 +308,7 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
         if isinstance(self.value, str):
             try:
                 value_dict = json.loads(self.value)
-            except (json.JSONDecodeError, TypeError):
+            except json.JSONDecodeError, TypeError:
                 return "N/A"
         else:
             value_dict = self.value
@@ -513,7 +513,7 @@ class BuiltinMetricSample(AbstractBaseModel):
                 risk_levels = assessment.risk_matrix.risk or []
                 for idx, level in enumerate(risk_levels):
                     risk_level_labels[idx] = level.get("name", str(idx))
-            except (KeyError, TypeError, AttributeError):
+            except KeyError, TypeError, AttributeError:
                 pass
 
         current_level_counts = dict(
@@ -1212,5 +1212,5 @@ def get_builtin_metrics_retention_days():
         settings = GlobalSettings.objects.get(name="general")
         retention = settings.value.get("builtin_metrics_retention_days", 730)
         return max(1, int(retention))
-    except (GlobalSettings.DoesNotExist, TypeError, ValueError):
+    except GlobalSettings.DoesNotExist, TypeError, ValueError:
         return 730

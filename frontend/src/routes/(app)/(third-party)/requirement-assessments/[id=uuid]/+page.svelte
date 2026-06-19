@@ -18,6 +18,7 @@
 	import { Progress, Tabs } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData } from '../[id=uuid]/$types';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
 	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
 	import { countMasked } from '$lib/utils/related-visibility';
 
@@ -70,7 +71,7 @@
 	}
 
 	let classesText = $derived(
-		complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : ''
+		complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : 'text-gray-900'
 	);
 
 	// Effective scale falls back to the CA bounds when the RA has no override.
@@ -108,7 +109,7 @@
 	let group = $state(pickDefaultTab());
 </script>
 
-<div class="card space-y-2 p-4 bg-white shadow-sm">
+<div class="card space-y-2 p-4 bg-surface-50-950 shadow-sm">
 	<div class="flex flex-row space-x-2 items-center">
 		<code class="code">{data.requirement.urn}</code>
 		{#if showStatus}
@@ -191,6 +192,9 @@
 				</div>
 			{/if}
 		{/if}
+		<div class="ml-auto shrink-0 self-center">
+			<AuditTrailButton model="requirement-assessments" objectId={data.requirementAssessment.id} />
+		</div>
 	</div>
 	{#if data.requirement.description}
 		<div class="font-light text-lg card p-4 preset-tonal-primary">
@@ -291,7 +295,7 @@
 							<i class="fa-solid fa-link"></i>
 							{m.mappingInference()}
 						</p>
-						<span class="text-xs text-gray-500"
+						<span class="text-xs text-surface-600-400"
 							><i class="fa-solid fa-circle-info"></i> {m.mappingInferenceHelpText()}</span
 						>
 						<div>
@@ -326,7 +330,7 @@
 													{source_requirement_assessment.used_mapping_set?.name}
 												</a>
 											{:else}
-												<span class="text-gray-500">--</span>
+												<span class="text-surface-600-400">--</span>
 											{/if}
 										</p>
 										<p class="whitespace-pre-line py-1">
@@ -452,8 +456,10 @@
 		<CommentsPanel parentType="requirement_assessment" parentId={data.requirementAssessment.id} />
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
-		<button class="btn bg-gray-400 text-white font-semibold w-full" type="button" onclick={cancel}
-			>{m.back()}</button
+		<button
+			class="btn bg-surface-400-600 text-white font-semibold w-full"
+			type="button"
+			onclick={cancel}>{m.back()}</button
 		>
 	</div>
 </div>

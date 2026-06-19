@@ -252,6 +252,11 @@
 					description: m.webhooksDescription()
 				},
 				{
+					field: 'audit_log_forwarding',
+					label: m.auditLogForwarding(),
+					description: m.auditLogForwardingDescription()
+				},
+				{
 					field: 'comments',
 					label: m.comments(),
 					description: m.commentsDescription()
@@ -265,6 +270,11 @@
 					field: 'chat_mode',
 					label: m.chatMode(),
 					description: m.chatModeDescription()
+				},
+				{
+					field: 'object_audit_trail',
+					label: m.objectAuditTrail(),
+					description: m.objectAuditTrailDescription()
 				}
 			].filter(({ field }) => availableKeys.includes(field))
 		}
@@ -390,20 +400,21 @@
 <div class="space-y-6">
 	<!-- Bulk-action toolbar -->
 	<div
-		class="sticky top-0 z-10 bg-white/95 backdrop-blur rounded-xl border border-gray-200 shadow-sm p-4 flex flex-wrap items-center gap-3"
+		class="sticky top-0 z-10 bg-surface-50-950/95 backdrop-blur rounded-xl border border-surface-200-800 shadow-sm p-4 flex flex-wrap items-center gap-3"
 	>
 		<div class="relative grow min-w-[200px] max-w-sm">
-			<i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+			<i
+				class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-surface-400-600"
 			></i>
 			<input
 				type="text"
 				bind:value={query}
 				placeholder={m.searchPlaceholder()}
-				class="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-primary-500 focus:border-primary-500"
+				class="w-full pl-9 pr-3 py-2 border border-surface-300-700 bg-surface-50-950 rounded-lg text-sm focus:ring-primary-500 focus:border-primary-500"
 			/>
 		</div>
 
-		<span class="text-sm text-gray-500 whitespace-nowrap">
+		<span class="text-sm text-surface-600-400 whitespace-nowrap">
 			{m.featureFlagsEnabledCount({ count: enabledCount, total: allFields.length })}
 		</span>
 
@@ -426,9 +437,9 @@
 				<i class="fa-solid fa-rotate-left mr-1"></i>{m.resetToDefaults()}
 			</button>
 
-			<span class="border-l border-gray-300 h-6 mx-1"></span>
+			<span class="border-l border-surface-300-700 h-6 mx-1"></span>
 
-			<span class="text-sm font-medium text-gray-600">{m.featureFlagPresets()}:</span>
+			<span class="text-sm font-medium text-surface-600-400">{m.featureFlagPresets()}:</span>
 			{#each PRESETS as preset}
 				<button
 					type="button"
@@ -443,20 +454,20 @@
 	</div>
 
 	{#if filteredGroups.length === 0}
-		<div class="text-center text-gray-500 py-12">{m.noFeatureFlagsMatch()}</div>
+		<div class="text-center text-surface-600-400 py-12">{m.noFeatureFlagsMatch()}</div>
 	{/if}
 
-	{#each filteredGroups as group}
+	{#each filteredGroups as group (group.category)}
 		{@const groupFields = group.fields.map((f) => f.field)}
 		{@const groupEnabled = groupFields.filter((f) => $formData[f]).length}
-		<div class="bg-white shadow-sm rounded-xl p-6 border border-gray-200">
+		<div class="bg-surface-50-950 shadow-sm rounded-xl p-6 border border-surface-200-800">
 			<div class="mb-4 flex items-start justify-between gap-4">
 				<div>
-					<h2 class="text-xl font-bold text-gray-800">{group.category}</h2>
-					<p class="text-sm text-gray-500 mt-1">{group.description}</p>
+					<h2 class="text-xl font-bold text-surface-950-50">{group.category}</h2>
+					<p class="text-sm text-surface-600-400 mt-1">{group.description}</p>
 				</div>
 				<div class="flex items-center gap-2 shrink-0">
-					<span class="text-xs text-gray-500 whitespace-nowrap"
+					<span class="text-xs text-surface-600-400 whitespace-nowrap"
 						>{groupEnabled}/{groupFields.length}</span
 					>
 					<button
@@ -481,7 +492,7 @@
 				class="grid gap-4"
 				style="grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); grid-auto-rows: 1fr;"
 			>
-				{#each group.fields as { field, label, description }}
+				{#each group.fields as { field, label, description } (field)}
 					<BackgroundCheckbox
 						{form}
 						{field}

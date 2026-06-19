@@ -909,7 +909,7 @@ class QuestionnaireRunViewSet(BaseModelViewSet):
 
         try:
             folder = Folder.objects.get(id=folder_id)
-        except (Folder.DoesNotExist, ValueError):
+        except Folder.DoesNotExist, ValueError:
             return Response(
                 {"detail": "Folder not found."}, status=status.HTTP_404_NOT_FOUND
             )

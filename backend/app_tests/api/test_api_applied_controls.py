@@ -386,3 +386,40 @@ class TestAppliedControlListIAMPostFilter:
             "scoped reader must NOT see the cross-folder asset's id/str; "
             f"got {assets_field[0]!r}"
         )
+
+
+@pytest.mark.django_db
+class TestAppliedControlFullEndpoint:
+    """`/api/applied-controls/full/` — bulk full-detail read that must (1) match
+    the per-id detail payload it replaces and (2) honor IAM exactly like list."""
+
+    def test_full_matches_detail_payload(self, authenticated_client):
+        """Each /full/ record must equal the per-id detail response. With no
+        SyncMapping rows in the fixture, detail omits sync_mappings too, so the
+        deliberately sync-free bulk payload is byte-identical."""
+        folder = Folder.objects.create(name=f"full-{uuid.uuid4().hex[:6]}")
+        ac = AppliedControl.objects.create(
+            folder=folder,
+            name=f"ac-{uuid.uuid4().hex[:6]}",
+            cost=APPLIED_CONTROL_COST,
+        )
+
+        bulk = _find_by_id(
+            _list(authenticated_client, "/api/applied-controls/full/?limit=1000"),
+            ac.id,
+        )
+        detail = authenticated_client.get(f"/api/applied-controls/{ac.id}/")
+        assert detail.status_code == status.HTTP_200_OK, detail.content
+        assert bulk == detail.json()
+
+    def test_full_respects_iam_scope_and_masks_related(self):
+        """Reader scoped to folder A sees the AC (in A) via /full/, but its
+        cross-folder asset reference (folder B) is masked to `{}` — same
+        get_queryset scoping + _filter_related_fields as the list endpoint."""
+        folder_a, _, ac, _ = _setup_cross_folder_link()
+        client = _client_for(_make_scoped_reader(folder_a))
+
+        item = _find_by_id(_list(client, "/api/applied-controls/full/"), ac.id)
+        assert item["assets"] == [{}], (
+            f"cross-folder asset must be masked in /full/; got {item['assets']!r}"
+        )

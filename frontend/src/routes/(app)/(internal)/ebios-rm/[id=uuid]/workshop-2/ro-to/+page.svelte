@@ -56,7 +56,7 @@
 	<Anchor
 		breadcrumbAction="push"
 		href={`/ebios-rm/${data.data.id}`}
-		class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+		class="flex items-center space-x-2 text-primary-800-300 hover:text-primary-600-400"
 	>
 		<i class="fa-solid fa-arrow-left"></i>
 		<p>{m.goBackToEbiosRmStudy()}</p>
@@ -71,7 +71,7 @@
 >
 	{#snippet addButton()}
 		<div>
-			<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+			<span class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs">
 				<button
 					class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 					data-testid="add-button"

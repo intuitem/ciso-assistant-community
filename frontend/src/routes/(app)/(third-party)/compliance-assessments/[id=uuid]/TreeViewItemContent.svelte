@@ -180,25 +180,21 @@
 
 	let classesShowInfo = $derived((show: boolean) => (!show ? 'hidden' : ''));
 	let classesShowInfoText = $derived((show: boolean) => (show ? 'text-primary-500' : ''));
+	// Percent text sits on a fixed result-color background, so its color must NOT follow
+	// the light/dark theme (the default would flip to light in dark mode and vanish on
+	// light segments). Force white on the black bg, a fixed-dark surface token otherwise.
 	let classesPercentText = $derived((resultColor: string) =>
-		resultColor === '#000000' ? 'text-white' : ''
+		resultColor === '#000000' ? 'text-white' : 'text-surface-950'
 	);
-
 	export const getBadgeStyles = (answers: any, questions: any) => {
-		if (!answers) {
-			return {
-				backgroundColor: '#fca5a5',
-				color: darkenColor('#fca5a5', 0.6),
-				answeredCount: 0,
-				totalCount: Object.keys(questions || {}).length
-			};
-		}
-		const visibleQuestions = Object.entries(questions || {}).filter(([_, q]) =>
-			isQuestionVisible(q, answers)
+		const questionMap = (questions || {}) as Record<string, any>;
+		const resolvedAnswers = answers ?? {};
+		const visibleQuestions = Object.entries(questionMap).filter(([_, q]) =>
+			isQuestionVisible(q, resolvedAnswers, questionMap)
 		);
 
 		const answeredCount = visibleQuestions.filter(([urn, _]) => {
-			const answer = answers[urn];
+			const answer = resolvedAnswers[urn];
 			if (Array.isArray(answer)) return answer.length > 0;
 			return answer !== null && answer !== undefined && answer !== '';
 		}).length;
@@ -405,7 +401,7 @@
 			<div class="flex max-w-96 grow items-center space-x-2">
 				{#if showResult}
 					<div
-						class="flex max-w-96 grow bg-gray-200 rounded-full overflow-hidden h-4 shrink self-center"
+						class="flex max-w-96 grow bg-surface-200-800 rounded-full overflow-hidden h-4 shrink self-center"
 					>
 						{#each orderedResultPercentages as rp}
 							<div
