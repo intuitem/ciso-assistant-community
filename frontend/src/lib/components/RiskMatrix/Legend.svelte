@@ -16,7 +16,7 @@
 </script>
 
 <div class="w-full flex flex-col justify-start mt-4">
-	<h3 class="flex font-semibold pl-6 m-2 text-md">{m.riskLevels()}</h3>
+	<h3 class="flex font-semibold m-2 text-md">{m.riskLevels()}</h3>
 	<div class="flex justify-start mx-2">
 		<table class="w-auto border-separate" style="border-spacing: 0 6px;">
 			<tbody>
