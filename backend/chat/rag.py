@@ -7,7 +7,6 @@ and context formatting.
 import structlog
 import os
 import time
-from typing import Any
 
 from iam.models import Folder, RoleAssignment
 
@@ -44,14 +43,10 @@ def get_qdrant_client():
 
 def get_accessible_folder_ids(user) -> list[str]:
     """Get all folder IDs the user has access to, as strings for Qdrant filtering."""
-    root = Folder.get_root_folder()
-    folder_ids = RoleAssignment.get_accessible_folder_ids(
-        folder=root,
-        user=user,
-        content_type=Folder.ContentType.DOMAIN,
-    )
-    return [str(fid) for fid in folder_ids]
 
+    folder_ids = RoleAssignment.get_allowed_folder_ids(user, "view", Folder)
+
+    return [str(folder_id) for folder_id in folder_ids]
 
 def search(
     query: str,

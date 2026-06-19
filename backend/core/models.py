@@ -9827,7 +9827,7 @@ class Actor(AbstractBaseModel):
         return super().save(*args, **kwargs)
 
     @property
-    def type(self):
+    def type(self) -> Literal["user", "team", "entity"]:
         """Helper to return the type of underlying instance."""
         if self.user:
             return "user"
@@ -9835,7 +9835,8 @@ class Actor(AbstractBaseModel):
             return "team"
         if self.entity:
             return "entity"
-        return None
+
+        raise ValueError("Invalid Actor.")
 
     @property
     def specific(self):

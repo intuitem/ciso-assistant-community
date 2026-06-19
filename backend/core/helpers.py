@@ -3,7 +3,7 @@ from collections import defaultdict
 from collections.abc import MutableMapping
 from datetime import date, datetime, timedelta
 from typing import Optional
-from typing import Dict, List
+from typing import Dict, List, Iterable
 from uuid import UUID
 
 # from icecream import ic
@@ -93,8 +93,8 @@ def applied_control_priority(user: User):
     }
     (
         object_ids_view,
-        object_ids_change,
-        object_ids_delete,
+        _,
+        _,
     ) = RoleAssignment.get_accessible_object_ids(
         Folder.get_root_folder(), user, AppliedControl
     )
@@ -108,8 +108,8 @@ def applied_control_priority(user: User):
 def measures_to_review(user: User):
     (
         object_ids_view,
-        object_ids_change,
-        object_ids_delete,
+        _,
+        _,
     ) = RoleAssignment.get_accessible_object_ids(
         Folder.get_root_folder(), user, AppliedControl
     )
@@ -1006,7 +1006,7 @@ def get_governance_calendar_data(
             activity_counts[str(expiry_date)] += 1
 
     # Helper function to count assessment dates
-    def count_assessment_dates(assessment_ids, model):
+    def count_assessment_dates(assessment_ids: Iterable[UUID], model: type[models.Model]):
         # Count due dates
         due_dates = model.objects.filter(
             id__in=assessment_ids, due_date__gte=start_date, due_date__lte=end_date
@@ -1376,14 +1376,12 @@ def get_counters(user: User, folder_id: Optional[str] = None) -> dict:
     )[0]
 
     return {
-        "domains": len(
-            RoleAssignment.get_accessible_object_ids(scoped_folder, user, Folder)[0]
-        ),
-        "frameworks": len(frameworks_ids),
+        "domains": RoleAssignment.get_accessible_object_ids(scoped_folder, user, Folder)[0].count(),
+        "frameworks": frameworks_ids.count(),
         "applied_controls": applied_controls_count,
         "policies": policies_count,
-        "exceptions": len(security_exceptions_ids),
-        "risk_acceptances": len(risk_acceptances_ids),
+        "exceptions": security_exceptions_ids.count(),
+        "risk_acceptances": risk_acceptances_ids.count(),
     }
 
 
@@ -1590,15 +1588,14 @@ def get_metrics(user: User, folder_id):
     return data
 
 
-def _compute_progress_by_assessment(assessment_ids):
+def _compute_progress_by_assessment(assessment_ids: QuerySet[UUID]) -> dict[UUID, int]:
     """
     Bulk-compute progress (% assessed) for a set of ComplianceAssessment ids,
     honoring each assessment's selected_implementation_groups. Mirrors the
     .progress property semantics (assessed = result != NOT_ASSESSED OR score
     is not None) but in two queries instead of N heavy prefetched ones.
     """
-    assessment_ids = list(assessment_ids)
-    if not assessment_ids:
+    if not assessment_ids.exists():
         return {}
 
     ig_by_audit = {
@@ -1679,7 +1676,7 @@ def get_compliance_analytics(user: User, folder_id=None):
     }
     """
 
-    def viewable_items(model, folder_id=None):
+    def viewable_items[T: models.Model](model: type[T], folder_id=None) -> QuerySet[T]:
         scoped_folder = (
             Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
         )
@@ -1688,14 +1685,12 @@ def get_compliance_analytics(user: User, folder_id=None):
         )
         return model.objects.filter(id__in=object_ids)
 
-    viewable_assessments = list(
-        viewable_items(ComplianceAssessment, folder_id).select_related(
-            "framework", "folder", "perimeter"
-        )
+    viewable_assessments = viewable_items(ComplianceAssessment, folder_id).select_related(
+        "framework", "folder", "perimeter"
     )
 
     progress_by_id = _compute_progress_by_assessment(
-        [a.id for a in viewable_assessments]
+        viewable_assessments.values_list("id", flat=True)
     )
 
     framework_data = {}

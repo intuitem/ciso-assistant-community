@@ -1974,6 +1974,7 @@ class FolderWriteSerializer(BaseModelSerializer):
         exclude = [
             "builtin",
             "content_type",
+            "descendants",
         ]
 
     def update(self, instance, validated_data):
