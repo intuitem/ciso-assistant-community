@@ -67,6 +67,15 @@ class CustomFieldDefinitionWriteSerializer(BaseModelSerializer):
         model = CustomFieldDefinition
         exclude = ["content_type", "is_published"]
 
+    def to_representation(self, instance):
+        # `model` is write_only; expose it on read so the edit form (which loads the
+        # write representation) can show it as a read-only field.
+        data = super().to_representation(instance)
+        data["model"] = (
+            f"{instance.content_type.app_label}.{instance.content_type.model}"
+        )
+        return data
+
     def validate(self, data):
         data = super().validate(data)
         model = data.pop("model", None)

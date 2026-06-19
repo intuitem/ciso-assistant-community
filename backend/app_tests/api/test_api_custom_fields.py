@@ -65,6 +65,14 @@ class TestCustomFieldsAPI:
         )
         assert resp.status_code == status.HTTP_201_CREATED, resp.content
 
+    def test_object_endpoint_exposes_model_for_edit_form(self, authenticated_client):
+        # The edit form loads /<id>/object/ (write serializer); it must carry `model`
+        # so the read-only model field can be shown.
+        root = Folder.get_root_folder()
+        created = self._make_choice_def(authenticated_client, str(root.id))
+        obj = authenticated_client.get(f"{CF_URL}{created.json()['id']}/object/").json()
+        assert obj["model"] == "pmbok.project"
+
     def test_searchable_rejected_on_non_text_type(self, authenticated_client):
         root = Folder.get_root_folder()
         resp = authenticated_client.post(

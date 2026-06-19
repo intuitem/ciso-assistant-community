@@ -989,6 +989,7 @@
 	"addChoice": "Add choice",
 	"noChoiceAdded": "No choice added yet",
 	"model": "Model",
+	"modelLabel": "Model",
 	"customFieldKeyHelpText": "Lowercase identifier used in the API (e.g. ?cf__<key>=). Cannot be changed after creation.",
 	"customFieldFolderHelpText": "Global (root domain) applies to every object of this model; a specific domain applies only within that domain and its sub-domains.",
 	"customFieldSearchableHelpText": "Include this field's text values in global search.",
