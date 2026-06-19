@@ -32,7 +32,7 @@
 	};
 
 	type SourceRequirementAssessmentMany = {
-		source_requirement_assessments: Record<RequirementAssessment, MappedRequirementAssessmentInfo>;
+		source_requirement_assessments: Record<string, MappedRequirementAssessmentInfo>;
 	};
 
 	type SourceRequirementData =
@@ -66,7 +66,7 @@
 
 	let sourceRequirementList = $derived.by(() => {
 		if (mappingInference.source_requirement_assessments !== undefined) {
-			return mappingInference.source_requirement_assessments;
+			return Object.values(mappingInference.source_requirement_assessments);
 		} else {
 			return [mappingInference.source_requirement_assessment];
 		}

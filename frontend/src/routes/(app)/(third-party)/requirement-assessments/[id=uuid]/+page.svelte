@@ -12,7 +12,7 @@
 		alignmentColorMap
 	} from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { toCamelCase } from '$lib/utils/locales';
+
 	import { hideSuggestions } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
 	import { Progress, Tabs } from '@skeletonlabs/skeleton-svelte';
@@ -67,7 +67,9 @@
 	}
 
 	let classesText = $derived(
-		complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : 'text-gray-900'
+		complianceResultColorMap[data.requirementAssessment.result] === '#000000'
+			? 'text-white'
+			: 'text-gray-900'
 	);
 
 	// Effective scale falls back to the CA bounds when the RA has no override.
@@ -77,8 +79,6 @@
 		data.requirementAssessment.effective_min_score ?? data.complianceAssessmentScore.min_score ?? 0;
 	const score = data.requirementAssessment.score;
 	const documentationScore = data.requirementAssessment.documentation_score;
-
-	let expandedInferences = $state(false);
 
 	const fw = data.requirementAssessment.compliance_assessment.framework;
 	const complianceAssessment = data.requirementAssessment.compliance_assessment;

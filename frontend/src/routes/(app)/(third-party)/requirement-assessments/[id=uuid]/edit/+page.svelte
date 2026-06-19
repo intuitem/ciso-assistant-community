@@ -16,7 +16,6 @@
 	import { getSecureRedirect, getFieldVisibility, alignmentColorMap } from '$lib/utils/helpers';
 	import { Progress, Tabs } from '@skeletonlabs/skeleton-svelte';
 
-	import { complianceResultColorMap } from '$lib/utils/constants';
 	import { hideSuggestions } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
 	import { countMasked } from '$lib/utils/related-visibility';
@@ -283,10 +282,6 @@
 		hideSuggestions.set(requirementAssessmentsList);
 	}
 
-	let classesText = $derived(
-		complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : ''
-	);
-
 	// Field visibility — derived so that SvelteKit's data reload (e.g. after the
 	// audit's field_visibility is edited in another tab and the user navigates
 	// back) refreshes the flags. A plain const would capture a stale reference.
@@ -374,8 +369,6 @@
 	let computedScoreAndResult = $derived(
 		computeRequirementScoreAndResult(data.requirementAssessment, $formStore.answers)
 	);
-
-	let expandedInferences = $state(false);
 
 	let computedResult = $derived(computedScoreAndResult.result);
 	let computedScore = $derived(computedScoreAndResult.score);
