@@ -58,16 +58,16 @@
 
 	const builder = createBuilderState(framework, requirementNodes, questions, editingDraft);
 	setBuilderContext(builder);
-	// Build the catalog urn -> label index once here, rather than rebuilding it
-	// inside every per-node picker instance.
-	const catalogLabelByUrn = new Map<string, string>();
+	// Build the catalog token -> label index once here (token = URN, or id for
+	// URN-less custom objects), rather than rebuilding it in every per-node picker.
+	const catalogLabelByToken = new Map<string, string>();
 	for (const e of [...referenceControlCatalog, ...threatCatalog]) {
-		if (e.urn) catalogLabelByUrn.set(e.urn, referentialLabel(e));
+		catalogLabelByToken.set(e.urn || e.id, referentialLabel(e));
 	}
 	setReferentialCatalogContext({
 		referenceControls: referenceControlCatalog,
 		threats: threatCatalog,
-		labelByUrn: catalogLabelByUrn
+		labelByToken: catalogLabelByToken
 	});
 
 	const cardCollapsed = createCollapsedStore(`fw-builder:${framework.id}:cards:collapsed`);

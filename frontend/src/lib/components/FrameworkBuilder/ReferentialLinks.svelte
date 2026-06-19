@@ -3,7 +3,6 @@
 		getBuilderContext,
 		getReferentialCatalogContext,
 		slugifyFrameworkName,
-		inlineCopyFromCatalogEntry,
 		makeInlineReferential,
 		referentialLabel,
 		getTranslation,
@@ -38,6 +37,9 @@
 	let adding = $state(false);
 	let tab: 'existing' | 'inline' = $state('existing');
 	let search = $state('');
+	// When set, the inline form is editing this inline-defined object (by id)
+	// rather than creating a new one.
+	let editingId: string | null = $state(null);
 	let newRefId = $state('');
 	let newName = $state('');
 	let newCategory = $state('');
@@ -76,8 +78,8 @@
 		return map;
 	});
 
-	function labelFor(urn: string): string {
-		return inlineLabelByUrn.get(urn) ?? catalog.labelByUrn?.get(urn) ?? urn;
+	function labelFor(token: string): string {
+		return inlineLabelByUrn.get(token) ?? catalog.labelByToken?.get(token) ?? token;
 	}
 
 	const linkableEntries = $derived.by(() => {
@@ -98,34 +100,23 @@
 			.slice(0, 50);
 	});
 
-	function addUrn(urn: string) {
-		if (currentUrns.includes(urn)) return;
-		builder.updateNode(node.node.id, { [kind]: [...currentUrns, urn] });
+	// A node link is a token: an object's URN (library-backed or inline-defined)
+	// or its id (custom instance objects, which have no URN). The published M2M
+	// is the source of truth; export decides how each is emitted (builtin →
+	// dependency, everything else embedded by value).
+	function addToken(token: string) {
+		if (currentUrns.includes(token)) return;
+		builder.updateNode(node.node.id, { [kind]: [...currentUrns, token] });
 	}
 
-	// Picking an existing instance object: reference it only if it comes from a
-	// builtin library (present in any target instance); otherwise copy it into
-	// this framework as an inline object so the export stays self-contained.
+	// Picking an existing object references it — by URN when it has one, else by
+	// id. No in-instance copy; embedding-by-value happens only on export.
 	function pickExisting(entry: ReferentialCatalogEntry) {
-		if (entry.referenceable) {
-			addUrn(entry.urn);
-			return;
-		}
-		const copy = inlineCopyFromCatalogEntry(entry, {
-			urnType,
-			namespace: $frameworkStore.urn_namespace || 'custom',
-			slug: frameworkSlug(),
-			isControl
-		});
-		// Deterministic URN dedups repeated picks of the same source into one copy.
-		if (!inlineEntries.some((e) => e.urn === copy.urn)) {
-			builder.updateFramework({ [inlineKey]: [...inlineEntries, copy] });
-		}
-		addUrn(copy.urn);
+		addToken(entry.urn || entry.id);
 	}
 
-	function removeUrn(urn: string) {
-		builder.updateNode(node.node.id, { [kind]: currentUrns.filter((u) => u !== urn) });
+	function removeToken(token: string) {
+		builder.updateNode(node.node.id, { [kind]: currentUrns.filter((u) => u !== token) });
 	}
 
 	let evidenceListEl: HTMLDivElement | undefined = $state();
@@ -168,12 +159,33 @@
 		return fw.ref_id && fw.ref_id.length > 0 ? fw.ref_id : slugifyFrameworkName(fw.name, fw.id);
 	}
 
+	// Only inline-defined objects (framework-owned) are editable here; library and
+	// custom references are edited at their source.
+	function isInlineDefined(token: string): boolean {
+		return inlineEntries.some((e) => e.urn === token);
+	}
+
+	function resetForm() {
+		newRefId = '';
+		newName = '';
+		newCategory = '';
+		newCsfFunction = '';
+		newDescription = '';
+		newAnnotation = '';
+		newTypicalEvidence = [];
+		editingId = null;
+		adding = false;
+	}
+
+	// Trimmed, non-empty evidence items → list (matches doc-pol); null if none.
+	function evidenceList(): string[] | null {
+		const evidence = newTypicalEvidence.map((item) => item.trim()).filter(Boolean);
+		return evidence.length ? evidence : null;
+	}
+
 	function createInline() {
 		const refId = newRefId.trim();
 		if (!refId) return;
-		// Trimmed, non-empty evidence items → list (matches doc-pol); null if none.
-		const evidence = newTypicalEvidence.map((item) => item.trim()).filter(Boolean);
-		// No sourceKey: a hand-defined ref_id is the user's chosen identity.
 		const entry = makeInlineReferential({
 			namespace: $frameworkStore.urn_namespace || 'custom',
 			slug: frameworkSlug(),
@@ -185,18 +197,57 @@
 			annotation: newAnnotation.trim() || null,
 			category: newCategory || null,
 			csfFunction: newCsfFunction || null,
-			typicalEvidence: evidence.length ? evidence : null
+			typicalEvidence: evidenceList()
 		});
 		builder.updateFramework({ [inlineKey]: [...inlineEntries, entry] });
-		addUrn(entry.urn);
-		newRefId = '';
-		newName = '';
-		newCategory = '';
-		newCsfFunction = '';
-		newDescription = '';
-		newAnnotation = '';
-		newTypicalEvidence = [];
-		adding = false;
+		addToken(entry.urn);
+		resetForm();
+	}
+
+	function editInline(token: string) {
+		const entry = inlineEntries.find((e) => e.urn === token);
+		if (!entry) return;
+		newRefId = entry.ref_id ?? '';
+		newName = entry.name ?? '';
+		newCategory = entry.category ?? '';
+		newCsfFunction = entry.csf_function ?? '';
+		newDescription = entry.description ?? '';
+		newAnnotation = entry.annotation ?? '';
+		newTypicalEvidence = Array.isArray(entry.typical_evidence)
+			? [...entry.typical_evidence]
+			: entry.typical_evidence
+				? [entry.typical_evidence]
+				: [];
+		editingId = entry.id;
+		tab = 'inline';
+		adding = true;
+	}
+
+	// Update the edited inline object in place. The URN stays stable (it's the
+	// object's identity and node links resolve by it); only the fields change.
+	function saveInline() {
+		const refId = newRefId.trim();
+		if (!refId || !editingId) return;
+		const updated = inlineEntries.map((e) =>
+			e.id === editingId
+				? {
+						...e,
+						ref_id: refId,
+						name: newName.trim() || null,
+						description: newDescription.trim() || null,
+						annotation: newAnnotation.trim() || null,
+						...(isControl
+							? {
+									category: newCategory || null,
+									csf_function: newCsfFunction || null,
+									typical_evidence: evidenceList()
+								}
+							: {})
+					}
+				: e
+		);
+		builder.updateFramework({ [inlineKey]: updated });
+		resetForm();
 	}
 </script>
 
@@ -288,16 +339,26 @@
 			<span class="text-xs text-gray-500 mr-1">
 				{isControl ? m.builderReferenceControlsLabel() : m.builderThreatsLabel()}
 			</span>
-			{#each currentUrns as urn (urn)}
+			{#each currentUrns as token (token)}
 				<span
 					class="inline-flex items-center text-xs px-2 py-0.5 rounded-full border bg-blue-50 border-blue-200 text-blue-700"
 				>
-					{labelFor(urn)}
+					{labelFor(token)}
+					{#if isInlineDefined(token)}
+						<button
+							type="button"
+							class="ml-1 text-blue-400 hover:text-blue-700"
+							aria-label={m.edit()}
+							onclick={() => editInline(token)}
+						>
+							<i class="fa-solid fa-pen text-[10px]"></i>
+						</button>
+					{/if}
 					<button
 						type="button"
 						class="ml-1 text-blue-400 hover:text-blue-700"
 						aria-label={m.remove()}
-						onclick={() => removeUrn(urn)}
+						onclick={() => removeToken(token)}
 					>
 						<i class="fa-solid fa-xmark"></i>
 					</button>
@@ -306,7 +367,7 @@
 			<button
 				type="button"
 				class="text-xs px-2 py-0.5 rounded-full border border-dashed border-gray-300 text-gray-400 hover:text-gray-600 hover:border-gray-400"
-				onclick={() => (adding = !adding)}
+				onclick={() => (adding ? resetForm() : (adding = true))}
 			>
 				<i class="fa-solid fa-plus mr-1"></i>{isControl
 					? m.builderAddReferenceControl()
@@ -316,26 +377,28 @@
 
 		{#if adding}
 			<div class="mt-2 p-2 border border-gray-200 rounded bg-gray-50">
-				<div class="flex gap-2 mb-2 text-xs">
-					<button
-						type="button"
-						class="px-2 py-0.5 rounded {tab === 'existing'
-							? 'bg-blue-100 text-blue-700'
-							: 'text-gray-500'}"
-						onclick={() => (tab = 'existing')}
-					>
-						{isControl ? m.builderLinkExistingControl() : m.builderLinkExistingThreat()}
-					</button>
-					<button
-						type="button"
-						class="px-2 py-0.5 rounded {tab === 'inline'
-							? 'bg-blue-100 text-blue-700'
-							: 'text-gray-500'}"
-						onclick={() => (tab = 'inline')}
-					>
-						{isControl ? m.builderDefineInlineControl() : m.builderDefineInlineThreat()}
-					</button>
-				</div>
+				{#if !editingId}
+					<div class="flex gap-2 mb-2 text-xs">
+						<button
+							type="button"
+							class="px-2 py-0.5 rounded {tab === 'existing'
+								? 'bg-blue-100 text-blue-700'
+								: 'text-gray-500'}"
+							onclick={() => (tab = 'existing')}
+						>
+							{isControl ? m.builderLinkExistingControl() : m.builderLinkExistingThreat()}
+						</button>
+						<button
+							type="button"
+							class="px-2 py-0.5 rounded {tab === 'inline'
+								? 'bg-blue-100 text-blue-700'
+								: 'text-gray-500'}"
+							onclick={() => (tab = 'inline')}
+						>
+							{isControl ? m.builderDefineInlineControl() : m.builderDefineInlineThreat()}
+						</button>
+					</div>
+				{/if}
 
 				{#if tab === 'existing'}
 					<input
@@ -451,14 +514,23 @@
 								</button>
 							</div>
 						{/if}
-						<div class="flex justify-end">
+						<div class="flex justify-end gap-2">
+							{#if editingId}
+								<button
+									type="button"
+									class="text-xs px-2 py-1 rounded border border-gray-300 text-gray-600"
+									onclick={resetForm}
+								>
+									{m.cancel()}
+								</button>
+							{/if}
 							<button
 								type="button"
 								class="text-xs px-2 py-1 rounded bg-blue-600 text-white disabled:opacity-50"
 								disabled={!newRefId.trim()}
-								onclick={createInline}
+								onclick={() => (editingId ? saveInline() : createInline())}
 							>
-								{m.create()}
+								{editingId ? m.save() : m.create()}
 							</button>
 						</div>
 					</div>

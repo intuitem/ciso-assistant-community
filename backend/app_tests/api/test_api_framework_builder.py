@@ -4054,3 +4054,131 @@ class TestFrameworkBuilderControlsThreats:
         assert error is None, f"Exported YAML failed to store: {error}"
         assert stored.load() is None
         assert ReferenceControl.objects.get(urn=rc_urn).translations == translations
+
+    # --- Model A: pick an existing object = a reference (by pk for URN-less
+    # custom objects), embedded by value only on export. No in-instance copy. ---
+
+    def test_publish_references_custom_object_by_pk(
+        self, authenticated_client, builder_fw
+    ):
+        """A node referencing a custom (library=None, URN-less) control by its pk
+        links the existing object on publish — no duplicate, no collision."""
+        fw, rn, folder = builder_fw
+        custom = ReferenceControl.objects.create(
+            name="Custom RC", ref_id="CUST", folder=folder
+        )
+        assert custom.urn is None and custom.library_id is None
+
+        draft = self._start_and_get_draft(authenticated_client, fw)
+        draft["nodes"][0]["reference_controls"] = [str(custom.id)]
+        response = self._save_and_publish(authenticated_client, fw, draft)
+        assert response.status_code == 200, response.data
+
+        rn.refresh_from_db()
+        assert set(rn.reference_controls.values_list("id", flat=True)) == {custom.id}
+        # Original is reused, not duplicated, and left untouched.
+        assert (
+            ReferenceControl.objects.filter(ref_id="CUST", library__isnull=True).count()
+            == 1
+        )
+        custom.refresh_from_db()
+        assert custom.urn is None and custom.library_id is None
+
+    def test_unlinking_referenced_custom_does_not_delete_it(
+        self, authenticated_client, builder_fw
+    ):
+        """Removing a referenced custom object from the framework unlinks it but
+        never deletes the user's standalone object."""
+        fw, rn, folder = builder_fw
+        custom = ReferenceControl.objects.create(
+            name="Custom RC", ref_id="CUST", folder=folder
+        )
+        draft = self._start_and_get_draft(authenticated_client, fw)
+        draft["nodes"][0]["reference_controls"] = [str(custom.id)]
+        assert (
+            self._save_and_publish(authenticated_client, fw, draft).status_code == 200
+        )
+
+        draft = self._start_and_get_draft(authenticated_client, fw)
+        draft["nodes"][0]["reference_controls"] = []
+        assert (
+            self._save_and_publish(authenticated_client, fw, draft).status_code == 200
+        )
+
+        assert ReferenceControl.objects.filter(id=custom.id).exists()
+        rn.refresh_from_db()
+        assert rn.reference_controls.count() == 0
+
+    def test_start_editing_emits_pk_token_for_urnless_custom(
+        self, authenticated_client, builder_fw
+    ):
+        """start_editing surfaces a URN-less custom link as its pk token, and does
+        not list it among the editable inline-defined collection."""
+        fw, rn, folder = builder_fw
+        custom = ReferenceControl.objects.create(
+            name="Custom RC", ref_id="CUST", folder=folder
+        )
+        rn.reference_controls.set([custom])
+
+        draft = self._start_and_get_draft(authenticated_client, fw)
+        assert draft["nodes"][0]["reference_controls"] == [str(custom.id)]
+        assert all(
+            e["id"] != str(custom.id) for e in draft.get("reference_controls", [])
+        )
+
+    def test_export_embeds_referenced_custom_reflecting_live_edits(
+        self, authenticated_client, builder_fw
+    ):
+        """Export embeds a referenced custom object under a re-minted framework
+        URN, and reflects later edits to the source (the reference is live)."""
+        fw, rn, folder = builder_fw
+        custom = ReferenceControl.objects.create(
+            name="Custom RC", ref_id="CUST", description="orig", folder=folder
+        )
+        rn.reference_controls.set([custom])
+        emitted_urn = "urn:custom:risk:reference_control:controls-fw:cust"
+
+        def _export():
+            resp = authenticated_client.get(
+                reverse("frameworks-export-yaml", args=[fw.id])
+            )
+            assert resp.status_code == 200
+            return yaml.safe_load(resp.content)
+
+        data = _export()
+        node = data["objects"]["framework"]["requirement_nodes"][0]
+        assert node["reference_controls"] == [emitted_urn]
+        emitted = {c["urn"]: c for c in data["objects"]["reference_controls"]}
+        assert emitted[emitted_urn]["description"] == "orig"
+
+        custom.description = "updated"
+        custom.save()
+        emitted2 = {c["urn"]: c for c in _export()["objects"]["reference_controls"]}
+        assert emitted2[emitted_urn]["description"] == "updated"
+
+    def test_duplicate_references_custom_object_not_clone(
+        self, authenticated_client, builder_fw
+    ):
+        """Duplicating a framework that references a custom (URN-less) object
+        points the copy at the same object rather than cloning it."""
+        fw, rn, folder = builder_fw
+        custom = ReferenceControl.objects.create(
+            name="Custom RC", ref_id="CUST", folder=folder
+        )
+        rn.reference_controls.set([custom])
+
+        response = authenticated_client.post(
+            reverse("frameworks-duplicate", args=[fw.id]),
+            {"name": "Controls FW Copy"},
+            format="json",
+        )
+        assert response.status_code == 201, response.data
+
+        assert (
+            ReferenceControl.objects.filter(ref_id="CUST", library__isnull=True).count()
+            == 1
+        )
+        new_node = RequirementNode.objects.get(
+            framework_id=response.data["id"], reference_controls=custom
+        )
+        assert custom in new_node.reference_controls.all()

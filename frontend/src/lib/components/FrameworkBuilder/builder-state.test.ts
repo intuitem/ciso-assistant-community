@@ -10,7 +10,7 @@ import {
 	serializeDraft,
 	hydrateDraft,
 	createBuilderState,
-	inlineCopyFromCatalogEntry,
+	makeInlineReferential,
 	setInlineReferentialTranslation,
 	type Framework,
 	type BuilderNode,
@@ -1426,123 +1426,61 @@ describe('inline reference control typical_evidence (pass 2: list support)', () 
 	});
 });
 
-describe('inlineCopyFromCatalogEntry (copy picked existing object)', () => {
-	it('clones a reference control entry into a framework-owned inline object', () => {
-		const entry = {
-			id: 'src-1',
-			urn: 'urn:intuitem:risk:function:doc-pol:a.5.1',
-			ref_id: 'A.5.1',
+describe('makeInlineReferential (inline-defined object)', () => {
+	const base = {
+		namespace: 'custom',
+		slug: 'fw',
+		urnType: 'reference_control' as const,
+		isControl: true
+	};
+
+	it('mints a framework-owned URN from the ref_id and carries all fields', () => {
+		const entry = makeInlineReferential({
+			...base,
+			refId: 'A.5.1',
 			name: 'Policies',
 			description: 'desc',
 			annotation: 'ann',
 			category: 'policy',
-			csf_function: 'govern',
-			typical_evidence: ['Signed doc', 'Review'],
-			translations: { fr: { name: 'Politiques' } },
-			referenceable: false
-		};
-		const copy = inlineCopyFromCatalogEntry(entry, {
-			urnType: 'reference_control',
-			namespace: 'custom',
-			slug: 'fw',
-			isControl: true
+			csfFunction: 'govern',
+			typicalEvidence: ['Signed doc', 'Review'],
+			translations: { fr: { name: 'Politiques' } }
 		});
-		// URN is framework-owned, ref_id-based, with a source-derived suffix.
-		expect(copy.urn).toMatch(/^urn:custom:risk:reference_control:fw:a\.5\.1-[0-9a-f]{8}$/);
-		expect(copy.ref_id).toBe('A.5.1');
-		expect(copy.name).toBe('Policies');
-		expect(copy.description).toBe('desc');
-		expect(copy.annotation).toBe('ann');
-		expect(copy.category).toBe('policy');
-		expect(copy.csf_function).toBe('govern');
-		expect(copy.typical_evidence).toEqual(['Signed doc', 'Review']);
-		expect(copy.translations).toEqual({ fr: { name: 'Politiques' } });
+		expect(entry.urn).toBe('urn:custom:risk:reference_control:fw:a.5.1');
+		expect(entry.ref_id).toBe('A.5.1');
+		expect(entry.name).toBe('Policies');
+		expect(entry.description).toBe('desc');
+		expect(entry.annotation).toBe('ann');
+		expect(entry.category).toBe('policy');
+		expect(entry.csf_function).toBe('govern');
+		expect(entry.typical_evidence).toEqual(['Signed doc', 'Review']);
+		expect(entry.translations).toEqual({ fr: { name: 'Politiques' } });
 	});
 
-	it('omits control-only fields when copying a threat', () => {
-		const entry = {
-			id: 't',
-			urn: 'urn:x:risk:threat:lib:t1',
-			ref_id: 'T1',
-			name: 'Threat',
-			description: 'd',
-			referenceable: false
-		};
-		const copy = inlineCopyFromCatalogEntry(entry, {
+	it('omits control-only fields for a threat', () => {
+		const entry = makeInlineReferential({
+			...base,
 			urnType: 'threat',
-			namespace: 'custom',
-			slug: 'fw',
-			isControl: false
+			isControl: false,
+			refId: 'T1',
+			name: 'Threat'
 		});
-		expect(copy.urn).toMatch(/^urn:custom:risk:threat:fw:t1-[0-9a-f]{8}$/);
-		expect(copy.name).toBe('Threat');
-		expect(copy.category).toBeUndefined();
-		expect(copy.csf_function).toBeUndefined();
-		expect(copy.typical_evidence).toBeUndefined();
+		expect(entry.urn).toBe('urn:custom:risk:threat:fw:t1');
+		expect(entry.category).toBeUndefined();
+		expect(entry.csf_function).toBeUndefined();
+		expect(entry.typical_evidence).toBeUndefined();
 	});
 
-	it('mints a ref_id when the source has none', () => {
-		const entry = { id: 'x', urn: 'urn:x', ref_id: null, name: 'No ref', referenceable: false };
-		const copy = inlineCopyFromCatalogEntry(entry, {
-			urnType: 'reference_control',
-			namespace: 'custom',
-			slug: 'fw',
-			isControl: true
-		});
-		expect(copy.ref_id?.startsWith('imported-')).toBe(true);
-		expect(copy.urn).toContain(':reference_control:fw:imported-');
-	});
-
-	it('mints distinct URNs for two different sources sharing a ref_id', () => {
-		const opts = {
-			urnType: 'reference_control' as const,
-			namespace: 'custom',
-			slug: 'fw',
-			isControl: true
-		};
-		const a = inlineCopyFromCatalogEntry(
-			{ id: 'a', urn: 'urn:libA:risk:function:lib-a:ac-1', ref_id: 'AC-1', name: 'A' },
-			opts
-		);
-		const b = inlineCopyFromCatalogEntry(
-			{ id: 'b', urn: 'urn:libB:risk:function:lib-b:ac-1', ref_id: 'AC-1', name: 'B' },
-			opts
-		);
-		expect(a.urn).not.toBe(b.urn);
-	});
-
-	it('mints a stable URN for the same source (dedups across sessions)', () => {
-		const opts = {
-			urnType: 'reference_control' as const,
-			namespace: 'custom',
-			slug: 'fw',
-			isControl: true
-		};
-		const entry = { id: 'a', urn: 'urn:libA:risk:function:lib-a:ac-1', ref_id: 'AC-1', name: 'A' };
-		expect(inlineCopyFromCatalogEntry(entry, opts).urn).toBe(
-			inlineCopyFromCatalogEntry(entry, opts).urn
-		);
-	});
-
-	it('falls back to the source id when the entry has no URN (custom object)', () => {
-		const opts = {
-			urnType: 'reference_control' as const,
-			namespace: 'custom',
-			slug: 'fw',
-			isControl: true
-		};
-		const a = inlineCopyFromCatalogEntry({ id: 'id-1', urn: '', ref_id: 'X', name: 'A' }, opts);
-		const b = inlineCopyFromCatalogEntry({ id: 'id-2', urn: '', ref_id: 'X', name: 'B' }, opts);
-		expect(a.urn).not.toBe(b.urn);
+	it('mints a ref_id when none is given', () => {
+		const entry = makeInlineReferential({ ...base, refId: '' });
+		expect(entry.ref_id?.startsWith('imported-')).toBe(true);
+		expect(entry.urn).toContain(':reference_control:fw:imported-');
 	});
 
 	it('trims leading/trailing dashes from the minted suffix (matches backend)', () => {
-		const copy = inlineCopyFromCatalogEntry(
-			{ id: 'z', urn: 'urn:z', ref_id: '-Foo Bar-', name: 'Z' },
-			{ urnType: 'reference_control', namespace: 'custom', slug: 'fw', isControl: true }
-		);
-		// "-Foo Bar-" -> "foo-bar" (lowercased, space collapsed, dashes trimmed) + hash.
-		expect(copy.urn).toMatch(/^urn:custom:risk:reference_control:fw:foo-bar-[0-9a-f]{8}$/);
+		const entry = makeInlineReferential({ ...base, refId: '-Foo Bar-' });
+		// "-Foo Bar-" -> "foo-bar" (lowercased, space collapsed, dashes trimmed).
+		expect(entry.urn).toBe('urn:custom:risk:reference_control:fw:foo-bar');
 	});
 });
 

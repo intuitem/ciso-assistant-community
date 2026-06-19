@@ -9113,7 +9113,11 @@ class FrameworkViewSet(BaseModelViewSet):
             def _carry_links(source_objs, clone_cache, model, urn_type, extra_fields):
                 carried = []
                 for obj in source_objs:
-                    if obj.library_id:
+                    # Library-backed and custom (URN-less) objects are referenced,
+                    # not duplicated — the copy points at the same object. Only
+                    # the source framework's own inline-defined objects (library-
+                    # less with a minted URN) are cloned so the copy owns its own.
+                    if obj.library_id or obj.urn is None:
                         carried.append(obj)
                         continue
                     clone = clone_cache.get(obj.id)
@@ -9357,30 +9361,33 @@ class FrameworkViewSet(BaseModelViewSet):
         fw_ns = framework.urn_namespace or "custom"
         dependency_urns = set()
 
-        def _partition_referentials(objs_by_urn, type_token):
-            """Return (rewrite, embedded): a {source_urn -> emitted_urn} map and a
+        def _partition_referentials(objs_by_pk, type_token):
+            """Return (rewrite, embedded): a {pk -> emitted_urn} map and an
             {emitted_urn -> object} map of the objects to inline. Populates
-            dependency_urns for builtin-library objects."""
+            dependency_urns for builtin-library objects. Objects with a foreign
+            or absent URN (custom instance objects, or non-builtin-library ones)
+            are re-minted into a collision-free framework-owned URN so the export
+            is self-contained."""
             owned_prefix = f"urn:{fw_ns}:risk:{type_token}:{slug}:"
             rewrite = {}
             embedded = {}
             used = set()
             foreign = []
-            for urn in sorted(objs_by_urn):
-                obj = objs_by_urn[urn]
+            for pk in sorted(objs_by_pk, key=str):
+                obj = objs_by_pk[pk]
                 if obj.is_referenceable:
-                    rewrite[urn] = urn
+                    rewrite[pk] = obj.urn
                     dependency_urns.add(obj.library.urn)
-                elif urn.startswith(owned_prefix):
-                    rewrite[urn] = urn
-                    embedded[urn] = obj
-                    used.add(urn[len(owned_prefix) :])
+                elif obj.urn and obj.urn.startswith(owned_prefix):
+                    rewrite[pk] = obj.urn
+                    embedded[obj.urn] = obj
+                    used.add(obj.urn[len(owned_prefix) :])
                 else:
-                    foreign.append((urn, obj))
-            for urn, obj in foreign:
+                    foreign.append((pk, obj))
+            for pk, obj in foreign:
                 base = (
                     _urn_suffix(obj.ref_id)
-                    or _urn_suffix(extract_node_id(urn))
+                    or _urn_suffix(extract_node_id(obj.urn))
                     or "object"
                 )
                 suffix = base
@@ -9390,7 +9397,7 @@ class FrameworkViewSet(BaseModelViewSet):
                     i += 1
                 used.add(suffix)
                 new_urn = f"{owned_prefix}{suffix}"
-                rewrite[urn] = new_urn
+                rewrite[pk] = new_urn
                 embedded[new_urn] = obj
             return rewrite, embedded
 
@@ -9398,11 +9405,9 @@ class FrameworkViewSet(BaseModelViewSet):
         threat_objs = {}
         for node in nodes:
             for c in node.reference_controls.all():
-                if c.urn:
-                    control_objs.setdefault(c.urn, c)
+                control_objs.setdefault(c.pk, c)
             for t in node.threats.all():
-                if t.urn:
-                    threat_objs.setdefault(t.urn, t)
+                threat_objs.setdefault(t.pk, t)
         control_rewrite, embedded_controls = _partition_referentials(
             control_objs, "reference_control"
         )
@@ -9451,14 +9456,14 @@ class FrameworkViewSet(BaseModelViewSet):
             # Reference controls / threats: emit the (possibly re-minted) URN
             # list. The partition above already routed each linked object to a
             # dependency or to the embedded-objects map.
-            node_controls = [c for c in node.reference_controls.all() if c.urn]
-            node_threats = [t for t in node.threats.all() if t.urn]
+            node_controls = list(node.reference_controls.all())
+            node_threats = list(node.threats.all())
             if node_controls:
                 node_data["reference_controls"] = [
-                    control_rewrite[c.urn] for c in node_controls
+                    control_rewrite[c.pk] for c in node_controls
                 ]
             if node_threats:
-                node_data["threats"] = [threat_rewrite[t.urn] for t in node_threats]
+                node_data["threats"] = [threat_rewrite[t.pk] for t in node_threats]
 
             # Build questions dict keyed by URN
             node_questions = node.questions.order_by("order")
@@ -9798,15 +9803,16 @@ class FrameworkViewSet(BaseModelViewSet):
             ).values(*choice_fields)
         )
 
-        # Attach each node's reference_control / threat links as URN lists
-        # (same shape as the library YAML). Inline-defined objects — those with
-        # no library, owned by this framework — are also surfaced as top-level
-        # collections so the builder can edit them; library-backed objects are
-        # only referenced by URN and resolved from their library on publish.
+        # Attach each node's reference_control / threat links as token lists.
+        # A token is the object's URN (library-backed or inline-defined objects)
+        # or its pk (custom instance objects, which have no URN). Inline-defined
+        # objects — library-less AND framework-owned (they carry a minted URN) —
+        # are also surfaced as top-level collections so the builder can edit
+        # them; library-backed and custom objects are only referenced.
         node_links = {
             node.id: (
-                sorted(c.urn for c in node.reference_controls.all() if c.urn),
-                sorted(t.urn for t in node.threats.all() if t.urn),
+                sorted(c.urn or str(c.pk) for c in node.reference_controls.all()),
+                sorted(t.urn or str(t.pk) for t in node.threats.all()),
             )
             for node in RequirementNode.objects.filter(
                 framework=framework
@@ -9831,7 +9837,9 @@ class FrameworkViewSet(BaseModelViewSet):
                 "translations": c.translations,
             }
             for c in ReferenceControl.objects.filter(
-                requirements__framework=framework, library__isnull=True
+                requirements__framework=framework,
+                library__isnull=True,
+                urn__isnull=False,
             ).distinct()
         ]
         inline_threats = [
@@ -9845,7 +9853,9 @@ class FrameworkViewSet(BaseModelViewSet):
                 "translations": t.translations,
             }
             for t in Threat.objects.filter(
-                requirements__framework=framework, library__isnull=True
+                requirements__framework=framework,
+                library__isnull=True,
+                urn__isnull=False,
             ).distinct()
         ]
 
@@ -10594,10 +10604,15 @@ class FrameworkViewSet(BaseModelViewSet):
             # in the DB and must be UPDATEd, not re-created under the same PK.
             existing = model.objects.in_bulk(by_id.keys())
 
-            # Delete owned objects (library-less, linked to this framework) that
-            # the draft dropped — but never one still linked by another framework.
+            # Delete framework-owned inline objects (library-less, URN-bearing,
+            # linked to this framework) that the draft dropped — but never one
+            # still linked by another framework. URN-less custom objects are the
+            # user's own standalone referentials, only referenced here, so they
+            # are never garbage-collected by the framework.
             for obj in model.objects.filter(
-                library__isnull=True, requirements__framework=framework
+                library__isnull=True,
+                urn__isnull=False,
+                requirements__framework=framework,
             ).distinct():
                 if (
                     obj.id not in by_id
@@ -10635,19 +10650,20 @@ class FrameworkViewSet(BaseModelViewSet):
 
         Skips nodes whose links are unchanged so a no-op publish performs no
         writes, and skips the work entirely when neither the draft nor the DB
-        has any links. Inline-defined objects must already be persisted; their
-        URNs resolve here exactly like library/custom ones. A URN that resolves
-        to nothing is a hard error rather than a silent drop.
+        has any links. Each link token is either a URN (library-backed or
+        inline-defined objects) or a primary key (custom instance objects, which
+        have no URN — they're referenced by value, embedded only on export). A
+        token that resolves to nothing is a hard error rather than a silent drop.
         """
         desired_by_node = {}
-        all_rc_urns = set()
-        all_threat_urns = set()
+        all_rc_tokens = set()
+        all_threat_tokens = set()
         for node in draft_nodes:
-            rc = [u for u in (node.get("reference_controls") or []) if u]
-            th = [u for u in (node.get("threats") or []) if u]
+            rc = [t for t in (node.get("reference_controls") or []) if t]
+            th = [t for t in (node.get("threats") or []) if t]
             desired_by_node[str(node["id"])] = (rc, th)
-            all_rc_urns.update(rc)
-            all_threat_urns.update(th)
+            all_rc_tokens.update(rc)
+            all_threat_tokens.update(th)
 
         has_existing = (
             RequirementNode.objects.filter(
@@ -10657,17 +10673,22 @@ class FrameworkViewSet(BaseModelViewSet):
                 framework=framework, threats__isnull=False
             ).exists()
         )
-        if not (all_rc_urns or all_threat_urns or has_existing):
+        if not (all_rc_tokens or all_threat_tokens or has_existing):
             return
 
-        rc_by_urn = {
-            c.urn: c for c in ReferenceControl.objects.filter(urn__in=all_rc_urns)
-        }
-        threat_by_urn = {
-            t.urn: t for t in Threat.objects.filter(urn__in=all_threat_urns)
-        }
-        missing = (all_rc_urns - set(rc_by_urn)) | (
-            all_threat_urns - set(threat_by_urn)
+        def _resolve(tokens, model):
+            """Map each token (URN or pk) to its object."""
+            urns = {t for t in tokens if isinstance(t, str) and t.startswith("urn:")}
+            pks = tokens - urns
+            by_token = {obj.urn: obj for obj in model.objects.filter(urn__in=urns)}
+            for obj in model.objects.filter(pk__in=pks):
+                by_token[str(obj.pk)] = obj
+            return by_token
+
+        rc_by_token = _resolve(all_rc_tokens, ReferenceControl)
+        threat_by_token = _resolve(all_threat_tokens, Threat)
+        missing = (all_rc_tokens - set(rc_by_token)) | (
+            all_threat_tokens - set(threat_by_token)
         )
         if missing:
             raise DraftValidationError(
@@ -10682,12 +10703,12 @@ class FrameworkViewSet(BaseModelViewSet):
                 framework=framework
             ).prefetch_related("reference_controls", "threats")
         }
-        for node_id, (rc_urns, th_urns) in desired_by_node.items():
+        for node_id, (rc_tokens, th_tokens) in desired_by_node.items():
             node = nodes_by_id.get(node_id)
             if node is None:
                 continue
-            desired_rc = {rc_by_urn[u] for u in rc_urns}
-            desired_th = {threat_by_urn[u] for u in th_urns}
+            desired_rc = {rc_by_token[t] for t in rc_tokens}
+            desired_th = {threat_by_token[t] for t in th_tokens}
             if set(node.reference_controls.all()) != desired_rc:
                 node.reference_controls.set(desired_rc)
             if set(node.threats.all()) != desired_th:

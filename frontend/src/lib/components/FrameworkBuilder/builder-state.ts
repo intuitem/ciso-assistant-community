@@ -282,20 +282,6 @@ export function urnSuffix(text: string): string {
 }
 
 /**
- * Deterministic short hash (FNV-1a, 32-bit) rendered as 8 hex chars. Used to
- * derive a source-unique, session-stable suffix when minting URNs for copied
- * catalog objects. Not cryptographic — only needs to separate distinct sources.
- */
-function stableHash(input: string): string {
-	let h = 0x811c9dc5;
-	for (let i = 0; i < input.length; i++) {
-		h ^= input.charCodeAt(i);
-		h = Math.imul(h, 0x01000193);
-	}
-	return (h >>> 0).toString(16).padStart(8, '0');
-}
-
-/**
  * Extract the node_id (mobile part) from a URN — everything after the 5th
  * colon. Mirrors the backend `extract_node_id`. node_id is the framework's
  * internal stable identifier; it must be unique per type within a framework
@@ -2149,10 +2135,10 @@ export interface ReferentialCatalogEntry {
 export interface ReferentialCatalog {
 	referenceControls: ReferentialCatalogEntry[];
 	threats: ReferentialCatalogEntry[];
-	/** Precomputed `urn -> label` over the whole catalog, built once so the
-	 *  per-node picker doesn't rebuild it. Framework-local inline objects are
-	 *  overlaid by the component. */
-	labelByUrn?: Map<string, string>;
+	/** Precomputed `token -> label` over the whole catalog (token = URN, or id
+	 *  for URN-less custom objects), built once so the per-node picker doesn't
+	 *  rebuild it. Framework-local inline objects are overlaid by the component. */
+	labelByToken?: Map<string, string>;
 }
 
 /** Display label for a referential: `ref_id name`, falling back to name/urn. */
@@ -2166,12 +2152,8 @@ export function referentialLabel(entry: {
 }
 
 /**
- * Mint a framework-owned inline referential. The single construction path for
- * both the inline-define form and the pick-existing copy, so created and copied
- * objects are shaped and URN-minted identically. `sourceKey`, when given (the
- * pick path passes the source URN/id), appends a stable hash so two distinct
- * sources that share a ref_id don't collapse to one copy — deterministically,
- * so re-picking the same source maps to the same copy across editing sessions.
+ * Mint a framework-owned inline referential for the inline-define form. The URN
+ * is minted from the ref_id in the framework's namespace/slug.
  */
 export function makeInlineReferential(opts: {
 	namespace: string;
@@ -2186,14 +2168,11 @@ export function makeInlineReferential(opts: {
 	csfFunction?: string | null;
 	typicalEvidence?: string | string[] | null;
 	translations?: Translations | null;
-	sourceKey?: string | null;
 }): InlineReferential {
 	const refId = opts.refId.trim() || `imported-${crypto.randomUUID().slice(0, 8)}`;
-	let suffix = urnSuffix(refId);
-	if (opts.sourceKey) suffix = `${suffix}-${stableHash(opts.sourceKey)}`;
 	return {
 		id: crypto.randomUUID(),
-		urn: `urn:${opts.namespace}:risk:${opts.urnType}:${opts.slug}:${suffix}`,
+		urn: `urn:${opts.namespace}:risk:${opts.urnType}:${opts.slug}:${urnSuffix(refId)}`,
 		ref_id: refId,
 		name: opts.name ?? null,
 		description: opts.description ?? null,
@@ -2207,37 +2186,6 @@ export function makeInlineReferential(opts: {
 				}
 			: {})
 	};
-}
-
-/**
- * Clone a picked catalog entry into a framework-owned inline object. Used when
- * the picked object can't travel as a library dependency (custom, or from a
- * non-builtin library), so it must be embedded by value on export.
- */
-export function inlineCopyFromCatalogEntry(
-	entry: ReferentialCatalogEntry,
-	opts: {
-		urnType: 'reference_control' | 'threat';
-		namespace: string;
-		slug: string;
-		isControl: boolean;
-	}
-): InlineReferential {
-	return makeInlineReferential({
-		namespace: opts.namespace,
-		slug: opts.slug,
-		urnType: opts.urnType,
-		isControl: opts.isControl,
-		refId: entry.ref_id?.trim() ?? '',
-		name: entry.name,
-		description: entry.description,
-		annotation: entry.annotation,
-		category: entry.category,
-		csfFunction: entry.csf_function,
-		typicalEvidence: entry.typical_evidence,
-		translations: entry.translations,
-		sourceKey: entry.urn || entry.id || ''
-	});
 }
 
 const CATALOG_CONTEXT_KEY = Symbol('framework-builder-catalog');
