@@ -1006,7 +1006,9 @@ def get_governance_calendar_data(
             activity_counts[str(expiry_date)] += 1
 
     # Helper function to count assessment dates
-    def count_assessment_dates(assessment_ids: Iterable[UUID], model: type[models.Model]):
+    def count_assessment_dates(
+        assessment_ids: Iterable[UUID], model: type[models.Model]
+    ):
         # Count due dates
         due_dates = model.objects.filter(
             id__in=assessment_ids, due_date__gte=start_date, due_date__lte=end_date
@@ -1376,7 +1378,9 @@ def get_counters(user: User, folder_id: Optional[str] = None) -> dict:
     )[0]
 
     return {
-        "domains": RoleAssignment.get_accessible_object_ids(scoped_folder, user, Folder)[0].count(),
+        "domains": RoleAssignment.get_accessible_object_ids(
+            scoped_folder, user, Folder
+        )[0].count(),
         "frameworks": frameworks_ids.count(),
         "applied_controls": applied_controls_count,
         "policies": policies_count,
@@ -1685,9 +1689,9 @@ def get_compliance_analytics(user: User, folder_id=None):
         )
         return model.objects.filter(id__in=object_ids)
 
-    viewable_assessments = viewable_items(ComplianceAssessment, folder_id).select_related(
-        "framework", "folder", "perimeter"
-    )
+    viewable_assessments = viewable_items(
+        ComplianceAssessment, folder_id
+    ).select_related("framework", "folder", "perimeter")
 
     progress_by_id = _compute_progress_by_assessment(
         viewable_assessments.values_list("id", flat=True)

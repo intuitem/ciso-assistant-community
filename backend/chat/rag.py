@@ -48,6 +48,7 @@ def get_accessible_folder_ids(user) -> list[str]:
 
     return [str(folder_id) for folder_id in folder_ids]
 
+
 def search(
     query: str,
     user,

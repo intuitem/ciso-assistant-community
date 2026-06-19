@@ -2,6 +2,7 @@
 
 from django.db import migrations, models
 
+
 def fill_folder_descendants(apps, schema_editor):
     Folder = apps.get_model("iam", "Folder")
 
@@ -23,7 +24,6 @@ def fill_folder_descendants(apps, schema_editor):
 
     descendant_relation_generator = (
         descendant_model(from_folder_id=ancestor_id, to_folder_id=descendant_id)
-
         for ancestor_id, descendant_ids in folder_to_descendants.items()
         for descendant_id in descendant_ids
     )
@@ -34,17 +34,17 @@ def fill_folder_descendants(apps, schema_editor):
         ignore_conflicts=True,
     )
 
-class Migration(migrations.Migration):
 
+class Migration(migrations.Migration):
     dependencies = [
-        ('iam', '0021_fix_auditee_iam_groups'),
+        ("iam", "0021_fix_auditee_iam_groups"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='folder',
-            name='descendants',
-            field=models.ManyToManyField(to='iam.folder', related_name='ancestors'),
+            model_name="folder",
+            name="descendants",
+            field=models.ManyToManyField(to="iam.folder", related_name="ancestors"),
         ),
         migrations.RunPython(fill_folder_descendants),
     ]

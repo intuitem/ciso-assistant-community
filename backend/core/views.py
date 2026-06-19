@@ -816,7 +816,9 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 else:
                     return self.model.objects.none()
 
-        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(Folder.get_root_folder(), self.request.user, self.model)
+        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), self.request.user, self.model
+        )
         queryset = self.model.objects.filter(id__in=object_ids_view)
 
         model_field_names = {f.name for f in self.model._meta.get_fields()}
