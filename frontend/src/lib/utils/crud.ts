@@ -2084,23 +2084,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [
 			{
 				field: 'findings',
-				urlModel: 'threats',
-				addExisting: {
-					parentField: 'threats'
-				}
-			},
-			{
-				field: 'findings',
 				urlModel: 'vulnerabilities',
 				addExisting: {
 					parentField: 'vulnerabilities'
-				}
-			},
-			{
-				field: 'findings',
-				urlModel: 'reference-controls',
-				addExisting: {
-					parentField: 'reference_controls'
 				}
 			},
 			{
@@ -2116,6 +2102,20 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'evidences',
 				addExisting: {
 					parentField: 'evidences'
+				}
+			},
+			{
+				field: 'findings',
+				urlModel: 'threats',
+				addExisting: {
+					parentField: 'threats'
+				}
+			},
+			{
+				field: 'findings',
+				urlModel: 'reference-controls',
+				addExisting: {
+					parentField: 'reference_controls'
 				}
 			}
 		],
@@ -2584,6 +2584,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
 		],
 		detailViewFields: [
+			{ field: 'model_label' },
 			{ field: 'key' },
 			{ field: 'label' },
 			{ field: 'field_type' },

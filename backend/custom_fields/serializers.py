@@ -41,6 +41,7 @@ class CustomFieldDefinitionReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     choices = CustomFieldChoiceSerializer(many=True, read_only=True)
     model = serializers.SerializerMethodField()
+    model_label = serializers.SerializerMethodField()
     label_localized = serializers.CharField(read_only=True)
     help_text_localized = serializers.CharField(read_only=True)
 
@@ -50,6 +51,12 @@ class CustomFieldDefinitionReadSerializer(BaseModelSerializer):
 
     def get_model(self, obj) -> str:
         return f"{obj.content_type.app_label}.{obj.content_type.model}"
+
+    def get_model_label(self, obj) -> str:
+        model_class = obj.content_type.model_class()
+        if model_class is not None:
+            return str(model_class._meta.verbose_name).capitalize()
+        return obj.content_type.model
 
 
 class CustomFieldDefinitionWriteSerializer(BaseModelSerializer):

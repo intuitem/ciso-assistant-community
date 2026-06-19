@@ -2837,8 +2837,8 @@ export const listViewFields = {
 		body: ['name', 'abbreviation']
 	},
 	'custom-fields': {
-		head: ['key', 'label', 'fieldType', 'required', 'domain'],
-		body: ['key', 'label', 'field_type', 'required', 'folder'],
+		head: ['model', 'key', 'label', 'fieldType', 'required', 'domain'],
+		body: ['model_label', 'key', 'label', 'field_type', 'required', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER
 		}

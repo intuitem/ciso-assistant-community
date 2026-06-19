@@ -88,16 +88,15 @@
 	});
 </script>
 
-{#if !isEdit}
-	<Select
-		{form}
-		options={modelOptions}
-		field="model"
-		label={m.model ? m.model() : 'Model'}
-		cacheLock={cacheLocks['model']}
-		bind:cachedValue={formDataCache['model']}
-	/>
-{/if}
+<Select
+	{form}
+	options={modelOptions}
+	field="model"
+	label={m.model()}
+	disabled={isEdit}
+	cacheLock={cacheLocks['model']}
+	bind:cachedValue={formDataCache['model']}
+/>
 
 <FolderTreeSelect
 	{form}
