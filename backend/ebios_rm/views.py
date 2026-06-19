@@ -3,6 +3,7 @@ import uuid
 
 import django_filters as df
 import pandas as pd
+from django.db.models import Case, F, FloatField, Value, When
 from django.http import HttpResponse
 from core.serializers import RiskMatrixReadSerializer
 from core.views import (
@@ -956,16 +957,44 @@ class StakeholderFilter(df.FilterSet):
 
 
 class StakeholderOrderingFilter(SmartOrderingFilter):
-    """Order Stakeholders by related object names instead of raw FK PKs (UUIDs).
+    """Remap ordering fields that don't map directly to DB columns.
 
-    ``?ordering=entity`` would otherwise sort on the Entity primary key, which
-    is meaningless to the user. Remap such FK fields to their ``__name`` lookup.
+    FK fields like ``entity`` are redirected to ``entity__name`` so the sort
+    is alphabetical instead of by UUID.  Computed properties like
+    ``current_criticality`` are backed by SQL annotations so the database
+    can ORDER BY them.
     """
 
     field_remap = {
         "entity": "entity__name",
-        # "category": "category__name",  # Not useful now : Terminology uses int PK, so insertion order is stable enough
+        "current_criticality": "_current_criticality",
+        "residual_criticality": "_residual_criticality",
     }
+
+    @staticmethod
+    def _criticality_annotation(prefix):
+        denom = F(f"{prefix}_maturity") * F(f"{prefix}_trust")
+        return Case(
+            When(**{f"{prefix}_maturity": 0}, then=Value(0.0)),
+            When(**{f"{prefix}_trust": 0}, then=Value(0.0)),
+            default=F(f"{prefix}_dependency")
+            * F(f"{prefix}_penetration")
+            * 1.0
+            / denom,
+            output_field=FloatField(),
+        )
+
+    def get_valid_fields(self, queryset, view, context=None):
+        valid = super().get_valid_fields(queryset, view, context or {})
+        valid += [(src, src) for src in self.field_remap if src not in dict(valid)]
+        return valid
+
+    def filter_queryset(self, request, queryset, view):
+        queryset = queryset.annotate(
+            _current_criticality=self._criticality_annotation("current"),
+            _residual_criticality=self._criticality_annotation("residual"),
+        )
+        return super().filter_queryset(request, queryset, view)
 
     def get_ordering(self, request, queryset, view):
         ordering = super().get_ordering(request, queryset, view)
@@ -983,7 +1012,6 @@ class StakeholderOrderingFilter(SmartOrderingFilter):
 class StakeholderViewSet(BaseModelViewSet):
     model = Stakeholder
     filterset_class = StakeholderFilter
-    search_fields = ["entity__name", "category__name"]
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
