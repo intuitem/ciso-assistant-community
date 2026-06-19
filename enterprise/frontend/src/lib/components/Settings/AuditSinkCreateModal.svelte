@@ -16,7 +16,7 @@
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { superForm } from 'sveltekit-superforms/client';
 
-	const cBase = 'card bg-surface-50 p-4 shadow-xl space-y-4';
+	const cBase = 'card bg-surface-50-950 p-4 shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 
 	interface Props {
