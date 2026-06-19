@@ -82,6 +82,24 @@ class CustomFieldDefinitionWriteSerializer(BaseModelSerializer):
             raise serializers.ValidationError(
                 {"field_type": "Cannot change field type while values exist."}
             )
+        # A key must resolve to a single value column across folders, otherwise
+        # filtering/search by `cf__<key>` is ambiguous: the filter selects one
+        # column per key regardless of the object's folder.
+        key = data.get("key", getattr(self.instance, "key", None))
+        if key and field_type:
+            conflicting = CustomFieldDefinition.objects.filter(
+                content_type=data["content_type"], key=key
+            ).exclude(field_type=field_type)
+            if self.instance is not None:
+                conflicting = conflicting.exclude(pk=self.instance.pk)
+            if conflicting.exists():
+                raise serializers.ValidationError(
+                    {
+                        "field_type": "A custom field with this key already exists "
+                        "for this model with a different type."
+                    }
+                )
+
         if data.get("choices") and field_type not in (
             FieldType.CHOICE,
             FieldType.MULTI_CHOICE,

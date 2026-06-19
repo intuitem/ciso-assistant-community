@@ -262,6 +262,8 @@ class CustomFieldValue(AbstractBaseModel):
         # write layer (see set_custom_fields). A DB constraint can't express it: a
         # partial condition cannot span the relation to definition.field_type, and
         # multi_choice deliberately keeps several rows per object.
+        # DEFERRED: a DB-backed guarantee (denormalize is_multi + partial unique)
+        # to close the concurrent-write race — see project-custom-fields memory.
 
     def __str__(self):
         return f"{self.definition.key}={self.value}"

@@ -82,6 +82,38 @@ class TestCustomFieldsAPI:
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
         assert "searchable" in resp.json()
 
+    def test_same_key_different_type_rejected(self, authenticated_client):
+        # A key must have one type across folders so cf__<key> resolves one column.
+        root = Folder.get_root_folder()
+        a = Folder.objects.create(name="Domain A", parent_folder=root)
+        b = Folder.objects.create(name="Domain B", parent_folder=root)
+        first = authenticated_client.post(
+            CF_URL,
+            {
+                "model": "core.asset",
+                "key": "priority",
+                "label": "Priority",
+                "field_type": "choice",
+                "folder": str(a.id),
+                "choices": [{"value": "high", "label": "High"}],
+            },
+            format="json",
+        )
+        assert first.status_code == status.HTTP_201_CREATED, first.content
+        second = authenticated_client.post(
+            CF_URL,
+            {
+                "model": "core.asset",
+                "key": "priority",
+                "label": "Priority",
+                "field_type": "number",
+                "folder": str(b.id),
+            },
+            format="json",
+        )
+        assert second.status_code == status.HTTP_400_BAD_REQUEST
+        assert "field_type" in second.json()
+
     def test_create_definition_without_model_is_400(self, authenticated_client):
         resp = authenticated_client.post(
             CF_URL,
