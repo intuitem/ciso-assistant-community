@@ -561,7 +561,7 @@ def detect_sync_sources(ebios_rm_study):
             covered_ss_ids.add(os_obj.attack_path.strategic_scenario_id)
 
     # Level 2: selected attack paths not covered by an operational scenario
-    selected_ap = list(ebios_rm_study.attackpath_set.filter(is_selected=True))
+    selected_ap = list(ebios_rm_study.attack_paths.filter(is_selected=True))
     covered_ap_ids = {os_obj.attack_path_id for os_obj in selected_os}
     uncovered_ap = [ap for ap in selected_ap if ap.id not in covered_ap_ids]
     if uncovered_ap:
