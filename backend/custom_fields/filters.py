@@ -30,6 +30,10 @@ class CustomFieldFilterBackend(BaseFilterBackend):
             return queryset
 
         content_type = ContentType.objects.get_for_model(queryset.model)
+        # One definition per key is safe: CustomFieldDefinition.clean() enforces a
+        # single field_type (hence value_column) per (content_type, key) across all
+        # folders, so any same-key definition the dict keeps yields the same column —
+        # even though a list queryset spans objects from multiple folders.
         definitions = {
             d.key: d
             for d in CustomFieldDefinition.objects.filter(

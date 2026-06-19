@@ -128,7 +128,17 @@ def test_same_key_disjoint_siblings_allowed(root, project_ct):
     a = Folder.objects.create(name="A", parent_folder=root)
     b = Folder.objects.create(name="B", parent_folder=root)
     make_def(project_ct, a, "dup", FieldType.TEXT)
-    make_def(project_ct, b, "dup", FieldType.TEXT)  # must not raise
+    make_def(project_ct, b, "dup", FieldType.TEXT)  # same type → must not raise
+
+
+def test_same_key_different_type_rejected_at_model(root, project_ct):
+    # A key must resolve to one type across folders, else cf__<key> filtering is
+    # ambiguous. Enforced in clean() for all write paths (not just the serializer).
+    a = Folder.objects.create(name="A", parent_folder=root)
+    b = Folder.objects.create(name="B", parent_folder=root)
+    make_def(project_ct, a, "tier", FieldType.CHOICE)
+    with pytest.raises(ValidationError):
+        make_def(project_ct, b, "tier", FieldType.NUMBER)
 
 
 # --------------------------------------------------------------------------- #

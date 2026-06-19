@@ -154,6 +154,19 @@ class CustomFieldDefinition(FolderMixin, PublishInRootFolderMixin, AbstractBaseM
         ).exclude(pk=self.pk)
         if not siblings.exists():
             return
+        # A key must resolve to a single type (hence a single value column) across
+        # ALL folders, so list filtering/search by `cf__<key>` is unambiguous even
+        # for a queryset spanning sibling folders. Enforced here (model level) so it
+        # holds for every write path, not just the API serializer.
+        if siblings.exclude(field_type=self.field_type).exists():
+            raise ValidationError(
+                {
+                    "field_type": _(
+                        "A custom field with this key already exists for this model "
+                        "with a different type."
+                    )
+                }
+            )
         my_chain = self._ancestor_or_self_ids(self.folder)
         for other in siblings.select_related("folder"):
             other_chain = self._ancestor_or_self_ids(other.folder)
