@@ -112,7 +112,7 @@ class FeatureFlagsViewSet(viewsets.ModelViewSet):
         self.check_object_permissions(self.request, obj)
         return obj
 
-    @action(detail=False, methods=["get"])
+    @action(detail=True, methods=["get"])
     def defaults(self, request, pk=None):
         """Expose each flag's serializer default so the frontend "Reset to
         defaults" never drifts from the backend. Only exposed flags are

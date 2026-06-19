@@ -53,6 +53,14 @@
 		initialized = true; // Always mark as initialized, even for new forms
 	});
 
+	// Warn when a residual hypothesis only has baseline (existing) controls:
+	// treatment cost is then 0, so ROSI cannot be computed.
+	let showBaselineControlsWarning = $derived(
+		$formStore.risk_stage === 'residual' &&
+			($formStore.existing_applied_controls?.length ?? 0) > 0 &&
+			($formStore.added_applied_controls?.length ?? 0) === 0
+	);
+
 	// Only sync percentage → probability (one direction)
 	$effect(() => {
 		if (!initialized) return;
@@ -90,6 +98,14 @@
 	bind:cachedValue={formDataCache['risk_stage']}
 	helpText="You can have multiple residual (future) hypotheses but only one current (present) and one inherent (past)"
 />
+
+{#if showBaselineControlsWarning}
+	<div
+		class="alert bg-amber-100 border border-amber-300 text-amber-800 px-4 py-3 rounded-lg text-xs"
+	>
+		<i class="fa-solid fa-triangle-exclamation mr-1"></i>{m.rosiBaselineControlsWarning()}
+	</div>
+{/if}
 
 <Dropdown
 	open={false}

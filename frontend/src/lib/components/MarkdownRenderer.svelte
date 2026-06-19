@@ -89,9 +89,11 @@
 </script>
 
 {#if renderedContent}
-	<div class="prose prose-sm max-w-none wrap-break-word whitespace-pre-line {className}">
+	<div
+		class="prose prose-sm dark:prose-invert max-w-none wrap-break-word whitespace-pre-line {className}"
+	>
 		{@html renderedContent}
 	</div>
 {:else}
-	<span class="text-gray-500 italic">--</span>
+	<span class="text-surface-600-400 italic">--</span>
 {/if}

@@ -23,7 +23,7 @@
 {:then report}
 	<ReportView {report} />
 {:catch err}
-	<div class="card p-6 m-2 bg-white text-sm text-red-700">
+	<div class="card p-6 m-2 bg-surface-50-950 text-sm text-red-700">
 		{err?.message ?? m.frameworkReport()}
 	</div>
 {/await}

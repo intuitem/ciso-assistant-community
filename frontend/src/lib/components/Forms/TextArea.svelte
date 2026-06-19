@@ -87,6 +87,6 @@
 		></textarea>
 	</div>
 	{#if helpText}
-		<p class="text-sm text-gray-500 whitespace-pre-line">{helpText}</p>
+		<p class="text-sm text-surface-600-400 whitespace-pre-line">{helpText}</p>
 	{/if}
 </div>

@@ -54,6 +54,10 @@ The permission is domain-scoped: a user sees an object's trail only when they ho
 
 The trail shows the most recent 200 changes per object. Turning the `object_audit_trail` flag off hides the button everywhere and disables the lookup, without deleting any recorded history.
 
+## Forwarding to a SIEM
+
+Beyond the two in-app surfaces, the log can be streamed to an external SIEM (Splunk, Elastic, Sentinel…) over HTTP or Kafka. See [Audit log forwarding](../integrations/audit-log-forwarding.md).
+
 ## What's never logged
 
 Some data is deliberately kept out of the audit log:

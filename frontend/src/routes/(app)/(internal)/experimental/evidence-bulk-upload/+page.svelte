@@ -145,24 +145,24 @@
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
 	<!-- Form -->
-	<section class="lg:col-span-2 bg-white shadow-sm py-5 px-6 space-y-5 card">
+	<section class="lg:col-span-2 bg-surface-50-950 shadow-sm py-5 px-6 space-y-5 card">
 		<header>
 			<h4 class="h4 font-bold flex items-center gap-2">
 				<i class="fa-solid fa-cloud-arrow-up text-indigo-600"></i>
 				{m.bulkEvidenceUpload()}
 			</h4>
-			<p class="text-sm text-gray-600 mt-1">{m.bulkEvidenceUploadDescription()}</p>
+			<p class="text-sm text-surface-600-400 mt-1">{m.bulkEvidenceUploadDescription()}</p>
 		</header>
 
 		<div class="space-y-1.5">
-			<label for="folder" class="block text-sm font-medium text-gray-900">
+			<label for="folder" class="block text-sm font-medium text-surface-900-100">
 				{m.targetDomain()} <span class="text-red-500">*</span>
 			</label>
 			<select
 				id="folder"
 				bind:value={folderId}
 				disabled={busy}
-				class="w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
+				class="w-full rounded-lg border-surface-300-700 text-surface-700-300 sm:text-sm"
 			>
 				<option value="">{m.selectADomain()}</option>
 				{#each data.folders as folder}
@@ -172,7 +172,7 @@
 		</div>
 
 		<div class="space-y-1.5">
-			<div class="block text-sm font-medium text-gray-900">
+			<div class="block text-sm font-medium text-surface-900-100">
 				{m.conflictStrategy()} <span class="text-red-500">*</span>
 			</div>
 			<ConflictStrategyPicker bind:strategy disabled={busy} />
@@ -182,7 +182,7 @@
 			<DirectoryFilePicker bind:entries disabled={busy} />
 		</div>
 
-		<div class="flex flex-wrap gap-2 pt-2 border-t border-gray-100">
+		<div class="flex flex-wrap gap-2 pt-2 border-t border-surface-100-900">
 			<button
 				type="button"
 				class="btn preset-filled"
@@ -210,27 +210,29 @@
 	</section>
 
 	<!-- Results panel -->
-	<aside class="lg:col-span-1 bg-white shadow-sm py-5 px-6 space-y-3 card">
-		<h5 class="font-semibold text-sm uppercase tracking-wide text-gray-500">{m.results()}</h5>
+	<aside class="lg:col-span-1 bg-surface-50-950 shadow-sm py-5 px-6 space-y-3 card">
+		<h5 class="font-semibold text-sm uppercase tracking-wide text-surface-600-400">
+			{m.results()}
+		</h5>
 		{#if summary}
 			<BatchUploadResults {summary} />
 		{:else}
-			<p class="text-sm text-gray-500">{m.summaryWillAppearHere()}</p>
+			<p class="text-sm text-surface-600-400">{m.summaryWillAppearHere()}</p>
 		{/if}
 	</aside>
 
 	<!-- Queue (full width) -->
-	<section class="lg:col-span-3 bg-white shadow-sm py-5 px-6 space-y-3 card">
+	<section class="lg:col-span-3 bg-surface-50-950 shadow-sm py-5 px-6 space-y-3 card">
 		<div class="flex items-center justify-between">
-			<h5 class="font-semibold text-sm uppercase tracking-wide text-gray-500">
+			<h5 class="font-semibold text-sm uppercase tracking-wide text-surface-600-400">
 				{m.queue()}
 				{#if entries.length > 0}
-					<span class="ml-1 text-gray-400 normal-case tracking-normal">({entries.length})</span>
+					<span class="ml-1 text-surface-500 normal-case tracking-normal">({entries.length})</span>
 				{/if}
 			</h5>
 		</div>
 		{#if entries.length === 0}
-			<p class="text-sm text-gray-500">{m.noFilesQueuedYet()}</p>
+			<p class="text-sm text-surface-600-400">{m.noFilesQueuedYet()}</p>
 		{:else}
 			<BatchUploadQueueTable {entries} onRemove={removeEntry} disabled={busy} />
 		{/if}

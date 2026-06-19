@@ -13,6 +13,7 @@
 	import SecIntelFeedsSettings from '$lib/components/Settings/SecIntelFeedsSettings.svelte';
 	import EmailTemplatesSettings from '$lib/components/Settings/EmailTemplatesSettings.svelte';
 	import WordTemplatesSettings from '$lib/components/Settings/WordTemplatesSettings.svelte';
+	import AuditLogForwardingSettings from '$lib/components/Settings/AuditLogForwardingSettings.svelte';
 
 	// Tabs whose content lives in a dedicated sub-route and is preloaded into
 	// page.state instead of being loaded by the main settings page.
@@ -88,7 +89,13 @@
 		{#if page.data?.featureflags?.outgoing_webhooks}
 			<Tabs.Trigger value="webhooks"
 				><span class="flex flex-row gap-2 items-center ml-0"
-					><svg width="20px" height="20px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+					><svg
+						width="20px"
+						height="20px"
+						viewBox="0 0 24 24"
+						xmlns="http://www.w3.org/2000/svg"
+						fill="currentColor"
+					>
 						<title>webhook</title>
 						<rect width="24" height="24" fill="none" />
 						<path
@@ -97,6 +104,11 @@
 					</svg>
 					{m.webhooks()}</span
 				></Tabs.Trigger
+			>
+		{/if}
+		{#if page.data?.featureflags?.audit_log_forwarding}
+			<Tabs.Trigger value="auditLogForwarding"
+				><i class="fa-solid fa-shield-halved"></i> {m.auditLogForwarding()}</Tabs.Trigger
 			>
 		{/if}
 		<Tabs.Trigger value="emailTemplates"
@@ -134,6 +146,9 @@
 	<Tabs.Content value="webhooks">
 		<WebhooksSettings {data} allowMultiple />
 	</Tabs.Content>
+	<Tabs.Content value="auditLogForwarding">
+		<AuditLogForwardingSettings {data} />
+	</Tabs.Content>
 	<Tabs.Content value="emailTemplates">
 		<div class="space-y-8">
 			<section>
@@ -153,17 +168,17 @@
 	</Tabs.Content>
 	<Tabs.Content value="integrations">
 		<div>
-			<span class="text-gray-500">{m.configureIntegrations()}</span>
+			<span class="text-surface-600-400">{m.configureIntegrations()}</span>
 			<div class="flow-root">
-				<dl class="divide-y divide-surface-100 text-sm">
+				<dl class="divide-y divide-surface-100-900 text-sm">
 					<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
 						<dt class="font-medium">{m.itsm()}</dt>
-						<dd class="text-surface-900 sm:col-span-2">
+						<dd class="text-surface-900-100 sm:col-span-2">
 							<div class="card p-4 bg-inherit flex flex-col space-y-3">
 								<a class="unstyled" href="/settings/integrations/jira">
-									<div class="flex flex-col space-y-2 hover:bg-primary-50 card p-4">
+									<div class="flex flex-col space-y-2 hover:bg-primary-50-950 card p-4">
 										<span class="flex flex-row justify-between text-xl">
-											<i class="text-blue-700 fab fa-jira"></i>
+											<i class="text-blue-700 dark:text-blue-300 fab fa-jira"></i>
 											{#if page.data.settings?.enabled_integrations?.some((integration: Record<string, any>) => integration.name === 'jira' && integration.configurations?.length)}
 												<i class="fa-solid fa-circle-check text-success-600-400"></i>
 											{/if}
@@ -176,9 +191,9 @@
 							</div>
 							<div class="card p-4 bg-inherit flex flex-col space-y-3">
 								<a class="unstyled" href="/settings/integrations/servicenow">
-									<div class="flex flex-col space-y-2 hover:bg-primary-50 card p-4">
+									<div class="flex flex-col space-y-2 hover:bg-primary-50-950 card p-4">
 										<span class="flex flex-row justify-between text-xl">
-											<i class="text-green-700 fa-solid fa-o"></i>
+											<i class="text-green-700 dark:text-green-300 fa-solid fa-o"></i>
 											{#if page.data.settings?.enabled_integrations?.some((integration: Record<string, any>) => integration.name === 'servicenow' && integration.configurations?.length)}
 												<i class="fa-solid fa-circle-check text-success-600-400"></i>
 											{/if}

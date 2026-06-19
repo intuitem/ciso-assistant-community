@@ -32,7 +32,7 @@
 <th
 	onclick={update}
 	class:active={isActive}
-	class="{_class} hover:text-black"
+	class="{_class} hover:text-surface-950-50"
 	data-testid="tableheader"
 	role="columnheader"
 	aria-sort={$sort?.orderBy === identifier
@@ -44,7 +44,7 @@
 	<div class="flex items-center h-full">
 		{@render children?.()}
 		<span
-			class="pl-2 before:border-b-surface-200 before:mt-0.5 after:border-t-surface-200 after:mt-0.5"
+			class="pl-2 before:border-b-surface-200-800 before:mt-0.5 after:border-t-surface-200-800 after:mt-0.5"
 			class:asc={$sort?.direction === 'asc'}
 			class:desc={$sort?.direction === 'desc'}
 			aria-hidden="true"

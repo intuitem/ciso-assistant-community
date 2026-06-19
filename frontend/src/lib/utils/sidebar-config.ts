@@ -18,6 +18,7 @@ type SidebarBackendKeys = {
 	organisation_issues: boolean;
 	quantitative_risk_studies: boolean;
 	terminologies: boolean;
+	custom_fields: boolean;
 	bia: boolean;
 	project_management: boolean;
 	contracts: boolean;
@@ -56,6 +57,7 @@ type SidebarFrontendKeys = {
 	organisationIssues: boolean;
 	quantitativeRiskStudies: boolean;
 	terminologies: boolean;
+	customFields: boolean;
 	businessImpactAnalysis: boolean;
 	projectManagement: boolean;
 	contracts: boolean;
@@ -95,6 +97,7 @@ export function getSidebarVisibleItems(
 		organisationIssues: featureFlags?.organisation_issues ?? false,
 		quantitativeRiskStudies: featureFlags?.quantitative_risk_studies ?? false,
 		terminologies: featureFlags?.terminologies ?? true,
+		customFields: featureFlags?.custom_fields ?? false,
 		businessImpactAnalysis: featureFlags?.bia ?? true,
 		projectManagement: featureFlags?.project_management ?? false,
 		contracts: featureFlags?.contracts ?? false,

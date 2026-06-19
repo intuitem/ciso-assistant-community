@@ -4,6 +4,19 @@
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
 
+	// Track the app dark mode (`.dark` on <html>) so the SVG-rendered
+	// node fill and labels stay readable. Unovis only reacts to
+	// `body.theme-dark`, which this app never sets.
+	let isDark = $state(false);
+	$effect(() => {
+		const root = document.documentElement;
+		const update = () => (isDark = root.classList.contains('dark'));
+		update();
+		const observer = new MutationObserver(update);
+		observer.observe(root, { attributes: true, attributeFilter: ['class'] });
+		return () => observer.disconnect();
+	});
+
 	type NodeDatum = {
 		id: string;
 		label: string;
@@ -348,7 +361,7 @@
 		}
 	};
 
-	const nodeFill = () => '#ffffff';
+	const nodeFill = () => (isDark ? '#292b34' : '#ffffff');
 
 	const linkStroke = '#8FA1B9';
 	const linkArrow = GraphLinkArrowStyle.Single;
@@ -395,7 +408,7 @@
 							.attr('y', i * lineHeight - (lines.length * lineHeight) / 2 + lineHeight / 2)
 							.attr('font-size', '11px')
 							.attr('font-weight', '500')
-							.attr('fill', '#0F1E57')
+							.attr('fill', isDark ? '#E6E9F3' : '#0F1E57')
 							.style('font-family', 'var(--vis-font-family)')
 							.text(line.trim());
 					});
@@ -407,7 +420,7 @@
 	const nodeLabel = () => '';
 </script>
 
-<div class="chart bg-white rounded-lg shadow-sm">
+<div class="chart bg-surface-50-950 rounded-lg shadow-sm">
 	<VisSingleContainer data={processedData} {height}>
 		<VisGraph
 			{nodeShape}
@@ -440,6 +453,17 @@
 		--vis-graph-link-band-opacity: 0.25;
 		--vis-graph-panel-label-font-weight: 800;
 		--vis-graph-link-stroke-color: #8fa1b9;
+	}
+
+	/* Unovis only swaps its dark vars on `body.theme-dark`, which this app
+	   never sets. Mirror its dark palette under the app's `.dark` class so
+	   panel labels/borders/fills stay readable. Category colors (panel
+	   border/side-icon symbol set via props) are left untouched. */
+	:global(.dark) .chart {
+		--vis-graph-panel-label-color: #e6e9f3;
+		--vis-graph-panel-label-background: #292b34;
+		--vis-graph-panel-fill-color: #292b34;
+		--vis-graph-panel-side-icon-shape-fill-color: #6c778c;
 	}
 
 	:global(.custom-multiline-label) {
