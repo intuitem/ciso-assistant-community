@@ -38,6 +38,7 @@
 	// both surface pairings (via color-scheme) and dark: utilities to render light.
 	let printWasDark = false;
 	let printForced = false;
+	let printTimeout: ReturnType<typeof setTimeout> | undefined;
 	function forceLightForPrint() {
 		if (printForced) return;
 		printForced = true;
@@ -56,6 +57,11 @@
 		window.addEventListener('beforeprint', handlePrint);
 		window.addEventListener('afterprint', handleAfterPrint);
 		return () => {
+			if (printTimeout) {
+				clearTimeout(printTimeout);
+				printTimeout = undefined;
+			}
+			restoreThemeAfterPrint();
 			window.removeEventListener('beforeprint', handlePrint);
 			window.removeEventListener('afterprint', handleAfterPrint);
 		};
@@ -63,7 +69,11 @@
 
 	function exportPDF() {
 		forceLightForPrint();
-		setTimeout(() => window.print(), 100);
+		if (printTimeout) clearTimeout(printTimeout);
+		printTimeout = setTimeout(() => {
+			printTimeout = undefined;
+			window.print();
+		}, 100);
 	}
 </script>
 

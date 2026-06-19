@@ -20,6 +20,7 @@
 	// both surface pairings (via color-scheme) and dark: utilities to render light.
 	let printWasDark = false;
 	let printForced = false;
+	let printTimeout: ReturnType<typeof setTimeout> | undefined;
 	function forceLightForPrint() {
 		if (printForced) return;
 		printForced = true;
@@ -45,6 +46,12 @@
 		window.addEventListener('afterprint', handleAfterPrint);
 
 		return () => {
+			if (printTimeout) {
+				clearTimeout(printTimeout);
+				printTimeout = undefined;
+			}
+			document.documentElement.classList.remove('is-printing');
+			restoreThemeAfterPrint();
 			window.removeEventListener('beforeprint', handlePrint);
 			window.removeEventListener('afterprint', handleAfterPrint);
 		};
@@ -62,7 +69,11 @@
 		// Flip to light first so theme-managed ECharts re-render (animation-free) in light
 		// before the print snapshot, then print. beforeprint also flips; both are idempotent.
 		forceLightForPrint();
-		setTimeout(() => window.print(), 200);
+		if (printTimeout) clearTimeout(printTimeout);
+		printTimeout = setTimeout(() => {
+			printTimeout = undefined;
+			window.print();
+		}, 200);
 	}
 
 	// Helper function to apply scale transformation
