@@ -2132,6 +2132,11 @@ class FrameworkReadSerializer(ReferentialSerializer):
     # the backend will actually save.
     effective_field_visibility = serializers.SerializerMethodField()
 
+    implementation_groups_definition = serializers.SerializerMethodField()
+
+    def get_implementation_groups_definition(self, obj):
+        return obj.get_implementation_groups_definition_translated()
+
     def get_has_editing_draft(self, obj):
         return obj.editing_draft is not None
 
@@ -2166,6 +2171,9 @@ class FrameworkWriteSerializer(FrameworkReadSerializer):
     )
     # reference_controls is a read-only property on Framework, not a writable DB field.
     reference_controls = serializers.ListField(required=False, read_only=True)
+    implementation_groups_definition = serializers.JSONField(
+        required=False, allow_null=True
+    )
 
     def create(self, validated_data):
         # Strip any non-model fields that leak through from the read serializer
