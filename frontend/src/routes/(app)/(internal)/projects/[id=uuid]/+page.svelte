@@ -590,7 +590,7 @@
 							href={project.ref_link}
 							target="_blank"
 							rel="noopener noreferrer"
-							class="text-primary-600 hover:text-primary-800-300 hover:underline text-sm inline-flex items-center gap-1 mt-2"
+							class="text-primary-600 hover:text-primary-800-200 hover:underline text-sm inline-flex items-center gap-1 mt-2"
 						>
 							<i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
 							{project.ref_link}
@@ -780,7 +780,7 @@
 				{#if project.parent_project}
 					<Anchor
 						href="/projects/{project.parent_project.id}"
-						class="text-primary-600 hover:text-primary-800-300 hover:underline truncate block"
+						class="text-primary-600 hover:text-primary-800-200 hover:underline truncate block"
 					>
 						{project.parent_project.str}
 					</Anchor>
@@ -1461,7 +1461,7 @@
 						{#if project.linked_collection}
 							<Anchor
 								href="/generic-collections/{project.linked_collection.id}"
-								class="text-primary-600 hover:text-primary-800-300 hover:underline text-sm"
+								class="text-primary-600 hover:text-primary-800-200 hover:underline text-sm"
 							>
 								{project.linked_collection.str}
 							</Anchor>
@@ -1492,7 +1492,7 @@
 									<li class="text-sm">
 										<Anchor
 											href="/responsibility-matrices/{matrix.id}"
-											class="text-primary-600 hover:text-primary-800-300 hover:underline"
+											class="text-primary-600 hover:text-primary-800-200 hover:underline"
 										>
 											{matrix.str}
 										</Anchor>

@@ -185,7 +185,7 @@
 						<input
 							type="number"
 							value={sliderMin}
-							class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40"
+							class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40"
 							onblur={(e) => updateSliderConfig({ min: Number(e.currentTarget.value) })}
 						/>
 					</label>
@@ -194,7 +194,7 @@
 						<input
 							type="number"
 							value={sliderMax}
-							class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40"
+							class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40"
 							onblur={(e) => updateSliderConfig({ max: Number(e.currentTarget.value) })}
 						/>
 					</label>
@@ -204,7 +204,7 @@
 							type="number"
 							value={sliderStep}
 							min="0"
-							class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40"
+							class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40"
 							onblur={(e) => updateSliderConfig({ step: Number(e.currentTarget.value) })}
 						/>
 					</label>
@@ -239,7 +239,7 @@
 						value={getTranslation(question.translations, lang, 'text')}
 						placeholder={m.builderTranslateQuestion()}
 						rows="2"
-						class="w-full text-sm border border-surface-200-800 rounded-lg px-3 py-2 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-none"
+						class="input w-full text-sm border border-surface-200-800 rounded-lg px-3 py-2 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-none"
 						onblur={(e) => {
 							saveField(
 								'translations',
@@ -253,7 +253,7 @@
 					value={question.text ?? ''}
 					placeholder={m.builderQuestionTextPlaceholder()}
 					rows="2"
-					class="w-full text-sm border border-surface-200-800 rounded-lg px-3 py-2 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-none"
+					class="input w-full text-sm border border-surface-200-800 rounded-lg px-3 py-2 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-none"
 					onblur={(e) => {
 						saveField('text', e.currentTarget.value);
 					}}
@@ -267,7 +267,7 @@
 					<input
 						type="text"
 						value={question.ref_id ?? ''}
-						class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40"
+						class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40"
 						onblur={(e) => {
 							saveField('ref_id', e.currentTarget.value || null);
 						}}
@@ -279,7 +279,7 @@
 						type="number"
 						value={question.weight}
 						min="0"
-						class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40"
+						class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40"
 						onblur={(e) => {
 							const val = Number(e.currentTarget.value) || 1;
 							saveField('weight', val);
@@ -292,7 +292,7 @@
 						type="text"
 						value={question.annotation ?? ''}
 						placeholder={m.builderAnnotationOptional()}
-						class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40"
+						class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40"
 						onblur={(e) => {
 							saveField('annotation', e.currentTarget.value || null);
 						}}

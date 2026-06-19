@@ -34,12 +34,12 @@
 			experimental
 		</span>
 		<div class="flex-1"></div>
-		<label class="text-sm font-medium text-surface-700" for="board-folder">Domain:</label>
+		<label class="text-sm font-medium text-surface-700-300" for="board-folder">Domain:</label>
 		<select
 			id="board-folder"
 			bind:value={selectedFolderId}
 			onchange={handleFolderChange}
-			class="rounded-lg border-surface-300-700 text-surface-700-300 sm:text-sm"
+			class="rounded-lg border-surface-300-700 bg-surface-100-900 text-surface-700-300 sm:text-sm"
 		>
 			<option value="">Select a domain</option>
 			{#each data.folders as folder}

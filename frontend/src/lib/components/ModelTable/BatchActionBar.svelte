@@ -160,7 +160,7 @@
 		</span>
 		<button
 			type="button"
-			class="text-sm text-primary-600 hover:text-primary-800-300 underline"
+			class="text-sm text-primary-600 hover:text-primary-800-200 underline"
 			onclick={onClearSelection}
 		>
 			{m.clearSelection()}

@@ -362,7 +362,7 @@
 											{m.personalAccessTokensDescription()}
 										</p>
 										<div class="card p-4 preset-tonal-warning max-w-[65ch]">
-											<i class="fa-solid fa-warning mr-2 text-warning-900"></i>
+											<i class="fa-solid fa-warning mr-2 text-warning-900-5"></i>
 											{m.personalAccessTokenCreateWarning()}
 										</div>
 									</div>
