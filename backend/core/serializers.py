@@ -206,6 +206,11 @@ class BaseModelSerializer(serializers.ModelSerializer):
         model: models.Model
 
 
+# Imported after BaseModelSerializer to avoid a circular import:
+# custom_fields.serializers imports BaseModelSerializer from this module.
+from custom_fields.serializers import CustomFieldsSerializerMixin  # noqa: E402
+
+
 class ReferentialSerializer(BaseModelSerializer):
     name = serializers.CharField(source="get_name_translated")
     description = serializers.CharField(
@@ -571,7 +576,7 @@ class AssetCapabilityWriteSerializer(AssetCapabilityReadSerializer):
     pass
 
 
-class AssetWriteSerializer(BaseModelSerializer):
+class AssetWriteSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
     ebios_rm_studies = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=EbiosRMStudy.objects.all(),
@@ -789,7 +794,7 @@ class AssetReadSerializer(AssetWriteSerializer):
         return obj.get_recovery_objectives_comparison()
 
 
-class AssetListSerializer(BaseModelSerializer):
+class AssetListSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
     """
     Lightweight serializer for the assets list view.
 
@@ -826,6 +831,7 @@ class AssetListSerializer(BaseModelSerializer):
             "parent_assets",
             "security_objectives",
             "disaster_recovery_objectives",
+            "custom_fields",
             "created_at",
             "updated_at",
         ]
@@ -1209,7 +1215,7 @@ class RiskScenarioImportExportSerializer(BaseModelSerializer):
         ]
 
 
-class AppliedControlWriteSerializer(BaseModelSerializer):
+class AppliedControlWriteSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
     findings = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Finding.objects.all()
     )

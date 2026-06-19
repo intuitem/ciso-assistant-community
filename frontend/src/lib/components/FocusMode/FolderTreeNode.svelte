@@ -111,9 +111,9 @@
 				aria-selected={isSelected}
 				class="flex-1 flex items-center gap-1.5 px-1.5 py-1 text-left rounded text-sm min-w-0 transition-colors
 				{isSelected
-					? 'bg-indigo-100 text-indigo-700'
+					? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300'
 					: isSelectable
-						? 'text-surface-700-300 hover:bg-indigo-50 cursor-pointer'
+						? 'text-surface-700-300 hover:bg-indigo-50 dark:hover:bg-indigo-950 cursor-pointer'
 						: 'text-surface-500 cursor-not-allowed'}"
 				title={node.name}
 				onclick={(e) => {

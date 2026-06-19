@@ -336,7 +336,7 @@
 									bind:this={searchInputRef}
 									bind:value={searchQuery}
 									autofocus
-									class="w-full px-3 py-2 border border-surface-300-700 rounded-md text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200"
+									class="w-full px-3 py-2 border border-surface-300-700 bg-surface-50-950 text-surface-900-100 rounded-md text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200"
 								/>
 							</div>
 
@@ -351,14 +351,16 @@
 												showModelDropdown = false;
 												searchQuery = '';
 											}}
-											class="w-full px-4 py-3 text-left hover:bg-indigo-50 dark:hover:bg-indigo-500/15 border-b border-surface-100-900 last:border-b-0 transition-colors group"
+											class="w-full px-4 py-3 text-left hover:bg-indigo-50 dark:hover:bg-indigo-950 border-b border-surface-100-900 last:border-b-0 transition-colors group"
 											class:bg-indigo-100={model.id === selectedModel}
+											class:dark:bg-indigo-900={model.id === selectedModel}
 										>
 											<div class="flex items-start gap-3">
 												<div class="flex-1 min-w-0 pt-0.5">
 													<p
-														class="font-medium text-surface-900-100 group-hover:text-indigo-700 transition-colors"
+														class="font-medium text-surface-900-100 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors"
 														class:text-indigo-700={model.id === selectedModel}
+														class:dark:text-indigo-300={model.id === selectedModel}
 													>
 														{model.label}
 													</p>
