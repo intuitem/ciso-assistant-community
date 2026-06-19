@@ -220,8 +220,12 @@ class Folder(NameDescriptionMixin):
 
         new_parent = self.parent_folder
 
-        new_ancestors = list(Folder.objects.filter(descendants=new_parent))
-        new_ancestors.append(new_parent)
+        if new_parent is None:
+            new_ancestors = []
+        else:
+            new_ancestors = list(Folder.objects.filter(descendants=new_parent))
+            new_ancestors.append(new_parent)
+
         new_ancestor_id_set = {ancestor.id for ancestor in new_ancestors}
 
         descendant_model = Folder.descendants.through
