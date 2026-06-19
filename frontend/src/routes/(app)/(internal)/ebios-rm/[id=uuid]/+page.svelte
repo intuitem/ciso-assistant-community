@@ -294,13 +294,13 @@
 					>
 						{#if data.data.meta.workshops[4].steps[0].status == 'done'}
 							<span
-								class="absolute flex items-center justify-center w-8 h-8 bg-success-200 rounded-full -start-4 ring-4 ring-white"
+								class="absolute flex items-center justify-center w-8 h-8 bg-success-300-700 text-success-950 rounded-full -start-4 ring-4 ring-surface-300-700"
 							>
 								<i class="fa-solid fa-check"></i>
 							</span>
 						{:else}
 							<span
-								class="absolute flex items-center justify-center w-8 h-8 bg-surface-200-800 rounded-full -start-4 ring-4 ring-white"
+								class="absolute flex items-center justify-center w-8 h-8 bg-surface-200-800 rounded-full -start-4 ring-4 ring-surface-300-700"
 							>
 								<i class="fa-solid fa-clipboard-check"></i>
 							</span>
