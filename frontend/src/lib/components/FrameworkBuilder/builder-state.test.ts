@@ -1535,6 +1535,15 @@ describe('inlineCopyFromCatalogEntry (copy picked existing object)', () => {
 		const b = inlineCopyFromCatalogEntry({ id: 'id-2', urn: '', ref_id: 'X', name: 'B' }, opts);
 		expect(a.urn).not.toBe(b.urn);
 	});
+
+	it('trims leading/trailing dashes from the minted suffix (matches backend)', () => {
+		const copy = inlineCopyFromCatalogEntry(
+			{ id: 'z', urn: 'urn:z', ref_id: '-Foo Bar-', name: 'Z' },
+			{ urnType: 'reference_control', namespace: 'custom', slug: 'fw', isControl: true }
+		);
+		// "-Foo Bar-" -> "foo-bar" (lowercased, space collapsed, dashes trimmed) + hash.
+		expect(copy.urn).toMatch(/^urn:custom:risk:reference_control:fw:foo-bar-[0-9a-f]{8}$/);
+	});
 });
 
 describe('setInlineReferentialTranslation', () => {

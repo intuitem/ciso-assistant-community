@@ -269,6 +269,19 @@ export function generateUrn(
 }
 
 /**
+ * Normalize free text into a URN suffix segment: lowercase, non-`[a-z0-9._-]`
+ * runs collapsed to `-`, and leading/trailing `-` trimmed. Mirrors the backend
+ * `_urn_suffix` (`re.sub(...).strip("-")`) so the same object mints the same URN
+ * whichever path touches it.
+ */
+export function urnSuffix(text: string): string {
+	return text
+		.toLowerCase()
+		.replace(/[^a-z0-9._-]+/g, '-')
+		.replace(/^-+|-+$/g, '');
+}
+
+/**
  * Deterministic short hash (FNV-1a, 32-bit) rendered as 8 hex chars. Used to
  * derive a source-unique, session-stable suffix when minting URNs for copied
  * catalog objects. Not cryptographic — only needs to separate distinct sources.
@@ -2136,14 +2149,70 @@ export interface ReferentialCatalogEntry {
 export interface ReferentialCatalog {
 	referenceControls: ReferentialCatalogEntry[];
 	threats: ReferentialCatalogEntry[];
+	/** Precomputed `urn -> label` over the whole catalog, built once so the
+	 *  per-node picker doesn't rebuild it. Framework-local inline objects are
+	 *  overlaid by the component. */
+	labelByUrn?: Map<string, string>;
+}
+
+/** Display label for a referential: `ref_id — name`, falling back to name/urn. */
+export function referentialLabel(entry: {
+	ref_id?: string | null;
+	name?: string | null;
+	urn?: string | null;
+}): string {
+	if (entry.ref_id) return `${entry.ref_id} — ${entry.name ?? ''}`;
+	return entry.name ?? entry.urn ?? '';
 }
 
 /**
- * Clone a picked catalog entry into a framework-owned inline object, minting a
- * framework URN. Used when the picked object can't travel as a library
- * dependency (custom, or from a non-builtin library), so it must be embedded by
- * value on export. The URN is deterministic in (namespace, slug, ref_id) so
- * repeated picks of the same source dedup to one copy.
+ * Mint a framework-owned inline referential. The single construction path for
+ * both the inline-define form and the pick-existing copy, so created and copied
+ * objects are shaped and URN-minted identically. `sourceKey`, when given (the
+ * pick path passes the source URN/id), appends a stable hash so two distinct
+ * sources that share a ref_id don't collapse to one copy — deterministically,
+ * so re-picking the same source maps to the same copy across editing sessions.
+ */
+export function makeInlineReferential(opts: {
+	namespace: string;
+	slug: string;
+	urnType: 'reference_control' | 'threat';
+	isControl: boolean;
+	refId: string;
+	name?: string | null;
+	description?: string | null;
+	annotation?: string | null;
+	category?: string | null;
+	csfFunction?: string | null;
+	typicalEvidence?: string | string[] | null;
+	translations?: Translations | null;
+	sourceKey?: string | null;
+}): InlineReferential {
+	const refId = opts.refId.trim() || `imported-${crypto.randomUUID().slice(0, 8)}`;
+	let suffix = urnSuffix(refId);
+	if (opts.sourceKey) suffix = `${suffix}-${stableHash(opts.sourceKey)}`;
+	return {
+		id: crypto.randomUUID(),
+		urn: `urn:${opts.namespace}:risk:${opts.urnType}:${opts.slug}:${suffix}`,
+		ref_id: refId,
+		name: opts.name ?? null,
+		description: opts.description ?? null,
+		annotation: opts.annotation ?? null,
+		translations: opts.translations ?? null,
+		...(opts.isControl
+			? {
+					category: opts.category ?? null,
+					csf_function: opts.csfFunction ?? null,
+					typical_evidence: opts.typicalEvidence ?? null
+				}
+			: {})
+	};
+}
+
+/**
+ * Clone a picked catalog entry into a framework-owned inline object. Used when
+ * the picked object can't travel as a library dependency (custom, or from a
+ * non-builtin library), so it must be embedded by value on export.
  */
 export function inlineCopyFromCatalogEntry(
 	entry: ReferentialCatalogEntry,
@@ -2154,31 +2223,21 @@ export function inlineCopyFromCatalogEntry(
 		isControl: boolean;
 	}
 ): InlineReferential {
-	const refId = entry.ref_id?.trim() || `imported-${crypto.randomUUID().slice(0, 8)}`;
-	const base = refId.toLowerCase().replace(/[^a-z0-9._-]+/g, '-');
-	// Disambiguate the minted URN by source: two distinct catalog entries that
-	// happen to share a ref_id must not collapse to the same framework URN (which
-	// would silently drop one on the dedup-by-URN guard). Hashing the source's
-	// stable identity keeps the same source mapping to the same copy — even
-	// across editing sessions — while separating different sources.
-	const sourceKey = entry.urn || entry.id || refId;
-	const suffix = `${base}-${stableHash(String(sourceKey))}`;
-	return {
-		id: crypto.randomUUID(),
-		urn: `urn:${opts.namespace}:risk:${opts.urnType}:${opts.slug}:${suffix}`,
-		ref_id: refId,
-		name: entry.name ?? null,
-		description: entry.description ?? null,
-		annotation: entry.annotation ?? null,
-		translations: entry.translations ?? null,
-		...(opts.isControl
-			? {
-					category: entry.category ?? null,
-					csf_function: entry.csf_function ?? null,
-					typical_evidence: entry.typical_evidence ?? null
-				}
-			: {})
-	};
+	return makeInlineReferential({
+		namespace: opts.namespace,
+		slug: opts.slug,
+		urnType: opts.urnType,
+		isControl: opts.isControl,
+		refId: entry.ref_id?.trim() ?? '',
+		name: entry.name,
+		description: entry.description,
+		annotation: entry.annotation,
+		category: entry.category,
+		csfFunction: entry.csf_function,
+		typicalEvidence: entry.typical_evidence,
+		translations: entry.translations,
+		sourceKey: entry.urn || entry.id || ''
+	});
 }
 
 const CATALOG_CONTEXT_KEY = Symbol('framework-builder-catalog');

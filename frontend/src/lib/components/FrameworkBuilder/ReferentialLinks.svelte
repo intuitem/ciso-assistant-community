@@ -4,6 +4,8 @@
 		getReferentialCatalogContext,
 		slugifyFrameworkName,
 		inlineCopyFromCatalogEntry,
+		makeInlineReferential,
+		referentialLabel,
 		getTranslation,
 		setInlineReferentialTranslation,
 		type BuilderNode,
@@ -66,17 +68,17 @@
 		});
 	}
 
-	// urn -> display label, from both the server catalog and locally-defined ones.
-	const labelByUrn = $derived.by(() => {
+	// Labels for framework-local inline objects (few); the large server catalog is
+	// indexed once in the shared context (`catalog.labelByUrn`).
+	const inlineLabelByUrn = $derived.by(() => {
 		const map = new Map<string, string>();
-		for (const e of catalogEntries) {
-			if (e.urn) map.set(e.urn, e.ref_id ? `${e.ref_id} — ${e.name ?? ''}` : (e.name ?? e.urn));
-		}
-		for (const e of inlineEntries) {
-			if (e.urn) map.set(e.urn, e.ref_id ? `${e.ref_id} — ${e.name ?? ''}` : (e.name ?? e.urn));
-		}
+		for (const e of inlineEntries) if (e.urn) map.set(e.urn, referentialLabel(e));
 		return map;
 	});
+
+	function labelFor(urn: string): string {
+		return inlineLabelByUrn.get(urn) ?? catalog.labelByUrn?.get(urn) ?? urn;
+	}
 
 	const linkableEntries = $derived.by(() => {
 		const linked = new Set(currentUrns);
@@ -166,29 +168,24 @@
 	function createInline() {
 		const refId = newRefId.trim();
 		if (!refId) return;
-		const ns = $frameworkStore.urn_namespace || 'custom';
-		const suffix = refId.toLowerCase().replace(/[^a-z0-9._-]+/g, '-');
-		const urn = `urn:${ns}:risk:${urnType}:${frameworkSlug()}:${suffix}`;
 		// Trimmed, non-empty evidence items → list (matches doc-pol); null if none.
 		const evidence = newTypicalEvidence.map((item) => item.trim()).filter(Boolean);
-		const entry: InlineReferential = {
-			id: crypto.randomUUID(),
-			urn,
-			ref_id: refId,
+		// No sourceKey: a hand-defined ref_id is the user's chosen identity.
+		const entry = makeInlineReferential({
+			namespace: $frameworkStore.urn_namespace || 'custom',
+			slug: frameworkSlug(),
+			urnType,
+			isControl,
+			refId,
 			name: newName.trim() || null,
 			description: newDescription.trim() || null,
 			annotation: newAnnotation.trim() || null,
-			translations: null,
-			...(isControl
-				? {
-						category: newCategory || null,
-						csf_function: newCsfFunction || null,
-						typical_evidence: evidence.length ? evidence : null
-					}
-				: {})
-		};
+			category: newCategory || null,
+			csfFunction: newCsfFunction || null,
+			typicalEvidence: evidence.length ? evidence : null
+		});
 		builder.updateFramework({ [inlineKey]: [...inlineEntries, entry] });
-		addUrn(urn);
+		addUrn(entry.urn);
 		newRefId = '';
 		newName = '';
 		newCategory = '';
@@ -204,6 +201,53 @@
 	{@const lang = $activeLanguageStore}
 	<!-- Translation mode: edit translations of the inline referentials linked here.
 	     Each field shows the source (read-only) beside its translation input. -->
+	{#snippet translationField(
+		entry: InlineReferential,
+		field: 'name' | 'description' | 'annotation',
+		label: string,
+		placeholder: string,
+		multiline: boolean,
+		lang: string
+	)}
+		{@const source = entry[field] ?? ''}
+		<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500 block">
+			{label}
+			{#if source && !getTranslation(entry.translations, lang, field)}
+				<span class="text-amber-500 ml-1" title={m.builderNotTranslated()}>*</span>
+			{/if}
+		</label>
+		<div class="grid grid-cols-2 gap-2">
+			{#if multiline}
+				<textarea
+					readonly
+					rows="2"
+					value={source}
+					class="text-xs bg-transparent border border-gray-200 rounded px-2 py-1 text-gray-500 cursor-default resize-none"
+				></textarea>
+				<textarea
+					rows="2"
+					value={getTranslation(entry.translations, lang, field)}
+					{placeholder}
+					class="text-xs border border-gray-200 rounded px-2 py-1 resize-none"
+					onblur={(e) => saveInlineTranslation(entry.id, field, e.currentTarget.value)}
+				></textarea>
+			{:else}
+				<input
+					type="text"
+					readonly
+					value={source}
+					class="text-xs bg-transparent border border-gray-200 rounded px-2 py-1 text-gray-500 cursor-default"
+				/>
+				<input
+					type="text"
+					value={getTranslation(entry.translations, lang, field)}
+					{placeholder}
+					class="text-xs border border-gray-200 rounded px-2 py-1"
+					onblur={(e) => saveInlineTranslation(entry.id, field, e.currentTarget.value)}
+				/>
+			{/if}
+		</div>
+	{/snippet}
 	{#if translatableLinked.length}
 		<div class="px-4 py-2 border-b border-gray-100 space-y-2">
 			<span class="text-xs text-gray-500">
@@ -212,73 +256,24 @@
 			{#each translatableLinked as entry (entry.urn)}
 				<div class="p-2 border border-gray-200 rounded bg-gray-50 space-y-1">
 					<div class="text-[10px] font-mono text-gray-400">{entry.ref_id ?? entry.urn}</div>
-					<!-- Name -->
-					<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500 block">
-						{m.name()}
-						{#if entry.name && !getTranslation(entry.translations, lang, 'name')}
-							<span class="text-amber-500 ml-1" title={m.builderNotTranslated()}>*</span>
-						{/if}
-					</label>
-					<div class="grid grid-cols-2 gap-2">
-						<input
-							type="text"
-							readonly
-							value={entry.name ?? ''}
-							class="text-xs bg-transparent border border-gray-200 rounded px-2 py-1 text-gray-500 cursor-default"
-						/>
-						<input
-							type="text"
-							value={getTranslation(entry.translations, lang, 'name')}
-							placeholder={m.builderTranslateName()}
-							class="text-xs border border-gray-200 rounded px-2 py-1"
-							onblur={(e) => saveInlineTranslation(entry.id, 'name', e.currentTarget.value)}
-						/>
-					</div>
-					<!-- Description -->
-					<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500 block">
-						{m.description()}
-						{#if entry.description && !getTranslation(entry.translations, lang, 'description')}
-							<span class="text-amber-500 ml-1" title={m.builderNotTranslated()}>*</span>
-						{/if}
-					</label>
-					<div class="grid grid-cols-2 gap-2">
-						<textarea
-							readonly
-							rows="2"
-							value={entry.description ?? ''}
-							class="text-xs bg-transparent border border-gray-200 rounded px-2 py-1 text-gray-500 cursor-default resize-none"
-						></textarea>
-						<textarea
-							rows="2"
-							value={getTranslation(entry.translations, lang, 'description')}
-							placeholder={m.builderTranslateDescription()}
-							class="text-xs border border-gray-200 rounded px-2 py-1 resize-none"
-							onblur={(e) => saveInlineTranslation(entry.id, 'description', e.currentTarget.value)}
-						></textarea>
-					</div>
-					<!-- Annotation (only when the source defines one) -->
+					{@render translationField(entry, 'name', m.name(), m.builderTranslateName(), false, lang)}
+					{@render translationField(
+						entry,
+						'description',
+						m.description(),
+						m.builderTranslateDescription(),
+						true,
+						lang
+					)}
 					{#if entry.annotation}
-						<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500 block">
-							{m.annotation()}
-							{#if !getTranslation(entry.translations, lang, 'annotation')}
-								<span class="text-amber-500 ml-1" title={m.builderNotTranslated()}>*</span>
-							{/if}
-						</label>
-						<div class="grid grid-cols-2 gap-2">
-							<textarea
-								readonly
-								rows="2"
-								value={entry.annotation ?? ''}
-								class="text-xs bg-transparent border border-gray-200 rounded px-2 py-1 text-gray-500 cursor-default resize-none"
-							></textarea>
-							<textarea
-								rows="2"
-								value={getTranslation(entry.translations, lang, 'annotation')}
-								placeholder={m.builderTranslateAnnotation()}
-								class="text-xs border border-gray-200 rounded px-2 py-1 resize-none"
-								onblur={(e) => saveInlineTranslation(entry.id, 'annotation', e.currentTarget.value)}
-							></textarea>
-						</div>
+						{@render translationField(
+							entry,
+							'annotation',
+							m.annotation(),
+							m.builderTranslateAnnotation(),
+							true,
+							lang
+						)}
 					{/if}
 				</div>
 			{/each}
@@ -294,7 +289,7 @@
 				<span
 					class="inline-flex items-center text-xs px-2 py-0.5 rounded-full border bg-blue-50 border-blue-200 text-blue-700"
 				>
-					{labelByUrn.get(urn) ?? urn}
+					{labelFor(urn)}
 					<button
 						type="button"
 						class="ml-1 text-blue-400 hover:text-blue-700"

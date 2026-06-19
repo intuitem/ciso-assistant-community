@@ -929,12 +929,7 @@ class ReferenceControlBuilderCatalogSerializer(BaseModelSerializer):
     carried as a library dependency rather than embedded by value on export)."""
 
     library = FieldsRelatedField(["name", "id"])
-    referenceable = serializers.SerializerMethodField()
-
-    def get_referenceable(self, obj) -> bool:
-        # Only builtin libraries are guaranteed present in a target instance, so
-        # only their objects can travel as a `dependencies` reference.
-        return bool(obj.library_id) and obj.library.builtin
+    referenceable = serializers.BooleanField(source="is_referenceable", read_only=True)
 
     class Meta:
         model = ReferenceControl
@@ -1020,10 +1015,7 @@ class ThreatBuilderCatalogSerializer(BaseModelSerializer):
     ReferenceControlBuilderCatalogSerializer)."""
 
     library = FieldsRelatedField(["name", "id"])
-    referenceable = serializers.SerializerMethodField()
-
-    def get_referenceable(self, obj) -> bool:
-        return bool(obj.library_id) and obj.library.builtin
+    referenceable = serializers.BooleanField(source="is_referenceable", read_only=True)
 
     class Meta:
         model = Threat

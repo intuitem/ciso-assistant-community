@@ -7,6 +7,7 @@
 		setReferentialCatalogContext,
 		getTranslation,
 		withTranslation,
+		referentialLabel,
 		type Framework,
 		type BuilderNode,
 		type RequirementNode,
@@ -57,9 +58,16 @@
 
 	const builder = createBuilderState(framework, requirementNodes, questions, editingDraft);
 	setBuilderContext(builder);
+	// Build the catalog urn -> label index once here, rather than rebuilding it
+	// inside every per-node picker instance.
+	const catalogLabelByUrn = new Map<string, string>();
+	for (const e of [...referenceControlCatalog, ...threatCatalog]) {
+		if (e.urn) catalogLabelByUrn.set(e.urn, referentialLabel(e));
+	}
 	setReferentialCatalogContext({
 		referenceControls: referenceControlCatalog,
-		threats: threatCatalog
+		threats: threatCatalog,
+		labelByUrn: catalogLabelByUrn
 	});
 
 	const cardCollapsed = createCollapsedStore(`fw-builder:${framework.id}:cards:collapsed`);

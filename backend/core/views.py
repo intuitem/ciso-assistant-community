@@ -9368,7 +9368,7 @@ class FrameworkViewSet(BaseModelViewSet):
             foreign = []
             for urn in sorted(objs_by_urn):
                 obj = objs_by_urn[urn]
-                if obj.library_id and obj.library.builtin:
+                if obj.is_referenceable:
                     rewrite[urn] = urn
                     dependency_urns.add(obj.library.urn)
                 elif urn.startswith(owned_prefix):
