@@ -463,9 +463,7 @@ class NumberInFilter(df.BaseInFilter, df.NumberFilter):
 
 class LogEntryFilterSet(GenericFilterSet):
     actor = df.CharFilter(field_name="actor__email", lookup_expr="icontains")
-    folder = df.CharFilter(
-        field_name="additional_data__folder", lookup_expr="icontains"
-    )
+    folder = df.CharFilter(method="filter_folder")
     action = NumberInFilter(field_name="action", lookup_expr="in")
     content_type = df.CharFilter(method="filter_content_type_model")
 
@@ -482,6 +480,25 @@ class LogEntryFilterSet(GenericFilterSet):
             return queryset
         normalized = value.replace(" ", "").lower()
         return queryset.filter(content_type__model__icontains=normalized)
+
+    def filter_folder(self, queryset, name, value):
+        # additional_data stores folder_id, not the path string the old enrichment
+        # used. Resolve folders whose full path matches the query, then match their
+        # ids. Path resolution hits the in-memory folders cache, not the DB.
+        if not value:
+            return queryset
+        needle = value.lower()
+        matching_ids = [
+            str(folder.id)
+            for folder in Folder.objects.only("id")
+            if needle in folder.get_folder_full_path_string().lower()
+        ]
+        if not matching_ids:
+            return queryset.none()
+        q = models.Q()
+        for folder_id in matching_ids:
+            q |= models.Q(additional_data__folder_id=folder_id)
+        return queryset.filter(q)
 
 
 class LogEntryViewSet(
@@ -501,7 +518,6 @@ class LogEntryViewSet(
         "actor__first_name",
         "actor__last_name",
         "changes",  # allows to search for last_login (for example)
-        "additional_data__folder",
     ]
     filterset_class = LogEntryFilterSet
 
@@ -515,12 +531,14 @@ class LogEntryViewSet(
             folder=Folder.get_root_folder(),
         ):
             return LogEntry.objects.none()
+        # Annotate folder_id (display resolution to a path happens in the serializer
+        # via the folders cache). Keeps `folder` orderable without a per-row join.
         return LogEntry.objects.all().annotate(
             folder=Lower(
                 Case(
                     When(additional_data__isnull=True, then=Value("")),
-                    When(additional_data__folder=None, then=Value("")),
-                    default=Cast("additional_data__folder", CharField()),
+                    When(additional_data__folder_id=None, then=Value("")),
+                    default=Cast("additional_data__folder_id", CharField()),
                     output_field=CharField(),
                 )
             ),
