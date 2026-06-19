@@ -589,6 +589,22 @@ export function withTranslation(
 	return { ...current, [lang]: langDict };
 }
 
+/**
+ * Return a new inline-referential list with one translation field updated on the
+ * entry identified by `id`. Pure helper backing the picker's translation mode.
+ */
+export function setInlineReferentialTranslation(
+	entries: InlineReferential[],
+	id: string,
+	lang: string,
+	field: string,
+	value: string
+): InlineReferential[] {
+	return entries.map((e) =>
+		e.id === id ? { ...e, translations: withTranslation(e.translations, lang, field, value) } : e
+	);
+}
+
 /** Serialize a single RequirementNode into its flat persistence shape. */
 export function serializeNode(n: RequirementNode): Record<string, unknown> {
 	return {

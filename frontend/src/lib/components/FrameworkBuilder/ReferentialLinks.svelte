@@ -4,6 +4,8 @@
 		getReferentialCatalogContext,
 		slugifyFrameworkName,
 		inlineCopyFromCatalogEntry,
+		getTranslation,
+		setInlineReferentialTranslation,
 		type BuilderNode,
 		type InlineReferential,
 		type ReferentialCatalogEntry
@@ -20,7 +22,7 @@
 	let { node, kind }: Props = $props();
 
 	const builder = getBuilderContext();
-	const { framework: frameworkStore } = builder;
+	const { framework: frameworkStore, activeLanguage: activeLanguageStore } = builder;
 	const catalog = getReferentialCatalogContext();
 
 	const isControl = kind === 'reference_controls';
@@ -48,6 +50,21 @@
 		isControl ? catalog.referenceControls : catalog.threats
 	) as ReferentialCatalogEntry[];
 	const inlineEntries = $derived(($frameworkStore[inlineKey] ?? []) as InlineReferential[]);
+
+	// Inline-defined referentials linked to this node: their name/description/
+	// annotation are translatable here. Library-referenced objects are excluded —
+	// their translations come from their own library.
+	const translatableLinked = $derived(
+		inlineEntries.filter((e) => e.urn && currentUrns.includes(e.urn))
+	);
+
+	function saveInlineTranslation(id: string, field: string, value: string) {
+		const lang = $activeLanguageStore;
+		if (!lang) return;
+		builder.updateFramework({
+			[inlineKey]: setInlineReferentialTranslation(inlineEntries, id, lang, field, value)
+		});
+	}
 
 	// urn -> display label, from both the server catalog and locally-defined ones.
 	const labelByUrn = $derived.by(() => {
@@ -183,184 +200,270 @@
 	}
 </script>
 
-<div class="px-4 py-2 border-b border-gray-100">
-	<div class="flex items-center flex-wrap gap-1">
-		<span class="text-xs text-gray-500 mr-1">
-			{isControl ? m.builderReferenceControlsLabel() : m.builderThreatsLabel()}
-		</span>
-		{#each currentUrns as urn (urn)}
-			<span
-				class="inline-flex items-center text-xs px-2 py-0.5 rounded-full border bg-blue-50 border-blue-200 text-blue-700"
-			>
-				{labelByUrn.get(urn) ?? urn}
-				<button
-					type="button"
-					class="ml-1 text-blue-400 hover:text-blue-700"
-					aria-label={m.remove()}
-					onclick={() => removeUrn(urn)}
-				>
-					<i class="fa-solid fa-xmark"></i>
-				</button>
+{#if $activeLanguageStore}
+	{@const lang = $activeLanguageStore}
+	<!-- Translation mode: edit translations of the inline referentials linked here.
+	     Each field shows the source (read-only) beside its translation input. -->
+	{#if translatableLinked.length}
+		<div class="px-4 py-2 border-b border-gray-100 space-y-2">
+			<span class="text-xs text-gray-500">
+				{isControl ? m.builderReferenceControlsLabel() : m.builderThreatsLabel()}
 			</span>
-		{/each}
-		<button
-			type="button"
-			class="text-xs px-2 py-0.5 rounded-full border border-dashed border-gray-300 text-gray-400 hover:text-gray-600 hover:border-gray-400"
-			onclick={() => (adding = !adding)}
-		>
-			<i class="fa-solid fa-plus mr-1"></i>{isControl
-				? m.builderAddReferenceControl()
-				: m.builderAddThreat()}
-		</button>
-	</div>
-
-	{#if adding}
-		<div class="mt-2 p-2 border border-gray-200 rounded bg-gray-50">
-			<div class="flex gap-2 mb-2 text-xs">
-				<button
-					type="button"
-					class="px-2 py-0.5 rounded {tab === 'existing'
-						? 'bg-blue-100 text-blue-700'
-						: 'text-gray-500'}"
-					onclick={() => (tab = 'existing')}
-				>
-					{isControl ? m.builderLinkExistingControl() : m.builderLinkExistingThreat()}
-				</button>
-				<button
-					type="button"
-					class="px-2 py-0.5 rounded {tab === 'inline'
-						? 'bg-blue-100 text-blue-700'
-						: 'text-gray-500'}"
-					onclick={() => (tab = 'inline')}
-				>
-					{isControl ? m.builderDefineInlineControl() : m.builderDefineInlineThreat()}
-				</button>
-			</div>
-
-			{#if tab === 'existing'}
-				<input
-					type="text"
-					class="w-full text-xs px-2 py-1 border border-gray-200 rounded mb-1"
-					placeholder={m.search()}
-					bind:value={search}
-				/>
-				<ul class="max-h-40 overflow-y-auto">
-					{#each linkableEntries as entry (entry.urn)}
-						{@const lib =
-							entry.library && typeof entry.library === 'object'
-								? (entry.library.name ?? entry.library.str)
-								: entry.library}
-						<li>
-							<button
-								type="button"
-								class="w-full text-left text-xs px-2 py-1 hover:bg-blue-50 rounded flex items-center justify-between gap-2"
-								onclick={() => pickExisting(entry)}
-							>
-								<span class="font-medium">{entry.ref_id ?? entry.name ?? entry.urn}</span>
-								{#if entry.ref_id && entry.name}<span class="text-gray-500">
-										— {entry.name}</span
-									>{/if}
-								<span class="shrink-0 text-[10px] text-gray-400">
-									{entry.referenceable && lib ? lib : m.builderWillBeCopied()}
-								</span>
-							</button>
-						</li>
-					{:else}
-						<li class="text-xs text-gray-400 px-2 py-1">{m.builderNoCatalogMatches()}</li>
-					{/each}
-				</ul>
-			{:else}
-				<div class="space-y-1">
-					<div class="flex flex-wrap gap-1 items-center">
-						<input
-							type="text"
-							class="text-xs px-2 py-1 border border-gray-200 rounded w-24"
-							placeholder={m.refId()}
-							bind:value={newRefId}
-						/>
-						<input
-							type="text"
-							class="text-xs px-2 py-1 border border-gray-200 rounded flex-1 min-w-32"
-							placeholder={m.name()}
-							bind:value={newName}
-						/>
-						{#if isControl}
-							<select
-								class="text-xs px-2 py-1 border border-gray-200 rounded"
-								title={m.category()}
-								bind:value={newCategory}
-							>
-								<option value="">{m.category()}: —</option>
-								{#each CATEGORIES as cat}
-									<option value={cat}>{safeTranslate(cat)}</option>
-								{/each}
-							</select>
-							<select
-								class="text-xs px-2 py-1 border border-gray-200 rounded"
-								title={m.csfFunction()}
-								bind:value={newCsfFunction}
-							>
-								<option value="">{m.csfFunction()}: —</option>
-								{#each CSF_FUNCTIONS as fn}
-									<option value={fn}>{safeTranslate(fn)}</option>
-								{/each}
-							</select>
+			{#each translatableLinked as entry (entry.urn)}
+				<div class="p-2 border border-gray-200 rounded bg-gray-50 space-y-1">
+					<div class="text-[10px] font-mono text-gray-400">{entry.ref_id ?? entry.urn}</div>
+					<!-- Name -->
+					<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500 block">
+						{m.name()}
+						{#if entry.name && !getTranslation(entry.translations, lang, 'name')}
+							<span class="text-amber-500 ml-1" title={m.builderNotTranslated()}>*</span>
 						{/if}
+					</label>
+					<div class="grid grid-cols-2 gap-2">
+						<input
+							type="text"
+							readonly
+							value={entry.name ?? ''}
+							class="text-xs bg-transparent border border-gray-200 rounded px-2 py-1 text-gray-500 cursor-default"
+						/>
+						<input
+							type="text"
+							value={getTranslation(entry.translations, lang, 'name')}
+							placeholder={m.builderTranslateName()}
+							class="text-xs border border-gray-200 rounded px-2 py-1"
+							onblur={(e) => saveInlineTranslation(entry.id, 'name', e.currentTarget.value)}
+						/>
 					</div>
-					<textarea
-						class="w-full text-xs px-2 py-1 border border-gray-200 rounded"
-						rows="2"
-						placeholder={m.description()}
-						bind:value={newDescription}
-					></textarea>
-					<textarea
-						class="w-full text-xs px-2 py-1 border border-gray-200 rounded"
-						rows="2"
-						placeholder={m.annotation()}
-						bind:value={newAnnotation}
-					></textarea>
-					{#if isControl}
-						<div class="space-y-1" bind:this={evidenceListEl}>
-							{#each newTypicalEvidence as _item, i (i)}
-								<div class="flex items-center gap-1">
-									<input
-										type="text"
-										class="evidence-item-input flex-1 text-xs px-2 py-1 border border-gray-200 rounded"
-										placeholder={m.typicalEvidence()}
-										bind:value={newTypicalEvidence[i]}
-										onkeydown={(e) => handleEvidenceKeydown(e, i)}
-									/>
-									<button
-										type="button"
-										class="text-gray-400 hover:text-red-500"
-										aria-label={m.remove()}
-										onclick={() => removeEvidence(i)}
-									>
-										<i class="fa-solid fa-xmark"></i>
-									</button>
-								</div>
-							{/each}
-							<button
-								type="button"
-								class="text-xs text-blue-600 hover:text-blue-800"
-								onclick={addEvidence}
-							>
-								<i class="fa-solid fa-plus mr-1"></i>{m.builderAddTypicalEvidence()}
-							</button>
+					<!-- Description -->
+					<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500 block">
+						{m.description()}
+						{#if entry.description && !getTranslation(entry.translations, lang, 'description')}
+							<span class="text-amber-500 ml-1" title={m.builderNotTranslated()}>*</span>
+						{/if}
+					</label>
+					<div class="grid grid-cols-2 gap-2">
+						<textarea
+							readonly
+							rows="2"
+							value={entry.description ?? ''}
+							class="text-xs bg-transparent border border-gray-200 rounded px-2 py-1 text-gray-500 cursor-default resize-none"
+						></textarea>
+						<textarea
+							rows="2"
+							value={getTranslation(entry.translations, lang, 'description')}
+							placeholder={m.builderTranslateDescription()}
+							class="text-xs border border-gray-200 rounded px-2 py-1 resize-none"
+							onblur={(e) => saveInlineTranslation(entry.id, 'description', e.currentTarget.value)}
+						></textarea>
+					</div>
+					<!-- Annotation (only when the source defines one) -->
+					{#if entry.annotation}
+						<label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500 block">
+							{m.annotation()}
+							{#if !getTranslation(entry.translations, lang, 'annotation')}
+								<span class="text-amber-500 ml-1" title={m.builderNotTranslated()}>*</span>
+							{/if}
+						</label>
+						<div class="grid grid-cols-2 gap-2">
+							<textarea
+								readonly
+								rows="2"
+								value={entry.annotation ?? ''}
+								class="text-xs bg-transparent border border-gray-200 rounded px-2 py-1 text-gray-500 cursor-default resize-none"
+							></textarea>
+							<textarea
+								rows="2"
+								value={getTranslation(entry.translations, lang, 'annotation')}
+								placeholder={m.builderTranslateAnnotation()}
+								class="text-xs border border-gray-200 rounded px-2 py-1 resize-none"
+								onblur={(e) => saveInlineTranslation(entry.id, 'annotation', e.currentTarget.value)}
+							></textarea>
 						</div>
 					{/if}
-					<div class="flex justify-end">
-						<button
-							type="button"
-							class="text-xs px-2 py-1 rounded bg-blue-600 text-white disabled:opacity-50"
-							disabled={!newRefId.trim()}
-							onclick={createInline}
-						>
-							{m.create()}
-						</button>
-					</div>
 				</div>
-			{/if}
+			{/each}
 		</div>
 	{/if}
-</div>
+{:else}
+	<div class="px-4 py-2 border-b border-gray-100">
+		<div class="flex items-center flex-wrap gap-1">
+			<span class="text-xs text-gray-500 mr-1">
+				{isControl ? m.builderReferenceControlsLabel() : m.builderThreatsLabel()}
+			</span>
+			{#each currentUrns as urn (urn)}
+				<span
+					class="inline-flex items-center text-xs px-2 py-0.5 rounded-full border bg-blue-50 border-blue-200 text-blue-700"
+				>
+					{labelByUrn.get(urn) ?? urn}
+					<button
+						type="button"
+						class="ml-1 text-blue-400 hover:text-blue-700"
+						aria-label={m.remove()}
+						onclick={() => removeUrn(urn)}
+					>
+						<i class="fa-solid fa-xmark"></i>
+					</button>
+				</span>
+			{/each}
+			<button
+				type="button"
+				class="text-xs px-2 py-0.5 rounded-full border border-dashed border-gray-300 text-gray-400 hover:text-gray-600 hover:border-gray-400"
+				onclick={() => (adding = !adding)}
+			>
+				<i class="fa-solid fa-plus mr-1"></i>{isControl
+					? m.builderAddReferenceControl()
+					: m.builderAddThreat()}
+			</button>
+		</div>
+
+		{#if adding}
+			<div class="mt-2 p-2 border border-gray-200 rounded bg-gray-50">
+				<div class="flex gap-2 mb-2 text-xs">
+					<button
+						type="button"
+						class="px-2 py-0.5 rounded {tab === 'existing'
+							? 'bg-blue-100 text-blue-700'
+							: 'text-gray-500'}"
+						onclick={() => (tab = 'existing')}
+					>
+						{isControl ? m.builderLinkExistingControl() : m.builderLinkExistingThreat()}
+					</button>
+					<button
+						type="button"
+						class="px-2 py-0.5 rounded {tab === 'inline'
+							? 'bg-blue-100 text-blue-700'
+							: 'text-gray-500'}"
+						onclick={() => (tab = 'inline')}
+					>
+						{isControl ? m.builderDefineInlineControl() : m.builderDefineInlineThreat()}
+					</button>
+				</div>
+
+				{#if tab === 'existing'}
+					<input
+						type="text"
+						class="w-full text-xs px-2 py-1 border border-gray-200 rounded mb-1"
+						placeholder={m.search()}
+						bind:value={search}
+					/>
+					<ul class="max-h-40 overflow-y-auto">
+						{#each linkableEntries as entry (entry.urn)}
+							{@const lib =
+								entry.library && typeof entry.library === 'object'
+									? (entry.library.name ?? entry.library.str)
+									: entry.library}
+							<li>
+								<button
+									type="button"
+									class="w-full text-left text-xs px-2 py-1 hover:bg-blue-50 rounded flex items-center justify-between gap-2"
+									onclick={() => pickExisting(entry)}
+								>
+									<span class="font-medium">{entry.ref_id ?? entry.name ?? entry.urn}</span>
+									{#if entry.ref_id && entry.name}<span class="text-gray-500">
+											— {entry.name}</span
+										>{/if}
+									<span class="shrink-0 text-[10px] text-gray-400">
+										{entry.referenceable && lib ? lib : m.builderWillBeCopied()}
+									</span>
+								</button>
+							</li>
+						{:else}
+							<li class="text-xs text-gray-400 px-2 py-1">{m.builderNoCatalogMatches()}</li>
+						{/each}
+					</ul>
+				{:else}
+					<div class="space-y-1">
+						<div class="flex flex-wrap gap-1 items-center">
+							<input
+								type="text"
+								class="text-xs px-2 py-1 border border-gray-200 rounded w-24"
+								placeholder={m.refId()}
+								bind:value={newRefId}
+							/>
+							<input
+								type="text"
+								class="text-xs px-2 py-1 border border-gray-200 rounded flex-1 min-w-32"
+								placeholder={m.name()}
+								bind:value={newName}
+							/>
+							{#if isControl}
+								<select
+									class="text-xs px-2 py-1 border border-gray-200 rounded"
+									title={m.category()}
+									bind:value={newCategory}
+								>
+									<option value="">{m.category()}: —</option>
+									{#each CATEGORIES as cat}
+										<option value={cat}>{safeTranslate(cat)}</option>
+									{/each}
+								</select>
+								<select
+									class="text-xs px-2 py-1 border border-gray-200 rounded"
+									title={m.csfFunction()}
+									bind:value={newCsfFunction}
+								>
+									<option value="">{m.csfFunction()}: —</option>
+									{#each CSF_FUNCTIONS as fn}
+										<option value={fn}>{safeTranslate(fn)}</option>
+									{/each}
+								</select>
+							{/if}
+						</div>
+						<textarea
+							class="w-full text-xs px-2 py-1 border border-gray-200 rounded"
+							rows="2"
+							placeholder={m.description()}
+							bind:value={newDescription}
+						></textarea>
+						<textarea
+							class="w-full text-xs px-2 py-1 border border-gray-200 rounded"
+							rows="2"
+							placeholder={m.annotation()}
+							bind:value={newAnnotation}
+						></textarea>
+						{#if isControl}
+							<div class="space-y-1" bind:this={evidenceListEl}>
+								{#each newTypicalEvidence as _item, i (i)}
+									<div class="flex items-center gap-1">
+										<input
+											type="text"
+											class="evidence-item-input flex-1 text-xs px-2 py-1 border border-gray-200 rounded"
+											placeholder={m.typicalEvidence()}
+											bind:value={newTypicalEvidence[i]}
+											onkeydown={(e) => handleEvidenceKeydown(e, i)}
+										/>
+										<button
+											type="button"
+											class="text-gray-400 hover:text-red-500"
+											aria-label={m.remove()}
+											onclick={() => removeEvidence(i)}
+										>
+											<i class="fa-solid fa-xmark"></i>
+										</button>
+									</div>
+								{/each}
+								<button
+									type="button"
+									class="text-xs text-blue-600 hover:text-blue-800"
+									onclick={addEvidence}
+								>
+									<i class="fa-solid fa-plus mr-1"></i>{m.builderAddTypicalEvidence()}
+								</button>
+							</div>
+						{/if}
+						<div class="flex justify-end">
+							<button
+								type="button"
+								class="text-xs px-2 py-1 rounded bg-blue-600 text-white disabled:opacity-50"
+								disabled={!newRefId.trim()}
+								onclick={createInline}
+							>
+								{m.create()}
+							</button>
+						</div>
+					</div>
+				{/if}
+			</div>
+		{/if}
+	</div>
+{/if}

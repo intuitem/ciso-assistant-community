@@ -11,6 +11,7 @@ import {
 	hydrateDraft,
 	createBuilderState,
 	inlineCopyFromCatalogEntry,
+	setInlineReferentialTranslation,
 	type Framework,
 	type BuilderNode,
 	type RequirementNode,
@@ -1533,5 +1534,39 @@ describe('inlineCopyFromCatalogEntry (copy picked existing object)', () => {
 		const a = inlineCopyFromCatalogEntry({ id: 'id-1', urn: '', ref_id: 'X', name: 'A' }, opts);
 		const b = inlineCopyFromCatalogEntry({ id: 'id-2', urn: '', ref_id: 'X', name: 'B' }, opts);
 		expect(a.urn).not.toBe(b.urn);
+	});
+});
+
+describe('setInlineReferentialTranslation', () => {
+	const entries = [
+		{ id: 'a', urn: 'urn:a', ref_id: 'A', name: 'Alpha', translations: null },
+		{ id: 'b', urn: 'urn:b', ref_id: 'B', name: 'Beta', translations: null }
+	];
+
+	it('sets a translation field on the matching entry only', () => {
+		const out = setInlineReferentialTranslation(entries, 'a', 'fr', 'name', 'Alpha-fr');
+		expect(out.find((e) => e.id === 'a')?.translations).toEqual({ fr: { name: 'Alpha-fr' } });
+		expect(out.find((e) => e.id === 'b')?.translations).toBeNull();
+	});
+
+	it('does not mutate the input entries', () => {
+		setInlineReferentialTranslation(entries, 'a', 'fr', 'name', 'X');
+		expect(entries[0].translations).toBeNull();
+	});
+
+	it('merges fields and locales without clobbering existing ones', () => {
+		let out = setInlineReferentialTranslation(entries, 'a', 'fr', 'name', 'Alpha-fr');
+		out = setInlineReferentialTranslation(out, 'a', 'fr', 'description', 'desc-fr');
+		out = setInlineReferentialTranslation(out, 'a', 'de', 'name', 'Alpha-de');
+		expect(out.find((e) => e.id === 'a')?.translations).toEqual({
+			fr: { name: 'Alpha-fr', description: 'desc-fr' },
+			de: { name: 'Alpha-de' }
+		});
+	});
+
+	it('clears a field when set to empty (drops the key)', () => {
+		let out = setInlineReferentialTranslation(entries, 'a', 'fr', 'name', 'Alpha-fr');
+		out = setInlineReferentialTranslation(out, 'a', 'fr', 'name', '');
+		expect(out.find((e) => e.id === 'a')?.translations).toEqual({ fr: {} });
 	});
 });

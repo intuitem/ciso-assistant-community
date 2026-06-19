@@ -4022,3 +4022,35 @@ class TestFrameworkBuilderControlsThreats:
         # The list-form typical_evidence survives export → import unchanged.
         imported_rc = ReferenceControl.objects.get(urn=rc_urn)
         assert imported_rc.typical_evidence == ["Signed document", "Review records"]
+
+    def test_export_inline_referential_translations_round_trip(
+        self, authenticated_client, builder_fw
+    ):
+        """Translations set on an inline referential (the picker's translation
+        mode writes these) are emitted under objects.* and survive re-import."""
+        fw, rn, folder = builder_fw
+        translations = {"fr": {"name": "RC en ligne", "description": "desc fr"}}
+        rc = ReferenceControl.objects.create(
+            name="Inline RC",
+            ref_id="IRC",
+            urn="urn:custom:risk:reference_control:controls-fw:irc",
+            translations=translations,
+            folder=folder,
+        )
+        rn.reference_controls.set([rc])
+        rc_urn = rc.urn
+
+        response = authenticated_client.get(
+            reverse("frameworks-export-yaml", args=[fw.id])
+        )
+        assert response.status_code == 200
+        data = yaml.safe_load(response.content)
+        emitted = {c["urn"]: c for c in data["objects"]["reference_controls"]}
+        assert emitted[rc_urn]["translations"] == translations
+
+        fw.delete()
+        rc.delete()
+        stored, error = StoredLibrary.store_library_content(response.content)
+        assert error is None, f"Exported YAML failed to store: {error}"
+        assert stored.load() is None
+        assert ReferenceControl.objects.get(urn=rc_urn).translations == translations
