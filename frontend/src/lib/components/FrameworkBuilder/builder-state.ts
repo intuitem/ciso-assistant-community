@@ -2155,13 +2155,13 @@ export interface ReferentialCatalog {
 	labelByUrn?: Map<string, string>;
 }
 
-/** Display label for a referential: `ref_id — name`, falling back to name/urn. */
+/** Display label for a referential: `ref_id name`, falling back to name/urn. */
 export function referentialLabel(entry: {
 	ref_id?: string | null;
 	name?: string | null;
 	urn?: string | null;
 }): string {
-	if (entry.ref_id) return `${entry.ref_id} — ${entry.name ?? ''}`;
+	if (entry.ref_id) return entry.name ? `${entry.ref_id} ${entry.name}` : entry.ref_id;
 	return entry.name ?? entry.urn ?? '';
 }
 

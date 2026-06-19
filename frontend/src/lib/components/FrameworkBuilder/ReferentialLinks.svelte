@@ -350,13 +350,15 @@
 							<li>
 								<button
 									type="button"
-									class="w-full text-left text-xs px-2 py-1 hover:bg-blue-50 rounded flex items-center justify-between gap-2"
+									class="w-full text-left text-xs px-2 py-1 hover:bg-blue-50 rounded flex items-center gap-2"
 									onclick={() => pickExisting(entry)}
 								>
-									<span class="font-medium">{entry.ref_id ?? entry.name ?? entry.urn}</span>
-									{#if entry.ref_id && entry.name}<span class="text-gray-500">
-											— {entry.name}</span
-										>{/if}
+									<span class="min-w-0 flex-1 truncate">
+										<span class="font-medium">{entry.ref_id ?? entry.name ?? entry.urn}</span>
+										{#if entry.ref_id && entry.name}<span class="ml-1.5 text-gray-500"
+												>{entry.name}</span
+											>{/if}
+									</span>
 									<span class="shrink-0 text-[10px] text-gray-400">
 										{entry.referenceable && lib ? lib : m.builderWillBeCopied()}
 									</span>
