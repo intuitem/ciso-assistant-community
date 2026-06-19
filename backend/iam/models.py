@@ -1135,7 +1135,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
     )
     user_group = models.ForeignKey(UserGroup, null=True, on_delete=models.CASCADE)
     role = models.ForeignKey(Role, on_delete=models.CASCADE, verbose_name=_("Role"))
-    is_recursive = models.BooleanField(_("subfolders are visible"), default=False)
+    is_recursive = models.BooleanField(_("sub folders are visible"), default=False)
     builtin = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
