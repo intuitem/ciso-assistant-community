@@ -4567,12 +4567,10 @@ class Evidence(
         else:
             return None
 
-    def filename(self):
-        return (
-            os.path.basename(self.last_revision.attachment.name)
-            if self.last_revision and self.last_revision.attachment
-            else None
-        )
+    def filename(self) -> str | None:
+        if self.last_revision and self.last_revision.attachment:
+            return os.path.basename(self.last_revision.attachment.name)
+        return None
 
     def get_size(self):
         if (
@@ -4704,9 +4702,9 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
 
         super().save(*args, **kwargs)
 
-    def filename(self) -> str:
+    def filename(self) -> str | None:
         if not self.attachment:
-            return ""
+            return None
         return os.path.basename(self.attachment.name)
 
     def get_size(self):
