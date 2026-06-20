@@ -13477,7 +13477,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     item.get("control_impact"),
                     item.get("annual_cost"),
                     "\n".join(
-                        [ra.get("str") for ra in item.get("requirement_assessments")]
+                        escape_excel_formula(ra.get("str"))
+                        for ra in (item.get("requirement_assessments") or [])
                     ),
                     "\n".join(
                         escape_excel_formula(evidence.get("str"))
@@ -13534,7 +13535,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "impact": item.get("control_impact"),
                 "cost": item.get("annual_cost"),
                 "covered_requirements": "\n".join(
-                    [ra.get("str") for ra in item.get("requirement_assessments")]
+                    escape_excel_formula(ra.get("str"))
+                    for ra in (item.get("requirement_assessments") or [])
                 ),
                 "associated_evidences": "\n".join(
                     escape_excel_formula(evidence.get("str"))
