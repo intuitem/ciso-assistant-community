@@ -90,14 +90,14 @@
 										href={step.href}
 										prefixCrumbs={[{ label: safeTranslate(`ebiosWs${workshop}`) }]}
 										label={safeTranslate(`ebiosWs${workshop}_${getStepNumber(i)}`)}
-										class="hover:text-purple-800"
+										class="hover:text-primary-800-200"
 										data-testid="workshop-{workshop}-step-{getStepNumber(i)}-link"
 									>
 										<span
 											class="absolute flex items-center justify-center w-8 h-8 {step.status ===
 											'done'
-												? 'bg-success-200'
-												: 'bg-surface-200-800'} rounded-full -start-4 ring-4 ring-white"
+												? 'bg-success-300-700 text-success-950'
+												: 'bg-surface-200-800'} rounded-full -start-4 ring-4 ring-surface-300-700"
 										>
 											<i
 												class="fa-solid {step.status === 'done'
@@ -119,7 +119,7 @@
 										<Tooltip.Trigger>
 											<div class="text-surface-300-700 *:pointer-events-none">
 												<span
-													class="absolute flex items-center justify-center w-8 h-8 bg-surface-200-800 rounded-full -start-4 ring-4 ring-white"
+													class="absolute flex items-center justify-center w-8 h-8 bg-surface-200-800 rounded-full -start-4 ring-4 ring-surface-300-700"
 												>
 													<i class="fa-solid fa-clipboard-check" aria-hidden="true"></i>
 												</span>

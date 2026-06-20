@@ -51,9 +51,11 @@
 
 	// Visual weight by depth: top-level sections are bold, deeper ones lighter
 	const sectionStyles = $derived.by(() => {
-		if (depth === 0) return 'bg-gray-700 text-white border-b-2 border-gray-800';
-		if (depth === 1) return 'bg-gray-200 text-gray-900 border-b border-gray-300';
-		return 'bg-gray-100 text-gray-700 border-b border-gray-200';
+		if (depth === 0)
+			return 'bg-surface-200-800 text-surface-900-100 border-b-2 border-surface-300-700';
+		if (depth === 1)
+			return 'bg-surface-100-800 text-surface-900-100 border-b border-surface-200-700';
+		return 'bg-surface-50-900 text-surface-700-300 border-b border-surface-100-800';
 	});
 
 	const sectionTextSize = $derived(depth === 0 ? 'text-sm font-bold' : 'text-sm font-semibold');
@@ -164,15 +166,12 @@
 				style="padding-left: {depth * 1}rem"
 			>
 				<i
-					class="fas fa-chevron-right text-xs transition-transform duration-200 print:hidden
-						{depth === 0 ? 'text-gray-400' : 'text-gray-500'}
+					class="fas fa-chevron-right text-xs transition-transform duration-200 print:hidden text-surface-500
 						{expanded ? 'rotate-90' : ''}"
 				></i>
 				<span class={sectionTextSize}>
 					{#if node.ref_id}
-						<span class="{depth === 0 ? 'text-gray-300' : 'text-gray-500'} font-mono mr-1.5"
-							>{node.ref_id}</span
-						>
+						<span class="text-surface-500 font-mono mr-1.5">{node.ref_id}</span>
 					{/if}
 					{node.name || ''}
 				</span>

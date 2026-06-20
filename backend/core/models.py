@@ -36,6 +36,7 @@ from structlog import get_logger
 from django.utils.timezone import now
 
 from iam.models import Folder, FolderMixin, PublishInRootFolderMixin, User
+from custom_fields.host import CustomFieldsMixin
 
 from library.helpers import (
     get_referential_translation,
@@ -2432,6 +2433,13 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
         verbose_name = _("Framework")
         verbose_name_plural = _("Frameworks")
 
+    def get_implementation_groups_definition_translated(self):
+        import copy
+
+        return update_translations_in_object(
+            copy.deepcopy(self.implementation_groups_definition or [])
+        )
+
     def is_deletable(self) -> bool:
         """
         Returns True if the framework can be deleted
@@ -3165,7 +3173,11 @@ class AssetCapability(ReferentialObjectMixin, I18nObjectMixin):
 
 
 class Asset(
-    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
+    NameDescriptionMixin,
+    FolderMixin,
+    PublishInRootFolderMixin,
+    FilteringLabelMixin,
+    CustomFieldsMixin,
 ):
     class Type(models.TextChoices):
         """
@@ -4543,16 +4555,10 @@ class Evidence(
         super().save(*args, **kwargs)
         self.revisions.update(is_published=self.is_published)
 
-    def delete(self, using=None, keep_parents=False):
-        for rev in self.revisions.all():
-            if rev.attachment:
-                rev.attachment.delete(save=False)
-
-        return super().delete(using=using, keep_parents=keep_parents)
-
     @property
     def last_revision(self):
-        return self.revisions.order_by("-version").first() or None
+        revs = self.revisions.all()
+        return max(revs, key=lambda r: r.version) if revs else None
 
     def get_folder(self):
         if self.applied_controls:
@@ -4562,24 +4568,18 @@ class Evidence(
         else:
             return None
 
-    def filename(self):
-        return (
-            os.path.basename(self.last_revision.attachment.name)
-            if self.last_revision and self.last_revision.attachment
-            else None
-        )
+    def filename(self) -> str | None:
+        return self.last_revision.filename() if self.last_revision else None
 
     def get_size(self):
+        rev = self.last_revision
         if (
-            not self.last_revision
-            or not self.last_revision.attachment
-            or not self.last_revision.attachment.storage.exists(
-                self.last_revision.attachment.name
-            )
+            not rev
+            or not rev.attachment
+            or not rev.attachment.storage.exists(rev.attachment.name)
         ):
             return None
-        # get the attachment size with the correct unit
-        size = self.last_revision.attachment.size
+        size = rev.attachment.size
         if size < 1024:
             return f"{size} B"
         elif size < 1024 * 1024:
@@ -4589,9 +4589,10 @@ class Evidence(
 
     @property
     def attachment_hash(self):
-        if not self.last_revision or not self.last_revision.attachment:
+        rev = self.last_revision
+        if not rev or not rev.attachment:
             return None
-        return hashlib.sha256(self.last_revision.attachment.read()).hexdigest()
+        return hashlib.sha256(rev.attachment.read()).hexdigest()
 
 
 class EvidenceRevision(AbstractBaseModel, FolderMixin):
@@ -4634,6 +4635,10 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
     observation = models.TextField(verbose_name="Observation", blank=True, null=True)
 
     fields_to_check = ["evidence", "version"]
+
+    class Meta:
+        verbose_name = _("Evidence Revision")
+        verbose_name_plural = _("Evidence Revisions")
 
     def __str__(self):
         return f"{self.evidence.name} v{self.version}"
@@ -4682,7 +4687,6 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
                             if hasattr(self.attachment, "seek"):
                                 self.attachment.seek(0)
                 except Exception as e:
-                    logger = get_logger(__name__)
                     logger.warning(
                         "Failed to compute attachment hash",
                         revision_id=self.pk,
@@ -4696,13 +4700,9 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
 
         super().save(*args, **kwargs)
 
-    def delete(self, using=None, keep_parents=False):
-        if self.attachment:
-            self.attachment.delete(save=False)
-
-        return super().delete(using=using, keep_parents=keep_parents)
-
-    def filename(self):
+    def filename(self) -> str | None:
+        if not self.attachment:
+            return None
         return os.path.basename(self.attachment.name)
 
     def get_size(self):
@@ -4718,10 +4718,6 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
             return f"{size / 1024:.1f} KB"
         else:
             return f"{size / 1024 / 1024:.1f} MB"
-
-    class Meta:
-        verbose_name = _("Evidence Revision")
-        verbose_name_plural = _("Evidence Revisions")
 
 
 class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
@@ -5039,7 +5035,11 @@ def _get_default_applied_control_cost():
 
 
 class AppliedControl(
-    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
+    NameDescriptionMixin,
+    FolderMixin,
+    PublishInRootFolderMixin,
+    FilteringLabelMixin,
+    CustomFieldsMixin,
 ):
     class Status(models.TextChoices):
         TO_DO = "to_do", _("To do")
@@ -7602,7 +7602,7 @@ class ComplianceAssessment(Assessment):
 
         return [
             group.get("name")
-            for group in framework.implementation_groups_definition
+            for group in framework.get_implementation_groups_definition_translated()
             if group.get("ref_id") in self.selected_implementation_groups
         ]
 
@@ -8107,107 +8107,6 @@ class ComplianceAssessment(Assessment):
             "count": sum([len(errors_lst), len(warnings_lst), len(info_lst)]),
         }
         return findings
-
-    def compute_requirement_assessments_results(
-        self, mapping_set: RequirementMappingSet, source_assessment: Self
-    ) -> tuple[list["RequirementAssessment"], dict["RequirementAssessment", list[str]]]:
-        requirement_assessments: list[RequirementAssessment] = []
-        assessment_source_dict: dict[RequirementAssessment, list[str]] = {}
-        result_order = (
-            RequirementAssessment.Result.NOT_ASSESSED,
-            RequirementAssessment.Result.NOT_APPLICABLE,
-            RequirementAssessment.Result.NON_COMPLIANT,
-            RequirementAssessment.Result.PARTIALLY_COMPLIANT,
-            RequirementAssessment.Result.COMPLIANT,
-        )
-
-        def assign_attributes(target, attributes):
-            """
-            Helper function to assign attributes to a target object.
-            Only assigns if the attribute is not None.
-            """
-            keys = ["result", "status", "score", "is_scored", "observation"]
-            for key, value in zip(keys, attributes):
-                if value is not None:
-                    setattr(target, key, value)
-
-        for requirement_assessment in self.requirement_assessments.all():
-            mappings = mapping_set.mappings.filter(
-                target_requirement=requirement_assessment.requirement
-            )
-            inferences = []
-            refs = []
-
-            # Filter for full coverage relationships if applicable
-            if mappings.filter(
-                relationship__in=RequirementMapping.FULL_COVERAGE_RELATIONSHIPS
-            ).exists():
-                mappings = mappings.filter(
-                    relationship__in=RequirementMapping.FULL_COVERAGE_RELATIONSHIPS
-                )
-
-            for mapping in mappings:
-                source_requirement_assessment = RequirementAssessment.objects.get(
-                    compliance_assessment=source_assessment,
-                    requirement=mapping.source_requirement,
-                )
-                inferred_result = requirement_assessment.infer_result(
-                    mapping=mapping,
-                    source_requirement_assessment=source_requirement_assessment,
-                )
-                if inferred_result.get("result") in result_order:
-                    inferences.append(
-                        (
-                            inferred_result.get("result"),
-                            inferred_result.get("status"),
-                            inferred_result.get("score"),
-                            inferred_result.get("is_scored"),
-                            inferred_result.get("observation"),
-                        )
-                    )
-                    refs.append(source_requirement_assessment)
-
-            if inferences:
-                if len(inferences) == 1:
-                    selected_inference = inferences[0]
-                    ref = refs[0]
-                else:
-                    selected_inference = min(
-                        inferences, key=lambda x: result_order.index(x[0])
-                    )
-                    ref = refs[inferences.index(selected_inference)]
-
-                assessment_source_dict[requirement_assessment] = [
-                    str(ref.id) for ref in refs
-                ]
-
-                assign_attributes(requirement_assessment, selected_inference)
-                requirement_assessment.mapping_inference = {
-                    "result": requirement_assessment.result,
-                    "source_requirement_assessment": {
-                        "str": str(ref),
-                        "id": str(ref.id),
-                        "is_scored": ref.is_scored,
-                        "score": ref.score,
-                        "coverage": mapping.coverage,
-                    },
-                    # "mappings": [mapping.id for mapping in mappings],
-                }
-                requirement_assessments.append(requirement_assessment)
-
-        RequirementAssessment.objects.bulk_update(
-            requirement_assessments,
-            [
-                "mapping_inference",
-                "result",
-                "status",
-                "score",
-                "is_scored",
-                "observation",
-            ],
-            batch_size=1000,
-        )
-        return requirement_assessments, assessment_source_dict
 
     def _get_progress_counts(self) -> tuple[int, int]:
         """

@@ -43,7 +43,7 @@
 	/>
 
 	<div
-		class="alert bg-blue-100 border border-blue-300 text-blue-800 px-4 py-3 rounded-lg text-xs mt-6"
+		class="alert bg-blue-100 dark:bg-blue-500/15 border border-blue-300 dark:border-blue-500/30 text-blue-800 dark:text-blue-300 px-4 py-3 rounded-lg text-xs mt-6"
 	>
 		<div class="font-semibold mb-2">
 			<i class="fa-solid fa-circle-info mr-1"></i>{m.feedOutboundHostsTitle()}
