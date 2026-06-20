@@ -4555,13 +4555,6 @@ class Evidence(
         super().save(*args, **kwargs)
         self.revisions.update(is_published=self.is_published)
 
-    def delete(self, using=None, keep_parents=False):
-        for rev in self.revisions.all():
-            if rev.attachment:
-                rev.attachment.delete(save=False)
-
-        return super().delete(using=using, keep_parents=keep_parents)
-
     @property
     def last_revision(self):
         revs = self.revisions.all()
@@ -4575,9 +4568,8 @@ class Evidence(
         else:
             return None
 
-    def filename(self):
-        rev = self.last_revision
-        return os.path.basename(rev.attachment.name) if rev and rev.attachment else None
+    def filename(self) -> str | None:
+        return self.last_revision.filename() if self.last_revision else None
 
     def get_size(self):
         rev = self.last_revision
@@ -4644,6 +4636,10 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
 
     fields_to_check = ["evidence", "version"]
 
+    class Meta:
+        verbose_name = _("Evidence Revision")
+        verbose_name_plural = _("Evidence Revisions")
+
     def __str__(self):
         return f"{self.evidence.name} v{self.version}"
 
@@ -4691,7 +4687,6 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
                             if hasattr(self.attachment, "seek"):
                                 self.attachment.seek(0)
                 except Exception as e:
-                    logger = get_logger(__name__)
                     logger.warning(
                         "Failed to compute attachment hash",
                         revision_id=self.pk,
@@ -4705,13 +4700,9 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
 
         super().save(*args, **kwargs)
 
-    def delete(self, using=None, keep_parents=False):
-        if self.attachment:
-            self.attachment.delete(save=False)
-
-        return super().delete(using=using, keep_parents=keep_parents)
-
-    def filename(self):
+    def filename(self) -> str | None:
+        if not self.attachment:
+            return None
         return os.path.basename(self.attachment.name)
 
     def get_size(self):
@@ -4727,10 +4718,6 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
             return f"{size / 1024:.1f} KB"
         else:
             return f"{size / 1024 / 1024:.1f} MB"
-
-    class Meta:
-        verbose_name = _("Evidence Revision")
-        verbose_name_plural = _("Evidence Revisions")
 
 
 class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
