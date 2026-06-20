@@ -24,6 +24,7 @@
 			| 'change_folder';
 		count: number;
 		optionsEndpoint?: string;
+		enableDoubleDash?: boolean;
 		multiSelect?: boolean;
 		onConfirm: (value?: string | string[]) => void;
 	}
@@ -33,6 +34,7 @@
 		actionType,
 		count,
 		optionsEndpoint,
+		enableDoubleDash = false,
 		multiSelect = false,
 		onConfirm
 	}: Props = $props();
@@ -72,6 +74,16 @@
 		}));
 	}
 
+	const unsetLabels = new Set(['--', 'undefined']); // taken from Select.svelte
+
+	function withDoubleDash(opts: { label: string; value: string }[]) {
+		// Prepend a "--" (unset) option, unless one is already present
+		if (enableDoubleDash && !opts.find((o) => unsetLabels.has(o.label?.toLowerCase()))) {
+			return [{ label: '--', value: '--' }, ...opts];
+		}
+		return opts;
+	}
+
 	onMount(async () => {
 		if (isValueAction && optionsEndpoint) {
 			loading = true;
@@ -79,7 +91,7 @@
 				const res = await fetch(`/${optionsEndpoint}`);
 				if (res.ok) {
 					const data = await res.json();
-					options = parseOptions(data);
+					options = withDoubleDash(parseOptions(data));
 				}
 			} catch (e) {
 				console.error('Failed to fetch options', e);
@@ -95,7 +107,8 @@
 		} else if (multiSelect) {
 			onConfirm(selectedValues);
 		} else {
-			onConfirm(selectedValue);
+			// "--" means "unset": send undefined so the backend receives null
+			onConfirm(selectedValue === '--' ? undefined : selectedValue);
 		}
 		parent.onClose();
 	}

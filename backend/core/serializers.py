@@ -3196,9 +3196,12 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                         attrs.pop(name)
 
         # Validate extended_result against result
-        extended_result = attrs.get("extended_result")
-        if extended_result is None and self.instance:
+        if "extended_result" in attrs:
+            extended_result = attrs["extended_result"]
+        elif self.instance:
             extended_result = self.instance.extended_result
+        else:
+            extended_result = None
 
         result = attrs.get("result")
         if result is None and self.instance:
