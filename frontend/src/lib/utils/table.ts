@@ -88,6 +88,43 @@ const RISK_STAGE_OPTIONS = [
 	{ label: 'Current', value: 'current' },
 	{ label: 'Residual', value: 'residual' }
 ];
+const CUSTOM_FIELD_BOOLEAN_OPTIONS = [
+	{ label: 'yes', value: 'true' },
+	{ label: 'no', value: 'false' }
+];
+
+/**
+ * Build ModelTable filter configs for enumerable custom fields (choice / multi_choice / boolean).
+ * The filter key carries the backend lookup: `cf__<key>__in` (any-of) for choices, `cf__<key>` for
+ * booleans — both handled by the backend CustomFieldFilterBackend. The dotless `cf__` prefix keeps
+ * the key a flat field name (superforms treats "." as a nested path). Text/number/date fields
+ * filter via the API but have no dropdown UI here.
+ */
+export function buildCustomFieldFilters(
+	defs: import('./customFields').CustomFieldDef[]
+): Record<string, ListViewFilterConfig> {
+	const filters: Record<string, ListViewFilterConfig> = {};
+	for (const def of defs ?? []) {
+		if (def.filterable === false) continue;
+		if (def.field_type === 'choice' || def.field_type === 'multi_choice') {
+			filters[`cf__${def.key}__in`] = {
+				component: AutocompleteSelect,
+				props: {
+					label: def.label_localized,
+					multiple: true,
+					options: def.choices.map((c) => ({ label: c.label_localized, value: c.value }))
+				}
+			};
+		} else if (def.field_type === 'boolean') {
+			filters[`cf__${def.key}`] = {
+				component: AutocompleteSelect,
+				props: { label: def.label_localized, options: CUSTOM_FIELD_BOOLEAN_OPTIONS }
+			};
+		}
+	}
+	return filters;
+}
+
 export const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -2804,6 +2841,13 @@ export const listViewFields = {
 	qualifications: {
 		head: ['name', 'abbreviation'],
 		body: ['name', 'abbreviation']
+	},
+	'custom-fields': {
+		head: ['model', 'key', 'label', 'fieldType', 'required', 'domain'],
+		body: ['model_label', 'key', 'label', 'field_type', 'required', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER
+		}
 	},
 	terminologies: {
 		head: ['field_path', 'name', 'description', 'translations', 'is_visible'],

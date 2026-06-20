@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
+	import { isDark } from '$lib/utils/helpers';
 
 	interface TimelineEntry {
 		folder: string;
@@ -75,6 +76,23 @@
 		return parts.join(' ');
 	}
 
+	// A "--" / no-impact cell carries a white hexcolor from the backend, which stays glaringly
+	// light in dark mode. Treat those as empty and let them use the theme surface instead.
+	function isEmptyCell(point: { name?: string }) {
+		return !point?.name || point.name === '--';
+	}
+
+	// Empty cells follow the theme surface (bg + adaptive text); impact cells keep their fixed
+	// color with black/white text picked by luminance.
+	function cellBg(point: { hexcolor?: string; name?: string }) {
+		if (isEmptyCell(point)) return 'var(--color-surface-100-900)';
+		return point.hexcolor || 'var(--color-surface-100-900)';
+	}
+	function cellTextClass(point: { hexcolor?: string; name?: string }) {
+		if (isEmptyCell(point)) return 'text-surface-950-50';
+		return point.hexcolor && isDark(point.hexcolor) ? 'text-white' : 'text-surface-950';
+	}
+
 	// Helper to determine if a cell represents an impact change
 	function isImpactChange(entry: TimelineEntry, currentIndex: number) {
 		if (currentIndex === 0) return true;
@@ -137,11 +155,13 @@
 								{#each xAxisPoints as point, i}
 									<td
 										class="px-4 py-2 text-center"
-										style="background-color: {entry.data[point].hexcolor || '#f9fafb'};
+										style="background-color: {cellBg(entry.data[point])};
 										       {!isImpactChange(entry, i) ? 'border-left: none;' : ''}"
 									>
 										{#if isImpactChange(entry, i)}
-											<div class="font-medium">{entry.data[point].name || '--'}</div>
+											<div class="font-medium {cellTextClass(entry.data[point])}">
+												{entry.data[point].name || '--'}
+											</div>
 										{/if}
 									</td>
 								{/each}
@@ -183,7 +203,7 @@
 
 	th,
 	td {
-		border-right: 1px solid rgba(0, 0, 0, 0.05);
+		border-right: 1px solid var(--color-surface-200-800);
 	}
 
 	th:last-child,
@@ -217,7 +237,7 @@
 		top: 0;
 		bottom: 0;
 		width: 1px;
-		background: rgba(0, 0, 0, 0.05);
+		background: var(--color-surface-300-700);
 		opacity: 0.3;
 	}
 

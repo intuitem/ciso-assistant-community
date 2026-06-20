@@ -8,6 +8,7 @@
 		type ExportOption
 	} from '$lib/components/Modals/ExportModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { buildCustomFieldFilters, listViewFields } from '$lib/utils/table';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { driverInstance } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
@@ -31,6 +32,11 @@
 	let { data, form }: Props = $props();
 	const toastStore = getToastStore();
 	let URLModel = $derived(data.URLModel);
+	// Static (per-model) filters merged with dynamic custom-field filters.
+	const tableFilters = $derived({
+		...listViewFields[URLModel]?.filters,
+		...buildCustomFieldFilters(data.customFields ?? [])
+	});
 	let pullCatalogOpen = $state(false);
 	let currentFilterSearch = $state(page.url.search);
 
@@ -200,6 +206,7 @@
 		{#key URLModel}
 			<ModelTable
 				source={data.table}
+				{tableFilters}
 				deleteForm={data.deleteForm}
 				{URLModel}
 				disableEdit={['user-groups', 'validation-flows'].includes(URLModel)}
@@ -288,7 +295,7 @@
 								{/if}
 								{#if URLModel === 'security-advisories'}
 									<button
-										class="inline-block p-3 w-12 focus:relative bg-blue-50 hover:bg-blue-100"
+										class="inline-block p-3 w-12 focus:relative bg-blue-100 hover:bg-blue-200 dark:bg-blue-500/20 dark:hover:bg-blue-500/30"
 										title={m.syncKev()}
 										aria-label={m.syncKev()}
 										data-testid="sync-kev-button"
@@ -320,7 +327,7 @@
 										}}>🇺🇸</button
 									>
 									<button
-										class="inline-block p-3 w-12 focus:relative bg-yellow-50 hover:bg-yellow-100"
+										class="inline-block p-3 w-12 focus:relative bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-500/20 dark:hover:bg-yellow-500/30"
 										title={m.syncEuvd()}
 										aria-label={m.syncEuvd()}
 										data-testid="sync-euvd-button"

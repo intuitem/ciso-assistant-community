@@ -2,6 +2,18 @@
 	import { VisSingleContainer, VisGraph } from '@unovis/svelte';
 	import { GraphLayoutType, GraphNodeShape, GraphLinkArrowStyle } from '@unovis/ts';
 
+	// Track the app dark mode (`.dark` on <html>) so the SVG-rendered node fill and
+	// labels stay readable. Unovis only reacts to `body.theme-dark`, which this app never sets.
+	let isDark = $state(false);
+	$effect(() => {
+		const root = document.documentElement;
+		const update = () => (isDark = root.classList.contains('dark'));
+		update();
+		const observer = new MutationObserver(update);
+		observer.observe(root, { attributes: true, attributeFilter: ['class'] });
+		return () => observer.disconnect();
+	});
+
 	type NodeDatum = {
 		id: string;
 		label: string;
@@ -124,7 +136,7 @@
 		return StatusMap[status]?.color || StatusMap['null'].color;
 	};
 
-	const nodeFill = () => '#ffffff'; // white fill for all nodes
+	const nodeFill = () => (isDark ? '#292b34' : '#ffffff');
 
 	// Add status badge to nodes
 	const nodeSideLabels = (node: NodeDatum) => {
@@ -193,7 +205,7 @@
 							.attr('y', i * lineHeight - (lines.length * lineHeight) / 2 + lineHeight / 2)
 							.attr('font-size', '11px')
 							.attr('font-weight', '500')
-							.attr('fill', '#0F1E57')
+							.attr('fill', isDark ? '#E6E9F3' : '#0F1E57')
 							.style('font-family', 'var(--vis-font-family)')
 							.text(line.trim());
 					});
@@ -238,6 +250,15 @@
 		--vis-graph-link-band-opacity: 0.25;
 		--vis-graph-panel-label-font-weight: 800;
 		--vis-graph-link-stroke-color: #8fa1b9;
+	}
+
+	/* Mirror Unovis' dark palette under the app's `.dark` class (Unovis only swaps
+	   its dark vars on `body.theme-dark`, which this app never sets). */
+	:global(.dark) .chart {
+		--vis-graph-panel-label-color: #e6e9f3;
+		--vis-graph-panel-label-background: #292b34;
+		--vis-graph-panel-fill-color: #292b34;
+		--vis-graph-panel-side-icon-shape-fill-color: #6c778c;
 	}
 
 	:global(.custom-multiline-label) {
