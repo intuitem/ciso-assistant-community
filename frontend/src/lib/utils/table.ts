@@ -32,6 +32,7 @@ export interface ListViewFilterConfig {
 		optionsEndpoint?: string;
 		multiple?: boolean;
 		options?: Option[];
+		enableDoubleDash?: boolean;
 		[key: string]: unknown;
 	};
 	hide?: boolean;
@@ -238,6 +239,7 @@ export const PRIORITY_FILTER: ListViewFilterConfig = {
 		optionsValueField: 'value',
 		browserCache: 'force-cache',
 		label: 'priority',
+		enableDoubleDash: true,
 		multiple: true
 	}
 };
@@ -250,6 +252,7 @@ export const EFFORT_FILTER: ListViewFilterConfig = {
 		optionsValueField: 'value',
 		browserCache: 'force-cache',
 		label: 'effort',
+		enableDoubleDash: true,
 		multiple: true
 	}
 };
@@ -363,6 +366,7 @@ export const APPLIED_CONTROL_IMPACT_FILTER: ListViewFilterConfig = {
 		optionsValueField: 'value',
 		label: 'controlImpact',
 		browserCache: 'force-cache',
+		enableDoubleDash: true,
 		multiple: true
 	}
 };
@@ -1121,6 +1125,7 @@ export const APPLIED_CONTROL_CATEGORY_FILTER: ListViewFilterConfig = {
 		multiple: true,
 		optionsLabelField: 'label',
 		browserCache: 'force-cache',
+		enableDoubleDash: true,
 		optionsValueField: 'value'
 	}
 };
@@ -1133,6 +1138,7 @@ export const APPLIED_CONTROL_CSF_FUNCTION_FILTER: ListViewFilterConfig = {
 		optionsValueField: 'value',
 		label: 'csfFunction',
 		browserCache: 'force-cache',
+		enableDoubleDash: true,
 		multiple: true
 	}
 };
@@ -3159,6 +3165,7 @@ export interface BatchActionConfig {
 	icon: string;
 	field?: string;
 	optionsEndpoint?: string;
+	enableDoubleDash?: boolean;
 	multiSelect?: boolean;
 	children?: BatchActionConfig[];
 	minSelection?: number;
@@ -3184,14 +3191,16 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 					label: 'batchChangePriority',
 					icon: 'fa-solid fa-arrow-up-wide-short',
 					field: 'priority',
-					optionsEndpoint: 'applied-controls/priority'
+					optionsEndpoint: 'applied-controls/priority',
+					enableDoubleDash: true
 				},
 				{
 					type: 'change_field',
 					label: 'changeCsfFunction',
 					icon: 'fa-solid fa-shield-halved',
 					field: 'csf_function',
-					optionsEndpoint: 'applied-controls/csf_function'
+					optionsEndpoint: 'applied-controls/csf_function',
+					enableDoubleDash: true
 				}
 			]
 		},
