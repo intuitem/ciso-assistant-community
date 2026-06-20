@@ -45,7 +45,6 @@
 
 <HiddenInput {form} field="evidence" />
 <HiddenInput {form} field="task_node" />
-<HiddenInput {form} field="folder" />
 
 {#if context === 'edit'}
 	<NumberField

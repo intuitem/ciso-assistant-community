@@ -156,6 +156,18 @@
 
 	const URLModel = model.urlModel as urlModel;
 
+	const HIDDEN_FOLDER_MODELS: Set<string> = new Set([
+		'feared-events',
+		'stakeholders',
+		'attack-paths',
+		'ro-to',
+		'strategic-scenarios',
+		'operational-scenarios',
+		'operating-modes',
+		'kill-chains',
+		'evidence-revisions'
+	]);
+
 	let selectedFolder = $state<string | undefined>(undefined);
 	let folderKey = $state(0);
 	let isAutoFillingFolder = $state(false);
@@ -428,7 +440,7 @@
 				data-focusindex="1"
 			/>
 		{/if}
-		{#if shape.folder && !customFolder && URLModel !== 'validation-flows' && URLModel !== 'evidence-revisions'}
+		{#if shape.folder && !customFolder && URLModel !== 'validation-flows'}
 			{#key folderKey}
 				<FolderTreeSelect
 					{form}
@@ -436,14 +448,22 @@
 					cacheLock={cacheLocks['folder']}
 					bind:cachedValue={formDataCache['folder']}
 					label={m.domain()}
+					hidden={HIDDEN_FOLDER_MODELS.has(URLModel)}
+					disabled={(URLModel === 'entities' && object?.builtin) ||
+						(URLModel === 'perimeters' && !!initialData?.folder)}
 					contentTypes={['compliance-assessments', 'evidences'].includes(URLModel)
 						? ['DO', 'GL', 'EN']
 						: undefined}
+					helpText={URLModel === 'campaigns'
+						? m.campaignDomainHelpText()
+						: URLModel === 'custom-fields'
+							? m.customFieldFolderHelpText()
+							: undefined}
 					onChange={handleFolderChange}
 					mount={handleFolderChange}
 				/>
 			{/key}
-			{#if shape.perimeter}
+			{#if shape.perimeter && !HIDDEN_FOLDER_MODELS.has(URLModel)}
 				{#key selectedFolder}
 					<AutocompleteSelect
 						{form}
