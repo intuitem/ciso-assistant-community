@@ -6,6 +6,7 @@
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import FolderTreeSelect from './FolderTreeSelect.svelte';
 	import LoadingSpinner from '../utils/LoadingSpinner.svelte';
 
 	import RiskAssessmentForm from './ModelForm/RiskAssessmentForm.svelte';
@@ -122,6 +123,8 @@
 		duplicate?: boolean;
 		importFolder?: boolean;
 		customNameDescription?: boolean;
+		customFolder?: boolean;
+		onFolderChange?: (folderId: string) => void;
 		additionalInitialData?: any;
 		schema?: any;
 		object?: Record<string, any>;
@@ -143,6 +146,8 @@
 		duplicate = false,
 		importFolder = false,
 		customNameDescription = false,
+		customFolder = false,
+		onFolderChange = undefined,
 		additionalInitialData = {},
 		schema = modelSchema(model.urlModel),
 		object = {},
@@ -150,6 +155,45 @@
 	}: Props = $props();
 
 	const URLModel = model.urlModel as urlModel;
+
+	let selectedFolder = $state<string | undefined>(undefined);
+	let folderKey = $state(0);
+	let isAutoFillingFolder = $state(false);
+
+	function handleFolderChange(folderId: string) {
+		selectedFolder = folderId;
+		if (!isAutoFillingFolder && _form.form?.data?.perimeter) {
+			_form.form.update((currentData) => ({
+				...currentData,
+				perimeter: undefined
+			}));
+		}
+		isAutoFillingFolder = false;
+		onFolderChange?.(folderId);
+	}
+
+	async function handlePerimeterChange(perimeterId: string) {
+		if (perimeterId && !selectedFolder) {
+			try {
+				const response = await fetch(`/perimeters/${perimeterId}`);
+				if (response.ok) {
+					const perimeter = await response.json();
+					if (perimeter.folder?.id) {
+						isAutoFillingFolder = true;
+						selectedFolder = perimeter.folder.id;
+						_form.form.update((currentData) => ({
+							...currentData,
+							folder: perimeter.folder.id
+						}));
+						folderKey++;
+					}
+				}
+			} catch (error) {
+				console.error('Error fetching perimeter:', error);
+			}
+		}
+	}
+
 	const defaultFolderWritePermission =
 		context === 'edit' ? `change_${model.name}` : `add_${model.name}`;
 	setContext('folderTreeDefaultWritePermission', defaultFolderWritePermission);
@@ -383,6 +427,38 @@
 				bind:cachedValue={formDataCache['description']}
 				data-focusindex="1"
 			/>
+		{/if}
+		{#if shape.folder && !customFolder && URLModel !== 'validation-flows' && URLModel !== 'evidence-revisions'}
+			{#key folderKey}
+				<FolderTreeSelect
+					{form}
+					field="folder"
+					cacheLock={cacheLocks['folder']}
+					bind:cachedValue={formDataCache['folder']}
+					label={m.domain()}
+					contentTypes={['compliance-assessments', 'evidences'].includes(URLModel)
+						? ['DO', 'GL', 'EN']
+						: undefined}
+					onChange={handleFolderChange}
+					mount={handleFolderChange}
+				/>
+			{/key}
+			{#if shape.perimeter}
+				{#key selectedFolder}
+					<AutocompleteSelect
+						{form}
+						optionsEndpoint="perimeters"
+						optionsDetailedUrlParameters={selectedFolder ? [['folder', selectedFolder]] : []}
+						optionsExtraFields={[['folder', 'str']]}
+						field="perimeter"
+						nullable
+						cacheLock={cacheLocks['perimeter']}
+						bind:cachedValue={formDataCache['perimeter']}
+						label={m.perimeter()}
+						onChange={handlePerimeterChange}
+					/>
+				{/key}
+			{/if}
 		{/if}
 		{#if URLModel === 'perimeters'}
 			<PerimeterForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
