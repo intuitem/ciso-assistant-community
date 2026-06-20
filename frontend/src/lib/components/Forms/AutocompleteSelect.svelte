@@ -36,6 +36,7 @@
 		resetForm?: boolean;
 		multiple?: boolean;
 		nullable?: boolean;
+		acceptNullValue?: boolean;
 		mandatory?: boolean;
 		disabled?: boolean;
 		hidden?: boolean;
@@ -89,6 +90,7 @@
 		resetForm = false,
 		multiple = false,
 		nullable = false,
+		acceptNullValue = false,
 		mandatory = false,
 		disabled = false,
 		hidden = false,
@@ -289,6 +291,18 @@
 			isLoading = false;
 		}
 	}
+
+	const NULL_OPTION: Option = { label: '--', value: '--', translatedLabel: '--' };
+
+	$effect(() => {
+		if (acceptNullValue) {
+			const isNullOptionMissing = options.every((option) => option.value !== '--');
+
+			if (isNullOptionMissing) {
+				options = [NULL_OPTION, ...options];
+			}
+		}
+	});
 
 	async function fetchSelectedItems() {
 		if (!initialValue) return;
@@ -793,7 +807,8 @@
 					class="opacity-75"
 					fill="currentColor"
 					d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-				></path>
+				>
+				</path>
 			</svg>
 		{/if}
 	</div>
