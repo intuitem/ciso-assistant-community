@@ -4568,9 +4568,7 @@ class Evidence(
             return None
 
     def filename(self) -> str | None:
-        if self.last_revision and self.last_revision.attachment:
-            return os.path.basename(self.last_revision.attachment.name)
-        return None
+        return self.last_revision.filename() if self.last_revision else None
 
     def get_size(self):
         if (
