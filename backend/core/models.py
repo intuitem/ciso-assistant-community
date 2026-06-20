@@ -9660,6 +9660,18 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
                 linked.append(field)
         return linked
 
+    @property
+    def last_event(self):
+        """Most recent flow event. Reuses the prefetch cache when available."""
+        # FlowEvent is ordered by -created_at, so the first item is the latest.
+        events = list(self.events.all())
+        return events[0] if events else None
+
+    @property
+    def last_event_notes(self) -> str | None:
+        event = self.last_event
+        return event.event_notes if event else None
+
     def __str__(self) -> str:
         return self.ref_id
 

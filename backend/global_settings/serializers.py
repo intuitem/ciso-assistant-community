@@ -253,7 +253,7 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                                     * Decimal(str(conversion_rate))
                                 )
 
-                    control.save(update_fields=["cost"])
+                    control.save(update_fields=["cost"], skip_sync=True)
                     updated_count += 1
 
         print(

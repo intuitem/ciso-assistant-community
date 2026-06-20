@@ -5110,5 +5110,6 @@
 	"scoreRange": "Plage de notes",
 	"scoreScale": "Échelle de notes",
 	"downloadExcelTemplate": "Télécharger le modèle Excel",
-	"frameworkActionsHelp": "Le modèle Excel est destiné aux tiers ou entités externes pour le remplir hors ligne, puis ré-importer les résultats via {dataWizard}."
+	"frameworkActionsHelp": "Le modèle Excel est destiné aux tiers ou entités externes pour le remplir hors ligne, puis ré-importer les résultats via {dataWizard}.",
+	"decisionNotes": "Notes de décision"
 }

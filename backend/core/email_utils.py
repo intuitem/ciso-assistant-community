@@ -300,6 +300,36 @@ def format_evidence_list(evidences) -> str:
     return "\n".join(evidence_lines)
 
 
+def format_security_exception_list(security_exceptions) -> str:
+    """
+    Format a list of security exceptions for email templates
+
+    Args:
+        security_exceptions: List of SecurityException objects
+
+    Returns:
+        Formatted string with security exception information
+    """
+    exception_lines = []
+    for exception in security_exceptions:
+        expiration_date = (
+            exception.expiration_date.strftime("%Y-%m-%d")
+            if exception.expiration_date
+            else "Not set"
+        )
+        status = (
+            exception.get_status_display()
+            if hasattr(exception, "get_status_display")
+            else exception.status
+        )
+        ref_id = f"{exception.ref_id} - " if exception.ref_id else ""
+        exception_lines.append(
+            f"- {ref_id}{exception.name} (Status: {status}, Expiration: {expiration_date})"
+        )
+
+    return "\n".join(exception_lines)
+
+
 def format_validation_list(validations) -> str:
     """
     Format a list of validation flows for email templates

@@ -82,6 +82,7 @@
 				actionType: action.type,
 				count,
 				optionsEndpoint: action.optionsEndpoint,
+				enableDoubleDash: action.enableDoubleDash ?? false,
 				multiSelect: action.multiSelect ?? false,
 				onConfirm: async (value?: string | string[]) => {
 					try {
