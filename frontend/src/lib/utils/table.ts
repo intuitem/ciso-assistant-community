@@ -27,7 +27,13 @@ export function tableSourceMapper(source: any[], keys: string[]): any[] {
 
 export interface ListViewFilterConfig {
 	component: ComponentType;
-	props?: { label: string; optionsEndpoint?: string; multiple?: boolean; options?: Option[] };
+	props?: {
+		label: string;
+		optionsEndpoint?: string;
+		multiple?: boolean;
+		options?: Option[];
+		[key: string]: unknown;
+	};
 	hide?: boolean;
 }
 
@@ -35,6 +41,8 @@ interface ListViewFieldsConfig {
 	[key: string]: {
 		head: string[];
 		body: string[];
+		// Extra columns offered via the column selector but hidden by default; `head`/`body` stay the defaults.
+		optionalFields?: { head: string[]; body: string[] };
 		meta?: string[];
 		breadcrumb_link_disabled?: boolean;
 		filters?: {
@@ -79,6 +87,43 @@ const RISK_STAGE_OPTIONS = [
 	{ label: 'Current', value: 'current' },
 	{ label: 'Residual', value: 'residual' }
 ];
+const CUSTOM_FIELD_BOOLEAN_OPTIONS = [
+	{ label: 'yes', value: 'true' },
+	{ label: 'no', value: 'false' }
+];
+
+/**
+ * Build ModelTable filter configs for enumerable custom fields (choice / multi_choice / boolean).
+ * The filter key carries the backend lookup: `cf__<key>__in` (any-of) for choices, `cf__<key>` for
+ * booleans — both handled by the backend CustomFieldFilterBackend. The dotless `cf__` prefix keeps
+ * the key a flat field name (superforms treats "." as a nested path). Text/number/date fields
+ * filter via the API but have no dropdown UI here.
+ */
+export function buildCustomFieldFilters(
+	defs: import('./customFields').CustomFieldDef[]
+): Record<string, ListViewFilterConfig> {
+	const filters: Record<string, ListViewFilterConfig> = {};
+	for (const def of defs ?? []) {
+		if (def.filterable === false) continue;
+		if (def.field_type === 'choice' || def.field_type === 'multi_choice') {
+			filters[`cf__${def.key}__in`] = {
+				component: AutocompleteSelect,
+				props: {
+					label: def.label_localized,
+					multiple: true,
+					options: def.choices.map((c) => ({ label: c.label_localized, value: c.value }))
+				}
+			};
+		} else if (def.field_type === 'boolean') {
+			filters[`cf__${def.key}`] = {
+				component: AutocompleteSelect,
+				props: { label: def.label_localized, options: CUSTOM_FIELD_BOOLEAN_OPTIONS }
+			};
+		}
+	}
+	return filters;
+}
+
 export const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1320,6 +1365,10 @@ export const listViewFields = {
 	perimeters: {
 		head: ['ref_id', 'name', 'description', 'defaultAssignee', 'domain'],
 		body: ['ref_id', 'name', 'description', 'default_assignee', 'folder'],
+		optionalFields: {
+			head: ['lcStatus', 'createdAt', 'updatedAt'],
+			body: ['lc_status', 'created_at', 'updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			lc_status: PERIMETER_STATUS_FILTER
@@ -1403,6 +1452,10 @@ export const listViewFields = {
 			'perimeter',
 			'updated_at'
 		],
+		optionalFields: {
+			head: ['createdAt'],
+			body: ['created_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -1412,6 +1465,10 @@ export const listViewFields = {
 	threats: {
 		head: ['ref_id', 'name', 'description', 'library', 'domain', 'labels'],
 		body: ['ref_id', 'name', 'description', 'library', 'folder', 'filtering_labels'],
+		optionalFields: {
+			head: ['provider', 'createdAt', 'updatedAt'],
+			body: ['provider', 'created_at', 'updated_at']
+		},
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -1503,6 +1560,10 @@ export const listViewFields = {
 			'treatment',
 			'risk_assessment'
 		],
+		optionalFields: {
+			head: ['createdAt', 'updatedAt'],
+			body: ['created_at', 'updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -1581,7 +1642,6 @@ export const listViewFields = {
 			'csfFunction',
 			'eta',
 			'domain',
-			'owner',
 			'controlImpact',
 			'effort',
 			'linkedModels',
@@ -1598,12 +1658,15 @@ export const listViewFields = {
 			'csf_function',
 			'eta',
 			'folder',
-			'owner',
 			'control_impact',
 			'effort',
 			'linked_models',
 			'filtering_labels'
 		],
+		optionalFields: {
+			head: ['startDate', 'expiryDate', 'createdAt', 'updatedAt'],
+			body: ['start_date', 'expiry_date', 'created_at', 'updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: APPLIED_CONTROL_STATUS_FILTER,
@@ -1644,6 +1707,10 @@ export const listViewFields = {
 			'folder',
 			'reference_control'
 		],
+		optionalFields: {
+			head: ['startDate', 'expiryDate', 'createdAt', 'updatedAt'],
+			body: ['start_date', 'expiry_date', 'created_at', 'updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: APPLIED_CONTROL_STATUS_FILTER,
@@ -1673,6 +1740,10 @@ export const listViewFields = {
 			'folder',
 			'filtering_labels'
 		],
+		optionalFields: {
+			head: ['createdAt', 'updatedAt'],
+			body: ['created_at', 'updated_at']
+		},
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -1706,6 +1777,10 @@ export const listViewFields = {
 			'folder',
 			'filtering_labels'
 		],
+		optionalFields: {
+			head: ['referenceLink', 'createdAt', 'updatedAt'],
+			body: ['reference_link', 'created_at', 'updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			type: ASSET_TYPE_FILTER,
@@ -1798,6 +1873,10 @@ export const listViewFields = {
 			'created_at',
 			'updated_at'
 		],
+		optionalFields: {
+			head: ['status'],
+			body: ['status']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -1827,6 +1906,10 @@ export const listViewFields = {
 			'filtering_labels',
 			'applied_controls'
 		],
+		optionalFields: {
+			head: ['createdAt'],
+			body: ['created_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			filtering_labels: LABELS_FILTER,
@@ -1922,6 +2005,10 @@ export const listViewFields = {
 			'relationship',
 			'default_criticality'
 		],
+		optionalFields: {
+			head: ['referenceLink', 'createdAt', 'updatedAt'],
+			body: ['reference_link', 'created_at', 'updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			parent_entity: PARENT_ENTITY_FILTER,
@@ -1960,6 +2047,10 @@ export const listViewFields = {
 	solutions: {
 		head: ['refId', 'name', 'description', 'providerEntity', 'criticality', 'labels'],
 		body: ['ref_id', 'name', 'description', 'provider_entity', 'criticality', 'filtering_labels'],
+		optionalFields: {
+			head: ['createdAt', 'updatedAt'],
+			body: ['created_at', 'updated_at']
+		},
 		filters: {
 			provider_entity: ENTITY_FILTER,
 			criticality: SOLUTION_CRITICALITY_FILTER,
@@ -2006,6 +2097,10 @@ export const listViewFields = {
 	'business-impact-analysis': {
 		head: ['name', 'perimeter', 'folder', 'status'],
 		body: ['name', 'perimeter', 'folder', 'status'],
+		optionalFields: {
+			head: ['createdAt', 'updatedAt'],
+			body: ['created_at', 'updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -2427,6 +2522,10 @@ export const listViewFields = {
 			'associated_objects_count',
 			'created_at'
 		],
+		optionalFields: {
+			head: ['updatedAt'],
+			body: ['updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			severity: EXCEPTION_SEVERITY_FILTER,
@@ -2485,6 +2584,10 @@ export const listViewFields = {
 			'applied_controls',
 			'filtering_labels'
 		],
+		optionalFields: {
+			head: ['createdAt', 'updatedAt'],
+			body: ['created_at', 'updated_at']
+		},
 		filters: {
 			filtering_labels: LABELS_FILTER,
 			severity: FINDINGS_SEVERITY_FILTER,
@@ -2518,6 +2621,10 @@ export const listViewFields = {
 			'reported_at',
 			'updated_at'
 		],
+		optionalFields: {
+			head: ['createdAt'],
+			body: ['created_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			qualifications: QUALIFICATION_FILTER,
@@ -2704,6 +2811,10 @@ export const listViewFields = {
 			'folder',
 			'filtering_labels'
 		],
+		optionalFields: {
+			head: ['createdAt', 'updatedAt'],
+			body: ['created_at', 'updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			assigned_to: TASK_TEMPLATE_ASSIGNED_TO_FILTER,
@@ -2724,6 +2835,13 @@ export const listViewFields = {
 	qualifications: {
 		head: ['name', 'abbreviation'],
 		body: ['name', 'abbreviation']
+	},
+	'custom-fields': {
+		head: ['model', 'key', 'label', 'fieldType', 'required', 'domain'],
+		body: ['model_label', 'key', 'label', 'field_type', 'required', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER
+		}
 	},
 	terminologies: {
 		head: ['field_path', 'name', 'description', 'translations', 'is_visible'],
@@ -3579,10 +3697,12 @@ export function getBatchActions(model: urlModel): BatchActionConfig[] {
 
 export function getListViewFields({
 	key,
-	featureFlags = {}
+	featureFlags = {},
+	includeOptional = false
 }: {
 	key: string;
 	featureFlags: Record<string, boolean>;
+	includeOptional?: boolean;
 }) {
 	if (!Object.keys(listViewFields).includes(key)) {
 		return { head: [], body: [] };
@@ -3605,6 +3725,12 @@ export function getListViewFields({
 
 		head = head.filter((_, index) => !indicesToPop.includes(index));
 		body = body.filter((_, index) => !indicesToPop.includes(index));
+	}
+
+	// Optional fields are appended after the defaults but are hidden by default in the UI.
+	if (includeOptional && baseEntry.optionalFields) {
+		head = [...head, ...baseEntry.optionalFields.head];
+		body = [...body, ...baseEntry.optionalFields.body];
 	}
 
 	return {

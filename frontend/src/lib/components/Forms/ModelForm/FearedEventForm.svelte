@@ -27,7 +27,7 @@
 	}: Props = $props();
 </script>
 
-<p class="text-sm text-gray-500">{m.fearedEventHelpText()}</p>
+<p class="text-sm text-surface-600-400">{m.fearedEventHelpText()}</p>
 <AutocompleteSelect
 	{form}
 	field="ebios_rm_study"
@@ -43,13 +43,6 @@
 	bind:cachedValue={formDataCache['folder']}
 	label={m.folder()}
 	hidden
-/>
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
 />
 <Select
 	{form}

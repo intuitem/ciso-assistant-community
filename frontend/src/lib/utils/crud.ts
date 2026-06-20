@@ -136,12 +136,17 @@ interface Field {
 	tooltip?: string;
 }
 
-interface SelectField {
+export interface SelectField {
 	field: string;
 	detail?: boolean;
 	valueType?: 'string' | 'number';
 	endpointUrl?: string;
 	formNestedField?: string;
+}
+
+export interface SelectFieldData {
+	label: string;
+	value: string | number;
 }
 
 type FeatureFlag = string;
@@ -2079,23 +2084,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [
 			{
 				field: 'findings',
-				urlModel: 'threats',
-				addExisting: {
-					parentField: 'threats'
-				}
-			},
-			{
-				field: 'findings',
 				urlModel: 'vulnerabilities',
 				addExisting: {
 					parentField: 'vulnerabilities'
-				}
-			},
-			{
-				field: 'findings',
-				urlModel: 'reference-controls',
-				addExisting: {
-					parentField: 'reference_controls'
 				}
 			},
 			{
@@ -2111,6 +2102,20 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'evidences',
 				addExisting: {
 					parentField: 'evidences'
+				}
+			},
+			{
+				field: 'findings',
+				urlModel: 'threats',
+				addExisting: {
+					parentField: 'threats'
+				}
+			},
+			{
+				field: 'findings',
+				urlModel: 'reference-controls',
+				addExisting: {
+					parentField: 'reference_controls'
 				}
 			}
 		],
@@ -2566,6 +2571,30 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'removed_applied_controls' },
 			{ field: 'observation' },
 			{ field: 'is_selected' }
+		]
+	},
+	'custom-fields': {
+		name: 'customfielddefinition',
+		localName: 'customField',
+		localNamePlural: 'customFields',
+		verboseName: 'Custom field',
+		verboseNamePlural: 'Custom fields',
+		selectFields: [{ field: 'field_type' }],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+		],
+		detailViewFields: [
+			{ field: 'model_label' },
+			{ field: 'key' },
+			{ field: 'label' },
+			{ field: 'field_type' },
+			{ field: 'required' },
+			{ field: 'visible' },
+			{ field: 'searchable' },
+			{ field: 'filterable' },
+			{ field: 'order' },
+			{ field: 'folder' },
+			{ field: 'help_text' }
 		]
 	},
 	terminologies: {
@@ -3087,15 +3116,15 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 					to_do: { text: 'toDo', cssClasses: 'badge bg-blue-200' },
 					in_progress: { text: 'inProgress', cssClasses: 'badge bg-yellow-300' },
 					active: { text: 'active', cssClasses: 'badge bg-green-200' },
-					on_hold: { text: 'onHold', cssClasses: 'badge bg-gray-300' },
+					on_hold: { text: 'onHold', cssClasses: 'badge bg-surface-300-700' },
 					deprecated: { text: 'deprecated', cssClasses: 'badge bg-red-300' },
-					'--': { text: 'undefined', cssClasses: 'badge bg-gray-300' }
+					'--': { text: 'undefined', cssClasses: 'badge bg-surface-300-700' }
 				},
 				priority: {
 					P1: { text: '', cssClasses: 'fa-solid fa-flag text-red-500' },
 					P2: { text: '', cssClasses: 'fa-solid fa-flag text-orange-500' },
 					P3: { text: '', cssClasses: 'fa-solid fa-flag text-blue-500' },
-					P4: { text: '', cssClasses: 'fa-solid fa-flag text-gray-500' },
+					P4: { text: '', cssClasses: 'fa-solid fa-flag text-surface-600-400' },
 					'--': { text: '', cssClasses: '' }
 				}
 			}
@@ -3157,15 +3186,15 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 					to_do: { text: 'toDo', cssClasses: 'badge bg-blue-200' },
 					in_progress: { text: 'inProgress', cssClasses: 'badge bg-yellow-300' },
 					active: { text: 'active', cssClasses: 'badge bg-green-200' },
-					on_hold: { text: 'onHold', cssClasses: 'badge bg-gray-300' },
+					on_hold: { text: 'onHold', cssClasses: 'badge bg-surface-300-700' },
 					deprecated: { text: 'deprecated', cssClasses: 'badge bg-red-300' },
-					'--': { text: 'undefined', cssClasses: 'badge bg-gray-300' }
+					'--': { text: 'undefined', cssClasses: 'badge bg-surface-300-700' }
 				},
 				priority: {
 					P1: { text: '', cssClasses: 'fa-solid fa-flag text-red-500' },
 					P2: { text: '', cssClasses: 'fa-solid fa-flag text-orange-500' },
 					P3: { text: '', cssClasses: 'fa-solid fa-flag text-blue-500' },
-					P4: { text: '', cssClasses: 'fa-solid fa-flag text-gray-500' },
+					P4: { text: '', cssClasses: 'fa-solid fa-flag text-surface-600-400' },
 					'--': { text: '', cssClasses: '' }
 				}
 			}

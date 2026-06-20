@@ -104,13 +104,6 @@
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
 />
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
 <AutocompleteSelect
 	{form}
 	multiple
@@ -210,7 +203,7 @@
 	{#if context !== 'create'}
 		<div class="mt-4">
 			<button
-				class="btn bg-gray-300 h-10 w-10"
+				class="btn bg-surface-300-700 h-10 w-10"
 				aria-label={m.addAppliedControl()}
 				onclick={(_) => modalAppliedControlCreateForm('applied_controls')}
 				type="button"><i class="fa-solid fa-plus text-sm"></i></button

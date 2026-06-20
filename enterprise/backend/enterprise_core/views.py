@@ -3,7 +3,6 @@ from django.utils.formats import date_format
 
 import magic
 import structlog
-from core.permissions import IsAdministrator
 from django.db import models, transaction
 from django.db.models import CharField, Value, Case, When
 from django.db.models.functions import Lower, Cast
@@ -16,7 +15,8 @@ from rest_framework.decorators import (
     permission_classes,
 )
 from rest_framework.parsers import FileUploadParser
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import mixins, viewsets, filters
@@ -463,9 +463,7 @@ class NumberInFilter(df.BaseInFilter, df.NumberFilter):
 
 class LogEntryFilterSet(GenericFilterSet):
     actor = df.CharFilter(field_name="actor__email", lookup_expr="icontains")
-    folder = df.CharFilter(
-        field_name="additional_data__folder", lookup_expr="icontains"
-    )
+    folder = df.CharFilter(method="filter_folder")
     action = NumberInFilter(field_name="action", lookup_expr="in")
     content_type = df.CharFilter(method="filter_content_type_model")
 
@@ -482,6 +480,25 @@ class LogEntryFilterSet(GenericFilterSet):
             return queryset
         normalized = value.replace(" ", "").lower()
         return queryset.filter(content_type__model__icontains=normalized)
+
+    def filter_folder(self, queryset, name, value):
+        # additional_data stores folder_id, not the path string the old enrichment
+        # used. Resolve folders whose full path matches the query, then match their
+        # ids. Path resolution hits the in-memory folders cache, not the DB.
+        if not value:
+            return queryset
+        needle = value.lower()
+        matching_ids = [
+            str(folder.id)
+            for folder in Folder.objects.only("id")
+            if needle in folder.get_folder_full_path_string().lower()
+        ]
+        if not matching_ids:
+            return queryset.none()
+        q = models.Q()
+        for folder_id in matching_ids:
+            q |= models.Q(additional_data__folder_id=folder_id)
+        return queryset.filter(q)
 
 
 class LogEntryViewSet(
@@ -501,26 +518,27 @@ class LogEntryViewSet(
         "actor__first_name",
         "actor__last_name",
         "changes",  # allows to search for last_login (for example)
-        "additional_data__folder",
     ]
     filterset_class = LogEntryFilterSet
 
-    permission_classes = (IsAdministrator,)
+    permission_classes = (IsAuthenticated,)
     serializer_class = LogEntrySerializer
 
     def get_queryset(self):
         if not RoleAssignment.is_access_allowed(
             user=self.request.user,
-            perm=Permission.objects.get(codename="view_logentry"),
+            perm=Permission.objects.get(codename="view_central_auditlog"),
             folder=Folder.get_root_folder(),
         ):
             return LogEntry.objects.none()
+        # Annotate folder_id (display resolution to a path happens in the serializer
+        # via the folders cache). Keeps `folder` orderable without a per-row join.
         return LogEntry.objects.all().annotate(
             folder=Lower(
                 Case(
                     When(additional_data__isnull=True, then=Value("")),
-                    When(additional_data__folder=None, then=Value("")),
-                    default=Cast("additional_data__folder", CharField()),
+                    When(additional_data__folder_id=None, then=Value("")),
+                    default=Cast("additional_data__folder_id", CharField()),
                     output_field=CharField(),
                 )
             ),
@@ -808,3 +826,135 @@ class CustomWordTemplateViewSet(BaseModelViewSet):
             as_attachment=True,
             filename=f"{template_key}_template_{resolved_language}.docx",
         )
+
+
+AUDIT_TRAIL_PERMISSION = "view_object_audittrail"
+
+
+def _object_audit_trail_enabled():
+    from global_settings.models import GlobalSettings
+
+    gs = GlobalSettings.objects.filter(name=GlobalSettings.Names.FEATURE_FLAGS).first()
+    flags = gs.value if gs and isinstance(gs.value, dict) else {}
+    return flags.get("object_audit_trail", True) is not False
+
+
+class AuditedModelsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, format=None):
+        from auditlog.registry import auditlog
+
+        if (
+            not _object_audit_trail_enabled()
+            or AUDIT_TRAIL_PERMISSION not in request.user.permissions
+        ):
+            return Response([])
+        names = sorted(model._meta.model_name for model in auditlog.get_models())
+        return Response(names)
+
+
+class ObjectAuditTrailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    MAX_ENTRIES = 200
+
+    def get(self, request, format=None):
+        from uuid import UUID
+        from django.contrib.contenttypes.models import ContentType
+
+        model_name = (request.query_params.get("content_type") or "").lower()
+        raw_object_id = request.query_params.get("object_id")
+        if not model_name or not raw_object_id:
+            return Response(
+                {"detail": "content_type and object_id are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not _object_audit_trail_enabled():
+            raise PermissionDenied
+        try:
+            object_id = UUID(str(raw_object_id))
+        except ValueError:
+            return Response(
+                {"detail": "Invalid object_id."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        content_type = ContentType.objects.filter(model=model_name).first()
+        if content_type is None:
+            return Response(
+                {"detail": "Unknown content type."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        model_class = content_type.model_class()
+        obj = model_class.objects.filter(pk=object_id).first()
+        folder = getattr(obj, "folder", None) or Folder.get_root_folder()
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename=AUDIT_TRAIL_PERMISSION),
+            folder=folder,
+        ):
+            raise PermissionDenied
+
+        entries = (
+            LogEntry.objects.filter(content_type=content_type, object_pk=str(object_id))
+            .select_related("actor")
+            .order_by("-timestamp")[: self.MAX_ENTRIES]
+        )
+        fk_models = {
+            f.name: f.related_model
+            for f in model_class._meta.get_fields()
+            if getattr(f, "many_to_one", False) and f.related_model
+        }
+        label_cache = {}
+        results = [
+            {
+                "id": entry.id,
+                "cid": entry.cid or None,
+                "action": entry.get_action_display(),
+                "actor": (entry.additional_data or {}).get("user_email")
+                or (entry.actor.email if entry.actor else None),
+                "timestamp": entry.timestamp,
+                "changes": self._mask(
+                    model_name, self._humanize(entry.changes, fk_models, label_cache)
+                ),
+            }
+            for entry in entries
+        ]
+        return Response(results)
+
+    @staticmethod
+    def _humanize(changes, fk_models, label_cache):
+        # Replace foreign-key UUIDs with the related object's label when resolvable.
+        if not isinstance(changes, dict):
+            return changes
+        result = {}
+        for field, value in changes.items():
+            if field in fk_models and isinstance(value, list) and len(value) == 2:
+                model = fk_models[field]
+                result[field] = [
+                    ObjectAuditTrailView._label(model, v, label_cache) for v in value
+                ]
+            else:
+                result[field] = value
+        return result
+
+    @staticmethod
+    def _label(model, value, label_cache):
+        if value in (None, "None", ""):
+            return value
+        key = (model, value)
+        if key not in label_cache:
+            try:
+                obj = model.objects.filter(pk=value).first()
+            except Exception:
+                obj = None
+            label_cache[key] = str(obj) if obj is not None else value
+        return label_cache[key]
+
+    @staticmethod
+    def _mask(model_name, changes):
+        # Backstop for rows logged before "password" was excluded at registration
+        # (iam/models.py); current writes never include it.
+        if model_name == "user" and isinstance(changes, dict) and "password" in changes:
+            return {**changes, "password": ["***", "***"]}
+        return changes

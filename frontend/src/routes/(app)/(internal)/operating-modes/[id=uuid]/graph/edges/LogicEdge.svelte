@@ -21,10 +21,10 @@
 	}>('killChainEditor');
 
 	const STAGE_CLASSES: Record<number, { bg: string; border: string; text: string }> = {
-		0: { bg: 'bg-white', border: 'border-pink-400', text: 'text-pink-700' },
-		1: { bg: 'bg-white', border: 'border-violet-400', text: 'text-violet-700' },
-		2: { bg: 'bg-white', border: 'border-orange-400', text: 'text-orange-700' },
-		3: { bg: 'bg-white', border: 'border-red-400', text: 'text-red-700' }
+		0: { bg: 'bg-surface-50-950', border: 'border-pink-400', text: 'text-pink-700' },
+		1: { bg: 'bg-surface-50-950', border: 'border-violet-400', text: 'text-violet-700' },
+		2: { bg: 'bg-surface-50-950', border: 'border-orange-400', text: 'text-orange-700' },
+		3: { bg: 'bg-surface-50-950', border: 'border-red-400', text: 'text-red-700' }
 	};
 
 	const [path] = $derived(

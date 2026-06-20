@@ -104,7 +104,7 @@
 			fields: [],
 			position: 'suffix',
 			separator: ' ',
-			classes: 'text-surface-500'
+			classes: 'text-surface-600-400'
 		},
 		additionalMultiselectOptions = {},
 		pathField = '',
@@ -124,7 +124,7 @@
 		optionSnippet = undefined,
 		placeholder = '',
 		lazy = false,
-		lazyLimit = 10,
+		lazyLimit = 20,
 		lazyThreshold = 50,
 		maxVisibleChips: _maxVisibleChips = 3
 	}: Props = $props();
@@ -149,13 +149,14 @@
 
 	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 
-	let selected: typeof options = $state([]);
-	let selectedValues: (string | undefined)[] = $derived(
-		selected.map((item) => item.value || item.label || item)
-	);
+	const initialValue = resetForm ? undefined : $value;
+
+	type SelectValue = string | number | undefined;
+
+	let selected: Option[] = $state([]);
+	let selectedValues: SelectValue[] = $derived(selected.map((item) => item.value));
 	let isInternalUpdate = false;
 	let optionsLoaded = $state(Boolean(options.length));
-	const initialValue = resetForm ? undefined : $value;
 	const default_value = nullable ? null : '';
 
 	// Seed `selected` synchronously when static options are passed and a form value
@@ -163,15 +164,22 @@
 	// with selected=[] and overwrites $value to [] before onMount restores it — a
 	// race that wipes selections on remount (e.g. when a parent `{#key options}`
 	// block tears the component down on options change).
-	if (initialValue != null && options.length > 0) {
-		const ids = Array.isArray(initialValue) ? initialValue : [initialValue];
-		selected = options.filter((item) => ids.includes(item.value));
+	if (
+		initialValue !== undefined &&
+		initialValue !== null &&
+		initialValue !== '' &&
+		options.length > 0
+	) {
+		const ids = (Array.isArray(initialValue) ? initialValue : [initialValue]).map(String);
+		selected = options.filter((item) => ids.includes(String(item.value)));
 	}
 
 	const multiSelectOptions = {
 		minSelect: $constraints && $constraints.required === true ? 1 : 0,
 		maxSelect: multiple ? undefined : 1,
-		liSelectedClass: multiple ? '!chip !preset-filled' : '!bg-transparent',
+		liSelectedClass: multiple
+			? '!chip !bg-surface-300-700 !text-surface-900-100'
+			: '!bg-transparent',
 		inputClass: 'focus:ring-0! focus:outline-hidden!',
 		closeDropdownOnSelect: !multiple,
 		...additionalMultiselectOptions
@@ -269,13 +277,9 @@
 				}
 				optionsLoaded = true;
 			}
-			// After options are loaded, set initial selection using stored initial value
-			if (initialValue) {
-				selected = options.filter((item) =>
-					Array.isArray(initialValue)
-						? initialValue.includes(item.value)
-						: item.value === initialValue
-				);
+			if (initialValue !== undefined && initialValue !== null && initialValue !== '') {
+				const ids = (Array.isArray(initialValue) ? initialValue : [initialValue]).map(String);
+				selected = options.filter((item) => ids.includes(String(item.value)));
 			} else if (options.length === 1 && $constraints?.required) {
 				selected = [options[0]];
 			}
@@ -445,11 +449,17 @@
 
 	$effect(() => {
 		if (!isInternalUpdate && optionsLoaded && $value !== initialValue) {
-			const valueArray = $value ? (Array.isArray($value) ? $value : [$value]) : [];
+			const valueArray = (
+				$value !== undefined && $value !== null && $value !== ''
+					? Array.isArray($value)
+						? $value
+						: [$value]
+					: []
+			).map(String);
 			if (valueArray.length === 0) {
 				selected = [];
 			} else {
-				selected = options.filter((item) => valueArray.includes(item.value));
+				selected = options.filter((item) => valueArray.includes(String(item.value)));
 			}
 		}
 	});
@@ -470,12 +480,21 @@
 	}
 
 	function arraysEqual(
-		arr1: string | (string | undefined)[] | null | undefined,
-		arr2: string | (string | undefined)[] | null | undefined
+		arr1: string | number | SelectValue[] | null | undefined,
+		arr2: string | number | SelectValue[] | null | undefined
 	): boolean {
-		const normalize = (val: string | (string | undefined)[] | null | undefined) => {
-			if (typeof val === 'string') return [val];
-			return val ?? [];
+		const normalize = (val: string | number | SelectValue[] | null | undefined) => {
+			// Treat '' as "no selection" alongside null/undefined: a non-nullable
+			// select uses default_value '', so an empty selection ([]) and an
+			// empty-string value are equivalent. Without this, arraysEqual([], '')
+			// is false and the value-sync run() keeps re-firing onChange after the
+			// field is cleared, which loops the page (e.g. clearing Target Table).
+			const arr = Array.isArray(val)
+				? val
+				: val !== null && val !== undefined && val !== ''
+					? [val]
+					: [];
+			return arr.map((v) => (v === null || v === undefined ? v : String(v)));
 		};
 
 		const a1 = normalize(arr1);
@@ -573,7 +592,7 @@
 		const li = node.closest('li');
 		if (!li) return;
 		li.style.cssText =
-			'background: var(--color-surface-300, #d1d5db) !important; cursor: pointer !important; color: var(--color-surface-700, #374151) !important;';
+			'background: var(--color-surface-300-700) !important; cursor: pointer !important; color: var(--color-surface-700-300) !important;';
 		const removeBtn = li.querySelector('button');
 		if (removeBtn) (removeBtn as HTMLElement).style.display = 'none';
 		return {
@@ -664,7 +683,7 @@
 				}
 			)}
 			{...multiSelectOptions}
-			outerDivClass="!input !bg-surface-100 !px-2 !flex {overflowCssClass}"
+			outerDivClass="!input !bg-surface-100-900 !px-2 !flex {overflowCssClass}"
 			disabled={_disabled}
 			allowEmpty={true}
 			{allowUserOptions}
@@ -681,7 +700,7 @@
 		>
 			{#snippet option({ option })}
 				{#if option.value === LAZY_HINT_VALUE}
-					<span class="text-sm italic text-surface-500">{option.label}</span>
+					<span class="text-sm italic text-surface-600-400">{option.label}</span>
 				{:else if optionSnippet}
 					{@render optionSnippet?.(option)}
 				{:else}
@@ -693,7 +712,7 @@
 					{#if option.path}
 						<span>
 							{#each option.path as item}
-								<span class="text-surface-500 font-light">
+								<span class="text-surface-600-400 font-light">
 									{item} /&nbsp;
 								</span>
 							{/each}
@@ -715,7 +734,7 @@
 						</span>
 					{/if}
 					{#if option.suggested}
-						<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>
+						<span class="text-sm text-surface-600-400"> {m.suggestedParentheses()}</span>
 					{/if}
 				{/if}
 			{/snippet}
@@ -734,7 +753,7 @@
 							? (option.translatedLabel ?? option.label ?? option)
 							: (option.label ?? option)}
 					{#if option.infoString?.position === 'prefix'}
-						<span class="text-xs text-surface-500">&nbsp;{option.infoString.string}</span>
+						<span class="text-xs text-surface-600-400">&nbsp;{option.infoString.string}</span>
 					{/if}
 					{#if option.path}
 						<span>
@@ -752,10 +771,10 @@
 						{displayLabel}
 					</span>
 					{#if option.infoString?.position === 'suffix'}
-						<span class="text-xs text-surface-500">&nbsp;{option.infoString.string}</span>
+						<span class="text-xs text-surface-600-400">&nbsp;{option.infoString.string}</span>
 					{/if}
 					{#if option.suggested}
-						<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>
+						<span class="text-sm text-surface-600-400"> {m.suggestedParentheses()}</span>
 					{/if}
 				{/if}
 			{/snippet}
@@ -779,6 +798,6 @@
 		{/if}
 	</div>
 	{#if helpText}
-		<p class="text-sm text-gray-500 whitespace-pre-line">{helpText}</p>
+		<p class="text-sm text-surface-600-400 whitespace-pre-line">{helpText}</p>
 	{/if}
 </div>

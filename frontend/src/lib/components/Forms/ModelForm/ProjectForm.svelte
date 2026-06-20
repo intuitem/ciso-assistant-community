@@ -1,10 +1,11 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import FolderTreeSelect from '../FolderTreeSelect.svelte';
-	import TextField from '../TextField.svelte';
 	import Select from '../Select.svelte';
+	import CustomFieldsSection from '../CustomFieldsSection.svelte';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import type { SuperValidated } from 'sveltekit-superforms';
+	import { formFieldProxy } from 'sveltekit-superforms';
 	import { m } from '$paraglide/messages';
 
 	interface Props {
@@ -24,6 +25,8 @@
 		initialData = {},
 		object = {}
 	}: Props = $props();
+
+	const { value: folderId } = formFieldProxy(form, 'folder');
 </script>
 
 <Select
@@ -34,14 +37,6 @@
 	cacheLock={cacheLocks['kind']}
 	bind:cachedValue={formDataCache['kind']}
 	disableDoubleDash={true}
-/>
-
-<TextField
-	{form}
-	field="ref_id"
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-	label={m.refId()}
 />
 
 <FolderTreeSelect
@@ -74,3 +69,5 @@
 	nullable={true}
 	label={m.status()}
 />
+
+<CustomFieldsSection {form} model="pmbok.project" folderId={$folderId} />

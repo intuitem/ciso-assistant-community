@@ -22,7 +22,8 @@
 		unpublished: unpublishedStore,
 		rootNodes: rootNodesStore,
 		framework: frameworkStore,
-		activeLanguage: activeLanguageStore
+		activeLanguage: activeLanguageStore,
+		publishWarnings: publishWarningsStore
 	} = builder;
 
 	let topOffset = $state(0);
@@ -34,6 +35,28 @@
 	let confirmCopyBase = $state(false);
 	let publishPreview = $state<PublishPreview | null>(null);
 	let loadingPreview = $state(false);
+	// Real reason the preview failed (backend message), shown in the dialog
+	// instead of a generic "could not load preview".
+	let previewError = $state<string | null>(null);
+
+	// Surfaced inside the publish dialog so a backend rejection (e.g. a locked
+	// URN namespace or a server error) is visible instead of the dialog
+	// silently staying open with no feedback.
+	let publishError = $derived($errorsStore.get('publish'));
+
+	// Reset the dialog's local state. Used directly when the 'publish' error
+	// must stay visible in the page banner (validation failure, success flash);
+	// closePublishModal additionally clears it (user-initiated dismiss).
+	function resetPublishModal() {
+		confirmPublish = false;
+		publishPreview = null;
+		previewError = null;
+	}
+
+	function closePublishModal() {
+		resetPublishModal();
+		builder.clearError('publish');
+	}
 
 	let translationProgress = $derived.by(() => {
 		if (!$activeLanguageStore) return null;
@@ -55,18 +78,70 @@
 		}
 	});
 
+	// Map the backend's internal field/type identifiers (e.g. "add_score",
+	// "visibility_expression", "choice") to human-readable labels so the
+	// breaking-changes list doesn't expose raw column names. Unknown keys fall
+	// back to the raw value rather than hiding the information.
+	function breakingFieldLabel(field: string): string {
+		switch (field) {
+			case 'assessable':
+				return m.builderFieldLabelAssessable();
+			case 'weight':
+				return m.builderFieldLabelWeight();
+			case 'implementation_groups':
+				return m.builderFieldLabelImplementationGroups();
+			case 'visibility_expression':
+				return m.builderFieldLabelVisibilityExpression();
+			case 'type':
+				return m.builderFieldLabelType();
+			case 'depends_on':
+				return m.builderFieldLabelDependsOn();
+			case 'add_score':
+				return m.builderFieldLabelAddScore();
+			case 'compute_result':
+				return m.builderFieldLabelComputeResult();
+			case 'select_implementation_groups':
+				return m.builderFieldLabelSelectImplementationGroups();
+			default:
+				return field;
+		}
+	}
+
+	function breakingTypeLabel(type: string): string {
+		switch (type) {
+			case 'requirement':
+				return m.builderChangeTypeRequirement();
+			case 'question':
+				return m.builderChangeTypeQuestion();
+			case 'choice':
+				return m.builderChangeTypeChoice();
+			default:
+				return type;
+		}
+	}
+
 	async function handlePublish() {
 		publishing = true;
 		try {
-			await builder.publish();
+			const published = await builder.publish();
+			if (!published) {
+				// publish() recorded a 'publish' error. If the failure is
+				// field-level validation, close the dialog so the highlighted
+				// fields (and the page-level error banner) are visible;
+				// otherwise keep it open and show the error inside (below).
+				const hasFieldErrors = [...$errorsStore.keys()].some(
+					(k) => k.startsWith('node-') || k.startsWith('question-')
+				);
+				if (hasFieldErrors) {
+					resetPublishModal();
+				}
+				return;
+			}
 			publishSuccess = true;
-			confirmPublish = false;
-			publishPreview = null;
+			resetPublishModal();
 			builder.unsaved.set(false);
 			builder.unpublished.set(false);
 			setTimeout(() => (publishSuccess = false), 3000);
-		} catch {
-			// Error is already in the errors store
 		} finally {
 			publishing = false;
 		}
@@ -77,8 +152,10 @@
 		try {
 			await builder.discard();
 			confirmDiscard = false;
-		} catch {
-			// Error is already in the errors store
+		} catch (e) {
+			// The message is already in the errors store; keep the raw error
+			// (with stack) in the console for support diagnostics.
+			console.error('[FrameworkBuilder] Discard failed:', e);
 		} finally {
 			discarding = false;
 		}
@@ -86,18 +163,18 @@
 </script>
 
 <div
-	class="sticky z-40 bg-white border-b border-gray-200 shadow-sm rounded-t-lg"
+	class="sticky z-40 bg-surface-50-950 border-b border-surface-200-800 shadow-sm rounded-t-lg"
 	style="top: {topOffset}px"
 >
 	<div class="flex items-center gap-3 py-2 px-4">
 		<a
 			href="/frameworks/{frameworkId}"
-			class="text-sm text-gray-400 hover:text-gray-600 transition-colors shrink-0"
+			class="text-sm text-surface-500 hover:text-surface-600-400 transition-colors shrink-0"
 		>
 			<i class="fa-solid fa-arrow-left"></i>
 		</a>
 
-		<div class="h-4 w-px bg-gray-200 shrink-0"></div>
+		<div class="h-4 w-px bg-surface-200-800 shrink-0"></div>
 
 		<!--
 			Live-vs-draft status badge. The framework is always pickable by audit
@@ -129,7 +206,7 @@
 			</span>
 		{:else}
 			<span
-				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 inline-flex items-center gap-1"
+				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-surface-100-900 text-surface-600-400 inline-flex items-center gap-1"
 				title={m.builderStatusEmptyTitle()}
 			>
 				<i class="fa-solid fa-file-lines text-[10px]"></i>
@@ -162,7 +239,7 @@
 		<!-- Export YAML button -->
 		<a
 			href="/frameworks/{frameworkId}/builder?_action=export-yaml"
-			class="shrink-0 text-xs text-gray-500 hover:text-gray-700 transition-colors px-2 py-1 flex items-center gap-1"
+			class="shrink-0 text-xs text-surface-600-400 hover:text-surface-700-300 transition-colors px-2 py-1 flex items-center gap-1"
 			download
 			title={$unpublishedStore
 				? m.builderExportYamlUnpublishedWarning()
@@ -177,12 +254,12 @@
 
 		<!-- Language selector -->
 		{#if ($frameworkStore.available_languages ?? []).length > 0}
-			<div class="h-4 w-px bg-gray-200 shrink-0"></div>
+			<div class="h-4 w-px bg-surface-200-800 shrink-0"></div>
 			<div class="flex items-center gap-1.5 shrink-0">
-				<i class="fa-solid fa-language text-gray-400 text-xs"></i>
+				<i class="fa-solid fa-language text-surface-500 text-xs"></i>
 				<select
 					value={$activeLanguageStore ?? ''}
-					class="text-xs border border-gray-200 rounded px-1.5 py-1 focus:border-blue-500 outline-none bg-white cursor-pointer"
+					class="text-xs border border-surface-200-800 rounded px-1.5 py-1 focus:border-blue-500 outline-none bg-surface-50-950 cursor-pointer"
 					onchange={(e) => builder.setActiveLanguage(e.currentTarget.value || null)}
 				>
 					<option value="">{m.builderNoTranslation()}</option>
@@ -215,7 +292,7 @@
 						</button>
 						<button
 							type="button"
-							class="text-xs text-gray-500 px-1"
+							class="text-xs text-surface-600-400 px-1"
 							onclick={() => (confirmCopyBase = false)}
 						>
 							{m.no()}
@@ -223,7 +300,7 @@
 					{:else}
 						<button
 							type="button"
-							class="text-xs text-gray-400 hover:text-amber-600 transition-colors px-1.5 py-0.5"
+							class="text-xs text-surface-500 hover:text-amber-600 transition-colors px-1.5 py-0.5"
 							title={m.builderCopyBaseTitle({ lang: $activeLanguageStore?.toUpperCase() ?? '' })}
 							onclick={() => (confirmCopyBase = true)}
 						>
@@ -241,7 +318,7 @@
 		{#if onCollapseAllCards}
 			<button
 				type="button"
-				class="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-md text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+				class="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-md text-xs text-surface-500 hover:text-surface-600-400 hover:bg-surface-100-900 transition-colors"
 				onclick={onCollapseAllCards}
 				title={m.builderCollapseAllCards()}
 				aria-label={m.builderCollapseAllCards()}
@@ -252,7 +329,7 @@
 		{#if onExpandAllCards}
 			<button
 				type="button"
-				class="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-md text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+				class="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-md text-xs text-surface-500 hover:text-surface-600-400 hover:bg-surface-100-900 transition-colors"
 				onclick={onExpandAllCards}
 				title={m.builderExpandAllCards()}
 				aria-label={m.builderExpandAllCards()}
@@ -265,7 +342,7 @@
 		{#if onOpenHelp}
 			<button
 				type="button"
-				class="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-full text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+				class="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-full text-xs text-surface-500 hover:text-surface-600-400 hover:bg-surface-100-900 transition-colors"
 				onclick={onOpenHelp}
 				title={m.builderKeyboardShortcutsHint()}
 				aria-label={m.builderShowKeyboardShortcuts()}
@@ -333,7 +410,7 @@
 			</button>
 			<button
 				type="button"
-				class="shrink-0 text-xs text-gray-500 px-2 py-1"
+				class="shrink-0 text-xs text-surface-600-400 px-2 py-1"
 				onclick={() => (confirmDiscard = false)}
 			>
 				{m.cancel()}
@@ -341,7 +418,7 @@
 		{:else}
 			<button
 				type="button"
-				class="shrink-0 text-xs text-gray-400 hover:text-red-500 transition-colors px-2 py-1"
+				class="shrink-0 text-xs text-surface-500 hover:text-red-500 transition-colors px-2 py-1"
 				title={m.builderDiscardDraftTitle()}
 				onclick={() => (confirmDiscard = true)}
 			>
@@ -350,22 +427,27 @@
 		{/if}
 
 		{#if $unpublishedStore && !$unsavedStore}
-			<div class="h-4 w-px bg-gray-200 shrink-0"></div>
+			<div class="h-4 w-px bg-surface-200-800 shrink-0"></div>
 
 			<!-- Publish button (hidden until draft is saved) -->
 			<button
 				type="button"
-				class="shrink-0 text-xs text-white font-medium px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors flex items-center gap-1.5"
+				class="shrink-0 text-xs text-white font-medium px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 transition-colors flex items-center gap-1.5"
 				title={m.builderPublishDraftToLiveTitle()}
 				disabled={loadingPreview}
 				onclick={async () => {
+					builder.clearError('publish');
+					previewError = null;
 					loadingPreview = true;
 					try {
 						publishPreview = await apiPublishDraftPreview(frameworkId);
 						confirmPublish = true;
-					} catch {
-						// Fall back to confirmation without preview
+					} catch (e) {
+						// Fall back to confirmation without preview, but show the
+						// real reason so the user isn't confirming blind.
+						console.error('[FrameworkBuilder] Publish preview failed:', e);
 						publishPreview = null;
+						previewError = (e as Error).message;
 						confirmPublish = true;
 					} finally {
 						loadingPreview = false;
@@ -381,6 +463,32 @@
 			</button>
 		{/if}
 	</div>
+
+	{#if $publishWarningsStore.length > 0}
+		<!-- Non-fatal warnings from the last publish (e.g. URN disambiguation) -->
+		<div
+			class="flex items-start gap-2 px-4 py-2 bg-amber-50 border-t border-amber-200 text-xs text-amber-800"
+			role="status"
+		>
+			<i class="fa-solid fa-triangle-exclamation mt-0.5"></i>
+			<div class="grow space-y-0.5">
+				<span class="font-medium">{m.builderPublishedWithWarnings()}</span>
+				<ul class="list-disc list-inside">
+					{#each $publishWarningsStore as warning}
+						<li>{warning}</li>
+					{/each}
+				</ul>
+			</div>
+			<button
+				type="button"
+				class="shrink-0 text-amber-500 hover:text-amber-700"
+				title={m.cancel()}
+				onclick={() => publishWarningsStore.set([])}
+			>
+				<i class="fa-solid fa-xmark"></i>
+			</button>
+		</div>
+	{/if}
 </div>
 
 {#if confirmPublish}
@@ -388,16 +496,16 @@
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-		onkeydown={(e) => e.key === 'Escape' && (confirmPublish = false)}
+		onkeydown={(e) => e.key === 'Escape' && !publishing && closePublishModal()}
 	>
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<div
-			class="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden"
+			class="bg-surface-50-950 rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden"
 			onclick={(e) => e.stopPropagation()}
 		>
-			<div class="px-5 py-4 border-b border-gray-200">
-				<h3 class="text-lg font-semibold text-gray-900">{m.builderPublishModalTitle()}</h3>
-				<p class="text-sm text-gray-500 mt-1">
+			<div class="px-5 py-4 border-b border-surface-200-800">
+				<h3 class="text-lg font-semibold text-surface-900-100">{m.builderPublishModalTitle()}</h3>
+				<p class="text-sm text-surface-600-400 mt-1">
 					{m.builderPublishModalDescription()}
 				</p>
 			</div>
@@ -451,8 +559,8 @@
 					{/if}
 
 					{#if publishPreview.added.requirements === 0 && publishPreview.removed.requirements === 0}
-						<div class="p-3 bg-gray-50 border-l-2 border-gray-300 rounded-r">
-							<div class="text-sm text-gray-600">
+						<div class="p-3 bg-surface-50-950 border-l-2 border-surface-300-700 rounded-r">
+							<div class="text-sm text-surface-600-400">
 								<i class="fa-solid fa-equals mr-1"></i>
 								{m.builderNoStructuralChanges()}
 							</div>
@@ -469,10 +577,15 @@
 							</div>
 							<ul class="mt-1.5 text-xs text-orange-700 space-y-0.5">
 								{#each publishPreview.breaking_changes as change}
-									<li class="truncate" title="{change.type}: {change.name} ({change.field})">
-										<span class="font-mono">{change.field}</span>
+									<li
+										class="truncate"
+										title="{breakingTypeLabel(change.type)}: {change.name} ({breakingFieldLabel(
+											change.field
+										)})"
+									>
+										<span class="font-medium">{breakingFieldLabel(change.field)}</span>
 										{m.builderChangedOn()}
-										{change.type}
+										{breakingTypeLabel(change.type)}
 										<span class="font-medium">{change.name}</span>
 									</li>
 								{/each}
@@ -509,26 +622,37 @@
 						</div>
 					{/if}
 				{:else}
-					<div class="p-3 bg-gray-50 rounded text-sm text-gray-600">
+					<div class="p-3 bg-surface-50-950 rounded text-sm text-surface-600-400">
 						{m.builderCouldNotLoadPreview()}
+						{#if previewError}
+							<p class="mt-1 text-xs text-red-600">{previewError}</p>
+						{/if}
 					</div>
 				{/if}
 			</div>
 
-			<div class="px-5 py-3 border-t border-gray-200 flex justify-end gap-2">
+			{#if publishError}
+				<div class="px-5 pb-1">
+					<div
+						class="p-3 bg-red-50 border-l-2 border-red-500 rounded-r text-sm text-red-700"
+						role="alert"
+					>
+						<i class="fa-solid fa-circle-exclamation mr-1"></i>{publishError}
+					</div>
+				</div>
+			{/if}
+
+			<div class="px-5 py-3 border-t border-surface-200-800 flex justify-end gap-2">
 				<button
 					type="button"
-					class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-					onclick={() => {
-						confirmPublish = false;
-						publishPreview = null;
-					}}
+					class="px-4 py-2 text-sm font-medium text-surface-700-300 bg-surface-50-950 border border-surface-300-700 rounded-lg hover:bg-surface-50-950"
+					onclick={closePublishModal}
 				>
 					{m.cancel()}
 				</button>
 				<button
 					type="button"
-					class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+					class="px-4 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-700 rounded-lg hover:bg-blue-700"
 					disabled={publishing}
 					onclick={handlePublish}
 				>

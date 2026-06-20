@@ -192,7 +192,7 @@
 					helpText={m.defaultLanguageHelpText()}
 				/>
 				<hr class="my-2" />
-				<p class="text-sm text-gray-500">{m.forceLanguageHelpText()}</p>
+				<p class="text-sm text-surface-600-400">{m.forceLanguageHelpText()}</p>
 				<button
 					type="button"
 					class="btn preset-filled-warning-500 text-sm"
@@ -337,12 +337,16 @@
 					/>
 				</div>
 				<div class="flex-1">
-					<div class="relative w-full h-64 max-w-md bg-white rounded-lg shadow-md p-4">
-						<!-- Point d'origine -->
-						<div class={`absolute ${horizontalAxisPos} left-8 w-2 h-2 bg-black rounded-full`}></div>
+					<div class="relative w-full h-64 max-w-md bg-surface-50-950 rounded-lg shadow-md p-4">
+						<!-- Point d’origine -->
+						<div
+							class={`absolute ${horizontalAxisPos} left-8 w-2 h-2 bg-surface-900-100 rounded-full`}
+						></div>
 
 						<!-- Axe horizontal -->
-						<div class={`absolute ${horizontalAxisPos} left-8 w-4/5 h-0.5 bg-black`}></div>
+						<div
+							class={`absolute ${horizontalAxisPos} left-8 w-4/5 h-0.5 bg-surface-900-100`}
+						></div>
 
 						<!-- Label axe horizontal -->
 						<div
@@ -352,7 +356,9 @@
 						</div>
 
 						<!-- Axe vertical -->
-						<div class={`absolute ${horizontalAxisPos} left-8 w-0.5 h-4/5 bg-black`}></div>
+						<div
+							class={`absolute ${horizontalAxisPos} left-8 w-0.5 h-4/5 bg-surface-900-100`}
+						></div>
 
 						<!-- Label axe vertical -->
 						<div class="absolute top-1/2 left-4 transform -translate-y-1/2 -rotate-90 origin-left">

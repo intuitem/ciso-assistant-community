@@ -28,10 +28,10 @@ export const complianceResultColorMap: { [key: string]: string } = {
 };
 
 export const complianceResultTailwindColorMap: { [key: string]: string } = {
-	not_assessed: 'bg-gray-300',
-	partially_compliant: 'bg-yellow-300',
-	non_compliant: 'bg-red-300',
-	compliant: 'bg-green-300',
+	not_assessed: 'bg-surface-300-700',
+	partially_compliant: 'bg-yellow-300 dark:bg-yellow-600',
+	non_compliant: 'bg-red-300 dark:bg-red-800',
+	compliant: 'bg-green-300 dark:bg-green-700',
 	not_applicable: 'bg-black text-white'
 };
 
@@ -43,10 +43,10 @@ export const complianceStatusColorMap: { [key: string]: string } = {
 };
 
 export const complianceStatusTailwindColorMap = {
-	to_do: 'bg-gray-400',
-	in_progress: 'bg-amber-500',
+	to_do: 'bg-surface-400-600',
+	in_progress: 'bg-amber-500 dark:bg-amber-600',
 	in_review: 'bg-blue-500',
-	done: 'bg-green-300'
+	done: 'bg-green-300 dark:bg-green-700'
 };
 
 export const extendedResultColorMap: { [key: string]: string } = {
@@ -172,6 +172,7 @@ export const ISO_8601_REGEX =
 	/^([+-]?\d{4}(?!\d{2}\b))((-?)((0[1-9]|1[0-2])(\3([12]\d|0[1-9]|3[01]))?|W([0-4]\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\d|[12]\d{2}|3([0-5]\d|6[1-6])))([T\s]((([01]\d|2[0-3])((:?)[0-5]\d)?|24:?00)([.,]\d+(?!:))?)?(\17[0-5]\d([.,]\d+)?)?([zZ]|([+-])([01]\d|2[0-3]):?([0-5]\d)?)?)?)?$/;
 
 export const SECURITY_OBJECTIVE_SCALE_MAP = {
+	'1-3': ['1', '2', '3', '3', '3'],
 	'0-3': ['0', '1', '2', '3', '3'],
 	'0-4': ['0', '1', '2', '3', '4'],
 	'1-4': ['1', '2', '3', '4', '4'],

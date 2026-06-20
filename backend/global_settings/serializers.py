@@ -5,6 +5,8 @@ from django.conf import settings as django_settings
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 
+from urllib.parse import urlparse
+
 from .models import GlobalSettings
 
 
@@ -43,7 +45,7 @@ def validate_default_dashboard_value(value):
         return None
     try:
         uuid.UUID(str(value))
-    except (ValueError, TypeError):
+    except ValueError, TypeError:
         raise serializers.ValidationError(
             {"default_custom_analytics_dashboard": "Must be a valid UUID."}
         )
@@ -143,6 +145,18 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
         for key, value in validated_data["value"].items():
             if key not in GENERAL_SETTINGS_KEYS:
                 raise serializers.ValidationError(f"Invalid key: {key}")
+            if key in ("ollama_base_url", "openai_api_base") and value:
+                if not isinstance(value, str):
+                    raise serializers.ValidationError({key: "URL must be a string."})
+                parsed = urlparse(value)
+                if parsed.scheme not in ("http", "https"):
+                    raise serializers.ValidationError(
+                        {key: "URL must use http or https scheme."}
+                    )
+                if "#" in value:
+                    raise serializers.ValidationError(
+                        {key: "URL must not contain a fragment (#)."}
+                    )
             # Validate builtin_metrics_retention_days minimum value
             if key == "builtin_metrics_retention_days":
                 if not isinstance(value, int) or value < 1:
@@ -167,7 +181,7 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
             if key == "chat_temperature":
                 try:
                     temp = float(value)
-                except (TypeError, ValueError):
+                except TypeError, ValueError:
                     raise serializers.ValidationError(
                         {"chat_temperature": "Must be a number."}
                     )

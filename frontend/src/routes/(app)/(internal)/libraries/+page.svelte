@@ -104,6 +104,14 @@
 			hoverClass: 'hover:border-pink-400 hover:bg-pink-50',
 			label: m.requirementMappingSets()
 		},
+		preset: {
+			type: 'string',
+			field: 'object_type',
+			icon: findIconInSidebar('overview', 'presets', 'fa-solid fa-rocket'),
+			selectedClass: 'bg-gradient-to-r from-cyan-500 to-sky-600 text-white shadow-cyan-200',
+			hoverClass: 'hover:border-cyan-400 hover:bg-cyan-50',
+			label: m.journeys()
+		},
 		is_update: {
 			type: 'boolean',
 			field: 'is_update',
@@ -119,7 +127,7 @@
 	let quickFilterSelected: Record<string, boolean> = $state({});
 </script>
 
-<div class="card bg-white py-2 shadow-sm">
+<div class="card bg-surface-50-950 py-2 shadow-sm">
 	<ModelTable
 		source={data.storedLibrariesTable}
 		URLModel="stored-libraries"
@@ -147,7 +155,7 @@
 	>
 		{#snippet quickFilters(filterValues, form, invalidateTable)}
 			<div
-				class="flex flex-wrap gap-2 p-3 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-200"
+				class="flex flex-wrap gap-2 p-3 bg-gradient-to-r from-surface-50-950 to-surface-50-950 rounded-lg border border-surface-200-800"
 			>
 				{#each filterTypes as key}
 					{@const config = filterConfiguration[key]}
@@ -156,7 +164,7 @@
 						class="group relative px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 ease-out transform hover:scale-105 active:scale-95 shadow-sm hover:shadow-md
                         {quickFilterSelected[key]
 							? config.selectedClass
-							: `bg-white text-gray-700 border-2 border-gray-300 ${config.hoverClass}`}"
+							: `bg-surface-50-950 text-surface-700-300 border-2 border-surface-300-700 ${config.hoverClass}`}"
 						onclick={() => {
 							if (config.type === 'string') {
 								const filterValue = filterValues[config.field] ?? [];
@@ -208,7 +216,7 @@
 		{/snippet}
 		{#snippet addButton()}
 			<div>
-				<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+				<span class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs">
 					<button
 						class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 						data-testid="add-button"
