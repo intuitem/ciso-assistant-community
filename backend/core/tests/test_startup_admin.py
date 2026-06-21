@@ -132,3 +132,23 @@ def test_already_superuser_stays_in_group(administrators):
     user.refresh_from_db()
     assert user.is_superuser
     assert administrators in user.user_groups.all()
+
+
+@override_settings(
+    CISO_ASSISTANT_SUPERUSER_EMAIL="inactive@test.com",
+    FORCE_CREATE_ADMIN=True,
+    EMAIL_HOST=None,
+    EMAIL_HOST_RESCUE=None,
+)
+def test_force_promote_inactive_user_reactivates(administrators):
+    """FORCE_CREATE_ADMIN + inactive user -> promote and reactivate."""
+    user = User.objects.create(
+        email="inactive@test.com", is_superuser=False, is_active=False
+    )
+
+    ensure_admin_user()
+
+    user.refresh_from_db()
+    assert user.is_superuser
+    assert user.is_active
+    assert administrators in user.user_groups.all()

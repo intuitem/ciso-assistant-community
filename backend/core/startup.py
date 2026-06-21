@@ -1585,9 +1585,10 @@ def ensure_admin_user():
             except Exception as e:
                 logger.error("Error creating superuser", exc_info=True)
         elif superuser_exists and settings.FORCE_CREATE_ADMIN:
-            User.objects.filter(email=superuser_email, is_superuser=False).update(
-                is_superuser=True
-            )
+            user = User.objects.get(email=superuser_email)
+            if not user.is_superuser:
+                user.is_superuser = True
+                user.save(update_fields=["is_superuser", "is_active"])
 
     for u in User.objects.filter(is_superuser=True):
         u.user_groups.add(administrators)
