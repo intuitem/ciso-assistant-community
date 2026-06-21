@@ -4,7 +4,6 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import { m } from '$paraglide/messages';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import { page } from '$app/state';
@@ -47,16 +46,6 @@
 	});
 </script>
 
-{#if context != 'selectAudit' && context != 'selectAsset'}
-	<TextField
-		{form}
-		field="name"
-		label={m.name()}
-		cacheLock={cacheLocks['name']}
-		bind:cachedValue={formDataCache['name']}
-		data-focusindex="0"
-	/>
-{/if}
 {#if context !== 'ebiosRmStudy' && context !== 'selectAudit' && context !== 'selectAsset'}
 	<TextField
 		{form}
@@ -130,14 +119,6 @@
 			bind:cachedValue={formDataCache['risk_matrix']}
 			label={m.riskMatrix()}
 			helpText={m.ebiosRmMatrixHelpText() + '\n' + m.riskAssessmentMatrixHelpText()}
-		/>
-		<MarkdownField
-			{form}
-			field="description"
-			label={m.description()}
-			cacheLock={cacheLocks['description']}
-			bind:cachedValue={formDataCache['description']}
-			data-focusindex="1"
 		/>
 		<TextField
 			{form}
