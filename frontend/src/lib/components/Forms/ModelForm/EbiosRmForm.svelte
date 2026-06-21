@@ -30,6 +30,13 @@
 	}: Props = $props();
 
 	let activeActivity: string | null = $state(null);
+	let hasEntities = $state(false);
+
+	fetch('/entities?limit=1')
+		.then((r) => r.json())
+		.then((data) => {
+			hasEntities = (data.count ?? 0) > 0;
+		});
 
 	page.url.searchParams.forEach((value, key) => {
 		if (key === 'activity' && value === 'one') {
@@ -75,14 +82,16 @@
 		cacheLock={cacheLocks['status']}
 		bind:cachedValue={formDataCache['status']}
 	/>
-	<AutocompleteSelect
-		{form}
-		optionsEndpoint="entities"
-		field="reference_entity"
-		cacheLock={cacheLocks['reference_entity']}
-		bind:cachedValue={formDataCache['reference_entity']}
-		label={m.referenceEntity()}
-	/>
+	{#if hasEntities}
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="entities"
+			field="reference_entity"
+			cacheLock={cacheLocks['reference_entity']}
+			bind:cachedValue={formDataCache['reference_entity']}
+			label={m.referenceEntity()}
+		/>
+	{/if}
 	<AutocompleteSelect
 		{form}
 		optionsEndpoint="risk-matrices?is_enabled=true"
@@ -146,14 +155,16 @@
 			cacheLock={cacheLocks['quotation_method']}
 			bind:cachedValue={formDataCache['quotation_method']}
 		/>
-		<AutocompleteSelect
-			{form}
-			optionsEndpoint="entities"
-			field="reference_entity"
-			cacheLock={cacheLocks['reference_entity']}
-			bind:cachedValue={formDataCache['reference_entity']}
-			label={m.referenceEntity()}
-		/>
+		{#if hasEntities}
+			<AutocompleteSelect
+				{form}
+				optionsEndpoint="entities"
+				field="reference_entity"
+				cacheLock={cacheLocks['reference_entity']}
+				bind:cachedValue={formDataCache['reference_entity']}
+				label={m.referenceEntity()}
+			/>
+		{/if}
 		<AutocompleteSelect
 			multiple
 			{form}
