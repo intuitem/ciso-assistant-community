@@ -507,6 +507,12 @@ export const navData = {
 					permissions: ['view_terminology']
 				},
 				{
+					name: 'customFields',
+					fa_icon: 'fa-solid fa-sliders',
+					href: '/custom-fields',
+					permissions: ['view_customfielddefinition']
+				},
+				{
 					name: 'settings',
 					fa_icon: 'fa-solid fa-cog',
 					href: '/settings',
@@ -528,7 +534,7 @@ export const navData = {
 					name: 'Audit log',
 					fa_icon: 'fa-solid fa-newspaper',
 					href: '/audit-log',
-					permissions: ['view_logentry']
+					permissions: ['view_central_auditlog']
 				},
 				{
 					name: 'experimental',

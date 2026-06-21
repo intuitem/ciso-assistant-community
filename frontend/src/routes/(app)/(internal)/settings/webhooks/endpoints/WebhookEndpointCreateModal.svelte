@@ -17,7 +17,7 @@
 	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
 
 	// Base Classes
-	const cBase = 'card bg-surface-50 p-4 shadow-xl space-y-4';
+	const cBase = 'card bg-surface-50-950 p-4 shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 
 	interface Props {
@@ -123,7 +123,7 @@
 				/>
 				<div class="flex flex-row justify-between space-x-4">
 					<button
-						class="btn bg-gray-400 text-white font-semibold w-full"
+						class="btn bg-surface-400-600 text-white font-semibold w-full"
 						data-testid="cancel-button"
 						type="button"
 						onclick={(event) => {

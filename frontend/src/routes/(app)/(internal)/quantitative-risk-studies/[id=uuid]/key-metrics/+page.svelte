@@ -3,8 +3,21 @@
 	import { page } from '$app/stores';
 	import { m } from '$paraglide/messages';
 	import { goto } from '$app/navigation';
-	import { Grid, Willow } from 'wx-svelte-grid';
+	import { onMount } from 'svelte';
+	import { Grid, Willow, WillowDark } from 'wx-svelte-grid';
 	import ALETimelineRaceChart from '$lib/components/Chart/ALETimelineRaceChart.svelte';
+
+	// Track the dark-mode class on <html> so the grid theme matches the app theme
+	let isDark = $state(false);
+	onMount(() => {
+		const root = document.documentElement;
+		isDark = root.classList.contains('dark');
+		const observer = new MutationObserver(() => {
+			isDark = root.classList.contains('dark');
+		});
+		observer.observe(root, { attributes: true, attributeFilter: ['class'] });
+		return () => observer.disconnect();
+	});
 
 	interface Props {
 		data: PageData;
@@ -292,8 +305,8 @@
 	<!-- Header -->
 	<div class="flex items-center justify-between mb-8">
 		<div>
-			<h1 class="text-3xl font-bold text-gray-900">{m.keyMetrics()}</h1>
-			<p class="text-gray-600 mt-2">{m.advancedAnalysisMetrics()}</p>
+			<h1 class="text-3xl font-bold text-surface-950-50">{m.keyMetrics()}</h1>
+			<p class="text-surface-600-400 mt-2">{m.advancedAnalysisMetrics()}</p>
 		</div>
 		<button
 			class="btn variant-ghost-surface"
@@ -309,39 +322,39 @@
 		<div class="flex justify-center items-center h-64">
 			<div class="flex flex-col items-center space-y-4">
 				<div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
-				<p class="text-gray-600">{m.loadingKeyMetrics()}</p>
+				<p class="text-surface-600-400">{m.loadingKeyMetrics()}</p>
 			</div>
 		</div>
 	{:then keyMetricsData}
 		{#if keyMetricsData && keyMetricsData.scenarios}
 			<!-- Study Overview -->
-			<div class="bg-white rounded-lg p-6 shadow-sm mb-8">
+			<div class="bg-surface-50-950 rounded-lg p-6 shadow-sm mb-8">
 				<div class="flex justify-between items-center mb-4">
-					<h2 class="text-xl font-semibold text-gray-900">{m.studyOverview()}</h2>
-					<div class="text-sm text-gray-600">
+					<h2 class="text-xl font-semibold text-surface-950-50">{m.studyOverview()}</h2>
+					<div class="text-sm text-surface-600-400">
 						{keyMetricsData.currency} • {keyMetricsData.total_scenarios}
 						{m.scenarios()}
 					</div>
 				</div>
 
 				<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-					<div class="bg-blue-50 rounded-lg p-4 text-center">
-						<div class="text-2xl font-bold text-blue-600">
+					<div class="bg-blue-50 dark:bg-blue-950 rounded-lg p-4 text-center">
+						<div class="text-2xl font-bold text-blue-600 dark:text-blue-400">
 							{keyMetricsData.scenarios_with_current_data}
 						</div>
-						<div class="text-sm text-gray-600">{m.scenariosWithCurrentData()}</div>
+						<div class="text-sm text-surface-600-400">{m.scenariosWithCurrentData()}</div>
 					</div>
-					<div class="bg-green-50 rounded-lg p-4 text-center">
-						<div class="text-2xl font-bold text-green-600">
+					<div class="bg-green-50 dark:bg-green-950 rounded-lg p-4 text-center">
+						<div class="text-2xl font-bold text-green-600 dark:text-green-400">
 							{keyMetricsData.scenarios_with_residual_data}
 						</div>
-						<div class="text-sm text-gray-600">{m.scenariosWithResidualData()}</div>
+						<div class="text-sm text-surface-600-400">{m.scenariosWithResidualData()}</div>
 					</div>
-					<div class="bg-purple-50 rounded-lg p-4 text-center">
-						<div class="text-2xl font-bold text-purple-600">
+					<div class="bg-purple-50 dark:bg-purple-950 rounded-lg p-4 text-center">
+						<div class="text-2xl font-bold text-purple-600 dark:text-purple-400">
 							{keyMetricsData.loss_threshold_display}
 						</div>
-						<div class="text-sm text-gray-600">{m.lossThresholdLabel()}</div>
+						<div class="text-sm text-surface-600-400">{m.lossThresholdLabel()}</div>
 					</div>
 				</div>
 			</div>
@@ -361,12 +374,14 @@
 				</div>
 			{:else}
 				<!-- Debug information when chart doesn't show -->
-				<div class="mb-8 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-					<h3 class="text-lg font-semibold text-yellow-800 mb-2">
+				<div
+					class="mb-8 bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4"
+				>
+					<h3 class="text-lg font-semibold text-yellow-800 dark:text-yellow-300 mb-2">
 						<i class="fa-solid fa-info-circle mr-2"></i>
 						ALE Timeline Chart Debug Info
 					</h3>
-					<div class="text-sm text-yellow-700 space-y-1">
+					<div class="text-sm text-yellow-700 dark:text-yellow-400 space-y-1">
 						<p><strong>Total {m.scenarios()}:</strong> {keyMetricsData?.scenarios?.length || 0}</p>
 						<p>
 							<strong>{m.scenariosWithCurrentLevel()}</strong>
@@ -389,7 +404,8 @@
 						</p>
 						<details class="mt-2">
 							<summary class="cursor-pointer font-medium">View raw scenario data</summary>
-							<pre class="mt-2 p-2 bg-yellow-100 rounded text-xs overflow-auto">{JSON.stringify(
+							<pre
+								class="mt-2 p-2 bg-yellow-100 dark:bg-yellow-900 rounded text-xs overflow-auto">{JSON.stringify(
 									keyMetricsData?.scenarios,
 									null,
 									2
@@ -400,17 +416,17 @@
 			{/if}
 
 			<!-- Scenarios Grid -->
-			<div class="bg-white rounded-lg shadow-sm overflow-hidden">
-				<div class="px-6 py-4 border-b border-gray-200">
+			<div class="bg-surface-50-950 rounded-lg shadow-sm overflow-hidden">
+				<div class="px-6 py-4 border-b border-surface-200-800">
 					<div class="flex justify-between items-start">
 						<div>
-							<h2 class="text-xl font-semibold text-gray-900">{m.riskScenariosAnalysis()}</h2>
-							<p class="text-sm text-gray-600 mt-1">
+							<h2 class="text-xl font-semibold text-surface-950-50">{m.riskScenariosAnalysis()}</h2>
+							<p class="text-sm text-surface-600-400 mt-1">
 								{m.detailedMetricsForEachRisk()}
 							</p>
 						</div>
 						<div class="flex items-center space-x-2">
-							<span class="text-sm text-gray-500">
+							<span class="text-sm text-surface-600-400">
 								{getVisibleColumnsCount()}
 								{m.columnsOfColumns()}
 								{allColumns.length}
@@ -428,12 +444,12 @@
 
 								{#if showColumnControls}
 									<div
-										class="absolute right-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-10 min-w-[250px] column-controls-dropdown"
+										class="absolute right-0 top-full mt-2 bg-surface-50-950 border border-surface-200-800 rounded-lg shadow-lg p-4 z-10 min-w-[250px] column-controls-dropdown"
 									>
 										<div class="flex justify-between items-center mb-3">
-											<h4 class="font-medium text-gray-900">{m.showHideColumns()}</h4>
+											<h4 class="font-medium text-surface-950-50">{m.showHideColumns()}</h4>
 											<button
-												class="text-gray-400 hover:text-gray-600"
+												class="text-surface-400-600 hover:text-surface-600-400"
 												on:click={() => (showColumnControls = false)}
 											>
 												<i class="fa-solid fa-times"></i>
@@ -462,7 +478,7 @@
 												{@const isLastVisible =
 													getVisibleColumnsCount() === 1 && columnVisibility[column.id]}
 												<label
-													class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded {isLastVisible
+													class="flex items-center space-x-2 cursor-pointer hover:bg-surface-50-950 p-1 rounded {isLastVisible
 														? 'opacity-50'
 														: ''}"
 												>
@@ -471,11 +487,11 @@
 														checked={columnVisibility[column.id]}
 														on:change={(e) => toggleColumn(column.id, e.target?.checked || false)}
 														disabled={isLastVisible}
-														class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded disabled:opacity-50"
+														class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-surface-300-700 rounded disabled:opacity-50"
 													/>
-													<span class="text-sm text-gray-700">{column.displayName}</span>
+													<span class="text-sm text-surface-700-300">{column.displayName}</span>
 													{#if isLastVisible}
-														<span class="text-xs text-gray-400">({m.required()})</span>
+														<span class="text-xs text-surface-400-600">({m.required()})</span>
 													{/if}
 												</label>
 											{/each}
@@ -489,33 +505,38 @@
 
 				<div class="p-4">
 					<div style="height: 500px; width: 100%;">
-						<Willow>
+						{#snippet gridContent()}
 							<Grid
 								data={prepareGridData(keyMetricsData)}
 								columns={visibleColumns}
 								headerHeight={40}
 								rowHeight={45}
 							/>
-						</Willow>
+						{/snippet}
+						{#if isDark}
+							<WillowDark>{@render gridContent()}</WillowDark>
+						{:else}
+							<Willow>{@render gridContent()}</Willow>
+						{/if}
 					</div>
 				</div>
 			</div>
 
 			<!-- Legend and Notes -->
-			<div class="mt-8 bg-gray-50 rounded-lg p-6">
-				<h3 class="text-lg font-semibold text-gray-900 mb-4">{m.legendNotes()}</h3>
+			<div class="mt-8 bg-surface-50-950 rounded-lg p-6">
+				<h3 class="text-lg font-semibold text-surface-950-50 mb-4">{m.legendNotes()}</h3>
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 					<div>
-						<h4 class="font-medium text-gray-900 mb-2">{m.metricsDefinitions()}</h4>
-						<ul class="text-sm text-gray-600 space-y-1">
+						<h4 class="font-medium text-surface-950-50 mb-2">{m.metricsDefinitions()}</h4>
+						<ul class="text-sm text-surface-600-400 space-y-1">
 							<li><strong>{m.ale()}:</strong> {m.annualLossExpectancy()}</li>
 							<li><strong>VaR:</strong> {m.valueAtRisk()}</li>
 							<li><strong>P(>Threshold):</strong> {m.probabilityExceedingThreshold()}</li>
 						</ul>
 					</div>
 					<div>
-						<h4 class="font-medium text-gray-900 mb-2">{m.riskLevels()}</h4>
-						<ul class="text-sm text-gray-600 space-y-1">
+						<h4 class="font-medium text-surface-950-50 mb-2">{m.riskLevels()}</h4>
+						<ul class="text-sm text-surface-600-400 space-y-1">
 							<li><strong>{m.current()}:</strong> {m.currentRiskWithExistingControls()}</li>
 							<li><strong>{m.residual()}:</strong> {m.residualRiskAfterTreatment()}</li>
 						</ul>
@@ -524,11 +545,11 @@
 			</div>
 		{:else}
 			<!-- Empty State -->
-			<div class="bg-white rounded-lg p-8 shadow-sm text-center">
+			<div class="bg-surface-50-950 rounded-lg p-8 shadow-sm text-center">
 				<div class="flex flex-col items-center space-y-4">
-					<i class="fa-solid fa-chart-simple text-4xl text-gray-400"></i>
-					<h3 class="text-lg font-semibold text-gray-600">{m.noKeyMetricsAvailable()}</h3>
-					<p class="text-gray-500 max-w-md">
+					<i class="fa-solid fa-chart-simple text-4xl text-surface-400-600"></i>
+					<h3 class="text-lg font-semibold text-surface-600-400">{m.noKeyMetricsAvailable()}</h3>
+					<p class="text-surface-600-400 max-w-md">
 						{m.noSimulationDataFound()}
 					</p>
 				</div>
@@ -536,11 +557,11 @@
 		{/if}
 	{:catch error}
 		<!-- Error State -->
-		<div class="bg-white rounded-lg p-8 shadow-sm text-center">
+		<div class="bg-surface-50-950 rounded-lg p-8 shadow-sm text-center">
 			<div class="flex flex-col items-center space-y-4">
 				<i class="fa-solid fa-triangle-exclamation text-4xl text-red-400"></i>
-				<h3 class="text-lg font-semibold text-gray-600">{m.failedToLoadKeyMetrics()}</h3>
-				<p class="text-gray-500 max-w-md">
+				<h3 class="text-lg font-semibold text-surface-600-400">{m.failedToLoadKeyMetrics()}</h3>
+				<p class="text-surface-600-400 max-w-md">
 					{m.thereWasAnErrorLoading()}
 				</p>
 			</div>

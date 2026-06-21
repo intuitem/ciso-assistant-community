@@ -26,12 +26,15 @@
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 
 	import CommandPalette from '$lib/components/CommandPalette/CommandPalette.svelte';
+	import ThemeToggle from '$lib/components/ThemeToggle/ThemeToggle.svelte';
 	import ChatWidget from '$lib/components/ChatWidget/ChatWidget.svelte';
 	import {
 		interceptExternalLinks,
 		setGlobalModalStore,
 		setShowWarningExternalLinks
 	} from '$lib/utils/external-links';
+	import { onMount } from 'svelte';
+	import { initThemeFromUser } from '$lib/utils/theme';
 
 	const isMac = browser && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 	const modifierKey = isMac ? '⌘' : 'Ctrl';
@@ -122,6 +125,12 @@
 		}
 	});
 
+	// Apply the theme persisted in the user's server-side preferences (ui.theme).
+	// Falls back to localStorage / system preference when no server value is set.
+	onMount(() => {
+		initThemeFromUser(data.user?.preferences);
+	});
+
 	// Handle login-specific logic
 	run(() => {
 		if (browser) {
@@ -148,7 +157,7 @@
 <div class="overflow-x-clip">
 	<SideBar bind:open={sidebarOpen} {sideBarVisibleItems} />
 	<AppBar
-		class="sticky top-0 z-50 border-b border-slate-200 transition-all duration-300 bg-white w-auto {classesSidebarOpen(
+		class="sticky top-0 z-50 border-b border-surface-200-800 transition-all duration-300 bg-surface-50-950 w-auto pb-2 px-4 {classesSidebarOpen(
 			sidebarOpen
 		)}"
 	>
@@ -161,36 +170,37 @@
 					{safeTranslate(displayTitle)}
 				</div>
 				{#if displayModelName}
-					<div class="text-sm text-slate-500 font-medium">
+					<div class="text-sm text-surface-600-400 font-medium">
 						{safeTranslate(displayModelName)}
 					</div>
 				{/if}
 				{#if displayModelDescription}
-					<div class="text-xs text-slate-400 italic">
+					<div class="text-xs text-surface-600-400 italic">
 						{safeTranslate(displayModelDescription)}
 					</div>
 				{/if}
 			</div>
 			<div class="flex items-center gap-2">
+				<ThemeToggle />
 				{#if !data?.user?.is_third_party}
 					<button
 						onclick={() => commandPalette?.toggle()}
-						class="flex items-center gap-2 shrink-0 rounded-lg border border-gray-200 bg-gray-50/80 px-3 py-1.5
-				text-xs text-gray-500 hover:bg-gray-100 hover:border-gray-300 hover:text-gray-700
-				transition-all duration-150 cursor-pointer"
+						class="flex items-center gap-2 shrink-0 rounded-lg border border-surface-200-800 bg-surface-100-900/80 px-3 py-1.5
+			text-xs text-surface-600-400 hover:bg-surface-200-800 hover:border-surface-300-700 hover:text-surface-700-300
+			transition-all duration-150 cursor-pointer"
 					>
-						<i class="fa-solid fa-magnifying-glass text-gray-400"></i>
-						<span class="hidden sm:inline text-gray-400">{m.searchEllipsis()}</span>
+						<i class="fa-solid fa-magnifying-glass text-surface-500"></i>
+						<span class="hidden sm:inline text-surface-500">{m.searchEllipsis()}</span>
 						<kbd
-							class="hidden sm:inline-flex items-center rounded border border-gray-200 bg-white px-1.5 py-0.5
-					font-mono text-[10px] text-gray-400">{modifierKey}K</kbd
+							class="hidden sm:inline-flex items-center rounded border border-surface-200-800 bg-surface-50-950 px-1.5 py-0.5
+				font-mono text-[10px] text-surface-500">{modifierKey}K</kbd
 						>
 					</button>
 				{/if}
 				{#if data?.user?.is_admin}
 					<button
 						onclick={() => getStartedTrigger.set(true)}
-						class="shrink-0 px-3 py-1.5 rounded-full bg-violet-500 text-white text-xs font-semibold shadow-lg
+						class="shrink-0 px-3 py-1.5 rounded-full bg-violet-500 dark:bg-violet-600 text-white text-xs font-semibold shadow-lg
 			ring-2 ring-violet-400 ring-offset-2 transition-all duration-300 hover:bg-violet-600
 			hover:ring-violet-300 hover:ring-offset-violet-100 hover:shadow-violet-500/50
 			focus:outline-hidden focus:ring-violet-500 cursor-pointer"
@@ -214,7 +224,7 @@
 		<ChatWidget />
 	{/if}
 	<main
-		class="min-h-screen p-8 bg-linear-to-br from-violet-100 to-slate-200 transition-all duration-300 {classesSidebarOpen(
+		class="min-h-screen p-8 bg-linear-to-br from-surface-200-800 to-surface-150-850 transition-all duration-300 {classesSidebarOpen(
 			sidebarOpen
 		)}"
 	>

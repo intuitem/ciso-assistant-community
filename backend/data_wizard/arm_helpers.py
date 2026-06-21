@@ -368,7 +368,7 @@ def build_gravity_scale_mapping(workbook) -> dict[str, int]:
         if gravity_name and niveau is not None:
             try:
                 mapping[gravity_name.lower().strip()] = int(niveau) - 1
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 logger.warning(f"Invalid Niveau value: {niveau}")
     return mapping
 

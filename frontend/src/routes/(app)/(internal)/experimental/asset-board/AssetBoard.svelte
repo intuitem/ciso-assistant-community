@@ -34,6 +34,7 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import { m } from '$paraglide/messages';
+	import { resolvedTheme } from '$lib/utils/theme';
 
 	interface AssetItem {
 		id: string;
@@ -482,10 +483,13 @@
 	});
 </script>
 
-<div class="h-full bg-surface-50 rounded-base overflow-hidden border border-surface-200 relative">
+<div
+	class="h-full bg-surface-50-950 rounded-base overflow-hidden border border-surface-200-800 relative"
+>
 	<SvelteFlow
 		bind:nodes
 		bind:edges
+		colorMode={$resolvedTheme}
 		{nodeTypes}
 		{edgeTypes}
 		{isValidConnection}
@@ -519,11 +523,11 @@
 		</Panel>
 		<Panel position="top-left">
 			<div
-				class="text-xs bg-surface-100 text-surface-700 border border-surface-300 rounded-base shadow-sm max-w-md leading-relaxed"
+				class="text-xs bg-surface-100-900 text-surface-700-300 border border-surface-300-700 rounded-base shadow-sm max-w-md leading-relaxed"
 			>
 				<button
 					type="button"
-					class="w-full flex items-center justify-between px-3 py-2 font-semibold cursor-pointer hover:bg-surface-200 rounded-base"
+					class="w-full flex items-center justify-between px-3 py-2 font-semibold cursor-pointer hover:bg-surface-200-800 rounded-base"
 					aria-expanded={instructionsOpen}
 					aria-controls="asset-board-instructions"
 					onclick={() => (instructionsOpen = !instructionsOpen)}
@@ -536,7 +540,7 @@
 				</button>
 				{#if instructionsOpen}
 					<div id="asset-board-instructions" class="px-3 pb-2">
-						<div class="mb-1 text-surface-600">
+						<div class="mb-1 text-surface-600-400">
 							Convention: arrow <span class="font-mono">A → B</span> means
 							<em>A depends on B</em> (A is a parent of B).
 						</div>
@@ -564,6 +568,12 @@
 		--xy-node-border-radius: var(--radius-base);
 		--xy-edge-stroke: var(--color-surface-500);
 		background-color: var(--color-surface-50);
+	}
+	/* In dark mode the canvas surface must darken too. `colorMode` adds `.dark` to
+	   `.svelte-flow`, but this explicit background-color would otherwise win, so flip
+	   it here to keep the board dark. */
+	:global(.dark .svelte-flow) {
+		background-color: var(--color-surface-950);
 	}
 	:global(.svelte-flow .svelte-flow__edge-path) {
 		stroke-width: 2;

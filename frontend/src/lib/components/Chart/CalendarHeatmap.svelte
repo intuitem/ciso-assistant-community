@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { m } from '$paraglide/messages';
+	import { getLocale } from '$paraglide/runtime';
 
 	interface Props {
 		name: string;
@@ -44,10 +46,24 @@
 
 	onMount(async () => {
 		const echarts = await import('echarts');
-		let calendar_chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
+		let calendar_chart = echarts.init(
+			document.getElementById(chart_id),
+			document.documentElement.classList.contains('dark') ? 'dark' : null,
+			{ renderer: 'svg' }
+		);
 
 		const chartData = data.length > 0 ? data : generateSampleData(year);
 		const today = new Date().toISOString().split('T')[0];
+
+		// Localized short month/day names for the calendar axis labels.
+		const locale = getLocale();
+		const monthNames = Array.from({ length: 12 }, (_, i) =>
+			new Date(2024, i, 1).toLocaleDateString(locale, { month: 'short' })
+		);
+		// dayLabel.nameMap is indexed Sunday(0)..Saturday(6); 2024-01-07 is a Sunday.
+		const dayNames = Array.from({ length: 7 }, (_, i) =>
+			new Date(2024, 0, 7 + i).toLocaleDateString(locale, { weekday: 'short' })
+		);
 
 		const option = {
 			title: {
@@ -63,7 +79,7 @@
 				formatter: function (params: any) {
 					const date = new Date(params.value[0]);
 					const value = params.value[1];
-					return `${date.toLocaleDateString()}<br/>Activity: ${value}`;
+					return `${date.toLocaleDateString(locale)}<br/>${m.activitiesCount()}: ${value}`;
 				}
 			},
 			visualMap: {
@@ -91,16 +107,16 @@
 				range: year,
 				itemStyle: {
 					borderWidth: 0.5,
-					borderColor: '#fff'
+					borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff'
 				},
 				yearLabel: { show: false },
 				monthLabel: {
-					nameMap: 'en',
+					nameMap: monthNames,
 					fontSize: 12
 				},
 				dayLabel: {
 					fontSize: 10,
-					nameMap: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+					nameMap: dayNames,
 					firstDay: 1
 				}
 			},
@@ -127,6 +143,7 @@
 			]
 		};
 
+		option.backgroundColor = 'transparent';
 		calendar_chart.setOption(option);
 
 		window.addEventListener('resize', function () {

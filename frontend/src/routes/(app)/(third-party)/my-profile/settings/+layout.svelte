@@ -6,6 +6,6 @@
 	let { children }: Props = $props();
 </script>
 
-<div class="card bg-white shadow-lg p-4">
+<div class="card bg-surface-50-950 shadow-lg p-4">
 	{@render children?.()}
 </div>
