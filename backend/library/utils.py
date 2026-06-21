@@ -514,7 +514,12 @@ class RiskMatrixImporter:
         return None  # Do not verify anything for now
 
     def is_valid(self) -> Union[str, None]:
-        return None
+        return None  # Do not verify anything for now
+
+        # Create function to check if the "JSON definition" of the matrix is wrong or not, this function will be called within this is_valid function and return an error string is an error occured or return None or success exactly like this one.
+
+        if missing_fields := self.REQUIRED_FIELDS - set(self.risk_matrix_data.keys()):
+            return "Missing the following fields : {}".format(", ".join(missing_fields))
 
     def import_risk_matrix(self, library_object: LoadedLibrary):
         matrix_data = {
