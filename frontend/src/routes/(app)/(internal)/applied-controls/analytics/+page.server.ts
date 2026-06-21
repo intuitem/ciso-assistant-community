@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { getSecureRedirect } from '$lib/utils/helpers';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, url }) => {
@@ -15,9 +16,7 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 	const res = await fetch(endpoint);
 	const analytics = res.ok ? await res.json() : null;
 
-	const rawBackUrl = url.searchParams.get('backUrl') ?? '/applied-controls';
-	const backUrl =
-		rawBackUrl.startsWith('/') && !rawBackUrl.startsWith('//') ? rawBackUrl : '/applied-controls';
+	const backUrl = getSecureRedirect(url.searchParams.get('backUrl')) || '/applied-controls';
 	const backLabel = url.searchParams.get('backLabel') ?? 'Applied Controls';
 
 	return {

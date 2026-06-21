@@ -94,7 +94,7 @@
 		</div>
 	{/if}
 	<div
-		class="p-1 inline-flex gap-1 grow flex-wrap items-center bg-gray-200 border border-gray-400 rounded-md {classes} {disabledClasses}"
+		class="p-1 inline-flex gap-1 grow flex-wrap items-center bg-surface-200-800 border border-surface-400-600 rounded-md {classes} {disabledClasses}"
 	>
 		{#each labeledOptions as option}
 			{@const color = colorMap[option.id] ?? 'preset-filled-primary-500'}
@@ -121,6 +121,6 @@
 		{/each}
 	</div>
 	{#if helpText}
-		<p class="text-sm text-gray-500">{helpText}</p>
+		<p class="text-sm text-surface-600-400">{helpText}</p>
 	{/if}
 </div>

@@ -114,7 +114,7 @@ For flash-mode-style scoring where each choice contributes points:
 3. Below the question, click **Add choice** for each option. Per choice:
    - **Value** — the label (e.g. _"Annual review documented"_).
    - **`add_score`** — points contributed when this choice is picked.
-   - **`compute_result`** — optionally map the choice to a compliance result (_compliant_ / _partially compliant_ / etc.).
+   - **`compute_result`** — optionally map the choice to a compliance result (`compliant`, `partially_compliant`, `non_compliant`, `not_applicable`). Several contributing choices aggregate _worst-wins_, with `not_applicable` neutral. See the [framework builder reference](framework-builder.md#questions-and-choices) for the full rule and the backward-compatible legacy literals.
    - **`color`** — optional, for visual differentiation.
 4. Repeat for each choice. The order in the editor is the order respondents see.
 

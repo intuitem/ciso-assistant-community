@@ -47,5 +47,16 @@ class GlobalSettings(AbstractBaseModel, FolderMixin):
     # Value of the setting.
     value = models.JSONField(default=dict)
 
+    class Meta:
+        permissions = [
+            ("view_central_auditlog", "Can access the central audit log"),
+            ("view_object_audittrail", "Can view object audit trails"),
+        ]
+
     def __str__(self):
         return self.name
+
+    @classmethod
+    def get_daily_rate(cls) -> float:
+        gs = cls.objects.filter(name="general").only("value").first()
+        return gs.value.get("daily_rate", 500) if gs else 500

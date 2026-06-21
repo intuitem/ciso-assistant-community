@@ -36,6 +36,7 @@ from structlog import get_logger
 from django.utils.timezone import now
 
 from iam.models import Folder, FolderMixin, PublishInRootFolderMixin, User
+from custom_fields.host import CustomFieldsMixin
 
 from library.helpers import (
     get_referential_translation,
@@ -56,8 +57,9 @@ from .base_models import (
     NameDescriptionMixin,
 )
 from .utils import (
+    aggregate_compute_results,
     camel_case,
-    is_compute_result_truthy,
+    resolve_compute_result,
     sha256,
     update_selected_implementation_groups,
     _is_question_visible,
@@ -2431,6 +2433,13 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
         verbose_name = _("Framework")
         verbose_name_plural = _("Frameworks")
 
+    def get_implementation_groups_definition_translated(self):
+        import copy
+
+        return update_translations_in_object(
+            copy.deepcopy(self.implementation_groups_definition or [])
+        )
+
     def is_deletable(self) -> bool:
         """
         Returns True if the framework can be deleted
@@ -2598,7 +2607,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         reference_controls = []
         for control in _reference_controls:
             reference_controls.append(
-                {"str": control.display_long, "urn": control.urn, "id": control.id}
+                {"str": control.display_long, "urn": control.urn, "id": str(control.id)}
             )
         return reference_controls
 
@@ -2608,7 +2617,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         threats = []
         for control in _threats:
             threats.append(
-                {"str": control.display_long, "urn": control.urn, "id": control.id}
+                {"str": control.display_long, "urn": control.urn, "id": str(control.id)}
             )
         return threats
 
@@ -2659,9 +2668,9 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
             if choice.add_score is not None:
                 choice_data["add_score"] = choice.add_score
             if choice.compute_result is not None:
-                choice_data["compute_result"] = is_compute_result_truthy(
-                    choice.compute_result
-                )
+                resolved = resolve_compute_result(choice.compute_result)
+                if resolved is not None:
+                    choice_data["compute_result"] = resolved
             if choice.color:
                 choice_data["color"] = choice.color
             if choice.select_implementation_groups:
@@ -2678,6 +2687,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
             q_data = {
                 "type": question.type,
                 "text": q_tr.get("text", question.text or ""),
+                "weight": question.weight,
             }
             if question.annotation:
                 q_data["annotation"] = question.annotation
@@ -3163,7 +3173,11 @@ class AssetCapability(ReferentialObjectMixin, I18nObjectMixin):
 
 
 class Asset(
-    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
+    NameDescriptionMixin,
+    FolderMixin,
+    PublishInRootFolderMixin,
+    FilteringLabelMixin,
+    CustomFieldsMixin,
 ):
     class Type(models.TextChoices):
         """
@@ -3952,22 +3966,27 @@ class Asset(
         self.full_clean()
         return super().save(*args, **kwargs)
 
-    def get_security_objectives_comparison(self) -> list[dict]:
+    def get_security_objectives_comparison(
+        self, security_objectives=None, security_capabilities=None
+    ) -> list[dict]:
         """
         Compare security objectives (expectation) vs capabilities (reality) using RAW values.
         Returns a list of dicts with: objective, expectation, reality, verdict.
         Verdict is True if objective is met, False if not met, None if cannot be determined.
+
+        Callers may pass security_objectives/capabilities (as {"objectives": {...}})
+        to skip the per-asset graph traversal.
         """
         # Read raw JSON structures (no display/scales)
         so = (
-            self.get_security_objectives()
-            if hasattr(self, "get_security_objectives")
-            else self.security_objectives
+            security_objectives
+            if security_objectives is not None
+            else self.get_security_objectives()
         )
         sc = (
-            self.get_security_capabilities()
-            if hasattr(self, "get_security_capabilities")
-            else self.security_capabilities
+            security_capabilities
+            if security_capabilities is not None
+            else self.get_security_capabilities()
         )
 
         so_obj = (so or {}).get("objectives", {}) or {}
@@ -4009,23 +4028,32 @@ class Asset(
 
         return result
 
-    def get_recovery_objectives_comparison(self) -> list[dict]:
+    def get_recovery_objectives_comparison(
+        self,
+        disaster_recovery_objectives=None,
+        recovery_capabilities=None,
+        display_objectives_list=None,
+        display_capabilities_list=None,
+    ) -> list[dict]:
         """
         Compare recovery objectives (expectation) vs capabilities (reality).
         Returns list with objective, expectation, reality, and verdict.
         Compares raw seconds numerically, outputs formatted display strings.
         Verdict is True if objective is met, False if not met, None if cannot be determined.
+
+        Callers may pass the raw ({"objectives": {...}}) and display ([{"str": ...}])
+        inputs to skip the per-asset graph traversal.
         """
 
         dr_src = (
-            self.get_disaster_recovery_objectives()
-            if hasattr(self, "get_disaster_recovery_objectives")
-            else (getattr(self, "disaster_recovery_objectives", {}) or {})
+            disaster_recovery_objectives
+            if disaster_recovery_objectives is not None
+            else self.get_disaster_recovery_objectives()
         )
         rc_src = (
-            self.get_recovery_capabilities()
-            if hasattr(self, "get_recovery_capabilities")
-            else (getattr(self, "recovery_capabilities", {}) or {})
+            recovery_capabilities
+            if recovery_capabilities is not None
+            else self.get_recovery_capabilities()
         )
 
         def _normalize_seconds(source: dict) -> dict[str, int]:
@@ -4080,9 +4108,15 @@ class Asset(
             return parsed
 
         display_objectives = _parse_display(
-            self.get_disaster_recovery_objectives_display()
+            display_objectives_list
+            if display_objectives_list is not None
+            else self.get_disaster_recovery_objectives_display()
         )
-        display_capabilities = _parse_display(self.get_recovery_capabilities_display())
+        display_capabilities = _parse_display(
+            display_capabilities_list
+            if display_capabilities_list is not None
+            else self.get_recovery_capabilities_display()
+        )
 
         for item in result:
             key = item["objective"].lower()
@@ -4521,16 +4555,10 @@ class Evidence(
         super().save(*args, **kwargs)
         self.revisions.update(is_published=self.is_published)
 
-    def delete(self, using=None, keep_parents=False):
-        for rev in self.revisions.all():
-            if rev.attachment:
-                rev.attachment.delete(save=False)
-
-        return super().delete(using=using, keep_parents=keep_parents)
-
     @property
     def last_revision(self):
-        return self.revisions.order_by("-version").first() or None
+        revs = self.revisions.all()
+        return max(revs, key=lambda r: r.version) if revs else None
 
     def get_folder(self):
         if self.applied_controls:
@@ -4540,24 +4568,18 @@ class Evidence(
         else:
             return None
 
-    def filename(self):
-        return (
-            os.path.basename(self.last_revision.attachment.name)
-            if self.last_revision and self.last_revision.attachment
-            else None
-        )
+    def filename(self) -> str | None:
+        return self.last_revision.filename() if self.last_revision else None
 
     def get_size(self):
+        rev = self.last_revision
         if (
-            not self.last_revision
-            or not self.last_revision.attachment
-            or not self.last_revision.attachment.storage.exists(
-                self.last_revision.attachment.name
-            )
+            not rev
+            or not rev.attachment
+            or not rev.attachment.storage.exists(rev.attachment.name)
         ):
             return None
-        # get the attachment size with the correct unit
-        size = self.last_revision.attachment.size
+        size = rev.attachment.size
         if size < 1024:
             return f"{size} B"
         elif size < 1024 * 1024:
@@ -4567,9 +4589,10 @@ class Evidence(
 
     @property
     def attachment_hash(self):
-        if not self.last_revision or not self.last_revision.attachment:
+        rev = self.last_revision
+        if not rev or not rev.attachment:
             return None
-        return hashlib.sha256(self.last_revision.attachment.read()).hexdigest()
+        return hashlib.sha256(rev.attachment.read()).hexdigest()
 
 
 class EvidenceRevision(AbstractBaseModel, FolderMixin):
@@ -4612,6 +4635,10 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
     observation = models.TextField(verbose_name="Observation", blank=True, null=True)
 
     fields_to_check = ["evidence", "version"]
+
+    class Meta:
+        verbose_name = _("Evidence Revision")
+        verbose_name_plural = _("Evidence Revisions")
 
     def __str__(self):
         return f"{self.evidence.name} v{self.version}"
@@ -4660,7 +4687,6 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
                             if hasattr(self.attachment, "seek"):
                                 self.attachment.seek(0)
                 except Exception as e:
-                    logger = get_logger(__name__)
                     logger.warning(
                         "Failed to compute attachment hash",
                         revision_id=self.pk,
@@ -4674,13 +4700,9 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
 
         super().save(*args, **kwargs)
 
-    def delete(self, using=None, keep_parents=False):
-        if self.attachment:
-            self.attachment.delete(save=False)
-
-        return super().delete(using=using, keep_parents=keep_parents)
-
-    def filename(self):
+    def filename(self) -> str | None:
+        if not self.attachment:
+            return None
         return os.path.basename(self.attachment.name)
 
     def get_size(self):
@@ -4696,10 +4718,6 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
             return f"{size / 1024:.1f} KB"
         else:
             return f"{size / 1024 / 1024:.1f} MB"
-
-    class Meta:
-        verbose_name = _("Evidence Revision")
-        verbose_name_plural = _("Evidence Revisions")
 
 
 class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
@@ -5017,7 +5035,11 @@ def _get_default_applied_control_cost():
 
 
 class AppliedControl(
-    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
+    NameDescriptionMixin,
+    FolderMixin,
+    PublishInRootFolderMixin,
+    FilteringLabelMixin,
+    CustomFieldsMixin,
 ):
     class Status(models.TextChoices):
         TO_DO = "to_do", _("To do")
@@ -5328,6 +5350,10 @@ class AppliedControl(
     @property
     def annual_cost(self):
         """Returns the annualized cost as a numeric value"""
+        return self.compute_annual_cost()
+
+    def compute_annual_cost(self, daily_rate=None):
+        """Annualized cost. Pass daily_rate to skip the per-control GlobalSettings lookup."""
         if not self.cost:
             return 0
 
@@ -5335,11 +5361,9 @@ class AppliedControl(
         run_cost = self.cost.get("run", {})
         amortization_period = self.cost.get("amortization_period", 1)
 
-        # Get daily rate from global settings
-        general_settings = GlobalSettings.objects.filter(name="general").first()
-        daily_rate = (
-            general_settings.value.get("daily_rate", 500) if general_settings else 500
-        )
+        # Get daily rate from global settings unless provided by the caller
+        if daily_rate is None:
+            daily_rate = GlobalSettings.get_daily_rate()
 
         # Calculate annual cost
         annual_cost = 0
@@ -6869,6 +6893,12 @@ class ComplianceAssessment(Assessment):
     class Meta:
         verbose_name = _("Compliance assessment")
         verbose_name_plural = _("Compliance assessments")
+        permissions = [
+            (
+                "view_compliance_assessment_full",
+                "Can view the full auditor view of a compliance assessment (all rows and fields)",
+            ),
+        ]
 
     # --- Visibility-derived booleans ---
     # These mirror legacy boolean fields. Storage is `field_visibility` keyed by
@@ -7572,7 +7602,7 @@ class ComplianceAssessment(Assessment):
 
         return [
             group.get("name")
-            for group in framework.implementation_groups_definition
+            for group in framework.get_implementation_groups_definition_translated()
             if group.get("ref_id") in self.selected_implementation_groups
         ]
 
@@ -8078,107 +8108,6 @@ class ComplianceAssessment(Assessment):
         }
         return findings
 
-    def compute_requirement_assessments_results(
-        self, mapping_set: RequirementMappingSet, source_assessment: Self
-    ) -> tuple[list["RequirementAssessment"], dict["RequirementAssessment", list[str]]]:
-        requirement_assessments: list[RequirementAssessment] = []
-        assessment_source_dict: dict[RequirementAssessment, list[str]] = {}
-        result_order = (
-            RequirementAssessment.Result.NOT_ASSESSED,
-            RequirementAssessment.Result.NOT_APPLICABLE,
-            RequirementAssessment.Result.NON_COMPLIANT,
-            RequirementAssessment.Result.PARTIALLY_COMPLIANT,
-            RequirementAssessment.Result.COMPLIANT,
-        )
-
-        def assign_attributes(target, attributes):
-            """
-            Helper function to assign attributes to a target object.
-            Only assigns if the attribute is not None.
-            """
-            keys = ["result", "status", "score", "is_scored", "observation"]
-            for key, value in zip(keys, attributes):
-                if value is not None:
-                    setattr(target, key, value)
-
-        for requirement_assessment in self.requirement_assessments.all():
-            mappings = mapping_set.mappings.filter(
-                target_requirement=requirement_assessment.requirement
-            )
-            inferences = []
-            refs = []
-
-            # Filter for full coverage relationships if applicable
-            if mappings.filter(
-                relationship__in=RequirementMapping.FULL_COVERAGE_RELATIONSHIPS
-            ).exists():
-                mappings = mappings.filter(
-                    relationship__in=RequirementMapping.FULL_COVERAGE_RELATIONSHIPS
-                )
-
-            for mapping in mappings:
-                source_requirement_assessment = RequirementAssessment.objects.get(
-                    compliance_assessment=source_assessment,
-                    requirement=mapping.source_requirement,
-                )
-                inferred_result = requirement_assessment.infer_result(
-                    mapping=mapping,
-                    source_requirement_assessment=source_requirement_assessment,
-                )
-                if inferred_result.get("result") in result_order:
-                    inferences.append(
-                        (
-                            inferred_result.get("result"),
-                            inferred_result.get("status"),
-                            inferred_result.get("score"),
-                            inferred_result.get("is_scored"),
-                            inferred_result.get("observation"),
-                        )
-                    )
-                    refs.append(source_requirement_assessment)
-
-            if inferences:
-                if len(inferences) == 1:
-                    selected_inference = inferences[0]
-                    ref = refs[0]
-                else:
-                    selected_inference = min(
-                        inferences, key=lambda x: result_order.index(x[0])
-                    )
-                    ref = refs[inferences.index(selected_inference)]
-
-                assessment_source_dict[requirement_assessment] = [
-                    str(ref.id) for ref in refs
-                ]
-
-                assign_attributes(requirement_assessment, selected_inference)
-                requirement_assessment.mapping_inference = {
-                    "result": requirement_assessment.result,
-                    "source_requirement_assessment": {
-                        "str": str(ref),
-                        "id": str(ref.id),
-                        "is_scored": ref.is_scored,
-                        "score": ref.score,
-                        "coverage": mapping.coverage,
-                    },
-                    # "mappings": [mapping.id for mapping in mappings],
-                }
-                requirement_assessments.append(requirement_assessment)
-
-        RequirementAssessment.objects.bulk_update(
-            requirement_assessments,
-            [
-                "mapping_inference",
-                "result",
-                "status",
-                "score",
-                "is_scored",
-                "observation",
-            ],
-            batch_size=1000,
-        )
-        return requirement_assessments, assessment_source_dict
-
     def _get_progress_counts(self) -> tuple[int, int]:
         """
         Return (total, assessed) counts for assessable requirements
@@ -8667,6 +8596,9 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         Does NOT save the model.
         """
         questions_qs = self.requirement.questions.prefetch_related("choices").all()
+        if not questions_qs.exists():
+            return
+
         answers_qs = (
             self.answers.select_related("question")
             .prefetch_related("selected_choices")
@@ -8683,20 +8615,25 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
         total_score = 0
         total_weight = 0
-        resolved = self.get_resolved_scoring()
-        min_score = resolved["min_score"] if resolved["min_score"] is not None else 0
-        max_score = resolved["max_score"] if resolved["max_score"] is not None else 100
+        scoring = self.get_resolved_scoring()
+        min_score = scoring["min_score"] if scoring["min_score"] is not None else 0
+        max_score = scoring["max_score"] if scoring["max_score"] is not None else 100
         results = []
         visible_questions = 0
         answered_visible_questions = 0
         is_score_computed = False
-        is_result_computed = False
+        # Tracks whether the requirement is configured to drive `result` from
+        # questionnaire answers (i.e. at least one choice carries a resolvable
+        # `compute_result`). Set inline during the question pass below.
+        is_result_driven = False
 
         # Determine aggregation method
         scores_def = self.compliance_assessment.scores_definition
         aggregation = None
         if isinstance(scores_def, dict):
-            aggregation = scores_def.get("aggregation")
+            candidate = scores_def.get("aggregation")
+            if candidate in ("sum", "mean"):
+                aggregation = candidate
         if not aggregation:
             if (
                 self.compliance_assessment.score_calculation_method
@@ -8707,6 +8644,16 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 aggregation = "mean"
 
         for question in questions_qs:
+            # Detect result-driven capability across ALL choices (selection /
+            # visibility agnostic). Short-circuits across questions once set.
+            if not is_result_driven:
+                for choice in question.choices.all():
+                    if choice.compute_result is None:
+                        continue
+                    if resolve_compute_result(choice.compute_result) is not None:
+                        is_result_driven = True
+                        break
+
             if not _is_question_visible(question, answers_by_urn, questions_by_urn):
                 continue
 
@@ -8725,8 +8672,9 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                         total_weight += question.weight
 
                     if choice.compute_result is not None:
-                        is_result_computed = True
-                        results.append(is_compute_result_truthy(choice.compute_result))
+                        resolved_cr = resolve_compute_result(choice.compute_result)
+                        if resolved_cr is not None:
+                            results.append(resolved_cr)
 
         if is_score_computed:
             if aggregation == "mean" and total_weight > 0:
@@ -8738,19 +8686,28 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             new_score = None
         new_is_scored = is_score_computed
 
-        # Determine overall result
-        if visible_questions == 0:
-            new_result = self.Result.NOT_APPLICABLE
-        elif answered_visible_questions < visible_questions:
-            new_result = self.Result.NOT_ASSESSED
-        elif not results:
-            new_result = self.Result.NOT_ASSESSED
-        elif all(results):
-            new_result = self.Result.COMPLIANT
-        elif any(results):
-            new_result = self.Result.PARTIALLY_COMPLIANT
-        else:
-            new_result = self.Result.NON_COMPLIANT
+        # `is_result_driven` was set inline during the question pass: True iff
+        # at least one choice carries a resolvable `compute_result`. For
+        # score-only questionnaires (or only-unresolvable values), we must NOT
+        # touch self.result, otherwise a manually-set result would be silently
+        # reset to NOT_ASSESSED on every recompute.
+        new_result = self.result
+        if is_result_driven:
+            if visible_questions == 0:
+                new_result = self.Result.NOT_APPLICABLE
+            elif answered_visible_questions < visible_questions:
+                new_result = self.Result.NOT_ASSESSED
+            elif not results:
+                new_result = self.Result.NOT_ASSESSED
+            else:
+                aggregated = aggregate_compute_results(results)
+                result_map = {
+                    "compliant": self.Result.COMPLIANT,
+                    "partially_compliant": self.Result.PARTIALLY_COMPLIANT,
+                    "non_compliant": self.Result.NON_COMPLIANT,
+                    "not_applicable": self.Result.NOT_APPLICABLE,
+                }
+                new_result = result_map.get(aggregated, self.Result.NOT_ASSESSED)
 
         # Update attributes
         self.score = new_score
@@ -9674,7 +9631,7 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
             return "VAL.000001"
         try:
             suffix = int(last.ref_id.split(".")[1])
-        except (IndexError, ValueError):
+        except IndexError, ValueError:
             # Fallback if existing data is malformed
             suffix = 0
         return f"VAL.{suffix + 1:06d}"
@@ -9702,6 +9659,18 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
             if getattr(self, field).exists():
                 linked.append(field)
         return linked
+
+    @property
+    def last_event(self):
+        """Most recent flow event. Reuses the prefetch cache when available."""
+        # FlowEvent is ordered by -created_at, so the first item is the latest.
+        events = list(self.events.all())
+        return events[0] if events else None
+
+    @property
+    def last_event_notes(self) -> str | None:
+        event = self.last_event
+        return event.event_notes if event else None
 
     def __str__(self) -> str:
         return self.ref_id

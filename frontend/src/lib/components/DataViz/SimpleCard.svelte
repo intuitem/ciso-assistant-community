@@ -21,15 +21,15 @@
 
 	// Enhanced emphasis styling
 	const emphasisClasses = emphasis
-		? 'border-l-4 border-l-violet-500 bg-gradient-to-r from-violet-25 to-white shadow-md'
-		: 'border border-gray-200';
+		? 'border-l-4 border-l-violet-500 bg-surface-50-950 shadow-md'
+		: 'border border-surface-200-800';
 
 	// Base card styling - clean and minimal
 	const baseCardClasses = `
-		flex flex-col h-20 p-3 bg-white rounded-lg
+		flex flex-col h-20 p-3 bg-surface-50-950 rounded-lg
 		transition-all duration-200 ease-in-out
 		group cursor-pointer
-		hover:shadow-lg hover:shadow-violet-100 hover:-translate-y-0.5
+		hover:shadow-lg hover:shadow-violet-100/50 dark:hover:shadow-violet-900/30 hover:-translate-y-0.5
 		${emphasisClasses} ${customClass}
 	`;
 
@@ -55,12 +55,12 @@
 {#snippet cardContent()}
 	<div class="flex-1 flex flex-col justify-center">
 		<div
-			class="text-2xl font-bold text-gray-800 leading-none mb-1 group-hover:text-violet-800 transition-colors duration-200"
+			class="text-2xl font-bold text-surface-950-50 leading-none mb-1 group-hover:text-violet-700 dark:group-hover:text-violet-400 transition-colors duration-200"
 		>
 			{formattedCount()}
 		</div>
 		<div
-			class="text-xs font-medium text-gray-600 group-hover:text-violet-700 transition-colors duration-200"
+			class="text-xs font-medium text-surface-600-400 capitalize group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors duration-200"
 		>
 			{label}
 		</div>
@@ -68,11 +68,11 @@
 {/snippet}
 
 {#if href && href !== '#'}
-	<Anchor {href} {label} class="{baseCardClasses} text-gray-800">
+	<Anchor {href} {label} class="{baseCardClasses} text-surface-950-50">
 		{@render cardContent()}
 	</Anchor>
 {:else}
-	<div class="{baseCardClasses} text-gray-800">
+	<div class="{baseCardClasses} text-surface-950-50">
 		{@render cardContent()}
 	</div>
 {/if}
