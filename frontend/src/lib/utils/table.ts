@@ -2355,7 +2355,16 @@ export const listViewFields = {
 		}
 	},
 	'ebios-rm': {
-		head: ['refId', 'name', 'description', 'domain', 'status', 'quotationMethod', 'createdAt', 'updatedAt'],
+		head: [
+			'refId',
+			'name',
+			'description',
+			'domain',
+			'status',
+			'quotationMethod',
+			'createdAt',
+			'updatedAt'
+		],
 		body: [
 			'ref_id',
 			'name',
