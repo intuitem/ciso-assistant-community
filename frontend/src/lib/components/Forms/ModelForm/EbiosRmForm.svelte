@@ -77,6 +77,14 @@
 	/>
 	<AutocompleteSelect
 		{form}
+		optionsEndpoint="entities"
+		field="reference_entity"
+		cacheLock={cacheLocks['reference_entity']}
+		bind:cachedValue={formDataCache['reference_entity']}
+		label={m.referenceEntity()}
+	/>
+	<AutocompleteSelect
+		{form}
 		optionsEndpoint="risk-matrices?is_enabled=true"
 		field="risk_matrix"
 		cacheLock={cacheLocks['risk_matrix']}
@@ -137,6 +145,14 @@
 			label={m.quotationMethod()}
 			cacheLock={cacheLocks['quotation_method']}
 			bind:cachedValue={formDataCache['quotation_method']}
+		/>
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="entities"
+			field="reference_entity"
+			cacheLock={cacheLocks['reference_entity']}
+			bind:cachedValue={formDataCache['reference_entity']}
+			label={m.referenceEntity()}
 		/>
 		<AutocompleteSelect
 			multiple
