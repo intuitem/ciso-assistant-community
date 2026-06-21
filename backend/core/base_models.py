@@ -124,7 +124,7 @@ class AbstractBaseModel(models.Model):
             raise ValidationError(field_errors)
 
     def save(self, *args, **kwargs) -> None:
-        self.clean()
+        self.full_clean(validate_unique=False)
         super().save(*args, **kwargs)
 
 

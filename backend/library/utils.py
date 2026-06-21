@@ -2,7 +2,6 @@ import json
 import time
 
 from .helpers import get_referential_translation
-from .validators import validate_ref_id_length
 from typing import List, Union
 
 # interesting thread: https://stackoverflow.com/questions/27743711/can-i-speedup-yaml
@@ -96,8 +95,6 @@ class RequirementNodeImporter:
     def is_valid(self) -> Union[str, None]:
         if missing_fields := self.REQUIRED_FIELDS - set(self.requirement_data.keys()):
             return "Missing the following fields : {}".format(", ".join(missing_fields))
-        if err := validate_ref_id_length(self.requirement_data.get("ref_id")):
-            return err
 
     def import_requirement_node(self, framework_object: Framework):
         parent_urn = self.requirement_data.get("parent_urn")
@@ -312,8 +309,6 @@ class FrameworkImporter:
     def init(self) -> Union[str, None]:
         if missing_fields := self.REQUIRED_FIELDS - set(self.framework_data.keys()):
             return "Missing the following fields : {}".format(", ".join(missing_fields))
-        if err := validate_ref_id_length(self.framework_data.get("ref_id")):
-            return err
 
         detected_object_fields = self.OBJECT_FIELDS.union(self.framework_data.keys())
 
@@ -389,8 +384,6 @@ class ThreatImporter:
     def is_valid(self) -> Union[str, None]:
         if missing_fields := self.REQUIRED_FIELDS - set(self.threat_data.keys()):
             return "Missing the following fields : {}".format(", ".join(missing_fields))
-        if err := validate_ref_id_length(self.threat_data.get("ref_id")):
-            return err
 
     def import_threat(self, library_object: LoadedLibrary):
         Threat.objects.create(
@@ -423,8 +416,6 @@ class ReferenceControlImporter:
             self.reference_control_data.keys()
         ):
             return "Missing the following fields : {}".format(", ".join(missing_fields))
-        if err := validate_ref_id_length(self.reference_control_data.get("ref_id")):
-            return err
 
         if (category := self.reference_control_data.get("category")) is not None:
             if category not in ReferenceControlImporter.CATEGORIES:
@@ -470,8 +461,6 @@ class MetricDefinitionImporter:
             self.metric_definition_data.keys()
         ):
             return "Missing the following fields : {}".format(", ".join(missing_fields))
-        if err := validate_ref_id_length(self.metric_definition_data.get("ref_id")):
-            return err
 
         if (category := self.metric_definition_data.get("category")) is not None:
             if category not in MetricDefinitionImporter.CATEGORIES:
@@ -525,8 +514,6 @@ class RiskMatrixImporter:
         return None  # Do not verify anything for now
 
     def is_valid(self) -> Union[str, None]:
-        if err := validate_ref_id_length(self.risk_matrix_data.get("ref_id")):
-            return err
         return None
 
     def import_risk_matrix(self, library_object: LoadedLibrary):
