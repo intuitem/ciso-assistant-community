@@ -71,6 +71,7 @@ qdrant:
 Notes:
 
 - Any key under `qdrant:` is passed through to the Qdrant subchart (e.g. `qdrant.persistence.size`, `qdrant.resources`). Persistence is on by default; see the [subchart values](https://github.com/qdrant/qdrant-helm/tree/main/charts/qdrant) for all options.
+- The Qdrant subchart is bundled inside the published chart, so installing needs no access to the Qdrant Helm repo. Air-gapped clusters still pull the **Qdrant image** at runtime: mirror it and override `qdrant.image.repository` (same as for the backend/frontend images).
 - To point at an **external** Qdrant instead of the bundled one, leave `qdrant.enabled: false` and set `QDRANT_URL` through `backend.env` and `backend.huey.env`.
 - The **LLM provider** (Ollama or any OpenAI-compatible endpoint, model, base URL) is configured from the in-app **Settings → Chat/AI** section, not from the chart. LLM inference is heavy; point it at a GPU-backed endpoint.
 - The Qdrant collection and the indexes are **not** created automatically. After the pods are up, run the indexing commands once from the backend pod (`init_qdrant` creates the collection, `index_objects` indexes your existing risk/control/asset records, `index_libraries` indexes the framework libraries):

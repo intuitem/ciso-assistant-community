@@ -53,6 +53,7 @@ jobs:
       - name: Build Dependencies
         run: |
           cd charts
+          helm repo add qdrant https://qdrant.github.io/qdrant-helm
           helm dependency build ciso-assistant-next
 
       - name: Package Helm Chart
