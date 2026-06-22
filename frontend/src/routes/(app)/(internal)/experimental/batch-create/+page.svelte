@@ -206,7 +206,7 @@ Loss of customer trust</pre>
 						id="folder"
 						name="folder"
 						bind:value={selectedFolderId}
-						class="mt-1.5 w-full rounded-lg border-surface-300-700 text-surface-700-300 sm:text-sm"
+						class="select mt-1.5 w-full rounded-lg border-surface-300-700 text-surface-700-300 sm:text-sm"
 						required
 					>
 						<option value="">Select a folder</option>
@@ -224,7 +224,7 @@ Loss of customer trust</pre>
 						id="study"
 						name="study"
 						bind:value={selectedStudyId}
-						class="mt-1.5 w-full rounded-lg border-surface-300-700 text-surface-700-300 sm:text-sm"
+						class="select mt-1.5 w-full rounded-lg border-surface-300-700 text-surface-700-300 sm:text-sm"
 						required
 					>
 						<option value="">Select a study</option>
@@ -245,7 +245,7 @@ Loss of customer trust</pre>
 					name="items_text"
 					bind:value={itemsText}
 					onkeydown={handleTextareaKeydown}
-					class="mt-1.5 w-full rounded-lg border-surface-300-700 text-surface-700-300 sm:text-sm font-mono"
+					class="input mt-1.5 w-full rounded-lg border-surface-300-700 text-surface-700-300 sm:text-sm font-mono"
 					rows="15"
 					required
 				></textarea>
