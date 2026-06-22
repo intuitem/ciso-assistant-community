@@ -3,7 +3,7 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo, urlParamModelSelectFields } from '$lib/utils/crud';
 import { formatSelectFieldData } from '$lib/utils/load';
 import { modelSchema } from '$lib/utils/schemas';
-import type { ModelInfo } from '$lib/utils/types';
+import { URL_MODEL, type ModelInfo } from '$lib/utils/types';
 import { type Actions, error, fail } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
@@ -34,8 +34,8 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	const createModels = [
 		...new Set(
-			portal.sections
-				.flatMap((s: any) => s.items)
+			(portal.sections ?? [])
+				.flatMap((s: any) => s.items ?? [])
 				.filter((i: any) => i.kind === 'create' && i.target?.model)
 				.map((i: any) => i.target.model as string)
 		)
@@ -51,7 +51,9 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 export const actions: Actions = {
 	create: async (event) => {
 		const urlModel = event.url.searchParams.get('model');
-		if (!urlModel) return fail(400, { error: 'missing model' });
+		if (!urlModel || !URL_MODEL.includes(urlModel as (typeof URL_MODEL)[number])) {
+			return fail(400, { error: 'invalid model' });
+		}
 		return defaultWriteFormAction({ event, urlModel, action: 'create', doRedirect: false });
 	}
 };

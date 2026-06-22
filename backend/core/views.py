@@ -12568,7 +12568,7 @@ class PortalViewSet(BaseModelViewSet):
         bypasses IAM folder scoping (like the dashboard endpoints)."""
         groups = request.user.user_groups.all()
         return (
-            Portal.objects.filter(enabled=True)
+            Portal.objects.filter(enabled=True, status=Portal.Status.PUBLISHED)
             .filter(
                 Q(audience_groups__in=groups)
                 | Q(audience_groups__isnull=True)
@@ -12612,6 +12612,12 @@ class PortalViewSet(BaseModelViewSet):
             return Response(
                 {"detail": "Preset not found."}, status=status.HTTP_404_NOT_FOUND
             )
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="view_portalpreset"),
+            folder=preset.folder,
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
         data = {
             "name": request.data.get("name") or preset.name,
             "folder": str(preset.folder_id),

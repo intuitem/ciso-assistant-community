@@ -1,9 +1,9 @@
 import { BASE_API_URL } from '$lib/utils/constants';
-import { fail, redirect, type Actions } from '@sveltejs/kit';
+import { error, fail, redirect, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 const unwrap = async (res: Response) => {
-	if (!res.ok) return [];
+	if (!res.ok) error(res.status, await res.text());
 	const data = await res.json();
 	return data.results ?? data;
 };

@@ -20,16 +20,21 @@ async function patch(fetch: typeof globalThis.fetch, id: string, body: unknown) 
 export const actions: Actions = {
 	saveContent: async ({ params, request, fetch }) => {
 		const payload = (await request.formData()).get('payload') as string;
-		const res = await patch(fetch, params.id!, { content: JSON.parse(payload) });
+		let content;
+		try {
+			content = JSON.parse(payload);
+		} catch {
+			return fail(400, { error: 'Invalid payload' });
+		}
+		const res = await patch(fetch, params.id!, { content });
 		if (!res.ok) return fail(res.status, { error: await res.text() });
 		return { success: true };
 	},
 	updateMeta: async ({ params, request, fetch }) => {
 		const data = await request.formData();
-		const res = await patch(fetch, params.id!, {
-			name: (data.get('name') as string)?.trim(),
-			description: (data.get('description') as string) ?? ''
-		});
+		const body: Record<string, unknown> = { name: (data.get('name') as string)?.trim() };
+		if (data.has('description')) body.description = data.get('description');
+		const res = await patch(fetch, params.id!, body);
 		if (!res.ok) return fail(res.status, { error: await res.text() });
 		return { success: true };
 	},

@@ -4648,6 +4648,18 @@ class PortalWriteSerializer(BaseModelSerializer):
             "source_ref",
         ]
 
+    def validate_branding(self, value):
+        if not isinstance(value, dict):
+            raise serializers.ValidationError("must be an object")
+        return value
+
+    def validate_content(self, value):
+        if not isinstance(value, dict):
+            raise serializers.ValidationError("must be an object")
+        if not isinstance(value.get("sections", []), list):
+            raise serializers.ValidationError("sections must be a list")
+        return value
+
     def validate(self, data):
         data = super().validate(data)
         if self.instance is None and not data.get("slug"):

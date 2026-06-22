@@ -93,7 +93,7 @@
 				: 'bg-surface-200-800 text-surface-500'}">{data.portal.status}</span
 		>
 		<form method="POST" action="?/duplicate" use:enhance>
-			<button class="btn btn-sm preset-tonal" title={m.duplicate()}
+			<button class="btn btn-sm preset-tonal" aria-label={m.duplicate()} title={m.duplicate()}
 				><i class="fa-solid fa-copy"></i></button
 			>
 		</form>
@@ -108,15 +108,20 @@
 					placeholder="Group title"
 					class="input rounded-md font-semibold grow"
 				/>
-				<button onclick={() => moveSection(si, -1)} class="btn-icon btn-sm preset-tonal"
-					><i class="fa-solid fa-chevron-up"></i></button
+				<button
+					onclick={() => moveSection(si, -1)}
+					class="btn-icon btn-sm preset-tonal"
+					aria-label="Move group up"><i class="fa-solid fa-chevron-up"></i></button
 				>
-				<button onclick={() => moveSection(si, 1)} class="btn-icon btn-sm preset-tonal"
-					><i class="fa-solid fa-chevron-down"></i></button
+				<button
+					onclick={() => moveSection(si, 1)}
+					class="btn-icon btn-sm preset-tonal"
+					aria-label="Move group down"><i class="fa-solid fa-chevron-down"></i></button
 				>
 				<button
 					onclick={() => removeSection(si)}
 					class="btn-icon btn-sm preset-tonal-error"
+					aria-label={m.delete()}
 					title={m.delete()}><i class="fa-solid fa-trash"></i></button
 				>
 			</div>
@@ -155,14 +160,20 @@
 							/>
 						</label>
 						<div class="flex gap-1">
-							<button onclick={() => moveItem(si, ii, -1)} class="btn-icon btn-sm preset-tonal"
-								><i class="fa-solid fa-chevron-up"></i></button
+							<button
+								onclick={() => moveItem(si, ii, -1)}
+								class="btn-icon btn-sm preset-tonal"
+								aria-label="Move item up"><i class="fa-solid fa-chevron-up"></i></button
 							>
-							<button onclick={() => moveItem(si, ii, 1)} class="btn-icon btn-sm preset-tonal"
-								><i class="fa-solid fa-chevron-down"></i></button
+							<button
+								onclick={() => moveItem(si, ii, 1)}
+								class="btn-icon btn-sm preset-tonal"
+								aria-label="Move item down"><i class="fa-solid fa-chevron-down"></i></button
 							>
-							<button onclick={() => removeItem(si, ii)} class="btn-icon btn-sm preset-tonal-error"
-								><i class="fa-solid fa-trash"></i></button
+							<button
+								onclick={() => removeItem(si, ii)}
+								class="btn-icon btn-sm preset-tonal-error"
+								aria-label={m.delete()}><i class="fa-solid fa-trash"></i></button
 							>
 						</div>
 					</div>
@@ -186,9 +197,10 @@
 		method="POST"
 		action="?/setStatus"
 		use:enhance={() =>
-			async ({ update }) => {
+			async ({ result, update }) => {
 				await update();
-				toast.trigger({ message: m.saved(), background: 'preset-filled-success-500' });
+				if (result.type === 'success')
+					toast.trigger({ message: m.saved(), background: 'preset-filled-success-500' });
 			}}
 	>
 		<input
@@ -204,9 +216,10 @@
 		method="POST"
 		action="?/saveContent"
 		use:enhance={() =>
-			async ({ update }) => {
+			async ({ result, update }) => {
 				await update({ reset: false });
-				toast.trigger({ message: m.saved(), background: 'preset-filled-success-500' });
+				if (result.type === 'success')
+					toast.trigger({ message: m.saved(), background: 'preset-filled-success-500' });
 			}}
 	>
 		<input type="hidden" name="payload" value={payload} />

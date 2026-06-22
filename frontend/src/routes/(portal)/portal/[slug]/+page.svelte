@@ -25,7 +25,11 @@
 		if (!entry) return;
 		const component: ModalComponent = {
 			ref: CreateModal,
-			props: { form: entry.createForm, model: entry.model, formAction: `?/create&model=${model}` }
+			props: {
+				form: entry.createForm,
+				model: entry.model,
+				formAction: `?/create&model=${encodeURIComponent(model)}`
+			}
 		};
 		const modal: ModalSettings = { type: 'component', component, title };
 		modalStore.trigger(modal);
