@@ -77,7 +77,7 @@
 			disableEdit={true}
 		>
 			{#snippet addButton()}
-				{#if canApplyPreset}
+				{#if canApplyPreset && data.presets.length > 0}
 					<div class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs">
 						<button
 							class="inline-block p-3 btn-mini-primary w-12 focus:relative"

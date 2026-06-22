@@ -24,17 +24,23 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const deleteForm = await superValidate(zod(z.object({ id: z.string().uuid() })));
 
 	// Presets feed the "Start a journey" picker; domains feed the folder selector.
-	const presetsPromise = fetch(`${BASE_API_URL}/presets/`)
-		.then((res) => res.json())
-		.then((data) => data.results ?? data)
-		.catch(() => []);
+	// Always resolve to an array: tolerate non-OK responses and non-list payloads.
+	const fetchCollection = async (endpoint: string) => {
+		try {
+			const res = await fetch(endpoint);
+			if (!res.ok) return [];
+			const data = await res.json();
+			const list = data?.results ?? data;
+			return Array.isArray(list) ? list : [];
+		} catch {
+			return [];
+		}
+	};
 
-	const domainsPromise = fetch(`${BASE_API_URL}/folders?content_type=DO&content_type=GL`)
-		.then((res) => res.json())
-		.then((data) => data.results ?? data)
-		.catch(() => []);
-
-	const [presets, domains] = await Promise.all([presetsPromise, domainsPromise]);
+	const [presets, domains] = await Promise.all([
+		fetchCollection(`${BASE_API_URL}/presets/`),
+		fetchCollection(`${BASE_API_URL}/folders?content_type=DO&content_type=GL`)
+	]);
 
 	return { table, deleteForm, presets, domains, URLModel: 'journeys' };
 };

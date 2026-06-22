@@ -60,6 +60,8 @@ from core.models import (
     OrganisationIssue,
     AppliedControl,
     Policy,
+    SecurityException,
+    RiskAcceptance,
     Preset,
     PresetJourney,
     PresetJourneyStep,
@@ -77,6 +79,8 @@ from core.serializers import (
     OrganisationIssueWriteSerializer,
     AppliedControlWriteSerializer,
     PolicyWriteSerializer,
+    SecurityExceptionWriteSerializer,
+    RiskAcceptanceWriteSerializer,
 )
 from ebios_rm.models import EbiosRMStudy
 from ebios_rm.serializers import EbiosRMStudyWriteSerializer
@@ -390,6 +394,8 @@ class PresetExecutor:
         "risk_scenario": RiskScenario,
         "applied_control": AppliedControl,
         "policy": Policy,
+        "security_exception": SecurityException,
+        "risk_acceptance": RiskAcceptance,
         "project": Project,
         "responsibility_matrix": ResponsibilityMatrix,
     }
@@ -708,6 +714,34 @@ class PresetExecutor:
                 if item.get("status"):
                     data["status"] = item["status"]
                 serializer = PolicyWriteSerializer(data=data, context=context)
+                serializer.is_valid(raise_exception=True)
+                obj = serializer.save()
+
+            elif obj_type == "security_exception":
+                data = {
+                    "folder": str(folder.id),
+                    "name": name,
+                    "description": description,
+                }
+                if item.get("severity") is not None:
+                    data["severity"] = item["severity"]
+                if item.get("status"):
+                    data["status"] = item["status"]
+                serializer = SecurityExceptionWriteSerializer(
+                    data=data, context=context
+                )
+                serializer.is_valid(raise_exception=True)
+                obj = serializer.save()
+
+            elif obj_type == "risk_acceptance":
+                # Shell only: state defaults to "created"; approver and risk
+                # scenarios are linked by the user later.
+                data = {
+                    "folder": str(folder.id),
+                    "name": name,
+                    "description": description,
+                }
+                serializer = RiskAcceptanceWriteSerializer(data=data, context=context)
                 serializer.is_valid(raise_exception=True)
                 obj = serializer.save()
 

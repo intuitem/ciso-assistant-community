@@ -3,9 +3,7 @@ import { error, type NumericRange } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ fetch, url }) => {
-	const endpoint = `${BASE_API_URL}/journeys/${
-		url.searchParams ? '?' + url.searchParams.toString() : ''
-	}`;
+	const endpoint = `${BASE_API_URL}/journeys/${url.search || ''}`;
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {

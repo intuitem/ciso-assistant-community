@@ -17,6 +17,8 @@ ALLOWED_SCAFFOLD_TYPES = {
     "risk_assessment",
     "applied_control",
     "policy",
+    "security_exception",
+    "risk_acceptance",
     "entity",
     "project",
     "responsibility_matrix",
@@ -26,6 +28,15 @@ ALLOWED_SCAFFOLD_TYPES = {
 APPLIED_CONTROL_CATEGORIES = {"policy", "process", "technical", "physical", "procedure"}
 CSF_FUNCTIONS = {"govern", "identify", "protect", "detect", "respond", "recover"}
 APPLIED_CONTROL_PRIORITIES = {1, 2, 3, 4}
+SECURITY_EXCEPTION_SEVERITIES = {-1, 0, 1, 2, 3, 4}
+SECURITY_EXCEPTION_STATUSES = {
+    "draft",
+    "in_review",
+    "approved",
+    "resolved",
+    "expired",
+    "deprecated",
+}
 PROJECT_KINDS = {"portfolio", "program", "project"}
 RESPONSIBILITY_MATRIX_PRESETS = {"raci", "rasci", "rapid", "custom"}
 
@@ -254,6 +265,29 @@ def _validate_scaffolds(scaffolds: list, strict: bool = True) -> tuple[list, set
                         {f"scaffolded_objects[{i}].priority": "Must be 1, 2, 3 or 4."}
                     )
                 normalized["priority"] = priority
+        elif scaffold_type == "security_exception":
+            severity = item.get("severity")
+            if severity is not None:
+                if severity not in SECURITY_EXCEPTION_SEVERITIES:
+                    raise ValidationError(
+                        {
+                            f"scaffolded_objects[{i}].severity": (
+                                f"Must be one of: {sorted(SECURITY_EXCEPTION_SEVERITIES)}."
+                            )
+                        }
+                    )
+                normalized["severity"] = severity
+            status = item.get("status")
+            if status:
+                if status not in SECURITY_EXCEPTION_STATUSES:
+                    raise ValidationError(
+                        {
+                            f"scaffolded_objects[{i}].status": (
+                                f"Must be one of: {sorted(SECURITY_EXCEPTION_STATUSES)}."
+                            )
+                        }
+                    )
+                normalized["status"] = status
         elif scaffold_type == "project":
             kind = item.get("kind")
             if kind:

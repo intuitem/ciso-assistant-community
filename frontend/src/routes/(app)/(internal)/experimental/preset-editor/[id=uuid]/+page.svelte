@@ -19,6 +19,7 @@
 		category?: string;
 		csf_function?: string;
 		priority?: number;
+		severity?: number;
 		asset_type?: string;
 		kind?: string;
 		matrix_preset?: string;
@@ -58,6 +59,8 @@
 		asset: 'assets',
 		applied_control: 'applied-controls',
 		policy: 'policies',
+		security_exception: 'security-exceptions',
+		risk_acceptance: 'risk-acceptances',
 		project: 'projects',
 		responsibility_matrix: 'responsibility-matrices'
 	};
@@ -75,9 +78,7 @@
 		'actors',
 		'evidences',
 		'incidents',
-		'metric-instances',
-		'risk-acceptances',
-		'security-exceptions'
+		'metric-instances'
 	];
 	const ALL_MODELS = ['', ...NAV_ONLY_MODELS, ...Object.values(TYPE_TO_MODEL)].sort((a, b) =>
 		a.localeCompare(b)
@@ -89,6 +90,13 @@
 		{ value: 'PR', labelKey: 'primary' }
 	];
 	const APPLIED_CONTROL_CATEGORIES = ['policy', 'process', 'technical', 'physical', 'procedure'];
+	const SECURITY_EXCEPTION_SEVERITIES = [
+		{ value: 0, labelKey: 'info' },
+		{ value: 1, labelKey: 'low' },
+		{ value: 2, labelKey: 'medium' },
+		{ value: 3, labelKey: 'high' },
+		{ value: 4, labelKey: 'critical' }
+	];
 	const PROJECT_KINDS = ['portfolio', 'program', 'project'];
 	const MATRIX_PRESETS = ['raci', 'rasci', 'rapid', 'custom'];
 
@@ -684,6 +692,23 @@
 			>
 				{#each MATRIX_PRESETS as p (p)}
 					<option value={p}>{p.toUpperCase()}</option>
+				{/each}
+			</select>
+		</label>
+	{:else if scaffold.type === 'security_exception'}
+		<label class="flex flex-col gap-1 text-sm">
+			<span class="text-xs text-surface-600-400">Severity</span>
+			<select
+				class="text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+				value={scaffold.severity === undefined ? '' : String(scaffold.severity)}
+				onchange={(e) => {
+					const v = (e.target as HTMLSelectElement).value;
+					updateScaffoldByIndex(idx, { severity: v === '' ? undefined : Number(v) });
+				}}
+			>
+				<option value="">Undefined</option>
+				{#each SECURITY_EXCEPTION_SEVERITIES as s (s.value)}
+					<option value={String(s.value)}>{safeTranslate(s.labelKey)}</option>
 				{/each}
 			</select>
 		</label>
