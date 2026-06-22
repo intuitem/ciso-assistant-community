@@ -139,6 +139,8 @@ router.register(r"answers", AnswerViewSet, basename="answers")
 router.register(r"presets", PresetViewSet, basename="presets")
 router.register(r"journeys", JourneyViewSet, basename="journeys")
 router.register(r"journey-steps", JourneyStepViewSet, basename="journey-steps")
+router.register(r"portal-templates", PortalTemplateViewSet, basename="portal-templates")
+router.register(r"portals", PortalViewSet, basename="portals")
 
 ROUTES = settings.ROUTES
 MODULES = settings.MODULES.values()

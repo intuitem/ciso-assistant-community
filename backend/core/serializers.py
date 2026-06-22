@@ -4586,6 +4586,88 @@ class PresetJourneyWriteSerializer(BaseModelSerializer):
         fields = ["name", "description"]
 
 
+class PortalItemReadSerializer(BaseModelSerializer):
+    title = serializers.CharField(source="get_title_translated")
+    description = serializers.CharField(
+        source="get_description_translated", allow_blank=True
+    )
+
+    class Meta:
+        model = PortalItem
+        fields = ["id", "order", "icon", "title", "description", "kind", "target"]
+
+
+class PortalSectionReadSerializer(BaseModelSerializer):
+    title = serializers.CharField(source="get_title_translated")
+    items = PortalItemReadSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = PortalSection
+        fields = ["id", "order", "title", "description", "items"]
+
+
+class PortalTemplateReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    is_user_authored = serializers.SerializerMethodField()
+    sections = PortalSectionReadSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = PortalTemplate
+        fields = [
+            "id",
+            "name",
+            "description",
+            "urn",
+            "ref_id",
+            "version",
+            "provider",
+            "translations",
+            "status",
+            "folder",
+            "is_user_authored",
+            "sections",
+            "created_at",
+            "updated_at",
+        ]
+
+    def get_is_user_authored(self, obj) -> bool:
+        return obj.urn is None
+
+
+class PortalTemplateWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = PortalTemplate
+        fields = ["name", "description", "folder", "translations", "status"]
+
+
+class PortalReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    template = FieldsRelatedField(["id", "name", "urn", "version", "status"])
+    audience_groups = FieldsRelatedField(many=True)
+
+    class Meta:
+        model = Portal
+        fields = "__all__"
+
+
+class PortalWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Portal
+        fields = [
+            "name",
+            "description",
+            "folder",
+            "template",
+            "slug",
+            "enabled",
+            "is_public",
+            "audience_groups",
+            "is_default",
+            "priority",
+            "branding",
+        ]
+
+
 class QuickStartSerializer(serializers.Serializer):
     folder = serializers.UUIDField(required=False)
     audit_name = serializers.CharField()

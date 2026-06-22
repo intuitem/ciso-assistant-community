@@ -12527,6 +12527,87 @@ class JourneyStepViewSet(BaseModelViewSet):
     search_fields = ["title", "description"]
 
 
+class PortalTemplateViewSet(BaseModelViewSet):
+    model = PortalTemplate
+    filterset_fields = ["folder", "status", "provider"]
+    search_fields = ["name", "description", "ref_id", "urn"]
+
+    def _reject_if_library_backed(self):
+        if self.get_object().urn is not None:
+            return Response(
+                {"detail": "Library-backed templates are read-only. Duplicate first."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return None
+
+    def update(self, request, *args, **kwargs):
+        return self._reject_if_library_backed() or super().update(
+            request, *args, **kwargs
+        )
+
+    def partial_update(self, request, *args, **kwargs):
+        return self._reject_if_library_backed() or super().partial_update(
+            request, *args, **kwargs
+        )
+
+    def destroy(self, request, *args, **kwargs):
+        return self._reject_if_library_backed() or super().destroy(
+            request, *args, **kwargs
+        )
+
+
+class PortalViewSet(BaseModelViewSet):
+    model = Portal
+    filterset_fields = ["folder", "template", "is_public", "is_default", "enabled"]
+    search_fields = ["name", "description", "slug"]
+
+    def _entitled_queryset(self, request):
+        """Portals the current user may see: enabled, and either targeted at one of
+        the user's groups, untargeted (visible to all), public, or the default.
+        Audience entitlement is the access control here, so this intentionally
+        bypasses IAM folder scoping (like the dashboard endpoints)."""
+        groups = request.user.user_groups.all()
+        return (
+            Portal.objects.filter(enabled=True)
+            .filter(
+                Q(audience_groups__in=groups)
+                | Q(audience_groups__isnull=True)
+                | Q(is_public=True)
+                | Q(is_default=True)
+            )
+            .distinct()
+            .order_by("priority", "name")
+        )
+
+    @action(detail=False, methods=["get"])
+    def mine(self, request):
+        portals = self._entitled_queryset(request)
+        return Response(
+            [{"id": str(p.id), "slug": p.slug, "name": p.name} for p in portals]
+        )
+
+    @action(detail=False, methods=["get"])
+    def content(self, request):
+        slug = request.query_params.get("slug")
+        portal = self._entitled_queryset(request).filter(slug=slug).first()
+        if portal is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        from core.serializers import PortalSectionReadSerializer
+
+        sections = PortalSectionReadSerializer(
+            portal.template.sections.all(), many=True
+        ).data
+        return Response(
+            {
+                "id": str(portal.id),
+                "slug": portal.slug,
+                "name": portal.name,
+                "branding": portal.branding,
+                "sections": sections,
+            }
+        )
+
+
 class OrganisationObjectiveViewSet(BaseModelViewSet):
     model = OrganisationObjective
 
