@@ -1,0 +1,1264 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:ecc-2-2024
+locale: en
+ref_id: ecc-2-2024
+name: Essential Cybersecurity Controls (ECC-2:2024)
+description: 'NCA Essential Cybersecurity Controls (ECC-2:2024), the updated edition
+  of the National Cybersecurity Authority''s flagship cybersecurity framework for
+  the Kingdom of Saudi Arabia. 4 main domains / 28 subdomains / 108 controls. Each
+  subdomain carries its official objective; subcontrols are folded into their parent
+  control. Reference: https://nca.gov.sa'
+copyright: "\xA9 NCA"
+version: 1
+publication_date: 2026-06-22
+provider: NCA
+packager: community
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:ecc-2-2024
+    ref_id: ecc-2-2024
+    name: Essential Cybersecurity Controls (ECC-2:2024)
+    description: NCA Essential Cybersecurity Controls (ECC-2:2024). 4 main domains,
+      28 subdomains, 108 controls. The 2024 edition supersedes ECC-1:2018.
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1
+      assessable: false
+      depth: 1
+      ref_id: '1'
+      name: Cybersecurity Governance
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1
+      ref_id: 1-1
+      name: Cybersecurity Strategy
+      description: To ensure that the action plans, objectives, initiatives, and projects
+        of the entity contribute to compliance with the relevant legislative and regulatory
+        requirements.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-1-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-1
+      ref_id: 1-1-1
+      description: "The cybersecurity strategy of the entity shall be identified,\
+        \ documented, and approved, and it shall be supported by the head of the entity\
+        \ or his/her delegate (Hereinafter referred to as the \u201CAuthorized Official\u201D\
+        ). The strategy goals shall be in line with the relevant legislative and regulatory\
+        \ requirements."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-1-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-1
+      ref_id: 1-1-2
+      description: The entity shall execute an action plan to apply the cybersecurity
+        strategy.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-1-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-1
+      ref_id: 1-1-3
+      description: The cybersecurity strategy shall be reviewed at planned intervals
+        (or in case of changes to the relevant legislative and regulatory requirements).
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1
+      ref_id: 1-2
+      name: Cybersecurity Management
+      description: To ensure that the Authorized Official of the entity complies with
+        and supports the implementation and management of cybersecurity programs within
+        the entity, as per the relevant legislative and regulatory requirements.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-2-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-2
+      ref_id: 1-2-1
+      description: A department for cybersecurity shall be established within the
+        entity. This department shall be independent from the Information Technology
+        and Communications Department (As per High Order No. 37140, dated 14/08/1438H.).
+        It is recommended that the Cybersecurity Department reports directly to the
+        head of the entity or his/her delegate while ensuring that this does not result
+        in a conflict of interests.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-2-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-2
+      ref_id: 1-2-2
+      description: All cybersecurity positions shall be filled out with full-time
+        and qualified Saudi cybersecurity professionals.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-2-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-2
+      ref_id: 1-2-3
+      description: "A cybersecurity supervisory committee shall be established pursuant\
+        \ to the instruction of the entity\u2019s Authorized Official to ensure compliance\
+        \ with, support for, and monitoring of the implementation of the cybersecurity\
+        \ programs and regulations. The committee\u2019s members, responsibilities,\
+        \ and governance framework shall be identified, documented, and approved.\
+        \ The committee shall include the head of the cybersecurity department as\
+        \ a member. It is recommended that the committee reports directly to the head\
+        \ of the entity or his/her delegate while ensuring that this does not result\
+        \ in a conflict of interests."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1
+      ref_id: 1-3
+      name: Cybersecurity Policies and Procedures
+      description: "To ensure that the cybersecurity requirements and the entity\u2019\
+        s compliance therewith are documented and communicated, as per the entity\u2019\
+        s regulatory requirements and the relevant legislative and regulatory requirements."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-3-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-3
+      ref_id: 1-3-1
+      description: "The cybersecurity department of the entity shall identify and\
+        \ document cybersecurity policies and procedures, including the cybersecurity\
+        \ controls and requirements, and have them approved by the entity\u2019s Authorized\
+        \ Official, and communicate them to the relevant personnel and parties inside\
+        \ the entity."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-3-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-3
+      ref_id: 1-3-2
+      description: The cybersecurity department shall ensure that the cybersecurity
+        policies and procedures, including the relevant controls and requirements,
+        are implemented at the entity.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-3-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-3
+      ref_id: 1-3-3
+      description: The cybersecurity policies and procedures shall be supported by
+        technical security standards (e.g. technical security standards for firewall,
+        databases, operating systems, etc.).
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-3-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-3
+      ref_id: 1-3-4
+      description: The cybersecurity policies and procedures shall be reviewed and
+        updated at planned intervals (or in case of changes to the relevant legislative
+        and regulatory requirements and standards). Changes shall be documented and
+        approved.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1
+      ref_id: 1-4
+      name: Cybersecurity Roles and Responsibilities
+      description: To ensure that roles and responsibilities are clearly defined for
+        all parties participating in implementing the cybersecurity controls within
+        the entity.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-4-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-4
+      ref_id: 1-4-1
+      description: "The Authorized Official shall identify, document, and approve\
+        \ the governance organizational structure, roles, and responsibilities of\
+        \ the entity\u2019s cybersecurity, and assign the persons concerned therewith.\
+        \ The necessary support shall be provided for the implementation thereof while\
+        \ ensuring that this does not result in a conflict of interests."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-4-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-4
+      ref_id: 1-4-2
+      description: The cybersecurity roles and responsibilities within the entity
+        shall be reviewed and updated at planned intervals (or in case of changes
+        to the relevant legislative and regulatory requirements).
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1
+      ref_id: 1-5
+      name: Cybersecurity Risk Management
+      description: "To ensure managing cybersecurity risks in a methodological approach,\
+        \ in order to protect the entity\u2019s information and technology assets,\
+        \ as per the entity\u2019s regulatory policies and procedures and the relevant\
+        \ legislative and regulatory requirements."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-5-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-5
+      ref_id: 1-5-1
+      description: The cybersecurity department of the entity shall identify, document,
+        and approve the cybersecurity risk management methodology and procedures within
+        the entity, in accordance with considerations of confidentiality, and the
+        integrity and availability of information and technology assets.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-5-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-5
+      ref_id: 1-5-2
+      description: The cybersecurity department shall implement the cybersecurity
+        risk management methodology and procedures within the entity.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-5-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-5
+      ref_id: 1-5-3
+      description: 'The cybersecurity risk assessment procedures shall be implemented
+        at least in the following cases: (1) At early stage of technology projects.
+        (2) Before making major changes to technology infrastructure. (3) During planning
+        to obtain third party services. (4) During planning and before the release
+        of new technology services and products.'
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-5-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-5
+      ref_id: 1-5-4
+      description: The cybersecurity risk management methodology and procedures shall
+        be reviewed and updated at planned intervals (or in case of changes to the
+        relevant legislative and regulatory requirements and standards). Changes shall
+        be documented and approved.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1
+      ref_id: 1-6
+      name: Cybersecurity in Information and Technology Project Management
+      description: "To ensure that cybersecurity requirements are included in the\
+        \ methodology and procedures of the entity\u2019s project management, in order\
+        \ to protect the confidentiality, integrity, accuracy, and availability of\
+        \ the entity\u2019s information and technology assets, as per the entity\u2019\
+        s regulatory policies and procedures and the relevant legislative and regulatory\
+        \ requirements."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-6-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-6
+      ref_id: 1-6-1
+      description: Cybersecurity requirements shall be included in the project management
+        methodology and procedures and in the information and technology asset change
+        management within the entity to ensure identifying and managing cybersecurity
+        risks as part of the technology project lifecycle. The cybersecurity requirements
+        shall be a key part of the requirements for technology projects.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-6-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-6
+      ref_id: 1-6-2
+      description: 'The cybersecurity requirements for project management and information
+        and technology asset changes within the entity shall include the following
+        as a minimum: (1) Vulnerability assessment and remediation. (2) Reviewing
+        secure configuration and hardening and updates packages before launching projects
+        and changes.'
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-6-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-6
+      ref_id: 1-6-3
+      description: 'The cybersecurity requirements for software and application development
+        projects within the entity shall include the following as a minimum: (1) Using
+        the secure coding standards. (2) Using trusted and licensed sources for software
+        development tools and libraries. (3) Conducting compliance test for software
+        against the cybersecurity requirements within the entity. (4) Secure integration
+        between applications. (5) Reviewing secure configuration and hardening and
+        updates packages before launching software products'
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-6-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-6
+      ref_id: 1-6-4
+      description: The cybersecurity requirements for project management within the
+        entity shall be periodically reviewed.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1
+      ref_id: 1-7
+      name: Compliance with Cybersecurity Standards, Laws and Regulations
+      description: "To ensure that the entity\u2019s cybersecurity program complies\
+        \ with the relevant legislative and regulatory requirements."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-7-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-7
+      ref_id: 1-7-1
+      description: If there are nationally approved international agreements or commitments
+        that include cybersecurity requirements, the entity shall identify and comply
+        with these requirements.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1
+      ref_id: 1-8
+      name: Periodical Cybersecurity Review and Audit
+      description: "To ensure that the cybersecurity controls adopted by the entity\
+        \ are implemented and applicable in accordance with the entity\u2019s regulatory\
+        \ policies and procedures, relevant national legislative and regulatory requirements,\
+        \ and international requirements imposed on the entity by law."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-8-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-8
+      ref_id: 1-8-1
+      description: The cybersecurity department of the entity shall periodically review
+        the implementation of cybersecurity controls by the entity.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-8-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-8
+      ref_id: 1-8-2
+      description: The implementation of cybersecurity controls by the entity shall
+        be reviewed and audited by parties other than the cybersecurity department
+        at the entity, provided that the audit and review are to be conducted independently
+        while considering the principle of conflict of interest, as per the Generally
+        Accepted Auditing Standards (GAAS) and the relevant legislative and regulatory
+        requirements.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-8-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-8
+      ref_id: 1-8-3
+      description: The results of cybersecurity audits and reviews shall be documented
+        and presented to the cybersecurity supervisory committee and the Authorized
+        Official. Results shall include the audit and review scope, observations,
+        recommendations, corrective actions, and remediation plans.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1
+      ref_id: 1-9
+      name: Cybersecurity in Human Resources
+      description: "To ensure that cybersecurity risks and requirements for personnel\
+        \ (employees and contractors) of the entity are managed efficiently prior\
+        \ to, during, and upon the end or termination of their employment, as per\
+        \ the entity\u2019s regulatory policies and procedures and the relevant legislative\
+        \ and regulatory requirements."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-9-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-9
+      ref_id: 1-9-1
+      description: Cybersecurity requirements for personnel of the entity shall be
+        identified, documented, and approved prior to, during, and upon the end or
+        termination of their employment.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-9-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-9
+      ref_id: 1-9-2
+      description: Cybersecurity requirements for personnel of the entity shall be
+        implemented.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-9-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-9
+      ref_id: 1-9-3
+      description: "Cybersecurity requirements prior to the commencement of the employment\
+        \ relationship between personnel and the entity shall include the following\
+        \ as a minimum: (1) Incorporating the personnel\u2019s cybersecurity responsibilities\
+        \ clauses and nondisclosure clauses in their employment contracts with the\
+        \ entity (including during and after employment end/termination with the entity).\
+        \ (2) Conducting screening or vetting for personnel in cybersecurity positions\
+        \ and technical positions with critical and privileged powers."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-9-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-9
+      ref_id: 1-9-4
+      description: "Cybersecurity requirements for personnel during their employment\
+        \ relationship with the entity shall include the following as a minimum: (1)\
+        \ Cybersecurity awareness (during on-boarding and during employment). (2)\
+        \ Implementation and compliance with cybersecurity requirements, as per the\
+        \ entity\u2019s cybersecurity policies, procedures, and operations."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-9-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-9
+      ref_id: 1-9-5
+      description: "The personnel\u2019s powers shall be reviewed and revoked immediately\
+        \ upon the end/termination of their employment with the entity."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-9-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-9
+      ref_id: 1-9-6
+      description: Cybersecurity requirements for personnel of the entity shall be
+        periodically reviewed.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1
+      ref_id: 1-10
+      name: Cybersecurity Awareness and Training Program
+      description: "To ensure that the entity\u2019s personnel have the required security\
+        \ awareness, are aware of their cybersecurity responsibilities, and are equipped\
+        \ with the required cybersecurity skills, qualifications, and training courses\
+        \ in order to protect the entity\u2019s information and technology assets\
+        \ and fulfill their cybersecurity duties."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-10-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-10
+      ref_id: 1-10-1
+      description: A cybersecurity awareness program, delivered through multiple channels,
+        shall be periodically developed and approved by the entity to strengthen the
+        awareness about cybersecurity, cyber threats, and risks, and to build a positive
+        cybersecurity awareness culture.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-10-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-10
+      ref_id: 1-10-2
+      description: The approved cybersecurity awareness program shall be implemented
+        within the entity.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-10-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-10
+      ref_id: 1-10-3
+      description: 'The cybersecurity awareness program shall include how to protect
+        the entity against the most important and latest cyber risks and threats,
+        including: (1) Secure handling of email services, especially phishing emails.
+        (2) Secure handling of mobile devices and storage media. (3) Secure Internet
+        browsing. (4) Secure usage of social media.'
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-10-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-10
+      ref_id: 1-10-4
+      description: 'Specialized skills and necessary training shall be provided to
+        personnel in positions that are linked directly to cybersecurity within the
+        entity. Such skills and training shall be classified in line with their cybersecurity
+        responsibilities, including: (1) Cybersecurity department personnel. (2) Personnel
+        working on software/application development and those working on information
+        and technology assets of the entity. (3) Executive and supervisory positions.'
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:1-10-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:1-10
+      ref_id: 1-10-5
+      description: The implementation of cybersecurity awareness program within the
+        entity shall be periodically reviewed.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: Cybersecurity Defense
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2
+      ref_id: 2-1
+      name: Asset Management
+      description: "To ensure that the entity has an accurate and updated inventory\
+        \ of assets, including details of all information and technology assets of\
+        \ the entity, in order to support the entity\u2019s operations and cybersecurity\
+        \ requirements to maintain the confidentiality, integrity, accuracy, and availability\
+        \ of information and technology assets of the entity."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-1-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-1
+      ref_id: 2-1-1
+      description: Cybersecurity requirements for managing information and technology
+        assets of the entity shall be identified, documented, and approved.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-1-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-1
+      ref_id: 2-1-2
+      description: Cybersecurity requirements for managing information and technology
+        assets of the entity shall be implemented.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-1-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-1
+      ref_id: 2-1-3
+      description: The policy of acceptable use of information and technology assets
+        of the entity shall be identified, documented, approved, and communicated.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-1-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-1
+      ref_id: 2-1-4
+      description: The policy of acceptable use of information and technology assets
+        of the entity shall be implemented.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-1-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-1
+      ref_id: 2-1-5
+      description: Information and technology assets of the entity shall be classified,
+        labeled, and handled as per the relevant legislative and regulatory requirements.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-1-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-1
+      ref_id: 2-1-6
+      description: Cybersecurity requirements for managing information and technology
+        assets of the entity shall be periodically reviewed.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2
+      ref_id: 2-2
+      name: Identity and Access Management
+      description: To ensure protecting cybersecurity of logical access to information
+        and technology assets of the entity, in order to prevent unauthorized access
+        and restrict access to the extent necessary for accomplishment of the assigned
+        tasks of the entity.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-2-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-2
+      ref_id: 2-2-1
+      description: Cybersecurity requirements for identity and access management of
+        the entity shall be identified, documented, and approved.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-2-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-2
+      ref_id: 2-2-2
+      description: Cybersecurity requirements for identity and access management of
+        the entity shall be implemented.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-2-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-2
+      ref_id: 2-2-3
+      description: 'Cybersecurity requirements for identity and access management
+        of the entity shall include the following as a minimum: (1) Single-factor
+        authentication based on username and password. (2) Multi-factor authentication,
+        and defining the suitable authentication factors and their numbers as well
+        as the suitable authentication techniques based on the result of impact assessment
+        of authentication failure and bypass for remote access and for privileged
+        accounts. (3) User authorization based on identity and access control principles
+        (Need-to- Know and Need-to-Use principle, Least Privilege principle, and Segregation
+        of Duties principle). (4) Privileged access management. (5) Periodic review
+        of identities and access rights.'
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-2-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-2
+      ref_id: 2-2-4
+      description: The implementation of cybersecurity requirements for identity and
+        access management of the entity shall be periodically reviewed.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2
+      ref_id: 2-3
+      name: Information System and Processing Facilities Protection
+      description: To ensure the protection of information systems and processing
+        facilities, including workstations and infrastructures of the entity, against
+        cyber risks.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-3-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-3
+      ref_id: 2-3-1
+      description: Cybersecurity requirements for protection of information system
+        and processing facilities of the entity shall be identified, documented, and
+        approved.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-3-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-3
+      ref_id: 2-3-2
+      description: Cybersecurity requirements for protection of information systems
+        and processing facilities of the entity shall be implemented.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-3-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-3
+      ref_id: 2-3-3
+      description: 'Cybersecurity requirements for protection of information systems
+        and processing facilities of the entity shall include the following as a minimum:
+        (1) Protection from viruses, suspicious programs and activities, and malware
+        on workstations and servers, using modern and advanced protection technologies
+        and mechanisms, and securely managing them. (2) Strict restriction on the
+        use of external storage media and their security. (3) Patch management for
+        systems, applications, and devices. (4) Centralized clock synchronization
+        with an accurate and trusted source, such as sources provided by the Saudi
+        Standards, Metrology and Quality Organization (SASO).'
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-3-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-3
+      ref_id: 2-3-4
+      description: The implementation of cybersecurity requirements for protection
+        of the information system and processing facilities of the entity shall be
+        periodically reviewed.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2
+      ref_id: 2-4
+      name: Email Protection
+      description: "To ensure the protection of the entity\u2019s email service against\
+        \ cyber risks."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-4-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-4
+      ref_id: 2-4-1
+      description: Cybersecurity requirements for protection of the email service
+        of the entity shall be identified, documented, and approved.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-4-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-4
+      ref_id: 2-4-2
+      description: Cybersecurity requirements for protection of email service of the
+        entity shall be implemented.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-4-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-4
+      ref_id: 2-4-3
+      description: "Cybersecurity requirements for protection of the email service\
+        \ of the entity shall include the following as a minimum: (1) Analyzing and\
+        \ filtering email messages (specifically phishing emails and spam emails)\
+        \ using modern and advanced email protection techniques and mechanisms. (2)\
+        \ Multi-factor authentication, and defining the suitable authentication factors\
+        \ and their numbers as well as the suitable authentication techniques based\
+        \ on the result of impact assessment of authentication failure and bypass\
+        \ for remote and webmail access. (3) Email archiving and backup. (4) Secure\
+        \ management and protection against Advanced Persistent Threats (APT), which\
+        \ normally utilize zero-day malware and viruses. (5) Validation of the entity\u2019\
+        s email service domains by using Sender Policy Framework (SPF), Domain Keys\
+        \ Identified Mail (DKIM), and Domain Message Authentication Reporting and\
+        \ Conformance (DMARC)."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-4-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-4
+      ref_id: 2-4-4
+      description: The implementation of cybersecurity requirements for email service
+        of the entity shall be periodically reviewed.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2
+      ref_id: 2-5
+      name: Networks Security Management
+      description: "To ensure the protection of entity\u2019s networks against cyber\
+        \ risks."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-5-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-5
+      ref_id: 2-5-1
+      description: "Cybersecurity requirements for the entity\u2019s network security\
+        \ management shall be identified, documented, and approved."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-5-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-5
+      ref_id: 2-5-2
+      description: "Cybersecurity requirements for the entity\u2019s network security\
+        \ management shall be implemented."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-5-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-5
+      ref_id: 2-5-3
+      description: "Cybersecurity requirements for the entity\u2019s network security\
+        \ management shall include the following as a minimum: (1) Logical or physical\
+        \ isolation and segmentation of network segments in a secure manner which\
+        \ is required to control relevant cybersecurity risks, using firewall and\
+        \ defense-in-depth principle. (2) Isolation of production network from testing\
+        \ and development environment networks. (3) Secure browsing and internet connectivity,\
+        \ including strict restrictions on suspicious websites, file storage/sharing\
+        \ websites, and remote access websites. (4) Wireless network security and\
+        \ protection using secure authentication and encryption techniques and avoiding\
+        \ the connection of wireless networks to the entity\u2019s internal network,\
+        \ except after a comprehensive assessment of subsequent risks, with handling\
+        \ them in a way that protects the technology assets of the entity. (5) Restricting\
+        \ and managing network services, protocols, and ports. (6) Intrusion Prevention\
+        \ Systems (IPS). (7) Security of Domain Name Service (DNS). (8) Secure management\
+        \ and protection of Internet browsing channel against Advanced Persistent\
+        \ Threats (APT), which normally utilize zero-day malware and viruses. (9)\
+        \ Protecting against Distributed Denial of Service (DDoS) attacks to limit\
+        \ risks arising from these attacks."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-5-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-5
+      ref_id: 2-5-4
+      description: "The implementation of cybersecurity requirements for the entity\u2019\
+        s network security management shall be periodically reviewed."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2
+      ref_id: 2-6
+      name: Mobile Devices Security
+      description: "To ensure the protection of the entity\u2019s mobile devices (including\
+        \ laptops, smartphones, and tablets) against cyber risks, and ensure secure\
+        \ handling of the entity\u2019s sensitive information and business information\
+        \ and protecting them during transfer and storage while using the devices\
+        \ of personnel of the entity (Bring Your Own Device \"BYOD\u201D policy)."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-6-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-6
+      ref_id: 2-6-1
+      description: "Cybersecurity requirements for mobile devices and BYOD security\
+        \ when connected to the entity\u2019s network shall be identified, documented,\
+        \ and approved."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-6-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-6
+      ref_id: 2-6-2
+      description: Cybersecurity requirements for mobile devices and BYOD security
+        of the entity shall be implemented.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-6-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-6
+      ref_id: 2-6-3
+      description: "Cybersecurity requirements for mobile devices and BYOD security\
+        \ of the entity shall include the following as a minimum: (1) Separation and\
+        \ encryption of the entity\u2019s data and information stored on mobile devices\
+        \ and BYODs. (2) Controlled and restricted use based on the requirements of\
+        \ the interest of the entity's business. (3) Deletion of the entity\u2019\
+        s data and information stored on mobile devices and BYOD in cases of device\
+        \ loss or after the ending/termination of employment with the entity. (4)\
+        \ Security awareness for users."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-6-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-6
+      ref_id: 2-6-4
+      description: The implementation of cybersecurity requirements for mobile devices
+        and BYOD security of the entity shall be periodically reviewed.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2
+      ref_id: 2-7
+      name: Data and Information Protection
+      description: "To ensure confidentiality, integrity, accuracy, and availability\
+        \ of the entity\u2019s data and information, as per the entity\u2019s regulatory\
+        \ policies and procedures and the relevant legislative and regulatory requirements"
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-7-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-7
+      ref_id: 2-7-1
+      description: Cybersecurity requirements for protecting and handling data and
+        information of the entity shall be identified, documented, and approved, as
+        per the relevant legislative and regulatory requirements.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-7-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-7
+      ref_id: 2-7-2
+      description: Cybersecurity requirements for protecting data and information
+        of the entity shall be implemented, based on its classification level.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-7-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-7
+      ref_id: 2-7-3
+      description: The implementation of cybersecurity requirements for protecting
+        data and information of the entity shall be periodically reviewed.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2
+      ref_id: 2-8
+      name: Cryptography
+      description: "To ensure the proper and efficient use of cryptography to protect\
+        \ electronic information assets of the entity, as per the entity\u2019s regulatory\
+        \ policies and procedures and the relevant legislative and regulatory requirements."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-8-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-8
+      ref_id: 2-8-1
+      description: Cybersecurity requirements for cryptography within the entity shall
+        be identified, documented, and approved.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-8-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-8
+      ref_id: 2-8-2
+      description: Cybersecurity requirements for cryptography within the entity shall
+        be implemented.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-8-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-8
+      ref_id: 2-8-3
+      description: "Cybersecurity requirements for cryptography shall include at least\
+        \ the requirements in the National Cryptographic Standards, published by NCA.\
+        \ The appropriate cryptographic standard level shall be implemented based\
+        \ on the nature and sensitivity of the data, systems, and networks to be protected\
+        \ as well as the entity\u2019s risk assessment, and as per the relevant legislative\
+        \ and regulatory requirements, as follows: (1) Approved cryptographic systems\
+        \ and solutions standards and their technical and regulatory restrictions.\
+        \ (2) Secure management of cryptographic keys during their lifecycles. (3)\
+        \ Encryption of data in-transit and at-rest, as per their classification and\
+        \ the relevant legislative and regulatory requirements."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-8-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-8
+      ref_id: 2-8-4
+      description: The implementation of cybersecurity requirements for cryptography
+        within the entity shall be periodically reviewed.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2
+      ref_id: 2-9
+      name: Backup and Recovery Management
+      description: "To ensure the protection of the entity\u2019s data, information,\
+        \ and technical configurations of systems and applications against cyber risks,\
+        \ as per the entity\u2019s regulatory policies and procedures and the relevant\
+        \ legislative and regulatory requirements."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-9-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-9
+      ref_id: 2-9-1
+      description: Cybersecurity requirements for backup and recovery management within
+        the entity shall be identified, documented, and approved.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-9-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-9
+      ref_id: 2-9-2
+      description: Cybersecurity requirements for backup and recovery management within
+        the entity shall be implemented.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-9-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-9
+      ref_id: 2-9-3
+      description: 'Cybersecurity requirements for backup and recovery management
+        shall include the following as a minimum: (1) Scope of backups to cover critical
+        technology and information assets. (2) Ability to perform quick recovery of
+        data and systems after cybersecurity incidents. (3) Periodic testing for the
+        effectiveness of backup recovery.'
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-9-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-9
+      ref_id: 2-9-4
+      description: The implementation of cybersecurity requirements for backup and
+        recovery management within the entity shall be periodically reviewed.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2
+      ref_id: 2-10
+      name: Vulnerabilities Management
+      description: "To ensure timely detection and effective remediation of technical\
+        \ vulnerabilities to prevent or minimize the probability of exploitation of\
+        \ these vulnerabilities by cyber- attacks and to reduce any impacts on the\
+        \ entity\u2019s business."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-10-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-10
+      ref_id: 2-10-1
+      description: Cybersecurity requirements for technical vulnerabilities management
+        within the entity shall be identified, documented, and approved.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-10-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-10
+      ref_id: 2-10-2
+      description: Cybersecurity requirements for technical vulnerabilities management
+        within the entity shall be implemented.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-10-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-10
+      ref_id: 2-10-3
+      description: 'Cybersecurity requirements for technical vulnerabilities management
+        shall include the following as a minimum: (1) Periodic vulnerabilities assessment
+        and detection. (2) Vulnerabilities classification based on their severities.
+        (3) Vulnerabilities remediation based on their classification and the associated
+        cyber risks. (4) Patch management to remediate vulnerabilities, and ensuring
+        the integrity and effectiveness of these updates and fixes are verified using
+        a non-production environment before being applied. (5) Communication and subscription
+        with trusted resources for new and up-todate vulnerabilities.'
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-10-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-10
+      ref_id: 2-10-4
+      description: The implementation of cybersecurity requirements for technical
+        vulnerabilities management within the entity shall be periodically reviewed.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-11
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2
+      ref_id: 2-11
+      name: Penetration Testing
+      description: "To assess and test the efficiency of the entity\u2019s cybersecurity\
+        \ defense capabilities through simulation of actual cyber-attack methods and\
+        \ technologies to discover unknown weaknesses that may lead to cyber penetration\
+        \ of the entity, as per the relevant legislative and regulatory requirements."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-11-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-11
+      ref_id: 2-11-1
+      description: Cybersecurity requirements for penetration testing within the entity
+        shall be identified, documented, and approved.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-11-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-11
+      ref_id: 2-11-2
+      description: Cybersecurity requirements for penetration testing within the entity
+        shall be implemented.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-11-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-11
+      ref_id: 2-11-3
+      description: 'Cybersecurity requirements for penetration testing shall include
+        the following as a minimum: (1) Scope of penetration testing to include all
+        externally provided services (via the Internet) and their technical components,
+        including infrastructure, websites, web applications, smartphone and tablet
+        applications, email, and remote access. (2) Conducting penetration tests periodically.'
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-11-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-11
+      ref_id: 2-11-4
+      description: The implementation of cybersecurity requirements for penetration
+        testing shall be periodically reviewed.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-12
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2
+      ref_id: 2-12
+      name: Cybersecurity Event Logs and Monitoring Management
+      description: "To ensure timely collection, analysis, and monitoring of cybersecurity\
+        \ event logs for proactive detection and effective management of cyber-attacks\
+        \ to prevent or minimize negative impacts on the entity\u2019s business."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-12-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-12
+      ref_id: 2-12-1
+      description: Cybersecurity requirements for cybersecurity event logs and monitoring
+        management within the entity shall be identified, documented, and approved.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-12-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-12
+      ref_id: 2-12-2
+      description: Cybersecurity requirements for cybersecurity event logs and monitoring
+        management within the entity shall be implemented.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-12-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-12
+      ref_id: 2-12-3
+      description: 'Cybersecurity requirements for cybersecurity event logs and monitoring
+        management shall include the following as a minimum: (1) Activation of cybersecurity
+        event logs for critical information assets within the entity. (2) Activation
+        of cybersecurity event logs for critical and privileged accounts accessing
+        information assets as well as for remote access events within the entity.
+        (3) Identification of Security Information and Event Management (SIEM) techniques
+        required for cybersecurity event logs collection. (4) Continuous monitoring
+        of cybersecurity event logs. (5) Retention period of cybersecurity event logs
+        (shall be at least 12 months).'
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-12-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-12
+      ref_id: 2-12-4
+      description: The implementation of cybersecurity requirements for cybersecurity
+        event logs and monitoring management within the entity shall be periodically
+        reviewed.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-13
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2
+      ref_id: 2-13
+      name: Cybersecurity Incident and Threat Management
+      description: "To ensure timely identification, detection, and effective management\
+        \ of cybersecurity incidents and proactive response to cybersecurity threats\
+        \ to prevent or minimize impacts on the entity\u2019s business, as per High\
+        \ Order No. 37140, dated 14/08/1438H."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-13-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-13
+      ref_id: 2-13-1
+      description: Requirements for cybersecurity incident and threat management within
+        the entity shall be identified, documented, and approved.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-13-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-13
+      ref_id: 2-13-2
+      description: Requirements for cybersecurity incident and threat management within
+        the entity shall be implemented.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-13-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-13
+      ref_id: 2-13-3
+      description: 'Requirements for cybersecurity incident and threat management
+        shall include the following as a minimum: (1) Cybersecurity incident response
+        plans and escalation procedures. (2) Cybersecurity incident classification.
+        (3) Reporting cybersecurity incidents to the NCA. (4) Sharing cybersecurity
+        incident notifications, threat intelligence, penetration indicators, and incident
+        reports with the NCA. (5) Collecting and handling threat intelligence feeds.'
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-13-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-13
+      ref_id: 2-13-4
+      description: The implementation of cybersecurity requirements for incident and
+        threat management within the entity shall be periodically reviewed.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-14
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2
+      ref_id: 2-14
+      name: Physical Security
+      description: To ensure the protection of information and technology assets of
+        the entity against unauthorized physical access, loss, theft, and damage.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-14-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-14
+      ref_id: 2-14-1
+      description: Cybersecurity requirements for protection of information and technology
+        assets of the entity against unauthorized physical access, loss, theft, and
+        damage shall be identified, documented, and approved.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-14-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-14
+      ref_id: 2-14-2
+      description: Cybersecurity requirements for protection of information and technology
+        assets of the entity against unauthorized physical access, loss, theft, and
+        damage shall be implemented.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-14-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-14
+      ref_id: 2-14-3
+      description: "Cybersecurity requirements for protection of information and technology\
+        \ assets of the entity against unauthorized physical access, loss, theft,\
+        \ and damage shall include the following as a minimum: (1) Authorized access\
+        \ to critical areas within the entity (e.g. the entity\u2019s data center,\
+        \ disaster recovery center, critical information processing facilities, security\
+        \ surveillance center, network connection rooms, technical device and equipment\
+        \ supply areas, etc.). (2) Access and monitoring logs (CCTV). (3) Protection\
+        \ of access and monitoring log information. (4) Security of the destruction\
+        \ and re-use of physical assets that hold classified information (including\
+        \ paper documents and storage media). (5) Security of devices and equipment\
+        \ inside and outside the entity\u2019s facilities."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-14-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-14
+      ref_id: 2-14-4
+      description: Cybersecurity requirements for protection of information and technology
+        assets of the entity against unauthorized physical access, loss, theft, and
+        damage shall be periodically reviewed.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-15
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2
+      ref_id: 2-15
+      name: Web Application Security
+      description: To ensure the protection of external web applications of the entity
+        against cyber risks.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-15-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-15
+      ref_id: 2-15-1
+      description: Cybersecurity requirements for protection of external web applications
+        of the entity shall be identified, documented, and approved.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-15-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-15
+      ref_id: 2-15-2
+      description: Cybersecurity requirements for protection of external web applications
+        of the entity shall be implemented.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-15-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-15
+      ref_id: 2-15-3
+      description: "Cybersecurity requirements for protection of external web applications\
+        \ of the entity shall include the following as a minimum: (1) Use of web application\
+        \ firewall. (2) Adoption of the multi-tier architecture principle. (3) Use\
+        \ of secure protocols (e.g. HTTPS). (4) Clarification of the secure usage\
+        \ policy for users. (5) User authentication, and the suitable authentication\
+        \ factors and their numbers as well as the authentication techniques shall\
+        \ be defined based on the result of impact assessment of authentication failure\
+        \ and bypass for users\u2019 access."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:2-15-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:2-15
+      ref_id: 2-15-4
+      description: Cybersecurity requirements for protection of web applications of
+        the entity shall be periodically reviewed.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: Cybersecurity Resilience
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:3-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:3
+      ref_id: 3-1
+      name: Cybersecurity Resilience Aspects of Business Continuity Management
+      description: "To ensure the inclusion of cybersecurity resilience requirements\
+        \ in the entity\u2019s business continuity management and remediate and minimize\
+        \ the impacts of disruptions on the entity\u2019s critical e-services and\
+        \ information processing systems and facilities caused by cyber risks."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:3-1-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:3-1
+      ref_id: 3-1-1
+      description: Cybersecurity requirements for business continuity management within
+        the entity shall be identified, documented, and approved.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:3-1-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:3-1
+      ref_id: 3-1-2
+      description: Cybersecurity requirements for business continuity management within
+        the entity shall be implemented.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:3-1-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:3-1
+      ref_id: 3-1-3
+      description: "Cybersecurity requirements for business continuity management\
+        \ within the entity shall include the following as a minimum: (1) Ensuring\
+        \ the continuity of cybersecurity systems and procedures. (2) Developing plans\
+        \ for response to cybersecurity incidents that may affect the entity\u2019\
+        s business continuity. (3) Developing disaster recovery plans."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:3-1-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:3-1
+      ref_id: 3-1-4
+      description: Cybersecurity requirements for business continuity management within
+        the entity shall be periodically reviewed.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Third-Party and Cloud Computing Cybersecurity
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:4-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:4
+      ref_id: 4-1
+      name: Third-Party Cybersecurity
+      description: "To ensure the protection of the entity\u2019s assets against third-party\
+        \ cybersecurity risks (including Information Technology (IT) outsourcing,\
+        \ cybersecurity outsourcing, and managed services), as per the entity\u2019\
+        s regulatory policies and procedures and the relevant legislative and regulatory\
+        \ requirements."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:4-1-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:4-1
+      ref_id: 4-1-1
+      description: "Cybersecurity requirements for the entity\u2019s contracts and\
+        \ agreements with third parties shall be identified, documented, and approved."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:4-1-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:4-1
+      ref_id: 4-1-2
+      description: "Cybersecurity requirements for contracts and agreements with third\
+        \ parties, e.g. Service Level Agreement (SLA), which, if impaired, may affect\
+        \ the entity's data or services shall include the following as a minimum:\
+        \ (1) Clauses of non-disclosure and the secure removal of the entity\u2019\
+        s data by the third party upon the end of service. (2) Communication procedures\
+        \ in case of the occurrence of a cybersecurity incident. (3) Obligating the\
+        \ third party to apply the entity\u2019s cybersecurity requirements and policies\
+        \ and the relevant legislative and regulatory requirements."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:4-1-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:4-1
+      ref_id: 4-1-3
+      description: 'Cybersecurity requirements for contracts and agreements with third
+        parties providing IT or cybersecurity outsourcing or managed services shall
+        include the following as a minimum: (1) Conducting a cybersecurity risk assessment
+        and ensuring the availability of risk mitigation controls before signing contracts
+        and agreements or upon making changes to the relevant legislative and regulatory
+        requirements. (2) Cybersecurity managed service centers for monitoring and
+        operations which use remote access shall be fully located in the Kingdom of
+        Saudi Arabia.'
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:4-1-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:4-1
+      ref_id: 4-1-4
+      description: Cybersecurity requirements for third parties shall be periodically
+        reviewed.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:4-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:4
+      ref_id: 4-2
+      name: Cloud Computing and Hosting Cybersecurity
+      description: "To ensure proper and efficient remediation of cyber risks and\
+        \ implementation of cybersecurity requirements for cloud computing and hosting,\
+        \ as per the entity\u2019s regulatory policies and procedures, relevant legislative\
+        \ and regulatory requirements, orders, and decisions, and to ensure the protection\
+        \ of the entity\u2019s information and technology assets on cloud computing\
+        \ services hosted, processed, or managed by third parties."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:4-2-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:4-2
+      ref_id: 4-2-1
+      description: Cybersecurity requirements for use of cloud computing and hosting
+        services shall be identified, documented, and approved.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:4-2-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:4-2
+      ref_id: 4-2-2
+      description: Cybersecurity requirements for the cloud computing and hosting
+        services within the entity shall be implemented.
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:4-2-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:4-2
+      ref_id: 4-2-3
+      description: "In accordance with the relevant legislative and regulatory requirements,\
+        \ and in addition to the applicable controls in the Main Domains (1), (2),\
+        \ and (3) and Subdomain (4.1) that are necessary to protect the entity\u2019\
+        s data or services provided thereto, cybersecurity requirements for use of\
+        \ cloud computing and hosting services shall include the following as a minimum:\
+        \ (1) Protection of entity\u2019s data by cloud and hosting service providers\
+        \ in accordance with its classification level and returning data (in a usable\
+        \ format) upon service completion. (2) Separation of the entity\u2019s environment\
+        \ (especially virtual servers) from environments of other entities within\
+        \ the cloud computing service provider."
+    - urn: urn:intuitem:risk:req_node:ecc-2-2024:4-2-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ecc-2-2024:4-2
+      ref_id: 4-2-4
+      description: Cybersecurity requirements for cloud computing and hosting services
+        shall be periodically reviewed.
