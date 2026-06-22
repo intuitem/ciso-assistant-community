@@ -128,8 +128,7 @@ The dispatcher authenticates with a Personal Access Token (PAT) that you generat
 > [!IMPORTANT]
 > The token is tied to a CISO Assistant user and inherits their permissions. Issue it from a dedicated service account scoped to only what the dispatcher needs.
 
-> [!NOTE]
-> PATs are issued from an authenticated session, so MFA on the account stays effective. If the API returns `401`, the token is invalid or expired — generate a new PAT and update `USER_TOKEN`.
+PATs are issued from an authenticated session, so MFA on the account stays effective. If the API returns `401`, the token is invalid or expired — generate a new PAT and update `USER_TOKEN`.
 
 ### S3 storage configuration
 

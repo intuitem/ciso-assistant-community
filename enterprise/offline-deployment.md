@@ -166,6 +166,7 @@ AUDITLOG_MAX_RECORDS=50000
 
 # Allow outbound server-side requests (webhooks, integrations, chat LLM endpoints)
 # to target private/loopback addresses. Required for local LLMs (e.g. Ollama). Default False.
+# Renamed from WEBHOOK_ALLOW_PRIVATE_IPS; the old name is no longer recognized.
 # ALLOW_PRIVATE_NETWORK_REQUESTS=False
 
 # Logging

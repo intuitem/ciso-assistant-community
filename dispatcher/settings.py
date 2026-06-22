@@ -126,6 +126,7 @@ def init_config(y, interactive):
         access_token = click.prompt(
             "Enter the Personal Access Token used to authenticate the dispatcher to the CISO Assistant API.",
             hide_input=True,
+            show_default=False,
             default=os.getenv("USER_TOKEN", ""),
         )
 
