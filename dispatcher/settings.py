@@ -266,22 +266,12 @@ S3_ACCESS_KEY = config.get("s3_access_key", "")
 S3_SECRET_KEY = config.get("s3_secret_key", "")
 
 
-def get_access_token(token_file=".tmp.yaml", user_token=None):
-    """Retrieve the access token from environment or a temporary YAML file."""
+def get_access_token(user_token=None):
+    """Retrieve the access token (a Personal Access Token) from config or environment."""
     if user_token is None:
         user_token = config["credentials"].get("token")
     if user_token:
         return user_token
 
-    token_path = Path(token_file)
-    if token_path.exists():
-        try:
-            with token_path.open("r") as file:
-                auth_data = yaml.safe_load(file)
-            return auth_data.get("token")
-        except Exception as e:
-            logger.error(f"Error reading token file: {e}")
-            return None
-    else:
-        click.echo("Authentication data not found.", err=True)
-        return None
+    click.echo("No access token configured. Set USER_TOKEN.", err=True)
+    return None
