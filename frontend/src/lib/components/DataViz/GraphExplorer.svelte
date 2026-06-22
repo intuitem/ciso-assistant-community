@@ -419,7 +419,7 @@
 		<input
 			id="graph-search"
 			type="text"
-			class="w-full rounded-md border-surface-200-800 py-2.5 pe-10 shadow-xs"
+			class="w-full rounded-md border-surface-200-800 bg-surface-50-950 text-surface-900-100 py-2.5 pe-10 shadow-xs"
 			bind:value={searchQuery}
 			onkeydown={handleKeyDown}
 			placeholder={m.findANode()}

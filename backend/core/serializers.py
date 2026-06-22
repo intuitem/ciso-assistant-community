@@ -206,6 +206,11 @@ class BaseModelSerializer(serializers.ModelSerializer):
         model: models.Model
 
 
+# Imported after BaseModelSerializer to avoid a circular import:
+# custom_fields.serializers imports BaseModelSerializer from this module.
+from custom_fields.serializers import CustomFieldsSerializerMixin  # noqa: E402
+
+
 class ReferentialSerializer(BaseModelSerializer):
     name = serializers.CharField(source="get_name_translated")
     description = serializers.CharField(
@@ -524,6 +529,8 @@ class RiskAssessmentReadSerializer(AssessmentReadSerializer):
             "id",
             "ref_id",
             "status",
+            "request_notes",
+            "last_event_notes",
             {"approver": ["id", "email", "first_name", "last_name"]},
         ],
         source="validationflow_set",
@@ -571,7 +578,7 @@ class AssetCapabilityWriteSerializer(AssetCapabilityReadSerializer):
     pass
 
 
-class AssetWriteSerializer(BaseModelSerializer):
+class AssetWriteSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
     ebios_rm_studies = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=EbiosRMStudy.objects.all(),
@@ -789,7 +796,7 @@ class AssetReadSerializer(AssetWriteSerializer):
         return obj.get_recovery_objectives_comparison()
 
 
-class AssetListSerializer(BaseModelSerializer):
+class AssetListSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
     """
     Lightweight serializer for the assets list view.
 
@@ -826,6 +833,7 @@ class AssetListSerializer(BaseModelSerializer):
             "parent_assets",
             "security_objectives",
             "disaster_recovery_objectives",
+            "custom_fields",
             "created_at",
             "updated_at",
         ]
@@ -1209,7 +1217,7 @@ class RiskScenarioImportExportSerializer(BaseModelSerializer):
         ]
 
 
-class AppliedControlWriteSerializer(BaseModelSerializer):
+class AppliedControlWriteSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
     findings = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Finding.objects.all()
     )
@@ -1576,6 +1584,7 @@ class ComplianceAssessmentActionPlanSerializer(ActionPlanSerializer):
     requirement_assessments = serializers.SerializerMethodField(
         method_name="get_requirement_assessments"
     )
+    evidence_attachments = serializers.SerializerMethodField()
 
     def get_requirement_assessments(self, obj):
         pk = self.context.get("pk")
@@ -1591,6 +1600,20 @@ class ComplianceAssessmentActionPlanSerializer(ActionPlanSerializer):
             }
             for req in requirement_assessments
         ]
+
+    def get_evidence_attachments(self, obj):
+        attachments = []
+        for evidence in obj.evidences.all():
+            filename = evidence.filename()
+            if filename:
+                attachments.append(
+                    {
+                        "id": str(evidence.id),
+                        "str": str(evidence),
+                        "filename": filename,
+                    }
+                )
+        return attachments
 
     class Meta:
         model = AppliedControl
@@ -1614,6 +1637,7 @@ class ComplianceAssessmentActionPlanSerializer(ActionPlanSerializer):
             "requirement_assessments",
             "reference_control",
             "evidences",
+            "evidence_attachments",
             "owner",
         ]
 
@@ -1774,6 +1798,8 @@ class PolicyReadSerializer(AppliedControlReadSerializer):
             "id",
             "ref_id",
             "status",
+            "request_notes",
+            "last_event_notes",
             {"approver": ["id", "email", "first_name", "last_name"]},
         ],
         source="validationflow_set",
@@ -2126,6 +2152,11 @@ class FrameworkReadSerializer(ReferentialSerializer):
     # the backend will actually save.
     effective_field_visibility = serializers.SerializerMethodField()
 
+    implementation_groups_definition = serializers.SerializerMethodField()
+
+    def get_implementation_groups_definition(self, obj):
+        return obj.get_implementation_groups_definition_translated()
+
     def get_has_editing_draft(self, obj):
         return obj.editing_draft is not None
 
@@ -2160,6 +2191,9 @@ class FrameworkWriteSerializer(FrameworkReadSerializer):
     )
     # reference_controls is a read-only property on Framework, not a writable DB field.
     reference_controls = serializers.ListField(required=False, read_only=True)
+    implementation_groups_definition = serializers.JSONField(
+        required=False, allow_null=True
+    )
 
     def create(self, validated_data):
         # Strip any non-model fields that leak through from the read serializer
@@ -2588,6 +2622,8 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
             "id",
             "ref_id",
             "status",
+            "request_notes",
+            "last_event_notes",
             {"approver": ["id", "email", "first_name", "last_name"]},
         ],
         source="validationflow_set",
@@ -3160,9 +3196,12 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                         attrs.pop(name)
 
         # Validate extended_result against result
-        extended_result = attrs.get("extended_result")
-        if extended_result is None and self.instance:
+        if "extended_result" in attrs:
+            extended_result = attrs["extended_result"]
+        elif self.instance:
             extended_result = self.instance.extended_result
+        else:
+            extended_result = None
 
         result = attrs.get("result")
         if result is None and self.instance:
@@ -4147,6 +4186,104 @@ class SecurityExceptionWriteSerializer(BaseModelSerializer):
         many=True, queryset=Asset.objects.all(), required=False
     )
 
+    def create(self, validated_data):
+        owner_data = validated_data.get("owners", [])
+        security_exception = super().create(validated_data)
+
+        # Notify newly assigned owners
+        if owner_data:
+            self._send_assignment_notifications(
+                security_exception, [actor.id for actor in owner_data]
+            )
+
+        return security_exception
+
+    def update(self, instance, validated_data):
+        old_owner_ids = set(instance.owners.values_list("id", flat=True))
+        old_status = instance.status
+
+        updated_instance = super().update(instance, validated_data)
+
+        new_owner_ids = set(updated_instance.owners.values_list("id", flat=True))
+
+        # Notify only newly assigned owners
+        newly_assigned_ids = new_owner_ids - old_owner_ids
+        if newly_assigned_ids:
+            self._send_assignment_notifications(
+                updated_instance, list(newly_assigned_ids)
+            )
+
+        # Notify owners and approver on status change
+        if updated_instance.status != old_status:
+            self._send_status_notification(updated_instance)
+
+        return updated_instance
+
+    def _send_assignment_notifications(self, security_exception, owner_ids):
+        """Send assignment notifications to the specified owners"""
+        if not owner_ids:
+            return
+
+        try:
+            from core.models import Actor
+            from .tasks import send_security_exception_assignment_notification
+
+            assigned_actors = Actor.objects.filter(id__in=owner_ids)
+            assigned_emails = []
+            for actor in assigned_actors:
+                assigned_emails.extend(actor.get_emails())
+
+            # Dedupe (several actors can resolve to the same email) and defer until
+            # the transaction commits, so a rollback doesn't send spurious emails.
+            unique_emails = list(dict.fromkeys(filter(None, assigned_emails)))
+            if unique_emails:
+                exception_id = security_exception.id
+                transaction.on_commit(
+                    lambda: send_security_exception_assignment_notification(
+                        exception_id, unique_emails
+                    )
+                )
+        except Exception as e:
+            logger.error(
+                f"Failed to send SecurityException assignment notification: {str(e)}"
+            )
+
+    def _send_status_notification(self, security_exception):
+        """Notify owners and approver when the status changes"""
+        try:
+            from .tasks import send_security_exception_status_notification
+
+            recipient_emails = []
+            for owner in security_exception.owners.all():
+                recipient_emails.extend(owner.get_emails())
+            if security_exception.approver and security_exception.approver.email:
+                recipient_emails.append(security_exception.approver.email)
+
+            if not recipient_emails:
+                return
+
+            request = self.context.get("request")
+            actor_name = "System"
+            if request and getattr(request, "user", None):
+                user = request.user
+                actor_name = (
+                    f"{user.first_name} {user.last_name}".strip()
+                    if (user.first_name or user.last_name)
+                    else user.email
+                )
+
+            exception_id = security_exception.id
+            new_status = security_exception.get_status_display()
+            transaction.on_commit(
+                lambda: send_security_exception_status_notification(
+                    exception_id, new_status, actor_name, recipient_emails
+                )
+            )
+        except Exception as e:
+            logger.error(
+                f"Failed to send SecurityException status notification: {str(e)}"
+            )
+
     class Meta:
         model = SecurityException
         fields = "__all__"
@@ -4166,6 +4303,8 @@ class SecurityExceptionReadSerializer(BaseModelSerializer):
             "id",
             "ref_id",
             "status",
+            "request_notes",
+            "last_event_notes",
             {"approver": ["id", "email", "first_name", "last_name"]},
         ],
         source="validationflow_set",
@@ -4260,6 +4399,8 @@ class FindingsAssessmentReadSerializer(AssessmentReadSerializer):
             "id",
             "ref_id",
             "status",
+            "request_notes",
+            "last_event_notes",
             {"approver": ["id", "email", "first_name", "last_name"]},
         ],
         source="validationflow_set",

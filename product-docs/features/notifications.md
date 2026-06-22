@@ -32,6 +32,7 @@ You receive an email whenever something is assigned to you.
 | **Audit** | **Authors**     | You are added as an author   |
 | **Risk Scenario**         | **Owner**       | You are added as an owner    |
 | **Task (template)**       | **Assigned to** | You are added as an assignee |
+| **Security Exception**    | **Owner**       | You are added as an owner    |
 
 > **Note:** Task assignment notifications fire when a **task template** is assigned. Due-date reminders (below) fire on the **task occurrences** generated from that template.
 
@@ -62,6 +63,12 @@ CISO Assistant sends reminders automatically **30 days**, **7 days**, and **1 da
 | ------------------ | --------------- | --------------- |
 | Expiry approaching | **Expiry date** | **Owner**       |
 
+**Security Exception**
+
+| Notification       | Required field      | Who receives it |
+| ------------------ | ------------------- | --------------- |
+| Expiry approaching | **Expiration date** | **Owners**      |
+
 **Validation Flow**
 
 | Notification                                          | Required field          | Who receives it |
@@ -87,6 +94,7 @@ If a deadline has already passed and the item is still open, you will receive an
 | **Applied Control** — ETA expired | **ETA** + **Owner**            | Owners        |
 | **Evidence** — expired            | **Expiry date** + **Owner**    | Owners        |
 | **Task** — past due               | **Due date** + **Assigned to** | Assignees     |
+| **Security Exception** — expired  | **Expiration date** + **Owner** | Owners        |
 
 ***
 
@@ -108,6 +116,14 @@ When working on a **Requirement Assignment** inside an audit, notifications foll
 | ------------------------------------- | -------------------------------------------------- |
 | Validation flow created and submitted | Approver                                           |
 | Validation flow status changes        | Requester or approver, depending on the transition |
+
+***
+
+**Security exceptions**
+
+| Event                              | Who is notified         |
+| ---------------------------------- | ----------------------- |
+| Security exception status changes  | Owners and the approver |
 
 ***
 
@@ -138,6 +154,8 @@ If your organisation uses the Third-Party Risk Management module, external conta
 | Alert owners when evidence has expired       | **Evidence › Owner** + **Expiry date**                   |
 | Remind an approver of a validation deadline  | **Validation Flow › Approver** + **Validation deadline** |
 | Notify assignees of upcoming task due dates  | **Task › Assigned to** + **Due date**                    |
+| Remind owners before a security exception expires | **Security Exception › Owner** + **Expiration date** |
+| Alert owners when a security exception has expired | **Security Exception › Owner** + **Expiration date** |
 
 ***
 
@@ -149,6 +167,6 @@ If your organisation uses the Third-Party Risk Management module, external conta
 
 **I am receiving too many reminders. Can I opt out?** Per-user opt-out is not yet available.
 
-**At what time are reminders sent?** Reminders are sent in the early morning (between 6:00 AM and 7:15 AM server time). Account, password-reset, and validation-flow event emails are sent immediately when the event occurs, not in this window.
+**At what time are reminders sent?** Reminders are sent in the early morning (between 6:00 AM and 7:30 AM server time). Account, password-reset, validation-flow, and security-exception status-change event emails are sent immediately when the event occurs, not in this window.
 
 **Will I get a reminder every day until the deadline?** No. Reminders are sent only on specific days: 30 days before, 7 days before, and 1 day before the deadline. Overdue alerts are sent daily until the item is resolved.

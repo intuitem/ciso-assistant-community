@@ -372,6 +372,7 @@ INSTALLED_APPS = [
     "privacy",
     "resilience",
     "crq",
+    "custom_fields",
     "metrology",
     "chat",
     "doc_management",

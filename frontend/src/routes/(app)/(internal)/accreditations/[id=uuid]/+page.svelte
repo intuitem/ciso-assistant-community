@@ -160,7 +160,7 @@
 				{#if accreditation.authority}
 					<Anchor
 						href="/entities/{accreditation.authority.id}"
-						class="text-primary-600 hover:text-primary-800-300 hover:underline font-medium"
+						class="text-primary-600 hover:text-primary-800-200 hover:underline font-medium"
 					>
 						{accreditation.authority.str || accreditation.authority.name}
 					</Anchor>
@@ -226,7 +226,7 @@
 						<li class="text-sm">
 							<Anchor
 								href="/evidences/{evidence.id}"
-								class="text-primary-600 hover:text-primary-800-300 hover:underline"
+								class="text-primary-600 hover:text-primary-800-200 hover:underline"
 							>
 								{evidence.str || evidence.name || evidence.id}
 							</Anchor>
@@ -304,7 +304,7 @@
 									<li class="text-sm flex items-center justify-between gap-2">
 										<Anchor
 											href="{section.urlPattern}{item.id}"
-											class="text-primary-600 hover:text-primary-800-300 hover:underline truncate"
+											class="text-primary-600 hover:text-primary-800-200 hover:underline truncate"
 										>
 											{item.str || item.name || item.id}
 										</Anchor>

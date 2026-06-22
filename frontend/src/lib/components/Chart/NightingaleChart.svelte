@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
+	import { safeTranslate } from '$lib/utils/i18n';
+	import { m } from '$paraglide/messages';
 
 	interface ndChartData {
 		name: string;
@@ -33,6 +35,10 @@
 			const el = document.getElementById(chart_id);
 			if (!el) return;
 			dispose = mountThemeAwareChart(echarts, el, () => {
+				// Backend ships display labels ("Govern", "(undefined)"); normalize back to
+				// raw choice keys so safeTranslate resolves them (mirrors backend export).
+				const translateName = (name: string) => safeTranslate(name.replace(/[()]/g, ''));
+
 				// Color mapping for CSF functions
 				const colorMap: Record<string, string> = {
 					'(undefined)': '#505372',
@@ -56,14 +62,23 @@
 				return {
 					tooltip: {
 						trigger: 'item',
-						formatter: '{a} <br/>{b} : {c} ({d}%)'
+						formatter: (params: {
+							seriesName: string;
+							name: string;
+							value: number;
+							percent: number;
+						}) =>
+							`${params.seriesName} <br/>${translateName(params.name)} : ${params.value} (${params.percent}%)`
 					},
 					series: [
 						{
-							name: 'Control Function',
+							name: m.csfFunction(),
 							type: 'pie',
 							radius: [20, 100],
 							roseType: 'area',
+							label: {
+								formatter: (params: { name: string }) => translateName(params.name)
+							},
 							data: dataWithColors
 						}
 					]

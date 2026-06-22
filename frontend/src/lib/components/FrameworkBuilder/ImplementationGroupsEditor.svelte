@@ -113,7 +113,7 @@
 							<input
 								type="text"
 								value={group.ref_id}
-								class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+								class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 								onblur={(e) => {
 									items[index].ref_id = e.currentTarget.value;
 									persist();
@@ -126,7 +126,7 @@
 								type="text"
 								value={group.name}
 								placeholder={m.builderGroupNamePlaceholder()}
-								class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+								class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 								onblur={(e) => {
 									items[index].name = e.currentTarget.value;
 									persist();
@@ -141,7 +141,7 @@
 							value={group.description}
 							placeholder={m.builderGroupDescriptionPlaceholder()}
 							rows="2"
-							class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-none"
+							class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-none"
 							onblur={(e) => {
 								items[index].description = e.currentTarget.value;
 								persist();
@@ -175,7 +175,7 @@
 										type="text"
 										value={getTranslation(group.translations, lang, 'name')}
 										placeholder={m.builderTranslateName()}
-										class="w-full text-sm border border-blue-100 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+										class="input w-full text-sm border border-blue-100 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 										onblur={(e) => {
 											items[index].translations = withTranslation(
 												items[index].translations,
@@ -193,7 +193,7 @@
 										type="text"
 										value={getTranslation(group.translations, lang, 'description')}
 										placeholder={m.builderTranslateDescription()}
-										class="w-full text-sm border border-blue-100 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+										class="input w-full text-sm border border-blue-100 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 										onblur={(e) => {
 											items[index].translations = withTranslation(
 												items[index].translations,

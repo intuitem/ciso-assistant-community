@@ -2,8 +2,10 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import Select from '../Select.svelte';
+	import CustomFieldsSection from '../CustomFieldsSection.svelte';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import type { SuperValidated } from 'sveltekit-superforms';
+	import { formFieldProxy } from 'sveltekit-superforms';
 	import { m } from '$paraglide/messages';
 
 	interface Props {
@@ -23,6 +25,8 @@
 		initialData = {},
 		object = {}
 	}: Props = $props();
+
+	const { value: folderId } = formFieldProxy(form, 'folder');
 </script>
 
 <Select
@@ -65,3 +69,5 @@
 	nullable={true}
 	label={m.status()}
 />
+
+<CustomFieldsSection {form} model="pmbok.project" folderId={$folderId} />

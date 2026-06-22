@@ -1086,7 +1086,12 @@
 														{value.name}
 													{:else}
 														<!-- NOTE: We will have to handle the ellipses for RTL languages-->
-														{@const displayValue = ['name', 'description', 'ref_id'].includes(key)
+														{@const displayValue = [
+															'name',
+															'description',
+															'ref_id',
+															'key'
+														].includes(key)
 															? (value ?? '-')
 															: safeTranslate(value ?? '-')}
 														{#if displayValue?.length > 300}
