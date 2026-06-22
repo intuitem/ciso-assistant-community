@@ -19454,10 +19454,13 @@ class TaskNodeViewSet(BaseModelViewSet):
         detail=True, name="Remove/Move evidence to expected evidence", methods=["post"]
     )
     def remove_evidence(self, request, pk):
-        task_node = TaskNode.objects.get(id=pk)
+        task_node = self.get_object()
         evidence_id = request.data.get("evidence_id")
         to_move = request.data.get("move", False)
-        evidence = Evidence.objects.get(id=evidence_id)
+        accessible_evidence_ids = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Evidence
+        )[0]
+        evidence = Evidence.objects.get(id=evidence_id, id__in=accessible_evidence_ids)
         task_node.evidences.remove(evidence)
         if to_move:
             task_node.task_template.evidences.add(evidence)
