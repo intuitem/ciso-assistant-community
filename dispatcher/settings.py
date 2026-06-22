@@ -44,8 +44,6 @@ def load_env_config():
         },
         "credentials": {
             "token": os.getenv("USER_TOKEN"),
-            "email": os.getenv("USER_EMAIL"),
-            "password": os.getenv("USER_PASSWORD"),
         },
         "kafka": {
             "use_auth": os.getenv("KAFKA_USE_AUTH") == "True" or None,
@@ -54,7 +52,6 @@ def load_env_config():
             "sasl_plain_username": os.getenv("KAFKA_USERNAME"),
             "sasl_plain_password": os.getenv("KAFKA_PASSWORD"),
         },
-        "auto_renew_session": os.getenv("AUTO_RENEW_SESSION") == "True" or None,
         "bootstrap_servers": os.getenv("BOOTSTRAP_SERVERS"),
         "errors_topic": os.getenv("ERRORS_TOPIC"),
         "s3_url": os.getenv("S3_URL"),
@@ -126,40 +123,11 @@ def init_config(y, interactive):
             default=verify_default,
         )
 
-        authentication_mode = click.prompt(
-            "Enter your mode of authentication (credentials/token)",
-            default="credentials",
+        access_token = click.prompt(
+            "Enter the Personal Access Token used to authenticate the dispatcher to the CISO Assistant API.",
+            hide_input=True,
+            default=os.getenv("USER_TOKEN", ""),
         )
-
-        auto_renew_session = False
-        user_email = None
-        user_password = None
-        access_token = None
-
-        if authentication_mode == "credentials":
-            user_email = click.prompt(
-                "Enter the email of the CISO Assistant user account. This is the user account that will be used to authenticate the dispatcher to the CISO Assistant API.",
-                default=os.getenv("USER_EMAIL", "user@company.org"),
-            )
-            # Use confirmation_prompt for passwords to ensure they match.
-            user_password = click.prompt(
-                "Enter the password of the CISO Assistant user account",
-                hide_input=True,
-                confirmation_prompt=True,
-                default=os.getenv("USER_PASSWORD", ""),
-            )
-            auto_renew_default = os.getenv("AUTO_RENEW_SESSION", "True") == "True"
-            auto_renew_session = click.confirm(
-                "Enable silent reauthentication on session expiry?",
-                default=auto_renew_default,
-            )
-
-        else:
-            access_token = click.prompt(
-                "Enter access token",
-                hide_input=True,
-                default=os.getenv("USER_TOKEN", ""),
-            )
 
         bootstrap_servers = click.prompt(
             "Enter the URLs of the Kafka brokers (comma-separated), e.g., 'localhost:9092'",
@@ -233,8 +201,6 @@ def init_config(y, interactive):
             },
             "credentials": {
                 "token": access_token,
-                "email": user_email,
-                "password": user_password,
             },
             "kafka": {
                 "use_auth": kafka_use_auth,
@@ -243,7 +209,6 @@ def init_config(y, interactive):
                 "sasl_plain_password": kafka_password,
                 "security_protocol": kafka_security_protocol,
             },
-            "auto_renew_session": auto_renew_session,
             "bootstrap_servers": bootstrap_servers,
             "errors_topic": errors_topic,
             "s3_url": s3_url,
@@ -276,9 +241,9 @@ if "rest" not in config or "url" not in config["rest"]:
     )
     sys.exit(1)
 creds = config.get("credentials", {})
-if not (creds.get("token") or (creds.get("email") and creds.get("password"))):
+if not creds.get("token"):
     logger.warning(
-        "Missing credentials in configuration. Please set USER_EMAIL and USER_PASSWORD via environment variables or in the config file.",
+        "Missing access token in configuration. Please set USER_TOKEN (a Personal Access Token) via environment variables or in the config file.",
     )
 
 DEBUG = config.get("debug", False)
@@ -286,9 +251,6 @@ API_URL = config.get("rest", {}).get("url", "https://localhost:8443")
 if API_URL:
     API_URL = API_URL.rstrip("/")
 VERIFY_CERTIFICATE = config.get("rest", {}).get("verify_certificate", True)
-USER_EMAIL = config["credentials"].get("email", "user@company.org")
-USER_PASSWORD = config["credentials"].get("password", "")
-AUTO_RENEW_SESSION = config.get("auto_renew_session", False)
 BOOTSTRAP_SERVERS = config.get("bootstrap_servers", "localhost:9092")
 KAFKA_USE_AUTH = config.get("kafka", {}).get("use_auth", False)
 KAFKA_SASL_MECHANISM = config.get("kafka", {}).get("sasl_mechanism", "PLAIN")

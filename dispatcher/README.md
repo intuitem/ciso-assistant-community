@@ -69,8 +69,7 @@ The **CISO Assistant Dispatcher** is a command-line tool that bridges event-driv
    --name ciso-assistant-dispatcher \
    -e API_URL=https://localhost:8443 \
    -e BOOTSTRAP_SERVERS=localhost:9092 \
-   -e USER_EMAIL=user@company.org \
-   -e USER_PASSWORD=your_password \
+   -e USER_TOKEN=your_ciso_assistant_access_token \
    ciso-assistant-dispatcher
    ```
 
@@ -87,10 +86,7 @@ You can configure the dispatcher using environment variables, the `init-config` 
 DEBUG=True/False # Set to true to enable debug logging
 
 API_URL=https://localhost:8443 # The URL of the CISO Assistant REST API
-USER_EMAIL=user@company.org # The email address of the CISO Assistant user to authenticate with
-USER_PASSWORD=your_password # The password of the CISO Assistant user to authenticate with
-AUTO_RENEW_SESSION=True/False # Set to True to enable automatic token refresh, do not set if using token-based authentication
-USER_TOKEN=your_ciso_assistant_access_token # Personal Access Token, do not set if using credentials-based authentication
+USER_TOKEN=your_ciso_assistant_access_token # Personal Access Token used to authenticate to the CISO Assistant API
 VERIFY_CERTIFICATE=True/False # Set to True to verify SSL certificates between the dispatcher and API
 BOOTSTRAP_SERVERS=localhost:9092 # The Kafka bootstrap servers, comma separated list
 KAFKA_USE_AUTH=False # Set to True to enable authentication to Kafka
@@ -120,46 +116,20 @@ rest:
   url: "https://localhost:8443"
   verify_certificate: True
 credentials:
-  email: "user@company.org"
-  password: ""
+  token: ""
 ```
 
-Update this file with your actual REST API credentials.
+Update this file with your actual access token.
 
 ### Authentication to the CISO Assistant API
 
-Use the `auth` command to authenticate with the CISO Assistant API.
-There are currently two modes of authentication supported by the dispatcher:
-
-- Token-based authentication
-- Credentials-based authentication
+The dispatcher authenticates with a Personal Access Token (PAT) that you generate in CISO Assistant (from your user profile). Set it via the `USER_TOKEN` environment variable, in the configuration file, or during interactive configuration with `init-config -i`.
 
 > [!IMPORTANT]
-> Whichever mode you choose, it is tied to a CISO Assistant user and will inherit their permissions.
+> The token is tied to a CISO Assistant user and inherits their permissions. Issue it from a dedicated service account scoped to only what the dispatcher needs.
 
-#### Token-based authentication
-
-This is done using a Personal Access Token (PAT) that you can generate in CISO Assistant.
-To use token-based authentication, you need to set the `USER_TOKEN` environment variable or specify it in the configuration file or during interactive configuration definition using the `init-config` with the `-i` flag enabled.
-
-#### Credentials-based authentication
-
-This is done using your email and password. You can specify these credentials in the configuration file or pass them as command-line arguments to the `auth` command.
-
-```bash
-python dispatcher.py auth --email your_email@company.org --password your_password
-```
-
-If you have specified the credentials in the configuration file, or in the `USER_EMAIL` and `USER_PASSWORD` environment variables, you can skip the `--email` and `--password` arguments.
-
-> [!WARNING]
-> Multi-factor authentication is not yet supported in the dispatcher. Accounts with MFA enabled will not be able to authenticate using the dispatcher.
-
-#### Automatic token refresh
-
-Using credentials-based authentication, it is possible to enable silent re-authentication on token expiration. You can do so using the `auto_renew_session` setting. As usual, it can be set either as an environment variable or in the configuration file.
-
-The authentication token will be saved in a temporary file (`.tmp.yaml`).
+> [!NOTE]
+> PATs are issued from an authenticated session, so MFA on the account stays effective. If the API returns `401`, the token is invalid or expired — generate a new PAT and update `USER_TOKEN`.
 
 ### S3 storage configuration
 
