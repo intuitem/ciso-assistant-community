@@ -1,0 +1,811 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:sama-bcm-1.0
+locale: en
+ref_id: SAMA-BCM-1.0
+name: SAMA Business Continuity Management Framework
+description: 'SAMA Business Continuity Management (BCM) Framework, issued by the Saudi
+  Central Bank (SAMA) for its Member Organizations (banks, insurance and finance companies,
+  and payment service providers). The framework defines the BCM domains, subdomains,
+  principles, objectives and control considerations for building organizational resilience,
+  and is aligned with ISO 22301. 13 subdomains / 75 control considerations. Reference:
+  https://rulebook.sama.gov.sa'
+copyright: "\xA9 SAMA"
+version: 1
+publication_date: 2026-06-22
+provider: SAMA
+packager: community
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:sama-bcm-1.0
+    ref_id: SAMA-BCM-1.0
+    name: SAMA Business Continuity Management Framework
+    description: SAMA Business Continuity Management (BCM) Framework. One domain,
+      13 subdomains, 75 control considerations. Aligned with ISO 22301.
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: Business Continuity Requirements
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2
+      ref_id: '2.1'
+      name: BCM Governance
+      description: The business continuity governance framework should be defined,
+        approved, implemented and maintained, which should be monitored by senior
+        management. The business continuity structure should be defined and communicated
+        to all relevant employees and third parties. To direct, control and evaluate
+        the overall approach to business continuity within the Member Organization
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.1-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.1
+      ref_id: 2.1-1
+      description: Board of directors or a delegated executive member should have
+        the ultimate responsibility for the BCM program.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.1-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.1
+      ref_id: 2.1-2
+      description: The board of member organization, or a delegated member of senior
+        management should allocate sufficient budget to execute the required BCM activities,
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.1-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.1
+      ref_id: 2.1-3
+      description: A BCM Committee should be established and mandated by the board
+        of directors.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.1-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.1
+      ref_id: 2.1-4
+      description: Senior management, such as CRO, COO, CIO, CISO, BCM manager and
+        other relevant departments should be represented in the business continuity
+        committee.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.1-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.1
+      ref_id: 2.1-5
+      description: 'A business continuity committee charter should be developed and
+        should reflect: (a) Committee objectives (b) Roles and responsibilities (c)
+        Minimum number of meeting participants (d) Meeting frequency (minimum on quarterly
+        basis)'
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.1-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.1
+      ref_id: 2.1-6
+      description: A BCM function should be established.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.1-7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.1
+      ref_id: 2.1-7
+      description: 'A BCM manager/head should: (a) Be appointed (b) Have appropriate
+        authority to manage the BCM program (c) Be qualified and have appropriate
+        experience, skills and competencies to implement and maintain the BCM program
+        within the member organization'
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.1-8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.1
+      ref_id: 2.1-8
+      description: The BCM function should be adequately staffed with qualified team
+        members
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.1-9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.1
+      ref_id: 2.1-9
+      description: Cross-functional teams, consisting of strategic, tactical and operations
+        team members should contribute in implementation and maintenance of the business
+        continuity and disaster recovery plans.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2
+      ref_id: '2.2'
+      name: BCM Strategy
+      description: A business continuity strategy should be defined and aligned with
+        the Member Organization's overall strategic business objectives. To ensure
+        that business continuity Initiatives are in alignment with the strategic business
+        objectives and embeds BCM as part of the good management practice within the
+        Member Organization, in order to continual improvement In maturity.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.2-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.2
+      ref_id: 2.2-1
+      description: The business continuity strategy should be defined, approved, implemented
+        and maintained.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.2-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.2
+      ref_id: 2.2-2
+      description: 'The strategy should at minimum define: (a) Long-term strategic
+        objectives for implementing and maturing the BCM program (b) Road map with
+        timelines for achieving strategic objectives (c) Requirements for continual
+        review and validation of alignment of the BCM program with strategic objectives'
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2
+      ref_id: '2.3'
+      name: Business Continuity Policy
+      description: "A business continuity policy should be defined, approved and communicated\
+        \ to relevant stakeholders. To document the Member Organization\u2019s commitment\
+        \ and objective of the business continuity program, and to communicate this\
+        \ to the relevant stakeholders."
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.3-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.3
+      ref_id: 2.3-1
+      description: A business continuity policy should be defined, approved, implemented
+        and communicated
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.3-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.3
+      ref_id: 2.3-2
+      description: 'The business continuity policy should at the minimum identify:
+        (a) Objectives (b) Scope (c) Responsibilities'
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.3-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.3
+      ref_id: 2.3-3
+      description: The compliance with the business continuity policy should be monitored
+        .
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.3-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.3
+      ref_id: 2.3-4
+      description: The effectiveness of policy implementation should be measured and
+        periodically evaluated.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.3-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.3
+      ref_id: 2.3-5
+      description: Scope exclusions for the BCM should be documented and periodically
+        evaluated. The justifications for scope exclusions should be documented and
+        approved by BCM committee and senior management.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2
+      ref_id: '2.4'
+      name: Business Impact Analysis (BIA) and Risk Assessment (RA)
+      description: The Member Organization should perform a business impact analysis
+        and risk assessment for all relevant activities to determine the business
+        continuity, and disaster recovery requirements and improvements. To ensure
+        that each Member Organization has Identified and prioritized their business
+        processes along with key dependencies, and identified adequate controls in
+        order to fulfill their business, regulatory, legal and compliance requirements
+        with regards to business continuity
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.4-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.4
+      ref_id: 2.4-1
+      description: Methodology for BIA and RA should be defined, approved, implemented
+        and maintained.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.4-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.4
+      ref_id: 2.4-2
+      description: 'The Member Organization should periodically perform a Business
+        Continuity risk assessment. It should include, but not limited to: (a) Identify
+        potential internal and external threats, Including single point of failures
+        that may cause disruption to critical activities as determined in the BIA
+        considering people, process, technology and premises (b) Assess and prioritize
+        potential risks by evaluating potential threats based on their operational
+        impact and probability of occurrence (c) Select required controls to manage
+        identified risks (d) Define treatment plan and implement BCM controls'
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.4-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.4
+      ref_id: 2.4-3
+      description: 'The Member Organization should identify and prioritize the activities
+        (Le., products, services, business functions and processes) by performing
+        BIA to determine the following but no limited to: (a) The potential impact
+        of business disruptions for each prioritized business function and processes,
+        including but not restricted to financial, operational, customer, legal and
+        regulatory impacts (b) The recovery time objectives (RTOs), recover/ point
+        objectives (RPOs) and maximum Acceptable Outage (MAO) (c) The internal and
+        external interdependencies (d) Supporting recovery resources'
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.4-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.4
+      ref_id: 2.4-4
+      description: The BCM committee should endorse the prioritized list, BIA results,
+        RA and the defined RTOs, RPOs and MAOs.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.4-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.4
+      ref_id: 2.4-5
+      description: Risk assessment results should be communicated to the BCM committee
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.4-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.4
+      ref_id: 2.4-6
+      description: The BIA and RA should be updated annually and when major changes
+        occur (such as change in structure and organization of people, process, technology,
+        suppliers and locations).
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.4-7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.4
+      ref_id: 2.4-7
+      description: The risk assessment should include risks associated with overall
+        organization as well as data centers (primary and alternative), which are
+        not owned by the Member Organization (e.g., consider the timeframe needed
+        to relocate to a new site and accordingly, It should Include a sufficient
+        timeframe in the contractual agreement)
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.4-8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.4
+      ref_id: 2.4-8
+      description: Capability of vendors, suppliers and service providers to support
+        and maintain service levels for prioritized activities during disruptive incidents
+        should be assessed at least on a yearly basis.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.4-9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.4
+      ref_id: 2.4-9
+      description: Member Organizations should ensure that RTOs are adequately defined
+        for payment systems, customer related services, etc. considering the high
+        availability of these operations and minimum disruption in the event of disaster.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2
+      ref_id: '2.5'
+      name: Business Continuity Plan (BCP)
+      description: The Member Organization should define, approve and Implement BCP
+        for their critical activities. The compliance with BCP should be monitored,
+        and the effectiveness should be measured and periodically evaluated. To ensure
+        that the Member Organization has the capability to identify and clearly define
+        the actions to be taken, and resources which are needed to enable the organization
+        in managing a disruptive interruption and to come back to a position where
+        normal business processes can resume
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.5-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.5
+      ref_id: 2.5-1
+      description: A BCP should be defined, approved, implemented and maintained in
+        readiness for use during disruptive incidents, to enable the Member organization
+        to continue delivering its important and urgent activities, at an acceptable
+        pre-defined level.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.5-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.5
+      ref_id: 2.5-2
+      description: 'The member organization should define, approve and implement procedures
+        for responding to disruptive incidents. The procedures should collectively
+        include: (a) Key resources (e.g., people, equipment, facilities, technologies)
+        (b) Defined roles, responsibilities and authorities for stakeholders (c) A
+        process to manage the immediate consequences of a disruptive incident and
+        escalation procedures (d) A process to continue the critical activities within
+        predetermined recovery objectives (RTO, RPO and MAO) (e) A process to resume
+        the Member Organization''s operations to business-as-usual once the incident
+        is resolved (f) Guidelines for communicating with employees, relevant third-parties
+        and emergency contacts (g) Process for including relevant cyber security requirements,
+        if any, within the business continuity planning'
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.5-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.5
+      ref_id: 2.5-3
+      description: The compliance with the BCP should be monitored.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.5-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.5
+      ref_id: 2.5-4
+      description: The effectiveness of the BCPs should be measured and periodically
+        evaluated.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.5-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.5
+      ref_id: 2.5-5
+      description: The BCM Manager and BCM coordinators are responsible to maintain
+        and keep the BCPs and arrangements up-to-date.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.5-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.5
+      ref_id: 2.5-6
+      description: The Member Organization should have sufficient alternative business
+        workspace(s) where it can relocate the required resources to deliver the critical
+        processes required as per predefined recovery objectives in the BIA.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.5-7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.5
+      ref_id: 2.5-7
+      description: The alternative business workspace(s) should have clear demarcation
+        of the sitting arrangement for different business units.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.5-8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.5
+      ref_id: 2.5-8
+      description: The Member Organization should implement sufficient logical, physical
+        and environmental security controls in order to support the same level of
+        access and security in case the alternative location needs to be activated.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.5-10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.5
+      ref_id: 2.5-10
+      description: For all critical activities, as determined by the BIA, the Member
+        Organization should ensure that the key service providers (if any) have a
+        BCP in place and their plans tested at least on a yearly basis.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2
+      ref_id: '2.6'
+      name: IT Disaster Recovery Plan (DRP)
+      description: The Member Organization should define, approve, implement and maintain
+        a IT DRP for its critical activities and related technology infrastructure.
+        To ensure the Member Organization has IT DRP and up-to-date list of critical
+        activities in place, in case of a disruptive incident
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.6-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.6
+      ref_id: 2.6-1
+      description: An IT DRP to recover and restore technology services and infrastructure
+        components (Data, systems, network, services and applications) should be defined,
+        approved, implemented and maintained in alignment with business impact analysis.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.6-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.6
+      ref_id: 2.6-2
+      description: 'The Member Organization should establish an alternative data center
+        at an appropriate location. The location should be identified based on: (a)
+        A risk assessment to confirm that the location does not share the same risks
+        of the main data center (e.g., geographical threat) (b) Upon approval from
+        SAMA'
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.6-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.6
+      ref_id: 2.6-3
+      description: Data, system, network and application configurations, and capacities
+        in the alternative data center should be commensurate to such configurations
+        and capacities maintained in the main data center.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.6-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.6
+      ref_id: 2.6-4
+      description: Member Organization should implement the same logical, physical,
+        environmental and cyber security controls for the alternative data center
+        as for the primary data center.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.6-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.6
+      ref_id: 2.6-5
+      description: The Member Organization should define and implement a backup and
+        recovery process.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.6-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.6
+      ref_id: 2.6-6
+      description: The Member Organization should have offsite location for storing
+        backups.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.6-7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.6
+      ref_id: 2.6-7
+      description: Formal contracts should be signed with third parties to ensure
+        the continuity of outsourced services or delivery of replacing hardware or
+        software within the agreed timelines in case of a disaster. Include guidelines
+        to ensure that the contracts signed with external service providers are aligned
+        with the BIA and RA outcomes.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.6-8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.6
+      ref_id: 2.6-8
+      description: The IT manager should be responsible to maintain and keep the disaster
+        recovery plans and arrangements up to date with an overall accountability
+        of integration within the BCM Program on the BCM Manager.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.6-9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.6
+      ref_id: 2.6-9
+      description: The compliance with the disaster recovery plan should be monitored.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.6-10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.6
+      ref_id: 2.6-10
+      description: The effectiveness of the IT DRP should be measured and should be
+        evaluated on a yearly basis as minimum.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2
+      ref_id: '2.7'
+      name: Cyber Resilience
+      description: The Member Organization should ensure that critical services, business
+        functions and processes run on reliable and robust infrastructure and software.
+        To ensure each that the Member Organization's critical services, business
+        functions and processes are available when required and resistant to disruptions.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.7-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.7
+      ref_id: 2.7-1
+      description: 'All changes to the infrastructure and software, which directly
+        support the identified critical services, business functions and processes,
+        should: (a) Be subject to in-depth risk assessments to ensure the agreed business
+        requirements regarding availability and recovery are met. (b) Follow strict
+        development, testing and change management procedures to avoid single point
+        of failures or malfunctioning.'
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.7-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.7
+      ref_id: 2.7-2
+      description: A periodic architectural review should be defined and approved
+        to ensure the business requirements regarding availability and business continuity
+        are being correctly addressed and implemented. _Note. For more control considerations
+        to improve the overall resilience, e.g.,_[_threat management_](https://rulebook.sama.gov.sa/en/node/3958)_,_[_vulnerability
+        management_](https://rulebook.sama.gov.sa/en/node/3960)_, please refer to
+        the SAMA -_[_Cyber Security Framework_](https://rulebook.sama.gov.sa/en/node/3837)_._
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2
+      ref_id: '2.8'
+      name: Crisis Management Plan
+      description: The Member Organization should define, approve and implement a
+        crisis management plan that would facilitate a well-managed response for major
+        incidents, including rapid communication to ensure overall safety to both
+        internal and external stakeholders. To ensure the Member Organization has
+        effective crisis management plan in place and up-to-date for critical member
+        organization products, services, business functions and processes, in case
+        of a disruptive incident.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.8-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.8
+      ref_id: 2.8-1
+      description: A crisis management plan should be defined, approved and implemented.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.8-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.8
+      ref_id: 2.8-2
+      description: The compliance with the crisis management plan should be monitored.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.8-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.8
+      ref_id: 2.8-3
+      description: The effectiveness of the business continuity program within the
+        crisis management plan should be measured and periodically evaluated.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.8-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.8
+      ref_id: 2.8-4
+      description: 'The Member Organization should document a crisis management plan(s)
+        that define(s) how crisis resulting from a major incident(s) will be addressed
+        and managed, and should include at least: (a) Criteria for declaring a crisis.
+        (b) The member organization should establish a command center for centralized
+        management and an emergency command center. (c) Crisis-management team members.
+        Considering representatives of the critical products, services, functions
+        and processes of the Member Organization (including Communications department)
+        (d) Contact details of those who are part of the crisis management team (including
+        third-parties) (e) Definition of the steps to be taken during and after a
+        crisis or disaster (including the mandates required) (f) Communication plan
+        including the media response plan, to address the communication with the internal
+        and external stakeholders during crisis. (g) The frequency of crisis management
+        tests'
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2
+      ref_id: '2.9'
+      name: Testing
+      description: The Member Organization should define, approve, implement, execute
+        and monitor regular BCP and DRP tests to train their employees and third-parties
+        and test the effectiveness of the BC and DR plans. To ensure that the Member
+        Organization's existing BCP and DRP do work as defined and employees and third-
+        parties are trained to execute these plans.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9
+      ref_id: 2.9.1
+      name: BCP Testing
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9.1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9.1
+      ref_id: 2.9.1-1
+      description: The Member Organization should periodically conduct BCP simulation
+        test exercises ("at least once a year")
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9.1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9.1
+      ref_id: 2.9.1-2
+      description: The tests should consider appropriate scenarios that are well planned
+        with clearly defined objectives (e.g., per function, per service, per process,
+        per location, per worst cases scenarios). The Member Organization should take
+        into consideration to Include cyber security scenarios.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9.1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9.1
+      ref_id: 2.9.1-3
+      description: Defined test scenarios should cover the activation and involvement
+        for crisis management team.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9.1-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9.1
+      ref_id: 2.9.1-4
+      description: After the completion of the above individual tests, each Member
+        organization should consider conducting an integrated BCM test for all critical
+        services, business processes and functions.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9
+      ref_id: 2.9.2
+      name: DRP Testing
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9.2-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9.2
+      ref_id: 2.9.2-1
+      description: The Member Organization should periodically execute a DR test combined
+        with BCP ("at least once a year").
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9.2-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9.2
+      ref_id: 2.9.2-2
+      description: The Member Organization should conduct an evaluation of the executed
+        DR test of IT DR infrastructure that supports the Member Organization's critical
+        systems to ensure the readiness and capability of DR to resume critical business
+        operations for a period of time in case of a major disaster.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9.2-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9.2
+      ref_id: 2.9.2-3
+      description: The DR test results should provide an evaluation and suggestions
+        for improvements to manage disruptive events impacting the Member Organization's
+        business continuity.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9.2-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9.2
+      ref_id: 2.9.2-4
+      description: It should cover the activation and involvement of the crisis management
+        team.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9
+      ref_id: 2.9.3
+      name: Executed Tests
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9.3-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9.3
+      ref_id: 2.9.3-1
+      description: 'Detailed results of all exercises and tests should be documented
+        for future reference. The exercises/tests results should include, but not
+        be limited to the following considerations: (a) Confirm meeting the objectives
+        of the exercised plan (b) Confirm capabilities and readiness of recovery resources
+        (c) Document lessons learnt and the required improvements (d) In case of failure,
+        Capture the root-cause of the failure and remediation actions should be tracked
+        to successful conclusion'
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9.3-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9.3
+      ref_id: 2.9.3-2
+      description: Re-testing of the plan within the defined timelines in case of
+        a failure, the timelines should not exceed the limit of three (3) months.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9.3-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9.3
+      ref_id: 2.9.3-3
+      description: The Internal Audit of the Member Organization, or a qualified external
+        auditor, should observe the business continuity and disaster recovery testing
+        activities as an independent participant in order to provide a reasonable
+        assurance on the executed activities, test results and to observe if the executed
+        tests are meeting the Member Organization's overall Business Continuity program
+        objectives.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9.3-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.9.3
+      ref_id: 2.9.3-4
+      description: All BCP and DRP tests results should be reported to the BCM committee,
+        senior management and the board of directors.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2
+      ref_id: '2.10'
+      name: Awareness and Training
+      description: The Member Organization should establish, Implement and maintain
+        a training and awareness program that effectively supports the BCM objectives
+        by developing the required competency among staff. The Member Organization
+        should ensure BCM integration into its day-to-day activities, through an ongoing
+        awareness plan, which should be documented.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.10-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.10
+      ref_id: 2.10-1
+      description: 'The Member Organization and relevant third-parties, such as providers
+        and suppliers should be: (a) Familiar with relevant parts of business continuity
+        policy and plans (b) Contractually bound to provide their services or products
+        within the agreed time, in case of disruptive event (c) Familiar with their
+        point of contact or their local BCM coordinator in the Member Organization
+        (d) Familiar with their roles and responsibilities during disruptive incidents'
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.10-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.10
+      ref_id: 2.10-2
+      description: A training program should be provided once on an annual basis to
+        employees involved in BCM to achieve the required level of experience, skills
+        and competences.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.10-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.10
+      ref_id: 2.10-3
+      description: The Member Organization should periodically measure the effectiveness
+        of the training and awareness program.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.11
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2
+      ref_id: '2.11'
+      name: Communication
+      description: The Member Organization should define, establish and maintain a
+        communication process for periodic communications with SAMA on matters related
+        to its BCM program. To ensure that continuous communication is maintained
+        with SAMA by defining, agreeing and adhering to communication protocol, frequency,
+        and roles and responsibilities for communications
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.11-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.11
+      ref_id: 2.11-1
+      description: The Member Organization should report all disruptive incidents
+        classified as "Medium" or "High" to SAMA "Banking IT Risk Supervision" immediately.
+        A post-incident report should be communicated to SAMA after the Member Organization
+        resumes to normal operations.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.11-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.11
+      ref_id: 2.11-2
+      description: The Member Organization should coordinate with SAMA Supervision
+        when communicating with the media in case of incidents.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.11-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.11
+      ref_id: 2.11-3
+      description: Member Organizations should seek SAMA's approval when selecting
+        a new site for its main or alternative data center, or when relocating the
+        current main or alternative data center.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.11-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.11
+      ref_id: 2.11-4
+      description: The Member Organization should communicate the approved program
+        for executing business continuity and disaster recovery tests, for the upcoming
+        year, with SAMA "Banking IT Risk Supervision" by end of January of every year.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.11-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.11
+      ref_id: 2.11-5
+      description: Test results of business continuity and disaster recovery should
+        be shared with SAMA within four weeks after the test The Member Organization
+        should identify the improvements based on the test performed and provide an
+        action plan to SAMA within two months after the submission of the test results.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.12
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2
+      ref_id: '2.12'
+      name: Periodic Documents Review
+      description: The business continuity and disaster recovery program, policies,
+        plans and procedures should be reviewed and updated periodically, and in case
+        of (major) change in the Member Organization's critical products, services,
+        business functions and/or processes. To ensure that all the business continuity
+        documents are up to date and can be used during a disruptive incident to recover
+        the business operations.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.12-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.12
+      ref_id: 2.12-1
+      description: Member Organizations should establish a process for document review/update
+        to ensure the BC documents are up-to-date, reviewed and approved.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.12-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.12
+      ref_id: 2.12-2
+      description: All documents should clearly identify the last date in which the
+        document was reviewed and approved.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.13
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2
+      ref_id: '2.13'
+      name: Assurance
+      description: The BCM of the Member Organizations should be subjected to periodically
+        reviews and audits by a qualified independent internal or external party to
+        ensure its effectiveness, and to obtain assurance regarding the compliance
+        with the SAMA BCM. To ensure that an independent party is reviewing the BCM
+        framework activities and reporting the identified issues to the senior management
+        independently.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.13-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.13
+      ref_id: 2.13-1
+      description: Member organization should conduct review / audit of BCM by qualified
+        independent internal/ external party.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.13-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.13
+      ref_id: 2.13-2
+      description: the Member Organization should identify the gaps and provide a
+        road map to enhance the BCM within the organization.
+    - urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.13-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-bcm-1.0:2.13
+      ref_id: 2.13-3
+      description: The identified gaps along with road map should be reported to senior
+        management and BCM committee.
