@@ -16287,6 +16287,8 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
         "provider",
     ]
 
+    search_fields = ["name", "provider"]
+
     def get_serializer_class(self, **kwargs):
         return RequirementMappingSetReadSerializer
 
