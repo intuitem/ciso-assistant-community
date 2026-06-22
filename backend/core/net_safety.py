@@ -66,12 +66,10 @@ def assert_public_url(
 def assert_public_url_unless_dev(
     url: str, *, allowed_schemes: tuple[str, ...] = ("https",)
 ) -> None:
-    """assert_public_url, skipped when WEBHOOK_ALLOW_PRIVATE_IPS is set
-    (shared dev/loopback escape hatch across webhooks and integrations).
-    """
+    """assert_public_url, skipped when ALLOW_PRIVATE_NETWORK_REQUESTS is set."""
     from django.conf import settings
 
-    if getattr(settings, "WEBHOOK_ALLOW_PRIVATE_IPS", False):
+    if getattr(settings, "ALLOW_PRIVATE_NETWORK_REQUESTS", False):
         return
     assert_public_url(url, allowed_schemes=allowed_schemes)
 
