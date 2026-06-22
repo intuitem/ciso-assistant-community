@@ -35,7 +35,7 @@ The chart lives at `oci://ghcr.io/intuitem/helm-charts/ce/ciso-assistant`. Sourc
 
    The chart README in the repository carries the full values table (`charts/ciso-assistant-next/README.md`) — refer to it for every key with its default and description.
 
-3. **Pin the appVersion** to a published release if you want predictable upgrades. Set `global.image.tag` in `custom.yaml` to the version you tested against (e.g. `v3.18.1`). Leaving it empty pins to the chart's `appVersion`, which moves with the chart.
+3. **Pin the appVersion** to a published release if you want predictable upgrades. Set `global.image.tag` in `custom.yaml` to the version you tested against (e.g. `v3.18.2`). Leaving it empty pins to the chart's `appVersion`, which moves with the chart.
 
 4. **Create a namespace and install**:
 
