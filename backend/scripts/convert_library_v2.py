@@ -856,7 +856,7 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                             try:
                                 score_to_add = int(val)
                                 choices[i]["add_score"] = score_to_add
-                            except TypeError, ValueError:
+                            except (TypeError, ValueError):
                                 raise ValueError(
                                     f"(answers_definition) Invalid add_score value '{val}' "
                                     f"for answer ID '{answer_id}', choice #{i + 1}. Must be an integer"
@@ -1135,7 +1135,7 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                     if (w := int(data["weight"])) <= 0:
                         raise ValueError
                     node["weight"] = w
-                except TypeError, ValueError:
+                except (TypeError, ValueError):
                     raise ValueError(
                         f"(framework) Invalid weight at row #{row[0].row}: {data['weight']}. Must be a strictly positive integer."
                     )
@@ -1150,7 +1150,7 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                 ):
                     try:
                         node[int_field] = int(data[int_field])
-                    except TypeError, ValueError:
+                    except (TypeError, ValueError):
                         raise ValueError(
                             f"(framework) Invalid {int_field} at row #{row[0].row}: "
                             f"{data[int_field]}. Must be an integer."
@@ -1291,7 +1291,7 @@ def _handle_metric_definitions(obj, library, compat_mode, verbose):
         if "default_target" in data and data["default_target"] is not None:
             try:
                 entry["default_target"] = float(data["default_target"])
-            except TypeError, ValueError:
+            except (TypeError, ValueError):
                 raise ValueError(
                     f"(metric_definitions) Invalid default_target '{data['default_target']}' at row #{row[0].row}. Must be a number."
                 )

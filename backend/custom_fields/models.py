@@ -52,7 +52,7 @@ def coerce_value(field_type: str, raw):
     if field_type == FieldType.NUMBER:
         try:
             return Decimal(str(raw))
-        except InvalidOperation, ValueError, TypeError:
+        except (InvalidOperation, ValueError, TypeError):
             raise ValueError(f"'{raw}' is not a valid number")
 
     if field_type == FieldType.DATE:

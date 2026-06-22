@@ -124,7 +124,7 @@ def execute_tool_query(
     if priority is not None and hasattr(model_class, "priority"):
         try:
             priority = int(priority)
-        except TypeError, ValueError:
+        except (TypeError, ValueError):
             priority = None
         if priority is not None:
             qs = qs.filter(priority=priority)
@@ -147,7 +147,7 @@ def execute_tool_query(
     if severity is not None and hasattr(model_class, "severity"):
         try:
             severity = int(severity)
-        except TypeError, ValueError:
+        except (TypeError, ValueError):
             severity = None
         if severity is not None:
             qs = qs.filter(severity=severity)
@@ -200,7 +200,7 @@ def execute_tool_query(
     total_count = qs.count()
     try:
         page = int(arguments.get("page", 1) or 1)
-    except TypeError, ValueError:
+    except (TypeError, ValueError):
         page = 1
 
     # Pagination — always applied

@@ -228,7 +228,7 @@ class DocumentAttachmentViewSet(BaseModelViewSet):
         """Serve the attachment file with correct content type."""
         try:
             pk_uuid = UUID(pk)
-        except ValueError, AttributeError:
+        except (ValueError, AttributeError):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         object_ids_view = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, DocumentAttachment

@@ -197,7 +197,7 @@ def inject_tool_replays(
             args = obs.get("args", {})
             try:
                 args_str = json.dumps(args, ensure_ascii=False, default=str)
-            except TypeError, ValueError:
+            except (TypeError, ValueError):
                 args_str = str(args)
             result_text = truncate_to_tokens(
                 obs.get("result_text", "") or "", TOOL_REPLAY_TOKENS

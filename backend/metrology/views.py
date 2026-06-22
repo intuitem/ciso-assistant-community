@@ -29,7 +29,7 @@ def _user_can_read_target(user, content_type, object_id):
         object_uuid = (
             object_id if isinstance(object_id, uuid.UUID) else uuid.UUID(str(object_id))
         )
-    except ValueError, TypeError:
+    except (ValueError, TypeError):
         return False
     try:
         return RoleAssignment.is_object_readable(user, target_model, object_uuid)

@@ -26,7 +26,7 @@ def convert_cost_to_json(apps, schema_editor):
             }
             control.save(update_fields=["cost_temp"])
 
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             # Set to default structure for invalid values
             control.cost_temp = {
                 "currency": "€",
@@ -50,7 +50,7 @@ def reverse_cost_conversion(apps, schema_editor):
             else:
                 control.cost = 0.0
             control.save(update_fields=["cost"])
-        except ValueError, TypeError, KeyError:
+        except (ValueError, TypeError, KeyError):
             control.cost = 0.0
             control.save(update_fields=["cost"])
 

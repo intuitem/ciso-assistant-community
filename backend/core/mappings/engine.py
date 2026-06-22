@@ -103,7 +103,7 @@ class MappingEngine:
                 local_framework_mappings,
                 local_direct_mappings,
             ) = self.load_rms_data()
-        except ProgrammingError, OperationalError:
+        except (ProgrammingError, OperationalError):
             # Tables might not exist during migrations. Preserve whatever
             # cache state already exists and let the next access retry.
             return

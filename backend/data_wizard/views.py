@@ -227,7 +227,7 @@ def _reverse_scale_value(display_val: str, scale: list) -> int | None:
         for idx, sv in enumerate(scale):
             if isinstance(sv, (int, float)) and int(sv) == numeric:
                 return idx
-    except ValueError, TypeError:
+    except (ValueError, TypeError):
         pass
 
     # Fall back to case-insensitive string comparison (e.g. FIPS-199)
@@ -2048,7 +2048,7 @@ class BusinessImpactAnalysisRecordConsumer(RecordConsumer):
                 perimeter = Perimeter.objects.filter(id=perimeter_uuid).first()
                 if perimeter:
                     return perimeter, None
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 pass
 
             perimeter = Perimeter.objects.filter(ref_id=perimeter_value).first()
@@ -2102,7 +2102,7 @@ class BusinessImpactAnalysisRecordConsumer(RecordConsumer):
                 risk_matrix = RiskMatrix.objects.filter(id=matrix_uuid).first()
                 if risk_matrix:
                     return risk_matrix, None
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 pass
 
             risk_matrix = RiskMatrix.objects.filter(ref_id=matrix_value).first()
@@ -2206,7 +2206,7 @@ class AssetAssessmentRecordConsumer(RecordConsumer):
             bia = BusinessImpactAnalysis.objects.filter(id=bia_uuid).first()
             if bia:
                 return bia, None
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             pass
 
         bia = BusinessImpactAnalysis.objects.filter(name__iexact=bia_value).first()
@@ -2231,7 +2231,7 @@ class AssetAssessmentRecordConsumer(RecordConsumer):
             asset = Asset.objects.filter(id=asset_uuid).first()
             if asset:
                 return asset, None
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             pass
 
         asset = Asset.objects.filter(ref_id=asset_value).first()
@@ -2268,7 +2268,7 @@ class AssetAssessmentRecordConsumer(RecordConsumer):
             try:
                 control_uuid = UUID(str(item))
                 control = AppliedControl.objects.filter(id=control_uuid).first()
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 control = None
 
             if control is None:
@@ -2294,7 +2294,7 @@ class AssetAssessmentRecordConsumer(RecordConsumer):
             try:
                 evidence_uuid = UUID(str(item))
                 evidence = Evidence.objects.filter(id=evidence_uuid).first()
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 evidence = None
 
             if evidence is None:
@@ -2383,7 +2383,7 @@ class EscalationThresholdRecordConsumer(RecordConsumer):
             bia = BusinessImpactAnalysis.objects.filter(id=bia_uuid).first()
             if bia:
                 return bia, None
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             pass
 
         bia = BusinessImpactAnalysis.objects.filter(name__iexact=bia_value).first()
@@ -2408,7 +2408,7 @@ class EscalationThresholdRecordConsumer(RecordConsumer):
             asset = Asset.objects.filter(id=asset_uuid).first()
             if asset:
                 return asset, None
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             pass
 
         asset = Asset.objects.filter(ref_id=asset_value).first()
@@ -2431,7 +2431,7 @@ class EscalationThresholdRecordConsumer(RecordConsumer):
                 assessment = AssetAssessment.objects.filter(id=assessment_uuid).first()
                 if assessment:
                     return assessment, None
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 pass
 
         bia, error = self._resolve_bia(record)
@@ -2497,7 +2497,7 @@ class EscalationThresholdRecordConsumer(RecordConsumer):
             return {}, Error(record=record, error="point_in_time is mandatory")
         try:
             point_in_time = int(float(point_in_time))
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             return {}, Error(
                 record=record,
                 error=f"Invalid point_in_time '{point_in_time}'",
@@ -2509,7 +2509,7 @@ class EscalationThresholdRecordConsumer(RecordConsumer):
         else:
             try:
                 quali_impact_value = int(float(quali_impact))
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 return {}, Error(
                     record=record,
                     error=f"Invalid quali_impact '{quali_impact}'",
@@ -2534,7 +2534,7 @@ class EscalationThresholdRecordConsumer(RecordConsumer):
         else:
             try:
                 quanti_impact_value = float(quanti_impact)
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 return {}, Error(
                     record=record,
                     error=f"Invalid quanti_impact '{quanti_impact}'",
@@ -3433,7 +3433,7 @@ class LoadFileView(APIView):
                                 if value != "" and value is not None:
                                     try:
                                         update_data[f"default_{field}"] = int(value)
-                                    except ValueError, TypeError:
+                                    except (ValueError, TypeError):
                                         pass
                             legal_ids = {}
                             for id_type in ["lei", "euid", "duns", "vat"]:
@@ -3479,7 +3479,7 @@ class LoadFileView(APIView):
                     if value != "" and value is not None:
                         try:
                             entity_data[f"default_{field}"] = int(value)
-                        except ValueError, TypeError:
+                        except (ValueError, TypeError):
                             pass
 
                 # Handle legal identifiers (LEI, EUID, DUNS, VAT, etc.)
@@ -3639,7 +3639,7 @@ class LoadFileView(APIView):
                                     update_data["criticality"] = int(
                                         record.get("criticality")
                                     )
-                                except ValueError, TypeError:
+                                except (ValueError, TypeError):
                                     pass
                             serializer = SolutionWriteSerializer(
                                 instance=existing_solution,
@@ -3672,7 +3672,7 @@ class LoadFileView(APIView):
                 ):
                     try:
                         solution_data["criticality"] = int(record.get("criticality"))
-                    except ValueError, TypeError:
+                    except (ValueError, TypeError):
                         pass
 
                 # Create the solution
@@ -3829,7 +3829,7 @@ class LoadFileView(APIView):
                         contract_data["annual_expense"] = float(
                             record.get("annual_expense")
                         )
-                    except ValueError, TypeError:
+                    except (ValueError, TypeError):
                         pass
                 if record.get("currency"):
                     contract_data["currency"] = record.get("currency")

@@ -282,7 +282,7 @@ class JiraFieldMapper(BaseFieldMapper):
                 return None
             try:
                 return int(mapped)
-            except TypeError, ValueError:
+            except (TypeError, ValueError):
                 return mapped
 
         if field in ("eta", "start_date"):

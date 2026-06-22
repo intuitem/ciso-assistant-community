@@ -45,7 +45,7 @@ class CustomFieldDefinitionViewSet(BaseModelViewSet):
         if for_folder:
             try:
                 folder = Folder.objects.filter(pk=for_folder).first()
-            except ValueError, ValidationError:
+            except (ValueError, ValidationError):
                 return queryset.none()
             folder_ids = {Folder.get_root_folder_id()}
             if folder is not None:

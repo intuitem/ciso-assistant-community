@@ -45,7 +45,7 @@ def validate_default_dashboard_value(value):
         return None
     try:
         uuid.UUID(str(value))
-    except ValueError, TypeError:
+    except (ValueError, TypeError):
         raise serializers.ValidationError(
             {"default_custom_analytics_dashboard": "Must be a valid UUID."}
         )
@@ -181,7 +181,7 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
             if key == "chat_temperature":
                 try:
                     temp = float(value)
-                except TypeError, ValueError:
+                except (TypeError, ValueError):
                     raise serializers.ValidationError(
                         {"chat_temperature": "Must be a number."}
                     )

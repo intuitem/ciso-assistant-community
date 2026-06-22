@@ -125,7 +125,7 @@ class ServiceNowFieldMapper(BaseFieldMapper):
                 if int(value) not in [p[0] for p in AppliedControl.PRIORITY]:
                     return None
                 return int(value)
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 return None
 
         return value

@@ -53,7 +53,7 @@ def _validate_uuid(value: str) -> UUID | None:
         return None
     try:
         return UUID(value.strip())
-    except ValueError, AttributeError:
+    except (ValueError, AttributeError):
         return None
 
 

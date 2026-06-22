@@ -409,7 +409,7 @@ class DashboardWidgetReadSerializer(BaseModelSerializer):
                 model_class = obj.target_content_type.model_class()
                 target_obj = model_class.objects.get(id=obj.target_object_id)
                 return str(target_obj)
-            except model_class.DoesNotExist, AttributeError:
+            except (model_class.DoesNotExist, AttributeError):
                 return None
         return None
 

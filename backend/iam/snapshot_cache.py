@@ -142,7 +142,7 @@ class VersionedSnapshotCache(Generic[T]):
         """
         try:
             new_v = VersionStore.bump(self.key)
-        except OperationalError, ProgrammingError:
+        except (OperationalError, ProgrammingError):
             # Still clear local snapshot so this process rebuilds next time it can.
             self._snapshot = None
             return None

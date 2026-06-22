@@ -365,11 +365,11 @@ def get_mapping_max_depth():
         raw = gs.value.get("mapping_max_depth", MAPPING_MAX_DEPTH)
         try:
             val = int(raw)
-        except TypeError, ValueError:
+        except (TypeError, ValueError):
             return MAPPING_MAX_DEPTH
         # Clamp to UI constraints
         return max(2, min(5, val))
-    except OperationalError, ProgrammingError:
+    except (OperationalError, ProgrammingError):
         # DB not ready (e.g., migrate, makemigrations)
         return MAPPING_MAX_DEPTH
 
@@ -1015,7 +1015,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 ids = RoleAssignment.get_accessible_object_ids(
                     root_folder, self.request.user, model
                 )[0]
-            except NotImplementedError, Permission.DoesNotExist:
+            except (NotImplementedError, Permission.DoesNotExist):
                 # Model does not support IAM scoping; skip filtering
                 allowed[model] = None
                 continue
@@ -2523,7 +2523,7 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
 
             try:
                 folder = Folder.objects.get(id=uuid.UUID(str(folder_id)))
-            except ValueError, AttributeError, Folder.DoesNotExist:
+            except (ValueError, AttributeError, Folder.DoesNotExist):
                 return Response(
                     {"error": "Folder not found"},
                     status=status.HTTP_404_NOT_FOUND,
@@ -3467,7 +3467,7 @@ class VulnerabilityViewSet(BaseModelViewSet):
                 continue
             try:
                 delta = timedelta(days=int(days))
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 continue
             qs = accessible.filter(
                 severity=severity_int,
@@ -4523,7 +4523,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     {"detail": "loss_threshold must be greater than 0"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-        except TypeError, ValueError:
+        except (TypeError, ValueError):
             return Response(
                 {"detail": "loss_threshold must be a valid number"},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -4860,7 +4860,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     risk_level_colors[level.get("name", "")] = level.get(
                         "hexcolor", "#6b7280"
                     )
-            except KeyError, TypeError, AttributeError:
+            except (KeyError, TypeError, AttributeError):
                 pass
 
         samples = (
@@ -6273,7 +6273,7 @@ class ActionPlanBudgetOverview:
         """Coerce a JSON-sourced value to float, returning default on failure."""
         try:
             return float(value)
-        except TypeError, ValueError:
+        except (TypeError, ValueError):
             return default
 
     @staticmethod
@@ -9870,7 +9870,7 @@ class FrameworkViewSet(BaseModelViewSet):
                     )
                 try:
                     parsed = uuid.UUID(str(record.get("id")))
-                except TypeError, ValueError:
+                except (TypeError, ValueError):
                     raise DraftValidationError(
                         f"{kind.capitalize()} '{_label(record)}' has a missing or "
                         "invalid id. Discard the draft and start editing again."
@@ -9890,7 +9890,7 @@ class FrameworkViewSet(BaseModelViewSet):
         for q in draft_questions:
             try:
                 parent_id = uuid.UUID(str(q.get("requirement_node_id")))
-            except TypeError, ValueError:
+            except (TypeError, ValueError):
                 parent_id = None
             if parent_id not in parsed_ids_by_kind["requirement"]:
                 raise DraftValidationError(
@@ -9899,7 +9899,7 @@ class FrameworkViewSet(BaseModelViewSet):
         for c in draft_choices:
             try:
                 parent_id = uuid.UUID(str(c.get("question_id")))
-            except TypeError, ValueError:
+            except (TypeError, ValueError):
                 parent_id = None
             if parent_id not in parsed_ids_by_kind["question"]:
                 raise DraftValidationError(
@@ -11667,7 +11667,7 @@ class EvidenceViewSet(BaseModelViewSet):
             )
         try:
             folder = Folder.objects.get(id=uuid.UUID(str(folder_id)))
-        except ValueError, TypeError, Folder.DoesNotExist:
+        except (ValueError, TypeError, Folder.DoesNotExist):
             return Response(
                 {"error": "Folder not found"},
                 status=status.HTTP_404_NOT_FOUND,
@@ -11677,7 +11677,7 @@ class EvidenceViewSet(BaseModelViewSet):
             manifest = json.loads(request.data.get("manifest") or "[]")
             if not isinstance(manifest, list):
                 raise ValueError("manifest must be a list")
-        except ValueError, json.JSONDecodeError:
+        except (ValueError, json.JSONDecodeError):
             logger.exception("Invalid manifest JSON received in batch upload")
             return Response(
                 {"error": "Invalid manifest JSON"},
@@ -12515,7 +12515,7 @@ class JourneyViewSet(BaseModelViewSet):
                         round(assessed_ra / total_ra * 100) if total_ra > 0 else 0
                     ),
                 }
-            except ComplianceAssessment.DoesNotExist, ValueError:
+            except (ComplianceAssessment.DoesNotExist, ValueError):
                 continue
         stats["compliance"] = compliance_stats
         return stats
@@ -12840,7 +12840,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 target_audit = ComplianceAssessment.objects.select_related(
                     "framework"
                 ).get(id=has_mapping_path_to)
-            except ComplianceAssessment.DoesNotExist, ValueError:
+            except (ComplianceAssessment.DoesNotExist, ValueError):
                 return qs.none()
             from core.mappings.engine import engine
 
@@ -13765,7 +13765,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             if score is not None:
                 try:
                     score = int(score)
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     return Response(
                         {"error": "Score must be a valid integer"},
                         status=status.HTTP_400_BAD_REQUEST,
@@ -16404,7 +16404,7 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
                     "value": display_value,
                     "pk": lib.pk,
                 }
-            except KeyError, TypeError:
+            except (KeyError, TypeError):
                 # Skip this library if content is malformed
                 continue
 
@@ -20107,7 +20107,7 @@ def metrics_view(request):
                     tzinfo=timezone.utc,
                 ).timestamp()
             )
-        except ValueError, AttributeError, TypeError:
+        except (ValueError, AttributeError, TypeError):
             expiration_ts = -1
         expiration_gauge.set(expiration_ts)
         created_at_gauge.set(metrics.get("created_at", 0))

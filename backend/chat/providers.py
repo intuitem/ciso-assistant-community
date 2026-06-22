@@ -468,7 +468,7 @@ class OpenAICompatibleLLM:
                         yield ("thinking", reasoning)
                     if content := delta.get("content"):
                         yield ("raw", content)
-                except json.JSONDecodeError, KeyError, IndexError:
+                except (json.JSONDecodeError, KeyError, IndexError):
                     continue
 
     def stream(

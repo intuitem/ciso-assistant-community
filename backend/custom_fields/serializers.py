@@ -20,7 +20,7 @@ def _resolve_content_type(model: str) -> ContentType:
     try:
         app_label, model_name = model.lower().split(".")
         return ContentType.objects.get(app_label=app_label, model=model_name)
-    except ValueError, ContentType.DoesNotExist:
+    except (ValueError, ContentType.DoesNotExist):
         raise serializers.ValidationError(
             {"model": f"'{model}' is not a valid app_label.model"}
         )

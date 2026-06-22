@@ -100,7 +100,7 @@ def _get_root_folder() -> Folder | None:
         )
     except Folder.DoesNotExist:
         return None
-    except OperationalError, ProgrammingError:
+    except (OperationalError, ProgrammingError):
         return None
 
 
