@@ -9943,21 +9943,17 @@ class PresetJourneyStep(AbstractBaseModel):
         return f"{self.journey.name} - {self.title}"
 
 
-class PortalTemplate(NameDescriptionMixin, FolderMixin):
-    """Reusable portal design. Library-backed (urn set, read-only) or user-authored."""
-
-    class Status(models.TextChoices):
-        DRAFT = "draft", _("Draft")
-        PUBLISHED = "published", _("Published")
+class PortalPreset(NameDescriptionMixin, FolderMixin):
+    """A portal definition / catalog entry. Library-backed (urn set) or user-authored.
+    Cloned into a live Portal; never referenced live (no sync). Exports to YAML.
+    `content` holds the whole design: {"sections": [{"title", "items": [...]}]}."""
 
     urn = models.CharField(max_length=255, null=True, blank=True, unique=True)
     ref_id = models.CharField(max_length=255, null=True, blank=True)
     version = models.IntegerField(default=1)
     provider = models.CharField(max_length=255, null=True, blank=True)
     translations = models.JSONField(default=dict, blank=True)
-    status = models.CharField(
-        max_length=20, choices=Status.choices, default=Status.DRAFT
-    )
+    content = models.JSONField(default=dict, blank=True)
 
     class Meta:
         ordering = ["name"]
@@ -9966,75 +9962,16 @@ class PortalTemplate(NameDescriptionMixin, FolderMixin):
         return self.name
 
 
-class PortalSection(AbstractBaseModel):
-    """A titled group of items within a portal template."""
-
-    template = models.ForeignKey(
-        PortalTemplate, related_name="sections", on_delete=models.CASCADE
-    )
-    order = models.IntegerField(default=0)
-    title = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
-    translations = models.JSONField(null=True, blank=True)
-
-    class Meta:
-        ordering = ["order"]
-
-    @property
-    def get_title_translated(self) -> str:
-        locale = (get_language() or "en").split("-")[0]
-        return (self.translations or {}).get(locale, {}).get("title", self.title)
-
-    def __str__(self):
-        return f"{self.template.name} - {self.title}"
-
-
-class PortalItem(AbstractBaseModel):
-    """A single button/entry in a portal section. Triggers an action or shows a status."""
-
-    class Kind(models.TextChoices):
-        CREATE = "create", _("Create")
-        NAVIGATE = "navigate", _("Navigate")
-        EXTERNAL = "external", _("External")
-        STATUS = "status", _("Status")
-
-    section = models.ForeignKey(
-        PortalSection, related_name="items", on_delete=models.CASCADE
-    )
-    order = models.IntegerField(default=0)
-    icon = models.CharField(max_length=100, blank=True)
-    title = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
-    translations = models.JSONField(null=True, blank=True)
-    kind = models.CharField(max_length=20, choices=Kind.choices, default=Kind.NAVIGATE)
-    target = models.JSONField(default=dict, blank=True)
-
-    class Meta:
-        ordering = ["order"]
-
-    @property
-    def get_title_translated(self) -> str:
-        locale = (get_language() or "en").split("-")[0]
-        return (self.translations or {}).get(locale, {}).get("title", self.title)
-
-    @property
-    def get_description_translated(self) -> str:
-        locale = (get_language() or "en").split("-")[0]
-        return (
-            (self.translations or {})
-            .get(locale, {})
-            .get("description", self.description)
-        )
-
-    def __str__(self):
-        return f"{self.section.title} - {self.title}"
-
-
 class Portal(NameDescriptionMixin, FolderMixin):
-    """A live deployment of a portal template, carrying audience and branding."""
+    """A live portal: owns its own design (`content`), cloned from a preset or built
+    from scratch, then tuned locally. Carries audience, branding and publication state."""
 
-    template = models.ForeignKey(
-        PortalTemplate, related_name="deployments", on_delete=models.PROTECT
+    class Status(models.TextChoices):
+        DRAFT = "draft", _("Draft")
+        PUBLISHED = "published", _("Published")
+
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.DRAFT
     )
     slug = models.SlugField(max_length=100, unique=True)
     enabled = models.BooleanField(default=True)
@@ -10045,6 +9982,8 @@ class Portal(NameDescriptionMixin, FolderMixin):
     is_default = models.BooleanField(default=False)
     priority = models.IntegerField(default=0)
     branding = models.JSONField(default=dict, blank=True)
+    content = models.JSONField(default=dict, blank=True)
+    source_ref = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         ordering = ["priority", "name"]

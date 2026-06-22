@@ -472,6 +472,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-flask',
 					href: '/experimental',
 					permissions: ['change_globalsettings']
+				},
+				{
+					name: 'managePortals',
+					fa_icon: 'fa-solid fa-grip',
+					href: '/portal-editor',
+					permissions: ['change_globalsettings']
 				}
 			]
 		}

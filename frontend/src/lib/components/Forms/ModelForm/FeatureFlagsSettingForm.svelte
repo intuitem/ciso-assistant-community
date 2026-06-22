@@ -33,6 +33,11 @@
 					field: 'journeys',
 					label: m.journeys(),
 					description: m.journeysDescription()
+				},
+				{
+					field: 'custom_portals',
+					label: m.customPortals(),
+					description: m.customPortalsDescription()
 				}
 			].filter(({ field }) => availableKeys.includes(field))
 		},

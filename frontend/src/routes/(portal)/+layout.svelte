@@ -40,17 +40,31 @@
 					<i class="fa-solid fa-chevron-down text-xs text-surface-400"></i>
 				</button>
 				{#if switcherOpen}
-					<div class="absolute left-0 mt-2 w-56 rounded-lg border border-surface-200-800 bg-surface-50-950 p-2 shadow-xl">
+					<div
+						class="absolute left-0 mt-2 w-56 rounded-lg border border-surface-200-800 bg-surface-50-950 p-2 shadow-xl"
+					>
 						{#each data.portals as p}
 							<a
 								href="/portal/{p.slug}"
 								onclick={() => (switcherOpen = false)}
-								class="flex items-center justify-between rounded px-2 py-1.5 text-sm hover:bg-surface-100-900 {p.slug === current?.slug ? 'font-semibold text-violet-600' : ''}"
+								class="flex items-center justify-between rounded px-2 py-1.5 text-sm hover:bg-surface-100-900 {p.slug ===
+								current?.slug
+									? 'font-semibold text-violet-600'
+									: ''}"
 							>
 								{p.name}
 								{#if p.slug === current?.slug}<i class="fa-solid fa-check text-xs"></i>{/if}
 							</a>
 						{/each}
+						{#if data.user?.is_admin}
+							<a
+								href="/portal-editor"
+								onclick={() => (switcherOpen = false)}
+								class="mt-1 flex items-center gap-2 border-t border-surface-200-800 px-2 pt-2 text-sm text-surface-500 hover:text-primary-500"
+							>
+								<i class="fa-solid fa-sliders text-xs"></i>{m.managePortals()}
+							</a>
+						{/if}
 					</div>
 				{/if}
 			</div>
@@ -64,7 +78,10 @@
 				>
 					<i class="fa-solid fa-magnifying-glass"></i>
 					<span class="hidden sm:inline">{m.searchEllipsis()}</span>
-					<kbd class="hidden sm:inline rounded border border-surface-200-800 px-1.5 py-0.5 font-mono text-[10px]">{modifierKey}K</kbd>
+					<kbd
+						class="hidden sm:inline rounded border border-surface-200-800 px-1.5 py-0.5 font-mono text-[10px]"
+						>{modifierKey}K</kbd
+					>
 				</button>
 			{/if}
 			<a
@@ -81,11 +98,18 @@
 					{(data.user?.first_name?.[0] ?? data.user?.email?.[0] ?? '?').toUpperCase()}
 				</button>
 				{#if menuOpen}
-					<div class="absolute right-0 mt-2 w-48 rounded-lg border border-surface-200-800 bg-surface-50-950 p-2 shadow-xl">
+					<div
+						class="absolute right-0 mt-2 w-48 rounded-lg border border-surface-200-800 bg-surface-50-950 p-2 shadow-xl"
+					>
 						<div class="px-2 py-1 text-xs text-surface-500 truncate">{data.user?.email}</div>
-						<a href="/my-profile" class="block rounded px-2 py-1.5 text-sm hover:bg-surface-100-900">{m.myProfile()}</a>
+						<a href="/my-profile" class="block rounded px-2 py-1.5 text-sm hover:bg-surface-100-900"
+							>{m.myProfile()}</a
+						>
 						<form action="/logout" method="POST">
-							<button class="block w-full rounded px-2 py-1.5 text-left text-sm hover:bg-surface-100-900 cursor-pointer">{m.Logout()}</button>
+							<button
+								class="block w-full rounded px-2 py-1.5 text-left text-sm hover:bg-surface-100-900 cursor-pointer"
+								>{m.Logout()}</button
+							>
 						</form>
 					</div>
 				{/if}

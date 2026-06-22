@@ -384,6 +384,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         source="value.security_advisories", required=False, default=True
     )
     cwes = serializers.BooleanField(source="value.cwes", required=False, default=True)
+    custom_portals = serializers.BooleanField(
+        source="value.custom_portals", required=False, default=False
+    )
 
     class Meta:
         model = GlobalSettings

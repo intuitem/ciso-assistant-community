@@ -182,6 +182,17 @@
 			</div>
 			<div class="flex items-center gap-2">
 				<ThemeToggle />
+				{#if data?.featureflags?.custom_portals && !data?.user?.is_third_party}
+					<a
+						href="/portal"
+						class="flex items-center gap-2 shrink-0 rounded-lg border border-surface-200-800 bg-surface-100-900/80 px-3 py-1.5
+			text-xs text-surface-600-400 hover:bg-surface-200-800 hover:border-surface-300-700 hover:text-surface-700-300
+			transition-all duration-150"
+					>
+						<i class="fa-solid fa-grip text-surface-500"></i>
+						<span class="hidden sm:inline">{m.portals()}</span>
+					</a>
+				{/if}
 				{#if !data?.user?.is_third_party}
 					<button
 						onclick={() => commandPalette?.toggle()}

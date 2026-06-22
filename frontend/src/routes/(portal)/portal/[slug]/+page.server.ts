@@ -26,7 +26,9 @@ async function buildCreateForm(urlModel: string, fetch: typeof globalThis.fetch)
 }
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
-	const res = await fetch(`${BASE_API_URL}/portals/content/?slug=${encodeURIComponent(params.slug)}`);
+	const res = await fetch(
+		`${BASE_API_URL}/portals/content/?slug=${encodeURIComponent(params.slug)}`
+	);
 	if (!res.ok) error(404, 'Portal not found');
 	const portal = await res.json();
 

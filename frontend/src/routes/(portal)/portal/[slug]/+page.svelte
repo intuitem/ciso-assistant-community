@@ -58,10 +58,13 @@
 						</div>
 						<div class="min-w-0">
 							<div class="font-semibold text-surface-800-200">{safeTranslate(item.title)}</div>
-							<div class="mt-0.5 text-xs text-surface-600-400">{safeTranslate(item.description)}</div>
+							<div class="mt-0.5 text-xs text-surface-600-400">
+								{safeTranslate(item.description)}
+							</div>
 						</div>
 						{#if item.kind === 'external'}
-							<i class="fa-solid fa-arrow-up-right-from-square ml-auto text-xs text-surface-400"></i>
+							<i class="fa-solid fa-arrow-up-right-from-square ml-auto text-xs text-surface-400"
+							></i>
 						{/if}
 					</button>
 				{/each}

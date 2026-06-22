@@ -119,6 +119,9 @@ READER_PERMISSIONS_LIST = [
     "view_preset",
     "view_presetjourney",
     "view_presetjourneystep",
+    # portals
+    "view_portal",
+    "view_portalpreset",
     # chat
     "add_chatsession",
     "view_chatsession",
@@ -232,6 +235,9 @@ APPROVER_PERMISSIONS_LIST = [
     "view_preset",
     "view_presetjourney",
     "view_presetjourneystep",
+    # portals
+    "view_portal",
+    "view_portalpreset",
     # chat
     "add_chatsession",
     "view_chatsession",
@@ -587,6 +593,15 @@ ANALYST_PERMISSIONS_LIST = [
     "delete_presetjourney",
     "view_presetjourneystep",
     "change_presetjourneystep",
+    # portals
+    "view_portal",
+    "add_portal",
+    "change_portal",
+    "delete_portal",
+    "view_portalpreset",
+    "add_portalpreset",
+    "change_portalpreset",
+    "delete_portalpreset",
     # chat
     "add_chatsession",
     "view_chatsession",
@@ -1001,6 +1016,15 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "delete_presetjourney",
     "view_presetjourneystep",
     "change_presetjourneystep",
+    # portals
+    "view_portal",
+    "add_portal",
+    "change_portal",
+    "delete_portal",
+    "view_portalpreset",
+    "add_portalpreset",
+    "change_portalpreset",
+    "delete_portalpreset",
     # chat
     "add_chatsession",
     "view_chatsession",
@@ -1471,6 +1495,15 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "delete_presetjourney",
     "view_presetjourneystep",
     "change_presetjourneystep",
+    # portals
+    "view_portal",
+    "add_portal",
+    "change_portal",
+    "delete_portal",
+    "view_portalpreset",
+    "add_portalpreset",
+    "change_portalpreset",
+    "delete_portalpreset",
     # chat
     "add_chatsession",
     "view_chatsession",

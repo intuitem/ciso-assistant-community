@@ -12527,15 +12527,15 @@ class JourneyStepViewSet(BaseModelViewSet):
     search_fields = ["title", "description"]
 
 
-class PortalTemplateViewSet(BaseModelViewSet):
-    model = PortalTemplate
-    filterset_fields = ["folder", "status", "provider"]
+class PortalPresetViewSet(BaseModelViewSet):
+    model = PortalPreset
+    filterset_fields = ["folder", "provider"]
     search_fields = ["name", "description", "ref_id", "urn"]
 
     def _reject_if_library_backed(self):
         if self.get_object().urn is not None:
             return Response(
-                {"detail": "Library-backed templates are read-only. Duplicate first."},
+                {"detail": "Library-backed presets are read-only. Duplicate first."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         return None
@@ -12558,7 +12558,7 @@ class PortalTemplateViewSet(BaseModelViewSet):
 
 class PortalViewSet(BaseModelViewSet):
     model = Portal
-    filterset_fields = ["folder", "template", "is_public", "is_default", "enabled"]
+    filterset_fields = ["folder", "status", "is_public", "is_default", "enabled"]
     search_fields = ["name", "description", "slug"]
 
     def _entitled_queryset(self, request):
@@ -12592,19 +12592,56 @@ class PortalViewSet(BaseModelViewSet):
         portal = self._entitled_queryset(request).filter(slug=slug).first()
         if portal is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        from core.serializers import PortalSectionReadSerializer
-
-        sections = PortalSectionReadSerializer(
-            portal.template.sections.all(), many=True
-        ).data
         return Response(
             {
                 "id": str(portal.id),
                 "slug": portal.slug,
                 "name": portal.name,
                 "branding": portal.branding,
-                "sections": sections,
+                "sections": (portal.content or {}).get("sections", []),
             }
+        )
+
+    @action(detail=False, methods=["post"], url_path="from-preset")
+    def from_preset(self, request):
+        """Clone a preset's design into a new editable portal (cord cut, no sync)."""
+        from core.serializers import PortalReadSerializer
+
+        preset = PortalPreset.objects.filter(pk=request.data.get("preset")).first()
+        if preset is None:
+            return Response(
+                {"detail": "Preset not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+        data = {
+            "name": request.data.get("name") or preset.name,
+            "folder": str(preset.folder_id),
+            "content": preset.content,
+            "source_ref": preset.urn or preset.ref_id or str(preset.id),
+        }
+        serializer = PortalWriteSerializer(data=data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        portal = serializer.save()
+        return Response(
+            PortalReadSerializer(portal).data, status=status.HTTP_201_CREATED
+        )
+
+    @action(detail=True, methods=["post"])
+    def duplicate(self, request, pk=None):
+        from core.serializers import PortalReadSerializer
+
+        portal = self.get_object()
+        data = {
+            "name": f"{portal.name} (copy)",
+            "folder": str(portal.folder_id),
+            "content": portal.content,
+            "branding": portal.branding,
+            "source_ref": portal.source_ref,
+        }
+        serializer = PortalWriteSerializer(data=data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        clone = serializer.save()
+        return Response(
+            PortalReadSerializer(clone).data, status=status.HTTP_201_CREATED
         )
 
 

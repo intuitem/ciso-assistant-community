@@ -4586,33 +4586,12 @@ class PresetJourneyWriteSerializer(BaseModelSerializer):
         fields = ["name", "description"]
 
 
-class PortalItemReadSerializer(BaseModelSerializer):
-    title = serializers.CharField(source="get_title_translated")
-    description = serializers.CharField(
-        source="get_description_translated", allow_blank=True
-    )
-
-    class Meta:
-        model = PortalItem
-        fields = ["id", "order", "icon", "title", "description", "kind", "target"]
-
-
-class PortalSectionReadSerializer(BaseModelSerializer):
-    title = serializers.CharField(source="get_title_translated")
-    items = PortalItemReadSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = PortalSection
-        fields = ["id", "order", "title", "description", "items"]
-
-
-class PortalTemplateReadSerializer(BaseModelSerializer):
+class PortalPresetReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     is_user_authored = serializers.SerializerMethodField()
-    sections = PortalSectionReadSerializer(many=True, read_only=True)
 
     class Meta:
-        model = PortalTemplate
+        model = PortalPreset
         fields = [
             "id",
             "name",
@@ -4622,10 +4601,9 @@ class PortalTemplateReadSerializer(BaseModelSerializer):
             "version",
             "provider",
             "translations",
-            "status",
+            "content",
             "folder",
             "is_user_authored",
-            "sections",
             "created_at",
             "updated_at",
         ]
@@ -4634,15 +4612,14 @@ class PortalTemplateReadSerializer(BaseModelSerializer):
         return obj.urn is None
 
 
-class PortalTemplateWriteSerializer(BaseModelSerializer):
+class PortalPresetWriteSerializer(BaseModelSerializer):
     class Meta:
-        model = PortalTemplate
-        fields = ["name", "description", "folder", "translations", "status"]
+        model = PortalPreset
+        fields = ["name", "description", "folder", "translations", "content"]
 
 
 class PortalReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
-    template = FieldsRelatedField(["id", "name", "urn", "version", "status"])
     audience_groups = FieldsRelatedField(many=True)
 
     class Meta:
@@ -4651,21 +4628,37 @@ class PortalReadSerializer(BaseModelSerializer):
 
 
 class PortalWriteSerializer(BaseModelSerializer):
+    slug = serializers.SlugField(max_length=100, required=False)
+
     class Meta:
         model = Portal
         fields = [
             "name",
             "description",
             "folder",
-            "template",
             "slug",
+            "status",
             "enabled",
             "is_public",
             "audience_groups",
             "is_default",
             "priority",
             "branding",
+            "content",
+            "source_ref",
         ]
+
+    def validate(self, data):
+        data = super().validate(data)
+        if self.instance is None and not data.get("slug"):
+            from django.utils.text import slugify
+
+            base = slugify(data.get("name", "")) or "portal"
+            slug, i = base, 2
+            while Portal.objects.filter(slug=slug).exists():
+                slug, i = f"{base}-{i}", i + 1
+            data["slug"] = slug
+        return data
 
 
 class QuickStartSerializer(serializers.Serializer):
