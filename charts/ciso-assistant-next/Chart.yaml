@@ -13,3 +13,7 @@ dependencies:
     version: "16.6.3"
     repository: "oci://registry-1.docker.io/bitnamicharts"
     condition: postgresql.enabled
+  - name: qdrant
+    version: "1.18.2"
+    repository: "https://qdrant.github.io/qdrant-helm"
+    condition: qdrant.enabled

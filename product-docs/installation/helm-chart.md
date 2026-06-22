@@ -57,7 +57,7 @@ The backend pod runs migrations on startup; allow it ~30s before checking the fr
 
 ## AI assistant (chat / RAG)
 
-The in-product AI assistant needs two things wired in the chart: the `ENABLE_CHAT` flag on the backend and a reachable [Qdrant](https://qdrant.tech/) vector database for retrieval-augmented generation.
+The in-product AI assistant needs two things wired in the chart: the `ENABLE_CHAT` flag on the backend and a reachable [Qdrant](https://qdrant.tech/) vector database for retrieval-augmented generation. Setting `qdrant.enabled: true` deploys the official [Qdrant chart](https://github.com/qdrant/qdrant-helm) as a dependency (a StatefulSet with persistent storage and health probes) and injects `QDRANT_URL` automatically.
 
 ```yaml
 backend:
@@ -65,13 +65,12 @@ backend:
     chat:
       enabled: true        # sets ENABLE_CHAT on the backend and Huey worker
 qdrant:
-  enabled: true            # deploys a bundled Qdrant and injects QDRANT_URL
-  persistence:
-    enabled: true          # otherwise storage is ephemeral (emptyDir)
+  enabled: true            # deploys the Qdrant subchart and injects QDRANT_URL
 ```
 
 Notes:
 
+- Any key under `qdrant:` is passed through to the Qdrant subchart (e.g. `qdrant.persistence.size`, `qdrant.resources`). Persistence is on by default; see the [subchart values](https://github.com/qdrant/qdrant-helm/tree/main/charts/qdrant) for all options.
 - To point at an **external** Qdrant instead of the bundled one, leave `qdrant.enabled: false` and set `QDRANT_URL` through `backend.env` and `backend.huey.env`.
 - The **LLM provider** (Ollama or any OpenAI-compatible endpoint, model, base URL) is configured from the in-app **Settings → Chat/AI** section, not from the chart. LLM inference is heavy; point it at a GPU-backed endpoint.
 - The Qdrant collection and the indexes are **not** created automatically. After the pods are up, run the indexing commands once from the backend pod (`init_qdrant` creates the collection, `index_objects` indexes your existing risk/control/asset records, `index_libraries` indexes the framework libraries):

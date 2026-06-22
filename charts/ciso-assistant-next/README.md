@@ -26,6 +26,7 @@ helm-docs
 
 | Repository | Name | Version |
 |------------|------|---------|
+| https://qdrant.github.io/qdrant-helm | qdrant | 1.18.2 |
 | oci://registry-1.docker.io/bitnamicharts | postgresql | 16.6.3 |
 
 ## Installing the chart
@@ -163,30 +164,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | postgresql.global.postgresql.auth.postgresPassword | string | `""` | Super-user postgres account password # Note: if not set, it will be dynamically generated |
 | postgresql.global.postgresql.auth.username | string | `"ciso-assistant"` | Database username |
 | postgresql.primary.persistence.size | string | `"5Gi"` | PostgreSQL persistant volume size (default 8Gi). |
-| qdrant.affinity | object | `{}` | Affinity rules for Qdrant |
-| qdrant.annotations | object | `{}` | Qdrant deployment annotations |
-| qdrant.containerSecurityContext | object | `{}` | Toggle and define container-level security context |
-| qdrant.enabled | bool | `false` | Deploy the bundled Qdrant vector database (needed for the AI assistant / RAG) |
-| qdrant.env | list | `[]` | Environment variables to pass to Qdrant |
-| qdrant.image.imagePullPolicy | string | `"IfNotPresent"` | Image pull policy for Qdrant |
-| qdrant.image.registry | string | `"docker.io"` | Registry to use for Qdrant |
-| qdrant.image.repository | string | `"qdrant/qdrant"` | Repository to use for Qdrant |
-| qdrant.image.tag | string | `"v1.14.0"` | Tag to use for Qdrant |
-| qdrant.imagePullSecrets | list | `[]` (defaults to global.imagePullSecrets) | Secrets with credentials to pull images from a private registry |
-| qdrant.name | string | `"qdrant"` | Qdrant container name # Note: the bundled Qdrant is a single standalone node (replicas are fixed to 1). # For high availability, run an external Qdrant cluster and point QDRANT_URL at it. |
-| qdrant.nodeSelector | object | `{}` | Default node selector for Qdrant |
-| qdrant.persistence.accessMode | string | `"ReadWriteOnce"` | Qdrant persistant volume accessMode |
-| qdrant.persistence.enabled | bool | `false` | Enable Qdrant storage persistence |
-| qdrant.persistence.existingClaim | string | `""` | Name of an existing PersistentVolumeClaim for Qdrant |
-| qdrant.persistence.size | string | `"5Gi"` | Qdrant persistant volume size |
-| qdrant.persistence.storageClass | string | `""` | Qdrant persistant volume storageClass |
-| qdrant.podAnnotations | object | `{}` | Qdrant pod annotations |
-| qdrant.resources | object | `{}` | Resources for Qdrant |
-| qdrant.service.annotations | object | `{}` | Qdrant service annotations |
-| qdrant.service.labels | object | `{}` | Qdrant service labels |
-| qdrant.service.port | int | `6333` | Qdrant service http port |
-| qdrant.service.portName | string | `"http"` | Qdrant service port name |
-| qdrant.tolerations | list | `[]` | Default tolerations for Qdrant |
+| qdrant.enabled | bool | `false` | Deploy the bundled Qdrant (official subchart) and inject QDRANT_URL |
 | serviceAccount.annotations | object | `{}` | Annotations applied to created service account |
 | serviceAccount.automountServiceAccountToken | bool | `true` | Automount API credentials for the Service Account |
 | serviceAccount.create | bool | `false` | Create a service account for CISO Assistant |

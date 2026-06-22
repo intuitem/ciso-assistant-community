@@ -93,10 +93,28 @@ Backend in-cluster API URL used by the frontend (includes the service port).
 {{- end -}}
 
 {{/*
+Service name of the Qdrant subchart (mirrors its own "qdrant.fullname" template so
+QDRANT_URL stays correct even when qdrant.nameOverride / fullnameOverride is set).
+*/}}
+{{- define "ciso-assistant.qdrantFullname" -}}
+{{- if .Values.qdrant.fullnameOverride -}}
+{{- .Values.qdrant.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default "qdrant" .Values.qdrant.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Qdrant in-cluster URL used by the backend for the AI / RAG feature.
+Uses the Qdrant REST port (6333, fixed by the subchart's service).
 */}}
 {{- define "ciso-assistant.qdrantUrl" -}}
-{{- printf "http://%s-qdrant:%v" (include "ciso-assistant.fullname" .) .Values.qdrant.service.port -}}
+{{- printf "http://%s:6333" (include "ciso-assistant.qdrantFullname" .) -}}
 {{- end -}}
 
 {{/*

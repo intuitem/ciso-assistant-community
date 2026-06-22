@@ -467,85 +467,12 @@ externalPgsql:
   # -- Port of an external PostgreSQL to connect
   port: 5432
 
-## Qdrant vector database
-## Required by the AI assistant / RAG feature (backend reads QDRANT_URL).
-## When enabled, a Qdrant deployment is created and QDRANT_URL is injected into
-## the backend and Huey containers automatically.
-qdrant:
-  # -- Deploy the bundled Qdrant vector database (needed for the AI assistant / RAG)
+## Qdrant vector database (AI assistant / RAG)
+## Deployed via the official Qdrant chart (https://github.com/qdrant/qdrant-helm)
+## as a StatefulSet with persistence and health probes out of the box.
+## When enabled, QDRANT_URL is injected into the backend and Huey containers.
+## Any key below is passed through to the Qdrant subchart, refer to its values for
+## the full set of options (replicaCount, persistence, image, resources, ...).
+qdrant: # @schema additionalProperties: true
+  # -- Deploy the bundled Qdrant (official subchart) and inject QDRANT_URL
   enabled: false
-
-  # -- Qdrant container name
-  ## Note: the bundled Qdrant is a single standalone node (replicas are fixed to 1).
-  ## For high availability, run an external Qdrant cluster and point QDRANT_URL at it.
-  name: qdrant
-
-  # -- Qdrant deployment annotations
-  annotations: {} # @schema additionalProperties: true
-
-  # -- Qdrant pod annotations
-  podAnnotations: {} # @schema additionalProperties: true
-
-  ## Qdrant image
-  image:
-    # -- Registry to use for Qdrant
-    registry: docker.io
-    # -- Repository to use for Qdrant
-    repository: qdrant/qdrant
-    # -- Tag to use for Qdrant
-    tag: "v1.14.0"
-    # -- Image pull policy for Qdrant
-    imagePullPolicy: IfNotPresent
-
-  # -- Secrets with credentials to pull images from a private registry
-  # @default -- `[]` (defaults to global.imagePullSecrets)
-  imagePullSecrets: []
-
-  ## Qdrant persistence configuration
-  persistence:
-    # -- Enable Qdrant storage persistence
-    enabled: false
-    # -- Qdrant persistant volume size
-    size: 5Gi
-    # -- Qdrant persistant volume storageClass
-    storageClass: ""
-    # -- Qdrant persistant volume accessMode
-    accessMode: ReadWriteOnce
-    # -- Name of an existing PersistentVolumeClaim for Qdrant
-    existingClaim: ""
-
-  ## Qdrant service configuration
-  service:
-    # -- Qdrant service annotations
-    annotations: {} # @schema additionalProperties: true
-    # -- Qdrant service labels
-    labels: {} # @schema additionalProperties: true
-    # -- Qdrant service http port
-    port: 6333
-    # -- Qdrant service port name
-    portName: http
-
-  # -- Resources for Qdrant
-  resources: {} # @schema additionalProperties: true
-    #   requests:
-    #     cpu: 100m
-    #     memory: 512Mi
-    #   limits:
-    #     cpu: 256m
-    #     memory: 1024Mi
-
-  # -- Default node selector for Qdrant
-  nodeSelector: {} # @schema additionalProperties: true
-
-  # -- Default tolerations for Qdrant
-  tolerations: []
-
-  # -- Affinity rules for Qdrant
-  affinity: {} # @schema additionalProperties: true
-
-  # -- Environment variables to pass to Qdrant
-  env: []
-
-  # -- Toggle and define container-level security context
-  # @default -- `{}`
-  containerSecurityContext: {} # @schema additionalProperties: true
