@@ -47,6 +47,10 @@ These settings drive the optional AI features (chat mode, agentic workflows, RAG
 - **Embedding backend** — which backend powers semantic search over knowledge.
 - **Chat system prompt** — system prompt prepended to chat-mode conversations.
 
+{% hint style="warning" %}
+**Local or self-hosted LLMs.** The **Ollama URL** and OpenAI **API base URL** are checked when you save them and must resolve to a public address — private, loopback, and internal IPs are rejected to prevent server-side request forgery (SSRF). To point at a local or in-network model (for example Ollama on `localhost`, LM Studio, or an in-cluster endpoint), start the backend with the environment variable `ALLOW_PRIVATE_NETWORK_REQUESTS=True`.
+{% endhint %}
+
 ## Analytics
 
 - **Default custom analytics dashboard** — UUID of the dashboard shown by default on the analytics page.

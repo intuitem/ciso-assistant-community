@@ -7,6 +7,11 @@ from rest_framework import serializers
 
 from urllib.parse import urlparse
 
+from core.net_safety import (
+    BlockedRequestError,
+    DnsLookupError,
+    assert_public_url_unless_dev,
+)
 from .models import GlobalSettings
 
 
@@ -156,6 +161,18 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                 if "#" in value:
                     raise serializers.ValidationError(
                         {key: "URL must not contain a fragment (#)."}
+                    )
+                try:
+                    assert_public_url_unless_dev(
+                        value, allowed_schemes=("http", "https")
+                    )
+                except BlockedRequestError:
+                    raise serializers.ValidationError(
+                        {key: "URL must point to a public address."}
+                    )
+                except DnsLookupError:
+                    raise serializers.ValidationError(
+                        {key: "URL hostname could not be resolved."}
                     )
             # Validate builtin_metrics_retention_days minimum value
             if key == "builtin_metrics_retention_days":

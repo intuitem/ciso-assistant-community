@@ -132,7 +132,7 @@ The field-level diff and the originating domain (`folder_id`) ride in `unmapped`
 ## Operational details
 
 - **Delivery & retries.** HTTP delivery treats any `2xx` as success. `4xx`/`5xx` responses and network errors or timeouts are retried — up to 5 times with exponential backoff (60s, then doubling, ~30 minutes total) — before the event is dropped. Redirects (`3xx`) are **not** followed and count as a terminal failure (no retry). Kafka delivery retries on producer errors. Forwarding is best-effort — replay is the backstop for gaps.
-- **Egress safety.** Every HTTP sink URL is validated to point at a public host (no private, loopback, or internal addresses) at save time and again at send time; redirects are not followed.
+- **Egress safety.** Every HTTP sink URL is validated to point at a public host (no private, loopback, or internal addresses) at save time and again at send time; redirects are not followed. To forward to an internal collector, start the backend with `ALLOW_PRIVATE_NETWORK_REQUESTS=True`.
 - **SaaS.** Forwarding is pure egress to a destination you own — a SIEM collector URL or a Kafka broker you operate. CISO Assistant runs no per-tenant infrastructure for this.
 
 ## Related

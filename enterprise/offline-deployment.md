@@ -164,8 +164,9 @@ LICENSE_EXPIRATION=2025-12-31
 AUDITLOG_RETENTION_DAYS=90
 AUDITLOG_MAX_RECORDS=50000
 
-# Webhook configuration
-# WEBHOOK_ALLOW_PRIVATE_IPS=False
+# Allow outbound server-side requests (webhooks, integrations, chat LLM endpoints)
+# to target private/loopback addresses. Required for local LLMs (e.g. Ollama). Default False.
+# ALLOW_PRIVATE_NETWORK_REQUESTS=False
 
 # Logging
 # LOG_LEVEL=INFO
