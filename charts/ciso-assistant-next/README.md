@@ -173,7 +173,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | qdrant.image.repository | string | `"qdrant/qdrant"` | Repository to use for Qdrant |
 | qdrant.image.tag | string | `"v1.14.0"` | Tag to use for Qdrant |
 | qdrant.imagePullSecrets | list | `[]` (defaults to global.imagePullSecrets) | Secrets with credentials to pull images from a private registry |
-| qdrant.name | string | `"qdrant"` | Qdrant container name |
+| qdrant.name | string | `"qdrant"` | Qdrant container name # Note: the bundled Qdrant is a single standalone node (replicas are fixed to 1). # For high availability, run an external Qdrant cluster and point QDRANT_URL at it. |
 | qdrant.nodeSelector | object | `{}` | Default node selector for Qdrant |
 | qdrant.persistence.accessMode | string | `"ReadWriteOnce"` | Qdrant persistant volume accessMode |
 | qdrant.persistence.enabled | bool | `false` | Enable Qdrant storage persistence |
@@ -181,7 +181,6 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | qdrant.persistence.size | string | `"5Gi"` | Qdrant persistant volume size |
 | qdrant.persistence.storageClass | string | `""` | Qdrant persistant volume storageClass |
 | qdrant.podAnnotations | object | `{}` | Qdrant pod annotations |
-| qdrant.replicas | int | `1` | The number of Qdrant pods to run |
 | qdrant.resources | object | `{}` | Resources for Qdrant |
 | qdrant.service.annotations | object | `{}` | Qdrant service annotations |
 | qdrant.service.labels | object | `{}` | Qdrant service labels |

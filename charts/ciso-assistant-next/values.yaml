@@ -476,10 +476,9 @@ qdrant:
   enabled: false
 
   # -- Qdrant container name
+  ## Note: the bundled Qdrant is a single standalone node (replicas are fixed to 1).
+  ## For high availability, run an external Qdrant cluster and point QDRANT_URL at it.
   name: qdrant
-
-  # -- The number of Qdrant pods to run
-  replicas: 1
 
   # -- Qdrant deployment annotations
   annotations: {} # @schema additionalProperties: true

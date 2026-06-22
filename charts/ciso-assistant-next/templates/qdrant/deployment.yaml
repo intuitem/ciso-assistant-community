@@ -11,7 +11,12 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  replicas: {{ .Values.qdrant.replicas }}
+  # Bundled Qdrant is a single standalone node over one volume. Recreate avoids a
+  # rollout deadlock where a new pod can't attach the ReadWriteOnce PVC still held
+  # by the old one.
+  replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       {{- include "ciso-assistant.selectorLabels" (dict "context" . "component" "qdrant") | nindent 6 }}
@@ -44,6 +49,18 @@ spec:
           - name: http
             containerPort: 6333
             protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 30
         volumeMounts:
           - name: qdrant-data
             mountPath: /qdrant/storage

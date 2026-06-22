@@ -614,9 +614,6 @@
                     "type": "object",
                     "additionalProperties": true
                 },
-                "replicas": {
-                    "type": "integer"
-                },
                 "resources": {
                     "type": "object",
                     "additionalProperties": true
