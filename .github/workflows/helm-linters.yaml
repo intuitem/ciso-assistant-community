@@ -29,6 +29,7 @@ jobs:
       - name: Lint Helm Chart
         run: |
           cd charts
+          helm repo add qdrant https://qdrant.github.io/qdrant-helm
           helm dependency build ciso-assistant-next
           helm lint ciso-assistant-next
 
@@ -38,6 +39,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Check Helm Dependencies lock
         run: |
+          helm repo add qdrant https://qdrant.github.io/qdrant-helm
           helm dependency build charts/ciso-assistant-next
 
   helm-check-schema:
