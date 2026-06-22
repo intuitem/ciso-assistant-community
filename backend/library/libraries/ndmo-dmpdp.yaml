@@ -1,0 +1,3392 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:ndmo-dmpdp
+locale: en
+ref_id: NDMO-DMPDP
+name: NDMO Data Management and Personal Data Protection Standards
+description: 'NDMO Data Management and Personal Data Protection Standards, issued
+  by the National Data Management Office (NDMO) under the Saudi Data and Artificial
+  Intelligence Authority (SDAIA). The national standards for data management and personal
+  data protection across Saudi public entities and their data-handling partners. 15
+  domains, 77 controls and 190 specifications, each specification carrying an implementation
+  priority (P1/P2/P3) modelled as an implementation group. Reference: https://sdaia.gov.sa/ndmo'
+copyright: "\xA9 NDMO / SDAIA"
+version: 1
+publication_date: 2026-06-22
+provider: NDMO
+packager: community
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:ndmo-dmpdp
+    ref_id: NDMO-DMPDP
+    name: NDMO Data Management and Personal Data Protection Standards
+    description: NDMO (SDAIA) Data Management and Personal Data Protection Standards.
+      15 domains, 77 controls, 190 specifications with P1/P2/P3 priorities.
+    implementation_groups_definition:
+    - ref_id: P1
+      name: Priority 1
+      description: NDMO implementation priority tier 1.
+    - ref_id: P2
+      name: Priority 2
+      description: NDMO implementation priority tier 2.
+    - ref_id: P3
+      name: Priority 3
+      description: NDMO implementation priority tier 3.
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg
+      assessable: false
+      depth: 1
+      ref_id: DG
+      name: Data Governance
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg
+      ref_id: DG.1
+      name: Strategy and Plan
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.1
+      ref_id: DG.1.1
+      name: Data Management and Personal Data Protection Strategy
+      description: 'The Entity shall establish a Data Management and Personal Data
+        Protection Strategy to align Entity data initiatives and relevant stakeholders
+        to achieving its business goals, in alignment with the overall program strategy.
+        The Strategy shall cover all domains and reflect: 1. Current data management
+        challenges 2. Strategic requirements covering internal requirements derived
+        from the Entity''s business strategy as well as external requirements derived
+        from the National Data Management Agenda 3. Data Management and Personal Data
+        Protection Vision, Mission and Strategic Goals and Objectives 4. Strategic
+        and Operational performance metrics with targets across the 3 to 5 years strategy
+        duration 5. Required financial budget for the implementation of the strategy,
+        broken down by initiatives.'
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.1
+      ref_id: DG.1.2
+      name: Guiding Principles
+      description: The Entity shall adopt the National Data Management and Personal
+        Data Protection Program's Guiding Principles to affirm alignment of the Entity's
+        Data Management and Personal Data Protection Strategy to the National Data
+        Management and Personal Data Protection agendas. The Entity may, at its discretion,
+        include additional Entity-level guiding principles to augment the core set
+        of NDMO Guiding Principles. Adoption of the National Data Management and Personal
+        Data Protection Program's Guiding Principles shall be articulated either in
+        the Data Management and Personal Data Protection Strategy or as a standalone
+        document. The guiding principles establish a data-centric culture where all
+        stakeholders are unified in understanding what is most important for the Entity's
+        Data Management and Personal Data Protection agendas.
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.1
+      ref_id: DG.1.3
+      name: Data Management and Personal Data Protection Plan
+      description: "Based on the Entity\u2019s defined Data Management and Personal\
+        \ Data Protection Strategy, the Entity shall develop a Data Management and\
+        \ Personal Data Protection Plan with a 3-year implementation roadmap. The\
+        \ implementation roadmap shall include, at minimum, the following: 1. Initiatives\
+        \ that cover all the Data Management Domains defined in these standards and\
+        \ in alignment with the National Data Management and Personal Data Protection\
+        \ Framework 2. Prioritization of the list of initiatives based on a prioritization\
+        \ framework such as, at minimum, Impact versus Ease of Implementation 1. Highlight\
+        \ of the initiatives that are Quick Wins and planned to be implemented within\
+        \ the first 6 months, and the mid to long term initiatives that are planned\
+        \ throughout the 3-year period."
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg
+      ref_id: DG.2
+      name: Policy and Guidelines
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.2
+      ref_id: DG.2.1
+      name: Data Management and Personal Data Protection Policy and Guidelines Gap
+        Analysis
+      description: 'To support implementation of the Entity''s Data Management and
+        Personal Data Protection Strategy, the Entity shall conduct a Data Management
+        and Personal Data Protection Policy and Guidelines gap analysis, including,
+        at minimum, the following: 1. An analysis of the National Data Management
+        and Personal Data Protection Program''s Policies, Standards, and Guidelines
+        2. Identification and analysis of all data related standards and policies
+        currently published by the Entity or the Regulator of the sector to which
+        the Entity belongs to 3. An analysis of the internal Entity- specific requirements
+        for Data Management and Personal Data Protection Policies and Guidelines 4.
+        A Data Management and Personal Data Protection Policies and Guidelines development
+        plan that clearly indicates the timeline for implementation.'
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.2
+      ref_id: DG.2.2
+      name: Data Management and Personal Data Protection Policy and Guidelines
+      description: The Entity shall develop the Entity specific Data Management and
+        Personal Data Protection Policy and Guidelines, aligned to the National Data
+        Management and Personal Data Protection Policies and Standards.
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg
+      ref_id: DG.3
+      name: Training and Awareness
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.3
+      ref_id: DG.3.1
+      name: Data Management and Personal Data Protection Training
+      description: 'The Entity shall conduct Data Management and Personal Data Protection
+        training for all related employees to promote the agenda and enable a data-centric
+        culture. The training shall include, at minimum, the following: 1. Awareness
+        of the national Data Management and Personal Data Protection laws, policies,
+        and standards, and their applicability on the Entity 2. Awareness of the national
+        Data Management and Personal Data Protection programs, and their applicability
+        on the Entity 3. All data management domains as per the National Data Management
+        and Personal Data Protection Framework, addressed to the related Data Management
+        and Personal Data Protection roles.'
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg
+      ref_id: DG.4
+      name: Data Management Organization
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.4
+      ref_id: DG.4.1
+      name: Data Management Office
+      description: "The Entity shall establish a Data Management Office to manage\
+        \ the achievement of the national data management agendas at the Entity level.\
+        \ The office responsibilities shall be aligned with the responsibilities defined\
+        \ in the \u201COrganizational Manual\u201D published by NDMO."
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.4
+      ref_id: DG.4.2
+      name: Entity Data Management Committee
+      description: "The Entity shall establish a Data Management Committee aimed to\
+        \ provide direction and oversight to the overall data management agenda at\
+        \ the Entity level. The committee responsibilities shall be aligned with the\
+        \ responsibilities defined in the \u201COrganizational Manual\u201D published\
+        \ by NDMO."
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.4
+      ref_id: DG.4.3
+      name: Chief Data Officer
+      description: "The Entity shall identify and appoint a Chief Data Officer to\
+        \ lead the Data Management and Personal Data Protection agenda. The Chief\
+        \ Data Officer's (CDO) responsibilities shall be highlighted in a job description\
+        \ and aligned with the responsibilities defined in the \u201COrganizational\
+        \ Manual\u201D published by NDMO."
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.4
+      ref_id: DG.4.4
+      name: Data Governance Officer
+      description: "The Entity shall identify and appoint Data Governance Officer\
+        \ to support the data management agenda. The Data Governance Officer's responsibilities\
+        \ shall be highlighted in a job description and aligned with the responsibilities\
+        \ defined in the \u201COrganizational Manual\u201D published by NDMO."
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.4.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.4
+      ref_id: DG.4.5
+      name: Open Data and Information
+      description: The Entity shall identify and appoint an Open Data and Information
+        Access Officer (ODIA) to support the data management agenda. The Open Data
+        and Information Access Officer's responsibilities
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.4.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.4
+      ref_id: DG.4.6
+      name: Compliance Officer
+      description: "The Entity shall identify and appoint a Compliance Officer to\
+        \ audit and monitor the data management agenda. The Compliance Officer\u2019\
+        s responsibilities shall be highlighted in a job description and aligned with\
+        \ the National Data Management Office\u2019s with the responsibilities defined\
+        \ in the \u201COrganizational Manual\u201D published by NDMO."
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.4.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.4
+      ref_id: DG.4.7
+      name: Personal Data Protection Officer
+      description: "The Entity shall identify and appoint a Personal Data Protection\
+        \ Officer (PDPO) to support the Personal Data Protection agenda. The Personal\
+        \ Data Protection Officer's responsibilities shall be highlighted in a job\
+        \ description and aligned with the responsibilities defined in the \u201C\
+        Organizational Manual\u201D published by NDMO."
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.4.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.4
+      ref_id: DG.4.8
+      name: Business Data Executive
+      description: "The Entity shall identify and appoint Business Data Executives\
+        \ (BDE) to enable the data management agenda for their related domains. The\
+        \ Business Data Executive's responsibilities shall be highlighted in a job\
+        \ description and aligned with the responsibilities defined in the \u201C\
+        Organizational Manual\u201D published by NDMO."
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.4.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.4
+      ref_id: DG.4.9
+      name: Business Data Steward
+      description: "The Entity shall identify and appoint Business Data Stewards to\
+        \ enable the data management agenda for their related domains. The Business\
+        \ Data Steward responsibilities shall be highlighted in a job description\
+        \ and aligned with the responsibilities defined in the \u201COrganizational\
+        \ Manual\u201D published by NDMO."
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.4.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.4
+      ref_id: DG.4.10
+      name: IT Data Steward
+      description: "The Entity shall identify and appoint IT Data Stewards to enable\
+        \ the data management agenda from an IT perspective. The IT Data Steward responsibilities\
+        \ shall be highlighted in a job description and aligned with the responsibilities\
+        \ defined in the \u201COrganizational Manual\u201D published by NDMO."
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.4.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.4
+      ref_id: DG.4.11
+      name: Legal Advisor
+      description: "The Entity shall identify and appoint a Legal Advisor to support\
+        \ in data related regulatory matters. The Legal Advisor's responsibilities\
+        \ shall be highlighted in a job description and aligned with the responsibilities\
+        \ defined in the \u201COrganizational Manual\u201D published by NDMO."
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg
+      ref_id: DG.5
+      name: Compliance Audit Framework
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.5
+      ref_id: DG.5.1
+      name: Compliance Management
+      description: 'The Entity shall establish Data Management and Personal Data Protection
+        Compliance Management practices, and shall accordingly define the following:
+        1. Scope of the periodic compliance audit exercise 2. Processes to plan for
+        and execute the compliance audits 3. Processes and tools to report compliance
+        audit findings 4. Processes and plans for the remediation and escalation of
+        non-compliance The processes shall be aligned to the National Data Management
+        and Personal Data Protection Compliance Framework.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.5
+      ref_id: DG.5.2
+      name: Compliance Audit Results
+      description: 'The Entity shall document results and findings from every compliance
+        audit performed included in an Audit Report. The Audit Report(s) shall have,
+        but not limited to, the following: 1. Compliance or non-compliance to each
+        specification in this document 2. Clearly articulated findings with supporting
+        evidence for each specification 3. Recommendations to remediate each instance
+        of non-compliance 4. Accountable stakeholder for each recommendation, and
+        the target date to complete the recommendation.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.5
+      ref_id: DG.5.3
+      name: Compliance Monitoring
+      description: The Entity shall generate and monitor compliance audit scores by
+        conducting periodic
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg
+      ref_id: DG.6
+      name: Data Lifecycle Governance
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.6
+      ref_id: DG.6.1
+      name: Periodic Plan Review
+      description: "The Entity shall conduct periodic reviews to the Entity\u2019\
+        s Data Management and Personal Data Protection Plan, and document the outcome\
+        \ of these reviews, to ensure the plan maintains alignment towards the stated\
+        \ program objectives and evolving priorities. The Entity shall also document\
+        \ any changes to the initial approved plan where applicable."
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.6.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.6
+      ref_id: DG.6.2
+      name: Communications
+      description: 'The Entity shall implement a communications capability to communicate
+        updates on Data Management and Personal Data Protection activities and its
+        effectiveness. Communication updates shall be ongoing and, at minimum, include:
+        1. Key Data Management and Personal Data Protection program plan, activities
+        and decisions 2. Storage of data management documents and artifacts 3. Measure
+        of the data management performance metrics 4. Updates on the data management
+        policies and processes 5. Updates on the compliance scores, compliance report,
+        relevant regulatory environment and implementation plans.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg
+      ref_id: DG.7
+      name: Performance Management
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.7
+      ref_id: DG.7.1
+      name: Data Governance KPIs
+      description: 'The Entity shall establish key performance indicators (KPIs) to
+        gather statistics on Data Governance. KPIs shall include, at minimum, the
+        following: 1. Assignment of the Data Management and Personal Data Protection
+        roles 2. Periodic Data Management and Personal Data Protection Committee Meetings
+        completed 3. Development / Refresh of the Entity Specific Data Management
+        Strategy and Policies 4. Trainings and awareness sessions completed 5. Participation
+        in Training and Awareness Sessions 6. Compliance Audit Score 7. Start to finish
+        cycle time to resolve data related issues reported to the Data Office 8. Number
+        of change requests resolved and closed.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.7.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.7
+      ref_id: DG.7.2
+      name: Continuous Improvement
+      description: The Entity shall define, implement, and monitor continuous improvement
+        mechanisms for all Data Management domains. Improvements defined should relate
+        to dimensions including the data organization and roles, processes, and technologies.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg
+      ref_id: DG.8
+      name: Artifacts
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.8.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.8
+      ref_id: DG.8.1
+      name: Data Governance Approvals Register
+      description: The Entity shall document in a register CDO's approved data governance
+        decisions along with their respective justifications.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.8.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.8
+      ref_id: DG.8.2
+      name: Data Management Issue Tracking Register
+      description: The Entity shall document in a register historical records of data
+        management related issues and resolutions raised by business and technical
+        users.
+      implementation_groups:
+      - P3
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.8.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dg.8
+      ref_id: DG.8.3
+      name: Version Control
+      description: The Entity shall define and implement version control for data
+        management documents and artifacts that the Entity is the creator of.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm
+      assessable: false
+      depth: 1
+      ref_id: MCM
+      name: Data Catalog and Metadata
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm
+      ref_id: MCM.1
+      name: Plan
+      description: As part of the Plan control, the Entity shall develop a Data Catalog
+        Plan and the target metadata architecture
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.1
+      ref_id: MCM.1.1
+      name: Data Catalog Plan
+      description: "Based on the Entity\u2019s defined Data Management and Personal\
+        \ Data Protection Strategy and Plan, the Entity shall create a Data Catalog\
+        \ Plan to manage the implementation of the Entity\u2019s Data Catalog. The\
+        \ plan shall include, at minimum, the following: 1. Roadmap with the activities\
+        \ and key milestones for the implementation of the Data Catalog automated\
+        \ tool. The activities shall, at minimum, incorporate what is needed to achieve\
+        \ the specifications in this domain 2. Assignment of the required resources\
+        \ and budget to manage the implementation of the Data Catalog automated tool."
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.1
+      ref_id: MCM.1.2
+      name: Data Sources Prioritization
+      description: The Entity shall prioritize data sources to be included in the
+        Data Catalog, along with the definition of their business and technical metadata
+        (or metadata structure)..
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.1
+      ref_id: MCM.1.3
+      name: Metadata Architecture
+      description: 'The Entity shall develop and document a target metadata architecture.
+        The target metadata architecture shall include (but not limited to), the following:
+        1. Metadata sources - the Entity''s data sources that are sources of metadata
+        for the Data Catalog 2. Metadata repository - the Data Catalog as the Entity''s
+        central metadata repository 3. Metadata flows - a definition of metadata flows
+        between the metadata sources and the metadata repository 4. Metadata model
+        - a metadata model used by the Entity''s Data Catalog.'
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm
+      ref_id: MCM.2
+      name: Policy and Guidelines
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.2
+      ref_id: MCM.2.1
+      name: Data Access Approval
+      description: The Entity shall establish and follow a clear process for the approval
+        of connecting the Data Catalog tool to the Entity's Data Sources.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.2
+      ref_id: MCM.2.2
+      name: Metadata Access Approval
+      description: The Entity shall establish and follow a clear process for providing
+        the Entity's employees an access to the Data Catalog automated tool. The process
+        shall implement role-based access to the Data Catalog, which includes the
+        creation of access groups (for example read only, read and update, and administrator)
+        and an assignment of the Data Catalog's users to these groups. The Data Catalog
+        access groups shall be defined based on access rights to the Metadata and
+        scope of the Metadata.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm
+      ref_id: MCM.3
+      name: Training and Awareness
+      description: As part of the Training and Awareness control, the Entity shall
+        conduct the Data Catalog trainings, accelerate adoption and increase usage
+        of its Data Catalog
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.3
+      ref_id: MCM.3.1
+      name: Data Catalog Training
+      description: 'The Entity shall conduct the Data Catalog training for every employee
+        having direct need to discover, analyze or administer Metadata to promote
+        the proper use of the Data Catalog. The training shall include, at minimum,
+        the following: 1. Introduction of the Data Catalog concept and its benefits
+        2. Introductory and advanced tutorials about the Data Catalog automated tool
+        and its functionalities 3. Hands-on exercises of the Data Catalog automated
+        tool based on practical use cases.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.3
+      ref_id: MCM.3.2
+      name: Data Catalog Adoption and Usage
+      description: 'The Entity shall push for an adoption and increase usage of its
+        Data Catalog by: 1. Identification of Data Catalog power users - the Entity''s
+        Data Catalog advanced users that can act as coaches for other users 2. Creation
+        of a communication plan announcing current Data Catalog power users and encouraging
+        other Data Catalog users to interact with them. The plan shall include, at
+        minimum, the following: 2a. Description of communication actions 2b. Frequency
+        of communication actions 2c. Target audience.'
+      implementation_groups:
+      - P3
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm
+      ref_id: MCM.4
+      name: Data Lifecycle Management
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.4
+      ref_id: MCM.4.1
+      name: Metadata Stewardship Coverage
+      description: The Entity shall assign Business and IT Data Stewards to all the
+        Metadata registered within the Data Catalog. Data Stewards assigned to the
+        Metadata shall be continuously updated and shall reflect the most current
+        Data Stewards' assignments within the Entity.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.4
+      ref_id: MCM.4.2
+      name: Metadata Population
+      description: The Entity shall establish and follow a clear process for registering
+        and populating the Metadata within the Data Catalog. The process shall be
+        implemented as a workflow in the Data Catalog automated tool and by following
+        the National Data Management Office's Data Catalog Guidelines.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.4
+      ref_id: MCM.4.3
+      name: Metadata Structure
+      description: The Entity shall develop the Metadata structure according to the
+        National Data Management Office's Data Catalog Guidelines. The Metadata structure
+        defines Business Metadata attributes that are required to be populated in
+        the Data Catalog. The Entity can augment the mandated Metadata structure with
+        additional attributes based on the Entity's requirements.
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.4
+      ref_id: MCM.4.4
+      name: Metadata Update
+      description: The Entity shall establish and follow a clear process for updating
+        Metadata within its Data Catalog. The process of metadata update shall be
+        implemented as a workflow in the Data Catalog automated tool and by following
+        the National Data Management Office's Data Catalog Guidelines.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.4.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.4
+      ref_id: MCM.4.5
+      name: Metadata Quality
+      description: The Entity shall establish and follow a clear process for identifying
+        and addressing quality issues with the Metadata. The Metadata quality management
+        process shall include reporting of identified quality issues and development
+        of remediation actions within defined SLAs. The process shall be implemented
+        as a workflow in the Data Catalog automated tool and by following the National
+        Data Management Office's Data Catalog Guidelines.
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.4.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.4
+      ref_id: MCM.4.6
+      name: Metadata Annotation
+      description: The Entity shall establish a clear process for reviewing on regular
+        basis Metadata annotations (tags, comments) added by users to the Metadata
+        within the Data Catalog. The process shall be implemented as a workflow in
+        the Data Catalog automated tool and by following the National Data Management
+        Office's Data Catalog Guidelines.
+      implementation_groups:
+      - P3
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.4.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.4
+      ref_id: MCM.4.7
+      name: Metadata Certification
+      description: The Entity shall establish a clear process for reviewing on regular
+        basis trust certificates assigned by users to the Metadata within the Data
+        Catalog. The process shall be implemented as a workflow in the Data Catalog
+        automated tool and by following the National Data Management Office's Data
+        Catalog Guidelines.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm
+      ref_id: MCM.5
+      name: Data Catalog Automation
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.5
+      ref_id: MCM.5.1
+      name: Data Catalog Automated Tool
+      description: The Entity shall implement the Data Catalog automated tool acting
+        as an inventory of the Entity's data assets and supporting automation of Entity's
+        Metadata management. The implementation shall be conducted according to the
+        National Data Management Office's Data Catalog Guidelines.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.5
+      ref_id: MCM.5.2
+      name: Metadata and Catalog Notifications
+      description: "The Entity shall monitor changes to its Metadata by setting up\
+        \ automated notifications functionality within the Data Catalog automated\
+        \ tool, to keep the entity\u2019s data catalog users aware of any metadata\
+        \ updates"
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.5
+      ref_id: MCM.5.3
+      name: Metadata and Catalog Audit Trial
+      description: "The Entity shall monitor activity of users within the Data Catalog\
+        \ automated tool by setting-up a tracking functionality provided by the tool.\
+        \ Monitoring shall include information about users\u2019 logins to the Data\
+        \ Catalog and operations they invoke. The Entity shall store as artifacts\
+        \ the Data Catalog's activity and tracking logs."
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.5.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.5
+      ref_id: MCM.5.4
+      name: Tool Versioning
+      description: The Entity shall have the Data Catalog automated tool updated to
+        the latest published Vendor release or shall have a plan to update to the
+        latest release reflected in the Data Catalog Development Plan. If the latest
+        release is not applicable to the Entity, the Entity shall have the analysis
+        and a rationale for its release management strategy.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm
+      ref_id: MCM.6
+      name: Performance Management
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.6
+      ref_id: MCM.6.1
+      name: Data Catalog KPIs
+      description: 'The Entity shall establish key performance indicators (KPIs) to
+        gather statistics on the usage and the adoption of the Data Catalog by users.
+        KPIs shall include, at minimum, the following: 1. Number of registered Data
+        Catalog users 2. Number of active Data Catalog users 3. Number of logins to
+        Data Catalog 4. Number of performed metadata queries 5. Number of annotations
+        (tags, comments) added to data assets 6. Number of ratings added to data assets
+        7. Number of assigned trust certificates to metadata.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.6.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:mcm.6
+      ref_id: MCM.6.2
+      name: Metadata Quality KPIs
+      description: 'The Entity shall establish key performance indicators (KPIs) to
+        measure quality of its Metadata. KPIs shall include, at minimum, the following:
+        1. Completeness (degree to which business glossaries and data dictionaries
+        are completed) 2. Accuracy (degree to which definitions and descriptions align
+        to business context) 3. Consistency (degree to which definitions of Metadata
+        are consistent across Entity).'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq
+      assessable: false
+      depth: 1
+      ref_id: DQ
+      name: Data Quality
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq
+      ref_id: DQ.1
+      name: Plan
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.1
+      ref_id: DQ.1.1
+      name: Data Quality Prioritization
+      description: The Entity shall prioritize its data from the perspective of its
+        importance for the Data Quality Management. The result of the prioritization
+        shall be a ranked list of data to be followed when performing the Initial
+        Data Quality Assessment. The 1st priority data shall include, at minimum,
+        the Entity's master data.
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.1
+      ref_id: DQ.1.2
+      name: Data Quality Plan
+      description: "Based on the Entity\u2019s defined Data Management and Personal\
+        \ Data Protection Strategy and Plan, the Entity shall create a Data Quality\
+        \ Plan to implement and manage activities aiming to improve quality of the\
+        \ Entity's data. The plan shall include, at minimum, the following: 1. Roadmap\
+        \ with the activities and key milestones for implementation of the Entity's\
+        \ Data Quality Management. The activities shall, at minimum, incorporate what\
+        \ is needed to achieve the specifications in this domain 2. Assignment of\
+        \ the required resources and budget to manage the implementation of Data Quality\
+        \ management."
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.1
+      ref_id: DQ.1.3
+      name: Initial Data Quality Assessment
+      description: 'The Entity shall perform an Initial Data Quality Assessment of
+        data included in the Entity''s Data Quality Management scope. The assessment
+        shall include, at minimum, the following: 1. Collection of business requirements
+        for the Quality of data in the scope'
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq
+      ref_id: DQ.2
+      name: Data Quality Operations
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.2
+      ref_id: DQ.2.1
+      name: Data Quality Rules Development
+      description: 'The Entity shall develop and document Data Quality Rules for all
+        data included in the Entity''s Data Quality Management scope. The rules are
+        used to define the business requirements for Data Quality. The definition
+        of Data Quality Rules shall include, at minimum, the following: 1. Rule owner
+        - the Data Quality Analyst responsible for the rule''s definition 2. Business
+        description of the requirement to be validated by the rule 3. Assignment of
+        rules to each of the Data Quality dimensions related to the particular data
+        being measured: 3a. Completeness (the degree to which the necessary data is
+        available for use) 3b. Uniqueness (the degree to which data records are unique,
+        and not duplicates) 3c. Timeliness (the degree to which data is up to date
+        and available when it is needed) 3d. Validity (a degree of records'' conformance
+        to format, type and range) 3e. Accuracy (a degree to which data values align
+        to real values) 3f. Consistency (a degree to which data is consistent across
+        different sources) 4. List of data attributes that are validated by the defined
+        rules 5. Metrics that are calculated when the rule is validated (e.g. for
+        the rule validating the completeness of population of the data field, the
+        metrics would be: a number of records'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.2
+      ref_id: DQ.2.2
+      name: Data Quality Monitoring
+      description: 'The Entity shall monitor and document the Entity''s Data Quality
+        on a regular basis based on the defined Data Quality rules. The Data Quality
+        monitoring shall include, at minimum, the following: 1. Execution of existing
+        Data Quality Rules according to defined triggering conditions (time schedule,
+        event) 2. Reporting of the identified Data Quality issues to the Entity''s
+        data stewards and owners (at minimum, Business Data Steward and Business Data
+        Executive).'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.2
+      ref_id: DQ.2.3
+      name: Data Quality Issues Resolution
+      description: 'The Entity shall establish and follow a clear process for resolving
+        the identified Data Quality issues. The process shall include, at minimum,
+        the following: 1. The development of a remediation plan. The remediation plan
+        shall include, at minimum, the following: 1a. Root cause analysis to determine
+        the cause of the identified Data Quality issue 1b. Impact analysis to assess
+        negative consequences and level (local, enterprise- wide) of the issue 1c.
+        Definition of the options for resolving the issue''s root cause, including
+        a feasibility analysis 1d. Specification of data cleansing to be performed
+        if a Data Quality issue resolution does not correct data errors in the source
+        system 2. The decision and rationale on the selected option to resolve the
+        issue 3. The implementation status of the issue''s resolution change 4. The
+        review of the implemented change with a verification that the issue is resolved.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.2
+      ref_id: DQ.2.4
+      name: Data Quality Service Level Agreements
+      description: 'The Entity shall establish and implement Data Quality Service
+        Level Agreements specifying the Entity''s requirements for resolving the identified
+        Data Quality issues. The Entity''s Data Quality Service Level Agreement shall
+        include, at minimum, the following: 1. Timelines and deadlines for the development
+        of the remediation plan for the Data Quality issue 2. Timelines and deadlines
+        for the implementation and the review of Data Quality changes 3. Escalation
+        actions to be taken when the SLA is not met.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.2
+      ref_id: DQ.2.5
+      name: Data Quality Tools
+      description: 'The Entity shall implement tools supporting automation of the
+        Entity''s Data Quality Management. The tools shall cover, at minimum, the
+        following capabilities: 1. Data profiling - statistical analysis of data on
+        data attribute, table and cross-domain level 2. Data Quality rules management
+        - a development and an execution of Data Quality rules 3. Data Quality issues
+        management - an automation of workflows for reporting and resolving Data Quality
+        issues.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq
+      ref_id: DQ.3
+      name: Performance Management
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.3
+      ref_id: DQ.3.1
+      name: Data Quality Trends
+      description: 'The Entity shall establish key performance indicators (KPIs) to
+        measure and report on the Entity''s Data Quality trends against established
+        targets. KPIs shall include, at minimum, the following: 1. Number of Data
+        Quality issues reported based on the implemented Data Quality Rules 2. Number
+        of Data Quality issues reported by the Data Catalog users 3. Number of the
+        Data Quality Rules deployed.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.3
+      ref_id: DQ.3.2
+      name: Data Quality Issues Resolution
+      description: 'The Entity shall establish key performance indicators (KPIs) to
+        measure and report on a performance of the Entity''s Data Quality issues resolution
+        process. KPIs shall include, at minimum, the following: 1. Number of resolved
+        Data Quality issues vs reported Data Quality issues 2. Number of Data Quality
+        issues resolved after the specified deadlines 3. Total time of the development
+        of a Data Quality issue remediation plan 4. Total time of resolving a Data
+        Quality issue (a root cause resolution implementation).'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq
+      ref_id: DQ.4
+      name: Data Lifecycle Management
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.4
+      ref_id: DQ.4.1
+      name: Data Quality Checkpoints
+      description: 'The Entity shall have Business and IT Data Stewards conducting
+        the Data Quality reviews within the Software Development Lifecycle (SDLC)
+        process. All Data Quality issues identified during Data Quality reviews shall
+        be remediated before moving to the production. The Data Quality review should
+        include, at minimum, the following: 1. The Data Quality log of identified
+        quality issues 2. The remediation plan for the identified issues.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.4
+      ref_id: DQ.4.2
+      name: Data Quality Support
+      description: The Entity shall establish and follow a clear process enabling
+        data users to report Data Quality issues to the Business Data Stewards. The
+        process shall be implemented as a workflow in the Data Catalog automated tool
+        and following the National Data Management Office's Data Catalog Guidelines.
+      implementation_groups:
+      - P3
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dq.4
+      ref_id: DQ.4.3
+      name: Data Quality Metadata
+      description: The Entity shall publish existing Data Quality Rules and results
+        of Data Quality Monitoring as the metadata registered within the Data Catalog
+        automated tool. The population of the metadata shall be executed according
+        to the process defined in Metadata and Data Catalog Management domain.
+      implementation_groups:
+      - P3
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do
+      assessable: false
+      depth: 1
+      ref_id: DO
+      name: Data Operations
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do
+      ref_id: DO.1
+      name: Plan
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.1
+      ref_id: DO.1.1
+      name: Data Operations Plan
+      description: "Based on the Entity\u2019s defined Data Management and Personal\
+        \ Data Protection Strategy and Plan, the Entity shall create a Data Operations\
+        \ Plan to manage and orchestrate Data Operations activities. The plan shall\
+        \ include, at minimum, the following: 1. Roadmap with the activities and key\
+        \ milestones for the implementation of Data Operations initiatives. The activities\
+        \ shall, at minimum, incorporate what is needed to achieve the specifications\
+        \ in this domain 2. Assignment of the required resources and budget to manage\
+        \ the implementation of Data Operations initiatives."
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.1
+      ref_id: DO.1.2
+      name: Data Storage Forecasting
+      description: 'The Entity shall conduct periodic forecasts of a storage capacity
+        needed to support future business requirements of the Entity based on: 1.
+        Observation of historical storage trends 2. Assessment of a performance of
+        the Entity''s applications 3. The Entity''s roadmap for applications'' development.
+        Forecasts of a storage capacity shall include, at minimum the following: 1.
+        Prediction of the Entity''s future storage capacity needs'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.1
+      ref_id: DO.1.3
+      name: Data Systems Prioritization
+      description: The Entity shall prioritize its information systems based on their
+        business criticality and potential monetary and reputational losses as a consequence
+        of emergency or disaster. The result of the prioritization shall be a list
+        of ranked information systems which shall be used to establish an order of
+        systems recovery in the disaster recovery plan.
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.1
+      ref_id: DO.1.4
+      name: Database Technology Evaluation
+      description: 'The Entity shall establish and follow a clear process for evaluation
+        and selection of the Database Management System Software. The process'' evaluation
+        factors shall include (but not limited to) the following factors: 1. Total
+        cost of ownership including, at minimum, licensing, support, training, hardware
+        2. Availability of resources skilled in the technology, both internally and
+        in the market 3. Presence of related software tools in the Entity 4. Volume
+        and velocity limits of the technology 5. Reliability provided by the technology
+        6. Scalability of the technology 7. Security controls provided by the technology'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do
+      ref_id: DO.2
+      name: Policy and Guidelines
+      description: As part of the Policy and Guidelines control, the Entity shall
+        create a storage and retention policy for the Data Lifecycle Management of
+        all stored data
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.2
+      ref_id: DO.2.1
+      name: Storage and Retention Policy
+      description: 'The Entity shall create a storage and retention policy for the
+        Data Lifecycle Management of the Entity''s data. The policy shall cover, at
+        minimum, the following areas of the data lifecycle: 1. Storage conditions
+        ensuring a protection of data in the event of disaster 2. Retention periods
+        of data based on its type, classification, business value and legal requirements
+        3. Disposal and destruction rules based on the data type and classification
+        4. Required actions in the event of an accidental permanent loss of data.'
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do
+      ref_id: DO.3
+      name: Database Operations
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.3
+      ref_id: DO.3.1
+      name: Database Monitoring
+      description: 'The Entity shall monitor and report database performance on regular
+        basis including (but not limited to) the following: 1. Capacity - size of
+        the unused storage 2. Availability - accessibility of databases to users 3.
+        Queries execution performance - query execution times and errors 4. Changes
+        tracking - tracking of database changes for root cause analysis'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.3
+      ref_id: DO.3.2
+      name: Database Access Control
+      description: The Entity shall establish and follow a clear process for providing
+        the Entity's employees an access to the databases. The process shall implement
+        a role-based access to the databases which includes an assignment of roles
+        to Entity's employees and granting permissions to the roles. Roles shall be
+        defined by following the data classification domain standards.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.3
+      ref_id: DO.3.3
+      name: Storage Configuration Management
+      description: 'The Entity shall establish and follow a clear process for managing
+        its Storage Configuration. The process shall include (but not limited to)
+        the following steps: 1. Configuration identification - identification and
+        documentation of the attributes defining the database system configuration
+        2. Configuration change control - implementation of changes in the defined
+        database configuration'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.3
+      ref_id: DO.3.4
+      name: DBMS Versioning
+      description: The Entity shall have its DBMS tools updated to the latest published
+        Vendor release or shall have a plan to update to the latest release reflected
+        in the Data Management and Personal Data Protection Plan. If the latest release
+        is not applicable to the Entity, the Entity shall have the analysis and rationale
+        for its release management strategy.
+      implementation_groups:
+      - P3
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.3
+      ref_id: DO.3.5
+      name: Service Level Agreements
+      description: 'The Entity shall establish and implement database performance
+        Service Level Agreements specifying the Entity''s requirements for the databases
+        performance, data availability and recovery. The Entity''s database performance
+        Service Level Agreements shall include (but not limited to) the following:
+        1. Timeframes for database''s availability for users 2. Maximum allowable
+        execution time for selected application transactions 3. Escalation actions
+        to be taken when the SLA is not met'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do
+      ref_id: DO.4
+      name: Business Continuity
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.4
+      ref_id: DO.4.1
+      name: Data Backup Recovery
+      description: 'The Entity shall establish and follow a clear process for the
+        data backup and recovery including (but not limited to) the following: 1 -
+        Definition of backup frequency for each information system 2 - Scope of backup
+        for each information system including scope of data and scope of database
+        transaction logs 3 - Location of backup files including a storage medium and
+        a physical location 4 - Periodic validations of backup completions using non-production
+        system copies'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.4
+      ref_id: DO.4.2
+      name: Disaster Recovery
+      description: 'The Entity shall establish and follow a disaster recovery plan
+        including (but not limited to) the following: 1. Prioritized list of information
+        systems defining an order of the information systems recovery 2. Assignment
+        of roles responsible for addressing an incident response 3. Definition of
+        actions to be taken to activate a response to the incident 4. Definition of
+        actions to be taken to reduce the damage and mitigate the consequences of
+        an incident on Entity''s critical operations 5. Definition of Recovery Point
+        Objectives (a maximum targeted period within which data might be lost without
+        causing damage to business) for each information system covered in the plan'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.4
+      ref_id: DO.4.3
+      name: Production Data Access Control
+      description: 'The Entity shall establish and follow a clear process for the
+        implementation of database changes to Production Environments. The process
+        shall include (but not limited to) the following: 1. Change request initiating
+        the process 2. Definition of actions to be taken for a controlled implementation
+        of changes to databases 3. Definition of actions to be taken for reversing
+        the changes in case of identified issues'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do
+      ref_id: DO.5
+      name: Performance Management
+      description: As part of the Performance Management control, the Entity shall
+        establish key performance indicators (KPIs) to gather statistics on usage
+        of its data storage
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:do.5
+      ref_id: DO.5.1
+      name: Storage KPIs
+      description: 'The Entity shall establish key performance indicators (KPIs) to
+        gather statistics on usage of its data storage. KPIs shall include, at minimum,
+        the following: 1. Percentage of total data storage capacity used 2. Percentage
+        of data storage capacity used by type of database 3. Percentage of data storage
+        capacity used for backups 4. Number of performed data transactions 5. Average
+        time of queries execution.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm
+      assessable: false
+      depth: 1
+      ref_id: DCM
+      name: Document and Content Management
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm
+      ref_id: DCM.1
+      name: Plan
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm.1
+      ref_id: DCM.1.1
+      name: Document and Content Management Plan
+      description: "Based on the Entity\u2019s defined Data Management and Personal\
+        \ Data Protection Strategy and Plan, the Entity shall create a Document and\
+        \ Content Management Plan to implement and control activities aiming to manage\
+        \ the Entity's documents and content lifecycle. The plan shall include, at\
+        \ minimum, the following: 1. Roadmap with the activities and key milestones\
+        \ for implementation of Documents and Content Management processes. The activities\
+        \ shall, at minimum, incorporate what is needed to achieve the specifications\
+        \ in this domain 2. Assignment of the required resources and budget to manage\
+        \ the implementation of Documents and Content Management processes."
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm.1
+      ref_id: DCM.1.2
+      name: Documents Digitization Plan
+      description: "Based on the Entity\u2019s defined Data Management and Personal\
+        \ Data Protection Strategy and Plan, the Entity shall create a Documents and\
+        \ Content Digitization Plan to manage the implementation of paperless management\
+        \ initiatives. The plan shall include, at minimum, the following: 1. Roadmap\
+        \ with the activities and key milestones for a migration of the Entity's existing\
+        \ paper-based documents to the electronic format 2. Roadmap with the activities\
+        \ and key milestones for the implementation of initiatives focused on eliminating\
+        \ a creation of paper- based documents in the Entity and replacing them with\
+        \ electronic documents 3. Assignment of the required resources and budget\
+        \ to manage the implementation of paperless management initiatives."
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm.1
+      ref_id: DCM.1.3
+      name: Documents Prioritization
+      description: The Entity shall identify and prioritize its documents to be stored
+        and managed in the Entity's DMS. The result of the prioritization shall be
+        a ranked list of documents to be used as an input in the implementation of
+        the Entity's DMS.
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm.1
+      ref_id: DCM.1.4
+      name: Documents Workflows Prioritization
+      description: The Entity shall identify and prioritize its key processes to be
+        implemented as workflows in DMS to enable automated and paperless management
+        of documents within the Entity. The result of the prioritization shall be
+        a ranked list of the processes to be used as an input in the implementation
+        of the Entity's DMS.
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm
+      ref_id: DCM.2
+      name: Policy and Guidelines
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm.2
+      ref_id: DCM.2.1
+      name: Document and Content Management Policy
+      description: 'The Entity shall create a Document and Content Management policy/policies
+        on managing the data lifecycle for documents and content within the Entity.
+        The policy/policies shall cover, at minimum, the following areas of the document
+        and content lifecycle: 1. Documents'' naming conventions used 2. Assignment
+        of classification levels to documents 3. Documents and content access approval
+        4. Documents and content backup and recovery 5. Documents and content retention
+        and disposal'
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm
+      ref_id: DCM.3
+      name: Training and Awareness
+      description: As part of the Training and Awareness control, the Entity shall
+        conduct document and content management training for the Entity's employees
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm.3
+      ref_id: DCM.3.1
+      name: Document and Content Management Training
+      description: 'The Entity shall conduct the Document and Content Management training
+        for the Entity''s employees to increase the awareness on leading practices
+        in the Document and Content Management. The training shall include, at minimum,
+        the following: 1. Introduction of the policies around the Document and Content
+        Management 2. Introductory and advanced tutorials about Document and Content
+        Management systems used and their functionalities.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm
+      ref_id: DCM.4
+      name: Document and Content Operations
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm.4
+      ref_id: DCM.4.1
+      name: Backup and Recovery
+      description: The Entity shall include the Document and Content Management Systems
+        within its overall backup and recovery plan
+      implementation_groups:
+      - P3
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm.4
+      ref_id: DCM.4.2
+      name: Retention and Disposal
+      description: 'The Entity shall establish and follow a clear process for retention
+        and disposal of the Entity''s documents. The process shall implement the Entity''s
+        documents retention and disposal policy and shall include (but not limited
+        to) the following: 1. Handover of documents to the Entity''s archival facility
+        2. Physical destruction of documents, including overwriting and a secure deletion'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm.4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm.4
+      ref_id: DCM.4.3
+      name: Document and Content Access Approval
+      description: The Entity shall establish and follow a clear process for providing
+        Entity's employees access to documents and content stored in the Entity's
+        Document and Content Management Systems. The process shall implement a role-based
+        access to documents and content. The CMS and DMS access groups shall be defined
+        by following the Data Classification domain standards
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm.4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm.4
+      ref_id: DCM.4.4
+      name: Document and Content Metadata Publishing
+      description: The Entity shall publish metadata of documents and content stored
+        within the Entity's Document and Content Management Systems in the Entity's
+        Data Catalog automated tool. The population of the metadata shall be executed
+        according to the process defined in Metadata and Data Catalog Management domain.
+      implementation_groups:
+      - P3
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm.4.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm.4
+      ref_id: DCM.4.5
+      name: Documents and Content Management Tools
+      description: 'The Entity shall implement tools supporting automation of the
+        Entity''s Document and Content Management. The tools shall include, at minimum,
+        the following: 1. Document Management System - an application used to capture,
+        store and manage documents in an electronic format (electronic documents and
+        digital media). The selected DMS tool shall provide, at minimum, the following
+        capabilities: - Storage of documents - OCR (Optical Character Recognition)
+        functionality to analyze imported images - Indexing of documents - Versioning
+        of documents including tracking of the history of changes - Secured access
+        to documents - Global search and discovery on the registered documents - Documents
+        workflows development 2. Web Content Management System - an application used
+        to store and manage website Content used by the Entity''s portals and internet
+        sites 3. Collaboration tools - applications providing users with platform
+        to collaborate real-time on electronic documents, communicate using chat and
+        track changes in the documents'
+      implementation_groups:
+      - P3
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm
+      ref_id: DCM.5
+      name: Performance Management
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dcm.5
+      ref_id: DCM.5.1
+      name: Documents Management KPIs
+      description: 'The Entity shall establish key performance indicators (KPIs) to
+        measure its documents management efficiency. KPIs shall include, at minimum,
+        the following: 1. Volume of the Entity''s documents stored and managed within
+        the Entity''s Document Management System 2. Number of users of the Entity''s
+        Document Management System 3. % of identified paper-based documents migrated
+        to electronic format.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam
+      assessable: false
+      depth: 1
+      ref_id: DAM
+      name: Data Architecture and Modeling
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam
+      ref_id: DAM.1
+      name: Plan
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.1
+      ref_id: DAM.1.1
+      name: Data Architecture and Modeling Plan
+      description: "Based on the Entity\u2019s defined Data Management and Personal\
+        \ Data Protection Strategy and Plan, the Entity shall create a Data Architecture\
+        \ and Modeling Plan to implement and manage activities aiming to improve its\
+        \ Data Architecture Capabilities. The plan shall include, at minimum, the\
+        \ following: 1. Roadmap with the activities and key milestones for the implementation\
+        \ of the target Data Architecture Capabilities. The activities shall, at minimum,\
+        \ incorporate what is needed to achieve the specifications in this domain\
+        \ 2. Assignment of the required resources and budget to manage the implementation\
+        \ of the activities included in the Roadmap."
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam
+      ref_id: DAM.2
+      name: Policy and Guidelines
+      description: As part of Policy and Guidelines control, the Entity shall document
+        and publish a Data Architecture and Modeling Policy
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.2
+      ref_id: DAM.2.1
+      name: Data Architecture and Modeling Policy
+      description: 'The Entity shall document and publish a Data Architecture and
+        Modeling Policy to guide the development of the target data architecture.
+        The policy shall cover, at minimum, the following: 1. Target Data Architecture
+        shall address strategic requirements defined within the Entity''s Data Management
+        and Personal Data Protection Strategy 2. Target Data Architecture shall be
+        developed in conjunction with the development of the Entity''s overall Enterprise
+        Architecture 3. Target Data Architecture shall adopt a widely used Enterprise
+        Architecture Framework, e.g. TOGAF, Zachmann 4. The Entity''s Data Models
+        shall be monitored regularly and kept up to date.'
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam
+      ref_id: DAM.3
+      name: Data Architecture Framework Definition
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.3
+      ref_id: DAM.3.1
+      name: Current State Architecture
+      description: 'The Entity shall define its ''baseline'' current state Data Architecture
+        to support the development of its target state Data Architecture. The current
+        state Data and Technical architecture should cover, at minimum, the following:
+        1. Data Model - The Entity''s current Enterprise Data Model at Conceptual,
+        Logical and Physical level. Each data model level shall cover, at minimum:
+        1a. Conceptual Model - Key business entities for the Entity with their relationships
+        divided into business subject areas 1b. Logical Model - Conceptual model extended
+        with attributes for business entities and addition of less significant entities
+        and relationships 1c. Physical Model - Physical representation (physical tables
+        names, attributes names, data types, primary and foreign keys etc.) of logical
+        data models within the key System Components 2. Key Processes - Essential
+        current processes involved in ongoing business operations and decision making
+        3. Key System Components - Essential current applications, data storages,
+        data processing platforms and data analytics solutions involved in key processes'
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.3
+      ref_id: DAM.3.2
+      name: Target State Architecture
+      description: 'The Entity shall define and develop a future state target data
+        architecture by following the Entity''s Data Architecture and Modeling Policy.
+        The target Data Architecture shall cover, at minimum, the following: 1. Data
+        Model - the Entity''s target Enterprise Data Model at Conceptual, Logical
+        and Physical level. Each data model level shall include, at minimum: 1a. Conceptual
+        Model - key business entities for the Entity with their relationships divided
+        into business subject areas 1b. Logical Model - conceptual model extended
+        with attributes for business entities and addition of less significant entities
+        and relationships 1c. Physical Model - physical representation (physical tables
+        names, attributes names, data types, primary and foreign keys etc.) of logical
+        data models within the key System Components 2. Key Processes - Essential
+        target processes involved in ongoing business operations and decision making
+        3. Key System Components - Essential target applications, data storages, data
+        processing platforms and data analytics solutions involved in key processes
+        4. Data Flows and Lineage - Visualized target data movement across the key
+        processes and system components.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.3
+      ref_id: DAM.3.3
+      name: Future State Gap Assessment
+      description: The Entity shall conduct and document a gap analysis between the
+        Entity's current state architecture and the defined target state architecture.
+        The gap analysis shall be used as an input for definition of initiatives required
+        to implement target state data architecture.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.3
+      ref_id: DAM.3.4
+      name: Big Data Considerations
+      description: The Entity shall identify and document its requirements for developing
+        a Data Lake environment using a vendor-neutral Big Data
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.3
+      ref_id: DAM.3.5
+      name: Data Processing Considerations
+      description: The Entity shall employ and document a partitioning strategy for
+        its target state Data Architecture for efficient processing of various data
+        volumes, variety and velocity of data and optimizing data processing and systems
+        performance. The partitioning strategy should cover both real-time and batch
+        processing operations.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam
+      ref_id: DAM.4
+      name: Data Modeling Definition
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.4
+      ref_id: DAM.4.1
+      name: Model Representation
+      description: The Entity shall select and follow a diagramming method (e.g. UML)
+        for documenting the structure, relationships and notations of business entities
+        at the conceptual, logical and physical level that can be used throughout
+        the Software Development Lifecycle (SDLC).
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.4
+      ref_id: DAM.4.2
+      name: Tools and Technologies
+      description: 'The Entity shall select and implement a toolset of technologies
+        for the design, development and implementation of data architecture and modeling
+        initiatives within the Entity. The Entity''s toolset shall cover, at minimum,
+        the following: 1. Data Architecture Design - Visually representing data and
+        system components along with data flow diagramming 2. Data Modeling - Drawing
+        functionality to create and modify data and system objects, attributes and
+        relationships, and perform reverse engineering of existing data models 3.
+        Data Lineage - Capturing and maintaining of data flows between systems to
+        enable an impact analysis.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam
+      ref_id: DAM.5
+      name: Data Lifecycle Management
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.5
+      ref_id: DAM.5.1
+      name: Change Management
+      description: 'The Entity shall establish and follow an architecture change management
+        process to review, approve and implement changes to current and/or target
+        state Data Architectures. The scope of architecture changes shall include,
+        at minimum, the following: 1. Requests for new Data Architecture and Data
+        Modeling initiatives 2. Modifications to Statement of Architecture Work documents
+        for existing initiatives.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.5
+      ref_id: DAM.5.2
+      name: Data Architecture Checkpoints
+      description: 'The Entity shall have Data Architecture checkpoints incorporated
+        into its Software Development Lifecycle (SDLC) process. The checkpoints shall
+        include, at minimum, the following: 1. Investigation of possibilities for
+        reusage of existing Data Architecture components to address business requirements
+        2. Validation of conformance of created data models with the Entity''s Enterprise
+        Data Model 3. Verification if project implies any changes required to the
+        Entity''s overall Enterprise Data Model.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam
+      ref_id: DAM.6
+      name: Performance Management
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.6
+      ref_id: DAM.6.1
+      name: Data Architecture and Modeling KPIs
+      description: The Entity shall establish key performance indicators (KPIs) to
+        measure the state of its Data Architecture and Modeling capabilities. KPIs
+        shall include, at minimum, metrics to track progress in transforming current
+        state data architecture towards a target state data architecture.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam
+      ref_id: DAM.7
+      name: Artifacts
+      description: As part of the Artifacts control, the Entity shall store and maintain
+        its Data Architecture documentation materials
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dam.7
+      ref_id: DAM.7.1
+      name: Data Architecture and Modeling Register
+      description: The Entity shall store in a register its data and technical architecture
+        project, reference documentation materials and data model designs.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi
+      assessable: false
+      depth: 1
+      ref_id: DSI
+      name: Data Sharing and Interoperability
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi
+      ref_id: DSI.1
+      name: Plan
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.1
+      ref_id: DSI.1.1
+      name: Initial Data Integration Assessment
+      description: 'The Entity shall perform an Initial Data Integration Assessment
+        to identify pain points and inefficiencies in the data movement and the integration
+        across the Entity. The assessment shall include, at minimum, the following:
+        1. Creating an inventory of all existing IT components (data sources, systems,
+        applications and data stores) 2. Documenting a high-level Data Lineage including
+        the rules according to which data is changed, and the frequency of changes
+        3. Documenting data models used by the Entity''s IT components. The result
+        of the Initial Data Integration Assessment shall be a list of identified data
+        movement and integration pain points.'
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.1
+      ref_id: DSI.1.2
+      name: Target Data Integration Architecture
+      description: 'The Entity shall create a Target Data Integration Architecture
+        based on the pain points identified in the Initial Data Integration Assessment
+        to manage the data movement efficiently across data stores, systems and applications.
+        At minimum, the Target Data Integration Architecture shall include, the following:
+        1. Data Integration Requirements - Data Integration Requirements defined by
+        the key business and IT stakeholders (incl. Data Architects)'
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.1
+      ref_id: DSI.1.3
+      name: Data Integration Plan
+      description: "Based on the Entity\u2019s defined Data Management and Personal\
+        \ Data Protection Strategy and Plan, the Entity shall create a Data Integration\
+        \ Plan to identify and orchestrate the implementation of the integration initiatives.\
+        \ The plan shall include, at minimum, the following: 1. Roadmap with the activities\
+        \ and key milestones for the implementation of the Target Data Integration\
+        \ Architecture. The activities shall, at minimum, incorporate what is needed\
+        \ to achieve the specifications in this domain 2. Assignment of the required\
+        \ resources and budget to manage the implementation of the Data Integration\
+        \ initiatives."
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi
+      ref_id: DSI.2
+      name: Training and Awareness
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.2
+      ref_id: DSI.2.1
+      name: Data Sharing Training
+      description: 'The Entity shall conduct the Data Sharing training for every employee
+        involved in the Data Sharing initiatives to ensure that they understand their
+        obligations, responsibilities and the consequences of an unauthorized disclosure
+        or mishandling of data. The training shall include, at minimum, the following:
+        1. Introduction on the applicability of the Data Sharing process 2. Leading
+        practices of data handling 3. Consequences of mishandling of data 4. Data
+        Sharing Principles and Controls'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi
+      ref_id: DSI.3
+      name: Integration Solution Development Lifecycle
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.3
+      ref_id: DSI.3.1
+      name: Integration Requirements Document
+      description: 'The Entity shall produce an Integration Requirements Document
+        for each Entity''s initiative requiring the data integration between the Entity''s
+        IT components. The document shall include, at minimum, the following: 1. Clearly
+        defined scope 2. Entity''s Business goals and objectives to be achieved 3.
+        Implementation Timeline 4. Resources required 5. Cost estimate 6. Functional
+        Requirements 7. Non-Functional Requirements.'
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.3
+      ref_id: DSI.3.2
+      name: Solution Design Document
+      description: "The Entity shall create a Solution Design Document for each integration\
+        \ initiative based on the Integration Requirements Document provided. The\
+        \ document shall include, at minimum, the following: 1. Integration Solution\
+        \ Overview \u2013 Description of the solution supported by the Solution Overview\
+        \ Diagram 2. Target Data Integration Architecture Adherence \u2013 Alignment\
+        \ to the Target Data Integration Architecture 3. Data Orchestration \u2013\
+        \ The Data-Flow- Diagram (DFD) portraying the flow of data in a data integration\
+        \ solution from start to finish, including intermediate steps, required to\
+        \ complete the transformation 4. Source-To-Target Mapping - Set of data transformation\
+        \ instructions that determine"
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.3
+      ref_id: DSI.3.3
+      name: Integration Solution Testing
+      description: "The Entity shall perform testing of the developed Integration\
+        \ Solution prior to deploying it to the Production Environment to verify that\
+        \ it was implemented as defined in the Solution Design Document. At minimum,\
+        \ testing shall consist of the following stages: 1. Integration Testing \u2013\
+        \ Verifying the correctness of data flows between integrated IT components\
+        \ (systems, applications, data stores) to identify and resolve any Data Quality\
+        \ issues or bugs 2. Functional Testing \u2013 Verifying that the system meets\
+        \ both functional and non- functional requirements and satisfies business\
+        \ goals. Each of above stages shall include, at minimum, the following: 1.\
+        \ Defining Test Use Cases 2. Setting up a Test Environment 3. Executing Test\
+        \ Use Cases in a Test Environment and documenting test results."
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.3
+      ref_id: DSI.3.4
+      name: Monitoring and Maintenance
+      description: 'The Entity shall actively monitor and maintain the Integration
+        Solution after its release to the Production Environment. The monitoring and
+        maintenance shall include, at minimum, the following: 1. Reporting on any
+        identified bugs or defects 2. Producing the Change Request document to accommodate
+        for any change requirements from the end users.'
+      implementation_groups:
+      - P3
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi
+      ref_id: DSI.4
+      name: Data Processes
+      description: As part of the Data Processes control, the Entity shall design,
+        document and follow ETL and ELT processes
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.4
+      ref_id: DSI.4.1
+      name: ETL Process
+      description: 'The Entity shall design, document and follow ETL (Extract Transform
+        Load) process to integrate data from disparate sources and load it into Data
+        Warehouse Store. The process shall include the following steps: 1. Extract
+        - Data Extraction shall include, at minimum, the following: 1a. Identification
+        of data sources from which the data will be extracted 1b. Extracting data
+        from the data sources 1c. Staging extracted data temporarily in a physical
+        data store on disk or in a memory 2. Transform - Data Transformation shall
+        include, at minimum, the following: 2a. Data Mapping - Planning the actual
+        transformation process 2b. Data Transformation - Removing duplicate data,
+        filling out missing values, filtering, sorting, joining and splitting data
+        2c. Review - Validating the correctness of the transformation 3. Load - Storing
+        of physically transformed data in the Data Warehouse Store.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.4
+      ref_id: DSI.4.2
+      name: ELT Process
+      description: 'The Entity shall design, document and follow ELT Process to store
+        the unstructured data in its raw native format in the Data Lake. The process
+        shall include the following steps: 1. Extract - Data Extraction shall include,
+        at minimum, the following: 1a. Identification of data sources from which the
+        data will be extracted 1b. Extracting data from the data sources'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi
+      ref_id: DSI.5
+      name: Data Sharing Process
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.5
+      ref_id: DSI.5.1
+      name: Data Sharing Process
+      description: 'The Entity shall adopt and follow the Data Sharing Process as
+        defined in the Data Sharing Regulation published by the National Data Management
+        Office when sharing data externally with Public Entities, Private Organizations
+        and Individuals. The Data Sharing Process shall include the following steps:
+        1. Data Sharing Request Reception 2. Roles assignment 3. Data Classification
+        level check 4. Data Sharing Principles assessment 5. Data Sharing decision
+        and feedback 6. Business Data Executive approval 7. Design and implementation
+        of Data Sharing controls 8. Data Sharing agreement signing 9. Sharing data
+        with the Requestor.'
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi
+      ref_id: DSI.6
+      name: Data Sharing Requests
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.6
+      ref_id: DSI.6.1
+      name: Data Sharing Request Submission Channel
+      description: The Entity shall establish on its official Government website a
+        channel to manage the submission and the reception of Data Sharing requests.
+        Each such request shall be routed to the Data Office.
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi
+      ref_id: DSI.7
+      name: Data Sharing Agreements
+      description: As part of the Data Sharing Agreements control, the Entity shall
+        design, implement and review Data Sharing Agreements
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.7
+      ref_id: DSI.7.1
+      name: Internal Data Sharing Agreements
+      description: The Entity shall define and follow an Internal Data Sharing agreement
+        template that shall be used when data is shared between information systems
+        within the Entity.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.7.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.7
+      ref_id: DSI.7.2
+      name: External Data Sharing Agreements
+      description: 'The Entity shall design and implement the required Data Sharing
+        controls as defined in the Data Sharing Regulation. The controls shall be
+        agreed with the requesting Entity, and they shall be documented in the Data
+        Sharing Agreement. The Data Sharing Agreement shall include, at minimum, the
+        following: 1. Purpose of the Data Sharing 2. Information about requesting
+        and sharing Entity 3. Lawful basis for sharing 4. Sharing details (date, duration)
+        5. Liability provisions The Data Sharing agreement shall be signed by the
+        Business Data Executive and the Requestor prior to sharing data.'
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.7.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.7
+      ref_id: DSI.7.3
+      name: Data Sharing Agreements' Review
+      description: The Entity shall review all ongoing Data Sharing agreements on
+        a regular basis to accommodate for any changes. The audit shall be executed,
+        and its outcome documented by the Data Steward based on contractual provisions
+        and procedures detailed out in the Data Sharing agreement.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi
+      ref_id: DSI.8
+      name: Performance Management
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.8.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dsi.8
+      ref_id: DSI.8.1
+      name: Data Sharing and Interoperability KPIs
+      description: 'The Entity shall establish key performance indicators (KPIs) to
+        measure the progress and benefits from implementing Data Integration solutions,
+        and the effectiveness of Data Sharing activities. KPIs shall include, at minimum,
+        the following: 1. Data transfer rate between systems / applications 2. Latency
+        between data sources and data targets 3. The number of Data Sharing requests
+        received 4. The number of Data Sharing requests accepted/denied 5. The number
+        of Data Sharing requests sent 6. The number of ongoing Data Sharing agreements
+        7. Average duration of Data Sharing requests evaluation process expressed
+        in days.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd
+      assessable: false
+      depth: 1
+      ref_id: RMD
+      name: Reference and Master Data Management
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd
+      ref_id: RMD.1
+      name: Plan
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.1
+      ref_id: RMD.1.1
+      name: Reference and Master Data Plan
+      description: "Based on the Entity\u2019s defined Data Management and Personal\
+        \ Data Protection Strategy and Plan, the Entity shall create a Reference and\
+        \ Master Data Plan to implement and manage activities aiming to improve its\
+        \ Reference and Master Data Management Capabilities. The plan shall include,\
+        \ at minimum, the following: 1. Roadmap with the activities and key milestones\
+        \ for the implementation of the Entity's Reference and Master Data Management.\
+        \ The activities shall, at minimum, incorporate what is needed to achieve\
+        \ the specifications in this domain 2. Assignment of the required resources\
+        \ and budget to manage the implementation of the activities included in the\
+        \ Roadmap."
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.1
+      ref_id: RMD.1.2
+      name: Reference and Master Data Identification and Prioritization
+      description: 'The Entity shall identify its reference and master data. The identification
+        shall cover, at minimum, the following: 1. Identification of Master Data objects
+        (e.g. customer, product, citizen) used across the Entity 2. Identification
+        of Reference Data Objects required by instances of identified Master Data
+        Objects 3. Identification of data sources and applications where Reference
+        and Master'
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.1
+      ref_id: RMD.1.3
+      name: Reference Data Categorization
+      description: 'The Entity shall categorize its identified Reference Data Objects
+        as either internal or external datasets: - Internal - Any reference data the
+        Entity owns, manages and is Single Source of Truth across government - External
+        - Any reference data owned and managed by other Entities across government
+        or considered standard industry data coming from external organizations such
+        as ISO. An identification of internal and external reference data used by
+        the Entity is as an input for standardization activities of Reference Data
+        at the national Government level.'
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.1
+      ref_id: RMD.1.4
+      name: Master Data Categorization
+      description: 'The Entity shall categorize its identified Master Data objects
+        as either internal or external: - Internal - Any Master Data Objects the Entity
+        owns, manages and is Single Source of Truth across government - External -
+        Any Master Data Objects owned and managed by other Entities across government.
+        An identification of internal and external Master Data Objects used by the
+        Entity is as an input for standardization activities of Master Data at the
+        national Government level.'
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd
+      ref_id: RMD.2
+      name: Architecture
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.2
+      ref_id: RMD.2.1
+      name: RMD Requirements
+      description: 'Based on the Data Management and Personal Data Protection Strategy,
+        the Entity shall establish and document its requirements for effectively managing
+        the Entity''s Reference and Master Data across the data lifecycle. The requirements
+        for Reference and Master Data shall cover, at minimum, the following: 1. Processes
+        and related roles for managing the Entity''s Reference and Master Data Objects
+        across the data lifecycle from creation to archiving 2. Rules for accurate
+        matching and merging Master Data Records from different data sources to create
+        Golden Record 3. Requirements for provisioning of Master Data Golden Records
+        to consuming applications 4. Requirements for provisioning of Reference Data
+        Objects to consuming applications 5. Data quality requirements for Reference
+        and Master Data Objects to be leveraged an input for Initial Data Quality
+        Assessment detailed in Data Quality domain.'
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.2
+      ref_id: RMD.2.2
+      name: RMD Data Hub Design
+      description: The Entity shall evaluate and select Reference Master Data Hub
+        architecture design to effectively manage its Reference and Master
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.2
+      ref_id: RMD.2.3
+      name: RMD Conceptual Architecture
+      description: The Entity shall develop and document a conceptual architecture
+        for its target Reference and Master Data environment per the Entity's selected
+        Data Hub architecture design. The conceptual architecture shall indicate foundational
+        building block components and
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.2
+      ref_id: RMD.2.4
+      name: RMD Information Architecture
+      description: 'The Entity shall develop and document an information architecture
+        for its target Reference and Master Data environment based on defined conceptual
+        architecture. The information architecture shall represent, at minimum, the
+        following components: 1. Reference and Master Data Objects - inventory of
+        identified Reference and Master Data Objects including metadata definitions
+        2. Conceptual and Logical Master Data Model - conceptual and logical data
+        model for identified Master Data Objects and their relationships 3. Reference
+        and Master Data Sources - Inventory of identified reference and master data
+        sources 4. Rules for matching and merging Master Data Records from different
+        data sources to create Golden Record within the Data Hub 5. Reference and
+        Master Data Flows - One way or bi-directional data movements of: 5a. Master
+        Data Records between data sources and the Data Hub 5b. Master Data Golden
+        Records between Data Hub and consuming applications 5c. Reference Data between
+        Data Hub and consuming applications.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.2
+      ref_id: RMD.2.5
+      name: RMD Data Hub Technical Requirements
+      description: The Entity shall define and document the technical requirements
+        for its Reference and Master Data Hub platform based on the defined target
+        RDM Information Architecture. The
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd
+      ref_id: RMD.3
+      name: Training and Awareness
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.3
+      ref_id: RMD.3.1
+      name: Reference and Master Data Training
+      description: 'The Entity shall conduct the Reference and Master Data training
+        for employees responsible for managing Reference and Master Data. The training
+        shall include, at minimum, the following topics: 1. Identification - Identifying
+        correct sources of Master and Reference Data 2. Matching - Linking records
+        between systems containing Master Data 3. Consolidation - Removing duplication
+        and overlap between Master Data Sources 4. Conflict Resolution - Resolving
+        conflicts in Reference and Master Data 5. Managing Changes - Leveraging supporting
+        technologies in managing and automating Reference and Master Data changes.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd
+      ref_id: RMD.4
+      name: Data Lifecycle Management
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.4
+      ref_id: RMD.4.1
+      name: RMD Stewardship Coverage
+      description: The Entity shall assign Business and IT Data Stewards to all identified
+        Reference and Master Data Objects.
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.4
+      ref_id: RMD.4.2
+      name: RMD Data Lifecycle Management Process
+      description: 'The Entity shall establish and follow a clear process for managing
+        Reference and Master Data Objects across Data Lifecycle from creation to archiving.
+        The process shall cover roles and actions involved in, at minimum, the following
+        steps of Data Lifecycle: 1. Creation of new Reference and Master Data Objects
+        and their instances 2. Modification of existing Reference and Master Data
+        Objects and their instances 3. Archiving of Reference and Master Data Objects
+        and their instances'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.4
+      ref_id: RMD.4.3
+      name: RMD Data Hub Implementation
+      description: 'The Entity shall implement the Reference and Master Data Hub for
+        managing its Reference and Master Data Objects and provide Trusted Source
+        of reference and master data across entity. As a part of implementation of
+        the Data Hub, the Entity shall, at minimum: 1. Instantiate the physical Data
+        Hub technical architecture components necessary to address the Entity''s target
+        RMD information architecture requirements'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.4
+      ref_id: RMD.4.4
+      name: Data Hub as Trusted Source
+      description: The Entity shall establish the Data Hub as the Entity's Trusted
+        Source for any new information system and application implemented requiring
+        the use of the Entity's Reference and/or Master Data Objects.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd
+      ref_id: RMD.5
+      name: Performance Management
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.5
+      ref_id: RMD.5.1
+      name: RMD Service Level Agreements
+      description: The Entity shall establish Service Level Agreements for its RMD
+        Data Lifecycle Management Process to effectively balance time vs. cost for
+        changes to its Reference and Master Data.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.5
+      ref_id: RMD.5.2
+      name: RMD Program KPIs
+      description: 'The Entity shall establish key performance indicators (KPIs) to
+        measure the effectiveness of development of its Reference and Master Data
+        capabilities. KPIs shall include, at minimum, the following: 1. Number of
+        incorrect data values in the Master Data Records 2. Mean Time to Repair (MTTR)
+        Reference and Master Data quality issues 3. Change request volumes for Reference
+        and Master Data Objects.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd
+      ref_id: RMD.6
+      name: Artifacts
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.6
+      ref_id: RMD.6.1
+      name: RMD Change Request Logs
+      description: The Entity shall document in a register its reference and master
+        data change request logs and the decisions made based on those requests.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.6.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:rmd.6
+      ref_id: RMD.6.2
+      name: RMD Initiative Planning Documents
+      description: The Entity shall document in a register Statement of Architecture
+        Work documents for its Reference and Master Data initiatives.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia
+      assessable: false
+      depth: 1
+      ref_id: BIA
+      name: Business Intelligence and Analytics
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia
+      ref_id: BIA.1
+      name: Plan
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia.1
+      ref_id: BIA.1.1
+      name: Business Intelligence and Analytics Plan
+      description: "Based on the Entity\u2019s defined Data Management and Personal\
+        \ Data Protection Strategy and Plan, the Entity shall create a Business Intelligence\
+        \ and Analytics Plan to manage and orchestrate Business Intelligence and Analytics\
+        \ activities. The plan shall include, at minimum, the following: 1. Roadmap\
+        \ with the activities and key milestones for the implementation of BI and\
+        \ Analytics use cases. The activities shall, at minimum, incorporate what\
+        \ is needed to achieve the specifications in this domain 2. Assignment of\
+        \ the required resources and budget to manage the implementation BI and Analytics\
+        \ use cases"
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia.1
+      ref_id: BIA.1.2
+      name: Bi and Analytics Use Case Identification and Prioritization
+      description: 'The Entity shall identify and prioritize the list of BI and Analytics
+        use cases based on the Entity''s strategy and key challenges faced within
+        the sector: 1. Identify: Ideation workshops shall be conducted with a long
+        list of identified use cases documented, with each use case defined with its
+        name, description, and entities to be involved in this use case 2. Prioritization:
+        The long list of use cases shall be shortlisted based on a predefined'
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia.1
+      ref_id: BIA.1.3
+      name: BI and Analytics Use Case Detailing
+      description: 'The Entity shall detail the shortlisted BI and Analytics Use Cases
+        that represent the Entity''s business data-driven needs. Each shortlisted
+        Analytics Use Case shall, at minimum, have the following documented: 1. Objective
+        aimed to be achieved from the use case 2. Type of Analytics leveraged (among
+        the five maturity levels of discovery, descriptive, diagnostic, predictive,
+        prescriptive) 3. The expected benefits and business value aimed to be derived
+        (ROI) through development of a business case 4. Stakeholders involved in the
+        implementation of the use case, the owner that would lead the use case, and
+        the target consumers that would benefit from the insights generated by the
+        use case 5. List of business requirements to implement the use case 6. Data
+        sources that would feed the use case with the required data fields 7. The
+        technologies required to implement the use cases The long list of use cases,
+        their prioritization, and detailing shall be inserted in a use case portfolio
+        document.'
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia.1
+      ref_id: BIA.1.4
+      name: BI and Analytics Use Case Implementation Plan
+      description: 'The Entity shall develop and document an implementation plan for
+        each the shortlisted and approved BI and Analytics Use Cases defined in the
+        use case portfolio and comprise of the next steps to pilot the use case, followed
+        by production and then monitoring results. The implementation plan shall address,
+        at minimum: 1. Detail Functional and Non-Functional Requirements - Use case
+        objectives translated into analytics requirements 2. High Level Design - Conceptual
+        design of the analytics solution, e.g. wireframes 3. Staging and Production
+        Environment Preparations - Analytics solution hosting environments during
+        and after development'
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia
+      ref_id: BIA.2
+      name: Training and Awareness
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia.2
+      ref_id: BIA.2.1
+      name: Business Intelligence and Analytics Training
+      description: 'The Entity shall conduct the BI and Analytics training for all
+        employees involved in BI and Analytics initiatives to upskill analytics capabilities
+        within the Entity. The training shall include, at minimum, the following:
+        1. Methods for gathering and organizing data required for the analysis 2.
+        Model development, applying analytics methods and using analytics tools 3.
+        Data models and data flows development 4. Types of graphical representation
+        of data and information 5. Analytical models'' evaluation techniques.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia.2
+      ref_id: BIA.2.2
+      name: Business Intelligence and Analytics Awareness
+      description: 'The Entity shall develop and implement Business Intelligence and
+        Analytics awareness campaigns to promote the awareness, education and adoption
+        of its Business Intelligence and Analytics capabilities. Awareness campaigns
+        shall leverage one or more of the Entity''s existing communications channels
+        to drive awareness of the Entity''s: 1. Current Analytics Assets Available
+        from the Entity - Previously implemented use cases, analytics models, APIs,
+        BI reports and dashboards for potential data sharing and reuse 2. BI and Analytics
+        Success Stories - Quantifiable and qualitative benefits and outcomes from
+        recent use case implementations'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia
+      ref_id: BIA.3
+      name: Data Lifecycle Management
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia.3
+      ref_id: BIA.3.1
+      name: Business Intelligence and Analytics Use Case Validation
+      description: 'The Entity shall define and conduct a validation process to validate
+        use case outcomes, initial intended purpose and alignment with the Entity''s
+        overall Analytics Plan. The validation of use cases, at minimum, shall address:
+        1. Analytics Use Case functional and non- functional requirements 2. Analytics
+        Use Case Personal Data Protection considerations, as prescribed in the Privacy
+        Domain 3. Analytics Use Case return on investment as per the target set'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia.3
+      ref_id: BIA.3.2
+      name: Data Science Team
+      description: The Entity shall leverage a Data Analytics Team that would drive
+        the implementation of the Business Intelligence and Analytics specifications.
+        The Data Analytics Team typically include roles such as Data Scientists, Data
+        Engineers, and Visualization Engineers.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia
+      ref_id: BIA.4
+      name: Performance Management
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia.4
+      ref_id: BIA.4.1
+      name: Business Intelligence and Analytics KPIs
+      description: 'The Entity shall establish key performance indicators (KPIs) to
+        measure the performance and effectiveness of its Analytics and AI portfolio.
+        KPIs shall include, at minimum, the following: 1. Number of use cases defined
+        2. Number of use cases piloted 3. Number of use cases implemented and scaled
+        4. Total ROI value generated from the implemented use cases 5. Training and
+        awareness sessions delivered.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia
+      ref_id: BIA.5
+      name: Artifacts
+      description: As part of the Artifacts control, the Entity shall document in
+        a register its BI and Analytics Use Cases
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:bia.5
+      ref_id: BIA.5.1
+      name: Business Intelligence and Analytics Register
+      description: The Entity shall document in a register its BI and Analytics Use
+        Cases, final review of outcomes delivered as a result of each implementation
+        and related process documentation whereby read access is granted to all Entity
+        stakeholders.
+      implementation_groups:
+      - P3
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dvr
+      assessable: false
+      depth: 1
+      ref_id: DVR
+      name: Data Value Realization
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dvr.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dvr
+      ref_id: DVR.1
+      name: Plan
+      description: As part of the Plan control, the Entity shall identify and document
+        Data Value Realization Use Cases and create a Data Value Realization Plan
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dvr.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dvr.1
+      ref_id: DVR.1.1
+      name: Data Value Realization Use Cases
+      description: "The Entity shall identify, and document Data Value Realization\
+        \ Use Cases. The Data Value Realization Use Cases shall include, at minimum,\
+        \ the following: 1. Data Revenue Generation Use Cases - Data or Data Products\
+        \ to generate revenue from, as defined in the Data Revenue Framework Regulation.\
+        \ Data or Data Products are the outputs resulting from transforming data for\
+        \ added value by performing additional data collection, enrichment, preparation,\
+        \ analysis, or presentation 2. Cost Saving Use Cases \u2013 Data-driven use\
+        \ cases that will contribute directly or indirectly to reducing costs and\
+        \ achieving efficiencies by leveraging data to improve organizational operational\
+        \ performance, productivity, and products and services. For each Data Value\
+        \ Realization Use Case the Entity shall estimate and document the projected\
+        \ Payback period and Return on Investment (ROI)."
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dvr.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dvr.1
+      ref_id: DVR.1.2
+      name: Data Value Realization Plan
+      description: "Based on the Entity\u2019s defined Data Management and Personal\
+        \ Data Protection Strategy and Plan, the Entity shall create a Data Value\
+        \ Realization Plan to realize its data revenue generation potential and drive\
+        \ data-related cost optimization initiatives. The plan shall include, at minimum,\
+        \ the following: 1. Roadmap with the activities and key milestones for the\
+        \ implementation of Data"
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dvr.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dvr
+      ref_id: DVR.2
+      name: Data Revenue Generation Process
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dvr.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dvr.2
+      ref_id: DVR.2.1
+      name: Pricing Scheme Definition
+      description: The Entity shall, for each Data or Data Product expecting to generate
+        revenue from, select and document an appropriate Pricing Scheme Model based
+        on the scenarios outlined in the Data Revenue Framework Regulation.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dvr.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dvr.2
+      ref_id: DVR.2.2
+      name: Data or Data Product Price Calculation
+      description: 'The Entity shall, for each Data or Data Product expecting to generate
+        revenue from, calculate and document the Total Cost as defined by the Data
+        Revenue Framework Regulation. The total cost shall include, at minimum, the
+        following: 1. Data Collection Cost - Cost incurred for collecting, cleansing,
+        and curating data 2. Data Development Cost - Cost incurred for developing
+        analytical models, data visualizations and other value-added services provided
+        on top of collected data.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dvr.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dvr.2
+      ref_id: DVR.2.3
+      name: Charging Model Adoption
+      description: 'The Entity shall for each Data or Data Product that it is expecting
+        to generate revenue from, define and document the adopted Charging Model.
+        The Entity shall choose, at minimum, from the following Charging Models defined
+        in the Data Revenue Framework Regulation: 1. Subscription Model 2. Consumption-Based
+        Model 3. Freemium / Premium Model 4. One-Time Fee Model.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dvr.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dvr.2
+      ref_id: DVR.2.4
+      name: Revenue Generation Request Submission
+      description: 'The Entity shall for each Data or Data Product that it is expecting
+        to generate revenue from, submit a revenue generation request to the National
+        Data Management Office. The request shall include, at minimum, the following:
+        1. Description of Data or Data Product 2. Pricing Scheme Documentation 3.
+        Proposed Charging Model 4. Proposed Final Unit Price 5. Justification if the
+        Final Unit Price does not follow the Cost Recovery Pricing Scheme.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dvr.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dvr
+      ref_id: DVR.3
+      name: Monitoring and Maintenance
+      description: As part of the Monitoring and Maintenance control, the Entity shall
+        actively monitor and maintain implemented Data Value Realization Use Cases
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dvr.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dvr.3
+      ref_id: DVR.3.1
+      name: Data Value Realization Use Cases Monitoring and Maintenance
+      description: '"The Entity shall actively monitor and maintain implemented Data
+        Value Realization Use Cases. The monitoring and maintenance shall include,
+        at minimum, the following: 1. Measuring and validating KPIs (ROI and Payback
+        Period) against projected values in the Data Value Realization Plan 2. Developing
+        Change Request documents to accommodate change requirements from end users
+        3. Reporting defects or malfunctions in the use case implemented.'
+      implementation_groups:
+      - P3
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dvr.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dvr
+      ref_id: DVR.4
+      name: Performance Management
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dvr.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dvr.4
+      ref_id: DVR.4.1
+      name: Data Value Realization KPIs
+      description: 'The Entity shall establish key performance indicators (KPIs) to
+        measure the Entity''s Data Value Realization activities. KPIs shall include,
+        at minimum, the following: 1. Number of Data Products developed 2. Number
+        of Data or Data Products revenue generation requests raised to NDMO 3. Number
+        of Data Products that generated revenue 4. Total revenue generated from offering
+        Data or Data Products 5. Total cost saved from implemented Cost Saving Use
+        Cases 6. Data Value Realization Use Case Payback period 7. Data Value Realization
+        Use Case Return on Investment (ROI).'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od
+      assessable: false
+      depth: 1
+      ref_id: OD
+      name: Open Data
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od
+      ref_id: OD.1
+      name: Plan
+      description: As part of the Plan control, the Entity shall develop an Open Data
+        Plan
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od.1
+      ref_id: OD.1.1
+      name: Open Data Plan
+      description: "Based on the Entity\u2019s defined Data Management and Personal\
+        \ Data Protection Strategy and Plan, the Entity shall create an Open Data\
+        \ Plan to identify and coordinate the publishing of its Open Datasets. The\
+        \ plan shall include, at minimum, the following: 1. Roadmap with the activities\
+        \ and key milestones for the implementation of Open Data initiatives. The\
+        \ activities shall, at minimum, incorporate what is needed to achieve the\
+        \ specifications in this domain 2. Assignment of the required resources and\
+        \ budget to manage the implementation of Open Data initiatives."
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od
+      ref_id: OD.2
+      name: Training and Awareness
+      description: As part of the Training and Awareness control, the Entity shall
+        plan awareness campaigns to promote the usage and benefits of Open Data
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od.2
+      ref_id: OD.2.1
+      name: Open Data Awareness
+      description: 'The Entity shall plan awareness campaigns to ensure potential
+        users are aware of the existence, nature, and quality of the Open Data offered
+        by the Entity. The awareness plan shall include, at minimum, the following:
+        1. Usage of Open Data and its various positive social and economic benefits
+        2. Promoting the Entity Open Data and related activities'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od
+      ref_id: OD.3
+      name: Data Lifecycle Management
+      description: As part of the Data Lifecycle Management control, the Entity shall
+        identify, publish and maintain its Open Datasets
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od.3
+      ref_id: OD.3.1
+      name: Open Data Processes
+      description: 'The Entity shall, in alignment to the National Data Management
+        Office''s Open Data Regulation, develop and document processes required across
+        the lifecycle of Open Data, including, at minimum, the following: 1. Processes
+        to identify public datasets to be published the Entity 2. Processes to ensure
+        that datasets are published and maintained to their appropriate format, timeliness,
+        comprehensiveness, and overall high quality and ensure the exclusion of any
+        restricted data 3. Processes for gathering feedback, analyzing performance
+        at the Entity level, and improving the overall Open Data national impact.'
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od.3
+      ref_id: OD.3.2
+      name: Open Data Identification
+      description: 'The Entity shall, as part of the identification process: 1. Identify
+        and document all data classified as ''public'' and prioritize each dataset
+        identified as Open Data 2. Perform a valuation of the identified dataset to
+        drive decision making on whether it should be published as open data or not
+        3. Assess whether some combination of any publicly available data and the
+        data intended to be published could allow for the unauthorized disclosure
+        of personal information or create any other security or privacy risk or threat'
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od.3
+      ref_id: OD.3.3
+      name: Open Data Publishing
+      description: The Entity shall publish datasets identified under the KSA Open
+        Data License, as referred to in the National Data Management Office's Open
+        Data Regulation
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od.3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od.3
+      ref_id: OD.3.4
+      name: Open Data Metadata
+      description: The Entity shall identify and document the metadata necessary within
+        the Open Dataset to easily identify, describe and search for it once published
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od.3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od.3
+      ref_id: OD.3.5
+      name: Open Data Format
+      description: 'The Entity shall use standardized formats when publishing its
+        datasets that are, at minimum, in machine-readable form. Common formats that
+        meet this standard include, but may not be limited to, the following: 1. CSV
+        - Comma Separated Values 2. JSON - JavaScript Object Notation 3. XML - eXtensible
+        Markup Language 4. RDF - Resource Description Framework. The Entity shall
+        also accompany datasets with documentation containing instructions on how
+        to use them in relation to its published format'
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od.3.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od.3
+      ref_id: OD.3.6
+      name: Open Data Maintenance
+      description: 'The Entity shall, as part of the maintenance process: 1. Regularly
+        update and document changes to its published Open Datasets and associated
+        metadata whenever changes occur 2. Perform continuous review of the published
+        Open Datasets to ensure they meet defined regulatory requirements Maintain
+        data traceability by documenting data provenance and maintaining versioning
+        history of the dataset'
+      implementation_groups:
+      - P3
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od
+      ref_id: OD.4
+      name: Performance Management
+      description: As part of the Performance Management control, the Entity shall
+        establish Key Performance indicators (KPIs) to measure the progress of the
+        Open Data Plan
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od.4
+      ref_id: OD.4.1
+      name: Open Data KPIs
+      description: 'The Entity shall establish key performance indicators (KPIs) to
+        measure the progress of the Open Data Plan and gather statistics on the published
+        Open Datasets. KPIs shall include, at minimum, the following: 1. Number of
+        downloads per published Open Dataset 2. Number of identified and prioritized
+        Open Datasets 3. Number of identified Open Datasets that have been published
+        4. Number of updates performed on published Open Datasets.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od
+      ref_id: OD.5
+      name: Artifacts
+      description: As part of the Artifacts control, the Entity document in a register
+        the list of all Open Datasets
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:od.5
+      ref_id: OD.5.1
+      name: Open Data Register
+      description: The Entity shall document in a register the list of all its identified
+        Open Datasets combined with a log of open data activities conducted and decisions
+        taken during the Data Lifecycle Management process
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:foi
+      assessable: false
+      depth: 1
+      ref_id: FOI
+      name: Freedom of Information
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:foi.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:foi
+      ref_id: FOI.1
+      name: Plan
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:foi.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:foi.1
+      ref_id: FOI.1.1
+      name: FOI Plan
+      description: "Based on the Entity\u2019s defined Data Management and Personal\
+        \ Data Protection Strategy and Plan, the Entity shall create a Freedom of\
+        \ Information Plan to address both strategic and operational requirements\
+        \ of the National Data Management Office's Freedom of Information Regulations.\
+        \ The plan shall include, at minimum, the following: 1. Roadmap with the activities\
+        \ and key milestones for achieving and maintaining the Entity's compliance\
+        \ with the National Data Management Office's Freedom of Information Regulations.\
+        \ The activities shall, at minimum, incorporate what is needed to achieve\
+        \ the specifications in this domain 2. Assignment of the required resources\
+        \ and budget to achieve and maintain the Entity's compliance with the National\
+        \ Data Management Office's Freedom of Information Regulations."
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:foi.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:foi
+      ref_id: FOI.2
+      name: Training and Awareness
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:foi.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:foi.2
+      ref_id: FOI.2.1
+      name: FOI Awareness
+      description: 'The Entity shall launch awareness campaigns to promote and enhance
+        the culture of transparency and to raise awareness of the National Data Management
+        Office''s Freedom of Information Regulations and right to access Public Information.
+        The awareness campaigns shall include, at minimum, the following: 1. Raising
+        awareness across the employees involved in the processing of FOI Access Requests
+        to understand the main obligations and requirements of National Data Management
+        Office''s Freedom of Information Regulations 2. Raising awareness of the Freedom
+        of Information Principles and their applicability on Saudi citizens'' rights.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:foi.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:foi
+      ref_id: FOI.3
+      name: Data Lifecycle Management
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:foi.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:foi.3
+      ref_id: FOI.3.1
+      name: FOI Request Process Design
+      description: The Entity shall design and document a standardized Request for
+        Information Process and develop the procedures to manage, process and document
+        the requests to access Public Information according to in the National Data
+        Management Office Freedom of Information Regulations.
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:foi.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:foi.3
+      ref_id: FOI.3.2
+      name: FOI Request Process Implementation
+      description: "The Entity shall establish and follow a clear process to manage\
+        \ the requests to access Public Information according to the conditions and\
+        \ requirements defined in the National Data Management Office's Freedom of\
+        \ Information Regulation. As part of the process the Entity shall make one\
+        \ of the following decisions after receiving the request for access to Public\
+        \ Information within the period defined in the National Data Management Office's\
+        \ Freedom of Information Regulations: 1. Grant the access to Public Information\
+        \ 2. Deny the request to access Public Information 3. Extend the time required\
+        \ to provide a response to the Requestor 4. Notify the Requestor if the required\
+        \ information is available on the Entity\u2019s website or is not within its\
+        \ competence."
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:foi.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:foi.3
+      ref_id: FOI.3.3
+      name: Public Entity Publication
+      description: "The Entity, under the National Data Management Office's Freedom\
+        \ of Information Regulation, shall publish on their official Government websites\
+        \ or its affiliate's websites, at minimum, the following information: 1. Laws,\
+        \ regulations, instructions and regulatory decisions applicable to the Entity\
+        \ 2. Entity's services provided and description detailing how to obtain access\
+        \ to those services 3. Entity's organizational structure including Entity's\
+        \ roles and responsibilities 4. Entity's job vacancy information, except information\
+        \ of security or military job vacancies as determined by security or military\
+        \ regulatory authorities or KSA Regulations 5. Entity's annual key strategic\
+        \ and operational reports including the Entity's financial statement 6. Entity's\
+        \ general statistics and updates on its activities including, at minimum,\
+        \ the following: 6a. Number of the Entity's employees 6b. Year of the Entity's\
+        \ establishment 6c. Number of the Entity's services provided in the last year\
+        \ 6d. Up-to-date Entity's activities' descriptions 7. Contact details to persons\
+        \ with valid licenses granted by the Entity including, at minimum, the following:\
+        \ 7a. Names of the persons 7b. Postal addresses of the person 7c. E-mail addresses\
+        \ of the persons 8. Information on projects offered or awarded by the Entity\
+        \ as prescribed by the Freedom of Information Regulations in respect of a\
+        \ risk that may affect people\u2019 life, health or property. The information\
+        \ shall include, at minimum, the following: 8a. Names of recipients 8b. Execution\
+        \ period"
+      implementation_groups:
+      - P3
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:foi.3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:foi.3
+      ref_id: FOI.3.4
+      name: Access Request Forms
+      description: 'The Entity shall prepare request forms for access to Public Information
+        - whether paper or electronic - specifying the required information to be
+        provided by the Requestor. The required information shall include, at minimum,
+        the following: 1. Information about the Requestor including name, address,
+        national ID 2. Description of Public Information being requested 3. Purpose
+        behind the request for access to public information 4. Legal basis for the
+        request 5. Notice delivery method to the requestor (e-mail, national address)
+        6. Date of the request.'
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:foi.3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:foi.3
+      ref_id: FOI.3.5
+      name: Information Fees Determination
+      description: The Entity shall, for each granted Public Information Access Request,
+        calculate and document a processing fee by adopting a Pricing Scheme as defined
+        in the National Data Management Office's Data Value Realization Regulation.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:foi.3.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:foi.3
+      ref_id: FOI.3.6
+      name: Compliance monitoring
+      description: The Entity shall conduct internal audits to monitor compliance
+        with the National Data Management Office's Freedom of Information Regulations
+        and document its findings in a report submitted to the Open Data and Information
+        Access Officer. In cases of non-compliance, corrective actions should be taken
+        with a notification to the Regulatory Authority and the National Data Management
+        Office and documented within the audit findings report. Refer to the National
+        Data Management Office's Freedom of Information Regulations for more detailed
+        requirements.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:foi.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:foi
+      ref_id: FOI.4
+      name: Artifacts
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:foi.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:foi.4
+      ref_id: FOI.4.1
+      name: FOI Register
+      description: 'The Entity shall document in a register compliance records as
+        required by the National Data Management Office''s Freedom of Information
+        Regulations. The register shall include, at minimum, the following: 1. Information
+        on the current Open Data and Information Access Officer 2. Public Information
+        Access Requests Records 3. Public Entity Publication 4. Any other records,
+        including the manner and format, that is required by the National Data Management
+        Office''s Freedom of Information Regulation. Refer to the National Data Management
+        Office''s Freedom of Information Regulations for more detailed requirements.'
+      implementation_groups:
+      - P3
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc
+      assessable: false
+      depth: 1
+      ref_id: DC
+      name: Data Classification
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc
+      ref_id: DC.1
+      name: Plan
+      description: As part of the Plan control, the Entity shall develop a Data Classification
+        Plan and prioritize its datasets and artifacts
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc.1
+      ref_id: DC.1.1
+      name: Data Classification Plan
+      description: "Based on the Entity\u2019s defined Data Management and Personal\
+        \ Data Protection Strategy and Plan, the Entity shall create a Data Classification\
+        \ Plan to manage and orchestrate its Data Classification activities. The plan\
+        \ shall include, at minimum, the following: 1. Roadmap with the activities\
+        \ and key milestones for the classification of Entity's data. The activities\
+        \ shall, at minimum, incorporate what is needed to achieve the specifications\
+        \ in this domain 2. Assignment of the required resources and budget to manage\
+        \ the classification of Entity's data."
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc.1
+      ref_id: DC.1.2
+      name: Data Classification Prioritization
+      description: The Entity shall prioritize the Entity's datasets and artifacts
+        to be classified. The result of the prioritization shall be a list of ranked
+        datasets and artifacts to be followed when establishing an order of the Entity's
+        Data Classification.
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc
+      ref_id: DC.2
+      name: Classification Controls
+      description: As part of the Classification Controls, the Entity shall assign
+        data handling and protection controls to datasets and artifacts
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc.2
+      ref_id: DC.2.1
+      name: Security Controls
+      description: The Entity shall assign data handling and protection controls to
+        datasets and artifacts based on their classification to ensure secure handling,
+        processing, sharing and disposal of data by following the National Cybersecurity
+        Authority regulations.
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc
+      ref_id: DC.3
+      name: Classification Process
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc.3
+      ref_id: DC.3.1
+      name: Data Identification
+      description: The Entity shall identify and inventory all datasets and artifacts
+        owned by the Entity as part of the Data Classification Implementation process
+        detailed in the National Data Management Office's Data Classification Regulation.
+        If the Entity had already implemented its Data Catalog automated tool, the
+        Entity shall use it to inventory all its datasets and artifacts.
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc.3
+      ref_id: DC.3.2
+      name: Impact Assessment
+      description: 'The Entity shall conduct an impact assessment of the potential
+        damages due to an unauthorized access to all its identified datasets and artifacts.
+        The impact assessment shall include the following steps: 1. Identification
+        of the potential categories impacted amongst national interest, organizations,
+        individuals and environment 2. Selection of the level of impact of potential
+        damage for the identified categories amongst ''High'', ''Medium'', ''Low''
+        and ''None/Insignificant'' 3. Assignment of classification levels to datasets
+        and artifacts based on the selected impact level: 3a. If the impact level
+        was assessed as ''High'', then datasets and artifacts shall be classified
+        as ''Top Secret'' 3b. If the impact level was assessed as ''Medium'', then
+        datasets and artifacts shall be classified as ''Secret'''
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc.3
+      ref_id: DC.3.3
+      name: Assessment for Low Impact Data
+      description: 'The Entity shall assess the possibility to Classify ''Low'' impact
+        data as ''Public'' instead of ''Confidential''. The assessment shall include
+        the following: 1. Evaluation if the disclosure of ''Low'' impact data is in
+        breach of any existing regulation 2. Identify the potential benefits of opening
+        such datasets and artifacts and consider whether those would outweigh the
+        negative impacts If release of ''Low'' impact data is not in breach of any
+        existing regulation and if benefits of release outweigh the negative impact,
+        the Entity shall classify ''Low'' impact data as ''Public''. The assessment
+        shall be conducted as part of the Data Classification Implementation process
+        by following the National Data Management Office''s Data Classification Regulation.'
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc.3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc.3
+      ref_id: DC.3.4
+      name: Data Classification Review
+      description: The Entity shall review all its classified datasets and artifacts
+        to ensure that the classification levels assigned to them are the most appropriate
+        ones as part of the Data Classification Implementation process by following
+        National Data Management Office's Data Classification Regulation.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc.3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc.3
+      ref_id: DC.3.5
+      name: Data Classification Metadata
+      description: The Entity shall publish classification levels assigned to its
+        datasets and artifacts as the metadata registered within the Data Catalog
+        automated tool. The population of the metadata shall be executed according
+        to the
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc
+      ref_id: DC.4
+      name: Performance Management
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc.4
+      ref_id: DC.4.1
+      name: Data Classificatio n KPIs
+      description: 'The Entity shall establish key performance indicators (KPIs) to
+        measure the progress on the classification plan and the implementation of
+        the Entity''s Data Classification process. KPIs shall include, at minimum,
+        the following: 1. % of datasets and artifacts classified 2. % of datasets
+        and artifacts classified by a classification level 3. % of ''Low'' impact
+        data classified as ''Confidential'' 4. % of classified datasets and artifacts
+        that has been reviewed and approved.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc
+      ref_id: DC.5
+      name: Artifacts
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:dc.5
+      ref_id: DC.5.1
+      name: Data Register
+      description: 'The Entity shall document in a register the list of all its identified
+        datasets and artifacts combined with log of Data Classification activities
+        conducted during Data Classification Implementation process. The register
+        shall include, at minimum, the following: 1. List of the Entity''s identified
+        datasets and artifacts 2. Classification levels assigned to identified datasets
+        and artifacts 3. Dates of assignment of classification levels to identified
+        datasets and artifacts 4. Classification duration applied to identified datasets
+        and artifacts 5. Classification levels approved during review 6. Dates of
+        classification levels'' review.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp
+      assessable: false
+      depth: 1
+      ref_id: PDP
+      name: Personal Data Protection
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp
+      ref_id: PDP.1
+      name: Plan
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp.1
+      ref_id: PDP.1.1
+      name: Personal Data Protection Initial Assessment
+      description: 'The Entity shall perform an initial Personal Data Protection Assessment
+        to evaluate the current state of the Personal Data Protection environment.
+        The assessment shall include, at minimum, the following: 1. Identification
+        of types of personal data being collected 2. Location and method of storage
+        of personal data 3. Current processing and uses of the personal data 4. Privacy
+        challenges to meet compliance with the National Data Management Office''s
+        Personal Data Protection Regulations.'
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp.1
+      ref_id: PDP.1.2
+      name: Personal Data Protection Plan
+      description: "Based on the Entity\u2019s defined Data Management and Personal\
+        \ Data Protection Strategy and Plan, the Entity shall create a Personal Data\
+        \ Protection Plan to address both the strategic and operational privacy requirements\
+        \ of the National Data Management Office's Personal Data Protection Regulations.\
+        \ The plan shall include, at minimum, the following: 1. Roadmap with the activities\
+        \ and key milestones for achieving and maintaining the Entity's compliance\
+        \ with the National Data Management Office's Personal Data Protection Regulations.\
+        \ The activities shall,"
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp
+      ref_id: PDP.2
+      name: Training and Awareness
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp.2
+      ref_id: PDP.2.1
+      name: Personal Data Protection Training
+      description: 'The Entity shall conduct the Personal Data Protection training
+        for every employee to promote a Personal Data Protection-centric culture in
+        accordance with the Entity-specific and national privacy regulations. The
+        training shall include, at minimum, the following: 1. Importance of Personal
+        Data Protection and the Impacts and consequences to the Entity and / or Data
+        Subject 2. Definition of Personal Data 3. Data Subject Data Rights 4. Entity
+        and Data Subject Responsibilities 5. Notifications as for when the Entity
+        and / or Data Subject should be notified and how to handle inquiries about
+        personal data collection, processing and sharing.'
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp
+      ref_id: PDP.3
+      name: Data Breach
+      description: As part of the Data Breach control, the Entity shall establish
+        a Data Breach Process
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp.3
+      ref_id: PDP.3.1
+      name: Data Breach Notification
+      description: The Entity's Data Controller or Data Processor handling personal
+        data shall, in the event it is determined that personal data has been compromised,
+        notify the Regulatory Authority within the allotted timeframe specified within
+        the National Data Management Office's Personal Data Protection Regulations.
+        The allotted timeframe for notification is 72 hours. Refer to the National
+        Data Management Office's Personal Data Protection Regulations for more detailed
+        requirements.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp.3
+      ref_id: PDP.3.2
+      name: Data Breach Management Process
+      description: 'The Entity shall develop and document breach management procedures
+        to directly manage and address the privacy violations and to set the functions
+        and responsibilities for the affected work team, including cases in which
+        the Regulatory Authority is notified once a breach has been identified. The
+        breach management process shall include, at minimum, the following: 1. Conducting
+        an incident review by the Data Controller with the Regulatory Authority 2.
+        Formulating an immediate response to the incident by the Data Controller and
+        / or Data Processor 3. Implementing the permanent corrective actions when
+        issued by the Regulatory Authority 4. Conducting testing of the implemented
+        corrective actions to validate personal data protection solution(s).'
+      implementation_groups:
+      - P1
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp
+      ref_id: PDP.4
+      name: Data Lifecycle Management
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp.4
+      ref_id: PDP.4.1
+      name: Privacy Notice and Consent Management
+      description: 'The Entity shall establish, at minimum, the following Privacy
+        Notice and Consent Management components: 1. Define and document its processes
+        for providing Data Subjects with notice and requesting consent at all points
+        along the data lifecycle where personal data is collected as prescribed by
+        the National Data Management Office''s Personal Data Protection Regulations
+        2. The Entity shall provide all possible options to Data Subject and his (implicit
+        / explicit) approval shall be obtained regarding the collection, use or disclosure
+        of personal data 3. The Entity shall document and make available a Privacy
+        Notice for Data Subjects to review before or at the time the Entity requests
+        permission to collect personal data 4. In the event the Data Controller maintains
+        a presence on internet, a hyperlink to privacy notice must be maintained.
+        The notice must be made available to the National Data Management Office for
+        inspection upon request. Refer to the NMDO Personal Data Protection Regulations
+        for more detailed requirements.'
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp.4
+      ref_id: PDP.4.2
+      name: Data Subject Rights
+      description: The Entity shall establish and document its Data Rights Management
+        processes to support the rights of Data Subjects, in accordance with the National
+        Data Management Office's Personal
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp.4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp.4
+      ref_id: PDP.4.3
+      name: Personal Data Protection Risk Assessment s
+      description: 'The Entity shall conduct yearly risk assessments of the operation
+        and use of its information systems containing personal data, including the
+        collection and processing of personal data, and the storing and transmittal
+        of personal data by each system - whether automated or manual. Risk assessment
+        findings shall, at minimum, be: 1c. Documented 1d. Analyzed for impact and
+        likelihood of occurrence 1e. Evaluated against current regulations obligations
+        and criticality to resolve.'
+      implementation_groups:
+      - P3
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp.4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp.4
+      ref_id: PDP.4.4
+      name: Compliance Monitoring and Audit
+      description: The Entity shall conduct internal audits to monitor compliance
+        with privacy regulations and document its findings in a report presented to
+        the Data Protection Officer. In cases of non- compliance, corrective actions
+        should be taken with a notification to the Regulatory Authority and the National
+        Data Management Office and documented within the audit findings report. Refer
+        to the National Data Management Office's Personal Data Protection Regulations
+        for more detailed requirements.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp
+      ref_id: PDP.5
+      name: Artifacts
+      description: As part of the Artefacts control, the Entity shall document in
+        a register its compliance records The fundamental concepts and properties
+        of the Entity's systems to enable the purpose, context and guidance for making
+        security design decisions Minimum Security provisions to include as components
+        into a system during its development, testing and implementation Identity
+        of users and information systems requesting to have access to the Entity's
+        information assets Obligations to ensure Information Security requirements
+        are reflected in the Entity's engagement of third-party suppliers Documented
+        and maintained inventory of information assets containing critical Entity
+        data Operational duties by the Entity and its personnel to monitor, assess
+        and protect the Entity's information assets A framework for preserving and
+        maintaining the confidentiality, integrity and availability of data in the
+        event of an incident (ISO 27001)
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ndmo-dmpdp:pdp.5
+      ref_id: PDP.5.1
+      name: Personal Data Protection Register
+      description: The Entity shall document in a register compliance records for
+        a reasonable period of time, but not less than 24 months, and shall make those
+        records available when requested by the National Data Management Office as
+        defined in the National Data Management Office's Personal Data Protection
+        Regulations. The register shall include, at minimum, a record of any collection
+        and/or processing of any personal data.
+      implementation_groups:
+      - P2
+    - urn: urn:intuitem:risk:req_node:ndmo-dmpdp:ds
+      assessable: false
+      depth: 1
+      ref_id: DS
+      name: Data Security and Protection
+      description: Per the NDMO standard, the Data Security and Protection domain
+        is governed by the National Cybersecurity Authority (NCA). Refer to the applicable
+        NCA controls (e.g. the Essential Cybersecurity Controls). No NDMO specifications
+        are enumerated for this domain.
