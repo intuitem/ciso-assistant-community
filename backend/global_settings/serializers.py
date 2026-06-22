@@ -96,6 +96,11 @@ GENERAL_SETTINGS_KEYS = [
     "audit_tree_aggregation_strategy",
 ]
 
+LLM_URL_DEFAULTS = {
+    "ollama_base_url": "http://localhost:11434",
+    "openai_api_base": "http://localhost:1234/v1",
+}
+
 
 class GlobalSettingsSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
@@ -162,18 +167,20 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError(
                         {key: "URL must not contain a fragment (#)."}
                     )
-                try:
-                    assert_public_url_unless_dev(
-                        value, allowed_schemes=("http", "https")
-                    )
-                except BlockedRequestError:
-                    raise serializers.ValidationError(
-                        {key: "URL must point to a public address."}
-                    )
-                except DnsLookupError:
-                    raise serializers.ValidationError(
-                        {key: "URL hostname could not be resolved."}
-                    )
+                stored = (instance.value or {}).get(key)
+                if value != stored and value != LLM_URL_DEFAULTS.get(key):
+                    try:
+                        assert_public_url_unless_dev(
+                            value, allowed_schemes=("http", "https")
+                        )
+                    except BlockedRequestError:
+                        raise serializers.ValidationError(
+                            {key: "URL must point to a public address."}
+                        )
+                    except DnsLookupError:
+                        raise serializers.ValidationError(
+                            {key: "URL hostname could not be resolved."}
+                        )
             # Validate builtin_metrics_retention_days minimum value
             if key == "builtin_metrics_retention_days":
                 if not isinstance(value, int) or value < 1:
