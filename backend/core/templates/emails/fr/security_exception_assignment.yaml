@@ -1,0 +1,17 @@
+subject: "CISO Assistant: Vous avez été affecté à '${exception_name}'"
+body: |
+  Bonjour,
+
+  Vous avez été affecté à la dérogation de sécurité suivante :
+
+  - Nom : ${exception_name}
+  - Description : ${exception_description}
+  - ID : ${exception_ref_id}
+  - Sévérité : ${exception_severity}
+  - Statut : ${exception_status}
+  - Date d'expiration : ${expiration_date}
+  - Domaine : ${folder_name}
+
+  Connectez-vous à votre portail CISO Assistant pour consulter et gérer cette dérogation de sécurité : [Accéder à CISO Assistant](${ciso_assistant_url})
+
+  Merci.

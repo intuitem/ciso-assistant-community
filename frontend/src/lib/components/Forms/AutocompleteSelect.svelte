@@ -40,6 +40,7 @@
 		disabled?: boolean;
 		hidden?: boolean;
 		translateOptions?: boolean;
+		enableDoubleDash?: boolean;
 		options?: Option[];
 		optionsEndpoint?: string;
 		optionsDetailedUrlParameters?: [string, string][];
@@ -93,6 +94,7 @@
 		disabled = false,
 		hidden = false,
 		translateOptions = true,
+		enableDoubleDash = false,
 		options = [],
 		optionsEndpoint = '',
 		optionsDetailedUrlParameters = [],
@@ -104,7 +106,7 @@
 			fields: [],
 			position: 'suffix',
 			separator: ' ',
-			classes: 'text-surface-500'
+			classes: 'text-surface-600-400'
 		},
 		additionalMultiselectOptions = {},
 		pathField = '',
@@ -177,7 +179,9 @@
 	const multiSelectOptions = {
 		minSelect: $constraints && $constraints.required === true ? 1 : 0,
 		maxSelect: multiple ? undefined : 1,
-		liSelectedClass: multiple ? '!chip !preset-filled' : '!bg-transparent',
+		liSelectedClass: multiple
+			? '!chip !bg-surface-300-700 !text-surface-900-100'
+			: '!bg-transparent',
 		inputClass: 'focus:ring-0! focus:outline-hidden!',
 		closeDropdownOnSelect: !multiple,
 		...additionalMultiselectOptions
@@ -348,7 +352,7 @@
 	function processOptions(objects: any[]) {
 		const append = (x: string, y: string) => (!y ? x : !x || x == '' ? y : x + ' - ' + y);
 
-		return objects
+		const processed = objects
 			.map((object) => {
 				const mainLabel =
 					optionsLabelField === 'auto'
@@ -429,6 +433,16 @@
 
 				return a.translatedLabel!.toLowerCase().localeCompare(b.translatedLabel!.toLowerCase());
 			});
+
+		// Prepend a "--" (unset) option, unless one is already present
+		const unsetLabels = new Set(['--', 'undefined']); // taken from Select.svelte
+		if (
+			enableDoubleDash &&
+			!processed.find((o) => unsetLabels.has(o.label?.toLowerCase()) || o.value == null)
+		) {
+			return [{ label: '--', value: '--', translatedLabel: '--' }, ...processed];
+		}
+		return processed;
 	}
 
 	function getNestedValue(obj: any, path: string, field = '') {
@@ -590,7 +604,7 @@
 		const li = node.closest('li');
 		if (!li) return;
 		li.style.cssText =
-			'background: var(--color-surface-300, #d1d5db) !important; cursor: pointer !important; color: var(--color-surface-700, #374151) !important;';
+			'background: var(--color-surface-300-700) !important; cursor: pointer !important; color: var(--color-surface-700-300) !important;';
 		const removeBtn = li.querySelector('button');
 		if (removeBtn) (removeBtn as HTMLElement).style.display = 'none';
 		return {
@@ -698,7 +712,7 @@
 		>
 			{#snippet option({ option })}
 				{#if option.value === LAZY_HINT_VALUE}
-					<span class="text-sm italic text-surface-500">{option.label}</span>
+					<span class="text-sm italic text-surface-600-400">{option.label}</span>
 				{:else if optionSnippet}
 					{@render optionSnippet?.(option)}
 				{:else}
@@ -710,7 +724,7 @@
 					{#if option.path}
 						<span>
 							{#each option.path as item}
-								<span class="text-surface-500 font-light">
+								<span class="text-surface-600-400 font-light">
 									{item} /&nbsp;
 								</span>
 							{/each}
@@ -732,7 +746,7 @@
 						</span>
 					{/if}
 					{#if option.suggested}
-						<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>
+						<span class="text-sm text-surface-600-400"> {m.suggestedParentheses()}</span>
 					{/if}
 				{/if}
 			{/snippet}
@@ -751,7 +765,7 @@
 							? (option.translatedLabel ?? option.label ?? option)
 							: (option.label ?? option)}
 					{#if option.infoString?.position === 'prefix'}
-						<span class="text-xs text-surface-500">&nbsp;{option.infoString.string}</span>
+						<span class="text-xs text-surface-600-400">&nbsp;{option.infoString.string}</span>
 					{/if}
 					{#if option.path}
 						<span>
@@ -769,10 +783,10 @@
 						{displayLabel}
 					</span>
 					{#if option.infoString?.position === 'suffix'}
-						<span class="text-xs text-surface-500">&nbsp;{option.infoString.string}</span>
+						<span class="text-xs text-surface-600-400">&nbsp;{option.infoString.string}</span>
 					{/if}
 					{#if option.suggested}
-						<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>
+						<span class="text-sm text-surface-600-400"> {m.suggestedParentheses()}</span>
 					{/if}
 				{/if}
 			{/snippet}

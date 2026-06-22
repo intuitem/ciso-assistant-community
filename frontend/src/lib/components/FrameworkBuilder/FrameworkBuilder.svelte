@@ -493,8 +493,8 @@
 											value={$frameworkStore.urn_namespace ?? 'custom'}
 											placeholder="custom"
 											pattern="[a-zA-Z0-9_-]+"
-											class="mt-1 w-48 text-sm font-mono border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 {lockUrnEdits
-												? 'bg-surface-100-900 text-surface-500 cursor-not-allowed'
+											class="mt-1 w-48 text-sm font-mono border border-surface-200-800 rounded bg-surface-100-900 px-2 py-1 text-surface-950-50 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 {lockUrnEdits
+												? 'text-surface-500 cursor-not-allowed'
 												: ''}"
 											readonly={lockUrnEdits}
 											onblur={(e) => {
@@ -514,8 +514,8 @@
 											value={$frameworkStore.ref_id ?? ''}
 											placeholder="my-framework"
 											pattern="[a-zA-Z0-9_-]+"
-											class="mt-1 w-48 text-sm font-mono border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 {lockUrnEdits
-												? 'bg-surface-100-900 text-surface-500 cursor-not-allowed'
+											class="mt-1 w-48 text-sm font-mono border border-surface-200-800 rounded bg-surface-100-900 px-2 py-1 text-surface-950-50 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 {lockUrnEdits
+												? 'text-surface-500 cursor-not-allowed'
 												: ''}"
 											readonly={lockUrnEdits}
 											onblur={(e) => {
@@ -562,7 +562,7 @@
 												<input
 													type="number"
 													value={$frameworkStore.min_score}
-													class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+													class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 													onblur={(e) => {
 														builder.updateFramework({
 															min_score: parseInt(e.currentTarget.value) || 0
@@ -575,7 +575,7 @@
 												<input
 													type="number"
 													value={$frameworkStore.max_score}
-													class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+													class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 													onblur={(e) => {
 														builder.updateFramework({
 															max_score: parseInt(e.currentTarget.value) || 100
@@ -627,7 +627,7 @@
 																	<input
 																		type="number"
 																		value={entry.score}
-																		class="w-full text-sm border border-surface-200-800 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+																		class="input w-full text-sm border border-surface-200-800 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 																		onblur={(e) => {
 																			const entries = [...scaleEntries];
 																			entries[idx].score = parseInt(e.currentTarget.value) || 0;
@@ -641,7 +641,7 @@
 																		type="text"
 																		value={entry.name}
 																		placeholder={m.builderScaleNamePlaceholder()}
-																		class="w-full text-sm border border-surface-200-800 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+																		class="input w-full text-sm border border-surface-200-800 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 																		onblur={(e) => {
 																			const entries = [...scaleEntries];
 																			entries[idx].name = e.currentTarget.value;
@@ -656,7 +656,7 @@
 																		type="text"
 																		value={entry.description}
 																		placeholder={m.builderScaleDescriptionPlaceholder()}
-																		class="w-full text-sm border border-surface-200-800 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+																		class="input w-full text-sm border border-surface-200-800 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 																		onblur={(e) => {
 																			const entries = [...scaleEntries];
 																			entries[idx].description = e.currentTarget.value;
@@ -691,7 +691,7 @@
 																			type="text"
 																			value={getTranslation(entry.translations, lang, 'name')}
 																			placeholder={m.builderTranslateName()}
-																			class="w-full text-sm border border-blue-100 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+																			class="input w-full text-sm border border-blue-100 dark:border-blue-900/40 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 																			onblur={(e) => {
 																				const entries = [...scaleEntries];
 																				entries[idx].translations = withTranslation(
@@ -718,7 +718,7 @@
 																				'description'
 																			)}
 																			placeholder={m.builderTranslateDescription()}
-																			class="w-full text-sm border border-blue-100 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+																			class="input w-full text-sm border border-blue-100 dark:border-blue-900/40 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 																			onblur={(e) => {
 																				const entries = [...scaleEntries];
 																				entries[idx].translations = withTranslation(

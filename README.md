@@ -717,12 +717,12 @@ The goal of the test harness is to prevent any regression, i.e. all the tests sh
 
 To interact with the API via Swagger or directly with HTTP calls:
 
-1. Authenticate by sending a POST request to `/api/iam/login/` with your credentials in the request body. The response will include an authentication token.
+1. Create a Personal Access Token (PAT) from your user profile in the application.
 2. Include this token in the header of subsequent requests as: `Authorization: Token <token>`
 
 ⚠️ Note: use `Token`, **not** `Bearer`.
 
-When using the interactive Swagger UI, simply log in, the token will be automatically handled for subsequent requests.
+PATs respect MFA: they are issued from an authenticated session, so an account protected by MFA stays protected. For interactive/browser flows, authentication goes through the standard login (which enforces MFA when enabled).
 
 ## Setting CISO Assistant for production
 
