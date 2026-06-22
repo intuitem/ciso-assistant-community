@@ -164,7 +164,10 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | postgresql.global.postgresql.auth.postgresPassword | string | `""` | Super-user postgres account password # Note: if not set, it will be dynamically generated |
 | postgresql.global.postgresql.auth.username | string | `"ciso-assistant"` | Database username |
 | postgresql.primary.persistence.size | string | `"5Gi"` | PostgreSQL persistant volume size (default 8Gi). |
+| qdrant.config | object | `{"cluster":{"consensus":{"tick_period_ms":100},"enabled":true,"p2p":{"enable_tls":false,"port":6335}},"service":{"enable_tls":false}}` | Qdrant runtime configuration (passed through to the subchart) |
 | qdrant.enabled | bool | `false` | Deploy the bundled Qdrant (official subchart) and inject QDRANT_URL |
+| qdrant.persistence | object | `{"accessModes":["ReadWriteOnce"],"additionalLabels":{},"annotations":{},"size":"10Gi"}` | Qdrant storage persistence (passed through to the subchart) |
+| qdrant.replicaCount | int | `1` | Number of Qdrant replicas (requires `qdrant.config.cluster.enabled`) |
 | serviceAccount.annotations | object | `{}` | Annotations applied to created service account |
 | serviceAccount.automountServiceAccountToken | bool | `true` | Automount API credentials for the Service Account |
 | serviceAccount.create | bool | `false` | Create a service account for CISO Assistant |

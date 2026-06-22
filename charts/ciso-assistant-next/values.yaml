@@ -476,3 +476,29 @@ externalPgsql:
 qdrant: # @schema additionalProperties: true
   # -- Deploy the bundled Qdrant (official subchart) and inject QDRANT_URL
   enabled: false
+
+  # -- Number of Qdrant replicas (requires `qdrant.config.cluster.enabled`)
+  replicaCount: 1
+
+  # -- Qdrant storage persistence
+  persistence: # @schema additionalProperties: true
+    accessModes: ["ReadWriteOnce"]
+    size: 10Gi
+    annotations: {} # @schema additionalProperties: true
+    additionalLabels: {} # @schema additionalProperties: true
+    # storageVolumeName: qdrant-storage
+    # storageSubPath: ""
+    # storageClassName: local-path
+    # volumeAttributesClassName: ""
+
+  # -- Qdrant runtime configuration
+  config: # @schema additionalProperties: true
+    cluster: # @schema additionalProperties: true
+      enabled: true
+      p2p: # @schema additionalProperties: true
+        port: 6335
+        enable_tls: false
+      consensus: # @schema additionalProperties: true
+        tick_period_ms: 100
+    service: # @schema additionalProperties: true
+      enable_tls: false
