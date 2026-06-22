@@ -58,6 +58,8 @@ from core.models import (
     TaskTemplate,
     OrganisationObjective,
     OrganisationIssue,
+    AppliedControl,
+    Policy,
     Preset,
     PresetJourney,
     PresetJourneyStep,
@@ -73,6 +75,8 @@ from core.serializers import (
     TaskTemplateWriteSerializer,
     OrganisationObjectiveWriteSerializer,
     OrganisationIssueWriteSerializer,
+    AppliedControlWriteSerializer,
+    PolicyWriteSerializer,
 )
 from ebios_rm.models import EbiosRMStudy
 from ebios_rm.serializers import EbiosRMStudyWriteSerializer
@@ -84,6 +88,11 @@ from tprm.models import Entity
 from tprm.serializers import EntityWriteSerializer
 from metrology.models import MetricInstance, MetricDefinition
 from metrology.serializers import MetricInstanceWriteSerializer
+from pmbok.models import Project, ResponsibilityMatrix
+from pmbok.serializers import (
+    ProjectWriteSerializer,
+    ResponsibilityMatrixWriteSerializer,
+)
 from global_settings.models import GlobalSettings
 from iam.models import Folder, User
 
@@ -379,6 +388,10 @@ class PresetExecutor:
         "metric_instance": MetricInstance,
         "asset": Asset,
         "risk_scenario": RiskScenario,
+        "applied_control": AppliedControl,
+        "policy": Policy,
+        "project": Project,
+        "responsibility_matrix": ResponsibilityMatrix,
     }
 
     def _find_existing(self, folder: Folder, obj_type: str, item: dict, name: str):
@@ -415,6 +428,11 @@ class PresetExecutor:
             queryset = queryset.filter(metric_definition=metric_def)
         elif obj_type == "asset":
             queryset = queryset.filter(type=item.get("asset_type", "SP"))
+        elif obj_type == "applied_control":
+            if item.get("category"):
+                queryset = queryset.filter(category=item["category"])
+        elif obj_type == "project":
+            queryset = queryset.filter(kind=item.get("kind", "project"))
 
         return queryset.first()
 
@@ -658,6 +676,68 @@ class PresetExecutor:
                     "type": item.get("asset_type", "SP"),
                 }
                 serializer = AssetWriteSerializer(data=data, context=context)
+                serializer.is_valid(raise_exception=True)
+                obj = serializer.save()
+
+            elif obj_type == "applied_control":
+                data = {
+                    "folder": str(folder.id),
+                    "name": name,
+                    "description": description,
+                }
+                if item.get("category"):
+                    data["category"] = item["category"]
+                if item.get("csf_function"):
+                    data["csf_function"] = item["csf_function"]
+                if item.get("priority") is not None:
+                    data["priority"] = item["priority"]
+                if item.get("status"):
+                    data["status"] = item["status"]
+                serializer = AppliedControlWriteSerializer(data=data, context=context)
+                serializer.is_valid(raise_exception=True)
+                obj = serializer.save()
+
+            elif obj_type == "policy":
+                data = {
+                    "folder": str(folder.id),
+                    "name": name,
+                    "description": description,
+                }
+                if item.get("priority") is not None:
+                    data["priority"] = item["priority"]
+                if item.get("status"):
+                    data["status"] = item["status"]
+                serializer = PolicyWriteSerializer(data=data, context=context)
+                serializer.is_valid(raise_exception=True)
+                obj = serializer.save()
+
+            elif obj_type == "project":
+                data = {
+                    "folder": str(folder.id),
+                    "name": name,
+                    "description": description,
+                    "kind": item.get("kind", "project"),
+                }
+                if item.get("ref_id"):
+                    data["ref_id"] = item["ref_id"]
+                if item.get("priority") is not None:
+                    data["priority"] = item["priority"]
+                serializer = ProjectWriteSerializer(data=data, context=context)
+                serializer.is_valid(raise_exception=True)
+                obj = serializer.save()
+
+            elif obj_type == "responsibility_matrix":
+                # Shell only: create the matrix with its taxonomy; roles auto-populate
+                # from the preset. Activities/actors/assignments are left to the user.
+                data = {
+                    "folder": str(folder.id),
+                    "name": name,
+                    "description": description,
+                    "preset": item.get("matrix_preset", "raci"),
+                }
+                serializer = ResponsibilityMatrixWriteSerializer(
+                    data=data, context=context
+                )
                 serializer.is_valid(raise_exception=True)
                 obj = serializer.save()
 
