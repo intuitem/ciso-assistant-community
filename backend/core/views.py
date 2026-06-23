@@ -828,7 +828,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 https://stackoverflow.com/questions/74048193/why-does-a-retrieve-request-end-up-calling-get-queryset"""
                 id = UUID(q.group(1))
                 if RoleAssignment.is_object_readable(self.request.user, self.model, id):
-                    self.model.objects.filter(id=id)
+                    return self.model.objects.filter(id=id)
                 else:
                     return self.model.objects.none()
 

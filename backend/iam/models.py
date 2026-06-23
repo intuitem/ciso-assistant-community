@@ -1238,7 +1238,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         specific_model = type(specific)
         iam_scope_folder = specific.folder
 
-        return iam_scope_folder in RoleAssignment.get_allowed_folder_ids(
+        return iam_scope_folder.id in RoleAssignment.get_allowed_folder_ids(
             user, perm, specific_model
         )
 
@@ -1299,7 +1299,10 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         if has_is_published_field and getattr(obj, "is_published"):
             ancestor_folder_ids = (
-                Folder.objects.filter(descendants__in=direct_accessible_folder_id_set)
+                Folder.objects.filter(
+                    ~Q(content_type=Folder.ContentType.ENCLAVE)
+                    & Q(descendants__in=direct_accessible_folder_id_set)
+                )
                 .values_list("id", flat=True)
                 .distinct()
             )
@@ -1653,7 +1656,8 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
             if perm == "view" and has_is_published_field:
                 ancestor_folder_ids = Folder.objects.filter(
-                    descendants__in=allowed_folder_ids
+                    ~Q(content_type=Folder.ContentType.ENCLAVE)
+                    & Q(descendants__in=allowed_folder_ids)
                 ).distinct()
                 published_objects_query = Q(
                     **{f"{iam_folder_field}__in": ancestor_folder_ids},

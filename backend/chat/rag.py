@@ -8,6 +8,8 @@ import structlog
 import os
 import time
 
+from django.db.models import Q
+
 from iam.models import Folder, RoleAssignment
 
 logger = structlog.get_logger(__name__)
@@ -42,11 +44,14 @@ def get_qdrant_client():
 
 
 def get_accessible_folder_ids(user) -> list[str]:
-    """Get all folder IDs the user has access to, as strings for Qdrant filtering."""
+    """Get all folder IDs the user has access to (exclusing enclaves), as strings for Qdrant filtering."""
 
-    folder_ids = RoleAssignment.get_allowed_folder_ids(user, "view", Folder)
+    folder_id_queryset = RoleAssignment.get_allowed_folder_ids(user, "view", Folder)
+    non_enclave_folder_ids = Folder.objects.filter(
+        Q(id__in=folder_id_queryset) & ~Q(content_type=Folder.ContentType.ENCLAVE)
+    )
 
-    return [str(folder_id) for folder_id in folder_ids]
+    return [str(folder_id) for folder_id in non_enclave_folder_ids]
 
 
 def search(
