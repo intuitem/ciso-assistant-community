@@ -18,7 +18,7 @@
 	let menuOpen = $state(false);
 	let switcherOpen = $state(false);
 
-	const current = $derived(data.portals.find((p) => p.slug === $page.params.slug));
+	const current = $derived(data.portals.find((p) => p.id === $page.params.id));
 
 	onMount(() => initThemeFromUser(data.user?.preferences));
 </script>
@@ -45,15 +45,15 @@
 					>
 						{#each data.portals as p}
 							<a
-								href="/portal/{p.slug}"
+								href="/portal/{p.id}"
 								onclick={() => (switcherOpen = false)}
-								class="flex items-center justify-between rounded px-2 py-1.5 text-sm hover:bg-surface-100-900 {p.slug ===
-								current?.slug
+								class="flex items-center justify-between rounded px-2 py-1.5 text-sm hover:bg-surface-100-900 {p.id ===
+								current?.id
 									? 'font-semibold text-violet-600'
 									: ''}"
 							>
 								{p.name}
-								{#if p.slug === current?.slug}<i class="fa-solid fa-check text-xs"></i>{/if}
+								{#if p.id === current?.id}<i class="fa-solid fa-check text-xs"></i>{/if}
 							</a>
 						{/each}
 						{#if data.user?.is_admin}

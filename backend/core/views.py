@@ -12582,20 +12582,16 @@ class PortalViewSet(BaseModelViewSet):
     @action(detail=False, methods=["get"])
     def mine(self, request):
         portals = self._entitled_queryset(request)
-        return Response(
-            [{"id": str(p.id), "slug": p.slug, "name": p.name} for p in portals]
-        )
+        return Response([{"id": str(p.id), "name": p.name} for p in portals])
 
-    @action(detail=False, methods=["get"])
-    def content(self, request):
-        slug = request.query_params.get("slug")
-        portal = self._entitled_queryset(request).filter(slug=slug).first()
+    @action(detail=True, methods=["get"])
+    def content(self, request, pk=None):
+        portal = self._entitled_queryset(request).filter(pk=pk).first()
         if portal is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
         return Response(
             {
                 "id": str(portal.id),
-                "slug": portal.slug,
                 "name": portal.name,
                 "branding": portal.branding,
                 "sections": (portal.content or {}).get("sections", []),

@@ -9973,7 +9973,6 @@ class Portal(NameDescriptionMixin, FolderMixin):
     status = models.CharField(
         max_length=20, choices=Status.choices, default=Status.DRAFT
     )
-    slug = models.SlugField(max_length=100, unique=True)
     enabled = models.BooleanField(default=True)
     is_public = models.BooleanField(default=False)
     audience_groups = models.ManyToManyField(

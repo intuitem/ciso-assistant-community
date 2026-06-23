@@ -4628,15 +4628,13 @@ class PortalReadSerializer(BaseModelSerializer):
 
 
 class PortalWriteSerializer(BaseModelSerializer):
-    slug = serializers.SlugField(max_length=100, required=False)
-
     class Meta:
         model = Portal
         fields = [
+            "id",
             "name",
             "description",
             "folder",
-            "slug",
             "status",
             "enabled",
             "is_public",
@@ -4659,18 +4657,6 @@ class PortalWriteSerializer(BaseModelSerializer):
         if not isinstance(value.get("sections", []), list):
             raise serializers.ValidationError("sections must be a list")
         return value
-
-    def validate(self, data):
-        data = super().validate(data)
-        if self.instance is None and not data.get("slug"):
-            from django.utils.text import slugify
-
-            base = slugify(data.get("name", "")) or "portal"
-            slug, i = base, 2
-            while Portal.objects.filter(slug=slug).exists():
-                slug, i = f"{base}-{i}", i + 1
-            data["slug"] = slug
-        return data
 
 
 class QuickStartSerializer(serializers.Serializer):

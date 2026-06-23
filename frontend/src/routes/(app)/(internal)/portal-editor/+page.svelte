@@ -24,7 +24,9 @@
 					<div class="flex items-center gap-3">
 						<i class="fa-solid fa-grip text-surface-400"></i>
 						<a href="/portal-editor/{p.id}" class="font-medium hover:text-primary-500">{p.name}</a>
-						<a href="/portal/{p.slug}" class="text-xs text-primary-500">/portal/{p.slug}</a>
+						<a href="/portal/{p.id}" class="text-xs text-primary-500" aria-label="Open portal"
+							><i class="fa-solid fa-arrow-up-right-from-square"></i></a
+						>
 						<span
 							class="text-[10px] uppercase rounded-full px-2 py-0.5 {p.status === 'published'
 								? 'bg-success-500/15 text-success-700'
