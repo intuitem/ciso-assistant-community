@@ -230,6 +230,7 @@
 	"generateScimToken": "Generate token",
 	"noScimTokens": "No SCIM tokens yet.",
 	"scimTokenName": "Name",
+	"scimTokenDigest": "Digest",
 	"revokeScimToken": "Revoke",
 	"scimTokenGenerated": "Token generated",
 	"scimTokenWarning": "Copy this token now. For security reasons it will not be shown again.",

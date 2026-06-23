@@ -111,7 +111,7 @@
 					<tr class="bg-surface-100-900">
 						<th class="px-4 py-2 text-left font-medium">{m.scimTokenName()}</th>
 						<th class="px-4 py-2 text-left font-medium">{m.createdAt()}</th>
-						<th class="px-4 py-2 text-left font-medium">Digest</th>
+						<th class="px-4 py-2 text-left font-medium">{m.scimTokenDigest()}</th>
 						<th class="px-4 py-2"></th>
 					</tr>
 				</thead>

@@ -4,7 +4,7 @@ from datetime import timedelta
 import structlog
 from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model, login, logout
-from django.db import models
+from django.db import transaction
 from django.db.models import Q, Exists, OuterRef
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils import timezone
@@ -525,14 +525,20 @@ class SCIMTokenViewSet(views.APIView):
         return Response(data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
-        name = request.data.get("name", "SCIM provisioning token")
+        name = request.data.get("name") or "SCIM provisioning token"
+        if len(name) > 255:
+            return Response(
+                {"error": "Name must be at most 255 characters."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         token_prefix = knox_settings.TOKEN_PREFIX
-        instance, raw_token = get_token_model().objects.create(
-            user=request.user,
-            expiry=None,
-            prefix=token_prefix,
-        )
-        scim_token = SCIMToken.objects.create(auth_token=instance, name=name)
+        with transaction.atomic():
+            instance, raw_token = get_token_model().objects.create(
+                user=request.user,
+                expiry=None,
+                prefix=token_prefix,
+            )
+            scim_token = SCIMToken.objects.create(auth_token=instance, name=name)
         return Response(
             {
                 "id": scim_token.id,

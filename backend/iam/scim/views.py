@@ -208,7 +208,7 @@ class SCIMUserViewSet(ViewSet):
         filter_str = request.query_params.get("filter", "")
         try:
             start_index = max(int(request.query_params.get("startIndex", 1)), 1)
-            count = min(int(request.query_params.get("count", 100)), 200)
+            count = min(max(int(request.query_params.get("count", 100)), 0), 200)
         except TypeError, ValueError:
             start_index, count = 1, 100
 
@@ -346,7 +346,6 @@ class SCIMUserViewSet(ViewSet):
         logger.info(
             "SCIM: user PATCH received",
             user_id=pk,
-            body=data,
             top_level_keys=list(data.keys()),
             operations_count=len(operations),
         )
@@ -413,7 +412,7 @@ class SCIMGroupViewSet(ViewSet):
         filter_str = request.query_params.get("filter", "")
         try:
             start_index = max(int(request.query_params.get("startIndex", 1)), 1)
-            count = min(int(request.query_params.get("count", 100)), 200)
+            count = min(max(int(request.query_params.get("count", 100)), 0), 200)
         except TypeError, ValueError:
             start_index, count = 1, 100
 
@@ -475,9 +474,10 @@ class SCIMGroupViewSet(ViewSet):
             return _scim_error_response("Invalid JSON body", 400, "invalidSyntax")
 
         display_name = data.get("displayName")
-        if display_name and display_name != idp_group.name:
-            idp_group.name = display_name
-            idp_group.save(update_fields=["name"])
+        if display_name and not _rename_idp_group(idp_group, display_name):
+            return _scim_error_response(
+                f"A group named '{display_name}' already exists", 409, "uniqueness"
+            )
 
         _set_members(idp_group, _member_ids(data.get("members", []) or []))
         return _scim_response(scim_group_to_dict(idp_group, request))
@@ -545,12 +545,19 @@ class SCIMGroupViewSet(ViewSet):
                 elif path == "displayName" and value:
                     # IdP renamed the group. Only the label changes; the
                     # IdPGroup PK (the SCIM id) is the stable reference.
-                    idp_group.name = value
-                    idp_group.save(update_fields=["name"])
+                    if not _rename_idp_group(idp_group, value):
+                        return _scim_error_response(
+                            f"A group named '{value}' already exists", 409, "uniqueness"
+                        )
                 elif isinstance(value, dict):
-                    if "displayName" in value:
-                        idp_group.name = value["displayName"]
-                        idp_group.save(update_fields=["name"])
+                    if "displayName" in value and not _rename_idp_group(
+                        idp_group, value["displayName"]
+                    ):
+                        return _scim_error_response(
+                            f"A group named '{value['displayName']}' already exists",
+                            409,
+                            "uniqueness",
+                        )
                     if "members" in value:
                         replace_ids = _member_ids(value["members"] or [])
                         add_ids.clear()
@@ -593,7 +600,7 @@ def _valid_uuid(value):
     """
     try:
         return uuid.UUID(str(value))
-    except (ValueError, TypeError, AttributeError):
+    except ValueError, TypeError, AttributeError:
         return None
 
 
@@ -647,6 +654,20 @@ def _primary_email(emails):
         return None
     primary = next((e for e in dicts if e.get("primary")), dicts[0])
     return primary.get("value")
+
+
+def _rename_idp_group(idp_group, new_name) -> bool:
+    """Rename the IdP group. Returns False on a unique-name collision so the
+    SCIM caller can surface it as a 409 instead of a 500."""
+    if not new_name or new_name == idp_group.name:
+        return True
+    idp_group.name = new_name
+    try:
+        idp_group.save(update_fields=["name"])
+    except IntegrityError:
+        idp_group.refresh_from_db(fields=["name"])
+        return False
+    return True
 
 
 def _member_ids(members):
@@ -714,6 +735,8 @@ def _apply_user_replace_dict(user, value_dict):
         user.first_name = name_data["givenName"]
     if "familyName" in name_data:
         user.last_name = name_data["familyName"]
+    if "externalId" in value_dict:
+        user.scim_external_id = value_dict["externalId"] or None
     new_email = _primary_email(value_dict.get("emails", []))
     if new_email:
         user.email = new_email

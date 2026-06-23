@@ -29,14 +29,44 @@
 	// the selection across those round-trips.
 	const SETTINGS_TAB_STORAGE_KEY = 'settingsActiveTab';
 
+	// Tabs that only exist when their feature flag is enabled. A persisted or
+	// stale tab is restored only when it is actually available, so the settings
+	// page never initialises on a hidden tab (e.g. `scim` with idp_groups off).
+	const FLAG_GATED_TABS: Record<string, string> = {
+		scim: 'idp_groups',
+		webhooks: 'outgoing_webhooks',
+		auditLogForwarding: 'audit_log_forwarding',
+		infraConfig: 'infra_config_management'
+	};
+	const KNOWN_TABS = new Set([
+		'general',
+		'sso',
+		'scim',
+		'featureFlags',
+		'vulnerabilitySla',
+		'secIntelFeeds',
+		'webhooks',
+		'auditLogForwarding',
+		'emailTemplates',
+		'integrations',
+		'clientSettings',
+		'infraConfig'
+	]);
+
+	function tabAvailable(tab: string | null | undefined): tab is string {
+		if (!tab || !KNOWN_TABS.has(tab)) return false;
+		const flag = FLAG_GATED_TABS[tab];
+		return flag ? Boolean(page.data?.featureflags?.[flag]) : true;
+	}
+
 	function deriveInitialTab(): string {
-		if (page.state?.settingsTab) return page.state.settingsTab;
+		if (tabAvailable(page.state?.settingsTab)) return page.state.settingsTab;
 		for (const [tab, { href }] of Object.entries(PRELOAD_TABS)) {
 			if (page.url.pathname.endsWith(href.replace('/settings', ''))) return tab;
 		}
 		if (browser) {
 			const saved = sessionStorage.getItem(SETTINGS_TAB_STORAGE_KEY);
-			if (saved) return saved;
+			if (tabAvailable(saved)) return saved;
 		}
 		return 'general';
 	}

@@ -13,6 +13,8 @@ SCIM 2.0 lets your identity provider (Okta, Microsoft Entra ID, Keycloak, …) p
 This is a **PRO** feature. It is gated by the `IdP groups` feature flag (see [feature-flags.md](../settings/feature-flags.md "mention")). While the flag is off, the **IdP groups** menu, the **SCIM** settings tab and the **IdP groups** column on the users table stay hidden. The flag is enabled by default on PRO instances.
 {% endhint %}
 
+<figure><img src="../../.gitbook/assets/scim-feature-flag.png" alt=""><figcaption><p>The <strong>IdP groups</strong> feature flag in Settings › Feature flags.</p></figcaption></figure>
+
 ### How it works
 
 Authentication and provisioning are two separate concerns, handled by two complementary mechanisms:
@@ -32,18 +34,26 @@ An IdP group grants nothing until you map it to at least one user group. SCIM ca
 
 IdP groups live under **Organization > IdP groups** in the sidebar. The page behaves like any other object table — view, create, edit and delete.
 
+<figure><img src="../../.gitbook/assets/scim-idp-groups-list.png" alt=""><figcaption><p>Organization › IdP groups — each IdP group and the user groups it grants.</p></figcaption></figure>
+
 Creating or editing an IdP group asks for two things:
 
 * **Name** — the display name of the group as it exists in your identity provider.
 * **User groups** — one or more CISO Assistant [user groups](../organization/user-groups.md "mention") this IdP group should grant. Edit this list at any time; every member of the IdP group is re-granted immediately.
 
+<figure><img src="../../.gitbook/assets/scim-idp-group-form.png" alt=""><figcaption><p>Creating an IdP group: its IdP-side name and the user groups it grants.</p></figcaption></figure>
+
 The **members** of an IdP group are managed by SCIM and shown read-only. You will also find an **IdP groups** column on the **Organization > Users** table, listing the IdP groups each user belongs to.
+
+<figure><img src="../../.gitbook/assets/scim-users-idp-groups-column.png" alt=""><figcaption><p>The IdP groups column on the users table shows SCIM-managed memberships.</p></figcaption></figure>
 
 {% hint style="info" %}
 IdP groups are administered globally and are only visible to administrators, just like [user groups](../organization/user-groups.md "mention") and roles.
 {% endhint %}
 
 ### Configuring SCIM
+
+<figure><img src="../../.gitbook/assets/scim-settings-tab.png" alt=""><figcaption><p>Settings › SCIM — the endpoint URL and bearer-token management.</p></figcaption></figure>
 
 1. Log in as an **administrator > Extra > Settings** and open the **SCIM** tab.
 2. Copy the **SCIM endpoint URL** (for example `https://<your-instance>/api/scim/v2/`). This is the base URL your identity provider connects to.

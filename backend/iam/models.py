@@ -1675,7 +1675,7 @@ class SCIMToken(models.Model):
 common_exclude = ["created_at", "updated_at"]
 auditlog.register(
     User,
-    m2m_fields={"user_groups"},
+    m2m_fields={"user_groups", "idp_groups"},
     exclude_fields=common_exclude,
 )
 auditlog.register(
