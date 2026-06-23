@@ -12,7 +12,7 @@ from webhooks.tasks import send_webhook_request
 
 @pytest.fixture
 def public_endpoint(db):
-    with override_settings(WEBHOOK_ALLOW_PRIVATE_IPS=True):
+    with override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=True):
         return WebhookEndpoint.objects.create(
             name="public",
             url="https://example.com/hook",
@@ -24,9 +24,9 @@ def public_endpoint(db):
 @pytest.fixture
 def private_endpoint(db):
     """WebhookEndpoint pointing at a private IP. Bypasses the save-time
-    guard via WEBHOOK_ALLOW_PRIVATE_IPS to simulate a pre-existing
+    guard via ALLOW_PRIVATE_NETWORK_REQUESTS to simulate a pre-existing
     record or post-save DNS flip."""
-    with override_settings(WEBHOOK_ALLOW_PRIVATE_IPS=True):
+    with override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=True):
         return WebhookEndpoint.objects.create(
             name="private",
             url="http://10.0.0.1/admin",
@@ -36,7 +36,7 @@ def private_endpoint(db):
 
 
 @pytest.mark.django_db
-@override_settings(WEBHOOK_ALLOW_PRIVATE_IPS=False)
+@override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=False)
 def test_blocked_url_returns_terminally(private_endpoint):
     # Permanent policy denial must be terminal: return (not raise) so
     # Huey doesn't retry 5x with fresh webhook-ids.
@@ -47,7 +47,7 @@ def test_blocked_url_returns_terminally(private_endpoint):
 
 
 @pytest.mark.django_db
-@override_settings(WEBHOOK_ALLOW_PRIVATE_IPS=False)
+@override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=False)
 def test_redirect_returns_terminally(public_endpoint):
     # 3xx must not be followed and must not trigger retries — each
     # retry would mint a new webhook-id, so a 307/308 target would see
@@ -64,7 +64,7 @@ def test_redirect_returns_terminally(public_endpoint):
 
 
 @pytest.mark.django_db
-@override_settings(WEBHOOK_ALLOW_PRIVATE_IPS=False)
+@override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=False)
 def test_dns_failure_is_transient_and_propagates(public_endpoint):
     # DnsLookupError must propagate so Huey retries; it must NOT be
     # caught by the BlockedRequestError handler.
@@ -79,7 +79,7 @@ def test_dns_failure_is_transient_and_propagates(public_endpoint):
 
 
 @pytest.mark.django_db
-@override_settings(WEBHOOK_ALLOW_PRIVATE_IPS=False)
+@override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=False)
 def test_5xx_raises_for_retry(public_endpoint):
     # Non-redirect non-2xx must raise so Huey retries the transient
     # remote failure.
@@ -94,7 +94,7 @@ def test_5xx_raises_for_retry(public_endpoint):
 
 
 @pytest.mark.django_db
-@override_settings(WEBHOOK_ALLOW_PRIVATE_IPS=True)
+@override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=True)
 def test_allow_private_ips_bypasses_guard(private_endpoint):
     # Dev escape hatch: the SSRF check is skipped.
     mock_response = MagicMock()

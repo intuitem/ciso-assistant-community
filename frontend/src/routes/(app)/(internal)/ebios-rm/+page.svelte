@@ -24,8 +24,7 @@
 			ref: CreateModal,
 			props: {
 				form: data.createForm,
-				model: data.model,
-				customNameDescription: true
+				model: data.model
 			}
 		};
 		let modal: ModalSettings = {

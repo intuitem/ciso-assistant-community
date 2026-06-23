@@ -13,7 +13,6 @@
 	import { formFieldProxy } from 'sveltekit-superforms';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import CustomFieldsSection from '../CustomFieldsSection.svelte';
-	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import Duration from '../Duration.svelte';
 	import RadioGroup from '../RadioGroup.svelte';
 	import Select from '../Select.svelte';
@@ -124,13 +123,6 @@
 	cacheLock={cacheLocks['owner']}
 	bind:cachedValue={formDataCache['owner']}
 	label={m.owner()}
-/>
-<FolderTreeSelect
-	{form}
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
 />
 <Select
 	{form}

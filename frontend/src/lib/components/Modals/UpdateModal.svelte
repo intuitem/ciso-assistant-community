@@ -26,6 +26,7 @@
 		selectOptions?: Record<string, any>;
 		debug?: boolean;
 		customNameDescription?: boolean;
+		customFolder?: boolean;
 	}
 
 	let {
@@ -39,7 +40,8 @@
 		suggestions = {},
 		selectOptions = {},
 		debug = false,
-		customNameDescription = true
+		customNameDescription = true,
+		customFolder = false
 	}: Props = $props();
 </script>
 
@@ -59,6 +61,7 @@
 		</div>
 		<ModelForm
 			{customNameDescription}
+			{customFolder}
 			{form}
 			{object}
 			{suggestions}

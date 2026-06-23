@@ -3,7 +3,6 @@ import sys
 import click
 import requests
 import json
-import yaml
 from kafka import KafkaConsumer, KafkaProducer
 from kafka.errors import NoBrokersAvailable, UnsupportedCodecError
 
@@ -42,46 +41,12 @@ def cli():
     pass
 
 
-def _auth(email, password):
-    """Authenticate to get a temp token (config file or params). Pass the email and password or set them on the config file"""
-    url = f"{settings.API_URL}/iam/login/"
-    if email and password:
-        data = {"username": email, "password": password}
-    else:
-        logger.info("trying credentials from the config file")
-        if settings.USER_EMAIL and settings.USER_PASSWORD:
-            data = {"username": settings.USER_EMAIL, "password": settings.USER_PASSWORD}
-        else:
-            logger.error("Could not find any usable credentials.")
-            sys.exit(1)
-    headers = {"accept": "application/json", "Content-Type": "application/json"}
-
-    res = api.post(url, json=data, headers=headers, verify=settings.VERIFY_CERTIFICATE)
-    if res.ok:
-        with open(".tmp.yaml", "w") as yfile:
-            yaml.safe_dump(res.json(), yfile)
-            logger.success("Successfully authenticated. Token saved to .tmp.yaml")
-        api.update_session_token()
-    else:
-        logger.error(
-            "Authentication failed. Check your credentials again. You can set them on the config file or on the command line.",
-        )
-        sys.exit(1)
-
-
-@click.command()
-@click.option("--email", required=False)
-@click.option("--password", required=False)
-def auth(email: str, password: str):
-    """Authenticate to get a temp token (config file or params). Pass the email and password or set them on the config file"""
-    return _auth(email, password)
-
-
 @click.command()
 def consume():
     """
     Consume messages from the Kafka topic and process them.
     """
+    api.update_session_token()
     kafka_cfg = build_kafka_config()
     logger.info("Starting consumer", bootstrap_servers=settings.BOOTSTRAP_SERVERS)
     try:
@@ -148,23 +113,11 @@ def consume():
                             f"Request failed with status code {e.response.status_code} and message: {e.response.text}"
                         )
                         if e.response.status_code == 401:
-                            if not settings.AUTO_RENEW_SESSION:
-                                logger.error(
-                                    "Session expired. Please run the `auth` command."
-                                )
-                                raise
-                            try:
-                                logger.debug(
-                                    "Automatic session renewal enabled, attempting silent reauthentication."
-                                )
-                                _auth(settings.USER_EMAIL, settings.USER_PASSWORD)
-                                continue
-                            except Exception as e:
-                                logger.error(
-                                    "Silent reauthentication failed. Please run the `auth` command.",
-                                    e,
-                                )
-                                raise
+                            logger.error(
+                                "Authentication failed (401). The access token is invalid or expired. "
+                                "Provision a new Personal Access Token in CISO Assistant and update USER_TOKEN."
+                            )
+                            raise
                         raise
 
                 except Exception as e:
@@ -192,7 +145,6 @@ def consume():
         error_producer.close()
 
 
-cli.add_command(auth)
 cli.add_command(consume)
 cli.add_command(init_config)
 
