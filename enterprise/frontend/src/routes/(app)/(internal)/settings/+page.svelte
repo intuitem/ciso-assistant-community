@@ -5,8 +5,10 @@
 	import ClientSettings from './client-settings/+page.svelte';
 	import InfraConfig from './infra-config/+page.svelte';
 	import { goto, preloadData, pushState } from '$app/navigation';
+	import { browser } from '$app/environment';
 	import GeneralSettings from '$lib/components/Settings/GeneralSettings.svelte';
 	import SSOSettings from '$lib/components/Settings/SSOSettings.svelte';
+	import SCIMSettings from '$lib/components/Settings/SCIMSettings.svelte';
 	import FeatureFlagsSettings from '$lib/components/Settings/FeatureFlagsSettings.svelte';
 	import WebhooksSettings from '$lib/components/Settings/WebhooksSettings.svelte';
 	import VulnerabilitySlaSettings from '$lib/components/Settings/VulnerabilitySlaSettings.svelte';
@@ -22,10 +24,19 @@
 		infraConfig: { href: '/settings/infra-config', stateKey: 'infraConfig' }
 	};
 
+	// page.state (shallow routing) is dropped by server form-action POSTs, which
+	// would otherwise snap the active tab back to "general". sessionStorage keeps
+	// the selection across those round-trips.
+	const SETTINGS_TAB_STORAGE_KEY = 'settingsActiveTab';
+
 	function deriveInitialTab(): string {
 		if (page.state?.settingsTab) return page.state.settingsTab;
 		for (const [tab, { href }] of Object.entries(PRELOAD_TABS)) {
 			if (page.url.pathname.endsWith(href.replace('/settings', ''))) return tab;
+		}
+		if (browser) {
+			const saved = sessionStorage.getItem(SETTINGS_TAB_STORAGE_KEY);
+			if (saved) return saved;
 		}
 		return 'general';
 	}
@@ -45,6 +56,7 @@
 	// Centralized handler for tab changes.
 	async function handleTabChange(newValue: string) {
 		group = newValue;
+		if (browser) sessionStorage.setItem(SETTINGS_TAB_STORAGE_KEY, newValue);
 		const nextState = { ...page.state, settingsTab: newValue };
 
 		// Tabs backed by a sub-route preload their data into page.state instead of
@@ -77,6 +89,9 @@
 	<Tabs.List class="flex-nowrap overflow-x-auto gap-2">
 		<Tabs.Trigger value="general"><i class="fa-solid fa-globe"></i> {m.general()}</Tabs.Trigger>
 		<Tabs.Trigger value="sso"><i class="fa-solid fa-key"></i> {m.sso()}</Tabs.Trigger>
+		{#if page.data?.featureflags?.idp_groups}
+			<Tabs.Trigger value="scim"><i class="fa-solid fa-arrows-rotate"></i> {m.scim()}</Tabs.Trigger>
+		{/if}
 		<Tabs.Trigger value="featureFlags"
 			><i class="fa-solid fa-flag"></i> {m.featureFlags()}</Tabs.Trigger
 		>
@@ -134,6 +149,11 @@
 	<Tabs.Content value="sso">
 		<SSOSettings {data} />
 	</Tabs.Content>
+	{#if page.data?.featureflags?.idp_groups}
+		<Tabs.Content value="scim">
+			<SCIMSettings {data} />
+		</Tabs.Content>
+	{/if}
 	<Tabs.Content value="featureFlags">
 		<FeatureFlagsSettings {data} />
 	</Tabs.Content>

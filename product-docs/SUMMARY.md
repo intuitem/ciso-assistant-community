@@ -95,6 +95,7 @@
 * [SSO](configuration/sso/README.md)
   * [SAML](configuration/sso/saml.md)
   * [OpenID Connect (OIDC)](configuration/sso/oidc.md)
+  * [SCIM provisioning and IdP groups](configuration/sso/scim.md)
   * [Identity providers](configuration/sso/identity-providers/README.md)
     * [Microsoft Entra ID](configuration/sso/identity-providers/entra-id.md)
     * [Okta](configuration/sso/identity-providers/okta.md)

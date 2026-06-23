@@ -77,6 +77,7 @@ from django.views.decorators.vary import vary_on_cookie
 from django.core.cache import cache
 
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+from core.permissions import FeatureFlagRequired
 from core.helpers import get_instance_metrics
 from core.instance_metrics import (
     nb_users_gauge,
@@ -115,7 +116,7 @@ from django.template.loader import render_to_string
 from django.utils.functional import Promise
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from iam.models import Folder, RoleAssignment, User, UserGroup
+from iam.models import Folder, IdPGroup, RoleAssignment, User, UserGroup
 from rest_framework import filters, generics, permissions, status, viewsets
 from custom_fields.filters import CustomFieldFilterBackend, CustomFieldSearchFilter
 from django.utils.translation import gettext_lazy as _, get_language
@@ -7353,6 +7354,7 @@ class UserFilter(GenericFilterSet):
             "is_third_party",
             "expiry_date",
             "user_groups",
+            "idp_groups",
             "exclude_current",
             "representative__entity",
         ]
@@ -7800,6 +7802,20 @@ class UserGroupViewSet(BaseModelViewSet):
                 status=status.HTTP_403_FORBIDDEN,
             )
         return super().destroy(request, *args, **kwargs)
+
+
+class IdPGroupViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows IdP groups to be viewed or edited
+    """
+
+    model = IdPGroup
+    feature_flag = "idp_groups"
+    ordering_fields = ["name"]
+    search_fields = ["name"]
+
+    def get_permissions(self):
+        return super().get_permissions() + [FeatureFlagRequired()]
 
 
 class RoleAssignmentViewSet(BaseModelViewSet):

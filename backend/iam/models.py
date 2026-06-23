@@ -85,6 +85,8 @@ IGNORED_PERMISSION_MODELS = (
     "usergroup",
     "ssosettings",
     "historicalmetric",
+    "idpgroup",
+    "scimtoken",
 )
 
 
@@ -632,6 +634,16 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             "granted to each of their user groups."
         ),
     )
+    idp_groups = models.ManyToManyField(
+        "IdPGroup",
+        related_name="users",
+        blank=True,
+        verbose_name=_("IdP groups"),
+        help_text=_(
+            "External IdP groups this user belongs to (SCIM-managed). The user "
+            "additionally inherits the user groups granted by each IdP group."
+        ),
+    )
     observation = models.TextField(
         null=True, blank=True, verbose_name="Notes about a user"
     )
@@ -639,6 +651,13 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         blank=True,
         null=True,
         verbose_name=_("Expiry date"),
+    )
+    scim_external_id = models.CharField(
+        max_length=512,
+        blank=True,
+        null=True,
+        unique=True,
+        verbose_name=_("SCIM external ID"),
     )
     objects = CaseInsensitiveUserManager()
 
@@ -912,10 +931,18 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
 
     @staticmethod
     def get_admin_users() -> QuerySet["User"]:
-        return User.objects.filter(user_groups__name="BI-UG-ADM")
+        # Admin membership is reached directly or via an IdP group whose
+        # user_groups include BI-UG-ADM (groups-of-groups closure).
+        return User.objects.filter(
+            Q(user_groups__name="BI-UG-ADM")
+            | Q(idp_groups__user_groups__name="BI-UG-ADM")
+        ).distinct()
 
     def is_admin(self) -> bool:
-        return self.user_groups.filter(name="BI-UG-ADM").exists()
+        return (
+            self.user_groups.filter(name="BI-UG-ADM").exists()
+            or self.idp_groups.filter(user_groups__name="BI-UG-ADM").exists()
+        )
 
     # Permissions that grant write access but do not consume a license seat
     NON_SEAT_PERMISSIONS = {
@@ -1593,6 +1620,58 @@ class PersonalAccessToken(models.Model):
         return f"{self.auth_token.user.email} : {self.name} : {self.auth_token.digest}"
 
 
+# -----------------------------
+# IdP groups (SCIM federation)
+# -----------------------------
+
+
+class IdPGroup(AbstractBaseModel, FolderMixin):
+    """External IdP group provisioned via SCIM. ``users`` is SCIM-managed;
+    ``user_groups`` (the CISO groups it grants) is admin-managed. Folder-scoped
+    (defaults to the root folder) so it participates in RBAC like UserGroup."""
+
+    name = models.CharField(max_length=512, unique=True, verbose_name=_("Name"))
+    user_groups = models.ManyToManyField(
+        UserGroup,
+        related_name="idp_groups",
+        blank=True,
+        verbose_name=_("User groups"),
+    )
+
+    class Meta:
+        verbose_name = _("IdP group")
+        verbose_name_plural = _("IdP groups")
+
+    def __str__(self):
+        return self.name
+
+
+class SCIMToken(models.Model):
+    """Knox-backed bearer token for SCIM 2.0 provisioning. Admin-only."""
+
+    name = models.CharField(max_length=255, default="SCIM provisioning token")
+    auth_token = models.ForeignKey(
+        AuthToken,
+        on_delete=models.CASCADE,
+        related_name="scim_token",
+    )
+
+    class Meta:
+        verbose_name = "SCIM token"
+        verbose_name_plural = "SCIM tokens"
+
+    @property
+    def created(self):
+        return self.auth_token.created
+
+    @property
+    def digest(self):
+        return self.auth_token.digest
+
+    def __str__(self):
+        return f"{self.name} : {self.auth_token.digest}"
+
+
 common_exclude = ["created_at", "updated_at"]
 auditlog.register(
     User,
@@ -1601,5 +1680,10 @@ auditlog.register(
 )
 auditlog.register(
     Folder,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    IdPGroup,
+    m2m_fields={"user_groups"},
     exclude_fields=common_exclude,
 )
