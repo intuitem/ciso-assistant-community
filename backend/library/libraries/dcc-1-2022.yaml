@@ -19,9 +19,11 @@ objects:
     urn: urn:intuitem:risk:framework:dcc-1-2022
     ref_id: dcc-1-2022
     name: Data Cybersecurity Controls (DCC-1:2022)
-    description: NCA Data Cybersecurity Controls (DCC-1:2022). An ECC extension for
-      data protection. Each control applies to one or more data classification levels
-      (Public, Confidential, Secret, Top Secret), exposed as implementation groups.
+    description: 'NCA Data Cybersecurity Controls (DCC-1:2022), an extension of the
+      Essential Cybersecurity Controls (ECC) focused on protecting data across its
+      lifecycle. 3 main domains / 11 subdomains / 19 main controls / 47 subcontrols.
+      Controls apply to four data classification levels (Public, Confidential, Secret,
+      Top Secret), modelled here as implementation groups. Source: https://cdn.nca.gov.sa/api/public/cms/files/1c2cfb9c-7788-4549-9f29-f337500f1787_Data-Cybersecurity-Controls-.pdf'
     implementation_groups_definition:
     - ref_id: public
       name: Public
