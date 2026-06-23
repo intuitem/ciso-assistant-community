@@ -931,17 +931,24 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
 
     @staticmethod
     def get_admin_users() -> QuerySet["User"]:
-        # Admin membership is reached directly or via an IdP group whose
-        # user_groups include BI-UG-ADM (groups-of-groups closure).
-        return User.objects.filter(
-            Q(user_groups__name="BI-UG-ADM")
-            | Q(idp_groups__user_groups__name="BI-UG-ADM")
-        ).distinct()
+        # Admin membership is reached directly or, when the idp_groups feature
+        # is enabled, via an IdP group whose user_groups include BI-UG-ADM
+        # (groups-of-groups closure).
+        from global_settings.utils import ff_is_enabled
+
+        q = Q(user_groups__name="BI-UG-ADM")
+        if ff_is_enabled("idp_groups"):
+            q |= Q(idp_groups__user_groups__name="BI-UG-ADM")
+        return User.objects.filter(q).distinct()
 
     def is_admin(self) -> bool:
+        from global_settings.utils import ff_is_enabled
+
+        if self.user_groups.filter(name="BI-UG-ADM").exists():
+            return True
         return (
-            self.user_groups.filter(name="BI-UG-ADM").exists()
-            or self.idp_groups.filter(user_groups__name="BI-UG-ADM").exists()
+            ff_is_enabled("idp_groups")
+            and self.idp_groups.filter(user_groups__name="BI-UG-ADM").exists()
         )
 
     # Permissions that grant write access but do not consume a license seat
