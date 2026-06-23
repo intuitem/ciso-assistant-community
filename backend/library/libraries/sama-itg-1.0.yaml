@@ -8,10 +8,10 @@ description: 'SAMA IT Governance Framework, issued by the Saudi Central Bank (SA
   for its Member Organizations (banks, insurance and finance companies, and payment
   service providers). It defines the IT governance control domains, subdomains, principles
   and control requirements to identify and address IT-related risks. 4 control domains
-  / 35 subdomains / 240 control requirements. Reference: https://rulebook.sama.gov.sa'
+  / 35 subdomains. Source: https://rulebook.sama.gov.sa/en/information-technology-governance-framework'
 copyright: "\xA9 SAMA"
 version: 1
-publication_date: 2026-06-22
+publication_date: 2026-06-24
 provider: SAMA
 packager: community
 objects:
@@ -19,8 +19,11 @@ objects:
     urn: urn:intuitem:risk:framework:sama-itg-1.0
     ref_id: SAMA-ITG-1.0
     name: SAMA IT Governance Framework
-    description: SAMA IT Governance Framework. 4 control domains, 35 subdomains, 240
-      control requirements.
+    description: 'SAMA IT Governance Framework, issued by the Saudi Central Bank (SAMA)
+      for its Member Organizations (banks, insurance and finance companies, and payment
+      service providers). It defines the IT governance control domains, subdomains,
+      principles and control requirements to identify and address IT-related risks.
+      4 control domains / 35 subdomains. Source: https://rulebook.sama.gov.sa/en/information-technology-governance-framework'
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1
       assessable: false
@@ -51,23 +54,67 @@ objects:
       description: The ITSC should be headed by senior manager responsible for Member
         Organizations operations.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1
       ref_id: 3.1.1-3
-      description: 'The following positions should be represented in the ITSC: (a)
-        senior managers from all relevant departments (e.g., CRO, CISO, compliance
-        officer, heads of relevant business departments); (b) Chief Information Officer
-        (CIO); and (c) Internal Audit may attend as an "observer".'
-    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-4
+      description: 'The following positions should be represented in the ITSC:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-3.a
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-3
+      ref_id: 3.1.1-3.a
+      description: senior managers from all relevant departments (e.g., CRO, CISO,
+        compliance officer, heads of relevant business departments);
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-3.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-3
+      ref_id: 3.1.1-3.b
+      description: Chief Information Officer (CIO); and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-3.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-3
+      ref_id: 3.1.1-3.c
+      description: Internal Audit may attend as an "observer".
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-4
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1
       ref_id: 3.1.1-4
       description: 'An ITSC charter should be developed, approved and reflect the
-        following: (a) committee objectives; (b) roles and responsibilities; (c) minimum
-        number of meeting participants; (d) meeting frequency (minimum on quarterly
-        basis); and (e) documentation and retention of meeting minutes and decisions.'
+        following:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-4.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-4
+      ref_id: 3.1.1-4.a
+      description: committee objectives;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-4.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-4
+      ref_id: 3.1.1-4.b
+      description: roles and responsibilities;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-4.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-4
+      ref_id: 3.1.1-4.c
+      description: minimum number of meeting participants;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-4.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-4
+      ref_id: 3.1.1-4.d
+      description: meeting frequency (minimum on quarterly basis); and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-4.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-4
+      ref_id: 3.1.1-4.e
+      description: documentation and retention of meeting minutes and decisions.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-5
       assessable: true
       depth: 3
@@ -76,13 +123,30 @@ objects:
       description: A full-time senior manager for the IT function, referred to as
         CIO, should be appointed at senior management level.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-6
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1
       ref_id: 3.1.1-6
-      description: 'The Member Organizations should: (a) ensure the CIO is a Saudi
-        national; (b) ensure the CIO is sufficiently qualified; and (c) obtain a written
-        no objection letter from SAMA prior to assigning the CIO.'
+      description: 'The Member Organizations should:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-6.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-6
+      ref_id: 3.1.1-6.a
+      description: ensure the CIO is a Saudi national;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-6.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-6
+      ref_id: 3.1.1-6.b
+      description: ensure the CIO is sufficiently qualified; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-6.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-6
+      ref_id: 3.1.1-6.c
+      description: obtain a written no objection letter from SAMA prior to assigning
+        the CIO.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-7
       assessable: true
       depth: 3
@@ -124,12 +188,23 @@ objects:
         role within the IT function to identify the required changes to the portfolio
         of applications across the member organizations ecosystem.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-12
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1
       ref_id: 3.1.1-12
-      description: 'Roles and responsibilities within IT function should be: (a) documented
-        and approved by the management; and (b) segregated to avoid conflict of interest.'
+      description: 'Roles and responsibilities within IT function should be:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-12.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-12
+      ref_id: 3.1.1-12.a
+      description: documented and approved by the management; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-12.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-12
+      ref_id: 3.1.1-12.b
+      description: segregated to avoid conflict of interest.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.1-13
       assessable: true
       depth: 3
@@ -153,35 +228,83 @@ objects:
       ref_id: 3.1.2-1
       description: IT strategy should be defined, approved, maintained and executed.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.2-2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.2
       ref_id: 3.1.2-2
       description: 'IT strategic initiatives should be translated into defined roadmap
-        considering the following: (a) the initiatives should require closing the
-        gaps between current and target environments; (b) the initiatives should be
-        integrated into a coherent IT strategy that aligns with the business strategy;
-        (c) the initiatives should address the external ecosystem (enterprise partners,
-        suppliers, start-ups, etc.); and (d) should include determining dependencies,
-        overlaps, synergies and impacts among projects, and prioritization.'
-    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.2-3
+        considering the following:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.2-2.a
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.2-2
+      ref_id: 3.1.2-2.a
+      description: the initiatives should require closing the gaps between current
+        and target environments;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.2-2.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.2-2
+      ref_id: 3.1.2-2.b
+      description: the initiatives should be integrated into a coherent IT strategy
+        that aligns with the business strategy;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.2-2.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.2-2
+      ref_id: 3.1.2-2.c
+      description: the initiatives should address the external ecosystem (enterprise
+        partners, suppliers, start-ups, etc.); and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.2-2.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.2-2
+      ref_id: 3.1.2-2.d
+      description: should include determining dependencies, overlaps, synergies and
+        impacts among projects, and prioritization.
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.2-3
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.2
       ref_id: 3.1.2-3
-      description: 'IT strategy should be aligned with: (a) the Member Organization''s
-        overall business objectives; and (b) legal and regulatory compliance requirements
-        of the Member Organization.'
-    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.2-4
+      description: 'IT strategy should be aligned with:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.2-3.a
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.2-3
+      ref_id: 3.1.2-3.a
+      description: the Member Organization's overall business objectives; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.2-3.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.2-3
+      ref_id: 3.1.2-3.b
+      description: legal and regulatory compliance requirements of the Member Organization.
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.2-4
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.2
       ref_id: 3.1.2-4
-      description: 'IT strategy at minimum should address: (a) the importance and
-        benefits of IT for the Member Organization; (b) the current business and IT
-        environment, the future direction, and the initiatives required to migrate
-        to the future state environment; and (c) interdependencies of the critical
-        information assets.'
+      description: 'IT strategy at minimum should address:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.2-4.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.2-4
+      ref_id: 3.1.2-4.a
+      description: the importance and benefits of IT for the Member Organization;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.2-4.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.2-4
+      ref_id: 3.1.2-4.b
+      description: the current business and IT environment, the future direction,
+        and the initiatives required to migrate to the future state environment; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.2-4.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.2-4
+      ref_id: 3.1.2-4.c
+      description: interdependencies of the critical information assets.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.2-5
       assessable: true
       depth: 3
@@ -230,15 +353,32 @@ objects:
       ref_id: 3.1.3-2
       description: The compliance with the enterprise architecture should be monitored.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.3-3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.3
       ref_id: 3.1.3-3
       description: 'The enterprise architecture should address the following, but
-        not limited to: (a) a strategic outline of organizations technology capabilities;
-        (b) outline the gaps between baseline and target architectures, taking both
-        business and technical perspectives; and (c) agility to meet changing business
-        needs in an effective and efficient manner.'
+        not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.3-3.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.3-3
+      ref_id: 3.1.3-3.a
+      description: a strategic outline of organizations technology capabilities;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.3-3.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.3-3
+      ref_id: 3.1.3-3.b
+      description: outline the gaps between baseline and target architectures, taking
+        both business and technical perspectives; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.3-3.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.3-3
+      ref_id: 3.1.3-3.c
+      description: agility to meet changing business needs in an effective and efficient
+        manner.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.4
       assessable: false
       depth: 2
@@ -270,15 +410,36 @@ objects:
       description: IT Policy should be developed considering input from relevant member
         organizations policies (e.g. cyber security, finance, HR).
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.4-4
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.4
       ref_id: 3.1.4-4
-      description: 'IT Policy should include: (a) the Member Organization''s overall
-        IT objectives and scope; (b) a statement of the board''s intent, supporting
-        the IT objectives; (c) a definition of general and specific responsibilities
-        for IT; and (d) the reference to supporting IT (inter)national standards and
-        process (where applicable).'
+      description: 'IT Policy should include:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.4-4.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.4-4
+      ref_id: 3.1.4-4.a
+      description: the Member Organization's overall IT objectives and scope;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.4-4.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.4-4
+      ref_id: 3.1.4-4.b
+      description: a statement of the board's intent, supporting the IT objectives;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.4-4.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.4-4
+      ref_id: 3.1.4-4.c
+      description: a definition of general and specific responsibilities for IT; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.4-4.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.4-4
+      ref_id: 3.1.4-4.d
+      description: the reference to supporting IT (inter)national standards and process
+        (where applicable).
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5
       assessable: false
       depth: 2
@@ -289,66 +450,185 @@ objects:
         involved in the Member Organization's IT processes should have an adequate
         level of understanding of the expectations related to their role.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5
       ref_id: 3.1.5-1
-      description: 'The board should be accountable for: (a) the ultimate responsibility
-        for the establishment of IT governance practice; (b) ensuring that robust
-        IT risk management framework is established and maintained to manage IT risks;
-        (c) ensuring that sufficient budget for IT is allocated; (d) approving the
-        IT steering committee (ITSC) charter; and (e) endorsing (after being approved
-        by the ITSC): (1) the governance and management practices roles and responsibilities;
-        (2) the IT strategy; and (3) the IT policy.'
-    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-2
+      description: 'The board should be accountable for:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-1.a
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-1
+      ref_id: 3.1.5-1.a
+      description: the ultimate responsibility for the establishment of IT governance
+        practice;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-1.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-1
+      ref_id: 3.1.5-1.b
+      description: ensuring that robust IT risk management framework is established
+        and maintained to manage IT risks;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-1.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-1
+      ref_id: 3.1.5-1.c
+      description: ensuring that sufficient budget for IT is allocated;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-1.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-1
+      ref_id: 3.1.5-1.d
+      description: approving the IT steering committee (ITSC) charter; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-1.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-1
+      ref_id: 3.1.5-1.e
+      description: 'endorsing (after being approved by the ITSC): (1) the governance
+        and management practices roles and responsibilities; (2) the IT strategy;
+        and (3) the IT policy.'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-2
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5
       ref_id: 3.1.5-2
-      description: 'ITSC, at a minimum, should be responsible for: (a) monitoring,
-        reviewing and communicating the Member Organization''s IT risks periodically;
-        (b) approving, communicating, supporting and monitoring: (1) IT strategy;
+      description: 'ITSC, at a minimum, should be responsible for:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-2.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-2
+      ref_id: 3.1.5-2.a
+      description: monitoring, reviewing and communicating the Member Organization's
+        IT risks periodically;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-2.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-2
+      ref_id: 3.1.5-2.b
+      description: 'approving, communicating, supporting and monitoring: (1) IT strategy;
         (2) IT policies; (3) IT risk management processes; and (4) key performance
         indicators (KPIs) and key risk indicators (KRIs) for IT.'
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5
       ref_id: 3.1.5-3
-      description: 'The CIO, at minimum, should be accountable for: (a) developing,
-        implementing and maintaining: (1) IT strategy; (2) IT policy; and (3) IT budget.
-        (b) ensuring that detailed IT standards and procedures are established, approved
-        and implemented; (c) delivering risk-based IT solutions that address people,
-        process and technology; (d) defining and maintaining specific key performance
-        indicators (KPIs) and key risk indicators (KRIs) for IT process; (e) periodically
-        inform ITSC on the latest developments on IT strategic initiatives and its
-        implementation status; (f) implementing adequate technology to streamline
-        all internal operations and help optimize their strategic benefits; (g) the
-        IT activities across the Member Organization, including: (1) monitoring of
-        the IT operation; (2) monitoring of compliance with IT regulations, policies,
-        standards and procedures; and (3) overseeing the investigation of IT related
-        incidents. (h) analyzing IT costs, value and risks to advise COO/Managing
-        director; and (i) defining IT training plan in coordination with HR.'
-    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-4
+      description: 'The CIO, at minimum, should be accountable for:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-3.a
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-3
+      ref_id: 3.1.5-3.a
+      description: 'developing, implementing and maintaining: (1) IT strategy; (2)
+        IT policy; and (3) IT budget.'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-3.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-3
+      ref_id: 3.1.5-3.b
+      description: ensuring that detailed IT standards and procedures are established,
+        approved and implemented;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-3.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-3
+      ref_id: 3.1.5-3.c
+      description: delivering risk-based IT solutions that address people, process
+        and technology;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-3.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-3
+      ref_id: 3.1.5-3.d
+      description: defining and maintaining specific key performance indicators (KPIs)
+        and key risk indicators (KRIs) for IT process;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-3.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-3
+      ref_id: 3.1.5-3.e
+      description: periodically inform ITSC on the latest developments on IT strategic
+        initiatives and its implementation status;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-3.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-3
+      ref_id: 3.1.5-3.f
+      description: implementing adequate technology to streamline all internal operations
+        and help optimize their strategic benefits;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-3.g
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-3
+      ref_id: 3.1.5-3.g
+      description: 'the IT activities across the Member Organization, including: (1)
+        monitoring of the IT operation; (2) monitoring of compliance with IT regulations,
+        policies, standards and procedures; and (3) overseeing the investigation of
+        IT related incidents.'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-3.h
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-3
+      ref_id: 3.1.5-3.h
+      description: analyzing IT costs, value and risks to advise COO/Managing director;
+        and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-3.i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-3
+      ref_id: 3.1.5-3.i
+      description: defining IT training plan in coordination with HR.
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-4
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5
       ref_id: 3.1.5-4
-      description: 'The internal audit function should be responsible for: (a) the
-        identification of comprehensive set of auditable areas for IT risk and performance
-        of effective IT risk assessment during audit planning; and (b) performing
-        IT audits.'
-    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-5
+      description: 'The internal audit function should be responsible for:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-4.a
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-4
+      ref_id: 3.1.5-4.a
+      description: the identification of comprehensive set of auditable areas for
+        IT risk and performance of effective IT risk assessment during audit planning;
+        and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-4.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-4
+      ref_id: 3.1.5-4.b
+      description: performing IT audits.
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-5
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5
       ref_id: 3.1.5-5
       description: 'The enterprise application architect, at minimum should be responsible
-        for: (a) developing of IT ecosystem application architecture models, processes
-        and documentation; (b) developing enterprise level application and custom
-        integration solutions including major enhancements and interfaces, functions
-        and features; and (c) ensuring continuous improvement to transition between
-        current and future states of the application architectures.'
+        for:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-5.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-5
+      ref_id: 3.1.5-5.a
+      description: developing of IT ecosystem application architecture models, processes
+        and documentation;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-5.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-5
+      ref_id: 3.1.5-5.b
+      description: developing enterprise level application and custom integration
+        solutions including major enhancements and interfaces, functions and features;
+        and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-5.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-5
+      ref_id: 3.1.5-5.c
+      description: ensuring continuous improvement to transition between current and
+        future states of the application architectures.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.5-6
       assessable: true
       depth: 3
@@ -366,18 +646,40 @@ objects:
         communicated and complied which are affecting IT operations of the Member
         Organizations.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.6-1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.6
       ref_id: 3.1.6-1
       description: 'Member Organizations should establish a process ensuring compliance
         with IT related regulatory requirements. The process of ensuring compliance
-        should: (a) be performed periodically or when new regulatory requirements
-        become effective; (b) involve representatives from key areas of the Member
-        Organization; (c) result in the update of IT policy, standards and procedures
-        to accommodate any necessary changes (if applicable); and (d) maintain an
-        up-to-date log of all relevant legal, regulatory and contractual requirements;
-        their impact and required actions.'
+        should:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.6-1.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.6-1
+      ref_id: 3.1.6-1.a
+      description: be performed periodically or when new regulatory requirements become
+        effective;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.6-1.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.6-1
+      ref_id: 3.1.6-1.b
+      description: involve representatives from key areas of the Member Organization;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.6-1.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.6-1
+      ref_id: 3.1.6-1.c
+      description: result in the update of IT policy, standards and procedures to
+        accommodate any necessary changes (if applicable); and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.6-1.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.6-1
+      ref_id: 3.1.6-1.d
+      description: maintain an up-to-date log of all relevant legal, regulatory and
+        contractual requirements; their impact and required actions.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.7
       assessable: false
       depth: 2
@@ -438,15 +740,32 @@ objects:
         requisite level of competencies and skills to effectively assess and evaluate
         the adequacy of IT policies, procedures, processes and controls implemented.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.7-8
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.7
       ref_id: 3.1.7-8
-      description: 'IT audit report, at a minimum, should: (a) include the findings,
-        recommendations, management''s response with defined action plan, and responsible
-        party and limitations in scope with respect to the IT audits; (b) signed,
-        dated and distributed according to the format defined; and (c) submitted to
-        the audit committee on periodical basis.'
+      description: 'IT audit report, at a minimum, should:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.7-8.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.7-8
+      ref_id: 3.1.7-8.a
+      description: include the findings, recommendations, management's response with
+        defined action plan, and responsible party and limitations in scope with respect
+        to the IT audits;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.7-8.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.7-8
+      ref_id: 3.1.7-8.b
+      description: signed, dated and distributed according to the format defined;
+        and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.7-8.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.7-8
+      ref_id: 3.1.7-8.c
+      description: submitted to the audit committee on periodical basis.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.8
       assessable: false
       depth: 2
@@ -494,12 +813,23 @@ objects:
       ref_id: 3.1.8-5
       description: Annual IT training plan should be developed by the Member Organizations.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.8-6
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.8
       ref_id: 3.1.8-6
-      description: 'Formal training should be conducted, as a minimum for: (a) IT
-        staff (existing and new); and (b) Contractors (where applicable).'
+      description: 'Formal training should be conducted, as a minimum for:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.8-6.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.8-6
+      ref_id: 3.1.8-6.a
+      description: IT staff (existing and new); and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.8-6.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.8-6
+      ref_id: 3.1.8-6.b
+      description: Contractors (where applicable).
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.8-7
       assessable: true
       depth: 3
@@ -507,15 +837,32 @@ objects:
       ref_id: 3.1.8-7
       description: IT training plan should be reviewed periodically.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.8-8
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.8
       ref_id: 3.1.8-8
       description: 'Specialist training should be provided to staff in the Member
         Organization''s relevant functional area categories in line with their job
-        descriptions, including: (a) staff involved in performing critical IT roles;
-        (b) staff involved in developing and (technically) maintaining information
-        assets; and (c) staff involved in risk assessments.'
+        descriptions, including:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.8-8.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.8-8
+      ref_id: 3.1.8-8.a
+      description: staff involved in performing critical IT roles;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.8-8.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.8-8
+      ref_id: 3.1.8-8.b
+      description: staff involved in developing and (technically) maintaining information
+        assets; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.8-8.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.8-8
+      ref_id: 3.1.8-8.c
+      description: staff involved in risk assessments.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.9
       assessable: false
       depth: 2
@@ -533,24 +880,70 @@ objects:
       description: KPIs should be defined, approved and implemented to measure the
         execution of IT processes and system performance.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.9-2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.9
       ref_id: 3.1.9-2
       description: 'KPIs should be defined considering for the following, but not
-        limited to: (a) IT function and related processes; (b) workforce competency
-        and development; and (c) compliance with regulatory regulations.'
-    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.9-3
+        limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.9-2.a
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.9-2
+      ref_id: 3.1.9-2.a
+      description: IT function and related processes;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.9-2.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.9-2
+      ref_id: 3.1.9-2.b
+      description: workforce competency and development; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.9-2.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.9-2
+      ref_id: 3.1.9-2.c
+      description: compliance with regulatory regulations.
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.9-3
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.9
       ref_id: 3.1.9-3
-      description: 'KPIs should be: (a) communicated to the concerned IT Divisions/Units
-        of the Member Organizations for implementation; (b) supported by target value
-        and thresholds; (c) analyzed to identify the deviations against targets and
-        initiate remedial actions; (d) analyzed to identify trends in performance
-        and compliance and take appropriate action; and (e) monitored and periodically
-        reported to the senior management and ITSC.'
+      description: 'KPIs should be:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.9-3.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.9-3
+      ref_id: 3.1.9-3.a
+      description: communicated to the concerned IT Divisions/Units of the Member
+        Organizations for implementation;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.9-3.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.9-3
+      ref_id: 3.1.9-3.b
+      description: supported by target value and thresholds;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.9-3.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.9-3
+      ref_id: 3.1.9-3.c
+      description: analyzed to identify the deviations against targets and initiate
+        remedial actions;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.9-3.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.9-3
+      ref_id: 3.1.9-3.d
+      description: analyzed to identify trends in performance and compliance and take
+        appropriate action; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.9-3.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.1.9-3
+      ref_id: 3.1.9-3.e
+      description: monitored and periodically reported to the senior management and
+        ITSC.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2
       assessable: false
       depth: 1
@@ -588,23 +981,67 @@ objects:
       description: IT risk management process should be aligned with the Member Organization's
         enterprise risk management process.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-4
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1
       ref_id: 3.2.1-4
       description: 'IT risk management process should clearly address the following
-        sub processes, including but not limited to: (a) risk identification, analysis
-        and classification; (b) risk treatment; (c) risk reporting; and (d) risk monitoring
-        and profiling.'
-    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-5
+        sub processes, including but not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-4.a
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-4
+      ref_id: 3.2.1-4.a
+      description: risk identification, analysis and classification;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-4.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-4
+      ref_id: 3.2.1-4.b
+      description: risk treatment;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-4.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-4
+      ref_id: 3.2.1-4.c
+      description: risk reporting; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-4.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-4
+      ref_id: 3.2.1-4.d
+      description: risk monitoring and profiling.
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-5
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1
       ref_id: 3.2.1-5
       description: 'IT risk management process should address Member Organization''s
-        information assets, including but not limited to: (a) business processes and
-        related data; (b) business applications; (c) infrastructure components; and
-        (d) Third party relationships and associated risks.'
+        information assets, including but not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-5.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-5
+      ref_id: 3.2.1-5.a
+      description: business processes and related data;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-5.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-5
+      ref_id: 3.2.1-5.b
+      description: business applications;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-5.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-5
+      ref_id: 3.2.1-5.c
+      description: infrastructure components; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-5.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-5
+      ref_id: 3.2.1-5.d
+      description: Third party relationships and associated risks.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-6
       assessable: true
       depth: 3
@@ -613,34 +1050,90 @@ objects:
       description: IT risk management process should address Member Organization's
         people aspect (i.e. permanent staff, contractual employees, third party).
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-7
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1
       ref_id: 3.2.1-7
       description: 'IT risk management process should be initiated at, but not limited
-        to: (a) an early stage of the program and project implementation; (b) prior
-        to initiate critical and major changes to the information assets; (c) the
-        time of outsourcing services; and (d) prior to procuring of new systems, tools
-        and emerging technologies (i.e. Distributed Ledger Technology (DTL), Robotic
-        Process Assurance (RPA)etc.)'
-    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-8
+        to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-7.a
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-7
+      ref_id: 3.2.1-7.a
+      description: an early stage of the program and project implementation;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-7.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-7
+      ref_id: 3.2.1-7.b
+      description: prior to initiate critical and major changes to the information
+        assets;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-7.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-7
+      ref_id: 3.2.1-7.c
+      description: the time of outsourcing services; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-7.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-7
+      ref_id: 3.2.1-7.d
+      description: prior to procuring of new systems, tools and emerging technologies
+        (i.e. Distributed Ledger Technology (DTL), Robotic Process Assurance (RPA)etc.)
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-8
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1
       ref_id: 3.2.1-8
       description: 'Existing information assets should be subject to periodic IT risk
-        assessment based on their criticality such as: (a) all mission critical and
-        critical information assets should be assessed at least once a year; and (b)
-        non-critical information assets should be assessed based on their importance
-        to the business.'
-    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-9
+        assessment based on their criticality such as:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-8.a
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-8
+      ref_id: 3.2.1-8.a
+      description: all mission critical and critical information assets should be
+        assessed at least once a year; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-8.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-8
+      ref_id: 3.2.1-8.b
+      description: non-critical information assets should be assessed based on their
+        importance to the business.
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-9
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1
       ref_id: 3.2.1-9
       description: 'IT risk management activities should involve the following stakeholders,
-        but not limited to: (a) business owners and users; (b) IT departmental/functional
-        heads; (c) technical administrators; and (d) cyber security specialists.'
+        but not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-9.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-9
+      ref_id: 3.2.1-9.a
+      description: business owners and users;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-9.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-9
+      ref_id: 3.2.1-9.b
+      description: IT departmental/functional heads;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-9.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-9
+      ref_id: 3.2.1-9.c
+      description: technical administrators; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-9.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-9
+      ref_id: 3.2.1-9.d
+      description: cyber security specialists.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.1-10
       assessable: true
       depth: 3
@@ -681,16 +1174,54 @@ objects:
       ref_id: 3.2.2-2
       description: IT risk register should be regularly updated.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.2-3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.2
       ref_id: 3.2.2-3
       description: 'IT risk analysis should address the following, but not limited
-        to: (a) information asset description and classification; (b) potential threat(s)
-        to the information asset; (c) impact and likelihood; (d) existing IT controls;
-        (e) risk owner (business or process owner); (f) implementation owner (control
-        owner); and (g) inherent as well as residual risks related to the information
-        assets.'
+        to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.2-3.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.2-3
+      ref_id: 3.2.2-3.a
+      description: information asset description and classification;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.2-3.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.2-3
+      ref_id: 3.2.2-3.b
+      description: potential threat(s) to the information asset;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.2-3.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.2-3
+      ref_id: 3.2.2-3.c
+      description: impact and likelihood;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.2-3.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.2-3
+      ref_id: 3.2.2-3.d
+      description: existing IT controls;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.2-3.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.2-3
+      ref_id: 3.2.2-3.e
+      description: risk owner (business or process owner);
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.2-3.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.2-3
+      ref_id: 3.2.2-3.f
+      description: implementation owner (control owner); and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.2-3.g
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.2-3
+      ref_id: 3.2.2-3.g
+      description: inherent as well as residual risks related to the information assets.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3
       assessable: false
       depth: 2
@@ -743,21 +1274,53 @@ objects:
       description: Risk acceptance should be least preferred over risk mitigation
         through implementation of primary controls.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-7
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3
       ref_id: 3.2.3-7
       description: 'Accepting IT risks should be formally documented, approved and
         signed-off by the business owner and reported to the risk committee, ensuring
-        that: (a) risk acceptance should be provided with detail justification including
+        that:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-7.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-7
+      ref_id: 3.2.3-7.a
+      description: 'risk acceptance should be provided with detail justification including
         but not limited to the following: (1) impact (i.e. operational, financial
         and reputational) of not implementing the primary control(s); and (2) compensating
-        control(s) in place of primary control(s) for risk mitigation. (b) the accepted
-        IT risk should be within the risk appetite of the Member Organization; (c)
-        the accepted IT risk should not contradict with the SAMA regulations; (d)
-        a separate exception should be documented for each unique risk; (e) risk acceptance
-        should be renewed periodically; and (f) Risk acceptance should be presented
-        and reported to the risk committee.'
+        control(s) in place of primary control(s) for risk mitigation.'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-7.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-7
+      ref_id: 3.2.3-7.b
+      description: the accepted IT risk should be within the risk appetite of the
+        Member Organization;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-7.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-7
+      ref_id: 3.2.3-7.c
+      description: the accepted IT risk should not contradict with the SAMA regulations;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-7.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-7
+      ref_id: 3.2.3-7.d
+      description: a separate exception should be documented for each unique risk;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-7.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-7
+      ref_id: 3.2.3-7.e
+      description: risk acceptance should be renewed periodically; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-7.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-7
+      ref_id: 3.2.3-7.f
+      description: Risk acceptance should be presented and reported to the risk committee.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-8
       assessable: true
       depth: 3
@@ -767,23 +1330,55 @@ objects:
         and risk committee to cancel or postpone a particular activity or project
         that introduces an unacceptable IT risk to the business.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-9
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3
       ref_id: 3.2.3-9
-      description: 'Transferring or sharing the IT risks should: (a) involve sharing
-        the IT risks with relevant (internal or external) providers; and (b) be accepted
-        by the receiving (internal or external) provider(s).'
-    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-10
+      description: 'Transferring or sharing the IT risks should:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-9.a
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-9
+      ref_id: 3.2.3-9.a
+      description: involve sharing the IT risks with relevant (internal or external)
+        providers; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-9.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-9
+      ref_id: 3.2.3-9.b
+      description: be accepted by the receiving (internal or external) provider(s).
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-10
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3
       ref_id: 3.2.3-10
-      description: 'Applying IT controls to mitigate IT risks should include: (a)
-        identifying appropriate IT controls; (b) evaluating the strengths and weaknesses
-        of the IT controls; (c) selection of adequate IT controls; and (d) documenting
-        and obtaining sign-off for any residual risk by the business owner and risk
-        committee.'
+      description: 'Applying IT controls to mitigate IT risks should include:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-10.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-10
+      ref_id: 3.2.3-10.a
+      description: identifying appropriate IT controls;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-10.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-10
+      ref_id: 3.2.3-10.b
+      description: evaluating the strengths and weaknesses of the IT controls;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-10.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-10
+      ref_id: 3.2.3-10.c
+      description: selection of adequate IT controls; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-10.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-10
+      ref_id: 3.2.3-10.d
+      description: documenting and obtaining sign-off for any residual risk by the
+        business owner and risk committee.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.3-11
       assessable: true
       depth: 3
@@ -814,13 +1409,23 @@ objects:
       description: IT risk assessment results should include risks, impact, likelihood,
         mitigations, and remediation status.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.4-3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.4
       ref_id: 3.2.4-3
-      description: 'IT risks should be monitored, including but not limited to: (a)
-        tracking progress in accordance to the risk treatment plan; and (b) the selected
-        and agreed IT controls are being implemented.'
+      description: 'IT risks should be monitored, including but not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.4-3.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.4-3
+      ref_id: 3.2.4-3.a
+      description: tracking progress in accordance to the risk treatment plan; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.4-3.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.4-3
+      ref_id: 3.2.4-3.b
+      description: the selected and agreed IT controls are being implemented.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.2.4-4
       assessable: true
       depth: 3
@@ -891,29 +1496,145 @@ objects:
       description: The effectiveness of the asset management process should be monitored,
         measured and periodically evaluated.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1
       ref_id: 3.3.1-3
-      description: 'The asset management process should include but not limited to:
-        (a) asset onboarding; (b) asset identification, classification, labeling and
-        handling; (c) asset disposal; and (d) asset decommissioning.'
-    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4
+      description: 'The asset management process should include but not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-3.a
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-3
+      ref_id: 3.3.1-3.a
+      description: asset onboarding;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-3.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-3
+      ref_id: 3.3.1-3.b
+      description: asset identification, classification, labeling and handling;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-3.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-3
+      ref_id: 3.3.1-3.c
+      description: asset disposal; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-3.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-3
+      ref_id: 3.3.1-3.d
+      description: asset decommissioning.
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1
       ref_id: 3.3.1-4
       description: 'Asset register should provide with the level of details, including
-        (but not limited): (a) asset name; (b) asset owner; (c) asset custodian; asset
-        criticality; (d) asset physical location; (e) asset logical location (network
-        zone); (f) asset identified as direct in-scope of PCI; (g) asset identified
-        as indirect in-scope of PCI; (h) availability or backup information; (i) service
-        contract or license information; (j) technical contacts (OS, Application,
-        Database and Network); (k) primary and secondary processes supported by the
-        asset; (l) acceptable downtime aligned with BCM - Business Impact Analysis
-        where applicable; (m) financial impact per hour in the event of downtime;
-        (n) vendor engagement contract number; (o) vendor point of contact details;
-        (p) vendor SLA details; and (q) vendor classification details.'
+        (but not limited):'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4
+      ref_id: 3.3.1-4.a
+      description: asset name;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4
+      ref_id: 3.3.1-4.b
+      description: asset owner;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4
+      ref_id: 3.3.1-4.c
+      description: asset custodian; asset criticality;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4
+      ref_id: 3.3.1-4.d
+      description: asset physical location;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4
+      ref_id: 3.3.1-4.e
+      description: asset logical location (network zone);
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4
+      ref_id: 3.3.1-4.f
+      description: asset identified as direct in-scope of PCI;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4.g
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4
+      ref_id: 3.3.1-4.g
+      description: asset identified as indirect in-scope of PCI;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4.h
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4
+      ref_id: 3.3.1-4.h
+      description: availability or backup information;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4.i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4
+      ref_id: 3.3.1-4.i
+      description: service contract or license information;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4.j
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4
+      ref_id: 3.3.1-4.j
+      description: technical contacts (OS, Application, Database and Network);
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4.k
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4
+      ref_id: 3.3.1-4.k
+      description: primary and secondary processes supported by the asset;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4.l
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4
+      ref_id: 3.3.1-4.l
+      description: acceptable downtime aligned with BCM - Business Impact Analysis
+        where applicable;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4.m
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4
+      ref_id: 3.3.1-4.m
+      description: financial impact per hour in the event of downtime;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4.n
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4
+      ref_id: 3.3.1-4.n
+      description: vendor engagement contract number;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4.o
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4
+      ref_id: 3.3.1-4.o
+      description: vendor point of contact details;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4.p
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4
+      ref_id: 3.3.1-4.p
+      description: vendor SLA details; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4.q
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-4
+      ref_id: 3.3.1-4.q
+      description: vendor classification details.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-5
       assessable: true
       depth: 3
@@ -922,25 +1643,68 @@ objects:
       description: Asset register should be maintained and updated on yearly basis,
         or whenever any asset introduced or removed from inventory.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-6
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1
       ref_id: 3.3.1-6
-      description: 'Member organizations should: (a) define criteria for the identification
-        of critical assets; (b) identify, maintain and periodically update comprehensive
-        list of critical assets; (c) proactively monitor performance of critical assets;
-        and (d) ensure adequate resilience measures in place for critical assets to
-        maintain availability of the required critical services.'
-    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-7
+      description: 'Member organizations should:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-6.a
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-6
+      ref_id: 3.3.1-6.a
+      description: define criteria for the identification of critical assets;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-6.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-6
+      ref_id: 3.3.1-6.b
+      description: identify, maintain and periodically update comprehensive list of
+        critical assets;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-6.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-6
+      ref_id: 3.3.1-6.c
+      description: proactively monitor performance of critical assets; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-6.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-6
+      ref_id: 3.3.1-6.d
+      description: ensure adequate resilience measures in place for critical assets
+        to maintain availability of the required critical services.
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-7
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1
       ref_id: 3.3.1-7
-      description: 'Asset owner should be responsible for, but not limited to: (a)
-        classification and labeling of asset; (b) defining and reviewing access rights,
-        restrictions, and taking into account applicable access control policies of
-        the Member Organizations; (c) authorizing changes related to assets; and (d)
-        ensure alignment with cyber security controls.'
+      description: 'Asset owner should be responsible for, but not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-7.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-7
+      ref_id: 3.3.1-7.a
+      description: classification and labeling of asset;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-7.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-7
+      ref_id: 3.3.1-7.b
+      description: defining and reviewing access rights, restrictions, and taking
+        into account applicable access control policies of the Member Organizations;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-7.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-7
+      ref_id: 3.3.1-7.c
+      description: authorizing changes related to assets; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-7.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-7
+      ref_id: 3.3.1-7.d
+      description: ensure alignment with cyber security controls.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.1-8
       assessable: true
       depth: 3
@@ -1006,14 +1770,32 @@ objects:
       description: The effectiveness of the internal IT SLA should be monitored, measured,
         and periodically evaluated.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3
       ref_id: 3.3.3-3
       description: 'Internal IT SLA should include the following, but not limited
-        to: (a) service level agreed between the business functions and the IT department;
-        (b) specific and measurable targets for IT services against the defined KPI''s;
-        and (c) roles and responsibilities of the business and IT stakeholders.'
+        to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-3.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-3
+      ref_id: 3.3.3-3.a
+      description: service level agreed between the business functions and the IT
+        department;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-3.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-3
+      ref_id: 3.3.3-3.b
+      description: specific and measurable targets for IT services against the defined
+        KPI's; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-3.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-3
+      ref_id: 3.3.3-3.c
+      description: roles and responsibilities of the business and IT stakeholders.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-4
       assessable: true
       depth: 3
@@ -1035,28 +1817,90 @@ objects:
       ref_id: 3.3.3-6
       description: Formal SLA should be defined and signed with the third party.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-7
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3
       ref_id: 3.3.3-7
       description: 'The third party relationship process should cover following requirements,
-        but not limited to: (a) outsourcing service providers should have adequate
-        process in place to ensure availability, protection of data and applications
-        outsourced; (b) periodic reporting, reviewing and evaluating the contractually
-        agreed requirements (in SLAs); (c) changes to the provision of provided services;
-        (d) execution of a risk assessment as part of the procurement process; (e)
-        escalation process in case of SLA breached; (f) administrative, physical,
-        and technical safeguards that reasonably and appropriately protect the confidentiality,
-        integrity, and availability of information; (g) legal assurance from the third
-        party to provide onsite support that mandates onsite presence of certified
-        and experienced relevant support engineer within a defined timeline to support
-        the Member Organizations in adverse situations; (h) exiting, terminating,
-        or renewing the contract (including escrow agreements if applicable); (i)
-        compliance with applicable frameworks including but not limited to SAMA [Cyber
-        Security](https://rulebook.sama.gov.sa/en/node/3837), [Business Continuity
-        Management](https://rulebook.sama.gov.sa/en/node/3709) and [IT Governance](https://rulebook.sama.gov.sa/en/node/4066)
-        Frameworks-and applicable Laws and Regulations; (j) right to audit (Member
-        Organizations or independent party); and (k) Non-Disclosure Agreement (''NDA'').'
+        but not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-7.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-7
+      ref_id: 3.3.3-7.a
+      description: outsourcing service providers should have adequate process in place
+        to ensure availability, protection of data and applications outsourced;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-7.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-7
+      ref_id: 3.3.3-7.b
+      description: periodic reporting, reviewing and evaluating the contractually
+        agreed requirements (in SLAs);
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-7.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-7
+      ref_id: 3.3.3-7.c
+      description: changes to the provision of provided services;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-7.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-7
+      ref_id: 3.3.3-7.d
+      description: execution of a risk assessment as part of the procurement process;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-7.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-7
+      ref_id: 3.3.3-7.e
+      description: escalation process in case of SLA breached;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-7.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-7
+      ref_id: 3.3.3-7.f
+      description: administrative, physical, and technical safeguards that reasonably
+        and appropriately protect the confidentiality, integrity, and availability
+        of information;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-7.g
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-7
+      ref_id: 3.3.3-7.g
+      description: legal assurance from the third party to provide onsite support
+        that mandates onsite presence of certified and experienced relevant support
+        engineer within a defined timeline to support the Member Organizations in
+        adverse situations;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-7.h
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-7
+      ref_id: 3.3.3-7.h
+      description: exiting, terminating, or renewing the contract (including escrow
+        agreements if applicable);
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-7.i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-7
+      ref_id: 3.3.3-7.i
+      description: compliance with applicable frameworks including but not limited
+        to SAMA [Cyber Security](https://rulebook.sama.gov.sa/en/node/3837), [Business
+        Continuity Management](https://rulebook.sama.gov.sa/en/node/3709) and [IT
+        Governance](https://rulebook.sama.gov.sa/en/node/4066) Frameworks-and applicable
+        Laws and Regulations;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-7.j
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-7
+      ref_id: 3.3.3-7.j
+      description: right to audit (Member Organizations or independent party); and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-7.k
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.3-7
+      ref_id: 3.3.3-7.k
+      description: Non-Disclosure Agreement ('NDA').
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.4
       assessable: false
       depth: 2
@@ -1089,17 +1933,44 @@ objects:
       description: IT availability and capacity plan should be developed, approved
         and periodically evaluated.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.4-4
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.4
       ref_id: 3.3.4-4
       description: 'IT availability and capacity plan should be defined to address
-        the following, but not limited to: (a) existing capacity of systems and resources;
-        (b) alignment with the current and future business needs; (c) high availability
-        requirements (including disruption and slowness for customer channels); (d)
-        roles and responsibilities to maintain the plan; and (e) identification of
-        dependencies over service providers as part of capacity planning to address
-        BCM requirements.'
+        the following, but not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.4-4.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.4-4
+      ref_id: 3.3.4-4.a
+      description: existing capacity of systems and resources;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.4-4.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.4-4
+      ref_id: 3.3.4-4.b
+      description: alignment with the current and future business needs;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.4-4.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.4-4
+      ref_id: 3.3.4-4.c
+      description: high availability requirements (including disruption and slowness
+        for customer channels);
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.4-4.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.4-4
+      ref_id: 3.3.4-4.d
+      description: roles and responsibilities to maintain the plan; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.4-4.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.4-4
+      ref_id: 3.3.4-4.e
+      description: identification of dependencies over service providers as part of
+        capacity planning to address BCM requirements.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.4-5
       assessable: true
       depth: 3
@@ -1107,15 +1978,43 @@ objects:
       ref_id: 3.3.4-5
       description: System performance thresholds should be defined and implemented.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.4-6
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.4
       ref_id: 3.3.4-6
       description: 'System performance should be monitored considering the following,
-        but not limited to: (a) current and future business requirement; (b) the agreed
-        upon SLA with the business; (c) critical IT infrastructures; (d) disruption
-        and slowness in the underlying system(s) supporting customer channels; and
-        (e) lessons learned from previous system performance issues.'
+        but not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.4-6.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.4-6
+      ref_id: 3.3.4-6.a
+      description: current and future business requirement;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.4-6.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.4-6
+      ref_id: 3.3.4-6.b
+      description: the agreed upon SLA with the business;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.4-6.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.4-6
+      ref_id: 3.3.4-6.c
+      description: critical IT infrastructures;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.4-6.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.4-6
+      ref_id: 3.3.4-6.d
+      description: disruption and slowness in the underlying system(s) supporting
+        customer channels; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.4-6.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.4-6
+      ref_id: 3.3.4-6.e
+      description: lessons learned from previous system performance issues.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.4-7
       assessable: true
       depth: 3
@@ -1147,16 +2046,62 @@ objects:
       description: Physical and environmental controls should be monitored and periodically
         evaluated.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.5-3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.5
       ref_id: 3.3.5-3
       description: 'Necessary physical and environmental controls should be implemented
-        such as but not limited to: (a) access to the data center should be strictly
-        controlled and provided on need to know basis; (b) visitors entry to data
-        center should be logged and escorted by an authorized person; (c) smoke detectors;
-        (d) fire alarms; (e) fire extinguishers; (f) humidity control; (g) temperature
-        monitoring; and (h) CCTV.'
+        such as but not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.5-3.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.5-3
+      ref_id: 3.3.5-3.a
+      description: access to the data center should be strictly controlled and provided
+        on need to know basis;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.5-3.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.5-3
+      ref_id: 3.3.5-3.b
+      description: visitors entry to data center should be logged and escorted by
+        an authorized person;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.5-3.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.5-3
+      ref_id: 3.3.5-3.c
+      description: smoke detectors;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.5-3.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.5-3
+      ref_id: 3.3.5-3.d
+      description: fire alarms;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.5-3.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.5-3
+      ref_id: 3.3.5-3.e
+      description: fire extinguishers;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.5-3.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.5-3
+      ref_id: 3.3.5-3.f
+      description: humidity control;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.5-3.g
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.5-3
+      ref_id: 3.3.5-3.g
+      description: temperature monitoring; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.5-3.h
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.5-3
+      ref_id: 3.3.5-3.h
+      description: CCTV.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.5-4
       assessable: true
       depth: 3
@@ -1166,15 +2111,26 @@ objects:
         published in SAMA circulars on [the Rules of The Outsourcing](https://rulebook.sama.gov.sa/en/node/2389)
         and [Cybersecurity Framework](https://rulebook.sama.gov.sa/en/node/3837).
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.5-5
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.5
       ref_id: 3.3.5-5
       description: 'Member Organizations should ensure that appropriate control measures
         are built into contracts with the service providers to whom they plan to outsource
-        data center such as but not limited to: (a) have documented business case
-        for outsourcing data center services; and (b) nature and type of access to
-        data center by the service provider.'
+        data center such as but not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.5-5.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.5-5
+      ref_id: 3.3.5-5.a
+      description: have documented business case for outsourcing data center services;
+        and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.5-5.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.5-5
+      ref_id: 3.3.5-5.b
+      description: nature and type of access to data center by the service provider.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6
       assessable: false
       depth: 2
@@ -1185,64 +2141,214 @@ objects:
         designed and implemented to continuously monitor IT operations in order to
         protect member organizations network from unauthorized access.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6
       ref_id: 3.3.6-1
       description: 'Member Organizations should define, approve and implement network
-        architecture policy considering the following: (a) organization''s stance
-        with respect to acceptable network usage; (b) explicit rules for the secure
-        use of specific network resources, services and applications; (c) consequences
-        of failure to comply with security rules; (d) organization''s attitude towards
-        network abuse; and (e) rationale(s) for the policy, and for any specific security
-        rules.'
-    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2
+        architecture policy considering the following:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-1.a
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-1
+      ref_id: 3.3.6-1.a
+      description: organization's stance with respect to acceptable network usage;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-1.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-1
+      ref_id: 3.3.6-1.b
+      description: explicit rules for the secure use of specific network resources,
+        services and applications;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-1.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-1
+      ref_id: 3.3.6-1.c
+      description: consequences of failure to comply with security rules;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-1.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-1
+      ref_id: 3.3.6-1.d
+      description: organization's attitude towards network abuse; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-1.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-1
+      ref_id: 3.3.6-1.e
+      description: rationale(s) for the policy, and for any specific security rules.
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6
       ref_id: 3.3.6-2
       description: 'Member Organizations should ensure the implementation of following
-        network architecture controls, but not limited to: (a) network diagram showing
-        the complete current infrastructure; (b) segmentation of network into multiple
-        separate network domains based on the required trust levels (6.8. public domain,
-        desktop domain, server domain) and in line with relevant architectural principles;
-        (c) perimeter of each network domain should be well protected by a security
-        gateway (e.g. firewall, filtering router). For each security gateway a separate
-        service access (security) rules should be developed and implemented to ensure
-        that only the authorized traffic is allowed to pass; (d) all internal traffic
-        (head office users, branch users, third party users, etc.) passing to DMZ
-        or internal servers should pass via 2 security gateway (firewall); (e) all
-        outbound internet access from internal networks are routed via proxy server
-        such that access is allowed only to approved authenticated users; (f) visitor
-        network (wired/wireless network) should be isolated and segregated from the
-        internal network; (g) the perimeter firewall to the DMZ should raise an alert
-        and block active scanning; (h) web application firewall (WAF) should be implemented
-        against customer facing applications; (i) ensure non-existence of single node
-        of failure that affects the critical service availability; (j) centralized
-        authentication server (AAA, TACACS or RADIUS, etc.) should be deployed for
-        managing authentication and authorization of network devices; (k) centralized
-        log server (e.g. syslog server) should be deployed to collect and store logs
-        from all network devices; (l) retention period for logs should be 12 months
-        minimum; (m) all network devices should synchronize their clock timings from
-        a centralized NTP server; (n) all network communication over extranet (WLAN)
-        and internet should be through an encrypted channel; (o) remote access should
-        be restricted only to certain group of IP addresses; (p) remote administration
-        should be over an encrypted channel (like SSL VPN, SSH); (q) remote administration
-        access for vendors should be time-bound and granted on a need basis with approval;
-        (r) scan for Member Organization''s devices before accessing the network to
-        ensure enforcement of security policies on devices before they access organization''s
-        network; and (s) segregation of duties within the infrastructure component
-        (supported with a documented authorization profile matrix).'
-    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-3
+        network architecture controls, but not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2.a
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2
+      ref_id: 3.3.6-2.a
+      description: network diagram showing the complete current infrastructure;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2
+      ref_id: 3.3.6-2.b
+      description: segmentation of network into multiple separate network domains
+        based on the required trust levels (6.8. public domain, desktop domain, server
+        domain) and in line with relevant architectural principles;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2
+      ref_id: 3.3.6-2.c
+      description: perimeter of each network domain should be well protected by a
+        security gateway (e.g. firewall, filtering router). For each security gateway
+        a separate service access (security) rules should be developed and implemented
+        to ensure that only the authorized traffic is allowed to pass;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2
+      ref_id: 3.3.6-2.d
+      description: all internal traffic (head office users, branch users, third party
+        users, etc.) passing to DMZ or internal servers should pass via 2 security
+        gateway (firewall);
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2
+      ref_id: 3.3.6-2.e
+      description: all outbound internet access from internal networks are routed
+        via proxy server such that access is allowed only to approved authenticated
+        users;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2
+      ref_id: 3.3.6-2.f
+      description: visitor network (wired/wireless network) should be isolated and
+        segregated from the internal network;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2.g
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2
+      ref_id: 3.3.6-2.g
+      description: the perimeter firewall to the DMZ should raise an alert and block
+        active scanning;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2.h
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2
+      ref_id: 3.3.6-2.h
+      description: web application firewall (WAF) should be implemented against customer
+        facing applications;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2.i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2
+      ref_id: 3.3.6-2.i
+      description: ensure non-existence of single node of failure that affects the
+        critical service availability;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2.j
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2
+      ref_id: 3.3.6-2.j
+      description: centralized authentication server (AAA, TACACS or RADIUS, etc.)
+        should be deployed for managing authentication and authorization of network
+        devices;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2.k
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2
+      ref_id: 3.3.6-2.k
+      description: centralized log server (e.g. syslog server) should be deployed
+        to collect and store logs from all network devices;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2.l
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2
+      ref_id: 3.3.6-2.l
+      description: retention period for logs should be 12 months minimum;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2.m
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2
+      ref_id: 3.3.6-2.m
+      description: all network devices should synchronize their clock timings from
+        a centralized NTP server;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2.n
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2
+      ref_id: 3.3.6-2.n
+      description: all network communication over extranet (WLAN) and internet should
+        be through an encrypted channel;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2.o
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2
+      ref_id: 3.3.6-2.o
+      description: remote access should be restricted only to certain group of IP
+        addresses;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2.p
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2
+      ref_id: 3.3.6-2.p
+      description: remote administration should be over an encrypted channel (like
+        SSL VPN, SSH);
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2.q
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2
+      ref_id: 3.3.6-2.q
+      description: remote administration access for vendors should be time-bound and
+        granted on a need basis with approval;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2.r
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2
+      ref_id: 3.3.6-2.r
+      description: scan for Member Organization's devices before accessing the network
+        to ensure enforcement of security policies on devices before they access organization's
+        network; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2.s
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-2
+      ref_id: 3.3.6-2.s
+      description: segregation of duties within the infrastructure component (supported
+        with a documented authorization profile matrix).
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-3
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6
       ref_id: 3.3.6-3
       description: 'Member Organizations should ensure that network monitoring is
-        performed considering the following, but not limited to: (a) administrative
-        trails including login and activity trails (like configuration change, rule
-        change, etc.); (b) resource utilization (processor and memory); and (c) network
-        connectivity to all branches and ATMs.'
+        performed considering the following, but not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-3.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-3
+      ref_id: 3.3.6-3.a
+      description: administrative trails including login and activity trails (like
+        configuration change, rule change, etc.);
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-3.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-3
+      ref_id: 3.3.6-3.b
+      description: resource utilization (processor and memory); and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-3.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.6-3
+      ref_id: 3.3.6-3.c
+      description: network connectivity to all branches and ATMs.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.7
       assessable: false
       depth: 2
@@ -1267,13 +2373,36 @@ objects:
       description: The effectiveness of the Batch management process should be measured
         and periodically evaluated.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.7-3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.7
       ref_id: 3.3.7-3
       description: 'Batch Management process should include the following, but not
-        limited to: (a) start and end of day schedules; (b) roles and responsibilities;
-        (c) monitoring of batches; and (d) error or exception handling.'
+        limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.7-3.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.7-3
+      ref_id: 3.3.7-3.a
+      description: start and end of day schedules;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.7-3.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.7-3
+      ref_id: 3.3.7-3.b
+      description: roles and responsibilities;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.7-3.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.7-3
+      ref_id: 3.3.7-3.c
+      description: monitoring of batches; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.7-3.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.7-3
+      ref_id: 3.3.7-3.d
+      description: error or exception handling.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.7-4
       assessable: true
       depth: 3
@@ -1314,18 +2443,68 @@ objects:
       description: The effectiveness of the IT incident management process should
         be measured and periodically evaluated.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8
       ref_id: 3.3.8-3
       description: 'IT incident management process should include the following requirements,
-        but not limited to: (a) the establishment of a designated team responsible
-        for incident management; (b) communication plan; (c) details of key staff
-        who need to be notified; (d) skilled and (continuously) trained staff; (e)
-        the prioritization and classification of incidents; (f) the timely handling
-        of incidents, recording and monitoring progress; (g) the protection of relevant
-        evidence and loggings; (h) post-incident activities such as root-cause analysis
-        of the incidents; and (i) lessons learned.'
+        but not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-3.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-3
+      ref_id: 3.3.8-3.a
+      description: the establishment of a designated team responsible for incident
+        management;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-3.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-3
+      ref_id: 3.3.8-3.b
+      description: communication plan;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-3.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-3
+      ref_id: 3.3.8-3.c
+      description: details of key staff who need to be notified;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-3.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-3
+      ref_id: 3.3.8-3.d
+      description: skilled and (continuously) trained staff;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-3.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-3
+      ref_id: 3.3.8-3.e
+      description: the prioritization and classification of incidents;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-3.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-3
+      ref_id: 3.3.8-3.f
+      description: the timely handling of incidents, recording and monitoring progress;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-3.g
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-3
+      ref_id: 3.3.8-3.g
+      description: the protection of relevant evidence and loggings;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-3.h
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-3
+      ref_id: 3.3.8-3.h
+      description: post-incident activities such as root-cause analysis of the incidents;
+        and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-3.i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-3
+      ref_id: 3.3.8-3.i
+      description: lessons learned.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-4
       assessable: true
       depth: 3
@@ -1343,15 +2522,42 @@ objects:
         communicated to the relevant IT staff for hands on experience and also for
         future reference to enhance efficiency.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-6
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8
       ref_id: 3.3.8-6
       description: 'All user requests and IT incident should be logged with the following
-        information but not limited to: (a) unique reference number; (b) date and
-        time; (c) name of the impacted services and systems; (d) update the relevant
-        owner; and (e) categorization and prioritization based on the urgency and
-        impact.'
+        information but not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-6.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-6
+      ref_id: 3.3.8-6.a
+      description: unique reference number;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-6.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-6
+      ref_id: 3.3.8-6.b
+      description: date and time;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-6.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-6
+      ref_id: 3.3.8-6.c
+      description: name of the impacted services and systems;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-6.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-6
+      ref_id: 3.3.8-6.d
+      description: update the relevant owner; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-6.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-6
+      ref_id: 3.3.8-6.e
+      description: categorization and prioritization based on the urgency and impact.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-7
       assessable: true
       depth: 3
@@ -1391,18 +2597,67 @@ objects:
         Risk Control' before disclosing any information about the incident to the
         media.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-12
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8
       ref_id: 3.3.8-12
       description: 'The Member Organizations should submit a detail incident report
         within five (5) days to ''General Department of Cyber Risk Control'', including
-        the following details as a minimum: (a) title of the incident; (b) identification,
-        classification and prioritization of incident; (c) logging and monitoring
-        of incident; (d) resolution and closure of incident; (e) impact assessment
-        such as financial, data, customer and/or reputational; (f) date and time of
-        the incident; (g) name of the impacted services and systems; (h) root-cause
-        analysis; and (i) corrective actions with target dates.'
+        the following details as a minimum:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-12.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-12
+      ref_id: 3.3.8-12.a
+      description: title of the incident;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-12.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-12
+      ref_id: 3.3.8-12.b
+      description: identification, classification and prioritization of incident;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-12.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-12
+      ref_id: 3.3.8-12.c
+      description: logging and monitoring of incident;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-12.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-12
+      ref_id: 3.3.8-12.d
+      description: resolution and closure of incident;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-12.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-12
+      ref_id: 3.3.8-12.e
+      description: impact assessment such as financial, data, customer and/or reputational;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-12.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-12
+      ref_id: 3.3.8-12.f
+      description: date and time of the incident;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-12.g
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-12
+      ref_id: 3.3.8-12.g
+      description: name of the impacted services and systems;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-12.h
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-12
+      ref_id: 3.3.8-12.h
+      description: root-cause analysis; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-12.i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.8-12
+      ref_id: 3.3.8-12.i
+      description: corrective actions with target dates.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.9
       assessable: false
       depth: 2
@@ -1427,17 +2682,66 @@ objects:
       description: The effectiveness of the problem management process should be measured
         and periodically evaluated.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.9-3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.9
       ref_id: 3.3.9-3
       description: 'The problem management process should include the following requirements
-        but not limited to: (a) identification, classification and prioritization
-        of problem; (b) logging and monitoring of problem; (c) resolution and closure
-        of problem; (d) the protection of relevant evidence and loggings; (e) impact
-        assessment such as financial, data, customer and/or reputational; (f) date
-        and time of the problem; (g) name of the impacted services and systems; (h)
-        root-cause analysis; and (i) corrective actions.'
+        but not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.9-3.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.9-3
+      ref_id: 3.3.9-3.a
+      description: identification, classification and prioritization of problem;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.9-3.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.9-3
+      ref_id: 3.3.9-3.b
+      description: logging and monitoring of problem;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.9-3.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.9-3
+      ref_id: 3.3.9-3.c
+      description: resolution and closure of problem;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.9-3.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.9-3
+      ref_id: 3.3.9-3.d
+      description: the protection of relevant evidence and loggings;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.9-3.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.9-3
+      ref_id: 3.3.9-3.e
+      description: impact assessment such as financial, data, customer and/or reputational;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.9-3.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.9-3
+      ref_id: 3.3.9-3.f
+      description: date and time of the problem;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.9-3.g
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.9-3
+      ref_id: 3.3.9-3.g
+      description: name of the impacted services and systems;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.9-3.h
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.9-3
+      ref_id: 3.3.9-3.h
+      description: root-cause analysis; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.9-3.i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.9-3
+      ref_id: 3.3.9-3.i
+      description: corrective actions.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.9-4
       assessable: true
       depth: 3
@@ -1462,16 +2766,42 @@ objects:
       description: Data backup management strategy should be defined, approved and
         implemented.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10
       ref_id: 3.3.10-2
       description: 'The data backup management policy should consider the following,
-        but not limited to: (a) alignment with SAMA [Business Continuity Management
-        Framework](https://rulebook.sama.gov.sa/en/node/3709); (b) implementation
-        of replication, backup and recovery capabilities; (c) data storage; (d) data
-        retrieval; and (e) data retention as per the legal, regulatory and business
-        requirements.'
+        but not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-2.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-2
+      ref_id: 3.3.10-2.a
+      description: alignment with SAMA [Business Continuity Management Framework](https://rulebook.sama.gov.sa/en/node/3709);
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-2.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-2
+      ref_id: 3.3.10-2.b
+      description: implementation of replication, backup and recovery capabilities;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-2.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-2
+      ref_id: 3.3.10-2.c
+      description: data storage;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-2.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-2
+      ref_id: 3.3.10-2.d
+      description: data retrieval; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-2.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-2
+      ref_id: 3.3.10-2.e
+      description: data retention as per the legal, regulatory and business requirements.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-3
       assessable: true
       depth: 3
@@ -1487,23 +2817,67 @@ objects:
       description: The effectiveness of the backup and restoration procedure should
         be measured and periodically evaluated.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-5
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10
       ref_id: 3.3.10-5
       description: 'Member Organizations should define its backup and restoration
-        requirements considering the following, but not limited to: (a) legal and
-        regulatory requirements; (b) business requirements in line with agreed RPO
-        (Recover Point Objective); (c) type of backups (offline, online, full, incremental,
-        etc.); and (d) schedule of the backup (daily, weekly, monthly, etc.).'
-    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-6
+        requirements considering the following, but not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-5.a
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-5
+      ref_id: 3.3.10-5.a
+      description: legal and regulatory requirements;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-5.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-5
+      ref_id: 3.3.10-5.b
+      description: business requirements in line with agreed RPO (Recover Point Objective);
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-5.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-5
+      ref_id: 3.3.10-5.c
+      description: type of backups (offline, online, full, incremental, etc.); and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-5.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-5
+      ref_id: 3.3.10-5.d
+      description: schedule of the backup (daily, weekly, monthly, etc.).
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-6
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10
       ref_id: 3.3.10-6
       description: 'Member Organizations should ensure the following information are
-        backed up at minimum: (a) applications; (b) operating systems software; (c)
-        databases; and (d) device configurations.'
+        backed up at minimum:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-6.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-6
+      ref_id: 3.3.10-6.a
+      description: applications;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-6.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-6
+      ref_id: 3.3.10-6.b
+      description: operating systems software;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-6.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-6
+      ref_id: 3.3.10-6.c
+      description: databases; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-6.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-6
+      ref_id: 3.3.10-6.d
+      description: device configurations.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.10-7
       assessable: true
       depth: 3
@@ -1620,25 +2994,66 @@ objects:
         of the virtual images and snapshots should be handle in a controlled and secured
         manner.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.11-8
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.11
       ref_id: 3.3.11-8
       description: 'The following should be considered as part of virtualization/containerization
-        but not limited to: (a) administrative access should be tightly controlled
-        where access via local admin should be restricted; (b) management of hypervisors
-        should be restricted to administrators only; (c) virtual test environment
-        should be physically and/or logically segregated from the production environment
-        and even should not operate on the same host; (d) unnecessary program and
-        services should be disabled on virtual machines unless authorized by the business;
-        (e) audit logging should be enabled and monitored for all virtual machines
-        that should include but not limited to: (1) creation, deployment and removal;
-        (2) root and administrative activities; and (3) creation, modification and
-        deletion of system level objects. (f) appropriate controls should be in place
-        to protect sensitive and critical data being used and managed through virtual
-        images or snapshots; and (g) all virtual drives used by the guest operating
-        systems should be backed-up and tested on regular basis, using the same policy
-        for backup management as is used for non-virtualized systems.'
+        but not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.11-8.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.11-8
+      ref_id: 3.3.11-8.a
+      description: administrative access should be tightly controlled where access
+        via local admin should be restricted;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.11-8.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.11-8
+      ref_id: 3.3.11-8.b
+      description: management of hypervisors should be restricted to administrators
+        only;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.11-8.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.11-8
+      ref_id: 3.3.11-8.c
+      description: virtual test environment should be physically and/or logically
+        segregated from the production environment and even should not operate on
+        the same host;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.11-8.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.11-8
+      ref_id: 3.3.11-8.d
+      description: unnecessary program and services should be disabled on virtual
+        machines unless authorized by the business;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.11-8.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.11-8
+      ref_id: 3.3.11-8.e
+      description: 'audit logging should be enabled and monitored for all virtual
+        machines that should include but not limited to: (1) creation, deployment
+        and removal; (2) root and administrative activities; and (3) creation, modification
+        and deletion of system level objects.'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.11-8.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.11-8
+      ref_id: 3.3.11-8.f
+      description: appropriate controls should be in place to protect sensitive and
+        critical data being used and managed through virtual images or snapshots;
+        and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.11-8.g
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.3.11-8
+      ref_id: 3.3.11-8.g
+      description: all virtual drives used by the guest operating systems should be
+        backed-up and tested on regular basis, using the same policy for backup management
+        as is used for non-virtualized systems.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4
       assessable: false
       depth: 1
@@ -1677,16 +3092,72 @@ objects:
         and updated on periodic basis and/or whenever significant changes occurs in
         the IT environment or changes in laws and regulatory requirements.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-4
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1
       ref_id: 3.4.1-4
       description: 'System change management process should address the following,
-        but not limited to: (a) change requirement definition and approval; (b) change
-        severity and priority; (c) change risk and impact assessment; (d) change development;
-        (e) change testing; (f) change roll-out and roll-back; (g) change roles and
-        responsibilities; (h) change documentation; (i) change awareness and/or training
-        for users; and (j) change advisory board (CAB) input, if applicable.'
+        but not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-4.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-4
+      ref_id: 3.4.1-4.a
+      description: change requirement definition and approval;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-4.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-4
+      ref_id: 3.4.1-4.b
+      description: change severity and priority;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-4.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-4
+      ref_id: 3.4.1-4.c
+      description: change risk and impact assessment;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-4.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-4
+      ref_id: 3.4.1-4.d
+      description: change development;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-4.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-4
+      ref_id: 3.4.1-4.e
+      description: change testing;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-4.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-4
+      ref_id: 3.4.1-4.f
+      description: change roll-out and roll-back;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-4.g
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-4
+      ref_id: 3.4.1-4.g
+      description: change roles and responsibilities;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-4.h
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-4
+      ref_id: 3.4.1-4.h
+      description: change documentation;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-4.i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-4
+      ref_id: 3.4.1-4.i
+      description: change awareness and/or training for users; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-4.j
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-4
+      ref_id: 3.4.1-4.j
+      description: change advisory board (CAB) input, if applicable.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-5
       assessable: true
       depth: 3
@@ -1718,23 +3189,62 @@ objects:
         ) should be ensured so that no individual have two conflicting responsibilities\
         \ such as (develop, compile, test, migrate and deploy) at the same time."
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-9
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1
       ref_id: 3.4.1-9
       description: 'Emergency changes in the information assets should be performed
-        in strictly controlled manner and should consider the following: (a) the number
-        of emergency changes should be least preferred over planned changes in order
-        to keep such changes as minimum as possible; (b) emergency changes should
-        be assessed for their impact on the systems; (c) emergency changes should
-        be approved by the Emergency Change Advisory Board (''ECAB''); (d) minimum
-        level of testing should be acceptable to implement the emergency changes;
-        (e) formal documentation of emergency changes should be completed post implementation;
-        (f) post implementation review should be conducted for all emergency changes;
-        and (g) root cause analysis should be conducted to determine the cause due
-        to which emergency change was required, as well as maintaining a register
+        in strictly controlled manner and should consider the following:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-9.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-9
+      ref_id: 3.4.1-9.a
+      description: the number of emergency changes should be least preferred over
+        planned changes in order to keep such changes as minimum as possible;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-9.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-9
+      ref_id: 3.4.1-9.b
+      description: emergency changes should be assessed for their impact on the systems;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-9.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-9
+      ref_id: 3.4.1-9.c
+      description: emergency changes should be approved by the Emergency Change Advisory
+        Board ('ECAB');
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-9.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-9
+      ref_id: 3.4.1-9.d
+      description: minimum level of testing should be acceptable to implement the
+        emergency changes;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-9.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-9
+      ref_id: 3.4.1-9.e
+      description: formal documentation of emergency changes should be completed post
+        implementation;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-9.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-9
+      ref_id: 3.4.1-9.f
+      description: post implementation review should be conducted for all emergency
+        changes; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-9.g
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-9
+      ref_id: 3.4.1-9.g
+      description: root cause analysis should be conducted to determine the cause
+        due to which emergency change was required, as well as maintaining a register
         to reflect lesson learned and report to all concerned staff, management and
-        ITSC.'
+        ITSC.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.1-10
       assessable: true
       depth: 3
@@ -1842,24 +3352,56 @@ objects:
         process to assess vendor for their offering and capabilities to support system
         during and post implementation.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.3-6
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.3
       ref_id: 3.4.3-6
       description: 'The system acquisition should be supported with a detail implementation
-        plan describing the following, but not limited to: (a) system implementation
-        milestones (including requirement gathering, development or customization,
-        testing, go-live etc.); (b) timeline for each milestone and their dependencies;
-        and (c) resources assigned to milestones.'
-    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.3-7
+        plan describing the following, but not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.3-6.a
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.3-6
+      ref_id: 3.4.3-6.a
+      description: system implementation milestones (including requirement gathering,
+        development or customization, testing, go-live etc.);
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.3-6.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.3-6
+      ref_id: 3.4.3-6.b
+      description: timeline for each milestone and their dependencies; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.3-6.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.3-6
+      ref_id: 3.4.3-6.c
+      description: resources assigned to milestones.
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.3-7
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.3
       ref_id: 3.4.3-7
       description: 'The off-the-shelf system or package should be evaluated based
-        on the following, but not limited to: (a) system conformance with the requirements
-        of the Member Organization; (b) system creditability and market presence,
-        if required; and (c) vendor evaluation and service level.'
+        on the following, but not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.3-7.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.3-7
+      ref_id: 3.4.3-7.a
+      description: system conformance with the requirements of the Member Organization;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.3-7.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.3-7
+      ref_id: 3.4.3-7.b
+      description: system creditability and market presence, if required; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.3-7.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.3-7
+      ref_id: 3.4.3-7.c
+      description: vendor evaluation and service level.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4
       assessable: false
       depth: 2
@@ -1884,16 +3426,61 @@ objects:
       description: The effectiveness of the system development methodology should
         be monitored and periodically evaluated.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4
       ref_id: 3.4.4-3
       description: 'The system development methodology should address the following,
-        but not limited to: (a) system development approach such as agile, waterfall,
-        etc.; (b) secure coding standards; (c) testing types and approaches such as
-        unit testing, regression testing, stress testing, etc.; (d) version controlling;
-        (e) quality control; (f) data migration; (g) documentation; and (h) end user
-        training.'
+        but not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-3.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-3
+      ref_id: 3.4.4-3.a
+      description: system development approach such as agile, waterfall, etc.;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-3.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-3
+      ref_id: 3.4.4-3.b
+      description: secure coding standards;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-3.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-3
+      ref_id: 3.4.4-3.c
+      description: testing types and approaches such as unit testing, regression testing,
+        stress testing, etc.;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-3.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-3
+      ref_id: 3.4.4-3.d
+      description: version controlling;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-3.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-3
+      ref_id: 3.4.4-3.e
+      description: quality control;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-3.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-3
+      ref_id: 3.4.4-3.f
+      description: data migration;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-3.g
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-3
+      ref_id: 3.4.4-3.g
+      description: documentation; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-3.h
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-3
+      ref_id: 3.4.4-3.h
+      description: end user training.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-4
       assessable: true
       depth: 3
@@ -1901,22 +3488,61 @@ objects:
       ref_id: 3.4.4-4
       description: The system design document should be defined, documented and approved.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-5
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4
       ref_id: 3.4.4-5
       description: 'The system design document should address the low level design
-        requirements for the intended system, which includes but not limited to following:
-        (a) configurations requirements; (b) integration requirements; (c) performance
-        requirements; (d) cyber security requirements; and (e) data definition requirements.'
-    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-6
+        requirements for the intended system, which includes but not limited to following:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-5.a
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-5
+      ref_id: 3.4.4-5.a
+      description: configurations requirements;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-5.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-5
+      ref_id: 3.4.4-5.b
+      description: integration requirements;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-5.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-5
+      ref_id: 3.4.4-5.c
+      description: performance requirements;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-5.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-5
+      ref_id: 3.4.4-5.d
+      description: cyber security requirements; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-5.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-5
+      ref_id: 3.4.4-5.e
+      description: data definition requirements.
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-6
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4
       ref_id: 3.4.4-6
       description: 'Member organizations relevant IT function or development team
-        should conduct secure code review for: (a) applications developed internally;
-        and (b) externally developed applications if the source code is available.'
+        should conduct secure code review for:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-6.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-6
+      ref_id: 3.4.4-6.a
+      description: applications developed internally; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-6.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-6
+      ref_id: 3.4.4-6.b
+      description: externally developed applications if the source code is available.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.4-7
       assessable: true
       depth: 3
@@ -1958,59 +3584,137 @@ objects:
       description: Test plan should be formally defined, approved and documented for
         the changes.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5
       ref_id: 3.4.5-2
       description: 'Test case should be defined, approved and documented for the changes.
-        In addition, test case should address the following, but not limited to: (a)
-        test case name and unique ID; (b) test case designed by and tested by; (c)
-        test case description with clear identification of negative and positive test
-        cases; (d) test priority; (e) date of the test execution; (f) data use to
-        test the cases; (g) status of the test case (i.e. pass or fail); (h) expected
-        outcome of the test case; and (i) third party testing certification requirement,
-        if applicable, i.e. MADA, Tanfeeth, etc.'
+        In addition, test case should address the following, but not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-2.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-2
+      ref_id: 3.4.5-2.a
+      description: test case name and unique ID;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-2.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-2
+      ref_id: 3.4.5-2.b
+      description: test case designed by and tested by;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-2.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-2
+      ref_id: 3.4.5-2.c
+      description: test case description with clear identification of negative and
+        positive test cases;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-2.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-2
+      ref_id: 3.4.5-2.d
+      description: test priority;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-2.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-2
+      ref_id: 3.4.5-2.e
+      description: date of the test execution;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-2.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-2
+      ref_id: 3.4.5-2.f
+      description: data use to test the cases;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-2.g
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-2
+      ref_id: 3.4.5-2.g
+      description: status of the test case (i.e. pass or fail);
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-2.h
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-2
+      ref_id: 3.4.5-2.h
+      description: expected outcome of the test case; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-2.i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-2
+      ref_id: 3.4.5-2.i
+      description: third party testing certification requirement, if applicable, i.e.
+        MADA, Tanfeeth, etc.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5
       ref_id: 3.4.5-3
       description: At a minimum, the following types of testing should be considered
-        as part of system change management. (a) unit testing; (b) system integration
-        testing (SIT); (c) stress testing (if applicable); (d) security testing; and
-        (e) user acceptance testing (UAT).
+        as part of system change management.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5
       ref_id: 3.4.5-4
-      description: All changes to information system should be thoroughly tested on
-        a separate test environment in accordance with the approved test cases.
+      description: unit testing;
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-5
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5
       ref_id: 3.4.5-5
-      description: All changes should be formally tested and accepted by the concern
-        business users.
+      description: system integration testing (SIT);
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-6
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5
       ref_id: 3.4.5-6
-      description: Testing should include positive and negative test cases scenarios.
+      description: stress testing (if applicable);
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-7
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5
       ref_id: 3.4.5-7
-      description: The results of UAT should be documented and maintained for future
-        reference purposes.
+      description: security testing; and
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-8
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5
       ref_id: 3.4.5-8
+      description: user acceptance testing (UAT).
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5
+      ref_id: 3.4.5-9
+      description: All changes to information system should be thoroughly tested on
+        a separate test environment in accordance with the approved test cases.
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5
+      ref_id: 3.4.5-10
+      description: All changes should be formally tested and accepted by the concern
+        business users.
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5
+      ref_id: 3.4.5-11
+      description: Testing should include positive and negative test cases scenarios.
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5
+      ref_id: 3.4.5-12
+      description: The results of UAT should be documented and maintained for future
+        reference purposes.
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5-13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.5
+      ref_id: 3.4.5-13
       description: The production data should not be utilized for system testing in
         the test environment. Only sanitized data should be used for testing purposes.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.6
@@ -2055,14 +3759,42 @@ objects:
       description: The release management process should be monitored and periodically
         evaluated.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.7-3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.7
       ref_id: 3.4.7-3
       description: 'The release management process should address the following, but
-        not limited to: (a) change release strategy and approach; (b) roles and responsibilities
-        to carry out change releases; (c) change release schedule and logistics; (d)
-        change roll-out and roll-back procedures; and (e) data migration, where applicable.'
+        not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.7-3.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.7-3
+      ref_id: 3.4.7-3.a
+      description: change release strategy and approach;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.7-3.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.7-3
+      ref_id: 3.4.7-3.b
+      description: roles and responsibilities to carry out change releases;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.7-3.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.7-3
+      ref_id: 3.4.7-3.c
+      description: change release schedule and logistics;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.7-3.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.7-3
+      ref_id: 3.4.7-3.d
+      description: change roll-out and roll-back procedures; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.7-3.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.7-3
+      ref_id: 3.4.7-3.e
+      description: data migration, where applicable.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.7-4
       assessable: true
       depth: 3
@@ -2103,16 +3835,38 @@ objects:
       description: The configuration management process should be monitored and periodically
         evaluated.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.8-3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.8
       ref_id: 3.4.8-3
       description: 'The configuration management process should address the following,
-        but not limited to: (a) roles and responsibilities for carrying out configuration
-        management; (b) identification and recording of configuration items and their
-        criticality with respect to its supporting business processes; (c) interrelationships
-        between configuration items among various information assets; and (d) periodic
-        verification of configuration items.'
+        but not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.8-3.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.8-3
+      ref_id: 3.4.8-3.a
+      description: roles and responsibilities for carrying out configuration management;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.8-3.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.8-3
+      ref_id: 3.4.8-3.b
+      description: identification and recording of configuration items and their criticality
+        with respect to its supporting business processes;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.8-3.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.8-3
+      ref_id: 3.4.8-3.c
+      description: interrelationships between configuration items among various information
+        assets; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.8-3.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.8-3
+      ref_id: 3.4.8-3.d
+      description: periodic verification of configuration items.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.8-4
       assessable: true
       depth: 3
@@ -2239,25 +3993,77 @@ objects:
       description: The effectiveness of the IT project management process should be
         monitored, measured and periodically evaluated.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.10-4
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.10
       ref_id: 3.4.10-4
       description: 'All IT projects should be provided with detail project plan, which
-        include the following, but not limited to: (a) detail scope of work including
-        activities for a project or each phase of the project; (b) priorities, milestones
-        and timelines associated with project or each phase of the project; (c) deliverables;
-        (d) roles and responsibilities; and (e) risks associated with any IT projects.'
-    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.10-5
+        include the following, but not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.10-4.a
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.10-4
+      ref_id: 3.4.10-4.a
+      description: detail scope of work including activities for a project or each
+        phase of the project;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.10-4.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.10-4
+      ref_id: 3.4.10-4.b
+      description: priorities, milestones and timelines associated with project or
+        each phase of the project;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.10-4.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.10-4
+      ref_id: 3.4.10-4.c
+      description: deliverables;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.10-4.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.10-4
+      ref_id: 3.4.10-4.d
+      description: roles and responsibilities; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.10-4.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.10-4
+      ref_id: 3.4.10-4.e
+      description: risks associated with any IT projects.
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.10-5
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.10
       ref_id: 3.4.10-5
       description: 'Necessary documentations for the IT project should be defined,
         approved and maintained for future reference purposes including but not limited
-        to following: (a) project charter; (b) requirement analysis, business information
-        flow and technical information flow; (c) feasibility as well as cost-benefit
-        analysis; and (d) detail project plan.'
+        to following:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.10-5.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.10-5
+      ref_id: 3.4.10-5.a
+      description: project charter;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.10-5.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.10-5
+      ref_id: 3.4.10-5.b
+      description: requirement analysis, business information flow and technical information
+        flow;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.10-5.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.10-5
+      ref_id: 3.4.10-5.c
+      description: feasibility as well as cost-benefit analysis; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.10-5.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.10-5
+      ref_id: 3.4.10-5.d
+      description: detail project plan.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.10-6
       assessable: true
       depth: 3
@@ -2339,16 +4145,33 @@ objects:
       description: The quality assurance process should be monitored and periodically
         evaluated.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.11-3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.11
       ref_id: 3.4.11-3
       description: 'The quality assurance process should address the following, but
-        not limited to: (a) clear roles and responsibilities for personnel carrying
-        out quality assurance activities; (b) minimum quality requirements sets by
-        the Member Organizations including business and any other applicable regulatory
-        requirements; and (c) process for identification, maintenance and retirement
-        of quality related records.'
+        not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.11-3.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.11-3
+      ref_id: 3.4.11-3.a
+      description: clear roles and responsibilities for personnel carrying out quality
+        assurance activities;
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.11-3.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.11-3
+      ref_id: 3.4.11-3.b
+      description: minimum quality requirements sets by the Member Organizations including
+        business and any other applicable regulatory requirements; and
+    - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.11-3.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.11-3
+      ref_id: 3.4.11-3.c
+      description: process for identification, maintenance and retirement of quality
+        related records.
     - urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.11-4
       assessable: true
       depth: 3
@@ -2368,236 +4191,6 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:sama-itg-1.0:3.4.11
       ref_id: 3.4.11-6
-      description: "The quality assurance function should report the reviewed results\
-        \ to the relevant stakeholder(s) within the Member Organizations and initiate\
-        \ improvements where appropriate. * ## Appendices * ## Appendix A - How to\
-        \ Request an Update to the Framework Below the illustration of the process\
-        \ for requesting an update to the Framework. * Detail information supported\
-        \ by pros and cons about the suggested update. * The request should first\
-        \ be approved by CIO before submitting to IT steering committee. * The request\
-        \ should be approved by Member Organization's IT steering committee. * The\
-        \ request should be sent formally in writing to the manager 'General Department\
-        \ of Cyber Risk Control' via the Member Organization's CEO or managing director.\
-        \ * 'General Department of Cyber Risk Control' will evaluate the request and\
-        \ informs the Member Organization. * The current Framework remains applicable\
-        \ while the requested update is being considered, processed and if applicable\
-        \ is approved and processed. ![Image 3](https://rulebook.sama.gov.sa/sites/default/files/en_net_file_store/210H-10.jpg)\
-        \ * ## Appendix B - Framework Update Request Form **Request to Update the\
-        \ IT Governance Framework** A submission to the manager of SAMA MA General\
-        \ Department of Cyber Risk Control. The Saudi Arabia Monetary Authority (SAMA)\
-        \ will consider requests from a member organization (MO) to update its IT\
-        \ Governance Framework based on the information submitted using the form below.\
-        \ A separate form must be completed for each requested update. Please note\
-        \ that all required fields must be properly filled in before SAMA will begin\
-        \ the review process Requestor Information REQUESTOR'S SIGNATURE* x REQUESTOR'S\
-        \ POSITION*DATE* REQUESTOR'S NAME*MEMBER ORGANIZATION OF REQUESTOR* FRAMEWORK\
-        \ SECTION*: PURPOSE OF REQUESTED UPDATE (including detailed information on\
-        \ its pros and cons)*: PROPOSAL*: Approvals (1) MO'S CIO APPROVAL*DATE* (2)\
-        \ MO'S IT STEERING COMMITTEE APPROVAL*APPROVER'S POSITION*DATE* 3 SAMA DECISION\
-        \ SAMA APPROVAL DATE * * * * Denotes required fields * ## Appendix C - How\
-        \ to Request 2 Waiver from the Framework Below the illustration of the process\
-        \ for requesting a waiver from the Framework. * Detail description about the\
-        \ reasons that the member organization could not meet the required control.\
-        \ * Details description about the available or suggested compensating controls.\
-        \ * The waiver request should first be approved by CIO before submitting to\
-        \ IT steering committee. * The waiver request should approved by the members\
-        \ of Member Organization's IT steering committee. * The waiver request should\
-        \ be signed by the CIO and relevant (business) owner. * The waiver request\
-        \ should be formally issued in writing to the manager of 'General Department\
-        \ of Cyber Risk Control' via the Member Organization's CEO or managing director.\
-        \ * \u2018General Department of Cyber Risk Control' will evaluate the waiver\
-        \ request and informs the Member Organization. The current Framework remains\
-        \ applicable while the requested waiver is being evaluated and processed,\
-        \ until the moment of granting the waiver. ![Image 4](https://rulebook.sama.gov.sa/sites/default/files/en_net_file_store/210H-12.jpg)\
-        \ * ## Appendix D - Framework Waiver Request Form **Request for Waiver from\
-        \ the SAMA IT Governance Framework** A submission to the manager of 'General\
-        \ Department of Cyber Risk Control' The Saudi Arabia Monetary Authority (SAMA)\
-        \ will consider requests for waiver from a member organization (MO) from its\
-        \ IT Governance Framework based on the information submitted using the form\
-        \ below. A separate form must be completed for each requested waiver. Please\
-        \ note that all required fields must be properly filled in before SAMA will\
-        \ begin the review process. Requestor Information REQUESTOR'S SIGNATURE* x\
-        \ REQUESTOR'S POSITION*DATE* REQUESTOR'S NAME*MEMBER ORGANIZATION OF REQUESTOR*\
-        \ FRAMEWORK CONTROL*: DETAILED DESCRIPTION OF WHY CONTROL CANNOT BE IMPLEMENTED*:\
-        \ DETAILED DESCRIPTION OF AVAILABLE OR SUGGESTED COMPENSATING CONTROLS*: Approvals\
-        \ 1 .MO's CIO APPROVAL*DATE* (2) MO'S IT STEERING COMMITTEE APPROVAL*APPROVER'S\
-        \ POSITION*DATE* (3) SAMA DECISION SAMA APPROVAL DATE * * * * Denotes required\
-        \ fields **The validity of this waiver is one year. It is the Member Organizations\
-        \ responsibility to ensure renewal of this waiver. * ## Appendix E - Glossary\
-        \ **Term****Description** Access Control Means to ensure that access to assets\
-        \ is authorized and restricted based on business and security requirements.\
-        \ Application Architects Application Architects identify needed changes to\
-        \ the portfolio of applications across the ecosystem. They develop and administer\
-        \ application-specific standards such as user interface design, globalization,\
-        \ Web services, portal application programming interfaces, XML, and content.\
-        \ They provide design recommendations based on long-term development organization\
-        \ strategy and develop enterprise level application and custom integration\
-        \ solutions including major enhancements and interfaces, functions and features.\
-        \ Asset Management The systematic process of deploying, operating, maintaining,\
-        \ upgrading, and disposing of assets in a safe, secure and cost effective\
-        \ manner Asset Owner The term Asset owner identifies an individual or entity\
-        \ that has approved management responsibility for controlling the production,\
-        \ development, maintenance, use of the information assets. Authorization Matrix\
-        \ A. matrix that defines the rights and permissions for a specific role needs\
-        \ for information. The matrix lists each user, the business process tasks\
-        \ he or she performs, and the affected systems. Audit Independent review and\
-        \ examination of records and activities to assess the effectiveness of IT\
-        \ governance controls and to ensure compliance with established policies,\
-        \ operational procedures and relevant standard, legal and regulatory requirements.\
-        \ Authentication Verifying the identity of a user, process, or device, often\
-        \ as a prerequisite in order to allow access to resources in a system. Backup\
-        \ Files, devices, data and procedures available for use in case of a failure\
-        \ or loss, or in case of deletion or suspension of their original copies.\
-        \ Business Application Any software or set of computer programs that are used\
-        \ by business users to perform various business functions. Batch Processing\
-        \ Batch processing is the processing of the transactions in a group or batch\
-        \ with no or minimal human interaction. Configuration Item (CI)Component of\
-        \ an infrastructure-or an item, such as a request for change, associated with\
-        \ an infrastructure-which is (or is to be) under the control of configuration\
-        \ management Change Management The controlled identification and implementation\
-        \ of required changes within a business or information systems. Chief Information\
-        \ Officer (CIO)A senior-level executive referred as _Chief Information Officer\
-        \ (CIO)_, Chief Technology Officer (10) / Head of IT or relevant stakeholder\
-        \ who is accountable for IT advocacy, aligning IT and business strategies,\
-        \ and planning, resourcing and managing the delivery of IT services, information\
-        \ and the deployment of associated human resources. Classification Setting\
-        \ the sensitivity level2 of data and information that results in security\
-        \ controls for each level of classification. Data and information sensitivity\
-        \ levels are set according to predefined categories where data and information\
-        \ is created, modified, improved, stored or transmitted. The classification\
-        \ level is an indication of the value or importance of the data and information\
-        \ of the organization. Chief Operating Officer (COO)A senior-level executive\
-        \ responsible for the daily operation of the organization. Critical IT infrastructures\
-        \ These are the information assets (i.e., facilities, systems, networks, processes,\
-        \ and key operators who operate and process them), whose loss or vulnerability\
-        \ to security breaches may result in significant negative impact on the availability,\
-        \ integration or delivery of basic services, including services that could\
-        \ result in serious loss of property, alongside observance of significant\
-        \ economic and/or social impacts. Compensating Control A management, operational,\
-        \ and/or technical control (i.e., safeguard or countermeasure) employed by\
-        \ an organization in place of a recommended control in the low, moderate,\
-        \ or high baselines that provides equivalent or comparable protection for\
-        \ an information system. Containerization Unit of software that packages up\
-        \ code and all its dependencies. Data Masking A. computerized technique of\
-        \ blocking out the display of sensitive information or PII. Database Administrator\
-        \ Database administrator, frequently known just by the acronym DBA, is a role\
-        \ usually within the Information Technology department, charged with the creation,\
-        \ maintenance, backups, querying, tuning, user rights assignment and security\
-        \ of an organization's database. Disaster Recovery Programs, activities and\
-        \ plans designed to restore the organizations critical business functions\
-        \ and services to an acceptable situation, following exposure to cyber and\
-        \ IT incidents or disruption of such services. Enterprise Architect Description\
-        \ of the fundamental underlying design of the components of the business system,\
-        \ or of one element of the business system (e.g., technology), the relationships\
-        \ among them, and the manner in which they support the enterprise's objectives.\
-        \ Feasibility study A phase of a system development life cycle (SDLC) methodology\
-        \ that researches the feasibility and adequacy of resources for the development\
-        \ or acquisition of a system solution to a user need. Formally documented\
-        \ Documentation that is written, approved by the senior leadership and disseminated\
-        \ to relevant parties. Freezing period e.g. Salaries deposit days, public\
-        \ or national holidays. Hypervisor A hypervisor allows one host computer to\
-        \ support multiple guest Virtual Machines (VMs) by virtually sharing its resources,\
-        \ like memory and processing. Incident An occurrence that actually or potentially\
-        \ jeopardizes the confidentiality, integrity, or availability of an information\
-        \ system or the information the system processes, stores, or transmits or\
-        \ that constitutes violation or imminent threat of violation of security policies,\
-        \ security procedures, or acceptable use policies. Incident Management The\
-        \ monitoring and detection of events on an information systems and the execution\
-        \ of proper responses to those events. Information Asset A piece of information,\
-        \ stored in any manner, which is recognized as 'valuable' to the organization.\
-        \ Interdependencies Set of interaction with dependence of information assets\
-        \ on each another in order to deliver set of works or tasks. IT Change and\
-        \ Release Management A holistic and proactive approach to managing the transition\
-        \ from a current to a desired organizational state, focusing specifically\
-        \ on the critical human or \"soft\" elements of change IT facilities The physical\
-        \ environment where the IT infrastructure is located. IT risk The business\
-        \ risk associated with the use, ownership, operation, involvement, influence\
-        \ and adoption of IT within an enterprise. IT Steering committee An executive-management-level\
-        \ committee that assists in the delivery of the IT strategy oversees day-to-day\
-        \ management of IT service delivery and IT projects, and focuses on implementation\
-        \ aspects. Key Performance Indicator (KPI)KPI is a type of performance measurement\
-        \ that evaluates the success of an organization or of a particular activity\
-        \ in which it engages to achieve particular objectives and goals. Key Risk\
-        \ Indicator (KRI)KRI is a measure used to indicate the probability an activity\
-        \ or organization will exceed its defined risk appetite. KRIs are used by\
-        \ organizations to provide an early signal of increasing risk exposures in\
-        \ various areas of the enterprise. Likelihood A weighted factor based on an\
-        \ analysis of the probability that a given threat is capable of exploiting\
-        \ a given vulnerability. Member Organization Organizations affiliated with\
-        \ SAMA. Need-to-know The restriction of data, which is considered sensitive\
-        \ unless one has a specific need to know; for official business duties. Off-the-shelf\
-        \ system Software that already exists and is available from commercial sources.\
-        \ Outsourcing Obtaining goods or services by contracting with a supplier or\
-        \ service provider. Patch An update to an operating system, application, or\
-        \ other software issued specifically to correct particular problems with the\
-        \ software. Patch management The systematic notification, identification,\
-        \ deployment, installation, and verification of operating system and application\
-        \ software code revisions. Recovery A procedure or process to restore or control\
-        \ something that is suspended, damaged, stolen or lost. Recovery Point Objective\
-        \ (RPO)The point in time to which data must be recovered after an outage.\
-        \ RPO is determined based on the acceptable data loss in case of a disruption\
-        \ of operations. It indicates the earliest point in time that is acceptable\
-        \ to recover the data. The RPO effectively quantifies the permissible amount\
-        \ of data loss in case of interruption. Recovery Time Objective (RTO)The amount\
-        \ of time allowed for the recovery of a business function or resource after\
-        \ a disaster occurs Regression Testing Testing of a previously tested program\
-        \ following modification to ensure that defects have not been introduced or\
-        \ uncovered in unchanged areas of the software, as a result of the changes\
-        \ made. Residual risks The remaining risk after management has implemented\
-        \ a risk response. Retention The length of time that information, data, event\
-        \ logs or backups must be retained, regardless of the form (i.e., paper and\
-        \ electronic). Risk A measure of the extent to which an organization is threatened\
-        \ by a potential circumstance or event, and typically a function of: (i) the\
-        \ adverse impacts that would arise if the circumstance or event occurs; and\
-        \ (ii) the likelihood of occurrence. Risk register Risk register is a table\
-        \ used as a repository for all risks identified and includes additional information\
-        \ about each risk, e.g. risk category, risk owner, and mitigation actions\
-        \ taken. Risk Tolerance The acceptable variation relative to performance to\
-        \ the achievement of objectives. Also refer to 'Risk appetite'. Risk Treatment\
-        \ A process to modify risk that can involve avoiding the risk by deciding\
-        \ not to start or continue with the activity that gives rise to the risk;\
-        \ taking or increasing risk in order to pursue an opportunity; removing the\
-        \ risk source; changing the likelihood; changing the consequences; sharing\
-        \ the risk with another party or parties; and retaining the risk by informed\
-        \ decision. Risk treatments that deal with negative consequences are sometimes\
-        \ referred to as \"risk mitigation\", \"risk elimination\", \"risk prevention\"\
-        \ and \"risk reduction\". Risk treatments can create new risks or modify existing\
-        \ risks. Root-cause analysis A principle-based, systems approach for the identification\
-        \ of underlying causes associated with a particular set of risks. RACI Chart\
-        \ Illustrates who is Responsible, Accountable, Consulted and Informed within\
-        \ an organizational framework. Security Testing A process intended to ensure\
-        \ that modified or new systems and applications include appropriate security\
-        \ controls and protection and do not introduce any security holes or vulnerabilities\
-        \ that might compromise other systems or applications or misuses of the system,\
-        \ application or its information, and to maintain functionality as intended.\
-        \ Security-by Design A methodology to systems and software development and\
-        \ networks design that seeks to make systems, software and networks free from\
-        \ cybersecurity vulnerabilities/weaknesses and impervious to cyber-attack\
-        \ as much as possible through measures such as: continuous testing, authentication\
-        \ safeguards and adherence to best programming and design practices. Segregation\
-        \ of Duties Key principle that aims at minimizing errors and fraud when processing\
-        \ specific tasks. It is accomplished through having several people with different\
-        \ privileges, required to complete a task. Service level agreement (SLA)Defines\
-        \ the specific responsibilities of the service provider and sets the customer\
-        \ expectations. Stress Testing A type of performance testing conducted to\
-        \ evaluate a system or component at or beyond the limits of its anticipated\
-        \ or specified workloads, or with reduced availability of resources such as\
-        \ access to memory or servers. System Acquisition Procedures established to\
-        \ purchase application software, or an upgrade, including evaluation of the\
-        \ supplier's financial stability, track record, resources and references from\
-        \ existing customers System Configuration Management The control of changes\
-        \ to a set of configuration items over a system life cycle. Third-Party Any\
-        \ organization acting as a party in a contractual relationship to provide\
-        \ goods or services (this includes suppliers and service providers). Threat\
-        \ Any circumstance or event with the potential to adversely impact organizational\
-        \ operations (including mission, functions, image, or reputation), organizational\
-        \ assets, or individuals through an information system via unauthorized access,\
-        \ destruction, disclosure, modification of information, and/or denial of service.\
-        \ Unit Testing A testing technique that is used to test program logic within\
-        \ a particular program or module. User Acceptance Testing (UAT)Taking use\
-        \ cases or procedures for how the system was designed to perform and ensuring\
-        \ that someone who follows the procedure gets the intended result. Vulnerability\
-        \ Weakness in an information system, system security procedures, internal\
-        \ controls, or implementation that could be exploited or triggered by a threat\
-        \ source. Owner Individual or group that holds or possesses the rights of\
-        \ and the responsibilities for an enterprise, entity or asset."
+      description: The quality assurance function should report the reviewed results
+        to the relevant stakeholder(s) within the Member Organizations and initiate
+        improvements where appropriate.
