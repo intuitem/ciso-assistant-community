@@ -8,10 +8,10 @@ description: 'NCA Data Cybersecurity Controls (DCC-1:2022), an extension of the 
   Cybersecurity Controls (ECC) focused on protecting data across its lifecycle. 3
   main domains / 11 subdomains / 19 main controls / 47 subcontrols. Controls apply
   to four data classification levels (Public, Confidential, Secret, Top Secret), modelled
-  here as implementation groups. Reference: https://nca.gov.sa'
+  here as implementation groups. Source: https://cdn.nca.gov.sa/api/public/cms/files/1c2cfb9c-7788-4549-9f29-f337500f1787_Data-Cybersecurity-Controls-.pdf'
 copyright: "\xA9 NCA"
 version: 1
-publication_date: 2026-06-22
+publication_date: 2026-06-23
 provider: NCA
 packager: community
 objects:
@@ -59,10 +59,10 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:1-1
       ref_id: 1-1-1
-      description: 'With reference to ECC control 1-8-1, the cybersecurity function
+      description: With reference to ECC control 1-8-1, the cybersecurity function
         in the organization must review the implementation of the Data Cybersecurity
-        Controls as specified for each data classification level. Review frequency:
-        at least annually for all classification levels.'
+        Controls as specified for each data classification level.
+      annotation: 'Review frequency: at least annually for all classification levels.'
       implementation_groups:
       - public
       - confidential
@@ -73,11 +73,14 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:1-1
       ref_id: 1-1-2
-      description: 'With reference to ECC control 1-8-2, cybersecurity review and
-        audit must be conducted periodically by independent parties outside the organization''s
-        cybersecurity function as specified for each data classification level. Review
-        frequency: Public and Confidential at least every 2 years; Secret and Top
-        Secret at least annually.'
+      description: With reference to ECC control 1-8-2, cybersecurity review and audit
+        must be conducted periodically by independent parties outside the organization's
+        cybersecurity function as specified for each data classification level.
+      annotation: 'Review frequency:
+
+        * **Public** and **Confidential** at least every 2 years
+
+        * **Secret** and **Top Secret** at least annually'
       implementation_groups:
       - public
       - confidential
@@ -278,10 +281,14 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-1
       ref_id: 2-1-3
-      description: 'In addition to ECC subcontrol 2-2-3-5, the approved lists of privileges
+      description: In addition to ECC subcontrol 2-2-3-5, the approved lists of privileges
         and privileges used to handle data must be reviewed as specified for each
-        data classification level. Review frequency: Public and Confidential at least
-        annually; Secret and Top Secret at least every 3 months.'
+        data classification level.
+      annotation: 'Review frequency:
+
+        * **Public** and **Confidential** at least annually
+
+        * **Secret** and **Top Secret** at least every 3 months'
       implementation_groups:
       - public
       - confidential
@@ -309,10 +316,13 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-2-1
       ref_id: 2-2-1-1
-      description: 'Applying security patches and updates from the time of announcement
+      description: Applying security patches and updates from the time of announcement
         on systems used to handle data as specified for each data classification level.
-        Frequency: Public and Confidential at least every month; Secret and Top Secret
-        immediately.'
+      annotation: 'Frequency:
+
+        * **Public** and **Confidential** at least every month
+
+        * **Secret** and **Top Secret** immediately'
       implementation_groups:
       - public
       - confidential
@@ -323,10 +333,13 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-2-1
       ref_id: 2-2-1-2
-      description: 'Reviewing the security configuration and hardening of systems
-        used to handle data as specified for each data classification level. Frequency:
-        Public and Confidential at least annually; Secret and Top Secret at least
-        every 6 months.'
+      description: Reviewing the security configuration and hardening of systems used
+        to handle data as specified for each data classification level.
+      annotation: 'Frequency:
+
+        * **Public** and **Confidential** at least annually
+
+        * **Secret** and **Top Secret** at least every 6 months'
       implementation_groups:
       - public
       - confidential
@@ -388,10 +401,10 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-3-1
       ref_id: 2-3-1-2
-      description: 'Centrally managing BYOD devices using Mobile Device Management
-        (MDM) system and activating the remote wipe feature. Applicability by classification
-        level: applicable for Public and Confidential; for Secret and Top Secret the
-        use of BYOD devices is prohibited.'
+      description: Centrally managing BYOD devices using Mobile Device Management
+        (MDM) system and activating the remote wipe feature.
+      annotation: 'Applicability by classification level: for **Secret** and **Top
+        Secret** the use of BYOD devices is prohibited.'
       implementation_groups:
       - public
       - confidential
@@ -573,10 +586,13 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-6
       ref_id: 2-6-2
-      description: 'The implementation of the secure data disposal requirements must
-        be reviewed as specified for each data classification level. Review frequency:
-        Public and Confidential at least annually; Secret and Top Secret at least
-        every 6 months.'
+      description: The implementation of the secure data disposal requirements must
+        be reviewed as specified for each data classification level.
+      annotation: 'Review frequency:
+
+        * **Public** and **Confidential** at least annually
+
+        * **Secret** and **Top Secret** at least every 6 months'
       implementation_groups:
       - public
       - confidential
@@ -673,10 +689,14 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:dcc-1-2022:2-7
       ref_id: 2-7-4
-      description: 'Implementation of cybersecurity requirements for printers, scanners
+      description: Implementation of cybersecurity requirements for printers, scanners
         and copy machines must be reviewed as specified for each data classification
-        level. Review frequency: Public and Confidential at least every 3 years; Secret
-        and Top Secret at least annually.'
+        level.
+      annotation: 'Review frequency:
+
+        * **Public** and **Confidential** at least every 3 years
+
+        * **Secret** and **Top Secret** at least annually'
       implementation_groups:
       - public
       - confidential
