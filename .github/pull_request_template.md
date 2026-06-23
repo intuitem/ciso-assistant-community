@@ -21,6 +21,7 @@ Closes #
 
 - [ ] PR title follows Conventional Commits (`!` set if this is a breaking change)
 - [ ] One focused change, branched off `main`
+- [ ] PR content & changes are fully reviewed/tested by a human (PRs managed exclusively by Claude or any other AI agent will be closed)
 - [ ] CLA accepted (first contribution only)
 
 ### Backend — if you touched `backend/`
@@ -35,9 +36,15 @@ Closes #
 - [ ] New/changed UI strings added to `frontend/messages/en.json` (keep keys, preserve `{tokens}`)
 - [ ] Clicked through the change in the dev server; screenshots attached for UI changes
 
-### Other — libraries, CI, infra
+### Libraries — If you made any
 
+- [ ] A single library is included in the PR
+- [ ] Excel version of the library in a folder located in `tools/excel`
+- [ ] Sources and direct links to the documents used are mentioned in the library and PR description
 - [ ] Library changes built via the `tools/` script
+
+### Other — CI, infra
+
 - [ ] CI / build changes run green
 
 ### Tests & documentation — definition of done
