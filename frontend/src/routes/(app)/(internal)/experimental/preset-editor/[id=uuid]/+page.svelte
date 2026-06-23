@@ -17,7 +17,12 @@
 		risk_matrix?: string;
 		implementation_groups?: string[];
 		category?: string;
+		csf_function?: string;
+		priority?: number;
+		severity?: number;
 		asset_type?: string;
+		kind?: string;
+		matrix_preset?: string;
 		step_ref_id?: string;
 		[k: string]: any;
 	};
@@ -51,23 +56,29 @@
 		organisation_objective: 'organisation-objectives',
 		organisation_issue: 'organisation-issues',
 		perimeter: 'perimeters',
-		asset: 'assets'
+		asset: 'assets',
+		applied_control: 'applied-controls',
+		policy: 'policies',
+		security_exception: 'security-exceptions',
+		risk_acceptance: 'risk-acceptances',
+		project: 'projects',
+		responsibility_matrix: 'responsibility-matrices'
 	};
 	const MODEL_TO_TYPE: Record<string, string> = Object.fromEntries(
 		Object.entries(TYPE_TO_MODEL).map(([t, m]) => [m, t])
 	);
 	const SCAFFOLD_TYPES = Object.keys(TYPE_TO_MODEL);
 
+	// Object types behind the project_management feature flag; presets scaffolding
+	// these must enable that flag (the editor warns the author).
+	const PROJECT_MANAGEMENT_TYPES = ['project', 'responsibility_matrix'];
+
 	const NAV_ONLY_MODELS = [
 		'accreditations',
 		'actors',
-		'applied-controls',
 		'evidences',
 		'incidents',
-		'metric-instances',
-		'policies',
-		'risk-acceptances',
-		'security-exceptions'
+		'metric-instances'
 	];
 	const ALL_MODELS = ['', ...NAV_ONLY_MODELS, ...Object.values(TYPE_TO_MODEL)].sort((a, b) =>
 		a.localeCompare(b)
@@ -78,6 +89,16 @@
 		{ value: 'SP', labelKey: 'support' },
 		{ value: 'PR', labelKey: 'primary' }
 	];
+	const APPLIED_CONTROL_CATEGORIES = ['policy', 'process', 'technical', 'physical', 'procedure'];
+	const SECURITY_EXCEPTION_SEVERITIES = [
+		{ value: 0, labelKey: 'info' },
+		{ value: 1, labelKey: 'low' },
+		{ value: 2, labelKey: 'medium' },
+		{ value: 3, labelKey: 'high' },
+		{ value: 4, labelKey: 'critical' }
+	];
+	const PROJECT_KINDS = ['portfolio', 'program', 'project'];
+	const MATRIX_PRESETS = ['raci', 'rasci', 'rapid', 'custom'];
 
 	let draft: Draft | null = $state(null);
 	let initialJson = $state('');
@@ -92,6 +113,12 @@
 	let isReadOnly = $derived(!data.preset.is_user_authored);
 
 	const dirty = $derived(draft != null && JSON.stringify(draft) !== initialJson);
+
+	// Project & responsibility-matrix scaffolds only surface once the project_management
+	// feature flag is on; remind the author since the flag isn't editable here.
+	const needsProjectManagement = $derived(
+		!!draft?.scaffolded_objects?.some((s) => PROJECT_MANAGEMENT_TYPES.includes(s.type))
+	);
 
 	beforeNavigate(({ cancel }) => {
 		if (dirty && !confirm('You have unsaved changes. Leave anyway?')) cancel();
@@ -418,6 +445,8 @@
 			return { ...base, risk_matrix: '' };
 		if (type === 'findings_assessment') return { ...base, category: 'pentest' };
 		if (type === 'asset') return { ...base, asset_type: 'SP' };
+		if (type === 'project') return { ...base, kind: 'project' };
+		if (type === 'responsibility_matrix') return { ...base, matrix_preset: 'raci' };
 		return base;
 	}
 
@@ -623,6 +652,66 @@
 				{/each}
 			</select>
 		</label>
+	{:else if scaffold.type === 'applied_control'}
+		<label class="flex flex-col gap-1 text-sm">
+			<span class="text-xs text-surface-600-400">Category</span>
+			<select
+				class="text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+				value={scaffold.category ?? ''}
+				onchange={(e) =>
+					updateScaffoldByIndex(idx, { category: (e.target as HTMLSelectElement).value })}
+			>
+				<option value="">Any category…</option>
+				{#each APPLIED_CONTROL_CATEGORIES as c (c)}
+					<option value={c}>{safeTranslate(c)}</option>
+				{/each}
+			</select>
+		</label>
+	{:else if scaffold.type === 'project'}
+		<label class="flex flex-col gap-1 text-sm">
+			<span class="text-xs text-surface-600-400">Kind</span>
+			<select
+				class="text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+				value={scaffold.kind ?? 'project'}
+				onchange={(e) =>
+					updateScaffoldByIndex(idx, { kind: (e.target as HTMLSelectElement).value })}
+			>
+				{#each PROJECT_KINDS as k (k)}
+					<option value={k}>{safeTranslate(k)}</option>
+				{/each}
+			</select>
+		</label>
+	{:else if scaffold.type === 'responsibility_matrix'}
+		<label class="flex flex-col gap-1 text-sm">
+			<span class="text-xs text-surface-600-400">Matrix preset</span>
+			<select
+				class="text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+				value={scaffold.matrix_preset ?? 'raci'}
+				onchange={(e) =>
+					updateScaffoldByIndex(idx, { matrix_preset: (e.target as HTMLSelectElement).value })}
+			>
+				{#each MATRIX_PRESETS as p (p)}
+					<option value={p}>{p.toUpperCase()}</option>
+				{/each}
+			</select>
+		</label>
+	{:else if scaffold.type === 'security_exception'}
+		<label class="flex flex-col gap-1 text-sm">
+			<span class="text-xs text-surface-600-400">Severity</span>
+			<select
+				class="text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+				value={scaffold.severity === undefined ? '' : String(scaffold.severity)}
+				onchange={(e) => {
+					const v = (e.target as HTMLSelectElement).value;
+					updateScaffoldByIndex(idx, { severity: v === '' ? undefined : Number(v) });
+				}}
+			>
+				<option value="">Undefined</option>
+				{#each SECURITY_EXCEPTION_SEVERITIES as s (s.value)}
+					<option value={String(s.value)}>{safeTranslate(s.labelKey)}</option>
+				{/each}
+			</select>
+		</label>
 	{/if}
 {/snippet}
 
@@ -642,6 +731,20 @@
 {:else if !draft}
 	<div class="p-6 text-red-700">Failed to load draft.</div>
 {:else}
+	{#if needsProjectManagement}
+		<div
+			class="mb-3 flex items-start gap-2.5 rounded-lg border border-amber-300 bg-amber-50 px-3.5 py-2.5 text-sm text-amber-800"
+		>
+			<i class="fa-solid fa-triangle-exclamation mt-0.5 text-amber-500"></i>
+			<span>
+				This preset scaffolds projects or responsibility matrices, which require the
+				<span class="font-medium">project management</span> feature. Make sure the preset's
+				<span class="font-mono text-xs">feature_flags</span> enable
+				<span class="font-mono text-xs">project_management</span>, otherwise the created objects
+				won't be visible.
+			</span>
+		</div>
+	{/if}
 	<div class="bg-surface-50-950 rounded-lg shadow-sm border border-surface-200-800 overflow-hidden">
 		<!-- Sticky toolbar -->
 		<div class="sticky top-0 z-40 bg-surface-50-950 border-b border-surface-200-800 px-4 py-2.5">

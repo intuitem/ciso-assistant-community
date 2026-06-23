@@ -117,6 +117,7 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from iam.models import Folder, RoleAssignment, User, UserGroup
 from rest_framework import filters, generics, permissions, status, viewsets
+from custom_fields.filters import CustomFieldFilterBackend, CustomFieldSearchFilter
 from django.utils.translation import gettext_lazy as _, get_language
 from rest_framework.decorators import (
     action,
@@ -355,17 +356,6 @@ class NullableChoiceFilter(df.MultipleChoiceFilter):
             return qs.none()
 
 
-def add_unset_option(choices):
-    """Add '--' (unset) option to choices dictionary or list"""
-    # Handle both dict and list of tuples format
-    if isinstance(choices, dict):
-        # For dict format {value: label}, prepend with "--": "--"
-        return {"--": "--", **choices}
-    else:
-        # For list of tuples like [(value, label), ...]
-        return [("--", "--")] + list(choices)
-
-
 def get_mapping_max_depth():
     """Get mapping max depth from general settings at runtime; safe during migrations."""
     try:
@@ -394,7 +384,7 @@ def escape_excel_formula(value):
     s = str(value)
     if not s:
         return ""
-    stripped = s.lstrip(" \t\r\n")
+    stripped = s.lstrip()
     if stripped and stripped[0] in ("=", "+", "-", "@"):
         return "'" + s
     return s
@@ -1933,6 +1923,10 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
 
     model = Asset
     filterset_class = AssetFilter
+    filter_backends = [
+        CustomFieldSearchFilter if b is filters.SearchFilter else b
+        for b in BaseModelViewSet.filter_backends
+    ] + [CustomFieldFilterBackend]
     search_fields = ["name", "description", "ref_id", "folder__name"]
     ordering = ["folder__name", "name"]
 
@@ -1943,7 +1937,12 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
         # The list view only renders objectives + a handful of lightweight M2Ms,
         # so skip the heavier prefetches used by the detail serializer.
         if self.action == "list":
-            return qs.prefetch_related("owner", "filtering_labels", "parent_assets")
+            return qs.prefetch_related(
+                "owner",
+                "filtering_labels",
+                "parent_assets",
+                "custom_field_values__definition",
+            )
         return qs.prefetch_related(
             "parent_assets",
             "child_assets",
@@ -5108,6 +5107,10 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
     model = AppliedControl
     filterset_class = AppliedControlFilterSet
+    filter_backends = [
+        CustomFieldSearchFilter if b is filters.SearchFilter else b
+        for b in BaseModelViewSet.filter_backends
+    ] + [CustomFieldFilterBackend]
     search_fields = ["name", "description", "ref_id"]
 
     @staticmethod
@@ -5208,10 +5211,22 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
                 "label": "labels",
                 "format": lambda qs: ",".join(lbl.label for lbl in qs.all()),
             },
+            "evidences": {
+                "source": "evidences",
+                "label": "evidences",
+                "format": lambda qs: "\n".join(str(e) for e in qs.all()),
+            },
+            "evidence_attachments": {
+                "source": "evidences",
+                "label": "evidence_attachments",
+                "format": lambda qs: "\n".join(
+                    e.filename() for e in qs.all() if e.filename()
+                ),
+            },
         },
         "filename": "audit_export",
         "select_related": ["reference_control", "folder"],
-        "prefetch_related": ["owner", "filtering_labels"],
+        "prefetch_related": ["owner", "filtering_labels", "evidences__revisions"],
     }
 
     def get_queryset(self):
@@ -5264,6 +5279,7 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
                 "owner",
                 "filtering_labels__folder",
                 "assets",
+                "custom_field_values__definition",
             )
 
         return qs.prefetch_related(
@@ -5450,27 +5466,27 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get category choices")
     def category(self, request):
-        return Response(add_unset_option(dict(AppliedControl.CATEGORY)))
+        return Response(dict(AppliedControl.CATEGORY))
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get csf_function choices")
     def csf_function(self, request):
-        return Response(add_unset_option(dict(AppliedControl.CSF_FUNCTION)))
+        return Response(dict(AppliedControl.CSF_FUNCTION))
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get priority choices")
     def priority(self, request):
-        return Response(add_unset_option(dict(AppliedControl.PRIORITY)))
+        return Response(dict(AppliedControl.PRIORITY))
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get effort choices")
     def effort(self, request):
-        return Response(add_unset_option(dict(AppliedControl.EFFORT)))
+        return Response(dict(AppliedControl.EFFORT))
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get impact choices")
     def control_impact(self, request):
-        return Response(add_unset_option(dict(AppliedControl.IMPACT)))
+        return Response(dict(AppliedControl.IMPACT))
 
     @action(detail=False, name="Get all applied controls owners")
     def owner(self, request):
@@ -8945,7 +8961,7 @@ class FrameworkViewSet(BaseModelViewSet):
                     "min_score": framework.min_score,
                     "max_score": framework.max_score,
                     "scores_definition": framework.scores_definition,
-                    "implementation_groups_definition": framework.implementation_groups_definition,
+                    "implementation_groups_definition": framework.get_implementation_groups_definition_translated(),
                     "sections": sections,
                 },
                 "rows": rows,
@@ -12931,7 +12947,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 ),
                 Prefetch(
                     "validationflow_set",
-                    queryset=ValidationFlow.objects.select_related("approver"),
+                    queryset=ValidationFlow.objects.select_related(
+                        "approver"
+                    ).prefetch_related("events"),
                 ),
             )
         # Custom detail actions (tree, global_score, donut_data, etc.)
@@ -13410,9 +13428,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         requirement_assessments = compliance_assessment.get_requirement_assessments(
             include_non_assessable=False
         )
-        queryset = AppliedControl.objects.filter(
-            requirement_assessments__in=requirement_assessments
-        ).distinct()
+        queryset = (
+            AppliedControl.objects.filter(
+                requirement_assessments__in=requirement_assessments
+            )
+            .prefetch_related("evidences__revisions")
+            .distinct()
+        )
 
         # Use the same serializer to maintain consistency - to review
         serializer = ComplianceAssessmentActionPlanSerializer(
@@ -13438,6 +13460,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "Impact",
                 "Cost",
                 "Covered requirements",
+                "Associated evidences",
+                "Evidence attachments",
             ]
         )
 
@@ -13456,7 +13480,18 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     item.get("control_impact"),
                     item.get("annual_cost"),
                     "\n".join(
-                        [ra.get("str") for ra in item.get("requirement_assessments")]
+                        escape_excel_formula(ra.get("str"))
+                        for ra in (item.get("requirement_assessments") or [])
+                    ),
+                    "\n".join(
+                        escape_excel_formula(evidence.get("str"))
+                        for evidence in (item.get("evidences") or [])
+                        if evidence.get("str")
+                    ),
+                    "\n".join(
+                        escape_excel_formula(evidence.get("filename"))
+                        for evidence in (item.get("evidence_attachments") or [])
+                        if evidence.get("filename")
                     ),
                 ]
             )
@@ -13476,9 +13511,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         requirement_assessments = compliance_assessment.get_requirement_assessments(
             include_non_assessable=False
         )
-        queryset = AppliedControl.objects.filter(
-            requirement_assessments__in=requirement_assessments
-        ).distinct()
+        queryset = (
+            AppliedControl.objects.filter(
+                requirement_assessments__in=requirement_assessments
+            )
+            .prefetch_related("evidences__revisions")
+            .distinct()
+        )
 
         serializer = ComplianceAssessmentActionPlanSerializer(
             queryset, many=True, context={"pk": pk}
@@ -13499,7 +13538,18 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "impact": item.get("control_impact"),
                 "cost": item.get("annual_cost"),
                 "covered_requirements": "\n".join(
-                    [ra.get("str") for ra in item.get("requirement_assessments")]
+                    escape_excel_formula(ra.get("str"))
+                    for ra in (item.get("requirement_assessments") or [])
+                ),
+                "associated_evidences": "\n".join(
+                    escape_excel_formula(evidence.get("str"))
+                    for evidence in (item.get("evidences") or [])
+                    if evidence.get("str")
+                ),
+                "evidence_attachments": "\n".join(
+                    escape_excel_formula(evidence.get("filename"))
+                    for evidence in (item.get("evidence_attachments") or [])
+                    if evidence.get("filename")
                 ),
             }
             entries.append(entry)
@@ -13511,7 +13561,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             df.to_excel(writer, index=False)
             worksheet = writer.sheets["Sheet1"]
 
-            wrap_columns = ["name", "description", "covered_requirements"]
+            wrap_columns = [
+                "name",
+                "description",
+                "covered_requirements",
+                "associated_evidences",
+                "evidence_attachments",
+            ]
             wrap_indices = [
                 df.columns.get_loc(col) + 1 for col in wrap_columns if col in df.columns
             ]
@@ -14407,7 +14463,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         "id": str(_framework.id),
                         "name": _framework.name,
                         "ref_id": _framework.ref_id or "",
-                        "implementation_groups_definition": _framework.implementation_groups_definition,
+                        "implementation_groups_definition": _framework.get_implementation_groups_definition_translated(),
                     },
                     "risk_assessments": risk_assessment_names,
                     "selected_implementation_groups": list(effective_groups)
@@ -15943,7 +15999,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         compliance_assessment = self.get_object()
         framework = compliance_assessment.framework
 
-        ig_definition = framework.implementation_groups_definition
+        ig_definition = framework.get_implementation_groups_definition_translated()
         if not ig_definition:
             return Response({"groups": []})
 
@@ -16963,6 +17019,12 @@ class SecurityExceptionViewSet(ExportMixin, BaseModelViewSet):
                 "risk_scenarios",
                 "requirement_assessments",
                 "owners",
+                Prefetch(
+                    "validationflow_set",
+                    queryset=ValidationFlow.objects.select_related(
+                        "approver"
+                    ).prefetch_related("events"),
+                ),
             )
         )
 
@@ -19304,10 +19366,13 @@ class TaskNodeViewSet(BaseModelViewSet):
         detail=True, name="Remove/Move evidence to expected evidence", methods=["post"]
     )
     def remove_evidence(self, request, pk):
-        task_node = TaskNode.objects.get(id=pk)
+        task_node = self.get_object()
         evidence_id = request.data.get("evidence_id")
         to_move = request.data.get("move", False)
-        evidence = Evidence.objects.get(id=evidence_id)
+        accessible_evidence_ids = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Evidence
+        )[0]
+        evidence = Evidence.objects.get(id=evidence_id, id__in=accessible_evidence_ids)
         task_node.evidences.remove(evidence)
         if to_move:
             task_node.task_template.evidences.add(evidence)
