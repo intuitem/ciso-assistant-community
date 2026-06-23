@@ -3,7 +3,6 @@
 	import Select from '../Select.svelte';
 	import TextField from '../TextField.svelte';
 	import NumberField from '../NumberField.svelte';
-	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import NestedTranslationField from '../NestedTranslationField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import { formFieldProxy } from 'sveltekit-superforms';
@@ -96,15 +95,6 @@
 	disabled={isEdit}
 	cacheLock={cacheLocks['model']}
 	bind:cachedValue={formDataCache['model']}
-/>
-
-<FolderTreeSelect
-	{form}
-	field="folder"
-	label={m.domain()}
-	helpText={m.customFieldFolderHelpText()}
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
 />
 
 <TextField

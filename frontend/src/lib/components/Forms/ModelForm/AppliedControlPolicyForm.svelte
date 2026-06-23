@@ -1,6 +1,5 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import CustomFieldsSection from '../CustomFieldsSection.svelte';
 	import Select from '../Select.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
@@ -443,14 +442,6 @@
 		helpText={m.bringTheEvidencesHelpText()}
 	/>
 {/if}
-
-<FolderTreeSelect
-	{form}
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-/>
 
 {#if model?.name === 'appliedcontrol'}
 	<CustomFieldsSection {form} model="core.appliedcontrol" folderId={$formStore.folder} />
