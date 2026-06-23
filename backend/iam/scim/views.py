@@ -400,6 +400,12 @@ class SCIMUserViewSet(ViewSet):
         user = _get_scim_user_by_pk(pk)
         if user is None:
             return _scim_error_response(f"User {pk} not found", 404)
+        if _would_orphan_admins(user):
+            return _scim_error_response(
+                "Refusing to deactivate the last active administrator",
+                409,
+                "mutability",
+            )
         user.is_active = False
         user.save(update_fields=["is_active"])
         logger.info("SCIM: user deactivated", user_id=pk)
@@ -636,6 +642,17 @@ def _is_protected_account(user) -> bool:
     return user.is_admin() or user.keep_local_login
 
 
+def _would_orphan_admins(user) -> bool:
+    """True if deactivating ``user`` would leave the instance with no other
+    active administrator. Mirrors the superuser deactivation guard in
+    ``User.save`` for the BI-UG-ADM admin population."""
+    if not user.is_admin():
+        return False
+    return (
+        not User.get_admin_users().filter(is_active=True).exclude(pk=user.pk).exists()
+    )
+
+
 def _get_user_by_pk(pk):
     if _valid_uuid(pk) is None:
         return None
@@ -661,7 +678,11 @@ def _get_idp_group_by_pk(pk):
 def _save_user_or_scim_error(user):
     """Persist a SCIM-mutated user, normalizing the email and translating
     storage failures into SCIM responses. Returns None on success, or a SCIM
-    error response (400 invalidValue / 409 uniqueness)."""
+    error response (400 invalidValue / 409 uniqueness / 409 mutability)."""
+    if not user.is_active and _would_orphan_admins(user):
+        return _scim_error_response(
+            "Refusing to deactivate the last active administrator", 409, "mutability"
+        )
     if user.email:
         user.email = user.email.lower()
         try:
