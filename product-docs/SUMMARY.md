@@ -143,6 +143,7 @@
   * [Managing a responsibility matrix](guides/responsibility-matrix.md)
 * Third-party
   * [Third-Party Risk Management](guides/tprm.md)
+  * [Common TPRM pitfalls](guides/tprm-challenges.md)
 
 ## Features
 
