@@ -212,7 +212,11 @@ class SCIMUserViewSet(ViewSet):
         except TypeError, ValueError:
             start_index, count = 1, 100
 
-        qs = User.objects.all().order_by("date_joined", "id")
+        # Only expose users SCIM provisioned/owns; locally-managed accounts are
+        # not part of the SCIM directory.
+        qs = User.objects.filter(scim_external_id__isnull=False).order_by(
+            "date_joined", "id"
+        )
         if filter_str:
             attr, value = parse_filter(filter_str)
             if attr == "username":
@@ -244,11 +248,26 @@ class SCIMUserViewSet(ViewSet):
 
         # Idempotency: externalId first, then email
         user = None
+        matched_by_external_id = False
         if external_id:
             user = User.objects.filter(scim_external_id=external_id).first()
+            matched_by_external_id = user is not None
         if user is None:
             user = User.objects.filter(email__iexact=user_name).first()
         if user is not None:
+            # Adopt-but-protect: SCIM may link a pre-existing non-privileged
+            # account by email, but must never silently adopt or rewrite an
+            # administrator or a local-login account it does not already own.
+            if (
+                not matched_by_external_id
+                and not _is_scim_managed(user)
+                and _is_protected_account(user)
+            ):
+                return _scim_error_response(
+                    "A user with this email already exists and cannot be managed by SCIM",
+                    409,
+                    "uniqueness",
+                )
             _update_user_from_scim_data(user, data)
             err = _save_user_or_scim_error(user)
             if err:
@@ -312,13 +331,13 @@ class SCIMUserViewSet(ViewSet):
         return _scim_response(scim_user_to_dict(user, request), 201)
 
     def retrieve(self, request, pk=None):
-        user = _get_user_by_pk(pk)
+        user = _get_scim_user_by_pk(pk)
         if user is None:
             return _scim_error_response(f"User {pk} not found", 404)
         return _scim_response(scim_user_to_dict(user, request))
 
     def update(self, request, pk=None):
-        user = _get_user_by_pk(pk)
+        user = _get_scim_user_by_pk(pk)
         if user is None:
             return _scim_error_response(f"User {pk} not found", 404)
         try:
@@ -332,7 +351,7 @@ class SCIMUserViewSet(ViewSet):
         return _scim_response(scim_user_to_dict(user, request))
 
     def partial_update(self, request, pk=None):
-        user = _get_user_by_pk(pk)
+        user = _get_scim_user_by_pk(pk)
         if user is None:
             return _scim_error_response(f"User {pk} not found", 404)
         try:
@@ -378,7 +397,7 @@ class SCIMUserViewSet(ViewSet):
         return _scim_response(scim_user_to_dict(user, request))
 
     def destroy(self, request, pk=None):
-        user = _get_user_by_pk(pk)
+        user = _get_scim_user_by_pk(pk)
         if user is None:
             return _scim_error_response(f"User {pk} not found", 404)
         user.is_active = False
@@ -604,10 +623,32 @@ def _valid_uuid(value):
         return None
 
 
+def _is_scim_managed(user) -> bool:
+    """True if SCIM provisioned/owns this user (it has an external id). SCIM may
+    only read and mutate the accounts it owns; locally-managed accounts are not
+    part of the SCIM directory."""
+    return bool(user.scim_external_id)
+
+
+def _is_protected_account(user) -> bool:
+    """Accounts SCIM must never silently adopt or take over by email collision:
+    administrators and local-login accounts."""
+    return user.is_admin() or user.keep_local_login
+
+
 def _get_user_by_pk(pk):
     if _valid_uuid(pk) is None:
         return None
     return User.objects.filter(id=pk).first()
+
+
+def _get_scim_user_by_pk(pk):
+    """Resolve a user for SCIM read/modify, restricted to SCIM-managed accounts
+    so SCIM can never reach into a locally-managed account it does not own."""
+    user = _get_user_by_pk(pk)
+    if user is None or not _is_scim_managed(user):
+        return None
+    return user
 
 
 def _get_idp_group_by_pk(pk):
@@ -681,15 +722,21 @@ def _member_ids(members):
 
 
 def _resolve_user_ids(ids):
-    """Filter SCIM member ids down to existing User PKs.
+    """Filter SCIM member ids down to existing, SCIM-managed User PKs.
 
     Non-UUID member values (e.g. an external IdP id) are dropped rather than
-    passed into the ORM, which would raise on an invalid UUID.
+    passed into the ORM, which would raise on an invalid UUID. Only SCIM-managed
+    users may be members of an IdP group, so a locally-managed account (e.g. a
+    hand-created admin) can never be pulled into a role-bearing group via SCIM.
     """
     valid = [v for v in (_valid_uuid(i) for i in ids) if v is not None]
     if not valid:
         return []
-    return list(User.objects.filter(id__in=valid).values_list("id", flat=True))
+    return list(
+        User.objects.filter(id__in=valid, scim_external_id__isnull=False).values_list(
+            "id", flat=True
+        )
+    )
 
 
 def _add_members(idp_group, ids):
