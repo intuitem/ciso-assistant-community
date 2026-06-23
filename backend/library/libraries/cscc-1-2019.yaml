@@ -13,7 +13,7 @@ description: 'NCA Critical Systems Cybersecurity Controls (CSCC-1:2019), the Nat
   control. Source: https://cdn.nca.gov.sa/api/public/cms/files/f15af01c-dc59-4281-95e2-03a770655937_Critical-Systems-Cybersecurity-Controls.pdf'
 copyright: "\xA9 NCA"
 version: 1
-publication_date: 2026-06-23
+publication_date: 2026-06-24
 provider: NCA
 packager: community
 objects:
@@ -356,7 +356,7 @@ objects:
       description: "Applying security patches and updates at least once every month\
         \ for external and internet-connected critical systems and at least once every\
         \ three months for internal critical systems, in line with the organization\u2019\
-        s approved change managmenet mechanisms."
+        s approved change management mechanisms."
     - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-3-1-4
       assessable: true
       depth: 4
@@ -497,7 +497,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-5-1
       ref_id: 2-5-1-1
-      description: Prohibting access to critical systems from mobile devices except
+      description: Prohibiting access to critical systems from mobile devices except
         for a temporary period only, after assessing the risks and obtaining the necessary
         approvals from the cybersecurity function in the organization.
     - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-5-1-2
@@ -529,7 +529,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-6-1
       ref_id: 2-6-1-1
-      description: "Prohibting the use of critical systems\u2019 data in any environment\
+      description: "Prohibiting the use of critical systems\u2019 data in any environment\
         \ other than production environment, except after applying strict controls\
         \ for protecting that data, such as: data masking or data scrambling techniques."
     - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-6-1-2
@@ -558,7 +558,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cscc-1-2019:2-6-1
       ref_id: 2-6-1-5
-      description: "Prohibting the transfer of any critical systems\u2019 data from\
+      description: "Prohibiting the transfer of any critical systems\u2019 data from\
         \ production environment to any other environment."
     - urn: urn:intuitem:risk:req_node:cscc-1-2019:2-7
       assessable: false
