@@ -136,7 +136,7 @@
 		mount={async (e) => handleFrameworkChange(e)}
 	/>
 {/if}
-{#if implementationGroupsChoices.length > 0 && !is_dynamic}
+{#if implementationGroupsChoices.length > 0}
 	<AutocompleteSelect
 		multiple
 		translateOptions={false}
@@ -146,6 +146,7 @@
 		cacheLock={cacheLocks['selected_implementation_groups']}
 		bind:cachedValue={formDataCache['selected_implementation_groups']}
 		label={m.selectedImplementationGroups()}
+		helpText={is_dynamic ? m.selectedImplementationGroupsDynamicHelpText() : undefined}
 	/>
 {/if}
 <TextField

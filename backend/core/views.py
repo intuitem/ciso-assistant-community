@@ -13987,6 +13987,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 for requirement_assessment in assessments:
                     requirement_assessment.create_applied_controls_from_suggestions()
 
+            # For dynamic frameworks, reconcile manual IGs with the answer-driven
+            # calc once RAs (and any baseline-copied answers) exist. Baseline copy
+            # uses bulk_create which bypasses Answer.save(), so the deferred IG
+            # hook never fires — run it explicitly here.
+            if instance.framework and instance.framework.is_dynamic():
+                from core.utils import update_selected_implementation_groups
+
+                update_selected_implementation_groups(instance)
+
     def perform_update(self, serializer):
         compliance_assessment = serializer.save()
         if compliance_assessment.show_documentation_score:

@@ -899,6 +899,7 @@
 	"userWillBeDisconnected": "L'utilisateur sera déconnecté et devra se reconnecter",
 	"scoresDefinition": "Définition des scores",
 	"selectedImplementationGroups": "Groupes d'implémentation sélectionnés",
+	"selectedImplementationGroupsDynamicHelpText": "Les groupes pilotés par les réponses sont recalculés à la sauvegarde. Les groupes manuels sont conservés.",
 	"implementationGroups": "Groupes d'implémentation",
 	"implementationGroupsDefinition": "Définition des groupes d'implémentation",
 	"threatRadarChart": "Radar des menaces",

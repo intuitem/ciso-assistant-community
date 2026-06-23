@@ -2885,6 +2885,14 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
             # Perform the main update (fields + M2M)
             updated_instance = super().update(instance, validated_data)
 
+            # For dynamic frameworks, recompute IGs from current answers so the
+            # answer-driven calc always wins over any manual override submitted
+            # here. Manual (non-dynamic) IGs are preserved inside the helper.
+            if updated_instance.framework and updated_instance.framework.is_dynamic():
+                from core.utils import update_selected_implementation_groups
+
+                update_selected_implementation_groups(updated_instance)
+
             # Cascade folder change to requirement assessments
             if old_folder_id != updated_instance.folder_id:
                 RequirementAssessment.objects.filter(
