@@ -35,7 +35,8 @@
 		.then((r) => r.json())
 		.then((data) => {
 			hasEntities = (data.count ?? 0) > 0;
-		});
+		})
+		.catch(() => {});
 
 	page.url.searchParams.forEach((value, key) => {
 		if (key === 'activity' && value === 'one') {
