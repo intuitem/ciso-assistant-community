@@ -4,11 +4,20 @@
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import IconPicker from '$lib/components/IconPicker/IconPicker.svelte';
 	import PortalGrid from '$lib/components/PortalGrid/PortalGrid.svelte';
+	import { SCAFFOLDABLE_MODELS } from '$lib/utils/modelTargets';
+	import { urlParamModelVerboseName } from '$lib/utils/crud';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import type { PageData } from './$types';
+
+	const modelOptions = SCAFFOLDABLE_MODELS.map((model) => ({
+		value: model,
+		label: safeTranslate(urlParamModelVerboseName(model))
+	})).sort((a, b) => a.label.localeCompare(b.label));
 
 	let { data }: { data: PageData } = $props();
 	const toast = getToastStore();
-	let preview = $state(false);
+	let view = $state<'edit' | 'preview' | 'settings'>('edit');
+	const audienceIds = new Set((data.portal.audience_groups ?? []).map((g: any) => g.id));
 
 	type Item = {
 		icon: string;
@@ -100,8 +109,17 @@
 				? 'bg-success-500/15 text-success-700'
 				: 'bg-surface-200-800 text-surface-500'}">{data.portal.status}</span
 		>
-		<button class="btn btn-sm preset-tonal" onclick={() => (preview = !preview)}>
-			<i class="fa-solid {preview ? 'fa-pen' : 'fa-eye'} mr-1"></i>{preview
+		<button
+			class="btn btn-sm {view === 'settings' ? 'preset-filled-primary-500' : 'preset-tonal'}"
+			onclick={() => (view = view === 'settings' ? 'edit' : 'settings')}
+		>
+			<i class="fa-solid fa-sliders mr-1"></i>{m.settings()}
+		</button>
+		<button
+			class="btn btn-sm preset-tonal"
+			onclick={() => (view = view === 'preview' ? 'edit' : 'preview')}
+		>
+			<i class="fa-solid {view === 'preview' ? 'fa-pen' : 'fa-eye'} mr-1"></i>{view === 'preview'
 				? m.edit()
 				: m.preview()}
 		</button>
@@ -112,7 +130,7 @@
 		</form>
 	</div>
 
-	{#if !preview}
+	{#if view === 'edit'}
 		{#each sections as section, si}
 			<section class="card bg-surface-50-950 p-5 space-y-4">
 				<div class="flex items-center gap-2">
@@ -162,11 +180,23 @@
 							</label>
 							<label class="text-[10px] text-surface-500 grow">
 								<span class="block">{tf.label}</span>
-								<input
-									bind:value={item.target[tf.key]}
-									placeholder={tf.ph}
-									class="input rounded-md text-sm"
-								/>
+								{#if item.kind === 'create'}
+									<select bind:value={item.target.model} class="select rounded-md text-sm">
+										<option value="">—</option>
+										{#each modelOptions as o}<option value={o.value}>{o.label}</option>{/each}
+									</select>
+								{:else if item.kind === 'navigate'}
+									<select bind:value={item.target.url} class="select rounded-md text-sm">
+										<option value="">—</option>
+										{#each modelOptions as o}<option value="/{o.value}">{o.label}</option>{/each}
+									</select>
+								{:else}
+									<input
+										bind:value={item.target[tf.key]}
+										placeholder={tf.ph}
+										class="input rounded-md text-sm"
+									/>
+								{/if}
 							</label>
 							<label class="text-[10px] text-surface-500">
 								<span class="block">Group</span>
@@ -216,48 +246,104 @@
 		<button onclick={addSection} class="btn preset-tonal">
 			<i class="fa-solid fa-plus mr-1"></i>{m.addGroup()}
 		</button>
-	{:else}
+	{:else if view === 'preview'}
 		<div class="rounded-2xl bg-linear-to-br from-surface-100-900 to-surface-200-800 p-8">
 			<PortalGrid {sections} />
 		</div>
+	{:else}
+		<form
+			method="POST"
+			action="?/updateSettings"
+			use:enhance={() =>
+				async ({ result, update }) => {
+					await update();
+					if (result.type === 'success')
+						toast.trigger({ message: m.saved(), background: 'preset-filled-success-500' });
+				}}
+			class="card bg-surface-50-950 p-6 space-y-5 max-w-xl"
+		>
+			<label class="flex items-center gap-2 text-sm">
+				<input type="checkbox" name="enabled" checked={data.portal.enabled} class="checkbox" />
+				{m.enabled()}
+			</label>
+			<label class="flex items-center gap-2 text-sm">
+				<input
+					type="checkbox"
+					name="is_default"
+					checked={data.portal.is_default}
+					class="checkbox"
+				/>
+				{m.defaultPortal()}
+			</label>
+			<label class="block text-sm">
+				<span class="block text-surface-600-400">{m.priority()}</span>
+				<input
+					type="number"
+					name="priority"
+					value={data.portal.priority}
+					class="input rounded-md w-24"
+				/>
+			</label>
+			<fieldset class="text-sm">
+				<legend class="text-surface-600-400">{m.audience()}</legend>
+				<p class="text-xs text-surface-500">{m.audienceHelp()}</p>
+				<div class="mt-2 max-h-64 space-y-1 overflow-auto">
+					{#each data.userGroups as g}
+						<label class="flex items-center gap-2">
+							<input
+								type="checkbox"
+								name="audience_groups"
+								value={g.id}
+								checked={audienceIds.has(g.id)}
+								class="checkbox"
+							/>
+							{g.name}
+						</label>
+					{/each}
+				</div>
+			</fieldset>
+			<button class="btn preset-filled-primary-500">{m.save()}</button>
+		</form>
 	{/if}
 </div>
 
-<div
-	class="fixed bottom-0 right-0 left-64 flex items-center justify-end gap-3 border-t border-surface-200-800 bg-surface-50-950/90 px-8 py-3 backdrop-blur"
->
-	<form
-		method="POST"
-		action="?/setStatus"
-		use:enhance={() =>
-			async ({ result, update }) => {
-				await update();
-				if (result.type === 'success')
-					toast.trigger({ message: m.saved(), background: 'preset-filled-success-500' });
-			}}
+{#if view !== 'settings'}
+	<div
+		class="fixed bottom-0 right-0 left-64 flex items-center justify-end gap-3 border-t border-surface-200-800 bg-surface-50-950/90 px-8 py-3 backdrop-blur"
 	>
-		<input
-			type="hidden"
-			name="status"
-			value={data.portal.status === 'published' ? 'draft' : 'published'}
-		/>
-		<button class="btn preset-tonal">
-			{data.portal.status === 'published' ? m.unpublish() : m.publish()}
-		</button>
-	</form>
-	<form
-		method="POST"
-		action="?/saveContent"
-		use:enhance={() =>
-			async ({ result, update }) => {
-				await update({ reset: false });
-				if (result.type === 'success')
-					toast.trigger({ message: m.saved(), background: 'preset-filled-success-500' });
-			}}
-	>
-		<input type="hidden" name="payload" value={payload} />
-		<button class="btn preset-filled-primary-500">
-			<i class="fa-solid fa-floppy-disk mr-1"></i>{m.save()}
-		</button>
-	</form>
-</div>
+		<form
+			method="POST"
+			action="?/setStatus"
+			use:enhance={() =>
+				async ({ result, update }) => {
+					await update();
+					if (result.type === 'success')
+						toast.trigger({ message: m.saved(), background: 'preset-filled-success-500' });
+				}}
+		>
+			<input
+				type="hidden"
+				name="status"
+				value={data.portal.status === 'published' ? 'draft' : 'published'}
+			/>
+			<button class="btn preset-tonal">
+				{data.portal.status === 'published' ? m.unpublish() : m.publish()}
+			</button>
+		</form>
+		<form
+			method="POST"
+			action="?/saveContent"
+			use:enhance={() =>
+				async ({ result, update }) => {
+					await update({ reset: false });
+					if (result.type === 'success')
+						toast.trigger({ message: m.saved(), background: 'preset-filled-success-500' });
+				}}
+		>
+			<input type="hidden" name="payload" value={payload} />
+			<button class="btn preset-filled-primary-500">
+				<i class="fa-solid fa-floppy-disk mr-1"></i>{m.save()}
+			</button>
+		</form>
+	</div>
+{/if}

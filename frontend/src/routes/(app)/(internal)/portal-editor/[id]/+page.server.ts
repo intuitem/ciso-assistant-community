@@ -4,9 +4,13 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 	if (!locals.featureflags?.custom_portals) redirect(302, '/');
-	const res = await fetch(`${BASE_API_URL}/portals/${params.id}/`);
-	if (!res.ok) error(res.status === 404 ? 404 : 500, 'Portal not found');
-	return { portal: await res.json() };
+	const [pRes, gRes] = await Promise.all([
+		fetch(`${BASE_API_URL}/portals/${params.id}/`),
+		fetch(`${BASE_API_URL}/user-groups/`)
+	]);
+	if (!pRes.ok) error(pRes.status === 404 ? 404 : 500, 'Portal not found');
+	const userGroups = gRes.ok ? ((await gRes.json()).results ?? []) : [];
+	return { portal: await pRes.json(), userGroups };
 };
 
 async function patch(fetch: typeof globalThis.fetch, id: string, body: unknown) {
@@ -41,6 +45,17 @@ export const actions: Actions = {
 	setStatus: async ({ params, request, fetch }) => {
 		const status = (await request.formData()).get('status');
 		const res = await patch(fetch, params.id!, { status });
+		if (!res.ok) return fail(res.status, { error: await res.text() });
+		return { success: true };
+	},
+	updateSettings: async ({ params, request, fetch }) => {
+		const data = await request.formData();
+		const res = await patch(fetch, params.id!, {
+			enabled: data.get('enabled') === 'on',
+			is_default: data.get('is_default') === 'on',
+			priority: parseInt(data.get('priority') as string) || 0,
+			audience_groups: data.getAll('audience_groups')
+		});
 		if (!res.ok) return fail(res.status, { error: await res.text() });
 		return { success: true };
 	},
