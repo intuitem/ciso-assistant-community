@@ -134,6 +134,27 @@
 	// Clamp to supported CSS range (chip-max-1 through chip-max-5 in app.css)
 	const maxVisibleChips = Math.max(1, Math.min(5, _maxVisibleChips));
 
+	// Stable id so the visible <label> can associate with the inner search input.
+	const inputId = `form-input-${field.replaceAll('_', '-')}`;
+
+	// svelte-multiselect's internal DOM is not fully accessible out of the box:
+	// the role="searchbox" wrapper is unnamed, and its chips <ul> holds the search
+	// <input> as a direct child (violating "list must only contain <li>"). Patch
+	// both via the bound outer element since the library exposes no props for them.
+	let outerDiv: HTMLElement | null = $state(null);
+	$effect(() => {
+		if (!outerDiv) return;
+		const a11yName = label ?? placeholder ?? field.replaceAll('_', ' ');
+		if (!outerDiv.getAttribute('aria-label')) outerDiv.setAttribute('aria-label', a11yName);
+		outerDiv.querySelector('ul.selected')?.setAttribute('role', 'group');
+		// No visible <label> to associate with (e.g. table column filters) — name the input directly.
+		if (label === undefined) {
+			outerDiv
+				.querySelector('ul.selected input:not([aria-hidden])')
+				?.setAttribute('aria-label', a11yName);
+		}
+	});
+
 	if (translateOptions) {
 		options = options.map((option) => {
 			const fromLabel = safeTranslate(option.label);
@@ -639,11 +660,11 @@
 <div class={baseClass} hidden={hidden || undefined}>
 	{#if label !== undefined}
 		{#if $constraints?.required || mandatory}
-			<label class="text-sm font-semibold" for={field}
+			<label class="text-sm font-semibold" for={inputId}
 				>{label} <span class="text-red-500">*</span></label
 			>
 		{:else}
-			<label class="text-sm font-semibold" for={field}>{label}</label>
+			<label class="text-sm font-semibold" for={inputId}>{label}</label>
 		{/if}
 	{/if}
 	{#if $errors && $errors._errors}
@@ -674,6 +695,8 @@
 		<MultiSelect
 			bind:selected
 			bind:open={multiSelectOpen}
+			bind:outerDiv
+			id={inputId}
 			options={new Proxy(
 				effectiveLazy && selected.length > 0 && !lazyHasSearched
 					? [...options, { label: m.typeToSearch(), value: LAZY_HINT_VALUE, disabled: true }]

@@ -72,11 +72,13 @@
 <div>
 	{#if label !== undefined}
 		{#if $constraints?.required}
-			<label class="text-sm font-semibold" for={field}
+			<label class="text-sm font-semibold" for="form-input-{field.replaceAll('_', '-')}"
 				>{label} <span class="text-red-500">*</span></label
 			>
 		{:else}
-			<label class="text-sm font-semibold" for={field}>{label}</label>
+			<label class="text-sm font-semibold" for="form-input-{field.replaceAll('_', '-')}"
+				>{label}</label
+			>
 		{/if}
 	{/if}
 	{#if $errors && $errors.length > 0}
@@ -90,6 +92,8 @@
 		<select
 			class="{'select ' + _class} {classesTextField($errors)}"
 			data-testid="form-input-{field.replaceAll('_', '-')}"
+			id="form-input-{field.replaceAll('_', '-')}"
+			aria-label={label}
 			name={field}
 			aria-invalid={$errors ? 'true' : undefined}
 			placeholder=""
