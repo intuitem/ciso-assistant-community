@@ -66,7 +66,10 @@
 		}
 		if (browser) {
 			const saved = sessionStorage.getItem(SETTINGS_TAB_STORAGE_KEY);
-			if (tabAvailable(saved)) return saved;
+			if (tabAvailable(saved)) {
+				const preload = PRELOAD_TABS[saved];
+				if (!preload || page.state?.[preload.stateKey]) return saved;
+			}
 		}
 		return 'general';
 	}
