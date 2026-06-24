@@ -1,9 +1,25 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { m } from '$paraglide/messages';
+	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
+	const modalStore = getModalStore();
+
+	function confirmDelete(e: MouseEvent, name: string) {
+		const form = (e.currentTarget as HTMLElement).closest('form') as HTMLFormElement;
+		const modal: ModalSettings = {
+			type: 'confirm',
+			title: m.delete(),
+			body: m.deleteModalMessage({ name }),
+			buttonTextConfirm: m.delete(),
+			response: (confirmed: boolean) => {
+				if (confirmed) form.requestSubmit();
+			}
+		};
+		modalStore.trigger(modal);
+	}
 </script>
 
 <div class="space-y-8">
@@ -39,7 +55,13 @@
 						<a href="/portal-editor/{p.id}" class="btn btn-sm preset-tonal">{m.edit()}</a>
 						<form method="POST" action="?/deletePortal" use:enhance>
 							<input type="hidden" name="id" value={p.id} />
-							<button class="btn btn-sm preset-tonal-error" title={m.delete()}>
+							<button
+								type="button"
+								onclick={(e) => confirmDelete(e, p.name)}
+								class="btn btn-sm preset-tonal-error"
+								aria-label={m.delete()}
+								title={m.delete()}
+							>
 								<i class="fa-solid fa-trash"></i>
 							</button>
 						</form>
