@@ -1441,6 +1441,7 @@ export const listViewFields = {
 		head: [
 			'ref_id',
 			'name',
+			'description',
 			'riskMatrix',
 			'status',
 			'riskScenarios',
@@ -1451,6 +1452,7 @@ export const listViewFields = {
 		body: [
 			'ref_id',
 			'str',
+			'description',
 			'risk_matrix',
 			'status',
 			'risk_scenarios_count',
@@ -2359,8 +2361,18 @@ export const listViewFields = {
 		}
 	},
 	'ebios-rm': {
-		head: ['name', 'description', 'domain', 'status', 'quotationMethod', 'createdAt', 'updatedAt'],
+		head: [
+			'refId',
+			'name',
+			'description',
+			'domain',
+			'status',
+			'quotationMethod',
+			'createdAt',
+			'updatedAt'
+		],
 		body: [
+			'ref_id',
 			'name',
 			'description',
 			'folder',
@@ -2722,8 +2734,8 @@ export const listViewFields = {
 		}
 	},
 	'quantitative-risk-studies': {
-		head: ['name', 'description', 'status', 'updatedAt', 'domain'],
-		body: ['name', 'description', 'status', 'updated_at', 'folder'],
+		head: ['refId', 'name', 'description', 'status', 'updatedAt', 'domain'],
+		body: ['ref_id', 'name', 'description', 'status', 'updated_at', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: RISK_ASSESSMENT_STATUS_FILTER
