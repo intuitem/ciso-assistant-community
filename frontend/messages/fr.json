@@ -2911,6 +2911,7 @@
 	"cal": "Calendrier",
 	"viewFolder": "Voir le domaine",
 	"selectAll": "Tout sélectionner",
+	"selectRow": "Sélectionner la ligne",
 	"deselectAll": "Tout désélectionner",
 	"batchCreate": "Création par lot",
 	"batchCreatePersonalData": "Création par lot de données personnelles",
