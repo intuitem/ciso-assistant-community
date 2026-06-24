@@ -164,6 +164,7 @@
 					<input
 						type="text"
 						class="input w-full border border-surface-300-700 rounded px-3 py-2 text-sm"
+						aria-label={m.search()}
 						placeholder={m.searchPlaceholder()}
 						bind:value={searchQuery}
 					/>
@@ -178,7 +179,7 @@
 										{translateOption(opt)}
 										<button
 											type="button"
-											class="hover:text-primary-600"
+											aria-label="{m.remove()} {translateOption(opt)}" class="hover:text-primary-600"
 											onclick={() => toggleValue(val)}
 										>
 											<i class="fa-solid fa-xmark text-xs"></i>

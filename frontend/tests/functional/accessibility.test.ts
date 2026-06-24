@@ -19,15 +19,56 @@ import { writePageReport, type PageReport, type Severity } from '../utils/a11y-r
 // WCAG 2.1 levels A + AA, which the automatable RGAA criteria map onto.
 const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 
+// Minimum supported viewport width (desktop-scoped). Reflow is checked here, not
+// at the WCAG 1.4.10 320px target — see the accessibility statement.
+const REFLOW_MIN_WIDTH = 1024;
+
+// Dark-theme variant (A11Y_THEME=dark): re-audit the same pages with the dark
+// theme forced, so theme-specific contrast issues are caught.
+const THEME: 'light' | 'dark' = process.env.A11Y_THEME === 'dark' ? 'dark' : 'light';
+const suffix = THEME === 'dark' ? '-dark' : '';
+
+// Apply the dark theme before navigation: the app keys off localStorage
+// 'ciso-theme' (default 'system' → prefers-color-scheme) and toggles a `.dark`
+// class on <html> via an anti-FOUC inline script.
+async function applyThemePref(page: Page): Promise<void> {
+	if (THEME !== 'dark') return;
+	await page.emulateMedia({ colorScheme: 'dark' });
+	await page.addInitScript(() => {
+		try {
+			localStorage.setItem('ciso-theme', 'dark');
+		} catch {
+			/* storage may be unavailable pre-navigation */
+		}
+	});
+}
+
 async function auditPage(page: Page, name: string, path: string): Promise<void> {
 	// Let async data tables / charts settle before scanning.
 	await page.waitForLoadState('networkidle').catch(() => {});
 
+	// Confirm the requested theme actually took effect, else the dark run is moot.
+	const isDark = await page.evaluate(() => document.documentElement.classList.contains('dark'));
+	if (THEME === 'dark') {
+		expect.soft(isDark, `${name}: dark theme did not apply`).toBe(true);
+	}
+
 	const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
 
+	// Horizontal-overflow check at the declared minimum supported width. CISO
+	// Assistant targets desktop/laptop screens; the app shell is not laid out for
+	// ~320px, so full WCAG 1.4.10 reflow is a documented limitation. We instead
+	// guard that no page overflows at the supported minimum.
+	await page.setViewportSize({ width: REFLOW_MIN_WIDTH, height: 900 });
+	const horizontalOverflowPx = await page.evaluate(() =>
+		Math.max(0, document.documentElement.scrollWidth - document.documentElement.clientWidth)
+	);
+
 	const report: PageReport = {
-		name,
+		name: `${name}${suffix}`,
 		path,
+		theme: THEME,
+		reflow: { horizontalOverflowPx },
 		violations: results.violations.map((v) => ({
 			id: v.id,
 			impact: (v.impact as Severity) ?? null,
@@ -65,6 +106,7 @@ async function auditPage(page: Page, name: string, path: string): Promise<void> 
 
 // Unauthenticated entry point — the login form is a core RGAA "forms" surface.
 test('a11y: login page', async ({ loginPage, page }) => {
+	await applyThemePref(page);
 	await loginPage.goto();
 	await page.locator('body[data-hydrated="true"]').waitFor();
 	await auditPage(page, 'login', '/login');
@@ -86,6 +128,7 @@ const AUTH_PAGES: { name: string; path: string }[] = [
 
 for (const { name, path } of AUTH_PAGES) {
 	test(`a11y: ${name}`, async ({ logedPage, page }) => {
+		await applyThemePref(page);
 		await page.goto(path);
 		await page.locator('body[data-hydrated="true"]').waitFor();
 		await auditPage(page, name, path);
@@ -96,11 +139,14 @@ for (const { name, path } of AUTH_PAGES) {
 // autocompletes, checkboxes) that list/detail pages don't exercise.
 const CREATE_FORMS: { name: string; listPath: string }[] = [
 	{ name: 'create-applied-control', listPath: '/applied-controls' },
-	{ name: 'create-perimeter', listPath: '/perimeters' }
+	{ name: 'create-perimeter', listPath: '/perimeters' },
+	// /libraries 'add-button' opens UploadLibraryModal (custom upload form, not a model create).
+	{ name: 'upload-library-modal', listPath: '/libraries' }
 ];
 
 for (const { name, listPath } of CREATE_FORMS) {
 	test(`a11y: ${name}`, async ({ logedPage, page }) => {
+		await applyThemePref(page);
 		await page.goto(listPath);
 		await page.locator('body[data-hydrated="true"]').waitFor();
 		await page.getByTestId('add-button').first().click();
@@ -119,6 +165,7 @@ const ROW_TARGETS: { name: string; listPath: string; action: 'detail' | 'edit' }
 
 for (const { name, listPath, action } of ROW_TARGETS) {
 	test(`a11y: ${name}`, async ({ logedPage, page }) => {
+		await applyThemePref(page);
 		await page.goto(listPath);
 		await page.locator('body[data-hydrated="true"]').waitFor();
 		// Wait for the async table data before counting rows, else we false-skip.

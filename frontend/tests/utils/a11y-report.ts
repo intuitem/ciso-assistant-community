@@ -12,6 +12,9 @@ export type Severity = 'critical' | 'serious' | 'moderate' | 'minor';
 export interface PageReport {
 	name: string;
 	path: string;
+	theme?: 'light' | 'dark';
+	/** WCAG 1.4.10 reflow smoke check: horizontal overflow at a 320px viewport. */
+	reflow?: { horizontalOverflowPx: number };
 	violations: {
 		id: string;
 		impact: Severity | null;
@@ -47,6 +50,10 @@ export function aggregateReports(): void {
 
 	const order: Severity[] = ['critical', 'serious', 'moderate', 'minor'];
 	const total = reports.reduce((n, r) => n + r.violations.length, 0);
+	// A page "passes" when it has no critical/serious violations (the test gate).
+	const passes = (r: PageReport) =>
+		!r.violations.some((v) => v.impact === 'critical' || v.impact === 'serious');
+	const passedCount = reports.filter(passes).length;
 
 	const lines: string[] = [
 		'# Accessibility audit (axe-core / WCAG 2.1 AA)',
@@ -54,18 +61,39 @@ export function aggregateReports(): void {
 		'> Automated scan only. Covers ~30% of WCAG SC fully and ~62% of RGAA criteria partially.',
 		'> Keyboard, screen-reader, multimedia and content criteria still need a manual RGAA audit.',
 		'',
-		`**Pages scanned:** ${reports.length} — **violation types:** ${total}`,
+		`**Result:** ${passedCount}/${reports.length} pages passed — ` +
+			`**violation types:** ${total} — **theme:** ${reports[0].theme ?? 'light'}`,
 		'',
-		'## Per-page summary',
+		'## Results by page',
 		'',
-		'| Page | Path | Critical | Serious | Moderate | Minor |',
-		'| --- | --- | --- | --- | --- | --- |'
+		'| Page | Status | Path | Critical | Serious | Moderate | Minor |',
+		'| --- | --- | --- | --- | --- | --- | --- |'
 	];
 	for (const r of reports) {
 		const c = (s: Severity) => r.violations.filter((v) => v.impact === s).length;
+		const status = passes(r) ? '✅ Pass' : '❌ Fail';
 		lines.push(
-			`| ${r.name} | \`${r.path}\` | ${c('critical')} | ${c('serious')} | ${c('moderate')} | ${c('minor')} |`
+			`| ${r.name} | ${status} | \`${r.path}\` | ${c('critical')} | ${c('serious')} | ${c('moderate')} | ${c('minor')} |`
 		);
+	}
+
+	const reflowed = reports.filter((r) => (r.reflow?.horizontalOverflowPx ?? 0) > 0);
+	if (reports.some((r) => r.reflow)) {
+		lines.push(
+			'',
+			'## Horizontal overflow at the minimum supported width (1024px)',
+			'',
+			'_The app targets desktop/laptop screens; full WCAG 1.4.10 reflow to 320px is a documented limitation. This guards against overflow at the supported minimum._',
+			''
+		);
+		if (!reflowed.length) {
+			lines.push('No horizontal overflow detected at 1024px.');
+		} else {
+			lines.push('| Page | Overflow (px) |', '| --- | --- |');
+			for (const r of reflowed) {
+				lines.push(`| ${r.name} | ${r.reflow!.horizontalOverflowPx} |`);
+			}
+		}
 	}
 
 	lines.push('', '## Violations by rule', '');

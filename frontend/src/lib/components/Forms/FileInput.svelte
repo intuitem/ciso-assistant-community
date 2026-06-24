@@ -121,6 +121,8 @@
 			name={field}
 			class="{'input ' + _class} {classesTextField($errors)}"
 			data-testid="form-input-{field.replaceAll('_', '-')}"
+			id={field}
+			aria-label={label}
 			aria-invalid={$errors ? 'true' : undefined}
 			placeholder=""
 			bind:files={$value}
