@@ -55,3 +55,8 @@ class GlobalSettings(AbstractBaseModel, FolderMixin):
 
     def __str__(self):
         return self.name
+
+    @classmethod
+    def get_daily_rate(cls) -> float:
+        gs = cls.objects.filter(name="general").only("value").first()
+        return gs.value.get("daily_rate", 500) if gs else 500

@@ -203,3 +203,43 @@
 	--color-surface-contrast-900: var(--color-surface-contrast-light);
 	--color-surface-contrast-950: var(--color-surface-contrast-light);
 }
+
+/*
+  Dark mode softening: lower the CHROMA of the brand/semantic ramps so vivid
+  button fills, violet links and reds are less harsh against the dark surfaces
+  (more "pastel"). Lightness and hue are kept; light mode is untouched.
+  Tune the chroma values up/down to taste.
+*/
+[data-theme='cisotheme'].dark {
+	--color-surface-700: oklch(37.2% 0.03 263);
+	--color-surface-800: oklch(30% 0.03 263);
+	--color-surface-900: oklch(25% 0.03 263);
+	--color-surface-950: oklch(20% 0.03 263);
+
+	/* links: lighter for readability on dark surfaces, only lightly softened */
+	--anchor-font-color-dark: var(--color-primary-300);
+	--color-primary-300: oklch(66.79% 0.12 284.15deg);
+	--color-primary-400: oklch(58.49% 0.15 281.34deg);
+	--color-primary-500: oklch(51.06% 0.18 276.97deg);
+	--color-primary-600: oklch(47.35% 0.17 277.11deg);
+
+	--color-secondary-400: oklch(61.42% 0.14 263.48deg);
+	--color-secondary-500: oklch(54.62% 0.17 262.95deg);
+	--color-secondary-600: oklch(50.51% 0.16 263.01deg);
+
+	--color-tertiary-400: oklch(62.88% 0.16 12.36deg);
+	--color-tertiary-500: oklch(58.56% 0.17 17.44deg);
+	--color-tertiary-600: oklch(54.02% 0.16 17.34deg);
+
+	--color-success-500: oklch(76.91% 0.16 130.94deg);
+	--color-success-600: oklch(70.93% 0.15 130.88deg);
+	--color-success-700: oklch(64.88% 0.14 130.55deg);
+
+	--color-warning-500: oklch(79.54% 0.13 85.76deg);
+	--color-warning-600: oklch(73.46% 0.12 86.2deg);
+
+	--color-error-400: oklch(68.23% 0.15 23.03deg);
+	--color-error-500: oklch(63.75% 0.16 25.44deg);
+	--color-error-600: oklch(58.95% 0.15 25.38deg);
+	--color-error-700: oklch(53.88% 0.15 25.28deg);
+}

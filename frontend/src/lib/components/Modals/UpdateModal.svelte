@@ -10,7 +10,7 @@
 	let closeModal = true;
 
 	// Base Classes
-	const cBase = 'card bg-surface-50 p-4 w-modal shadow-xl space-y-4';
+	const cBase = 'card bg-surface-50-950 p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 
 	interface Props {
@@ -26,6 +26,7 @@
 		selectOptions?: Record<string, any>;
 		debug?: boolean;
 		customNameDescription?: boolean;
+		customFolder?: boolean;
 	}
 
 	let {
@@ -39,7 +40,8 @@
 		suggestions = {},
 		selectOptions = {},
 		debug = false,
-		customNameDescription = true
+		customNameDescription = true,
+		customFolder = false
 	}: Props = $props();
 </script>
 
@@ -59,6 +61,7 @@
 		</div>
 		<ModelForm
 			{customNameDescription}
+			{customFolder}
 			{form}
 			{object}
 			{suggestions}

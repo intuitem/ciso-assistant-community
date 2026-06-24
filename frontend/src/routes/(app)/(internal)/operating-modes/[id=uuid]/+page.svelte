@@ -122,14 +122,14 @@
 <Anchor
 	breadcrumbAction="push"
 	href={`/ebios-rm/${data.data.ebios_rm_study.id}`}
-	class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+	class="flex items-center space-x-2 text-primary-800-200 hover:text-primary-600-400"
 >
 	<i class="fa-solid fa-arrow-left"></i>
 	<p>{m.goBackToEbiosRmStudy()}</p>
 </Anchor>
 <DetailView {data} displayModelTable={false} />
 {#if Object.keys(data.relatedModels).length > 0}
-	<div class="card shadow-lg mt-8 bg-white w-full">
+	<div class="card shadow-lg mt-8 bg-surface-50-950 w-full">
 		<Tabs
 			value={group}
 			onValueChange={(e) => {
@@ -164,7 +164,9 @@
 						>
 							{#snippet addButton()}
 								<div>
-									<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+									<span
+										class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
+									>
 										<button
 											class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
 											data-testid="add-button"
@@ -183,16 +185,13 @@
 	</div>
 {/if}
 
-<div class="card shadow-lg mt-8 bg-surface-50 w-full p-4">
+<div class="card shadow-lg mt-8 bg-surface-50-950 w-full p-4">
 	<div class="flex justify-between items-center mb-4">
-		<h3 class="text-lg font-semibold text-surface-800">
+		<h3 class="text-lg font-semibold text-surface-800-200">
 			<i class="fa-solid fa-diagram-project mr-2"></i>{m.moGraph()}
 		</h3>
 		{#if canEditObject}
-			<button
-				class="btn text-sm {editMode ? 'preset-tonal-primary' : 'preset-filled-primary-500'}"
-				onclick={() => (editMode = !editMode)}
-			>
+			<button class="btn text-sm preset-filled-primary-500" onclick={() => (editMode = !editMode)}>
 				{#if editMode}
 					<i class="fa-solid fa-eye"></i>
 					{m.viewGraph()}

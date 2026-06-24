@@ -143,6 +143,7 @@
   * [Managing a responsibility matrix](guides/responsibility-matrix.md)
 * Third-party
   * [Third-Party Risk Management](guides/tprm.md)
+  * [Common TPRM pitfalls](guides/tprm-challenges.md)
 
 ## Features
 
@@ -171,6 +172,7 @@
 * [Control Plan](features/control-plan.md)
 * [Action plans](features/action-plans.md)
 * [Working with tables](features/working-with-tables.md)
+* [Custom fields](features/custom-fields.md)
 * [Command palette](features/command-palette.md)
 * [Universal search](features/search.md)
 * [My assignments](features/my-assignments.md)

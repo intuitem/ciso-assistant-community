@@ -3,7 +3,6 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import { m } from '$paraglide/messages';
 	import TextArea from '../TextArea.svelte';
@@ -27,7 +26,7 @@
 	}: Props = $props();
 </script>
 
-<p class="text-sm text-gray-500">{m.fearedEventHelpText()}</p>
+<p class="text-sm text-surface-600-400">{m.fearedEventHelpText()}</p>
 <AutocompleteSelect
 	{form}
 	field="ebios_rm_study"
@@ -35,14 +34,6 @@
 	bind:cachedValue={formDataCache['ebios_rm_study']}
 	label={m.ebiosRmStudy()}
 	hidden={initialData.ebios_rm_study}
-/>
-<FolderTreeSelect
-	{form}
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.folder()}
-	hidden
 />
 <Select
 	{form}
