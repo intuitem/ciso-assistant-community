@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -47,11 +47,11 @@ def _mock_client():
 
 
 def _orchestrator(config, client):
-    with patch(
-        "integrations.itsm.servicenow.integration.ServiceNowOrchestrator._get_client",
-        return_value=client,
-    ):
-        return IntegrationRegistry.get_orchestrator(config)
+    # Clients are built lazily per model_key; inject the mock into the cache so
+    # both the back-compat `self.client` and `client_for(...)` return it.
+    orchestrator = IntegrationRegistry.get_orchestrator(config)
+    orchestrator._client_cache["applied_control"] = client
+    return orchestrator
 
 
 def test_get_tables_cache_miss_fetches_and_stores(servicenow_config):

@@ -71,11 +71,11 @@ class JiraOrchestrator(BaseITSMOrchestrator):
     client_class = JiraClient
     mapper_class = JiraFieldMapper
 
-    def _get_mapper(self) -> BaseFieldMapper:
-        return JiraFieldMapper(self.configuration)
+    def _get_mapper(self, model_key="applied_control") -> BaseFieldMapper:
+        return JiraFieldMapper(self.configuration, model_key)
 
-    def _get_client(self) -> JiraClient:
-        return JiraClient(self.configuration)
+    def _get_client(self, model_key="applied_control") -> JiraClient:
+        return JiraClient(self.configuration, model_key)
 
     def _extract_remote_id(self, payload: Dict[str, Any]) -> str:
         """Extract issue key from Jira webhook payload"""
@@ -154,7 +154,8 @@ class JiraOrchestrator(BaseITSMOrchestrator):
         return ["get_tables", "get_columns", "get_choices", "suggest_mapping"]
 
     def execute_action(self, action: str, params: dict):
-        client = self._get_client()
+        model_key = params.get("model_key", self.DEFAULT_MODEL_KEY)
+        client = self.client_for(model_key)
 
         if action == "get_tables":
             return client.get_available_tables()
@@ -180,7 +181,7 @@ class JiraOrchestrator(BaseITSMOrchestrator):
                 raise ValueError(
                     "Parameter 'table_name' is required for suggest_mapping"
                 )
-            return self.mapper.suggest_mapping_for_table(table, client)
+            return self.mapper_for(model_key).suggest_mapping_for_table(table, client)
 
         raise NotImplementedError(f"Unknown action: {action}")
 

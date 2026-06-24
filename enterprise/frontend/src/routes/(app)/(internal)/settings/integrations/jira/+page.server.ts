@@ -29,7 +29,8 @@ const schema = z
 			project_key: z.string().optional(),
 			issue_type: z.string().optional(),
 			field_map: z.record(z.string(), z.any()).default({}).optional(),
-			value_map: z.record(z.string(), z.any()).default({}).optional()
+			value_map: z.record(z.string(), z.any()).default({}).optional(),
+			models: z.record(z.string(), z.any()).default({}).optional()
 		})
 	})
 	.superRefine((data, ctx) => {
@@ -68,6 +69,15 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
 	if (settings && !settings.table_name && settings.project_key) {
 		settings.table_name = `${settings.project_key}:${settings.issue_type || 'Task'}`;
 	}
+
+	// Seed the nested per-model structure so the asset FieldMapper's form paths
+	// (settings.models.asset.*) exist for binding.
+	config.settings = config.settings ?? {};
+	config.settings.models = config.settings.models ?? {};
+	config.settings.models.asset = config.settings.models.asset ?? {
+		field_map: {},
+		value_map: {}
+	};
 
 	const form = await superValidate(config, zod(schema), { errors: false });
 	return {

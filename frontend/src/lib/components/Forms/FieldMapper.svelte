@@ -8,24 +8,9 @@
 
 	const toastStore = getToastStore();
 
-	let {
-		integrationId,
-		initialConfig = null,
-		form,
-		title = m.integrationMappingsTitle(),
-		description = m.integrationMappingsHelpText(),
-		remoteFieldLabel = m.remoteField(),
-		tableHelpText = m.integrationTableHelpText(),
-		onSave = (config) => console.log('Saved:', config),
-		// Fires after handleTableChange so the parent page can sync field_map /
-		// value_map into the superform store. Without this, the per-row
-		// AutocompleteSelect rebinds happen on the next tick but the form's
-		// settings.field_map / settings.value_map keep stale values.
-		onMapsChange = (_maps: { field_map: Record<string, any>; value_map: Record<string, any> }) =>
-			undefined
-	} = $props();
-
-	const LOCAL_FIELDS = [
+	// Default local field list (AppliedControl). Other models pass their own via
+	// the `localFields` prop. Kept here so existing callers keep working.
+	const APPLIED_CONTROL_FIELDS = [
 		{ key: 'name', label: m.name(), type: 'string', required: true },
 		{ key: 'description', label: m.description(), type: 'text', required: false },
 		{ key: 'eta', label: m.eta(), type: 'date', required: false },
@@ -56,6 +41,29 @@
 		}
 	];
 
+	let {
+		integrationId,
+		initialConfig = null,
+		form,
+		// Which local model this mapper configures, and where its config lives in
+		// the form store. modelKey is sent with every RPC so the backend targets
+		// the right remote table; valuePathPrefix points at settings.models.<key>.
+		modelKey = 'applied_control',
+		valuePathPrefix = 'settings',
+		localFields = APPLIED_CONTROL_FIELDS,
+		title = m.integrationMappingsTitle(),
+		description = m.integrationMappingsHelpText(),
+		remoteFieldLabel = m.remoteField(),
+		tableHelpText = m.integrationTableHelpText(),
+		onSave = (config) => console.log('Saved:', config),
+		// Fires after handleTableChange so the parent page can sync field_map /
+		// value_map into the superform store. Without this, the per-row
+		// AutocompleteSelect rebinds happen on the next tick but the form's
+		// field_map / value_map keep stale values.
+		onMapsChange = (_maps: { field_map: Record<string, any>; value_map: Record<string, any> }) =>
+			undefined
+	} = $props();
+
 	let selectedTable = $state(initialConfig?.table_name || '');
 	let fieldMap = $state(initialConfig?.field_map || {});
 	let valueMap = $state(initialConfig?.value_map || {});
@@ -68,7 +76,7 @@
 	let isRefreshing = $state(false);
 
 	let activeChoiceFields = $derived(
-		LOCAL_FIELDS.filter((f) => f.type === 'choice' && fieldMap[f.key])
+		localFields.filter((f) => f.type === 'choice' && fieldMap[f.key])
 	);
 
 	// Returns `null` (not `[]`) on failure so callers can branch on it.
@@ -81,7 +89,8 @@
 			res = await fetch(`/settings/integrations/configs/${integrationId}/rpc`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ action, params })
+				// model_key tells the backend which remote table/mapper to use.
+				body: JSON.stringify({ action, params: { ...params, model_key: modelKey } })
 			});
 		} catch (e) {
 			console.error(`RPC ${action} network error:`, e);
@@ -277,7 +286,7 @@
 			<AutocompleteSelect
 				{form}
 				field="table_name"
-				valuePath="settings.table_name"
+				valuePath={`${valuePathPrefix}.table_name`}
 				label={m.targetTable()}
 				optionsValueField="value"
 				optionsLabelField="label"
@@ -306,7 +315,7 @@
 				</div>
 
 				<div class="space-y-4">
-					{#each LOCAL_FIELDS as field}
+					{#each localFields as field}
 						<div class="grid grid-cols-12 gap-4 items-center">
 							<div class="col-span-5">
 								<div class="font-medium text-surface-700">
@@ -323,7 +332,7 @@
 									<AutocompleteSelect
 										{form}
 										field={field.key}
-										valuePath={`settings.field_map.${field.key}`}
+										valuePath={`${valuePathPrefix}.field_map.${field.key}`}
 										options={columns}
 										cachedValue={fieldMap[field.key]}
 										onChange={(val) => (fieldMap[field.key] = val)}
@@ -370,7 +379,7 @@
 												<AutocompleteSelect
 													{form}
 													field={String(choice.value)}
-													valuePath={`settings.value_map.${field.key}.${choice.value}`}
+													valuePath={`${valuePathPrefix}.value_map.${field.key}.${choice.value}`}
 													options={choices}
 													optionsValueField="value"
 													optionsLabelField="label"

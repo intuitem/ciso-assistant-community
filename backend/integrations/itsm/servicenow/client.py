@@ -11,8 +11,8 @@ logger = get_logger(__name__)
 
 
 class ServiceNowClient(BaseIntegrationClient):
-    def __init__(self, configuration):
-        super().__init__(configuration)
+    def __init__(self, configuration, model_key="applied_control"):
+        super().__init__(configuration, model_key)
         self.base_url = self.credentials.get("instance_url", "").rstrip("/")
         try:
             check_integration_url(self.base_url, "ServiceNow instance_url")
@@ -22,9 +22,10 @@ class ServiceNowClient(BaseIntegrationClient):
         username = self.credentials.get("username", "")
         password = self.credentials.get("password", "")
         self.auth = (username, password)
-        # Default to 'incident' if not specified, but for AppliedControl likely 'sn_compliance_control' or custom
-        self.table = self.settings.get("table_name", "incident")
-        self.mapper = ServiceNowFieldMapper(configuration)
+        # Per-model target table (e.g. 'incident' for controls, a CMDB table for
+        # assets). Defaults to 'incident' when unset.
+        self.table = self.model_settings.get("table_name", "incident")
+        self.mapper = ServiceNowFieldMapper(configuration, model_key)
 
     def _get_headers(self):
         return {
@@ -136,7 +137,7 @@ class ServiceNowClient(BaseIntegrationClient):
 
         # Build Encoded Query
         # Example: active=true^sys_updated_on>=2024-01-01
-        sysparm_query = self.settings.get("base_query", "active=true")
+        sysparm_query = self.model_settings.get("base_query", "active=true")
 
         url = f"{self.base_url}/api/now/table/{self.table}"
         params = {

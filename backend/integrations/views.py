@@ -173,8 +173,9 @@ class IntegrationConfigurationViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"], url_path="remote-objects")
     def list_remote_objects(self, request, pk=None):
         instance = self.get_object()
+        model_key = request.query_params.get("model_key", "applied_control")
         try:
-            client = IntegrationRegistry.get_client(instance)
+            client = IntegrationRegistry.get_client(instance, model_key)
             remote_objects = client.list_remote_objects()
             return Response(remote_objects, status=status.HTTP_200_OK)
         except Exception:
@@ -302,6 +303,36 @@ class IntegrationWebhookView(View):
         process_webhook_event.schedule(args=(config.id, event_type, payload), delay=1)
 
         return HttpResponse(status=202)
+
+
+class SyncableModelListView(APIView):
+    """List the local models that can be synced with a remote system, with their
+    mappable fields, types and choice values. Source of truth for the frontend
+    FieldMapper (so the local field list isn't duplicated client-side)."""
+
+    def get(self, request, *args, **kwargs):
+        from integrations.syncable import all_specs
+
+        data = [
+            {
+                "key": spec.key,
+                "label": spec.label,
+                "fields": [
+                    {
+                        "key": f.key,
+                        "type": f.type,
+                        "required": f.required,
+                        "choices": [
+                            {"value": value, "label": label}
+                            for value, label in f.choices
+                        ],
+                    }
+                    for f in spec.fields
+                ],
+            }
+            for spec in all_specs()
+        ]
+        return Response(data)
 
 
 class SyncMappingDeleteView(generics.DestroyAPIView):

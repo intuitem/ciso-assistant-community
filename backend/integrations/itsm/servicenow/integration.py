@@ -38,16 +38,11 @@ class ServiceNowOrchestrator(BaseITSMOrchestrator):
     client_class = ServiceNowClient
     mapper_class = ServiceNowFieldMapper
 
-    # Local AppliedControl fields the frontend treats as choice/enum fields and
-    # therefore loads remote choice lists for. Kept in sync with LOCAL_FIELDS in
-    # FieldMapper.svelte so warming covers exactly what the page fetches.
-    CHOICE_LOCAL_FIELDS = {"status", "priority"}
+    def _get_mapper(self, model_key="applied_control"):
+        return ServiceNowFieldMapper(self.configuration, model_key)
 
-    def _get_mapper(self):
-        return ServiceNowFieldMapper(self.configuration)
-
-    def _get_client(self):
-        return ServiceNowClient(self.configuration)
+    def _get_client(self, model_key="applied_control"):
+        return ServiceNowClient(self.configuration, model_key)
 
     def _extract_remote_id(self, payload: Dict[str, Any]) -> str:
         # Assumes ServiceNow Business Rule sends the record as the root json or under 'result'
@@ -129,25 +124,35 @@ class ServiceNowOrchestrator(BaseITSMOrchestrator):
         return cache.choices[key]
 
     def refresh_schema(self, force: bool = True) -> list[dict]:
-        """Fetch the page-load set (tables + configured table columns +
-        mapped choice-field choices) into the cache. Returns the tables.
+        """Fetch the page-load set into the cache, for every configured model
+        (each model has its own remote table + mapped choice fields). Returns
+        the tables list.
 
         force=True (the manual refresh button) re-fetches everything and
         overwrites the cache. force=False (startup warming) only fills gaps,
         so a restart with an already-populated cache costs no live calls.
         """
+        from integrations import syncable
+        from integrations.settings_access import (
+            configured_model_keys,
+            get_model_settings,
+        )
+
         tables = self._cached_tables(force=force)
 
-        table = self.configuration.settings.get("table_name")
-        if table:
+        for model_key in configured_model_keys(self.configuration.settings):
+            ms = get_model_settings(self.configuration.settings, model_key)
+            table = ms.get("table_name")
+            if not table:
+                continue
             self._cached_columns(table, force=force)
 
-            # Warm choices for every mapped choice field, mirroring what the
-            # page loads (any choice-type field with a field_map entry) rather
-            # than only fields the user has already value-mapped.
-            field_map = self.configuration.settings.get("field_map", {}) or {}
+            # Warm choices for every mapped choice field of this model, mirroring
+            # what the page loads (any choice-type field with a field_map entry).
+            field_map = ms.get("field_map", {}) or {}
+            model_choice_fields = syncable.choice_fields(model_key)
             for local_field, remote_field in field_map.items():
-                if local_field in self.CHOICE_LOCAL_FIELDS and remote_field:
+                if local_field in model_choice_fields and remote_field:
                     self._cached_choices(table, remote_field, force=force)
 
         logger.info(
