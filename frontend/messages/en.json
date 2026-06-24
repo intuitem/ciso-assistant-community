@@ -1124,6 +1124,8 @@
 	"duplicateOrganisationObjective": "Duplicate the organisation objective",
 	"requestValidation": "Request validation",
 	"requestRiskAcceptance": "Request risk acceptance",
+	"submitForApproval": "Submit for approval",
+	"submitForApprovalHelpText": "Send the acceptance to the approver immediately instead of saving it as a draft.",
 	"pendingValidationFlow": "This revision is pending approval via a validation flow.",
 	"size": "Size",
 	"favicon": "Favicon",

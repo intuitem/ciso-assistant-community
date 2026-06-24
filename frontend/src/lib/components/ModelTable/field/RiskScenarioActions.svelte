@@ -1,55 +1,29 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { m } from '$paraglide/messages';
-	import { getModelInfo } from '$lib/utils/crud';
-	import { modelSchema } from '$lib/utils/schemas';
-	import { defaults } from 'sveltekit-superforms';
-	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import {
-		getModalStore,
-		type ModalComponent,
-		type ModalSettings
-	} from '$lib/components/Modals/stores';
+	import { getModalStore } from '$lib/components/Modals/stores';
+	import { openRiskAcceptanceModal } from '$lib/utils/riskAcceptance';
 
 	interface Props {
 		meta: any;
-		actionsURLModel: string;
 	}
 
 	let { meta }: Props = $props();
 
 	const modalStore = getModalStore();
 	const canCreate = Object.hasOwn(page.data.user?.permissions ?? {}, 'add_riskacceptance');
+	// Mirror the detail page: no acceptance requests on a locked assessment.
+	const isLocked = $derived(meta.risk_assessment?.is_locked ?? false);
 
 	function createAcceptance(): void {
-		const schema = modelSchema('risk-acceptances');
-		// Pre-fill the new acceptance with this scenario and its domain; the
-		// approver is left empty (usually not the scenario owner).
-		const form = defaults(
-			{ folder: meta.folder?.id ?? meta.folder, risk_scenarios: [meta.id] },
-			zod(schema)
-		);
-		const modalComponent: ModalComponent = {
-			ref: CreateModal,
-			props: {
-				form,
-				model: getModelInfo('risk-acceptances'),
-				formAction: '/risk-acceptances?/create',
-				invalidateAll: true,
-				debug: false
-			}
-		};
-		const modal: ModalSettings = {
-			type: 'component',
-			component: modalComponent,
-			title: m.requestRiskAcceptance()
-		};
-		modalStore.trigger(modal);
+		openRiskAcceptanceModal(modalStore, {
+			folderId: meta.folder?.id ?? meta.folder,
+			riskScenarioIds: [meta.id]
+		});
 	}
 </script>
 
-{#if canCreate}
+{#if canCreate && !isLocked}
 	<button
 		onclick={(e) => {
 			e.stopPropagation();

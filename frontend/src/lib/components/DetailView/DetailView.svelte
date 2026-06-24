@@ -478,7 +478,7 @@
 		<div
 			class="flex flex-row items-center space-x-4 bg-green-100 dark:bg-green-900 rounded-container shadow-lg px-6 py-2 mt-2 justify-between"
 		>
-			<div class="text-success-800-200">
+			<div class="text-green-800 dark:text-green-200">
 				{m.riskAcceptanceValidatedMessage()}
 			</div>
 			{#if page.data.user.id === data.data.approver?.id}

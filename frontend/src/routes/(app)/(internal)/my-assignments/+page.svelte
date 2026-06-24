@@ -314,7 +314,6 @@
 					source={{
 						head: {
 							name: 'name',
-							state: 'state',
 							expiry_date: 'expiry_date',
 							folder: 'folder'
 						},

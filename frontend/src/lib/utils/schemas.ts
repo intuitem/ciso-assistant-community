@@ -297,7 +297,8 @@ export const RiskAcceptanceSchema = z.object({
 	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	justification: z.string().optional().nullable(),
 	approver: z.string().optional().nullable(),
-	risk_scenarios: z.array(z.string())
+	risk_scenarios: z.array(z.string()),
+	submit: z.boolean().optional()
 });
 
 export const ValidationFlowSchema = z.object({

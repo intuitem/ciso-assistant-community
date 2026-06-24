@@ -17,13 +17,11 @@
 	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
 	import RiskAcceptancesSection from '$lib/components/RiskAcceptances/RiskAcceptancesSection.svelte';
 
-	import { goto, invalidateAll } from '$app/navigation';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import { goto } from '$app/navigation';
+	import { openRiskAcceptanceModal } from '$lib/utils/riskAcceptance';
 
 	import { onMount } from 'svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
-	import List from '$lib/components/List/List.svelte';
-	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
@@ -134,25 +132,10 @@
 	});
 
 	function modalRequestRiskAcceptance(): void {
-		const modalComponent: ModalComponent = {
-			ref: CreateModal,
-			props: {
-				form: data.riskAcceptanceForm,
-				model: data.riskAcceptanceModel,
-				debug: false,
-				invalidateAll: true,
-				formAction: '/risk-acceptances?/create',
-				onConfirm: async () => {
-					await invalidateAll();
-				}
-			}
-		};
-		const modal: ModalSettings = {
-			type: 'component',
-			component: modalComponent,
-			title: m.requestRiskAcceptance()
-		};
-		modalStore.trigger(modal);
+		openRiskAcceptanceModal(modalStore, {
+			folderId: data.scenario.folder.id,
+			riskScenarioIds: [page.params.id]
+		});
 	}
 
 	onMount(() => {
@@ -202,9 +185,7 @@
 					<p class="text-surface-400-600 italic text-sm">{m.noDescription()}</p>
 				{/if}
 			</div>
-			{#key data.riskAcceptances}
-				<RiskAcceptancesSection riskAcceptances={data.riskAcceptances} />
-			{/key}
+			<RiskAcceptancesSection riskAcceptances={data.riskAcceptances} />
 		</div>
 		<div class="flex flex-col space-y-2 sm:self-start shrink-0">
 			{#if canEditObject}

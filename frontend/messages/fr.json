@@ -1070,6 +1070,8 @@
 	"duplicateOrganisationObjective": "Dupliquer l'objectif organisationnel",
 	"requestValidation": "Demander une validation",
 	"requestRiskAcceptance": "Demander une acceptation de risque",
+	"submitForApproval": "Soumettre pour approbation",
+	"submitForApprovalHelpText": "Envoyer l'acceptation directement à l'approbateur au lieu de l'enregistrer comme brouillon.",
 	"pendingValidationFlow": "Cette révision est en attente d'approbation via un flux de validation.",
 	"size": "Taille",
 	"favicon": "Icône de favori",

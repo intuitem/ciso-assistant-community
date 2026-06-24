@@ -3,6 +3,7 @@
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { formatDate } from '$lib/utils/datetime';
+	import { formatActorName } from '$lib/utils/helpers';
 	import { getLocale } from '$paraglide/runtime';
 	import { m } from '$paraglide/messages';
 
@@ -44,11 +45,7 @@
 	}
 
 	function getApproverName(approver: RiskAcceptance['approver']): string {
-		if (!approver) return m.undefined();
-		if (approver.first_name || approver.last_name) {
-			return `${approver.first_name || ''} ${approver.last_name || ''}`.trim();
-		}
-		return approver.str ?? m.undefined();
+		return formatActorName(approver) || m.undefined();
 	}
 </script>
 
@@ -78,10 +75,10 @@
 							class:preset-tonal-success={riskAcceptance.state === 'Accepted'}
 							class:preset-tonal-error={riskAcceptance.state === 'Rejected' ||
 								riskAcceptance.state === 'Revoked'}
-							class:preset-tonal-secondary={riskAcceptance.state === 'Submitted' ||
-								riskAcceptance.state === 'Created'}
+							class:preset-tonal-primary={riskAcceptance.state === 'Submitted'}
+							class:preset-tonal-secondary={riskAcceptance.state === 'Created'}
 						>
-							{safeTranslate(riskAcceptance.state)}
+							{riskAcceptance.state === 'Created' ? m.draft() : safeTranslate(riskAcceptance.state)}
 						</span>
 						<i class="fa-solid {getStatusIcon(riskAcceptance.state)} text-sm ml-1"></i>
 					</div>

@@ -9,12 +9,18 @@ import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { m } from '$paraglide/messages';
 import { error, redirect } from '@sveltejs/kit';
-import { loadRiskAcceptanceFormData } from '$lib/utils/load';
 
 export const load = (async ({ fetch, params, cookies, locals }) => {
 	const URLModel = 'risk-scenarios';
 	const baseEndpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
 	const objectEndpoint = `${BASE_API_URL}/${URLModel}/${params.id}/object/`;
+
+	// Depends only on params.id, so start it now and let it overlap the fetches below.
+	const riskAcceptancesPromise = fetch(
+		`${BASE_API_URL}/risk-acceptances/?risk_scenarios=${params.id}`
+	)
+		.then((res) => (res.ok ? res.json() : { results: [] }))
+		.then((res) => res.results ?? []);
 
 	const res = await fetch(baseEndpoint);
 	if (!res.ok) {
@@ -69,25 +75,12 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 		.then((res) => res.json())
 		.then((res) => JSON.parse(res.json_definition));
 
-	const { riskAcceptanceForm, riskAcceptanceModel } = await loadRiskAcceptanceFormData({
-		folderId: scenario.folder.id,
-		riskScenarioIds: [params.id]
-	});
-
-	const riskAcceptances = await fetch(
-		`${BASE_API_URL}/risk-acceptances/?risk_scenarios=${params.id}`
-	)
-		.then((res) => (res.ok ? res.json() : { results: [] }))
-		.then((res) => res.results ?? []);
-
 	return {
 		scenario,
 		tables,
 		riskMatrix,
 		title: scenario.str,
-		riskAcceptanceForm,
-		riskAcceptanceModel,
-		riskAcceptances
+		riskAcceptances: await riskAcceptancesPromise
 	};
 }) satisfies PageServerLoad;
 

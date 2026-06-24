@@ -1588,8 +1588,13 @@ export const listViewFields = {
 		}
 	},
 	'risk-acceptances': {
-		head: ['name', 'description', 'riskScenarios', 'state'],
-		body: ['name', 'description', 'risk_scenarios', 'state'],
+		head: ['name', 'description', 'riskScenarios'],
+		body: ['name', 'description', 'risk_scenarios'],
+		// State is shown as a badge on the name column, so the column is opt-in.
+		optionalFields: {
+			head: ['state'],
+			body: ['state']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			state: STATE_FILTER,
