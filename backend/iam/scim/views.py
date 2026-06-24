@@ -214,9 +214,7 @@ class SCIMUserViewSet(ViewSet):
 
         # Only expose users SCIM provisioned/owns; locally-managed accounts are
         # not part of the SCIM directory.
-        qs = User.objects.filter(scim_external_id__isnull=False).order_by(
-            "date_joined", "id"
-        )
+        qs = User.objects.filter(is_scim_managed=True).order_by("date_joined", "id")
         if filter_str:
             attr, value = parse_filter(filter_str)
             if attr == "username":
@@ -268,6 +266,7 @@ class SCIMUserViewSet(ViewSet):
                     409,
                     "uniqueness",
                 )
+            user.is_scim_managed = True
             _update_user_from_scim_data(user, data)
             err = _save_user_or_scim_error(user)
             if err:
@@ -303,6 +302,7 @@ class SCIMUserViewSet(ViewSet):
             is_active=is_active,
             is_published=True,
             keep_local_login=False,
+            is_scim_managed=True,
             folder=Folder.get_root_folder(),
             preferences={"lang": default_lang},
         )
@@ -379,11 +379,26 @@ class SCIMUserViewSet(ViewSet):
                 op_type = op.get("op", "").lower()
                 path = op.get("path", "")
                 value = op.get("value")
-                if op_type == "replace":
+                if op_type in ("replace", "add"):
+                    # RFC 7644 §3.5.2.1: on a single-valued attribute, "add"
+                    # assigns the value exactly like "replace".
                     if isinstance(value, dict):
                         _apply_user_replace_dict(user, value)
                     elif path:
                         _apply_user_replace_path(user, path, value)
+                elif op_type == "remove":
+                    # RFC 7644 §3.5.2.2: "path" is REQUIRED for remove.
+                    if not path:
+                        return _scim_error_response(
+                            "remove operation requires a path", 400, "noTarget"
+                        )
+                    _apply_user_remove_path(user, path)
+                else:
+                    return _scim_error_response(
+                        f"Unsupported PATCH operation '{op.get('op')}'",
+                        400,
+                        "invalidValue",
+                    )
 
         err = _save_user_or_scim_error(user)
         if err:
@@ -524,14 +539,20 @@ class SCIMGroupViewSet(ViewSet):
             operations_count=len(operations),
         )
 
-        # Coalesce member ops: an IdP can send thousands of single-member
-        # "add" ops in one PATCH (one per user). Accumulate them and apply a
-        # single bulk add / remove instead of one DB round-trip per op. A
-        # full-member "replace" (or "remove members" with no value) resets the
-        # SCIM membership, so it takes precedence over accumulated adds/removes.
-        add_ids: list[str] = []
-        remove_ids: list[str] = []
-        replace_ids: list[str] | None = None
+        # RFC 7644 §3.5.2: operations are applied in the order they appear.
+        # We build an ordered list of member mutations, merging *consecutive*
+        # same-type ops so a PATCH with thousands of single-member "add" ops
+        # (one per user, as Okta/Entra send) still applies as one bulk call —
+        # without reordering distinct add/remove ops relative to each other.
+        segments: list[
+            tuple[str, list[str]]
+        ] = []  # (action, ids): add|remove|set|clear
+
+        def _push(action: str, ids: list[str]) -> None:
+            if action in ("add", "remove") and segments and segments[-1][0] == action:
+                segments[-1][1].extend(ids)
+            else:
+                segments.append((action, list(ids)))
 
         for op in operations:
             op_type = op.get("op", "").lower()
@@ -540,33 +561,29 @@ class SCIMGroupViewSet(ViewSet):
 
             if op_type == "add":
                 if path == "members":
-                    add_ids.extend(_member_ids(value or []))
+                    _push("add", _member_ids(value or []))
                 elif isinstance(value, dict) and "members" in value:
                     # Path-less add: members nested under value (Okta/Entra).
-                    add_ids.extend(_member_ids(value["members"] or []))
+                    _push("add", _member_ids(value["members"] or []))
             elif op_type == "remove":
                 if path == "members":
                     # RFC 7644 §3.5.2.2: no value → remove ALL (a reset);
                     # with a value → remove only the listed members.
                     if value:
-                        remove_ids.extend(_member_ids(value))
+                        _push("remove", _member_ids(value))
                     else:
-                        replace_ids = []
-                        add_ids.clear()
-                        remove_ids.clear()
+                        _push("clear", [])
                 elif isinstance(value, dict) and "members" in value:
                     # Path-less remove: members nested under value.
-                    remove_ids.extend(_member_ids(value["members"] or []))
+                    _push("remove", _member_ids(value["members"] or []))
                 else:
                     # Filter selector path, e.g. members[value eq "uuid"]
                     uid = _extract_member_filter_id(path)
                     if uid:
-                        remove_ids.append(uid)
+                        _push("remove", [uid])
             elif op_type == "replace":
                 if path == "members":
-                    replace_ids = _member_ids(value or [])
-                    add_ids.clear()
-                    remove_ids.clear()
+                    _push("set", _member_ids(value or []))
                 elif path == "displayName" and value:
                     # IdP renamed the group. Only the label changes; the
                     # IdPGroup PK (the SCIM id) is the stable reference.
@@ -584,16 +601,17 @@ class SCIMGroupViewSet(ViewSet):
                             "uniqueness",
                         )
                     if "members" in value:
-                        replace_ids = _member_ids(value["members"] or [])
-                        add_ids.clear()
-                        remove_ids.clear()
+                        _push("set", _member_ids(value["members"] or []))
 
-        if replace_ids is not None:
-            _set_members(idp_group, replace_ids)
-        if remove_ids:
-            _remove_members(idp_group, remove_ids)
-        if add_ids:
-            _add_members(idp_group, add_ids)
+        for action, ids in segments:
+            if action == "add":
+                _add_members(idp_group, ids)
+            elif action == "remove":
+                _remove_members(idp_group, ids)
+            elif action == "set":
+                _set_members(idp_group, ids)
+            elif action == "clear":
+                idp_group.users.clear()
 
         return _scim_response(scim_group_to_dict(idp_group, request))
 
@@ -630,10 +648,11 @@ def _valid_uuid(value):
 
 
 def _is_scim_managed(user) -> bool:
-    """True if SCIM provisioned/owns this user (it has an external id). SCIM may
-    only read and mutate the accounts it owns; locally-managed accounts are not
-    part of the SCIM directory."""
-    return bool(user.scim_external_id)
+    """True if SCIM provisioned/owns this user. SCIM may only read and mutate the
+    accounts it owns; locally-managed accounts are not part of the SCIM
+    directory. Keyed off an internal marker, not externalId — the latter is
+    optional and client-issued (RFC 7643 §3.1), so it cannot define ownership."""
+    return user.is_scim_managed
 
 
 def _is_protected_account(user) -> bool:
@@ -754,7 +773,7 @@ def _resolve_user_ids(ids):
     if not valid:
         return []
     return list(
-        User.objects.filter(id__in=valid, scim_external_id__isnull=False).values_list(
+        User.objects.filter(id__in=valid, is_scim_managed=True).values_list(
             "id", flat=True
         )
     )
@@ -773,7 +792,20 @@ def _remove_members(idp_group, ids):
 
 
 def _set_members(idp_group, ids):
-    idp_group.users.set(_resolve_user_ids(ids))
+    resolved = _resolve_user_ids(ids)
+    # Guard the wipe footgun: a non-empty members list that resolves to nothing
+    # (every id unprovisioned / not SCIM-managed) would otherwise clear the whole
+    # group. Treat that as a no-op rather than stripping every member (incl. the
+    # groups they inherit). An explicit empty list still clears.
+    if ids and not resolved:
+        logger.warning(
+            "SCIM: ignoring group member replace; no requested members resolved "
+            "to SCIM-managed users",
+            group_id=str(idp_group.id),
+            requested=len(ids),
+        )
+        return
+    idp_group.users.set(resolved)
 
 
 def _update_user_from_scim_data(user, data):
@@ -848,6 +880,19 @@ def _apply_user_replace_path(user, path, value):
         # Since we only persist one email, any such update writes user.email.
         if value:
             user.email = value
+
+
+def _apply_user_remove_path(user, path):
+    """Apply a SCIM PATCH 'remove' to a supported single-valued attribute.
+    Required attributes (userName/active/emails) cannot be unset and are left
+    untouched; unknown paths are ignored (consistent with replace handling)."""
+    path_lower = path.lower()
+    if path_lower == "externalid":
+        user.scim_external_id = None
+    elif path_lower == "name.givenname":
+        user.first_name = ""
+    elif path_lower == "name.familyname":
+        user.last_name = ""
 
 
 _MEMBER_FILTER_RE = re.compile(

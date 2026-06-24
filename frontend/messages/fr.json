@@ -226,6 +226,7 @@
 	"scimTokenGenerated": "Jeton généré",
 	"scimTokenWarning": "Copiez ce jeton maintenant. Pour des raisons de sécurité, il ne sera plus affiché.",
 	"scimTokenRevoked": "Jeton SCIM révoqué",
+	"scimTokenGenerationFailed": "Échec de la génération du jeton SCIM",
 	"roleAssignments": "Affectations de rôle",
 	"xRays": "X-rays",
 	"inspect": "Inspecter",

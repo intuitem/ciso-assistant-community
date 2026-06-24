@@ -659,6 +659,14 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         unique=True,
         verbose_name=_("SCIM external ID"),
     )
+    is_scim_managed = models.BooleanField(
+        default=False,
+        verbose_name=_("SCIM managed"),
+        help_text=_(
+            "True when this account is provisioned/owned by SCIM. Independent of "
+            "scim_external_id, which the provisioning client may omit (RFC 7643)."
+        ),
+    )
     objects = CaseInsensitiveUserManager()
 
     # USERNAME_FIELD is used as the unique identifier for the user
@@ -892,12 +900,26 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         return [(x.__str__(), x.builtin) for x in self.user_groups.all()]
 
     def get_roles(self):
-        """get the list of roles attached to the user"""
-        return list(
+        """get the list of roles attached to the user — directly via its user
+        groups and, when the idp_groups feature is enabled, via the user groups
+        granted by its IdP groups (groups-of-groups closure). Kept consistent
+        with the inheritance-aware ``permissions`` and ``is_admin()`` so the
+        current-user payload (and the role-name nav gating it drives) matches
+        what the user can actually do."""
+        from global_settings.utils import ff_is_enabled
+
+        roles = set(
             self.user_groups.all()
             .values_list("roleassignment__role__name", flat=True)
             .distinct()
         )
+        if ff_is_enabled("idp_groups"):
+            roles |= set(
+                self.idp_groups.all()
+                .values_list("user_groups__roleassignment__role__name", flat=True)
+                .distinct()
+            )
+        return list(roles)
 
     @property
     def is_auditee(self) -> bool:

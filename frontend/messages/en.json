@@ -235,6 +235,7 @@
 	"scimTokenGenerated": "Token generated",
 	"scimTokenWarning": "Copy this token now. For security reasons it will not be shown again.",
 	"scimTokenRevoked": "SCIM token revoked",
+	"scimTokenGenerationFailed": "Failed to generate SCIM token",
 	"roleAssignments": "Role assignments",
 	"xRays": "X-rays",
 	"inspect": "Inspect",
