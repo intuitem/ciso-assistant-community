@@ -9203,6 +9203,12 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
             self.rejected_at = datetime.now()
         elif state == "revoked":
             self.revoked_at = datetime.now()
+            # revert the treatment set on acceptance, leaving scenarios that
+            # have since moved to another treatment untouched
+            for scenario in self.risk_scenarios.all():
+                if scenario.treatment == "accept":
+                    scenario.treatment = "open"
+                    scenario.save()
         self.save()
 
 

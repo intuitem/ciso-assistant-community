@@ -16,7 +16,8 @@
 	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
 	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
 
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
+	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 
 	import { onMount } from 'svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
@@ -131,6 +132,28 @@
 			syncingToActionsIsLoading = false;
 	});
 
+	function modalRequestRiskAcceptance(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.riskAcceptanceForm,
+				model: data.riskAcceptanceModel,
+				debug: false,
+				invalidateAll: true,
+				formAction: '/risk-acceptances?/create',
+				onConfirm: async () => {
+					await invalidateAll();
+				}
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.requestRiskAcceptance()
+		};
+		modalStore.trigger(modal);
+	}
+
 	onMount(() => {
 		// Add event listener when component mounts
 		window.addEventListener('keydown', handleKeydown);
@@ -209,6 +232,16 @@
 						{m.syncToAppliedControls()}
 					</button>
 				{/if}
+			{/if}
+			{#if !data.scenario.risk_assessment?.is_locked}
+				<button
+					class="btn text-white bg-linear-to-r from-orange-500 to-amber-500 h-fit"
+					onclick={() => modalRequestRiskAcceptance()}
+					data-testid="request-risk-acceptance-button"
+				>
+					<i class="fa-solid fa-signature mr-2"></i>
+					{m.requestRiskAcceptance()}
+				</button>
 			{/if}
 			<AuditTrailButton model="risk-scenarios" objectId={data.scenario.id} />
 		</div>
@@ -324,6 +357,23 @@
 			hideFilters={true}
 			URLModel="security-exceptions"
 			baseEndpoint="/security-exceptions?risk_scenarios={page.params.id}"
+		/>
+	</div>
+	<div class="card px-4 py-2 bg-surface-50-950 shadow-lg max-w-full max-h-96 overflow-y-auto">
+		<h4 class="h4 font-semibold">{m.riskAcceptances()}</h4>
+		<ModelTable
+			source={{
+				head: {
+					name: 'name',
+					state: 'state',
+					expiry_date: 'expiry_date',
+					approver: 'approver'
+				},
+				body: []
+			}}
+			hideFilters={true}
+			URLModel="risk-acceptances"
+			baseEndpoint="/risk-acceptances?risk_scenarios={page.params.id}"
 		/>
 	</div>
 

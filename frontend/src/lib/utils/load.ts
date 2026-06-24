@@ -105,6 +105,34 @@ export const loadValidationFlowFormData = async ({
 	return { validationFlowForm, validationFlowModel };
 };
 
+interface LoadRiskAcceptanceFormDataParams {
+	folderId: string;
+	riskScenarioIds: string[];
+}
+
+/**
+ * Build a risk acceptance create form pre-filled with the given risk scenario(s) and folder.
+ * The approver is intentionally left empty: the approver is usually not the scenario owner.
+ */
+export const loadRiskAcceptanceFormData = async ({
+	folderId,
+	riskScenarioIds
+}: LoadRiskAcceptanceFormDataParams) => {
+	const riskAcceptanceSchema = modelSchema('risk-acceptances');
+	const riskAcceptanceInitialData = {
+		folder: folderId,
+		risk_scenarios: riskScenarioIds
+	};
+	const riskAcceptanceForm = await superValidate(
+		riskAcceptanceInitialData,
+		zod(riskAcceptanceSchema),
+		{ errors: false }
+	);
+	const riskAcceptanceModel = getModelInfo('risk-acceptances');
+
+	return { riskAcceptanceForm, riskAcceptanceModel };
+};
+
 export const loadDetail = async ({ event, model, id }) => {
 	const endpoint = `${BASE_API_URL}/${model.endpointUrl ?? model.urlModel}/${id}/`;
 

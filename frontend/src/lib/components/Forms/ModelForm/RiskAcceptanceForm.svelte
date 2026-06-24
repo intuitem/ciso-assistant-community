@@ -69,5 +69,6 @@
 	bind:cachedValue={formDataCache['risk_scenarios']}
 	label={m.riskScenarios()}
 	helpText={m.riskAcceptanceRiskScenariosHelpText()}
+	disabled={initialData.risk_scenarios}
 	multiple
 />

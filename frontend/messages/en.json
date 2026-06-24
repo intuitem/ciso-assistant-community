@@ -1123,6 +1123,7 @@
 	"duplicateAppliedControl": "Duplicate the applied control",
 	"duplicateOrganisationObjective": "Duplicate the organisation objective",
 	"requestValidation": "Request validation",
+	"requestRiskAcceptance": "Request risk acceptance",
 	"pendingValidationFlow": "This revision is pending approval via a validation flow.",
 	"size": "Size",
 	"favicon": "Favicon",

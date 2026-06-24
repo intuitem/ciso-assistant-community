@@ -1069,6 +1069,7 @@
 	"duplicateAppliedControl": "Dupliquer la mesure appliquée",
 	"duplicateOrganisationObjective": "Dupliquer l'objectif organisationnel",
 	"requestValidation": "Demander une validation",
+	"requestRiskAcceptance": "Demander une acceptation de risque",
 	"pendingValidationFlow": "Cette révision est en attente d'approbation via un flux de validation.",
 	"size": "Taille",
 	"favicon": "Icône de favori",

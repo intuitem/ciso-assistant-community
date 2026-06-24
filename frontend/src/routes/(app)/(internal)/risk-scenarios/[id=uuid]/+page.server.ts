@@ -9,6 +9,7 @@ import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { m } from '$paraglide/messages';
 import { error, redirect } from '@sveltejs/kit';
+import { loadRiskAcceptanceFormData } from '$lib/utils/load';
 
 export const load = (async ({ fetch, params, cookies, locals }) => {
 	const URLModel = 'risk-scenarios';
@@ -68,7 +69,19 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 		.then((res) => res.json())
 		.then((res) => JSON.parse(res.json_definition));
 
-	return { scenario, tables, riskMatrix, title: scenario.str };
+	const { riskAcceptanceForm, riskAcceptanceModel } = await loadRiskAcceptanceFormData({
+		folderId: scenario.folder.id,
+		riskScenarioIds: [params.id]
+	});
+
+	return {
+		scenario,
+		tables,
+		riskMatrix,
+		title: scenario.str,
+		riskAcceptanceForm,
+		riskAcceptanceModel
+	};
 }) satisfies PageServerLoad;
 
 export const actions: Actions = {
