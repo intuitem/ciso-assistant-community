@@ -1,7 +1,7 @@
 """Security regression tests for SCIM 2.0 provisioning and IdP-group inheritance.
 
 These pin the invariants added to harden the feature for release:
-  * SCIM only reads/mutates the accounts it provisioned (scim_external_id set),
+  * SCIM only reads/mutates the accounts it provisioned (is_scim_managed),
     and never adopts or rewrites an administrator / local-login account.
   * Only SCIM-managed users can be pulled into an IdP group, so a locally
     managed admin can never inherit admin via a SCIM membership push.
@@ -52,11 +52,13 @@ def _scim_client():
 
 
 def _scim_user(email, external_id):
-    # create_user only persists a whitelist of fields, so set the SCIM marker
-    # explicitly to mark the account as SCIM-managed.
+    # create_user only persists a whitelist of fields, so set the SCIM markers
+    # explicitly. is_scim_managed is what marks the account as SCIM-owned;
+    # external_id is optional (RFC 7643) and kept here for realism.
     user = User.objects.create_user(email, is_published=True)
     user.scim_external_id = external_id
-    user.save(update_fields=["scim_external_id"])
+    user.is_scim_managed = True
+    user.save(update_fields=["scim_external_id", "is_scim_managed"])
     return user
 
 
@@ -91,6 +93,40 @@ class TestSCIMOwnershipInvariant:
         assert resp.status_code == 200
         emails = {r["userName"] for r in json.loads(resp.content)["Resources"]}
         assert emails == {"provisioned@tests.com"}
+
+    def test_provisioning_without_external_id_stays_manageable(self, enable_idp_groups):
+        # externalId is optional (RFC 7643 §3.1). A user provisioned without one
+        # must still be SCIM-managed: listed, retrievable and PATCH/DELETE-able.
+        client = _scim_client()
+        created = client.post(
+            USERS_URL,
+            data={"userName": "noext@tests.com", "active": True},
+            format="json",
+        )
+        assert created.status_code == 201
+        uid = json.loads(created.content)["id"]
+
+        user = User.objects.get(email="noext@tests.com")
+        assert user.scim_external_id is None
+        assert user.is_scim_managed is True
+
+        # listed
+        listed = json.loads(client.get(USERS_URL).content)["Resources"]
+        assert "noext@tests.com" in {r["userName"] for r in listed}
+
+        # retrievable + PATCH-addressable (not a 404)
+        assert client.get(f"{USERS_URL}/{uid}").status_code == 200
+        patched = client.patch(
+            f"{USERS_URL}/{uid}",
+            data={"Operations": [{"op": "replace", "path": "active", "value": False}]},
+            format="json",
+        )
+        assert patched.status_code == 200
+        user.refresh_from_db()
+        assert user.is_active is False
+
+        # DELETE-addressable
+        assert client.delete(f"{USERS_URL}/{uid}").status_code == 204
 
     def test_create_refuses_to_adopt_an_admin(self, enable_idp_groups):
         admin = User.objects.create_user("boss@tests.com", is_published=True)

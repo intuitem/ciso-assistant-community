@@ -919,6 +919,9 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
                 .values_list("user_groups__roleassignment__role__name", flat=True)
                 .distinct()
             )
+        # Groups with no role assignment yield NULL through the join; never
+        # surface a null role name in the payload.
+        roles.discard(None)
         return list(roles)
 
     @property
