@@ -12,6 +12,7 @@
 		"test": "vitest",
 		"test:ci": "vitest run",
 		"test:ui": "vitest --ui",
+		"test:a11y": "playwright test --config=playwright.a11y.config.ts",
 		"test:e2e": "ARGS=\"$npm_config_args\" docker compose -f ./tests/docker-compose.e2e-tests.yml up --force-recreate --build -V",
 		"coverage": "vitest run --coverage",
 		"lint": "prettier --check . && eslint .",
@@ -19,6 +20,7 @@
 		"postinstall": "paraglide-js compile --project ./project.inlang"
 	},
 	"devDependencies": {
+		"@axe-core/playwright": "^4.12.1",
 		"@inlang/paraglide-js": "^2.17.0",
 		"@playwright/test": "^1.60.0",
 		"@skeletonlabs/skeleton": "^4.0.0",
