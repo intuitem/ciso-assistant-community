@@ -441,16 +441,18 @@
 	<!-- Warning for non-visible objects (only for users with edit permissions) -->
 
 	{#if data.urlModel === 'risk-acceptances' && data.data.state === 'Created'}
-		<div class="flex flex-row items-center bg-yellow-100 rounded-container shadow-sm px-6 py-2">
-			<div class="text-yelloW-900">
+		<div
+			class="flex flex-row items-center bg-yellow-100 dark:bg-yellow-900 rounded-container shadow-sm px-6 py-2"
+		>
+			<div class="text-yellow-800 dark:text-yellow-200">
 				{m.riskAcceptanceNotYetSubmittedMessage()}
 			</div>
 		</div>
 	{:else if data.data.state === 'Submitted' && page.data.user.id === data.data.approver?.id}
 		<div
-			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container shadow-sm px-6 py-2 justify-between"
+			class="flex flex-row space-x-4 items-center bg-yellow-100 dark:bg-yellow-900 rounded-container shadow-sm px-6 py-2 justify-between"
 		>
-			<div class="text-yellow-900">
+			<div class="text-yellow-800 dark:text-yellow-200">
 				{m.riskAcceptanceValidatingReviewMessage()}
 			</div>
 			<div class="flex space-x-2">
@@ -474,9 +476,9 @@
 		</div>
 	{:else if data.data.state === 'Accepted'}
 		<div
-			class="flex flex-row items-center space-x-4 bg-green-100 rounded-container shadow-lg px-6 py-2 mt-2 justify-between"
+			class="flex flex-row items-center space-x-4 bg-green-100 dark:bg-green-900 rounded-container shadow-lg px-6 py-2 mt-2 justify-between"
 		>
-			<div class="text-green-900">
+			<div class="text-success-800-200">
 				{m.riskAcceptanceValidatedMessage()}
 			</div>
 			{#if page.data.user.id === data.data.approver?.id}
