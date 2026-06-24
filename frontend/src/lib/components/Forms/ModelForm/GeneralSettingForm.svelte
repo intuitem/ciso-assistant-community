@@ -191,6 +191,17 @@
 					label={m.defaultLanguage()}
 					helpText={m.defaultLanguageHelpText()}
 				/>
+				<Select
+					{form}
+					field="default_landing"
+					options={[
+						{ label: m.analytics(), value: 'analytics' },
+						{ label: m.respondentMode(), value: 'respondent' },
+						{ label: m.portals(), value: 'portal' }
+					]}
+					label={m.defaultLanding()}
+					helpText={m.defaultLandingHelpText()}
+				/>
 				<hr class="my-2" />
 				<p class="text-sm text-surface-600-400">{m.forceLanguageHelpText()}</p>
 				<button

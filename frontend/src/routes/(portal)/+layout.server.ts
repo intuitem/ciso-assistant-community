@@ -11,7 +11,9 @@ export const load = loadFlash(async ({ locals, url, fetch }) => {
 		redirect(302, '/');
 	}
 	const res = await fetch(`${BASE_API_URL}/portals/mine/`);
-	const portals: { id: string; name: string }[] = res.ok ? await res.json() : [];
+	const portals: { id: string; name: string; is_default: boolean }[] = res.ok
+		? await res.json()
+		: [];
 	return {
 		user: locals.user,
 		settings: locals.settings,

@@ -8317,6 +8317,14 @@ class UserPreferencesView(APIView):
                         status=status.HTTP_400_BAD_REQUEST,
                     )
                 ui_prefs["theme"] = new_theme
+            if "landing" in new_ui:
+                new_landing = new_ui.get("landing")
+                if new_landing not in ("", "analytics", "respondent", "portal"):
+                    return Response(
+                        {"error": "This landing doesn't exist."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                ui_prefs["landing"] = new_landing
             prefs["ui"] = ui_prefs
 
         request.user.preferences = prefs
@@ -12576,13 +12584,18 @@ class PortalViewSet(BaseModelViewSet):
                 | Q(is_default=True)
             )
             .distinct()
-            .order_by("priority", "name")
+            .order_by("order", "name")
         )
 
     @action(detail=False, methods=["get"])
     def mine(self, request):
         portals = self._entitled_queryset(request)
-        return Response([{"id": str(p.id), "name": p.name} for p in portals])
+        return Response(
+            [
+                {"id": str(p.id), "name": p.name, "is_default": p.is_default}
+                for p in portals
+            ]
+        )
 
     @action(detail=True, methods=["get"])
     def content(self, request, pk=None):

@@ -607,6 +607,7 @@ export const GeneralSettingsSchema = z.object({
 		.enum(['none', 'parent_wins', 'child_wins', 'best_case', 'worst_case'])
 		.default('none')
 		.optional(),
+	default_landing: z.enum(['analytics', 'respondent', 'portal']).default('analytics').optional(),
 	currency: z.enum(CURRENCY_SYMBOLS).default('€'),
 	daily_rate: z.number().default(500).optional(),
 	mapping_max_depth: z.coerce.number().int().min(2).max(5).default(3).optional(),
@@ -690,6 +691,13 @@ export const FeatureFlagsSchema = z.object({
 	cwes: z.boolean().optional(),
 	object_audit_trail: z.boolean().optional(),
 	custom_portals: z.boolean().optional()
+});
+
+export const PortalSettingsSchema = z.object({
+	enabled: z.boolean().default(true),
+	is_default: z.boolean().default(false),
+	order: z.number().default(0),
+	audience_groups: z.string().uuid().optional().array().optional()
 });
 
 export const SSOSettingsSchema = z.object({

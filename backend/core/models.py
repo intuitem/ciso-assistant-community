@@ -9979,13 +9979,13 @@ class Portal(NameDescriptionMixin, FolderMixin):
         UserGroup, related_name="portals", blank=True
     )
     is_default = models.BooleanField(default=False)
-    priority = models.IntegerField(default=0)
+    order = models.IntegerField(default=0)
     branding = models.JSONField(default=dict, blank=True)
     content = models.JSONField(default=dict, blank=True)
     source_ref = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
-        ordering = ["priority", "name"]
+        ordering = ["order", "name"]
 
     def __str__(self):
         return self.name

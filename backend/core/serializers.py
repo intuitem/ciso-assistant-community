@@ -4640,7 +4640,7 @@ class PortalWriteSerializer(BaseModelSerializer):
             "is_public",
             "audience_groups",
             "is_default",
-            "priority",
+            "order",
             "branding",
             "content",
             "source_ref",

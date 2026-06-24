@@ -85,7 +85,7 @@
 				</button>
 			{/if}
 			<a
-				href="/"
+				href="/analytics"
 				class="rounded-lg border border-surface-200-800 px-3 py-1.5 text-xs text-surface-600-400 hover:bg-surface-200-800"
 			>
 				<i class="fa-solid fa-arrow-right-from-bracket mr-1"></i>{m.backToApp()}

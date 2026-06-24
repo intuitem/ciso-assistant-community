@@ -1,16 +1,25 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { PortalSettingsSchema } from '$lib/utils/schemas';
 import { error, fail, redirect, type Actions } from '@sveltejs/kit';
+import { superValidate } from 'sveltekit-superforms';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 	if (!locals.featureflags?.custom_portals) redirect(302, '/');
-	const [pRes, gRes] = await Promise.all([
-		fetch(`${BASE_API_URL}/portals/${params.id}/`),
-		fetch(`${BASE_API_URL}/user-groups/`)
-	]);
-	if (!pRes.ok) error(pRes.status === 404 ? 404 : 500, 'Portal not found');
-	const userGroups = gRes.ok ? ((await gRes.json()).results ?? []) : [];
-	return { portal: await pRes.json(), userGroups };
+	const res = await fetch(`${BASE_API_URL}/portals/${params.id}/`);
+	if (!res.ok) error(res.status === 404 ? 404 : 500, 'Portal not found');
+	const portal = await res.json();
+	const settingsForm = await superValidate(
+		{
+			enabled: portal.enabled,
+			is_default: portal.is_default,
+			order: portal.order,
+			audience_groups: (portal.audience_groups ?? []).map((g: { id: string }) => g.id)
+		},
+		zod(PortalSettingsSchema)
+	);
+	return { portal, settingsForm };
 };
 
 async function patch(fetch: typeof globalThis.fetch, id: string, body: unknown) {
@@ -49,15 +58,16 @@ export const actions: Actions = {
 		return { success: true };
 	},
 	updateSettings: async ({ params, request, fetch }) => {
-		const data = await request.formData();
+		const form = await superValidate(request, zod(PortalSettingsSchema));
+		if (!form.valid) return fail(400, { form });
 		const res = await patch(fetch, params.id!, {
-			enabled: data.get('enabled') === 'on',
-			is_default: data.get('is_default') === 'on',
-			priority: parseInt(data.get('priority') as string) || 0,
-			audience_groups: data.getAll('audience_groups')
+			enabled: form.data.enabled,
+			is_default: form.data.is_default,
+			order: form.data.order,
+			audience_groups: form.data.audience_groups ?? []
 		});
 		if (!res.ok) return fail(res.status, { error: await res.text() });
-		return { success: true };
+		return { form };
 	},
 	duplicate: async ({ params, fetch }) => {
 		const res = await fetch(`${BASE_API_URL}/portals/${params.id}/duplicate/`, { method: 'POST' });

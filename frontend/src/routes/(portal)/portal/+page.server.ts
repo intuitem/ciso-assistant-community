@@ -4,7 +4,8 @@ import type { PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ parent }) => {
 	const { portals } = await parent();
 	if (portals?.length) {
-		redirect(302, `/portal/${portals[0].id}`);
+		const target = portals.find((p) => p.is_default) ?? portals[0];
+		redirect(302, `/portal/${target.id}`);
 	}
 	return {};
 };

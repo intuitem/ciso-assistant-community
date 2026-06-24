@@ -7,6 +7,8 @@
 	import { SCAFFOLDABLE_MODELS } from '$lib/utils/modelTargets';
 	import { urlParamModelVerboseName } from '$lib/utils/crud';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { superForm } from 'sveltekit-superforms';
+	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import type { PageData } from './$types';
 
 	const modelOptions = SCAFFOLDABLE_MODELS.map((model) => ({
@@ -17,7 +19,17 @@
 	let { data }: { data: PageData } = $props();
 	const toast = getToastStore();
 	let view = $state<'edit' | 'preview' | 'settings'>('edit');
-	const audienceIds = new Set((data.portal.audience_groups ?? []).map((g: any) => g.id));
+
+	const settingsSuperform = superForm(data.settingsForm, {
+		dataType: 'json',
+		resetForm: false,
+		invalidateAll: true,
+		onUpdated: ({ form }) => {
+			if (form.valid)
+				toast.trigger({ message: m.saved(), background: 'preset-filled-success-500' });
+		}
+	});
+	const { form: settingsData, enhance: settingsEnhance } = settingsSuperform;
 
 	type Item = {
 		icon: string;
@@ -254,54 +266,30 @@
 		<form
 			method="POST"
 			action="?/updateSettings"
-			use:enhance={() =>
-				async ({ result, update }) => {
-					await update();
-					if (result.type === 'success')
-						toast.trigger({ message: m.saved(), background: 'preset-filled-success-500' });
-				}}
-			class="card bg-surface-50-950 p-6 space-y-5 max-w-xl"
+			use:settingsEnhance
+			class="card bg-surface-50-950 p-6 space-y-5 max-w-4xl"
 		>
 			<label class="flex items-center gap-2 text-sm">
-				<input type="checkbox" name="enabled" checked={data.portal.enabled} class="checkbox" />
+				<input type="checkbox" bind:checked={$settingsData.enabled} class="checkbox" />
 				{m.enabled()}
 			</label>
 			<label class="flex items-center gap-2 text-sm">
-				<input
-					type="checkbox"
-					name="is_default"
-					checked={data.portal.is_default}
-					class="checkbox"
-				/>
+				<input type="checkbox" bind:checked={$settingsData.is_default} class="checkbox" />
 				{m.defaultPortal()}
 			</label>
 			<label class="block text-sm">
-				<span class="block text-surface-600-400">{m.priority()}</span>
-				<input
-					type="number"
-					name="priority"
-					value={data.portal.priority}
-					class="input rounded-md w-24"
-				/>
+				<span class="block text-surface-600-400">{m.order()}</span>
+				<input type="number" bind:value={$settingsData.order} class="input rounded-md w-24" />
 			</label>
-			<fieldset class="text-sm">
-				<legend class="text-surface-600-400">{m.audience()}</legend>
-				<p class="text-xs text-surface-500">{m.audienceHelp()}</p>
-				<div class="mt-2 max-h-64 space-y-1 overflow-auto">
-					{#each data.userGroups as g}
-						<label class="flex items-center gap-2">
-							<input
-								type="checkbox"
-								name="audience_groups"
-								value={g.id}
-								checked={audienceIds.has(g.id)}
-								class="checkbox"
-							/>
-							{g.name}
-						</label>
-					{/each}
-				</div>
-			</fieldset>
+			<AutocompleteSelect
+				form={settingsSuperform}
+				multiple
+				optionsEndpoint="user-groups"
+				field="audience_groups"
+				pathField="path"
+				label={m.audience()}
+			/>
+			<p class="text-xs text-surface-500">{m.audienceHelp()}</p>
 			<button class="btn preset-filled-primary-500">{m.save()}</button>
 		</form>
 	{/if}

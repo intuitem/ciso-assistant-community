@@ -94,6 +94,7 @@ GENERAL_SETTINGS_KEYS = [
     "chat_temperature",
     "default_custom_analytics_dashboard",
     "audit_tree_aggregation_strategy",
+    "default_landing",
 ]
 
 LLM_URL_DEFAULTS = {
