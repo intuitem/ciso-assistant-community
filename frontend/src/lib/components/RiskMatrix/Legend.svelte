@@ -11,32 +11,26 @@
 
 	let classesCellText = $derived((backgroundHexColor: string | undefined | null): string => {
 		if (!backgroundHexColor) return '';
-		return isDark(backgroundHexColor) ? 'text-white' : 'text-black';
+		return isDark(backgroundHexColor) ? 'text-white' : 'text-surface-950';
 	});
 </script>
 
 <div class="w-full flex flex-col justify-start mt-4">
-	<h3 class="flex font-semibold pl-6 m-2 text-md">{m.riskLevels()}</h3>
+	<h3 class="flex font-semibold m-2 text-md">{m.riskLevels()}</h3>
 	<div class="flex justify-start mx-2">
-		<table class="w-auto border-separate" style="border-spacing: 0 4px;">
-			<thead>
-				<tr>
-					<th class="text-center pb-2 px-2 font-semibold">{m.level()}</th>
-					<th class="text-left pb-2 px-2 font-semibold">{m.description()}</th>
-				</tr>
-			</thead>
+		<table class="w-auto border-separate" style="border-spacing: 0 6px;">
 			<tbody>
 				{#each parsedRiskMatrix.risk as riskItem}
-					<tr class="col">
+					<tr>
 						<td
-							class="w-auto text-center border-4 border-white p-2 font-semibold whitespace-nowrap rounded-l {classesCellText(
+							class="text-center px-3 py-1.5 font-semibold whitespace-nowrap rounded-md {classesCellText(
 								riskItem.hexcolor
 							)}"
 							style="background-color: {riskItem.hexcolor}"
 						>
 							{riskItem.name}
 						</td>
-						<td class="col italic pl-3 border-t-4 border-b-4 border-r-4 border-white rounded-r">
+						<td class="italic pl-3 text-surface-700-300">
 							{riskItem.description}
 						</td>
 					</tr>

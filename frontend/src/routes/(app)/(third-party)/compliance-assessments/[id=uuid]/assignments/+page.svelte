@@ -668,7 +668,7 @@
 
 	<!-- Info banner -->
 	<div
-		class="bg-white border border-blue-200 border-l-[3px] border-l-blue-400 rounded-lg px-4 py-3 shadow-sm"
+		class="bg-surface-50-950 border border-blue-200 border-l-[3px] border-l-blue-400 rounded-lg px-4 py-3 shadow-sm"
 	>
 		<div class="flex items-start gap-3">
 			<div
@@ -688,7 +688,7 @@
 	<!-- Read-only banner -->
 	{#if isReadOnly}
 		<div
-			class="bg-white border border-yellow-200 border-l-[3px] border-l-yellow-500 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
+			class="bg-surface-50-950 border border-yellow-200 border-l-[3px] border-l-yellow-500 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
 		>
 			<div class="w-8 h-8 rounded-full bg-yellow-50 flex items-center justify-center flex-shrink-0">
 				<i class="fa-solid fa-lock text-yellow-500 text-sm"></i>
@@ -703,11 +703,11 @@
 
 	<div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
 		<!-- Left Panel: Tree with Checkboxes -->
-		<div class="lg:col-span-2 card bg-white shadow-lg p-4">
+		<div class="lg:col-span-2 card bg-surface-50-950 shadow-lg p-4">
 			<div class="flex items-center justify-between mb-4">
 				<div>
 					<h2 class="h4 font-semibold">{m.requirements()}</h2>
-					<p class="text-sm text-gray-500">
+					<p class="text-sm text-surface-600-400">
 						{m.selectRequirementsToAssign()}
 					</p>
 				</div>
@@ -738,7 +738,7 @@
 			<!-- Implementation Groups quick-select -->
 			{#if hasImplementationGroups && !isReadOnly}
 				<div class="flex flex-wrap items-center gap-2 mb-4 pb-4 border-b">
-					<span class="text-xs font-medium text-gray-500 mr-1">
+					<span class="text-xs font-medium text-surface-600-400 mr-1">
 						<i class="fa-solid fa-layer-group mr-1"></i>
 						{m.implementationGroups()}:
 					</span>
@@ -754,7 +754,7 @@
 							<span
 								class="badge text-[10px] ml-1 {availableCount > 0
 									? 'bg-secondary-100 text-secondary-700'
-									: 'bg-gray-100 text-gray-400'}"
+									: 'bg-surface-100-900 text-surface-500'}"
 							>
 								{availableCount}
 							</span>
@@ -770,7 +770,7 @@
 						<i class="fa-solid fa-square-check mr-1"></i>
 						{m.available()}
 					</span>
-					<span class="text-gray-400">({m.clickToSelect()})</span>
+					<span class="text-surface-400-600">({m.clickToSelect()})</span>
 				</div>
 				<div class="flex items-center gap-1">
 					<span class="px-2 py-1 rounded-md bg-violet-50 border border-violet-200 text-violet-700">
@@ -779,7 +779,9 @@
 					</span>
 				</div>
 				<div class="flex items-center gap-1">
-					<span class="px-2 py-1 rounded-md bg-gray-100 border border-gray-200 text-gray-500">
+					<span
+						class="px-2 py-1 rounded-md bg-surface-100-900 border border-surface-200-800 text-surface-600-400"
+					>
 						<i class="fa-solid fa-lock mr-1"></i>
 						{m.alreadyAssigned()}
 					</span>
@@ -787,12 +789,12 @@
 			</div>
 
 			<!-- Tree View -->
-			<div class="max-h-[600px] overflow-y-auto border rounded-lg p-2 bg-gray-50">
+			<div class="max-h-[600px] overflow-y-auto border rounded-lg p-2 bg-surface-50-950">
 				{#key assignedRequirementIds}
 					<RecursiveTreeView
 						nodes={treeViewNodes}
 						bind:expandedNodes
-						hover="hover:bg-gray-100"
+						hover="hover:bg-surface-100-900"
 						padding="py-2 px-2"
 					/>
 				{/key}
@@ -804,7 +806,9 @@
 			<!-- Create/Edit Assignment Card -->
 			{#if !isReadOnly}
 				<div
-					class="card bg-white shadow-lg p-4 {editingAssignmentId ? 'ring-2 ring-violet-400' : ''}"
+					class="card bg-surface-50-950 shadow-lg p-4 {editingAssignmentId
+						? 'ring-2 ring-violet-400'
+						: ''}"
 				>
 					<h2 class="h4 font-semibold mb-4">
 						{#if editingAssignmentId}
@@ -837,9 +841,9 @@
 						{/key}
 
 						<!-- Selected Count -->
-						<div class="bg-gray-50 rounded-lg p-3">
+						<div class="bg-surface-50-950 rounded-lg p-3">
 							<div class="flex items-center justify-between text-sm">
-								<span class="text-gray-600">{m.selectedRequirements()}:</span>
+								<span class="text-surface-600-400">{m.selectedRequirements()}:</span>
 								<span class="font-semibold text-primary-600">{availableCheckedNodes.length}</span>
 							</div>
 						</div>
@@ -880,7 +884,7 @@
 						{/if}
 
 						{#if !hasSelectedActors || availableCheckedNodes.length === 0}
-							<p class="text-xs text-gray-500 text-center">
+							<p class="text-xs text-surface-600-400 text-center">
 								{m.fillAllFieldsToCreateAssignment()}
 							</p>
 						{/if}
@@ -889,12 +893,14 @@
 			{/if}
 
 			<!-- Existing Assignments Card -->
-			<div class="card bg-white shadow-lg p-4">
+			<div class="card bg-surface-50-950 shadow-lg p-4">
 				<div class="flex items-center justify-between mb-4">
 					<h2 class="h4 font-semibold">
 						<i class="fa-solid fa-list text-primary-500 mr-2"></i>
 						{m.existingAssignments()}
-						<span class="badge bg-gray-200 text-gray-700 ml-2">{assignments.length}</span>
+						<span class="badge bg-surface-200-800 text-surface-700-300 ml-2"
+							>{assignments.length}</span
+						>
 					</h2>
 					{#if !isReadOnly && hasDraftAssignments}
 						<button class="btn btn-sm preset-filled-warning-500" onclick={handleActivateAll}>
@@ -905,9 +911,11 @@
 				</div>
 
 				{#if assignments.length === 0}
-					<div class="flex flex-col items-center justify-center py-10 text-gray-400">
-						<div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mb-3">
-							<i class="fa-solid fa-folder-open text-lg text-gray-300"></i>
+					<div class="flex flex-col items-center justify-center py-10 text-surface-400-600">
+						<div
+							class="w-12 h-12 rounded-xl bg-surface-100-900 flex items-center justify-center mb-3"
+						>
+							<i class="fa-solid fa-folder-open text-lg text-surface-300-700"></i>
 						</div>
 						<p class="text-sm">{m.noAssignmentsYet()}</p>
 					</div>
@@ -918,17 +926,17 @@
 								class="border border-l-[3px] rounded-lg transition-all duration-200 {editingAssignmentId ===
 								assignment.id
 									? 'bg-violet-50 border-violet-300 border-l-violet-500 ring-2 ring-violet-200'
-									: `bg-white hover:bg-gray-50 hover:shadow-sm ${statusAccentLeft[assignment.status] ?? 'border-l-gray-300'}`}"
+									: `bg-surface-50-950 hover:bg-surface-100-900 hover:shadow-sm ${statusAccentLeft[assignment.status] ?? 'border-l-surface-300-700'}`}"
 							>
 								<!-- Card body -->
 								<div class="p-3.5">
-									<div class="flex items-center gap-2 text-sm text-gray-900 font-medium">
+									<div class="flex items-center gap-2 text-sm text-surface-950-50 font-medium">
 										<i class="fa-solid fa-{actorIcon(assignment.actor)}"></i>
 										<span class="truncate">{formatActors(assignment.actor)}</span>
 										<span
 											class="text-xs font-medium px-2 py-0.5 rounded-md whitespace-nowrap {assignmentStatusStyle[
 												assignment.status
-											] ?? 'bg-gray-100 text-gray-700'}"
+											] ?? 'bg-surface-100-900 text-surface-700-300'}"
 										>
 											{assignmentStatusLabel[assignment.status]?.() ?? assignment.status}
 										</span>
@@ -946,7 +954,7 @@
 										{#if assignment.status !== 'draft'}
 											<a
 												href="/auditee-assessments/{assignment.id}"
-												class="badge bg-gray-100 text-gray-700 text-xs hover:bg-gray-200 cursor-pointer transition-colors"
+												class="badge bg-surface-100-900 text-surface-700-300 text-xs hover:bg-surface-200-800 cursor-pointer transition-colors"
 												title={m.reviewResponses()}
 											>
 												<i class="fa-solid fa-eye mr-1"></i>
@@ -955,7 +963,7 @@
 										{/if}
 										{#if assignment.events.length > 0}
 											<button
-												class="badge bg-gray-100 text-gray-600 text-xs hover:bg-gray-200 cursor-pointer transition-colors"
+												class="badge bg-surface-100-900 text-surface-600-400 text-xs hover:bg-surface-200-800 cursor-pointer transition-colors"
 												onclick={() => openHistoryModal(assignment)}
 												title={m.viewHistory()}
 											>
@@ -996,7 +1004,7 @@
 										canModifyAssignment(assignment.status)}
 									{#if hasActions}
 										<div
-											class="flex flex-wrap items-center gap-1.5 px-3.5 py-2 border-t border-gray-100 bg-gray-50/50 rounded-b-lg"
+											class="flex flex-wrap items-center gap-1.5 px-3.5 py-2 border-t border-surface-100-900 bg-surface-100-900/50 rounded-b-lg"
 										>
 											<!-- Status transitions -->
 											{#if assignment.status === 'draft'}
@@ -1097,7 +1105,7 @@
 	<!-- Modal -->
 	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
 		<div
-			class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col"
+			class="bg-surface-50-950 rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col"
 			onclick={(e) => e.stopPropagation()}
 			role="dialog"
 			aria-modal="true"
@@ -1123,7 +1131,7 @@
 			<!-- Content -->
 			<div class="p-4 overflow-y-auto flex-1">
 				<div class="mb-3 flex items-center justify-between">
-					<span class="text-sm text-gray-600">
+					<span class="text-sm text-surface-600-400">
 						{m.requirements()}
 					</span>
 					<span class="badge bg-blue-100 text-blue-700 text-xs">
@@ -1135,7 +1143,7 @@
 				<div class="space-y-2">
 					{#each getRequirementDetails(selectedAssignmentForModal.requirement_assessments) as req}
 						<div
-							class="flex items-center gap-3 p-2 rounded-md bg-gray-50 hover:bg-gray-100 transition-colors"
+							class="flex items-center gap-3 p-2 rounded-md bg-surface-50-950 hover:bg-surface-100-900 transition-colors"
 						>
 							<!-- Result indicator -->
 							{#if req.result}
@@ -1145,12 +1153,14 @@
 									title={req.result}
 								></span>
 							{:else}
-								<span class="w-2 h-2 rounded-full bg-gray-300 flex-shrink-0" title={m.notAssessed()}
+								<span
+									class="w-2 h-2 rounded-full bg-surface-300-700 flex-shrink-0"
+									title={m.notAssessed()}
 								></span>
 							{/if}
 
 							<!-- Requirement content -->
-							<span class="text-sm text-gray-800">
+							<span class="text-sm text-surface-950-50">
 								{#if req.node_content}
 									{req.node_content}
 								{:else}
@@ -1163,7 +1173,7 @@
 			</div>
 
 			<!-- Footer -->
-			<div class="p-4 border-t bg-gray-50 rounded-b-lg">
+			<div class="p-4 border-t bg-surface-50-950 rounded-b-lg">
 				<button class="btn preset-filled-surface-500 w-full" onclick={closeRequirementsModal}>
 					{m.close()}
 				</button>
@@ -1181,7 +1191,7 @@
 	></div>
 	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
 		<div
-			class="bg-white rounded-lg shadow-xl max-w-lg w-full flex flex-col"
+			class="bg-surface-50-950 rounded-lg shadow-xl max-w-lg w-full flex flex-col"
 			onclick={(e) => e.stopPropagation()}
 			role="dialog"
 			aria-modal="true"
@@ -1211,7 +1221,7 @@
 					bind:value={reviewerObservationText}
 				></textarea>
 			</div>
-			<div class="p-4 border-t bg-gray-50 rounded-b-lg flex gap-2">
+			<div class="p-4 border-t bg-surface-50-950 rounded-b-lg flex gap-2">
 				<button
 					class="btn preset-filled-error-500 flex-1"
 					onclick={handleRequestChanges}
@@ -1233,7 +1243,7 @@
 	<div class="fixed inset-0 bg-black/50 z-40" onclick={closeHistoryModal} role="presentation"></div>
 	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
 		<div
-			class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col"
+			class="bg-surface-50-950 rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col"
 			onclick={(e) => e.stopPropagation()}
 			role="dialog"
 			aria-modal="true"
@@ -1257,7 +1267,7 @@
 			<!-- Content -->
 			<div class="p-4 overflow-y-auto flex-1">
 				<div class="mb-3">
-					<span class="text-sm text-gray-600">
+					<span class="text-sm text-surface-600-400">
 						<i class="fa-solid fa-{actorIcon(historyModalAssignment.actor)} mr-1"></i>
 						{formatActors(historyModalAssignment.actor)}
 					</span>
@@ -1277,29 +1287,29 @@
 												? 'bg-blue-400'
 												: event.event_type === 'in_progress'
 													? 'bg-amber-400'
-													: 'bg-gray-300'}"
+													: 'bg-surface-300-700'}"
 								></div>
-								<div class="w-px flex-1 bg-gray-200 mt-1"></div>
+								<div class="w-px flex-1 bg-surface-200-800 mt-1"></div>
 							</div>
 							<div class="pb-3 flex-1">
 								<div class="flex items-center gap-2 text-sm">
 									<span
 										class="font-medium px-1.5 py-0.5 rounded text-xs {assignmentStatusStyle[
 											event.event_type
-										] ?? 'bg-gray-100 text-gray-700'}"
+										] ?? 'bg-surface-100-900 text-surface-700-300'}"
 									>
 										{assignmentStatusLabel[event.event_type]?.() ?? event.event_type}
 									</span>
-									<span class="text-gray-500 text-xs">
+									<span class="text-surface-600-400 text-xs">
 										{formatEventActor(event.event_actor)}
 									</span>
 								</div>
-								<span class="text-gray-400 text-xs">
+								<span class="text-surface-500 text-xs">
 									{formatDate(new Date(event.created_at), true, getLocale())}
 								</span>
 								{#if event.event_notes}
 									<div
-										class="mt-1.5 text-sm text-gray-700 whitespace-pre-line bg-gray-50 border border-gray-100 rounded-md px-3 py-2"
+										class="mt-1.5 text-sm text-surface-700-300 whitespace-pre-line bg-surface-50-950 border border-surface-100-900 rounded-md px-3 py-2"
 									>
 										{event.event_notes}
 									</div>
@@ -1311,7 +1321,7 @@
 			</div>
 
 			<!-- Footer -->
-			<div class="p-4 border-t bg-gray-50 rounded-b-lg">
+			<div class="p-4 border-t bg-surface-50-950 rounded-b-lg">
 				<button class="btn preset-filled-surface-500 w-full" onclick={closeHistoryModal}>
 					{m.close()}
 				</button>

@@ -12,6 +12,7 @@ from library.views import (
     StoredLibraryViewSet,
     LoadedLibraryViewSet,
 )
+from custom_fields.views import CustomFieldDefinitionViewSet
 import importlib
 
 
@@ -22,6 +23,11 @@ from django.conf import settings
 
 router = routers.DefaultRouter()
 router.register(r"folders", FolderViewSet, basename="folders")
+router.register(
+    r"custom-fields",
+    CustomFieldDefinitionViewSet,
+    basename="custom-fields",
+)
 router.register(r"entities", EntityViewSet, basename="entities")
 router.register(
     r"entity-assessments", EntityAssessmentViewSet, basename="entity-assessments"

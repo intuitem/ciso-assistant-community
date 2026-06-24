@@ -286,7 +286,7 @@
 								<span>{$modalStore[0].title}</span>
 								<button
 									type="button"
-									class="btn-icon btn-icon-sm text-gray-500 hover:text-gray-700"
+									class="btn-icon btn-icon-sm text-surface-600-400 hover:text-surface-700-300"
 									onclick={onCloseButton}
 									aria-label="Close"
 								>

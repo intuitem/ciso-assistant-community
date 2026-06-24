@@ -33,7 +33,7 @@ def domain_folder(db, root_folder):
 
 
 def _make_audit_sink(folder, **kwargs):
-    with override_settings(WEBHOOK_ALLOW_PRIVATE_IPS=True):
+    with override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=True):
         defaults = dict(
             name="siem",
             url="https://siem.example/collector",
@@ -218,7 +218,7 @@ def test_replay_respects_folder_scope(root_folder, domain_folder):
 
 
 @pytest.mark.django_db
-@override_settings(WEBHOOK_ALLOW_PRIVATE_IPS=True)
+@override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=True)
 def test_send_audit_request_uses_static_headers_no_hmac(root_folder):
     ep = _make_audit_sink(root_folder)
     mock_response = MagicMock()
@@ -385,7 +385,7 @@ def test_update_preserves_headers_when_omitted(root_folder):
     from webhooks.serializers import AuditSinkSerializer
 
     ep = _make_audit_sink(root_folder, headers={"Authorization": "Splunk token"})
-    with override_settings(WEBHOOK_ALLOW_PRIVATE_IPS=True):
+    with override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=True):
         AuditSinkSerializer().update(ep, {"url": "https://siem.example/v2"})
     ep.refresh_from_db()
     assert ep.url == "https://siem.example/v2"

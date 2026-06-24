@@ -6,7 +6,6 @@ from .views import (
     PersonalAccessTokenViewSet,
     ChangePasswordView,
     CurrentUserView,
-    LoginView,
     PasswordResetView,
     ResetPasswordConfirmView,
     SessionTokenView,
@@ -15,7 +14,6 @@ from .views import (
 )
 
 urlpatterns = [
-    path(r"login/", LoginView.as_view(), name="knox_login"),
     path(r"logout/", knox_views.LogoutView.as_view(), name="knox_logout"),
     path(r"logoutall/", knox_views.LogoutAllView.as_view(), name="knox_logoutall"),
     path("current-user/", CurrentUserView.as_view(), name="current-user"),

@@ -48,7 +48,7 @@
 <aside class="flex items-center">
 	{m.show()}
 	<select
-		class="select bg-surface-50 w-fit mx-1"
+		class="select bg-surface-50-950 w-fit mx-1"
 		bind:value={$rowsPerPage}
 		onchange={setRowsPerPage}
 	>

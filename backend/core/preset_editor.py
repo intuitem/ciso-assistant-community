@@ -12,7 +12,33 @@ from core.models import LoadedLibrary, Preset
 REF_RE = re.compile(r"^[A-Za-z0-9_]+$")
 KEY_RE = re.compile(r"^[A-Za-z0-9_-]+$")
 
-ALLOWED_SCAFFOLD_TYPES = {"compliance_assessment", "risk_assessment"}
+ALLOWED_SCAFFOLD_TYPES = {
+    "compliance_assessment",
+    "risk_assessment",
+    "applied_control",
+    "policy",
+    "security_exception",
+    "risk_acceptance",
+    "entity",
+    "project",
+    "responsibility_matrix",
+}
+
+# Enum allow-lists for type-specific scaffold fields (mirror the model choices).
+APPLIED_CONTROL_CATEGORIES = {"policy", "process", "technical", "physical", "procedure"}
+CSF_FUNCTIONS = {"govern", "identify", "protect", "detect", "respond", "recover"}
+APPLIED_CONTROL_PRIORITIES = {1, 2, 3, 4}
+SECURITY_EXCEPTION_SEVERITIES = {-1, 0, 1, 2, 3, 4}
+SECURITY_EXCEPTION_STATUSES = {
+    "draft",
+    "in_review",
+    "approved",
+    "resolved",
+    "expired",
+    "deprecated",
+}
+PROJECT_KINDS = {"portfolio", "program", "project"}
+RESPONSIBILITY_MATRIX_PRESETS = {"raci", "rasci", "rapid", "custom"}
 
 ALLOWED_TARGET_MODELS = {
     "accreditations",
@@ -32,6 +58,8 @@ ALLOWED_TARGET_MODELS = {
     "perimeters",
     "policies",
     "processings",
+    "projects",
+    "responsibility-matrices",
     "risk-acceptances",
     "risk-assessments",
     "security-exceptions",
@@ -207,6 +235,85 @@ def _validate_scaffolds(scaffolds: list, strict: bool = True) -> tuple[list, set
                     {f"scaffolded_objects[{i}].risk_matrix": "Risk matrix is required."}
                 )
             normalized["risk_matrix"] = risk_matrix
+        elif scaffold_type == "applied_control":
+            category = item.get("category")
+            if category:
+                if category not in APPLIED_CONTROL_CATEGORIES:
+                    raise ValidationError(
+                        {
+                            f"scaffolded_objects[{i}].category": (
+                                f"Must be one of: {sorted(APPLIED_CONTROL_CATEGORIES)}."
+                            )
+                        }
+                    )
+                normalized["category"] = category
+            csf_function = item.get("csf_function")
+            if csf_function:
+                if csf_function not in CSF_FUNCTIONS:
+                    raise ValidationError(
+                        {
+                            f"scaffolded_objects[{i}].csf_function": (
+                                f"Must be one of: {sorted(CSF_FUNCTIONS)}."
+                            )
+                        }
+                    )
+                normalized["csf_function"] = csf_function
+            priority = item.get("priority")
+            if priority is not None:
+                if priority not in APPLIED_CONTROL_PRIORITIES:
+                    raise ValidationError(
+                        {f"scaffolded_objects[{i}].priority": "Must be 1, 2, 3 or 4."}
+                    )
+                normalized["priority"] = priority
+        elif scaffold_type == "security_exception":
+            severity = item.get("severity")
+            if severity is not None:
+                if severity not in SECURITY_EXCEPTION_SEVERITIES:
+                    raise ValidationError(
+                        {
+                            f"scaffolded_objects[{i}].severity": (
+                                f"Must be one of: {sorted(SECURITY_EXCEPTION_SEVERITIES)}."
+                            )
+                        }
+                    )
+                normalized["severity"] = severity
+            status = item.get("status")
+            if status:
+                if status not in SECURITY_EXCEPTION_STATUSES:
+                    raise ValidationError(
+                        {
+                            f"scaffolded_objects[{i}].status": (
+                                f"Must be one of: {sorted(SECURITY_EXCEPTION_STATUSES)}."
+                            )
+                        }
+                    )
+                normalized["status"] = status
+        elif scaffold_type == "project":
+            kind = item.get("kind")
+            if kind:
+                if kind not in PROJECT_KINDS:
+                    raise ValidationError(
+                        {
+                            f"scaffolded_objects[{i}].kind": (
+                                f"Must be one of: {sorted(PROJECT_KINDS)}."
+                            )
+                        }
+                    )
+                normalized["kind"] = kind
+            if item.get("ref_id"):
+                normalized["ref_id"] = item["ref_id"]
+        elif scaffold_type == "responsibility_matrix":
+            matrix_preset = item.get("matrix_preset")
+            if matrix_preset:
+                if matrix_preset not in RESPONSIBILITY_MATRIX_PRESETS:
+                    raise ValidationError(
+                        {
+                            f"scaffolded_objects[{i}].matrix_preset": (
+                                f"Must be one of: {sorted(RESPONSIBILITY_MATRIX_PRESETS)}."
+                            )
+                        }
+                    )
+                normalized["matrix_preset"] = matrix_preset
         translations = item.get("translations")
         if translations is not None:
             if not isinstance(translations, dict):
