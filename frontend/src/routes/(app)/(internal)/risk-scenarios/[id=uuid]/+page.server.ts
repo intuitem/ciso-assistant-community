@@ -74,13 +74,20 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 		riskScenarioIds: [params.id]
 	});
 
+	const riskAcceptances = await fetch(
+		`${BASE_API_URL}/risk-acceptances/?risk_scenarios=${params.id}`
+	)
+		.then((res) => (res.ok ? res.json() : { results: [] }))
+		.then((res) => res.results ?? []);
+
 	return {
 		scenario,
 		tables,
 		riskMatrix,
 		title: scenario.str,
 		riskAcceptanceForm,
-		riskAcceptanceModel
+		riskAcceptanceModel,
+		riskAcceptances
 	};
 }) satisfies PageServerLoad;
 

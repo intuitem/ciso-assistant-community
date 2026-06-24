@@ -15,6 +15,7 @@
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
 	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
+	import RiskAcceptancesSection from '$lib/components/RiskAcceptances/RiskAcceptancesSection.svelte';
 
 	import { goto, invalidateAll } from '$app/navigation';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
@@ -201,8 +202,11 @@
 					<p class="text-surface-400-600 italic text-sm">{m.noDescription()}</p>
 				{/if}
 			</div>
+			{#key data.riskAcceptances}
+				<RiskAcceptancesSection riskAcceptances={data.riskAcceptances} />
+			{/key}
 		</div>
-		<div class="flex flex-col space-y-2 sm:my-auto shrink-0">
+		<div class="flex flex-col space-y-2 sm:self-start shrink-0">
 			{#if canEditObject}
 				<Anchor
 					href={`${page.url.pathname}/edit?next=${page.url.pathname}`}
@@ -357,23 +361,6 @@
 			hideFilters={true}
 			URLModel="security-exceptions"
 			baseEndpoint="/security-exceptions?risk_scenarios={page.params.id}"
-		/>
-	</div>
-	<div class="card px-4 py-2 bg-surface-50-950 shadow-lg max-w-full max-h-96 overflow-y-auto">
-		<h4 class="h4 font-semibold">{m.riskAcceptances()}</h4>
-		<ModelTable
-			source={{
-				head: {
-					name: 'name',
-					state: 'state',
-					expiry_date: 'expiry_date',
-					approver: 'approver'
-				},
-				body: []
-			}}
-			hideFilters={true}
-			URLModel="risk-acceptances"
-			baseEndpoint="/risk-acceptances?risk_scenarios={page.params.id}"
 		/>
 	</div>
 
