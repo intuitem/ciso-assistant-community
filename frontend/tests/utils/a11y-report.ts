@@ -13,6 +13,10 @@ export interface PageReport {
 	name: string;
 	path: string;
 	theme?: 'light' | 'dark';
+	/** axe rule checks that passed on this page. */
+	passes?: number;
+	/** axe rule checks that need manual review (axe could not be certain). */
+	incomplete?: number;
 	/** WCAG 1.4.10 reflow smoke check: horizontal overflow at a 320px viewport. */
 	reflow?: { horizontalOverflowPx: number };
 	violations: {
@@ -54,6 +58,8 @@ export function aggregateReports(): void {
 	const passes = (r: PageReport) =>
 		!r.violations.some((v) => v.impact === 'critical' || v.impact === 'serious');
 	const passedCount = reports.filter(passes).length;
+	const sumPasses = reports.reduce((n, r) => n + (r.passes ?? 0), 0);
+	const sumIncomplete = reports.reduce((n, r) => n + (r.incomplete ?? 0), 0);
 
 	const lines: string[] = [
 		'# Accessibility audit (axe-core / WCAG 2.1 AA)',
@@ -64,16 +70,19 @@ export function aggregateReports(): void {
 		`**Result:** ${passedCount}/${reports.length} pages passed — ` +
 			`**violation types:** ${total} — **theme:** ${reports[0].theme ?? 'light'}`,
 		'',
+		`**axe checks (cumulative across screens):** ${sumPasses} passed · ${total} failed · ` +
+			`${sumIncomplete} need manual review`,
+		'',
 		'## Results by page',
 		'',
-		'| Page | Status | Path | Critical | Serious | Moderate | Minor |',
-		'| --- | --- | --- | --- | --- | --- | --- |'
+		'| Page | Status | Path | Critical | Serious | Moderate | Minor | Passed | Review |',
+		'| --- | --- | --- | --- | --- | --- | --- | --- | --- |'
 	];
 	for (const r of reports) {
 		const c = (s: Severity) => r.violations.filter((v) => v.impact === s).length;
 		const status = passes(r) ? '✅ Pass' : '❌ Fail';
 		lines.push(
-			`| ${r.name} | ${status} | \`${r.path}\` | ${c('critical')} | ${c('serious')} | ${c('moderate')} | ${c('minor')} |`
+			`| ${r.name} | ${status} | \`${r.path}\` | ${c('critical')} | ${c('serious')} | ${c('moderate')} | ${c('minor')} | ${r.passes ?? '—'} | ${r.incomplete ?? '—'} |`
 		);
 	}
 

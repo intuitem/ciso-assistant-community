@@ -68,6 +68,8 @@ async function auditPage(page: Page, name: string, path: string): Promise<void> 
 		name: `${name}${suffix}`,
 		path,
 		theme: THEME,
+		passes: results.passes.length,
+		incomplete: results.incomplete.length,
 		reflow: { horizontalOverflowPx },
 		violations: results.violations.map((v) => ({
 			id: v.id,
@@ -123,7 +125,9 @@ const AUTH_PAGES: { name: string; path: string }[] = [
 	{ name: 'my-profile-form', path: '/my-profile' },
 	{ name: 'settings-form', path: '/settings' },
 	{ name: 'calendar', path: '/calendar' },
-	{ name: 'x-rays', path: '/x-rays' }
+	{ name: 'x-rays', path: '/x-rays' },
+	{ name: 'entities-graph', path: '/entities/graph' },
+	{ name: 'reports', path: '/reports' }
 ];
 
 for (const { name, path } of AUTH_PAGES) {
@@ -160,7 +164,9 @@ for (const { name, listPath } of CREATE_FORMS) {
 const ROW_TARGETS: { name: string; listPath: string; action: 'detail' | 'edit' }[] = [
 	{ name: 'applied-control-detail', listPath: '/applied-controls', action: 'detail' },
 	{ name: 'audit-detail', listPath: '/compliance-assessments', action: 'detail' },
-	{ name: 'applied-control-edit', listPath: '/applied-controls', action: 'edit' }
+	{ name: 'applied-control-edit', listPath: '/applied-controls', action: 'edit' },
+	{ name: 'risk-matrix-detail', listPath: '/risk-matrices', action: 'detail' },
+	{ name: 'risk-assessment-detail', listPath: '/risk-assessments', action: 'detail' }
 ];
 
 for (const { name, listPath, action } of ROW_TARGETS) {

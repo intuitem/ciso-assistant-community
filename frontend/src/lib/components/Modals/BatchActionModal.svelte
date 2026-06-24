@@ -179,7 +179,8 @@
 										{translateOption(opt)}
 										<button
 											type="button"
-											aria-label="{m.remove()} {translateOption(opt)}" class="hover:text-primary-600"
+											aria-label="{m.remove()} {translateOption(opt)}"
+											class="hover:text-primary-600"
 											onclick={() => toggleValue(val)}
 										>
 											<i class="fa-solid fa-xmark text-xs"></i>
