@@ -324,8 +324,13 @@ class SCIMUserViewSet(ViewSet):
                 email=user.email,
                 defaults={"verified": True, "primary": True},
             )
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.warning(
+                "SCIM: failed to create/update EmailAddress for user",
+                user_id=str(user.pk),
+                email=user.email,
+                error=str(exc),
+            )
 
         logger.info("SCIM: user created", email=user.email, external_id=external_id)
         return _scim_response(scim_user_to_dict(user, request), 201)
