@@ -1808,5 +1808,21 @@
 	"builderQuestionTypeMultipleChoice": "Pilihan ganda",
 	"builderQuestionTypeDate": "Tanggal",
 	"builderChangedOn": "diubah pada",
-	"requirementWeight": "Bobot"
+	"requirementWeight": "Bobot",
+	"scim": "SCIM",
+	"scimDescription": "Konfigurasikan penyediaan SCIM 2.0. Arahkan penyedia identitas Anda ke endpoint di bawah ini dan autentikasi dengan token bearer yang dibuat di sini.",
+	"scimEndpointUrl": "URL endpoint SCIM",
+	"scimTokens": "Token SCIM",
+	"generateScimToken": "Buat token",
+	"noScimTokens": "Belum ada token SCIM.",
+	"scimTokenName": "Nama",
+	"scimTokenDigest": "Digest",
+	"revokeScimToken": "Cabut",
+	"scimTokenGenerated": "Token dibuat",
+	"scimTokenWarning": "Salin token ini sekarang. Untuk alasan keamanan, token tidak akan ditampilkan lagi.",
+	"scimTokenRevoked": "Token SCIM dicabut",
+	"scimTokenGenerationFailed": "Gagal membuat token SCIM",
+	"idpGroup": "Grup IdP",
+	"idpGroups": "Grup IdP",
+	"idpGroupsDescription": "Aktifkan federasi grup IdP (penyediaan SCIM, pemetaan grup IdP, dan keanggotaan grup IdP pada pengguna)."
 }

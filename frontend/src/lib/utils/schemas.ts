@@ -659,6 +659,7 @@ export const FeatureFlagsSchema = z.object({
 	reports: z.boolean().optional(),
 	validation_flows: z.boolean().optional(),
 	focus_mode: z.boolean().optional(),
+	idp_groups: z.boolean().optional(),
 	outgoing_webhooks: z.boolean().optional(),
 	audit_log_forwarding: z.boolean().optional(),
 	metrology: z.boolean().optional(),
@@ -1803,6 +1804,12 @@ export const DocumentRevisionSchema = z.object({
 	reviewer_comments: z.string().optional().nullable()
 });
 
+export const IdPGroupSchema = z.object({
+	id: z.string().uuid().optional(),
+	name: z.string().min(1),
+	user_groups: z.array(z.string().uuid().optional()).optional()
+});
+
 const SCHEMA_MAP: Record<string, ZodSchema> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -1827,6 +1834,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	evidences: EvidenceSchema,
 	'evidence-revisions': EvidenceRevisionSchema,
 	users: UserCreateSchema,
+	'idp-groups': IdPGroupSchema,
 	'sso-settings': SSOSettingsSchema,
 	'general-settings': GeneralSettingsSchema,
 	'feature-flags': FeatureFlagsSchema,
