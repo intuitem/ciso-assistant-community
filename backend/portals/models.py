@@ -76,6 +76,48 @@ def _public_document_token():
     return secrets.token_urlsafe(32)
 
 
+class FrameworkSnapshot(NameDescriptionMixin, FolderMixin):
+    """A frozen, audit-derived projection of a framework's compliance posture, mirrored
+    from a ComplianceAssessment scoped to chosen implementation groups. Powers the trust
+    center donut / drill-down / export. Never a live window: everything (result breakdown,
+    score, per-requirement rows, the controls touched) is CAPTURED at sync time and only
+    changes on a manual re-sync."""
+
+    source_audit = models.ForeignKey(
+        "core.ComplianceAssessment",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="framework_snapshots",
+    )
+    implementation_groups = models.JSONField(default=list, blank=True)
+    framework_name = models.CharField(max_length=255, blank=True)
+    framework_ref_id = models.CharField(max_length=255, blank=True)
+    framework_version = models.CharField(max_length=255, blank=True)
+    synced_at = models.DateTimeField(null=True, blank=True)
+    summary = models.JSONField(default=dict, blank=True)
+    content = models.JSONField(default=list, blank=True)
+    # Captured set of applied controls touched by the in-scope requirements. Server-side
+    # only (never emitted publicly) — feeds the deduped portal-level "# controls".
+    control_ids = models.JSONField(default=list, blank=True)
+    public_token = models.CharField(
+        max_length=64, null=True, blank=True, unique=True, editable=False
+    )
+
+    class Meta:
+        ordering = ["name"]
+
+    def save(self, *args, **kwargs):
+        if not self.public_token:
+            import secrets
+
+            self.public_token = secrets.token_urlsafe(32)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+
+
 class PublicDocument(NameDescriptionMixin, FolderMixin):
     """A file published to a trust center. Deliberately isolated from internal Evidence:
     its own storage path + its own token-served AllowAny endpoint, holding a frozen copy of

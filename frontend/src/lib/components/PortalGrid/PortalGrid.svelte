@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { safeTranslate } from '$lib/utils/i18n';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import FrameworkTile from '$lib/components/PortalGrid/FrameworkTile.svelte';
 
 	let { sections = [], onTrigger }: { sections: any[]; onTrigger?: (item: any) => void } = $props();
 
@@ -22,7 +23,9 @@
 			{/if}
 			<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
 				{#each section.items ?? [] as item}
-					{#if item.kind === 'metric'}
+					{#if item.kind === 'framework'}
+						<FrameworkTile {item} {onTrigger} />
+					{:else if item.kind === 'metric'}
 						<div
 							class="flex flex-col justify-center rounded-2xl border border-surface-200-800 bg-surface-50-950 p-5 shadow-sm"
 						>

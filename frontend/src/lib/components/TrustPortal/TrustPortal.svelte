@@ -1,15 +1,22 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import PortalGrid from '$lib/components/PortalGrid/PortalGrid.svelte';
 	import { m } from '$paraglide/messages';
 
 	let { portal }: { portal: { name: string; branding?: any; sections?: any[] } } = $props();
 	const accent = $derived(portal.branding?.accent_color || '#7c3aed');
 
-	function trigger(item: { kind: string; target?: { url?: string; token?: string } }) {
+	function trigger(item: {
+		kind: string;
+		target?: { url?: string; token?: string };
+		snapshot?: { token?: string };
+	}) {
 		if (item.kind === 'external' && item.target?.url)
 			window.open(item.target.url, '_blank', 'noopener');
 		else if (item.kind === 'document' && item.target?.token)
 			window.open(`/trust/documents/${item.target.token}`, '_blank', 'noopener');
+		else if (item.kind === 'framework' && item.snapshot?.token)
+			goto(`/trust/snapshot/${item.snapshot.token}`);
 	}
 </script>
 

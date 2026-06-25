@@ -3,7 +3,7 @@ from rest_framework import serializers
 from core.serializer_fields import FieldsRelatedField
 from core.serializers import BaseModelSerializer
 
-from .models import Portal, PortalPreset, PublicDocument
+from .models import FrameworkSnapshot, Portal, PortalPreset, PublicDocument
 
 
 class PortalPresetReadSerializer(BaseModelSerializer):
@@ -78,6 +78,48 @@ class PortalWriteSerializer(BaseModelSerializer):
         if not isinstance(value.get("sections", []), list):
             raise serializers.ValidationError("sections must be a list")
         return value
+
+
+class FrameworkSnapshotReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    source_audit = FieldsRelatedField()
+    control_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = FrameworkSnapshot
+        fields = [
+            "id",
+            "name",
+            "description",
+            "folder",
+            "source_audit",
+            "implementation_groups",
+            "framework_name",
+            "framework_ref_id",
+            "framework_version",
+            "synced_at",
+            "summary",
+            "content",
+            "control_count",
+            "public_token",
+            "created_at",
+            "updated_at",
+        ]
+
+    def get_control_count(self, obj) -> int:
+        return len(obj.control_ids or [])
+
+
+class FrameworkSnapshotWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = FrameworkSnapshot
+        fields = [
+            "name",
+            "description",
+            "folder",
+            "source_audit",
+            "implementation_groups",
+        ]
 
 
 class PublicDocumentReadSerializer(BaseModelSerializer):

@@ -1,6 +1,7 @@
 from django.contrib.auth.models import Permission
 from django.db.models import Q
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponse
+from django.utils import timezone
 from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
@@ -10,8 +11,13 @@ from rest_framework.views import APIView
 from core.views import BaseModelViewSet
 from iam.models import RoleAssignment
 
-from .models import Portal, PortalPreset, PublicDocument
-from .serializers import PortalReadSerializer, PortalWriteSerializer
+from .models import FrameworkSnapshot, Portal, PortalPreset, PublicDocument
+from .serializers import (
+    FrameworkSnapshotReadSerializer,
+    PortalReadSerializer,
+    PortalWriteSerializer,
+)
+from .snapshots import compute_snapshot
 
 
 class PortalPresetViewSet(BaseModelViewSet):
@@ -155,23 +161,134 @@ class PublicDocumentViewSet(BaseModelViewSet):
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
 
+def _apply_snapshot_sync(snapshot):
+    """Pull the source audit into the snapshot's captured fields and stamp synced_at."""
+    if snapshot.source_audit is None:
+        return False
+    payload = compute_snapshot(snapshot.source_audit, snapshot.implementation_groups)
+    snapshot.framework_name = payload["framework_name"]
+    snapshot.framework_ref_id = payload["framework_ref_id"]
+    snapshot.framework_version = payload["framework_version"]
+    snapshot.summary = payload["summary"]
+    snapshot.content = payload["content"]
+    snapshot.control_ids = payload["control_ids"]
+    snapshot.synced_at = timezone.now()
+    snapshot.save()
+    return True
+
+
+class FrameworkSnapshotViewSet(BaseModelViewSet):
+    model = FrameworkSnapshot
+    serializers_module = "portals.serializers"
+    filterset_fields = ["folder", "source_audit"]
+    search_fields = ["name", "description", "framework_name", "framework_ref_id"]
+
+    def perform_create(self, serializer):
+        # Capture the audit posture immediately so a new snapshot is never empty.
+        snapshot = serializer.save()
+        _apply_snapshot_sync(snapshot)
+
+    @action(detail=False, methods=["post"])
+    def preview(self, request):
+        """Compute a fresh projection without saving — feeds the pre-sync diff view."""
+        from core.models import ComplianceAssessment
+
+        audit = ComplianceAssessment.objects.filter(
+            pk=request.data.get("source_audit")
+        ).first()
+        if audit is None:
+            return Response(
+                {"detail": "Audit not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="view_complianceassessment"),
+            folder=audit.folder,
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        return Response(
+            compute_snapshot(audit, request.data.get("implementation_groups") or [])
+        )
+
+    @action(detail=True, methods=["post"])
+    def sync(self, request, pk=None):
+        """Manual re-pull: recompute from the (possibly changed) source audit."""
+        snapshot = self.get_object()
+        if not _apply_snapshot_sync(snapshot):
+            return Response(
+                {"detail": "Snapshot has no source audit to sync from."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(FrameworkSnapshotReadSerializer(snapshot).data)
+
+
 # --- Trust center: unauthenticated, token-gated public surface ---------------
 # These views are AllowAny on purpose and never touch internal models other than
 # the explicitly-published Portal / PublicDocument rows.
 
-PUBLIC_SAFE_TILE_KINDS = {"badge", "metric", "document", "external", "status"}
+PUBLIC_SAFE_TILE_KINDS = {
+    "badge",
+    "metric",
+    "document",
+    "external",
+    "status",
+    "framework",
+}
+
+
+def _portal_snapshot_map(portal):
+    """Load every FrameworkSnapshot referenced by the portal's framework tiles, keyed by id."""
+    ids = set()
+    for section in (portal.content or {}).get("sections", []):
+        for item in section.get("items") or []:
+            if item.get("kind") == "framework":
+                sid = (item.get("target") or {}).get("snapshot")
+                if sid:
+                    ids.add(sid)
+    return {str(s.id): s for s in FrameworkSnapshot.objects.filter(id__in=ids)}
 
 
 def _serialize_public_portal(portal):
     """Project a portal down to what's safe to expose anonymously: name, branding, and
-    only the public-safe tile kinds."""
+    only the public-safe tile kinds. Framework tiles are enriched with their captured
+    snapshot summary; computed metric tiles (frameworks_count / controls_count) are filled
+    from the portal's own snapshots (scope = this portal)."""
+    snapshots = _portal_snapshot_map(portal)
+    control_union = set()
+    for snap in snapshots.values():
+        control_union.update(snap.control_ids or [])
+    computed = {
+        "frameworks_count": len(snapshots),
+        "controls_count": len(control_union),
+    }
+
     sections = []
     for section in (portal.content or {}).get("sections", []):
-        items = [
-            item
-            for item in (section.get("items") or [])
-            if item.get("kind") in PUBLIC_SAFE_TILE_KINDS
-        ]
+        items = []
+        for item in section.get("items") or []:
+            kind = item.get("kind")
+            if kind not in PUBLIC_SAFE_TILE_KINDS:
+                continue
+            target = item.get("target") or {}
+            if kind == "framework":
+                snap = snapshots.get(target.get("snapshot"))
+                if snap is None:
+                    continue
+                item = {
+                    **item,
+                    "snapshot": {
+                        "name": snap.name,
+                        "framework_name": snap.framework_name,
+                        "summary": snap.summary,
+                        "token": snap.public_token,
+                    },
+                }
+            elif kind == "metric" and target.get("source") in computed:
+                item = {
+                    **item,
+                    "target": {**target, "value": computed[target["source"]]},
+                }
+            items.append(item)
         sections.append(
             {
                 "title": section.get("title", ""),
@@ -224,3 +341,74 @@ class PublicDocumentServeView(APIView):
             as_attachment=True,
             filename=doc.name or doc.file.name.rsplit("/", 1)[-1],
         )
+
+
+class PublicFrameworkSnapshotView(APIView):
+    """Drill-down for a framework tile: the captured per-requirement rows + summary.
+    Serves only the frozen snapshot, never live audit data; control_ids stay private."""
+
+    permission_classes = [permissions.AllowAny]
+    authentication_classes = []
+
+    def get(self, request, token):
+        snap = FrameworkSnapshot.objects.filter(public_token=token).first()
+        if snap is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {
+                "name": snap.name,
+                "framework_name": snap.framework_name,
+                "framework_ref_id": snap.framework_ref_id,
+                "framework_version": snap.framework_version,
+                "synced_at": snap.synced_at,
+                "summary": snap.summary,
+                "content": snap.content,
+            }
+        )
+
+
+class PublicFrameworkSnapshotExportView(APIView):
+    permission_classes = [permissions.AllowAny]
+    authentication_classes = []
+
+    def get(self, request, token):
+        snap = FrameworkSnapshot.objects.filter(public_token=token).first()
+        if snap is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        rows = snap.content or []
+        headers = ["ref_id", "name", "result", "score"]
+        slug = (snap.framework_ref_id or snap.name or "framework").replace(" ", "_")
+
+        if request.query_params.get("format") == "xlsx":
+            from io import BytesIO
+
+            from openpyxl import Workbook
+
+            wb = Workbook()
+            ws = wb.active
+            ws.append([h.replace("_", " ").title() for h in headers])
+            for r in rows:
+                ws.append([r.get(h, "") for h in headers])
+            buf = BytesIO()
+            wb.save(buf)
+            buf.seek(0)
+            resp = HttpResponse(
+                buf.read(),
+                content_type=(
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                ),
+            )
+            resp["Content-Disposition"] = f'attachment; filename="{slug}.xlsx"'
+            return resp
+
+        import csv
+        from io import StringIO
+
+        buf = StringIO()
+        writer = csv.DictWriter(buf, fieldnames=headers, extrasaction="ignore")
+        writer.writeheader()
+        for r in rows:
+            writer.writerow({h: r.get(h, "") for h in headers})
+        resp = HttpResponse(buf.getvalue(), content_type="text/csv")
+        resp["Content-Disposition"] = f'attachment; filename="{slug}.csv"'
+        return resp

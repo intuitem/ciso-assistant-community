@@ -12,6 +12,8 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 	const portal = await res.json();
 	const docsRes = await fetch(`${BASE_API_URL}/public-documents/`);
 	const publicDocuments = docsRes.ok ? ((await docsRes.json()).results ?? []) : [];
+	const snapsRes = await fetch(`${BASE_API_URL}/framework-snapshots/`);
+	const snapshots = snapsRes.ok ? ((await snapsRes.json()).results ?? []) : [];
 	const settingsForm = await superValidate(
 		{
 			enabled: portal.enabled,
@@ -24,7 +26,7 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 		},
 		zod(PortalSettingsSchema)
 	);
-	return { portal, settingsForm, publicDocuments };
+	return { portal, settingsForm, publicDocuments, snapshots };
 };
 
 async function patch(fetch: typeof globalThis.fetch, id: string, body: unknown) {

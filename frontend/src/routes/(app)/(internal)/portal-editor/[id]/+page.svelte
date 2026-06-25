@@ -48,7 +48,15 @@
 		icon: string;
 		title: string;
 		description: string;
-		kind: 'create' | 'navigate' | 'external' | 'status' | 'metric' | 'badge' | 'document';
+		kind:
+			| 'create'
+			| 'navigate'
+			| 'external'
+			| 'status'
+			| 'metric'
+			| 'badge'
+			| 'document'
+			| 'framework';
 		target: Record<string, string>;
 	};
 	type Section = { title: string; description: string; items: Item[] };
@@ -74,12 +82,44 @@
 		'status',
 		'metric',
 		'badge',
-		'document'
+		'document',
+		'framework'
 	] as const;
 	// Kinds surfaced on the unauthenticated trust-center page (mirror of backend PUBLIC_SAFE_TILE_KINDS).
-	const PUBLIC_SAFE = ['external', 'status', 'metric', 'badge', 'document'];
+	const PUBLIC_SAFE = ['external', 'status', 'metric', 'badge', 'document', 'framework'];
+
+	const METRIC_SOURCES = [
+		{ value: '', label: m.manual() },
+		{ value: 'frameworks_count', label: m.frameworksMonitored() },
+		{ value: 'controls_count', label: m.controlsCovered() }
+	];
 
 	const payload = $derived(JSON.stringify({ sections }));
+
+	// Preview enrichment: graft the captured snapshot onto framework tiles so the
+	// preview shows real donuts (the live /trust page is enriched server-side).
+	const snapById = $derived(new Map((data.snapshots ?? []).map((s: any) => [s.id, s])));
+	const previewSections = $derived(
+		sections.map((sec) => ({
+			...sec,
+			items: sec.items.map((it) => {
+				if (it.kind === 'framework' && it.target.snapshot) {
+					const s: any = snapById.get(it.target.snapshot);
+					if (s)
+						return {
+							...it,
+							snapshot: {
+								name: s.name,
+								framework_name: s.framework_name,
+								summary: s.summary,
+								token: s.public_token
+							}
+						};
+				}
+				return it;
+			})
+		}))
+	);
 
 	function addSection() {
 		sections.push({ title: 'New group', description: '', items: [] });
@@ -122,6 +162,7 @@
 		if (kind === 'metric') return { key: 'value', label: m.value(), ph: '128' };
 		if (kind === 'badge') return { key: 'image_url', label: m.logoUrl(), ph: 'https://…' };
 		if (kind === 'document') return { key: 'token', label: m.document(), ph: '' };
+		if (kind === 'framework') return { key: 'snapshot', label: m.framework(), ph: '' };
 		return { key: 'url', label: 'URL', ph: kind === 'external' ? 'https://…' : '/incidents' };
 	}
 </script>
@@ -246,6 +287,25 @@
 										{#each data.publicDocuments as d}<option value={d.token}>{d.name}</option
 											>{/each}
 									</select>
+								{:else if item.kind === 'framework'}
+									<select bind:value={item.target.snapshot} class="select rounded-md text-sm">
+										<option value="">—</option>
+										{#each data.snapshots as s}<option value={s.id}
+												>{s.name} ({s.framework_name})</option
+											>{/each}
+									</select>
+								{:else if item.kind === 'metric'}
+									<select bind:value={item.target.source} class="select rounded-md text-sm">
+										{#each METRIC_SOURCES as src}<option value={src.value}>{src.label}</option
+											>{/each}
+									</select>
+									{#if !item.target.source}
+										<input
+											bind:value={item.target.value}
+											placeholder="128"
+											class="input mt-1 rounded-md text-sm"
+										/>
+									{/if}
 								{:else}
 									<input
 										bind:value={item.target[tf.key]}
@@ -304,7 +364,7 @@
 		</button>
 	{:else if view === 'preview'}
 		<div class="rounded-2xl bg-linear-to-br from-surface-100-900 to-surface-200-800 p-8">
-			<PortalGrid {sections} />
+			<PortalGrid sections={previewSections} />
 		</div>
 	{:else}
 		<form

@@ -123,6 +123,7 @@ READER_PERMISSIONS_LIST = [
     "view_portal",
     "view_portalpreset",
     "view_publicdocument",
+    "view_frameworksnapshot",
     # chat
     "add_chatsession",
     "view_chatsession",
@@ -240,6 +241,7 @@ APPROVER_PERMISSIONS_LIST = [
     "view_portal",
     "view_portalpreset",
     "view_publicdocument",
+    "view_frameworksnapshot",
     # chat
     "add_chatsession",
     "view_chatsession",
@@ -608,6 +610,10 @@ ANALYST_PERMISSIONS_LIST = [
     "add_publicdocument",
     "change_publicdocument",
     "delete_publicdocument",
+    "view_frameworksnapshot",
+    "add_frameworksnapshot",
+    "change_frameworksnapshot",
+    "delete_frameworksnapshot",
     # chat
     "add_chatsession",
     "view_chatsession",
@@ -1035,6 +1041,10 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "add_publicdocument",
     "change_publicdocument",
     "delete_publicdocument",
+    "view_frameworksnapshot",
+    "add_frameworksnapshot",
+    "change_frameworksnapshot",
+    "delete_frameworksnapshot",
     # chat
     "add_chatsession",
     "view_chatsession",
@@ -1518,6 +1528,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "add_publicdocument",
     "change_publicdocument",
     "delete_publicdocument",
+    "view_frameworksnapshot",
+    "add_frameworksnapshot",
+    "change_frameworksnapshot",
+    "delete_frameworksnapshot",
     # chat
     "add_chatsession",
     "view_chatsession",

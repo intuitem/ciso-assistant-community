@@ -23,7 +23,10 @@
 </script>
 
 <div class="space-y-8">
-	<div class="flex justify-end">
+	<div class="flex justify-end gap-2">
+		<a href="/portal-editor/snapshots" class="btn btn-sm preset-tonal">
+			<i class="fa-solid fa-chart-pie mr-1"></i>{m.frameworkSnapshots()}
+		</a>
 		<a href="/portal-editor/documents" class="btn btn-sm preset-tonal">
 			<i class="fa-solid fa-folder-open mr-1"></i>{m.publicDocuments()}
 		</a>
