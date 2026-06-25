@@ -196,6 +196,7 @@
 				{#if !data?.user?.is_third_party}
 					<button
 						onclick={() => commandPalette?.toggle()}
+						aria-label={m.search()}
 						class="flex items-center gap-2 shrink-0 rounded-lg border border-surface-200-800 bg-surface-100-900/80 px-3 py-1.5
 			text-xs text-surface-600-400 hover:bg-surface-200-800 hover:border-surface-300-700 hover:text-surface-700-300
 			transition-all duration-150 cursor-pointer"
