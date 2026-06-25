@@ -8,8 +8,13 @@
 	import { urlParamModelVerboseName } from '$lib/utils/crud';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { superForm } from 'sveltekit-superforms';
+	import { page } from '$app/state';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import type { PageData } from './$types';
+
+	const personalFoldersMisconfigured = $derived(
+		!!page.data?.featureflags?.personal_folders && !page.data?.settings?.personal_folders_parent
+	);
 
 	const modelOptions = SCAFFOLDABLE_MODELS.map((model) => ({
 		value: model,
@@ -141,6 +146,12 @@
 			>
 		</form>
 	</div>
+
+	{#if personalFoldersMisconfigured}
+		<aside class="card preset-tonal-warning p-4 text-sm">
+			<i class="fa-solid fa-triangle-exclamation mr-2"></i>{m.personalFoldersParentNotSet()}
+		</aside>
+	{/if}
 
 	{#if view === 'edit'}
 		{#each sections as section, si}

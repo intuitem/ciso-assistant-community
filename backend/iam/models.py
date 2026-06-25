@@ -142,6 +142,7 @@ class Folder(NameDescriptionMixin):
         ROOT = "GL", _("GLOBAL")
         DOMAIN = "DO", _("DOMAIN")
         ENCLAVE = "EN", _("ENCLAVE")
+        PERSONAL = "PE", _("PERSONAL")
 
     content_type = models.CharField(
         max_length=2, choices=ContentType.choices, default=ContentType.DOMAIN

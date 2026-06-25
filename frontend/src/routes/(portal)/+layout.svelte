@@ -20,6 +20,13 @@
 
 	const current = $derived(data.portals.find((p) => p.id === $page.params.id));
 
+	// Admins-only nudge: personal folders enabled but no parent set, so "My space" is off.
+	const personalFoldersMisconfigured = $derived(
+		!!data.user?.is_admin &&
+			!!data.featureflags?.personal_folders &&
+			!data.settings?.personal_folders_parent
+	);
+
 	onMount(() => initThemeFromUser(data.user?.preferences));
 </script>
 
@@ -122,6 +129,11 @@
 	{/if}
 
 	<main class="mx-auto max-w-6xl px-6 py-10">
+		{#if personalFoldersMisconfigured}
+			<aside class="card preset-tonal-warning mb-6 p-4 text-sm">
+				<i class="fa-solid fa-triangle-exclamation mr-2"></i>{m.personalFoldersParentNotSet()}
+			</aside>
+		{/if}
 		{@render children?.()}
 	</main>
 </div>

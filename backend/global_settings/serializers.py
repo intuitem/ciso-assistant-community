@@ -95,6 +95,7 @@ GENERAL_SETTINGS_KEYS = [
     "default_custom_analytics_dashboard",
     "audit_tree_aggregation_strategy",
     "default_landing",
+    "personal_folders_parent",
 ]
 
 LLM_URL_DEFAULTS = {
@@ -411,6 +412,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     cwes = serializers.BooleanField(source="value.cwes", required=False, default=True)
     custom_portals = serializers.BooleanField(
         source="value.custom_portals", required=False, default=False
+    )
+    personal_folders = serializers.BooleanField(
+        source="value.personal_folders", required=False, default=False
     )
 
     class Meta:
