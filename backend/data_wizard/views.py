@@ -1784,7 +1784,7 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
         if freq and interval_raw:
             try:
                 interval = int(interval_raw)
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 return {}, Error(
                     record=record,
                     error=f"Invalid schedule_interval value: '{interval_raw}'",
@@ -1800,7 +1800,7 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
                     if opt_key == "occurrences":
                         try:
                             schedule[opt_key] = int(raw_val)
-                        except (ValueError, TypeError):
+                        except ValueError, TypeError:
                             return {}, Error(
                                 record=record,
                                 error=f"Invalid schedule_occurrences value: '{raw_val}'",
@@ -1818,7 +1818,7 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
                         schedule[opt_key] = [
                             int(v.strip()) for v in raw_val.split(",") if v.strip()
                         ]
-                    except (ValueError, TypeError):
+                    except ValueError, TypeError:
                         return {}, Error(
                             record=record,
                             error=f"Invalid {col} value: '{raw_val}' (expected comma-separated integers)",
@@ -3476,7 +3476,7 @@ class LoadFileView(APIView):
                 try:
                     if date.fromisoformat(str(due_date)) > today:
                         continue
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
 
                 raw_status = str(row.get("status", "")).lower().strip()
