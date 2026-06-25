@@ -177,7 +177,7 @@
 		{#if displayDetail}
 			<Anchor
 				breadcrumbAction="push"
-				label={m.view()}
+				aria-label={m.view()}
 				href={detailURL}
 				class="unstyled cursor-pointer hover:text-primary-500"
 				data-testid="tablerow-detail-button"><i class="fa-solid fa-eye"></i></Anchor
