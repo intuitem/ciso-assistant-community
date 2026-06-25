@@ -7,7 +7,6 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -81,13 +80,6 @@
 		label={m.observation()}
 		cacheLock={cacheLocks['observation']}
 		bind:cachedValue={formDataCache['observation']}
-	/>
-	<FolderTreeSelect
-		{form}
-		field="folder"
-		cacheLock={cacheLocks['folder']}
-		bind:cachedValue={formDataCache['folder']}
-		label={m.domain()}
 	/>
 	<HiddenInput {form} field="compliance_assessment" />
 {/if}

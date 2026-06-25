@@ -2,6 +2,7 @@
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -314,10 +315,10 @@
 	<div class="flex justify-between items-center mb-4">
 		<a
 			href={data.backUrl}
-			class="flex items-center space-x-2 text-primary-800-300 hover:text-primary-600-400"
+			class="flex items-center space-x-2 text-primary-800-200 hover:text-primary-600-400"
 		>
 			<i class="fa-solid fa-arrow-left"></i>
-			<span>{data.backLabel}</span>
+			<span>{safeTranslate(data.backLabel)}</span>
 		</a>
 		<div class="flex items-center space-x-4">
 			<span class="text-sm text-surface-600-400">

@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { getSecureRedirect } from '$lib/utils/helpers';
 import type { PageServerLoad } from './$types';
 import type { Actions } from '@sveltejs/kit';
 
@@ -27,10 +28,7 @@ export const load = (async ({ fetch, url }) => {
 	const foldersData = await foldersResponse.json();
 
 	// Extract UI parameters for the kanban mode page
-	const rawBackUrl = searchParams.get('backUrl') || '/applied-controls';
-	// Validate backUrl is a relative path to prevent open redirects
-	const backUrl =
-		rawBackUrl.startsWith('/') && !rawBackUrl.startsWith('//') ? rawBackUrl : '/applied-controls';
+	const backUrl = getSecureRedirect(searchParams.get('backUrl')) || '/applied-controls';
 	const backLabel = searchParams.get('backLabel') || 'Applied Controls';
 
 	return {

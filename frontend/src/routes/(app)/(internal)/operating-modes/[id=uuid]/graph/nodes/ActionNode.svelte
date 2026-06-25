@@ -43,9 +43,9 @@
 
 	<div class="flex items-center gap-2">
 		{#if data.iconClass}
-			<i class="{data.iconClass} text-[11px] text-surface-500"></i>
+			<i class="{data.iconClass} text-[11px] text-surface-900-100"></i>
 		{/if}
-		<span class="text-[11px] leading-tight text-surface-900 text-wrap">{data.label}</span>
+		<span class="text-[11px] leading-tight text-surface-900-100 text-wrap">{data.label}</span>
 	</div>
 
 	{#if hovered && !editor?.readonly}
@@ -72,13 +72,13 @@
 		position={Position.Left}
 		class={editor?.readonly
 			? '!w-0 !h-0 !border-0 !bg-transparent !pointer-events-none'
-			: '!w-3 !h-3 !bg-surface-50 !border-2 !border-surface-600'}
+			: '!w-3 !h-3 !bg-surface-50-950 !border-2 !border-surface-600-400'}
 	/>
 	<Handle
 		type="source"
 		position={Position.Right}
 		class={editor?.readonly
 			? '!w-0 !h-0 !border-0 !bg-transparent !pointer-events-none'
-			: '!w-3 !h-3 !bg-surface-50 !border-2 !border-surface-600'}
+			: '!w-3 !h-3 !bg-surface-50-950 !border-2 !border-surface-600-400'}
 	/>
 </div>

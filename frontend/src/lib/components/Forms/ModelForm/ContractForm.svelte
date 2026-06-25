@@ -1,6 +1,5 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import NumberField from '$lib/components/Forms/NumberField.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
@@ -28,13 +27,6 @@
 	}: Props = $props();
 </script>
 
-<FolderTreeSelect
-	{form}
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-/>
 <AutocompleteSelect
 	{form}
 	field="status"

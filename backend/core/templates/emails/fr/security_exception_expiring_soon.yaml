@@ -1,0 +1,11 @@
+subject: "CISO Assistant: Dérogation de sécurité expirant dans ${days_remaining} jour(s)"
+body: |
+  Bonjour,
+
+  Vous avez ${exception_count} dérogation(s) de sécurité expirant dans ${days_remaining} jour(s) :
+
+  ${exception_list}
+
+  Connectez-vous à votre portail CISO Assistant pour consulter et mettre à jour ces dérogations de sécurité : [Accéder à CISO Assistant](${ciso_assistant_url})
+
+  Merci.

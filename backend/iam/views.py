@@ -16,9 +16,7 @@ from knox import crypto
 from knox.auth import TokenAuthentication, get_token_model, knox_settings
 from knox.models import AuthToken
 from knox.views import DateTimeField
-from knox.views import LoginView as KnoxLoginView
 from rest_framework import permissions, serializers, status, views
-from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.response import Response
 from rest_framework.status import (
     HTTP_200_OK,
@@ -35,7 +33,6 @@ from core.permissions import IsAdministrator
 from .models import Folder, PersonalAccessToken, Role, RoleAssignment
 from .serializers import (
     ChangePasswordSerializer,
-    LoginSerializer,
     PersonalAccessTokenReadSerializer,
     DisableMFASerializer,
     ResetPasswordConfirmSerializer,
@@ -45,18 +42,6 @@ from .serializers import (
 logger = structlog.get_logger(__name__)
 
 User = get_user_model()
-
-
-class LoginView(KnoxLoginView):
-    permission_classes = (permissions.AllowAny,)
-    serializer_class = LoginSerializer
-
-    def post(self, request, format=None):
-        serializer = AuthTokenSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data["user"]
-        login(request, user)
-        return super(LoginView, self).post(request, format=None)
 
 
 class LogoutView(views.APIView):

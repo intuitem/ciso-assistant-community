@@ -82,6 +82,7 @@
 				actionType: action.type,
 				count,
 				optionsEndpoint: action.optionsEndpoint,
+				enableDoubleDash: action.enableDoubleDash ?? false,
 				multiSelect: action.multiSelect ?? false,
 				onConfirm: async (value?: string | string[]) => {
 					try {
@@ -160,7 +161,7 @@
 		</span>
 		<button
 			type="button"
-			class="text-sm text-primary-600 hover:text-primary-800-300 underline"
+			class="text-sm text-primary-600 hover:text-primary-800-200 underline"
 			onclick={onClearSelection}
 		>
 			{m.clearSelection()}
