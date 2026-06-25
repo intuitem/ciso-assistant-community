@@ -10,6 +10,10 @@ import structlog
 
 logger = structlog.get_logger(__name__)
 
+# Default local embedding model. Pre-baked into the backend image at build time
+# so the AI works fully offline. Keep this value in sync with the model baked in the Dockerfile.
+DEFAULT_EMBEDDING_MODEL = "paraphrase-multilingual-MiniLM-L12-v2"
+
 
 # Shared system prompts — used by all LLM implementations
 DEFAULT_SYSTEM_PROMPT = (
@@ -195,7 +199,7 @@ class LLM(Protocol):
 class SentenceTransformerEmbedder:
     """Local embeddings using sentence-transformers. No external service needed."""
 
-    def __init__(self, model_name: str = "paraphrase-multilingual-MiniLM-L12-v2"):
+    def __init__(self, model_name: str = DEFAULT_EMBEDDING_MODEL):
         from sentence_transformers import SentenceTransformer
 
         self.model = SentenceTransformer(model_name)

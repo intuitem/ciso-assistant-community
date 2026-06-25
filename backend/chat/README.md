@@ -149,9 +149,9 @@ In **Settings > General**, set:
 
 ### Option A: Sentence-Transformers (zero setup)
 
-Set `embedding_backend` to `sentence-transformers`. This uses `paraphrase-multilingual-MiniLM-L12-v2` locally on CPU. The model (~130 MB) downloads automatically on first use. Multilingual support included.
+Set `embedding_backend` to `sentence-transformers`. This uses `paraphrase-multilingual-MiniLM-L12-v2` locally on CPU. Multilingual support included.
 
-This is the default and requires no external service.
+This is the default and requires no external service. The model (~130 MB) is **pre-baked into the backend image** at build time (see `backend/Dockerfile`) and the runtime is forced offline (`HF_HUB_OFFLINE=1`, `TRANSFORMERS_OFFLINE=1`), so the AI works with no internet access.
 
 ### Option B: Ollama Embeddings
 
