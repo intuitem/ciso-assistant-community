@@ -21,7 +21,7 @@
 	});
 </script>
 
-<div>{safeTranslate(text)}</div>
+<div class="text-surface-900-100">{safeTranslate(text)}</div>
 <select class="select w-full" {id} bind:value {disabled}>
 	{#each choices as text, i}
 		<option class="text-{i}" value={i}

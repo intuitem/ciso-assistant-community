@@ -5,6 +5,13 @@ from django.conf import settings as django_settings
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 
+from urllib.parse import urlparse
+
+from core.net_safety import (
+    BlockedRequestError,
+    DnsLookupError,
+    assert_public_url_unless_dev,
+)
 from .models import GlobalSettings
 
 
@@ -43,7 +50,7 @@ def validate_default_dashboard_value(value):
         return None
     try:
         uuid.UUID(str(value))
-    except (ValueError, TypeError):
+    except ValueError, TypeError:
         raise serializers.ValidationError(
             {"default_custom_analytics_dashboard": "Must be a valid UUID."}
         )
@@ -88,6 +95,11 @@ GENERAL_SETTINGS_KEYS = [
     "default_custom_analytics_dashboard",
     "audit_tree_aggregation_strategy",
 ]
+
+LLM_URL_DEFAULTS = {
+    "ollama_base_url": "http://localhost:11434",
+    "openai_api_base": "http://localhost:1234/v1",
+}
 
 
 class GlobalSettingsSerializer(serializers.ModelSerializer):
@@ -143,6 +155,32 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
         for key, value in validated_data["value"].items():
             if key not in GENERAL_SETTINGS_KEYS:
                 raise serializers.ValidationError(f"Invalid key: {key}")
+            if key in ("ollama_base_url", "openai_api_base") and value:
+                if not isinstance(value, str):
+                    raise serializers.ValidationError({key: "URL must be a string."})
+                parsed = urlparse(value)
+                if parsed.scheme not in ("http", "https"):
+                    raise serializers.ValidationError(
+                        {key: "URL must use http or https scheme."}
+                    )
+                if "#" in value:
+                    raise serializers.ValidationError(
+                        {key: "URL must not contain a fragment (#)."}
+                    )
+                stored = (instance.value or {}).get(key)
+                if value != stored and value != LLM_URL_DEFAULTS.get(key):
+                    try:
+                        assert_public_url_unless_dev(
+                            value, allowed_schemes=("http", "https")
+                        )
+                    except BlockedRequestError:
+                        raise serializers.ValidationError(
+                            {key: "URL must point to a public address."}
+                        )
+                    except DnsLookupError:
+                        raise serializers.ValidationError(
+                            {key: "URL hostname could not be resolved."}
+                        )
             # Validate builtin_metrics_retention_days minimum value
             if key == "builtin_metrics_retention_days":
                 if not isinstance(value, int) or value < 1:
@@ -167,7 +205,7 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
             if key == "chat_temperature":
                 try:
                     temp = float(value)
-                except (TypeError, ValueError):
+                except TypeError, ValueError:
                     raise serializers.ValidationError(
                         {"chat_temperature": "Must be a number."}
                     )
@@ -239,7 +277,7 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                                     * Decimal(str(conversion_rate))
                                 )
 
-                    control.save(update_fields=["cost"])
+                    control.save(update_fields=["cost"], skip_sync=True)
                     updated_count += 1
 
         print(

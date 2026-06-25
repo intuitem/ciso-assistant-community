@@ -4,7 +4,6 @@
 	import type { SuperForm } from 'sveltekit-superforms';
 	import { formFieldProxy } from 'sveltekit-superforms';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import Select from '../Select.svelte';
 	import MarkdownField from '../MarkdownField.svelte';
 	import TextField from '../TextField.svelte';
@@ -32,13 +31,6 @@
 	const formStore = form.form;
 </script>
 
-<FolderTreeSelect
-	{form}
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-/>
 {#if context != 'edit'}
 	<AutocompleteSelect
 		{form}

@@ -24,8 +24,7 @@
 			ref: CreateModal,
 			props: {
 				form: data.createForm,
-				model: data.model,
-				customNameDescription: true
+				model: data.model
 			}
 		};
 		let modal: ModalSettings = {
@@ -41,7 +40,7 @@
 <ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel}>
 	{#snippet addButton()}
 		<div>
-			<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+			<span class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs">
 				<button
 					class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 					data-testid="add-button"

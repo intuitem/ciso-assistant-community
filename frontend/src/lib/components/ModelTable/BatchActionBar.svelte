@@ -82,6 +82,7 @@
 				actionType: action.type,
 				count,
 				optionsEndpoint: action.optionsEndpoint,
+				enableDoubleDash: action.enableDoubleDash ?? false,
 				multiSelect: action.multiSelect ?? false,
 				onConfirm: async (value?: string | string[]) => {
 					try {
@@ -155,12 +156,12 @@
 
 <div class="flex justify-between items-center w-full h-full">
 	<div class="flex items-center gap-3">
-		<span class="text-sm font-medium text-gray-700">
+		<span class="text-sm font-medium text-surface-700-300">
 			{m.itemsSelected({ count: selectedIds.size })}
 		</span>
 		<button
 			type="button"
-			class="text-sm text-primary-600 hover:text-primary-800 underline"
+			class="text-sm text-primary-600 hover:text-primary-800-200 underline"
 			onclick={onClearSelection}
 		>
 			{m.clearSelection()}
@@ -181,12 +182,12 @@
 					</button>
 					{#if openGroupIndex === index}
 						<div
-							class="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded shadow-lg z-50 min-w-max"
+							class="absolute right-0 top-full mt-1 bg-surface-50-950 border border-surface-200-800 rounded shadow-lg z-50 min-w-max"
 						>
 							{#each action.children as child}
 								<button
 									type="button"
-									class="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+									class="flex items-center gap-2 w-full px-4 py-2 text-sm text-surface-700-300 hover:bg-surface-100-900"
 									onclick={() => triggerAction(child)}
 								>
 									<i class={child.icon}></i>

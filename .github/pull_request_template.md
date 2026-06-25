@@ -24,21 +24,25 @@ Closes #
 - [ ] CLA accepted (first contribution only)
 
 ### Backend — if you touched `backend/`
+
 - [ ] `ruff format` run, no new linter errors
 - [ ] Migrations generated with `makemigrations` and committed (or none needed)
 - [ ] New dependencies checked for known vulnerabilities and called out above
 
 ### Frontend — if you touched `frontend/`
+
 - [ ] Svelte 5 syntax; `pnpm run lint` and `pnpm run format` run
 - [ ] New/changed UI strings added to `frontend/messages/en.json` (keep keys, preserve `{tokens}`)
 - [ ] Clicked through the change in the dev server; screenshots attached for UI changes
 
 ### Other — libraries, CI, infra
+
 - [ ] Library changes built via the `tools/` script
 - [ ] CI / build changes run green
 
 ### Tests & documentation — definition of done
-- [ ] Tests added or updated and passing locally — backend `poetry run pytest`, frontend `pnpm run test` / `./tests/e2e-tests.sh` *(if relevant)*
-- [ ] Regression test added for bug fixes *(if relevant)*
-- [ ] `product-docs/` updated, new pages listed in `SUMMARY.md`, vocabulary terms added *(if relevant)*
+
+- [ ] Tests added or updated and passing locally — backend `uv run pytest`, frontend `pnpm run test` / `./tests/e2e-tests.sh` _(if relevant)_
+- [ ] Regression test added for bug fixes _(if relevant)_
+- [ ] `product-docs/` updated, new pages listed in `SUMMARY.md`, vocabulary terms added _(if relevant)_
 - [ ] No tests or docs needed for this change — why:

@@ -1,7 +1,7 @@
 from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 from django.urls.base import reverse_lazy
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 import uuid
 
 
@@ -30,6 +30,24 @@ class AbstractBaseModel(models.Model):
 
     def __str__(self) -> str:
         return self.name if hasattr(self, "name") and self.name else str(self.id)
+
+    def get_additional_data(self) -> dict:
+        # Attached to every django-auditlog LogEntry at creation (create/update/
+        # delete and m2m). Runs with the instance in memory, so the folder is
+        # captured even on delete — used to scope audit events forwarded to SIEMs.
+        folder_id = getattr(self, "folder_id", None)
+        if folder_id is None:
+            from iam.models import Folder
+
+            # Runs in auditlog's synchronous delete receiver: a cascade may have
+            # already removed the FK target get_folder traverses, raising
+            # DoesNotExist. Never let metadata enrichment break the delete.
+            try:
+                folder = Folder.get_folder(self)
+                folder_id = folder.id if folder else None
+            except ObjectDoesNotExist:
+                folder_id = None
+        return {"folder_id": str(folder_id) if folder_id else None}
 
     def is_unique_in_scope(self, scope: models.QuerySet, fields_to_check: list) -> bool:
         """
@@ -123,7 +141,23 @@ class AbstractBaseModel(models.Model):
         if field_errors:
             raise ValidationError(field_errors)
 
+    def _validate_char_max_lengths(self):
+        errors = {}
+        for field in self._meta.fields:
+            if not isinstance(field, models.CharField):
+                continue
+            value = field.to_python(getattr(self, field.attname))
+            if value is not None and len(value) > field.max_length:
+                errors[field.name] = ValidationError(
+                    f"Ensure this value has at most {field.max_length} characters (it has {len(value)}).",
+                    code="max_length",
+                    params={"max_length": field.max_length, "length": len(value)},
+                )
+        if errors:
+            raise ValidationError(errors)
+
     def save(self, *args, **kwargs) -> None:
+        self._validate_char_max_lengths()
         self.clean()
         super().save(*args, **kwargs)
 

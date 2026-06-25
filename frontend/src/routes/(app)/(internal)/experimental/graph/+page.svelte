@@ -71,7 +71,7 @@
 	};
 </script>
 
-<div class="bg-white p-4 h-full w-full">
+<div class="bg-surface-50-950 p-4 h-full w-full">
 	<VisSingleContainer data={gdata} height={containerHeight}>
 		<VisGraph
 			layoutType={GraphLayoutType.Force}
