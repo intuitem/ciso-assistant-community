@@ -883,6 +883,7 @@
 							<input
 								type="checkbox"
 								class="checkbox pointer-events-none"
+								aria-label={m.selectAll()}
 								checked={selectAllChecked}
 								tabindex={-1}
 							/>
@@ -941,6 +942,7 @@
 											<input
 												type="checkbox"
 												class="checkbox pointer-events-none"
+												aria-label={m.selectRow()}
 												checked={selectedIds.has(meta?.id)}
 												tabindex={-1}
 											/>
