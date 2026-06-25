@@ -134,20 +134,17 @@
 	// Clamp to supported CSS range (chip-max-1 through chip-max-5 in app.css)
 	const maxVisibleChips = Math.max(1, Math.min(5, _maxVisibleChips));
 
-	// Stable id so the visible <label> can associate with the inner search input.
 	const inputId = `form-input-${field.replaceAll('_', '-')}`;
 
-	// svelte-multiselect's internal DOM is not fully accessible out of the box:
-	// the role="searchbox" wrapper is unnamed, and its chips <ul> holds the search
-	// <input> as a direct child (violating "list must only contain <li>"). Patch
-	// both via the bound outer element since the library exposes no props for them.
+	// Patch svelte-multiselect's internal DOM (it exposes no props for these): name
+	// the role="searchbox" wrapper and re-role its chips <ul>, which holds the <input>.
 	let outerDiv: HTMLElement | null = $state(null);
 	$effect(() => {
 		if (!outerDiv) return;
-		const a11yName = label ?? placeholder ?? field.replaceAll('_', ' ');
+		const a11yName = label?.trim() || placeholder?.trim() || field.replaceAll('_', ' ');
 		if (!outerDiv.getAttribute('aria-label')) outerDiv.setAttribute('aria-label', a11yName);
 		outerDiv.querySelector('ul.selected')?.setAttribute('role', 'group');
-		// No visible <label> to associate with (e.g. table column filters) — name the input directly.
+		// No visible <label> (e.g. column filters) — name the input directly.
 		if (label === undefined) {
 			outerDiv
 				.querySelector('ul.selected input:not([aria-hidden])')

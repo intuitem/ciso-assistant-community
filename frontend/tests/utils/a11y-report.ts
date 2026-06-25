@@ -13,11 +13,8 @@ export interface PageReport {
 	name: string;
 	path: string;
 	theme?: 'light' | 'dark';
-	/** axe rule checks that passed on this page. */
 	passes?: number;
-	/** axe rule checks that need manual review (axe could not be certain). */
 	incomplete?: number;
-	/** WCAG 1.4.10 reflow smoke check: horizontal overflow at a 320px viewport. */
 	reflow?: { horizontalOverflowPx: number };
 	violations: {
 		id: string;
@@ -30,18 +27,17 @@ export interface PageReport {
 	}[];
 }
 
-/** Written once per audited page, immediately — survives Playwright worker restarts on failure. */
+// Per-page file written immediately, since Playwright restarts the worker on failure.
 export function writePageReport(report: PageReport): void {
 	if (!existsSync(PAGES_DIR)) mkdirSync(PAGES_DIR, { recursive: true });
 	writeFileSync(join(PAGES_DIR, `${report.name}.json`), JSON.stringify(report, null, 2));
 }
 
-/** Global setup: wipe previous run's per-page files so stale pages don't linger. */
+// Whole dir, so a zero-page run can't leave a stale report behind.
 export function cleanReports(): void {
-	rmSync(PAGES_DIR, { recursive: true, force: true });
+	rmSync(REPORT_DIR, { recursive: true, force: true });
 }
 
-/** Global teardown: fold per-page files into a combined json + markdown report. */
 export function aggregateReports(): void {
 	if (!existsSync(PAGES_DIR)) return;
 	const reports: PageReport[] = readdirSync(PAGES_DIR)
@@ -54,7 +50,6 @@ export function aggregateReports(): void {
 
 	const order: Severity[] = ['critical', 'serious', 'moderate', 'minor'];
 	const total = reports.reduce((n, r) => n + r.violations.length, 0);
-	// A page "passes" when it has no critical/serious violations (the test gate).
 	const passes = (r: PageReport) =>
 		!r.violations.some((v) => v.impact === 'critical' || v.impact === 'serious');
 	const passedCount = reports.filter(passes).length;

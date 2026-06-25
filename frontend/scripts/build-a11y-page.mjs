@@ -1,7 +1,5 @@
-// Generates a single publish-ready accessibility page by merging the
-// hand-written statement (docs/accessibility-statement.md) with the latest
-// automated test results (tests/reports/accessibility/axe-report.json).
-// Run after an audit:  pnpm run a11y:page
+// Merges docs/accessibility-statement.md with the latest axe-report.json into a
+// publishable docs/accessibility.md. Run after an audit: pnpm run a11y:page
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';

@@ -1,9 +1,7 @@
 import type { PlaywrightTestConfig } from '@playwright/test';
 import { devices } from '@playwright/test';
 
-// Accessibility audit config: drives an already-running dev server (default
-// http://localhost:5173) instead of spawning a preview server. Override the
-// target with A11Y_BASE_URL. The main playwright.config.ts is left untouched.
+// Drives an already-running dev server (A11Y_BASE_URL, default :5173) — no webServer.
 const config: PlaywrightTestConfig = {
 	testDir: 'tests/functional',
 	testMatch: 'accessibility.test.ts',

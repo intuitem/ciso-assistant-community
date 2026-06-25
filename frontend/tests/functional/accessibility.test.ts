@@ -2,35 +2,19 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '../utils/test-utils.js';
 import { writePageReport, type PageReport, type Severity } from '../utils/a11y-report.js';
 
-/**
- * Automated accessibility audit (axe-core) for the key pages of CISO Assistant.
- *
- * Scope note: axe-core fully certifies ~30% of WCAG 2.1 AA success criteria and
- * touches ~62% of the 106 RGAA criteria. It catches roughly half of real-world
- * defects (contrast, labels, name/role/value, lang, headings...). The remaining
- * RGAA criteria (keyboard, screen reader, multimedia, content) still require a
- * manual audit — this spec does NOT certify RGAA conformance.
- *
- * Aggregation: each page writes its own report file (see a11y-report.ts) because
- * Playwright restarts the worker after a failing test, wiping in-memory state.
- * The combined report is built in global teardown.
- */
+// axe-core audit of CISO Assistant's key pages. Each page writes its own report
+// file (a11y-report.ts) because Playwright restarts the worker on a failing test;
+// the combined report is built in global teardown.
 
-// WCAG 2.1 levels A + AA, which the automatable RGAA criteria map onto.
 const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 
-// Minimum supported viewport width (desktop-scoped). Reflow is checked here, not
-// at the WCAG 1.4.10 320px target — see the accessibility statement.
+// Desktop-scoped; not the WCAG 1.4.10 320px target — see the accessibility statement.
 const REFLOW_MIN_WIDTH = 1024;
 
-// Dark-theme variant (A11Y_THEME=dark): re-audit the same pages with the dark
-// theme forced, so theme-specific contrast issues are caught.
 const THEME: 'light' | 'dark' = process.env.A11Y_THEME === 'dark' ? 'dark' : 'light';
 const suffix = THEME === 'dark' ? '-dark' : '';
 
-// Apply the dark theme before navigation: the app keys off localStorage
-// 'ciso-theme' (default 'system' → prefers-color-scheme) and toggles a `.dark`
-// class on <html> via an anti-FOUC inline script.
+// The app derives `.dark` on <html> from localStorage 'ciso-theme'.
 async function applyThemePref(page: Page): Promise<void> {
 	if (THEME !== 'dark') return;
 	await page.emulateMedia({ colorScheme: 'dark' });
@@ -38,16 +22,14 @@ async function applyThemePref(page: Page): Promise<void> {
 		try {
 			localStorage.setItem('ciso-theme', 'dark');
 		} catch {
-			/* storage may be unavailable pre-navigation */
+			/* storage unavailable pre-navigation */
 		}
 	});
 }
 
 async function auditPage(page: Page, name: string, path: string): Promise<void> {
-	// Let async data tables / charts settle before scanning.
 	await page.waitForLoadState('networkidle').catch(() => {});
 
-	// Confirm the requested theme actually took effect, else the dark run is moot.
 	const isDark = await page.evaluate(() => document.documentElement.classList.contains('dark'));
 	if (THEME === 'dark') {
 		expect.soft(isDark, `${name}: dark theme did not apply`).toBe(true);
@@ -55,10 +37,6 @@ async function auditPage(page: Page, name: string, path: string): Promise<void> 
 
 	const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
 
-	// Horizontal-overflow check at the declared minimum supported width. CISO
-	// Assistant targets desktop/laptop screens; the app shell is not laid out for
-	// ~320px, so full WCAG 1.4.10 reflow is a documented limitation. We instead
-	// guard that no page overflows at the supported minimum.
 	await page.setViewportSize({ width: REFLOW_MIN_WIDTH, height: 900 });
 	const horizontalOverflowPx = await page.evaluate(() =>
 		Math.max(0, document.documentElement.scrollWidth - document.documentElement.clientWidth)
@@ -102,11 +80,9 @@ async function auditPage(page: Page, name: string, path: string): Promise<void> 
 			`${blocking.length} critical/serious\n${summary}`
 	);
 
-	// Surface blocking issues as test failures; lower-impact ones live in the report.
 	expect.soft(blocking, `${name} has critical/serious a11y violations`).toEqual([]);
 }
 
-// Unauthenticated entry point — the login form is a core RGAA "forms" surface.
 test('a11y: login page', async ({ loginPage, page }) => {
 	await applyThemePref(page);
 	await loginPage.goto();
@@ -114,8 +90,6 @@ test('a11y: login page', async ({ loginPage, page }) => {
 	await auditPage(page, 'login', '/login');
 });
 
-// Authenticated key pages: dashboards, representative lists, settings, and
-// distinct visual archetypes (calendar grid, x-rays analysis view).
 const AUTH_PAGES: { name: string; path: string }[] = [
 	{ name: 'analytics-dashboard', path: '/analytics' },
 	{ name: 'audits-list', path: '/compliance-assessments' },
@@ -139,12 +113,10 @@ for (const { name, path } of AUTH_PAGES) {
 	});
 }
 
-// Create-form modals — the RGAA "forms" surface (text fields, selects,
-// autocompletes, checkboxes) that list/detail pages don't exercise.
+// Create-form modals — exercise the form widgets lists/details don't.
 const CREATE_FORMS: { name: string; listPath: string }[] = [
 	{ name: 'create-applied-control', listPath: '/applied-controls' },
 	{ name: 'create-perimeter', listPath: '/perimeters' },
-	// /libraries 'add-button' opens UploadLibraryModal (custom upload form, not a model create).
 	{ name: 'upload-library-modal', listPath: '/libraries' }
 ];
 
@@ -159,8 +131,7 @@ for (const { name, listPath } of CREATE_FORMS) {
 	});
 }
 
-// Detail pages and full-page edit forms — reached from the first row of a list.
-// Skipped (not failed) when the table is empty, so coverage degrades gracefully.
+// Detail / edit pages reached from the first row; skipped when the table is empty.
 const ROW_TARGETS: { name: string; listPath: string; action: 'detail' | 'edit' }[] = [
 	{ name: 'applied-control-detail', listPath: '/applied-controls', action: 'detail' },
 	{ name: 'audit-detail', listPath: '/compliance-assessments', action: 'detail' },
@@ -174,7 +145,7 @@ for (const { name, listPath, action } of ROW_TARGETS) {
 		await applyThemePref(page);
 		await page.goto(listPath);
 		await page.locator('body[data-hydrated="true"]').waitFor();
-		// Wait for the async table data before counting rows, else we false-skip.
+		// Wait for table data before counting rows, else we false-skip.
 		await page.waitForLoadState('networkidle').catch(() => {});
 		const button = page.getByTestId(`tablerow-${action}-button`).first();
 		await button.waitFor({ timeout: 5000 }).catch(() => {});

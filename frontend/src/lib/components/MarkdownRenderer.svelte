@@ -74,12 +74,11 @@
 		html = sanitizeHtml(html, sanitizeConfig);
 		html = html.replace(new RegExp(`src="${INTERNAL_PLACEHOLDER}`, 'g'), 'src="');
 
-		// GFM task lists render disabled <input type="checkbox"> with no accessible
-		// name; give each a state label so they don't fail the axe "label" rule.
-		html = html.replace(/<input\b([^>]*\btype="checkbox"[^>]*)>/g, (full, attrs) =>
+		// Name GFM task-list checkboxes, which render unlabeled.
+		html = html.replace(/<input\b([^>]*?\btype="checkbox"[^>]*?)\s*\/?>/g, (full, attrs) =>
 			/aria-label/.test(attrs)
 				? full
-				: `<input${attrs} aria-label="${/\bchecked\b/.test(attrs) ? m.taskItemChecked() : m.taskItemUnchecked()}">`
+				: `<input${attrs} aria-label="${/\bchecked\b/.test(attrs) ? m.taskItemChecked() : m.taskItemUnchecked()}" />`
 		);
 
 		// Clean up excessive spacing
