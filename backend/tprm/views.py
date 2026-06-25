@@ -1187,12 +1187,42 @@ class EntityAssessmentViewSet(BaseModelViewSet):
         return Response(assessments_data)
 
 
-class RepresentativeViewSet(BaseModelViewSet):
+class RepresentativeViewSet(ExportMixin, BaseModelViewSet):
     """
     API endpoint that allows representatives to be viewed or edited.
     """
 
     model = Representative
+    export_config = {
+        "filename": "representatives_export",
+        "fields": {
+            "email": {"source": "email", "label": "email", "escape": True},
+            "first_name": {
+                "source": "first_name",
+                "label": "first_name",
+                "escape": True,
+            },
+            "last_name": {
+                "source": "last_name",
+                "label": "last_name",
+                "escape": True,
+            },
+            "description": {
+                "source": "description",
+                "label": "description",
+                "escape": True,
+            },
+            "phone": {"source": "phone", "label": "phone", "escape": True},
+            "role": {"source": "role", "label": "role", "escape": True},
+            "provider_entity_ref_id": {
+                "source": "entity.ref_id",
+                "label": "provider_entity_ref_id",
+                "escape": True,
+            },
+        },
+        "select_related": ["entity"],
+        "wrap_columns": ["first_name", "last_name", "description", "role"],
+    }
     filterset_fields = ["entity", "ref_id", "filtering_labels"]
     search_fields = ["email"]
 
