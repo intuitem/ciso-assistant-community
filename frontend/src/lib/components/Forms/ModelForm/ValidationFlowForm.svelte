@@ -102,18 +102,6 @@
 		multiple
 	/>
 {/if}
-<FolderTreeSelect
-	{form}
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-	onChange={async (e) => {
-		if (e && !object?.id) {
-			await fetchDefaultRefId();
-		}
-	}}
-/>
 {#if object?.id}
 	<Select
 		{form}
@@ -227,3 +215,15 @@
 		/>
 	</Dropdown>
 {/if}
+<FolderTreeSelect
+	{form}
+	field="folder"
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.domain()}
+	onChange={async (e) => {
+		if (e && !object?.id) {
+			await fetchDefaultRefId();
+		}
+	}}
+/>

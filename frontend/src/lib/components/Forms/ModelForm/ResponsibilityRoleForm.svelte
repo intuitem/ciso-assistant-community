@@ -1,5 +1,4 @@
 <script lang="ts">
-	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import TextField from '../TextField.svelte';
 	import TextArea from '../TextArea.svelte';
 	import Select from '../Select.svelte';
@@ -26,14 +25,6 @@
 		object = {}
 	}: Props = $props();
 </script>
-
-<FolderTreeSelect
-	{form}
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-/>
 
 <TextField
 	{form}

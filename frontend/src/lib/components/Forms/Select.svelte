@@ -57,6 +57,7 @@
 		...rest
 	}: Props = $props();
 
+	const inputId = `form-input-${field.replaceAll('_', '-')}`;
 	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 
 	let classesTextField = $derived((errors: string[] | undefined) =>
@@ -72,11 +73,11 @@
 <div>
 	{#if label !== undefined}
 		{#if $constraints?.required}
-			<label class="text-sm font-semibold" for={field}
+			<label class="text-sm font-semibold" for={inputId}
 				>{label} <span class="text-red-500">*</span></label
 			>
 		{:else}
-			<label class="text-sm font-semibold" for={field}>{label}</label>
+			<label class="text-sm font-semibold" for={inputId}>{label}</label>
 		{/if}
 	{/if}
 	{#if $errors && $errors.length > 0}
@@ -89,7 +90,9 @@
 	<div class="control">
 		<select
 			class="{'select ' + _class} {classesTextField($errors)}"
-			data-testid="form-input-{field.replaceAll('_', '-')}"
+			data-testid={inputId}
+			id={inputId}
+			aria-label={label}
 			name={field}
 			aria-invalid={$errors ? 'true' : undefined}
 			placeholder=""
