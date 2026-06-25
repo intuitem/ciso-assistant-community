@@ -717,6 +717,9 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
         (viewable_contract_ids, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, Contract
         )
+        (viewable_representative_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Representative
+        )
 
         # Honor the filters/search applied on the entities list page so the
         # exported "Entities" sheet matches what the user is viewing. The
@@ -739,6 +742,13 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
                     queryset=Solution.objects.filter(id__in=viewable_solution_ids),
                 )
             )
+        )
+        representatives = (
+            Representative.objects.filter(
+                id__in=viewable_representative_ids,
+                entity__in=entities,
+            )
+            .select_related("entity")
         )
 
         esc = escape_excel_formula
@@ -827,6 +837,21 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
                     "domain": esc(contract.folder.name) if contract.folder else "",
                 }
             )
+            
+        # --- Representatives sheet ---
+        representatives_rows = []
+        for representative in representatives:
+            representatives_rows.append(
+                {
+                    "email": esc(representative.email),
+                    "first_name": esc(representative.first_name),
+                    "last_name": esc(representative.last_name),
+                    "description": esc(representative.description),
+                    "phone": esc(representative.phone),
+                    "role": esc(representative.role),
+                    "provider_entity_ref_id": esc(representative.entity.ref_id),
+                }
+            )
 
         entity_columns = [
             "ref_id",
@@ -869,6 +894,16 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
             "currency",
             "domain",
         ]
+        
+        representative_columns = [
+            "email",
+            "first_name",
+            "last_name",
+            "description",
+            "phone",
+            "role",
+            "provider_entity_ref_id",
+        ]
 
         buffer = io.BytesIO()
         with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
@@ -880,6 +915,9 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
             )
             pd.DataFrame(contracts_rows, columns=contract_columns).to_excel(
                 writer, index=False, sheet_name="Contracts"
+            )
+            pd.DataFrame(representatives_rows, columns=representative_columns).to_excel(
+                writer, index=False, sheet_name="Representatives"
             )
 
         buffer.seek(0)
