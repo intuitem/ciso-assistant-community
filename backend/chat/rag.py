@@ -7,7 +7,8 @@ and context formatting.
 import structlog
 import os
 import time
-from typing import Any
+
+from django.db.models import Q
 
 from iam.models import Folder, RoleAssignment
 
@@ -43,14 +44,14 @@ def get_qdrant_client():
 
 
 def get_accessible_folder_ids(user) -> list[str]:
-    """Get all folder IDs the user has access to, as strings for Qdrant filtering."""
-    root = Folder.get_root_folder()
-    folder_ids = RoleAssignment.get_accessible_folder_ids(
-        folder=root,
-        user=user,
-        content_type=Folder.ContentType.DOMAIN,
+    """Get all folder IDs the user has access to (exclusing enclaves), as strings for Qdrant filtering."""
+
+    folder_id_queryset = RoleAssignment.get_allowed_folder_ids(user, "view", Folder)
+    non_enclave_folder_ids = Folder.objects.filter(
+        Q(id__in=folder_id_queryset) & ~Q(content_type=Folder.ContentType.ENCLAVE)
     )
-    return [str(fid) for fid in folder_ids]
+
+    return [str(folder_id) for folder_id in non_enclave_folder_ids]
 
 
 def search(

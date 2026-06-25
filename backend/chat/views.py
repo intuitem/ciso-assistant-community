@@ -2,6 +2,7 @@ import json
 import re
 import structlog
 import time
+from typing import Iterable
 
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
@@ -1905,7 +1906,7 @@ def _build_context_prompt(page_context: dict, parsed_context) -> str:
     return "\n".join(parts) + "\n"
 
 
-def _enrich_context(parsed_context, accessible_folder_ids: list[str]) -> str:
+def _enrich_context(parsed_context, accessible_folder_ids: Iterable[str]) -> str:
     """
     Enrich the LLM context with domain objects relevant to the current page.
     For example, when on a risk assessment page, include the domain's assets

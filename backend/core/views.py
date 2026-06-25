@@ -819,19 +819,21 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 https://stackoverflow.com/questions/74048193/why-does-a-retrieve-request-end-up-calling-get-queryset"""
                 id = UUID(q.group(1))
                 if RoleAssignment.is_object_readable(self.request.user, self.model, id):
-                    object_ids_view = [id]
+                    return self.model.objects.filter(id=id)
+                else:
+                    return self.model.objects.none()
 
-        if not object_ids_view:
-            object_ids_view = RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), self.request.user, self.model
-            )[0]
-
+        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), self.request.user, self.model
+        )
         queryset = self.model.objects.filter(id__in=object_ids_view)
 
-        field_names = {f.name for f in self.model._meta.get_fields()}
-        if "parent_folder" in field_names:
+        model_field_names = {f.name for f in self.model._meta.get_fields()}
+
+        if "parent_folder" in model_field_names:
             queryset = queryset.select_related("parent_folder")
-        if "filtering_labels" in field_names:
+
+        if "filtering_labels" in model_field_names:
             queryset = queryset.prefetch_related("filtering_labels")
 
         return queryset
@@ -1096,28 +1098,37 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         """
         Override the list method to inject optimized data into the serializer context.
         """
-        queryset = self.filter_queryset(self.get_queryset())
+        queryset: models.QuerySet = self.filter_queryset(self.get_queryset())
+
         page = self.paginate_queryset(queryset)
+
         objects = page if page is not None else queryset
         # 1. Perform the bulk calculation for the current page (or entire set if not paginated)
         optimized_data = self._get_optimized_object_data(objects)
+
         # 2. Pass the data to the serializer via context
         context = self.get_serializer_context()
+
         context["optimized_data"] = optimized_data
         if page is not None:
             serializer = self.get_serializer(page, many=True, context=context)
             data = serializer.data
+
             field_models = self._get_fieldsrelated_map(serializer)
             if field_models:
                 allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
                 data = self._filter_related_fields(data, field_models, allowed_ids)
+
             return self.get_paginated_response(data)
+
         serializer = self.get_serializer(queryset, many=True, context=context)
         data = serializer.data
+
         field_models = self._get_fieldsrelated_map(serializer)
         if field_models:
             allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
             data = self._filter_related_fields(data, field_models, allowed_ids)
+
         return Response(data)
 
     def retrieve(self, request, *args, **kwargs):
@@ -5504,7 +5515,7 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             Folder.get_root_folder(), request.user, AppliedControl
         )
 
-        return Response({"results": object_ids_change})
+        return Response({"results": list(object_ids_change)})
 
     @action(detail=False, methods=["get"], name="Get applied controls analytics")
     def analytics(self, request):
@@ -16245,7 +16256,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
             Folder.get_root_folder(), request.user, AppliedControl
         )
 
-        return Response({"results": object_ids_change})
+        return Response({"results": list(object_ids_change)})
 
     @action(
         detail=False, name="Something"
@@ -16908,8 +16919,8 @@ def export_mp_csv(request):
     writer.writerow(columns)
     (
         object_ids_view,
-        object_ids_change,
-        object_ids_delete,
+        _,
+        _,
     ) = RoleAssignment.get_accessible_object_ids(
         Folder.get_root_folder(), request.user, AppliedControl
     )
