@@ -4599,5 +4599,21 @@
 	"builderQuestionTypeMultipleChoice": "Keli pasirinkimai",
 	"builderQuestionTypeDate": "Data",
 	"builderChangedOn": "pakeista",
-	"requirementWeight": "Svoris"
+	"requirementWeight": "Svoris",
+	"scim": "SCIM",
+	"scimDescription": "Konfigūruokite SCIM 2.0 teikimą. Nukreipkite savo tapatybės teikėją į toliau nurodytą galinį tašką ir autentifikuokite jį čia sugeneruotu bearer žetonu.",
+	"scimEndpointUrl": "SCIM galinio taško URL",
+	"scimTokens": "SCIM žetonai",
+	"generateScimToken": "Generuoti žetoną",
+	"noScimTokens": "Kol kas nėra SCIM žetonų.",
+	"scimTokenName": "Pavadinimas",
+	"scimTokenDigest": "Santrauka",
+	"revokeScimToken": "Atšaukti",
+	"scimTokenGenerated": "Žetonas sugeneruotas",
+	"scimTokenWarning": "Nukopijuokite šį žetoną dabar. Saugumo sumetimais jis nebebus rodomas.",
+	"scimTokenRevoked": "SCIM žetonas atšauktas",
+	"scimTokenGenerationFailed": "Nepavyko sugeneruoti SCIM žetono",
+	"idpGroup": "IdP grupė",
+	"idpGroups": "IdP grupės",
+	"idpGroupsDescription": "Įjungti IdP grupių federaciją (SCIM teikimas, IdP grupių susiejimai ir naudotojų narystės IdP grupėse)."
 }

@@ -56,16 +56,18 @@
 <ol class="flex items-center gap-4 h-6 overflow-hidden whitespace-nowrap">
 	{#each $breadcrumbs as c, i}
 		{#if i == $breadcrumbs.length - 1}
-			<span
-				class="max-w-[64ch] overflow-hidden whitespace-nowrap text-ellipsis text-sm text-surface-600-400 font-semibold antialiased"
-				data-testid="crumb-item"
-				title={safeTranslate(c.label)}
-			>
-				{#if c.icon}
-					<i class={c.icon}></i>
-				{/if}
-				{safeTranslate(c.label)}
-			</span>
+			<li>
+				<span
+					class="max-w-[64ch] overflow-hidden whitespace-nowrap text-ellipsis text-sm text-surface-600-400 font-semibold antialiased"
+					data-testid="crumb-item"
+					title={safeTranslate(c.label)}
+				>
+					{#if c.icon}
+						<i class={c.icon}></i>
+					{/if}
+					{safeTranslate(c.label)}
+				</span>
+			</li>
 		{:else}
 			<li>
 				{#if c.href}
