@@ -281,11 +281,20 @@
 
 	const isRelatedField = (fieldName: string): boolean => relatedFieldNames.has(fieldName);
 	const nonNavigableRelatedFields = new Set(['qualifications', 'relationship', 'nature']);
-	const getRelatedFieldHref = (fieldName: string, id: string): string | undefined => {
+	const getRelatedFieldHref = (
+		fieldName: string,
+		id: string,
+		options: { fallbackToDashedField?: boolean } = {}
+	): string | undefined => {
 		if (nonNavigableRelatedFields.has(fieldName)) return undefined;
-		const relatedField = model?.foreignKeyFields?.find((field) => field.field === fieldName);
-		if (!relatedField?.urlModel) return undefined;
-		return `/${relatedField.urlModel}/${id}`;
+		const relatedUrlModel = model?.foreignKeyFields?.find(
+			(field) => field.field === fieldName
+		)?.urlModel;
+		const urlModel =
+			relatedUrlModel ?? (options.fallbackToDashedField ? fieldName.replace(/_/g, '-') : undefined);
+
+		if (!urlModel) return undefined;
+		return `/${urlModel}/${id}`;
 	};
 
 	let classProp = ''; // Replacing $$props.class
@@ -976,7 +985,9 @@
 																				Object.entries(val)[0]}
 																			{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
 																		{:else if val.str && val.id}
-																			{@const itemHref = getRelatedFieldHref(key, val.id)}
+																			{@const itemHref = getRelatedFieldHref(key, val.id, {
+																				fallbackToDashedField: true
+																			})}
 																			{#if itemHref}
 																				<Anchor href={itemHref} class="anchor" stopPropagation
 																					>{safeTranslate(val.str)}</Anchor
