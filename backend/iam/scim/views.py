@@ -468,7 +468,8 @@ class SCIMGroupViewSet(ViewSet):
             if attr == "displayname":
                 qs = qs.filter(name__iexact=value)
             elif attr == "id":
-                qs = qs.filter(id=value)
+                uid = _valid_uuid(value)
+                qs = qs.filter(id=uid) if uid is not None else qs.none()
             else:
                 qs = qs.none()
 
