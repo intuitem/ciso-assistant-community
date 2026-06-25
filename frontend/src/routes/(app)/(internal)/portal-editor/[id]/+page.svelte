@@ -36,11 +36,19 @@
 	});
 	const { form: settingsData, enhance: settingsEnhance } = settingsSuperform;
 
+	const regenEnhance =
+		() =>
+		async ({ result, update }: { result: { type: string }; update: () => Promise<void> }) => {
+			await update();
+			if (result.type === 'success')
+				toast.trigger({ message: m.saved(), background: 'preset-filled-success-500' });
+		};
+
 	type Item = {
 		icon: string;
 		title: string;
 		description: string;
-		kind: 'create' | 'navigate' | 'external' | 'status';
+		kind: 'create' | 'navigate' | 'external' | 'status' | 'metric' | 'badge' | 'document';
 		target: Record<string, string>;
 	};
 	type Section = { title: string; description: string; items: Item[] };
@@ -59,7 +67,17 @@
 		}))
 	);
 
-	const KINDS = ['create', 'navigate', 'external', 'status'] as const;
+	const KINDS = [
+		'create',
+		'navigate',
+		'external',
+		'status',
+		'metric',
+		'badge',
+		'document'
+	] as const;
+	// Kinds surfaced on the unauthenticated trust-center page (mirror of backend PUBLIC_SAFE_TILE_KINDS).
+	const PUBLIC_SAFE = ['external', 'status', 'metric', 'badge', 'document'];
 
 	const payload = $derived(JSON.stringify({ sections }));
 
@@ -101,6 +119,9 @@
 	function targetField(kind: Item['kind']) {
 		if (kind === 'create') return { key: 'model', label: 'Model (url name)', ph: 'incidents' };
 		if (kind === 'status') return { key: 'source', label: 'Source key', ph: 'iso-27001' };
+		if (kind === 'metric') return { key: 'value', label: m.value(), ph: '128' };
+		if (kind === 'badge') return { key: 'image_url', label: m.logoUrl(), ph: 'https://…' };
+		if (kind === 'document') return { key: 'token', label: m.document(), ph: '' };
 		return { key: 'url', label: 'URL', ph: kind === 'external' ? 'https://…' : '/incidents' };
 	}
 </script>
@@ -200,6 +221,12 @@
 								<select bind:value={item.kind} class="select rounded-md text-sm">
 									{#each KINDS as k}<option value={k}>{k}</option>{/each}
 								</select>
+								{#if data.portal.is_public && !PUBLIC_SAFE.includes(item.kind)}
+									<span class="mt-0.5 block text-warning-600" title={m.hiddenOnPublicHelp()}>
+										<i class="fa-solid fa-eye-slash"></i>
+										{m.hiddenOnPublic()}
+									</span>
+								{/if}
 							</label>
 							<label class="text-[10px] text-surface-500 grow">
 								<span class="block">{tf.label}</span>
@@ -212,6 +239,12 @@
 									<select bind:value={item.target.url} class="select rounded-md text-sm">
 										<option value="">—</option>
 										{#each modelOptions as o}<option value="/{o.value}">{o.label}</option>{/each}
+									</select>
+								{:else if item.kind === 'document'}
+									<select bind:value={item.target.token} class="select rounded-md text-sm">
+										<option value="">—</option>
+										{#each data.publicDocuments as d}<option value={d.token}>{d.name}</option
+											>{/each}
 									</select>
 								{:else}
 									<input
@@ -301,8 +334,110 @@
 				label={m.audience()}
 			/>
 			<p class="text-xs text-surface-500">{m.audienceHelp()}</p>
+
+			<hr class="border-surface-200-800" />
+
+			<div class="space-y-4">
+				<div class="flex items-center gap-2">
+					<i class="fa-solid fa-globe text-surface-400"></i>
+					<h3 class="font-semibold text-surface-800-200">{m.trustCenter()}</h3>
+				</div>
+				<label class="flex items-center gap-2 text-sm">
+					<input type="checkbox" bind:checked={$settingsData.is_public} class="checkbox" />
+					{m.makePublic()}
+				</label>
+				<p class="text-xs text-surface-500">{m.makePublicHelp()}</p>
+
+				{#if $settingsData.is_public}
+					<label class="flex items-center gap-2 text-sm">
+						<input type="checkbox" bind:checked={$settingsData.is_primary} class="checkbox" />
+						{m.primaryPortal()}
+					</label>
+					<p class="text-xs text-surface-500">{m.primaryPortalHelp()}</p>
+
+					<div class="grid gap-4 sm:grid-cols-2">
+						<label class="block text-sm">
+							<span class="block text-surface-600-400">{m.tagline()}</span>
+							<input bind:value={$settingsData.branding.tagline} class="input rounded-md" />
+						</label>
+						<label class="block text-sm">
+							<span class="block text-surface-600-400">{m.logoUrl()}</span>
+							<input
+								bind:value={$settingsData.branding.logo_url}
+								placeholder="https://…"
+								class="input rounded-md"
+							/>
+						</label>
+						<label class="block text-sm">
+							<span class="block text-surface-600-400">{m.accentColor()}</span>
+							<input
+								type="color"
+								value={$settingsData.branding.accent_color || '#7c3aed'}
+								oninput={(e) => ($settingsData.branding.accent_color = e.currentTarget.value)}
+								class="input h-10 rounded-md p-1"
+							/>
+						</label>
+					</div>
+				{/if}
+			</div>
+
 			<button class="btn preset-filled-primary-500">{m.save()}</button>
 		</form>
+
+		{#if data.portal.is_public && data.portal.public_token}
+			<div class="card bg-surface-50-950 p-6 space-y-3 max-w-4xl mt-4">
+				<h3 class="font-semibold text-surface-800-200">{m.publicLink()}</h3>
+				<p class="text-xs text-surface-500">{m.publicLinkHelp()}</p>
+				<div class="flex items-center gap-2">
+					<input
+						readonly
+						value={`${page.url.origin}/trust/${data.portal.public_token}`}
+						class="input rounded-md text-sm grow font-mono"
+					/>
+					<a
+						href={`/trust/${data.portal.public_token}`}
+						target="_blank"
+						rel="noopener"
+						class="btn btn-sm preset-tonal"
+						aria-label={m.open()}><i class="fa-solid fa-arrow-up-right-from-square"></i></a
+					>
+					<button
+						type="button"
+						onclick={() =>
+							navigator.clipboard?.writeText(
+								`${page.url.origin}/trust/${data.portal.public_token}`
+							)}
+						class="btn btn-sm preset-tonal"
+						aria-label={m.copy()}><i class="fa-solid fa-copy"></i></button
+					>
+				</div>
+				<form method="POST" action="?/regeneratePublicToken" use:enhance={regenEnhance}>
+					<button class="btn btn-sm preset-tonal-error">
+						<i class="fa-solid fa-rotate mr-1"></i>{m.regenerateLink()}
+					</button>
+				</form>
+
+				{#if data.portal.is_primary}
+					<div class="border-t border-surface-200-800 pt-3">
+						<p class="text-xs text-surface-500">{m.vanityUrlHelp()}</p>
+						<div class="mt-2 flex items-center gap-2">
+							<input
+								readonly
+								value={`${page.url.origin}/trust`}
+								class="input rounded-md text-sm grow font-mono"
+							/>
+							<a
+								href="/trust"
+								target="_blank"
+								rel="noopener"
+								class="btn btn-sm preset-tonal"
+								aria-label={m.open()}><i class="fa-solid fa-arrow-up-right-from-square"></i></a
+							>
+						</div>
+					</div>
+				{/if}
+			</div>
+		{/if}
 	{/if}
 </div>
 

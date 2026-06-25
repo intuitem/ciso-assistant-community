@@ -23,6 +23,12 @@
 </script>
 
 <div class="space-y-8">
+	<div class="flex justify-end">
+		<a href="/portal-editor/documents" class="btn btn-sm preset-tonal">
+			<i class="fa-solid fa-folder-open mr-1"></i>{m.publicDocuments()}
+		</a>
+	</div>
+
 	<!-- My portals -->
 	<section class="card bg-surface-50-950 p-6 space-y-4">
 		<div class="flex items-center justify-between">

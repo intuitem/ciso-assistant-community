@@ -9943,54 +9943,6 @@ class PresetJourneyStep(AbstractBaseModel):
         return f"{self.journey.name} - {self.title}"
 
 
-class PortalPreset(NameDescriptionMixin, FolderMixin):
-    """A portal definition / catalog entry. Library-backed (urn set) or user-authored.
-    Cloned into a live Portal; never referenced live (no sync). Exports to YAML.
-    `content` holds the whole design: {"sections": [{"title", "items": [...]}]}."""
-
-    urn = models.CharField(max_length=255, null=True, blank=True, unique=True)
-    ref_id = models.CharField(max_length=255, null=True, blank=True)
-    version = models.IntegerField(default=1)
-    provider = models.CharField(max_length=255, null=True, blank=True)
-    translations = models.JSONField(default=dict, blank=True)
-    content = models.JSONField(default=dict, blank=True)
-
-    class Meta:
-        ordering = ["name"]
-
-    def __str__(self):
-        return self.name
-
-
-class Portal(NameDescriptionMixin, FolderMixin):
-    """A live portal: owns its own design (`content`), cloned from a preset or built
-    from scratch, then tuned locally. Carries audience, branding and publication state."""
-
-    class Status(models.TextChoices):
-        DRAFT = "draft", _("Draft")
-        PUBLISHED = "published", _("Published")
-
-    status = models.CharField(
-        max_length=20, choices=Status.choices, default=Status.DRAFT
-    )
-    enabled = models.BooleanField(default=True)
-    is_public = models.BooleanField(default=False)
-    audience_groups = models.ManyToManyField(
-        UserGroup, related_name="portals", blank=True
-    )
-    is_default = models.BooleanField(default=False)
-    order = models.IntegerField(default=0)
-    branding = models.JSONField(default=dict, blank=True)
-    content = models.JSONField(default=dict, blank=True)
-    source_ref = models.CharField(max_length=255, null=True, blank=True)
-
-    class Meta:
-        ordering = ["order", "name"]
-
-    def __str__(self):
-        return self.name
-
-
 common_exclude = ["created_at", "updated_at"]
 
 auditlog.register(

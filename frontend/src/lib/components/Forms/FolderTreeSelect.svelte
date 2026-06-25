@@ -34,6 +34,12 @@
 		 * previous optionsEndpoint="folders?content_type=DO&content_type=GL".
 		 */
 		contentTypes?: string[];
+		/**
+		 * Override the write-permission filter inherited from ModelForm context.
+		 * Pass `null` to make every accessible folder selectable (e.g. when picking a
+		 * folder as a setting reference, where write access on it isn't required).
+		 */
+		writePermission?: string | null;
 	}
 
 	let {
@@ -52,7 +58,8 @@
 		onChange = () => {},
 		mount: mountCallback = () => null,
 		optionsSelf = null,
-		contentTypes = ['DO', 'GL']
+		contentTypes = ['DO', 'GL'],
+		writePermission = undefined
 	}: Props = $props();
 
 	// Write permission is inferred from ModelForm context: add_<model.name>.
@@ -220,9 +227,8 @@
 
 		isLoading = true;
 		const includeEnclaves = contentTypes.includes('EN');
-		const writePerm = defaultWritePermission
-			? `&write_perm=${encodeURIComponent(defaultWritePermission)}`
-			: '';
+		const effectivePerm = writePermission !== undefined ? writePermission : defaultWritePermission;
+		const writePerm = effectivePerm ? `&write_perm=${encodeURIComponent(effectivePerm)}` : '';
 		fetch(
 			`/folders/org_tree/?include_perimeters=false${includeEnclaves ? '&include_enclaves=true' : ''}${writePerm}`
 		)

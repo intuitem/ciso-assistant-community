@@ -1,0 +1,44 @@
+import { BASE_API_URL } from '$lib/utils/constants';
+import { error, fail, redirect, type Actions } from '@sveltejs/kit';
+import type { PageServerLoad } from './$types';
+
+const unwrap = async (res: Response) => {
+	if (!res.ok) error(res.status, await res.text());
+	const data = await res.json();
+	return data.results ?? data;
+};
+
+export const load: PageServerLoad = async ({ fetch, locals }) => {
+	if (!locals.featureflags?.custom_portals) redirect(302, '/');
+	const [docs, folders] = await Promise.all([
+		fetch(`${BASE_API_URL}/public-documents/`),
+		fetch(`${BASE_API_URL}/folders/`)
+	]);
+	return { documents: await unwrap(docs), folders: await unwrap(folders) };
+};
+
+export const actions: Actions = {
+	upload: async ({ request, fetch }) => {
+		const data = await request.formData();
+		const file = data.get('file');
+		const name = (data.get('name') as string)?.trim();
+		const folder = data.get('folder') as string;
+		if (!file || !(file instanceof File) || file.size === 0)
+			return fail(400, { error: 'File required' });
+		if (!name) return fail(400, { error: 'Name required' });
+		// Rebuild FormData — never forward the raw request stream (boundary loss).
+		const body = new FormData();
+		body.append('name', name);
+		if (folder) body.append('folder', folder);
+		body.append('file', file);
+		const res = await fetch(`${BASE_API_URL}/public-documents/`, { method: 'POST', body });
+		if (!res.ok) return fail(res.status, { error: await res.text() });
+		return { success: true };
+	},
+	delete: async ({ request, fetch }) => {
+		const id = (await request.formData()).get('id');
+		const res = await fetch(`${BASE_API_URL}/public-documents/${id}/`, { method: 'DELETE' });
+		if (!res.ok) return fail(res.status, { error: await res.text() });
+		return { success: true };
+	}
+};

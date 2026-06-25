@@ -685,7 +685,16 @@ export const PortalSettingsSchema = z.object({
 	enabled: z.boolean().default(true),
 	is_default: z.boolean().default(false),
 	order: z.number().default(0),
-	audience_groups: z.string().uuid().optional().array().optional()
+	audience_groups: z.string().uuid().optional().array().optional(),
+	is_public: z.boolean().default(false),
+	is_primary: z.boolean().default(false),
+	branding: z
+		.object({
+			logo_url: z.string().optional(),
+			accent_color: z.string().optional(),
+			tagline: z.string().optional()
+		})
+		.default({})
 });
 
 export const SSOSettingsSchema = z.object({

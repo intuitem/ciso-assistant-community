@@ -139,8 +139,6 @@ router.register(r"answers", AnswerViewSet, basename="answers")
 router.register(r"presets", PresetViewSet, basename="presets")
 router.register(r"journeys", JourneyViewSet, basename="journeys")
 router.register(r"journey-steps", JourneyStepViewSet, basename="journey-steps")
-router.register(r"portal-presets", PortalPresetViewSet, basename="portal-presets")
-router.register(r"portals", PortalViewSet, basename="portals")
 
 ROUTES = settings.ROUTES
 MODULES = settings.MODULES.values()
@@ -169,6 +167,7 @@ urlpatterns = [
     path("crq/", include("crq.urls")),
     path("pmbok/", include("pmbok.urls")),
     path("metrology/", include("metrology.urls")),
+    path("", include("portals.urls")),
     path("csrf/", get_csrf_token, name="get_csrf_token"),
     path("health/", healthcheck, name="healthcheck"),
     path("build/", get_build, name="get_build"),

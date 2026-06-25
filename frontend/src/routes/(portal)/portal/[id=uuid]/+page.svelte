@@ -13,8 +13,8 @@
 		icon: string;
 		title: string;
 		description?: string;
-		kind: 'create' | 'navigate' | 'external' | 'status';
-		target: { model?: string; url?: string };
+		kind: 'create' | 'navigate' | 'external' | 'status' | 'metric' | 'badge' | 'document';
+		target: { model?: string; url?: string; token?: string };
 	}
 
 	let { data }: { data: PageData } = $props();
@@ -40,6 +40,8 @@
 		else if (item.kind === 'navigate' && item.target.url) goto(item.target.url);
 		else if (item.kind === 'external' && item.target.url)
 			window.open(item.target.url, '_blank', 'noopener');
+		else if (item.kind === 'document' && item.target.token)
+			window.open(`/trust/documents/${item.target.token}`, '_blank', 'noopener');
 	}
 </script>
 

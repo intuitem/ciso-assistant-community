@@ -10,16 +10,21 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 	const res = await fetch(`${BASE_API_URL}/portals/${params.id}/`);
 	if (!res.ok) error(res.status === 404 ? 404 : 500, 'Portal not found');
 	const portal = await res.json();
+	const docsRes = await fetch(`${BASE_API_URL}/public-documents/`);
+	const publicDocuments = docsRes.ok ? ((await docsRes.json()).results ?? []) : [];
 	const settingsForm = await superValidate(
 		{
 			enabled: portal.enabled,
 			is_default: portal.is_default,
 			order: portal.order,
-			audience_groups: (portal.audience_groups ?? []).map((g: { id: string }) => g.id)
+			audience_groups: (portal.audience_groups ?? []).map((g: { id: string }) => g.id),
+			is_public: portal.is_public,
+			is_primary: portal.is_primary,
+			branding: portal.branding ?? {}
 		},
 		zod(PortalSettingsSchema)
 	);
-	return { portal, settingsForm };
+	return { portal, settingsForm, publicDocuments };
 };
 
 async function patch(fetch: typeof globalThis.fetch, id: string, body: unknown) {
@@ -64,10 +69,20 @@ export const actions: Actions = {
 			enabled: form.data.enabled,
 			is_default: form.data.is_default,
 			order: form.data.order,
-			audience_groups: form.data.audience_groups ?? []
+			audience_groups: form.data.audience_groups ?? [],
+			is_public: form.data.is_public,
+			is_primary: form.data.is_primary,
+			branding: form.data.branding ?? {}
 		});
 		if (!res.ok) return fail(res.status, { error: await res.text() });
 		return { form };
+	},
+	regeneratePublicToken: async ({ params, fetch }) => {
+		const res = await fetch(`${BASE_API_URL}/portals/${params.id}/regenerate-public-token/`, {
+			method: 'POST'
+		});
+		if (!res.ok) return fail(res.status, { error: await res.text() });
+		return { success: true };
 	},
 	duplicate: async ({ params, fetch }) => {
 		const res = await fetch(`${BASE_API_URL}/portals/${params.id}/duplicate/`, { method: 'POST' });

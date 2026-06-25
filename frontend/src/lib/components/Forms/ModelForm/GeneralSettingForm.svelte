@@ -237,6 +237,7 @@
 					{form}
 					field="personal_folders_parent"
 					contentTypes={['DO', 'GL']}
+					writePermission={null}
 					nullable
 					label={m.personalFoldersParent()}
 					helpText={m.personalFoldersParentHelpText()}
