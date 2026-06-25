@@ -1378,14 +1378,8 @@
 	"associatedFindingsAssessments": "Follow-up associati",
 	"hourCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"count",
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
 			"match": {
 				"countPlural=one": "{count} Ora",
 				"countPlural=other": "{count} Ore"
@@ -1394,13 +1388,8 @@
 	],
 	"minuteCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} Minuto",
 				"countPlural=other": "{count} Minuti"
@@ -1409,13 +1398,8 @@
 	],
 	"dayCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} Giorno",
 				"countPlural=other": "{count} Giorni"
@@ -1424,13 +1408,8 @@
 	],
 	"objectsNotVisible": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} oggetto non visibile.",
 				"countPlural=other": "{count} oggetti non visibili."
@@ -1531,14 +1510,8 @@
 	"errorFetching": "Impossibile caricare le informazioni di cascata. Riprova.",
 	"cascadeAffectedNotice": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"count",
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
 			"match": {
 				"count=0": "Nessun altro oggetto sarà influenzato.",
 				"countPlural=one": "{count} oggetto correlato non verrà eliminato ma perderà una o più relazioni.",
@@ -2563,13 +2536,8 @@
 	"builderPublishModalDescription": "Questa azione aggiornerà il framework in produzione. Verifica le modifiche qui sotto.",
 	"builderRequirementAdded": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} requisiti aggiunti",
 				"countPlural=other": "{count} requisiti aggiunti"
@@ -2578,13 +2546,8 @@
 	],
 	"builderQuestionsAddedSuffix": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} domande",
 				"countPlural=other": "{count} domande"
@@ -2593,13 +2556,8 @@
 	],
 	"builderRequirementRemoved": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} requisiti rimossi",
 				"countPlural=other": "{count} requisiti rimossi"
@@ -2608,13 +2566,8 @@
 	],
 	"builderQuestionsRemovedSuffix": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} domande",
 				"countPlural=other": "{count} domande"
@@ -2624,13 +2577,8 @@
 	"builderNoStructuralChanges": "Nessuna modifica strutturale rilevata (solo metadati).",
 	"builderBreakingChangesDetected": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} modifiche incompatibili rilevate",
 				"countPlural=other": "{count} modifiche incompatibili rilevate"
@@ -2640,13 +2588,8 @@
 	"builderBreakingChangesHint": "Queste modifiche possono influenzare il calcolo del punteggio, la visibilità o i risultati di conformità negli audit esistenti.",
 	"builderAffectedAudits": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} audit esistenti saranno interessati",
 				"countPlural=other": "{count} audit esistenti saranno interessati"
@@ -2684,13 +2627,8 @@
 	"builderNoRulesOrGroupsConfigured": "Nessuna regola o gruppo configurato",
 	"builderOutcomeRuleSummary": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} regole di esito",
 				"countPlural=other": "{count} regole di esito"
@@ -2699,13 +2637,8 @@
 	],
 	"builderImplementationGroupsSummaryShort": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} gruppi",
 				"countPlural=other": "{count} gruppi"
@@ -2718,13 +2651,8 @@
 	"builderScoreScale": "Scala di punteggio",
 	"builderScaleLevel": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} livelli",
 				"countPlural=other": "{count} livelli"
@@ -2794,13 +2722,8 @@
 	"builderAssessableLeaf": "Foglia valutabile",
 	"builderAssessableWithChildren": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Valutabile · {count} figlio",
 				"countPlural=other": "Valutabile · {count} figli"
@@ -2809,13 +2732,8 @@
 	],
 	"builderGroupWithChildren": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Gruppo · {count} figlio",
 				"countPlural=other": "Gruppo · {count} figli"
@@ -2842,13 +2760,8 @@
 	"builderAddQuestion": "Aggiungi domanda",
 	"builderChildrenHidden": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} figlio nascosto",
 				"countPlural=other": "{count} figli nascosti"
@@ -2876,14 +2789,8 @@
 	"builderChangeTypeWarning": "Cambiare il tipo eliminerà le scelte esistenti. Continuare?",
 	"builderShownWhenAnswers": [
 		{
-			"declarations": [
-				"input count",
-				"input ref",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Mostrato quando {ref} = {count} risposte",
 				"countPlural=other": "Mostrato quando {ref} = {count} risposte"
