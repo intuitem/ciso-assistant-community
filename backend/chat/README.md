@@ -151,7 +151,7 @@ In **Settings > General**, set:
 
 Set `embedding_backend` to `sentence-transformers`. This uses `paraphrase-multilingual-MiniLM-L12-v2` locally on CPU. Multilingual support included.
 
-This is the default and requires no external service. The model (~130 MB) is **pre-baked into the backend image** at build time (see `backend/Dockerfile`) and the runtime is forced offline (`HF_HUB_OFFLINE=1`, `TRANSFORMERS_OFFLINE=1`), so the AI works with no internet access.
+This is the default and requires no external service. This model and the cross-encoder reranker (`cross-encoder/ms-marco-MiniLM-L-6-v2`, see `chat/rag.py`) are **pre-baked into the backend image** at build time (see `backend/Dockerfile`, ~500 MB for both) and the runtime is forced offline (`HF_HUB_OFFLINE=1`, `TRANSFORMERS_OFFLINE=1`), so the AI works with no internet access.
 
 ### Option B: Ollama Embeddings
 
