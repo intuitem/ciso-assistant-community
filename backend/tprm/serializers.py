@@ -6,6 +6,7 @@ from core.models import ComplianceAssessment, Framework, RequirementAssignment
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
 from core.serializers import BaseModelSerializer
 from core.utils import RoleCodename, UserGroupCodename
+from pmbok.models import GenericCollection
 from iam.models import Folder, Role, RoleAssignment, UserGroup
 from django.contrib.auth import get_user_model
 from tprm.models import (
@@ -187,6 +188,12 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
 
 
 class EntityAssessmentWriteSerializer(BaseModelSerializer):
+    genericcollection = serializers.PrimaryKeyRelatedField(
+        source="genericcollection_set",
+        many=True,
+        required=False,
+        queryset=GenericCollection.objects.all(),
+    )
     create_audit = serializers.BooleanField(default=False)
     framework = serializers.PrimaryKeyRelatedField(
         queryset=Framework.objects.all(), required=False
