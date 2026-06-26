@@ -3669,5 +3669,21 @@
 	"errorDisablingMFA": "No se pudo desactivar MFA para este usuario",
 	"userHasNoMFAEnabled": "Este usuario no tiene MFA habilitada",
 	"builderChangedOn": "modificado en",
-	"requirementWeight": "Peso"
+	"requirementWeight": "Peso",
+	"scim": "SCIM",
+	"scimDescription": "Configure el aprovisionamiento SCIM 2.0. Apunte su proveedor de identidad al endpoint de abajo y autentíquelo con un token de portador generado aquí.",
+	"scimEndpointUrl": "URL del endpoint SCIM",
+	"scimTokens": "Tokens SCIM",
+	"generateScimToken": "Generar token",
+	"noScimTokens": "Aún no hay tokens SCIM.",
+	"scimTokenName": "Nombre",
+	"scimTokenDigest": "Resumen",
+	"revokeScimToken": "Revocar",
+	"scimTokenGenerated": "Token generado",
+	"scimTokenWarning": "Copie este token ahora. Por motivos de seguridad no se volverá a mostrar.",
+	"scimTokenRevoked": "Token SCIM revocado",
+	"scimTokenGenerationFailed": "No se pudo generar el token SCIM",
+	"idpGroup": "Grupo IdP",
+	"idpGroups": "Grupos IdP",
+	"idpGroupsDescription": "Habilitar la federación de grupos IdP (aprovisionamiento SCIM, asignaciones de grupos IdP y pertenencias a grupos IdP en los usuarios)."
 }

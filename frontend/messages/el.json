@@ -2329,5 +2329,21 @@
 	"errorDisablingMFA": "Δεν ήταν δυνατή η απενεργοποίηση του MFA για αυτόν τον χρήστη",
 	"userHasNoMFAEnabled": "Αυτός ο χρήστης δεν έχει ενεργοποιημένο MFA",
 	"builderChangedOn": "άλλαξε σε",
-	"requirementWeight": "Βάρος"
+	"requirementWeight": "Βάρος",
+	"scim": "SCIM",
+	"scimDescription": "Διαμορφώστε την παροχή SCIM 2.0. Κατευθύνετε τον πάροχο ταυτότητάς σας στο παρακάτω σημείο πρόσβασης και πιστοποιήστε τον με ένα διακριτικό bearer που δημιουργείται εδώ.",
+	"scimEndpointUrl": "URL σημείου πρόσβασης SCIM",
+	"scimTokens": "Διακριτικά SCIM",
+	"generateScimToken": "Δημιουργία διακριτικού",
+	"noScimTokens": "Δεν υπάρχουν ακόμη διακριτικά SCIM.",
+	"scimTokenName": "Όνομα",
+	"scimTokenDigest": "Σύνοψη",
+	"revokeScimToken": "Ανάκληση",
+	"scimTokenGenerated": "Το διακριτικό δημιουργήθηκε",
+	"scimTokenWarning": "Αντιγράψτε αυτό το διακριτικό τώρα. Για λόγους ασφαλείας δεν θα εμφανιστεί ξανά.",
+	"scimTokenRevoked": "Το διακριτικό SCIM ανακλήθηκε",
+	"scimTokenGenerationFailed": "Αποτυχία δημιουργίας διακριτικού SCIM",
+	"idpGroup": "Ομάδα IdP",
+	"idpGroups": "Ομάδες IdP",
+	"idpGroupsDescription": "Ενεργοποίηση ομοσπονδίας ομάδων IdP (παροχή SCIM, αντιστοιχίσεις ομάδων IdP και συμμετοχές χρηστών σε ομάδες IdP)."
 }

@@ -1645,5 +1645,21 @@
 	"errorDisablingMFA": "Det gick inte att inaktivera MFA för den här användaren",
 	"userHasNoMFAEnabled": "Den här användaren har inte MFA aktiverat",
 	"builderChangedOn": "ändrad i",
-	"requirementWeight": "Vikt"
+	"requirementWeight": "Vikt",
+	"scim": "SCIM",
+	"scimDescription": "Konfigurera SCIM 2.0-provisionering. Rikta din identitetsleverantör mot slutpunkten nedan och autentisera den med en bearer-token som genereras här.",
+	"scimEndpointUrl": "URL för SCIM-slutpunkt",
+	"scimTokens": "SCIM-tokens",
+	"generateScimToken": "Generera token",
+	"noScimTokens": "Inga SCIM-tokens ännu.",
+	"scimTokenName": "Namn",
+	"scimTokenDigest": "Digest",
+	"revokeScimToken": "Återkalla",
+	"scimTokenGenerated": "Token genererad",
+	"scimTokenWarning": "Kopiera denna token nu. Av säkerhetsskäl visas den inte igen.",
+	"scimTokenRevoked": "SCIM-token återkallad",
+	"scimTokenGenerationFailed": "Det gick inte att generera SCIM-token",
+	"idpGroup": "IdP-grupp",
+	"idpGroups": "IdP-grupper",
+	"idpGroupsDescription": "Aktivera IdP-gruppfederation (SCIM-provisionering, IdP-gruppmappningar och IdP-gruppmedlemskap för användare)."
 }

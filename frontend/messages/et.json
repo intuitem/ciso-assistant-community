@@ -4865,5 +4865,21 @@
 	"mfaDisabledSuccessfully": "Selle kasutaja MFA on keelatud",
 	"errorDisablingMFA": "Selle kasutaja MFA keelamine ebaõnnestus",
 	"userHasNoMFAEnabled": "Sellel kasutajal ei ole MFA lubatud",
-	"requirementWeight": "Kaal"
+	"requirementWeight": "Kaal",
+	"scim": "SCIM",
+	"scimDescription": "Seadistage SCIM 2.0 ettevalmistamine. Suunake oma identiteedipakkuja allolevale lõpp-punktile ja autentige see siin loodud bearer-tokeniga.",
+	"scimEndpointUrl": "SCIM-i lõpp-punkti URL",
+	"scimTokens": "SCIM-i tokenid",
+	"generateScimToken": "Loo token",
+	"noScimTokens": "SCIM-i tokeneid veel pole.",
+	"scimTokenName": "Nimi",
+	"scimTokenDigest": "Digest",
+	"revokeScimToken": "Tühista",
+	"scimTokenGenerated": "Token loodud",
+	"scimTokenWarning": "Kopeerige see token kohe. Turvakaalutlustel seda enam ei kuvata.",
+	"scimTokenRevoked": "SCIM-i token tühistatud",
+	"scimTokenGenerationFailed": "SCIM-i tokeni loomine ebaõnnestus",
+	"idpGroup": "IdP rühm",
+	"idpGroups": "IdP rühmad",
+	"idpGroupsDescription": "Luba IdP rühmade föderatsioon (SCIM ettevalmistamine, IdP rühmade vastendused ja kasutajate IdP rühmade liikmesused)."
 }

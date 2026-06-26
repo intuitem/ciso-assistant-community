@@ -1600,5 +1600,21 @@
 	"errorDisablingMFA": "इस उपयोगकर्ता के लिए MFA अक्षम नहीं किया जा सका",
 	"userHasNoMFAEnabled": "इस उपयोगकर्ता के पास MFA सक्षम नहीं है",
 	"builderChangedOn": "बदला गया",
-	"requirementWeight": "भार"
+	"requirementWeight": "भार",
+	"scim": "SCIM",
+	"scimDescription": "SCIM 2.0 प्रावधान कॉन्फ़िगर करें। अपने पहचान प्रदाता को नीचे दिए गए एंडपॉइंट पर इंगित करें और यहाँ उत्पन्न बियरर टोकन से प्रमाणित करें।",
+	"scimEndpointUrl": "SCIM एंडपॉइंट URL",
+	"scimTokens": "SCIM टोकन",
+	"generateScimToken": "टोकन बनाएँ",
+	"noScimTokens": "अभी तक कोई SCIM टोकन नहीं है।",
+	"scimTokenName": "नाम",
+	"scimTokenDigest": "डाइजेस्ट",
+	"revokeScimToken": "निरस्त करें",
+	"scimTokenGenerated": "टोकन उत्पन्न हुआ",
+	"scimTokenWarning": "इस टोकन को अभी कॉपी करें। सुरक्षा कारणों से इसे दोबारा नहीं दिखाया जाएगा।",
+	"scimTokenRevoked": "SCIM टोकन निरस्त किया गया",
+	"scimTokenGenerationFailed": "SCIM टोकन उत्पन्न करने में विफल",
+	"idpGroup": "IdP समूह",
+	"idpGroups": "IdP समूह",
+	"idpGroupsDescription": "IdP समूह फ़ेडरेशन सक्षम करें (SCIM प्रावधान, IdP समूह मैपिंग, और उपयोगकर्ताओं पर IdP समूह सदस्यताएँ)।"
 }

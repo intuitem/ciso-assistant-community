@@ -12,6 +12,8 @@ from .views import (
     SessionTokenView,
     SetPasswordView,
     RevokeOtherSessionsView,
+    SCIMTokenViewSet,
+    SCIMTokenDeleteView,
 )
 
 urlpatterns = [
@@ -39,5 +41,11 @@ urlpatterns = [
         "auth-tokens/<str:pk>/",
         AuthTokenDetailView.as_view(),
         name="auth-token-detail",
+    ),
+    path("scim-token/", SCIMTokenViewSet.as_view(), name="scim-token"),
+    path(
+        "scim-token/<int:token_id>/",
+        SCIMTokenDeleteView.as_view(),
+        name="scim-token-delete",
     ),
 ]

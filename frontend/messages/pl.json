@@ -2390,5 +2390,21 @@
 	"errorDisablingMFA": "Nie można wyłączyć MFA dla tego użytkownika",
 	"userHasNoMFAEnabled": "Ten użytkownik nie ma włączonego MFA",
 	"builderChangedOn": "zmienione w",
-	"requirementWeight": "Waga"
+	"requirementWeight": "Waga",
+	"scim": "SCIM",
+	"scimDescription": "Skonfiguruj provisioning SCIM 2.0. Skieruj swojego dostawcę tożsamości na poniższy punkt końcowy i uwierzytelnij go za pomocą tokenu bearer wygenerowanego tutaj.",
+	"scimEndpointUrl": "URL punktu końcowego SCIM",
+	"scimTokens": "Tokeny SCIM",
+	"generateScimToken": "Wygeneruj token",
+	"noScimTokens": "Brak tokenów SCIM.",
+	"scimTokenName": "Nazwa",
+	"scimTokenDigest": "Skrót",
+	"revokeScimToken": "Unieważnij",
+	"scimTokenGenerated": "Token wygenerowany",
+	"scimTokenWarning": "Skopiuj ten token teraz. Ze względów bezpieczeństwa nie zostanie ponownie wyświetlony.",
+	"scimTokenRevoked": "Token SCIM unieważniony",
+	"scimTokenGenerationFailed": "Nie udało się wygenerować tokenu SCIM",
+	"idpGroup": "Grupa IdP",
+	"idpGroups": "Grupy IdP",
+	"idpGroupsDescription": "Włącz federację grup IdP (provisioning SCIM, mapowania grup IdP i członkostwa w grupach IdP użytkowników)."
 }

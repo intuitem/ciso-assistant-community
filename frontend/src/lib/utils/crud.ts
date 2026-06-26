@@ -835,6 +835,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'users',
 		verboseName: 'User',
 		verboseNamePlural: 'Users',
+		flaggedFields: {
+			idp_groups: 'idp_groups'
+		},
 		foreignKeyFields: [{ field: 'user_groups', urlModel: 'user-groups' }],
 		filters: []
 	},
@@ -869,6 +872,18 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableDelete: true,
 				folderPermsNeeded: [{ model: 'folder', action: 'change' }]
 			}
+		],
+		filters: []
+	},
+	'idp-groups': {
+		name: 'idpgroup',
+		localName: 'idpGroup',
+		localNamePlural: 'idpGroups',
+		verboseName: 'IdP group',
+		verboseNamePlural: 'IdP groups',
+		foreignKeyFields: [{ field: 'user_groups', urlModel: 'user-groups' }],
+		reverseForeignKeyFields: [
+			{ field: 'idp_groups', urlModel: 'users', disableCreate: true, disableDelete: true }
 		],
 		filters: []
 	},

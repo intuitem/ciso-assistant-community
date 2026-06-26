@@ -1631,5 +1631,21 @@
 	"errorDisablingMFA": "Nem sikerült letiltani az MFA-t ennél a felhasználónál",
 	"userHasNoMFAEnabled": "Ennél a felhasználónál nincs engedélyezve az MFA",
 	"builderChangedOn": "módosítva itt:",
-	"requirementWeight": "Súly"
+	"requirementWeight": "Súly",
+	"scim": "SCIM",
+	"scimDescription": "SCIM 2.0 kiépítés konfigurálása. Irányítsa identitásszolgáltatóját az alábbi végpontra, és hitelesítse egy itt generált bearer tokennel.",
+	"scimEndpointUrl": "SCIM végpont URL",
+	"scimTokens": "SCIM tokenek",
+	"generateScimToken": "Token generálása",
+	"noScimTokens": "Még nincsenek SCIM tokenek.",
+	"scimTokenName": "Név",
+	"scimTokenDigest": "Kivonat",
+	"revokeScimToken": "Visszavonás",
+	"scimTokenGenerated": "Token létrehozva",
+	"scimTokenWarning": "Másolja ki most ezt a tokent. Biztonsági okokból nem jelenik meg újra.",
+	"scimTokenRevoked": "SCIM token visszavonva",
+	"scimTokenGenerationFailed": "Nem sikerült a SCIM token generálása",
+	"idpGroup": "IdP csoport",
+	"idpGroups": "IdP csoportok",
+	"idpGroupsDescription": "IdP csoportföderáció engedélyezése (SCIM kiépítés, IdP csoport-hozzárendelések és felhasználók IdP csoporttagságai)."
 }

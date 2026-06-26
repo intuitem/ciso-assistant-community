@@ -452,21 +452,7 @@ export const UserEditSchema = z.object({
 	has_mfa_enabled: z.boolean().optional(),
 	user_groups: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),
-	expiry_date: z
-		.union([z.literal('').transform(() => null), z.iso.date()])
-		.nullish()
-		.refine(
-			(val) => {
-				if (!val) return true; // Allow null/undefined values
-				const expiryDate = new Date(val);
-				const today = new Date();
-				today.setHours(0, 0, 0, 0); // Set to start of today to allow today's date
-				return expiryDate >= today;
-			},
-			{
-				message: 'Expiry date cannot be in the past'
-			}
-		)
+	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
 });
 
 export const UserCreateSchema = z.object({
@@ -674,6 +660,7 @@ export const FeatureFlagsSchema = z.object({
 	reports: z.boolean().optional(),
 	validation_flows: z.boolean().optional(),
 	focus_mode: z.boolean().optional(),
+	idp_groups: z.boolean().optional(),
 	outgoing_webhooks: z.boolean().optional(),
 	audit_log_forwarding: z.boolean().optional(),
 	metrology: z.boolean().optional(),
@@ -1818,6 +1805,12 @@ export const DocumentRevisionSchema = z.object({
 	reviewer_comments: z.string().optional().nullable()
 });
 
+export const IdPGroupSchema = z.object({
+	id: z.string().uuid().optional(),
+	name: z.string().min(1),
+	user_groups: z.array(z.string().uuid().optional()).optional()
+});
+
 const SCHEMA_MAP: Record<string, ZodSchema> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -1842,6 +1835,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	evidences: EvidenceSchema,
 	'evidence-revisions': EvidenceRevisionSchema,
 	users: UserCreateSchema,
+	'idp-groups': IdPGroupSchema,
 	'sso-settings': SSOSettingsSchema,
 	'general-settings': GeneralSettingsSchema,
 	'feature-flags': FeatureFlagsSchema,

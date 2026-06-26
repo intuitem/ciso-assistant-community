@@ -1622,5 +1622,21 @@
 	"errorDisablingMFA": "اس صارف کے لیے MFA غیر فعال نہیں کیا جا سکا",
 	"userHasNoMFAEnabled": "اس صارف کا MFA فعال نہیں ہے",
 	"builderChangedOn": "میں تبدیل ہوا",
-	"requirementWeight": "وزن"
+	"requirementWeight": "وزن",
+	"scim": "SCIM",
+	"scimDescription": "SCIM 2.0 پرووژننگ کنفیگر کریں۔ اپنے شناختی فراہم کنندہ کو نیچے دیے گئے اینڈ پوائنٹ کی طرف اشارہ کریں اور یہاں تیار کردہ بیئرر ٹوکن سے تصدیق کریں۔",
+	"scimEndpointUrl": "SCIM اینڈ پوائنٹ URL",
+	"scimTokens": "SCIM ٹوکنز",
+	"generateScimToken": "ٹوکن بنائیں",
+	"noScimTokens": "ابھی تک کوئی SCIM ٹوکن نہیں ہے۔",
+	"scimTokenName": "نام",
+	"scimTokenDigest": "ڈائجسٹ",
+	"revokeScimToken": "منسوخ کریں",
+	"scimTokenGenerated": "ٹوکن تیار ہو گیا",
+	"scimTokenWarning": "اس ٹوکن کو ابھی کاپی کریں۔ سکیورٹی وجوہات کی بنا پر یہ دوبارہ نہیں دکھایا جائے گا۔",
+	"scimTokenRevoked": "SCIM ٹوکن منسوخ کر دیا گیا",
+	"scimTokenGenerationFailed": "SCIM ٹوکن بنانے میں ناکام",
+	"idpGroup": "IdP گروپ",
+	"idpGroups": "IdP گروپس",
+	"idpGroupsDescription": "IdP گروپ فیڈریشن فعال کریں (SCIM پرووژننگ، IdP گروپ میپنگز، اور صارفین پر IdP گروپ ممبرشپس)۔"
 }

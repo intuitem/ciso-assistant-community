@@ -3524,5 +3524,21 @@
 	"errorDisablingMFA": "MFA konnte für diesen Benutzer nicht deaktiviert werden",
 	"userHasNoMFAEnabled": "Dieser Benutzer hat MFA nicht aktiviert",
 	"builderChangedOn": "geändert in",
-	"requirementWeight": "Gewicht"
+	"requirementWeight": "Gewicht",
+	"scim": "SCIM",
+	"scimDescription": "SCIM-2.0-Bereitstellung konfigurieren. Richten Sie Ihren Identitätsanbieter auf den unten stehenden Endpunkt aus und authentifizieren Sie ihn mit einem hier erzeugten Bearer-Token.",
+	"scimEndpointUrl": "SCIM-Endpunkt-URL",
+	"scimTokens": "SCIM-Token",
+	"generateScimToken": "Token erzeugen",
+	"noScimTokens": "Noch keine SCIM-Token.",
+	"scimTokenName": "Name",
+	"scimTokenDigest": "Digest",
+	"revokeScimToken": "Widerrufen",
+	"scimTokenGenerated": "Token erzeugt",
+	"scimTokenWarning": "Kopieren Sie dieses Token jetzt. Aus Sicherheitsgründen wird es nicht erneut angezeigt.",
+	"scimTokenRevoked": "SCIM-Token widerrufen",
+	"scimTokenGenerationFailed": "SCIM-Token konnte nicht erzeugt werden",
+	"idpGroup": "IdP-Gruppe",
+	"idpGroups": "IdP-Gruppen",
+	"idpGroupsDescription": "IdP-Gruppenföderation aktivieren (SCIM-Bereitstellung, IdP-Gruppenzuordnungen und IdP-Gruppenmitgliedschaften von Benutzern)."
 }
