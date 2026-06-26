@@ -17,6 +17,8 @@ export const TYPE_TO_MODEL: Record<string, string> = {
 	policy: 'policies',
 	security_exception: 'security-exceptions',
 	risk_acceptance: 'risk-acceptances',
+	incident: 'incidents',
+	vulnerability: 'vulnerabilities',
 	project: 'projects',
 	responsibility_matrix: 'responsibility-matrices'
 };
