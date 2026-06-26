@@ -766,11 +766,13 @@ def _primary_email(emails):
 
 
 def _display_name_error(name):
-    """Reject a displayName that won't fit IdPGroup.name, returning a 400
-    invalidValue instead of letting it reach the DB as an over-length write
-    (a 500 on Postgres; SQLite silently ignores max_length)."""
+    """Reject a displayName that is not a string or won't fit IdPGroup.name."""
+    if name is None:
+        return None
+    if not isinstance(name, str):
+        return _scim_error_response("displayName must be a string", 400, "invalidValue")
     max_len = IdPGroup._meta.get_field("name").max_length
-    if name and len(name) > max_len:
+    if len(name) > max_len:
         return _scim_error_response(
             f"displayName exceeds the maximum length of {max_len} characters",
             400,
