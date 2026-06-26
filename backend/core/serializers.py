@@ -2624,7 +2624,6 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
             "ref_id",
             "reference_controls",
             "has_update",
-            "translations",
         ]
     )
     selected_implementation_groups = serializers.ReadOnlyField(

@@ -677,15 +677,6 @@
 		}
 		return false;
 	});
-
-	function translatedFrameworkName(value: {
-		str?: string;
-		translations?: Record<string, { name?: string | null } | undefined> | null;
-	}) {
-		const locale = getLocale();
-		const baseLocale = locale.split('-')[0];
-		return value.translations?.[baseLocale]?.name ?? value.str ?? '';
-	}
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
@@ -776,12 +767,10 @@
 												(item) => item.field === key
 											)?.urlModel
 										}/${value.id}`}
-										{@const itemLabel =
-											key === 'framework' ? translatedFrameworkName(value) : value.str}
 										{#if !page.data.user.is_third_party}
-											<Anchor href={itemHref} class="anchor">{itemLabel}</Anchor>
+											<Anchor href={itemHref} class="anchor">{value.str}</Anchor>
 										{:else}
-											{itemLabel}
+											{value.str}
 										{/if}
 									{:else if isMaskedPlaceholder(value)}
 										<p class="text-xs text-yellow-700">{objectsNotVisibleLabel(1)}</p>
