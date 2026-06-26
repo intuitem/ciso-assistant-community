@@ -30,6 +30,7 @@ class GenericCollectionReadSerializer(BaseModelSerializer):
     security_exceptions = FieldsRelatedField(["id", "status"], many=True)
     policies = FieldsRelatedField(["id", "status"], many=True)
     dependencies = FieldsRelatedField(many=True)
+    projects = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
 
     class Meta:
