@@ -151,7 +151,9 @@ In **Settings > General**, set:
 
 Set `embedding_backend` to `sentence-transformers`. This uses `paraphrase-multilingual-MiniLM-L12-v2` locally on CPU. Multilingual support included.
 
-This is the default and requires no external service. This model and the cross-encoder reranker (`cross-encoder/ms-marco-MiniLM-L-6-v2`, see `chat/rag.py`) are **pre-baked into the backend image** at build time (see `backend/Dockerfile`, ~500 MB for both) and the runtime is forced offline (`HF_HUB_OFFLINE=1`, `TRANSFORMERS_OFFLINE=1`), so the AI works with no internet access.
+This is the default and requires no external service. This model and the cross-encoder reranker (`cross-encoder/ms-marco-MiniLM-L-6-v2`) are **pre-baked into the backend image** at build time (see `backend/Dockerfile`, ~500 MB for both) and the runtime is forced offline (`HF_HUB_OFFLINE=1`, `TRANSFORMERS_OFFLINE=1`), so the AI works with no internet access. Both model IDs live in `chat/embedding_models.py` (single source of truth, read by the code and the image bake).
+
+> Deployment note: `HF_HOME` is set by the image to the baked cache (`/opt/hf-cache`) and must **not** be overridden, otherwise the baked models are not found and, with downloads disabled, model load fails hard. On read-only / hardened containers, redirect only `HOME` and `XDG_CACHE_HOME` to a writable tmpfs for scratch writes; model weights are read from the read-only `HF_HOME`.
 
 ### Option B: Ollama Embeddings
 

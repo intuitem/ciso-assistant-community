@@ -59,11 +59,12 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # Pre-bake the embedding and reranker models into the image so the AI works with no
 # internet at runtime (otherwise sentence-transformers downloads them from HuggingFace
 # on first use, which breaks fully offline / air-gapped instances).
-# Model names must match DEFAULT_EMBEDDING_MODEL in chat/providers.py and _RERANKER_MODEL
-# in chat/rag.py. Network is needed here at BUILD time only.
+# Model IDs come from chat/embedding_models.py (single source of truth). It is copied
+# first so this layer re-bakes whenever the IDs change. Network is needed at BUILD time only.
+COPY backend/chat/embedding_models.py ./chat/embedding_models.py
 ENV HF_HOME=/opt/hf-cache \
   SENTENCE_TRANSFORMERS_HOME=/opt/hf-cache
-RUN uv run python -c "from sentence_transformers import SentenceTransformer, CrossEncoder; SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2'); CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')" \
+RUN uv run python -c "import chat.embedding_models as m; from sentence_transformers import SentenceTransformer, CrossEncoder; SentenceTransformer(m.DEFAULT_EMBEDDING_MODEL); CrossEncoder(m.RERANKER_MODEL)" \
   && chown -R 1001:1001 /opt/hf-cache
 
 # Force offline at runtime: the model is cached above and nothing else in the chat

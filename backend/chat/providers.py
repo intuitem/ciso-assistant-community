@@ -8,11 +8,9 @@ from typing import Protocol, Iterator
 import json
 import structlog
 
-logger = structlog.get_logger(__name__)
+from chat.embedding_models import DEFAULT_EMBEDDING_MODEL
 
-# Default local embedding model. Pre-baked into the backend image at build time
-# so the AI works fully offline. Keep this value in sync with the model baked in the Dockerfile.
-DEFAULT_EMBEDDING_MODEL = "paraphrase-multilingual-MiniLM-L12-v2"
+logger = structlog.get_logger(__name__)
 
 
 # Shared system prompts — used by all LLM implementations
