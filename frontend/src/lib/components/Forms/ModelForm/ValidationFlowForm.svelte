@@ -78,8 +78,8 @@
 />
 {#if object?.id}
 	<div class="space-y-2">
-		<span class="text-sm font-medium text-gray-700">{m.requestNotes()}</span>
-		<MarkdownRenderer content={object.request_notes} class="p-3 bg-gray-50 rounded-lg" />
+		<span class="text-sm font-medium text-surface-700-300">{m.requestNotes()}</span>
+		<MarkdownRenderer content={object.request_notes} class="p-3 bg-surface-50-950 rounded-lg" />
 	</div>
 {:else}
 	<TextArea
@@ -102,18 +102,6 @@
 		multiple
 	/>
 {/if}
-<FolderTreeSelect
-	{form}
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-	onChange={async (e) => {
-		if (e && !object?.id) {
-			await fetchDefaultRefId();
-		}
-	}}
-/>
 {#if object?.id}
 	<Select
 		{form}
@@ -128,8 +116,8 @@
 {#if object?.id}
 	{#if object.validation_deadline}
 		<div class="space-y-2">
-			<span class="text-sm font-medium text-gray-700">{m.validationDeadline()}</span>
-			<p class="p-3 bg-gray-50 rounded-lg text-sm">{object.validation_deadline}</p>
+			<span class="text-sm font-medium text-surface-700-300">{m.validationDeadline()}</span>
+			<p class="p-3 bg-surface-50-950 rounded-lg text-sm">{object.validation_deadline}</p>
 		</div>
 	{/if}
 {:else}
@@ -145,14 +133,6 @@
 {/if}
 {#if !hasPresetAssessments}
 	<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
-		<TextField
-			{form}
-			field="ref_id"
-			label={m.refId()}
-			cacheLock={cacheLocks['ref_id']}
-			bind:cachedValue={formDataCache['ref_id']}
-			disabled={initialData.ref_id}
-		/>
 		<AutocompleteSelect
 			{form}
 			optionsEndpoint="compliance-assessments"
@@ -235,3 +215,15 @@
 		/>
 	</Dropdown>
 {/if}
+<FolderTreeSelect
+	{form}
+	field="folder"
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.domain()}
+	onChange={async (e) => {
+		if (e && !object?.id) {
+			await fetchDefaultRefId();
+		}
+	}}
+/>

@@ -192,7 +192,7 @@
 					helpText={m.defaultLanguageHelpText()}
 				/>
 				<hr class="my-2" />
-				<p class="text-sm text-gray-500">{m.forceLanguageHelpText()}</p>
+				<p class="text-sm text-surface-600-400">{m.forceLanguageHelpText()}</p>
 				<button
 					type="button"
 					class="btn preset-filled-warning-500 text-sm"
@@ -255,6 +255,40 @@
 			</div>
 		</Accordion.ItemContent>
 	</Accordion.Item>
+	{#if $page.data.featureflags?.audit_tree_inheritance}
+		<Accordion.Item value="audits">
+			<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+				<i class="fa-solid fa-list-check mr-2"></i><span class="flex-1 text-left"
+					>{m.complianceAssessments()}</span
+				>
+				<Accordion.ItemIndicator
+					class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+					><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+						><path
+							d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+						/></svg
+					></Accordion.ItemIndicator
+				>
+			</Accordion.ItemTrigger>
+			<Accordion.ItemContent>
+				<div class="p-4">
+					<Select
+						{form}
+						field="audit_tree_aggregation_strategy"
+						options={[
+							{ label: m.auditTreeAggregationNone(), value: 'none' },
+							{ label: m.auditTreeAggregationParentWins(), value: 'parent_wins' },
+							{ label: m.auditTreeAggregationChildWins(), value: 'child_wins' },
+							{ label: m.auditTreeAggregationBestCase(), value: 'best_case' },
+							{ label: m.auditTreeAggregationWorstCase(), value: 'worst_case' }
+						]}
+						label={m.auditTreeAggregationStrategy()}
+						helpText={m.auditTreeAggregationStrategyHelpText()}
+					/>
+				</div>
+			</Accordion.ItemContent>
+		</Accordion.Item>
+	{/if}
 	<Accordion.Item value="riskMatrix">
 		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
 			<i class="fa-solid fa-table-cells-large mr-2"></i><span class="flex-1 text-left"
@@ -303,12 +337,16 @@
 					/>
 				</div>
 				<div class="flex-1">
-					<div class="relative w-full h-64 max-w-md bg-white rounded-lg shadow-md p-4">
-						<!-- Point d'origine -->
-						<div class={`absolute ${horizontalAxisPos} left-8 w-2 h-2 bg-black rounded-full`}></div>
+					<div class="relative w-full h-64 max-w-md bg-surface-50-950 rounded-lg shadow-md p-4">
+						<!-- Point d’origine -->
+						<div
+							class={`absolute ${horizontalAxisPos} left-8 w-2 h-2 bg-surface-900-100 rounded-full`}
+						></div>
 
 						<!-- Axe horizontal -->
-						<div class={`absolute ${horizontalAxisPos} left-8 w-4/5 h-0.5 bg-black`}></div>
+						<div
+							class={`absolute ${horizontalAxisPos} left-8 w-4/5 h-0.5 bg-surface-900-100`}
+						></div>
 
 						<!-- Label axe horizontal -->
 						<div
@@ -318,7 +356,9 @@
 						</div>
 
 						<!-- Axe vertical -->
-						<div class={`absolute ${horizontalAxisPos} left-8 w-0.5 h-4/5 bg-black`}></div>
+						<div
+							class={`absolute ${horizontalAxisPos} left-8 w-0.5 h-4/5 bg-surface-900-100`}
+						></div>
 
 						<!-- Label axe vertical -->
 						<div class="absolute top-1/2 left-4 transform -translate-y-1/2 -rotate-90 origin-left">

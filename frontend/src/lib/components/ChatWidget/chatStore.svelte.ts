@@ -1,6 +1,8 @@
 import type { ChatMessage, ChatSession, ChatView, PendingAction, SuggestedAction } from './types';
 import { browser } from '$app/environment';
 import { m } from '$paraglide/messages';
+import { getLocale } from '$paraglide/runtime';
+import { formatDate } from '$lib/utils/datetime';
 
 const CHAT_API = '/fe-api/chat';
 const STORAGE_KEY = 'ciso-chat-state';
@@ -768,7 +770,7 @@ export async function loadSessionHistory() {
 			sessionHistory = (data.results ?? data)
 				.map((s: any) => ({
 					id: s.id,
-					title: s.title || `Chat ${new Date(s.created_at).toLocaleDateString()}`,
+					title: s.title || `Chat ${formatDate(new Date(s.created_at), false, getLocale())}`,
 					folder: s.folder?.str ?? '',
 					message_count: s.message_count ?? 0,
 					created_at: s.created_at

@@ -115,11 +115,13 @@
 	<div class={classesDisabled(disabled)}>
 		{#if label !== undefined && !hidden}
 			{#if $constraints?.required || required}
-				<label class="text-sm font-semibold" for={field}
+				<label class="text-sm font-semibold" for="form-input-{field.replaceAll('_', '-')}"
 					>{label} <span class="text-red-500">*</span></label
 				>
 			{:else}
-				<label class="text-sm font-semibold" for={field}>{label}</label>
+				<label class="text-sm font-semibold" for="form-input-{field.replaceAll('_', '-')}"
+					>{label}</label
+				>
 			{/if}
 		{/if}
 		{#if $errors}
@@ -165,6 +167,6 @@
 		{/if}
 	</div>
 	{#if helpText}
-		<p class="text-sm text-gray-500 whitespace-pre-line">{helpText}</p>
+		<p class="text-sm text-surface-600-400 whitespace-pre-line">{helpText}</p>
 	{/if}
 </div>

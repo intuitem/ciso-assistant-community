@@ -4,9 +4,11 @@ import {
 	slugifyFrameworkName,
 	computeRefId,
 	generateUrn,
+	extractNodeId,
 	validateDraft,
 	buildTree,
 	serializeDraft,
+	createBuilderState,
 	type Framework,
 	type BuilderNode,
 	type RequirementNode,
@@ -844,5 +846,439 @@ describe('question and choice CRUD on top-level requirement nodes', () => {
 		const firstId = get(s.rootNodes)[0].questions[0].question.id;
 		s.reorderQuestions(id, 0, 1);
 		expect(get(s.rootNodes)[0].questions[1].question.id).toBe(firstId);
+	});
+});
+
+describe('extractNodeId', () => {
+	it('returns everything after the 5th colon', () => {
+		expect(extractNodeId('urn:custom:risk:req_node:my-fw:2.1')).toBe('2.1');
+	});
+
+	it('preserves node_ids that themselves contain colons', () => {
+		expect(extractNodeId('urn:custom:risk:question:my-fw:2.1:q1')).toBe('2.1:q1');
+	});
+
+	it('returns null for short or empty URNs', () => {
+		expect(extractNodeId('urn:custom:risk:req_node:my-fw')).toBeNull();
+		expect(extractNodeId(null)).toBeNull();
+		expect(extractNodeId(undefined)).toBeNull();
+	});
+});
+
+describe('node_id uniqueness on creation', () => {
+	it('disambiguates a new node_id that collides with a renamed/moved node', () => {
+		const fw = makeFramework({ urn_namespace: 'custom', ref_id: 'fw' });
+		// Node A's displayed ref_id was renamed to "2.9" but its URN keeps the
+		// frozen node_id "2.1". Node P is the parent a new "2.1" will compute under.
+		const nodeP = makeNode({
+			id: 'p',
+			urn: 'urn:custom:risk:req_node:fw:2',
+			ref_id: '2',
+			parent_urn: null
+		});
+		const nodeA = makeNode({
+			id: 'a',
+			urn: 'urn:custom:risk:req_node:fw:2.1',
+			ref_id: '2.9',
+			parent_urn: null
+		});
+		const s = createBuilderState(fw, [nodeP, nodeA], []);
+		s.addNode({ parent: 'p', preset: 'requirement' });
+		const parent = get(s.rootNodes).find((r) => r.node.id === 'p')!;
+		const child = parent.children[0];
+		// Display ref_id stays the natural "2.1"; the URN node_id is disambiguated.
+		expect(child.node.ref_id).toBe('2.1');
+		expect(extractNodeId(child.node.urn)).toBe('2.1-2');
+	});
+});
+
+describe('node_id repair on draft load', () => {
+	function draftWithDuplicateNodeIds() {
+		return {
+			schema_version: 1,
+			framework_meta: {
+				name: 'F',
+				description: null,
+				min_score: 0,
+				max_score: 100,
+				scores_definition: null,
+				implementation_groups_definition: null,
+				outcomes_definition: null,
+				urn_namespace: 'custom',
+				ref_id: 'fw'
+			},
+			nodes: [
+				{
+					id: 'a',
+					urn: 'urn:custom:risk:req_node:fw:2.1',
+					ref_id: '2.1',
+					name: 'Alpha',
+					parent_urn: null,
+					order_id: 0,
+					assessable: true
+				},
+				{
+					id: 'b',
+					urn: 'urn:custom:risk:req_node:fw:2.1',
+					ref_id: '2.1',
+					name: 'Beta',
+					parent_urn: null,
+					order_id: 1,
+					assessable: true
+				}
+			],
+			questions: [],
+			choices: []
+		};
+	}
+
+	it('gives colliding nodes distinct node_ids and marks the draft unsaved', () => {
+		const s = createBuilderState(makeFramework(), [], [], draftWithDuplicateNodeIds());
+		const roots = get(s.rootNodes);
+		const nodeIds = roots.map((r) => extractNodeId(r.node.urn));
+		expect(nodeIds).toHaveLength(2);
+		expect(new Set(nodeIds).size).toBe(2); // no longer duplicated
+		expect(nodeIds).toContain('2.1'); // first occurrence kept
+		expect(get(s.unsaved)).toBe(true); // repair persists on next save
+		expect(get(s.unpublished)).toBe(true);
+	});
+
+	it('restores the original node_id from ref_id when the URN drifted onto a sibling', () => {
+		// Node B's URN was corrupted to A's, but its ref_id "2.2" is intact and
+		// free — the repair must restore ":2.2" (matching the DB row) rather
+		// than mint ":2.1-2", otherwise the publish-time URN lock rejects the
+		// repaired draft on frameworks with audits.
+		const draft = draftWithDuplicateNodeIds();
+		draft.nodes[1].ref_id = '2.2';
+		const s = createBuilderState(makeFramework(), [], [], draft);
+		const beta = get(s.rootNodes).find((r) => r.node.name === 'Beta')!;
+		expect(extractNodeId(beta.node.urn)).toBe('2.2');
+	});
+
+	it('keeps ambiguous children on the first occurrence; duplicate becomes a leaf', () => {
+		const draft = draftWithDuplicateNodeIds();
+		// A child pointing at the shared URN ":2.1" — genuinely ambiguous.
+		draft.nodes.push({
+			id: 'child',
+			urn: 'urn:custom:risk:req_node:fw:2.1.1',
+			ref_id: '2.1.1',
+			name: 'Child',
+			parent_urn: 'urn:custom:risk:req_node:fw:2.1',
+			order_id: 0,
+			assessable: true
+		});
+		const s = createBuilderState(makeFramework(), [], [], draft);
+		const roots = get(s.rootNodes);
+		const alpha = roots.find((r) => r.node.name === 'Alpha')!;
+		const beta = roots.find((r) => r.node.name === 'Beta')!;
+		// Alpha (first occurrence) keeps node_id "2.1" and the ambiguous child.
+		expect(extractNodeId(alpha.node.urn)).toBe('2.1');
+		expect(alpha.children).toHaveLength(1);
+		expect(alpha.children[0].node.name).toBe('Child');
+		// Beta (duplicate) got a fresh node_id and is now a standalone leaf.
+		expect(extractNodeId(beta.node.urn)).not.toBe('2.1');
+		expect(beta.children).toHaveLength(0);
+	});
+});
+
+describe('URN rewrite on namespace / ref_id change', () => {
+	it('rewrites node, question, depends_on and choice URNs when ref_id changes', () => {
+		const fw = makeFramework({ ref_id: 'old', urn_namespace: 'custom' });
+		const node = makeNode({
+			urn: 'urn:custom:risk:req_node:old:1',
+			ref_id: '1',
+			parent_urn: null
+		});
+		const q: Question = {
+			...makeQuestion({ requirement_node: node.id }),
+			urn: 'urn:custom:risk:question:old:1-q1',
+			depends_on: {
+				question: 'urn:custom:risk:question:old:1-q2',
+				answers: ['urn:custom:risk:question_choice:old:1-q2-c1']
+			},
+			choices: [
+				{
+					...makeChoice('c1', 1),
+					urn: 'urn:custom:risk:question_choice:old:1-q1-c1',
+					question: node.id
+				}
+			]
+		};
+		const store = createBuilderState(fw, [node], [q]);
+
+		store.updateFramework({ ref_id: 'new' });
+
+		const root = get(store.rootNodes)[0];
+		expect(root.node.urn).toBe('urn:custom:risk:req_node:new:1');
+		const question = root.questions[0].question;
+		expect(question.urn).toBe('urn:custom:risk:question:new:1-q1');
+		const dep = question.depends_on as { question: string; answers: string[] };
+		expect(dep.question).toBe('urn:custom:risk:question:new:1-q2');
+		expect(dep.answers[0]).toBe('urn:custom:risk:question_choice:new:1-q2-c1');
+		expect(question.choices[0].urn).toBe('urn:custom:risk:question_choice:new:1-q1-c1');
+	});
+
+	it('rewrites the namespace segment too, preserving node_id', () => {
+		const fw = makeFramework({ ref_id: 'fw', urn_namespace: 'custom' });
+		const node = makeNode({
+			urn: 'urn:custom:risk:req_node:fw:1',
+			ref_id: '1',
+			parent_urn: null
+		});
+		const store = createBuilderState(fw, [node], []);
+
+		store.updateFramework({ urn_namespace: 'myorg' });
+
+		expect(get(store.rootNodes)[0].node.urn).toBe('urn:myorg:risk:req_node:fw:1');
+	});
+
+	it('does not rewrite URNs when compliance assessments lock them', () => {
+		const fw = makeFramework({
+			ref_id: 'old',
+			urn_namespace: 'custom',
+			has_compliance_assessments: true
+		});
+		const node = makeNode({
+			urn: 'urn:custom:risk:req_node:old:1',
+			ref_id: '1',
+			parent_urn: null
+		});
+		const store = createBuilderState(fw, [node], []);
+
+		store.updateFramework({ ref_id: 'new' });
+
+		expect(get(store.rootNodes)[0].node.urn).toBe('urn:custom:risk:req_node:old:1');
+	});
+});
+
+describe('duplicate question node_id repair on hydrate', () => {
+	it('de-dupes question node_ids carried by a draft', () => {
+		const draft = {
+			schema_version: 1,
+			framework_meta: {
+				name: 'X',
+				description: null,
+				min_score: 0,
+				max_score: 100,
+				scores_definition: null,
+				implementation_groups_definition: null,
+				outcomes_definition: null,
+				urn_namespace: 'custom',
+				ref_id: 'fw'
+			},
+			nodes: [
+				{
+					id: 'n1',
+					urn: 'urn:custom:risk:req_node:fw:1',
+					ref_id: '1',
+					assessable: true,
+					parent_urn: null,
+					order_id: 0
+				}
+			],
+			questions: [
+				{
+					id: 'q1',
+					urn: 'urn:custom:risk:question:fw:1-q1',
+					ref_id: '1-q1',
+					requirement_node_id: 'n1',
+					type: 'text',
+					order: 0
+				},
+				{
+					id: 'q2',
+					urn: 'urn:custom:risk:question:fw:1-q1', // duplicate node_id
+					ref_id: '1-q2',
+					requirement_node_id: 'n1',
+					type: 'text',
+					order: 1
+				}
+			],
+			choices: []
+		};
+
+		const store = createBuilderState(makeFramework(), [], [], draft as never);
+
+		const urns = get(store.rootNodes)[0].questions.map((bq) => bq.question.urn);
+		expect(new Set(urns).size).toBe(2);
+	});
+});
+
+describe('self-heals legacy (pre-v3.18.0) seeded drafts on load', () => {
+	// Mirrors the exact drafts seeded for manual repro: pre-v3.18.0 the builder
+	// set node_id == ref_id with no dedup, so two questions collide on node_id.
+	const legacyDraft = (questions: Record<string, unknown>[], refId = 'oldfw') => ({
+		schema_version: 1,
+		framework_meta: {
+			name: 'X',
+			description: '',
+			urn_namespace: 'custom',
+			ref_id: refId,
+			min_score: 0,
+			max_score: 100,
+			scores_definition: null,
+			implementation_groups_definition: null,
+			outcomes_definition: null
+		},
+		nodes: [
+			{
+				id: 'n1',
+				urn: 'urn:custom:risk:req_node:oldfw:1',
+				ref_id: '1',
+				name: 'S1',
+				assessable: true,
+				parent_urn: null,
+				order_id: 0
+			}
+		],
+		questions,
+		choices: []
+	});
+
+	it('same-slug exact-duplicate questions get distinct URNs (Duplicate URN repro)', () => {
+		const draft = legacyDraft([
+			{
+				id: 'q1',
+				urn: 'urn:custom:risk:question:oldfw:1-q1',
+				ref_id: '1-q1',
+				requirement_node_id: 'n1',
+				type: 'text',
+				text: 'Q1',
+				order: 0
+			},
+			{
+				id: 'q2',
+				urn: 'urn:custom:risk:question:oldfw:1-q1',
+				ref_id: '1-q1',
+				requirement_node_id: 'n1',
+				type: 'text',
+				text: 'Q2',
+				order: 1
+			}
+		]);
+		const store = createBuilderState(makeFramework(), [], [], draft as never);
+		const urns = get(store.rootNodes)[0].questions.map((bq) => bq.question.urn);
+		expect(new Set(urns).size).toBe(2);
+	});
+
+	it('divergent-slug duplicate node_ids are de-duped so a rename cannot collapse them (opaque repro)', () => {
+		const draft = legacyDraft(
+			[
+				{
+					id: 'q1',
+					urn: 'urn:custom:risk:question:oldfw:1-q1',
+					ref_id: '1-q1',
+					requirement_node_id: 'n1',
+					type: 'text',
+					text: 'Q1',
+					order: 0
+				},
+				{
+					id: 'q2',
+					urn: 'urn:custom:risk:question:other:1-q1',
+					ref_id: '1-q2',
+					requirement_node_id: 'n1',
+					type: 'text',
+					text: 'Q2',
+					order: 1
+				}
+			],
+			'renamedfw'
+		);
+		const store = createBuilderState(makeFramework(), [], [], draft as never);
+		const nodeIds = get(store.rootNodes)[0].questions.map((bq) => extractNodeId(bq.question.urn));
+		expect(new Set(nodeIds).size).toBe(2);
+	});
+});
+
+describe('URN rewrite & repair — gap coverage', () => {
+	it('re-slugs children when the name changes and ref_id is empty', () => {
+		const fw = makeFramework({ name: 'Old Name', ref_id: null });
+		const node = makeNode({
+			urn: 'urn:custom:risk:req_node:old-name:1',
+			ref_id: '1',
+			parent_urn: null
+		});
+		const store = createBuilderState(fw, [node], []);
+
+		store.updateFramework({ name: 'New Name' });
+
+		expect(get(store.rootNodes)[0].node.urn).toBe('urn:custom:risk:req_node:new-name:1');
+	});
+
+	it('does not rewrite child URNs when a non-slug field changes', () => {
+		const fw = makeFramework({ ref_id: 'fw' });
+		const node = makeNode({
+			urn: 'urn:custom:risk:req_node:fw:1',
+			ref_id: '1',
+			parent_urn: null
+		});
+		const store = createBuilderState(fw, [node], []);
+
+		store.updateFramework({ description: 'changed' });
+
+		expect(get(store.rootNodes)[0].node.urn).toBe('urn:custom:risk:req_node:fw:1');
+	});
+
+	it('repairs duplicate choice node_ids on hydrate', () => {
+		const draft = {
+			schema_version: 1,
+			framework_meta: {
+				name: 'X',
+				description: '',
+				urn_namespace: 'custom',
+				ref_id: 'fw',
+				min_score: 0,
+				max_score: 100,
+				scores_definition: null,
+				implementation_groups_definition: null,
+				outcomes_definition: []
+			},
+			nodes: [
+				{
+					id: 'n1',
+					urn: 'urn:custom:risk:req_node:fw:1',
+					ref_id: '1',
+					name: 'S',
+					assessable: true,
+					parent_urn: null,
+					order_id: 0
+				}
+			],
+			questions: [
+				{
+					id: 'q1',
+					urn: 'urn:custom:risk:question:fw:1-q1',
+					ref_id: '1-q1',
+					requirement_node_id: 'n1',
+					type: 'unique_choice',
+					text: 'Q',
+					order: 0
+				}
+			],
+			choices: [
+				{
+					id: 'c1',
+					urn: 'urn:custom:risk:question_choice:fw:1-q1-c1',
+					ref_id: '1-q1-c1',
+					question_id: 'q1',
+					value: 'A',
+					order: 0
+				},
+				{
+					id: 'c2',
+					urn: 'urn:custom:risk:question_choice:fw:1-q1-c1', // duplicate node_id
+					ref_id: '1-q1-c2',
+					question_id: 'q1',
+					value: 'B',
+					order: 1
+				}
+			]
+		};
+
+		const store = createBuilderState(makeFramework(), [], [], draft as never);
+
+		const choiceUrns = get(store.rootNodes)[0].questions[0].question.choices.map((c) => c.urn);
+		expect(new Set(choiceUrns).size).toBe(2);
 	});
 });

@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import structlog
 from rest_framework import permissions
@@ -25,7 +25,7 @@ class LicensePermission(permissions.BasePermission):
             )
             return False
 
-        if expiration_date < datetime.now():
+        if expiration_date + timedelta(days=1) < datetime.now():
             # License has expired, only allow read operations
             if request.method not in permissions.SAFE_METHODS:
                 logger.warning(

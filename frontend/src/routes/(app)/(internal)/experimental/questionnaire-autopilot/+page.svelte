@@ -2,6 +2,8 @@
 	import { enhance } from '$app/forms';
 	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
+	import { getLocale } from '$paraglide/runtime';
+	import { formatDate } from '$lib/utils/datetime';
 	import { pageTitle } from '$lib/utils/stores';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import { onDestroy } from 'svelte';
@@ -142,31 +144,31 @@
 </script>
 
 {#if !chatEnabled}
-	<div class="bg-white shadow-sm py-6 px-6 card max-w-2xl border-l-4 border-amber-400">
+	<div class="bg-surface-50-950 shadow-sm py-6 px-6 card max-w-2xl border-l-4 border-amber-400">
 		<h4 class="h4 font-bold">
 			<i class="fa-solid fa-robot mr-2 text-amber-600"></i>AI chat is required
 		</h4>
-		<p class="text-sm text-gray-700 mt-2">
+		<p class="text-sm text-surface-700-300 mt-2">
 			Questionnaire Autopilot uses the same LLM and retrieval pipeline as AI Chat. It's currently
 			disabled on this deployment.
 		</p>
-		<p class="text-xs text-gray-500 mt-2">
+		<p class="text-xs text-surface-600-400 mt-2">
 			Ask an administrator to enable <code class="font-mono">ENABLE_CHAT</code> on the backend and
 			turn on the <em>chat mode</em> feature flag in Settings.
 		</p>
 	</div>
 {:else}
 	<div class="grid grid-cols-3 gap-4">
-		<div class="col-span-2 bg-white shadow-sm py-4 px-6 space-y-4 card">
+		<div class="col-span-2 bg-surface-50-950 shadow-sm py-4 px-6 space-y-4 card">
 			<div>
 				<h4 class="h4 font-bold">
 					<i class="fa-solid fa-file-import mr-2"></i>Questionnaire Autopilot
 				</h4>
-				<p class="text-sm text-gray-600 mt-1">
+				<p class="text-sm text-surface-600-400 mt-1">
 					Upload a customer security questionnaire (.xlsx) and scope it to a domain. Once parsed,
 					you'll review the detected sheet/columns before any prefill happens.
 				</p>
-				<p class="text-xs text-gray-500 mt-1">
+				<p class="text-xs text-surface-600-400 mt-1">
 					Experimental — no LLM prefill yet, just upload + parse + column mapping.
 				</p>
 			</div>
@@ -192,14 +194,14 @@
 						contentTypes={['DO']}
 					/>
 					<input type="hidden" name="folder" value={selectedFolderId} />
-					<p class="text-xs text-gray-500 mt-1">
+					<p class="text-xs text-surface-600-400 mt-1">
 						The agent will look up applied controls, evidences, and existing assessments inside this
 						domain when answering questions.
 					</p>
 				</div>
 
 				<div class="rounded-lg p-4 border-2 border-blue-500">
-					<label for="title" class="block text-sm font-medium text-gray-900">
+					<label for="title" class="block text-sm font-medium text-surface-900-100">
 						Title (optional)
 					</label>
 					<input
@@ -209,12 +211,12 @@
 						bind:value={title}
 						maxlength="200"
 						placeholder="e.g. Acme Corp — Vendor Security Review Q2"
-						class="mt-1.5 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
+						class="mt-1.5 w-full rounded-lg border-surface-300-700 text-surface-700-300 sm:text-sm"
 					/>
 				</div>
 
 				<div>
-					<label for="file" class="block text-sm font-medium text-gray-900 mb-1.5">
+					<label for="file" class="block text-sm font-medium text-surface-900-100 mb-1.5">
 						Questionnaire file (.xlsx) *
 					</label>
 					<label
@@ -228,15 +230,15 @@
 							? 'border-pink-500 bg-pink-50'
 							: selectedFile
 								? 'border-green-500 bg-green-50'
-								: 'border-gray-300 bg-gray-50 hover:border-pink-400 hover:bg-pink-50/40'}"
+								: 'border-surface-300-700 bg-surface-50-950 hover:border-pink-400 hover:bg-pink-50/40'}"
 					>
 						{#if selectedFile}
 							<i class="fa-solid fa-file-excel text-3xl text-green-600"></i>
 							<div class="text-center">
-								<div class="text-sm font-medium text-gray-900 truncate max-w-[420px]">
+								<div class="text-sm font-medium text-surface-900-100 truncate max-w-[420px]">
 									{selectedFile.name}
 								</div>
-								<div class="text-xs text-gray-500 mt-0.5">
+								<div class="text-xs text-surface-600-400 mt-0.5">
 									{formatBytes(selectedFile.size)} · click to change or
 									<button
 										type="button"
@@ -250,13 +252,13 @@
 						{:else}
 							<i
 								class="fa-solid {isDraggingOver ? 'fa-arrow-down' : 'fa-cloud-arrow-up'} text-3xl
-								{isDraggingOver ? 'text-pink-600' : 'text-gray-400'}"
+								{isDraggingOver ? 'text-pink-600' : 'text-surface-500'}"
 							></i>
 							<div class="text-center">
-								<div class="text-sm font-medium text-gray-700">
+								<div class="text-sm font-medium text-surface-700-300">
 									{isDraggingOver ? 'Drop the file here' : 'Click to choose a file or drop it here'}
 								</div>
-								<div class="text-xs text-gray-500 mt-0.5">.xlsx only</div>
+								<div class="text-xs text-surface-600-400 mt-0.5">.xlsx only</div>
 							</div>
 						{/if}
 						<input
@@ -292,12 +294,12 @@
 		<div class="col-span-1 p-4">
 			<h5 class="font-semibold mb-2 text-sm">Recent runs</h5>
 			{#if data.runs.length === 0}
-				<p class="text-sm text-gray-500">No runs yet. Upload a questionnaire to start.</p>
+				<p class="text-sm text-surface-600-400">No runs yet. Upload a questionnaire to start.</p>
 			{:else}
 				<div class="space-y-2">
 					{#each data.runs as run}
 						<div
-							class="group relative p-3 bg-white rounded shadow-sm hover:shadow-md transition-shadow"
+							class="group relative p-3 bg-surface-50-950 rounded shadow-sm hover:shadow-md transition-shadow"
 						>
 							<a href="/experimental/questionnaire-autopilot/{run.id}" class="block pr-7">
 								<div class="flex justify-between items-start gap-2">
@@ -309,20 +311,20 @@
 									</span>
 								</div>
 								{#if run.title && run.filename && run.title !== run.filename}
-									<div class="text-xs text-gray-500 mt-0.5 truncate" title={run.filename}>
+									<div class="text-xs text-surface-600-400 mt-0.5 truncate" title={run.filename}>
 										{run.filename}
 									</div>
 								{/if}
-								<div class="text-xs text-gray-500 mt-1 truncate">
+								<div class="text-xs text-surface-600-400 mt-1 truncate">
 									{run.folder?.str || run.folder?.name || '—'}
 								</div>
-								<div class="text-xs text-gray-400">
-									{new Date(run.created_at).toLocaleString()}
+								<div class="text-xs text-surface-500">
+									{formatDate(new Date(run.created_at), true, getLocale())}
 								</div>
 							</a>
 							<button
 								type="button"
-								class="absolute top-2 right-2 text-gray-300 hover:text-red-600 transition-colors disabled:opacity-50"
+								class="absolute top-2 right-2 text-surface-400 hover:text-red-600 transition-colors disabled:opacity-50"
 								title="Delete this run"
 								aria-label="Delete this run"
 								disabled={deletingId === run.id}

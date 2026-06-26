@@ -75,6 +75,10 @@ The headline dimension — the actual answer to _"does this requirement hold?"_.
 
 This is the field that feeds the framework's compliance percentages, the report, and the cross-framework roll-ups.
 
+For questionnaire-driven frameworks (whether authored in the [framework builder UI](../configuration/authoring/framework-builder.md#questions-and-choices) or imported from an [Excel source](../configuration/authoring/framework.md#questions-and-choices) — same vocabulary on both paths), the result is computed from the `compute_result` tag carried by each question choice and aggregated _worst-wins_ across the requirement's questions, with `not_applicable` neutral. The full rule lives in the framework builder reference.
+
+If you maintain a tenant whose audits were produced under the older boolean-collapse logic, see [Special cases — Recompute assessment results](../installation/special-cases.md#recompute-assessment-results-after-the-semantic-compute_result-upgrade) for the realignment procedure.
+
 ### Analyst dimension (assignee + workflow status)
 
 Independently of the compliance result, each requirement assessment captures _who is working on it_ and _where they are in their process_:
@@ -115,16 +119,13 @@ Together with the compliance result, the analyst dimension, the extended results
 
 Each requirement assessment can carry a thread of **comments** — short, dated, author-attributed notes used for in-context conversation during the audit. They sit alongside the formal fields and don't change the compliance result or the score; they're where the back-and-forth between the analyst, the reviewer, and the auditee happens (clarifications, follow-up questions, agreed-upon next steps).
 
-Each comment has a body, an author, a creation timestamp, and an **active / processed** toggle so resolved threads can be filtered out of the default view without losing the history. Comments can be edited (the platform records the edited state), preserving who said what and when.
+Each comment has a body, an author, a creation timestamp, and an **active / processed** toggle so resolved threads can be filtered out of the default view without losing the history. Comments can be edited (the platform records the edited state), preserving who said what and when. The panel is collapsed by default and shows the comment count, so it stays out of the way until you open it.
 
-Comments are not exclusive to requirement assessments — the same model is shared across **risk scenarios**, **applied controls**, and **findings**, so the same in-context discussion surface exists wherever it's useful to capture iterative review.
+Comments are not exclusive to requirement assessments — the same thread is available on **risk scenarios**, **applied controls**, and **findings**.
 
-#### Feature flag and visibility
+On audits, **Comments** is governed by two controls: the `comments` [feature flag](../configuration/settings/feature-flags.md) (the platform-wide master switch, default on) and the per-audit [field-visibility editor](../guides/customize-audit.md), which lets you make the thread visible to respondents, auditor-only, or hidden. So you can keep comments enabled everywhere while still hiding the discussion from third-party respondents on a sensitive audit. Authors are also masked for third-party participants who can't see other users.
 
-- The `comments` [feature flag](../configuration/settings/feature-flags.md) is the master switch. When off, the comment panel disappears from every supported surface and the per-audit visibility editor stops exposing the **Comments** field. _Default on._
-- When the flag is on, the [audit field-visibility editor](../guides/customize-audit.md) treats **Comments** like any other field — you can choose whether respondents see them, whether they're auditor-only, or whether they're hidden — per audit.
-
-This dual control means you can keep comments enabled platform-wide while still hiding the discussion thread from third-party respondents on sensitive audits.
+See [Comments](../features/comments.md) for the full feature reference — processed state, edit history, permissions, and author privacy.
 
 ## Evidence
 

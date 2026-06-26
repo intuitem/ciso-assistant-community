@@ -3,6 +3,8 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { m } from '$paraglide/messages';
+	import { getLocale } from '$paraglide/runtime';
+	import { formatDate } from '$lib/utils/datetime';
 	import { safeTranslate } from '$lib/utils/i18n';
 
 	// -----------------------------------------------------------------------------
@@ -15,6 +17,35 @@
 		| 'non_compliant'
 		| 'compliant'
 		| 'not_applicable';
+
+	type InheritancePathEntry = {
+		ca_id: string;
+		ca_name: string;
+		folder_id: string | null;
+		folder_name: string | null;
+		distance: number;
+		result: Result | null;
+		score: number | null;
+		raw_score: number | null;
+		is_scored: boolean;
+		scale: { min: number | null; max: number | null };
+	};
+
+	type Inheritance = {
+		strategy: string;
+		inherited: boolean;
+		effective_result: Result;
+		effective_score: number | null;
+		scale: { min: number | null; max: number | null };
+		own: {
+			result: Result | null;
+			score: number | null;
+			is_scored: boolean;
+			scale: { min: number | null; max: number | null };
+		} | null;
+		source: InheritancePathEntry | null;
+		path: InheritancePathEntry[];
+	};
 
 	type ReportRow = {
 		requirement_assessment_id: string;
@@ -42,6 +73,8 @@
 		evidences_count: number;
 		direct_evidences_count: number;
 		indirect_evidences_count: number;
+
+		inheritance: Inheritance | null;
 	};
 
 	type ComplianceAssessmentSummary = {
@@ -79,6 +112,7 @@
 		compliance_assessments: ComplianceAssessmentSummary[];
 		ca_status_counts: Record<string, number>;
 		live_statuses: string[];
+		aggregation_strategy: string;
 		generated_at: string;
 	};
 
@@ -182,6 +216,16 @@
 
 	const resultLabel = (r: Result): string => safeTranslate(r);
 
+	// Human-readable inheritance chain for a tooltip, nearest-first:
+	// "Domain · Audit: Result  ←  Domain · Audit: Result"
+	function pathTitle(inh: Inheritance): string {
+		return inh.path
+			.map(
+				(e) => `${e.folder_name ?? '—'} · ${e.ca_name}: ${e.result ? safeTranslate(e.result) : '—'}`
+			)
+			.join('  ←  ');
+	}
+
 	const RESULT_ORDER: Result[] = [
 		'compliant',
 		'partially_compliant',
@@ -225,10 +269,36 @@
 	}
 
 	// Backend already honors each CA's selected IGs; the dropdown narrows further.
+	// -----------------------------------------------------------------------------
+	// Domain-tree inheritance overlay. When the org-wide strategy is enabled, each
+	// row may carry an `inheritance` block. The "Apply domain inheritance" toggle
+	// swaps each row's result/score for the effective (combined) value, so the
+	// distributions, scores AND the detail cells all reflect the combined view
+	// from a single transform point.
+	// -----------------------------------------------------------------------------
+	let aggregationStrategy = $derived<string>(report.aggregation_strategy ?? 'none');
+	let inheritanceAvailable = $derived(
+		aggregationStrategy !== 'none' && rows.some((r) => r.inheritance?.inherited)
+	);
+	let applyInheritance = $state<boolean>(true);
+
+	function toEffective(r: ReportRow): ReportRow {
+		const inh = r.inheritance;
+		if (!applyInheritance || !inh || !inh.inherited) return r;
+		return {
+			...r,
+			result: inh.effective_result,
+			score: inh.effective_score,
+			is_scored: inh.effective_score !== null
+		};
+	}
+
+	let displayRows = $derived(inheritanceAvailable ? rows.map(toEffective) : rows);
+
 	let filteredRows = $derived(
 		igFilter === 'all'
-			? rows
-			: rows.filter((r) => (r.implementation_groups ?? []).includes(igFilter))
+			? displayRows
+			: displayRows.filter((r) => (r.implementation_groups ?? []).includes(igFilter))
 	);
 
 	// Hierarchical rollup: sections at the top, each carrying its child requirement rollups.
@@ -386,26 +456,30 @@
 
 <div class="space-y-4 p-2">
 	<!-- Header card -->
-	<div class="card p-4 bg-white">
+	<div class="card p-4 bg-surface-50-950">
 		<div class="flex items-start justify-between gap-4 flex-wrap">
 			<div>
-				<div class="text-xs uppercase tracking-wide text-gray-500">{m.frameworkReport()}</div>
+				<div class="text-xs uppercase tracking-wide text-surface-600-400">
+					{m.frameworkReport()}
+				</div>
 				<h1 class="text-xl font-semibold">{framework.name}</h1>
-				<div class="text-sm text-gray-600 mt-1">
+				<div class="text-sm text-surface-600-400 mt-1">
 					{m.frameworkReportSubtitle({
 						min: framework.min_score ?? '—',
 						max: framework.max_score ?? '—',
 						nIGs: igDefs.length
 					})}
 				</div>
-				<div class="text-xs text-gray-500 mt-1">
+				<div class="text-xs text-surface-600-400 mt-1">
 					{m.onlyLiveStatusesCounted({
 						statuses: liveStatuses.map((s) => safeTranslate(s)).join(', '),
 						deprecated: m.deprecated()
 					})}
 				</div>
 				{#if totalDetectedCAs > 0}
-					<div class="text-xs text-gray-600 mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+					<div
+						class="text-xs text-surface-600-400 mt-1 flex flex-wrap items-center gap-x-2 gap-y-1"
+					>
 						<span>
 							{m.detectedComplianceAssessments({
 								total: totalDetectedCAs,
@@ -418,7 +492,7 @@
 							<span
 								class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 border text-[11px] {isLive
 									? 'border-emerald-300 bg-emerald-50 text-emerald-800'
-									: 'border-gray-300 bg-gray-50 text-gray-500'}"
+									: 'border-surface-300-700 bg-surface-50-950 text-surface-600-400'}"
 								title={isLive ? m.countedInReport() : m.excludedFromReport()}
 							>
 								<span>{safeTranslate(s)}</span>
@@ -427,7 +501,7 @@
 						{/each}
 						<button
 							type="button"
-							class="text-[11px] underline text-gray-600 hover:text-gray-900"
+							class="text-[11px] underline text-surface-600-400 hover:text-surface-900-100"
 							onclick={() => (showCAList = !showCAList)}
 							aria-expanded={showCAList}
 						>
@@ -436,9 +510,9 @@
 					</div>
 
 					{#if showCAList}
-						<div class="mt-2 border rounded bg-gray-50 max-h-72 overflow-auto">
+						<div class="mt-2 border rounded bg-surface-50-950 max-h-72 overflow-auto">
 							<table class="w-full text-xs">
-								<thead class="bg-gray-100 sticky top-0">
+								<thead class="bg-surface-100-900 sticky top-0">
 									<tr class="text-left">
 										<th class="px-3 py-1.5 w-6"></th>
 										<th class="px-3 py-1.5">{m.assessment()}</th>
@@ -448,12 +522,16 @@
 								</thead>
 								<tbody>
 									{#each complianceAssessments as ca}
-										<tr class="border-t {ca.is_counted ? '' : 'bg-gray-100/60 text-gray-500'}">
+										<tr
+											class="border-t {ca.is_counted
+												? ''
+												: 'bg-surface-100-900/60 text-surface-600-400'}"
+										>
 											<td class="px-3 py-1 text-center">
 												<span
 													class="inline-block w-2 h-2 rounded-full {ca.is_counted
 														? 'bg-emerald-500'
-														: 'bg-gray-300'}"
+														: 'bg-surface-300-700'}"
 													title={ca.is_counted ? m.countedInReport() : m.excludedFromReport()}
 												></span>
 											</td>
@@ -469,13 +547,13 @@
 						</div>
 					{/if}
 				{:else}
-					<div class="text-xs text-gray-500 mt-1 italic">
+					<div class="text-xs text-surface-600-400 mt-1 italic">
 						{m.noVisibleComplianceAssessments()}
 					</div>
 				{/if}
-				<div class="text-xs text-gray-400 mt-1">
+				<div class="text-xs text-surface-500 mt-1">
 					{m.generatedLabel()}
-					{new Date(report.generated_at).toLocaleString()}
+					{formatDate(new Date(report.generated_at), true, getLocale())}
 				</div>
 			</div>
 			<div class="flex gap-2 items-center">
@@ -488,35 +566,35 @@
 		<!-- KPI row -->
 		<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
 			<div class="rounded border p-3">
-				<div class="text-xs text-gray-500">{m.compliancePercentage()}</div>
+				<div class="text-xs text-surface-600-400">{m.compliancePercentage()}</div>
 				<div class="text-2xl font-semibold">
 					{overallCompliance === null ? '—' : `${overallCompliance.toFixed(1)}%`}
 				</div>
-				<div class="text-xs text-gray-500">{m.complianceFormulaShort()}</div>
+				<div class="text-xs text-surface-600-400">{m.complianceFormulaShort()}</div>
 			</div>
 			<div class="rounded border p-3">
-				<div class="text-xs text-gray-500">{m.averageImplementationScore()}</div>
+				<div class="text-xs text-surface-600-400">{m.averageImplementationScore()}</div>
 				<div class="text-2xl font-semibold">
 					{overallScore === null ? '—' : overallScore.toFixed(1)}
 				</div>
-				<div class="text-xs text-gray-500">{m.overScoredRequirementsOnly()}</div>
+				<div class="text-xs text-surface-600-400">{m.overScoredRequirementsOnly()}</div>
 			</div>
 			<div class="rounded border p-3">
-				<div class="text-xs text-gray-500">{m.complianceAssessments()}</div>
+				<div class="text-xs text-surface-600-400">{m.complianceAssessments()}</div>
 				<div class="text-2xl font-semibold">{totalCAs}</div>
-				<div class="text-xs text-gray-500">{m.visibleToCurrentUser()}</div>
+				<div class="text-xs text-surface-600-400">{m.visibleToCurrentUser()}</div>
 			</div>
 			<div class="rounded border p-3">
-				<div class="text-xs text-gray-500">{m.requirementAssessments()}</div>
+				<div class="text-xs text-surface-600-400">{m.requirementAssessments()}</div>
 				<div class="text-2xl font-semibold">{totalAssessments}</div>
-				<div class="text-xs text-gray-500">{m.inScopeAfterIGFilter()}</div>
+				<div class="text-xs text-surface-600-400">{m.inScopeAfterIGFilter()}</div>
 			</div>
 		</div>
 
 		<!-- Overall distribution -->
 		{#if totalAssessments > 0}
 			<div class="mt-4">
-				<div class="text-xs text-gray-500 mb-1">{m.overallResultDistribution()}</div>
+				<div class="text-xs text-surface-600-400 mb-1">{m.overallResultDistribution()}</div>
 				<div class="flex h-6 w-full rounded overflow-hidden border">
 					{#each RESULT_ORDER as r}
 						{@const w =
@@ -545,21 +623,23 @@
 				</div>
 			</div>
 		{:else}
-			<div class="mt-4 text-sm text-gray-500 italic">
+			<div class="mt-4 text-sm text-surface-600-400 italic">
 				{m.noVisibleComplianceAssessments()}
 			</div>
 		{/if}
 	</div>
 
 	<!-- Filter + view bar -->
-	<div class="card p-3 bg-white flex flex-wrap items-end gap-4">
+	<div class="card p-3 bg-surface-50-950 flex flex-wrap items-end gap-4">
 		<div>
-			<label class="text-xs text-gray-500 block" for="ig-filter">{m.implementationGroup()}</label>
+			<label class="text-xs text-surface-600-400 block" for="ig-filter"
+				>{m.implementationGroup()}</label
+			>
 			<select
 				id="ig-filter"
 				value={igFilter}
 				onchange={onIGChange}
-				class="rounded-lg border-gray-300 text-gray-700 text-sm bg-white"
+				class="rounded-lg border-surface-300-700 text-surface-700-300 text-sm bg-surface-50-950"
 			>
 				<option value="all">{m.allGroupsHonorCASelection()}</option>
 				{#each igDefs as ig}
@@ -572,14 +652,14 @@
 		</div>
 
 		<div>
-			<label class="text-xs text-gray-500 block">{m.view()}</label>
+			<label class="text-xs text-surface-600-400 block">{m.view()}</label>
 			<div class="inline-flex rounded border overflow-hidden">
 				{#each [['requirement', m.requirementsTree()], ['domain', m.perDomainView()]] as [k, label]}
 					<button
 						type="button"
 						class="px-3 py-1 text-sm {view === k
 							? 'bg-primary-500 text-white'
-							: 'bg-white hover:bg-gray-50'}"
+							: 'bg-surface-50-950 hover:bg-surface-50-950'}"
 						onclick={() => (view = k as typeof view)}
 					>
 						{label}
@@ -588,20 +668,37 @@
 			</div>
 		</div>
 
+		{#if inheritanceAvailable}
+			<div>
+				<label class="text-xs text-surface-600-400 block" for="apply-inheritance"
+					>{m.combinedView()}</label
+				>
+				<label class="inline-flex items-center gap-2 text-sm cursor-pointer h-[34px]">
+					<input
+						id="apply-inheritance"
+						type="checkbox"
+						class="checkbox"
+						bind:checked={applyInheritance}
+					/>
+					{m.applyDomainInheritance()}
+				</label>
+			</div>
+		{/if}
+
 		{#if view === 'requirement' && !isFlat}
 			<div>
-				<div class="text-xs text-gray-500 block">{m.sections()}</div>
+				<div class="text-xs text-surface-600-400 block">{m.sections()}</div>
 				<div class="inline-flex gap-2">
 					<button
 						type="button"
-						class="px-2 py-1 text-xs border rounded hover:bg-gray-50"
+						class="px-2 py-1 text-xs border rounded hover:bg-surface-50-950"
 						onclick={() => expandAllSections(hierarchical.map((s) => s.urn))}
 					>
 						{m.expandAll()}
 					</button>
 					<button
 						type="button"
-						class="px-2 py-1 text-xs border rounded hover:bg-gray-50"
+						class="px-2 py-1 text-xs border rounded hover:bg-surface-50-950"
 						onclick={collapseAllSections}
 					>
 						{m.collapseAll()}
@@ -612,11 +709,13 @@
 
 		{#if view === 'domain'}
 			<div>
-				<label class="text-xs text-gray-500 block" for="depth">{m.groupByFolderDepth()}</label>
+				<label class="text-xs text-surface-600-400 block" for="depth"
+					>{m.groupByFolderDepth()}</label
+				>
 				<select
 					id="depth"
 					bind:value={domainDepth}
-					class="rounded-lg border-gray-300 text-gray-700 text-sm bg-white"
+					class="rounded-lg border-surface-300-700 text-surface-700-300 text-sm bg-surface-50-950"
 				>
 					{#each Array(maxFolderDepth) as _, i}
 						<option value={i + 1}
@@ -632,7 +731,7 @@
 			</div>
 
 			<div>
-				<label class="text-xs text-gray-500 block" for="domain-sort">{m.sortBy()}</label>
+				<label class="text-xs text-surface-600-400 block" for="domain-sort">{m.sortBy()}</label>
 				<div class="inline-flex items-center gap-1">
 					<select
 						id="domain-sort"
@@ -641,7 +740,7 @@
 							setDomainSortKey(
 								(e.currentTarget as HTMLSelectElement).value as typeof domainSortKey
 							)}
-						class="rounded-lg border-gray-300 text-gray-700 text-sm bg-white"
+						class="rounded-lg border-surface-300-700 text-surface-700-300 text-sm bg-surface-50-950"
 					>
 						<option value="name">{m.domainAlphabetical()}</option>
 						<option value="compliance">{m.compliancePercentage()}</option>
@@ -649,7 +748,7 @@
 					</select>
 					<button
 						type="button"
-						class="border rounded px-2 py-1 text-xs hover:bg-gray-50"
+						class="border rounded px-2 py-1 text-xs hover:bg-surface-50-950"
 						onclick={toggleDomainSortDir}
 						title={domainSortDir === 'asc' ? m.sortAscending() : m.sortDescending()}
 						aria-label={m.toggleSortDirection()}
@@ -660,7 +759,7 @@
 			</div>
 		{/if}
 
-		<div class="ml-auto text-xs text-gray-500">
+		<div class="ml-auto text-xs text-surface-600-400">
 			{filteredRows.length}
 			{m.rowsLabel()}{#if view === 'requirement'}
 				· {m.clickRowToDrillDown()}{/if}
@@ -668,12 +767,14 @@
 	</div>
 
 	<!-- Main view -->
-	<div class="card bg-white overflow-x-auto">
+	<div class="card bg-surface-50-950 overflow-x-auto">
 		{#if filteredRows.length === 0}
-			<div class="p-6 text-sm text-gray-500 italic">{m.noRequirementAssessmentsInScope()}</div>
+			<div class="p-6 text-sm text-surface-600-400 italic">
+				{m.noRequirementAssessmentsInScope()}
+			</div>
 		{:else if view === 'requirement'}
 			<table class="w-full text-sm">
-				<thead class="bg-gray-50 text-left">
+				<thead class="bg-surface-50-950 text-left">
 					<tr>
 						<th class="px-3 py-2 w-32">{m.refLabel()}</th>
 						<th class="px-3 py-2">{m.sectionOrRequirement()}</th>
@@ -690,24 +791,24 @@
 						{@const sectionCompliance = compliancePct(section.dist)}
 						{#if !isFlat}
 							<tr
-								class="border-t bg-gray-100 font-medium hover:bg-gray-200 cursor-pointer"
+								class="border-t bg-surface-100-900 font-medium hover:bg-surface-200-800 cursor-pointer"
 								onclick={() => toggleSection(section.urn)}
 							>
 								<td class="px-3 py-2 font-mono text-xs">
-									<span class="inline-block w-3 text-gray-500"
+									<span class="inline-block w-3 text-surface-600-400"
 										>{expandedSections.has(section.urn) ? '▾' : '▸'}</span
 									>
 									{section.ref}
 								</td>
 								<td class="px-3 py-2">
 									{section.name}
-									<span class="text-xs text-gray-500 ml-2 font-normal"
+									<span class="text-xs text-surface-600-400 ml-2 font-normal"
 										>({section.requirement_count}
 										{m.reqsAbbr()} · {section.row_count}
 										{m.rowsLabel()})</span
 									>
 								</td>
-								<td class="px-3 py-2 text-center text-xs text-gray-500">—</td>
+								<td class="px-3 py-2 text-center text-xs text-surface-600-400">—</td>
 								<td class="px-3 py-2">
 									{#if section.row_count > 0}
 										<div class="flex h-5 w-full rounded overflow-hidden border">
@@ -725,7 +826,7 @@
 											{/each}
 										</div>
 									{:else}
-										<span class="text-xs text-gray-400">{m.noRowsInScope()}</span>
+										<span class="text-xs text-surface-500">{m.noRowsInScope()}</span>
 									{/if}
 								</td>
 								<td class="px-3 py-2 text-right font-mono"
@@ -741,11 +842,11 @@
 							{#each section.requirements as req}
 								{@const reqCompliance = compliancePct(req.dist)}
 								<tr
-									class="border-t hover:bg-gray-50 cursor-pointer"
+									class="border-t hover:bg-surface-50-950 cursor-pointer"
 									onclick={() => (expandedRow = expandedRow === req.urn ? null : req.urn)}
 								>
 									<td class="px-3 py-2 font-mono text-xs {isFlat ? '' : 'pl-8'}">
-										<span class="inline-block w-3 text-gray-400"
+										<span class="inline-block w-3 text-surface-500"
 											>{expandedRow === req.urn ? '▾' : '▸'}</span
 										>
 										{req.ref_id}
@@ -774,13 +875,15 @@
 									>
 								</tr>
 								{#if expandedRow === req.urn}
-									<tr class="bg-gray-50 border-t">
+									<tr class="bg-surface-50-950 border-t">
 										<td></td>
 										<td colspan="5" class="px-3 py-2">
-											<div class="text-xs text-gray-600 mb-2">{m.perAssessmentBreakdown()}</div>
+											<div class="text-xs text-surface-600-400 mb-2">
+												{m.perAssessmentBreakdown()}
+											</div>
 											<table class="w-full text-xs">
 												<thead>
-													<tr class="text-left text-gray-500">
+													<tr class="text-left text-surface-600-400">
 														<th class="py-1">{m.domain()}</th>
 														<th class="py-1">{m.assessment()}</th>
 														<th class="py-1">{m.result()}</th>
@@ -792,6 +895,8 @@
 												<tbody>
 													{#each req.rows as row}
 														{@const returnUrl = page.url.pathname + page.url.search}
+														{@const inh = row.inheritance}
+														{@const showInh = applyInheritance && !!inh?.inherited}
 														{@const evidencesTitle =
 															row.indirect_evidences_count > 0
 																? m.directPlusIndirectEvidences({
@@ -799,7 +904,7 @@
 																		indirect: row.indirect_evidences_count
 																	})
 																: m.directEvidencesOnly({ direct: row.direct_evidences_count })}
-														<tr class="border-t border-gray-200">
+														<tr class="border-t border-surface-200-800">
 															<td class="py-1 font-mono">{row.folder_path_str}</td>
 															<td class="py-1">
 																<a
@@ -823,14 +928,39 @@
 																		]}"
 																	></span>
 																	{row.result ? resultLabel(row.result) : '—'}
+																	{#if showInh && inh}
+																		<a
+																			class="anchor inline-flex items-center gap-0.5 text-xs text-surface-600-400"
+																			href="/compliance-assessments/{inh.source?.ca_id}"
+																			title="{m.inheritedFrom()}: {inh.source?.folder_name ??
+																				'—'} · {inh.source?.ca_name}&#10;{pathTitle(inh)}"
+																		>
+																			<i class="fa-solid fa-code-branch text-[10px]"></i>
+																			{inh.source?.ca_name}
+																		</a>
+																	{/if}
 																</span>
 															</td>
-															<td class="py-1 text-right font-mono">{row.score ?? '—'}</td>
+															<td class="py-1 text-right font-mono">
+																{row.score ?? '—'}
+																{#if showInh && inh && inh.own && inh.own.result !== inh.effective_result}
+																	<span
+																		class="text-[10px] text-surface-500"
+																		title="{m.ownResult()}: {inh.own.result
+																			? resultLabel(inh.own.result)
+																			: '—'}{inh.own.score !== null
+																			? ` (${inh.own.score}${inh.own.scale?.max != null ? ` / ${inh.own.scale.max}` : ''})`
+																			: ''}"
+																	>
+																		<i class="fa-solid fa-circle-info"></i>
+																	</span>
+																{/if}
+															</td>
 															<td class="py-1 text-center">{row.applied_controls_count}</td>
 															<td class="py-1 text-center" title={evidencesTitle}>
 																{row.evidences_count}
 																{#if row.indirect_evidences_count > 0}
-																	<span class="text-[10px] text-gray-400"
+																	<span class="text-[10px] text-surface-500"
 																		>({row.direct_evidences_count}+{row.indirect_evidences_count})</span
 																	>
 																{/if}
@@ -849,7 +979,7 @@
 			</table>
 		{:else if view === 'domain'}
 			<table class="w-full text-sm">
-				<thead class="bg-gray-50 text-left">
+				<thead class="bg-surface-50-950 text-left">
 					<tr>
 						<th class="px-3 py-2">{m.domain()} ({m.depthLabel()} {domainDepth})</th>
 						<th class="px-3 py-2 w-32 text-center">{m.complianceAssessments()}</th>
@@ -864,7 +994,7 @@
 				<tbody>
 					{#each perDomain as d}
 						{@const dCompliance = compliancePct(d.dist)}
-						<tr class="border-t hover:bg-gray-50">
+						<tr class="border-t hover:bg-surface-50-950">
 							<td class="px-3 py-2 font-mono">{d.key}</td>
 							<td class="px-3 py-2 text-center">{d.ca_count}</td>
 							<td class="px-3 py-2 text-center">{d.row_count}</td>

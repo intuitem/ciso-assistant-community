@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
 	import { safeTranslate } from '$lib/utils/i18n';
 	interface Props {
 		name: string;
@@ -41,116 +42,123 @@
 		}
 	}
 	const chart_id = `${name}_div`;
-	onMount(async () => {
-		const echarts = await import('echarts');
-		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
-		const filteredEntries = values
-			.map((item, i) => ({ item, color: colors[i] }))
-			.filter((entry) => entry.item.value > 0);
-		const filteredValues = filteredEntries.map((entry) => entry.item);
-		const filteredColors = filteredEntries.map((entry) => entry.color);
-		// specify chart configuration item and data
-		let option = {
-			tooltip: {
-				trigger: 'item',
-				formatter: function (params) {
-					// Return formatted tooltip content with just the name and value
-					return `${params.data.name}: ${params.data.value}`;
-				}
-			},
-			title: {
-				text: title,
-				textStyle: {
-					fontWeight: 'bold',
-					fontSize: 14
-				}
-			},
-			toolbox: {
-				show: true,
-				feature: {
-					mark: { show: true },
-					dataView: { show: false, readOnly: true },
-					saveAsImage: { show: false }
-				}
-			},
-			legend: {
-				top: 'bottom',
-				right: '0',
-				orient: orientation
-			},
-			series: [
-				{
-					name: s_label,
-					type: 'pie',
-					radius: showPercentage ? ['30%', '55%'] : ['40%', '70%'],
-					center: ['50%', '45%'],
-					avoidLabelOverlap: true,
-					itemStyle: {
-						borderRadius: 10,
-						borderColor: '#fff',
-						borderWidth: 2
-					},
-					label: showPercentage
-						? {
-								show: true,
-								position: 'outside',
-								formatter: '{d}%',
-								fontSize: 10,
-								fontWeight: 'bold',
-								distanceToLabelLine: 2
-							}
-						: {
-								show: false,
-								position: 'center'
-							},
-					emphasis: {
-						label: {
-							show: true,
-							fontSize: 20,
-							fontWeight: 'bold',
-							formatter: function (params) {
-								// Calculate the total value
-								const total =
-									params.data.value +
-									filteredValues
-										.filter((item) => item.name !== params.data.name)
-										.reduce((sum, item) => sum + item.value, 0);
-
-								// Calculate percentage
-								const percent = ((params.data.value / total) * 100).toFixed(1);
-
-								// Return formatted center label with just the name and percentage
-								return `{value|${percent}%}`;
-							},
-							rich: {
-								name: {
-									fontSize: 16,
-									fontWeight: 'bold',
-									lineHeight: 30
-								},
-								value: {
-									fontSize: 14,
-									lineHeight: 20
-								}
-							}
+	onMount(() => {
+		let dispose: (() => void) | undefined;
+		let active = true;
+		(async () => {
+			const echarts = await import('echarts');
+			if (!active) return;
+			const el = document.getElementById(chart_id);
+			if (!el) return;
+			dispose = mountThemeAwareChart(echarts, el, () => {
+				const filteredEntries = values
+					.map((item, i) => ({ item, color: colors[i] }))
+					.filter((entry) => entry.item.value > 0);
+				const filteredValues = filteredEntries.map((entry) => entry.item);
+				const filteredColors = filteredEntries.map((entry) => entry.color);
+				return {
+					tooltip: {
+						trigger: 'item',
+						formatter: function (params) {
+							// Return formatted tooltip content with just the name and value
+							return `${params.data.name}: ${params.data.value}`;
 						}
 					},
-					labelLine: {
-						show: showPercentage,
-						length: 8,
-						length2: 5
+					title: {
+						text: title,
+						textStyle: {
+							fontWeight: 'bold',
+							fontSize: 14
+						}
 					},
-					data: filteredValues,
-					color: filteredColors
-				}
-			]
+					toolbox: {
+						show: true,
+						feature: {
+							mark: { show: true },
+							dataView: { show: false, readOnly: true },
+							saveAsImage: { show: false }
+						}
+					},
+					legend: {
+						top: 'bottom',
+						right: '0',
+						orient: orientation
+					},
+					series: [
+						{
+							name: s_label,
+							type: 'pie',
+							radius: showPercentage ? ['30%', '55%'] : ['40%', '70%'],
+							center: ['50%', '45%'],
+							avoidLabelOverlap: true,
+							itemStyle: {
+								borderRadius: 10,
+								borderColor: document.documentElement.classList.contains('dark')
+									? '#1e293b'
+									: '#fff',
+								borderWidth: 2
+							},
+							label: showPercentage
+								? {
+										show: true,
+										position: 'outside',
+										formatter: '{d}%',
+										fontSize: 10,
+										fontWeight: 'bold',
+										distanceToLabelLine: 2
+									}
+								: {
+										show: false,
+										position: 'center'
+									},
+							emphasis: {
+								label: {
+									show: true,
+									fontSize: 20,
+									fontWeight: 'bold',
+									formatter: function (params) {
+										// Calculate the total value
+										const total =
+											params.data.value +
+											filteredValues
+												.filter((item) => item.name !== params.data.name)
+												.reduce((sum, item) => sum + item.value, 0);
+
+										// Calculate percentage
+										const percent = ((params.data.value / total) * 100).toFixed(1);
+
+										// Return formatted center label with just the name and percentage
+										return `{value|${percent}%}`;
+									},
+									rich: {
+										name: {
+											fontSize: 16,
+											fontWeight: 'bold',
+											lineHeight: 30
+										},
+										value: {
+											fontSize: 14,
+											lineHeight: 20
+										}
+									}
+								}
+							},
+							labelLine: {
+								show: showPercentage,
+								length: 8,
+								length2: 5
+							},
+							data: filteredValues,
+							color: filteredColors
+						}
+					]
+				};
+			});
+		})();
+		return () => {
+			active = false;
+			dispose?.();
 		};
-		// console.debug(option);
-		// use configuration item and data specified to show chart
-		chart.setOption(option);
-		window.addEventListener('resize', function () {
-			chart.resize();
-		});
 	});
 </script>
 

@@ -3,6 +3,7 @@
 	import { m } from '$paraglide/messages';
 	import { invalidateAll } from '$app/navigation';
 	import { goto } from '$lib/utils/breadcrumbs';
+	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { page } from '$app/stores';
 	import { getModalStore } from '$lib/components/Modals/stores';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
@@ -82,15 +83,10 @@
 		return parts.length ? `?${parts.join('&')}` : '';
 	}
 
-	function isSafeInternalUrl(url: string): boolean {
-		// Must be a rooted, same-origin path. Reject protocol-relative "//..." and any scheme.
-		return url.startsWith('/') && !url.startsWith('//') && !/^\w+:/.test(url);
-	}
-
 	function getStepLink(step: any): string | null {
 		// target_url takes precedence: supports generic routes like /reporting or /settings.
 		if (step.target_url && typeof step.target_url === 'string') {
-			if (!isSafeInternalUrl(step.target_url)) return null;
+			if (!getSecureRedirect(step.target_url)) return null;
 			return `${step.target_url}${buildQueryString(step.target_params)}`;
 		}
 		if (!step.target_model) return null;
@@ -226,7 +222,7 @@
 
 {#if !data.journey}
 	<div class="flex flex-col items-center justify-center p-10">
-		<p class="text-gray-500 mb-4">{m.journeyNotFound()}</p>
+		<p class="text-surface-600-400 mb-4">{m.journeyNotFound()}</p>
 		<a href="/presets" class="btn preset-tonal-surface border border-surface-500">
 			<i class="fa-solid fa-arrow-left mr-2"></i>
 			{m.presets()}
@@ -237,7 +233,9 @@
 		<!-- Main content -->
 		<div class="flex-1 min-w-0 space-y-4">
 			<!-- Header -->
-			<div class="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
+			<div
+				class="rounded-lg border border-surface-200-800 bg-surface-50-950 shadow-sm overflow-hidden"
+			>
 				<div class="bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-3">
 					<div class="flex items-start gap-3">
 						<a
@@ -257,7 +255,7 @@
 								>
 									<input
 										type="text"
-										class="input input-sm bg-white text-gray-800 placeholder-gray-400 border-white/30 focus:border-white rounded-md text-lg font-semibold flex-1 min-w-0"
+										class="input input-sm bg-surface-50-950 text-surface-800-200 placeholder-surface-500 border-white/30 focus:border-white rounded-md text-lg font-semibold flex-1 min-w-0"
 										bind:value={renameValue}
 										autofocus
 										onkeydown={(e) => {
@@ -354,16 +352,18 @@
 			</div>
 
 			<!-- Progress bar (four-state) -->
-			<div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+			<div class="rounded-lg border border-surface-200-800 bg-surface-50-950 p-4 shadow-sm">
 				<div class="flex items-center justify-between mb-2">
-					<span class="font-medium text-sm text-gray-800" data-testid="journey-progress-title"
-						>{m.journeyProgress()}</span
+					<span
+						class="font-medium text-sm text-surface-800-200"
+						data-testid="journey-progress-title">{m.journeyProgress()}</span
 					>
-					<span class="text-sm font-mono text-gray-500" data-testid="journey-progress-percent"
-						>{data.stats.progress_percent ?? 0}%</span
+					<span
+						class="text-sm font-mono text-surface-600-400"
+						data-testid="journey-progress-percent">{data.stats.progress_percent ?? 0}%</span
 					>
 				</div>
-				<div class="flex h-2.5 rounded-full bg-gray-100 overflow-hidden">
+				<div class="flex h-2.5 rounded-full bg-surface-100-900 overflow-hidden">
 					{#if stepCounts.done}
 						<div
 							class="h-full bg-green-500 transition-all duration-500"
@@ -378,12 +378,12 @@
 					{/if}
 					{#if stepCounts.skipped}
 						<div
-							class="h-full bg-gray-300 transition-all duration-500"
+							class="h-full bg-surface-300-700 transition-all duration-500"
 							style="width: {(stepCounts.skipped / stepTotal) * 100}%"
 						></div>
 					{/if}
 				</div>
-				<div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-gray-600">
+				<div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-surface-600-400">
 					<span class="flex items-center gap-1.5" data-testid="journey-count-done">
 						<span class="inline-block w-2 h-2 rounded-full bg-green-500"></span>
 						{m.done()}
@@ -395,12 +395,13 @@
 						{stepCounts.in_progress}
 					</span>
 					<span class="flex items-center gap-1.5">
-						<span class="inline-block w-2 h-2 rounded-full bg-gray-300"></span>
+						<span class="inline-block w-2 h-2 rounded-full bg-surface-300-700"></span>
 						{m.skipped()}
 						{stepCounts.skipped}
 					</span>
 					<span class="flex items-center gap-1.5">
-						<span class="inline-block w-2 h-2 rounded-full bg-gray-100 border border-gray-300"
+						<span
+							class="inline-block w-2 h-2 rounded-full bg-surface-100-900 border border-surface-300-700"
 						></span>
 						{m.notStarted()}
 						{stepCounts.not_started}
@@ -431,12 +432,12 @@
 									? 'text-white'
 									: step.status === 'in_progress'
 										? 'text-white'
-										: 'text-gray-500 bg-white'}"
+										: 'text-surface-600-400 bg-surface-50-950'}"
 							>
 								{#if step.status === 'done'}
 									<i class="fa-solid fa-check text-[10px]"></i>
 								{:else if step.status === 'skipped'}
-									<i class="fa-solid fa-forward text-[9px] text-gray-400"></i>
+									<i class="fa-solid fa-forward text-[9px] text-surface-500"></i>
 								{:else}
 									{i + 1}
 								{/if}
@@ -445,12 +446,12 @@
 
 						<!-- Step card -->
 						<div
-							class="flex-1 min-w-0 rounded-lg border bg-white shadow-sm {step.status ===
+							class="flex-1 min-w-0 rounded-lg border bg-surface-50-950 shadow-sm {step.status ===
 							'in_progress'
 								? 'border-amber-200'
 								: step.status === 'done'
 									? 'border-green-200'
-									: 'border-gray-200'} p-3.5"
+									: 'border-surface-200-800'} p-3.5"
 						>
 							<div class="flex items-start gap-3">
 								<div class="flex-1 min-w-0">
@@ -460,7 +461,7 @@
 												href={link}
 												breadcrumbAction="push"
 												label={step.title}
-												class="font-medium text-gray-800 hover:text-violet-600 transition-colors"
+												class="font-medium text-surface-800-200 hover:text-violet-600 transition-colors"
 											>
 												{step.title}
 												<i
@@ -468,7 +469,7 @@
 												></i>
 											</Anchor>
 										{:else}
-											<h4 class="font-medium text-gray-800">{step.title}</h4>
+											<h4 class="font-medium text-surface-800-200">{step.title}</h4>
 										{/if}
 										<span
 											class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] leading-tight {style.bg} {style.text}"
@@ -478,12 +479,12 @@
 										</span>
 									</div>
 									{#if step.description && !compactMode}
-										<p class="text-sm text-gray-500 mt-1">{step.description}</p>
+										<p class="text-sm text-surface-600-400 mt-1">{step.description}</p>
 									{/if}
 									{#if editMode && step.target_ref != null && step.target_model && choicesCache[step.target_model]}
 										<div class="mt-2">
 											<select
-												class="select select-sm text-sm max-w-xs bg-white text-gray-800 border-gray-300"
+												class="select select-sm text-sm max-w-xs bg-surface-50-950 text-surface-800-200 border-surface-300-700"
 												value={step.target_ref ?? ''}
 												onchange={(e) => {
 													const val = (e.target as HTMLSelectElement).value;
@@ -558,27 +559,31 @@
 
 		<!-- Stats sidebar -->
 		<div class="lg:w-72 shrink-0 space-y-4">
-			<div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm space-y-3">
-				<h3 class="font-semibold text-sm text-gray-800">{m.stats()}</h3>
+			<div
+				class="rounded-lg border border-surface-200-800 bg-surface-50-950 p-4 shadow-sm space-y-3"
+			>
+				<h3 class="font-semibold text-sm text-surface-800-200">{m.stats()}</h3>
 				<div class="space-y-2 text-sm">
 					<div class="flex justify-between">
-						<span class="text-gray-600">{m.assets()}</span>
-						<span class="font-mono text-gray-800">{data.stats.assets ?? 0}</span>
+						<span class="text-surface-600-400">{m.assets()}</span>
+						<span class="font-mono text-surface-800-200">{data.stats.assets ?? 0}</span>
 					</div>
 					<div class="flex justify-between">
-						<span class="text-gray-600">{m.riskScenarios()}</span>
-						<span class="font-mono text-gray-800">{data.stats.risk_scenarios ?? 0}</span>
+						<span class="text-surface-600-400">{m.riskScenarios()}</span>
+						<span class="font-mono text-surface-800-200">{data.stats.risk_scenarios ?? 0}</span>
 					</div>
 					<div class="flex justify-between">
-						<span class="text-gray-600">{m.appliedControls()}</span>
-						<span class="font-mono text-gray-800">{data.stats.applied_controls ?? 0}</span>
+						<span class="text-surface-600-400">{m.appliedControls()}</span>
+						<span class="font-mono text-surface-800-200">{data.stats.applied_controls ?? 0}</span>
 					</div>
 				</div>
 			</div>
 
 			{#if data.stats.compliance && Object.keys(data.stats.compliance).length > 0}
-				<div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm space-y-3">
-					<h3 class="font-semibold text-sm text-gray-800">{m.compliance()}</h3>
+				<div
+					class="rounded-lg border border-surface-200-800 bg-surface-50-950 p-4 shadow-sm space-y-3"
+				>
+					<h3 class="font-semibold text-sm text-surface-800-200">{m.compliance()}</h3>
 					{#each Object.entries(data.stats.compliance) as [, info]}
 						{@const compInfo = info as {
 							name: string;
@@ -588,10 +593,10 @@
 						}}
 						<div class="space-y-1">
 							<div class="flex justify-between text-sm">
-								<span class="text-gray-600 truncate mr-2">{compInfo.name}</span>
-								<span class="font-mono shrink-0 text-gray-800">{compInfo.percent}%</span>
+								<span class="text-surface-600-400 truncate mr-2">{compInfo.name}</span>
+								<span class="font-mono shrink-0 text-surface-800-200">{compInfo.percent}%</span>
 							</div>
-							<div class="h-1.5 rounded-full bg-gray-100 overflow-hidden">
+							<div class="h-1.5 rounded-full bg-surface-100-900 overflow-hidden">
 								<div
 									class="h-full rounded-full bg-sky-500"
 									style="width: {compInfo.percent}%"

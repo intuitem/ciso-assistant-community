@@ -1,6 +1,5 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import Select from '../Select.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
@@ -44,46 +43,6 @@
 	let is_dynamic = $state(false);
 
 	let isLocked = $derived(form.data?.is_locked || object?.is_locked || false);
-
-	let selectedFolder = $state<string | undefined>(undefined);
-	let folderKey = $state(0);
-	let isAutoFillingFolder = $state(false);
-
-	function handleFolderChange(folderId: string) {
-		selectedFolder = folderId;
-		// Clear perimeter when folder changes (unless we're auto-filling from perimeter)
-		if (!isAutoFillingFolder && form.data?.perimeter) {
-			form.form.update((currentData) => ({
-				...currentData,
-				perimeter: undefined
-			}));
-		}
-		isAutoFillingFolder = false;
-	}
-
-	async function handlePerimeterChange(perimeterId: string) {
-		if (perimeterId && !selectedFolder) {
-			// Fetch perimeter to get its folder and auto-fill
-			try {
-				const response = await fetch(`/perimeters/${perimeterId}`);
-				if (response.ok) {
-					const perimeter = await response.json();
-					if (perimeter.folder?.id) {
-						isAutoFillingFolder = true;
-						selectedFolder = perimeter.folder.id;
-						// Update form data and force folder component to re-render
-						form.form.update((currentData) => ({
-							...currentData,
-							folder: perimeter.folder.id
-						}));
-						folderKey++;
-					}
-				}
-			} catch (error) {
-				console.error('Error fetching perimeter:', error);
-			}
-		}
-	}
 
 	let frameworkDefaults = $state<Record<string, any> | null>(null);
 
@@ -139,32 +98,6 @@
 		hidden
 	/>
 {/if}
-{#key folderKey}
-	<FolderTreeSelect
-		{form}
-		field="folder"
-		cacheLock={cacheLocks['folder']}
-		contentTypes={['DO', 'GL', 'EN']}
-		bind:cachedValue={formDataCache['folder']}
-		label={m.folder()}
-		onChange={handleFolderChange}
-		mount={handleFolderChange}
-	/>
-{/key}
-{#key selectedFolder}
-	<AutocompleteSelect
-		{form}
-		optionsEndpoint="perimeters"
-		optionsDetailedUrlParameters={selectedFolder ? [['folder', selectedFolder]] : []}
-		optionsExtraFields={[['folder', 'str']]}
-		field="perimeter"
-		nullable
-		cacheLock={cacheLocks['perimeter']}
-		bind:cachedValue={formDataCache['perimeter']}
-		label={m.perimeter()}
-		onChange={handlePerimeterChange}
-	/>
-{/key}
 {#if context === 'fromBaseline' && initialData.baseline}
 	<AutocompleteSelect
 		{form}
@@ -292,13 +225,6 @@
 			bind:cachedValue={formDataCache['anchor_na_to_target']}
 		/>
 	</div>
-	<TextField
-		{form}
-		field="ref_id"
-		label={m.refId()}
-		cacheLock={cacheLocks['ref_id']}
-		bind:cachedValue={formDataCache['ref_id']}
-	/>
 	<AutocompleteSelect
 		multiple
 		lazy

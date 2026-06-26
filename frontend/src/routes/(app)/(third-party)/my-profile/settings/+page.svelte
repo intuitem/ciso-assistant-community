@@ -7,8 +7,16 @@
 	import RegisterWebAuthnModal from './mfa/components/RegisterWebAuthnModal.svelte';
 
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
+	import { invalidateAll } from '$app/navigation';
+	import { page } from '$app/state';
+	import {
+		formatDate,
+		sampleDateForPreference,
+		type DateFormatPreference
+	} from '$lib/utils/datetime';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
+	import { setTheme, type ThemeMode } from '$lib/utils/theme';
 	import { defaults } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -83,6 +91,52 @@
 	}
 
 	let group = $state('security');
+
+	const dateFormatOptions: { value: DateFormatPreference; label: string }[] = [
+		{ value: 'auto', label: m.dateFormatAuto() },
+		{ value: 'iso', label: m.dateFormatIso() },
+		{ value: 'ddmmyyyy', label: m.dateFormatDdmmyyyy() },
+		{ value: 'mmddyyyy', label: m.dateFormatMmddyyyy() },
+		{ value: 'long_dmy', label: m.dateFormatLongDmy() },
+		{ value: 'long_mdy', label: m.dateFormatLongMdy() }
+	];
+
+	let dateFormat = $state(
+		(page.data.user?.preferences?.date_format as DateFormatPreference) ?? 'auto'
+	);
+
+	async function handleDateFormatChange(event: Event) {
+		const value = (event.target as HTMLSelectElement).value as DateFormatPreference;
+		const previous = dateFormat;
+		dateFormat = value;
+		try {
+			const response = await fetch('/fe-api/user-preferences', {
+				method: 'PATCH',
+				body: JSON.stringify({ date_format: value })
+			});
+			if (!response.ok) {
+				dateFormat = previous;
+				return;
+			}
+			await invalidateAll();
+		} catch {
+			dateFormat = previous;
+		}
+	}
+
+	const themeOptions: { value: ThemeMode; label: string }[] = [
+		{ value: 'light', label: m.themeLight() },
+		{ value: 'dark', label: m.themeDark() },
+		{ value: 'system', label: m.themeSystem() }
+	];
+
+	let theme = $state((page.data.user?.preferences?.ui?.theme as ThemeMode) ?? 'system');
+
+	// setTheme applies the theme immediately and persists it to the backend (ui.theme).
+	function handleThemeChange(event: Event) {
+		theme = (event.target as HTMLSelectElement).value as ThemeMode;
+		setTheme(theme);
+	}
 	function modalPATCreateForm(): void {
 		const modalComponent: ModalComponent = {
 			ref: CreatePatModal,
@@ -176,20 +230,23 @@
 		<Tabs.Trigger value="security"
 			><i class="fa-solid fa-shield-halved mr-2"></i>{m.securitySettings()}</Tabs.Trigger
 		>
+		<Tabs.Trigger value="preferences"
+			><i class="fa-solid fa-sliders mr-2"></i>{m.preferencesSettings()}</Tabs.Trigger
+		>
 		<Tabs.Indicator />
 	</Tabs.List>
 	<Tabs.Content value="security">
 		<div class="p-4 flex flex-col space-y-4">
 			<div class="flex flex-col">
 				<h3 class="h3 font-medium">{m.securitySettings()}</h3>
-				<p class="text-sm text-surface-800">{m.securitySettingsDescription()}</p>
+				<p class="text-sm text-surface-800-200">{m.securitySettingsDescription()}</p>
 			</div>
 			<hr />
 			<div class="flow-root">
-				<dl class="-my-3 divide-y divide-surface-100 text-sm">
+				<dl class="-my-3 divide-y divide-surface-100-900 text-sm">
 					<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
 						<dt class="font-medium">{m.multiFactorAuthentication()}</dt>
-						<dd class="text-surface-900 sm:col-span-2">
+						<dd class="text-surface-900-100 sm:col-span-2">
 							<div class="card p-4 bg-inherit w-fit flex flex-col space-y-3">
 								<div class="flex flex-col space-y-2">
 									<span class="flex flex-row justify-between text-xl">
@@ -202,7 +259,7 @@
 										<h6 class="h6 base-font-color">{m.authenticatorApp()}</h6>
 										<p class="badge h-fit preset-tonal-secondary">{m.recommended()}</p>
 									</span>
-									<p class="text-sm text-surface-800 max-w-[50ch]">
+									<p class="text-sm text-surface-800-200 max-w-[50ch]">
 										{m.authenticatorAppDescription()}
 									</p>
 								</div>
@@ -229,10 +286,10 @@
 						</dd>
 					</div>
 				</dl>
-				<dl class="-my-3 divide-y divide-surface-100 text-sm">
+				<dl class="-my-3 divide-y divide-surface-100-900 text-sm">
 					<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
 						<dt class="font-medium">{m.securityKeys()}</dt>
-						<dd class="text-surface-900 sm:col-span-2">
+						<dd class="text-surface-900-100 sm:col-span-2">
 							<div class="card p-4 bg-inherit w-fit flex flex-col space-y-3">
 								<div class="flex flex-col space-y-2">
 									<span class="flex flex-row justify-between text-xl">
@@ -244,7 +301,7 @@
 									<span class="flex flex-row space-x-2">
 										<h6 class="h6 base-font-color">{m.securityKeys()}</h6>
 									</span>
-									<p class="text-sm text-surface-800 max-w-[50ch]">
+									<p class="text-sm text-surface-800-200 max-w-[50ch]">
 										{m.securityKeyDescription()}
 									</p>
 								</div>
@@ -254,8 +311,8 @@
 											<li class="flex flex-row justify-between items-center card p-3 bg-inherit">
 												<span class="flex flex-col">
 													<p class="font-medium">{credential.name}</p>
-													<p class="text-xs text-surface-600">
-														{new Date(credential.created_at * 1000).toLocaleDateString(getLocale())}
+													<p class="text-xs text-surface-600-400">
+														{formatDate(new Date(credential.created_at * 1000), false, getLocale())}
 													</p>
 												</span>
 												<button
@@ -269,7 +326,7 @@
 										{/each}
 									</ul>
 								{:else}
-									<p class="text-sm text-surface-600">{m.noSecurityKeysRegistered()}</p>
+									<p class="text-sm text-surface-600-400">{m.noSecurityKeysRegistered()}</p>
 								{/if}
 								<div class="flex flex-wrap gap-2">
 									{#if data.webauthnCreationOptions}
@@ -286,10 +343,10 @@
 					</div>
 				</dl>
 				{#if data.patAllowed}
-					<dl class="-my-3 divide-y divide-surface-100 text-sm">
+					<dl class="-my-3 divide-y divide-surface-100-900 text-sm">
 						<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
 							<dt class="font-medium">{m.personalAccessTokens()}</dt>
-							<dd class="text-surface-900 sm:col-span-2">
+							<dd class="text-surface-900-100 sm:col-span-2">
 								<div class="card p-4 bg-inherit w-fit flex flex-col space-y-3">
 									<div class="flex flex-col space-y-2">
 										<span class="flex flex-row justify-between text-xl">
@@ -301,11 +358,11 @@
 										<span class="flex flex-row space-x-2">
 											<h6 class="h6 text-token">{m.personalAccessTokens()}</h6>
 										</span>
-										<p class="text-sm text-surface-800 max-w-[65ch]">
+										<p class="text-sm text-surface-800-200 max-w-[65ch]">
 											{m.personalAccessTokensDescription()}
 										</p>
 										<div class="card p-4 preset-tonal-warning max-w-[65ch]">
-											<i class="fa-solid fa-warning mr-2 text-warning-900"></i>
+											<i class="fa-solid fa-warning mr-2 text-warning-900-5"></i>
 											{m.personalAccessTokenCreateWarning()}
 										</div>
 									</div>
@@ -319,7 +376,7 @@
 														</p>
 														<p>
 															{m.expiresOn({
-																date: new Date(pat.expiry).toLocaleDateString(getLocale())
+																date: formatDate(new Date(pat.expiry), false, getLocale())
 															})}
 														</p>
 													</span>
@@ -345,6 +402,60 @@
 						</div>
 					</dl>
 				{/if}
+			</div>
+		</div>
+	</Tabs.Content>
+	<Tabs.Content value="preferences">
+		<div class="p-4 flex flex-col space-y-4">
+			<div class="flex flex-col">
+				<h3 class="h3 font-medium">{m.preferencesSettings()}</h3>
+				<p class="text-sm text-surface-800-200">{m.preferencesSettingsDescription()}</p>
+			</div>
+			<hr />
+			<div class="flow-root">
+				<dl class="-my-3 divide-y divide-surface-100-900 text-sm">
+					<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+						<dt class="font-medium">{m.theme()}</dt>
+						<dd class="text-surface-900-100 sm:col-span-2">
+							<div class="flex flex-col space-y-2 max-w-[40ch]">
+								<p class="text-sm text-surface-800-200">{m.themeDescription()}</p>
+								<select
+									class="select"
+									data-testid="theme-select"
+									value={theme}
+									onchange={handleThemeChange}
+								>
+									{#each themeOptions as option}
+										<option value={option.value}>{option.label}</option>
+									{/each}
+								</select>
+							</div>
+						</dd>
+					</div>
+				</dl>
+				<dl class="-my-3 divide-y divide-surface-100-900 text-sm">
+					<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+						<dt class="font-medium">{m.dateFormat()}</dt>
+						<dd class="text-surface-900-100 sm:col-span-2">
+							<div class="flex flex-col space-y-2 max-w-[40ch]">
+								<p class="text-sm text-surface-800-200">{m.dateFormatDescription()}</p>
+								<select
+									class="select"
+									data-testid="date-format-select"
+									value={dateFormat}
+									onchange={handleDateFormatChange}
+								>
+									{#each dateFormatOptions as option}
+										<option value={option.value}>{option.label}</option>
+									{/each}
+								</select>
+								<p class="text-xs text-surface-600-400">
+									{sampleDateForPreference(dateFormat, getLocale())}
+								</p>
+							</div>
+						</dd>
+					</div>
+				</dl>
 			</div>
 		</div>
 	</Tabs.Content>

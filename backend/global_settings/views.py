@@ -4,18 +4,22 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
+from core.permissions import IsAdministrator
 from core.serializers import SerializerFactory
 from iam.models import Folder, Permission, RoleAssignment, User
 from iam.sso.models import SSOSettings
 from integrations.models import IntegrationProvider
 from core.serializers import SerializerFactory
 from django.conf import settings
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
 from .serializers import (
     GlobalSettingsSerializer,
     GeneralSettingsSerializer,
     FeatureFlagsSerializer,
     VulnerabilitySlaSerializer,
     SecIntelFeedsSerializer,
+    InfraConfigSerializer,
 )
 from django.db import transaction
 from .models import GlobalSettings
@@ -107,6 +111,20 @@ class FeatureFlagsViewSet(viewsets.ModelViewSet):
         obj.save(update_fields=["is_published"])
         self.check_object_permissions(self.request, obj)
         return obj
+
+    @action(detail=True, methods=["get"])
+    def defaults(self, request, pk=None):
+        """Expose each flag's serializer default so the frontend "Reset to
+        defaults" never drifts from the backend. Only exposed flags are
+        returned (get_fields already drops gated ones like chat_mode)."""
+        serializer = self.get_serializer_class()()
+        flag_defaults = {
+            name: field.default
+            for name, field in serializer.fields.items()
+            if name not in serializer.Meta.read_only_fields
+            and getattr(field, "default", serializers.empty) is not serializers.empty
+        }
+        return Response(flag_defaults)
 
 
 class GeneralSettingsViewSet(viewsets.ModelViewSet):
@@ -287,6 +305,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
     @action(detail=True, name="Get security objective scales")
     def security_objective_scale(self, request):
         choices = {
+            "1-3": "1-3",
             "1-4": "1-4",
             "1-5": "1-5",
             "0-3": "0-3",
@@ -378,6 +397,52 @@ class SecIntelFeedsViewSet(viewsets.ModelViewSet):
         obj.save(update_fields=["is_published"])
         self.check_object_permissions(self.request, obj)
         return obj
+
+
+class InfraConfigViewSet(viewsets.ModelViewSet):
+    """Singleton GET/PUT for infrastructure configuration settings (stored as a
+    JSON object). Restricted to administrators."""
+
+    model = GlobalSettings
+    serializer_class = InfraConfigSerializer
+    queryset = GlobalSettings.objects.filter(name="infra-config")
+    permission_classes = [IsAuthenticated, IsAdministrator]
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    def get_object(self):
+        obj, _ = self.model.objects.get_or_create(name="infra-config")
+        obj.is_published = True
+        obj.save(update_fields=["is_published"])
+        self.check_object_permissions(self.request, obj)
+        return obj
+
+
+@require_GET
+def infra_config_view(request):
+    """Unauthenticated endpoint exposing infrastructure configuration settings
+    for the infrastructure layer to consume.
+
+    Mirrors the /metrics endpoint contract: it must never be reachable from
+    the public internet — keep it behind the reverse proxy / restricted to
+    trusted networks. Only registered when ENABLE_INFRA_CONFIG_MANAGEMENT is set.
+    """
+    obj = GlobalSettings.objects.filter(name="infra-config").first()
+    value = obj.value if obj and isinstance(obj.value, dict) else {}
+    allowed_ips = value.get("allowed_ips", [])
+    if not isinstance(allowed_ips, list):
+        allowed_ips = []
+    return JsonResponse({"allowed_ips": allowed_ips})
 
 
 @api_view(["GET"])

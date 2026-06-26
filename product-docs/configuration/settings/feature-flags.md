@@ -34,6 +34,7 @@ Flags affect what's visible in the sidebar, what appears in CRUD pages, and whic
 - **compliance** — compliance assessments (audits). Effectively master switch for the entire compliance pillar.
 - **auditee_mode** — the read-only auditee surface for external assessors. _Default off._
 - **campaigns** — bulk-orchestration of audits across many perimeters. _PRO._
+- **audit_tree_inheritance** — combine an audit's results with parent-domain audits on the same framework. Reveals the **Domain inheritance strategy** [general setting](general.md#domain-tree-audit-inheritance) and the **Combined view** on the [Framework report](../../features/framework-report.md#combined-view-domain-tree-inheritance). _Default off._
 
 ## Resilience
 
@@ -63,8 +64,11 @@ Flags affect what's visible in the sidebar, what appears in CRUD pages, and whic
 ## Integrations and automation
 
 - **outgoing_webhooks** — outgoing webhooks. _Default off._
+- **audit_log_forwarding** — [forward the audit log](../../integrations/audit-log-forwarding.md) to an external SIEM over HTTP or Kafka. _PRO. Default off._
+- **idp_groups** — [SCIM 2.0 provisioning and IdP group mapping](../sso/scim.md): the IdP groups menu, the SCIM settings tab, and the IdP groups column on the users table. _PRO._
 - **chat_mode** — the in-product chat assistant. _Default off; only visible when `ENABLE_CHAT` is set on the instance._
 - **terminologies** — organisation-specific label overrides.
+- **custom_fields** — org-defined typed fields on objects (Projects, Assets, Applied controls); see [Custom fields](../../features/custom-fields.md). _PRO. Default off._
 
 ## Project management
 
@@ -74,6 +78,7 @@ Flags affect what's visible in the sidebar, what appears in CRUD pages, and whic
 
 - **journeys** — preset journeys for bootstrapping new organisations or domains.
 - **comments** — comments on objects.
+- **object_audit_trail** — per-object [audit trail](../../features/audit-log.md#per-object-audit-trail) button on detail pages, gated by the **Can view object audit trails** permission. _PRO._
 - **focus_mode** — UI mode that filters the entire workspace to a single domain. _PRO. Default off._
 
 ## Experimental

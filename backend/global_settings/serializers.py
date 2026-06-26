@@ -1,9 +1,39 @@
+import ipaddress
 import uuid
 
 from django.conf import settings as django_settings
+from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 
+from urllib.parse import urlparse
+
+from core.net_safety import (
+    BlockedRequestError,
+    DnsLookupError,
+    assert_public_url_unless_dev,
+)
 from .models import GlobalSettings
+
+
+def canonical_ip_or_cidr(value: str) -> str:
+    """Return the canonical string form of an IP address or CIDR network.
+
+    Host-bit CIDRs are normalised to their network (e.g. ``10.0.0.7/24`` ->
+    ``10.0.0.0/24``) and IPv6 is lower-cased/compressed, so the value published
+    to downstream consumers is stable and equivalent ranges dedupe correctly.
+    Raises ``DjangoValidationError`` on invalid input.
+    """
+    candidate = (value or "").strip()
+    try:
+        return str(ipaddress.ip_address(candidate))
+    except ValueError:
+        pass
+    try:
+        return str(ipaddress.ip_network(candidate, strict=False))
+    except ValueError:
+        raise DjangoValidationError(
+            f"'{value}' is not a valid IP address or CIDR range."
+        )
 
 
 def validate_default_dashboard_value(value):
@@ -20,7 +50,7 @@ def validate_default_dashboard_value(value):
         return None
     try:
         uuid.UUID(str(value))
-    except (ValueError, TypeError):
+    except ValueError, TypeError:
         raise serializers.ValidationError(
             {"default_custom_analytics_dashboard": "Must be a valid UUID."}
         )
@@ -63,7 +93,13 @@ GENERAL_SETTINGS_KEYS = [
     "chat_temperature_enabled",
     "chat_temperature",
     "default_custom_analytics_dashboard",
+    "audit_tree_aggregation_strategy",
 ]
+
+LLM_URL_DEFAULTS = {
+    "ollama_base_url": "http://localhost:11434",
+    "openai_api_base": "http://localhost:1234/v1",
+}
 
 
 class GlobalSettingsSerializer(serializers.ModelSerializer):
@@ -119,6 +155,32 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
         for key, value in validated_data["value"].items():
             if key not in GENERAL_SETTINGS_KEYS:
                 raise serializers.ValidationError(f"Invalid key: {key}")
+            if key in ("ollama_base_url", "openai_api_base") and value:
+                if not isinstance(value, str):
+                    raise serializers.ValidationError({key: "URL must be a string."})
+                parsed = urlparse(value)
+                if parsed.scheme not in ("http", "https"):
+                    raise serializers.ValidationError(
+                        {key: "URL must use http or https scheme."}
+                    )
+                if "#" in value:
+                    raise serializers.ValidationError(
+                        {key: "URL must not contain a fragment (#)."}
+                    )
+                stored = (instance.value or {}).get(key)
+                if value != stored and value != LLM_URL_DEFAULTS.get(key):
+                    try:
+                        assert_public_url_unless_dev(
+                            value, allowed_schemes=("http", "https")
+                        )
+                    except BlockedRequestError:
+                        raise serializers.ValidationError(
+                            {key: "URL must point to a public address."}
+                        )
+                    except DnsLookupError:
+                        raise serializers.ValidationError(
+                            {key: "URL hostname could not be resolved."}
+                        )
             # Validate builtin_metrics_retention_days minimum value
             if key == "builtin_metrics_retention_days":
                 if not isinstance(value, int) or value < 1:
@@ -143,7 +205,7 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
             if key == "chat_temperature":
                 try:
                     temp = float(value)
-                except (TypeError, ValueError):
+                except TypeError, ValueError:
                     raise serializers.ValidationError(
                         {"chat_temperature": "Must be a number."}
                     )
@@ -215,7 +277,7 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                                     * Decimal(str(conversion_rate))
                                 )
 
-                    control.save(update_fields=["cost"])
+                    control.save(update_fields=["cost"], skip_sync=True)
                     updated_count += 1
 
         print(
@@ -265,6 +327,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     compliance = serializers.BooleanField(
         source="value.compliance", required=False, default=True
     )
+    audit_tree_inheritance = serializers.BooleanField(
+        source="value.audit_tree_inheritance", required=False, default=False
+    )
     tprm = serializers.BooleanField(source="value.tprm", required=False, default=True)
     privacy = serializers.BooleanField(
         source="value.privacy", required=False, default=True
@@ -303,6 +368,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     outgoing_webhooks = serializers.BooleanField(
         source="value.outgoing_webhooks", required=False, default=False
     )
+    idp_groups = serializers.BooleanField(
+        source="value.idp_groups", required=False, default=False
+    )
     metrology = serializers.BooleanField(
         source="value.metrology", required=False, default=True
     )
@@ -320,6 +388,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     )
     chat_mode = serializers.BooleanField(
         source="value.chat_mode", required=False, default=False
+    )
+    infra_config_management = serializers.BooleanField(
+        source="value.infra_config_management", required=False, default=True
     )
     auditee_mode = serializers.BooleanField(
         source="value.auditee_mode", required=False, default=True
@@ -360,6 +431,8 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
 
         if not getattr(settings, "ENABLE_CHAT", False):
             fields.pop("chat_mode", None)
+        if not getattr(settings, "ENABLE_INFRA_CONFIG_MANAGEMENT", False):
+            fields.pop("infra_config_management", None)
         return fields
 
     def update(self, instance, validated_data):
@@ -369,6 +442,7 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         """
         current_value_dict = instance.value if isinstance(instance.value, dict) else {}
         value_changed = False
+        idp_groups_changed = False
         new_value_dict = validated_data.get("value", {})
 
         for field_name, field_instance in self.fields.items():
@@ -390,10 +464,23 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
                 if current_value_dict.get(source_key) != new_flag_value:
                     current_value_dict[source_key] = new_flag_value
                     value_changed = True
+                    if source_key == "idp_groups":
+                        idp_groups_changed = True
 
         if value_changed:
             instance.value = current_value_dict
             instance.save(update_fields=["value"])
+
+        if idp_groups_changed:
+            # The groups cache bakes in the idp_groups closure at build time, so
+            # toggling the flag must rebuild it for the change to take effect.
+            from iam.cache_builders import (
+                invalidate_assignments_cache,
+                invalidate_groups_cache,
+            )
+
+            invalidate_groups_cache()
+            invalidate_assignments_cache()
 
         return instance
 
@@ -459,6 +546,90 @@ class VulnerabilitySlaSerializer(serializers.ModelSerializer):
                         current_value_dict.pop(source_key, None)
                     else:
                         current_value_dict[source_key] = new_flag_value
+                    value_changed = True
+
+        if value_changed:
+            instance.value = current_value_dict
+            instance.save(update_fields=["value"])
+
+        return instance
+
+
+MAX_ALLOWED_IPS = 50
+
+
+class InfraConfigSerializer(serializers.ModelSerializer):
+    """
+    Serializer for infrastructure configuration settings, stored as a JSON object
+    in the 'value' field of a GlobalSettings instance (singleton). Currently holds
+    the list of IPs/CIDRs allowed to reach the backend API; new keys can be added
+    over time without a schema change.
+    """
+
+    allowed_ips = serializers.ListField(
+        child=serializers.CharField(),
+        source="value.allowed_ips",
+        required=False,
+        default=list,
+    )
+
+    class Meta:
+        model = GlobalSettings
+        exclude = [
+            "id",
+            "created_at",
+            "updated_at",
+            "name",
+            "value",
+            "folder",
+            "is_published",
+        ]
+        read_only_fields = ["name"]
+
+    def validate_allowed_ips(self, value):
+        cleaned = []
+        errors = []
+        seen = set()
+        for raw in value:
+            ip = (raw or "").strip()
+            if not ip:
+                continue
+            try:
+                canonical = canonical_ip_or_cidr(ip)
+            except DjangoValidationError as exc:
+                errors.extend(exc.messages)
+                continue
+            # Dedupe on the canonical form so equivalent ranges (e.g.
+            # 10.0.0.0/24 and 10.0.0.7/24) collapse to a single entry.
+            if canonical in seen:
+                continue
+            seen.add(canonical)
+            cleaned.append(canonical)
+        if errors:
+            raise serializers.ValidationError(errors)
+        if len(cleaned) > MAX_ALLOWED_IPS:
+            raise serializers.ValidationError(
+                f"You can add at most {MAX_ALLOWED_IPS} IP addresses."
+            )
+        return cleaned
+
+    def update(self, instance, validated_data):
+        current_value_dict = instance.value if isinstance(instance.value, dict) else {}
+        new_value_dict = validated_data.get("value", {})
+        value_changed = False
+
+        for field_name, field_instance in self.fields.items():
+            if field_name in self.Meta.read_only_fields:
+                continue
+            if not hasattr(
+                field_instance, "source"
+            ) or not field_instance.source.startswith("value."):
+                continue
+            if field_name in new_value_dict:
+                source_key = field_instance.source.split(".")[-1]
+                new_val = new_value_dict[field_name]
+                if current_value_dict.get(source_key) != new_val:
+                    current_value_dict[source_key] = new_val
                     value_changed = True
 
         if value_changed:

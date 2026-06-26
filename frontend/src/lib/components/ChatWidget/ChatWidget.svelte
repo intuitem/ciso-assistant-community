@@ -4,6 +4,8 @@
 	import { page } from '$app/stores';
 	import { browser } from '$app/environment';
 	import { m } from '$paraglide/messages';
+	import { getLocale } from '$paraglide/runtime';
+	import { formatDate } from '$lib/utils/datetime';
 	import type { ChatMessage } from './types';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import {
@@ -207,7 +209,9 @@
 				{/if}
 			{/if}
 			{#if message.content}
-				<div class="rounded-2xl rounded-tl-sm bg-gray-100 px-3.5 py-2.5 text-sm text-gray-800">
+				<div
+					class="rounded-2xl rounded-tl-sm bg-surface-100-900 px-3.5 py-2.5 text-sm text-surface-800-200"
+				>
 					<MarkdownRenderer content={message.content} />
 				</div>
 			{/if}
@@ -219,11 +223,11 @@
 			{/if}
 			{#if message.id !== 'welcome'}
 				<div class="mt-1 flex items-center gap-1 px-1">
-					<span class="text-[10px] text-gray-400">{formatTime(message.timestamp)}</span>
+					<span class="text-[10px] text-surface-500">{formatTime(message.timestamp)}</span>
 					{#if message.content}
 						<button
 							onclick={() => handleCopy(message.content, message.id)}
-							class="ml-1 text-gray-300 opacity-0 transition-opacity hover:text-gray-500 group-hover:opacity-100"
+							class="ml-1 text-gray-300 opacity-0 transition-opacity hover:text-surface-600-400 group-hover:opacity-100"
 							title="Copy"
 						>
 							<i
@@ -242,21 +246,21 @@
 {#snippet userMessage(message: ChatMessage)}
 	<div class="group flex flex-row-reverse gap-2.5">
 		<div
-			class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-600 text-white"
+			class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-600 dark:bg-violet-700 text-white"
 		>
 			<i class="fa-solid fa-user text-xs"></i>
 		</div>
 		<div class="flex max-w-[80%] flex-col items-end">
 			<div
-				class="whitespace-pre-wrap rounded-2xl rounded-tr-sm bg-violet-600 px-3.5 py-2.5 text-sm text-white"
+				class="whitespace-pre-wrap rounded-2xl rounded-tr-sm bg-violet-600 dark:bg-violet-700 px-3.5 py-2.5 text-sm text-white"
 			>
 				{message.content}
 			</div>
 			<div class="mt-1 flex items-center gap-1 px-1">
-				<span class="text-[10px] text-gray-400">{formatTime(message.timestamp)}</span>
+				<span class="text-[10px] text-surface-500">{formatTime(message.timestamp)}</span>
 				<button
 					onclick={() => handleCopy(message.content, message.id)}
-					class="ml-1 text-gray-300 opacity-0 transition-opacity hover:text-gray-500 group-hover:opacity-100"
+					class="ml-1 text-gray-300 opacity-0 transition-opacity hover:text-surface-600-400 group-hover:opacity-100"
 					title="Copy"
 				>
 					<i
@@ -267,7 +271,7 @@
 				</button>
 				<button
 					onclick={retryLastMessage}
-					class="text-gray-300 opacity-0 transition-opacity hover:text-gray-500 group-hover:opacity-100"
+					class="text-gray-300 opacity-0 transition-opacity hover:text-surface-600-400 group-hover:opacity-100"
 					title={m.chatRetry()}
 				>
 					<i class="fa-solid fa-rotate-right text-[10px]"></i>
@@ -280,9 +284,9 @@
 {#snippet pendingActionCard(message: ChatMessage)}
 	{@const pa = message.pendingAction!}
 	{@const selectedCount = pa.selectedIndices?.size ?? pa.items.length}
-	<div class="mt-2 rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
+	<div class="mt-2 rounded-xl border border-surface-200-800 bg-surface-50-950 p-3 shadow-sm">
 		<div class="mb-2 flex items-center justify-between">
-			<div class="flex items-center gap-2 text-xs font-medium text-gray-600">
+			<div class="flex items-center gap-2 text-xs font-medium text-surface-600-400">
 				{#if pa.action === 'attach'}
 					<i class="fa-solid fa-link text-violet-500"></i>
 					{m.chatAttach()}
@@ -297,7 +301,7 @@
 		<!-- Target folder indicator/selector -->
 		{#if pa.action === 'create' && pa.status === 'pending'}
 			<div class="mb-2 flex items-center gap-2 text-[11px]">
-				<i class="fa-solid fa-folder text-gray-400"></i>
+				<i class="fa-solid fa-folder text-surface-500"></i>
 				{#if pa.availableFolders && pa.availableFolders.length > 1}
 					<select
 						value={pa.folderId}
@@ -306,7 +310,7 @@
 							const selected = pa.availableFolders?.find((f) => f.id === target.value);
 							if (selected) changeActionFolder(message.id, selected.id, selected.name);
 						}}
-						class="rounded border border-gray-200 bg-gray-50 px-2 py-0.5 text-[11px] text-gray-600
+						class="rounded border border-surface-200-800 bg-surface-50-950 px-2 py-0.5 text-[11px] text-surface-600-400
 							focus:border-violet-400 focus:ring-1 focus:ring-violet-100 outline-none"
 					>
 						{#each pa.availableFolders as folder}
@@ -314,11 +318,11 @@
 						{/each}
 					</select>
 				{:else if pa.folderName}
-					<span class="text-gray-500">{pa.folderName}</span>
+					<span class="text-surface-600-400">{pa.folderName}</span>
 				{/if}
 			</div>
 		{:else if pa.folderName}
-			<div class="mb-2 flex items-center gap-2 text-[11px] text-gray-400">
+			<div class="mb-2 flex items-center gap-2 text-[11px] text-surface-500">
 				<i class="fa-solid fa-folder"></i>
 				<span>{pa.folderName}</span>
 			</div>
@@ -335,12 +339,12 @@
 		</div>
 		<ul class="mb-2 space-y-1">
 			{#each pa.items as item, i}
-				<li class="flex items-center gap-2 text-xs text-gray-700">
+				<li class="flex items-center gap-2 text-xs text-surface-700-300">
 					{#if pa.status === 'created'}
 						{#if pa.selectedIndices?.has(i)}<i class="fa-solid fa-check text-green-500 text-[10px]"
 							></i>
 						{:else}<i class="fa-solid fa-minus text-gray-300 text-[10px]"></i>{/if}
-						<span class:text-gray-400={!pa.selectedIndices?.has(i)}>{item.name}</span>
+						<span class:text-surface-500={!pa.selectedIndices?.has(i)}>{item.name}</span>
 					{:else if pa.status === 'error' && pa.results}
 						{@const resultIdx = [...(pa.selectedIndices ?? [])].indexOf(i)}
 						{#if resultIdx >= 0 && pa.results[resultIdx]?.error}
@@ -352,27 +356,27 @@
 							<span>{item.name}</span>
 						{:else}
 							<i class="fa-solid fa-minus text-gray-300 text-[10px]"></i>
-							<span class="text-gray-400">{item.name}</span>
+							<span class="text-surface-500">{item.name}</span>
 						{/if}
 					{:else if pa.status === 'creating'}
 						{#if pa.selectedIndices?.has(i)}<i
 								class="fa-solid fa-spinner fa-spin text-violet-400 text-[10px]"
 							></i>
 						{:else}<i class="fa-solid fa-minus text-gray-300 text-[10px]"></i>{/if}
-						<span class:text-gray-400={!pa.selectedIndices?.has(i)}>{item.name}</span>
+						<span class:text-surface-500={!pa.selectedIndices?.has(i)}>{item.name}</span>
 					{:else if pa.status === 'pending'}
 						<label class="flex items-center gap-2 cursor-pointer">
 							<input
 								type="checkbox"
 								checked={pa.selectedIndices?.has(i) ?? true}
 								onchange={() => toggleItemSelection(message.id, i)}
-								class="h-3.5 w-3.5 rounded border-gray-300 text-violet-600 focus:ring-violet-500 cursor-pointer"
+								class="h-3.5 w-3.5 rounded border-surface-300-700 text-violet-600 focus:ring-violet-500 cursor-pointer"
 							/>
 							<span>{item.name}</span>
 						</label>
 					{:else}
 						<i class="fa-solid fa-minus text-gray-300 text-[10px]"></i>
-						<span class="text-gray-400">{item.name}</span>
+						<span class="text-surface-500">{item.name}</span>
 					{/if}
 				</li>
 			{/each}
@@ -382,7 +386,7 @@
 				<button
 					onclick={() => confirmAction(message.id)}
 					disabled={selectedCount === 0}
-					class="rounded-lg bg-violet-600 px-3 py-1.5 text-[11px] font-medium text-white transition-colors hover:bg-violet-700 disabled:opacity-40"
+					class="rounded-lg bg-violet-600 dark:bg-violet-700 px-3 py-1.5 text-[11px] font-medium text-white transition-colors hover:bg-violet-700 disabled:opacity-40"
 				>
 					<i class="fa-solid fa-check mr-1"></i>{m.chatConfirm()}{selectedCount < pa.items.length
 						? ` (${selectedCount})`
@@ -390,13 +394,13 @@
 				</button>
 				<button
 					onclick={() => rejectAction(message.id)}
-					class="rounded-lg bg-gray-100 px-3 py-1.5 text-[11px] font-medium text-gray-600 transition-colors hover:bg-gray-200"
+					class="rounded-lg bg-surface-100-900 px-3 py-1.5 text-[11px] font-medium text-surface-600-400 transition-colors hover:bg-surface-200-800"
 				>
 					{m.chatCancel()}
 				</button>
 			</div>
 		{:else if pa.status === 'rejected'}
-			<div class="text-[11px] text-gray-400 italic">{m.chatCancelled()}</div>
+			<div class="text-[11px] text-surface-500 italic">{m.chatCancelled()}</div>
 		{:else if pa.status === 'created'}
 			<div class="text-[11px] text-green-600 font-medium">
 				<i class="fa-solid fa-check-circle mr-1"></i>
@@ -409,8 +413,8 @@
 
 {#snippet pendingChoiceCard(message: ChatMessage)}
 	{@const pc = message.pendingChoice!}
-	<div class="mt-2 rounded-xl border border-gray-200 bg-white p-2.5 shadow-sm">
-		<div class="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-gray-600">
+	<div class="mt-2 rounded-xl border border-surface-200-800 bg-surface-50-950 p-2.5 shadow-sm">
+		<div class="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-surface-600-400">
 			<i class="fa-solid fa-hand-pointer text-violet-500"></i>
 			{pc.label}
 		</div>
@@ -419,7 +423,7 @@
 				{#if pc.status === 'selected' || pc.status === 'done'}
 					<div
 						class="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs
-						{pc.selectedId === item.id ? 'bg-violet-50 text-violet-900' : 'text-gray-400'}"
+						{pc.selectedId === item.id ? 'bg-violet-50 text-violet-900' : 'text-surface-500'}"
 					>
 						{#if pc.selectedId === item.id}
 							{#if pc.status === 'selected'}
@@ -433,13 +437,13 @@
 				{:else}
 					<button
 						onclick={() => selectChoice(message.id, item.id)}
-						class="w-full flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-left text-gray-700 hover:bg-violet-50 hover:text-violet-900 transition-colors cursor-pointer"
+						class="w-full flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-left text-surface-700-300 hover:bg-violet-50 hover:text-violet-900 transition-colors cursor-pointer"
 					>
-						<i class="fa-regular fa-circle text-gray-400 text-[10px]"></i>
+						<i class="fa-regular fa-circle text-surface-500 text-[10px]"></i>
 						<div>
 							<span>{item.name}</span>
 							{#if item.description}
-								<span class="block text-[10px] text-gray-400">{item.description}</span>
+								<span class="block text-[10px] text-surface-500">{item.description}</span>
 							{/if}
 						</div>
 					</button>
@@ -457,7 +461,7 @@
 			>
 				<i class="fa-solid fa-robot text-xs"></i>
 			</div>
-			<div class="flex items-center gap-1 rounded-2xl bg-gray-100 px-4 py-3">
+			<div class="flex items-center gap-1 rounded-2xl bg-surface-100-900 px-4 py-3">
 				<span class="h-2 w-2 animate-bounce rounded-full bg-gray-400" style="animation-delay: 0ms"
 				></span>
 				<span class="h-2 w-2 animate-bounce rounded-full bg-gray-400" style="animation-delay: 150ms"
@@ -475,7 +479,7 @@
 			<button
 				transition:fly={{ y: 10, duration: 150 }}
 				onclick={scrollToBottom}
-				class="flex items-center gap-1.5 rounded-full bg-violet-600 px-3 py-1.5 text-xs text-white shadow-lg transition-colors hover:bg-violet-700"
+				class="flex items-center gap-1.5 rounded-full bg-violet-600 dark:bg-violet-700 px-3 py-1.5 text-xs text-white shadow-lg transition-colors hover:bg-violet-700"
 			>
 				<i class="fa-solid fa-arrow-down text-[10px]"></i>
 				{m.chatScrollToBottom()}
@@ -485,7 +489,7 @@
 {/snippet}
 
 {#snippet chatInputArea(compact: boolean)}
-	<div class="border-t border-gray-200 {compact ? 'px-4 py-3' : 'px-6 py-4'}">
+	<div class="border-t border-surface-200-800 {compact ? 'px-4 py-3' : 'px-6 py-4'}">
 		{#if showQuickActions && hasUserMessages}
 			<div class="mb-2 flex flex-wrap gap-1.5">
 				{#each getSuggestedActions().slice(0, compact ? 4 : undefined) as action}
@@ -510,7 +514,7 @@
 					class="flex {compact
 						? 'h-10 w-10'
 						: 'h-11 w-11'} shrink-0 items-center justify-center rounded-xl
-						text-gray-400 transition-colors hover:bg-gray-100 hover:text-violet-600
+						text-surface-500 transition-colors hover:bg-surface-100-900 hover:text-violet-600
 						{showQuickActions ? 'bg-violet-50 text-violet-600' : ''}"
 					aria-label={m.chatQuickActions()}
 					title={m.chatQuickActions()}
@@ -526,10 +530,10 @@
 				placeholder={m.chatPlaceholder()}
 				disabled={isStreaming}
 				rows="1"
-				class="flex-1 resize-none rounded-xl border border-gray-300 bg-gray-50 {compact
+				class="flex-1 resize-none rounded-xl border border-surface-300-700 bg-surface-50-950 {compact
 					? 'px-3.5 py-2.5'
 					: 'px-4 py-3'} text-sm
-					outline-none transition-colors placeholder:text-gray-400
+					outline-none transition-colors placeholder:text-surface-500
 					focus:border-violet-400 focus:ring-2 focus:ring-violet-100 disabled:opacity-50"
 			></textarea>
 			{#if isStreaming}
@@ -537,7 +541,7 @@
 					onclick={stopStreaming}
 					class="flex {compact
 						? 'h-10 w-10'
-						: 'h-11 w-11'} shrink-0 items-center justify-center rounded-xl bg-red-500 text-white transition-colors hover:bg-red-600"
+						: 'h-11 w-11'} shrink-0 items-center justify-center rounded-xl bg-red-500 dark:bg-red-600 text-white transition-colors hover:bg-red-600"
 					aria-label="Stop"
 				>
 					<i class="fa-solid fa-stop text-sm"></i>
@@ -548,13 +552,13 @@
 					disabled={!inputText.trim()}
 					class="flex {compact
 						? 'h-10 w-10'
-						: 'h-11 w-11'} shrink-0 items-center justify-center rounded-xl bg-violet-600 text-white transition-colors hover:bg-violet-700 disabled:opacity-40"
+						: 'h-11 w-11'} shrink-0 items-center justify-center rounded-xl bg-violet-600 dark:bg-violet-700 text-white transition-colors hover:bg-violet-700 disabled:opacity-40"
 				>
 					<i class="fa-solid fa-paper-plane text-sm"></i>
 				</button>
 			{/if}
 		</div>
-		<p class="mt-1.5 text-center text-[10px] text-gray-400">{m.chatDisclaimer()}</p>
+		<p class="mt-1.5 text-center text-[10px] text-surface-500">{m.chatDisclaimer()}</p>
 	</div>
 {/snippet}
 
@@ -588,7 +592,7 @@
 	<div
 		transition:fly={{ y: 20, duration: 200 }}
 		class="fixed bottom-6 right-6 z-950 flex h-[520px] w-[400px] flex-col overflow-hidden
-			rounded-2xl bg-white shadow-2xl"
+			rounded-2xl bg-surface-50-950 shadow-2xl"
 	>
 		<!-- Header -->
 		<div
@@ -684,14 +688,14 @@
 			role="dialog"
 			aria-modal="true"
 			aria-label="CISO Assistant Chat"
-			class="flex h-[90vh] w-full max-w-6xl overflow-hidden rounded-2xl bg-white shadow-2xl"
+			class="flex h-[90vh] w-full max-w-6xl overflow-hidden rounded-2xl bg-surface-50-950 shadow-2xl"
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.stopPropagation()}
 		>
 			<!-- Session history sidebar -->
-			<div class="w-64 shrink-0 flex flex-col border-r border-gray-200 bg-gray-50">
-				<div class="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-					<span class="text-xs font-semibold text-gray-500 uppercase tracking-wider"
+			<div class="w-64 shrink-0 flex flex-col border-r border-surface-200-800 bg-surface-50-950">
+				<div class="flex items-center justify-between px-4 py-3 border-b border-surface-200-800">
+					<span class="text-xs font-semibold text-surface-600-400 uppercase tracking-wider"
 						>{m.timeline()}</span
 					>
 					<button
@@ -699,8 +703,8 @@
 							startNewSession();
 							loadSessionHistory();
 						}}
-						class="flex h-7 w-7 items-center justify-center rounded-lg text-gray-400
-							transition-colors hover:bg-gray-200 hover:text-gray-600"
+						class="flex h-7 w-7 items-center justify-center rounded-lg text-surface-500
+							transition-colors hover:bg-surface-200-800 hover:text-surface-600-400"
 						title="New conversation"
 					>
 						<i class="fa-solid fa-plus text-xs"></i>
@@ -709,23 +713,26 @@
 				<div class="flex-1 overflow-y-auto">
 					{#if loadingHistory}
 						<div class="flex justify-center py-6">
-							<i class="fa-solid fa-spinner fa-spin text-gray-400"></i>
+							<i class="fa-solid fa-spinner fa-spin text-surface-500"></i>
 						</div>
 					{:else if sessionHistory.length === 0}
-						<div class="px-4 py-6 text-xs text-gray-400 text-center">{m.chatNoConversations()}</div>
+						<div class="px-4 py-6 text-xs text-surface-500 text-center">
+							{m.chatNoConversations()}
+						</div>
 					{:else}
 						{#each sessionHistory as session}
 							<div
-								class="group/session flex items-center border-l-2 transition-colors hover:bg-gray-100
+								class="group/session flex items-center border-l-2 transition-colors hover:bg-surface-100-900
 								{session.id === currentSessionId ? 'border-violet-500 bg-violet-50/50' : 'border-transparent'}"
 							>
 								<button
 									onclick={() => switchToSession(session.id)}
 									class="flex-1 flex flex-col gap-0.5 px-4 py-2.5 text-left min-w-0"
 								>
-									<span class="text-sm text-gray-700 truncate">{session.title}</span>
-									<span class="text-[10px] text-gray-400">
-										{new Date(session.created_at).toLocaleDateString()} · {session.message_count} msg
+									<span class="text-sm text-surface-700-300 truncate">{session.title}</span>
+									<span class="text-[10px] text-surface-500">
+										{formatDate(new Date(session.created_at), false, getLocale())} · {session.message_count}
+										msg
 									</span>
 								</button>
 								<button

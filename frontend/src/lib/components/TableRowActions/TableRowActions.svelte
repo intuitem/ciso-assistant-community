@@ -50,7 +50,7 @@
 		identifierField = 'id',
 		preventDelete = false,
 		preventEdit = false,
-		baseClass = 'space-x-2 whitespace-nowrap flex flex-row items-center text-xl text-surface-700 justify-end',
+		baseClass = 'space-x-2 whitespace-nowrap flex flex-row items-center text-xl text-surface-700-300 justify-end',
 		hasBody = false,
 		head,
 		body,
@@ -177,6 +177,7 @@
 		{#if displayDetail}
 			<Anchor
 				breadcrumbAction="push"
+				aria-label={m.view()}
 				href={detailURL}
 				class="unstyled cursor-pointer hover:text-primary-500"
 				data-testid="tablerow-detail-button"><i class="fa-solid fa-eye"></i></Anchor

@@ -97,6 +97,7 @@ from core.models import FilteringLabel
 from core.utils import get_global_currency
 from uuid import UUID
 from django.core.files.uploadedfile import UploadedFile
+from django.db.models import Q
 from django.http import HttpRequest
 from datetime import datetime
 from typing import Optional, Final, ClassVar, Mapping, Any
@@ -226,7 +227,7 @@ def _reverse_scale_value(display_val: str, scale: list) -> int | None:
         for idx, sv in enumerate(scale):
             if isinstance(sv, (int, float)) and int(sv) == numeric:
                 return idx
-    except (ValueError, TypeError):
+    except ValueError, TypeError:
         pass
 
     # Fall back to case-insensitive string comparison (e.g. FIPS-199)
@@ -306,26 +307,41 @@ def _resolve_filtering_labels(value: Any) -> list[UUID]:
     return label_ids
 
 
-def _resolve_vulnerabilities(value, folder) -> tuple[list[UUID], list[str]]:
+def _resolve_vulnerabilities(
+    value: str | None, folder: "Folder"
+) -> tuple[list[UUID], list[str]]:
     """
-    Parse pipe- or comma-separated vulnerability names and return a tuple of
-    (list of resolved Vulnerability IDs, list of names that failed to resolve).
+    Parse pipe- or comma-separated vulnerability identifiers and return a tuple of
+    (list of resolved Vulnerability IDs, list of values that failed to resolve).
+
+    Each token is matched against existing vulnerabilities in the given folder by
+    ref_id first, then by name.  If no match is found a new Vulnerability is created
+    using the token as its name.
     """
     if not value or not isinstance(value, str):
         return [], []
-    vuln_names = [name.strip() for name in re.split(r"[|,]", value) if name.strip()]
+    tokens = [t.strip() for t in re.split(r"[|,]", value) if t.strip()]
     vuln_ids: list[UUID] = []
-    failed_names: list[str] = []
-    for vuln_name in vuln_names:
+    failed_tokens: list[str] = []
+    for token in tokens:
         try:
-            vuln, _created = Vulnerability.objects.get_or_create(
-                name=vuln_name, folder=folder
+            vuln = (
+                Vulnerability.objects.filter(ref_id=token, folder=folder).first()
+                or Vulnerability.objects.filter(
+                    name__iexact=token, folder=folder
+                ).first()
             )
+            if vuln is None:
+                create_kwargs = {"name": token, "folder": folder}
+                ref_id_max = Vulnerability._meta.get_field("ref_id").max_length
+                if len(token) <= ref_id_max:
+                    create_kwargs["ref_id"] = token
+                vuln = Vulnerability.objects.create(**create_kwargs)
             vuln_ids.append(vuln.id)
         except Exception:
-            logging.exception(f"Failed to resolve vulnerability {vuln_name}")
-            failed_names.append(vuln_name)
-    return vuln_ids, failed_names
+            logging.exception(f"Failed to resolve vulnerability {token}")
+            failed_tokens.append(token)
+    return vuln_ids, failed_tokens
 
 
 class RecordFileType(enum.StrEnum):
@@ -394,6 +410,10 @@ class Error:
 
     def to_dict(self) -> dict:
         return {"record": self.record, "error": self.error}
+
+
+class FolderScopeError(ValueError):
+    """Raised when an existing-record lookup cannot be scoped to a folder."""
 
 
 @dataclass
@@ -485,14 +505,42 @@ class RecordConsumer[Context = None](ABC):
     ) -> tuple[dict, Optional[Error]]:
         pass
 
-    def find_existing(self, record_data: dict) -> Optional[type[AbstractBaseModel]]:
-        """Find an existing record matching this data based on the model's fields_to_check."""
+    def find_existing(self, record_data: dict):
+        """Find an existing record matching this data based on the model's fields_to_check.
+
+        When ref_id is listed in fields_to_check and a non-empty ref_id is supplied,
+        it is tried first (exact match + folder).  On miss the lookup falls back to
+        the remaining fields (typically name) so that either identifier alone is
+        sufficient to detect a duplicate.
+        """
         model_class = self.SERIALIZER_CLASS.Meta.model
         fields_to_check = getattr(model_class, "fields_to_check", [])
         if not fields_to_check:
             return None
+
+        folder_filter = {}
+        if hasattr(model_class, "folder"):
+            folder = record_data.get("folder") or self.folder_id
+            if folder is None:
+                raise FolderScopeError(
+                    "Cannot resolve existing record without folder context: "
+                    "provide an X-Folder-Id header or a 'domain' column"
+                )
+            folder_filter["folder"] = folder
+
+        if "ref_id" in fields_to_check:
+            ref_id = record_data.get("ref_id")
+            if ref_id:
+                existing = model_class.objects.filter(
+                    ref_id=ref_id, **folder_filter
+                ).first()
+                if existing:
+                    return existing
+
         query = {}
         for f in fields_to_check:
+            if f == "ref_id":
+                continue
             value = record_data.get(f)
             if value is None or value == "":
                 continue
@@ -502,9 +550,7 @@ class RecordConsumer[Context = None](ABC):
                 query[f] = value
         if not query:
             return None
-        folder = record_data.get("folder")
-        if folder and hasattr(model_class, "folder"):
-            query["folder"] = folder
+        query.update(folder_filter)
         return model_class.objects.filter(**query).first()
 
     def _build_update_data(self, record: dict, record_data: dict) -> dict:
@@ -566,7 +612,14 @@ class RecordConsumer[Context = None](ABC):
                     pk=internal_id, id__in=viewable_ids
                 ).first()
             if existing is None:
-                existing = self.find_existing(record_data)
+                try:
+                    existing = self.find_existing(record_data)
+                except FolderScopeError as e:
+                    results.add_error(Error(record=record, error=str(e)))
+                    if self.on_conflict == ConflictMode.STOP:
+                        results.stopped = True
+                        break
+                    continue
 
             if existing:
                 match self.on_conflict:
@@ -762,8 +815,17 @@ class AssetRecordConsumer(RecordConsumer[list]):
             if not asset_ref_id:
                 continue
 
-            # Find the created asset
-            asset = Asset.objects.filter(ref_id=asset_ref_id).first()
+            domain_name = record.get("domain")
+            record_folder_id = (
+                self.folders_map.get(domain_name.lower(), self.folder_id)
+                if domain_name is not None
+                else self.folder_id
+            )
+
+            # Find the created asset (scoped to its folder)
+            asset = Asset.objects.filter(
+                ref_id=asset_ref_id, folder_id=record_folder_id
+            ).first()
             if not asset:
                 continue
 
@@ -777,9 +839,11 @@ class AssetRecordConsumer(RecordConsumer[list]):
             else:
                 parent_ref_ids = [str(parent_assets_ref)]
 
-            # Link parent assets
+            # Link parent assets (scoped to same folder)
             for parent_ref_id in parent_ref_ids:
-                parent_asset = Asset.objects.filter(ref_id=parent_ref_id).first()
+                parent_asset = Asset.objects.filter(
+                    ref_id=parent_ref_id, folder_id=record_folder_id
+                ).first()
                 if parent_asset and parent_asset.id != asset.id:
                     asset.parent_assets.add(parent_asset)
 
@@ -1315,15 +1379,6 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             record.get("vulnerabilities"), context.folder
         )
 
-        if failed_vulnerabilities:
-            return {}, Error(
-                record=record,
-                error=(
-                    "Failed to create or retrieve thiese vulnerabilities: "
-                    + ", ".join(failed_vulnerabilities)
-                ),
-            )
-
         finding_data = {
             "name": name,
             "description": record.get("description"),
@@ -1675,49 +1730,69 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
             status = "--"
 
         applied_controls = []
-        for ap_name in (record.get("applied_controls") or "").splitlines():
-            ap_name = ap_name.strip()
-            if not ap_name:
+        for token in re.split(r"[|,]", record.get("applied_controls") or ""):
+            token = token.strip()
+            if not token:
                 continue
-            obj = AppliedControl.objects.filter(
-                name=ap_name, folder_id=folder_id
-            ).first()
+            candidates = list(
+                AppliedControl.objects.filter(
+                    Q(ref_id=token) | Q(name__iexact=token), folder_id=folder_id
+                )
+            )
+            obj = next(
+                (c for c in candidates if c.ref_id == token),
+                candidates[0] if candidates else None,
+            )
             if obj:
                 applied_controls.append(obj.id)
             else:
                 return {}, Error(
                     record=record,
-                    error=f"No applied control named '{ap_name}' found in folder",
+                    error=f"No applied control with ref_id or name '{token}' found in folder",
                 )
 
         assets = []
-        for asset_name in (record.get("assets") or "").splitlines():
-            asset_name = asset_name.strip()
-            if not asset_name:
+        for token in re.split(r"[|,]", record.get("assets") or ""):
+            token = token.strip()
+            if not token:
                 continue
-            obj = Asset.objects.filter(name=asset_name, folder_id=folder_id).first()
+            candidates = list(
+                Asset.objects.filter(
+                    Q(ref_id=token) | Q(name__iexact=token), folder_id=folder_id
+                )
+            )
+            obj = next(
+                (c for c in candidates if c.ref_id == token),
+                candidates[0] if candidates else None,
+            )
             if obj:
                 assets.append(obj.id)
             else:
                 return {}, Error(
                     record=record,
-                    error=f"No asset named '{asset_name}' found in folder",
+                    error=f"No asset with ref_id or name '{token}' found in folder",
                 )
 
         security_exceptions = []
-        for se_name in (record.get("security_exceptions") or "").splitlines():
-            se_name = se_name.strip()
-            if not se_name:
+        for token in re.split(r"[|,]", record.get("security_exceptions") or ""):
+            token = token.strip()
+            if not token:
                 continue
-            obj = SecurityException.objects.filter(
-                name=se_name, folder_id=folder_id
-            ).first()
+            candidates = list(
+                SecurityException.objects.filter(
+                    Q(ref_id=token) | Q(name__iexact=token), folder_id=folder_id
+                )
+            )
+            obj = next(
+                (c for c in candidates if c.ref_id == token),
+                candidates[0] if candidates else None,
+            )
             if obj:
                 security_exceptions.append(obj.id)
             else:
                 return {}, Error(
                     record=record,
-                    error=f"No security exception named '{se_name}' found in folder",
+                    error=f"No security exception with ref_id or name '{token}' found in folder",
                 )
 
         data = {
@@ -1745,19 +1820,6 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
             data["filtering_labels"] = filtering_labels
 
         return data, None
-
-    def find_existing(self, record_data: dict):
-        folder_id = record_data.get("folder")
-        ref_id = record_data.get("ref_id")
-        if ref_id:
-            existing = Vulnerability.objects.filter(
-                ref_id=ref_id, folder_id=folder_id
-            ).first()
-            if existing:
-                return existing
-        return Vulnerability.objects.filter(
-            name=record_data.get("name"), folder_id=folder_id
-        ).first()
 
 
 class ElementaryActionRecordConsumer(RecordConsumer):
@@ -1986,7 +2048,7 @@ class BusinessImpactAnalysisRecordConsumer(RecordConsumer):
                 perimeter = Perimeter.objects.filter(id=perimeter_uuid).first()
                 if perimeter:
                     return perimeter, None
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 pass
 
             perimeter = Perimeter.objects.filter(ref_id=perimeter_value).first()
@@ -2040,7 +2102,7 @@ class BusinessImpactAnalysisRecordConsumer(RecordConsumer):
                 risk_matrix = RiskMatrix.objects.filter(id=matrix_uuid).first()
                 if risk_matrix:
                     return risk_matrix, None
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 pass
 
             risk_matrix = RiskMatrix.objects.filter(ref_id=matrix_value).first()
@@ -2144,7 +2206,7 @@ class AssetAssessmentRecordConsumer(RecordConsumer):
             bia = BusinessImpactAnalysis.objects.filter(id=bia_uuid).first()
             if bia:
                 return bia, None
-        except (ValueError, TypeError):
+        except ValueError, TypeError:
             pass
 
         bia = BusinessImpactAnalysis.objects.filter(name__iexact=bia_value).first()
@@ -2169,7 +2231,7 @@ class AssetAssessmentRecordConsumer(RecordConsumer):
             asset = Asset.objects.filter(id=asset_uuid).first()
             if asset:
                 return asset, None
-        except (ValueError, TypeError):
+        except ValueError, TypeError:
             pass
 
         asset = Asset.objects.filter(ref_id=asset_value).first()
@@ -2206,7 +2268,7 @@ class AssetAssessmentRecordConsumer(RecordConsumer):
             try:
                 control_uuid = UUID(str(item))
                 control = AppliedControl.objects.filter(id=control_uuid).first()
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 control = None
 
             if control is None:
@@ -2232,7 +2294,7 @@ class AssetAssessmentRecordConsumer(RecordConsumer):
             try:
                 evidence_uuid = UUID(str(item))
                 evidence = Evidence.objects.filter(id=evidence_uuid).first()
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 evidence = None
 
             if evidence is None:
@@ -2321,7 +2383,7 @@ class EscalationThresholdRecordConsumer(RecordConsumer):
             bia = BusinessImpactAnalysis.objects.filter(id=bia_uuid).first()
             if bia:
                 return bia, None
-        except (ValueError, TypeError):
+        except ValueError, TypeError:
             pass
 
         bia = BusinessImpactAnalysis.objects.filter(name__iexact=bia_value).first()
@@ -2346,7 +2408,7 @@ class EscalationThresholdRecordConsumer(RecordConsumer):
             asset = Asset.objects.filter(id=asset_uuid).first()
             if asset:
                 return asset, None
-        except (ValueError, TypeError):
+        except ValueError, TypeError:
             pass
 
         asset = Asset.objects.filter(ref_id=asset_value).first()
@@ -2369,7 +2431,7 @@ class EscalationThresholdRecordConsumer(RecordConsumer):
                 assessment = AssetAssessment.objects.filter(id=assessment_uuid).first()
                 if assessment:
                     return assessment, None
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 pass
 
         bia, error = self._resolve_bia(record)
@@ -2435,7 +2497,7 @@ class EscalationThresholdRecordConsumer(RecordConsumer):
             return {}, Error(record=record, error="point_in_time is mandatory")
         try:
             point_in_time = int(float(point_in_time))
-        except (ValueError, TypeError):
+        except ValueError, TypeError:
             return {}, Error(
                 record=record,
                 error=f"Invalid point_in_time '{point_in_time}'",
@@ -2447,7 +2509,7 @@ class EscalationThresholdRecordConsumer(RecordConsumer):
         else:
             try:
                 quali_impact_value = int(float(quali_impact))
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 return {}, Error(
                     record=record,
                     error=f"Invalid quali_impact '{quali_impact}'",
@@ -2472,7 +2534,7 @@ class EscalationThresholdRecordConsumer(RecordConsumer):
         else:
             try:
                 quanti_impact_value = float(quanti_impact)
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 return {}, Error(
                     record=record,
                     error=f"Invalid quanti_impact '{quanti_impact}'",
@@ -2494,6 +2556,18 @@ class EscalationThresholdRecordConsumer(RecordConsumer):
             "qualifications": qualifications,
             "justification": record.get("justification", ""),
         }, None
+
+
+def normalize_df_columns(df: pd.DataFrame) -> pd.DataFrame:
+    normalized = [str(c).strip().lower() for c in df.columns]
+    seen, duplicates = set(), set()
+    for col in normalized:
+        (duplicates if col in seen else seen).add(col)
+    if duplicates:
+        raise ValueError(f"DuplicateColumns: {sorted(duplicates)}")
+    df = df.copy()
+    df.columns = normalized
+    return df
 
 
 class LoadFileView(APIView):
@@ -2574,8 +2648,21 @@ class LoadFileView(APIView):
                         ).fillna("")
                     else:
                         file_type = RecordFileType.CSV
-                        df = pd.read_csv(record_file).fillna("")
+                        # utf-8-sig transparently strips a leading BOM (added to our
+                        # CSV exports for Excel) so the first column header is not corrupted.
+                        df = pd.read_csv(record_file, encoding="utf-8-sig").fillna("")
 
+                    try:
+                        df = normalize_df_columns(df)
+                    except ValueError:
+                        logger.warning(
+                            "Invalid import file structure during column normalization",
+                            exc_info=True,
+                        )
+                        return Response(
+                            {"error": "Invalid file format or columns."},
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
                     base_context = BaseContext(
                         request,
                         folders_map=folders_map,
@@ -3348,7 +3435,7 @@ class LoadFileView(APIView):
                                 if value != "" and value is not None:
                                     try:
                                         update_data[f"default_{field}"] = int(value)
-                                    except (ValueError, TypeError):
+                                    except ValueError, TypeError:
                                         pass
                             legal_ids = {}
                             for id_type in ["lei", "euid", "duns", "vat"]:
@@ -3394,7 +3481,7 @@ class LoadFileView(APIView):
                     if value != "" and value is not None:
                         try:
                             entity_data[f"default_{field}"] = int(value)
-                        except (ValueError, TypeError):
+                        except ValueError, TypeError:
                             pass
 
                 # Handle legal identifiers (LEI, EUID, DUNS, VAT, etc.)
@@ -3554,7 +3641,7 @@ class LoadFileView(APIView):
                                     update_data["criticality"] = int(
                                         record.get("criticality")
                                     )
-                                except (ValueError, TypeError):
+                                except ValueError, TypeError:
                                     pass
                             serializer = SolutionWriteSerializer(
                                 instance=existing_solution,
@@ -3587,7 +3674,7 @@ class LoadFileView(APIView):
                 ):
                     try:
                         solution_data["criticality"] = int(record.get("criticality"))
-                    except (ValueError, TypeError):
+                    except ValueError, TypeError:
                         pass
 
                 # Create the solution
@@ -3744,7 +3831,7 @@ class LoadFileView(APIView):
                         contract_data["annual_expense"] = float(
                             record.get("annual_expense")
                         )
-                    except (ValueError, TypeError):
+                    except ValueError, TypeError:
                         pass
                 if record.get("currency"):
                     contract_data["currency"] = record.get("currency")

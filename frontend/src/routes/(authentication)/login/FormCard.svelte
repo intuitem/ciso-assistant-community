@@ -7,6 +7,7 @@
 
 	import { page } from '$app/state';
 	import { redirectToProvider } from '$lib/allauth.js';
+	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import MfaAuthenticateModal from './mfa/components/MFAAuthenticateModal.svelte';
 	import { m } from '$paraglide/messages';
@@ -49,9 +50,21 @@
 	run(() => {
 		form && form.mfaFlow ? modalMFAAuthenticate() : null;
 	});
+
+	function getSSOCallbackURL(callbackURL: string): string {
+		const url = new URL(callbackURL);
+		const next = getSecureRedirect(page.url.searchParams.get('next')) || '/';
+
+		url.pathname = '/sso/authenticate';
+		url.search = '';
+		url.searchParams.set('next', next);
+		return url.toString();
+	}
 </script>
 
-<div class="flex flex-col w-7/8 lg:w-3/4 p-10 rounded-lg shadow-lg bg-white bg-opacity-[.90]">
+<div
+	class="flex flex-col w-7/8 lg:w-3/4 p-10 rounded-lg shadow-lg bg-surface-50-950 bg-opacity-[.90]"
+>
 	<div data-testid="login" class="flex flex-col w-full items-center space-y-4">
 		<div class="bg-primary-300 px-6 py-5 rounded-full text-3xl">
 			<i class="fa-solid fa-right-to-bracket"></i>
@@ -61,7 +74,7 @@
 		>
 			{m.logIntoYourAccount()}
 		</h3>
-		<p class="text-center text-gray-600 text-sm">
+		<p class="text-center text-surface-600-400 text-sm">
 			{m.youNeedToLogIn()}
 		</p>
 		<div class="w-full">
@@ -79,7 +92,7 @@
 					<div class="flex flex-row justify-end">
 						<a
 							href="/password-reset"
-							class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+							class="flex items-center space-x-2 text-primary-800-200 hover:text-primary-600-400"
 							data-testid="forgot-password-btn"
 						>
 							<p class="">{m.forgtPassword()}?</p>
@@ -97,15 +110,18 @@
 		</div>
 		{#if data.SSOInfo.is_enabled}
 			<div class="flex items-center justify-center w-full space-x-2">
-				<hr class="w-64 items-center bg-gray-200 border-0" />
-				<span class="flex items-center text-gray-600 text-sm">{m.or()}</span>
-				<hr class="w-64 items-center bg-gray-200 border-0" />
+				<hr class="w-64 items-center bg-surface-200-800 border-0" />
+				<span class="flex items-center text-surface-600-400 text-sm">{m.or()}</span>
+				<hr class="w-64 items-center bg-surface-200-800 border-0" />
 			</div>
 			<button
 				class="btn bg-linear-to-l from-violet-800 to-violet-400 text-white font-semibold w-1/2"
 				onclick={() =>
-					redirectToProvider(data.SSOInfo.sp_entity_id, data.SSOInfo.callback_url, 'login')}
-				>{m.loginSSO()}</button
+					redirectToProvider(
+						data.SSOInfo.sp_entity_id,
+						getSSOCallbackURL(data.SSOInfo.callback_url),
+						'login'
+					)}>{m.loginSSO()}</button
 			>
 		{/if}
 	</div>
