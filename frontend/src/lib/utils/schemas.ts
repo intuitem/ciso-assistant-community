@@ -1661,6 +1661,7 @@ export const ProjectSchema = z.object({
 	actual_cost: z.coerce.number().optional().nullable(),
 	currency: z.string().max(3).optional(),
 	linked_collection: z.string().uuid().optional().nullable(),
+	create_collection: z.boolean().optional().default(true),
 	parent_project: z.string().uuid().optional().nullable(),
 	tolerances: z.record(z.string(), z.unknown()).optional(),
 	observation: z.string().optional().nullable(),
