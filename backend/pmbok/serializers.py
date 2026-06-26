@@ -30,6 +30,7 @@ class GenericCollectionReadSerializer(BaseModelSerializer):
     security_exceptions = FieldsRelatedField(["id", "status"], many=True)
     policies = FieldsRelatedField(["id", "status"], many=True)
     dependencies = FieldsRelatedField(many=True)
+    projects = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
 
     class Meta:
@@ -142,10 +143,33 @@ class ProjectWriteSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
         many=True,
         required=False,
     )
+    create_collection = serializers.BooleanField(
+        write_only=True, required=False, default=True
+    )
 
     class Meta:
         model = Project
         fields = "__all__"
+
+    def create(self, validated_data):
+        create_collection = validated_data.pop("create_collection", True)
+        # Only the collection auto-created by Project.save() is subject to opt-out;
+        # an explicitly provided collection is never touched.
+        explicit_collection = validated_data.get("linked_collection")
+        instance = super().create(validated_data)
+        # linked_collection is on_delete=SET_NULL, so the FK clears automatically.
+        if (
+            not create_collection
+            and not explicit_collection
+            and instance.linked_collection_id
+        ):
+            instance.linked_collection.delete()
+            instance.linked_collection = None
+        return instance
+
+    def update(self, instance, validated_data):
+        validated_data.pop("create_collection", None)
+        return super().update(instance, validated_data)
 
     def validate(self, data):
         instance = getattr(self, "instance", None)
