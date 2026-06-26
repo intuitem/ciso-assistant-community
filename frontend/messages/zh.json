@@ -3666,5 +3666,21 @@
 	"builderQuestionTypeMultipleChoice": "多选",
 	"builderQuestionTypeDate": "日期",
 	"builderChangedOn": "已变更于",
-	"requirementWeight": "权重"
+	"requirementWeight": "权重",
+	"scim": "SCIM",
+	"scimDescription": "配置 SCIM 2.0 预配。将您的身份提供商指向下面的端点，并使用此处生成的持有者令牌进行身份验证。",
+	"scimEndpointUrl": "SCIM 端点 URL",
+	"scimTokens": "SCIM 令牌",
+	"generateScimToken": "生成令牌",
+	"noScimTokens": "尚无 SCIM 令牌。",
+	"scimTokenName": "名称",
+	"scimTokenDigest": "摘要",
+	"revokeScimToken": "吊销",
+	"scimTokenGenerated": "令牌已生成",
+	"scimTokenWarning": "立即复制此令牌。出于安全原因，它将不会再次显示。",
+	"scimTokenRevoked": "SCIM 令牌已吊销",
+	"scimTokenGenerationFailed": "生成 SCIM 令牌失败",
+	"idpGroup": "IdP 组",
+	"idpGroups": "IdP 组",
+	"idpGroupsDescription": "启用 IdP 组联合（SCIM 预配、IdP 组映射以及用户的 IdP 组成员资格）。"
 }
