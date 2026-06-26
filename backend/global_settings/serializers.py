@@ -370,6 +370,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     outgoing_webhooks = serializers.BooleanField(
         source="value.outgoing_webhooks", required=False, default=False
     )
+    idp_groups = serializers.BooleanField(
+        source="value.idp_groups", required=False, default=False
+    )
     metrology = serializers.BooleanField(
         source="value.metrology", required=False, default=True
     )
@@ -447,6 +450,7 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         """
         current_value_dict = instance.value if isinstance(instance.value, dict) else {}
         value_changed = False
+        idp_groups_changed = False
         new_value_dict = validated_data.get("value", {})
 
         for field_name, field_instance in self.fields.items():
@@ -468,10 +472,23 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
                 if current_value_dict.get(source_key) != new_flag_value:
                     current_value_dict[source_key] = new_flag_value
                     value_changed = True
+                    if source_key == "idp_groups":
+                        idp_groups_changed = True
 
         if value_changed:
             instance.value = current_value_dict
             instance.save(update_fields=["value"])
+
+        if idp_groups_changed:
+            # The groups cache bakes in the idp_groups closure at build time, so
+            # toggling the flag must rebuild it for the change to take effect.
+            from iam.cache_builders import (
+                invalidate_assignments_cache,
+                invalidate_groups_cache,
+            )
+
+            invalidate_groups_cache()
+            invalidate_assignments_cache()
 
         return instance
 

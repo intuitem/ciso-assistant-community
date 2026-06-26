@@ -1856,6 +1856,7 @@ class TeamReadSerializer(BaseModelSerializer):
 
 class UserReadSerializer(BaseModelSerializer):
     user_groups = FieldsRelatedField(fields=["builtin", "id"], many=True)
+    idp_groups = FieldsRelatedField(many=True)
     has_mfa_enabled = serializers.BooleanField(read_only=True)
 
     class Meta:
@@ -1868,6 +1869,7 @@ class UserReadSerializer(BaseModelSerializer):
             "is_active",
             "date_joined",
             "user_groups",
+            "idp_groups",
             "keep_local_login",
             "is_third_party",
             "observation",
@@ -1982,6 +1984,21 @@ class UserGroupReadSerializer(BaseModelSerializer):
 class UserGroupWriteSerializer(BaseModelSerializer):
     class Meta:
         model = UserGroup
+        fields = "__all__"
+
+
+class IdPGroupReadSerializer(BaseModelSerializer):
+    user_groups = FieldsRelatedField(many=True)
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = IdPGroup
+        fields = "__all__"
+
+
+class IdPGroupWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = IdPGroup
         fields = "__all__"
 
 
