@@ -7,6 +7,7 @@
 
 	const snap = $derived(item.snapshot);
 	const summary = $derived(snap?.summary ?? {});
+	const mode = $derived(snap?.display_mode ?? 'both');
 
 	const RESULT_META = [
 		{ key: 'compliant', label: 'compliant', color: '#86efac' },
@@ -42,7 +43,7 @@
 			<div class="font-semibold text-surface-800-200">
 				{safeTranslate(item.title) || snap.framework_name}
 			</div>
-			{#if summary.score != null}
+			{#if mode !== 'result' && summary.score != null}
 				<span class="text-sm font-bold text-violet-600"
 					>{summary.score}{#if summary.max_score}<span class="text-surface-400"
 							>/{summary.max_score}</span
@@ -50,9 +51,9 @@
 				>
 			{/if}
 		</div>
-		{#if values.length}
+		{#if mode !== 'score' && values.length}
 			<div class="h-40">
-				<DonutChart name={`fw_${snap.token}`} {values} height="h-40" />
+				<DonutChart name={`fw_${snap.token}`} {values} height="h-40" showPercentage />
 			</div>
 		{/if}
 		<div class="text-xs text-surface-500">

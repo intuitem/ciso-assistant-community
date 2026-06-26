@@ -38,6 +38,19 @@ async function patch(fetch: typeof globalThis.fetch, id: string, body: unknown) 
 }
 
 export const actions: Actions = {
+	uploadDocument: async ({ request, fetch }) => {
+		const data = await request.formData();
+		const file = data.get('file');
+		if (!(file instanceof File) || file.size === 0) return fail(400, { error: 'File required' });
+		const name = ((data.get('name') as string) || '').trim() || file.name;
+		const body = new FormData();
+		body.append('name', name);
+		body.append('file', file);
+		const res = await fetch(`${BASE_API_URL}/public-documents/`, { method: 'POST', body });
+		if (!res.ok) return fail(res.status, { error: await res.text() });
+		const doc = await res.json();
+		return { uploaded: { id: doc.id, name: doc.name, token: doc.token } };
+	},
 	saveContent: async ({ params, request, fetch }) => {
 		const payload = (await request.formData()).get('payload') as string;
 		let content;

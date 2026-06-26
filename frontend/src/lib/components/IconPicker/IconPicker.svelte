@@ -1,5 +1,6 @@
 <script lang="ts">
-	let { value = $bindable('') }: { value: string } = $props();
+	let { value = $bindable(''), showInput = true }: { value: string; showInput?: boolean } =
+		$props();
 	let open = $state(false);
 
 	const ICONS = [
@@ -69,7 +70,9 @@
 		>
 			<i class="fa-solid {value || 'fa-star'}"></i>
 		</button>
-		<input bind:value placeholder="fa-bolt" class="input rounded-md text-sm w-24" />
+		{#if showInput}
+			<input bind:value placeholder="fa-bolt" class="input rounded-md text-sm w-24" />
+		{/if}
 	</div>
 	{#if open}
 		<button

@@ -7,6 +7,7 @@
 	let { data }: { data: PageData } = $props();
 	const snap = $derived(data.snapshot);
 	const summary = $derived(snap.summary ?? {});
+	const mode = $derived(snap.display_mode ?? 'both');
 
 	const RESULT_META: Record<string, { label: string; color: string }> = {
 		compliant: { label: 'compliant', color: '#86efac' },
@@ -50,15 +51,19 @@
 		</div>
 
 		<div class="grid gap-6 sm:grid-cols-2">
-			<div class="card bg-surface-50-950 p-5">
-				{#if values.length}
-					<div class="h-56"><DonutChart name="snapshot_donut" {values} height="h-56" /></div>
-				{:else}
-					<p class="text-sm text-surface-500">{m.noData()}</p>
-				{/if}
-			</div>
+			{#if mode !== 'score'}
+				<div class="card bg-surface-50-950 p-5">
+					{#if values.length}
+						<div class="h-56">
+							<DonutChart name="snapshot_donut" {values} height="h-56" showPercentage />
+						</div>
+					{:else}
+						<p class="text-sm text-surface-500">{m.noData()}</p>
+					{/if}
+				</div>
+			{/if}
 			<div class="card flex flex-col justify-center bg-surface-50-950 p-5">
-				{#if summary.score != null}
+				{#if mode !== 'result' && summary.score != null}
 					<div class="text-4xl font-bold text-violet-600">
 						{summary.score}{#if summary.max_score}<span class="text-lg text-surface-400"
 								>/{summary.max_score}</span
@@ -93,8 +98,8 @@
 					<tr class="border-b border-surface-200-800 text-left text-surface-500">
 						<th class="py-2 pr-3 font-medium">{m.refId()}</th>
 						<th class="py-2 pr-3 font-medium">{m.name()}</th>
-						<th class="py-2 pr-3 font-medium">{m.result()}</th>
-						<th class="py-2 font-medium">{m.score()}</th>
+						{#if mode !== 'score'}<th class="py-2 pr-3 font-medium">{m.result()}</th>{/if}
+						{#if mode !== 'result'}<th class="py-2 font-medium">{m.score()}</th>{/if}
 					</tr>
 				</thead>
 				<tbody>
@@ -102,15 +107,17 @@
 						<tr class="border-b border-surface-100-900">
 							<td class="py-1.5 pr-3 font-mono text-xs text-surface-500">{row.ref_id}</td>
 							<td class="py-1.5 pr-3">{row.name}</td>
-							<td class="py-1.5 pr-3">
-								<span
-									class="inline-block rounded-full px-2 py-0.5 text-xs"
-									style="background-color: {RESULT_META[row.result]?.color ?? '#d1d5db'}33"
-								>
-									{safeTranslate(RESULT_META[row.result]?.label ?? row.result)}
-								</span>
-							</td>
-							<td class="py-1.5">{row.score ?? '—'}</td>
+							{#if mode !== 'score'}
+								<td class="py-1.5 pr-3">
+									<span
+										class="inline-block rounded-full px-2 py-0.5 text-xs"
+										style="background-color: {RESULT_META[row.result]?.color ?? '#d1d5db'}33"
+									>
+										{safeTranslate(RESULT_META[row.result]?.label ?? row.result)}
+									</span>
+								</td>
+							{/if}
+							{#if mode !== 'result'}<td class="py-1.5">{row.score ?? '—'}</td>{/if}
 						</tr>
 					{/each}
 				</tbody>

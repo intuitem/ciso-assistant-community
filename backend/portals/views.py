@@ -227,11 +227,9 @@ class FrameworkSnapshotViewSet(BaseModelViewSet):
 # the explicitly-published Portal / PublicDocument rows.
 
 PUBLIC_SAFE_TILE_KINDS = {
-    "badge",
+    "certificationDocument",
     "metric",
-    "document",
     "external",
-    "status",
     "framework",
 }
 
@@ -280,6 +278,7 @@ def _serialize_public_portal(portal):
                         "name": snap.name,
                         "framework_name": snap.framework_name,
                         "summary": snap.summary,
+                        "display_mode": snap.display_mode,
                         "token": snap.public_token,
                     },
                 }
@@ -361,6 +360,7 @@ class PublicFrameworkSnapshotView(APIView):
                 "framework_ref_id": snap.framework_ref_id,
                 "framework_version": snap.framework_version,
                 "synced_at": snap.synced_at,
+                "display_mode": snap.display_mode,
                 "summary": snap.summary,
                 "content": snap.content,
             }

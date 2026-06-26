@@ -8,14 +8,16 @@
 
 	function trigger(item: {
 		kind: string;
-		target?: { url?: string; token?: string };
+		target?: { url?: string; token?: string; dest?: string };
 		snapshot?: { token?: string };
 	}) {
 		if (item.kind === 'external' && item.target?.url)
 			window.open(item.target.url, '_blank', 'noopener');
-		else if (item.kind === 'document' && item.target?.token)
-			window.open(`/trust/documents/${item.target.token}`, '_blank', 'noopener');
-		else if (item.kind === 'framework' && item.snapshot?.token)
+		else if (item.kind === 'certificationDocument') {
+			if (item.target?.dest === 'document' && item.target?.token)
+				window.open(`/trust/documents/${item.target.token}`, '_blank', 'noopener');
+			else if (item.target?.url) window.open(item.target.url, '_blank', 'noopener');
+		} else if (item.kind === 'framework' && item.snapshot?.token)
 			goto(`/trust/snapshot/${item.snapshot.token}`);
 	}
 </script>

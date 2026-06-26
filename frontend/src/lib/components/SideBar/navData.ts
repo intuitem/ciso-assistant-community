@@ -475,7 +475,7 @@ export const navData = {
 				},
 				{
 					name: 'managePortals',
-					fa_icon: 'fa-solid fa-grip',
+					fa_icon: 'fa-solid fa-table-cells-large',
 					href: '/portal-editor',
 					permissions: ['change_portal']
 				}

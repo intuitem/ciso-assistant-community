@@ -189,7 +189,7 @@
 			text-xs text-surface-600-400 hover:bg-surface-200-800 hover:border-surface-300-700 hover:text-surface-700-300
 			transition-all duration-150"
 					>
-						<i class="fa-solid fa-grip text-surface-500"></i>
+						<i class="fa-solid fa-table-cells-large text-surface-500"></i>
 						<span class="hidden sm:inline">{m.portals()}</span>
 					</a>
 				{/if}

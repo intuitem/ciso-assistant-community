@@ -27,9 +27,13 @@ async function postJSON(fetch: typeof globalThis.fetch, path: string, body: unkn
 
 export const actions: Actions = {
 	createPortal: async ({ request, fetch }) => {
-		const name = (await request.formData()).get('name') as string;
+		const data = await request.formData();
+		const name = data.get('name') as string;
 		if (!name?.trim()) return fail(400, { error: 'Name required' });
-		const res = await postJSON(fetch, '/portals/', { name: name.trim() });
+		const res = await postJSON(fetch, '/portals/', {
+			name: name.trim(),
+			is_public: data.get('visibility') === 'public'
+		});
 		if (!res.ok) return fail(res.status, { error: await res.text() });
 		redirect(303, `/portal-editor/${(await res.json()).id}`);
 	},

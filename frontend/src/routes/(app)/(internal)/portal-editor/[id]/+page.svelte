@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
+	import { enhance, deserialize } from '$app/forms';
 	import { m } from '$paraglide/messages';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import IconPicker from '$lib/components/IconPicker/IconPicker.svelte';
@@ -25,6 +25,32 @@
 	const toast = getToastStore();
 	let view = $state<'edit' | 'preview' | 'settings'>('edit');
 
+	// Public documents available to certification tiles — reactive so inline uploads appear at once.
+	let docs = $state<any[]>(data.publicDocuments ?? []);
+
+	async function uploadDoc(item: { target: Record<string, string>; title: string }, e: Event) {
+		const input = e.currentTarget as HTMLInputElement;
+		const file = input.files?.[0];
+		if (!file) return;
+		const fd = new FormData();
+		fd.append('file', file);
+		fd.append('name', item.title?.trim() || file.name);
+		const res = await fetch('?/uploadDocument', { method: 'POST', body: fd });
+		const result: any = deserialize(await res.text());
+		if (result.type === 'success' && result.data?.uploaded) {
+			const doc = result.data.uploaded;
+			docs.push({ id: doc.id, name: doc.name, token: doc.token });
+			item.target.token = doc.token;
+			toast.trigger({ message: m.saved(), background: 'preset-filled-success-500' });
+		} else {
+			toast.trigger({
+				message: result.data?.error ?? m.error(),
+				background: 'preset-filled-error-500'
+			});
+		}
+		input.value = '';
+	}
+
 	const settingsSuperform = superForm(data.settingsForm, {
 		dataType: 'json',
 		resetForm: false,
@@ -48,15 +74,7 @@
 		icon: string;
 		title: string;
 		description: string;
-		kind:
-			| 'create'
-			| 'navigate'
-			| 'external'
-			| 'status'
-			| 'metric'
-			| 'badge'
-			| 'document'
-			| 'framework';
+		kind: 'create' | 'navigate' | 'external' | 'metric' | 'certificationDocument' | 'framework';
 		target: Record<string, string>;
 	};
 	type Section = { title: string; description: string; items: Item[] };
@@ -75,18 +93,13 @@
 		}))
 	);
 
-	const KINDS = [
-		'create',
-		'navigate',
-		'external',
-		'status',
-		'metric',
-		'badge',
-		'document',
-		'framework'
-	] as const;
-	// Kinds surfaced on the unauthenticated trust-center page (mirror of backend PUBLIC_SAFE_TILE_KINDS).
-	const PUBLIC_SAFE = ['external', 'status', 'metric', 'badge', 'document', 'framework'];
+	// Kinds offered depend on the portal type: internal launcher vs public trust center.
+	// 'external' belongs to both.
+	const KINDS = $derived(
+		data.portal.is_public
+			? ['metric', 'certificationDocument', 'framework', 'external']
+			: ['create', 'navigate', 'external']
+	);
 
 	const METRIC_SOURCES = [
 		{ value: '', label: m.manual() },
@@ -94,7 +107,26 @@
 		{ value: 'controls_count', label: m.controlsCovered() }
 	];
 
+	const KIND_LABELS: Record<string, string> = {
+		create: 'Create',
+		navigate: 'Navigate',
+		external: 'External link',
+		metric: 'Metric',
+		certificationDocument: 'Certification / Document',
+		framework: 'Framework'
+	};
+
 	const payload = $derived(JSON.stringify({ sections }));
+
+	// 'navigate' targets a model (mandatory) — backfill any tile that lacks one so the
+	// select is never silently empty.
+	$effect(() => {
+		const fallback = modelOptions[0]?.value;
+		if (!fallback) return;
+		for (const sec of sections)
+			for (const it of sec.items)
+				if (it.kind === 'navigate' && !it.target.model) it.target.model = fallback;
+	});
 
 	// Preview enrichment: graft the captured snapshot onto framework tiles so the
 	// preview shows real donuts (the live /trust page is enriched server-side).
@@ -137,7 +169,7 @@
 			icon: 'fa-star',
 			title: 'New item',
 			description: '',
-			kind: 'navigate',
+			kind: KINDS[0] as Item['kind'],
 			target: {}
 		});
 	}
@@ -158,10 +190,9 @@
 
 	function targetField(kind: Item['kind']) {
 		if (kind === 'create') return { key: 'model', label: 'Model (url name)', ph: 'incidents' };
-		if (kind === 'status') return { key: 'source', label: 'Source key', ph: 'iso-27001' };
+		if (kind === 'navigate') return { key: 'model', label: 'Model (url name)', ph: '' };
 		if (kind === 'metric') return { key: 'value', label: m.value(), ph: '128' };
-		if (kind === 'badge') return { key: 'image_url', label: m.logoUrl(), ph: 'https://…' };
-		if (kind === 'document') return { key: 'token', label: m.document(), ph: '' };
+		if (kind === 'certificationDocument') return { key: '', label: m.proof(), ph: '' };
 		if (kind === 'framework') return { key: 'snapshot', label: m.framework(), ph: '' };
 		return { key: 'url', label: 'URL', ph: kind === 'external' ? 'https://…' : '/incidents' };
 	}
@@ -251,7 +282,7 @@
 						>
 							<label class="text-[10px] text-surface-500">
 								<span class="block">Icon</span>
-								<IconPicker bind:value={item.icon} />
+								<IconPicker bind:value={item.icon} showInput={false} />
 							</label>
 							<label class="text-[10px] text-surface-500 grow">
 								<span class="block">{m.title()}</span>
@@ -260,14 +291,8 @@
 							<label class="text-[10px] text-surface-500">
 								<span class="block">Kind</span>
 								<select bind:value={item.kind} class="select rounded-md text-sm">
-									{#each KINDS as k}<option value={k}>{k}</option>{/each}
+									{#each KINDS as k}<option value={k}>{KIND_LABELS[k] ?? k}</option>{/each}
 								</select>
-								{#if data.portal.is_public && !PUBLIC_SAFE.includes(item.kind)}
-									<span class="mt-0.5 block text-warning-600" title={m.hiddenOnPublicHelp()}>
-										<i class="fa-solid fa-eye-slash"></i>
-										{m.hiddenOnPublic()}
-									</span>
-								{/if}
 							</label>
 							<label class="text-[10px] text-surface-500 grow">
 								<span class="block">{tf.label}</span>
@@ -277,16 +302,57 @@
 										{#each modelOptions as o}<option value={o.value}>{o.label}</option>{/each}
 									</select>
 								{:else if item.kind === 'navigate'}
-									<select bind:value={item.target.url} class="select rounded-md text-sm">
-										<option value="">—</option>
-										{#each modelOptions as o}<option value="/{o.value}">{o.label}</option>{/each}
+									<select bind:value={item.target.model} required class="select rounded-md text-sm">
+										{#each modelOptions as o}<option value={o.value}>{o.label}</option>{/each}
 									</select>
-								{:else if item.kind === 'document'}
-									<select bind:value={item.target.token} class="select rounded-md text-sm">
-										<option value="">—</option>
-										{#each data.publicDocuments as d}<option value={d.token}>{d.name}</option
-											>{/each}
+								{:else if item.kind === 'certificationDocument'}
+									<input
+										bind:value={item.target.image_url}
+										placeholder={m.imageUrlOptional()}
+										class="input rounded-md text-sm"
+									/>
+									<div class="mt-1 flex gap-1">
+										<input
+											type="date"
+											bind:value={item.target.valid_from}
+											class="input rounded-md text-sm"
+											title={m.validFrom()}
+										/>
+										<input
+											type="date"
+											bind:value={item.target.valid_until}
+											class="input rounded-md text-sm"
+											title={m.validUntil()}
+										/>
+									</div>
+									<select bind:value={item.target.dest} class="select mt-1 rounded-md text-sm">
+										<option value="link">{m.link()}</option>
+										<option value="document">{m.file()}</option>
 									</select>
+									{#if item.target.dest === 'document'}
+										<div class="flex items-center gap-1">
+											<select
+												bind:value={item.target.token}
+												class="select mt-1 grow rounded-md text-sm"
+											>
+												<option value="">—</option>
+												{#each docs as d}<option value={d.token}>{d.name}</option>{/each}
+											</select>
+											<label
+												class="mt-1 flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-md border border-surface-200-800 text-violet-500 hover:bg-surface-100-900"
+												title={m.uploadNewFile()}
+											>
+												<i class="fa-solid fa-upload text-xs"></i>
+												<input type="file" class="hidden" onchange={(e) => uploadDoc(item, e)} />
+											</label>
+										</div>
+									{:else}
+										<input
+											bind:value={item.target.url}
+											placeholder="https://..."
+											class="input mt-1 rounded-md text-sm"
+										/>
+									{/if}
 								{:else if item.kind === 'framework'}
 									<select bind:value={item.target.snapshot} class="select rounded-md text-sm">
 										<option value="">—</option>

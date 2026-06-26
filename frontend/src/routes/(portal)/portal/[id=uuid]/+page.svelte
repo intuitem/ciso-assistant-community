@@ -13,8 +13,8 @@
 		icon: string;
 		title: string;
 		description?: string;
-		kind: 'create' | 'navigate' | 'external' | 'status' | 'metric' | 'badge' | 'document';
-		target: { model?: string; url?: string; token?: string };
+		kind: 'create' | 'navigate' | 'external' | 'metric' | 'certificationDocument' | 'framework';
+		target: { model?: string; url?: string; token?: string; dest?: string };
 	}
 
 	let { data }: { data: PageData } = $props();
@@ -37,11 +37,14 @@
 
 	function trigger(item: PortalItem) {
 		if (item.kind === 'create' && item.target.model) openCreate(item.target.model, item.title);
-		else if (item.kind === 'navigate' && item.target.url) goto(item.target.url);
+		else if (item.kind === 'navigate' && item.target.model) goto(`/${item.target.model}`);
 		else if (item.kind === 'external' && item.target.url)
 			window.open(item.target.url, '_blank', 'noopener');
-		else if (item.kind === 'document' && item.target.token)
-			window.open(`/trust/documents/${item.target.token}`, '_blank', 'noopener');
+		else if (item.kind === 'certificationDocument') {
+			if (item.target.dest === 'document' && item.target.token)
+				window.open(`/trust/documents/${item.target.token}`, '_blank', 'noopener');
+			else if (item.target.url) window.open(item.target.url, '_blank', 'noopener');
+		}
 	}
 </script>
 

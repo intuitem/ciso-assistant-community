@@ -94,6 +94,7 @@ class FrameworkSnapshotReadSerializer(BaseModelSerializer):
             "folder",
             "source_audit",
             "implementation_groups",
+            "display_mode",
             "framework_name",
             "framework_ref_id",
             "framework_version",
@@ -119,6 +120,7 @@ class FrameworkSnapshotWriteSerializer(BaseModelSerializer):
             "folder",
             "source_audit",
             "implementation_groups",
+            "display_mode",
         ]
 
 
@@ -143,7 +145,9 @@ class PublicDocumentReadSerializer(BaseModelSerializer):
 class PublicDocumentWriteSerializer(BaseModelSerializer):
     class Meta:
         model = PublicDocument
-        fields = ["name", "description", "folder", "file"]
+        # id + token are read-only (pk / editable=False) — surfaced so the create
+        # response can hand back the token for inline linking.
+        fields = ["id", "name", "description", "folder", "file", "token"]
 
     def _apply_file_meta(self, validated_data):
         f = validated_data.get("file")

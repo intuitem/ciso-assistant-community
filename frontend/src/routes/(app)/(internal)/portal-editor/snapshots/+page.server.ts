@@ -1,5 +1,8 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { SnapshotCreateSchema, SnapshotEditSchema } from '$lib/utils/schemas';
 import { error, fail, redirect, type Actions } from '@sveltejs/kit';
+import { superValidate } from 'sveltekit-superforms';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 
 const unwrap = async (res: Response) => {
@@ -10,15 +13,15 @@ const unwrap = async (res: Response) => {
 
 export const load: PageServerLoad = async ({ fetch, locals }) => {
 	if (!locals.featureflags?.custom_portals) redirect(302, '/');
-	const [snaps, audits, folders] = await Promise.all([
+	const [snaps, audits] = await Promise.all([
 		fetch(`${BASE_API_URL}/framework-snapshots/`),
-		fetch(`${BASE_API_URL}/compliance-assessments/`),
-		fetch(`${BASE_API_URL}/folders/`)
+		fetch(`${BASE_API_URL}/compliance-assessments/`)
 	]);
 	return {
 		snapshots: await unwrap(snaps),
 		audits: await unwrap(audits),
-		folders: await unwrap(folders)
+		createForm: await superValidate(zod(SnapshotCreateSchema)),
+		editForm: await superValidate(zod(SnapshotEditSchema))
 	};
 };
 
@@ -31,23 +34,33 @@ const postJSON = (fetch: typeof globalThis.fetch, path: string, body: unknown) =
 
 export const actions: Actions = {
 	create: async ({ request, fetch }) => {
-		const data = await request.formData();
-		const name = (data.get('name') as string)?.trim();
-		const source_audit = data.get('source_audit') as string;
-		const folder = data.get('folder') as string;
-		const igs = ((data.get('implementation_groups') as string) || '')
-			.split(',')
-			.map((s) => s.trim())
-			.filter(Boolean);
-		if (!name || !source_audit) return fail(400, { error: 'Name and audit required' });
+		const form = await superValidate(request, zod(SnapshotCreateSchema));
+		if (!form.valid) return fail(400, { form });
 		const res = await postJSON(fetch, '/framework-snapshots/', {
-			name,
-			source_audit,
-			folder,
-			implementation_groups: igs
+			name: form.data.name,
+			source_audit: form.data.source_audit,
+			folder: form.data.folder,
+			implementation_groups: (form.data.implementation_groups ?? []).filter(Boolean)
 		});
 		if (!res.ok) return fail(res.status, { error: await res.text() });
-		return { success: true };
+		return { form };
+	},
+	update: async ({ request, fetch }) => {
+		const form = await superValidate(request, zod(SnapshotEditSchema));
+		if (!form.valid) return fail(400, { form });
+		const patch = await fetch(`${BASE_API_URL}/framework-snapshots/${form.data.id}/`, {
+			method: 'PATCH',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				name: form.data.name,
+				implementation_groups: (form.data.implementation_groups ?? []).filter(Boolean),
+				display_mode: form.data.display_mode
+			})
+		});
+		if (!patch.ok) return fail(patch.status, { error: await patch.text() });
+		// Re-sync so an implementation-group change is reflected in the captured data.
+		await postJSON(fetch, `/framework-snapshots/${form.data.id}/sync/`, {});
+		return { form };
 	},
 	preview: async ({ request, fetch }) => {
 		const id = (await request.formData()).get('id');

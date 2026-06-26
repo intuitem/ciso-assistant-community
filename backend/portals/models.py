@@ -83,6 +83,11 @@ class FrameworkSnapshot(NameDescriptionMixin, FolderMixin):
     score, per-requirement rows, the controls touched) is CAPTURED at sync time and only
     changes on a manual re-sync."""
 
+    class DisplayMode(models.TextChoices):
+        BOTH = "both", _("Score and result")
+        SCORE = "score", _("Score only")
+        RESULT = "result", _("Result only")
+
     source_audit = models.ForeignKey(
         "core.ComplianceAssessment",
         null=True,
@@ -91,6 +96,9 @@ class FrameworkSnapshot(NameDescriptionMixin, FolderMixin):
         related_name="framework_snapshots",
     )
     implementation_groups = models.JSONField(default=list, blank=True)
+    display_mode = models.CharField(
+        max_length=10, choices=DisplayMode.choices, default=DisplayMode.BOTH
+    )
     framework_name = models.CharField(max_length=255, blank=True)
     framework_ref_id = models.CharField(max_length=255, blank=True)
     framework_version = models.CharField(max_length=255, blank=True)

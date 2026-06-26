@@ -697,6 +697,20 @@ export const PortalSettingsSchema = z.object({
 		.default({})
 });
 
+export const SnapshotCreateSchema = z.object({
+	name: z.string(),
+	folder: z.string().uuid().optional(),
+	source_audit: z.string().uuid(),
+	implementation_groups: z.string().optional().array().optional()
+});
+
+export const SnapshotEditSchema = z.object({
+	id: z.string().uuid(),
+	name: z.string(),
+	implementation_groups: z.string().optional().array().optional(),
+	display_mode: z.enum(['both', 'score', 'result']).default('both')
+});
+
 export const SSOSettingsSchema = z.object({
 	is_enabled: z.boolean().default(false).optional(),
 	force_sso: z.boolean().default(false).optional(),
