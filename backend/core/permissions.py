@@ -3,6 +3,7 @@ from rest_framework.request import Request
 from django.contrib.auth import get_user_model
 from .utils import RoleCodename
 
+from global_settings.utils import ff_is_enabled
 from iam.models import RoleAssignment, Folder, Permission, Role
 
 User = get_user_model()
@@ -66,3 +67,17 @@ class IsAdministrator(permissions.BasePermission):
         return RoleAssignment.has_role(
             user=request.user, role=Role.objects.get(name=RoleCodename.ADMINISTRATOR)
         )
+
+
+class FeatureFlagRequired(permissions.BasePermission):
+    """Deny access unless the feature flag named by the view's ``feature_flag``
+    attribute is enabled. Server-side counterpart to the UI flag gating, so a
+    flag-off / community build cannot reach the endpoint via the API."""
+
+    message = "This feature is not enabled."
+
+    def has_permission(self, request, view):
+        flag = getattr(view, "feature_flag", None)
+        if not flag:
+            return True
+        return ff_is_enabled(flag)
