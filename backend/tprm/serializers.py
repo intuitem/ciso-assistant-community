@@ -476,6 +476,39 @@ class SolutionReadSerializer(BaseModelSerializer):
     subcontracting_chain = SolutionSubcontractorReadSerializer(
         many=True, read_only=True
     )
+    dora_ict_service_type = serializers.CharField(
+        source="get_dora_ict_service_type_display", default=""
+    )
+    data_location_storage = serializers.CharField(
+        source="get_data_location_storage_display", default=""
+    )
+    data_location_processing = serializers.CharField(
+        source="get_data_location_processing_display", default=""
+    )
+    dora_data_sensitiveness = serializers.CharField(
+        source="get_dora_data_sensitiveness_display", default=""
+    )
+    dora_reliance_level = serializers.CharField(
+        source="get_dora_reliance_level_display", default=""
+    )
+    dora_substitutability = serializers.CharField(
+        source="get_dora_substitutability_display", default=""
+    )
+    dora_non_substitutability_reason = serializers.CharField(
+        source="get_dora_non_substitutability_reason_display", default=""
+    )
+    dora_has_exit_plan = serializers.CharField(
+        source="get_dora_has_exit_plan_display", default=""
+    )
+    dora_reintegration_possibility = serializers.CharField(
+        source="get_dora_reintegration_possibility_display", default=""
+    )
+    dora_discontinuing_impact = serializers.CharField(
+        source="get_dora_discontinuing_impact_display", default=""
+    )
+    dora_alternative_providers_identified = serializers.CharField(
+        source="get_dora_alternative_providers_identified_display", default=""
+    )
 
     class Meta:
         model = Solution

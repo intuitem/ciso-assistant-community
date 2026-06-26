@@ -2648,7 +2648,9 @@ class LoadFileView(APIView):
                         ).fillna("")
                     else:
                         file_type = RecordFileType.CSV
-                        df = pd.read_csv(record_file).fillna("")
+                        # utf-8-sig transparently strips a leading BOM (added to our
+                        # CSV exports for Excel) so the first column header is not corrupted.
+                        df = pd.read_csv(record_file, encoding="utf-8-sig").fillna("")
 
                     try:
                         df = normalize_df_columns(df)
