@@ -33,12 +33,52 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
         THIN = "thin", "Thin"
         FULL = "full", "Full"
 
+    class Kind(models.TextChoices):
+        INTEGRATION = "integration", "Integration"
+        AUDIT_SINK = "audit_sink", "Audit sink"
+
+    class Transport(models.TextChoices):
+        HTTP = "http", "HTTP"
+        KAFKA = "kafka", "Kafka"
+
+    class BodyFormat(models.TextChoices):
+        CISO_NATIVE = "ciso_native", "CISO Assistant (HMAC-signed)"
+        OCSF = "ocsf", "OCSF"
+        RAW = "raw", "Raw LogEntry"
+
     payload_format = models.CharField(
         verbose_name="Payload Format",
         max_length=10,
         choices=PayloadFormats.choices,
         default=PayloadFormats.FULL,
         help_text="The format of the webhook payload sent to this endpoint.",
+    )
+
+    # An "audit_sink" forwards the audit log (LogEntry stream) to an external
+    # SIEM; an "integration" is the user-facing model-event webhook. Audit sinks
+    # are admin/org-managed and hidden from the user webhook list.
+    kind = models.CharField(
+        max_length=20,
+        choices=Kind.choices,
+        default=Kind.INTEGRATION,
+    )
+    transport = models.CharField(
+        max_length=10,
+        choices=Transport.choices,
+        default=Transport.HTTP,
+        help_text="Delivery transport (audit sinks only).",
+    )
+    body_format = models.CharField(
+        max_length=20,
+        choices=BodyFormat.choices,
+        default=BodyFormat.OCSF,
+        help_text="Canonical event schema for audit sinks.",
+    )
+    headers = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Static headers added to each request, e.g. "
+        '{"Authorization": "Splunk <token>"}. Used for audit-sink auth.',
     )
 
     owner = models.ForeignKey(
@@ -51,10 +91,24 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
     )
 
     url = models.URLField(
-        max_length=512, help_text="The consumer URL to send webhook events to."
+        max_length=512,
+        blank=True,
+        default="",
+        help_text="Consumer URL (HTTP transport).",
     )
 
-    secret = models.CharField(max_length=100, help_text="HMAC signing secret.")
+    kafka_config = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Kafka transport: {bootstrap_servers, topic, config:{...}}.",
+    )
+
+    secret = models.CharField(
+        max_length=100,
+        blank=True,
+        default="",
+        help_text="HMAC signing secret (integration webhooks only).",
+    )
 
     event_types = models.ManyToManyField(
         WebhookEventType,
@@ -78,7 +132,9 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
 
     def clean(self):
         super().clean()
-        if getattr(settings, "WEBHOOK_ALLOW_PRIVATE_IPS", False):
+        if self.transport != self.Transport.HTTP:
+            return
+        if getattr(settings, "ALLOW_PRIVATE_NETWORK_REQUESTS", False):
             return
         try:
             assert_public_url(self.url, allowed_schemes=("http", "https"))
@@ -91,8 +147,6 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
             )
 
     def save(self, *args, **kwargs):
-        """
-        On save, ensure a secret exists if one wasn't provided.
-        """
-        self.full_clean()  # Run validation
+        """Run full model validation (clean + field checks) before persisting."""
+        self.full_clean()
         super().save(*args, **kwargs)

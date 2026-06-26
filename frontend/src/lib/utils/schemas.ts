@@ -280,7 +280,8 @@ export const AppliedControlSchema = z.object({
 	observation: z.string().optional().nullable(),
 	integration_config: z.string().optional().nullable(),
 	remote_object_id: z.string().optional().nullable(),
-	create_remote_object: z.boolean().optional().default(false)
+	create_remote_object: z.boolean().optional().default(false),
+	custom_fields: z.record(z.string(), z.any()).optional()
 });
 
 export const AppliedControlDuplicateSchema = z.object({
@@ -414,7 +415,8 @@ export const AssetSchema = z.object({
 	dora_licenced_activity: z.string().optional().nullable(),
 	dora_criticality_assessment: z.string().default('eba_BT:x21'),
 	dora_criticality_justification: z.string().optional().nullable(),
-	dora_discontinuing_impact: z.string().default('eba_ZZ:x799')
+	dora_discontinuing_impact: z.string().default('eba_ZZ:x799'),
+	custom_fields: z.record(z.string(), z.any()).optional()
 });
 
 export const FilteringLabelSchema = z.object({
@@ -449,21 +451,7 @@ export const UserEditSchema = z.object({
 	keep_local_login: z.boolean().optional(),
 	user_groups: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),
-	expiry_date: z
-		.union([z.literal('').transform(() => null), z.iso.date()])
-		.nullish()
-		.refine(
-			(val) => {
-				if (!val) return true; // Allow null/undefined values
-				const expiryDate = new Date(val);
-				const today = new Date();
-				today.setHours(0, 0, 0, 0); // Set to start of today to allow today's date
-				return expiryDate >= today;
-			},
-			{
-				message: 'Expiry date cannot be in the past'
-			}
-		)
+	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
 });
 
 export const UserCreateSchema = z.object({
@@ -664,13 +652,16 @@ export const FeatureFlagsSchema = z.object({
 	organisation_issues: z.boolean().optional(),
 	quantitative_risk_studies: z.boolean().optional(),
 	terminologies: z.boolean().optional(),
+	custom_fields: z.boolean().optional(),
 	bia: z.boolean().optional(),
 	project_management: z.boolean().optional(),
 	contracts: z.boolean().optional(),
 	reports: z.boolean().optional(),
 	validation_flows: z.boolean().optional(),
 	focus_mode: z.boolean().optional(),
+	idp_groups: z.boolean().optional(),
 	outgoing_webhooks: z.boolean().optional(),
+	audit_log_forwarding: z.boolean().optional(),
 	metrology: z.boolean().optional(),
 	personal_data: z.boolean().optional(),
 	purposes: z.boolean().optional(),
@@ -1545,6 +1536,50 @@ export const KillChainSchema = z.object({
 	folder: z.string()
 });
 
+export const CustomFieldDefinitionSchema = z
+	.object({
+		model: z.string().optional(),
+		key: z
+			.string()
+			.min(1)
+			.regex(/^[a-z0-9_]+$/, {
+				message: 'Use lowercase letters, digits and underscores only.'
+			}),
+		label: z.string().min(1),
+		help_text: z.string().optional().default(''),
+		field_type: z.enum(['text', 'number', 'date', 'boolean', 'choice', 'multi_choice']),
+		required: z.boolean().default(false),
+		visible: z.boolean().default(true),
+		searchable: z.boolean().default(false),
+		filterable: z.boolean().default(true),
+		order: z.number().default(0),
+		folder: z.string(),
+		choices: z
+			.array(
+				z.object({
+					value: z.string().min(1),
+					label: z.string().min(1),
+					order: z.number().default(0),
+					translations: z.record(z.string(), z.any()).optional()
+				})
+			)
+			.optional()
+			.default([]),
+		translations: z.record(z.string(), z.any()).optional()
+	})
+	.superRefine((data, ctx) => {
+		if (
+			(data.field_type === 'choice' || data.field_type === 'multi_choice') &&
+			data.choices.length === 0
+		) {
+			ctx.addIssue({
+				code: 'custom',
+				path: ['choices'],
+				message: 'At least one choice is required for choice fields.'
+			});
+		}
+	});
+
 export const TerminologySchema = z.object({
 	...NameDescriptionMixin,
 	field_path: z.string().min(1),
@@ -1629,7 +1664,8 @@ export const ProjectSchema = z.object({
 	parent_project: z.string().uuid().optional().nullable(),
 	tolerances: z.record(z.string(), z.unknown()).optional(),
 	observation: z.string().optional().nullable(),
-	filtering_labels: z.array(z.string().uuid().optional()).optional()
+	filtering_labels: z.array(z.string().uuid().optional()).optional(),
+	custom_fields: z.record(z.string(), z.any()).optional()
 });
 
 export const ResponsibilityRoleSchema = z.object({
@@ -1768,6 +1804,12 @@ export const DocumentRevisionSchema = z.object({
 	reviewer_comments: z.string().optional().nullable()
 });
 
+export const IdPGroupSchema = z.object({
+	id: z.string().uuid().optional(),
+	name: z.string().min(1),
+	user_groups: z.array(z.string().uuid().optional()).optional()
+});
+
 const SCHEMA_MAP: Record<string, ZodSchema> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -1792,6 +1834,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	evidences: EvidenceSchema,
 	'evidence-revisions': EvidenceRevisionSchema,
 	users: UserCreateSchema,
+	'idp-groups': IdPGroupSchema,
 	'sso-settings': SSOSettingsSchema,
 	'general-settings': GeneralSettingsSchema,
 	'feature-flags': FeatureFlagsSchema,
@@ -1840,6 +1883,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'quantitative-risk-scenarios': quantitativeRiskScenarioSchema,
 	'quantitative-risk-hypotheses': quantitativeRiskHypothesisSchema,
 	terminologies: TerminologySchema,
+	'custom-fields': CustomFieldDefinitionSchema,
 	roles: RoleSchema,
 	'generic-collections': GenericCollectionSchema,
 	accreditations: AccreditationSchema,
@@ -1877,6 +1921,27 @@ export const webhookEndpointSchema = z.object({
 	secret: z.string().min(1).optional(),
 	target_folders: z.string().uuid().optional().array().optional(),
 	payload_format: z.enum(['thin', 'full']).default('full')
+});
+
+export const auditSinkSchema = z.object({
+	...NameDescriptionMixin,
+	id: z.string().optional(),
+	transport: z.enum(['http', 'kafka']).default('http'),
+	url: z.string().url().optional().or(z.literal('')),
+	body_format: z.enum(['ocsf', 'raw']).default('ocsf'),
+	// HTTP: JSON of auth headers, parsed server-side.
+	headers: z.string().optional(),
+	// Kafka: assembled server-side into kafka_config {bootstrap_servers, topic, config}.
+	bootstrap_servers: z.string().optional(),
+	topic: z.string().optional(),
+	security_protocol: z
+		.enum(['PLAINTEXT', 'SSL', 'SASL_PLAINTEXT', 'SASL_SSL'])
+		.default('PLAINTEXT'),
+	sasl_mechanism: z.string().optional(),
+	sasl_username: z.string().optional(),
+	sasl_password: z.string().optional(),
+	target_folders: z.string().uuid().optional().array().optional(),
+	is_active: z.boolean().default(true)
 });
 
 export const activateTOTPSchema: ZodSchema = z.object({

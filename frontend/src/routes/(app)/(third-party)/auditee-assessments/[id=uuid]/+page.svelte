@@ -606,11 +606,11 @@
 	<div
 		class="flex-shrink-0 transition-all duration-200 {tocCollapsed
 			? 'w-10'
-			: 'w-72'} sticky top-0 self-start max-h-screen overflow-y-auto border-r border-gray-200 bg-white"
+			: 'w-72'} sticky top-0 self-start max-h-screen overflow-y-auto border-r border-surface-200-800 bg-surface-50-950"
 	>
-		<div class="flex items-center justify-between p-2 border-b border-gray-100">
+		<div class="flex items-center justify-between p-2 border-b border-surface-100-900">
 			{#if !tocCollapsed}
-				<span class="text-sm font-semibold text-gray-700">{m.tableOfContents()}</span>
+				<span class="text-sm font-semibold text-surface-700-300">{m.tableOfContents()}</span>
 			{/if}
 			<button
 				class="btn btn-sm preset-tonal-surface"
@@ -620,14 +620,14 @@
 			</button>
 		</div>
 		{#if !tocCollapsed}
-			<div class="px-2 py-2 flex flex-wrap gap-1 border-b border-gray-200">
+			<div class="px-2 py-2 flex flex-wrap gap-1 border-b border-surface-200-800">
 				{#each resultCounts as opt}
 					{#if opt.count > 0}
 						<button
 							class="px-2 py-1 text-[10px] rounded transition-colors flex items-center gap-1.5
 								{tocFilterResult === opt.id
-								? 'bg-gray-700 text-white font-semibold'
-								: 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'}"
+								? 'bg-surface-700-300 text-white font-semibold'
+								: 'bg-surface-50-950 text-surface-700-300 hover:bg-surface-200-800 border border-surface-200-800'}"
 							onclick={() => (tocFilterResult = tocFilterResult === opt.id ? null : opt.id)}
 							title={opt.label}
 						>
@@ -644,7 +644,7 @@
 				{#each filteredTocSections as section}
 					{#if section.result === '__section__'}
 						<button
-							class="w-full text-left px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-gray-400 mt-2 truncate
+							class="w-full text-left px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-surface-400-600 mt-2 truncate
 								{section.index === currentIndex ? 'text-primary-700' : ''}"
 							onclick={() => goTo(section.index)}
 							title={section.title}
@@ -655,8 +655,8 @@
 						<button
 							class="w-full text-left px-2 py-1.5 text-xs rounded-md transition-colors truncate flex items-center gap-1.5
 								{section.index === currentIndex
-								? 'bg-primary-100 text-primary-800 font-semibold'
-								: 'text-gray-600 hover:bg-gray-100'}"
+								? 'bg-primary-100 text-primary-800-200 font-semibold'
+								: 'text-surface-600-400 hover:bg-surface-200-800'}"
 							onclick={() => goTo(section.index)}
 							title={section.title}
 						>
@@ -679,12 +679,12 @@
 	<!-- Main content -->
 	<div class="flex-1 flex flex-col space-y-4 p-4 min-w-0">
 		<!-- Header: audit name + progress -->
-		<div class="card bg-white shadow-sm px-5 py-4 border-t-[3px] border-t-primary-500">
+		<div class="card bg-surface-50-950 shadow-sm px-5 py-4 border-t-[3px] border-t-primary-500">
 			<div class="flex items-center justify-between mb-2">
 				<div class="flex items-center space-x-3">
 					<a
 						href="/auditee-dashboard"
-						class="text-primary-600 hover:text-primary-800"
+						class="text-primary-600 hover:text-primary-800-200"
 						title={m.auditDashboard()}
 					>
 						<i class="fa-solid fa-arrow-left"></i>
@@ -692,19 +692,19 @@
 					<div>
 						<h2 class="text-lg font-semibold">{complianceAssessment.name}</h2>
 						{#if complianceAssessment.framework?.name}
-							<p class="text-sm text-gray-500">
+							<p class="text-sm text-surface-600-400">
 								<i class="fa-solid fa-book mr-1"></i>{complianceAssessment.framework.name}
 							</p>
 						{/if}
 					</div>
 				</div>
-				<div class="text-sm text-gray-500">
+				<div class="text-sm text-surface-600-400">
 					{currentIndex + 1} / {navItems.length}
 				</div>
 			</div>
 			<!-- ETA / Due date -->
 			{#if complianceAssessment.eta || complianceAssessment.due_date}
-				<div class="flex items-center space-x-4 text-sm text-gray-500">
+				<div class="flex items-center space-x-4 text-sm text-surface-600-400">
 					{#if complianceAssessment.eta}
 						<span
 							><i class="fa-solid fa-calendar mr-1"></i>{m.eta()}: {complianceAssessment.eta}</span
@@ -719,13 +719,13 @@
 			{/if}
 			<!-- Progress bar -->
 			<div class="flex items-center space-x-3">
-				<div class="flex-1 bg-gray-200 rounded-full h-2">
+				<div class="flex-1 bg-surface-200-800 rounded-full h-2">
 					<div
 						class="h-2 rounded-full transition-all duration-500 ease-out"
 						style="width: {progressPercent}%; background: linear-gradient(90deg, var(--color-primary-500), var(--color-primary-400));"
 					></div>
 				</div>
-				<span class="text-sm font-medium text-gray-600 whitespace-nowrap">
+				<span class="text-sm font-medium text-surface-600-400 whitespace-nowrap">
 					{#if useQuestionProgress}
 						{answeredQuestions}/{totalQuestions} {m.questions()} ({progressPercent}%)
 					{:else}
@@ -740,7 +740,7 @@
 			<!-- Auditors see nothing here -->
 		{:else if assignmentStatus === 'submitted'}
 			<div
-				class="bg-white border border-blue-200 border-l-[3px] border-l-blue-500 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
+				class="bg-surface-50-950 border border-blue-200 border-l-[3px] border-l-blue-500 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
 			>
 				<div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
 					<i class="fa-solid fa-clock text-blue-500 text-sm"></i>
@@ -749,7 +749,7 @@
 			</div>
 		{:else if assignmentStatus === 'closed'}
 			<div
-				class="bg-white border border-green-200 border-l-[3px] border-l-emerald-500 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
+				class="bg-surface-50-950 border border-green-200 border-l-[3px] border-l-emerald-500 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
 			>
 				<div
 					class="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0"
@@ -760,7 +760,7 @@
 			</div>
 		{:else if assignmentStatus === 'changes_requested'}
 			<div
-				class="bg-white border border-red-200 border-l-[3px] border-l-red-500 rounded-lg px-5 py-3 flex flex-col gap-2 shadow-sm"
+				class="bg-surface-50-950 border border-red-200 border-l-[3px] border-l-red-500 rounded-lg px-5 py-3 flex flex-col gap-2 shadow-sm"
 			>
 				<div class="flex items-center gap-3">
 					<div
@@ -778,13 +778,13 @@
 				{/if}
 				{#if assignment?.events?.length > 0}
 					<button
-						class="ml-11 badge bg-gray-100 text-gray-600 text-xs hover:bg-gray-200 cursor-pointer transition-colors"
+						class="ml-11 badge bg-surface-200-800 text-surface-600-400 text-xs hover:bg-surface-200-800 cursor-pointer transition-colors"
 						onclick={openHistoryModal}
 						title={m.viewHistory()}
 					>
 						<i class="fa-solid fa-clock-rotate-left mr-1"></i>
 						{m.eventsHistory()}
-						<span class="badge bg-gray-100 text-gray-500 text-[10px] ml-1"
+						<span class="badge bg-surface-200-800 text-surface-600-400 text-[10px] ml-1"
 							>{assignment.events.length}</span
 						>
 					</button>
@@ -792,14 +792,14 @@
 			</div>
 		{:else if assignmentStatus === 'draft'}
 			<div
-				class="bg-white border border-gray-200 border-l-[3px] border-l-gray-400 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
+				class="bg-surface-50-950 border border-surface-200-800 border-l-[3px] border-l-gray-400 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
 			>
 				<div
-					class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0"
+					class="w-8 h-8 rounded-full bg-surface-200-800 flex items-center justify-center flex-shrink-0"
 				>
-					<i class="fa-solid fa-hourglass text-gray-400 text-sm"></i>
+					<i class="fa-solid fa-hourglass text-surface-400-600 text-sm"></i>
 				</div>
-				<p class="text-sm text-gray-600 font-medium">{m.assignmentAwaitingStart()}</p>
+				<p class="text-sm text-surface-600-400 font-medium">{m.assignmentAwaitingStart()}</p>
 			</div>
 		{/if}
 
@@ -824,7 +824,7 @@
 		<!-- Read-only banner (only for CA-level locks, not assignment-level) -->
 		{#if complianceAssessment.is_locked || complianceAssessment.status === 'in_review'}
 			<div
-				class="bg-white border border-yellow-200 border-l-[3px] border-l-yellow-500 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
+				class="bg-surface-50-950 border border-yellow-200 border-l-[3px] border-l-yellow-500 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
 			>
 				<div
 					class="w-8 h-8 rounded-full bg-yellow-50 flex items-center justify-center flex-shrink-0"
@@ -845,14 +845,14 @@
 				name={currentSplashNode.name}
 				description={currentSplashNode.description}
 				id="current-requirement"
-				class="card bg-white shadow-md"
+				class="card bg-surface-50-950 shadow-md"
 			/>
 		{:else if currentSectionNode}
 			<div
 				id="current-requirement"
-				class="card bg-gray-50 shadow-sm border-l-4 border-l-gray-400 px-6 py-3"
+				class="card bg-surface-100-900 shadow-sm border-l-4 border-l-gray-400 px-6 py-3"
 			>
-				<h3 class="text-lg font-semibold text-gray-700">{currentSectionNode.name}</h3>
+				<h3 class="text-lg font-semibold text-surface-700-300">{currentSectionNode.name}</h3>
 				{#if currentSectionNode.description}
 					<div class="mt-2">
 						<MarkdownRenderer content={currentSectionNode.description} />
@@ -867,7 +867,7 @@
 				] ?? requirementAssessment}
 			<div
 				id="current-requirement"
-				class="card bg-white shadow-md border-t-[3px] border-t-orange-400 px-6 py-5 flex flex-col space-y-4"
+				class="card bg-surface-50-950 shadow-md border-t-[3px] border-t-orange-400 px-6 py-5 flex flex-col space-y-4"
 			>
 				<!-- Requirement title -->
 				<div class="flex items-start justify-between">
@@ -876,7 +876,7 @@
 							{getTitle(requirementAssessment)}
 						</h3>
 						{#if requirement.ref_id && requirement.name}
-							<p class="text-sm text-gray-500 mt-0.5">{requirement.ref_id}</p>
+							<p class="text-sm text-surface-600-400 mt-0.5">{requirement.ref_id}</p>
 						{/if}
 					</div>
 				</div>
@@ -1318,7 +1318,7 @@
 
 		<!-- Previous / Next navigation (shown for both splash and assessment items) -->
 		{#if currentSplashNode || currentItem}
-			<div class="flex items-center justify-between card bg-white shadow-sm px-5 py-3">
+			<div class="flex items-center justify-between card bg-surface-50-950 shadow-sm px-5 py-3">
 				<button
 					class="btn preset-tonal-surface"
 					disabled={currentIndex === 0}
@@ -1327,7 +1327,7 @@
 					<i class="fa-solid fa-arrow-left mr-2"></i>
 					{m.previous()}
 				</button>
-				<span class="text-sm text-gray-500">
+				<span class="text-sm text-surface-600-400">
 					{currentIndex + 1} / {navItems.length}
 				</span>
 				<button
@@ -1341,10 +1341,10 @@
 			</div>
 		{:else}
 			<div class="flex flex-col items-center justify-center py-20">
-				<div class="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mb-5">
-					<i class="fa-solid fa-clipboard-check text-2xl text-gray-300"></i>
+				<div class="w-16 h-16 rounded-2xl bg-surface-200-800 flex items-center justify-center mb-5">
+					<i class="fa-solid fa-clipboard-check text-2xl text-surface-300-700"></i>
 				</div>
-				<p class="text-gray-400">{m.noAuditAssignments()}</p>
+				<p class="text-surface-400-600">{m.noAuditAssignments()}</p>
 			</div>
 		{/if}
 	</div>
@@ -1355,7 +1355,7 @@
 	<div class="fixed inset-0 bg-black/50 z-40" onclick={closeHistoryModal} role="presentation"></div>
 	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
 		<div
-			class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col"
+			class="bg-surface-50-950 rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col"
 			onclick={(e) => e.stopPropagation()}
 			role="dialog"
 			aria-modal="true"
@@ -1379,7 +1379,7 @@
 			<!-- Content -->
 			<div class="p-4 overflow-y-auto flex-1">
 				<div class="mb-3">
-					<span class="text-sm text-gray-600">
+					<span class="text-sm text-surface-600-400">
 						{complianceAssessment.name}
 					</span>
 				</div>
@@ -1398,9 +1398,9 @@
 												? 'bg-blue-400'
 												: event.event_type === 'in_progress'
 													? 'bg-amber-400'
-													: 'bg-gray-300'}"
+													: 'bg-surface-300-700'}"
 								></div>
-								<div class="w-px flex-1 bg-gray-200 mt-1"></div>
+								<div class="w-px flex-1 bg-surface-200-800 mt-1"></div>
 							</div>
 							<div class="pb-3 flex-1">
 								<div class="flex items-center gap-2 text-sm">
@@ -1414,20 +1414,20 @@
 													? 'bg-blue-100 text-blue-700'
 													: event.event_type === 'in_progress'
 														? 'bg-orange-100 text-orange-700'
-														: 'bg-gray-100 text-gray-700'}"
+														: 'bg-surface-200-800 text-surface-700-300'}"
 									>
 										{safeTranslate(event.event_type)}
 									</span>
-									<span class="text-gray-500 text-xs">
+									<span class="text-surface-600-400 text-xs">
 										{formatEventActor(event.event_actor)}
 									</span>
 								</div>
-								<span class="text-gray-400 text-xs">
+								<span class="text-surface-400-600 text-xs">
 									{formatDate(new Date(event.created_at), true, getLocale())}
 								</span>
 								{#if event.event_notes}
 									<div
-										class="mt-1.5 text-sm text-gray-700 whitespace-pre-line bg-gray-50 border border-gray-100 rounded-md px-3 py-2"
+										class="mt-1.5 text-sm text-surface-700-300 whitespace-pre-line bg-surface-100-900 border border-surface-100-900 rounded-md px-3 py-2"
 									>
 										{event.event_notes}
 									</div>
@@ -1439,7 +1439,7 @@
 			</div>
 
 			<!-- Footer -->
-			<div class="p-4 border-t bg-gray-50 rounded-b-lg">
+			<div class="p-4 border-t bg-surface-100-900 rounded-b-lg">
 				<button class="btn preset-filled-surface-500 w-full" onclick={closeHistoryModal}>
 					{m.close()}
 				</button>

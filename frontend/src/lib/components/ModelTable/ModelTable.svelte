@@ -125,11 +125,11 @@
 		orderBy = undefined,
 		element = 'table',
 		text = 'text-xs',
-		backgroundColor = 'bg-white',
+		backgroundColor = 'bg-surface-50-950',
 		color = '',
 		regionHead = '',
-		regionHeadCell = 'uppercase bg-white text-gray-700',
-		regionBody = 'bg-white',
+		regionHeadCell = 'uppercase bg-surface-50-950 text-surface-700-300',
+		regionBody = 'bg-surface-50-950',
 		regionCell = 'max-w-[65ch] max-h-[8em] overflow-hidden hover:overflow-y-auto',
 		regionFoot = '',
 		regionFootCell = '',
@@ -280,6 +280,22 @@
 	const user = page.data.user;
 
 	const isRelatedField = (fieldName: string): boolean => relatedFieldNames.has(fieldName);
+	const nonNavigableRelatedFields = new Set(['qualifications', 'relationship', 'nature']);
+	const getRelatedFieldHref = (
+		fieldName: string,
+		id: string,
+		options: { fallbackToDashedField?: boolean } = {}
+	): string | undefined => {
+		if (nonNavigableRelatedFields.has(fieldName)) return undefined;
+		const relatedUrlModel = model?.foreignKeyFields?.find(
+			(field) => field.field === fieldName
+		)?.urlModel;
+		const urlModel =
+			relatedUrlModel ?? (options.fallbackToDashedField ? fieldName.replace(/_/g, '-') : undefined);
+
+		if (!urlModel) return undefined;
+		return `/${urlModel}/${id}`;
+	};
 
 	let classProp = ''; // Replacing $$props.class
 
@@ -615,7 +631,10 @@
 	}
 
 	let classesHexBackgroundText = $derived((backgroundHexColor: string) => {
-		return isDark(backgroundHexColor) ? 'text-white' : '';
+		// The badge background is a fixed hex color, so the text must be a fixed color too
+		// (not theme-dependent), otherwise it turns light in dark mode and vanishes on a
+		// light-colored badge. White on dark backgrounds, fixed dark surface otherwise.
+		return isDark(backgroundHexColor) ? 'text-white' : 'text-surface-950';
 	});
 
 	const tail_render = $derived(tail);
@@ -762,7 +781,7 @@
 					</Popover.Trigger>
 					<Popover.Positioner class="z-50!">
 						<Popover.Content
-							class="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
+							class="card p-2 bg-surface-50-950 max-w-lg shadow-lg space-y-2 border border-surface-200-800"
 						>
 							<SuperForm {_form} validators={zod(z.object({}))}>
 								{#snippet children({ form })}
@@ -859,11 +878,12 @@
 						}}
 					>
 						<span
-							class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors group-hover/check:bg-black/10 dark:group-hover/check:bg-white/10"
+							class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors group-hover/check:bg-black/10 dark:group-hover/check:bg-surface-100-900/10"
 						>
 							<input
 								type="checkbox"
 								class="checkbox pointer-events-none"
+								aria-label={m.selectAll()}
 								checked={selectAllChecked}
 								tabindex={-1}
 							/>
@@ -905,7 +925,7 @@
 								onkeydown={(e) => onRowKeydown(e, rowIndex)}
 								oncontextmenu={() => (contextMenuOpenRow = row)}
 								aria-rowindex={rowIndex + 1}
-								class="hover:preset-tonal-primary even:bg-surface-50 cursor-pointer"
+								class="hover:bg-surface-200-800 even:bg-surface-100-900 cursor-pointer"
 							>
 								{#if hasBatchActions}
 									<td
@@ -917,11 +937,12 @@
 										}}
 									>
 										<span
-											class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors group-hover/check:bg-black/10 dark:group-hover/check:bg-white/10"
+											class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors group-hover/check:bg-black/10 dark:group-hover/check:bg-surface-100-900/10"
 										>
 											<input
 												type="checkbox"
 												class="checkbox pointer-events-none"
+												aria-label={m.selectRow()}
 												checked={selectedIds.has(meta?.id)}
 												tabindex={-1}
 											/>
@@ -965,11 +986,17 @@
 																			{@const [securityObjectiveName, securityObjectiveValue] =
 																				Object.entries(val)[0]}
 																			{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
-																		{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship' && key !== 'nature'}
-																			{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key.replace(/_/g, '-')}/${val.id}`}
-																			<Anchor href={itemHref} class="anchor" stopPropagation
-																				>{safeTranslate(val.str)}</Anchor
-																			>
+																		{:else if val.str && val.id}
+																			{@const itemHref = getRelatedFieldHref(key, val.id, {
+																				fallbackToDashedField: true
+																			})}
+																			{#if itemHref}
+																				<Anchor href={itemHref} class="anchor" stopPropagation
+																					>{safeTranslate(val.str)}</Anchor
+																				>
+																			{:else}
+																				{safeTranslate(val.str)}
+																			{/if}
 																		{:else if val.str}
 																			{safeTranslate(val.str)}
 																		{:else if typeof val === 'string' && val.includes(':') && unsafeTranslate(val.split(':')[0])}
@@ -1004,8 +1031,10 @@
 															--
 														{/if}
 													{:else if value && value.str}
-														{#if value.id}
-															{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${value.id}`}
+														{@const itemHref = value.id
+															? getRelatedFieldHref(key, value.id)
+															: undefined}
+														{#if itemHref}
 															{#if key === 'ro_to_couple'}
 																<Anchor
 																	breadcrumbAction="push"
@@ -1083,7 +1112,12 @@
 														{value.name}
 													{:else}
 														<!-- NOTE: We will have to handle the ellipses for RTL languages-->
-														{@const displayValue = ['name', 'description', 'ref_id'].includes(key)
+														{@const displayValue = [
+															'name',
+															'description',
+															'ref_id',
+															'key'
+														].includes(key)
 															? (value ?? '-')
 															: safeTranslate(value ?? '-')}
 														{#if displayValue?.length > 300}
@@ -1149,17 +1183,17 @@
 			</ContextMenu.Trigger>
 			{#if contextMenuDisplayEdit || contextMenuDisplayDelete || Object.hasOwn(contextMenuActions, URLModel)}
 				<ContextMenu.Content
-					class="z-50 min-w-[180px] outline-hidden bg-white px-1 py-1.5 shadow-md border border-surface-200 rounded-md"
+					class="z-50 min-w-[180px] outline-hidden bg-surface-50-950 px-1 py-1.5 shadow-md border border-surface-200-800 rounded-md"
 				>
 					{#if Object.hasOwn(contextMenuActions, URLModel)}
 						{#each contextMenuActions[URLModel] as action}
 							<action.component row={contextMenuOpenRow} {handler} {URLModel} {action} />
 						{/each}
-						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100" />
+						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100-900" />
 					{/if}
 					{#if !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn) || URLModel === 'terminologies' || URLModel === 'entities'}
 						<ContextMenu.Item
-							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-50"
+							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-100-900"
 							onclick={() => {
 								goto(
 									`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`,
@@ -1172,7 +1206,7 @@
 							{m.edit()}
 						</ContextMenu.Item>
 						<ContextMenu.Item
-							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-50"
+							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-100-900"
 							onclick={() => {
 								goto(`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/`, {
 									breadcrumbAction: 'push'
@@ -1183,9 +1217,9 @@
 						</ContextMenu.Item>
 					{/if}
 					{#if contextMenuDisplayDelete}
-						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100" />
+						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100-900" />
 						<ContextMenu.Item
-							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer text-red-500 data-highlighted:bg-surface-50"
+							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer text-red-500 data-highlighted:bg-surface-100-900"
 							onclick={() => {
 								if (URLModel === 'folders') {
 									contextMenuPromptModalConfirmDelete(

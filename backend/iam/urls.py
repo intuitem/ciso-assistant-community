@@ -6,16 +6,16 @@ from .views import (
     PersonalAccessTokenViewSet,
     ChangePasswordView,
     CurrentUserView,
-    LoginView,
     PasswordResetView,
     ResetPasswordConfirmView,
     SessionTokenView,
     SetPasswordView,
     RevokeOtherSessionsView,
+    SCIMTokenViewSet,
+    SCIMTokenDeleteView,
 )
 
 urlpatterns = [
-    path(r"login/", LoginView.as_view(), name="knox_login"),
     path(r"logout/", knox_views.LogoutView.as_view(), name="knox_logout"),
     path(r"logoutall/", knox_views.LogoutAllView.as_view(), name="knox_logoutall"),
     path("current-user/", CurrentUserView.as_view(), name="current-user"),
@@ -39,5 +39,11 @@ urlpatterns = [
         "auth-tokens/<str:pk>/",
         AuthTokenDetailView.as_view(),
         name="auth-token-detail",
+    ),
+    path("scim-token/", SCIMTokenViewSet.as_view(), name="scim-token"),
+    path(
+        "scim-token/<int:token_id>/",
+        SCIMTokenDeleteView.as_view(),
+        name="scim-token-delete",
     ),
 ]

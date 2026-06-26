@@ -135,6 +135,12 @@ export const navData = {
 					href: '/user-groups'
 				},
 				{
+					name: 'idpGroups',
+					fa_icon: 'fa-solid fa-id-badge',
+					href: '/idp-groups',
+					featureFlag: 'idp_groups'
+				},
+				{
 					name: 'roles',
 					fa_icon: 'fa-solid fa-shield-halved',
 					href: '/roles',
@@ -505,6 +511,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-language',
 					href: '/terminologies',
 					permissions: ['view_terminology']
+				},
+				{
+					name: 'customFields',
+					fa_icon: 'fa-solid fa-sliders',
+					href: '/custom-fields',
+					permissions: ['view_customfielddefinition']
 				},
 				{
 					name: 'settings',

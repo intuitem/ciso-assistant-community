@@ -95,6 +95,7 @@
 * [SSO](configuration/sso/README.md)
   * [SAML](configuration/sso/saml.md)
   * [OpenID Connect (OIDC)](configuration/sso/oidc.md)
+  * [SCIM provisioning and IdP groups](configuration/sso/scim.md)
   * [Identity providers](configuration/sso/identity-providers/README.md)
     * [Microsoft Entra ID](configuration/sso/identity-providers/entra-id.md)
     * [Okta](configuration/sso/identity-providers/okta.md)
@@ -143,6 +144,7 @@
   * [Managing a responsibility matrix](guides/responsibility-matrix.md)
 * Third-party
   * [Third-Party Risk Management](guides/tprm.md)
+  * [Common TPRM pitfalls](guides/tprm-challenges.md)
 
 ## Features
 
@@ -171,6 +173,7 @@
 * [Control Plan](features/control-plan.md)
 * [Action plans](features/action-plans.md)
 * [Working with tables](features/working-with-tables.md)
+* [Custom fields](features/custom-fields.md)
 * [Command palette](features/command-palette.md)
 * [Universal search](features/search.md)
 * [My assignments](features/my-assignments.md)
@@ -187,6 +190,7 @@
 * [API reference](integrations/api.md)
 * [Generating a PAT](integrations/pat.md)
 * [Outgoing webhooks](integrations/webhooks.md)
+* [Audit log forwarding](integrations/audit-log-forwarding.md)
 * [MCP setup guide](integrations/mcp.md)
 * [Third-party integrations](integrations/third-party/README.md)
   * [Jira](integrations/third-party/jira.md)

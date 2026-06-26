@@ -9,6 +9,7 @@ from core.utils import RoleCodename, UserGroupCodename
 logger = get_logger(__name__)
 
 READER_PERMISSIONS_LIST = [
+    "view_customfielddefinition",
     "view_compliance_assessment_full",
     "view_object_audittrail",
     "view_appliedcontrol",
@@ -135,6 +136,7 @@ READER_PERMISSIONS_LIST = [
 ]
 
 APPROVER_PERMISSIONS_LIST = [
+    "view_customfielddefinition",
     "view_compliance_assessment_full",
     "view_perimeter",
     "view_riskassessment",
@@ -247,6 +249,7 @@ APPROVER_PERMISSIONS_LIST = [
 ]
 
 ANALYST_PERMISSIONS_LIST = [
+    "view_customfielddefinition",
     "view_compliance_assessment_full",
     "view_object_audittrail",
     "add_filteringlabel",
@@ -612,6 +615,10 @@ ANALYST_PERMISSIONS_LIST = [
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
+    "add_customfielddefinition",
+    "view_customfielddefinition",
+    "change_customfielddefinition",
+    "delete_customfielddefinition",
     "view_compliance_assessment_full",
     "view_object_audittrail",
     "add_filteringlabel",
@@ -1022,6 +1029,10 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
+    "add_customfielddefinition",
+    "view_customfielddefinition",
+    "change_customfielddefinition",
+    "delete_customfielddefinition",
     "view_central_auditlog",
     "view_compliance_assessment_full",
     "view_object_audittrail",
@@ -1037,6 +1048,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_usergroup",
     "change_usergroup",
     "delete_usergroup",
+    "add_idpgroup",
+    "view_idpgroup",
+    "change_idpgroup",
+    "delete_idpgroup",
     "add_event",
     "view_event",
     "change_event",

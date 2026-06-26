@@ -24,17 +24,41 @@
 
 	const outcomeBadge: Record<BatchOutcome, { label: string; cls: string; icon: string }> = $derived(
 		{
-			created: { label: m.created(), cls: 'bg-green-100 text-green-800', icon: 'fa-circle-plus' },
+			created: {
+				label: m.created(),
+				cls: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200',
+				icon: 'fa-circle-plus'
+			},
 			revision_added: {
 				label: m.revisionAdded(),
-				cls: 'bg-blue-100 text-blue-800',
+				cls: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200',
 				icon: 'fa-code-branch'
 			},
-			replaced: { label: m.replaced(), cls: 'bg-violet-100 text-violet-800', icon: 'fa-rotate' },
-			renamed: { label: m.renamed(), cls: 'bg-amber-100 text-amber-800', icon: 'fa-pen' },
-			skipped: { label: m.skipped(), cls: 'bg-gray-100 text-gray-700', icon: 'fa-forward' },
-			duplicate: { label: m.duplicate(), cls: 'bg-cyan-100 text-cyan-800', icon: 'fa-clone' },
-			error: { label: m.error(), cls: 'bg-red-100 text-red-800', icon: 'fa-triangle-exclamation' }
+			replaced: {
+				label: m.replaced(),
+				cls: 'bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-200',
+				icon: 'fa-rotate'
+			},
+			renamed: {
+				label: m.renamed(),
+				cls: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200',
+				icon: 'fa-pen'
+			},
+			skipped: {
+				label: m.skipped(),
+				cls: 'bg-surface-100-900 text-surface-700-300',
+				icon: 'fa-forward'
+			},
+			duplicate: {
+				label: m.duplicate(),
+				cls: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-200',
+				icon: 'fa-clone'
+			},
+			error: {
+				label: m.error(),
+				cls: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200',
+				icon: 'fa-triangle-exclamation'
+			}
 		}
 	);
 </script>
@@ -42,7 +66,9 @@
 {#if entries.length > 0}
 	<div class="border rounded-lg overflow-hidden">
 		<table class="w-full text-sm">
-			<thead class="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
+			<thead
+				class="bg-surface-50-950 text-left text-xs uppercase tracking-wide text-surface-600-400"
+			>
 				<tr>
 					<th class="px-3 py-2 font-medium">{m.pathOrName()}</th>
 					<th class="px-3 py-2 font-medium">{m.size()}</th>
@@ -62,10 +88,10 @@
 								<div class="text-xs text-amber-700">→ {entry.renamedTo}</div>
 							{/if}
 						</td>
-						<td class="px-3 py-2 text-gray-600 whitespace-nowrap">{fmtSize(entry.size)}</td>
+						<td class="px-3 py-2 text-surface-600-400 whitespace-nowrap">{fmtSize(entry.size)}</td>
 						<td class="px-3 py-2">
 							{#if entry.status === 'pending'}
-								<span class="text-gray-500"
+								<span class="text-surface-600-400"
 									><i class="fa-regular fa-clock mr-1"></i>{m.pending()}</span
 								>
 							{:else if entry.status === 'uploading'}
@@ -79,7 +105,7 @@
 								</span>
 							{/if}
 						</td>
-						<td class="px-3 py-2 text-xs text-gray-600">
+						<td class="px-3 py-2 text-xs text-surface-600-400">
 							{#if entry.outcome === 'error' && entry.message}
 								<span class="text-red-700">{entry.message}</span>
 							{:else if entry.message}
@@ -92,7 +118,7 @@
 									class="text-indigo-600 hover:underline"
 								>
 									{m.evidence()}
-									{#if entry.version}<span class="text-gray-500">v{entry.version}</span>{/if}
+									{#if entry.version}<span class="text-surface-600-400">v{entry.version}</span>{/if}
 								</a>
 							{/if}
 						</td>
@@ -100,7 +126,7 @@
 							{#if onRemove && entry.status !== 'uploading'}
 								<button
 									type="button"
-									class="text-gray-400 hover:text-red-600"
+									class="text-surface-500 hover:text-red-600"
 									onclick={() => onRemove?.(entry.id)}
 									{disabled}
 									aria-label={m.remove()}

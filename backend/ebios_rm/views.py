@@ -3,9 +3,16 @@ import uuid
 
 import django_filters as df
 import pandas as pd
+from django.db.models import Case, F, FloatField, Value, When
 from django.http import HttpResponse
 from core.serializers import RiskMatrixReadSerializer
-from core.views import BaseModelViewSet as AbstractBaseModelViewSet, GenericFilterSet
+from core.views import (
+    BaseModelViewSet as AbstractBaseModelViewSet,
+    GenericFilterSet,
+    SmartOrderingFilter,
+)
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
 from core.models import Terminology
 from openpyxl.styles import Alignment
 
@@ -761,7 +768,7 @@ class FearedEventViewSet(BaseModelViewSet):
             # Verify study exists
             try:
                 study = EbiosRMStudy.objects.get(id=uuid.UUID(str(study_id)))
-            except (ValueError, AttributeError, EbiosRMStudy.DoesNotExist):
+            except ValueError, AttributeError, EbiosRMStudy.DoesNotExist:
                 return Response(
                     {"error": "EBIOS RM Study not found"},
                     status=http_status.HTTP_404_NOT_FOUND,
@@ -949,9 +956,67 @@ class StakeholderFilter(df.FilterSet):
         return queryset.filter(id__in=ids)
 
 
+class StakeholderOrderingFilter(SmartOrderingFilter):
+    """Remap ordering fields that don't map directly to DB columns.
+
+    FK fields like ``entity`` are redirected to ``entity__name`` so the sort
+    is alphabetical instead of by UUID.  Computed properties like
+    ``current_criticality`` are backed by SQL annotations so the database
+    can ORDER BY them.
+    """
+
+    field_remap = {
+        "entity": "entity__name",
+        "current_criticality": "_current_criticality",
+        "residual_criticality": "_residual_criticality",
+    }
+
+    @staticmethod
+    def _criticality_annotation(prefix):
+        denom = F(f"{prefix}_maturity") * F(f"{prefix}_trust")
+        return Case(
+            When(**{f"{prefix}_maturity": 0}, then=Value(0.0)),
+            When(**{f"{prefix}_trust": 0}, then=Value(0.0)),
+            default=F(f"{prefix}_dependency")
+            * F(f"{prefix}_penetration")
+            * 1.0
+            / denom,
+            output_field=FloatField(),
+        )
+
+    def get_valid_fields(self, queryset, view, context=None):
+        valid = super().get_valid_fields(queryset, view, context or {})
+        valid += [(src, src) for src in self.field_remap if src not in dict(valid)]
+        return valid
+
+    def filter_queryset(self, request, queryset, view):
+        queryset = queryset.annotate(
+            _current_criticality=self._criticality_annotation("current"),
+            _residual_criticality=self._criticality_annotation("residual"),
+        )
+        return super().filter_queryset(request, queryset, view)
+
+    def get_ordering(self, request, queryset, view):
+        ordering = super().get_ordering(request, queryset, view)
+        if not ordering:
+            return ordering
+        remapped = []
+        for f in ordering:
+            descending = f.startswith("-")
+            field = f[1:] if descending else f
+            mapped = self.field_remap.get(field, field)
+            remapped.append(f"-{mapped}" if descending else mapped)
+        return remapped
+
+
 class StakeholderViewSet(BaseModelViewSet):
     model = Stakeholder
     filterset_class = StakeholderFilter
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        StakeholderOrderingFilter,
+    ]
 
     @action(detail=False, name="Get category choices")
     def category(self, request):
@@ -1187,7 +1252,7 @@ class OperatingModeViewSet(BaseModelViewSet):
 
             try:
                 ea_id = uuid.UUID(str(ea_id))
-            except (ValueError, AttributeError):
+            except ValueError, AttributeError:
                 errors.append(f"Step {i}: invalid elementary_action UUID.")
                 continue
 
@@ -1211,7 +1276,7 @@ class OperatingModeViewSet(BaseModelViewSet):
             for ant_id in antecedent_ids:
                 try:
                     ant_uuid = uuid.UUID(str(ant_id))
-                except (ValueError, AttributeError):
+                except ValueError, AttributeError:
                     errors.append(f"Step {i}: invalid antecedent UUID.")
                     continue
 
