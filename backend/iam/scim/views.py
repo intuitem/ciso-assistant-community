@@ -18,7 +18,7 @@ from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.validators import validate_email
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.http import JsonResponse
 from knox.auth import TokenAuthentication
 from rest_framework import views
@@ -27,7 +27,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.viewsets import ViewSet
 
 from global_settings.models import GlobalSettings
-from iam.models import Folder, IdPGroup
+from iam.models import Folder, IdPGroup, UserGroup
 
 from core.permissions import FeatureFlagRequired
 from .permissions import IsSCIMToken
@@ -420,14 +420,15 @@ class SCIMUserViewSet(ViewSet):
         user = _get_scim_user_by_pk(pk)
         if user is None:
             return _scim_error_response(f"User {pk} not found", 404)
-        if _would_orphan_admins(user):
-            return _scim_error_response(
-                "Refusing to deactivate the last active administrator",
-                409,
-                "mutability",
-            )
-        user.is_active = False
-        user.save(update_fields=["is_active"])
+        with transaction.atomic():
+            if _would_orphan_admins(user):
+                return _scim_error_response(
+                    "Refusing to deactivate the last active administrator",
+                    409,
+                    "mutability",
+                )
+            user.is_active = False
+            user.save(update_fields=["is_active"])
         logger.info("SCIM: user deactivated", user_id=pk)
         return JsonResponse({}, status=204)
 
@@ -490,6 +491,9 @@ class SCIMGroupViewSet(ViewSet):
         display_name = data.get("displayName")
         if not display_name:
             return _scim_error_response("displayName is required", 400, "invalidValue")
+        err = _display_name_error(display_name)
+        if err:
+            return err
 
         # Auto-create on first push: the group grants nothing until an admin
         # wires its user_groups, so accepting unknown groups is safe.
@@ -520,6 +524,9 @@ class SCIMGroupViewSet(ViewSet):
             return _scim_error_response("Invalid JSON body", 400, "invalidSyntax")
 
         display_name = data.get("displayName")
+        err = _display_name_error(display_name)
+        if err:
+            return err
         if display_name and not _rename_idp_group(idp_group, display_name):
             return _scim_error_response(
                 f"A group named '{display_name}' already exists", 409, "uniqueness"
@@ -593,19 +600,24 @@ class SCIMGroupViewSet(ViewSet):
                 elif path == "displayName" and value:
                     # IdP renamed the group. Only the label changes; the
                     # IdPGroup PK (the SCIM id) is the stable reference.
+                    err = _display_name_error(value)
+                    if err:
+                        return err
                     if not _rename_idp_group(idp_group, value):
                         return _scim_error_response(
                             f"A group named '{value}' already exists", 409, "uniqueness"
                         )
                 elif isinstance(value, dict):
-                    if "displayName" in value and not _rename_idp_group(
-                        idp_group, value["displayName"]
-                    ):
-                        return _scim_error_response(
-                            f"A group named '{value['displayName']}' already exists",
-                            409,
-                            "uniqueness",
-                        )
+                    if "displayName" in value:
+                        err = _display_name_error(value["displayName"])
+                        if err:
+                            return err
+                        if not _rename_idp_group(idp_group, value["displayName"]):
+                            return _scim_error_response(
+                                f"A group named '{value['displayName']}' already exists",
+                                409,
+                                "uniqueness",
+                            )
                     if "members" in value:
                         _push("set", _member_ids(value["members"] or []))
 
@@ -670,9 +682,16 @@ def _is_protected_account(user) -> bool:
 def _would_orphan_admins(user) -> bool:
     """True if deactivating ``user`` would leave the instance with no other
     active administrator. Mirrors the superuser deactivation guard in
-    ``User.save`` for the BI-UG-ADM admin population."""
+    ``User.save`` for the BI-UG-ADM admin population.
+
+    Must be called inside ``transaction.atomic()``: it locks the admin group
+    row so two concurrent SCIM deactivations serialize on it instead of both
+    reading a stale "another admin is still active" and dropping the count to
+    zero. ``select_for_update`` is a no-op on SQLite and enforced on Postgres.
+    """
     if not user.is_admin():
         return False
+    UserGroup.objects.filter(name="BI-UG-ADM").select_for_update().first()
     return (
         not User.get_admin_users().filter(is_active=True).exclude(pk=user.pk).exists()
     )
@@ -704,10 +723,6 @@ def _save_user_or_scim_error(user):
     """Persist a SCIM-mutated user, normalizing the email and translating
     storage failures into SCIM responses. Returns None on success, or a SCIM
     error response (400 invalidValue / 409 uniqueness / 409 mutability)."""
-    if not user.is_active and _would_orphan_admins(user):
-        return _scim_error_response(
-            "Refusing to deactivate the last active administrator", 409, "mutability"
-        )
     if user.email:
         user.email = user.email.lower()
         try:
@@ -717,7 +732,14 @@ def _save_user_or_scim_error(user):
                 f"Invalid email address: {user.email}", 400, "invalidValue"
             )
     try:
-        user.save()
+        with transaction.atomic():
+            if not user.is_active and _would_orphan_admins(user):
+                return _scim_error_response(
+                    "Refusing to deactivate the last active administrator",
+                    409,
+                    "mutability",
+                )
+            user.save()
     except IntegrityError:
         return _scim_error_response(
             "A user with this email or externalId already exists",
@@ -741,6 +763,20 @@ def _primary_email(emails):
         return None
     primary = next((e for e in dicts if e.get("primary")), dicts[0])
     return primary.get("value")
+
+
+def _display_name_error(name):
+    """Reject a displayName that won't fit IdPGroup.name, returning a 400
+    invalidValue instead of letting it reach the DB as an over-length write
+    (a 500 on Postgres; SQLite silently ignores max_length)."""
+    max_len = IdPGroup._meta.get_field("name").max_length
+    if name and len(name) > max_len:
+        return _scim_error_response(
+            f"displayName exceeds the maximum length of {max_len} characters",
+            400,
+            "invalidValue",
+        )
+    return None
 
 
 def _rename_idp_group(idp_group, new_name) -> bool:
