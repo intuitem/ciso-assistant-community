@@ -4,7 +4,7 @@ from datetime import timedelta
 import structlog
 from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model, login, logout
-from django.db import models
+from django.db import transaction
 from django.db.models import Q, Exists, OuterRef
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils import timezone
@@ -28,7 +28,8 @@ from django.conf import settings
 
 from global_settings.models import GlobalSettings
 from core.models import Actor
-from .models import Folder, PersonalAccessToken, Role, RoleAssignment
+from .models import Folder, PersonalAccessToken, Role, RoleAssignment, SCIMToken
+from core.permissions import IsAdministrator, FeatureFlagRequired
 from .serializers import (
     ChangePasswordSerializer,
     PersonalAccessTokenReadSerializer,
@@ -480,3 +481,78 @@ class RevokeOtherSessionsView(views.APIView):
             {"revoked_sessions": deleted_count},
             status=status.HTTP_200_OK,
         )
+
+
+class SCIMTokenViewSet(views.APIView):
+    """
+    GET  /api/iam/scim-token/   — list all SCIM tokens (admin only)
+    POST /api/iam/scim-token/   — create a new SCIM token (admin only)
+    """
+
+    permission_classes = [
+        permissions.IsAuthenticated,
+        IsAdministrator,
+        FeatureFlagRequired,
+    ]
+    feature_flag = "idp_groups"
+
+    def get(self, request, *args, **kwargs):
+        tokens = SCIMToken.objects.select_related("auth_token").all()
+        data = [
+            {
+                "id": t.id,
+                "name": t.name,
+                "created": t.auth_token.created,
+                "digest": t.auth_token.digest,
+            }
+            for t in tokens
+        ]
+        return Response(data, status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        name = request.data.get("name") or "SCIM provisioning token"
+        if len(name) > 255:
+            return Response(
+                {"error": "Name must be at most 255 characters."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        token_prefix = knox_settings.TOKEN_PREFIX
+        with transaction.atomic():
+            instance, raw_token = get_token_model().objects.create(
+                user=request.user,
+                expiry=None,
+                prefix=token_prefix,
+            )
+            scim_token = SCIMToken.objects.create(auth_token=instance, name=name)
+        return Response(
+            {
+                "id": scim_token.id,
+                "name": scim_token.name,
+                "token": raw_token,
+                "created": instance.created,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class SCIMTokenDeleteView(views.APIView):
+    """
+    DELETE /api/iam/scim-token/{token_id}/  — revoke a SCIM token (admin only)
+    """
+
+    permission_classes = [
+        permissions.IsAuthenticated,
+        IsAdministrator,
+        FeatureFlagRequired,
+    ]
+    feature_flag = "idp_groups"
+
+    def delete(self, request, token_id, *args, **kwargs):
+        try:
+            scim_token = SCIMToken.objects.select_related("auth_token").get(id=token_id)
+        except SCIMToken.DoesNotExist:
+            return Response(
+                {"error": "Token not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+        scim_token.auth_token.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

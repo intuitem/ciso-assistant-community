@@ -2375,5 +2375,21 @@
 	"builderQuestionTypeMultipleChoice": "Çoktan seçmeli",
 	"builderQuestionTypeDate": "Tarih",
 	"builderChangedOn": "değiştirildi:",
-	"requirementWeight": "Ağırlık"
+	"requirementWeight": "Ağırlık",
+	"scim": "SCIM",
+	"scimDescription": "SCIM 2.0 sağlamayı yapılandırın. Kimlik sağlayıcınızı aşağıdaki uç noktaya yönlendirin ve burada oluşturulan bir bearer belirteciyle kimlik doğrulaması yapın.",
+	"scimEndpointUrl": "SCIM uç nokta URL'si",
+	"scimTokens": "SCIM belirteçleri",
+	"generateScimToken": "Belirteç oluştur",
+	"noScimTokens": "Henüz SCIM belirteci yok.",
+	"scimTokenName": "Ad",
+	"scimTokenDigest": "Özet",
+	"revokeScimToken": "İptal et",
+	"scimTokenGenerated": "Belirteç oluşturuldu",
+	"scimTokenWarning": "Bu belirteci şimdi kopyalayın. Güvenlik nedeniyle bir daha gösterilmeyecektir.",
+	"scimTokenRevoked": "SCIM belirteci iptal edildi",
+	"scimTokenGenerationFailed": "SCIM belirteci oluşturulamadı",
+	"idpGroup": "IdP grubu",
+	"idpGroups": "IdP grupları",
+	"idpGroupsDescription": "IdP grup federasyonunu etkinleştirin (SCIM sağlama, IdP grup eşlemeleri ve kullanıcılarda IdP grup üyelikleri)."
 }
