@@ -13206,9 +13206,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "typical_evidence": escape_excel_formula(
                     req_node.get_typical_evidence_translated
                 ),
-                "annotation": escape_excel_formula(
-                    req_node.get_annotation_translated
-                ),
+                "annotation": escape_excel_formula(req_node.get_annotation_translated),
                 "compliance_result": req.result,
                 "extended_result": req.extended_result,
                 "requirement_progress": req.status,
