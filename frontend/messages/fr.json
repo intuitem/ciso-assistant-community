@@ -1305,6 +1305,8 @@
 	"xRaysView": "Voir",
 	"xRaysDescription": "X-rays est un outil efficace pour detecter les inconsistances a travers les exigences de votre perimetre.",
 	"suggestControls": "Mesures recommandées",
+	"createCollection": "Créer une collection liée",
+	"createCollectionHelpText": "Créer automatiquement une collection liée à ce projet. Décochez pour créer le projet sans collection.",
 	"createAppliedControlsFromSuggestionsHelpText": "Créer des mesures appliquées à partir des mesures de référence suggérées",
 	"createAppliedControlsFromSuggestionsSuccess": "Mesures appliquées créées avec succès à partir des suggestions",
 	"createAppliedControlsFromSuggestionsError": "Une erreur s'est produite lors de la création des mesures appliquées depuis les suggestions",
