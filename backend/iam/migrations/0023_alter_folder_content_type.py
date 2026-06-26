@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("iam", "0022_user_is_scim_managed_user_scim_external_id_idpgroup_and_more"),
     ]
