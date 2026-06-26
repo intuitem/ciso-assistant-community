@@ -8,6 +8,8 @@ from typing import Protocol, Iterator
 import json
 import structlog
 
+from chat.embedding_models import DEFAULT_EMBEDDING_MODEL
+
 logger = structlog.get_logger(__name__)
 
 
@@ -195,7 +197,7 @@ class LLM(Protocol):
 class SentenceTransformerEmbedder:
     """Local embeddings using sentence-transformers. No external service needed."""
 
-    def __init__(self, model_name: str = "paraphrase-multilingual-MiniLM-L12-v2"):
+    def __init__(self, model_name: str = DEFAULT_EMBEDDING_MODEL):
         from sentence_transformers import SentenceTransformer
 
         self.model = SentenceTransformer(model_name)
