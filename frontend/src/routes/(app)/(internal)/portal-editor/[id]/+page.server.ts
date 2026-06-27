@@ -64,10 +64,9 @@ export const actions: Actions = {
 		return { success: true };
 	},
 	updateMeta: async ({ params, request, fetch }) => {
-		const data = await request.formData();
-		const body: Record<string, unknown> = { name: (data.get('name') as string)?.trim() };
-		if (data.has('description')) body.description = data.get('description');
-		const res = await patch(fetch, params.id!, body);
+		const name = ((await request.formData()).get('name') as string)?.trim();
+		if (!name) return fail(400, { error: 'Name required' });
+		const res = await patch(fetch, params.id!, { name });
 		if (!res.ok) return fail(res.status, { error: await res.text() });
 		return { success: true };
 	},

@@ -24,6 +24,25 @@
 	let { data }: { data: PageData } = $props();
 	const toast = getToastStore();
 	let view = $state<'edit' | 'preview' | 'settings'>('edit');
+	let name = $state(data.portal.name);
+
+	// Title auto-saves on blur — no dedicated Save button, available in any view.
+	async function saveName() {
+		const trimmed = name.trim();
+		if (!trimmed) {
+			name = data.portal.name;
+			return;
+		}
+		if (trimmed === data.portal.name) return;
+		const fd = new FormData();
+		fd.append('name', trimmed);
+		const res = await fetch('?/updateMeta', { method: 'POST', body: fd });
+		const result: any = deserialize(await res.text());
+		if (result.type === 'success') {
+			data.portal.name = trimmed;
+			toast.trigger({ message: m.saved(), background: 'preset-filled-success-500' });
+		}
+	}
 
 	// Public documents available to certification tiles — reactive so inline uploads appear at once.
 	let docs = $state<any[]>(data.publicDocuments ?? []);
@@ -203,17 +222,19 @@
 		<a href="/portal-editor" class="text-surface-500 hover:text-primary-500">
 			<i class="fa-solid fa-arrow-left"></i>
 		</a>
-		<form method="POST" action="?/updateMeta" use:enhance class="flex items-center gap-2 grow">
+		<div class="grow">
 			<input
-				name="name"
-				value={data.portal.name}
+				bind:value={name}
+				onblur={saveName}
+				aria-label={m.name()}
 				class="input rounded-md text-lg font-bold max-w-md"
 			/>
-			<button class="btn btn-sm preset-tonal">{m.save()}</button>
-		</form>
-		<a href="/portal/{data.portal.id}" class="text-xs text-primary-500" aria-label="Open portal"
-			><i class="fa-solid fa-arrow-up-right-from-square"></i></a
-		>
+		</div>
+		{#if data.portal.status === 'published'}
+			<a href="/portal/{data.portal.id}" class="text-xs text-primary-500" aria-label="Open portal"
+				><i class="fa-solid fa-arrow-up-right-from-square"></i></a
+			>
+		{/if}
 		<span
 			class="text-[10px] uppercase rounded-full px-2 py-0.5 {data.portal.status === 'published'
 				? 'bg-success-500/15 text-success-700'

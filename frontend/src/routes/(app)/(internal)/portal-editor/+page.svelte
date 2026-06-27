@@ -38,13 +38,15 @@
 		<div class="flex items-center gap-3">
 			<i class="fa-solid fa-window-maximize text-surface-400"></i>
 			<a href="/portal-editor/{p.id}" class="font-medium hover:text-primary-500">{p.name}</a>
-			<a
-				href={p.is_public ? `/trust/${p.public_token}` : `/portal/${p.id}`}
-				target={p.is_public ? '_blank' : undefined}
-				rel={p.is_public ? 'noopener' : undefined}
-				class="text-xs text-primary-500"
-				aria-label={m.open()}><i class="fa-solid fa-arrow-up-right-from-square"></i></a
-			>
+			{#if p.status === 'published'}
+				<a
+					href={p.is_public ? `/trust/${p.public_token}` : `/portal/${p.id}`}
+					target={p.is_public ? '_blank' : undefined}
+					rel={p.is_public ? 'noopener' : undefined}
+					class="text-xs text-primary-500"
+					aria-label={m.open()}><i class="fa-solid fa-arrow-up-right-from-square"></i></a
+				>
+			{/if}
 			<span
 				class="text-[10px] uppercase rounded-full px-2 py-0.5 {p.status === 'published'
 					? 'bg-success-500/15 text-success-700'
