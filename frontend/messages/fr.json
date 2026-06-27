@@ -1492,6 +1492,8 @@
 	"start": "Démarrer",
 	"startQuestionnaire": "Démarrer le questionnaire",
 	"userChoosesDomain": "L'utilisateur choisit le domaine",
+	"letUserNameAudit": "Laisser l'utilisateur le nommer",
+	"answeringVisibility": "Visibilité des réponses",
 	"mySpace": "Mon espace",
 	"assessmentLaunchFailed": "Impossible de démarrer le questionnaire. Vous n'avez peut-être pas l'autorisation de créer un audit dans le domaine configuré.",
 	"auditeeModeDescription": "Activer ce mode pour permettre aux personnes ou équipes auditées d'évaluer uniquement les exigences qui leur sont assignées",

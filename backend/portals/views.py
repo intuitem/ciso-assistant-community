@@ -201,14 +201,24 @@ class PortalViewSet(BaseModelViewSet):
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
+        # Name defaults to the tile title; the clicker may override only when the
+        # author opted in (user_names).
+        name = item.get("title") or ""
+        if target.get("user_names") and request.data.get("name"):
+            name = request.data.get("name")
         data = {
-            "name": (item.get("title") or "").strip() or "Assessment",
+            "name": name.strip() or "Assessment",
             "framework": framework_id,
             "folder": str(folder.id),
         }
         igs = target.get("implementation_groups") or []
         if igs:
             data["selected_implementation_groups"] = igs
+        # Author-configured field visibility; the serializer merges it over the
+        # framework defaults, so a partial map is fine.
+        field_visibility = target.get("field_visibility")
+        if field_visibility:
+            data["field_visibility"] = field_visibility
         serializer = ComplianceAssessmentWriteSerializer(
             data=data, context={"request": request}
         )

@@ -1606,6 +1606,8 @@
 	"start": "Start",
 	"startQuestionnaire": "Start questionnaire",
 	"userChoosesDomain": "User chooses domain",
+	"letUserNameAudit": "Let the user name it",
+	"answeringVisibility": "Answering visibility",
 	"assessmentLaunchFailed": "Could not start the questionnaire. You may not have permission to create an audit in the configured domain.",
 	"auditeeModeDescription": "Enable this mode to allow auditees to assess only their assigned requirements",
 	"advancedAnalytics": "Advanced Analytics",

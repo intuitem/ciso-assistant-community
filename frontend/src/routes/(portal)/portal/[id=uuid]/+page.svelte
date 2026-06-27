@@ -25,7 +25,14 @@
 			| 'certificationDocument'
 			| 'framework'
 			| 'assessment';
-		target: { model?: string; url?: string; token?: string; dest?: string; folder?: string };
+		target: {
+			model?: string;
+			url?: string;
+			token?: string;
+			dest?: string;
+			folder?: string;
+			user_names?: boolean;
+		};
 	}
 
 	let { data }: { data: PageData } = $props();
@@ -73,11 +80,14 @@
 		}
 	}
 
-	function openDomainPicker(item: PortalItem) {
+	function openLaunchModal(item: PortalItem) {
 		const component: ModalComponent = {
 			ref: AssessmentLaunchModal,
 			props: {
 				item: item.id ?? '',
+				showName: !!item.target.user_names,
+				defaultName: item.title,
+				showDomain: !item.target.folder,
 				domains: data.domains ?? [],
 				personalFoldersEnabled: data.personalFoldersEnabled ?? false
 			}
@@ -96,8 +106,9 @@
 				window.open(`/trust/documents/${item.target.token}`, '_blank', 'noopener');
 			else if (item.target.url) window.open(item.target.url, '_blank', 'noopener');
 		} else if (item.kind === 'assessment') {
-			if (item.target.folder) launchAssessment(item);
-			else openDomainPicker(item);
+			// Launch directly only when nothing needs to be asked at click time.
+			if (!item.target.folder || item.target.user_names) openLaunchModal(item);
+			else launchAssessment(item);
 		}
 	}
 </script>

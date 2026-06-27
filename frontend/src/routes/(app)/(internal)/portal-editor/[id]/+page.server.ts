@@ -19,7 +19,8 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 		? ((await fwRes.json()).results ?? []).map((f: any) => ({
 				id: f.id,
 				name: f.name,
-				implementation_groups_definition: f.implementation_groups_definition ?? []
+				implementation_groups_definition: f.implementation_groups_definition ?? [],
+				effective_field_visibility: f.effective_field_visibility ?? null
 			}))
 		: [];
 	const foldersRes = await fetch(`${BASE_API_URL}/folders/?content_type=DO`);

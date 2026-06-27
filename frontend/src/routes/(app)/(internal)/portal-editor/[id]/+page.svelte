@@ -4,6 +4,7 @@
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import IconPicker from '$lib/components/IconPicker/IconPicker.svelte';
 	import PortalGrid from '$lib/components/PortalGrid/PortalGrid.svelte';
+	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
 	import { SCAFFOLDABLE_MODELS } from '$lib/utils/modelTargets';
 	import { urlParamModelVerboseName } from '$lib/utils/crud';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -20,6 +21,14 @@
 		value: model,
 		label: safeTranslate(urlParamModelVerboseName(model))
 	})).sort((a, b) => a.label.localeCompare(b.label));
+
+	// Static in-app pages a 'navigate' tile can point at (no model behind them). The value
+	// is the route path minus the leading slash, so the viewer's goto(`/${target.model}`)
+	// reaches it unchanged.
+	const PAGE_DESTINATIONS = [
+		{ value: 'my-assignments', label: m.myAssignments() },
+		{ value: 'auditee-dashboard', label: m.auditDashboard() }
+	];
 
 	let { data }: { data: PageData } = $props();
 	const toast = getToastStore();
@@ -344,7 +353,13 @@
 									</select>
 								{:else if item.kind === 'navigate'}
 									<select bind:value={item.target.model} required class="select rounded-md text-sm">
-										{#each modelOptions as o}<option value={o.value}>{o.label}</option>{/each}
+										<optgroup label="Models">
+											{#each modelOptions as o}<option value={o.value}>{o.label}</option>{/each}
+										</optgroup>
+										<optgroup label="Pages">
+											{#each PAGE_DESTINATIONS as p}<option value={p.value}>{p.label}</option
+												>{/each}
+										</optgroup>
 									</select>
 								{:else if item.kind === 'certificationDocument'}
 									<input
@@ -479,6 +494,27 @@
 									class="textarea rounded-md text-sm w-full"
 								></textarea>
 							</label>
+							{#if item.kind === 'assessment'}
+								{@const fw = data.frameworks.find((f: any) => f.id === item.target.framework)}
+								<div class="w-full space-y-2 border-t border-surface-200-800 pt-2">
+									<label class="flex items-center gap-2 text-[10px] text-surface-600-400">
+										<input type="checkbox" class="checkbox" bind:checked={item.target.user_names} />
+										{m.letUserNameAudit()}
+									</label>
+									<details class="text-[10px]">
+										<summary class="cursor-pointer text-surface-500">
+											{m.answeringVisibility()}
+										</summary>
+										<div class="mt-2">
+											<VisibilityEditor
+												value={item.target.field_visibility}
+												frameworkDefaults={fw?.effective_field_visibility ?? null}
+												onChange={(next) => (item.target.field_visibility = next)}
+											/>
+										</div>
+									</details>
+								</div>
+							{/if}
 							<div class="flex gap-1">
 								<button
 									onclick={() => moveItem(si, ii, -1)}
