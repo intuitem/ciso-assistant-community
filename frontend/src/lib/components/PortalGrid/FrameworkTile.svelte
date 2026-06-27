@@ -34,8 +34,25 @@
 			{/if}
 		</div>
 		{#if mode !== 'score' && values.length}
-			<div class="h-40">
-				<DonutChart name={`fw_${snap.token}`} {values} height="h-40" showPercentage />
+			<div class="h-36">
+				<DonutChart
+					name={`fw_${snap.token}`}
+					{values}
+					height="h-36"
+					showPercentage
+					showLegend={false}
+				/>
+			</div>
+			<div class="flex flex-wrap justify-center gap-x-3 gap-y-1 text-[10px] text-surface-600-400">
+				{#each values as v}
+					<span class="flex items-center gap-1">
+						<span
+							class="inline-block h-2 w-2 shrink-0 rounded-full"
+							style="background-color: {v.itemStyle.color}"
+						></span>
+						{v.name} ({v.value})
+					</span>
+				{/each}
 			</div>
 		{/if}
 		<div class="text-xs text-surface-500">

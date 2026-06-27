@@ -580,6 +580,23 @@ class PublicFrameworkSnapshotView(PublicPortalAPIView):
 _EXPORT_HEADERS = ["ref_id", "name", "result", "score"]
 
 
+def _flatten_snapshot(content, depth=0):
+    """DFS the requirement tree into flat export rows, indenting names by depth so the
+    hierarchy survives a spreadsheet. Tolerates the legacy flat shape (no children)."""
+    rows = []
+    for node in content or []:
+        rows.append(
+            {
+                "ref_id": node.get("ref_id", ""),
+                "name": ("    " * depth) + (node.get("name") or ""),
+                "result": node.get("result") or "",
+                "score": node.get("score") if node.get("score") is not None else "",
+            }
+        )
+        rows.extend(_flatten_snapshot(node.get("children"), depth + 1))
+    return rows
+
+
 def _snapshot_export_xlsx(rows, slug):
     from io import BytesIO
 
@@ -619,7 +636,7 @@ class PublicFrameworkSnapshotExportView(PublicPortalAPIView):
         snap = FrameworkSnapshot.objects.filter(public_token=token).first()
         if snap is None or not _is_publicly_reachable(snapshot_id=snap.id):
             return Response(status=status.HTTP_404_NOT_FOUND)
-        rows = snap.content or []
+        rows = _flatten_snapshot(snap.content)
         slug = _safe_download_name(
             (snap.framework_ref_id or snap.name or "framework").replace(" ", "_"),
             fallback="framework",

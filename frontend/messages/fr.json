@@ -1542,6 +1542,8 @@
 	"clearSelection": "Effacer la sélection",
 	"expandAll": "Tout déplier",
 	"collapseAll": "Tout replier",
+	"expand": "Déplier",
+	"collapse": "Replier",
 	"clickToSelect": "cliquer pour sélectionner",
 	"alreadyAssigned": "Déjà affecté",
 	"editAssignment": "Modifier l'affectation",

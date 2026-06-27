@@ -8,13 +8,20 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, locals }) => {
 	if (!locals.featureflags?.custom_portals) redirect(302, '/');
-	const [snaps, audits] = await Promise.all([
+	const [snaps, audits, frameworks] = await Promise.all([
 		fetch(`${BASE_API_URL}/framework-snapshots/`),
-		fetch(`${BASE_API_URL}/compliance-assessments/`)
+		fetch(`${BASE_API_URL}/compliance-assessments/`),
+		fetch(`${BASE_API_URL}/frameworks/`)
 	]);
+	// The compliance-assessments list serializer only embeds {id, str} for framework, so
+	// the IG definitions come from the frameworks endpoint, keyed by framework id.
 	return {
 		snapshots: await unwrap(snaps),
 		audits: await unwrap(audits),
+		frameworks: (await unwrap(frameworks)).map((f: any) => ({
+			id: f.id,
+			implementation_groups_definition: f.implementation_groups_definition ?? []
+		})),
 		createForm: await superValidate(zod(SnapshotCreateSchema)),
 		editForm: await superValidate(zod(SnapshotEditSchema))
 	};

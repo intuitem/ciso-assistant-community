@@ -1652,6 +1652,8 @@
 	"clearSelection": "Clear selection",
 	"expandAll": "Expand all",
 	"collapseAll": "Collapse all",
+	"expand": "Expand",
+	"collapse": "Collapse",
 	"clickToSelect": "click to select",
 	"alreadyAssigned": "Already assigned",
 	"editAssignment": "Edit assignment",

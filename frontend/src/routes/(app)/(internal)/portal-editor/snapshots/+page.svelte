@@ -33,13 +33,19 @@
 	const selectedAudit = $derived(
 		(data.audits ?? []).find((a: any) => a.id === $createData.source_audit)
 	);
-	// Implementation groups offered by the selected audit's framework.
-	const igOptions = $derived(
-		(selectedAudit?.framework?.implementation_groups_definition ?? []).map((ig: any) => ({
+	// IG definitions live on the framework endpoint (the audit list only carries {id, str}).
+	const frameworkIgs = $derived(
+		new Map(
+			(data.frameworks ?? []).map((f: any) => [f.id, f.implementation_groups_definition ?? []])
+		)
+	);
+	const igOptionsFor = (audit: any) =>
+		(frameworkIgs.get(audit?.framework?.id) ?? []).map((ig: any) => ({
 			label: ig.name ?? ig.ref_id,
 			value: ig.ref_id
-		}))
-	);
+		}));
+	// Implementation groups offered by the selected audit's framework.
+	const igOptions = $derived(igOptionsFor(selectedAudit));
 
 	$effect(() => {
 		if ($createData.source_audit && !auditOptions.some((o) => o.value === $createData.source_audit))
@@ -78,13 +84,7 @@
 	const { form: editData, enhance: editEnhance } = editSuperform;
 
 	const editIgOptions = $derived(
-		(() => {
-			const a = (data.audits ?? []).find((x: any) => x.id === editing?.source_audit?.id);
-			return (a?.framework?.implementation_groups_definition ?? []).map((ig: any) => ({
-				label: ig.name ?? ig.ref_id,
-				value: ig.ref_id
-			}));
-		})()
+		igOptionsFor((data.audits ?? []).find((x: any) => x.id === editing?.source_audit?.id))
 	);
 
 	function openEdit(snap: any) {

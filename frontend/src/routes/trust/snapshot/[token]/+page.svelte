@@ -1,8 +1,8 @@
 <script lang="ts">
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { donutValues, RESULT_BY_KEY } from '$lib/utils/portalResults';
+	import { donutValues } from '$lib/utils/portalResults';
+	import SnapshotTreeNode from '$lib/components/TrustPortal/SnapshotTreeNode.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -10,6 +10,23 @@
 	const summary = $derived(snap.summary ?? {});
 	const mode = $derived(snap.display_mode ?? 'both');
 	const values = $derived(donutValues(summary));
+
+	let collapsed = $state(new Set<string>());
+	function toggle(path: string) {
+		const next = new Set(collapsed);
+		if (next.has(path)) next.delete(path);
+		else next.add(path);
+		collapsed = next;
+	}
+	// All section (branch) paths, for expand-all / collapse-all.
+	function sectionPaths(nodes: any[], prefix = ''): string[] {
+		let out: string[] = [];
+		(nodes ?? []).forEach((n, i) => {
+			const p = prefix === '' ? String(i) : `${prefix}.${i}`;
+			if ((n.children?.length ?? 0) > 0) out = [...out, p, ...sectionPaths(n.children, p)];
+		});
+		return out;
+	}
 </script>
 
 <svelte:head>
@@ -39,7 +56,26 @@
 				<div class="card bg-surface-50-950 p-5">
 					{#if values.length}
 						<div class="h-56">
-							<DonutChart name="snapshot_donut" {values} height="h-56" showPercentage />
+							<DonutChart
+								name="snapshot_donut"
+								{values}
+								height="h-56"
+								showPercentage
+								showLegend={false}
+							/>
+						</div>
+						<div
+							class="mt-3 flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs text-surface-600-400"
+						>
+							{#each values as v}
+								<span class="flex items-center gap-1.5">
+									<span
+										class="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
+										style="background-color: {v.itemStyle.color}"
+									></span>
+									{v.name} ({v.value})
+								</span>
+							{/each}
 						</div>
 					{:else}
 						<p class="text-sm text-surface-500">{m.noData()}</p>
@@ -77,35 +113,25 @@
 		</div>
 
 		<div class="card bg-surface-50-950 p-5">
-			<table class="w-full text-sm">
-				<thead>
-					<tr class="border-b border-surface-200-800 text-left text-surface-500">
-						<th class="py-2 pr-3 font-medium">{m.refId()}</th>
-						<th class="py-2 pr-3 font-medium">{m.name()}</th>
-						{#if mode !== 'score'}<th class="py-2 pr-3 font-medium">{m.result()}</th>{/if}
-						{#if mode !== 'result'}<th class="py-2 font-medium">{m.score()}</th>{/if}
-					</tr>
-				</thead>
-				<tbody>
-					{#each snap.content ?? [] as row}
-						<tr class="border-b border-surface-100-900">
-							<td class="py-1.5 pr-3 font-mono text-xs text-surface-500">{row.ref_id}</td>
-							<td class="py-1.5 pr-3">{row.name}</td>
-							{#if mode !== 'score'}
-								<td class="py-1.5 pr-3">
-									<span
-										class="inline-block rounded-full px-2 py-0.5 text-xs"
-										style="background-color: {RESULT_BY_KEY[row.result]?.color ?? '#d1d5db'}33"
-									>
-										{safeTranslate(RESULT_BY_KEY[row.result]?.label ?? row.result)}
-									</span>
-								</td>
-							{/if}
-							{#if mode !== 'result'}<td class="py-1.5">{row.score ?? '—'}</td>{/if}
-						</tr>
-					{/each}
-				</tbody>
-			</table>
+			{#if (snap.content ?? []).length}
+				<div class="mb-2 flex justify-end gap-3 text-xs">
+					<button
+						type="button"
+						onclick={() => (collapsed = new Set())}
+						class="text-surface-500 hover:text-primary-500">{m.expandAll()}</button
+					>
+					<button
+						type="button"
+						onclick={() => (collapsed = new Set(sectionPaths(snap.content)))}
+						class="text-surface-500 hover:text-primary-500">{m.collapseAll()}</button
+					>
+				</div>
+				{#each snap.content as root, i}
+					<SnapshotTreeNode node={root} path={String(i)} {mode} {collapsed} onToggle={toggle} />
+				{/each}
+			{:else}
+				<p class="text-sm text-surface-500">{m.noData()}</p>
+			{/if}
 		</div>
 	</div>
 </div>
