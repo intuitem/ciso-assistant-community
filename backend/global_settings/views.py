@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
-from core.permissions import IsAdministrator
+from core.permissions import IsGlobalAdmin
 from core.serializers import SerializerFactory
 from iam.models import Folder, Permission, RoleAssignment, User
 from iam.sso.models import SSOSettings
@@ -408,7 +408,7 @@ class InfraConfigViewSet(viewsets.ModelViewSet):
     model = GlobalSettings
     serializer_class = InfraConfigSerializer
     queryset = GlobalSettings.objects.filter(name="infra-config")
-    permission_classes = [IsAuthenticated, IsAdministrator]
+    permission_classes = [IsAuthenticated, IsGlobalAdmin]
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
