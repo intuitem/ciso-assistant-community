@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { deserialize } from '$app/forms';
+	import { isSafeExternalUrl } from '$lib/utils/external-links';
 	import { m } from '$paraglide/messages';
 	import PortalGrid from '$lib/components/PortalGrid/PortalGrid.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
@@ -99,12 +100,13 @@
 	function trigger(item: PortalItem) {
 		if (item.kind === 'create' && item.target.model) openCreate(item.target.model, item.title);
 		else if (item.kind === 'navigate' && item.target.model) goto(`/${item.target.model}`);
-		else if (item.kind === 'external' && item.target.url)
-			window.open(item.target.url, '_blank', 'noopener');
+		else if (item.kind === 'external' && isSafeExternalUrl(item.target.url))
+			window.open(item.target.url, '_blank', 'noopener,noreferrer');
 		else if (item.kind === 'certificationDocument') {
 			if (item.target.dest === 'document' && item.target.token)
-				window.open(`/trust/documents/${item.target.token}`, '_blank', 'noopener');
-			else if (item.target.url) window.open(item.target.url, '_blank', 'noopener');
+				window.open(`/trust/documents/${item.target.token}`, '_blank', 'noopener,noreferrer');
+			else if (isSafeExternalUrl(item.target.url))
+				window.open(item.target.url, '_blank', 'noopener,noreferrer');
 		} else if (item.kind === 'assessment') {
 			// Launch directly only when nothing needs to be asked at click time.
 			if (!item.target.folder || item.target.user_names) openLaunchModal(item);

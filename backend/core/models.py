@@ -35,7 +35,7 @@ from django.utils.translation import gettext_lazy as _
 from structlog import get_logger
 from django.utils.timezone import now
 
-from iam.models import Folder, FolderMixin, PublishInRootFolderMixin, User, UserGroup
+from iam.models import Folder, FolderMixin, PublishInRootFolderMixin, User
 from custom_fields.host import CustomFieldsMixin
 
 from library.helpers import (

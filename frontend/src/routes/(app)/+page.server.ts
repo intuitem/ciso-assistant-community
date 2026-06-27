@@ -10,9 +10,17 @@ export const load: PageServerLoad = async ({ url, locals, fetch }) => {
 	// 'analytics' | 'respondent' | 'portal'
 	const landing = locals.user?.preferences?.ui?.landing || locals.settings?.default_landing;
 	if (landing === 'portal' && locals.featureflags?.custom_portals) {
-		const res = await fetch(`${BASE_API_URL}/portals/mine/`);
-		const portals = res.ok ? await res.json() : [];
-		if (portals.length) redirect(302, '/portal');
+		let hasPortals = false;
+		try {
+			const res = await fetch(`${BASE_API_URL}/portals/mine/`);
+			if (res.ok) {
+				const portals = await res.json();
+				hasPortals = Array.isArray(portals) && portals.length > 0;
+			}
+		} catch {
+			// fall through to normal landing fallback
+		}
+		if (hasPortals) redirect(302, '/portal');
 	}
 	if (landing === 'respondent') {
 		redirect(302, '/auditee-dashboard');

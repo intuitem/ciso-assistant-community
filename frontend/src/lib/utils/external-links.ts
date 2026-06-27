@@ -13,6 +13,18 @@ export const setShowWarningExternalLinks = (enabled: boolean) => {
 	showWarningExternalLinks = enabled;
 };
 
+// Guards author-supplied URLs against unsafe schemes (javascript:, data:, vbscript:, …)
+// before they reach window.open/goto. Only absolute http(s) URLs are accepted.
+export const isSafeExternalUrl = (url: string | undefined | null): boolean => {
+	if (!url) return false;
+	try {
+		const parsed = new URL(url);
+		return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+	} catch {
+		return false;
+	}
+};
+
 const isExternalLink = (url: string): boolean => {
 	if (!browser) return false;
 	try {

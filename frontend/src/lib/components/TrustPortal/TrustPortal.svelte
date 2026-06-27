@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import PortalGrid from '$lib/components/PortalGrid/PortalGrid.svelte';
+	import { isSafeExternalUrl } from '$lib/utils/external-links';
 	import { m } from '$paraglide/messages';
 
 	let { portal }: { portal: { name: string; branding?: any; sections?: any[] } } = $props();
@@ -11,12 +12,13 @@
 		target?: { url?: string; token?: string; dest?: string };
 		snapshot?: { token?: string };
 	}) {
-		if (item.kind === 'external' && item.target?.url)
-			window.open(item.target.url, '_blank', 'noopener');
+		if (item.kind === 'external' && isSafeExternalUrl(item.target?.url))
+			window.open(item.target!.url, '_blank', 'noopener,noreferrer');
 		else if (item.kind === 'certificationDocument') {
 			if (item.target?.dest === 'document' && item.target?.token)
-				window.open(`/trust/documents/${item.target.token}`, '_blank', 'noopener');
-			else if (item.target?.url) window.open(item.target.url, '_blank', 'noopener');
+				window.open(`/trust/documents/${item.target.token}`, '_blank', 'noopener,noreferrer');
+			else if (isSafeExternalUrl(item.target?.url))
+				window.open(item.target!.url, '_blank', 'noopener,noreferrer');
 		} else if (item.kind === 'framework' && item.snapshot?.token)
 			goto(`/trust/snapshot/${item.snapshot.token}`);
 	}

@@ -687,7 +687,7 @@ export const PortalSettingsSchema = z.object({
 	enabled: z.boolean().default(true),
 	is_default: z.boolean().default(false),
 	order: z.number().default(0),
-	audience_groups: z.string().uuid().optional().array().optional(),
+	audience_groups: z.array(z.string().uuid()).optional(),
 	is_public: z.boolean().default(false),
 	is_primary: z.boolean().default(false),
 	branding: z
