@@ -3,6 +3,7 @@ from datetime import timedelta
 
 import structlog
 from allauth.account.models import EmailAddress
+from allauth.mfa.models import Authenticator
 from django.contrib.auth import get_user_model, login, logout
 from django.db import transaction
 from django.db.models import Q, Exists, OuterRef
@@ -28,11 +29,12 @@ from django.conf import settings
 
 from global_settings.models import GlobalSettings
 from core.models import Actor
-from .models import Folder, PersonalAccessToken, Role, RoleAssignment, SCIMToken
-from core.permissions import IsAdministrator, FeatureFlagRequired
+from .models import Folder, PersonalAccessToken, RoleAssignment, SCIMToken
+from core.permissions import IsGlobalAdmin, FeatureFlagRequired
 from .serializers import (
     ChangePasswordSerializer,
     PersonalAccessTokenReadSerializer,
+    DisableMFASerializer,
     ResetPasswordConfirmSerializer,
     SetPasswordSerializer,
 )
@@ -418,32 +420,65 @@ class SetPasswordView(views.APIView):
     An endpoint for setting a password as an administrator.
     """
 
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticated, IsGlobalAdmin)
 
     serializer_class = SetPasswordSerializer
 
     def post(self, request, *args, **kwargs):
         serializer = SetPasswordSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        if RoleAssignment.has_role(
-            self.request.user, Role.objects.get(name="BI-RL-ADM")
-        ):
-            new_password = serializer.validated_data.get("new_password")
-            user = serializer.validated_data.get("user")
-            user.set_password(new_password)
-            user.save()
-            try:
-                email_address = EmailAddress.objects.get(user=user, primary=True)
-                email_address.verified = True
-                email_address.save()
-            except Exception as e:
-                logger.error(
-                    "Error setting email address as verified",
-                    user=user,
-                    error=e,
-                )
+        new_password = serializer.validated_data.get("new_password")
+        user = serializer.validated_data.get("user")
+        user.set_password(new_password)
+        user.save()
+        try:
+            email_address = EmailAddress.objects.get(user=user, primary=True)
+            email_address.verified = True
+            email_address.save()
+        except Exception as e:
+            logger.error(
+                "Error setting email address as verified",
+                user=user,
+                error=e,
+            )
+        return Response(status=status.HTTP_200_OK)
+
+
+class DisableMFAView(views.APIView):
+    """
+    An endpoint for disabling another user's MFA as an administrator.
+    Removes all MFA authenticators (TOTP, WebAuthn, recovery codes).
+    The user will need to enable MFA again on their next login.
+    """
+
+    permission_classes = (permissions.IsAuthenticated, IsGlobalAdmin)
+    serializer_class = DisableMFASerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = DisableMFASerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        target_user = serializer.validated_data.get("user")
+
+        # Delete first and branch on the deleted count to avoid an
+        # exists-then-delete race where a concurrent request could empty the
+        # authenticators between the check and the delete.
+        deleted_count, _ = Authenticator.objects.filter(user=target_user).delete()
+        if deleted_count > 0:
+            logger.warning(
+                "Admin disabled MFA for another user",
+                admin_id=str(request.user.id),
+                admin_email=request.user.email,
+                target_user_id=str(target_user.id),
+                target_user_email=target_user.email,
+                deleted_authenticators=deleted_count,
+            )
             return Response(status=status.HTTP_200_OK)
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+        return Response(
+            {"error": "userHasNoMFAEnabled"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
 
 class RevokeOtherSessionsView(views.APIView):
@@ -491,7 +526,7 @@ class SCIMTokenViewSet(views.APIView):
 
     permission_classes = [
         permissions.IsAuthenticated,
-        IsAdministrator,
+        IsGlobalAdmin,
         FeatureFlagRequired,
     ]
     feature_flag = "idp_groups"
@@ -542,7 +577,7 @@ class SCIMTokenDeleteView(views.APIView):
 
     permission_classes = [
         permissions.IsAuthenticated,
-        IsAdministrator,
+        IsGlobalAdmin,
         FeatureFlagRequired,
     ]
     feature_flag = "idp_groups"

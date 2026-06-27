@@ -1,10 +1,9 @@
 from rest_framework import permissions
 from rest_framework.request import Request
 from django.contrib.auth import get_user_model
-from .utils import RoleCodename
 
 from global_settings.utils import ff_is_enabled
-from iam.models import RoleAssignment, Folder, Permission, Role
+from iam.models import RoleAssignment, Folder, Permission
 
 User = get_user_model()
 
@@ -62,11 +61,10 @@ class RBACPermissions(permissions.DjangoObjectPermissions):
         )
 
 
-class IsAdministrator(permissions.BasePermission):
+class IsGlobalAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
-        return RoleAssignment.has_role(
-            user=request.user, role=Role.objects.get(name=RoleCodename.ADMINISTRATOR)
-        )
+        user = request.user
+        return bool(user and user.is_authenticated and user.is_admin())
 
 
 class FeatureFlagRequired(permissions.BasePermission):
