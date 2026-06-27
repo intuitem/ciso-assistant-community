@@ -56,7 +56,7 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 			? ((await domRes.json()).results ?? []).map((d: any) => ({ id: d.id, name: d.name }))
 			: [];
 	}
-	const personalFoldersEnabled = !!locals.featureflags?.personal_folders;
+	const personalFoldersEnabled = !!locals.settings?.personal_folders;
 	return { portal, createForms, domains, personalFoldersEnabled };
 };
 

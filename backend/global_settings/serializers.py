@@ -77,6 +77,7 @@ GENERAL_SETTINGS_KEYS = [
     "mapping_max_depth",
     "allow_self_validation",
     "show_warning_external_links",
+    "show_get_started",
     "builtin_metrics_retention_days",
     "allow_assignments_to_entities",
     "enforce_mfa",
@@ -95,6 +96,7 @@ GENERAL_SETTINGS_KEYS = [
     "default_custom_analytics_dashboard",
     "audit_tree_aggregation_strategy",
     "default_landing",
+    "personal_folders",
     "personal_folders_parent",
 ]
 
@@ -415,9 +417,6 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     cwes = serializers.BooleanField(source="value.cwes", required=False, default=True)
     custom_portals = serializers.BooleanField(
         source="value.custom_portals", required=False, default=False
-    )
-    personal_folders = serializers.BooleanField(
-        source="value.personal_folders", required=False, default=False
     )
 
     class Meta:

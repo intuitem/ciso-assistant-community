@@ -233,6 +233,12 @@
 					label={m.defaultLanding()}
 					helpText={m.defaultLandingHelpText()}
 				/>
+				<Checkbox
+					{form}
+					field="personal_folders"
+					label={m.personalFolders()}
+					helpText={m.personalFoldersDescription()}
+				/>
 				<FolderTreeSelect
 					{form}
 					field="personal_folders_parent"
@@ -241,6 +247,12 @@
 					nullable
 					label={m.personalFoldersParent()}
 					helpText={m.personalFoldersParentHelpText()}
+				/>
+				<Checkbox
+					{form}
+					field="show_get_started"
+					label={m.showGetStartedButton()}
+					helpText={m.showGetStartedButtonHelpText()}
 				/>
 			</div>
 		</Accordion.ItemContent>

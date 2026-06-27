@@ -38,11 +38,6 @@
 					field: 'custom_portals',
 					label: m.customPortals(),
 					description: m.customPortalsDescription()
-				},
-				{
-					field: 'personal_folders',
-					label: m.personalFolders(),
-					description: m.personalFoldersDescription()
 				}
 			].filter(({ field }) => availableKeys.includes(field))
 		},

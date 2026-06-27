@@ -1900,6 +1900,8 @@ def startup(sender=None, **kwargs):
         "daily_rate": 500,
         "mapping_max_depth": 3,
         "show_warning_external_links": True,
+        "show_get_started": True,
+        "personal_folders": False,
         "allow_assignments_to_entities": False,
         "enforce_mfa": False,
     }

@@ -71,7 +71,7 @@
 	// and only once an admin has configured the personal-folders parent.
 	const showMySpace = $derived(
 		field === 'folder' &&
-			!!page.data?.featureflags?.personal_folders &&
+			!!page.data?.settings?.personal_folders &&
 			!!page.data?.settings?.personal_folders_parent
 	);
 

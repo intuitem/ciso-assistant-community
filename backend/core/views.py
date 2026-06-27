@@ -204,7 +204,7 @@ from serdes.serializers import ExportSerializer
 from django.contrib.admin.utils import NestedObjects
 from django.db import router
 from global_settings.models import GlobalSettings
-from global_settings.utils import ff_is_enabled
+from global_settings.utils import ff_is_enabled, general_setting_is_enabled
 
 import structlog
 
@@ -1205,7 +1205,9 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     def create(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
-        if request.data.get("folder") == PERSONAL_FOLDER_SENTINEL and ff_is_enabled(
+        if request.data.get(
+            "folder"
+        ) == PERSONAL_FOLDER_SENTINEL and general_setting_is_enabled(
             "personal_folders"
         ):
             personal = get_or_create_personal_folder(request.user)

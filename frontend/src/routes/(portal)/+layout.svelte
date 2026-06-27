@@ -23,7 +23,7 @@
 	// Admins-only nudge: personal folders enabled but no parent set, so "My space" is off.
 	const personalFoldersMisconfigured = $derived(
 		!!data.user?.is_admin &&
-			!!data.featureflags?.personal_folders &&
+			!!data.settings?.personal_folders &&
 			!data.settings?.personal_folders_parent
 	);
 

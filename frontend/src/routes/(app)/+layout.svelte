@@ -209,7 +209,7 @@
 						>
 					</button>
 				{/if}
-				{#if data?.user?.is_admin}
+				{#if data?.user?.is_admin && data?.settings?.show_get_started !== false}
 					<button
 						onclick={() => getStartedTrigger.set(true)}
 						class="shrink-0 px-3 py-1.5 rounded-full bg-violet-500 dark:bg-violet-600 text-white text-xs font-semibold shadow-lg

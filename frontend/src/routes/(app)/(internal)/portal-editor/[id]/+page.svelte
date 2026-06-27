@@ -14,7 +14,7 @@
 	import type { PageData } from './$types';
 
 	const personalFoldersMisconfigured = $derived(
-		!!page.data?.featureflags?.personal_folders && !page.data?.settings?.personal_folders_parent
+		!!page.data?.settings?.personal_folders && !page.data?.settings?.personal_folders_parent
 	);
 
 	const modelOptions = SCAFFOLDABLE_MODELS.map((model) => ({
