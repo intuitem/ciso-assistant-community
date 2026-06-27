@@ -1,11 +1,14 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { isSafeExternalUrl } from '$lib/utils/external-links';
+	import { onActivateKey } from '$lib/utils/portalActions';
 
 	let { item, onTrigger }: { item: any; onTrigger?: (item: any) => void } = $props();
 
 	const target = $derived(item.target ?? {});
 	const clickable = $derived(!!(target.url || target.token));
+	const safeImageUrl = $derived(isSafeExternalUrl(target.image_url) ? target.image_url : null);
 
 	function fmt(d: string) {
 		const date = new Date(d);
@@ -23,26 +26,19 @@
 		if (target.valid_from) return `${m.since()} ${fmt(target.valid_from)}`;
 		return '';
 	});
-
-	function handleKey(e: KeyboardEvent) {
-		if (clickable && (e.key === 'Enter' || e.key === ' ')) {
-			e.preventDefault();
-			onTrigger?.(item);
-		}
-	}
 </script>
 
 <div
 	role={clickable ? 'button' : undefined}
 	tabindex={clickable ? 0 : undefined}
 	onclick={clickable ? () => onTrigger?.(item) : undefined}
-	onkeydown={clickable ? handleKey : undefined}
+	onkeydown={clickable ? onActivateKey(() => onTrigger?.(item)) : undefined}
 	class="flex flex-col items-center justify-center gap-2 rounded-2xl border border-surface-200-800 bg-surface-50-950 p-5 text-center shadow-sm {clickable
 		? 'cursor-pointer transition-all hover:border-violet-400 hover:shadow-md'
 		: ''}"
 >
-	{#if target.image_url}
-		<img src={target.image_url} alt={item.title} class="h-16 object-contain" />
+	{#if safeImageUrl}
+		<img src={safeImageUrl} alt={item.title} class="h-16 object-contain" />
 	{:else}
 		<i class="fa-solid {item.icon || 'fa-certificate'} text-4xl text-violet-500"></i>
 	{/if}

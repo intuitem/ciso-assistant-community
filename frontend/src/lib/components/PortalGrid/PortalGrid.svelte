@@ -3,15 +3,9 @@
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import FrameworkTile from '$lib/components/PortalGrid/FrameworkTile.svelte';
 	import CertificationTile from '$lib/components/PortalGrid/CertificationTile.svelte';
+	import { onActivateKey } from '$lib/utils/portalActions';
 
 	let { sections = [], onTrigger }: { sections: any[]; onTrigger?: (item: any) => void } = $props();
-
-	function handleKey(e: KeyboardEvent, item: any) {
-		if (e.key === 'Enter' || e.key === ' ') {
-			e.preventDefault();
-			onTrigger?.(item);
-		}
-	}
 </script>
 
 <div class="space-y-10">
@@ -47,7 +41,7 @@
 							role="button"
 							tabindex="0"
 							onclick={() => onTrigger?.(item)}
-							onkeydown={(e) => handleKey(e, item)}
+							onkeydown={onActivateKey(() => onTrigger?.(item))}
 							class="group flex items-start gap-4 rounded-2xl border border-surface-200-800 bg-surface-50-950 p-5 text-left shadow-sm transition-all hover:border-violet-400 hover:shadow-md cursor-pointer"
 						>
 							<div

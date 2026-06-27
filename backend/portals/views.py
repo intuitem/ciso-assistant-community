@@ -1,15 +1,18 @@
+import re
+
 from django.contrib.auth.models import Permission
 from django.db import transaction
 from django.db.models import Q
 from django.http import FileResponse, HttpResponse
 from django.utils import timezone
-from rest_framework import permissions, status
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.models import RequirementAssignment
+from core.permissions import FeatureFlagRequired
 from core.serializers import ComplianceAssessmentWriteSerializer
 from core.views import (
     PERSONAL_FOLDER_SENTINEL,
@@ -17,6 +20,27 @@ from core.views import (
     get_or_create_personal_folder,
 )
 from iam.models import Folder, RoleAssignment
+
+# The whole feature is opt-in: the API is unreachable unless `custom_portals` is on,
+# mirroring the UI flag gating so a flag-off build can't reach it through the API.
+FEATURE_FLAG = "custom_portals"
+
+
+class CustomPortalsViewSet(BaseModelViewSet):
+    feature_flag = FEATURE_FLAG
+
+    def get_permissions(self):
+        return super().get_permissions() + [FeatureFlagRequired()]
+
+
+class PublicPortalAPIView(APIView):
+    """Base for the unauthenticated trust-center endpoints: token-gated, and only live
+    while `custom_portals` is enabled."""
+
+    permission_classes = [FeatureFlagRequired]
+    authentication_classes = []
+    feature_flag = FEATURE_FLAG
+
 
 from .models import FrameworkSnapshot, Portal, PortalPreset, PublicDocument
 from .serializers import (
@@ -27,7 +51,7 @@ from .serializers import (
 from .snapshots import compute_snapshot
 
 
-class PortalPresetViewSet(BaseModelViewSet):
+class PortalPresetViewSet(CustomPortalsViewSet):
     model = PortalPreset
     serializers_module = "portals.serializers"
     filterset_fields = ["folder", "provider"]
@@ -57,11 +81,53 @@ class PortalPresetViewSet(BaseModelViewSet):
         )
 
 
-class PortalViewSet(BaseModelViewSet):
+def _resolve_launch_folder(request, target):
+    """Resolve the domain for a launched assessment: forced by the author when the tile
+    carries one, otherwise the clicker's choice (a reachable domain, or their personal
+    'My space'). Returns (folder, error_response) with exactly one non-None."""
+    folder_id = target.get("folder") or request.data.get("folder")
+    if not folder_id:
+        return None, Response(
+            {"detail": "Select a domain."}, status=status.HTTP_400_BAD_REQUEST
+        )
+    if folder_id == PERSONAL_FOLDER_SENTINEL:
+        folder = get_or_create_personal_folder(request.user)
+        if folder is None:
+            return None, Response(
+                {"detail": "Personal folders are not configured."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return folder, None
+    folder = Folder.objects.filter(pk=folder_id).first()
+    if folder is None:
+        return None, Response(
+            {"detail": "Domain not found."}, status=status.HTTP_404_NOT_FOUND
+        )
+    return folder, None
+
+
+def _provision_auditee_assignment(assessment, folder, user):
+    """Self-service: provision the assignment ready to answer. 'draft' would show the
+    respondent "Not started yet" (only a reviewer can start it), and requirements_list
+    intersects with this M2M — an empty set shows nothing — so assign the whole in-scope
+    assessment."""
+    assignment = RequirementAssignment.objects.create(
+        compliance_assessment=assessment,
+        folder=folder,
+        status=RequirementAssignment.Status.IN_PROGRESS,
+    )
+    assignment.actor.set([user.actor])
+    assignment.requirement_assessments.set(
+        assessment.get_requirement_assessments(include_non_assessable=True)
+    )
+    return assignment
+
+
+class PortalViewSet(CustomPortalsViewSet):
     model = Portal
     serializers_module = "portals.serializers"
     filterset_fields = ["folder", "status", "is_public", "is_default", "enabled"]
-    search_fields = ["name", "description", "slug"]
+    search_fields = ["name", "description"]
 
     def _entitled_queryset(self, request):
         """Portals the current user may see: enabled, and either targeted at one of
@@ -138,6 +204,12 @@ class PortalViewSet(BaseModelViewSet):
         import secrets
 
         portal = self.get_object()
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_portal"),
+            folder=portal.folder,
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
         portal.public_token = secrets.token_urlsafe(32)
         portal.save(update_fields=["public_token"])
         return Response({"public_token": portal.public_token})
@@ -174,26 +246,9 @@ class PortalViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Domain: forced by the author when the tile carries one, otherwise chosen by
-        # the clicker (a domain they can reach, or their personal "My space").
-        folder_id = target.get("folder") or request.data.get("folder")
-        if not folder_id:
-            return Response(
-                {"detail": "Select a domain."}, status=status.HTTP_400_BAD_REQUEST
-            )
-        if folder_id == PERSONAL_FOLDER_SENTINEL:
-            folder = get_or_create_personal_folder(request.user)
-            if folder is None:
-                return Response(
-                    {"detail": "Personal folders are not configured."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-        else:
-            folder = Folder.objects.filter(pk=folder_id).first()
-            if folder is None:
-                return Response(
-                    {"detail": "Domain not found."}, status=status.HTTP_404_NOT_FOUND
-                )
+        folder, err = _resolve_launch_folder(request, target)
+        if err is not None:
+            return err
         if not RoleAssignment.is_access_allowed(
             user=request.user,
             perm=Permission.objects.get(codename="add_complianceassessment"),
@@ -228,18 +283,8 @@ class PortalViewSet(BaseModelViewSet):
             assessment = serializer.save()
             assessment.create_requirement_assessments()
             if target.get("mode") == "auditee":
-                # Self-service: provision the assignment ready to answer. 'draft' would
-                # show the respondent "Not started yet" (only a reviewer can start it),
-                # and requirements_list intersects with this M2M — an empty set shows
-                # nothing — so assign the whole in-scope assessment.
-                assignment = RequirementAssignment.objects.create(
-                    compliance_assessment=assessment,
-                    folder=folder,
-                    status=RequirementAssignment.Status.IN_PROGRESS,
-                )
-                assignment.actor.set([request.user.actor])
-                assignment.requirement_assessments.set(
-                    assessment.get_requirement_assessments(include_non_assessable=True)
+                assignment = _provision_auditee_assignment(
+                    assessment, folder, request.user
                 )
                 return Response({"redirect": f"/auditee-assessments/{assignment.id}"})
 
@@ -263,7 +308,7 @@ class PortalViewSet(BaseModelViewSet):
         )
 
 
-class PublicDocumentViewSet(BaseModelViewSet):
+class PublicDocumentViewSet(CustomPortalsViewSet):
     model = PublicDocument
     serializers_module = "portals.serializers"
     filterset_fields = ["folder"]
@@ -287,7 +332,7 @@ def _apply_snapshot_sync(snapshot):
     return True
 
 
-class FrameworkSnapshotViewSet(BaseModelViewSet):
+class FrameworkSnapshotViewSet(CustomPortalsViewSet):
     model = FrameworkSnapshot
     serializers_module = "portals.serializers"
     filterset_fields = ["folder", "source_audit"]
@@ -324,6 +369,12 @@ class FrameworkSnapshotViewSet(BaseModelViewSet):
     def sync(self, request, pk=None):
         """Manual re-pull: recompute from the (possibly changed) source audit."""
         snapshot = self.get_object()
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_frameworksnapshot"),
+            folder=snapshot.folder,
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
         if not _apply_snapshot_sync(snapshot):
             return Response(
                 {"detail": "Snapshot has no source audit to sync from."},
@@ -344,6 +395,41 @@ PUBLIC_SAFE_TILE_KINDS = {
 }
 
 
+def _published_public_portal_contents():
+    return Portal.objects.filter(
+        is_public=True, enabled=True, status=Portal.Status.PUBLISHED
+    ).values_list("content", flat=True)
+
+
+def _is_publicly_reachable(*, snapshot_id=None, document_token=None):
+    """A token-served resource is public only while a published public portal still
+    references it — so unpublishing the portal (or removing the tile) revokes access,
+    even if the token itself leaked."""
+    for content in _published_public_portal_contents():
+        for section in (content or {}).get("sections", []):
+            for item in section.get("items") or []:
+                target = item.get("target") or {}
+                if (
+                    snapshot_id is not None
+                    and item.get("kind") == "framework"
+                    and str(target.get("snapshot")) == str(snapshot_id)
+                ):
+                    return True
+                if (
+                    document_token is not None
+                    and item.get("kind") == "certificationDocument"
+                    and target.get("token") == document_token
+                ):
+                    return True
+    return False
+
+
+def _safe_download_name(name, fallback="download"):
+    """Strip characters that could break out of the Content-Disposition header."""
+    cleaned = re.sub(r'[\r\n";\\]', "", name or "").strip()
+    return cleaned or fallback
+
+
 def _portal_snapshot_map(portal):
     """Load every FrameworkSnapshot referenced by the portal's framework tiles, keyed by id."""
     ids = set()
@@ -354,6 +440,32 @@ def _portal_snapshot_map(portal):
                 if sid:
                     ids.add(sid)
     return {str(s.id): s for s in FrameworkSnapshot.objects.filter(id__in=ids)}
+
+
+def _enrich_framework_tile(item, snapshots):
+    """Attach the captured snapshot summary to a framework tile, or None to drop the tile
+    when its snapshot is missing."""
+    snap = snapshots.get((item.get("target") or {}).get("snapshot"))
+    if snap is None:
+        return None
+    return {
+        **item,
+        "snapshot": {
+            "name": snap.name,
+            "framework_name": snap.framework_name,
+            "summary": snap.summary,
+            "display_mode": snap.display_mode,
+            "token": snap.public_token,
+        },
+    }
+
+
+def _enrich_metric_tile(item, computed):
+    """Fill a computed metric tile's value from the portal-scoped counts."""
+    target = item.get("target") or {}
+    if target.get("source") not in computed:
+        return item
+    return {**item, "target": {**target, "value": computed[target["source"]]}}
 
 
 def _serialize_public_portal(portal):
@@ -377,26 +489,12 @@ def _serialize_public_portal(portal):
             kind = item.get("kind")
             if kind not in PUBLIC_SAFE_TILE_KINDS:
                 continue
-            target = item.get("target") or {}
             if kind == "framework":
-                snap = snapshots.get(target.get("snapshot"))
-                if snap is None:
+                item = _enrich_framework_tile(item, snapshots)
+                if item is None:
                     continue
-                item = {
-                    **item,
-                    "snapshot": {
-                        "name": snap.name,
-                        "framework_name": snap.framework_name,
-                        "summary": snap.summary,
-                        "display_mode": snap.display_mode,
-                        "token": snap.public_token,
-                    },
-                }
-            elif kind == "metric" and target.get("source") in computed:
-                item = {
-                    **item,
-                    "target": {**target, "value": computed[target["source"]]},
-                }
+            elif kind == "metric":
+                item = _enrich_metric_tile(item, computed)
             items.append(item)
         sections.append(
             {
@@ -412,56 +510,58 @@ def _serialize_public_portal(portal):
     }
 
 
-class PublicPortalView(APIView):
-    permission_classes = [permissions.AllowAny]
-    authentication_classes = []
-
+class PublicPortalView(PublicPortalAPIView):
     def get(self, request, token):
-        portal = Portal.objects.filter(is_public=True, public_token=token).first()
+        portal = Portal.objects.filter(
+            is_public=True,
+            enabled=True,
+            status=Portal.Status.PUBLISHED,
+            public_token=token,
+        ).first()
         if portal is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
         return Response(_serialize_public_portal(portal))
 
 
-class PublicPrimaryPortalView(APIView):
+class PublicPrimaryPortalView(PublicPortalAPIView):
     """Vanity `/trust` surface: the single portal flagged is_primary."""
 
-    permission_classes = [permissions.AllowAny]
-    authentication_classes = []
-
     def get(self, request):
-        portal = Portal.objects.filter(is_public=True, is_primary=True).first()
+        portal = Portal.objects.filter(
+            is_public=True,
+            is_primary=True,
+            enabled=True,
+            status=Portal.Status.PUBLISHED,
+        ).first()
         if portal is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
         return Response(_serialize_public_portal(portal))
 
 
-class PublicDocumentServeView(APIView):
-    permission_classes = [permissions.AllowAny]
-    authentication_classes = []
-
+class PublicDocumentServeView(PublicPortalAPIView):
     def get(self, request, token):
         doc = PublicDocument.objects.filter(token=token).first()
-        if doc is None or not doc.file:
+        if (
+            doc is None
+            or not doc.file
+            or not _is_publicly_reachable(document_token=token)
+        ):
             return Response(status=status.HTTP_404_NOT_FOUND)
         return FileResponse(
             doc.file.open("rb"),
             content_type=doc.mime_type or "application/octet-stream",
             as_attachment=True,
-            filename=doc.name or doc.file.name.rsplit("/", 1)[-1],
+            filename=_safe_download_name(doc.name or doc.file.name.rsplit("/", 1)[-1]),
         )
 
 
-class PublicFrameworkSnapshotView(APIView):
+class PublicFrameworkSnapshotView(PublicPortalAPIView):
     """Drill-down for a framework tile: the captured per-requirement rows + summary.
     Serves only the frozen snapshot, never live audit data; control_ids stay private."""
 
-    permission_classes = [permissions.AllowAny]
-    authentication_classes = []
-
     def get(self, request, token):
         snap = FrameworkSnapshot.objects.filter(public_token=token).first()
-        if snap is None:
+        if snap is None or not _is_publicly_reachable(snapshot_id=snap.id):
             return Response(status=status.HTTP_404_NOT_FOUND)
         return Response(
             {
@@ -477,48 +577,53 @@ class PublicFrameworkSnapshotView(APIView):
         )
 
 
-class PublicFrameworkSnapshotExportView(APIView):
-    permission_classes = [permissions.AllowAny]
-    authentication_classes = []
+_EXPORT_HEADERS = ["ref_id", "name", "result", "score"]
 
+
+def _snapshot_export_xlsx(rows, slug):
+    from io import BytesIO
+
+    from openpyxl import Workbook
+
+    wb = Workbook()
+    ws = wb.active
+    ws.append([h.replace("_", " ").title() for h in _EXPORT_HEADERS])
+    for r in rows:
+        ws.append([r.get(h, "") for h in _EXPORT_HEADERS])
+    buf = BytesIO()
+    wb.save(buf)
+    resp = HttpResponse(
+        buf.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+    resp["Content-Disposition"] = f'attachment; filename="{slug}.xlsx"'
+    return resp
+
+
+def _snapshot_export_csv(rows, slug):
+    import csv
+    from io import StringIO
+
+    buf = StringIO()
+    writer = csv.DictWriter(buf, fieldnames=_EXPORT_HEADERS, extrasaction="ignore")
+    writer.writeheader()
+    for r in rows:
+        writer.writerow({h: r.get(h, "") for h in _EXPORT_HEADERS})
+    resp = HttpResponse(buf.getvalue(), content_type="text/csv")
+    resp["Content-Disposition"] = f'attachment; filename="{slug}.csv"'
+    return resp
+
+
+class PublicFrameworkSnapshotExportView(PublicPortalAPIView):
     def get(self, request, token):
         snap = FrameworkSnapshot.objects.filter(public_token=token).first()
-        if snap is None:
+        if snap is None or not _is_publicly_reachable(snapshot_id=snap.id):
             return Response(status=status.HTTP_404_NOT_FOUND)
         rows = snap.content or []
-        headers = ["ref_id", "name", "result", "score"]
-        slug = (snap.framework_ref_id or snap.name or "framework").replace(" ", "_")
-
+        slug = _safe_download_name(
+            (snap.framework_ref_id or snap.name or "framework").replace(" ", "_"),
+            fallback="framework",
+        )
         if request.query_params.get("format") == "xlsx":
-            from io import BytesIO
-
-            from openpyxl import Workbook
-
-            wb = Workbook()
-            ws = wb.active
-            ws.append([h.replace("_", " ").title() for h in headers])
-            for r in rows:
-                ws.append([r.get(h, "") for h in headers])
-            buf = BytesIO()
-            wb.save(buf)
-            buf.seek(0)
-            resp = HttpResponse(
-                buf.read(),
-                content_type=(
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                ),
-            )
-            resp["Content-Disposition"] = f'attachment; filename="{slug}.xlsx"'
-            return resp
-
-        import csv
-        from io import StringIO
-
-        buf = StringIO()
-        writer = csv.DictWriter(buf, fieldnames=headers, extrasaction="ignore")
-        writer.writeheader()
-        for r in rows:
-            writer.writerow({h: r.get(h, "") for h in headers})
-        resp = HttpResponse(buf.getvalue(), content_type="text/csv")
-        resp["Content-Disposition"] = f'attachment; filename="{slug}.csv"'
-        return resp
+            return _snapshot_export_xlsx(rows, slug)
+        return _snapshot_export_csv(rows, slug)

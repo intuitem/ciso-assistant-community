@@ -2,15 +2,15 @@
 	import { enhance, deserialize } from '$app/forms';
 	import { m } from '$paraglide/messages';
 	import { getToastStore } from '$lib/components/Toast/stores';
-	import IconPicker from '$lib/components/IconPicker/IconPicker.svelte';
 	import PortalGrid from '$lib/components/PortalGrid/PortalGrid.svelte';
-	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
+	import SectionEditor from '$lib/components/PortalEditor/SectionEditor.svelte';
+	import PortalSettingsPanel from '$lib/components/PortalEditor/PortalSettingsPanel.svelte';
 	import { SCAFFOLDABLE_MODELS } from '$lib/utils/modelTargets';
 	import { urlParamModelVerboseName } from '$lib/utils/crud';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { savedToast, savedToastEnhance } from '$lib/utils/portalActions';
 	import { superForm } from 'sveltekit-superforms';
 	import { page } from '$app/state';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import type { PageData } from './$types';
 
 	const personalFoldersMisconfigured = $derived(
@@ -49,7 +49,7 @@
 		const result: any = deserialize(await res.text());
 		if (result.type === 'success') {
 			data.portal.name = trimmed;
-			toast.trigger({ message: m.saved(), background: 'preset-filled-success-500' });
+			savedToast(toast);
 		}
 	}
 
@@ -69,7 +69,7 @@
 			const doc = result.data.uploaded;
 			docs.push({ id: doc.id, name: doc.name, token: doc.token });
 			item.target.token = doc.token;
-			toast.trigger({ message: m.saved(), background: 'preset-filled-success-500' });
+			savedToast(toast);
 		} else {
 			toast.trigger({
 				message: result.data?.error ?? m.error(),
@@ -84,19 +84,9 @@
 		resetForm: false,
 		invalidateAll: true,
 		onUpdated: ({ form }) => {
-			if (form.valid)
-				toast.trigger({ message: m.saved(), background: 'preset-filled-success-500' });
+			if (form.valid) savedToast(toast);
 		}
 	});
-	const { form: settingsData, enhance: settingsEnhance } = settingsSuperform;
-
-	const regenEnhance =
-		() =>
-		async ({ result, update }: { result: { type: string }; update: () => Promise<void> }) => {
-			await update();
-			if (result.type === 'success')
-				toast.trigger({ message: m.saved(), background: 'preset-filled-success-500' });
-		};
 
 	type Item = {
 		id?: string;
@@ -145,14 +135,27 @@
 	];
 
 	const KIND_LABELS: Record<string, string> = {
-		create: 'Create',
-		navigate: 'Navigate',
-		external: 'External link',
-		metric: 'Metric',
-		certificationDocument: 'Certification / Document',
-		framework: 'Framework',
-		assessment: 'Questionnaire'
+		create: m.create(),
+		navigate: m.navigate(),
+		external: m.external(),
+		metric: m.metric(),
+		certificationDocument: m.certificationDocument(),
+		framework: m.framework(),
+		assessment: m.questionnaire()
 	};
+
+	// Bundle the shared option lists / data once for the section + tile editors.
+	const ctx = $derived({
+		modelOptions,
+		pageDestinations: PAGE_DESTINATIONS,
+		metricSources: METRIC_SOURCES,
+		kinds: KINDS,
+		kindLabels: KIND_LABELS,
+		snapshots: data.snapshots,
+		frameworks: data.frameworks,
+		folders: data.folders,
+		docs
+	});
 
 	const payload = $derived(JSON.stringify({ sections }));
 
@@ -167,13 +170,6 @@
 				if (it.kind === 'assessment' && !it.id) it.id = crypto.randomUUID();
 			}
 	});
-
-	function toggleIg(item: Item, refId: string) {
-		const list: string[] = item.target.implementation_groups ?? [];
-		item.target.implementation_groups = list.includes(refId)
-			? list.filter((r) => r !== refId)
-			: [...list, refId];
-	}
 
 	// Preview enrichment: graft the captured snapshot onto framework tiles so the
 	// preview shows real donuts (the live /trust page is enriched server-side).
@@ -234,16 +230,6 @@
 		const [item] = sections[si].items.splice(ii, 1);
 		sections[targetSi].items.push(item);
 	}
-
-	function targetField(kind: Item['kind']) {
-		if (kind === 'create') return { key: 'model', label: 'Model (url name)', ph: 'incidents' };
-		if (kind === 'navigate') return { key: 'model', label: 'Model (url name)', ph: '' };
-		if (kind === 'metric') return { key: 'value', label: m.value(), ph: '128' };
-		if (kind === 'certificationDocument') return { key: '', label: m.proof(), ph: '' };
-		if (kind === 'framework') return { key: 'snapshot', label: m.framework(), ph: '' };
-		if (kind === 'assessment') return { key: '', label: 'Audit setup', ph: '' };
-		return { key: 'url', label: 'URL', ph: kind === 'external' ? 'https://…' : '/incidents' };
-	}
 </script>
 
 <div class="space-y-6 pb-28">
@@ -298,247 +284,19 @@
 
 	{#if view === 'edit'}
 		{#each sections as section, si}
-			<section class="card bg-surface-50-950 p-5 space-y-4">
-				<div class="flex items-center gap-2">
-					<i class="fa-solid fa-layer-group text-surface-400"></i>
-					<input
-						bind:value={section.title}
-						placeholder="Group title"
-						class="input rounded-md font-semibold grow"
-					/>
-					<button
-						onclick={() => moveSection(si, -1)}
-						class="btn-icon btn-sm preset-tonal"
-						aria-label="Move group up"><i class="fa-solid fa-chevron-up"></i></button
-					>
-					<button
-						onclick={() => moveSection(si, 1)}
-						class="btn-icon btn-sm preset-tonal"
-						aria-label="Move group down"><i class="fa-solid fa-chevron-down"></i></button
-					>
-					<button
-						onclick={() => removeSection(si)}
-						class="btn-icon btn-sm preset-tonal-error"
-						aria-label={m.delete()}
-						title={m.delete()}><i class="fa-solid fa-trash"></i></button
-					>
-				</div>
-
-				<div class="space-y-3 pl-6">
-					{#each section.items as item, ii}
-						{@const tf = targetField(item.kind)}
-						<div
-							class="flex flex-wrap items-end gap-2 rounded-lg border border-surface-200-800 p-3"
-						>
-							<label class="text-[10px] text-surface-500">
-								<span class="block">Icon</span>
-								<IconPicker bind:value={item.icon} showInput={false} />
-							</label>
-							<label class="text-[10px] text-surface-500 grow">
-								<span class="block">{m.title()}</span>
-								<input bind:value={item.title} class="input rounded-md text-sm" />
-							</label>
-							<label class="text-[10px] text-surface-500">
-								<span class="block">Kind</span>
-								<select bind:value={item.kind} class="select rounded-md text-sm">
-									{#each KINDS as k}<option value={k}>{KIND_LABELS[k] ?? k}</option>{/each}
-								</select>
-							</label>
-							<label class="text-[10px] text-surface-500 grow">
-								<span class="block">{tf.label}</span>
-								{#if item.kind === 'create'}
-									<select bind:value={item.target.model} class="select rounded-md text-sm">
-										<option value="">—</option>
-										{#each modelOptions as o}<option value={o.value}>{o.label}</option>{/each}
-									</select>
-								{:else if item.kind === 'navigate'}
-									<select bind:value={item.target.model} required class="select rounded-md text-sm">
-										<optgroup label="Models">
-											{#each modelOptions as o}<option value={o.value}>{o.label}</option>{/each}
-										</optgroup>
-										<optgroup label="Pages">
-											{#each PAGE_DESTINATIONS as p}<option value={p.value}>{p.label}</option
-												>{/each}
-										</optgroup>
-									</select>
-								{:else if item.kind === 'certificationDocument'}
-									<input
-										bind:value={item.target.image_url}
-										placeholder={m.imageUrlOptional()}
-										class="input rounded-md text-sm"
-									/>
-									<div class="mt-1 flex gap-1">
-										<input
-											type="date"
-											bind:value={item.target.valid_from}
-											class="input rounded-md text-sm"
-											title={m.validFrom()}
-										/>
-										<input
-											type="date"
-											bind:value={item.target.valid_until}
-											class="input rounded-md text-sm"
-											title={m.validUntil()}
-										/>
-									</div>
-									<select bind:value={item.target.dest} class="select mt-1 rounded-md text-sm">
-										<option value="link">{m.link()}</option>
-										<option value="document">{m.file()}</option>
-									</select>
-									{#if item.target.dest === 'document'}
-										<div class="flex items-center gap-1">
-											<select
-												bind:value={item.target.token}
-												class="select mt-1 grow rounded-md text-sm"
-											>
-												<option value="">—</option>
-												{#each docs as d}<option value={d.token}>{d.name}</option>{/each}
-											</select>
-											<label
-												class="mt-1 flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-md border border-surface-200-800 text-violet-500 hover:bg-surface-100-900"
-												title={m.uploadNewFile()}
-											>
-												<i class="fa-solid fa-upload text-xs"></i>
-												<input type="file" class="hidden" onchange={(e) => uploadDoc(item, e)} />
-											</label>
-										</div>
-									{:else}
-										<input
-											bind:value={item.target.url}
-											placeholder="https://..."
-											class="input mt-1 rounded-md text-sm"
-										/>
-									{/if}
-								{:else if item.kind === 'framework'}
-									<select bind:value={item.target.snapshot} class="select rounded-md text-sm">
-										<option value="">—</option>
-										{#each data.snapshots as s}<option value={s.id}
-												>{s.name} ({s.framework_name})</option
-											>{/each}
-									</select>
-								{:else if item.kind === 'metric'}
-									<select bind:value={item.target.source} class="select rounded-md text-sm">
-										{#each METRIC_SOURCES as src}<option value={src.value}>{src.label}</option
-											>{/each}
-									</select>
-									{#if !item.target.source}
-										<input
-											bind:value={item.target.value}
-											placeholder="128"
-											class="input mt-1 rounded-md text-sm"
-										/>
-									{/if}
-								{:else if item.kind === 'assessment'}
-									{@const fw = data.frameworks.find((f: any) => f.id === item.target.framework)}
-									<select
-										bind:value={item.target.framework}
-										required
-										class="select rounded-md text-sm"
-									>
-										<option value="">{m.framework()}…</option>
-										{#each data.frameworks as f}<option value={f.id}>{f.name}</option>{/each}
-									</select>
-									<div class="mt-1 flex gap-1">
-										<select
-											bind:value={item.target.folder}
-											required
-											class="select grow rounded-md text-sm"
-										>
-											<option value="">{m.userChoosesDomain()}</option>
-											{#each data.folders as d}<option value={d.id}>{d.name}</option>{/each}
-										</select>
-										<select bind:value={item.target.mode} class="select rounded-md text-sm">
-											<option value="full">{m.fullAudit()}</option>
-											<option value="auditee">{m.auditeeMode()}</option>
-										</select>
-									</div>
-									{#if fw && fw.implementation_groups_definition.length}
-										<div class="mt-1 flex flex-wrap gap-x-3 gap-y-1">
-											{#each fw.implementation_groups_definition as ig}
-												<label class="flex items-center gap-1 text-[10px] text-surface-600-400">
-													<input
-														type="checkbox"
-														class="checkbox"
-														checked={(item.target.implementation_groups ?? []).includes(ig.ref_id)}
-														onchange={() => toggleIg(item, ig.ref_id)}
-													/>
-													{ig.name ?? ig.ref_id}
-												</label>
-											{/each}
-										</div>
-									{/if}
-								{:else}
-									<input
-										bind:value={item.target[tf.key]}
-										placeholder={tf.ph}
-										class="input rounded-md text-sm"
-									/>
-								{/if}
-							</label>
-							<label class="text-[10px] text-surface-500">
-								<span class="block">Group</span>
-								<select
-									value={si}
-									onchange={(e) => moveItemToGroup(si, ii, +e.currentTarget.value)}
-									class="select rounded-md text-sm"
-								>
-									{#each sections as s, gi}<option value={gi}>{s.title || `Group ${gi + 1}`}</option
-										>{/each}
-								</select>
-							</label>
-							<label class="text-[10px] text-surface-500 w-full">
-								<span class="block">Description (markdown)</span>
-								<textarea
-									bind:value={item.description}
-									rows="2"
-									class="textarea rounded-md text-sm w-full"
-								></textarea>
-							</label>
-							{#if item.kind === 'assessment'}
-								{@const fw = data.frameworks.find((f: any) => f.id === item.target.framework)}
-								<div class="w-full space-y-2 border-t border-surface-200-800 pt-2">
-									<label class="flex items-center gap-2 text-[10px] text-surface-600-400">
-										<input type="checkbox" class="checkbox" bind:checked={item.target.user_names} />
-										{m.letUserNameAudit()}
-									</label>
-									<details class="text-[10px]">
-										<summary class="cursor-pointer text-surface-500">
-											{m.answeringVisibility()}
-										</summary>
-										<div class="mt-2">
-											<VisibilityEditor
-												value={item.target.field_visibility}
-												frameworkDefaults={fw?.effective_field_visibility ?? null}
-												onChange={(next) => (item.target.field_visibility = next)}
-											/>
-										</div>
-									</details>
-								</div>
-							{/if}
-							<div class="flex gap-1">
-								<button
-									onclick={() => moveItem(si, ii, -1)}
-									class="btn-icon btn-sm preset-tonal"
-									aria-label="Move item up"><i class="fa-solid fa-chevron-up"></i></button
-								>
-								<button
-									onclick={() => moveItem(si, ii, 1)}
-									class="btn-icon btn-sm preset-tonal"
-									aria-label="Move item down"><i class="fa-solid fa-chevron-down"></i></button
-								>
-								<button
-									onclick={() => removeItem(si, ii)}
-									class="btn-icon btn-sm preset-tonal-error"
-									aria-label={m.delete()}><i class="fa-solid fa-trash"></i></button
-								>
-							</div>
-						</div>
-					{/each}
-					<button onclick={() => addItem(si)} class="btn btn-sm preset-tonal">
-						<i class="fa-solid fa-plus mr-1"></i>{m.addItem()}
-					</button>
-				</div>
-			</section>
+			<SectionEditor
+				{section}
+				{sections}
+				{si}
+				{ctx}
+				onMoveSection={(dir) => moveSection(si, dir)}
+				onRemoveSection={() => removeSection(si)}
+				onAddItem={() => addItem(si)}
+				onMoveItem={(ii, dir) => moveItem(si, ii, dir)}
+				onRemoveItem={(ii) => removeItem(si, ii)}
+				onMoveToGroup={(ii, targetSi) => moveItemToGroup(si, ii, targetSi)}
+				onUpload={uploadDoc}
+			/>
 		{/each}
 
 		<button onclick={addSection} class="btn preset-tonal">
@@ -549,137 +307,12 @@
 			<PortalGrid sections={previewSections} />
 		</div>
 	{:else}
-		<form
-			method="POST"
-			action="?/updateSettings"
-			use:settingsEnhance
-			class="card bg-surface-50-950 p-6 space-y-5 max-w-4xl"
-		>
-			<label class="flex items-center gap-2 text-sm">
-				<input type="checkbox" bind:checked={$settingsData.enabled} class="checkbox" />
-				{m.enabled()}
-			</label>
-			<label class="flex items-center gap-2 text-sm">
-				<input type="checkbox" bind:checked={$settingsData.is_default} class="checkbox" />
-				{m.defaultPortal()}
-			</label>
-			<label class="block text-sm">
-				<span class="block text-surface-600-400">{m.order()}</span>
-				<input type="number" bind:value={$settingsData.order} class="input rounded-md w-24" />
-			</label>
-			<AutocompleteSelect
-				form={settingsSuperform}
-				multiple
-				optionsEndpoint="user-groups"
-				field="audience_groups"
-				pathField="path"
-				label={m.audience()}
-			/>
-			<p class="text-xs text-surface-500">{m.audienceHelp()}</p>
-
-			<hr class="border-surface-200-800" />
-
-			<div class="space-y-4">
-				<div class="flex items-center gap-2">
-					<i class="fa-solid fa-globe text-surface-400"></i>
-					<h3 class="font-semibold text-surface-800-200">{m.trustCenter()}</h3>
-				</div>
-				<label class="flex items-center gap-2 text-sm">
-					<input type="checkbox" bind:checked={$settingsData.is_public} class="checkbox" />
-					{m.makePublic()}
-				</label>
-				<p class="text-xs text-surface-500">{m.makePublicHelp()}</p>
-
-				{#if $settingsData.is_public}
-					<label class="flex items-center gap-2 text-sm">
-						<input type="checkbox" bind:checked={$settingsData.is_primary} class="checkbox" />
-						{m.primaryPortal()}
-					</label>
-					<p class="text-xs text-surface-500">{m.primaryPortalHelp()}</p>
-
-					<div class="grid gap-4 sm:grid-cols-2">
-						<label class="block text-sm">
-							<span class="block text-surface-600-400">{m.tagline()}</span>
-							<input bind:value={$settingsData.branding.tagline} class="input rounded-md" />
-						</label>
-						<label class="block text-sm">
-							<span class="block text-surface-600-400">{m.logoUrl()}</span>
-							<input
-								bind:value={$settingsData.branding.logo_url}
-								placeholder="https://…"
-								class="input rounded-md"
-							/>
-						</label>
-						<label class="block text-sm">
-							<span class="block text-surface-600-400">{m.accentColor()}</span>
-							<input
-								type="color"
-								value={$settingsData.branding.accent_color || '#7c3aed'}
-								oninput={(e) => ($settingsData.branding.accent_color = e.currentTarget.value)}
-								class="input h-10 rounded-md p-1"
-							/>
-						</label>
-					</div>
-				{/if}
-			</div>
-
-			<button class="btn preset-filled-primary-500">{m.save()}</button>
-		</form>
-
-		{#if data.portal.is_public && data.portal.public_token}
-			<div class="card bg-surface-50-950 p-6 space-y-3 max-w-4xl mt-4">
-				<h3 class="font-semibold text-surface-800-200">{m.publicLink()}</h3>
-				<p class="text-xs text-surface-500">{m.publicLinkHelp()}</p>
-				<div class="flex items-center gap-2">
-					<input
-						readonly
-						value={`${page.url.origin}/trust/${data.portal.public_token}`}
-						class="input rounded-md text-sm grow font-mono"
-					/>
-					<a
-						href={`/trust/${data.portal.public_token}`}
-						target="_blank"
-						rel="noopener"
-						class="btn btn-sm preset-tonal"
-						aria-label={m.open()}><i class="fa-solid fa-arrow-up-right-from-square"></i></a
-					>
-					<button
-						type="button"
-						onclick={() =>
-							navigator.clipboard?.writeText(
-								`${page.url.origin}/trust/${data.portal.public_token}`
-							)}
-						class="btn btn-sm preset-tonal"
-						aria-label={m.copy()}><i class="fa-solid fa-copy"></i></button
-					>
-				</div>
-				<form method="POST" action="?/regeneratePublicToken" use:enhance={regenEnhance}>
-					<button class="btn btn-sm preset-tonal-error">
-						<i class="fa-solid fa-rotate mr-1"></i>{m.regenerateLink()}
-					</button>
-				</form>
-
-				{#if data.portal.is_primary}
-					<div class="border-t border-surface-200-800 pt-3">
-						<p class="text-xs text-surface-500">{m.vanityUrlHelp()}</p>
-						<div class="mt-2 flex items-center gap-2">
-							<input
-								readonly
-								value={`${page.url.origin}/trust`}
-								class="input rounded-md text-sm grow font-mono"
-							/>
-							<a
-								href="/trust"
-								target="_blank"
-								rel="noopener"
-								class="btn btn-sm preset-tonal"
-								aria-label={m.open()}><i class="fa-solid fa-arrow-up-right-from-square"></i></a
-							>
-						</div>
-					</div>
-				{/if}
-			</div>
-		{/if}
+		<PortalSettingsPanel
+			superform={settingsSuperform}
+			portal={data.portal}
+			origin={page.url.origin}
+			{toast}
+		/>
 	{/if}
 </div>
 
@@ -687,16 +320,7 @@
 	<div
 		class="fixed bottom-0 right-0 left-64 flex items-center justify-end gap-3 border-t border-surface-200-800 bg-surface-50-950/90 px-8 py-3 backdrop-blur"
 	>
-		<form
-			method="POST"
-			action="?/setStatus"
-			use:enhance={() =>
-				async ({ result, update }) => {
-					await update();
-					if (result.type === 'success')
-						toast.trigger({ message: m.saved(), background: 'preset-filled-success-500' });
-				}}
-		>
+		<form method="POST" action="?/setStatus" use:enhance={savedToastEnhance(toast)}>
 			<input
 				type="hidden"
 				name="status"
@@ -709,12 +333,7 @@
 		<form
 			method="POST"
 			action="?/saveContent"
-			use:enhance={() =>
-				async ({ result, update }) => {
-					await update({ reset: false });
-					if (result.type === 'success')
-						toast.trigger({ message: m.saved(), background: 'preset-filled-success-500' });
-				}}
+			use:enhance={savedToastEnhance(toast, { reset: false })}
 		>
 			<input type="hidden" name="payload" value={payload} />
 			<button class="btn preset-filled-primary-500">

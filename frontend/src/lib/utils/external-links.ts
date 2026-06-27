@@ -25,6 +25,29 @@ export const isSafeExternalUrl = (url: string | undefined | null): boolean => {
 	}
 };
 
+// Shared handler for the portal tile kinds that open a URL or a public document
+// (used by both the authenticated portal viewer and the public trust portal, so the
+// scheme guard can't drift between them). Returns true when it consumed the item, so
+// callers fall through to their own context-specific kinds only when it didn't.
+export const openPortalExternal = (item: {
+	kind?: string;
+	target?: { url?: string; token?: string; dest?: string };
+}): boolean => {
+	const target = item.target ?? {};
+	if (item.kind === 'external') {
+		if (isSafeExternalUrl(target.url)) window.open(target.url!, '_blank', 'noopener,noreferrer');
+		return true;
+	}
+	if (item.kind === 'certificationDocument') {
+		if (target.dest === 'document' && target.token)
+			window.open(`/trust/documents/${target.token}`, '_blank', 'noopener,noreferrer');
+		else if (isSafeExternalUrl(target.url))
+			window.open(target.url!, '_blank', 'noopener,noreferrer');
+		return true;
+	}
+	return false;
+};
+
 const isExternalLink = (url: string): boolean => {
 	if (!browser) return false;
 	try {

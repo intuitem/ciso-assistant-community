@@ -2,30 +2,14 @@
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { donutValues, RESULT_BY_KEY } from '$lib/utils/portalResults';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 	const snap = $derived(data.snapshot);
 	const summary = $derived(snap.summary ?? {});
 	const mode = $derived(snap.display_mode ?? 'both');
-
-	const RESULT_META: Record<string, { label: string; color: string }> = {
-		compliant: { label: 'compliant', color: '#86efac' },
-		partially_compliant: { label: 'partiallyCompliant', color: '#fde047' },
-		non_compliant: { label: 'nonCompliant', color: '#f87171' },
-		not_applicable: { label: 'notApplicable', color: '#000000' },
-		not_assessed: { label: 'notAssessed', color: '#d1d5db' }
-	};
-
-	const values = $derived(
-		Object.entries(RESULT_META)
-			.map(([key, meta]) => ({
-				name: safeTranslate(meta.label),
-				value: summary[key] ?? 0,
-				itemStyle: { color: meta.color }
-			}))
-			.filter((v) => v.value > 0)
-	);
+	const values = $derived(donutValues(summary));
 </script>
 
 <svelte:head>
@@ -111,9 +95,9 @@
 								<td class="py-1.5 pr-3">
 									<span
 										class="inline-block rounded-full px-2 py-0.5 text-xs"
-										style="background-color: {RESULT_META[row.result]?.color ?? '#d1d5db'}33"
+										style="background-color: {RESULT_BY_KEY[row.result]?.color ?? '#d1d5db'}33"
 									>
-										{safeTranslate(RESULT_META[row.result]?.label ?? row.result)}
+										{safeTranslate(RESULT_BY_KEY[row.result]?.label ?? row.result)}
 									</span>
 								</td>
 							{/if}

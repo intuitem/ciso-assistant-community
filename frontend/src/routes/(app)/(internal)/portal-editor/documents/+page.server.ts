@@ -1,12 +1,7 @@
 import { BASE_API_URL } from '$lib/utils/constants';
-import { error, fail, redirect, type Actions } from '@sveltejs/kit';
+import { del, unwrap } from '$lib/utils/portalApi';
+import { fail, redirect, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-
-const unwrap = async (res: Response) => {
-	if (!res.ok) error(res.status, await res.text());
-	const data = await res.json();
-	return data.results ?? data;
-};
 
 export const load: PageServerLoad = async ({ fetch, locals }) => {
 	if (!locals.featureflags?.custom_portals) redirect(302, '/');
@@ -37,7 +32,7 @@ export const actions: Actions = {
 	},
 	delete: async ({ request, fetch }) => {
 		const id = (await request.formData()).get('id');
-		const res = await fetch(`${BASE_API_URL}/public-documents/${id}/`, { method: 'DELETE' });
+		const res = await del(fetch, `/public-documents/${id}/`);
 		if (!res.ok) return fail(res.status, { error: await res.text() });
 		return { success: true };
 	}

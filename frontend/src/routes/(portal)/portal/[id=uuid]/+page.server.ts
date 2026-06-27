@@ -72,10 +72,11 @@ export const actions: Actions = {
 		const data = await request.formData();
 		const item = data.get('item');
 		const folder = data.get('folder') || undefined;
+		const name = data.get('name') || undefined;
 		const res = await fetch(`${BASE_API_URL}/portals/${params.id}/launch-assessment/`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ item, folder })
+			body: JSON.stringify({ item, folder, name })
 		});
 		if (!res.ok) return fail(res.status, { error: await res.text() });
 		const { redirect } = await res.json();

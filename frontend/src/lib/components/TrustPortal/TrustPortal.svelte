@@ -1,25 +1,26 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import PortalGrid from '$lib/components/PortalGrid/PortalGrid.svelte';
-	import { isSafeExternalUrl } from '$lib/utils/external-links';
+	import { openPortalExternal, isSafeExternalUrl } from '$lib/utils/external-links';
 	import { m } from '$paraglide/messages';
 
 	let { portal }: { portal: { name: string; branding?: any; sections?: any[] } } = $props();
-	const accent = $derived(portal.branding?.accent_color || '#7c3aed');
+	// Backend validates branding, but this is an unauthenticated surface — guard anyway.
+	const rawAccent = $derived(portal.branding?.accent_color);
+	const accent = $derived(
+		/^#[0-9a-f]{3,8}$|^rgba?\(/i.test(rawAccent ?? '') ? rawAccent : '#7c3aed'
+	);
+	const logoUrl = $derived(
+		isSafeExternalUrl(portal.branding?.logo_url) ? portal.branding.logo_url : null
+	);
 
 	function trigger(item: {
 		kind: string;
 		target?: { url?: string; token?: string; dest?: string };
 		snapshot?: { token?: string };
 	}) {
-		if (item.kind === 'external' && isSafeExternalUrl(item.target?.url))
-			window.open(item.target!.url, '_blank', 'noopener,noreferrer');
-		else if (item.kind === 'certificationDocument') {
-			if (item.target?.dest === 'document' && item.target?.token)
-				window.open(`/trust/documents/${item.target.token}`, '_blank', 'noopener,noreferrer');
-			else if (isSafeExternalUrl(item.target?.url))
-				window.open(item.target!.url, '_blank', 'noopener,noreferrer');
-		} else if (item.kind === 'framework' && item.snapshot?.token)
+		if (openPortalExternal(item)) return;
+		if (item.kind === 'framework' && item.snapshot?.token)
 			goto(`/trust/snapshot/${item.snapshot.token}`);
 	}
 </script>
@@ -34,8 +35,8 @@
 		style="border-top: 4px solid {accent}"
 	>
 		<div class="mx-auto flex max-w-5xl items-center gap-4 px-6 py-6">
-			{#if portal.branding?.logo_url}
-				<img src={portal.branding.logo_url} alt={portal.name} class="h-10 object-contain" />
+			{#if logoUrl}
+				<img src={logoUrl} alt={portal.name} class="h-10 object-contain" />
 			{/if}
 			<div>
 				<h1 class="text-2xl font-bold text-surface-900-100">{portal.name}</h1>

@@ -2,28 +2,15 @@
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { donutValues } from '$lib/utils/portalResults';
+	import { onActivateKey } from '$lib/utils/portalActions';
 
 	let { item, onTrigger }: { item: any; onTrigger?: (item: any) => void } = $props();
 
 	const snap = $derived(item.snapshot);
 	const summary = $derived(snap?.summary ?? {});
 	const mode = $derived(snap?.display_mode ?? 'both');
-
-	const RESULT_META = [
-		{ key: 'compliant', label: 'compliant', color: '#86efac' },
-		{ key: 'partially_compliant', label: 'partiallyCompliant', color: '#fde047' },
-		{ key: 'non_compliant', label: 'nonCompliant', color: '#f87171' },
-		{ key: 'not_applicable', label: 'notApplicable', color: '#000000' },
-		{ key: 'not_assessed', label: 'notAssessed', color: '#d1d5db' }
-	];
-
-	const values = $derived(
-		RESULT_META.map((r) => ({
-			name: safeTranslate(r.label),
-			value: summary[r.key] ?? 0,
-			itemStyle: { color: r.color }
-		})).filter((v) => v.value > 0)
-	);
+	const values = $derived(donutValues(summary));
 </script>
 
 {#if snap}
@@ -31,12 +18,7 @@
 		role="button"
 		tabindex="0"
 		onclick={() => onTrigger?.(item)}
-		onkeydown={(e) => {
-			if (e.key === 'Enter' || e.key === ' ') {
-				e.preventDefault();
-				onTrigger?.(item);
-			}
-		}}
+		onkeydown={onActivateKey(() => onTrigger?.(item))}
 		class="flex flex-col gap-2 rounded-2xl border border-surface-200-800 bg-surface-50-950 p-5 shadow-sm transition-all hover:border-violet-400 hover:shadow-md cursor-pointer"
 	>
 		<div class="flex items-center justify-between">

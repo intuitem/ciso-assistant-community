@@ -1,12 +1,7 @@
 import { BASE_API_URL } from '$lib/utils/constants';
-import { error, fail, redirect, type Actions } from '@sveltejs/kit';
+import { del, postJSON, unwrap } from '$lib/utils/portalApi';
+import { fail, redirect, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-
-const unwrap = async (res: Response) => {
-	if (!res.ok) error(res.status, await res.text());
-	const data = await res.json();
-	return data.results ?? data;
-};
 
 export const load: PageServerLoad = async ({ fetch, locals }) => {
 	if (!locals.featureflags?.custom_portals) redirect(302, '/');
@@ -16,14 +11,6 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
 	]);
 	return { portals: await unwrap(p), presets: await unwrap(pr) };
 };
-
-async function postJSON(fetch: typeof globalThis.fetch, path: string, body: unknown) {
-	return fetch(`${BASE_API_URL}${path}`, {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify(body)
-	});
-}
 
 export const actions: Actions = {
 	createPortal: async ({ request, fetch }) => {
@@ -45,13 +32,13 @@ export const actions: Actions = {
 	},
 	deletePortal: async ({ request, fetch }) => {
 		const id = (await request.formData()).get('id');
-		const res = await fetch(`${BASE_API_URL}/portals/${id}/`, { method: 'DELETE' });
+		const res = await del(fetch, `/portals/${id}/`);
 		if (!res.ok) return fail(res.status, { error: await res.text() });
 		return { success: true };
 	},
 	deletePreset: async ({ request, fetch }) => {
 		const id = (await request.formData()).get('id');
-		const res = await fetch(`${BASE_API_URL}/portal-presets/${id}/`, { method: 'DELETE' });
+		const res = await del(fetch, `/portal-presets/${id}/`);
 		if (!res.ok) return fail(res.status, { error: await res.text() });
 		return { success: true };
 	}

@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { patchJSON, unwrap } from '$lib/utils/portalApi';
 import { PortalSettingsSchema } from '$lib/utils/schemas';
 import { error, fail, redirect, type Actions } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
@@ -10,23 +11,19 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 	const res = await fetch(`${BASE_API_URL}/portals/${params.id}/`);
 	if (!res.ok) error(res.status === 404 ? 404 : 500, 'Portal not found');
 	const portal = await res.json();
-	const docsRes = await fetch(`${BASE_API_URL}/public-documents/`);
-	const publicDocuments = docsRes.ok ? ((await docsRes.json()).results ?? []) : [];
-	const snapsRes = await fetch(`${BASE_API_URL}/framework-snapshots/`);
-	const snapshots = snapsRes.ok ? ((await snapsRes.json()).results ?? []) : [];
-	const fwRes = await fetch(`${BASE_API_URL}/frameworks/`);
-	const frameworks = fwRes.ok
-		? ((await fwRes.json()).results ?? []).map((f: any) => ({
-				id: f.id,
-				name: f.name,
-				implementation_groups_definition: f.implementation_groups_definition ?? [],
-				effective_field_visibility: f.effective_field_visibility ?? null
-			}))
-		: [];
-	const foldersRes = await fetch(`${BASE_API_URL}/folders/?content_type=DO`);
-	const folders = foldersRes.ok
-		? ((await foldersRes.json()).results ?? []).map((f: any) => ({ id: f.id, name: f.name }))
-		: [];
+	const [publicDocuments, snapshots, rawFrameworks, rawFolders] = await Promise.all([
+		fetch(`${BASE_API_URL}/public-documents/`).then(unwrap),
+		fetch(`${BASE_API_URL}/framework-snapshots/`).then(unwrap),
+		fetch(`${BASE_API_URL}/frameworks/`).then(unwrap),
+		fetch(`${BASE_API_URL}/folders/?content_type=DO`).then(unwrap)
+	]);
+	const frameworks = rawFrameworks.map((f: any) => ({
+		id: f.id,
+		name: f.name,
+		implementation_groups_definition: f.implementation_groups_definition ?? [],
+		effective_field_visibility: f.effective_field_visibility ?? null
+	}));
+	const folders = rawFolders.map((f: any) => ({ id: f.id, name: f.name }));
 	const settingsForm = await superValidate(
 		{
 			enabled: portal.enabled,
@@ -42,13 +39,8 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 	return { portal, settingsForm, publicDocuments, snapshots, frameworks, folders };
 };
 
-async function patch(fetch: typeof globalThis.fetch, id: string, body: unknown) {
-	return fetch(`${BASE_API_URL}/portals/${id}/`, {
-		method: 'PATCH',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify(body)
-	});
-}
+const patchPortal = (fetch: typeof globalThis.fetch, id: string, body: unknown) =>
+	patchJSON(fetch, `/portals/${id}/`, body);
 
 export const actions: Actions = {
 	uploadDocument: async ({ request, fetch }) => {
@@ -72,35 +64,38 @@ export const actions: Actions = {
 		} catch {
 			return fail(400, { error: 'Invalid payload' });
 		}
-		const res = await patch(fetch, params.id!, { content });
+		const res = await patchPortal(fetch, params.id!, { content });
 		if (!res.ok) return fail(res.status, { error: await res.text() });
 		return { success: true };
 	},
 	updateMeta: async ({ params, request, fetch }) => {
 		const name = ((await request.formData()).get('name') as string)?.trim();
 		if (!name) return fail(400, { error: 'Name required' });
-		const res = await patch(fetch, params.id!, { name });
+		const res = await patchPortal(fetch, params.id!, { name });
 		if (!res.ok) return fail(res.status, { error: await res.text() });
 		return { success: true };
 	},
 	setStatus: async ({ params, request, fetch }) => {
 		const status = (await request.formData()).get('status');
-		const res = await patch(fetch, params.id!, { status });
+		const res = await patchPortal(fetch, params.id!, { status });
 		if (!res.ok) return fail(res.status, { error: await res.text() });
 		return { success: true };
 	},
 	updateSettings: async ({ params, request, fetch }) => {
 		const form = await superValidate(request, zod(PortalSettingsSchema));
 		if (!form.valid) return fail(400, { form });
-		const res = await patch(fetch, params.id!, {
+		const body: Record<string, unknown> = {
 			enabled: form.data.enabled,
 			is_default: form.data.is_default,
 			order: form.data.order,
 			audience_groups: form.data.audience_groups ?? [],
 			is_public: form.data.is_public,
-			is_primary: form.data.is_primary,
-			branding: form.data.branding ?? {}
-		});
+			is_primary: form.data.is_primary
+		};
+		// Branding is only authored on public portals; omit it otherwise so saving an
+		// internal portal's settings can't wipe branding set while it was public.
+		if (form.data.is_public) body.branding = form.data.branding ?? {};
+		const res = await patchPortal(fetch, params.id!, body);
 		if (!res.ok) return fail(res.status, { error: await res.text() });
 		return { form };
 	},

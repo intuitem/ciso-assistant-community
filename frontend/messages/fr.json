@@ -2613,6 +2613,8 @@
 	"detectedBy": "Détécté via",
 	"internal": "Interne",
 	"external": "Externe",
+	"navigate": "Naviguer",
+	"certificationDocument": "Certification / Document",
 	"internallyDetected": "Interne",
 	"externallyDetected": "Externe",
 	"mappingSuggested": "Suggestion de mapping",

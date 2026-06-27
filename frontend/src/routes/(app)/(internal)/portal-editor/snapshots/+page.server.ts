@@ -1,15 +1,10 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { del, patchJSON, postJSON, unwrap } from '$lib/utils/portalApi';
 import { SnapshotCreateSchema, SnapshotEditSchema } from '$lib/utils/schemas';
-import { error, fail, redirect, type Actions } from '@sveltejs/kit';
+import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
-
-const unwrap = async (res: Response) => {
-	if (!res.ok) error(res.status, await res.text());
-	const data = await res.json();
-	return data.results ?? data;
-};
 
 export const load: PageServerLoad = async ({ fetch, locals }) => {
 	if (!locals.featureflags?.custom_portals) redirect(302, '/');
@@ -24,13 +19,6 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
 		editForm: await superValidate(zod(SnapshotEditSchema))
 	};
 };
-
-const postJSON = (fetch: typeof globalThis.fetch, path: string, body: unknown) =>
-	fetch(`${BASE_API_URL}${path}`, {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify(body)
-	});
 
 export const actions: Actions = {
 	create: async ({ request, fetch }) => {
@@ -48,14 +36,10 @@ export const actions: Actions = {
 	update: async ({ request, fetch }) => {
 		const form = await superValidate(request, zod(SnapshotEditSchema));
 		if (!form.valid) return fail(400, { form });
-		const patch = await fetch(`${BASE_API_URL}/framework-snapshots/${form.data.id}/`, {
-			method: 'PATCH',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				name: form.data.name,
-				implementation_groups: (form.data.implementation_groups ?? []).filter(Boolean),
-				display_mode: form.data.display_mode
-			})
+		const patch = await patchJSON(fetch, `/framework-snapshots/${form.data.id}/`, {
+			name: form.data.name,
+			implementation_groups: (form.data.implementation_groups ?? []).filter(Boolean),
+			display_mode: form.data.display_mode
 		});
 		if (!patch.ok) return fail(patch.status, { error: await patch.text() });
 		// Re-sync so an implementation-group change is reflected in the captured data.
@@ -92,7 +76,7 @@ export const actions: Actions = {
 	},
 	delete: async ({ request, fetch }) => {
 		const id = (await request.formData()).get('id');
-		const res = await fetch(`${BASE_API_URL}/framework-snapshots/${id}/`, { method: 'DELETE' });
+		const res = await del(fetch, `/framework-snapshots/${id}/`);
 		if (!res.ok) return fail(res.status, { error: await res.text() });
 		return { success: true };
 	}

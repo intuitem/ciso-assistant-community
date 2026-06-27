@@ -1,13 +1,15 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { m } from '$paraglide/messages';
-	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
+	import { getModalStore } from '$lib/components/Modals/stores';
 	import { getToastStore } from '$lib/components/Toast/stores';
+	import { confirmDeleteForm, savedToastEnhance } from '$lib/utils/portalActions';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 	const modalStore = getModalStore();
 	const toast = getToastStore();
+	const confirmDelete = (e: MouseEvent, name: string) => confirmDeleteForm(modalStore, e, name);
 
 	function humanSize(bytes: number) {
 		if (!bytes) return '—';
@@ -19,20 +21,6 @@
 			i++;
 		}
 		return `${n.toFixed(n < 10 && i > 0 ? 1 : 0)} ${units[i]}`;
-	}
-
-	function confirmDelete(e: MouseEvent, name: string) {
-		const form = (e.currentTarget as HTMLElement).closest('form') as HTMLFormElement;
-		const modal: ModalSettings = {
-			type: 'confirm',
-			title: m.delete(),
-			body: m.deleteModalMessage({ name }),
-			buttonTextConfirm: m.delete(),
-			response: (confirmed: boolean) => {
-				if (confirmed) form.requestSubmit();
-			}
-		};
-		modalStore.trigger(modal);
 	}
 </script>
 
@@ -50,12 +38,7 @@
 			method="POST"
 			action="?/upload"
 			enctype="multipart/form-data"
-			use:enhance={() =>
-				async ({ result, update }) => {
-					await update();
-					if (result.type === 'success')
-						toast.trigger({ message: m.saved(), background: 'preset-filled-success-500' });
-				}}
+			use:enhance={savedToastEnhance(toast)}
 			class="flex flex-wrap items-end gap-3"
 		>
 			<label class="text-xs text-surface-500">

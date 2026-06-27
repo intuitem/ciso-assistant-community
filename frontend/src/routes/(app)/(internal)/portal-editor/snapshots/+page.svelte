@@ -1,29 +1,30 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { m } from '$paraglide/messages';
-	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
+	import { getModalStore } from '$lib/components/Modals/stores';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import { superForm } from 'sveltekit-superforms';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
+	import Overlay from '$lib/components/PortalEditor/Overlay.svelte';
+	import { confirmDeleteForm, savedToast } from '$lib/utils/portalActions';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 	const modalStore = getModalStore();
 	const toast = getToastStore();
+	const confirmDelete = (e: MouseEvent, name: string) => confirmDeleteForm(modalStore, e, name);
 
 	const createSuperform = superForm(data.createForm, {
 		dataType: 'json',
 		resetForm: true,
 		invalidateAll: true,
 		onUpdated: ({ form }) => {
-			if (form.valid)
-				toast.trigger({ message: m.saved(), background: 'preset-filled-success-500' });
+			if (form.valid) savedToast(toast);
 		}
 	});
 	const { form: createData, enhance: createEnhance } = createSuperform;
 
-	// Audits in the picked domain only.
 	const auditOptions = $derived(
 		(data.audits ?? [])
 			.filter((a: any) => !$createData.folder || a.folder?.id === $createData.folder)
@@ -40,7 +41,6 @@
 		}))
 	);
 
-	// Drop an audit that's no longer in the picked domain.
 	$effect(() => {
 		if ($createData.source_audit && !auditOptions.some((o) => o.value === $createData.source_audit))
 			$createData.source_audit = undefined as any;
@@ -70,7 +70,7 @@
 		invalidateAll: true,
 		onUpdated: ({ form }) => {
 			if (form.valid) {
-				toast.trigger({ message: m.saved(), background: 'preset-filled-success-500' });
+				savedToast(toast);
 				editing = null;
 			}
 		}
@@ -156,20 +156,6 @@
 		});
 		return rows;
 	});
-
-	function confirmDelete(e: MouseEvent, name: string) {
-		const form = (e.currentTarget as HTMLElement).closest('form') as HTMLFormElement;
-		const modal: ModalSettings = {
-			type: 'confirm',
-			title: m.delete(),
-			body: m.deleteModalMessage({ name }),
-			buttonTextConfirm: m.delete(),
-			response: (confirmed: boolean) => {
-				if (confirmed) form.requestSubmit();
-			}
-		};
-		modalStore.trigger(modal);
-	}
 </script>
 
 <div class="space-y-6">
@@ -268,105 +254,89 @@
 </div>
 
 {#if diff}
-	<div
-		class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-		role="presentation"
-		onclick={(e) => {
-			if (e.target === e.currentTarget) diff = null;
-		}}
-	>
-		<div class="w-full max-w-lg rounded-2xl bg-surface-50-950 p-6 shadow-xl space-y-4">
-			<div class="flex items-center justify-between">
-				<h2 class="text-lg font-bold">{m.reviewChanges()}</h2>
-				<button
-					onclick={() => (diff = null)}
-					class="text-surface-400 hover:text-surface-700"
-					aria-label={m.close()}
-				>
-					<i class="fa-solid fa-xmark"></i>
-				</button>
-			</div>
-			<p class="text-sm text-surface-500">{diff.name}</p>
-			<table class="w-full text-sm">
-				<thead>
-					<tr class="border-b border-surface-200-800 text-left text-surface-500">
-						<th class="py-1.5 font-medium"></th>
-						<th class="py-1.5 text-right font-medium">{m.currentValue()}</th>
-						<th class="py-1.5 text-right font-medium">{m.proposedValue()}</th>
-						<th class="py-1.5 text-right font-medium">Δ</th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each diffRows as row}
-						{@const d = delta(row.current, row.next)}
-						<tr class="border-b border-surface-100-900">
-							<td class="py-1.5">{row.label}</td>
-							<td class="py-1.5 text-right text-surface-500">{row.current ?? '—'}</td>
-							<td class="py-1.5 text-right font-medium">{row.next ?? '—'}</td>
-							<td class="py-1.5 text-right {deltaClass(d)}">{d || '·'}</td>
-						</tr>
-					{/each}
-				</tbody>
-			</table>
-			<div class="flex justify-end gap-2">
-				<button onclick={() => (diff = null)} class="btn btn-sm preset-tonal">{m.cancel()}</button>
-				<form method="POST" action="?/sync" use:enhance={applyEnhance}>
-					<input type="hidden" name="id" value={diff.id} />
-					<button class="btn btn-sm preset-filled-primary-500">
-						<i class="fa-solid fa-rotate mr-1"></i>{m.applySync()}
-					</button>
-				</form>
-			</div>
+	<Overlay onclose={() => (diff = null)} width="max-w-lg">
+		<div class="flex items-center justify-between">
+			<h2 class="text-lg font-bold">{m.reviewChanges()}</h2>
+			<button
+				onclick={() => (diff = null)}
+				class="text-surface-400 hover:text-surface-700"
+				aria-label={m.close()}
+			>
+				<i class="fa-solid fa-xmark"></i>
+			</button>
 		</div>
-	</div>
+		<p class="text-sm text-surface-500">{diff.name}</p>
+		<table class="w-full text-sm">
+			<thead>
+				<tr class="border-b border-surface-200-800 text-left text-surface-500">
+					<th class="py-1.5 font-medium"></th>
+					<th class="py-1.5 text-right font-medium">{m.currentValue()}</th>
+					<th class="py-1.5 text-right font-medium">{m.proposedValue()}</th>
+					<th class="py-1.5 text-right font-medium">Δ</th>
+				</tr>
+			</thead>
+			<tbody>
+				{#each diffRows as row}
+					{@const d = delta(row.current, row.next)}
+					<tr class="border-b border-surface-100-900">
+						<td class="py-1.5">{row.label}</td>
+						<td class="py-1.5 text-right text-surface-500">{row.current ?? '—'}</td>
+						<td class="py-1.5 text-right font-medium">{row.next ?? '—'}</td>
+						<td class="py-1.5 text-right {deltaClass(d)}">{d || '·'}</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+		<div class="flex justify-end gap-2">
+			<button onclick={() => (diff = null)} class="btn btn-sm preset-tonal">{m.cancel()}</button>
+			<form method="POST" action="?/sync" use:enhance={applyEnhance}>
+				<input type="hidden" name="id" value={diff.id} />
+				<button class="btn btn-sm preset-filled-primary-500">
+					<i class="fa-solid fa-rotate mr-1"></i>{m.applySync()}
+				</button>
+			</form>
+		</div>
+	</Overlay>
 {/if}
 
 {#if editing}
-	<div
-		class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-		role="presentation"
-		onclick={(e) => {
-			if (e.target === e.currentTarget) editing = null;
-		}}
-	>
-		<div class="w-full max-w-lg rounded-2xl bg-surface-50-950 p-6 shadow-xl space-y-4">
-			<div class="flex items-center justify-between">
-				<h2 class="text-lg font-bold">{m.edit()} — {editing.framework_name || editing.name}</h2>
-				<button
-					onclick={() => (editing = null)}
-					class="text-surface-400 hover:text-surface-700"
-					aria-label={m.close()}><i class="fa-solid fa-xmark"></i></button
-				>
-			</div>
-			<form method="POST" action="?/update" use:editEnhance class="space-y-3">
-				<label class="block text-xs text-surface-500">
-					<span class="block">{m.name()}</span>
-					<input bind:value={$editData.name} required class="input w-full rounded-md text-sm" />
-				</label>
-				{#key editing.id}
-					<AutocompleteSelect
-						form={editSuperform}
-						field="implementation_groups"
-						multiple
-						options={editIgOptions}
-						label={m.implementationGroups()}
-						helpText={m.implementationGroupsAllHelp()}
-					/>
-				{/key}
-				<label class="block text-xs text-surface-500">
-					<span class="block">{m.report()}</span>
-					<select bind:value={$editData.display_mode} class="select w-full rounded-md text-sm">
-						{#each DISPLAY_MODES as mode}<option value={mode.value}>{mode.label()}</option>{/each}
-					</select>
-				</label>
-				<p class="text-xs text-surface-500">{m.snapshotEditResyncHelp()}</p>
-				<div class="flex justify-end gap-2">
-					<button type="button" onclick={() => (editing = null)} class="btn btn-sm preset-tonal"
-						>{m.cancel()}</button
-					>
-					<button class="btn btn-sm preset-filled-primary-500">{m.save()}</button>
-				</div>
-			</form>
+	<Overlay onclose={() => (editing = null)} width="max-w-lg">
+		<div class="flex items-center justify-between">
+			<h2 class="text-lg font-bold">{m.edit()} — {editing.framework_name || editing.name}</h2>
+			<button
+				onclick={() => (editing = null)}
+				class="text-surface-400 hover:text-surface-700"
+				aria-label={m.close()}><i class="fa-solid fa-xmark"></i></button
+			>
 		</div>
-	</div>
+		<form method="POST" action="?/update" use:editEnhance class="space-y-3">
+			<label class="block text-xs text-surface-500">
+				<span class="block">{m.name()}</span>
+				<input bind:value={$editData.name} required class="input w-full rounded-md text-sm" />
+			</label>
+			{#key editing.id}
+				<AutocompleteSelect
+					form={editSuperform}
+					field="implementation_groups"
+					multiple
+					options={editIgOptions}
+					label={m.implementationGroups()}
+					helpText={m.implementationGroupsAllHelp()}
+				/>
+			{/key}
+			<label class="block text-xs text-surface-500">
+				<span class="block">{m.report()}</span>
+				<select bind:value={$editData.display_mode} class="select w-full rounded-md text-sm">
+					{#each DISPLAY_MODES as mode}<option value={mode.value}>{mode.label()}</option>{/each}
+				</select>
+			</label>
+			<p class="text-xs text-surface-500">{m.snapshotEditResyncHelp()}</p>
+			<div class="flex justify-end gap-2">
+				<button type="button" onclick={() => (editing = null)} class="btn btn-sm preset-tonal"
+					>{m.cancel()}</button
+				>
+				<button class="btn btn-sm preset-filled-primary-500">{m.save()}</button>
+			</div>
+		</form>
+	</Overlay>
 {/if}

@@ -1,11 +1,14 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { m } from '$paraglide/messages';
-	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
+	import { getModalStore } from '$lib/components/Modals/stores';
+	import Overlay from '$lib/components/PortalEditor/Overlay.svelte';
+	import { confirmDeleteForm } from '$lib/utils/portalActions';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 	const modalStore = getModalStore();
+	const confirmDelete = (e: MouseEvent, name: string) => confirmDeleteForm(modalStore, e, name);
 
 	const internalPortals = $derived((data.portals ?? []).filter((p: any) => !p.is_public));
 	const publicPortals = $derived((data.portals ?? []).filter((p: any) => p.is_public));
@@ -16,20 +19,6 @@
 	function openCreate(type: 'internal' | 'public') {
 		newName = '';
 		creating = type;
-	}
-
-	function confirmDelete(e: MouseEvent, name: string) {
-		const form = (e.currentTarget as HTMLElement).closest('form') as HTMLFormElement;
-		const modal: ModalSettings = {
-			type: 'confirm',
-			title: m.delete(),
-			body: m.deleteModalMessage({ name }),
-			buttonTextConfirm: m.delete(),
-			response: (confirmed: boolean) => {
-				if (confirmed) form.requestSubmit();
-			}
-		};
-		modalStore.trigger(modal);
 	}
 </script>
 
@@ -153,37 +142,29 @@
 </div>
 
 {#if creating}
-	<div
-		class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-		role="presentation"
-		onclick={(e) => {
-			if (e.target === e.currentTarget) creating = null;
-		}}
-	>
-		<div class="w-full max-w-md rounded-2xl bg-surface-50-950 p-6 shadow-xl space-y-4">
-			<h2 class="text-lg font-bold">
-				{creating === 'public' ? m.newPublicPortal() : m.newInternalPortal()}
-			</h2>
-			<form method="POST" action="?/createPortal" use:enhance class="space-y-3">
-				<input type="hidden" name="visibility" value={creating} />
-				<label class="block text-sm">
-					<span class="block text-surface-600-400">{m.name()}</span>
-					<!-- svelte-ignore a11y_autofocus -->
-					<input
-						name="name"
-						bind:value={newName}
-						required
-						autofocus
-						class="input w-full rounded-md"
-					/>
-				</label>
-				<div class="flex justify-end gap-2">
-					<button type="button" onclick={() => (creating = null)} class="btn btn-sm preset-tonal"
-						>{m.cancel()}</button
-					>
-					<button class="btn btn-sm preset-filled-primary-500">{m.create()}</button>
-				</div>
-			</form>
-		</div>
-	</div>
+	<Overlay onclose={() => (creating = null)}>
+		<h2 class="text-lg font-bold">
+			{creating === 'public' ? m.newPublicPortal() : m.newInternalPortal()}
+		</h2>
+		<form method="POST" action="?/createPortal" use:enhance class="space-y-3">
+			<input type="hidden" name="visibility" value={creating} />
+			<label class="block text-sm">
+				<span class="block text-surface-600-400">{m.name()}</span>
+				<!-- svelte-ignore a11y_autofocus -->
+				<input
+					name="name"
+					bind:value={newName}
+					required
+					autofocus
+					class="input w-full rounded-md"
+				/>
+			</label>
+			<div class="flex justify-end gap-2">
+				<button type="button" onclick={() => (creating = null)} class="btn btn-sm preset-tonal"
+					>{m.cancel()}</button
+				>
+				<button class="btn btn-sm preset-filled-primary-500">{m.create()}</button>
+			</div>
+		</form>
+	</Overlay>
 {/if}

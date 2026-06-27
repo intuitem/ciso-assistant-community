@@ -2996,6 +2996,8 @@
 	"implementationGroupsAllHelp": "Leave empty to mirror all implementation groups.",
 	"frameworksMonitored": "Frameworks monitored",
 	"controlsCovered": "Controls covered",
+	"navigate": "Navigate",
+	"certificationDocument": "Certification / Document",
 	"sync": "Sync",
 	"reviewChanges": "Review changes",
 	"proposedValue": "Proposed",
