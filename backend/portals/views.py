@@ -1,4 +1,5 @@
 from django.contrib.auth.models import Permission
+from django.db import transaction
 from django.db.models import Q
 from django.http import FileResponse, HttpResponse
 from django.utils import timezone
@@ -8,8 +9,14 @@ from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from core.views import BaseModelViewSet
-from iam.models import RoleAssignment
+from core.models import RequirementAssignment
+from core.serializers import ComplianceAssessmentWriteSerializer
+from core.views import (
+    PERSONAL_FOLDER_SENTINEL,
+    BaseModelViewSet,
+    get_or_create_personal_folder,
+)
+from iam.models import Folder, RoleAssignment
 
 from .models import FrameworkSnapshot, Portal, PortalPreset, PublicDocument
 from .serializers import (
@@ -134,6 +141,99 @@ class PortalViewSet(BaseModelViewSet):
         portal.public_token = secrets.token_urlsafe(32)
         portal.save(update_fields=["public_token"])
         return Response({"public_token": portal.public_token})
+
+    @staticmethod
+    def _find_item(portal, item_id):
+        for section in (portal.content or {}).get("sections", []):
+            for item in section.get("items", []):
+                if item.get("id") == item_id:
+                    return item
+        return None
+
+    @action(detail=True, methods=["post"], url_path="launch-assessment")
+    def launch_assessment(self, request, pk=None):
+        """Instantiate the audit configured on an 'assessment' tile, then hand back the
+        route the clicker should land on. The framework / domain / mode come from the
+        author-stored tile config (never the request body) so a clicker can only create
+        what the portal author wired up."""
+        portal = self._entitled_queryset(request).filter(pk=pk).first()
+        if portal is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        item = self._find_item(portal, request.data.get("item"))
+        if item is None or item.get("kind") != "assessment":
+            return Response(
+                {"detail": "Tile not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        target = item.get("target") or {}
+        framework_id = target.get("framework")
+        if not framework_id:
+            return Response(
+                {"detail": "Tile is misconfigured."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Domain: forced by the author when the tile carries one, otherwise chosen by
+        # the clicker (a domain they can reach, or their personal "My space").
+        folder_id = target.get("folder") or request.data.get("folder")
+        if not folder_id:
+            return Response(
+                {"detail": "Select a domain."}, status=status.HTTP_400_BAD_REQUEST
+            )
+        if folder_id == PERSONAL_FOLDER_SENTINEL:
+            folder = get_or_create_personal_folder(request.user)
+            if folder is None:
+                return Response(
+                    {"detail": "Personal folders are not configured."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        else:
+            folder = Folder.objects.filter(pk=folder_id).first()
+            if folder is None:
+                return Response(
+                    {"detail": "Domain not found."}, status=status.HTTP_404_NOT_FOUND
+                )
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_complianceassessment"),
+            folder=folder,
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        data = {
+            "name": (item.get("title") or "").strip() or "Assessment",
+            "framework": framework_id,
+            "folder": str(folder.id),
+        }
+        igs = target.get("implementation_groups") or []
+        if igs:
+            data["selected_implementation_groups"] = igs
+        serializer = ComplianceAssessmentWriteSerializer(
+            data=data, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+
+        with transaction.atomic():
+            assessment = serializer.save()
+            assessment.create_requirement_assessments()
+            if target.get("mode") == "auditee":
+                # Self-service: provision the assignment ready to answer. 'draft' would
+                # show the respondent "Not started yet" (only a reviewer can start it),
+                # and requirements_list intersects with this M2M — an empty set shows
+                # nothing — so assign the whole in-scope assessment.
+                assignment = RequirementAssignment.objects.create(
+                    compliance_assessment=assessment,
+                    folder=folder,
+                    status=RequirementAssignment.Status.IN_PROGRESS,
+                )
+                assignment.actor.set([request.user.actor])
+                assignment.requirement_assessments.set(
+                    assessment.get_requirement_assessments(include_non_assessable=True)
+                )
+                return Response({"redirect": f"/auditee-assessments/{assignment.id}"})
+
+        return Response({"redirect": f"/compliance-assessments/{assessment.id}"})
 
     @action(detail=True, methods=["post"])
     def duplicate(self, request, pk=None):

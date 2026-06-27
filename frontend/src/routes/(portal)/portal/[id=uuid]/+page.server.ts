@@ -25,7 +25,7 @@ async function buildCreateForm(urlModel: string, fetch: typeof globalThis.fetch)
 	return { createForm, model };
 }
 
-export const load: PageServerLoad = async ({ params, fetch }) => {
+export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 	const res = await fetch(`${BASE_API_URL}/portals/${params.id}/content/`);
 	if (!res.ok) error(404, 'Portal not found');
 	const portal = await res.json();
@@ -43,7 +43,21 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	for (const urlModel of createModels) {
 		createForms[urlModel] = await buildCreateForm(urlModel, fetch);
 	}
-	return { portal, createForms };
+
+	// Domain picker data — only needed when an assessment tile lets the clicker choose
+	// the domain (no folder forced by the author).
+	const needsDomainPicker = (portal.sections ?? [])
+		.flatMap((s: any) => s.items ?? [])
+		.some((i: any) => i.kind === 'assessment' && !i.target?.folder);
+	let domains: { id: string; name: string }[] = [];
+	if (needsDomainPicker) {
+		const domRes = await fetch(`${BASE_API_URL}/folders/?content_type=DO`);
+		domains = domRes.ok
+			? ((await domRes.json()).results ?? []).map((d: any) => ({ id: d.id, name: d.name }))
+			: [];
+	}
+	const personalFoldersEnabled = !!locals.featureflags?.personal_folders;
+	return { portal, createForms, domains, personalFoldersEnabled };
 };
 
 export const actions: Actions = {
@@ -53,5 +67,18 @@ export const actions: Actions = {
 			return fail(400, { error: 'invalid model' });
 		}
 		return defaultWriteFormAction({ event, urlModel, action: 'create', doRedirect: false });
+	},
+	launchAssessment: async ({ params, request, fetch }) => {
+		const data = await request.formData();
+		const item = data.get('item');
+		const folder = data.get('folder') || undefined;
+		const res = await fetch(`${BASE_API_URL}/portals/${params.id}/launch-assessment/`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ item, folder })
+		});
+		if (!res.ok) return fail(res.status, { error: await res.text() });
+		const { redirect } = await res.json();
+		return { redirect };
 	}
 };

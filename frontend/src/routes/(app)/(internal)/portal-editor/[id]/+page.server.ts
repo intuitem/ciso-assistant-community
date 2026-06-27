@@ -14,6 +14,18 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 	const publicDocuments = docsRes.ok ? ((await docsRes.json()).results ?? []) : [];
 	const snapsRes = await fetch(`${BASE_API_URL}/framework-snapshots/`);
 	const snapshots = snapsRes.ok ? ((await snapsRes.json()).results ?? []) : [];
+	const fwRes = await fetch(`${BASE_API_URL}/frameworks/`);
+	const frameworks = fwRes.ok
+		? ((await fwRes.json()).results ?? []).map((f: any) => ({
+				id: f.id,
+				name: f.name,
+				implementation_groups_definition: f.implementation_groups_definition ?? []
+			}))
+		: [];
+	const foldersRes = await fetch(`${BASE_API_URL}/folders/?content_type=DO`);
+	const folders = foldersRes.ok
+		? ((await foldersRes.json()).results ?? []).map((f: any) => ({ id: f.id, name: f.name }))
+		: [];
 	const settingsForm = await superValidate(
 		{
 			enabled: portal.enabled,
@@ -26,7 +38,7 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 		},
 		zod(PortalSettingsSchema)
 	);
-	return { portal, settingsForm, publicDocuments, snapshots };
+	return { portal, settingsForm, publicDocuments, snapshots, frameworks, folders };
 };
 
 async function patch(fetch: typeof globalThis.fetch, id: string, body: unknown) {

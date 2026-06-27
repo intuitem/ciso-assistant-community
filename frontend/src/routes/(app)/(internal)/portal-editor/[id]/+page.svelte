@@ -90,11 +90,19 @@
 		};
 
 	type Item = {
+		id?: string;
 		icon: string;
 		title: string;
 		description: string;
-		kind: 'create' | 'navigate' | 'external' | 'metric' | 'certificationDocument' | 'framework';
-		target: Record<string, string>;
+		kind:
+			| 'create'
+			| 'navigate'
+			| 'external'
+			| 'metric'
+			| 'certificationDocument'
+			| 'framework'
+			| 'assessment';
+		target: Record<string, any>;
 	};
 	type Section = { title: string; description: string; items: Item[] };
 
@@ -103,6 +111,7 @@
 			title: s.title ?? '',
 			description: s.description ?? '',
 			items: (s.items ?? []).map((i: any) => ({
+				id: i.id,
 				icon: i.icon ?? '',
 				title: i.title ?? '',
 				description: i.description ?? '',
@@ -117,7 +126,7 @@
 	const KINDS = $derived(
 		data.portal.is_public
 			? ['metric', 'certificationDocument', 'framework', 'external']
-			: ['create', 'navigate', 'external']
+			: ['create', 'navigate', 'assessment', 'external']
 	);
 
 	const METRIC_SOURCES = [
@@ -132,20 +141,30 @@
 		external: 'External link',
 		metric: 'Metric',
 		certificationDocument: 'Certification / Document',
-		framework: 'Framework'
+		framework: 'Framework',
+		assessment: 'Questionnaire'
 	};
 
 	const payload = $derived(JSON.stringify({ sections }));
 
 	// 'navigate' targets a model (mandatory) — backfill any tile that lacks one so the
-	// select is never silently empty.
+	// select is never silently empty. 'assessment' tiles need a stable id so a click can
+	// resolve the author's stored config server-side.
 	$effect(() => {
 		const fallback = modelOptions[0]?.value;
-		if (!fallback) return;
 		for (const sec of sections)
-			for (const it of sec.items)
-				if (it.kind === 'navigate' && !it.target.model) it.target.model = fallback;
+			for (const it of sec.items) {
+				if (it.kind === 'navigate' && !it.target.model && fallback) it.target.model = fallback;
+				if (it.kind === 'assessment' && !it.id) it.id = crypto.randomUUID();
+			}
 	});
+
+	function toggleIg(item: Item, refId: string) {
+		const list: string[] = item.target.implementation_groups ?? [];
+		item.target.implementation_groups = list.includes(refId)
+			? list.filter((r) => r !== refId)
+			: [...list, refId];
+	}
 
 	// Preview enrichment: graft the captured snapshot onto framework tiles so the
 	// preview shows real donuts (the live /trust page is enriched server-side).
@@ -213,6 +232,7 @@
 		if (kind === 'metric') return { key: 'value', label: m.value(), ph: '128' };
 		if (kind === 'certificationDocument') return { key: '', label: m.proof(), ph: '' };
 		if (kind === 'framework') return { key: 'snapshot', label: m.framework(), ph: '' };
+		if (kind === 'assessment') return { key: '', label: 'Audit setup', ph: '' };
 		return { key: 'url', label: 'URL', ph: kind === 'external' ? 'https://…' : '/incidents' };
 	}
 </script>
@@ -392,6 +412,45 @@
 											placeholder="128"
 											class="input mt-1 rounded-md text-sm"
 										/>
+									{/if}
+								{:else if item.kind === 'assessment'}
+									{@const fw = data.frameworks.find((f: any) => f.id === item.target.framework)}
+									<select
+										bind:value={item.target.framework}
+										required
+										class="select rounded-md text-sm"
+									>
+										<option value="">{m.framework()}…</option>
+										{#each data.frameworks as f}<option value={f.id}>{f.name}</option>{/each}
+									</select>
+									<div class="mt-1 flex gap-1">
+										<select
+											bind:value={item.target.folder}
+											required
+											class="select grow rounded-md text-sm"
+										>
+											<option value="">{m.userChoosesDomain()}</option>
+											{#each data.folders as d}<option value={d.id}>{d.name}</option>{/each}
+										</select>
+										<select bind:value={item.target.mode} class="select rounded-md text-sm">
+											<option value="full">{m.fullAudit()}</option>
+											<option value="auditee">{m.auditeeMode()}</option>
+										</select>
+									</div>
+									{#if fw && fw.implementation_groups_definition.length}
+										<div class="mt-1 flex flex-wrap gap-x-3 gap-y-1">
+											{#each fw.implementation_groups_definition as ig}
+												<label class="flex items-center gap-1 text-[10px] text-surface-600-400">
+													<input
+														type="checkbox"
+														class="checkbox"
+														checked={(item.target.implementation_groups ?? []).includes(ig.ref_id)}
+														onchange={() => toggleIg(item, ig.ref_id)}
+													/>
+													{ig.name ?? ig.ref_id}
+												</label>
+											{/each}
+										</div>
 									{/if}
 								{:else}
 									<input
