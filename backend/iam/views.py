@@ -29,8 +29,8 @@ from django.conf import settings
 
 from global_settings.models import GlobalSettings
 from core.models import Actor
-from .models import Folder, PersonalAccessToken, Role, RoleAssignment, SCIMToken
-from core.permissions import IsAdministrator, FeatureFlagRequired
+from .models import Folder, PersonalAccessToken, RoleAssignment, SCIMToken
+from core.permissions import IsGlobalAdmin, FeatureFlagRequired
 from .serializers import (
     ChangePasswordSerializer,
     PersonalAccessTokenReadSerializer,
@@ -420,32 +420,28 @@ class SetPasswordView(views.APIView):
     An endpoint for setting a password as an administrator.
     """
 
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticated, IsGlobalAdmin)
 
     serializer_class = SetPasswordSerializer
 
     def post(self, request, *args, **kwargs):
         serializer = SetPasswordSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        if RoleAssignment.has_role(
-            self.request.user, Role.objects.get(name="BI-RL-ADM")
-        ):
-            new_password = serializer.validated_data.get("new_password")
-            user = serializer.validated_data.get("user")
-            user.set_password(new_password)
-            user.save()
-            try:
-                email_address = EmailAddress.objects.get(user=user, primary=True)
-                email_address.verified = True
-                email_address.save()
-            except Exception as e:
-                logger.error(
-                    "Error setting email address as verified",
-                    user=user,
-                    error=e,
-                )
-            return Response(status=status.HTTP_200_OK)
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+        new_password = serializer.validated_data.get("new_password")
+        user = serializer.validated_data.get("user")
+        user.set_password(new_password)
+        user.save()
+        try:
+            email_address = EmailAddress.objects.get(user=user, primary=True)
+            email_address.verified = True
+            email_address.save()
+        except Exception as e:
+            logger.error(
+                "Error setting email address as verified",
+                user=user,
+                error=e,
+            )
+        return Response(status=status.HTTP_200_OK)
 
 
 class DisableMFAView(views.APIView):
@@ -455,7 +451,7 @@ class DisableMFAView(views.APIView):
     The user will need to enable MFA again on their next login.
     """
 
-    permission_classes = (permissions.IsAuthenticated, IsAdministrator)
+    permission_classes = (permissions.IsAuthenticated, IsGlobalAdmin)
     serializer_class = DisableMFASerializer
 
     def post(self, request, *args, **kwargs):
@@ -530,7 +526,7 @@ class SCIMTokenViewSet(views.APIView):
 
     permission_classes = [
         permissions.IsAuthenticated,
-        IsAdministrator,
+        IsGlobalAdmin,
         FeatureFlagRequired,
     ]
     feature_flag = "idp_groups"
@@ -581,7 +577,7 @@ class SCIMTokenDeleteView(views.APIView):
 
     permission_classes = [
         permissions.IsAuthenticated,
-        IsAdministrator,
+        IsGlobalAdmin,
         FeatureFlagRequired,
     ]
     feature_flag = "idp_groups"
