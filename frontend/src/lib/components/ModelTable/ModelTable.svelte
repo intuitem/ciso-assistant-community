@@ -280,6 +280,22 @@
 	const user = page.data.user;
 
 	const isRelatedField = (fieldName: string): boolean => relatedFieldNames.has(fieldName);
+	const nonNavigableRelatedFields = new Set(['qualifications', 'relationship', 'nature']);
+	const getRelatedFieldHref = (
+		fieldName: string,
+		id: string,
+		options: { fallbackToDashedField?: boolean } = {}
+	): string | undefined => {
+		if (nonNavigableRelatedFields.has(fieldName)) return undefined;
+		const relatedUrlModel = model?.foreignKeyFields?.find(
+			(field) => field.field === fieldName
+		)?.urlModel;
+		const urlModel =
+			relatedUrlModel ?? (options.fallbackToDashedField ? fieldName.replace(/_/g, '-') : undefined);
+
+		if (!urlModel) return undefined;
+		return `/${urlModel}/${id}`;
+	};
 
 	let classProp = ''; // Replacing $$props.class
 
@@ -970,11 +986,17 @@
 																			{@const [securityObjectiveName, securityObjectiveValue] =
 																				Object.entries(val)[0]}
 																			{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
-																		{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship' && key !== 'nature'}
-																			{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key.replace(/_/g, '-')}/${val.id}`}
-																			<Anchor href={itemHref} class="anchor" stopPropagation
-																				>{safeTranslate(val.str)}</Anchor
-																			>
+																		{:else if val.str && val.id}
+																			{@const itemHref = getRelatedFieldHref(key, val.id, {
+																				fallbackToDashedField: true
+																			})}
+																			{#if itemHref}
+																				<Anchor href={itemHref} class="anchor" stopPropagation
+																					>{safeTranslate(val.str)}</Anchor
+																				>
+																			{:else}
+																				{safeTranslate(val.str)}
+																			{/if}
 																		{:else if val.str}
 																			{safeTranslate(val.str)}
 																		{:else if typeof val === 'string' && val.includes(':') && unsafeTranslate(val.split(':')[0])}
@@ -1009,8 +1031,10 @@
 															--
 														{/if}
 													{:else if value && value.str}
-														{#if value.id}
-															{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${value.id}`}
+														{@const itemHref = value.id
+															? getRelatedFieldHref(key, value.id)
+															: undefined}
+														{#if itemHref}
 															{#if key === 'ro_to_couple'}
 																<Anchor
 																	breadcrumbAction="push"

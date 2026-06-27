@@ -1358,6 +1358,8 @@
 	"xRaysView": "View",
 	"xRaysDescription": "X-rays is a very useful tool to detect inconsistencies across your assessments for each perimeter.",
 	"suggestControls": "Suggest controls",
+	"createCollection": "Create a linked collection",
+	"createCollectionHelpText": "Automatically create a collection linked to this project. Uncheck to create the project without a collection.",
 	"createAppliedControlsFromSuggestionsHelpText": "Create applied controls from the framework's requirements' suggested reference controls",
 	"createAppliedControlsFromSuggestionsSuccess": "Applied controls successfully created from the suggested reference controls",
 	"createAppliedControlsFromSuggestionsError": "An error occurred while creating applied controls from the suggested reference controls",

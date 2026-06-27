@@ -391,6 +391,14 @@ def escape_excel_formula(value):
     return s
 
 
+def escape_csv_row(row):
+    """Apply formula-injection escaping to every string cell of a CSV row."""
+    return [
+        escape_excel_formula(value) if isinstance(value, str) else value
+        for value in row
+    ]
+
+
 def create_xlsx_response(entries, filename, wrap_columns=None):
     """
     DRY helper to create XLSX response with consistent formatting.
@@ -513,9 +521,10 @@ class ExportMixin:
 
         try:
             queryset = self._get_export_queryset()
-            response = HttpResponse(content_type="text/csv")
+            response = HttpResponse(content_type="text/csv; charset=utf-8")
             filename = f"{self.export_config.get('filename', 'export')}.csv"
             response["Content-Disposition"] = f'attachment; filename="{filename}"'
+            response.write("\ufeff")
 
             writer = csv.writer(response, delimiter=";")
             fields = self.export_config["fields"]
@@ -4046,7 +4055,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         if UUID(pk) in object_ids_view:
             risk_assessment = self.get_object()
 
-            response = HttpResponse(content_type="text/csv")
+            response = HttpResponse(content_type="text/csv; charset=utf-8")
+            response.write("\ufeff")
 
             writer = csv.writer(response, delimiter=";")
             columns = [
@@ -4122,7 +4132,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                         columns.index("inherent_level"),
                         scenario.get_inherent_risk()["name"],
                     )
-                writer.writerow(row)
+                writer.writerow(escape_csv_row(row))
 
             return response
         else:
@@ -9538,6 +9548,8 @@ class FrameworkViewSet(BaseModelViewSet):
                 "ref_id": rn.ref_id,
                 "name": rn.get_name_translated,
                 "description": rn.get_description_translated,
+                "typical_evidence": rn.get_typical_evidence_translated,
+                "annotation": rn.get_annotation_translated,
                 "compliance_result": "",
                 "requirement_progress": "",
                 "score": "",
@@ -9586,7 +9598,14 @@ class FrameworkViewSet(BaseModelViewSet):
             # Get the worksheet
             worksheet = writer.sheets["Sheet1"]
 
-            wrap_columns = ["name", "description", "observations", "answers"]
+            wrap_columns = [
+                "name",
+                "description",
+                "typical_evidence",
+                "annotation",
+                "observations",
+                "answers",
+            ]
 
             wrap_indices = [
                 df.columns.get_loc(col) + 1 for col in wrap_columns if col in df.columns
@@ -13076,8 +13095,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Get compliance assessment (audit) CSV")
     def compliance_assessment_csv(self, request, pk):
-        response = HttpResponse(content_type="text/csv")
+        response = HttpResponse(content_type="text/csv; charset=utf-8")
         response["Content-Disposition"] = 'attachment; filename="audit_export.csv"'
+        response.write("\ufeff")
 
         (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, ComplianceAssessment
@@ -13090,6 +13110,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "ref_id",
                 "name",
                 "description",
+                "typical_evidence",
+                "annotation",
                 "compliance_result",
                 "extended_result",
                 "requirement_progress",
@@ -13114,6 +13136,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     req_node.ref_id,
                     req_node.get_name_translated,
                     req_node.get_description_translated,
+                    req_node.get_typical_evidence_translated,
+                    req_node.get_annotation_translated,
                 ]
                 if req_node.assessable:
                     row += [
@@ -13125,7 +13149,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     ]
                 else:
                     row += ["", "", "", "", ""]
-                writer.writerow(row)
+                writer.writerow(escape_csv_row(row))
 
             return response
         else:
@@ -13179,6 +13203,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "description": escape_excel_formula(
                     req_node.get_description_translated
                 ),
+                "typical_evidence": escape_excel_formula(
+                    req_node.get_typical_evidence_translated
+                ),
+                "annotation": escape_excel_formula(req_node.get_annotation_translated),
                 "compliance_result": req.result,
                 "extended_result": req.extended_result,
                 "requirement_progress": req.status,
@@ -13255,7 +13283,14 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             df.to_excel(writer, index=False)
             worksheet = writer.sheets["Sheet1"]
 
-            wrap_columns = ["name", "description", "observations", "answers"]
+            wrap_columns = [
+                "name",
+                "description",
+                "typical_evidence",
+                "annotation",
+                "observations",
+                "answers",
+            ]
             wrap_indices = [
                 df.columns.get_loc(col) + 1 for col in wrap_columns if col in df.columns
             ]
@@ -13472,8 +13507,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             queryset, many=True, context={"pk": pk}
         )
 
-        response = HttpResponse(content_type="text/csv")
+        response = HttpResponse(content_type="text/csv; charset=utf-8")
         response["Content-Disposition"] = f'attachment; filename="action_plan_{pk}.csv"'
+        response.write("\ufeff")
 
         writer = csv.writer(response)
 
@@ -13498,33 +13534,35 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
         for item in serializer.data:
             writer.writerow(
-                [
-                    item.get("name"),
-                    item.get("description"),
-                    item.get("category"),
-                    item.get("csf_function"),
-                    item.get("priority"),
-                    item.get("status"),
-                    item.get("eta"),
-                    item.get("expiry_date"),
-                    item.get("effort"),
-                    item.get("control_impact"),
-                    item.get("annual_cost"),
-                    "\n".join(
-                        escape_excel_formula(ra.get("str"))
-                        for ra in (item.get("requirement_assessments") or [])
-                    ),
-                    "\n".join(
-                        escape_excel_formula(evidence.get("str"))
-                        for evidence in (item.get("evidences") or [])
-                        if evidence.get("str")
-                    ),
-                    "\n".join(
-                        escape_excel_formula(evidence.get("filename"))
-                        for evidence in (item.get("evidence_attachments") or [])
-                        if evidence.get("filename")
-                    ),
-                ]
+                escape_csv_row(
+                    [
+                        item.get("name"),
+                        item.get("description"),
+                        item.get("category"),
+                        item.get("csf_function"),
+                        item.get("priority"),
+                        item.get("status"),
+                        item.get("eta"),
+                        item.get("expiry_date"),
+                        item.get("effort"),
+                        item.get("control_impact"),
+                        item.get("annual_cost"),
+                        "\n".join(
+                            escape_excel_formula(ra.get("str"))
+                            for ra in (item.get("requirement_assessments") or [])
+                        ),
+                        "\n".join(
+                            escape_excel_formula(evidence.get("str"))
+                            for evidence in (item.get("evidences") or [])
+                            if evidence.get("str")
+                        ),
+                        "\n".join(
+                            escape_excel_formula(evidence.get("filename"))
+                            for evidence in (item.get("evidence_attachments") or [])
+                            if evidence.get("filename")
+                        ),
+                    ]
+                )
             )
 
         return response
@@ -16886,8 +16924,9 @@ def generate_html(
 
 
 def export_mp_csv(request):
-    response = HttpResponse(content_type="text/csv")
+    response = HttpResponse(content_type="text/csv; charset=utf-8")
     response["Content-Disposition"] = 'attachment; filename="MP.csv"'
+    response.write("\ufeff")
 
     writer = csv.writer(response, delimiter=";")
     columns = [
@@ -16920,16 +16959,16 @@ def export_mp_csv(request):
             mtg.description,
             mtg.category,
             mtg.csf_function,
-            mtg.priority,
             mtg.reference_control,
             mtg.eta,
+            mtg.priority,
             mtg.effort,
             mtg.control_impact,
             mtg.annual_cost,
             mtg.link,
             mtg.status,
         ]
-        writer.writerow(row)
+        writer.writerow(escape_csv_row(row))
 
     return response
 
