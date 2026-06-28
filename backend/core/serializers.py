@@ -3728,50 +3728,26 @@ class RequirementMappingSetReadSerializer(BaseModelSerializer):
             "frameworks_available",
         ]
 
-    def _lookup_framework(self, urn):
-        """Return the framework content dict for the given URN.
+    @staticmethod
+    def _framework_info(urn):
+        from core.mappings.engine import engine
 
-        On list requests the viewset pre-populates `framework_map` in context (O(1) lookup).
-        Falls back to a direct DB query for retrieve, where the map is absent.
-        """
-        framework_map = (self.context.get("optimized_data") or {}).get("framework_map")
-        if framework_map is not None:
-            return framework_map.get(urn)
-
-        # Fallback: single-object retrieve path — no pre-fetched map available.
-        lib = StoredLibrary.objects.filter(
-            content__framework__urn=urn,
-            content__framework__isnull=False,
-            content__requirement_mapping_set__isnull=True,
-            content__requirement_mapping_sets__isnull=True,
-        ).first()
-        return lib.content.get("framework") if lib else None
+        fw = engine.frameworks.get(urn)
+        if fw is None:
+            return {"str": urn, "urn": urn}
+        return {"str": fw.get("name", urn), "urn": urn}
 
     def get_source_framework(self, obj):
         mapping_set = obj.content.get(
             "requirement_mapping_sets", [obj.content.get("requirement_mapping_set", {})]
         )[0]
-        source_urn = mapping_set.get("source_framework_urn", "")
-        framework = self._lookup_framework(source_urn)
-        if framework is None:
-            return {"str": source_urn, "urn": source_urn}
-        return {
-            "str": framework.get("name", framework.get("urn")),
-            "urn": framework.get("urn"),
-        }
+        return self._framework_info(mapping_set.get("source_framework_urn", ""))
 
     def get_target_framework(self, obj):
         mapping_set = obj.content.get(
             "requirement_mapping_sets", [obj.content.get("requirement_mapping_set", {})]
         )[0]
-        target_urn = mapping_set.get("target_framework_urn", "")
-        framework = self._lookup_framework(target_urn)
-        if framework is None:
-            return {"str": target_urn, "urn": target_urn}
-        return {
-            "str": framework.get("name", framework.get("urn")),
-            "urn": framework.get("urn"),
-        }
+        return self._framework_info(mapping_set.get("target_framework_urn", ""))
 
     def get_urn(self, obj):
         rms = obj.content.get(
