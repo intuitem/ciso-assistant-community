@@ -88,9 +88,7 @@
 				item: item.id ?? '',
 				showName: !!item.target.user_names,
 				defaultName: item.title,
-				showDomain: !item.target.folder,
-				domains: data.domains ?? [],
-				personalFoldersEnabled: data.personalFoldersEnabled ?? false
+				showDomain: !item.target.folder
 			}
 		};
 		const modal: ModalSettings = { type: 'component', component, title: item.title };

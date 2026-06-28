@@ -1,8 +1,13 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { deserialize } from '$app/forms';
+	import { onDestroy } from 'svelte';
 	import { m } from '$paraglide/messages';
 	import { getModalStore, type ModalStore } from './stores';
+	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
 
 	interface Props {
 		parent: any;
@@ -10,24 +15,31 @@
 		showName?: boolean;
 		defaultName?: string;
 		showDomain?: boolean;
-		domains?: { id: string; name: string }[];
-		personalFoldersEnabled?: boolean;
 	}
 
-	let {
-		item,
-		showName = false,
-		defaultName = '',
-		showDomain = false,
-		domains = [],
-		personalFoldersEnabled = false
-	}: Props = $props();
+	let { item, showName = false, defaultName = '', showDomain = false }: Props = $props();
 	const modalStore: ModalStore = getModalStore();
 
 	let name = $state(defaultName);
 	let folder = $state('');
 	let busy = $state(false);
 	let error = $state('');
+
+	// Standalone SPA form backing the hierarchical domain picker (FolderTreeSelect requires
+	// a SuperForm); we mirror its value into `folder`. Using field="folder" surfaces the
+	// personal "My space" option, and the write-perm filter limits the tree to domains where
+	// the user may actually create the assessment.
+	const folderSchema = z.object({ folder: z.string() });
+	const _form = superForm(defaults({ folder: '' }, zod(folderSchema)), {
+		dataType: 'json',
+		taintedMessage: false,
+		validators: zod(folderSchema),
+		SPA: true
+	});
+	const unsubscribeFolder = _form.form.subscribe((v) => {
+		folder = v.folder ?? '';
+	});
+	onDestroy(unsubscribeFolder);
 
 	const ready = $derived((!showDomain || !!folder) && (!showName || !!name.trim()));
 
@@ -66,14 +78,12 @@
 			</label>
 		{/if}
 		{#if showDomain}
-			<label class="block space-y-1">
-				<span class="text-sm text-surface-600-400">{m.domain()}</span>
-				<select bind:value={folder} class="select rounded-md">
-					<option value="">—</option>
-					{#if personalFoldersEnabled}<option value="__personal__">{m.mySpace()}</option>{/if}
-					{#each domains as d}<option value={d.id}>{d.name}</option>{/each}
-				</select>
-			</label>
+			<FolderTreeSelect
+				form={_form}
+				field="folder"
+				label={m.domain()}
+				writePermission="add_complianceassessment"
+			/>
 		{/if}
 		{#if error}<p class="text-sm text-error-500">{error}</p>{/if}
 		<footer class="flex justify-end gap-2">

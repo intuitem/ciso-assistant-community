@@ -25,7 +25,7 @@ async function buildCreateForm(urlModel: string, fetch: typeof globalThis.fetch)
 	return { createForm, model };
 }
 
-export const load: PageServerLoad = async ({ params, fetch, locals }) => {
+export const load: PageServerLoad = async ({ params, fetch }) => {
 	const res = await fetch(`${BASE_API_URL}/portals/${params.id}/content/`);
 	if (!res.ok) error(404, 'Portal not found');
 	const portal = await res.json();
@@ -44,20 +44,9 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 		createForms[urlModel] = await buildCreateForm(urlModel, fetch);
 	}
 
-	// Domain picker data — only needed when an assessment tile lets the clicker choose
-	// the domain (no folder forced by the author).
-	const needsDomainPicker = (portal.sections ?? [])
-		.flatMap((s: any) => s.items ?? [])
-		.some((i: any) => i.kind === 'assessment' && !i.target?.folder);
-	let domains: { id: string; name: string }[] = [];
-	if (needsDomainPicker) {
-		const domRes = await fetch(`${BASE_API_URL}/folders/?content_type=DO`);
-		domains = domRes.ok
-			? ((await domRes.json()).results ?? []).map((d: any) => ({ id: d.id, name: d.name }))
-			: [];
-	}
-	const personalFoldersEnabled = !!locals.settings?.personal_folders;
-	return { portal, createForms, domains, personalFoldersEnabled };
+	// The assessment-launch modal picks the domain via FolderTreeSelect, which fetches its
+	// own org tree (and the personal "My space" option) client-side — no data needed here.
+	return { portal, createForms };
 };
 
 export const actions: Actions = {
