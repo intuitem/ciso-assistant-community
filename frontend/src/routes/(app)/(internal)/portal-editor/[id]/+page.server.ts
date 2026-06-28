@@ -48,9 +48,11 @@ export const actions: Actions = {
 		const file = data.get('file');
 		if (!(file instanceof File) || file.size === 0) return fail(400, { error: 'File required' });
 		const name = ((data.get('name') as string) || '').trim() || file.name;
+		const folder = data.get('folder') as string;
 		const body = new FormData();
 		body.append('name', name);
 		body.append('file', file);
+		if (folder) body.append('folder', folder);
 		const res = await fetch(`${BASE_API_URL}/public-documents/`, { method: 'POST', body });
 		if (!res.ok) return fail(res.status, { error: await res.text() });
 		const doc = await res.json();

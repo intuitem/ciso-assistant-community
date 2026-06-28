@@ -5,11 +5,9 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, locals }) => {
 	if (!locals.featureflags?.custom_portals) redirect(302, '/');
-	const [docs, folders] = await Promise.all([
-		fetch(`${BASE_API_URL}/public-documents/`),
-		fetch(`${BASE_API_URL}/folders/`)
-	]);
-	return { documents: await unwrap(docs), folders: await unwrap(folders) };
+	// FolderTreeSelect on the page fetches its own org tree, so we only need the documents.
+	const docs = await fetch(`${BASE_API_URL}/public-documents/`);
+	return { documents: await unwrap(docs) };
 };
 
 export const actions: Actions = {

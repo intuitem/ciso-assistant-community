@@ -4,12 +4,27 @@
 	import { getModalStore } from '$lib/components/Modals/stores';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import { confirmDeleteForm, savedToastEnhance } from '$lib/utils/portalActions';
+	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 	const modalStore = getModalStore();
 	const toast = getToastStore();
 	const confirmDelete = (e: MouseEvent, name: string) => confirmDeleteForm(modalStore, e, name);
+
+	// Standalone SPA form backing the hierarchical domain picker (FolderTreeSelect requires
+	// a SuperForm). It renders its own hidden <input name="folder">, so the value rides along
+	// in this page's multipart upload form without extra mirroring.
+	const folderSchema = z.object({ folder: z.string() });
+	const folderForm = superForm(defaults({ folder: '' }, zod(folderSchema)), {
+		dataType: 'json',
+		taintedMessage: false,
+		validators: zod(folderSchema),
+		SPA: true
+	});
 
 	function humanSize(bytes: number) {
 		if (!bytes) return '—';
@@ -45,12 +60,14 @@
 				<span class="block">{m.name()}</span>
 				<input name="name" required class="input rounded-md text-sm" />
 			</label>
-			<label class="text-xs text-surface-500">
-				<span class="block">{m.domain()}</span>
-				<select name="folder" class="select rounded-md text-sm">
-					{#each data.folders as f}<option value={f.id}>{f.name}</option>{/each}
-				</select>
-			</label>
+			<div class="min-w-56">
+				<FolderTreeSelect
+					form={folderForm}
+					field="folder"
+					label={m.domain()}
+					writePermission="add_publicdocument"
+				/>
+			</div>
 			<label class="text-xs text-surface-500">
 				<span class="block">{m.file()}</span>
 				<input name="file" type="file" required class="input rounded-md text-sm" />

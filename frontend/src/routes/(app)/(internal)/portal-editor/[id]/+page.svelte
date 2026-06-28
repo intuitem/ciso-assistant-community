@@ -63,6 +63,9 @@
 		const fd = new FormData();
 		fd.append('file', file);
 		fd.append('name', item.title?.trim() || file.name);
+		// File the doc in the portal's own folder so the editing analyst keeps visibility
+		// of it (without a folder it would default to root).
+		if (data.portal.folder?.id) fd.append('folder', data.portal.folder.id);
 		const res = await fetch('?/uploadDocument', { method: 'POST', body: fd });
 		const result: any = deserialize(await res.text());
 		if (result.type === 'success' && result.data?.uploaded) {
