@@ -49,6 +49,7 @@
 	{m.show()}
 	<select
 		class="select bg-surface-50-950 w-fit mx-1"
+		aria-label="{m.show()} {m.entries()}"
 		bind:value={$rowsPerPage}
 		onchange={setRowsPerPage}
 	>
