@@ -1205,11 +1205,12 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     def create(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
-        if request.data.get(
-            "folder"
-        ) == PERSONAL_FOLDER_SENTINEL and general_setting_is_enabled(
-            "personal_folders"
-        ):
+        if request.data.get("folder") == PERSONAL_FOLDER_SENTINEL:
+            if not general_setting_is_enabled("personal_folders"):
+                return Response(
+                    {"folder": ["Personal domains are not enabled."]},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             personal = get_or_create_personal_folder(request.user)
             if personal is None:
                 return Response(
