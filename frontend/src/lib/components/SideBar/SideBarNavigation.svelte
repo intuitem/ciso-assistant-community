@@ -9,11 +9,17 @@
 	import { driverInstance } from '$lib/utils/stores';
 
 	const user = page.data.user;
+	const featureflags = (page.data.featureflags ?? {}) as Record<string, boolean>;
 
 	const items = navData.items
 		.map((item) => {
 			// Check and filter the sub-items based on user permissions
 			const filteredSubItems = item.items.filter((subItem) => {
+				// Feature-flag gate: a flagged nav item is hidden unless its flag is enabled.
+				const featureFlag = (subItem as { featureFlag?: string }).featureFlag;
+				if (featureFlag && !featureflags[featureFlag]) {
+					return false;
+				}
 				if (subItem.exclude) {
 					return user?.roles?.some((role: string) => !subItem.exclude.includes(role)) ?? false;
 				} else if (subItem.permissions) {

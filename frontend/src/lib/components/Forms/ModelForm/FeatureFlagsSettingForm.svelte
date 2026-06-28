@@ -242,6 +242,11 @@
 					description: m.focusModeTooltip()
 				},
 				{
+					field: 'idp_groups',
+					label: m.idpGroups(),
+					description: m.idpGroupsDescription()
+				},
+				{
 					field: 'terminologies',
 					label: m.terminologies(),
 					description: m.riskOriginHelpText()

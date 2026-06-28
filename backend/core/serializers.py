@@ -18,6 +18,7 @@ from core.serializer_fields import (
 from core.utils import time_state
 from ebios_rm.models import EbiosRMStudy, Stakeholder
 from tprm.models import Contract, Solution
+from pmbok.models import GenericCollection
 from global_settings.utils import ff_is_enabled
 from iam.models import *
 from django.contrib.auth.models import Permission
@@ -466,6 +467,13 @@ class PerimeterImportExportSerializer(BaseModelSerializer):
 
 
 class RiskAssessmentWriteSerializer(BaseModelSerializer):
+    genericcollection = serializers.PrimaryKeyRelatedField(
+        source="genericcollection_set",
+        many=True,
+        required=False,
+        queryset=GenericCollection.objects.all(),
+    )
+
     def validate(self, attrs):
         if hasattr(self, "instance") and self.instance and self.instance.is_locked:
             # If we're unlocking (setting is_locked to False), allow the operation
@@ -1785,6 +1793,13 @@ class AppliedControlImportExportSerializer(BaseModelSerializer):
 
 
 class PolicyWriteSerializer(AppliedControlWriteSerializer):
+    genericcollection = serializers.PrimaryKeyRelatedField(
+        source="genericcollection_set",
+        many=True,
+        required=False,
+        queryset=GenericCollection.objects.all(),
+    )
+
     class Meta:
         model = Policy
         fields = "__all__"
@@ -1856,6 +1871,7 @@ class TeamReadSerializer(BaseModelSerializer):
 
 class UserReadSerializer(BaseModelSerializer):
     user_groups = FieldsRelatedField(fields=["builtin", "id"], many=True)
+    idp_groups = FieldsRelatedField(many=True)
     has_mfa_enabled = serializers.BooleanField(read_only=True)
 
     class Meta:
@@ -1868,6 +1884,7 @@ class UserReadSerializer(BaseModelSerializer):
             "is_active",
             "date_joined",
             "user_groups",
+            "idp_groups",
             "keep_local_login",
             "is_third_party",
             "observation",
@@ -1893,6 +1910,7 @@ class UserRolesOnFolderSerializer(BaseModelSerializer):
 
 class UserWriteSerializer(BaseModelSerializer):
     is_local = serializers.BooleanField(required=False)
+    has_mfa_enabled = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = User
@@ -1910,6 +1928,7 @@ class UserWriteSerializer(BaseModelSerializer):
             "observation",
             "expiry_date",
             "is_superuser",
+            "has_mfa_enabled",
         ]
 
     def validate_email(self, email):
@@ -1982,6 +2001,21 @@ class UserGroupReadSerializer(BaseModelSerializer):
 class UserGroupWriteSerializer(BaseModelSerializer):
     class Meta:
         model = UserGroup
+        fields = "__all__"
+
+
+class IdPGroupReadSerializer(BaseModelSerializer):
+    user_groups = FieldsRelatedField(many=True)
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = IdPGroup
+        fields = "__all__"
+
+
+class IdPGroupWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = IdPGroup
         fields = "__all__"
 
 
@@ -2324,6 +2358,12 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     )
     contracts = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Contract.objects.all(), required=False
+    )
+    genericcollection = serializers.PrimaryKeyRelatedField(
+        source="genericcollection_set",
+        many=True,
+        required=False,
+        queryset=GenericCollection.objects.all(),
     )
     owner = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Actor.objects.all(), required=False
@@ -2755,6 +2795,12 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
 
 
 class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
+    genericcollection = serializers.PrimaryKeyRelatedField(
+        source="genericcollection_set",
+        many=True,
+        required=False,
+        queryset=GenericCollection.objects.all(),
+    )
     baseline = serializers.PrimaryKeyRelatedField(
         write_only=True,
         queryset=ComplianceAssessment.objects.all(),
@@ -4153,6 +4199,12 @@ class LibraryFilteringLabelWriteSerializer(BaseModelSerializer):
 
 
 class SecurityExceptionWriteSerializer(BaseModelSerializer):
+    genericcollection = serializers.PrimaryKeyRelatedField(
+        source="genericcollection_set",
+        many=True,
+        required=False,
+        queryset=GenericCollection.objects.all(),
+    )
     requirement_assessments = serializers.PrimaryKeyRelatedField(
         many=True, queryset=RequirementAssessment.objects.all(), required=False
     )
@@ -4317,6 +4369,13 @@ class SecurityExceptionReadSerializer(BaseModelSerializer):
 
 
 class FindingsAssessmentWriteSerializer(BaseModelSerializer):
+    genericcollection = serializers.PrimaryKeyRelatedField(
+        source="genericcollection_set",
+        many=True,
+        required=False,
+        queryset=GenericCollection.objects.all(),
+    )
+
     def validate(self, attrs):
         if hasattr(self, "instance") and self.instance and self.instance.is_locked:
             # If we're unlocking (setting is_locked to False), allow the operation
