@@ -148,6 +148,10 @@
 	};
 
 	// Bundle the shared option lists / data once for the section + tile editors.
+	const personalFoldersEnabled = $derived(
+		!!page.data?.settings?.personal_folders && !!page.data?.settings?.personal_folders_parent
+	);
+
 	const ctx = $derived({
 		modelOptions,
 		pageDestinations: PAGE_DESTINATIONS,
@@ -157,6 +161,7 @@
 		snapshots: data.snapshots,
 		frameworks: data.frameworks,
 		folders: data.folders,
+		personalFoldersEnabled,
 		docs
 	});
 

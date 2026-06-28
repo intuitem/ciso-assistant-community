@@ -149,7 +149,10 @@
 			</select>
 			<div class="mt-1 flex gap-1">
 				<select bind:value={item.target.folder} required class="select grow rounded-md text-sm">
-					<option value="">{m.userChoosesDomain()}</option>
+					{#if ctx.personalFoldersEnabled}
+						<option value="__personal__">⟡ {m.mySpace()}</option>
+					{/if}
+					<option value="">⟡ {m.userChoosesDomain()}</option>
 					{#each ctx.folders as d}<option value={d.id}>{d.name}</option>{/each}
 				</select>
 				<select bind:value={item.target.mode} class="select rounded-md text-sm">

@@ -19,6 +19,7 @@ from core.views import (
     BaseModelViewSet,
     get_or_create_personal_folder,
 )
+from global_settings.utils import general_setting_is_enabled
 from iam.models import Folder, RoleAssignment
 
 # The whole feature is opt-in: the API is unreachable unless `custom_portals` is on,
@@ -91,6 +92,11 @@ def _resolve_launch_folder(request, target):
             {"detail": "Select a domain."}, status=status.HTTP_400_BAD_REQUEST
         )
     if folder_id == PERSONAL_FOLDER_SENTINEL:
+        if not general_setting_is_enabled("personal_folders"):
+            return None, Response(
+                {"detail": "Personal folders are not enabled."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         folder = get_or_create_personal_folder(request.user)
         if folder is None:
             return None, Response(
