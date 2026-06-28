@@ -54,8 +54,7 @@ def quiet_healthcheck(_, __, event_dict):
     if isinstance(request, str):
         for path in _QUIET_PATHS:
             if path in request:
-                event_dict["_log_level"] = logging.DEBUG
-                break
+                raise structlog.DropEvent
     return event_dict
 
 
