@@ -45,7 +45,7 @@
 		<input
 			bind:value={section.title}
 			placeholder="Group title"
-			class="input rounded-md font-semibold grow"
+			class="grow rounded-md border border-transparent bg-transparent px-2 py-1 text-base font-semibold hover:bg-surface-100-900 focus:border-surface-300-700 focus:bg-surface-100-900 focus:outline-none"
 		/>
 		<button
 			onclick={() => onMoveSection(-1)}

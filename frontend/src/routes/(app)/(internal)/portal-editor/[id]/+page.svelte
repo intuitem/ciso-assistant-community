@@ -124,7 +124,7 @@
 	// 'external' belongs to both.
 	const KINDS = $derived(
 		data.portal.is_public
-			? ['metric', 'certificationDocument', 'framework', 'external']
+			? ['certificationDocument', 'framework', 'external']
 			: ['create', 'navigate', 'assessment', 'external']
 	);
 
@@ -233,47 +233,61 @@
 </script>
 
 <div class="space-y-6 pb-28">
-	<div class="flex items-center gap-3">
-		<a href="/portal-editor" class="text-surface-500 hover:text-primary-500">
+	<div class="flex flex-wrap items-center gap-x-2 gap-y-3">
+		<a href="/portal-editor" class="btn-icon btn-sm preset-tonal shrink-0" aria-label="Back">
 			<i class="fa-solid fa-arrow-left"></i>
 		</a>
-		<div class="grow">
-			<input
-				bind:value={name}
-				onblur={saveName}
-				aria-label={m.name()}
-				class="input rounded-md text-lg font-bold max-w-md"
-			/>
-		</div>
-		{#if data.portal.status === 'published'}
-			<a href="/portal/{data.portal.id}" class="text-xs text-primary-500" aria-label="Open portal"
-				><i class="fa-solid fa-arrow-up-right-from-square"></i></a
-			>
-		{/if}
+		<input
+			bind:value={name}
+			onblur={saveName}
+			aria-label={m.name()}
+			class="grow min-w-48 max-w-md rounded-md border border-transparent bg-transparent px-2 py-1 text-xl font-bold hover:bg-surface-100-900 focus:border-surface-300-700 focus:bg-surface-100-900 focus:outline-none"
+		/>
 		<span
-			class="text-[10px] uppercase rounded-full px-2 py-0.5 {data.portal.status === 'published'
+			class="shrink-0 text-[10px] uppercase rounded-full px-2 py-0.5 {data.portal.status ===
+			'published'
 				? 'bg-success-500/15 text-success-700'
 				: 'bg-surface-200-800 text-surface-500'}">{data.portal.status}</span
 		>
-		<button
-			class="btn btn-sm {view === 'settings' ? 'preset-filled-primary-500' : 'preset-tonal'}"
-			onclick={() => (view = view === 'settings' ? 'edit' : 'settings')}
-		>
-			<i class="fa-solid fa-sliders mr-1"></i>{m.settings()}
-		</button>
-		<button
-			class="btn btn-sm preset-tonal"
-			onclick={() => (view = view === 'preview' ? 'edit' : 'preview')}
-		>
-			<i class="fa-solid {view === 'preview' ? 'fa-pen' : 'fa-eye'} mr-1"></i>{view === 'preview'
-				? m.edit()
-				: m.preview()}
-		</button>
-		<form method="POST" action="?/duplicate" use:enhance>
-			<button class="btn btn-sm preset-tonal" aria-label={m.duplicate()} title={m.duplicate()}
-				><i class="fa-solid fa-copy"></i></button
-			>
-		</form>
+		<div class="ml-auto flex items-center gap-2">
+			<div class="flex items-center gap-1 rounded-lg bg-surface-100-900 p-1">
+				<button
+					class="btn btn-sm {view === 'edit'
+						? 'preset-filled-primary-500'
+						: 'text-surface-600-400 hover:bg-surface-200-800'}"
+					onclick={() => (view = 'edit')}><i class="fa-solid fa-pen mr-1"></i>{m.edit()}</button
+				>
+				<button
+					class="btn btn-sm {view === 'preview'
+						? 'preset-filled-primary-500'
+						: 'text-surface-600-400 hover:bg-surface-200-800'}"
+					onclick={() => (view = 'preview')}
+					><i class="fa-solid fa-eye mr-1"></i>{m.preview()}</button
+				>
+				<button
+					class="btn btn-sm {view === 'settings'
+						? 'preset-filled-primary-500'
+						: 'text-surface-600-400 hover:bg-surface-200-800'}"
+					onclick={() => (view = 'settings')}
+					><i class="fa-solid fa-sliders mr-1"></i>{m.settings()}</button
+				>
+			</div>
+			<div class="h-6 w-px bg-surface-200-800"></div>
+			{#if data.portal.status === 'published'}
+				<a
+					href="/portal/{data.portal.id}"
+					class="btn-icon btn-sm preset-tonal"
+					aria-label="Open portal"><i class="fa-solid fa-arrow-up-right-from-square"></i></a
+				>
+			{/if}
+			<form method="POST" action="?/duplicate" use:enhance>
+				<button
+					class="btn-icon btn-sm preset-tonal"
+					aria-label={m.duplicate()}
+					title={m.duplicate()}><i class="fa-solid fa-copy"></i></button
+				>
+			</form>
+		</div>
 	</div>
 
 	{#if personalFoldersMisconfigured}

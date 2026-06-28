@@ -108,37 +108,6 @@
 			{/each}
 		</div>
 	</section>
-
-	<!-- Preset gallery -->
-	<section class="card bg-surface-50-950 p-6 space-y-4">
-		<h2 class="text-lg font-bold">{m.portalPresetGallery()}</h2>
-		<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-			{#each data.presets as preset}
-				<div class="flex flex-col rounded-xl border border-surface-200-800 p-4">
-					<div class="flex items-center gap-2">
-						<i class="fa-solid fa-layer-group text-violet-500"></i>
-						<span class="font-semibold">{preset.name}</span>
-						{#if !preset.is_user_authored}
-							<span class="text-[10px] text-surface-400"
-								><i class="fa-solid fa-lock"></i> library</span
-							>
-						{/if}
-					</div>
-					{#if preset.description}
-						<p class="mt-1 text-xs text-surface-600-400">{preset.description}</p>
-					{/if}
-					<form method="POST" action="?/usePreset" use:enhance class="mt-3">
-						<input type="hidden" name="preset" value={preset.id} />
-						<button class="btn btn-sm preset-filled-primary-500 w-full">
-							<i class="fa-solid fa-wand-magic-sparkles mr-1"></i>{m.useThisPreset()}
-						</button>
-					</form>
-				</div>
-			{:else}
-				<p class="text-sm text-surface-500">No presets available yet.</p>
-			{/each}
-		</div>
-	</section>
 </div>
 
 {#if creating}

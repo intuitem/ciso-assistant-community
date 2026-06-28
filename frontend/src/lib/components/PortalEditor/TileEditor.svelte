@@ -87,11 +87,6 @@
 				</optgroup>
 			</select>
 		{:else if item.kind === 'certificationDocument'}
-			<input
-				bind:value={item.target.image_url}
-				placeholder={m.imageUrlOptional()}
-				class="input rounded-md text-sm"
-			/>
 			<div class="mt-1 flex gap-1">
 				<input
 					type="date"
