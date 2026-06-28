@@ -5135,5 +5135,13 @@
 	"scoreScale": "Score scale",
 	"downloadExcelTemplate": "Download Excel template",
 	"frameworkActionsHelp": "The Excel template is meant for third parties or external entities to fill offline, then re-import the results through the {dataWizard}.",
+	"disableMFA": "Disable MFA",
+	"disableMFA1": "If this user has lost access to their second factor, you can",
+	"disableMFALinkText": "disable their MFA",
+	"disableMFA2": "All their MFA authenticators will be removed and they will need to enable MFA again on their next login",
+	"disableMFAWarning": "The MFA security will be disabled for this user until they enable it again.",
+	"mfaDisabledSuccessfully": "MFA has been disabled for this user",
+	"errorDisablingMFA": "Could not disable MFA for this user",
+	"userHasNoMFAEnabled": "This user does not have MFA enabled",
 	"decisionNotes": "Decision notes"
 }

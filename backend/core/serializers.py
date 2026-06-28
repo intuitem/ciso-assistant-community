@@ -1910,6 +1910,7 @@ class UserRolesOnFolderSerializer(BaseModelSerializer):
 
 class UserWriteSerializer(BaseModelSerializer):
     is_local = serializers.BooleanField(required=False)
+    has_mfa_enabled = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = User
@@ -1927,6 +1928,7 @@ class UserWriteSerializer(BaseModelSerializer):
             "observation",
             "expiry_date",
             "is_superuser",
+            "has_mfa_enabled",
         ]
 
     def validate_email(self, email):
@@ -3772,49 +3774,26 @@ class RequirementMappingSetReadSerializer(BaseModelSerializer):
             "frameworks_available",
         ]
 
+    @staticmethod
+    def _framework_info(urn):
+        from core.mappings.engine import engine
+
+        fw = engine.frameworks.get(urn)
+        if fw is None:
+            return {"str": urn, "urn": urn}
+        return {"str": fw.get("name", urn), "urn": urn}
+
     def get_source_framework(self, obj):
         mapping_set = obj.content.get(
             "requirement_mapping_sets", [obj.content.get("requirement_mapping_set", {})]
         )[0]
-        source_urn = mapping_set.get("source_framework_urn", "")
-        framework_lib = StoredLibrary.objects.filter(
-            content__framework__urn=source_urn,
-            content__framework__isnull=False,
-            content__requirement_mapping_set__isnull=True,
-            content__requirement_mapping_sets__isnull=True,
-        ).first()
-        if framework_lib is None:
-            return {
-                "str": source_urn,
-                "urn": source_urn,
-            }
-        framework = framework_lib.content.get("framework")
-        return {
-            "str": framework.get("name", framework.get("urn")),
-            "urn": framework.get("urn"),
-        }
+        return self._framework_info(mapping_set.get("source_framework_urn", ""))
 
     def get_target_framework(self, obj):
         mapping_set = obj.content.get(
             "requirement_mapping_sets", [obj.content.get("requirement_mapping_set", {})]
         )[0]
-        target_urn = mapping_set.get("target_framework_urn", "")
-        framework_lib = StoredLibrary.objects.filter(
-            content__framework__urn=target_urn,
-            content__framework__isnull=False,
-            content__requirement_mapping_set__isnull=True,
-            content__requirement_mapping_sets__isnull=True,
-        ).first()
-        if framework_lib is None:
-            return {
-                "str": target_urn,
-                "urn": target_urn,
-            }
-        framework = framework_lib.content.get("framework")
-        return {
-            "str": framework.get("name", framework.get("urn")),
-            "urn": framework.get("urn"),
-        }
+        return self._framework_info(mapping_set.get("target_framework_urn", ""))
 
     def get_urn(self, obj):
         rms = obj.content.get(

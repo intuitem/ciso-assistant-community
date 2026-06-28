@@ -967,6 +967,16 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         return User.objects.filter(q).distinct()
 
     def is_admin(self) -> bool:
+        """Whether the user is a *global administrator*.
+
+        "Admin" here always means global admin: membership of the built-in
+        global administrators group (BI-UG-ADM) — either directly, or via an
+        IdP group mapped to it (when the idp_groups feature flag is enabled).
+        This is the canonical check for "is a global administrator?"; the
+        IsGlobalAdmin permission and the current-user `is_admin` field both
+        resolve to it. It is NOT scoped to any domain — domain managers
+        (BI-UG-DMA) are not admins here.
+        """
         from global_settings.utils import ff_is_enabled
 
         if self.user_groups.filter(name="BI-UG-ADM").exists():
@@ -1540,26 +1550,6 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 out[codename] = {"str": name}
 
         return out
-
-    @staticmethod
-    def has_role(user: AbstractBaseUser | AnonymousUser, role: Role) -> bool:
-        """
-        Determines if a user has a specific role, using caches only.
-        Checks both direct assignments and assignments via groups.
-        """
-        if not getattr(user, "is_authenticated", False) or not getattr(
-            user, "id", None
-        ):
-            return False
-
-        role_id = getattr(role, "id", None)
-        if not role_id:
-            return False
-
-        for a in _iter_assignment_lites_for_user(user):
-            if a.role_id == role_id:
-                return True
-        return False
 
     @classmethod
     def get_permissions_per_folder(
