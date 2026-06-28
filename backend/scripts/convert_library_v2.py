@@ -1333,16 +1333,14 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                 )
                 if rc:
                     node["reference_controls"] = rc
+            translations = extract_translations_from_row(header, row)
             if "questions" in data and data["questions"]:
-                translations = extract_translations_from_row(header, row)
                 inject_questions_into_node(
                     data,
                     node,
                     answers_dict,
                     translations,
                 )
-            else:
-                translations = extract_translations_from_row(header, row)
             if translations:
                 node_translations = _node_translations_without_questions(translations)
                 if node_translations:
