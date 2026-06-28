@@ -10,7 +10,7 @@ from iam.models import Folder, RoleAssignment
 from .models import FrameworkSnapshot, Portal, PortalPreset, PublicDocument
 
 # accent_color goes verbatim into an inline style on the public trust page; constrain it.
-_COLOR_RE = re.compile(r"^#[0-9a-fA-F]{3,8}$|^rgba?\(", re.IGNORECASE)
+_COLOR_RE = re.compile(r"^#[0-9a-fA-F]{3,8}$|^rgba?\([\d.,\s/%]+\)$", re.IGNORECASE)
 
 
 class PortalPresetReadSerializer(BaseModelSerializer):
