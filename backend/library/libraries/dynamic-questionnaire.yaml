@@ -1,13 +1,17 @@
 urn: urn:intuitem:risk:library:example-dynamic-questionnaire
 locale: fr
 ref_id: "example-dynamic-questionnaire"
-name: "Exemple de questionnaire dynamique avec score, résultat et dépendances"
+name: "Exemple de questionnaire dynamique avec score, résultat et IG dynamiques"
 description: >
-  Ce formulaire illustre l'utilisation des champs add_score, compute_result,
-  select_implementation_groups, description et color, ainsi que la logique depends_on.
+  Ce formulaire illustre les fonctions avancées des questionnaires dynamiques :
+  add_score, compute_result (compliant/partially_compliant/non_compliant/not_applicable),
+  select_implementation_groups, depends_on, description, color, ainsi que les types
+  de questions text/number/date/boolean. Il sert aussi de référentiel de test pour
+  la gestion manuelle des IG sur frameworks dynamiques (les IG dynamiques sont
+  recalculés au save, les IG purement manuels sont préservés).
 copyright: Intuitem
-version: 2
-publication_date: 2025-10-13
+version: 3
+publication_date: 2026-06-23
 provider: Intuitem
 packager: Intuitem
 objects:
@@ -16,282 +20,476 @@ objects:
     ref_id: "example-dynamic-questionnaire"
     name: "Exemple de questionnaire dynamique"
     description: >
-      Exemple simplifié d'un framework illustrant toutes les fonctions récentes des questionnaires dynamiques,
-      y compris le calcul automatique des scores, la logique de dépendance, et la sélection dynamique
-      des Implementation Groups.
+      Framework de démonstration couvrant le calcul de score, la dérivation de
+      résultat (compliant/partially_compliant/non_compliant/not_applicable),
+      la sélection dynamique d'Implementation Groups via un préambule de profil,
+      les dépendances de visibilité, et l'utilisation conjointe d'un IG purement
+      manuel (non lié à une question) pour tester l'override manuel des IG.
     implementation_groups_definition:
       - name: "Groupe Fondamental"
         ref_id: "base"
-        description: "Regroupe les exigences de base à mettre en œuvre."
+        description: "Exigences de base applicables à toutes les organisations."
         default_selected: true
       - name: "Groupe Avancé"
         ref_id: "avance"
-        description: "Contient les exigences additionnelles pour les organisations plus matures."
-    requirement_nodes:
-      # === CATEGORY 1: Fondamentaux ===
-      - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:0_fondamentaux
-        assessable: false
-        depth: 1
-        ref_id: 0_Fondamentaux
-        name: Exigences fondamentales
+        description: "Exigences additionnelles pour les organisations matures."
+      - name: "Groupe Régulé"
+        ref_id: "regule"
+        description: "Exigences pour les secteurs régulés (banque, santé)."
+      - name: "Groupe Pilote (manuel)"
+        ref_id: "pilote"
         description: >
-          Ce chapitre regroupe les exigences de base applicables à toutes les organisations.
-        annotation: >
-          Ces exigences constituent le socle minimal de conformité.
-        implementation_groups:
-          - "base"
-
-      # === SPLASH SCREEN: Introduction fondamentaux ===
-      - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:splash_fondamentaux
+          Aucune réponse de question ne sélectionne ce groupe : il ne peut être
+          activé que manuellement sur l'audit. Sert à valider qu'un IG ajouté
+          à la main reste persisté lors du recalcul des IG dynamiques, et que
+          les exigences associées apparaissent ou disparaissent en conséquence.
+    requirement_nodes:
+      # === SPLASH SCREEN: Bienvenue ===
+      - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:splash_welcome
         assessable: false
         display_mode: splash
-        depth: 2
-        parent_urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:0_fondamentaux
-        ref_id: S1
-        name: "Bienvenue dans le questionnaire"
+        depth: 1
+        ref_id: S0
+        name: "Bienvenue dans le questionnaire dynamique"
         description: |
-          # Évaluation des exigences fondamentales
+          # Évaluation dynamique de cybersécurité
 
-          Ce questionnaire va vous guider à travers les **exigences de base** en matière de cybersécurité.
+          Ce questionnaire de démonstration illustre **toutes les fonctions** des
+          référentiels dynamiques de CISO Assistant.
 
-          ## Ce que vous allez évaluer
+          ## Fonctions couvertes
 
-          - **Gouvernance et contrôle d'accès** — Votre politique de gestion des accès
-          - **Sensibilisation** — La formation de vos collaborateurs
+          - **Score dynamique** : chaque réponse ajoute ou retire des points (`add_score`).
+          - **Résultat dérivé** : chaque réponse contribue à un résultat parmi
+            `compliant`, `partially_compliant`, `non_compliant`, `not_applicable`.
+          - **IG dynamiques** : un préambule de profil active des Implementation Groups
+            (Avancé, Régulé) selon vos réponses.
+          - **IG manuel** : le groupe « Pilote » n'est lié à aucune question, vous
+            pouvez l'activer manuellement dans le formulaire de l'audit et il sera
+            préservé au save.
+          - **Dépendances** : certaines questions n'apparaissent qu'en fonction
+            des réponses précédentes (`depends_on`).
+          - **Types variés** : choix unique, choix multiple, booléen, nombre, date, texte.
 
-          ## Comment répondre
+      # === CATEGORY 0: Préambule (profil organisationnel) ===
+      - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:0_preambule
+        assessable: false
+        depth: 1
+        ref_id: 0_Preambule
+        name: "Préambule — Profil de l'organisation"
+        description: >
+          Section initiale décrivant l'organisation. Les réponses ici déterminent
+          les Implementation Groups activés pour le reste du questionnaire.
 
-          Pour chaque exigence, sélectionnez la réponse qui correspond le mieux à votre situation actuelle.
-          Les réponses influencent le **score global** et peuvent débloquer des questions complémentaires.
-
-          > **Astuce** : Prenez le temps de consulter les annotations pour chaque exigence,
-          > elles contiennent des informations utiles sur le contexte réglementaire.
-
-      # === REQUIREMENT 1 ===
-      - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1
+      - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:0_preambule:profil
         assessable: true
         depth: 2
-        parent_urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:0_fondamentaux
-        ref_id: 1_Gouvernance-1
-        name: Politique d'accès et gouvernance
+        parent_urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:0_preambule
+        ref_id: 0_Profil
+        name: "Profil organisationnel"
         description: >
-          L'entreprise met en œuvre une politique de contrôle d'accès et de gouvernance adaptée à ses besoins.
+          Caractérisation de l'organisation : taille, secteur, contexte réglementaire.
         annotation: >
-          Une politique d'accès bien définie permet d'assurer la protection des systèmes et données sensibles.
-        typical_evidence: >
-          Copie de la politique de gestion des accès, description des rôles et responsabilités.
+          Les réponses à ces questions activent les Implementation Groups appropriés
+          pour la suite du questionnaire. Une fois le profil rempli, l'évaluateur
+          peut masquer cette section via la gestion de visibilité de l'audit.
         implementation_groups:
           - "base"
         questions:
-          urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:1:
+          urn:intuitem:risk:req_node:example-dynamic-questionnaire:0_preambule:profil:question:1:
+            type: unique_choice
+            text: "Quelle est la taille de votre organisation ?"
+            choices:
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:0_preambule:profil:question:1:choice:1
+                value: "TPE/PME (< 250 salariés)"
+                description: "Pas d'IG additionnel : seul le socle fondamental s'applique."
+                color: "#6c757d"
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:0_preambule:profil:question:1:choice:2
+                value: "ETI (250 à 5000 salariés)"
+                description: "Active le Groupe Avancé."
+                select_implementation_groups:
+                  - "avance"
+                color: "#007bff"
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:0_preambule:profil:question:1:choice:3
+                value: "Grande entreprise (> 5000 salariés)"
+                description: "Active le Groupe Avancé."
+                select_implementation_groups:
+                  - "avance"
+                color: "#0056b3"
+
+          urn:intuitem:risk:req_node:example-dynamic-questionnaire:0_preambule:profil:question:2:
+            type: unique_choice
+            text: "Votre secteur est-il soumis à une réglementation sectorielle (banque, santé, énergie...) ?"
+            choices:
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:0_preambule:profil:question:2:choice:1
+                value: "Oui"
+                description: "Active le Groupe Régulé en plus du socle."
+                select_implementation_groups:
+                  - "regule"
+                color: "#dc3545"
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:0_preambule:profil:question:2:choice:2
+                value: "Non"
+                color: "#28a745"
+
+          urn:intuitem:risk:req_node:example-dynamic-questionnaire:0_preambule:profil:question:3:
+            type: date
+            text: "Date d'entrée en vigueur du profil (déclarative, non utilisée pour le calcul)"
+
+      # === CATEGORY 1: Fondamentaux ===
+      - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux
+        assessable: false
+        depth: 1
+        ref_id: 1_Fondamentaux
+        name: "Exigences fondamentales"
+        description: >
+          Socle minimal applicable à toutes les organisations.
+        implementation_groups:
+          - "base"
+
+      - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux:gouvernance
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux
+        ref_id: 1.1_Gouvernance
+        name: "Politique d'accès et gouvernance"
+        description: >
+          L'organisation met en œuvre une politique de contrôle d'accès formalisée.
+        annotation: >
+          Une politique d'accès documentée est un prérequis pour la protection des
+          systèmes et des données sensibles.
+        typical_evidence: >
+          Politique de gestion des accès, matrice des rôles et responsabilités.
+        implementation_groups:
+          - "base"
+        questions:
+          urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux:gouvernance:question:1:
             type: unique_choice
             text: "Disposez-vous d'une politique de contrôle d'accès formalisée ?"
             choices:
-              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:1:choice:1
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux:gouvernance:question:1:choice:1
                 value: "Oui, documentée et appliquée."
                 add_score: 20
-                compute_result: true
-                select_implementation_groups:
-                  - "avance"
-                description: "Indique que la politique d'accès est documentée et mise en œuvre."
+                compute_result: compliant
+                description: "Politique d'accès documentée et mise en œuvre."
                 color: "#28a745"
-              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:1:choice:2
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux:gouvernance:question:1:choice:2
                 value: "Oui, mais non formalisée."
                 add_score: 10
-                compute_result: true
+                compute_result: partially_compliant
                 color: "#ffc107"
-              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:1:choice:3
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux:gouvernance:question:1:choice:3
                 value: "Non, pas de politique spécifique."
-                add_score: -50
-                compute_result: false
+                add_score: 0
+                compute_result: non_compliant
                 color: "#dc3545"
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux:gouvernance:question:1:choice:4
+                value: "Non applicable à mon organisation"
+                compute_result: not_applicable
+                color: "#6c757d"
 
-          urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:2:
+          urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux:gouvernance:question:2:
             type: unique_choice
             text: "La politique est-elle revue annuellement ?"
             depends_on:
-              question: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:1
+              question: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux:gouvernance:question:1
               answers:
-                - urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:1:choice:1
-                - urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:1:choice:2
+                - urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux:gouvernance:question:1:choice:1
+                - urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux:gouvernance:question:1:choice:2
               condition: any
             choices:
-              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:2:choice:1
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux:gouvernance:question:2:choice:1
                 value: "Oui, une revue annuelle est effectuée."
                 add_score: 10
-                compute_result: true
+                compute_result: compliant
                 color: "#28a745"
-              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:2:choice:2
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux:gouvernance:question:2:choice:2
                 value: "Non, la politique n'est pas revue régulièrement."
                 add_score: 0
-                compute_result: false
+                compute_result: non_compliant
                 color: "#dc3545"
 
-          urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:3:
+          urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux:gouvernance:question:3:
             type: multiple_choice
             text: "Quels mécanismes de contrôle d'accès sont en place ?"
             depends_on:
-              question: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:1
+              question: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux:gouvernance:question:1
               answers:
-                - urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:1:choice:1
+                - urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux:gouvernance:question:1:choice:1
               condition: any
             choices:
-              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:3:choice:1
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux:gouvernance:question:3:choice:1
                 value: "Authentification multi-facteurs (MFA)"
                 add_score: 5
-                compute_result: true
+                compute_result: compliant
                 description: "Améliore significativement la sécurité d'accès."
                 color: "#17a2b8"
-              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:3:choice:2
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux:gouvernance:question:3:choice:2
                 value: "Contrôle basé sur les rôles (RBAC)"
                 add_score: 5
-                compute_result: true
+                compute_result: compliant
                 color: "#007bff"
-              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:3:choice:3
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux:gouvernance:question:3:choice:3
                 value: "Aucune mesure spécifique"
                 add_score: 0
-                compute_result: false
+                compute_result: non_compliant
                 color: "#dc3545"
 
-      # === REQUIREMENT 2 ===
-      - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:2_gouvernance-2
+      - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux:sensibilisation
         assessable: true
         depth: 2
-        parent_urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:0_fondamentaux
-        ref_id: 2_Gouvernance-2
-        name: Sensibilisation à la cybersécurité
+        parent_urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux
+        ref_id: 1.2_Sensibilisation
+        name: "Sensibilisation à la cybersécurité"
         description: >
           L'organisation sensibilise ses employés aux bonnes pratiques de cybersécurité.
         annotation: >
-          La formation du personnel est un facteur clé de réussite dans la protection de l'information.
+          La formation du personnel est un facteur clé de réussite dans la protection
+          de l'information.
         implementation_groups:
           - "base"
         questions:
-          urn:intuitem:risk:req_node:example-dynamic-questionnaire:2_gouvernance-2:question:1:
+          urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux:sensibilisation:question:1:
             type: unique_choice
             text: "Les employés reçoivent-ils une formation cybersécurité ?"
             choices:
-              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:2_gouvernance-2:question:1:choice:1
-                value: "Oui, tous les employés sont formés régulièrement."
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux:sensibilisation:question:1:choice:1
+                value: "Oui, tous les employés sont formés annuellement."
                 add_score: 20
-                compute_result: true
+                compute_result: compliant
                 color: "#28a745"
-              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:2_gouvernance-2:question:1:choice:2
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux:sensibilisation:question:1:choice:2
                 value: "Seulement certains employés."
                 add_score: 10
-                compute_result: true
+                compute_result: partially_compliant
                 color: "#ffc107"
-              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:2_gouvernance-2:question:1:choice:3
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux:sensibilisation:question:1:choice:3
                 value: "Aucune formation prévue."
                 add_score: 0
-                compute_result: false
+                compute_result: non_compliant
                 color: "#dc3545"
 
-      # === CATEGORY 2: Avancés ===
-      - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:3_avances
-        assessable: false
-        depth: 1
-        ref_id: 3_Avancés
-        name: Exigences avancées
-        description: >
-          Ce chapitre regroupe les exigences destinées aux organisations plus matures.
-        annotation: >
-          Ces exigences visent à renforcer le niveau de sécurité au-delà du socle fondamental.
-        implementation_groups:
-          - "avance"
+          urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux:sensibilisation:question:2:
+            type: number
+            text: "Combien d'heures de formation cybersécurité par employé et par an ?"
+            depends_on:
+              question: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux:sensibilisation:question:1
+              answers:
+                - urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux:sensibilisation:question:1:choice:1
+                - urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux:sensibilisation:question:1:choice:2
+              condition: any
 
-      # === SPLASH SCREEN: Introduction avancés ===
+          urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_fondamentaux:sensibilisation:question:3:
+            type: text
+            text: "Décrivez brièvement le format des formations dispensées (libre)."
+
+      # === SPLASH SCREEN: Transition Avancés ===
       - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:splash_avances
         assessable: false
         display_mode: splash
-        depth: 2
-        parent_urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:3_avances
+        depth: 1
         ref_id: S2
         name: "Exigences avancées — Supervision et résilience"
         description: |
           # Passons aux exigences avancées
 
-          Vous avez complété les exigences fondamentales. Cette section couvre des mesures
-          de sécurité **plus poussées** destinées aux organisations matures.
-
-          ## Thèmes abordés
-
-          | Thème | Description |
-          |-------|-------------|
-          | Supervision | SIEM, journalisation centralisée |
-          | Sauvegardes | Plans de sauvegarde et restauration |
+          Vous avez complété les exigences fondamentales. Cette section couvre des
+          mesures de sécurité **plus poussées** destinées aux organisations matures.
 
           ## Prérequis
 
           Ces exigences ne s'appliquent que si le **Groupe Avancé** a été activé
-          lors de vos réponses précédentes.
+          lors du préambule (taille ETI ou Grande entreprise).
 
-      # === REQUIREMENT 3 ===
-      - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:3_avance-1
+      # === CATEGORY 2: Avancés ===
+      - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:2_avances
+        assessable: false
+        depth: 1
+        ref_id: 2_Avances
+        name: "Exigences avancées"
+        description: >
+          Mesures additionnelles pour les organisations matures.
+        implementation_groups:
+          - "avance"
+
+      - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:2_avances:supervision
         assessable: true
         depth: 2
-        parent_urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:3_avances
-        ref_id: 3_Avancé-1
-        name: Supervision et journalisation
+        parent_urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:2_avances
+        ref_id: 2.1_Supervision
+        name: "Supervision et journalisation"
         description: >
-          L'organisation met en place une supervision continue et une journalisation centralisée
-          des événements de sécurité.
+          Supervision continue et journalisation centralisée des événements de sécurité.
         annotation: >
-          Cette exigence s'applique principalement aux organisations plus matures.
+          Concerne principalement les organisations matures (ETI / GE).
         implementation_groups:
           - "avance"
         questions:
-          urn:intuitem:risk:req_node:example-dynamic-questionnaire:3_avance-1:question:1:
+          urn:intuitem:risk:req_node:example-dynamic-questionnaire:2_avances:supervision:question:1:
             type: multiple_choice
             text: "Quels types de supervision sont en place ?"
             choices:
-              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:3_avance-1:question:1:choice:1
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:2_avances:supervision:question:1:choice:1
                 value: "SIEM (Security Information and Event Management)"
                 add_score: 10
-                compute_result: true
+                compute_result: compliant
                 description: "Collecte et corrélation centralisée des logs."
                 color: "#007bff"
-              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:3_avance-1:question:1:choice:2
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:2_avances:supervision:question:1:choice:2
+                value: "EDR sur les postes critiques"
+                add_score: 7
+                compute_result: compliant
+                color: "#17a2b8"
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:2_avances:supervision:question:1:choice:3
                 value: "Surveillance manuelle ponctuelle"
-                add_score: 5
-                compute_result: true
+                add_score: 3
+                compute_result: partially_compliant
                 color: "#ffc107"
-              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:3_avance-1:question:1:choice:3
-                value: "Aucune supervision mise en place"
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:2_avances:supervision:question:1:choice:4
+                value: "Aucune supervision"
                 add_score: 0
-                compute_result: false
+                compute_result: non_compliant
                 color: "#dc3545"
 
-      # === REQUIREMENT 4 ===
-      - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:4_avance-2
+          urn:intuitem:risk:req_node:example-dynamic-questionnaire:2_avances:supervision:question:2:
+            type: boolean
+            text: "Les logs sont-ils conservés au moins 12 mois ?"
+
+      - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:2_avances:sauvegardes
         assessable: true
         depth: 2
-        parent_urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:3_avances
-        ref_id: 4_Avancé-2
-        name: Protection des données et sauvegardes
+        parent_urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:2_avances
+        ref_id: 2.2_Sauvegardes
+        name: "Protection des données et sauvegardes"
         description: >
-          L'organisation met en place des mécanismes de sauvegarde et de restauration des données critiques.
+          Mécanismes de sauvegarde et de restauration des données critiques.
         annotation: >
-          Les sauvegardes régulières permettent de garantir la résilience de l'organisation face aux incidents.
+          Les sauvegardes régulières garantissent la résilience face aux incidents.
         implementation_groups:
           - "avance"
         questions:
-          urn:intuitem:risk:req_node:example-dynamic-questionnaire:4_avance-2:question:1:
+          urn:intuitem:risk:req_node:example-dynamic-questionnaire:2_avances:sauvegardes:question:1:
             type: unique_choice
             text: "Des sauvegardes régulières sont-elles effectuées ?"
             choices:
-              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:4_avance-2:question:1:choice:1
-                value: "Oui, sauvegardes quotidiennes et testées."
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:2_avances:sauvegardes:question:1:choice:1
+                value: "Oui, sauvegardes quotidiennes et restauration testée."
                 add_score: 15
-                compute_result: true
+                compute_result: compliant
                 color: "#28a745"
-              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:4_avance-2:question:1:choice:2
-                value: "Oui, mais non testées."
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:2_avances:sauvegardes:question:1:choice:2
+                value: "Oui, mais restauration non testée."
                 add_score: 8
-                compute_result: true
+                compute_result: partially_compliant
                 color: "#ffc107"
-              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:4_avance-2:question:1:choice:3
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:2_avances:sauvegardes:question:1:choice:3
                 value: "Non, pas de sauvegarde formalisée."
                 add_score: 0
-                compute_result: false
+                compute_result: non_compliant
                 color: "#dc3545"
+
+          urn:intuitem:risk:req_node:example-dynamic-questionnaire:2_avances:sauvegardes:question:2:
+            type: date
+            text: "Date de la dernière restauration testée"
+            depends_on:
+              question: urn:intuitem:risk:req_node:example-dynamic-questionnaire:2_avances:sauvegardes:question:1
+              answers:
+                - urn:intuitem:risk:req_node:example-dynamic-questionnaire:2_avances:sauvegardes:question:1:choice:1
+              condition: any
+
+      # === CATEGORY 3: Réglementé ===
+      - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:3_regule
+        assessable: false
+        depth: 1
+        ref_id: 3_Regule
+        name: "Exigences sectorielles régulées"
+        description: >
+          Exigences additionnelles pour les secteurs sous réglementation sectorielle
+          (banque, santé, énergie...).
+        implementation_groups:
+          - "regule"
+
+      - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:3_regule:conformite
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:3_regule
+        ref_id: 3.1_Conformite
+        name: "Conformité sectorielle"
+        description: >
+          L'organisation respecte les exigences sectorielles spécifiques applicables.
+        annotation: >
+          N'apparaît que si le profil sélectionne un secteur régulé.
+        implementation_groups:
+          - "regule"
+        questions:
+          urn:intuitem:risk:req_node:example-dynamic-questionnaire:3_regule:conformite:question:1:
+            type: unique_choice
+            text: "Un dossier de conformité sectoriel est-il tenu à jour ?"
+            choices:
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:3_regule:conformite:question:1:choice:1
+                value: "Oui, revu et signé annuellement par la direction."
+                add_score: 25
+                compute_result: compliant
+                color: "#28a745"
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:3_regule:conformite:question:1:choice:2
+                value: "Oui, mais non revu."
+                add_score: 10
+                compute_result: partially_compliant
+                color: "#ffc107"
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:3_regule:conformite:question:1:choice:3
+                value: "Non."
+                add_score: 0
+                compute_result: non_compliant
+                color: "#dc3545"
+
+      # === CATEGORY 4: Pilote (IG purement manuel) ===
+      - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:4_pilote
+        assessable: false
+        depth: 1
+        ref_id: 4_Pilote
+        name: "Exigences pilote (manuelles)"
+        description: >
+          Section dont la visibilité ne dépend d'aucune réponse : elle ne
+          s'affiche que lorsque le groupe « Pilote » est activé manuellement
+          sur l'audit. Sert à vérifier visuellement que le groupe survit au
+          recalcul des IG dynamiques.
+        implementation_groups:
+          - "pilote"
+
+      - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:4_pilote:experimentations
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:4_pilote
+        ref_id: 4.1_Experimentations
+        name: "Expérimentations sécurité"
+        description: >
+          Exigences en cours d'expérimentation, non encore intégrées au socle
+          ni au parcours avancé/régulé.
+        annotation: >
+          Ces exigences n'apparaissent que si l'évaluateur a coché manuellement
+          le groupe « Pilote » sur l'audit.
+        implementation_groups:
+          - "pilote"
+        questions:
+          urn:intuitem:risk:req_node:example-dynamic-questionnaire:4_pilote:experimentations:question:1:
+            type: unique_choice
+            text: "Un programme d'expérimentation sécurité est-il en place ?"
+            choices:
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:4_pilote:experimentations:question:1:choice:1
+                value: "Oui, formalisé avec un budget dédié."
+                add_score: 10
+                compute_result: compliant
+                color: "#28a745"
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:4_pilote:experimentations:question:1:choice:2
+                value: "Oui, mais informel."
+                add_score: 5
+                compute_result: partially_compliant
+                color: "#ffc107"
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:4_pilote:experimentations:question:1:choice:3
+                value: "Non."
+                add_score: 0
+                compute_result: non_compliant
+                color: "#dc3545"
+
+          urn:intuitem:risk:req_node:example-dynamic-questionnaire:4_pilote:experimentations:question:2:
+            type: text
+            text: "Décrivez brièvement les expérimentations en cours (libre)."

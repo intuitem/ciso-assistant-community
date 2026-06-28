@@ -97,3 +97,11 @@ class PersonalAccessTokenReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = PersonalAccessToken
         fields = ["name", "user", "created", "expiry", "digest"]
+
+
+class DisableMFASerializer(serializers.Serializer):
+    """
+    Serializer for disabling another user's MFA as an administrator.
+    """
+
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
