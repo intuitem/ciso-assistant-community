@@ -1,6 +1,9 @@
 """
 Enterprise settings — imports everything from the community settings and
 applies EE-only overrides (license, extra routes, serializer path, etc.).
+
+DJANGO_BASE_DIR must be set by the launch script (manage.sh / Dockerfile)
+so that all path-dependent settings resolve correctly.
 """
 
 import os
