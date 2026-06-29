@@ -35,6 +35,7 @@ type SidebarBackendKeys = {
 	policy_documents: boolean;
 	security_advisories: boolean;
 	cwes: boolean;
+	custom_portals: boolean;
 };
 
 type SidebarFrontendKeys = {
@@ -72,6 +73,7 @@ type SidebarFrontendKeys = {
 	presets: boolean;
 	securityAdvisories: boolean;
 	cwes: boolean;
+	managePortals: boolean;
 };
 
 export function getSidebarVisibleItems(
@@ -111,6 +113,7 @@ export function getSidebarVisibleItems(
 		auditDashboard: featureFlags?.auditee_mode ?? false,
 		presets: featureFlags?.journeys ?? true,
 		securityAdvisories: featureFlags?.security_advisories ?? true,
-		cwes: featureFlags?.cwes ?? true
+		cwes: featureFlags?.cwes ?? true,
+		managePortals: featureFlags?.custom_portals ?? false
 	};
 }
