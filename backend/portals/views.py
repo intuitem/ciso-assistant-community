@@ -566,7 +566,7 @@ class PublicDocumentServeView(PublicPortalAPIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
         try:
             handle = doc.file.open("rb")
-        except (FileNotFoundError, OSError):
+        except FileNotFoundError, OSError:
             # DB row points at a file that's gone from storage: 404, not a 500.
             return Response(status=status.HTTP_404_NOT_FOUND)
         return FileResponse(
