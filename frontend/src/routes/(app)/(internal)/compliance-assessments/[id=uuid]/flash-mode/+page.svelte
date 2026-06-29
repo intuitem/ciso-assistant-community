@@ -12,6 +12,7 @@
 		resultBadgeStyle
 	} from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { page } from '$app/state';
 
 	interface Props {
 		data: PageData;
@@ -33,7 +34,9 @@
 	const possible_options = [
 		{ id: 'not_assessed', label: m.notAssessed() },
 		{ id: 'non_compliant', label: m.nonCompliant() },
-		{ id: 'partially_compliant', label: m.partiallyCompliant() },
+		...(page.data.settings?.disable_partially_compliant_result
+			? []
+			: [{ id: 'partially_compliant', label: m.partiallyCompliant() }]),
 		{ id: 'compliant', label: m.compliant() },
 		{ id: 'not_applicable', label: m.notApplicable() }
 	];

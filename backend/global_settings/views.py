@@ -181,6 +181,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             "enforce_mfa": False,
             "default_language": "en",
             "default_custom_analytics_dashboard": None,
+            "disable_partially_compliant_result": False,
         }
 
         settings, created = GlobalSettings.objects.get_or_create(name="general")
