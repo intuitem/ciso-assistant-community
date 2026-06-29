@@ -132,6 +132,34 @@
 
 	let theme = $state((page.data.user?.preferences?.ui?.theme as ThemeMode) ?? 'system');
 
+	const landingOptions = [
+		{ value: '', label: m.useOrganizationDefault() },
+		{ value: 'analytics', label: m.analytics() },
+		{ value: 'respondent', label: m.respondentMode() },
+		{ value: 'portal', label: m.portals() }
+	];
+	let landing = $state((page.data.user?.preferences?.ui?.landing as string) ?? '');
+
+	async function handleLandingChange(event: Event) {
+		const value = (event.target as HTMLSelectElement).value;
+		const previous = landing;
+		landing = value;
+		try {
+			const currentUi = page.data.user?.preferences?.ui ?? {};
+			const response = await fetch('/fe-api/user-preferences', {
+				method: 'PATCH',
+				body: JSON.stringify({ ui: { ...currentUi, landing: value } })
+			});
+			if (!response.ok) {
+				landing = previous;
+				return;
+			}
+			await invalidateAll();
+		} catch {
+			landing = previous;
+		}
+	}
+
 	// setTheme applies the theme immediately and persists it to the backend (ui.theme).
 	function handleThemeChange(event: Event) {
 		theme = (event.target as HTMLSelectElement).value as ThemeMode;
@@ -452,6 +480,21 @@
 								<p class="text-xs text-surface-600-400">
 									{sampleDateForPreference(dateFormat, getLocale())}
 								</p>
+							</div>
+						</dd>
+					</div>
+				</dl>
+				<dl class="-my-3 divide-y divide-surface-100-900 text-sm">
+					<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+						<dt class="font-medium">{m.defaultLanding()}</dt>
+						<dd class="text-surface-900-100 sm:col-span-2">
+							<div class="flex flex-col space-y-2 max-w-[40ch]">
+								<p class="text-sm text-surface-800-200">{m.defaultLandingHelpText()}</p>
+								<select class="select" value={landing} onchange={handleLandingChange}>
+									{#each landingOptions as option}
+										<option value={option.value}>{option.label}</option>
+									{/each}
+								</select>
 							</div>
 						</dd>
 					</div>

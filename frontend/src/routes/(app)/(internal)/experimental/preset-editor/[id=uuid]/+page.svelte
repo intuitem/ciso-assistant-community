@@ -4,6 +4,7 @@
 	import { beforeNavigate } from '$app/navigation';
 	import { pageTitle } from '$lib/utils/stores';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { TYPE_TO_MODEL, MODEL_TO_TYPE, SCAFFOLD_TYPES } from '$lib/utils/modelTargets';
 
 	let { data }: { data: PageData } = $props();
 	$pageTitle = `Preset Editor — ${data.preset.name}`;
@@ -43,31 +44,6 @@
 		steps: Step[];
 	};
 	type PointerMode = 'none' | 'model' | 'url';
-
-	const TYPE_TO_MODEL: Record<string, string> = {
-		compliance_assessment: 'compliance-assessments',
-		risk_assessment: 'risk-assessments',
-		business_impact_analysis: 'business-impact-analysis',
-		findings_assessment: 'findings-assessments',
-		ebios_rm_study: 'ebios-rm',
-		processing: 'processings',
-		entity: 'entities',
-		task_template: 'task-templates',
-		organisation_objective: 'organisation-objectives',
-		organisation_issue: 'organisation-issues',
-		perimeter: 'perimeters',
-		asset: 'assets',
-		applied_control: 'applied-controls',
-		policy: 'policies',
-		security_exception: 'security-exceptions',
-		risk_acceptance: 'risk-acceptances',
-		project: 'projects',
-		responsibility_matrix: 'responsibility-matrices'
-	};
-	const MODEL_TO_TYPE: Record<string, string> = Object.fromEntries(
-		Object.entries(TYPE_TO_MODEL).map(([t, m]) => [m, t])
-	);
-	const SCAFFOLD_TYPES = Object.keys(TYPE_TO_MODEL);
 
 	// Object types behind the project_management feature flag; presets scaffolding
 	// these must enable that flag (the editor warns the author).

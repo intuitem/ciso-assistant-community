@@ -600,11 +600,16 @@ export const GeneralSettingsSchema = z.object({
 		.enum(['none', 'parent_wins', 'child_wins', 'best_case', 'worst_case'])
 		.default('none')
 		.optional(),
+	default_landing: z.enum(['analytics', 'respondent', 'portal']).default('analytics').optional(),
+	disable_partially_compliant_result: z.boolean().default(false).optional(),
+	personal_folders_parent: z.string().uuid().optional().nullable(),
 	currency: z.enum(CURRENCY_SYMBOLS).default('€'),
 	daily_rate: z.number().default(500).optional(),
 	mapping_max_depth: z.coerce.number().int().min(2).max(5).default(3).optional(),
 	allow_self_validation: z.boolean().default(false).optional(),
 	show_warning_external_links: z.boolean().default(true).optional(),
+	show_get_started: z.boolean().default(true).optional(),
+	personal_folders: z.boolean().default(false).optional(),
 	allow_assignments_to_entities: z.boolean().default(false).optional(),
 	enforce_mfa: z.boolean().default(false).optional(),
 	default_language: z.string().default('en').optional(),
@@ -682,7 +687,38 @@ export const FeatureFlagsSchema = z.object({
 	policy_documents: z.boolean().optional(),
 	security_advisories: z.boolean().optional(),
 	cwes: z.boolean().optional(),
-	object_audit_trail: z.boolean().optional()
+	object_audit_trail: z.boolean().optional(),
+	custom_portals: z.boolean().optional()
+});
+
+export const PortalSettingsSchema = z.object({
+	enabled: z.boolean().default(true),
+	is_default: z.boolean().default(false),
+	order: z.number().default(0),
+	audience_groups: z.array(z.string().uuid()).optional(),
+	is_public: z.boolean().default(false),
+	is_primary: z.boolean().default(false),
+	branding: z
+		.object({
+			logo_url: z.string().optional(),
+			accent_color: z.string().optional(),
+			tagline: z.string().optional()
+		})
+		.default({})
+});
+
+export const SnapshotCreateSchema = z.object({
+	name: z.string(),
+	folder: z.string().uuid().optional(),
+	source_audit: z.string().uuid(),
+	implementation_groups: z.string().optional().array().optional()
+});
+
+export const SnapshotEditSchema = z.object({
+	id: z.string().uuid(),
+	name: z.string(),
+	implementation_groups: z.string().optional().array().optional(),
+	display_mode: z.enum(['both', 'score', 'result']).default('both')
 });
 
 export const SSOSettingsSchema = z.object({

@@ -2096,7 +2096,11 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'perimeter', urlModel: 'perimeters' },
-			{ field: 'vulnerabilities', urlModel: 'vulnerabilities' }
+			{ field: 'vulnerabilities', urlModel: 'vulnerabilities' },
+			{ field: 'threats', urlModel: 'threats' },
+			{ field: 'reference_controls', urlModel: 'reference-controls' },
+			{ field: 'applied_controls', urlModel: 'applied-controls' },
+			{ field: 'evidences', urlModel: 'evidences' }
 		],
 		reverseForeignKeyFields: [
 			{

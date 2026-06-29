@@ -174,11 +174,14 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             "mapping_max_depth": 3,
             "allow_self_validation": False,
             "show_warning_external_links": True,
+            "show_get_started": True,
+            "personal_folders": False,
             "builtin_metrics_retention_days": 730,  # 2 years default, minimum is 1
             "allow_assignments_to_entities": False,
             "enforce_mfa": False,
             "default_language": "en",
             "default_custom_analytics_dashboard": None,
+            "disable_partially_compliant_result": False,
         }
 
         settings, created = GlobalSettings.objects.get_or_create(name="general")
