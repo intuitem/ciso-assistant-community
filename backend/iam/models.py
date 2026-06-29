@@ -76,6 +76,7 @@ ALLOWED_PERMISSION_APPS = (
     "pmbok",
     "iam",
     "global_settings",
+    "portals",
 )
 
 IGNORED_PERMISSION_MODELS = (

@@ -17,6 +17,7 @@ from core.serializers import ComplianceAssessmentWriteSerializer
 from core.views import (
     PERSONAL_FOLDER_SENTINEL,
     BaseModelViewSet,
+    escape_excel_formula,
     get_or_create_personal_folder,
 )
 from global_settings.utils import general_setting_is_enabled
@@ -345,7 +346,8 @@ class FrameworkSnapshotViewSet(CustomPortalsViewSet):
     search_fields = ["name", "description", "framework_name", "framework_ref_id"]
 
     def perform_create(self, serializer):
-        # Capture the audit posture immediately so a new snapshot is never empty.
+        # source_audit read permission is enforced in the write serializer's
+        # validate_source_audit (covers create + update); just capture here.
         snapshot = serializer.save()
         _apply_snapshot_sync(snapshot)
 
@@ -379,6 +381,12 @@ class FrameworkSnapshotViewSet(CustomPortalsViewSet):
             user=request.user,
             perm=Permission.objects.get(codename="change_frameworksnapshot"),
             folder=snapshot.folder,
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        if snapshot.source_audit and not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="view_complianceassessment"),
+            folder=snapshot.source_audit.folder,
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
         if not _apply_snapshot_sync(snapshot):
@@ -454,8 +462,11 @@ def _enrich_framework_tile(item, snapshots):
     snap = snapshots.get((item.get("target") or {}).get("snapshot"))
     if snap is None:
         return None
+    # Drop `target`: it holds the snapshot's internal DB id, and the public tile
+    # drills down via snapshot.token, never target. Keeps the internal id off the
+    # unauthenticated surface.
     return {
-        **item,
+        **{k: v for k, v in item.items() if k != "target"},
         "snapshot": {
             "name": snap.name,
             "framework_name": snap.framework_name,
@@ -553,8 +564,13 @@ class PublicDocumentServeView(PublicPortalAPIView):
             or not _is_publicly_reachable(document_token=token)
         ):
             return Response(status=status.HTTP_404_NOT_FOUND)
+        try:
+            handle = doc.file.open("rb")
+        except (FileNotFoundError, OSError):
+            # DB row points at a file that's gone from storage: 404, not a 500.
+            return Response(status=status.HTTP_404_NOT_FOUND)
         return FileResponse(
-            doc.file.open("rb"),
+            handle,
             content_type=doc.mime_type or "application/octet-stream",
             as_attachment=True,
             filename=_safe_download_name(doc.name or doc.file.name.rsplit("/", 1)[-1]),
@@ -586,6 +602,11 @@ class PublicFrameworkSnapshotView(PublicPortalAPIView):
 _EXPORT_HEADERS = ["ref_id", "name", "result", "score"]
 
 
+def _escape_cell(value):
+    """Formula-injection escaping for string cells only, so numeric scores stay numeric."""
+    return escape_excel_formula(value) if isinstance(value, str) else value
+
+
 def _flatten_snapshot(content, depth=0):
     """DFS the requirement tree into flat export rows, indenting names by depth so the
     hierarchy survives a spreadsheet. Tolerates the legacy flat shape (no children)."""
@@ -612,7 +633,7 @@ def _snapshot_export_xlsx(rows, slug):
     ws = wb.active
     ws.append([h.replace("_", " ").title() for h in _EXPORT_HEADERS])
     for r in rows:
-        ws.append([r.get(h, "") for h in _EXPORT_HEADERS])
+        ws.append([_escape_cell(r.get(h, "")) for h in _EXPORT_HEADERS])
     buf = BytesIO()
     wb.save(buf)
     resp = HttpResponse(
@@ -631,7 +652,7 @@ def _snapshot_export_csv(rows, slug):
     writer = csv.DictWriter(buf, fieldnames=_EXPORT_HEADERS, extrasaction="ignore")
     writer.writeheader()
     for r in rows:
-        writer.writerow({h: r.get(h, "") for h in _EXPORT_HEADERS})
+        writer.writerow({h: _escape_cell(r.get(h, "")) for h in _EXPORT_HEADERS})
     resp = HttpResponse(buf.getvalue(), content_type="text/csv")
     resp["Content-Disposition"] = f'attachment; filename="{slug}.csv"'
     return resp

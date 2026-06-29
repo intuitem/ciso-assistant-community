@@ -2,6 +2,7 @@ import re
 
 from django.contrib.auth.models import Permission
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 
 from core.serializer_fields import FieldsRelatedField
 from core.serializers import BaseModelSerializer
@@ -157,6 +158,23 @@ class FrameworkSnapshotReadSerializer(BaseModelSerializer):
 
 
 class FrameworkSnapshotWriteSerializer(BaseModelSerializer):
+    def validate_source_audit(self, audit):
+        # A snapshot copies the audit's requirement results/scores into itself, so
+        # referencing an audit requires the right to read it — checked here so both
+        # create and a later change of source_audit are covered. The sync action
+        # bypasses this serializer and guards itself.
+        if audit is not None:
+            request = self.context.get("request")
+            if request is not None and not RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename="view_complianceassessment"),
+                folder=audit.folder,
+            ):
+                raise PermissionDenied(
+                    "You do not have permission to read the source audit."
+                )
+        return audit
+
     class Meta:
         model = FrameworkSnapshot
         fields = [
