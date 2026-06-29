@@ -373,9 +373,6 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     outgoing_webhooks = serializers.BooleanField(
         source="value.outgoing_webhooks", required=False, default=False
     )
-    idp_groups = serializers.BooleanField(
-        source="value.idp_groups", required=False, default=False
-    )
     metrology = serializers.BooleanField(
         source="value.metrology", required=False, default=True
     )

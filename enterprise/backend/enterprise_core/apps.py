@@ -26,7 +26,7 @@ def startup(sender, **kwargs):
     if not isinstance(ff.value, dict):
         ff.value = {}
     if "idp_groups" not in ff.value:
-        ff.value["idp_groups"] = True
+        ff.value["idp_groups"] = False
         ff.save(update_fields=["value"])
 
     administrator_permissions = Permission.objects.filter(
