@@ -760,7 +760,7 @@
 									options={filterResultChoices(
 										page.data.model.selectOptions['result'],
 										page.data.settings?.disable_partially_compliant_result,
-										data.requirementAssessment.result
+										data.result
 									)}
 									field="result"
 									label={m.result()}
