@@ -2512,7 +2512,7 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
         return self._is_dynamic_cache
 
     def __str__(self) -> str:
-        return f"{self.provider} - {self.name}"
+        return f"{self.provider} - {self.get_name_translated}"
 
 
 class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):

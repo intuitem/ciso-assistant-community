@@ -7,7 +7,7 @@ class IamConfig(AppConfig):
 
     def ready(self):
         from django.apps import apps
-        from django.db.models.signals import m2m_changed
+        from django.db.models.signals import m2m_changed, post_delete
 
         from iam.cache_builders import (
             invalidate_groups_cache,
@@ -18,6 +18,7 @@ class IamConfig(AppConfig):
         User = apps.get_model("iam", "User")
         RoleAssignment = apps.get_model("iam", "RoleAssignment")
         Role = apps.get_model("iam", "Role")
+        IdPGroup = apps.get_model("iam", "IdPGroup")
 
         def _user_groups_changed(sender, instance, action, **kwargs):
             if action in {"post_add", "post_remove", "post_clear"}:
@@ -31,6 +32,15 @@ class IamConfig(AppConfig):
         def _role_permissions_changed(sender, instance, action, **kwargs):
             if action in {"post_add", "post_remove", "post_clear"}:
                 invalidate_roles_cache()
+
+        def _idp_group_membership_changed(sender, instance, action, **kwargs):
+            if action in {"post_add", "post_remove", "post_clear"}:
+                invalidate_groups_cache()
+                invalidate_assignments_cache()
+
+        def _idp_group_deleted(sender, instance, **kwargs):
+            invalidate_groups_cache()
+            invalidate_assignments_cache()
 
         m2m_changed.connect(
             _user_groups_changed,
@@ -48,5 +58,23 @@ class IamConfig(AppConfig):
             _role_permissions_changed,
             sender=Role.permissions.through,
             dispatch_uid="iam.role.permissions.m2m.invalidate_roles_cache",
+            weak=False,
+        )
+        m2m_changed.connect(
+            _idp_group_membership_changed,
+            sender=User.idp_groups.through,
+            dispatch_uid="iam.user.idp_groups.m2m.invalidate_caches",
+            weak=False,
+        )
+        m2m_changed.connect(
+            _idp_group_membership_changed,
+            sender=IdPGroup.user_groups.through,
+            dispatch_uid="iam.idpgroup.user_groups.m2m.invalidate_caches",
+            weak=False,
+        )
+        post_delete.connect(
+            _idp_group_deleted,
+            sender=IdPGroup,
+            dispatch_uid="iam.idpgroup.post_delete.invalidate_caches",
             weak=False,
         )

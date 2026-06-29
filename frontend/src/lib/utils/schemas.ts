@@ -144,6 +144,7 @@ export const LibraryUploadSchema = z.object({
 
 export const RiskAssessmentSchema = z.object({
 	...NameDescriptionMixin,
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	version: z.string().optional().default('1.0'),
 	folder: z.string(),
 	perimeter: z.string().optional().nullable(),
@@ -289,7 +290,9 @@ export const AppliedControlDuplicateSchema = z.object({
 	duplicate_evidences: z.boolean().optional()
 });
 
-export const PolicySchema = AppliedControlSchema.omit({ category: true });
+export const PolicySchema = AppliedControlSchema.omit({ category: true }).extend({
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional()
+});
 
 export const RiskAcceptanceSchema = z.object({
 	...NameDescriptionMixin,
@@ -450,23 +453,10 @@ export const UserEditSchema = z.object({
 	last_name: z.string().optional(),
 	is_active: z.boolean().optional(),
 	keep_local_login: z.boolean().optional(),
+	has_mfa_enabled: z.boolean().optional(),
 	user_groups: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),
-	expiry_date: z
-		.union([z.literal('').transform(() => null), z.iso.date()])
-		.nullish()
-		.refine(
-			(val) => {
-				if (!val) return true; // Allow null/undefined values
-				const expiryDate = new Date(val);
-				const today = new Date();
-				today.setHours(0, 0, 0, 0); // Set to start of today to allow today's date
-				return expiryDate >= today;
-			},
-			{
-				message: 'Expiry date cannot be in the past'
-			}
-		)
+	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
 });
 
 export const UserCreateSchema = z.object({
@@ -508,6 +498,7 @@ export const SetPasswordSchema = z.object({
 
 export const ComplianceAssessmentSchema = z.object({
 	...NameDescriptionMixin,
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	version: z.string().optional().default('1.0'),
 	ref_id: z.string().optional(),
 	folder: z.string(),
@@ -567,6 +558,7 @@ export const EvidenceSchema = z.object({
 		.optional(),
 	timeline_entries: z.string().optional().array().optional(),
 	contracts: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	link: z
 		.string()
 		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
@@ -674,6 +666,7 @@ export const FeatureFlagsSchema = z.object({
 	reports: z.boolean().optional(),
 	validation_flows: z.boolean().optional(),
 	focus_mode: z.boolean().optional(),
+	idp_groups: z.boolean().optional(),
 	outgoing_webhooks: z.boolean().optional(),
 	audit_log_forwarding: z.boolean().optional(),
 	metrology: z.boolean().optional(),
@@ -781,6 +774,7 @@ export const EntitiesSchema = z.object({
 
 export const EntityAssessmentSchema = z.object({
 	...NameDescriptionMixin,
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	create_audit: z.boolean().optional().default(false),
 	framework: z.string().optional(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
@@ -1097,6 +1091,7 @@ export const organisationIssueSchema = z.object({
 
 export const quantitativeRiskStudySchema = z.object({
 	...NameDescriptionMixin,
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	ref_id: z.string().optional(),
 	status: z.string().optional().nullable(),
 	distribution_model: z.string().optional().default('lognormal_ci90'),
@@ -1171,6 +1166,7 @@ export const quantitativeRiskHypothesisSchema = z.object({
 });
 export const ebiosRMSchema = z.object({
 	...NameDescriptionMixin,
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	version: z.string().optional().default('0.1'),
 	quotation_method: z.string().optional().default('express'),
 	status: z.string().optional().default('planned'),
@@ -1264,6 +1260,7 @@ export const operationalScenarioSchema = z.object({
 
 export const SecurityExceptionSchema = z.object({
 	...NameDescriptionMixin,
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	folder: z.string(),
 	ref_id: z.string().optional(),
 	owners: z.array(z.string().optional()).optional(),
@@ -1299,6 +1296,7 @@ export const FindingSchema = z.object({
 
 export const FindingsAssessmentSchema = z.object({
 	...NameDescriptionMixin,
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	version: z.string().optional().default('0.1'),
 	folder: z.string(),
 	perimeter: z.string().optional().nullable(),
@@ -1675,6 +1673,7 @@ export const ProjectSchema = z.object({
 	actual_cost: z.coerce.number().optional().nullable(),
 	currency: z.string().max(3).optional(),
 	linked_collection: z.string().uuid().optional().nullable(),
+	create_collection: z.boolean().optional().default(true),
 	parent_project: z.string().uuid().optional().nullable(),
 	tolerances: z.record(z.string(), z.unknown()).optional(),
 	observation: z.string().optional().nullable(),
@@ -1818,6 +1817,12 @@ export const DocumentRevisionSchema = z.object({
 	reviewer_comments: z.string().optional().nullable()
 });
 
+export const IdPGroupSchema = z.object({
+	id: z.string().uuid().optional(),
+	name: z.string().min(1),
+	user_groups: z.array(z.string().uuid().optional()).optional()
+});
+
 const SCHEMA_MAP: Record<string, ZodSchema> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -1842,6 +1847,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	evidences: EvidenceSchema,
 	'evidence-revisions': EvidenceRevisionSchema,
 	users: UserCreateSchema,
+	'idp-groups': IdPGroupSchema,
 	'sso-settings': SSOSettingsSchema,
 	'general-settings': GeneralSettingsSchema,
 	'feature-flags': FeatureFlagsSchema,

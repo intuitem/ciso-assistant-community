@@ -1812,6 +1812,7 @@ export const listViewFields = {
 			'firstName',
 			'lastName',
 			'userGroups',
+			'idpGroups',
 			'isActive',
 			'expiryDate',
 			'keep_local_login',
@@ -1823,6 +1824,7 @@ export const listViewFields = {
 			'first_name',
 			'last_name',
 			'user_groups',
+			'idp_groups',
 			'is_active',
 			'expiry_date',
 			'keep_local_login',
@@ -1842,6 +1844,10 @@ export const listViewFields = {
 		head: ['name'],
 		body: ['name'],
 		meta: ['id', 'builtin']
+	},
+	'idp-groups': {
+		head: ['name', 'userGroups'],
+		body: ['name', 'user_groups']
 	},
 	roles: {
 		head: ['name', 'description'],
@@ -2876,8 +2882,8 @@ export const listViewFields = {
 		}
 	},
 	'generic-collections': {
-		head: ['ref_id', 'name', 'description', 'labels', 'folder'],
-		body: ['ref_id', 'name', 'description', 'filtering_labels', 'folder'],
+		head: ['ref_id', 'name', 'description', 'project', 'labels', 'folder'],
+		body: ['ref_id', 'name', 'description', 'projects', 'filtering_labels', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			filtering_labels: LABELS_FILTER

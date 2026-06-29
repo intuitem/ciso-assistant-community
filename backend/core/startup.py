@@ -1048,6 +1048,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_usergroup",
     "change_usergroup",
     "delete_usergroup",
+    "add_idpgroup",
+    "view_idpgroup",
+    "change_idpgroup",
+    "delete_idpgroup",
     "add_event",
     "view_event",
     "change_event",
@@ -1558,6 +1562,42 @@ AUDITEE_PERMISSIONS_LIST = [
 ]
 
 
+def ensure_admin_user():
+    """Ensure the designated superuser exists and is in the admin group.
+
+    - FORCE_CREATE_ADMIN + email + user doesn't exist: create superuser
+    - FORCE_CREATE_ADMIN + email + user exists: promote to superuser
+    - Admin group empty + email + user doesn't exist: create superuser
+    - Always: sync all is_superuser users into the admin group
+    """
+    from iam.models import Folder, User, UserGroup
+
+    administrators = UserGroup.objects.get(
+        name="BI-UG-ADM", folder=Folder.get_root_folder()
+    )
+    admin_group_empty = (
+        User.objects.filter(user_groups=administrators).distinct().count() == 0
+    )
+
+    superuser_email = settings.CISO_ASSISTANT_SUPERUSER_EMAIL
+    if superuser_email:
+        superuser_exists = User.objects.filter(email=superuser_email).exists()
+
+        if not superuser_exists and (settings.FORCE_CREATE_ADMIN or admin_group_empty):
+            try:
+                User.objects.create_superuser(email=superuser_email, is_superuser=True)
+            except Exception as e:
+                logger.error("Error creating superuser", exc_info=True)
+        elif superuser_exists and settings.FORCE_CREATE_ADMIN:
+            user = User.objects.get(email=superuser_email)
+            if not user.is_superuser:
+                user.is_superuser = True
+                user.save(update_fields=["is_superuser", "is_active"])
+
+    for u in User.objects.filter(is_superuser=True):
+        u.user_groups.add(administrators)
+
+
 def startup(sender=None, **kwargs):
     """
     Implement CISO Assistant 1.0 default Roles and User Groups during migrate.
@@ -1797,30 +1837,7 @@ def startup(sender=None, **kwargs):
     except Exception as e:
         logger.error("Error backfilling builtin metrics", exc_info=True)
 
-    # add administrators group to superusers (for resiliency)
-    administrators = UserGroup.objects.get(
-        name="BI-UG-ADM", folder=Folder.get_root_folder()
-    )
-    if (
-        User.objects.filter(user_groups=administrators).distinct().count() == 0
-        or settings.FORCE_CREATE_ADMIN
-    ):
-        # if superuser defined and does not exist, then create it
-        if (
-            settings.CISO_ASSISTANT_SUPERUSER_EMAIL
-            and not User.objects.filter(
-                email=settings.CISO_ASSISTANT_SUPERUSER_EMAIL
-            ).exists()
-        ):
-            try:
-                User.objects.create_superuser(
-                    email=settings.CISO_ASSISTANT_SUPERUSER_EMAIL, is_superuser=True
-                )
-            except Exception as e:
-                logger.error("Error creating superuser", exc_info=True)
-
-        for u in User.objects.filter(is_superuser=True):
-            u.user_groups.add(administrators)
+    ensure_admin_user()
 
     # reset global setings in case of an issue
     default_settings = {

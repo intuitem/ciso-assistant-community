@@ -169,15 +169,15 @@
 						<Tabs.Indicator />
 					</Tabs.List>
 					<Tabs.Content value="compliance_assessments">
-						<ul class="list-none pl-4 text-sm space-y-2">
+						<div class="pl-4 text-sm space-y-2">
 							{#each compliance_assessments as compliance_assessment, index}
-								<li class="h4 font-semibold mb-1">
+								<div class="h4 font-semibold mb-1">
 									<Anchor
 										href="/compliance-assessments/{compliance_assessment.object.id}"
 										class="hover:underline text-blue-600"
 										>{compliance_assessment.object.name}</Anchor
 									>
-								</li>
+								</div>
 								{@const quality_check = compliance_assessment.quality_check}
 								{@const aggregatedErrors = aggregateIssuesByType(
 									quality_check.errors,
@@ -344,17 +344,17 @@
 									<hr />
 								{/if}
 							{/each}
-						</ul>
+						</div>
 					</Tabs.Content>
 					<Tabs.Content value="risk_assessments">
-						<ul class="list-none pl-4 text-sm space-y-2">
+						<div class="pl-4 text-sm space-y-2">
 							{#each risk_assessments as risk_assessment, index}
-								<li class="h4 font-semibold mb-1">
+								<div class="h4 font-semibold mb-1">
 									<Anchor
 										href="/risk-assessments/{risk_assessment.object.id}"
 										class="hover:underline text-blue-600">{risk_assessment.object.name}</Anchor
 									>
-								</li>
+								</div>
 								{@const quality_check = risk_assessment.quality_check}
 								{@const aggregatedErrors = aggregateIssuesByType(
 									quality_check.errors,
@@ -521,7 +521,7 @@
 									<hr />
 								{/if}
 							{/each}
-						</ul>
+						</div>
 					</Tabs.Content>
 				</Tabs>
 			</div>
