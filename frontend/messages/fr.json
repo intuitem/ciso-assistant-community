@@ -836,6 +836,8 @@
 	"nonCompliantMinor": "Mineur non conforme",
 	"nonCompliantMajor": "Majeure non conforme",
 	"partiallyCompliant": "Partiellement conforme",
+	"disablePartiallyCompliantResult": "Désactiver le résultat « partiellement conforme »",
+	"disablePartiallyCompliantResultHelpText": "Lorsque cette option est activée, « partiellement conforme » n'est plus proposé lors de la définition du résultat d'une évaluation d'exigence. Les valeurs existantes sont conservées et restent affichées.",
 	"compliant": "Conforme",
 	"notApplicable": "Non applicable",
 	"notAssessed": "Non évaluée",
