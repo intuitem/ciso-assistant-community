@@ -4262,7 +4262,9 @@ class LibraryFilteringLabelWriteSerializer(BaseModelSerializer):
         exclude = ["folder", "is_published"]
 
 
-class SecurityExceptionWriteSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
+class SecurityExceptionWriteSerializer(
+    CustomFieldsSerializerMixin, BaseModelSerializer
+):
     genericcollection = serializers.PrimaryKeyRelatedField(
         source="genericcollection_set",
         many=True,
