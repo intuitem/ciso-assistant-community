@@ -3086,7 +3086,7 @@ class Perimeter(NameDescriptionMixin, FolderMixin):
         return self.folder.name + "/" + self.name
 
 
-class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, CustomFieldsMixin):
     class Status(models.TextChoices):
         DRAFT = "draft", "draft"
         IN_REVIEW = "in_review", "in review"
