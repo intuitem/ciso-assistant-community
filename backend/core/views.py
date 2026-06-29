@@ -16429,13 +16429,10 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(RequirementAssessment.Status.choices))
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get result choices")
     def result(self, request):
-        # Not cached: choices depend on a setting an admin can toggle anytime.
-        choices = dict(RequirementAssessment.Result.choices)
-        if general_setting_is_enabled("disable_partially_compliant_result"):
-            choices.pop(RequirementAssessment.Result.PARTIALLY_COMPLIANT, None)
-        return Response(choices)
+        return Response(dict(RequirementAssessment.Result.choices))
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get extended result choices")

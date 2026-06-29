@@ -34,6 +34,7 @@
 		choiceUrnFromAlignmentValue,
 		alignmentColorMap,
 		resultBadgeStyle,
+		requirementResultOptions,
 		AUTO_ALIGNMENT_QUESTION_URN
 	} from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -68,15 +69,6 @@
 		invalidateAllBool = true
 	}: Props = $props();
 
-	const result_options = [
-		{ id: 'not_assessed', label: m.notAssessed() },
-		{ id: 'non_compliant', label: m.nonCompliant() },
-		...(page.data.settings?.disable_partially_compliant_result
-			? []
-			: [{ id: 'partially_compliant', label: m.partiallyCompliant() }]),
-		{ id: 'compliant', label: m.compliant() },
-		{ id: 'not_applicable', label: m.notApplicable() }
-	];
 	const status_options = [
 		{ id: 'to_do', label: m.toDo() },
 		{ id: 'in_progress', label: m.inProgress() },
@@ -605,7 +597,10 @@
 														</span>
 													{:else}
 														<RadioGroup
-															possibleOptions={result_options}
+															possibleOptions={requirementResultOptions(
+																page.data.settings?.disable_partially_compliant_result,
+																requirementAssessment.result
+															)}
 															key="id"
 															labelKey="label"
 															field="result"

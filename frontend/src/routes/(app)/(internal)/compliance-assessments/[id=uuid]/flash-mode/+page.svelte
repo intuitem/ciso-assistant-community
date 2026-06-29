@@ -9,7 +9,8 @@
 		getFieldVisibility,
 		hasComputedResult,
 		computeRequirementScoreAndResult,
-		resultBadgeStyle
+		resultBadgeStyle,
+		requirementResultOptions
 	} from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { page } from '$app/state';
@@ -31,15 +32,12 @@
 	const showResult = $derived(fieldVis.showResult);
 	const showObservation = $derived(fieldVis.showObservation);
 
-	const possible_options = [
-		{ id: 'not_assessed', label: m.notAssessed() },
-		{ id: 'non_compliant', label: m.nonCompliant() },
-		...(page.data.settings?.disable_partially_compliant_result
-			? []
-			: [{ id: 'partially_compliant', label: m.partiallyCompliant() }]),
-		{ id: 'compliant', label: m.compliant() },
-		{ id: 'not_applicable', label: m.notApplicable() }
-	];
+	const possible_options = $derived(
+		requirementResultOptions(
+			page.data.settings?.disable_partially_compliant_result,
+			currentRequirementAssessment?.result
+		)
+	);
 
 	const requirementHashmap = Object.fromEntries(
 		data.requirements.map((requirement: Record<string, any>) => [requirement.id, requirement])
