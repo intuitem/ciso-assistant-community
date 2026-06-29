@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Select from '../Select.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import NumberField from '../NumberField.svelte';
 	import TextField from '../TextField.svelte';
 	import TextArea from '../TextArea.svelte';
@@ -202,6 +203,57 @@
 					<i class="fa-solid fa-users mr-2"></i>
 					{m.forceLanguageForAllUsers()}
 				</button>
+			</div>
+		</Accordion.ItemContent>
+	</Accordion.Item>
+	<Accordion.Item value="workspace">
+		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+			<i class="fa-solid fa-compass mr-2"></i><span class="flex-1 text-left"
+				>{m.workspaceSettings()}</span
+			>
+			<Accordion.ItemIndicator
+				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+					><path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					/></svg
+				></Accordion.ItemIndicator
+			>
+		</Accordion.ItemTrigger>
+		<Accordion.ItemContent>
+			<div class="p-4 space-y-4">
+				<Select
+					{form}
+					field="default_landing"
+					options={[
+						{ label: m.analytics(), value: 'analytics' },
+						{ label: m.respondentMode(), value: 'respondent' },
+						{ label: m.portals(), value: 'portal' }
+					]}
+					label={m.defaultLanding()}
+					helpText={m.defaultLandingHelpText()}
+				/>
+				<Checkbox
+					{form}
+					field="personal_folders"
+					label={m.personalFolders()}
+					helpText={m.personalFoldersDescription()}
+				/>
+				<FolderTreeSelect
+					{form}
+					field="personal_folders_parent"
+					contentTypes={['DO', 'GL']}
+					writePermission={null}
+					nullable
+					label={m.personalFoldersParent()}
+					helpText={m.personalFoldersParentHelpText()}
+				/>
+				<Checkbox
+					{form}
+					field="show_get_started"
+					label={m.showGetStartedButton()}
+					helpText={m.showGetStartedButtonHelpText()}
+				/>
 			</div>
 		</Accordion.ItemContent>
 	</Accordion.Item>

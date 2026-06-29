@@ -178,6 +178,7 @@
 * [Universal search](features/search.md)
 * [My assignments](features/my-assignments.md)
 * [Notifications](features/notifications.md)
+* [Portals and trust center](features/portals.md)
 * [Framework-specific features](features/framework-specific/README.md)
   * [ISO 27001](features/framework-specific/iso.md)
   * [CCB CyFun](features/framework-specific/cyfun.md)
