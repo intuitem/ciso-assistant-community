@@ -231,6 +231,57 @@ class TestSCIMLastAdminGuard:
         a.refresh_from_db()
         assert a.is_active is False
 
+    def test_patch_cannot_deactivate_last_admin(self, enable_idp_groups):
+        admin = _scim_user("solo-admin@tests.com", "ext-solo")
+        _admin_group().user_set.add(admin)
+        resp = _scim_client().patch(
+            f"{USERS_URL}/{admin.id}",
+            data={"Operations": [{"op": "replace", "path": "active", "value": False}]},
+            format="json",
+        )
+        assert resp.status_code == 409
+        admin.refresh_from_db()
+        assert admin.is_active is True
+
+    def test_put_cannot_deactivate_last_admin(self, enable_idp_groups):
+        admin = _scim_user("solo-admin@tests.com", "ext-solo")
+        _admin_group().user_set.add(admin)
+        resp = _scim_client().put(
+            f"{USERS_URL}/{admin.id}",
+            data={"userName": "solo-admin@tests.com", "active": False},
+            format="json",
+        )
+        assert resp.status_code == 409
+        admin.refresh_from_db()
+        assert admin.is_active is True
+
+
+@pytest.mark.django_db
+class TestSCIMDisplayNameValidation:
+    """Unit-level tests for _display_name_error, which guards all group
+    endpoints against names that won't fit IdPGroup.name."""
+
+    def test_rejects_too_long_name(self, enable_idp_groups):
+        from iam.scim.views import _display_name_error
+
+        max_len = IdPGroup._meta.get_field("name").max_length
+        assert _display_name_error("x" * max_len) is None
+        resp = _display_name_error("x" * (max_len + 1))
+        assert resp is not None
+        assert resp.status_code == 400
+
+    def test_rejects_non_string(self, enable_idp_groups):
+        from iam.scim.views import _display_name_error
+
+        resp = _display_name_error(12345)
+        assert resp is not None
+        assert resp.status_code == 400
+
+    def test_accepts_none(self, enable_idp_groups):
+        from iam.scim.views import _display_name_error
+
+        assert _display_name_error(None) is None
+
 
 @pytest.mark.django_db
 class TestIdPGroupsFlagGating:

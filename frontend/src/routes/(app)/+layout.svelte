@@ -182,6 +182,17 @@
 			</div>
 			<div class="flex items-center gap-2">
 				<ThemeToggle />
+				{#if data?.featureflags?.custom_portals && !data?.user?.is_third_party}
+					<a
+						href="/portal"
+						class="flex items-center gap-2 shrink-0 rounded-lg border border-surface-200-800 bg-surface-100-900/80 px-3 py-1.5
+			text-xs text-surface-600-400 hover:bg-surface-200-800 hover:border-surface-300-700 hover:text-surface-700-300
+			transition-all duration-150"
+					>
+						<i class="fa-solid fa-table-cells-large text-surface-500"></i>
+						<span class="hidden sm:inline">{m.portals()}</span>
+					</a>
+				{/if}
 				{#if !data?.user?.is_third_party}
 					<button
 						onclick={() => commandPalette?.toggle()}
@@ -198,7 +209,7 @@
 						>
 					</button>
 				{/if}
-				{#if data?.user?.is_admin}
+				{#if data?.user?.is_admin && data?.settings?.show_get_started !== false}
 					<button
 						onclick={() => getStartedTrigger.set(true)}
 						class="shrink-0 px-3 py-1.5 rounded-full bg-violet-500 dark:bg-violet-600 text-white text-xs font-semibold shadow-lg

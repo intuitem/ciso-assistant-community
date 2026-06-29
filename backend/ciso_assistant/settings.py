@@ -432,6 +432,7 @@ INSTALLED_APPS = [
     "metrology",
     "chat",
     "doc_management",
+    "portals",
     "core",
     "cal",
     "django_filters",
