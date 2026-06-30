@@ -2,8 +2,10 @@ services:
   backend:
     container_name: backend
     build:
-      context: ../
-      dockerfile: ./enterprise/backend/Dockerfile
+      context: ../backend
+      dockerfile: ../enterprise/backend/Dockerfile
+      additional_contexts:
+        enterprise_backend: ./backend
     restart: always
     environment:
       - ALLOWED_HOSTS=backend,localhost
@@ -18,8 +20,10 @@ services:
   huey:
     container_name: huey
     build:
-      context: ../
-      dockerfile: ./enterprise/backend/Dockerfile
+      context: ../backend
+      dockerfile: ../enterprise/backend/Dockerfile
+      additional_contexts:
+        enterprise_backend: ./backend
     restart: always
     environment:
       - ALLOWED_HOSTS=backend,localhost
@@ -43,8 +47,10 @@ services:
       - HOST_HEADER=x-forwarded-host
 
     build:
-      context: ../
-      dockerfile: ./enterprise/frontend/Dockerfile
+      context: ../frontend
+      dockerfile: ../enterprise/frontend/Dockerfile
+      additional_contexts:
+        enterprise_frontend: ./frontend
     depends_on:
       - backend
     restart: always
