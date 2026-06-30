@@ -1,4 +1,7 @@
 {
+	"licenseExpiresToday": "تنتهي صلاحية ترخيصك اليوم.",
+	"licenseExpiresTomorrow": "تنتهي صلاحية ترخيصك غدًا.",
+	"licenseExpiresInDays": "تنتهي صلاحية ترخيصك خلال {days_left} يومًا.",
 	"mapToFramework": "الربط بإطار",
 	"mapToFrameworkDescription": "إنشاء تدقيق جديد في إطار آخر، مرتبط من هذا التدقيق.",
 	"mapFromAudit": "الربط من تدقيق",
