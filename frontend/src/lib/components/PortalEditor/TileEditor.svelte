@@ -42,13 +42,13 @@
 	}
 
 	function targetField(kind: string) {
-		if (kind === 'create') return { key: 'model', label: 'Model (url name)', ph: 'incidents' };
-		if (kind === 'navigate') return { key: 'model', label: 'Model (url name)', ph: '' };
+		if (kind === 'create') return { key: 'model', label: m.modelUrlName(), ph: 'incidents' };
+		if (kind === 'navigate') return { key: 'model', label: m.modelUrlName(), ph: '' };
 		if (kind === 'metric') return { key: 'value', label: m.value(), ph: '128' };
 		if (kind === 'certificationDocument') return { key: '', label: m.proof(), ph: '' };
 		if (kind === 'framework') return { key: 'snapshot', label: m.framework(), ph: '' };
-		if (kind === 'assessment') return { key: '', label: 'Audit setup', ph: '' };
-		return { key: 'url', label: 'URL', ph: kind === 'external' ? 'https://…' : '/incidents' };
+		if (kind === 'assessment') return { key: '', label: m.auditSetup(), ph: '' };
+		return { key: 'url', label: m.url(), ph: kind === 'external' ? 'https://…' : '/incidents' };
 	}
 
 	const tf = $derived(targetField(item.kind));
@@ -57,7 +57,7 @@
 
 <div class="flex flex-wrap items-end gap-2 rounded-lg border border-surface-200-800 p-3">
 	<label class="text-[10px] text-surface-500">
-		<span class="block">Icon</span>
+		<span class="block">{m.icon()}</span>
 		<IconPicker bind:value={item.icon} showInput={false} />
 	</label>
 	<label class="text-[10px] text-surface-500 grow">
@@ -65,7 +65,7 @@
 		<input bind:value={item.title} class="input rounded-md text-sm" />
 	</label>
 	<label class="text-[10px] text-surface-500">
-		<span class="block">Kind</span>
+		<span class="block">{m.kind()}</span>
 		<select bind:value={item.kind} class="select rounded-md text-sm">
 			{#each ctx.kinds as k}<option value={k}>{ctx.kindLabels[k] ?? k}</option>{/each}
 		</select>
@@ -79,10 +79,10 @@
 			</select>
 		{:else if item.kind === 'navigate'}
 			<select bind:value={item.target.model} required class="select rounded-md text-sm">
-				<optgroup label="Models">
+				<optgroup label={m.models()}>
 					{#each ctx.modelOptions as o}<option value={o.value}>{o.label}</option>{/each}
 				</optgroup>
-				<optgroup label="Pages">
+				<optgroup label={m.pages()}>
 					{#each ctx.pageDestinations as p}<option value={p.value}>{p.label}</option>{/each}
 				</optgroup>
 			</select>
@@ -184,17 +184,18 @@
 		{/if}
 	</label>
 	<label class="text-[10px] text-surface-500">
-		<span class="block">Group</span>
+		<span class="block">{m.group()}</span>
 		<select
 			value={si}
 			onchange={(e) => onMoveToGroup(+e.currentTarget.value)}
 			class="select rounded-md text-sm"
 		>
-			{#each sections as s, gi}<option value={gi}>{s.title || `Group ${gi + 1}`}</option>{/each}
+			{#each sections as s, gi}<option value={gi}>{s.title || `${m.group()} ${gi + 1}`}</option
+				>{/each}
 		</select>
 	</label>
 	<label class="text-[10px] text-surface-500 w-full">
-		<span class="block">Description (markdown)</span>
+		<span class="block">{m.descriptionMarkdown()}</span>
 		<textarea bind:value={item.description} rows="2" class="textarea rounded-md text-sm w-full"
 		></textarea>
 	</label>
@@ -220,12 +221,12 @@
 		<button
 			onclick={() => onMoveItem(-1)}
 			class="btn-icon btn-sm preset-tonal"
-			aria-label="Move item up"><i class="fa-solid fa-chevron-up"></i></button
+			aria-label={m.moveItemUp()}><i class="fa-solid fa-chevron-up"></i></button
 		>
 		<button
 			onclick={() => onMoveItem(1)}
 			class="btn-icon btn-sm preset-tonal"
-			aria-label="Move item down"><i class="fa-solid fa-chevron-down"></i></button
+			aria-label={m.moveItemDown()}><i class="fa-solid fa-chevron-down"></i></button
 		>
 		<button
 			onclick={onRemoveItem}
