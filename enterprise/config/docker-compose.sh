@@ -2,6 +2,7 @@
 set -euo pipefail
 
 EXPECTED_OWNER="1001:1001"
+DOCKER_COMPOSE_FILE="./docker-compose.yml"
 
 is_linux_gnu_stat() {
   stat -c '%u:%g' . >/dev/null 2>&1
@@ -11,7 +12,7 @@ get_owner_linux() {
   stat -c '%u:%g' "$1"
 }
 
-if [ ! -f ./docker-compose.yml ]; then
+if [ ! -f "$DOCKER_COMPOSE_FILE" ]; then
   echo "Docker compose file doesn't exist. Run 'python3 make_config.py' first."
   exit 1
 fi
@@ -38,19 +39,19 @@ else
 fi
 
 echo "Starting CISO Assistant services..."
-docker compose -f ./docker-compose.yml pull
+docker compose -f "$DOCKER_COMPOSE_FILE" pull
 echo "Initializing the database. This can take up to 2 minutes, please wait.."
-docker compose -f ./docker-compose.yml up -d
+docker compose -f "$DOCKER_COMPOSE_FILE" up -d
 
 echo "Waiting for CISO Assistant backend to be ready..."
-until docker compose -f ./docker-compose.yml exec -T backend curl -f http://localhost:8000/api/health/ >/dev/null 2>&1; do
+until docker compose -f "$DOCKER_COMPOSE_FILE" exec -T backend curl -f http://localhost:8000/api/health/ >/dev/null 2>&1; do
   echo "Backend is not ready - waiting 10s..."
   sleep 10
 done
 
 echo -e "Backend is ready!"
 echo "Creating superuser..."
-docker compose -f ./docker-compose.yml exec backend python manage.py createsuperuser
+docker compose -f "$DOCKER_COMPOSE_FILE" exec backend python manage.py createsuperuser
 
 echo -e "Initialization complete!"
 echo "You can now access CISO Assistant at https://localhost:8443 (or the host:port you've specified)"
