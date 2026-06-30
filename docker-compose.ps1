@@ -6,7 +6,7 @@ $MigrationCheckDelaySeconds = 10
 
 function Wait-ForMigrations {
     for ($i = 1; $i -le $MigrationCheckAttempts; $i++) {
-        & docker compose -f $DockerComposeFile exec -T backend uv run python manage.py migrate --check *> $null
+        & docker compose -f $DockerComposeFile exec -T backend python manage.py migrate --check *> $null
         if ($LASTEXITCODE -eq 0) {
             Write-Host "Migrations complete!" -ForegroundColor Green
             return
@@ -45,7 +45,7 @@ Wait-ForMigrations
 
 Write-Host ""
 Write-Host "Creating superuser..." -ForegroundColor Cyan
-docker compose -f $DockerComposeFile exec backend uv run python manage.py createsuperuser
+docker compose -f $DockerComposeFile exec backend python manage.py createsuperuser
 
 Write-Host ""
 Write-Host "Initialization complete!" -ForegroundColor Green
