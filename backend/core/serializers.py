@@ -70,12 +70,47 @@ class SerializerFactory:
 class BaseModelSerializer(serializers.ModelSerializer):
     FLAGGED_FIELDS: dict[str, str] = {}
 
+    # Fields a third-party *respondent* must never write on this model. They are
+    # stripped centrally (see `_strip_respondent_protected_fields`) for any user
+    # whose access to the target object's folder is respondent-scoped.
+    # The per-audit-configurable equivalent for RequirementAssessment
+    # fields lives in the compliance assessment's `field_visibility`.
+    RESPONDENT_PROTECTED_FIELDS: set[str] = set()
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         for field_name, flag_name in self.FLAGGED_FIELDS.items():
             if not ff_is_enabled(flag_name):
                 self.fields.pop(field_name)
+
+    def _strip_respondent_protected_fields(self, attrs: dict) -> dict:
+        """Drop `RESPONDENT_PROTECTED_FIELDS` from *attrs* when the requesting
+        user is a respondent on the target object's folder.
+
+        Stripping is silent: full PUT bodies carry every field, so raising would
+        turn unrelated respondent edits into 400s. Resolves the folder from the
+        existing instance on update, or the incoming payload on create.
+        """
+        if not self.RESPONDENT_PROTECTED_FIELDS:
+            return attrs
+        request = self.context.get("request")
+        if request is None or not getattr(request.user, "is_authenticated", False):
+            return attrs
+        folder = (
+            Folder.get_folder(self.instance)
+            if self.instance is not None
+            else attrs.get("folder")
+        )
+        if folder is None:
+            return attrs
+        from core.utils import get_respondent_scoped_folder_ids
+
+        if folder.id not in get_respondent_scoped_folder_ids(request.user):
+            return attrs
+        for field_name in self.RESPONDENT_PROTECTED_FIELDS:
+            attrs.pop(field_name, None)
+        return attrs
 
     def _check_object_perm(
         self, instance_or_data, action: str, *, folder: Folder | None = None
@@ -102,11 +137,16 @@ class BaseModelSerializer(serializers.ModelSerializer):
             )
 
     def _ensure_immutable(self, field_name: str, value) -> None:
-        """Raise PermissionDenied if a field's value is changing on update."""
+        """Raise PermissionDenied if a field differs from the persisted value.
+
+        This treats null transitions as changes: None -> value, value -> None,
+        and value -> different value are all blocked on update.
+        """
         if self.instance is None:
             return
         current_id = getattr(self.instance, f"{field_name}_id", None)
-        if current_id and str(value.id) != str(current_id):
+        new_id = getattr(value, "id", None)
+        if str(new_id) != str(current_id):
             raise PermissionDenied({field_name: "This field is immutable"})
 
     def validate_folder(self, folder: Folder) -> Folder:
@@ -170,6 +210,7 @@ class BaseModelSerializer(serializers.ModelSerializer):
     def validate(self, data):
         data = super().validate(data)
         self._check_m2m_visibility(data)
+        data = self._strip_respondent_protected_fields(data)
         return data
 
     def delete(self, instance: models.Model) -> None:
@@ -2371,6 +2412,10 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     attachment = serializers.FileField(required=False)
     link = serializers.URLField(required=False)
 
+    # A respondent deposits evidence but must not adjudicate it: the status
+    # (in_review / approved / rejected / …) is an auditor-side decision.
+    RESPONDENT_PROTECTED_FIELDS = {"status"}
+
     class Meta:
         model = Evidence
         exclude = ["is_published"]
@@ -3193,6 +3238,22 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                     for k, v in data.items()
                     if is_field_editable_by(ca, k, "respondent")
                 }
+
+        # On update, treat an empty required-choice value as "unchanged" instead
+        # of failing validation. The respondent view (`requirements_list`) strips
+        # auditor-only fields like `status` from the read, so the Select-evidence /
+        # Select-applied-controls modals — which resubmit the *whole* RA form —
+        # send those fields back as "".
+        if self.instance is not None:
+            data = {
+                k: v
+                for k, v in data.items()
+                if not (
+                    v == ""
+                    and isinstance(self.fields.get(k), serializers.ChoiceField)
+                    and not getattr(self.fields[k], "allow_blank", False)
+                )
+            }
         return super().to_internal_value(data)
 
     def validate_answers(self, value):
@@ -4760,15 +4821,10 @@ class TimelineEntryReadSerializer(TimelineEntryWriteSerializer):
 
 
 class CommentWriteSerializer(BaseModelSerializer):
-    PARENT_FIELDS = [
-        "requirement_assessment",
-        "risk_scenario",
-        "applied_control",
-        "finding",
-    ]
+    PARENT_FIELDS = Comment.PARENT_FIELDS
 
     def validate(self, data):
-        # Only enforce the one-parent constraint on creation, not partial updates
+        data = super().validate(data)
         if self.instance is None:
             parent_count = sum(1 for f in self.PARENT_FIELDS if data.get(f) is not None)
             if parent_count != 1:
@@ -4776,6 +4832,10 @@ class CommentWriteSerializer(BaseModelSerializer):
                     "Exactly one parent (requirement_assessment, risk_scenario, "
                     "applied_control, or finding) must be set."
                 )
+        else:
+            for field_name in self.PARENT_FIELDS:
+                if field_name in data:
+                    self._ensure_immutable(field_name, data[field_name])
         return data
 
     def create(self, validated_data):
