@@ -5241,5 +5241,6 @@
 	"mfaDisabledSuccessfully": "MFA has been disabled for this user",
 	"errorDisablingMFA": "Could not disable MFA for this user",
 	"userHasNoMFAEnabled": "This user does not have MFA enabled",
-	"decisionNotes": "Decision notes"
+	"decisionNotes": "Decision notes",
+	"addIdpGroup": "Add IdP group"
 }
