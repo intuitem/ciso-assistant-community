@@ -98,6 +98,7 @@ GENERAL_SETTINGS_KEYS = [
     "default_landing",
     "personal_folders",
     "personal_folders_parent",
+    "disable_partially_compliant_result",
 ]
 
 LLM_URL_DEFAULTS = {
