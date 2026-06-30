@@ -11,6 +11,11 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
+	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
 
 	interface Props {
 		data: PageData;
@@ -29,8 +34,24 @@
 	let showModelDropdown = $state(false);
 	let searchInputRef: HTMLInputElement | null = $state(null);
 	let onConflict = $state('stop');
-	let selectedPerimeter = $state('');
-	let selectedTarget = $state('');
+
+	// SPA form backing the scope pickers; each renders its own name={field} hidden
+	// input, so the values post with the upload form.
+	const scopeSchema = z.object({
+		folder: z.string().nullish(),
+		perimeter: z.string().nullish(),
+		framework: z.string().nullish(),
+		matrix: z.string().nullish(),
+		target: z.string().nullish()
+	});
+	const scopeForm = superForm(
+		defaults(
+			{ folder: null, perimeter: null, framework: null, matrix: null, target: null },
+			zod(scopeSchema)
+		),
+		{ dataType: 'json', taintedMessage: false, validators: zod(scopeSchema), SPA: true }
+	);
+	const scope = scopeForm.form;
 
 	// Composite models: perimeter optional, domain derived from it when set.
 	const ASSESSMENT_MODELS = [
@@ -40,9 +61,13 @@
 		'BusinessImpactAnalysis'
 	];
 
-	// Models offering an explicit "update existing" target. BIA is excluded: it
-	// already reconciles by name through its multi-sheet importer.
-	const TARGET_MODELS = ['ComplianceAssessment', 'RiskAssessment', 'FindingsAssessment'];
+	// Models offering an explicit "update existing" target, mapped to their list
+	// endpoint. BIA is excluded: it already reconciles by name on import.
+	const TARGET_ENDPOINTS: Record<string, string> = {
+		ComplianceAssessment: 'compliance-assessments',
+		RiskAssessment: 'risk-assessments',
+		FindingsAssessment: 'findings-assessments'
+	};
 
 	// Model configuration
 	const modelOptions = [
@@ -135,7 +160,7 @@
 	let isDomainDisabled = $derived(
 		selectedModel === 'User' ||
 			selectedModel === 'Folder' ||
-			(ASSESSMENT_MODELS.includes(selectedModel) && !!selectedPerimeter)
+			(ASSESSMENT_MODELS.includes(selectedModel) && !!$scope.perimeter)
 	);
 
 	let isFrameworkDisabled = $derived(selectedModel !== 'ComplianceAssessment');
@@ -172,8 +197,8 @@
 	// Determine if perimeter selection should be disabled
 	let isPerimeterDisabled = $derived(modelsWithoutPerimeter.includes(selectedModel));
 
-	let isTargetEnabled = $derived(TARGET_MODELS.includes(selectedModel));
-	let targetOptions = $derived(data.data.targets?.[selectedModel] ?? []);
+	let targetEndpoint = $derived(TARGET_ENDPOINTS[selectedModel]);
+	let isTargetEnabled = $derived(!!targetEndpoint);
 
 	// Fixed: Check files correctly
 	let uploadButtonStyles = $derived(files && files.length > 0 ? '' : 'chip-disabled');
@@ -186,8 +211,8 @@
 	$effect(() => {
 		selectedModel;
 		files = null;
-		selectedPerimeter = '';
-		selectedTarget = '';
+		// Model-specific scope is no longer valid; keep the chosen domain.
+		scope.update((v) => ({ ...v, perimeter: null, framework: null, matrix: null, target: null }));
 		if (fileInputRef) fileInputRef.value = '';
 	});
 
@@ -508,125 +533,75 @@
 				</div>
 
 				<!-- Domain Selection -->
-				<div>
-					<label for="folder" class="block text-sm font-medium text-surface-900-100 mb-2"
-						>{m.dataWizardSelectFallbackDomain()}</label
-					>
-					{#if !isDomainDisabled}
-						<select
-							id="folder"
-							name="folder"
-							class="w-full px-4 py-2.5 border-2 border-surface-300-700 bg-surface-50-950 rounded-lg text-surface-900-100 text-sm hover:border-rose-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-colors"
+				{#if !isDomainDisabled}
+					<FolderTreeSelect
+						form={scopeForm}
+						field="folder"
+						nullable
+						label={m.dataWizardSelectFallbackDomain()}
+					/>
+				{:else}
+					<div>
+						<span class="block text-sm font-medium text-surface-900-100 mb-2"
+							>{m.dataWizardSelectFallbackDomain()}</span
 						>
-							{#each data.data.folders as folder}
-								<option value={folder.id}>{folder.name}</option>
-							{/each}
-						</select>
-					{:else}
 						<div
 							class="px-4 py-2.5 bg-surface-100-900 border-2 border-surface-200-800 rounded-lg text-surface-600-400 text-sm"
 						>
 							{m.automatic?.() ?? 'Automatic'}
 						</div>
-					{/if}
-				</div>
+					</div>
+				{/if}
 
 				<!-- Perimeter Selection -->
-				<div>
-					<label for="perimeter" class="block text-sm font-medium text-surface-900-100 mb-2"
-						>{m.dataWizardSelectPerimeter()}</label
-					>
-					{#if !isPerimeterDisabled}
-						<select
-							id="perimeter"
-							name="perimeter"
-							bind:value={selectedPerimeter}
-							class="w-full px-4 py-2.5 border-2 border-surface-300-700 bg-surface-50-950 rounded-lg text-surface-900-100 text-sm hover:border-rose-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-colors"
-						>
-							<option value="">{m.none?.() ?? '---'}</option>
-							{#each data.data.perimeters as perimeter}
-								<option value={perimeter.id}>{perimeter.name}</option>
-							{/each}
-						</select>
-					{:else}
-						<div
-							class="px-4 py-2.5 bg-surface-100-900 border-2 border-surface-200-800 rounded-lg text-surface-600-400 text-sm"
-						>
-							{m.notRequired?.() ?? 'Not required'}
-						</div>
-					{/if}
-				</div>
+				{#if !isPerimeterDisabled}
+					<AutocompleteSelect
+						form={scopeForm}
+						field="perimeter"
+						optionsEndpoint="perimeters"
+						optionsExtraFields={[['folder', 'str']]}
+						nullable
+						label={m.dataWizardSelectPerimeter()}
+					/>
+				{/if}
 
 				<!-- Framework Selection -->
-				<div>
-					<label for="framework" class="block text-sm font-medium text-surface-900-100 mb-2"
-						>{m.dataWizardSelectFramework()}</label
-					>
-					{#if !isFrameworkDisabled}
-						<select
-							id="framework"
-							name="framework"
-							class="w-full px-4 py-2.5 border-2 border-surface-300-700 bg-surface-50-950 rounded-lg text-surface-900-100 text-sm hover:border-rose-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-colors"
-						>
-							{#each data.data.frameworks as framework}
-								<option value={framework.id}>{framework.name}</option>
-							{/each}
-						</select>
-					{:else}
-						<div
-							class="px-4 py-2.5 bg-surface-100-900 border-2 border-surface-200-800 rounded-lg text-surface-600-400 text-sm"
-						>
-							{m.notRequired?.() ?? 'Not required'}
-						</div>
-					{/if}
-				</div>
+				{#if !isFrameworkDisabled}
+					<AutocompleteSelect
+						form={scopeForm}
+						field="framework"
+						optionsEndpoint="frameworks"
+						label={m.dataWizardSelectFramework()}
+					/>
+				{/if}
 
 				<!-- Risk Matrix Selection -->
-				<div>
-					<label for="matrix" class="block text-sm font-medium text-surface-900-100 mb-2"
-						>{m.dataWizardSelectRiskMatrix()}</label
-					>
-					{#if !isMatrixDisabled}
-						<select
-							id="matrix"
-							name="matrix"
-							class="w-full px-4 py-2.5 border-2 border-surface-300-700 bg-surface-50-950 rounded-lg text-surface-900-100 text-sm hover:border-rose-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-colors"
-						>
-							{#each data.data.risk_matrices || [] as matrix}
-								<option value={matrix.id}>{matrix.name}</option>
-							{/each}
-						</select>
-					{:else}
-						<div
-							class="px-4 py-2.5 bg-surface-100-900 border-2 border-surface-200-800 rounded-lg text-surface-600-400 text-sm"
-						>
-							{m.notRequired?.() ?? 'Not required'}
-						</div>
-					{/if}
-				</div>
+				{#if !isMatrixDisabled}
+					<AutocompleteSelect
+						form={scopeForm}
+						field="matrix"
+						optionsEndpoint="risk-matrices"
+						label={m.dataWizardSelectRiskMatrix()}
+					/>
+				{/if}
 
 				{#if isTargetEnabled}
-					<!-- Update existing assessment (reconcile into an existing container) -->
-					<div>
-						<label for="target" class="block text-sm font-medium text-surface-900-100 mb-2"
-							>{m.dataWizardUpdateExisting?.() ?? 'Update existing assessment'}</label
-						>
-						<select
-							id="target"
-							name="target"
-							bind:value={selectedTarget}
-							class="w-full px-4 py-2.5 border-2 border-surface-300-700 bg-surface-50-950 rounded-lg text-surface-900-100 text-sm hover:border-rose-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-colors"
-						>
-							<option value="">{m.dataWizardCreateNewAssessment?.() ?? 'Create new'}</option>
-							{#each targetOptions as target}
-								<option value={target.id}>{target.name}</option>
-							{/each}
-						</select>
-						<p class="text-xs text-surface-600-400 mt-1">
-							{m.dataWizardUpdateExistingHint?.() ??
-								'Leave on "Create new" to create a fresh assessment. Pick an existing one to reconcile the imported rows into it; the conflict strategy then applies to its children.'}
-						</p>
-					</div>
+					{#key selectedModel}
+						<div>
+							<AutocompleteSelect
+								form={scopeForm}
+								field="target"
+								optionsEndpoint={targetEndpoint}
+								optionsExtraFields={[['folder', 'str']]}
+								nullable
+								label={m.dataWizardUpdateExisting?.() ?? 'Update existing assessment'}
+							/>
+							<p class="text-xs text-surface-600-400 mt-1">
+								{m.dataWizardUpdateExistingHint?.() ??
+									'Leave empty to create a fresh assessment. Pick an existing one to reconcile the imported rows into it; the conflict strategy then applies to its children.'}
+							</p>
+						</div>
+					{/key}
 				{/if}
 			</div>
 

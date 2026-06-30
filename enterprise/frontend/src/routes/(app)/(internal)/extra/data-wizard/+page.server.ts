@@ -5,38 +5,10 @@ import { setFlash } from 'sveltekit-flash-message/server';
 import { m } from '$paraglide/messages';
 import type { PageServerLoad } from './$types';
 
-// Models with an "update existing" target, mapped to their list endpoint.
-const TARGET_ENDPOINTS: Record<string, string> = {
-	ComplianceAssessment: 'compliance-assessments',
-	RiskAssessment: 'risk-assessments',
-	FindingsAssessment: 'findings-assessments'
-};
-
 export const load = (async ({ fetch }) => {
 	const endpoint = `${BASE_API_URL}/folders/get_accessible_objects/`;
 	const res = await fetch(endpoint);
 	const data = await res.json();
-
-	// Accessible assessments per model, for the "update existing" picker.
-	const targets: Record<string, { id: string; name: string }[]> = {};
-	await Promise.all(
-		Object.entries(TARGET_ENDPOINTS).map(async ([model, path]) => {
-			try {
-				const r = await fetch(`${BASE_API_URL}/${path}/?page_size=1000`);
-				if (!r.ok) {
-					targets[model] = [];
-					return;
-				}
-				const body = await r.json();
-				const rows = Array.isArray(body) ? body : (body.results ?? []);
-				targets[model] = rows.map((o: any) => ({ id: o.id, name: o.str ?? o.name }));
-			} catch {
-				targets[model] = [];
-			}
-		})
-	);
-	data.targets = targets;
-
 	return { data: data, title: m.dataWizard() };
 }) satisfies PageServerLoad;
 
