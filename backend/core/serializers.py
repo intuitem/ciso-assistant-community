@@ -137,11 +137,16 @@ class BaseModelSerializer(serializers.ModelSerializer):
             )
 
     def _ensure_immutable(self, field_name: str, value) -> None:
-        """Raise PermissionDenied if a field's value is changing on update."""
+        """Raise PermissionDenied if a field differs from the persisted value.
+
+        This treats null transitions as changes: None -> value, value -> None,
+        and value -> different value are all blocked on update.
+        """
         if self.instance is None:
             return
         current_id = getattr(self.instance, f"{field_name}_id", None)
-        if current_id and str(value.id) != str(current_id):
+        new_id = getattr(value, "id", None)
+        if str(new_id) != str(current_id):
             raise PermissionDenied({field_name: "This field is immutable"})
 
     def validate_folder(self, folder: Folder) -> Folder:
@@ -4818,15 +4823,10 @@ class TimelineEntryReadSerializer(TimelineEntryWriteSerializer):
 
 
 class CommentWriteSerializer(BaseModelSerializer):
-    PARENT_FIELDS = [
-        "requirement_assessment",
-        "risk_scenario",
-        "applied_control",
-        "finding",
-    ]
+    PARENT_FIELDS = Comment.PARENT_FIELDS
 
     def validate(self, data):
-        # Only enforce the one-parent constraint on creation, not partial updates
+        data = super().validate(data)
         if self.instance is None:
             parent_count = sum(1 for f in self.PARENT_FIELDS if data.get(f) is not None)
             if parent_count != 1:
@@ -4834,6 +4834,10 @@ class CommentWriteSerializer(BaseModelSerializer):
                     "Exactly one parent (requirement_assessment, risk_scenario, "
                     "applied_control, or finding) must be set."
                 )
+        else:
+            for field_name in self.PARENT_FIELDS:
+                if field_name in data:
+                    self._ensure_immutable(field_name, data[field_name])
         return data
 
     def create(self, validated_data):
