@@ -624,9 +624,7 @@
 							bind:value={selectedTarget}
 							class="w-full px-4 py-2.5 border-2 border-surface-300-700 bg-surface-50-950 rounded-lg text-surface-900-100 text-sm hover:border-rose-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-colors"
 						>
-							<option value=""
-								>{m.dataWizardCreateNewAssessment?.() ?? 'Create new'}</option
-							>
+							<option value="">{m.dataWizardCreateNewAssessment?.() ?? 'Create new'}</option>
 							{#each targetOptions as target}
 								<option value={target.id}>{target.name}</option>
 							{/each}
