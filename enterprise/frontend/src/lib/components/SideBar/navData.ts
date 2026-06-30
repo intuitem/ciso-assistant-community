@@ -137,8 +137,7 @@ export const navData = {
 				{
 					name: 'idpGroups',
 					fa_icon: 'fa-solid fa-id-badge',
-					href: '/idp-groups',
-					featureFlag: 'idp_groups'
+					href: '/idp-groups'
 				},
 				{
 					name: 'roles',
