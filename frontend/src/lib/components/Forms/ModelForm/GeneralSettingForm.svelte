@@ -307,23 +307,29 @@
 			</div>
 		</Accordion.ItemContent>
 	</Accordion.Item>
-	{#if $page.data.featureflags?.audit_tree_inheritance}
-		<Accordion.Item value="audits">
-			<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
-				<i class="fa-solid fa-list-check mr-2"></i><span class="flex-1 text-left"
-					>{m.complianceAssessments()}</span
-				>
-				<Accordion.ItemIndicator
-					class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-					><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
-						><path
-							d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-						/></svg
-					></Accordion.ItemIndicator
-				>
-			</Accordion.ItemTrigger>
-			<Accordion.ItemContent>
-				<div class="p-4">
+	<Accordion.Item value="audits">
+		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+			<i class="fa-solid fa-list-check mr-2"></i><span class="flex-1 text-left"
+				>{m.complianceAssessments()}</span
+			>
+			<Accordion.ItemIndicator
+				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+					><path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					/></svg
+				></Accordion.ItemIndicator
+			>
+		</Accordion.ItemTrigger>
+		<Accordion.ItemContent>
+			<div class="p-4 space-y-4">
+				<Checkbox
+					{form}
+					field="disable_partially_compliant_result"
+					label={m.disablePartiallyCompliantResult()}
+					helpText={m.disablePartiallyCompliantResultHelpText()}
+				/>
+				{#if $page.data.featureflags?.audit_tree_inheritance}
 					<Select
 						{form}
 						field="audit_tree_aggregation_strategy"
@@ -337,10 +343,10 @@
 						label={m.auditTreeAggregationStrategy()}
 						helpText={m.auditTreeAggregationStrategyHelpText()}
 					/>
-				</div>
-			</Accordion.ItemContent>
-		</Accordion.Item>
-	{/if}
+				{/if}
+			</div>
+		</Accordion.ItemContent>
+	</Accordion.Item>
 	<Accordion.Item value="riskMatrix">
 		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
 			<i class="fa-solid fa-table-cells-large mr-2"></i><span class="flex-1 text-left"
