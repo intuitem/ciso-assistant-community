@@ -128,6 +128,17 @@ def resolve_container_name(request, default_prefix: str) -> str:
     return f"{default_prefix}_{timestamp}"
 
 
+def resolve_accessible_target(model_class, target_id, user):
+    """Resolve a client-supplied reconciliation target, scoped to the objects the
+    user may change. Returns None when the id is unknown or out of reach."""
+    if not target_id:
+        return None
+    (_, change_ids, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, model_class
+    )
+    return model_class.objects.filter(id=target_id, id__in=change_ids).first()
+
+
 def get_accessible_folders_map(user: User) -> dict[str, UUID]:
     """
     Build a map of folder names to IDs that the provided user can access.
@@ -473,8 +484,7 @@ class BaseContext:
     matrix_id: Optional[str] = None
     framework_id: Optional[str] = None
     on_conflict: ConflictMode = ConflictMode.STOP
-    # Id of an existing composite container (audit, risk/findings assessment, …)
-    # to reconcile the import into, instead of creating a new one.
+    # Existing composite container to reconcile the import into, if any.
     target_id: Optional[str] = None
 
 
@@ -1330,9 +1340,9 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
         try:
             if self.target_id:
                 # Reconcile into an existing follow-up instead of creating one.
-                findings_assessment = FindingsAssessment.objects.filter(
-                    id=self.target_id
-                ).first()
+                findings_assessment = resolve_accessible_target(
+                    FindingsAssessment, self.target_id, self.request.user
+                )
                 if findings_assessment is None:
                     return None, Error(
                         record={},
@@ -1388,9 +1398,7 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             return None, Error(record={}, error=str(e))
 
     def find_existing(self, record_data: dict):
-        # Scope finding reconciliation to this follow-up's container so an
-        # imported row only matches a finding already inside it (and never a
-        # like-named finding in a sibling assessment in the same folder).
+        # Match only within this follow-up, never a sibling assessment's finding.
         container = getattr(self, "_container", None)
         if container is None:
             return None
@@ -2636,9 +2644,7 @@ class LoadFileView(APIView):
         model_type_string = request.META.get("HTTP_X_MODEL_TYPE")
         model_type = ModelType.from_string(model_type_string)
         folder_id = request.META.get("HTTP_X_FOLDER_ID") or None
-        # Headers arrive as empty strings when the corresponding selector is left
-        # blank; normalize to None so optional scope (perimeter is optional on
-        # assessments) doesn't get passed as "" to Model.objects.get(id="").
+        # Empty header -> None, so a blank optional selector never reaches get(id="").
         perimeter_id = request.META.get("HTTP_X_PERIMETER_ID") or None
         framework_id = request.META.get("HTTP_X_FRAMEWORK_ID") or None
         matrix_id = request.META.get("HTTP_X_MATRIX_ID") or None
@@ -2911,12 +2917,11 @@ class LoadFileView(APIView):
         results = {"successful": 0, "failed": 0, "errors": []}
         try:
             if target_id is not None:
-                # Reconcile into an existing audit: reuse it (and its already
-                # generated requirement assessments) instead of creating a new
-                # container. The framework is fixed by the existing audit.
-                compliance_assessment = ComplianceAssessment.objects.filter(
-                    id=target_id
-                ).first()
+                # Reconcile into an existing audit (and its already generated
+                # requirement assessments); the framework is fixed by that audit.
+                compliance_assessment = resolve_accessible_target(
+                    ComplianceAssessment, target_id, request.user
+                )
                 if compliance_assessment is None:
                     results["failed"] += 1
                     results["errors"].append(
@@ -2992,13 +2997,8 @@ class LoadFileView(APIView):
     def _reconcile_compliance_requirements(
         self, request, records, compliance_assessment, framework_id, results
     ):
-        """Update the audit's requirement assessments from the imported rows.
-
-        Only requirements matched by ref_id/urn are touched; requirement
-        assessments present in the audit but absent from the file are left
-        untouched (additive / update-only). Shared by the create path and the
-        "update existing audit" path.
-        """
+        """Update matched requirement assessments from the rows; only populated
+        cells are written, so blanks never clobber existing audit data."""
         for record in records:
             ref_id = record.get("ref_id")
             urn = record.get("urn")
@@ -3016,49 +3016,37 @@ class LoadFileView(APIView):
                 continue
 
             try:
-                requirement_assessment = None
+                # ref_id wins, but a stale ref_id must still fall back to urn.
                 ReqNode = None
                 if ref_id:
                     ReqNode = RequirementNode.objects.filter(
                         framework__id=framework_id, ref_id=ref_id
                     ).first()
-                    if ReqNode:
-                        requirement_assessment = (
-                            RequirementAssessment.objects.filter(
-                                compliance_assessment=compliance_assessment
-                            )
-                            .filter(requirement=ReqNode)
-                            .first()
-                        )
-                    else:
-                        logger.warning("Import attempt: unknown ref_id ")
-                elif urn:
+                if ReqNode is None and urn:
                     ReqNode = RequirementNode.objects.filter(
                         framework__id=framework_id, urn=urn
                     ).first()
-                    if ReqNode:
-                        requirement_assessment = (
-                            RequirementAssessment.objects.filter(
-                                compliance_assessment=compliance_assessment
-                            )
-                            .filter(requirement=ReqNode)
-                            .first()
-                        )
-                    else:
-                        logger.error("Import attempt: unknown urn")
+
+                requirement_assessment = None
+                if ReqNode:
+                    requirement_assessment = RequirementAssessment.objects.filter(
+                        compliance_assessment=compliance_assessment,
+                        requirement=ReqNode,
+                    ).first()
+                else:
+                    logger.warning("Import attempt: unknown ref_id/urn")
 
                 if requirement_assessment:
                     compliance_result = record.get("compliance_result")
                     requirement_progress = record.get("requirement_progress")
-                    requirement_data = {
-                        "result": compliance_result
-                        if compliance_result not in (None, "")
-                        else "not_assessed",
-                        "status": requirement_progress
-                        if requirement_progress not in (None, "")
-                        else "to_do",
-                        "observation": record.get("observations", ""),
-                    }
+                    observations = record.get("observations")
+                    requirement_data = {}
+                    if compliance_result not in (None, ""):
+                        requirement_data["result"] = compliance_result
+                    if requirement_progress not in (None, ""):
+                        requirement_data["status"] = requirement_progress
+                    if observations not in (None, ""):
+                        requirement_data["observation"] = observations
                     impl_score = record.get("implementation_score")
                     doc_score = record.get("documentation_score")
                     score = record.get("score")
@@ -3074,8 +3062,6 @@ class LoadFileView(APIView):
                         enable_doc_score = True
                     elif score not in (None, ""):
                         requirement_data.update({"score": score, "is_scored": True})
-                    else:
-                        requirement_data.update({"is_scored": False})
 
                     # Build answers from the "answers" cell
                     answers_cell = record.get("answers")
@@ -4049,9 +4035,11 @@ class LoadFileView(APIView):
 
         try:
             if target_id is not None:
-                # Reconcile into an existing risk assessment: reuse it, its domain
-                # and its matrix instead of creating a new container.
-                risk_assessment = RiskAssessment.objects.filter(id=target_id).first()
+                # Reconcile into an existing risk assessment, reusing its domain
+                # and matrix.
+                risk_assessment = resolve_accessible_target(
+                    RiskAssessment, target_id, request.user
+                )
                 if risk_assessment is None:
                     results["failed"] += 1
                     results["errors"].append(
@@ -4165,6 +4153,7 @@ class LoadFileView(APIView):
                         on_conflict,
                     )
                     if action == "stopped":
+                        results["failed"] += 1
                         results["errors"].append(
                             {
                                 "record": record,
@@ -4325,14 +4314,10 @@ class LoadFileView(APIView):
         domain,
         on_conflict=ConflictMode.STOP,
     ):
-        """Process a single risk scenario record.
-
-        Returns a (scenario, action) tuple where action is one of
-        "created", "updated", "skipped", "stopped" or "failed". Existing
-        scenarios in the assessment are matched by ref_id, then name.
-        """
+        """Process one row, returning (scenario, action) where action is one of
+        created/updated/skipped/stopped/failed. Existing scenarios are matched by
+        ref_id, then name."""
         try:
-            # Extract basic fields
             ref_id = record.get("ref_id", "")
             name = record.get("name", "")
             description = record.get("description", "")
@@ -4340,7 +4325,6 @@ class LoadFileView(APIView):
             if not name:
                 raise ValueError("Risk scenario name is required")
 
-            # Reconcile against scenarios already in this assessment.
             existing_scenario = None
             if ref_id:
                 existing_scenario = RiskScenario.objects.filter(

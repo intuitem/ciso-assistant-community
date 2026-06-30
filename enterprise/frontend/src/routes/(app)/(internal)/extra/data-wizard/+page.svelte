@@ -32,9 +32,7 @@
 	let selectedPerimeter = $state('');
 	let selectedTarget = $state('');
 
-	// Composite models whose import produces a single container (audit, risk
-	// assessment, …) with nested children. They support reconciling into an
-	// existing container instead of always creating a new one.
+	// Composite models: perimeter optional, domain derived from it when set.
 	const ASSESSMENT_MODELS = [
 		'ComplianceAssessment',
 		'RiskAssessment',
@@ -42,9 +40,8 @@
 		'BusinessImpactAnalysis'
 	];
 
-	// Subset that supports reconciling into an explicitly chosen container.
-	// BIA is excluded: it already reconciles by name + conflict strategy through
-	// its multi-sheet importer, so an explicit target would only risk mislinking.
+	// Models offering an explicit "update existing" target. BIA is excluded: it
+	// already reconciles by name through its multi-sheet importer.
 	const TARGET_MODELS = ['ComplianceAssessment', 'RiskAssessment', 'FindingsAssessment'];
 
 	// Model configuration
@@ -133,10 +130,8 @@
 		}
 	}
 
-	// Determine if domain selection should be disabled.
-	// For assessment models the domain is normally derived from the perimeter,
-	// but perimeter is optional: when none is selected the user picks a fallback
-	// domain directly (the backend accepts a null perimeter + explicit folder).
+	// Assessment domain is derived from the perimeter; with none picked the user
+	// selects a fallback domain directly.
 	let isDomainDisabled = $derived(
 		selectedModel === 'User' ||
 			selectedModel === 'Folder' ||
@@ -177,8 +172,6 @@
 	// Determine if perimeter selection should be disabled
 	let isPerimeterDisabled = $derived(modelsWithoutPerimeter.includes(selectedModel));
 
-	// "Update existing assessment" target: only for composite models, populated
-	// from the accessible assessments of the selected type.
 	let isTargetEnabled = $derived(TARGET_MODELS.includes(selectedModel));
 	let targetOptions = $derived(data.data.targets?.[selectedModel] ?? []);
 

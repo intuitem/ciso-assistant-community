@@ -5,8 +5,7 @@ import { setFlash } from 'sveltekit-flash-message/server';
 import { m } from '$paraglide/messages';
 import type { PageServerLoad } from './$types';
 
-// Composite models that support reconciling an import into an existing
-// container, mapped to their list endpoint (relative to BASE_API_URL).
+// Models with an "update existing" target, mapped to their list endpoint.
 const TARGET_ENDPOINTS: Record<string, string> = {
 	ComplianceAssessment: 'compliance-assessments',
 	RiskAssessment: 'risk-assessments',
@@ -18,8 +17,7 @@ export const load = (async ({ fetch }) => {
 	const res = await fetch(endpoint);
 	const data = await res.json();
 
-	// Fetch the accessible assessments per composite model for the
-	// "Update existing assessment" picker.
+	// Accessible assessments per model, for the "update existing" picker.
 	const targets: Record<string, { id: string; name: string }[]> = {};
 	await Promise.all(
 		Object.entries(TARGET_ENDPOINTS).map(async ([model, path]) => {
