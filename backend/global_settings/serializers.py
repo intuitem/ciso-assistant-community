@@ -77,6 +77,7 @@ GENERAL_SETTINGS_KEYS = [
     "mapping_max_depth",
     "allow_self_validation",
     "show_warning_external_links",
+    "show_get_started",
     "builtin_metrics_retention_days",
     "allow_assignments_to_entities",
     "enforce_mfa",
@@ -94,6 +95,10 @@ GENERAL_SETTINGS_KEYS = [
     "chat_temperature",
     "default_custom_analytics_dashboard",
     "audit_tree_aggregation_strategy",
+    "default_landing",
+    "personal_folders",
+    "personal_folders_parent",
+    "disable_partially_compliant_result",
 ]
 
 LLM_URL_DEFAULTS = {
@@ -368,9 +373,6 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     outgoing_webhooks = serializers.BooleanField(
         source="value.outgoing_webhooks", required=False, default=False
     )
-    idp_groups = serializers.BooleanField(
-        source="value.idp_groups", required=False, default=False
-    )
     metrology = serializers.BooleanField(
         source="value.metrology", required=False, default=True
     )
@@ -411,6 +413,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         source="value.security_advisories", required=False, default=True
     )
     cwes = serializers.BooleanField(source="value.cwes", required=False, default=True)
+    custom_portals = serializers.BooleanField(
+        source="value.custom_portals", required=False, default=False
+    )
 
     class Meta:
         model = GlobalSettings

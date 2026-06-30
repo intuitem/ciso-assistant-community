@@ -114,15 +114,17 @@
 								</option>
 							{/each}
 						</select>
-						<button
-							onclick={() => {
-								openState = false;
-								dispatch('getStarted');
-							}}
-							class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-surface-200-800 disabled:text-surface-400-600 text-surface-950-50"
-							data-testid="get-started-button"
-							><i class="fa-solid fa-rocket mr-2"></i>{m.getStarted()}</button
-						>
+						{#if page.data?.settings?.show_get_started !== false}
+							<button
+								onclick={() => {
+									openState = false;
+									dispatch('getStarted');
+								}}
+								class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-surface-200-800 disabled:text-surface-400-600 text-surface-950-50"
+								data-testid="get-started-button"
+								><i class="fa-solid fa-rocket mr-2"></i>{m.getStarted()}</button
+							>
+						{/if}
 						{#if !page.data?.user?.is_third_party}
 							<button
 								onclick={() => {

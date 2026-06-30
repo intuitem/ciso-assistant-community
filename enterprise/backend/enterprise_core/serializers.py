@@ -280,3 +280,6 @@ class FeatureFlagsSerializer(CommunityFeatureFlagSerializer):
     object_audit_trail = serializers.BooleanField(
         source="value.object_audit_trail", required=False, default=True
     )
+    idp_groups = serializers.BooleanField(
+        source="value.idp_groups", required=False, default=False
+    )

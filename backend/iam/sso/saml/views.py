@@ -43,7 +43,7 @@ from allauth.socialaccount.providers.saml.views import (
 from allauth.utils import ValidationError
 
 # === Application-specific imports ===
-from core.permissions import IsAdministrator  # ou une permission plus adaptée
+from core.permissions import IsGlobalAdmin  # ou une permission plus adaptée
 from iam.models import User
 from iam.sso.errors import AuthError
 from iam.sso.models import SSOSettings
@@ -238,7 +238,7 @@ class GenerateSAMLKeyView(SAMLViewMixin, APIView):
     Accessible only to admins (to be adapted as needed).
     """
 
-    permission_classes = [IsAdministrator]
+    permission_classes = [IsGlobalAdmin]
 
     def post(self, request, organization_slug):
         try:
@@ -300,7 +300,7 @@ class GenerateSAMLKeyView(SAMLViewMixin, APIView):
 
 
 class DownloadSAMLPublicCertView(SAMLViewMixin, APIView):
-    permission_classes = [IsAdministrator]
+    permission_classes = [IsGlobalAdmin]
 
     def get(self, request, organization_slug):
         provider = self.get_provider(organization_slug)

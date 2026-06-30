@@ -144,6 +144,7 @@ export const LibraryUploadSchema = z.object({
 
 export const RiskAssessmentSchema = z.object({
 	...NameDescriptionMixin,
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	version: z.string().optional().default('1.0'),
 	folder: z.string(),
 	perimeter: z.string().optional().nullable(),
@@ -289,7 +290,9 @@ export const AppliedControlDuplicateSchema = z.object({
 	duplicate_evidences: z.boolean().optional()
 });
 
-export const PolicySchema = AppliedControlSchema.omit({ category: true });
+export const PolicySchema = AppliedControlSchema.omit({ category: true }).extend({
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional()
+});
 
 export const RiskAcceptanceSchema = z.object({
 	...NameDescriptionMixin,
@@ -449,6 +452,7 @@ export const UserEditSchema = z.object({
 	last_name: z.string().optional(),
 	is_active: z.boolean().optional(),
 	keep_local_login: z.boolean().optional(),
+	has_mfa_enabled: z.boolean().optional(),
 	user_groups: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),
 	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
@@ -493,6 +497,7 @@ export const SetPasswordSchema = z.object({
 
 export const ComplianceAssessmentSchema = z.object({
 	...NameDescriptionMixin,
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	version: z.string().optional().default('1.0'),
 	ref_id: z.string().optional(),
 	folder: z.string(),
@@ -552,6 +557,7 @@ export const EvidenceSchema = z.object({
 		.optional(),
 	timeline_entries: z.string().optional().array().optional(),
 	contracts: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	link: z
 		.string()
 		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
@@ -593,11 +599,16 @@ export const GeneralSettingsSchema = z.object({
 		.enum(['none', 'parent_wins', 'child_wins', 'best_case', 'worst_case'])
 		.default('none')
 		.optional(),
+	default_landing: z.enum(['analytics', 'respondent', 'portal']).default('analytics').optional(),
+	disable_partially_compliant_result: z.boolean().default(false).optional(),
+	personal_folders_parent: z.string().uuid().optional().nullable(),
 	currency: z.enum(CURRENCY_SYMBOLS).default('€'),
 	daily_rate: z.number().default(500).optional(),
 	mapping_max_depth: z.coerce.number().int().min(2).max(5).default(3).optional(),
 	allow_self_validation: z.boolean().default(false).optional(),
 	show_warning_external_links: z.boolean().default(true).optional(),
+	show_get_started: z.boolean().default(true).optional(),
+	personal_folders: z.boolean().default(false).optional(),
 	allow_assignments_to_entities: z.boolean().default(false).optional(),
 	enforce_mfa: z.boolean().default(false).optional(),
 	default_language: z.string().default('en').optional(),
@@ -675,7 +686,38 @@ export const FeatureFlagsSchema = z.object({
 	policy_documents: z.boolean().optional(),
 	security_advisories: z.boolean().optional(),
 	cwes: z.boolean().optional(),
-	object_audit_trail: z.boolean().optional()
+	object_audit_trail: z.boolean().optional(),
+	custom_portals: z.boolean().optional()
+});
+
+export const PortalSettingsSchema = z.object({
+	enabled: z.boolean().default(true),
+	is_default: z.boolean().default(false),
+	order: z.number().default(0),
+	audience_groups: z.array(z.string().uuid()).optional(),
+	is_public: z.boolean().default(false),
+	is_primary: z.boolean().default(false),
+	branding: z
+		.object({
+			logo_url: z.string().optional(),
+			accent_color: z.string().optional(),
+			tagline: z.string().optional()
+		})
+		.default({})
+});
+
+export const SnapshotCreateSchema = z.object({
+	name: z.string(),
+	folder: z.string().uuid().optional(),
+	source_audit: z.string().uuid(),
+	implementation_groups: z.string().optional().array().optional()
+});
+
+export const SnapshotEditSchema = z.object({
+	id: z.string().uuid(),
+	name: z.string(),
+	implementation_groups: z.string().optional().array().optional(),
+	display_mode: z.enum(['both', 'score', 'result']).default('both')
 });
 
 export const SSOSettingsSchema = z.object({
@@ -767,6 +809,7 @@ export const EntitiesSchema = z.object({
 
 export const EntityAssessmentSchema = z.object({
 	...NameDescriptionMixin,
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	create_audit: z.boolean().optional().default(false),
 	framework: z.string().optional(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
@@ -1083,6 +1126,7 @@ export const organisationIssueSchema = z.object({
 
 export const quantitativeRiskStudySchema = z.object({
 	...NameDescriptionMixin,
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	ref_id: z.string().optional(),
 	status: z.string().optional().nullable(),
 	distribution_model: z.string().optional().default('lognormal_ci90'),
@@ -1157,6 +1201,7 @@ export const quantitativeRiskHypothesisSchema = z.object({
 });
 export const ebiosRMSchema = z.object({
 	...NameDescriptionMixin,
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	version: z.string().optional().default('0.1'),
 	quotation_method: z.string().optional().default('express'),
 	status: z.string().optional().default('planned'),
@@ -1250,6 +1295,7 @@ export const operationalScenarioSchema = z.object({
 
 export const SecurityExceptionSchema = z.object({
 	...NameDescriptionMixin,
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	folder: z.string(),
 	ref_id: z.string().optional(),
 	owners: z.array(z.string().optional()).optional(),
@@ -1285,6 +1331,7 @@ export const FindingSchema = z.object({
 
 export const FindingsAssessmentSchema = z.object({
 	...NameDescriptionMixin,
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	version: z.string().optional().default('0.1'),
 	folder: z.string(),
 	perimeter: z.string().optional().nullable(),
@@ -1661,6 +1708,7 @@ export const ProjectSchema = z.object({
 	actual_cost: z.coerce.number().optional().nullable(),
 	currency: z.string().max(3).optional(),
 	linked_collection: z.string().uuid().optional().nullable(),
+	create_collection: z.boolean().optional().default(true),
 	parent_project: z.string().uuid().optional().nullable(),
 	tolerances: z.record(z.string(), z.unknown()).optional(),
 	observation: z.string().optional().nullable(),
