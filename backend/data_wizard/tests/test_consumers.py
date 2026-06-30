@@ -1080,6 +1080,21 @@ class TestFindingsAssessmentConsumer:
         assert result.created == 0
         assert not FindingsAssessment.objects.filter(folder=domain_folder).exists()
 
+    def test_target_not_accessible_fails(self, domain_folder, admin_user):
+        """A real target the user cannot change must not be writable."""
+        fa = FindingsAssessment.objects.create(name="Locked", folder=domain_folder)
+        ctx = self._findings_context(domain_folder, admin_user, target_id=fa.id)
+        with patch(
+            "data_wizard.views.RoleAssignment.get_accessible_object_ids",
+            return_value=([], [], []),
+        ):
+            result = FindingsAssessmentRecordConsumer(ctx).process_records(
+                [{"name": "X", "ref_id": "F-X", "status": "identified"}]
+            )
+        assert result.failed == 1
+        assert result.created == 0
+        assert fa.findings.count() == 0
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # VulnerabilityRecordConsumer — pipe/comma multi-value M2M
