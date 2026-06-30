@@ -1008,7 +1008,7 @@ class TestFindingsAssessmentConsumer:
         result = _run(
             FindingsAssessmentRecordConsumer,
             ctx,
-            [{"name": "Orphan Finding", "ref_id": "FIND-NP"}],
+            [{"name": "Orphan Finding", "ref_id": "FIND-NP", "status": "identified"}],
         )
         assert result.created == 1
         assert FindingsAssessment.objects.filter(folder=domain_folder).exists()
@@ -1028,7 +1028,14 @@ class TestFindingsAssessmentConsumer:
         _run(
             FindingsAssessmentRecordConsumer,
             seed_ctx,
-            [{"name": "Initial", "ref_id": "F-1", "observation": "old"}],
+            [
+                {
+                    "name": "Initial",
+                    "ref_id": "F-1",
+                    "observation": "old",
+                    "status": "identified",
+                }
+            ],
         )
         fa = FindingsAssessment.objects.get(folder=domain_folder)
         assert fa.findings.count() == 1
@@ -1044,8 +1051,13 @@ class TestFindingsAssessmentConsumer:
             FindingsAssessmentRecordConsumer,
             target_ctx,
             [
-                {"name": "Initial", "ref_id": "F-1", "observation": "new"},
-                {"name": "Second", "ref_id": "F-2"},
+                {
+                    "name": "Initial",
+                    "ref_id": "F-1",
+                    "observation": "new",
+                    "status": "identified",
+                },
+                {"name": "Second", "ref_id": "F-2", "status": "identified"},
             ],
         )
         assert FindingsAssessment.objects.filter(folder=domain_folder).count() == 1
