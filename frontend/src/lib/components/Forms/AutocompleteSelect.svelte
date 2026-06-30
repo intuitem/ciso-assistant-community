@@ -174,7 +174,12 @@
 	type SelectValue = string | number | undefined;
 
 	let selected: Option[] = $state([]);
-	let selectedValues: SelectValue[] = $derived(selected.map((item) => item.value));
+	// svelte-multiselect creates user options as `{ label }` without a value key
+	let selectedValues: SelectValue[] = $derived(
+		selected.map((item: any) =>
+			item != null && typeof item === 'object' ? (item.value ?? item.label) : item
+		)
+	);
 	let isInternalUpdate = false;
 	let optionsLoaded = $state(Boolean(options.length));
 	const default_value = nullable ? null : '';
@@ -550,8 +555,7 @@
 	});
 
 	run(() => {
-		const mapped = selected.map((option) => option.value);
-		cachedValue = mapped.length > 0 ? mapped : undefined;
+		cachedValue = selectedValues.length > 0 ? selectedValues : undefined;
 		cachedOptions = selected;
 	});
 
