@@ -29,6 +29,23 @@
 	let showModelDropdown = $state(false);
 	let searchInputRef: HTMLInputElement | null = $state(null);
 	let onConflict = $state('stop');
+	let selectedPerimeter = $state('');
+	let selectedTarget = $state('');
+
+	// Composite models whose import produces a single container (audit, risk
+	// assessment, …) with nested children. They support reconciling into an
+	// existing container instead of always creating a new one.
+	const ASSESSMENT_MODELS = [
+		'ComplianceAssessment',
+		'RiskAssessment',
+		'FindingsAssessment',
+		'BusinessImpactAnalysis'
+	];
+
+	// Subset that supports reconciling into an explicitly chosen container.
+	// BIA is excluded: it already reconciles by name + conflict strategy through
+	// its multi-sheet importer, so an explicit target would only risk mislinking.
+	const TARGET_MODELS = ['ComplianceAssessment', 'RiskAssessment', 'FindingsAssessment'];
 
 	// Model configuration
 	const modelOptions = [
@@ -116,14 +133,14 @@
 		}
 	}
 
-	// Determine if domain selection should be disabled
+	// Determine if domain selection should be disabled.
+	// For assessment models the domain is normally derived from the perimeter,
+	// but perimeter is optional: when none is selected the user picks a fallback
+	// domain directly (the backend accepts a null perimeter + explicit folder).
 	let isDomainDisabled = $derived(
-		selectedModel === 'ComplianceAssessment' ||
-			selectedModel === 'BusinessImpactAnalysis' ||
-			selectedModel === 'FindingsAssessment' ||
-			selectedModel === 'RiskAssessment' ||
-			selectedModel === 'User' ||
-			selectedModel === 'Folder'
+		selectedModel === 'User' ||
+			selectedModel === 'Folder' ||
+			(ASSESSMENT_MODELS.includes(selectedModel) && !!selectedPerimeter)
 	);
 
 	let isFrameworkDisabled = $derived(selectedModel !== 'ComplianceAssessment');
@@ -160,6 +177,11 @@
 	// Determine if perimeter selection should be disabled
 	let isPerimeterDisabled = $derived(modelsWithoutPerimeter.includes(selectedModel));
 
+	// "Update existing assessment" target: only for composite models, populated
+	// from the accessible assessments of the selected type.
+	let isTargetEnabled = $derived(TARGET_MODELS.includes(selectedModel));
+	let targetOptions = $derived(data.data.targets?.[selectedModel] ?? []);
+
 	// Fixed: Check files correctly
 	let uploadButtonStyles = $derived(files && files.length > 0 ? '' : 'chip-disabled');
 
@@ -171,6 +193,8 @@
 	$effect(() => {
 		selectedModel;
 		files = null;
+		selectedPerimeter = '';
+		selectedTarget = '';
 		if (fileInputRef) fileInputRef.value = '';
 	});
 
@@ -523,8 +547,10 @@
 						<select
 							id="perimeter"
 							name="perimeter"
+							bind:value={selectedPerimeter}
 							class="w-full px-4 py-2.5 border-2 border-surface-300-700 bg-surface-50-950 rounded-lg text-surface-900-100 text-sm hover:border-rose-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-colors"
 						>
+							<option value="">{m.none?.() ?? '---'}</option>
 							{#each data.data.perimeters as perimeter}
 								<option value={perimeter.id}>{perimeter.name}</option>
 							{/each}
@@ -585,6 +611,32 @@
 						</div>
 					{/if}
 				</div>
+
+				{#if isTargetEnabled}
+					<!-- Update existing assessment (reconcile into an existing container) -->
+					<div>
+						<label for="target" class="block text-sm font-medium text-surface-900-100 mb-2"
+							>{m.dataWizardUpdateExisting?.() ?? 'Update existing assessment'}</label
+						>
+						<select
+							id="target"
+							name="target"
+							bind:value={selectedTarget}
+							class="w-full px-4 py-2.5 border-2 border-surface-300-700 bg-surface-50-950 rounded-lg text-surface-900-100 text-sm hover:border-rose-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-colors"
+						>
+							<option value=""
+								>{m.dataWizardCreateNewAssessment?.() ?? 'Create new'}</option
+							>
+							{#each targetOptions as target}
+								<option value={target.id}>{target.name}</option>
+							{/each}
+						</select>
+						<p class="text-xs text-surface-600-400 mt-1">
+							{m.dataWizardUpdateExistingHint?.() ??
+								'Leave on "Create new" to create a fresh assessment. Pick an existing one to reconcile the imported rows into it; the conflict strategy then applies to its children.'}
+						</p>
+					</div>
+				{/if}
 			</div>
 
 			<!-- Upload Button -->

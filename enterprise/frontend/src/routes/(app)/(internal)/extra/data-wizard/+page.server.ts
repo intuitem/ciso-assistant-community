@@ -5,10 +5,40 @@ import { setFlash } from 'sveltekit-flash-message/server';
 import { m } from '$paraglide/messages';
 import type { PageServerLoad } from './$types';
 
+// Composite models that support reconciling an import into an existing
+// container, mapped to their list endpoint (relative to BASE_API_URL).
+const TARGET_ENDPOINTS: Record<string, string> = {
+	ComplianceAssessment: 'compliance-assessments',
+	RiskAssessment: 'risk-assessments',
+	FindingsAssessment: 'findings-assessments'
+};
+
 export const load = (async ({ fetch }) => {
 	const endpoint = `${BASE_API_URL}/folders/get_accessible_objects/`;
 	const res = await fetch(endpoint);
 	const data = await res.json();
+
+	// Fetch the accessible assessments per composite model for the
+	// "Update existing assessment" picker.
+	const targets: Record<string, { id: string; name: string }[]> = {};
+	await Promise.all(
+		Object.entries(TARGET_ENDPOINTS).map(async ([model, path]) => {
+			try {
+				const r = await fetch(`${BASE_API_URL}/${path}/?page_size=1000`);
+				if (!r.ok) {
+					targets[model] = [];
+					return;
+				}
+				const body = await r.json();
+				const rows = Array.isArray(body) ? body : (body.results ?? []);
+				targets[model] = rows.map((o: any) => ({ id: o.id, name: o.str ?? o.name }));
+			} catch {
+				targets[model] = [];
+			}
+		})
+	);
+	data.targets = targets;
+
 	return { data: data, title: m.dataWizard() };
 }) satisfies PageServerLoad;
 
@@ -24,6 +54,7 @@ export const actions: Actions = {
 		const perimeter = formData.get('perimeter') as string;
 		const framework = formData.get('framework') as string;
 		const matrix = formData.get('matrix') as string;
+		const target = formData.get('target') as string;
 		const onConflict = (formData.get('onConflict') as string) || 'stop';
 
 		if (!file?.name || file?.name === 'undefined') {
@@ -48,6 +79,7 @@ export const actions: Actions = {
 					'X-Perimeter-Id': perimeter,
 					'X-Framework-Id': framework,
 					'X-Matrix-Id': matrix,
+					'X-Target-Id': target,
 					'X-On-Conflict': onConflict
 				},
 				body: file
