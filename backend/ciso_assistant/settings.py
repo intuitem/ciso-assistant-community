@@ -22,7 +22,7 @@ from . import meta
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(os.getenv("DJANGO_BASE_DIR", Path(__file__).resolve().parent.parent))
 load_dotenv(BASE_DIR / ".meta")
 
 
@@ -45,6 +45,17 @@ def set_ciso_assistant_url(_, __, event_dict):
 
 
 _SENSITIVE_QUERY_PARAMS = frozenset({"code", "token", "id_token", "access_token"})
+
+_QUIET_PATHS = frozenset({"/api/health/"})
+
+
+def quiet_healthcheck(_, __, event_dict):
+    request = event_dict.get("request", "")
+    if isinstance(request, str):
+        for path in _QUIET_PATHS:
+            if path in request:
+                raise structlog.DropEvent
+    return event_dict
 
 
 def redact_sensitive_query_params(_, __, event_dict):
@@ -103,6 +114,7 @@ if LOG_OUTFILE:
 structlog.configure(
     processors=[
         structlog.contextvars.merge_contextvars,
+        quiet_healthcheck,
         redact_sensitive_query_params,
         set_ciso_assistant_url,
         structlog.stdlib.filter_by_level,
@@ -216,7 +228,7 @@ LOCAL_STORAGE_DIRECTORY = os.environ.get(
     "LOCAL_STORAGE_DIRECTORY", BASE_DIR / "db/attachments"
 )
 
-EXPOSE_METRICS = os.environ.get("EXPOSE_METRICS", "False").lower() in (
+EXPOSE_METRICS = os.environ.get("EXPOSE_METRICS", "False").strip().lower() in (
     "true",
     "1",
     "yes",
@@ -537,6 +549,7 @@ def _build_tls12_context():
     context = ssl.create_default_context()
     context.minimum_version = ssl.TLSVersion.TLSv1_2
     context.maximum_version = ssl.TLSVersion.TLSv1_2
+    context.set_ciphers("ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256")
     return context
 
 
