@@ -200,6 +200,14 @@
 	let targetEndpoint = $derived(TARGET_ENDPOINTS[selectedModel]);
 	let isTargetEnabled = $derived(!!targetEndpoint);
 
+	// Scope required to create a NEW assessment. A chosen target reuses the
+	// existing container's framework/matrix, so neither is needed then.
+	let isScopeIncomplete = $derived(
+		!$scope.target &&
+			((selectedModel === 'RiskAssessment' && !$scope.matrix) ||
+				(selectedModel === 'ComplianceAssessment' && !$scope.framework))
+	);
+
 	// Fixed: Check files correctly
 	let uploadButtonStyles = $derived(files && files.length > 0 ? '' : 'chip-disabled');
 
@@ -571,6 +579,7 @@
 						form={scopeForm}
 						field="framework"
 						optionsEndpoint="frameworks"
+						mandatory={!$scope.target}
 						label={m.dataWizardSelectFramework()}
 					/>
 				{/if}
@@ -581,6 +590,7 @@
 						form={scopeForm}
 						field="matrix"
 						optionsEndpoint="risk-matrices"
+						mandatory={selectedModel === 'RiskAssessment' && !$scope.target}
 						label={m.dataWizardSelectRiskMatrix()}
 					/>
 				{/if}
@@ -610,7 +620,7 @@
 				<button
 					class="flex-1 px-6 py-3 bg-gradient-to-r {uploadButtonStyles} from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
 					type="button"
-					disabled={!files || files.length === 0}
+					disabled={!files || files.length === 0 || isScopeIncomplete}
 					onclick={modalConfirm}
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
