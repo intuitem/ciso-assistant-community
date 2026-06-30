@@ -1,11 +1,24 @@
 #Requires -Version 5.0
 
+[CmdletBinding(PositionalBinding = $false)]
+param(
+    [Alias("f")]
+    [string] $DockerComposeFile = "docker-compose-build.yml",
+
+    [Parameter(ValueFromRemainingArguments = $true, DontShow = $true)]
+    [string[]] $UnsupportedArguments = @()
+)
+
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
-$DockerComposeFile = "docker-compose-build.yml"
 $MigrationCheckAttempts = 60
 $MigrationCheckDelaySeconds = 10
+
+if ($UnsupportedArguments.Count -gt 0) {
+    Write-Host "Unknown argument(s): $($UnsupportedArguments -join ', '). Supported arguments: -f <compose-file>." -ForegroundColor Red
+    exit 1
+}
 
 function Invoke-Checked {
     param(
@@ -83,6 +96,9 @@ try {
 
     $env:DOCKER_BUILDKIT = "1"
     $env:COMPOSE_DOCKER_CLI_BUILD = "1"
+
+    Write-Host "Using Docker Compose file: `"$DockerComposeFile`"" -ForegroundColor Cyan
+    Write-Host ""
 
     if (Test-Path -Path "db\ciso-assistant.sqlite3" -PathType Leaf) {
         Write-Host "The database seems already created." -ForegroundColor Yellow

@@ -1,8 +1,31 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DOCKER_COMPOSE_FILE=docker-compose-build.yml
+DOCKER_COMPOSE_FILE="docker-compose-build.yml"
 EXPECTED_OWNER="1001:1001"
+UNKNOWN_ARGUMENTS=()
+
+while (($#)); do
+  case "$1" in
+    -f)
+      shift
+      if (($# == 0)); then
+        printf 'Argument -f requires a compose file path.\n' >&2
+        exit 1
+      fi
+      DOCKER_COMPOSE_FILE="$1"
+      ;;
+    *)
+      UNKNOWN_ARGUMENTS+=("$1")
+      ;;
+  esac
+  shift
+done
+
+if ((${#UNKNOWN_ARGUMENTS[@]} > 0)); then
+  printf 'Unknown argument(s): %s. Supported arguments: -f <compose-file>.\n' "${UNKNOWN_ARGUMENTS[*]}" >&2
+  exit 1
+fi
 
 prepare_meta_file() {
   VERSION=$(git describe --tags --always)
@@ -26,6 +49,8 @@ get_owner_linux() {
 # Enable BuildKit for faster builds
 export DOCKER_BUILDKIT=1
 export COMPOSE_DOCKER_CLI_BUILD=1
+
+echo "Using Docker Compose file: \"${DOCKER_COMPOSE_FILE}\""
 
 # Check if database already exists
 if [ -f db/ciso-assistant.sqlite3 ]; then
