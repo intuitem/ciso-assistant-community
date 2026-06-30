@@ -69,12 +69,16 @@ class JiraFieldMapper(BaseFieldMapper):
         "ref_id": {"pull": {"create", "update"}, "push": {"create", "update"}},
     }
 
-    def __init__(self, configuration):
-        super().__init__(configuration)
-        self.settings = configuration.settings or {}
+    def __init__(self, configuration, model_key="applied_control"):
+        super().__init__(configuration, model_key)
 
-        field_map = self.settings.get("field_map") or {}
-        value_map = self.settings.get("value_map") or {}
+        field_map = self.model_settings.get("field_map") or {}
+        value_map = self.model_settings.get("value_map") or {}
+
+        # The legacy hardcoded defaults below describe AppliedControl <-> Jira.
+        # Other models (Asset, ...) have no sensible Jira defaults, so they are
+        # purely settings-driven: empty config means nothing is mapped.
+        use_defaults = self.model_key == "applied_control"
 
         # Fall back to defaults independently per map. The earlier "use
         # defaults only when both are empty" rule meant that a config with
@@ -83,19 +87,23 @@ class JiraFieldMapper(BaseFieldMapper):
         # with "summary required".
         if field_map:
             self.field_map = dict(field_map)
-        else:
+        elif use_defaults:
             self.field_map = dict(self._DEFAULT_FIELD_MAP)
+        else:
+            self.field_map = {}
 
         if value_map:
             self.value_map_to_remote = {
                 field: {str(k): v for k, v in mapping.items()}
                 for field, mapping in value_map.items()
             }
-        else:
+        elif use_defaults:
             self.value_map_to_remote = {
                 field: dict(mapping)
                 for field, mapping in self._DEFAULT_VALUE_MAP_TO_REMOTE.items()
             }
+        else:
+            self.value_map_to_remote = {}
 
         self.value_map_to_local: dict[str, dict[str, Any]] = {}
         for field, mapping in self.value_map_to_remote.items():
@@ -104,15 +112,21 @@ class JiraFieldMapper(BaseFieldMapper):
             }
 
         # Backfill priority aliases the user's saved value_map can't express.
-        priority_local = self.value_map_to_local.setdefault("priority", {})
-        for remote_label, local_val in self._PRIORITY_PULL_ALIASES.items():
-            priority_local.setdefault(remote_label, local_val)
+        if use_defaults:
+            priority_local = self.value_map_to_local.setdefault("priority", {})
+            for remote_label, local_val in self._PRIORITY_PULL_ALIASES.items():
+                priority_local.setdefault(remote_label, local_val)
 
     def suggest_mapping_for_table(self, table_name: str, client) -> dict[str, Any]:
         """Filter the legacy defaults against what the chosen project + issue
         type actually exposes, so the UI can pre-populate rows the user would
         almost certainly pick themselves.
         """
+        # The legacy default suggestions describe AppliedControl only. Other
+        # models are configured manually (no defaults to intersect).
+        if self.model_key != "applied_control":
+            return {"field_map": {}, "value_map": {}}
+
         columns = client.get_table_columns(table_name)
         column_names = {c.get("name") for c in columns if c.get("name")}
 
@@ -147,13 +161,6 @@ class JiraFieldMapper(BaseFieldMapper):
 
     def _get_mappings(self) -> dict[str, str]:
         return self.field_map
-
-    def get_allowed_fields(self, direction: str, operation: str) -> set[str]:
-        allowed = set()
-        for field, ops in self.FIELD_MAPPINGS_OPERATIONS.items():
-            if operation in ops.get(direction, set()):
-                allowed.add(field)
-        return allowed
 
     def to_remote(self, local_object: models.Model) -> dict[str, Any]:
         allowed_fields = self.get_allowed_fields("push", "create")

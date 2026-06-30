@@ -1,6 +1,8 @@
 from typing import Any, Dict
+from django.utils import timezone
 from structlog import get_logger
 from integrations.base import BaseITSMOrchestrator
+from integrations.models import IntegrationSchemaCache
 from integrations.registry import IntegrationRegistry
 from .client import ServiceNowClient
 from .mapper import ServiceNowFieldMapper
@@ -36,11 +38,11 @@ class ServiceNowOrchestrator(BaseITSMOrchestrator):
     client_class = ServiceNowClient
     mapper_class = ServiceNowFieldMapper
 
-    def _get_mapper(self):
-        return ServiceNowFieldMapper(self.configuration)
+    def _get_mapper(self, model_key="applied_control"):
+        return ServiceNowFieldMapper(self.configuration, model_key)
 
-    def _get_client(self):
-        return ServiceNowClient(self.configuration)
+    def _get_client(self, model_key="applied_control"):
+        return ServiceNowClient(self.configuration, model_key)
 
     def _extract_remote_id(self, payload: Dict[str, Any]) -> str:
         # Assumes ServiceNow Business Rule sends the record as the root json or under 'result'
@@ -73,19 +75,102 @@ class ServiceNowOrchestrator(BaseITSMOrchestrator):
         return False
 
     def get_interactive_actions(self):
-        return ["get_tables", "get_columns", "get_choices", "suggest_mapping"]
+        return [
+            "get_tables",
+            "get_columns",
+            "get_choices",
+            "suggest_mapping",
+            "refresh_schema",
+        ]
+
+    # --- Schema cache --------------------------------------------------------
+    # ServiceNow schema fetches (tables, columns, choices) are slow: the table
+    # list returns thousands of rows, and columns/choices recursively walk the
+    # parent-table inheritance chain. Reads go through a DB-backed cache that
+    # self-heals on a miss (live fetch + store); startup warming and the
+    # 'refresh_schema' action keep it fresh.
+
+    def _get_cache(self) -> IntegrationSchemaCache:
+        cache, _ = IntegrationSchemaCache.objects.get_or_create(
+            configuration=self.configuration
+        )
+        return cache
+
+    def _cached_tables(self, force: bool = False) -> list[dict]:
+        cache = self._get_cache()
+        if force or not cache.tables:
+            cache.tables = self.client.get_available_tables()
+            cache.fetched_at = timezone.now()
+            cache.save(update_fields=["tables", "fetched_at", "updated_at"])
+        return cache.tables
+
+    def _cached_columns(self, table: str, force: bool = False) -> list[dict]:
+        cache = self._get_cache()
+        if force or table not in cache.columns:
+            cache.columns[table] = self.client.get_table_columns(table)
+            cache.fetched_at = timezone.now()
+            cache.save(update_fields=["columns", "fetched_at", "updated_at"])
+        return cache.columns[table]
+
+    def _cached_choices(
+        self, table: str, field: str, force: bool = False
+    ) -> list[dict]:
+        cache = self._get_cache()
+        key = f"{table}:{field}"
+        if force or key not in cache.choices:
+            cache.choices[key] = self.client.get_field_choices(table, field)
+            cache.fetched_at = timezone.now()
+            cache.save(update_fields=["choices", "fetched_at", "updated_at"])
+        return cache.choices[key]
+
+    def refresh_schema(self, force: bool = True) -> list[dict]:
+        """Fetch the page-load set into the cache, for every configured model
+        (each model has its own remote table + mapped choice fields). Returns
+        the tables list.
+
+        force=True (the manual refresh button) re-fetches everything and
+        overwrites the cache. force=False (startup warming) only fills gaps,
+        so a restart with an already-populated cache costs no live calls.
+        """
+        from integrations import syncable
+        from integrations.settings_access import (
+            configured_model_keys,
+            get_model_settings,
+        )
+
+        tables = self._cached_tables(force=force)
+
+        for model_key in configured_model_keys(self.configuration.settings):
+            ms = get_model_settings(self.configuration.settings, model_key)
+            table = ms.get("table_name")
+            if not table:
+                continue
+            self._cached_columns(table, force=force)
+
+            # Warm choices for every mapped choice field of this model, mirroring
+            # what the page loads (any choice-type field with a field_map entry).
+            field_map = ms.get("field_map", {}) or {}
+            model_choice_fields = syncable.choice_fields(model_key)
+            for local_field, remote_field in field_map.items():
+                if local_field in model_choice_fields and remote_field:
+                    self._cached_choices(table, remote_field, force=force)
+
+        logger.info(
+            "Refreshed ServiceNow schema cache",
+            config_id=str(self.configuration.id),
+            force=force,
+        )
+        return tables
 
     def execute_action(self, action: str, params: dict):
-        client = self._get_client()
-
         if action == "get_tables":
-            return client.get_available_tables()
+            return self._cached_tables()
 
         elif action == "get_columns":
             table = params.get("table_name")
             if not table:
                 raise ValueError("Parameter 'table_name' is required for get_columns")
-            return client.get_table_columns(table)
+            return self._cached_columns(table)
 
         elif action == "get_choices":
             table = params.get("table_name")
@@ -94,7 +179,10 @@ class ServiceNowOrchestrator(BaseITSMOrchestrator):
                 raise ValueError(
                     "Parameters 'table_name' and 'field_name' are required"
                 )
-            return client.get_field_choices(table, field)
+            return self._cached_choices(table, field)
+
+        elif action == "refresh_schema":
+            return self.refresh_schema()
 
         elif action == "suggest_mapping":
             table = params.get("table_name")
@@ -105,7 +193,7 @@ class ServiceNowOrchestrator(BaseITSMOrchestrator):
             # ServiceNow doesn't ship default mappings yet; the base no-op
             # returns {field_map: {}, value_map: {}} so the frontend stops
             # treating the action as unsupported.
-            return self.mapper.suggest_mapping_for_table(table, client)
+            return self.mapper.suggest_mapping_for_table(table, self.client)
 
         else:
             raise NotImplementedError(f"Unknown action: {action}")

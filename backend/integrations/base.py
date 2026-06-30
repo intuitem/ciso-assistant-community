@@ -15,10 +15,21 @@ logger = structlog.get_logger(__name__)
 class BaseIntegrationClient(ABC):
     """Base class for all integration clients"""
 
-    def __init__(self, configuration: IntegrationConfiguration):
+    def __init__(
+        self,
+        configuration: IntegrationConfiguration,
+        model_key: str = "applied_control",
+    ):
+        from integrations.settings_access import get_model_settings
+
         self.configuration = configuration
+        self.model_key = model_key
         self.credentials = configuration.credentials
         self.settings = configuration.settings
+        # Per-model mapping settings (e.g. the remote table for this model).
+        self.model_settings = get_model_settings(
+            configuration.settings or {}, model_key
+        )
 
     @abstractmethod
     def test_connection(self) -> bool:
@@ -55,10 +66,46 @@ class BaseFieldMapper(ABC):
     # Format: {'local_field': 'remote_field'}
     FIELD_MAPPINGS: dict[str, str] = {}
 
-    def __init__(self, configuration: IntegrationConfiguration):
+    def __init__(
+        self,
+        configuration: IntegrationConfiguration,
+        model_key: str = "applied_control",
+    ):
+        from integrations.settings_access import get_model_settings
+
         self.configuration = configuration
+        self.model_key = model_key
+        # Per-model mapping settings (table_name/field_map/value_map/...), with
+        # the legacy top-level shim applied for applied_control.
+        self.model_settings = get_model_settings(
+            configuration.settings or {}, model_key
+        )
         # Allow per-instance custom mappings
-        self.custom_mappings = configuration.settings.get("field_mappings", {})
+        self.custom_mappings = self.model_settings.get("field_mappings", {})
+
+    def _field_operations(self) -> dict[str, dict[str, set]]:
+        """Per-model pull/push operation gating.
+
+        applied_control keeps the provider's explicit FIELD_MAPPINGS_OPERATIONS
+        (preserves immutability nuances like Jira name being pull-on-create).
+        Other models allow every mappable field on create+update both ways.
+        """
+        ops = getattr(self, "FIELD_MAPPINGS_OPERATIONS", None)
+        if self.model_key == "applied_control" and ops:
+            return ops
+        from integrations.syncable import mappable_field_keys
+
+        return {
+            key: {"pull": {"create", "update"}, "push": {"create", "update"}}
+            for key in mappable_field_keys(self.model_key)
+        }
+
+    def get_allowed_fields(self, direction: str, operation: str) -> set[str]:
+        allowed = set()
+        for field, ops in self._field_operations().items():
+            if operation in ops.get(direction, set()):
+                allowed.add(field)
+        return allowed
 
     def to_remote(self, local_object: models.Model) -> dict[str, Any]:
         """Convert local object to remote format (all fields)"""
@@ -177,20 +224,44 @@ class BaseFieldMapper(ABC):
 class BaseSyncOrchestrator(ABC):
     """Orchestrates sync operations between local and remote systems"""
 
+    DEFAULT_MODEL_KEY = "applied_control"
+
     def __init__(self, configuration: IntegrationConfiguration):
         self.configuration = configuration
-        self.client = self._get_client()
-        self.mapper = self._get_mapper()
+        # Clients/mappers are model-aware and built lazily per model_key. Caching
+        # avoids re-connecting (e.g. the Jira client opens a session in __init__).
+        self._client_cache: dict[str, BaseIntegrationClient] = {}
+        self._mapper_cache: dict[str, BaseFieldMapper] = {}
 
     @abstractmethod
-    def _get_client(self) -> BaseIntegrationClient:
-        """Return the appropriate client for this integration"""
+    def _get_client(self, model_key: str) -> BaseIntegrationClient:
+        """Return the appropriate client for this integration + model"""
         pass
 
     @abstractmethod
-    def _get_mapper(self) -> BaseFieldMapper:
-        """Return the appropriate field mapper for this integration"""
+    def _get_mapper(self, model_key: str) -> BaseFieldMapper:
+        """Return the appropriate field mapper for this integration + model"""
         pass
+
+    def client_for(self, model_key: str) -> BaseIntegrationClient:
+        if model_key not in self._client_cache:
+            self._client_cache[model_key] = self._get_client(model_key)
+        return self._client_cache[model_key]
+
+    def mapper_for(self, model_key: str) -> BaseFieldMapper:
+        if model_key not in self._mapper_cache:
+            self._mapper_cache[model_key] = self._get_mapper(model_key)
+        return self._mapper_cache[model_key]
+
+    @property
+    def client(self) -> BaseIntegrationClient:
+        """Back-compat default client (applied_control)."""
+        return self.client_for(self.DEFAULT_MODEL_KEY)
+
+    @property
+    def mapper(self) -> BaseFieldMapper:
+        """Back-compat default mapper (applied_control)."""
+        return self.mapper_for(self.DEFAULT_MODEL_KEY)
 
     def get_interactive_actions(self) -> list[str]:
         """Return a list of supported interactive actions (RPCs)."""
@@ -205,6 +276,16 @@ class BaseSyncOrchestrator(ABC):
             f"Action '{action}' is not supported by this integration."
         )
 
+    def refresh_schema(self, force: bool = True) -> list:
+        """Re-fetch and cache the remote schema.
+
+        Default is a no-op so the generic 'refresh schema' button in the UI is
+        harmless for providers that don't cache schema. Providers that do
+        (ServiceNow) override this. ``force`` distinguishes a user-triggered
+        hard refresh from populate-if-empty startup warming.
+        """
+        return []
+
     def push_changes(
         self, local_object: models.Model, changed_fields: list[str]
     ) -> bool:
@@ -218,21 +299,38 @@ class BaseSyncOrchestrator(ABC):
             True if sync succeeded, False otherwise
         """
         from .models import SyncMapping  # Import here to avoid circular imports
+        from integrations.settings_access import is_model_configured
+        from integrations.syncable import model_key_for_content_type
+
+        content_type = ContentType.objects.get_for_model(local_object)
+        model_key = model_key_for_content_type(content_type)
+        if not model_key or not is_model_configured(
+            self.configuration.settings, model_key
+        ):
+            logger.info(
+                "Skipping push: model not configured for this integration",
+                model=content_type.model,
+                config_id=str(self.configuration.id),
+            )
+            return False
+
+        mapper = self.mapper_for(model_key)
+        client = self.client_for(model_key)
 
         mapping = self._get_or_create_mapping(local_object)
 
         try:
             if mapping.remote_id:
                 # Update existing remote object
-                changes = self.mapper.to_remote_partial(local_object, changed_fields)
+                changes = mapper.to_remote_partial(local_object, changed_fields)
                 if changes:  # Only update if there are actual changes to sync
-                    self.client.update_remote_object(mapping.remote_id, changes)
+                    client.update_remote_object(mapping.remote_id, changes)
                     logger.info(
                         f"Updated remote object {mapping.remote_id} with changes: {list(changes.keys())}"
                     )
             else:
                 # Create new remote object
-                remote_id = self.client.create_remote_object(local_object)
+                remote_id = client.create_remote_object(local_object)
                 mapping.remote_id = remote_id
                 logger.info("Created remote object", remote_id=remote_id)
 
@@ -240,7 +338,7 @@ class BaseSyncOrchestrator(ABC):
             mapping.sync_status = SyncMapping.SyncStatus.SYNCED
             mapping.last_sync_direction = SyncMapping.SyncDirection.PUSH
             mapping.version += 1
-            mapping.remote_data = self.client.get_remote_object(mapping.remote_id)
+            mapping.remote_data = client.get_remote_object(mapping.remote_id)
             mapping.error_message = ""
             mapping.save()
 
@@ -277,6 +375,7 @@ class BaseSyncOrchestrator(ABC):
             True if sync succeeded, False otherwise
         """
         from .models import SyncMapping  # Import here to avoid circular imports
+        from integrations.syncable import model_key_for_content_type
 
         try:
             mapping = SyncMapping.objects.get(
@@ -285,6 +384,21 @@ class BaseSyncOrchestrator(ABC):
         except SyncMapping.DoesNotExist:
             logger.warning(f"No mapping found for remote_id {remote_id}")
             return False
+        except SyncMapping.MultipleObjectsReturned:
+            # One remote_id linked to multiple local models under the same
+            # config is unsupported in v1 (the link UI creates one per link).
+            logger.error(
+                "Multiple mappings for remote_id; skipping pull",
+                remote_id=remote_id,
+                config_id=str(self.configuration.id),
+            )
+            return False
+
+        # The mapping records which local model this is; map accordingly.
+        model_key = (
+            model_key_for_content_type(mapping.content_type) or self.DEFAULT_MODEL_KEY
+        )
+        mapper = self.mapper_for(model_key)
 
         try:
             # Check for conflicts
@@ -293,10 +407,10 @@ class BaseSyncOrchestrator(ABC):
                 mapping.sync_status = "conflict"
                 mapping.save()
                 # Handle conflict based on resolution strategy
-                return self._resolve_conflict(mapping, remote_data)
+                return self._resolve_conflict(mapping, remote_data, model_key)
 
             # Convert remote data to local format
-            local_data = self.mapper.to_local(remote_data)
+            local_data = mapper.to_local(remote_data)
             local_object = self._get_local_object(mapping)
 
             # Apply changes to local object
@@ -452,20 +566,26 @@ class BaseSyncOrchestrator(ABC):
         return False
 
     def _resolve_conflict(
-        self, mapping: SyncMapping, remote_data: dict[str, Any]
+        self,
+        mapping: SyncMapping,
+        remote_data: dict[str, Any],
+        model_key: str | None = None,
     ) -> bool:
         """Resolve conflict between local and remote changes
 
         Default strategy: Remote wins (last-write-wins from remote side)
         Override this method to implement different conflict resolution strategies
         """
+        model_key = model_key or self.DEFAULT_MODEL_KEY
+        mapper = self.mapper_for(model_key)
+        client = self.client_for(model_key)
         conflict_resolution = self.configuration.settings.get(
             "conflict_resolution", "remote_wins"
         )
 
         if conflict_resolution == "remote_wins":
             logger.info(f"Resolving conflict for mapping {mapping.id}: remote wins")
-            local_data = self.mapper.to_local(remote_data)
+            local_data = mapper.to_local(remote_data)
             local_object = self._get_local_object(mapping)
             self._update_local_object(local_object, local_data)
 
@@ -478,8 +598,8 @@ class BaseSyncOrchestrator(ABC):
         elif conflict_resolution == "local_wins":
             logger.info(f"Resolving conflict for mapping {mapping.id}: local wins")
             local_object = self._get_local_object(mapping)
-            remote_changes = self.mapper.to_remote(local_object)
-            self.client.update_remote_object(mapping.remote_id, remote_changes)
+            remote_changes = mapper.to_remote(local_object)
+            client.update_remote_object(mapping.remote_id, remote_changes)
 
             mapping.sync_status = SyncMapping.SyncStatus.SYNCED
             mapping.remote_data = remote_data

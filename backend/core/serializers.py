@@ -622,7 +622,84 @@ class AssetCapabilityWriteSerializer(AssetCapabilityReadSerializer):
     pass
 
 
-class AssetWriteSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
+class IntegrationLinkSerializerMixin(serializers.Serializer):
+    """Adds remote-object linking to a model serializer.
+
+    Declares the write-only ``integration_config`` / ``remote_object_id`` /
+    ``create_remote_object`` fields (stripped before the model is written) and
+    exposes existing ``sync_mappings`` on read, scoped by content type. The
+    actual SyncMapping creation / sync scheduling is done by
+    ``IntegrationLinkViewSetMixin`` on the viewset.
+    """
+
+    integration_config = serializers.PrimaryKeyRelatedField(
+        required=False,
+        allow_null=True,
+        queryset=IntegrationConfiguration.objects.all(),
+        write_only=True,
+    )
+    remote_object_id = serializers.CharField(
+        required=False, allow_blank=True, allow_null=True, write_only=True
+    )
+    create_remote_object = serializers.BooleanField(
+        required=False, default=False, write_only=True
+    )
+
+    _INTEGRATION_LINK_FIELDS = (
+        "integration_config",
+        "remote_object_id",
+        "create_remote_object",
+    )
+
+    def _strip_integration_link_fields(self, validated_data):
+        for field in self._INTEGRATION_LINK_FIELDS:
+            validated_data.pop(field, None)
+
+    def create(self, validated_data):
+        self._strip_integration_link_fields(validated_data)
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        self._strip_integration_link_fields(validated_data)
+        return super().update(instance, validated_data)
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        from django.contrib.contenttypes.models import ContentType
+
+        content_type = ContentType.objects.get_for_model(instance.__class__)
+        sync_mappings = [
+            {
+                "id": mapping.id,
+                "remote_id": mapping.remote_id,
+                "sync_status": mapping.sync_status,
+                "last_synced_at": mapping.last_synced_at,
+                "last_sync_direction": mapping.last_sync_direction,
+                "error_message": mapping.error_message,
+                "provider": mapping.configuration.provider.name,
+            }
+            for mapping in SyncMapping.objects.filter(
+                content_type=content_type, local_object_id=instance.id
+            )
+            .select_related("configuration__provider")
+            .only(
+                "id",
+                "remote_id",
+                "sync_status",
+                "last_synced_at",
+                "last_sync_direction",
+                "error_message",
+                "configuration__provider__name",
+            )
+        ]
+        if sync_mappings:
+            ret["sync_mappings"] = sync_mappings
+        return ret
+
+
+class AssetWriteSerializer(
+    IntegrationLinkSerializerMixin, CustomFieldsSerializerMixin, BaseModelSerializer
+):
     ebios_rm_studies = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=EbiosRMStudy.objects.all(),

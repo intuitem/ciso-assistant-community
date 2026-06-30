@@ -7,6 +7,7 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import FieldMapper from '$lib/components/Forms/FieldMapper.svelte';
+	import { ASSET_LOCAL_FIELDS } from '$lib/components/Forms/integrationModels';
 	import WebhookSecretGenerator from '$lib/components/Forms/WebhookSecretGenerator.svelte';
 	import { z } from 'zod';
 	import { m } from '$paraglide/messages';
@@ -40,7 +41,10 @@
 			enable_incoming_sync: z.boolean().default(false),
 			table_name: z.string(),
 			field_map: z.record(z.string(), z.any()).default({}).optional(),
-			value_map: z.record(z.string(), z.any()).default({}).optional()
+			value_map: z.record(z.string(), z.any()).default({}).optional(),
+			// Per-model mapping (asset, ...). AppliedControl stays at the top level
+			// for backward compatibility; the backend reads both.
+			models: z.record(z.string(), z.any()).default({}).optional()
 		})
 	});
 
@@ -227,6 +231,33 @@
 						description={m.serviceNowIntegrationMappingsHelpText()}
 						remoteFieldLabel={m.serviceNowColumn()}
 						tableHelpText={m.serviceNowTableHelpText()}
+					/>
+					<FieldMapper
+						{form}
+						integrationId={page.data?.config?.id}
+						modelKey="asset"
+						valuePathPrefix="settings.models.asset"
+						localFields={ASSET_LOCAL_FIELDS}
+						initialConfig={page.data?.config?.settings?.models?.asset}
+						title={m.assets()}
+						remoteFieldLabel={m.serviceNowColumn()}
+						tableHelpText={m.serviceNowTableHelpText()}
+						onMapsChange={({ field_map, value_map }) => {
+							$formStore = {
+								...$formStore,
+								settings: {
+									...$formStore.settings,
+									models: {
+										...($formStore.settings.models ?? {}),
+										asset: {
+											...($formStore.settings.models?.asset ?? {}),
+											field_map,
+											value_map
+										}
+									}
+								}
+							};
+						}}
 					/>
 				{/if}
 				<button

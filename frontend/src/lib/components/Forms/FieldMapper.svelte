@@ -1,30 +1,16 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
 
 	const toastStore = getToastStore();
 
-	let {
-		integrationId,
-		initialConfig = null,
-		form,
-		title = m.integrationMappingsTitle(),
-		description = m.integrationMappingsHelpText(),
-		remoteFieldLabel = m.remoteField(),
-		tableHelpText = m.integrationTableHelpText(),
-		onSave = (config) => console.log('Saved:', config),
-		// Fires after handleTableChange so the parent page can sync field_map /
-		// value_map into the superform store. Without this, the per-row
-		// AutocompleteSelect rebinds happen on the next tick but the form's
-		// settings.field_map / settings.value_map keep stale values.
-		onMapsChange = (_maps: { field_map: Record<string, any>; value_map: Record<string, any> }) =>
-			undefined
-	} = $props();
-
-	const LOCAL_FIELDS = [
+	// Default local field list (AppliedControl). Other models pass their own via
+	// the `localFields` prop. Kept here so existing callers keep working.
+	const APPLIED_CONTROL_FIELDS = [
 		{ key: 'name', label: m.name(), type: 'string', required: true },
 		{ key: 'description', label: m.description(), type: 'text', required: false },
 		{ key: 'eta', label: m.eta(), type: 'date', required: false },
@@ -55,6 +41,29 @@
 		}
 	];
 
+	let {
+		integrationId,
+		initialConfig = null,
+		form,
+		// Which local model this mapper configures, and where its config lives in
+		// the form store. modelKey is sent with every RPC so the backend targets
+		// the right remote table; valuePathPrefix points at settings.models.<key>.
+		modelKey = 'applied_control',
+		valuePathPrefix = 'settings',
+		localFields = APPLIED_CONTROL_FIELDS,
+		title = m.integrationMappingsTitle(),
+		description = m.integrationMappingsHelpText(),
+		remoteFieldLabel = m.remoteField(),
+		tableHelpText = m.integrationTableHelpText(),
+		onSave = (config) => console.log('Saved:', config),
+		// Fires after handleTableChange so the parent page can sync field_map /
+		// value_map into the superform store. Without this, the per-row
+		// AutocompleteSelect rebinds happen on the next tick but the form's
+		// field_map / value_map keep stale values.
+		onMapsChange = (_maps: { field_map: Record<string, any>; value_map: Record<string, any> }) =>
+			undefined
+	} = $props();
+
 	let selectedTable = $state(initialConfig?.table_name || '');
 	let fieldMap = $state(initialConfig?.field_map || {});
 	let valueMap = $state(initialConfig?.value_map || {});
@@ -64,9 +73,10 @@
 	let columns = $state([]);
 	let choicesCache = $state({}); // Key: "table:field", Value: Option[]
 	let isLoadingColumns = $state(false);
+	let isRefreshing = $state(false);
 
 	let activeChoiceFields = $derived(
-		LOCAL_FIELDS.filter((f) => f.type === 'choice' && fieldMap[f.key])
+		localFields.filter((f) => f.type === 'choice' && fieldMap[f.key])
 	);
 
 	// Returns `null` (not `[]`) on failure so callers can branch on it.
@@ -79,7 +89,8 @@
 			res = await fetch(`/settings/integrations/configs/${integrationId}/rpc`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ action, params })
+				// model_key tells the backend which remote table/mapper to use.
+				body: JSON.stringify({ action, params: { ...params, model_key: modelKey } })
 			});
 		} catch (e) {
 			console.error(`RPC ${action} network error:`, e);
@@ -144,6 +155,34 @@
 		});
 		if (rawChoices === null) return; // RPC failed — don't cache an empty list as success
 		choicesCache[cacheKey] = rawChoices.map((c) => ({ value: c.value, label: c.label }));
+	}
+
+	// Force the backend to re-pull the remote schema (tables/columns/choices)
+	// in case it changed provider-side, then reload the dropdowns from the
+	// freshly cached data. Synchronous: the user waits behind a spinner.
+	async function refreshSchema() {
+		if (!integrationId || isRefreshing) return;
+		isRefreshing = true;
+		const result = await fetchRpc('refresh_schema');
+		if (result !== null) {
+			// Drop component-local caches so reloads read the refreshed data.
+			columns = [];
+			choicesCache = {};
+			await loadTables();
+			if (selectedTable) {
+				await loadColumns(selectedTable);
+				// Repopulate choice lists explicitly rather than relying on the
+				// reactive $effect to re-fire (table/field_map are unchanged here).
+				await Promise.all(
+					activeChoiceFields.map((f) => {
+						const remoteField = fieldMap[f.key];
+						return remoteField ? loadChoices(selectedTable, remoteField) : undefined;
+					})
+				);
+			}
+			toastStore.trigger({ message: m.schemaRefreshed(), preset: 'success' });
+		}
+		isRefreshing = false;
 	}
 
 	onMount(() => {
@@ -220,11 +259,28 @@
 <div
 	class="p-6 max-w-4xl mx-auto bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800"
 >
-	<div class="mb-8 border-b border-surface-100-900 pb-4">
-		<h2 class="text-xl font-bold text-surface-800-200">
-			{title}
-		</h2>
-		<p class="text-sm text-surface-500 mt-1">{description}</p>
+	<div class="mb-8 border-b border-surface-100-900 pb-4 flex justify-between items-start gap-4">
+		<div>
+			<h2 class="text-xl font-bold text-surface-800-200">
+				{title}
+			</h2>
+			<p class="text-sm text-surface-500 mt-1">{description}</p>
+		</div>
+		{#if integrationId}
+			<button
+				type="button"
+				class="btn preset-tonal-secondary shrink-0 flex items-center gap-2"
+				disabled={isRefreshing}
+				onclick={refreshSchema}
+			>
+				{#if isRefreshing}
+					<LoadingSpinner />
+				{:else}
+					<i class="fa-solid fa-rotate"></i>
+				{/if}
+				{m.refreshSchema()}
+			</button>
+		{/if}
 	</div>
 
 	<section class="mb-8">
@@ -232,7 +288,7 @@
 			<AutocompleteSelect
 				{form}
 				field="table_name"
-				valuePath="settings.table_name"
+				valuePath={`${valuePathPrefix}.table_name`}
 				label={m.targetTable()}
 				optionsValueField="value"
 				optionsLabelField="label"
@@ -261,7 +317,7 @@
 				</div>
 
 				<div class="space-y-4">
-					{#each LOCAL_FIELDS as field}
+					{#each localFields as field}
 						<div class="grid grid-cols-12 gap-4 items-center">
 							<div class="col-span-5">
 								<div class="font-medium text-surface-700-300">
@@ -278,7 +334,7 @@
 									<AutocompleteSelect
 										{form}
 										field={field.key}
-										valuePath={`settings.field_map.${field.key}`}
+										valuePath={`${valuePathPrefix}.field_map.${field.key}`}
 										options={columns}
 										cachedValue={fieldMap[field.key]}
 										onChange={(val) => (fieldMap[field.key] = val)}
@@ -325,7 +381,7 @@
 												<AutocompleteSelect
 													{form}
 													field={String(choice.value)}
-													valuePath={`settings.value_map.${field.key}.${choice.value}`}
+													valuePath={`${valuePathPrefix}.value_map.${field.key}.${choice.value}`}
 													options={choices}
 													optionsValueField="value"
 													optionsLabelField="label"

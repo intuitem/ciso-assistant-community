@@ -7,6 +7,7 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import FieldMapper from '$lib/components/Forms/FieldMapper.svelte';
+	import { ASSET_LOCAL_FIELDS } from '$lib/components/Forms/integrationModels';
 	import { z } from 'zod';
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
@@ -42,7 +43,8 @@
 				project_key: z.string().optional(),
 				issue_type: z.string().optional(),
 				field_map: z.record(z.string(), z.any()).default({}).optional(),
-				value_map: z.record(z.string(), z.any()).default({}).optional()
+				value_map: z.record(z.string(), z.any()).default({}).optional(),
+				models: z.record(z.string(), z.any()).default({}).optional()
 			})
 		})
 		.superRefine((data, ctx) => {
@@ -248,6 +250,33 @@
 									...$formStore.settings,
 									field_map,
 									value_map
+								}
+							};
+						}}
+					/>
+					<FieldMapper
+						{form}
+						integrationId={page.data?.config?.id || $formStore.id}
+						modelKey="asset"
+						valuePathPrefix="settings.models.asset"
+						localFields={ASSET_LOCAL_FIELDS}
+						initialConfig={page.data?.config?.settings?.models?.asset}
+						title={m.assets()}
+						remoteFieldLabel={m.jiraField()}
+						tableHelpText={m.jiraTableHelpText()}
+						onMapsChange={({ field_map, value_map }) => {
+							$formStore = {
+								...$formStore,
+								settings: {
+									...$formStore.settings,
+									models: {
+										...($formStore.settings.models ?? {}),
+										asset: {
+											...($formStore.settings.models?.asset ?? {}),
+											field_map,
+											value_map
+										}
+									}
 								}
 							};
 						}}

@@ -381,6 +381,8 @@
 	"tableName": "Nom de la table",
 	"baseQuery": "Requête de base",
 	"targetTable": "Table cible",
+	"refreshSchema": "Actualiser le schéma",
+	"schemaRefreshed": "Schéma actualisé",
 	"serviceNowIntegrationMappingsDescription": "Correspondances de synchronisation ServiceNow",
 	"serviceNowIntegrationMappingsHelpText": "Associez vos mesures locales aux enregistrements ServiceNow.",
 	"fieldMapping": "Correspondance des champs",
