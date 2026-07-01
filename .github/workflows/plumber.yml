@@ -8,6 +8,7 @@ on:
 permissions:
   contents: read
   security-events: write
+  id-token: write # mint the OIDC token so the score can be published (score-push)
 
 jobs:
   plumber:
@@ -20,3 +21,7 @@ jobs:
       - uses: getplumber/plumber@5302ddc7d9f1c9edb3f617bff04a09be452bcfe2 # v0.3.79
         with:
           threshold: 85
+          # Publish this repo's Plumber Score to score.getplumber.io so the
+          # README badge stays live. Only publishes on the default branch;
+          # never fails the build. All published scores are public.
+          score-push: true
