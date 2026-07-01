@@ -1677,8 +1677,8 @@ export const listViewFields = {
 			'filtering_labels'
 		],
 		optionalFields: {
-			head: ['startDate', 'expiryDate', 'createdAt', 'updatedAt'],
-			body: ['start_date', 'expiry_date', 'created_at', 'updated_at']
+			head: ['progress', 'startDate', 'expiryDate', 'createdAt', 'updatedAt'],
+			body: ['progress_field', 'start_date', 'expiry_date', 'created_at', 'updated_at']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,

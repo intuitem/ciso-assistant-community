@@ -1073,7 +1073,7 @@
 													{:else if value === 'YES' || value === 'NO'}
 														{@const bd = booleanDisplay(value === 'YES', key, URLModel)}
 														<span class="ml-4"><i class="{bd.icon} {bd.colorClass}"></i></span>
-													{:else if key === 'progress' || key === 'treatment_progress'}
+													{:else if key === 'progress' || key === 'treatment_progress' || key === 'progress_field'}
 														<span class="ml-9"
 															>{value != null
 																? safeTranslate('percentageDisplay', { number: value })
