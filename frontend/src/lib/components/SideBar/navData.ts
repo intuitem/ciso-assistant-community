@@ -172,7 +172,7 @@ export const navData = {
 				{
 					name: 'documents',
 					fa_icon: 'fa-solid fa-file-lines',
-					href: '/document-containers',
+					href: '/documents',
 					permissions: ['view_documentcontainer']
 				},
 				{

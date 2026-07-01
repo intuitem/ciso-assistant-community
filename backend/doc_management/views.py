@@ -102,6 +102,52 @@ class DocumentContainerViewSet(BaseModelViewSet):
     ]
     serializers_module = "doc_management.serializers"
 
+    @action(detail=False, methods=["get"])
+    def catalog(self, request):
+        """Reading catalog: one entry per container that has at least one
+        published revision, with the latest published revision per locale."""
+        containers = (
+            self.get_queryset()
+            .prefetch_related("documents__revisions", "folder")
+            .distinct()
+        )
+        result = []
+        for c in containers:
+            languages = []
+            for doc in c.documents.all():
+                pub = (
+                    doc.revisions.filter(status=DocumentRevision.Status.PUBLISHED)
+                    .order_by("-version_number")
+                    .first()
+                )
+                if pub:
+                    languages.append(
+                        {
+                            "locale": doc.locale,
+                            "default_locale": doc.default_locale,
+                            "document_id": str(doc.id),
+                            "revision_id": str(pub.id),
+                            "version_number": pub.version_number,
+                            "published_at": pub.published_at,
+                            "has_pdf": bool(pub.pdf_snapshot),
+                        }
+                    )
+            if not languages:
+                continue
+            languages.sort(key=lambda x: (not x["default_locale"], x["locale"]))
+            result.append(
+                {
+                    "id": str(c.id),
+                    "name": c.name,
+                    "document_type": c.document_type,
+                    "folder": {"id": str(c.folder_id), "str": c.folder.name}
+                    if c.folder_id
+                    else None,
+                    "languages": languages,
+                }
+            )
+        return Response(result)
+
 
 class ManagedDocumentViewSet(BaseModelViewSet):
     """

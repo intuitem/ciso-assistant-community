@@ -23,7 +23,9 @@ export const load: PageServerLoad = async (event) => {
 	// Gracefully degrade if doc_management is unavailable
 	let allDocuments: any[] = [];
 	try {
-		const allDocsRes = await fetch(`${BASE_API_URL}/managed-documents/?container__policies=${params.id}`);
+		const allDocsRes = await fetch(
+			`${BASE_API_URL}/managed-documents/?container__policies=${params.id}`
+		);
 		if (allDocsRes.ok) {
 			const allDocsData = await allDocsRes.json();
 			allDocuments = allDocsData.results || [];
