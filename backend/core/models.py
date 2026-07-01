@@ -9204,18 +9204,35 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         )
 
     def set_state(self, state):
-        self.state = state
-        if state == "accepted":
-            self.accepted_at = datetime.now()
-            # iterate over the risk scenarios to set their treatment to accepted
-            for scenario in self.risk_scenarios.all():
-                scenario.treatment = "accept"
-                scenario.save()
-        if state == "rejected":
-            self.rejected_at = datetime.now()
-        elif state == "revoked":
-            self.revoked_at = datetime.now()
-        self.save()
+        # Scenario treatments and the acceptance state must move together, so all
+        # writes are wrapped in a single transaction.
+        with transaction.atomic():
+            self.state = state
+            if state == "accepted":
+                self.accepted_at = datetime.now()
+                # iterate over the risk scenarios to set their treatment to accepted
+                for scenario in self.risk_scenarios.all():
+                    scenario.treatment = "accept"
+                    scenario.save()
+            if state == "rejected":
+                self.rejected_at = datetime.now()
+            elif state == "revoked":
+                self.revoked_at = datetime.now()
+                # revert the treatment set on acceptance, leaving scenarios that have
+                # since moved to another treatment, or are still covered by another
+                # accepted acceptance, untouched
+                for scenario in self.risk_scenarios.all():
+                    if scenario.treatment != "accept":
+                        continue
+                    still_accepted = (
+                        scenario.riskacceptance_set.filter(state="accepted")
+                        .exclude(pk=self.pk)
+                        .exists()
+                    )
+                    if not still_accepted:
+                        scenario.treatment = "open"
+                        scenario.save()
+            self.save()
 
 
 # tasks management

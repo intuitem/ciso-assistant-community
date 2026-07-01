@@ -2,6 +2,7 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { formatActorName } from '$lib/utils/helpers';
 	import { m } from '$paraglide/messages';
 
 	interface Approver {
@@ -85,11 +86,7 @@
 
 	// Get approver display name
 	function getApproverName(approver: ValidationFlow['approver']): string {
-		if (approver === null) return m.undefined();
-		if (approver.first_name || approver.last_name) {
-			return `${approver.first_name || ''} ${approver.last_name || ''}`.trim();
-		}
-		return approver.email;
+		return formatActorName(approver) || m.undefined();
 	}
 </script>
 

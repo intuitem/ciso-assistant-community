@@ -1092,13 +1092,20 @@
 														{:else}
 															--
 														{/if}
-													{:else if URLModel == 'risk-acceptances' && key === 'name' && row.meta?.accepted_at && row.meta?.revoked_at == null}
+													{:else if URLModel == 'risk-acceptances' && key === 'name' && row.meta?.state}
 														<div class="flex items-center space-x-2">
 															<span>{safeTranslate(value ?? '-')}</span>
 															<span
-																class="bg-green-100 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-sm dark:bg-green-200 dark:text-green-900"
+																class="badge text-xs"
+																class:preset-tonal-success={row.meta.state === 'Accepted'}
+																class:preset-tonal-error={row.meta.state === 'Rejected' ||
+																	row.meta.state === 'Revoked'}
+																class:preset-tonal-primary={row.meta.state === 'Submitted'}
+																class:preset-tonal-secondary={row.meta.state === 'Created'}
 															>
-																{m.accept()}
+																{row.meta.state === 'Created'
+																	? m.draft()
+																	: safeTranslate(row.meta.state)}
 															</span>
 														</div>
 													{:else if (key === 'name' || key === 'str') && row.meta?.is_locked}
