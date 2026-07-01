@@ -6,7 +6,29 @@ from rest_framework import serializers
 from core.serializer_fields import FieldsRelatedField
 from core.serializers import BaseModelSerializer
 
-from .models import DocumentRevision, ManagedDocument
+from .models import DocumentContainer, DocumentRevision, ManagedDocument
+
+
+class DocumentContainerReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    policies = FieldsRelatedField(many=True)
+    applied_controls = FieldsRelatedField(many=True)
+    task_templates = FieldsRelatedField(many=True)
+    processings = FieldsRelatedField(many=True)
+    document_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = DocumentContainer
+        fields = "__all__"
+
+    def get_document_count(self, obj):
+        return obj.documents.count()
+
+
+class DocumentContainerWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = DocumentContainer
+        fields = "__all__"
 
 
 class ManagedDocumentWriteSerializer(BaseModelSerializer):
@@ -57,18 +79,52 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
                 else:
                     content = raw
         with transaction.atomic():
+            # Resolve the container that groups this document's locale variants.
+            # Legacy/policy flow: one container per policy. Standalone: a fresh one.
+            container = validated_data.get("container")
+            policy = validated_data.get("policy")
+            if container is None:
+                if policy is not None:
+                    container = (
+                        DocumentContainer.objects.select_for_update()
+                        .filter(policies=policy)
+                        .first()
+                    )
+                    if container is None:
+                        container = DocumentContainer.objects.create(
+                            document_type=validated_data.get(
+                                "document_type",
+                                DocumentContainer.DocumentType.POLICY,
+                            ),
+                            name=validated_data.get("name")
+                            or getattr(policy, "name", ""),
+                            folder=policy.folder,
+                            is_published=policy.is_published,
+                        )
+                        container.policies.add(policy)
+                else:
+                    container = DocumentContainer.objects.create(
+                        document_type=validated_data.get(
+                            "document_type", DocumentContainer.DocumentType.POLICY
+                        ),
+                        name=validated_data.get("name", ""),
+                        is_published=False,
+                        **(
+                            {"folder": validated_data["folder"]}
+                            if validated_data.get("folder")
+                            else {}
+                        ),
+                    )
+                validated_data["container"] = container
+
             # Set default_locale inside the transaction to avoid race conditions
             # where two concurrent creates both see no siblings and both set True
-            policy = validated_data.get("policy")
-            if policy:
-                has_siblings = (
-                    ManagedDocument.objects.select_for_update()
-                    .filter(policy=policy)
-                    .exists()
-                )
-                validated_data.setdefault("default_locale", not has_siblings)
-            else:
-                validated_data.setdefault("default_locale", True)
+            has_siblings = (
+                ManagedDocument.objects.select_for_update()
+                .filter(container=container)
+                .exists()
+            )
+            validated_data.setdefault("default_locale", not has_siblings)
 
             document = super().create(validated_data)
             revision = DocumentRevision.objects.create(
@@ -84,6 +140,7 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
 
 class ManagedDocumentReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
+    container = FieldsRelatedField()
     policy = FieldsRelatedField()
     current_revision = FieldsRelatedField(
         fields=["id", "version_number", "status", "published_at", "author"],

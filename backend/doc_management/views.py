@@ -29,7 +29,13 @@ from core.net_safety import BlockedRequestError, assert_public_url
 from core.views import BaseModelViewSet
 from iam.models import RoleAssignment, Folder
 
-from .models import DocumentAttachment, DocumentEdit, DocumentRevision, ManagedDocument
+from .models import (
+    DocumentAttachment,
+    DocumentContainer,
+    DocumentEdit,
+    DocumentRevision,
+    ManagedDocument,
+)
 
 logger = structlog.get_logger(__name__)
 
@@ -79,13 +85,31 @@ def _safe_url_fetcher(url, timeout=10, ssl_context=None):
     return {"string": content, "mime_type": mime, "redirected_url": final_url}
 
 
+class DocumentContainerViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows document containers (the language-independent
+    identity of a managed document) to be viewed or edited.
+    """
+
+    model = DocumentContainer
+    filterset_fields = [
+        "document_type",
+        "folder",
+        "policies",
+        "applied_controls",
+        "task_templates",
+        "processings",
+    ]
+    serializers_module = "doc_management.serializers"
+
+
 class ManagedDocumentViewSet(BaseModelViewSet):
     """
     API endpoint that allows managed documents to be viewed or edited.
     """
 
     model = ManagedDocument
-    filterset_fields = ["policy", "folder", "document_type", "locale"]
+    filterset_fields = ["container", "policy", "folder", "document_type", "locale"]
     serializers_module = "doc_management.serializers"
 
     @action(detail=False, methods=["get"])

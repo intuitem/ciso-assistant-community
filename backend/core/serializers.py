@@ -1775,7 +1775,6 @@ class AppliedControlMergeRequestSerializer(serializers.Serializer):
     )
     target = AppliedControlMergeTargetSerializer()
     dry_run = serializers.BooleanField(default=False)
-    managed_document_resolution = serializers.DictField(required=False)
 
     def validate_source_ids(self, value):
         seen: set[str] = set()

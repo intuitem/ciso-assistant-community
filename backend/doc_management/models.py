@@ -9,7 +9,15 @@ from core.validators import validate_file_name, validate_file_size
 from iam.models import FolderMixin, User
 
 
-class ManagedDocument(AbstractBaseModel, FolderMixin, I18nObjectMixin):
+class DocumentContainer(AbstractBaseModel, FolderMixin):
+    """Language-independent identity of a managed document.
+
+    Groups its per-locale ``ManagedDocument`` realizations and owns the
+    language-independent facts (type, folder, name) plus the typed object
+    links (Stream E.1). Links are purely associative — they never drive the
+    document's folder or publication state.
+    """
+
     class DocumentType(models.TextChoices):
         POLICY = "policy", _("Policy")
         PROCEDURE = "procedure", _("Procedure")
@@ -25,13 +33,65 @@ class ManagedDocument(AbstractBaseModel, FolderMixin, I18nObjectMixin):
     )
     name = models.CharField(max_length=200, blank=True, verbose_name=_("Name"))
     description = models.TextField(blank=True, verbose_name=_("Description"))
-    # Optional link to a parent policy — future document types may link to other objects
+
+    # Typed object links (Stream E.1). Policy is a proxy of AppliedControl, so the
+    # two M2Ms must use distinct reverse names or Django's E304 check fails (the
+    # proxy inherits the base's reverse accessor). The frontend labels both "Documents".
+    policies = models.ManyToManyField(
+        "core.Policy", blank=True, related_name="documents"
+    )
+    applied_controls = models.ManyToManyField(
+        "core.AppliedControl", blank=True, related_name="control_documents"
+    )
+    task_templates = models.ManyToManyField(
+        "core.TaskTemplate", blank=True, related_name="documents"
+    )
+    processings = models.ManyToManyField(
+        "privacy.Processing", blank=True, related_name="documents"
+    )
+
+    fields_to_check = ["name"]
+
+    class Meta:
+        verbose_name = _("Document container")
+        verbose_name_plural = _("Document containers")
+
+    def __str__(self):
+        return self.name or str(self.id)
+
+
+class ManagedDocument(AbstractBaseModel, FolderMixin, I18nObjectMixin):
+    class DocumentType(models.TextChoices):
+        POLICY = "policy", _("Policy")
+        PROCEDURE = "procedure", _("Procedure")
+        CHARTER = "charter", _("Charter")
+        RECORD = "record", _("Record")
+        OTHER = "other", _("Other")
+
+    container = models.ForeignKey(
+        DocumentContainer,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="documents",
+    )
+    document_type = models.CharField(
+        max_length=20,
+        choices=DocumentType.choices,
+        default=DocumentType.POLICY,
+        verbose_name=_("Document type"),
+    )
+    name = models.CharField(max_length=200, blank=True, verbose_name=_("Name"))
+    description = models.TextField(blank=True, verbose_name=_("Description"))
+    # Legacy anchor — superseded by container + container.policies (dropped in the
+    # Stream A contract migration). Reverse retired so container.policies owns
+    # Policy.documents.
     policy = models.ForeignKey(
         Policy,
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name="documents",
+        related_name="+",
     )
     current_revision = models.ForeignKey(
         "DocumentRevision",
@@ -48,7 +108,11 @@ class ManagedDocument(AbstractBaseModel, FolderMixin, I18nObjectMixin):
         verbose_name_plural = _("Managed documents")
 
     def save(self, *args, **kwargs):
-        if self.policy:
+        if self.container_id:
+            self.folder = self.container.folder
+            self.is_published = self.container.is_published
+        elif self.policy:
+            # Legacy fallback for rows created before the container back-fill.
             self.folder = self.policy.folder
             self.is_published = self.policy.is_published
         super().save(*args, **kwargs)
@@ -57,6 +121,8 @@ class ManagedDocument(AbstractBaseModel, FolderMixin, I18nObjectMixin):
     def display_name(self):
         if self.name:
             return self.name
+        if self.container_id and self.container.name:
+            return self.container.name
         if self.policy:
             return self.policy.name
         return str(self.id)
