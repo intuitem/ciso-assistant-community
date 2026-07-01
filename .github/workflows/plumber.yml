@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  administration: read # read branch-protection settings (branchMustBeProtected check)
   security-events: write
   id-token: write # mint the OIDC token so the score can be published (score-push)
 
