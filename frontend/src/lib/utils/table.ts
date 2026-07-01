@@ -3768,8 +3768,11 @@ export function getListViewFields({
 	};
 }
 
-export const headData = (model: urlModel) =>
-	listViewFields[model].body.reduce((obj, key, index) => {
-		obj[key] = listViewFields[model].head[index];
-		return obj;
-	}, {});
+export const headData = (model: urlModel): Record<string, string> =>
+	listViewFields[model].body.reduce(
+		(obj, key, index) => {
+			obj[key] = listViewFields[model].head[index];
+			return obj;
+		},
+		{} as Record<string, string>
+	);
