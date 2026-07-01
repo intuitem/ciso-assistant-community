@@ -84,6 +84,7 @@ github:
       - azure/*                  # setup-helm
       - losisin/helm-docs-github-action
       - losisin/helm-values-schema-json-action
+      - getplumber/*             # Plumber action (see .github/workflows/plumber.yml)
     workflowMustNotInjectUserInputInScripts:
       enabled: true
     workflowMustNotUseDangerousTriggers:
