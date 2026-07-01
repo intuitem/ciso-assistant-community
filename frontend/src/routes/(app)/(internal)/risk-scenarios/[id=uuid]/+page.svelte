@@ -51,6 +51,7 @@
 		model: model.name,
 		domain: data.scenario.folder.id
 	});
+	const canCreateAcceptance = Object.hasOwn(user?.permissions ?? {}, 'add_riskacceptance');
 	let color_map = $state({});
 	color_map['--'] = '#A9A9A9';
 
@@ -218,7 +219,7 @@
 					</button>
 				{/if}
 			{/if}
-			{#if !data.scenario.risk_assessment?.is_locked}
+			{#if canCreateAcceptance && !data.scenario.risk_assessment?.is_locked}
 				<button
 					class="btn text-white bg-linear-to-r from-orange-500 to-amber-500 h-fit"
 					onclick={() => modalRequestRiskAcceptance()}

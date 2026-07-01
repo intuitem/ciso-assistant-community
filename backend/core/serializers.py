@@ -446,7 +446,8 @@ class RiskAcceptanceWriteSerializer(BaseModelSerializer):
         exclude = ["accepted_at", "rejected_at", "revoked_at", "state"]
 
     def validate(self, data):
-        if data.get("submit") and not data.get("approver"):
+        # `submit` is only honoured on create; don't reject updates that carry it.
+        if not self.instance and data.get("submit") and not data.get("approver"):
             raise serializers.ValidationError(
                 {"approver": "An approver is required to submit for approval."}
             )

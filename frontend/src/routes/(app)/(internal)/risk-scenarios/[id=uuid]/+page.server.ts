@@ -20,7 +20,8 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 		`${BASE_API_URL}/risk-acceptances/?risk_scenarios=${params.id}`
 	)
 		.then((res) => (res.ok ? res.json() : { results: [] }))
-		.then((res) => res.results ?? []);
+		.then((res) => res.results ?? [])
+		.catch(() => []);
 
 	const res = await fetch(baseEndpoint);
 	if (!res.ok) {
