@@ -49,6 +49,7 @@ from .serializers import (
     LogEntrySerializer,
 )
 from .template_registry import EMAIL_TEMPLATE_REGISTRY, WORD_TEMPLATE_REGISTRY
+from .license import effective_expiration
 
 from auditlog.models import LogEntry
 
@@ -251,12 +252,13 @@ class LicenseStatusView(APIView):
             )
 
         now = datetime.now()
+        effective = effective_expiration(expiration_date)
 
-        if expiration_date > now:
-            days_left = (expiration_date - now).days
+        if effective > now:
+            days_left = (effective - now).days
             return Response({"status": "active", "days_left": days_left})
         else:
-            days_expired = (now - expiration_date).days
+            days_expired = (now - effective).days
             return Response({"status": "expired", "days_expired": days_expired})
 
 
