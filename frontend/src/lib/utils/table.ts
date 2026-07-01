@@ -2020,13 +2020,14 @@ export const listViewFields = {
 			'default_criticality'
 		],
 		optionalFields: {
-			head: ['referenceLink', 'createdAt', 'updatedAt'],
-			body: ['reference_link', 'created_at', 'updated_at']
+			head: ['filteringLabels', 'referenceLink', 'createdAt', 'updatedAt'],
+			body: ['filtering_labels', 'reference_link', 'created_at', 'updated_at']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			parent_entity: PARENT_ENTITY_FILTER,
-			relationship: ENTITY_RELATIONSHIP_FILTER
+			relationship: ENTITY_RELATIONSHIP_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'entity-assessments': {
@@ -3767,8 +3768,11 @@ export function getListViewFields({
 	};
 }
 
-export const headData = (model: urlModel) =>
-	listViewFields[model].body.reduce((obj, key, index) => {
-		obj[key] = listViewFields[model].head[index];
-		return obj;
-	}, {});
+export const headData = (model: urlModel): Record<string, string> =>
+	listViewFields[model].body.reduce(
+		(obj, key, index) => {
+			obj[key] = listViewFields[model].head[index];
+			return obj;
+		},
+		{} as Record<string, string>
+	);
