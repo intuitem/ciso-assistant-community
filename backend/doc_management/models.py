@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from core.base_models import AbstractBaseModel
-from core.models import I18nObjectMixin, Policy
+from core.models import I18nObjectMixin
 from core.validators import validate_file_name, validate_file_size
 from iam.models import FolderMixin, User
 
@@ -61,12 +61,8 @@ class DocumentContainer(AbstractBaseModel, FolderMixin):
 
 
 class ManagedDocument(AbstractBaseModel, FolderMixin, I18nObjectMixin):
-    class DocumentType(models.TextChoices):
-        POLICY = "policy", _("Policy")
-        PROCEDURE = "procedure", _("Procedure")
-        CHARTER = "charter", _("Charter")
-        RECORD = "record", _("Record")
-        OTHER = "other", _("Other")
+    """A single-locale realization of a DocumentContainer, owning the versioned
+    content (its DocumentRevision chain) and per-locale lifecycle."""
 
     container = models.ForeignKey(
         DocumentContainer,
@@ -75,24 +71,8 @@ class ManagedDocument(AbstractBaseModel, FolderMixin, I18nObjectMixin):
         blank=True,
         related_name="documents",
     )
-    document_type = models.CharField(
-        max_length=20,
-        choices=DocumentType.choices,
-        default=DocumentType.POLICY,
-        verbose_name=_("Document type"),
-    )
     name = models.CharField(max_length=200, blank=True, verbose_name=_("Name"))
     description = models.TextField(blank=True, verbose_name=_("Description"))
-    # Legacy anchor — superseded by container + container.policies (dropped in the
-    # Stream A contract migration). Reverse retired so container.policies owns
-    # Policy.documents.
-    policy = models.ForeignKey(
-        Policy,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        related_name="+",
-    )
     current_revision = models.ForeignKey(
         "DocumentRevision",
         on_delete=models.SET_NULL,
@@ -101,7 +81,7 @@ class ManagedDocument(AbstractBaseModel, FolderMixin, I18nObjectMixin):
         related_name="+",
     )
     template_used = models.CharField(max_length=200, null=True, blank=True)
-    fields_to_check = ["policy", "locale"]
+    fields_to_check = ["container", "locale"]
 
     class Meta:
         verbose_name = _("Managed document")
@@ -111,10 +91,6 @@ class ManagedDocument(AbstractBaseModel, FolderMixin, I18nObjectMixin):
         if self.container_id:
             self.folder = self.container.folder
             self.is_published = self.container.is_published
-        elif self.policy:
-            # Legacy fallback for rows created before the container back-fill.
-            self.folder = self.policy.folder
-            self.is_published = self.policy.is_published
         super().save(*args, **kwargs)
 
     @property
@@ -123,8 +99,6 @@ class ManagedDocument(AbstractBaseModel, FolderMixin, I18nObjectMixin):
             return self.name
         if self.container_id and self.container.name:
             return self.container.name
-        if self.policy:
-            return self.policy.name
         return str(self.id)
 
     def __str__(self):

@@ -124,7 +124,7 @@ export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
 		}
 		case 'documents-by-locale': {
 			const locale = url.searchParams.get('locale');
-			const docsEndpoint = `${BASE_API_URL}/managed-documents/?policy=${params.id}&locale=${locale}`;
+			const docsEndpoint = `${BASE_API_URL}/managed-documents/?container__policies=${params.id}&locale=${locale}`;
 			const docsRes = await fetch(docsEndpoint);
 			if (!docsRes.ok) {
 				error(docsRes.status as NumericRange<400, 599>, await docsRes.json());

@@ -109,7 +109,13 @@ class ManagedDocumentViewSet(BaseModelViewSet):
     """
 
     model = ManagedDocument
-    filterset_fields = ["container", "policy", "folder", "document_type", "locale"]
+    filterset_fields = [
+        "container",
+        "folder",
+        "locale",
+        "container__policies",
+        "container__document_type",
+    ]
     serializers_module = "doc_management.serializers"
 
     @action(detail=False, methods=["get"])

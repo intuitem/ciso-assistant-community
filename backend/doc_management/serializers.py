@@ -3,6 +3,7 @@ from pathlib import Path
 from django.db import models, transaction
 from rest_framework import serializers
 
+from core.models import Policy
 from core.serializer_fields import FieldsRelatedField
 from core.serializers import BaseModelSerializer
 
@@ -32,6 +33,20 @@ class DocumentContainerWriteSerializer(BaseModelSerializer):
 
 
 class ManagedDocumentWriteSerializer(BaseModelSerializer):
+    # Write-only inputs that resolve/seed the container; not model fields (the
+    # legacy policy/document_type columns were dropped in the Stream A contract).
+    policy = serializers.PrimaryKeyRelatedField(
+        queryset=Policy.objects.all(),
+        required=False,
+        allow_null=True,
+        write_only=True,
+    )
+    document_type = serializers.ChoiceField(
+        choices=DocumentContainer.DocumentType.choices,
+        required=False,
+        write_only=True,
+    )
+
     class Meta:
         model = ManagedDocument
         fields = "__all__"
@@ -60,6 +75,13 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
                 lang = request.user.get_preferences().get("lang", "en")
             validated_data["locale"] = lang
 
+        # Container inputs (write-only, not model fields).
+        policy = validated_data.pop("policy", None)
+        document_type = (
+            validated_data.pop("document_type", None)
+            or DocumentContainer.DocumentType.POLICY
+        )
+
         # Auto-create an initial draft revision atomically with the document
         author = request.user if request else None
         content = ""
@@ -82,7 +104,6 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
             # Resolve the container that groups this document's locale variants.
             # Legacy/policy flow: one container per policy. Standalone: a fresh one.
             container = validated_data.get("container")
-            policy = validated_data.get("policy")
             if container is None:
                 if policy is not None:
                     container = (
@@ -92,10 +113,7 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
                     )
                     if container is None:
                         container = DocumentContainer.objects.create(
-                            document_type=validated_data.get(
-                                "document_type",
-                                DocumentContainer.DocumentType.POLICY,
-                            ),
+                            document_type=document_type,
                             name=validated_data.get("name")
                             or getattr(policy, "name", ""),
                             folder=policy.folder,
@@ -104,9 +122,7 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
                         container.policies.add(policy)
                 else:
                     container = DocumentContainer.objects.create(
-                        document_type=validated_data.get(
-                            "document_type", DocumentContainer.DocumentType.POLICY
-                        ),
+                        document_type=document_type,
                         name=validated_data.get("name", ""),
                         is_published=False,
                         **(
@@ -141,17 +157,20 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
 class ManagedDocumentReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     container = FieldsRelatedField()
-    policy = FieldsRelatedField()
     current_revision = FieldsRelatedField(
         fields=["id", "version_number", "status", "published_at", "author"],
     )
     revision_count = serializers.SerializerMethodField()
     latest_draft = serializers.SerializerMethodField()
     display_name = serializers.CharField(read_only=True)
+    document_type = serializers.SerializerMethodField()
 
     class Meta:
         model = ManagedDocument
         fields = "__all__"
+
+    def get_document_type(self, obj):
+        return obj.container.document_type if obj.container_id else None
 
     def get_revision_count(self, obj):
         return obj.revisions.count()
