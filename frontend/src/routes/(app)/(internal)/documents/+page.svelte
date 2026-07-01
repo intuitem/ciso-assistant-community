@@ -37,9 +37,14 @@
 			<i class="fa-solid fa-book-open text-xl text-primary-500"></i>
 			<h1 class="text-2xl font-bold">{m.documents()}</h1>
 		</div>
-		<a href="/document-containers" class="btn btn-sm variant-soft">
-			<i class="fa-solid fa-table-list mr-2"></i>{m.manage()}
-		</a>
+		<div class="flex items-center gap-2">
+			<a href="/documents/upload" class="btn btn-sm variant-filled-primary">
+				<i class="fa-solid fa-upload mr-2"></i>{m.uploadDocument()}
+			</a>
+			<a href="/document-containers" class="btn btn-sm variant-soft">
+				<i class="fa-solid fa-table-list mr-2"></i>{m.manage()}
+			</a>
+		</div>
 	</header>
 
 	{#if grouped.length === 0}

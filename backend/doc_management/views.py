@@ -6,7 +6,8 @@ from uuid import UUID
 import requests
 import structlog
 import yaml
-from django.db import models
+from django.contrib.auth.models import Permission
+from django.db import models, transaction
 from django.forms import ValidationError as DjangoValidationError
 from django.http import HttpResponse
 from django.template.loader import render_to_string
@@ -26,6 +27,7 @@ import weasyprint
 from weasyprint import HTML
 
 from core.net_safety import BlockedRequestError, assert_public_url
+from core.validators import validate_file_name, validate_file_size
 from core.views import BaseModelViewSet
 from iam.models import RoleAssignment, Folder
 
@@ -36,6 +38,7 @@ from .models import (
     DocumentRevision,
     ManagedDocument,
 )
+from .serializers import DocumentContainerReadSerializer
 
 logger = structlog.get_logger(__name__)
 
@@ -129,7 +132,9 @@ class DocumentContainerViewSet(BaseModelViewSet):
                             "revision_id": str(pub.id),
                             "version_number": pub.version_number,
                             "published_at": pub.published_at,
+                            "source": pub.source,
                             "has_pdf": bool(pub.pdf_snapshot),
+                            "has_file": bool(pub.file),
                         }
                     )
             if not languages:
@@ -147,6 +152,74 @@ class DocumentContainerViewSet(BaseModelViewSet):
                 }
             )
         return Response(result)
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="upload",
+        parser_classes=[MultiPartParser, FormParser],
+    )
+    def upload(self, request):
+        """Create a document from an uploaded file, bypassing the markdown editor.
+        The file is stored as a published 'uploaded' revision so it appears in the
+        reading catalog immediately."""
+        upload = request.data.get("file")
+        if not upload:
+            return Response({"file": "Required."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            validate_file_size(upload)
+            validate_file_name(upload)
+        except DjangoValidationError as e:
+            return Response({"file": e.messages}, status=status.HTTP_400_BAD_REQUEST)
+
+        folder_id = request.data.get("folder")
+        try:
+            folder = Folder.objects.get(id=folder_id)
+        except Folder.DoesNotExist, ValueError:
+            return Response(
+                {"folder": "Required / not found."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_documentcontainer"),
+            folder=folder,
+        ):
+            return Response(
+                {"folder": "You do not have permission to add documents here."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        with transaction.atomic():
+            container = DocumentContainer.objects.create(
+                document_type=request.data.get("document_type")
+                or DocumentContainer.DocumentType.POLICY,
+                name=request.data.get("name") or getattr(upload, "name", ""),
+                folder=folder,
+                is_published=True,
+            )
+            document = ManagedDocument.objects.create(
+                container=container,
+                locale=request.data.get("locale") or "en",
+                default_locale=True,
+            )
+            revision = DocumentRevision.objects.create(
+                document=document,
+                version_number=1,
+                source=DocumentRevision.Source.UPLOADED,
+                file=upload,
+                status=DocumentRevision.Status.PUBLISHED,
+                published_at=timezone.now(),
+                author=request.user if request.user.is_authenticated else None,
+            )
+            document.current_revision = revision
+            document.save()
+        return Response(
+            DocumentContainerReadSerializer(
+                container, context={"request": request}
+            ).data,
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class ManagedDocumentViewSet(BaseModelViewSet):
@@ -353,6 +426,40 @@ class DocumentRevisionViewSet(BaseModelViewSet):
     filterset_fields = ["document", "status"]
     ordering = ["-version_number"]
     serializers_module = "doc_management.serializers"
+
+    @action(detail=True, methods=["get"])
+    def file(self, request, pk=None):
+        """Serve an uploaded revision's file (PDF inline, everything else download)."""
+        try:
+            pk_uuid = UUID(pk)
+        except ValueError, AttributeError:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        object_ids_view = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, DocumentRevision
+        )[0]
+        if pk_uuid not in object_ids_view:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        revision = self.get_object()
+        if not revision.file or not revision.file.storage.exists(revision.file.name):
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        guessed_type = (
+            mimetypes.guess_type(revision.file.name)[0] or "application/octet-stream"
+        )
+        is_pdf = guessed_type == "application/pdf"
+        base = slugify(revision.file.name.split("/")[-1].rsplit(".", 1)[0])
+        ext = revision.file.name.rsplit(".", 1)[-1] if "." in revision.file.name else ""
+        safe_filename = f"{base}.{ext}" if ext else base
+        return HttpResponse(
+            revision.file,
+            content_type="application/pdf" if is_pdf else "application/octet-stream",
+            headers={
+                "Content-Disposition": (
+                    f"{'inline' if is_pdf else 'attachment'}; "
+                    f'filename="{safe_filename}"'
+                )
+            },
+            status=status.HTTP_200_OK,
+        )
 
     def perform_update(self, serializer):
         instance = self.get_object()

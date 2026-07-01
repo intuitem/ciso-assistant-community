@@ -143,6 +143,21 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
         blank=True,
         validators=[validate_file_size, validate_file_name],
     )
+
+    class Source(models.TextChoices):
+        AUTHORED = "authored", _("Authored")
+        UPLOADED = "uploaded", _("Uploaded")
+
+    source = models.CharField(
+        max_length=20, choices=Source.choices, default=Source.AUTHORED
+    )
+    # Source-of-truth file for uploaded revisions (authored revisions render
+    # markdown from `content` instead).
+    file = models.FileField(
+        null=True,
+        blank=True,
+        validators=[validate_file_size, validate_file_name],
+    )
     published_at = models.DateTimeField(null=True, blank=True)
     editing_user = models.ForeignKey(
         User,
@@ -204,6 +219,8 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
     def delete(self, *args, **kwargs):
         if self.pdf_snapshot:
             self.pdf_snapshot.delete(save=False)
+        if self.file:
+            self.file.delete(save=False)
         super().delete(*args, **kwargs)
 
     def __str__(self):

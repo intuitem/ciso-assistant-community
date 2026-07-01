@@ -14,6 +14,12 @@
 	let publishedDocs = $derived(
 		(data.docs ?? []).filter((d: any) => d.current_revision?.status === 'published')
 	);
+
+	let isUploaded = $derived(data.revision?.source === 'uploaded');
+	let fileUrl = $derived(
+		data.revision?.id ? `/documents/${data.container?.id}/read/file?rev=${data.revision.id}` : ''
+	);
+	let isPdf = $derived((data.revision?.file ?? '').toLowerCase().endsWith('.pdf'));
 </script>
 
 <div class="mx-auto max-w-4xl space-y-6 p-4">
@@ -46,7 +52,20 @@
 		{/if}
 	</header>
 
-	{#if data.content}
+	{#if isUploaded && fileUrl}
+		<div class="space-y-4">
+			<a href={fileUrl} target="_blank" rel="noopener" class="btn variant-filled-primary">
+				<i class="fa-solid fa-download mr-2"></i>{m.download()}
+			</a>
+			{#if isPdf}
+				<iframe
+					src={fileUrl}
+					title={data.container?.name}
+					class="h-[70vh] w-full rounded border border-surface-200-800"
+				></iframe>
+			{/if}
+		</div>
+	{:else if data.content}
 		<article class="prose max-w-none dark:prose-invert">
 			<MarkdownRenderer content={data.content} />
 		</article>
