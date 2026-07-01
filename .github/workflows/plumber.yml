@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -20,7 +21,7 @@ jobs:
           persist-credentials: false
       - uses: getplumber/plumber@5302ddc7d9f1c9edb3f617bff04a09be452bcfe2 # v0.3.79
         with:
-          github-token: ${{ secrets.PLUMBER_TOKEN }} # fine-grained PAT with Administration:read (branchMustBeProtected)
+          github-token: ${{ secrets.PLUMBER_TOKEN || github.token }}
           threshold: 85
           # Publish this repo's Plumber Score to score.getplumber.io so the
           # README badge stays live. Only publishes on the default branch;
