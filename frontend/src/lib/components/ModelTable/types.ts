@@ -1,6 +1,6 @@
 export interface TableSource {
-	/** The formatted table heading values. */
-	head: any;
+	/** Field-name → label map (e.g. `{ name: 'name' }`); build with `headData(model)`, not a label array. */
+	head: Record<string, string>;
 	/** The formatted table body values. */
 	body: any;
 	/** The data returned when an interactive row is clicked. */
