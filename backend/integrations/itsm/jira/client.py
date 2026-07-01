@@ -278,46 +278,107 @@ class JiraClient(BaseIntegrationClient):
             )
             return []
 
+    def _legacy_createmeta_supported(self) -> bool:
+        """Whether the single-call ``createmeta`` endpoint is available.
+
+        Jira Server/DC dropped it in 9.0 (still present on Cloud and DC < 9.0).
+        On the unsupported deployments the ``jira`` client raises before making
+        any request, so we branch to the per-issue-type createmeta endpoints.
+        """
+        if getattr(self.jira, "_is_cloud", False):
+            return True
+        return getattr(self.jira, "_version", (0, 0, 0)) < (9, 0, 0)
+
+    def _fetch_field_meta(self, project_key: str, issue_type: str) -> dict[str, dict]:
+        """Return ``{field_id: field_def}`` for a project (+ optional issue type).
+
+        Normalizes both createmeta APIs to the legacy field-definition shape
+        (``name`` / ``schema`` / ``operations`` / ``allowedValues``) so callers
+        stay agnostic to the Jira deployment version.
+        """
+        if self._legacy_createmeta_supported():
+            return self._fetch_field_meta_legacy(project_key, issue_type)
+        return self._fetch_field_meta_v2(project_key, issue_type)
+
+    def _fetch_field_meta_legacy(
+        self, project_key: str, issue_type: str
+    ) -> dict[str, dict]:
+        meta = self.jira.createmeta(
+            projectKeys=project_key,
+            issuetypeNames=issue_type or None,
+            expand="projects.issuetypes.fields",
+        )
+        fields: dict[str, dict] = {}
+        for project in meta.get("projects", []) or []:
+            for it in project.get("issuetypes", []) or []:
+                if issue_type and it.get("name") != issue_type:
+                    continue
+                fields.update(it.get("fields") or {})
+        return fields
+
+    def _fetch_field_meta_v2(
+        self, project_key: str, issue_type: str
+    ) -> dict[str, dict]:
+        # Jira Server/DC >= 9.0: resolve the issue type name to its id, then
+        # pull that issue type's fields from the per-issue-type createmeta
+        # endpoints (createmeta/{project}/issuetypes[/{id}]). ``maxResults=False``
+        # tells the client to page through every result rather than the first 50.
+        fields: dict[str, dict] = {}
+        issue_types = self.jira.project_issue_types(project_key, maxResults=False)
+        for it in issue_types or []:
+            it_id = getattr(it, "id", None)
+            if not it_id:
+                continue
+            if issue_type and getattr(it, "name", None) != issue_type:
+                continue
+            for field in (
+                self.jira.project_issue_fields(project_key, it_id, maxResults=False)
+                or []
+            ):
+                raw = getattr(field, "raw", None) or {}
+                field_id = raw.get("fieldId")
+                if not field_id:
+                    continue
+                fields[field_id] = {
+                    "name": raw.get("name"),
+                    "schema": raw.get("schema", {}),
+                    "operations": raw.get("operations"),
+                    "allowedValues": raw.get("allowedValues"),
+                }
+        return fields
+
     def get_table_columns(self, table_name: str) -> list[dict]:
         """Return the fields available for a given project+issue type."""
         project_key, issue_type = self._parse_table_name(table_name)
         if not project_key:
             return []
 
-        columns: dict[str, dict] = {}
         try:
-            meta = self.jira.createmeta(
-                projectKeys=project_key,
-                issuetypeNames=issue_type or None,
-                expand="projects.issuetypes.fields",
-            )
+            field_meta = self._fetch_field_meta(project_key, issue_type)
         except Exception:
             # Let the orchestrator's RPC view surface this as a real error
             # (502 with detail) instead of silently returning only the
-            # synthetic status row — which the UI used to render as a
+            # synthetic status row, which the UI used to render as a
             # "1-row mapper" with no signal that the underlying API call
-            # had failed (expired token, missing scope, etc.).
+            # had failed (expired token, missing scope, unsupported version).
             logger.warning(
-                "Failed to fetch createmeta for project",
+                "Failed to fetch field metadata for project",
                 project_key=project_key,
                 issue_type=issue_type,
                 exc_info=True,
             )
             raise
 
-        for project in meta.get("projects", []) or []:
-            for it in project.get("issuetypes", []) or []:
-                if issue_type and it.get("name") != issue_type:
-                    continue
-                for field_id, field_def in (it.get("fields") or {}).items():
-                    label = field_def.get("name") or field_id
-                    schema = field_def.get("schema", {}) or {}
-                    columns[field_id] = {
-                        "name": field_id,
-                        "label": label,
-                        "type": schema.get("type"),
-                        "readonly": not field_def.get("operations"),
-                    }
+        columns: dict[str, dict] = {}
+        for field_id, field_def in field_meta.items():
+            label = field_def.get("name") or field_id
+            schema = field_def.get("schema", {}) or {}
+            columns[field_id] = {
+                "name": field_id,
+                "label": label,
+                "type": schema.get("type"),
+                "readonly": not field_def.get("operations"),
+            }
 
         # Status is workflow-driven and never appears in createmeta; surface it
         # so users can map CISO Assistant ``status`` to Jira's status field.
@@ -403,14 +464,10 @@ class JiraClient(BaseIntegrationClient):
         self, project_key: str, issue_type: str, field_name: str
     ) -> list[dict]:
         try:
-            meta = self.jira.createmeta(
-                projectKeys=project_key,
-                issuetypeNames=issue_type or None,
-                expand="projects.issuetypes.fields",
-            )
+            field_meta = self._fetch_field_meta(project_key, issue_type)
         except Exception:
             logger.warning(
-                "Failed to fetch createmeta for choices",
+                "Failed to fetch field metadata for choices",
                 project_key=project_key,
                 issue_type=issue_type,
                 field_name=field_name,
@@ -418,20 +475,15 @@ class JiraClient(BaseIntegrationClient):
             )
             return []
 
-        for project in meta.get("projects", []) or []:
-            for it in project.get("issuetypes", []) or []:
-                if issue_type and it.get("name") != issue_type:
-                    continue
-                field_def = (it.get("fields") or {}).get(field_name)
-                if not field_def:
-                    continue
-                allowed = field_def.get("allowedValues") or []
-                results = []
-                for entry in allowed:
-                    value = entry.get("value") or entry.get("name") or entry.get("id")
-                    label = entry.get("name") or entry.get("value") or value
-                    if value is None:
-                        continue
-                    results.append({"value": value, "label": label})
-                return results
-        return []
+        field_def = field_meta.get(field_name)
+        if not field_def:
+            return []
+
+        results = []
+        for entry in field_def.get("allowedValues") or []:
+            value = entry.get("value") or entry.get("name") or entry.get("id")
+            label = entry.get("name") or entry.get("value") or value
+            if value is None:
+                continue
+            results.append({"value": value, "label": label})
+        return results
