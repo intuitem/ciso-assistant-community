@@ -1942,9 +1942,13 @@ export const listViewFields = {
 		head: ['versionNumber', 'status', 'author', 'changeSummary', 'createdAt'],
 		body: ['version_number', 'status_display', 'author', 'change_summary', 'created_at']
 	},
+	'document-containers': {
+		head: ['name', 'documentType', 'domain'],
+		body: ['name', 'document_type', 'folder']
+	},
 	'managed-documents': {
-		head: ['name', 'documentType', 'policy', 'locale', 'domain'],
-		body: ['name', 'document_type', 'policy', 'locale', 'folder']
+		head: ['name', 'documentType', 'locale', 'domain'],
+		body: ['name', 'document_type', 'locale', 'folder']
 	},
 	requirements: {
 		head: ['ref_id', 'name', 'description', 'framework'],

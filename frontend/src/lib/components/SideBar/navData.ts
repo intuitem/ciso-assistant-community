@@ -170,6 +170,12 @@ export const navData = {
 					href: '/applied-controls'
 				},
 				{
+					name: 'documents',
+					fa_icon: 'fa-solid fa-file-lines',
+					href: '/document-containers',
+					permissions: ['view_documentcontainer']
+				},
+				{
 					name: 'calendar',
 					fa_icon: 'fa-solid fa-calendar-days',
 					href: '/calendar',

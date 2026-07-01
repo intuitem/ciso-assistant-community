@@ -153,7 +153,8 @@ export const URL_MODEL = [
 	'dashboard-widgets',
 	'dashboard-text-widgets',
 	'dashboard-builtin-widgets',
-	// policy documents
+	// document management
+	'document-containers',
 	'managed-documents',
 	'document-revisions',
 	// presets/journeys

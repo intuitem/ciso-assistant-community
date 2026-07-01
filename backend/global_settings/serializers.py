@@ -409,6 +409,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     policy_documents = serializers.BooleanField(
         source="value.policy_documents", required=False, default=True
     )
+    document_management = serializers.BooleanField(
+        source="value.document_management", required=False, default=True
+    )
     security_advisories = serializers.BooleanField(
         source="value.security_advisories", required=False, default=True
     )

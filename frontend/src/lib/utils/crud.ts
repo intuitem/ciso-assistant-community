@@ -981,6 +981,33 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'task_node', urlModel: 'task-nodes' }
 		]
 	},
+	'document-containers': {
+		name: 'documentcontainer',
+		localName: 'documentContainer',
+		localNamePlural: 'documentContainers',
+		verboseName: 'Document',
+		verboseNamePlural: 'Documents',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'policies', urlModel: 'policies' },
+			{ field: 'applied_controls', urlModel: 'applied-controls' },
+			{ field: 'task_templates', urlModel: 'task-templates' },
+			{ field: 'processings', urlModel: 'processings' }
+		],
+		reverseForeignKeyFields: [{ field: 'container', urlModel: 'managed-documents' }],
+		selectFields: [{ field: 'document_type' }],
+		detailViewFields: [
+			{ field: 'name' },
+			{ field: 'document_type' },
+			{ field: 'folder' },
+			{ field: 'policies' },
+			{ field: 'applied_controls' },
+			{ field: 'task_templates' },
+			{ field: 'processings' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		]
+	},
 	'managed-documents': {
 		name: 'manageddocument',
 		localName: 'managedDocument',
