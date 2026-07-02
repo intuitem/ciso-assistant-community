@@ -3,6 +3,8 @@
 	import { onMount, onDestroy } from 'svelte';
 	import DiffViewer from '$lib/components/PolicyEditor/DiffViewer.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import DocumentReferencesPanel from './DocumentReferencesPanel.svelte';
+	import DocumentLinkModal from './DocumentLinkModal.svelte';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import {
 		getModalStore,
@@ -105,6 +107,29 @@
 	async function proxyGet(params: Record<string, string>) {
 		const qs = new URLSearchParams(params).toString();
 		return fetch(`${proxyUrl}?${qs}`);
+	}
+
+	// --- Document references (E.2) --------------------------------------------
+	let refs = $state<{ references: any[]; referenced_by: any[] }>({
+		references: [],
+		referenced_by: []
+	});
+	let showDocPicker = $state(false);
+
+	function containerId(): string | null {
+		return document?.container?.id ?? (createParentField === 'container' ? parent.id : null);
+	}
+
+	async function loadRefs() {
+		const cid = containerId();
+		if (!cid) return;
+		const res = await proxyGet({ _action: 'references', container_id: cid });
+		if (res.ok) refs = await res.json();
+	}
+
+	function onDocLinkInsert(c: { id: string; name: string }) {
+		insertAtCursor(`[${c.name}](document:${c.id})`);
+		showDocPicker = false;
 	}
 
 	async function createDocument(templateId: string | null, locale?: string) {
@@ -229,6 +254,7 @@
 				lastLoadedAt = currentRevision.updated_at || '';
 				saved = true;
 				saveTimeout = setTimeout(() => (saved = false), 3000);
+				loadRefs();
 				return true;
 			} else {
 				const errData = await res.json().catch(() => null);
@@ -541,6 +567,7 @@
 			});
 		}
 		window.addEventListener('beforeunload', releaseLock);
+		loadRefs();
 	});
 
 	onDestroy(() => {
@@ -1173,6 +1200,13 @@
 								bind:this={fileInputEl}
 								onchange={handleFileInput}
 							/>
+							<button
+								class="btn btn-sm preset-tonal-surface px-2"
+								onclick={() => (showDocPicker = true)}
+								title={m.linkToDocument()}
+							>
+								<i class="fa-solid fa-file-circle-plus text-xs"></i>
+							</button>
 						</div>
 					{/if}
 
@@ -1495,5 +1529,13 @@
 				</div>
 			{/if}
 		</div>
+	{/if}
+
+	<div class="mt-4">
+		<DocumentReferencesPanel {refs} />
+	</div>
+
+	{#if showDocPicker}
+		<DocumentLinkModal onInsert={onDocLinkInsert} onClose={() => (showDocPicker = false)} />
 	{/if}
 </div>

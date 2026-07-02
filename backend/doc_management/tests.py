@@ -94,3 +94,32 @@ class TestContainerGrouping:
             folder=str(folder.id), locale="en", template_used="my_tmpl", name="D"
         )
         assert doc.revisions.first().content == "# Hello from template"
+
+    def test_references_computed_from_content_links(self):
+        from doc_management.models import DocumentReference
+
+        folder = Folder.objects.create(
+            name="DR", parent_folder=Folder.get_root_folder()
+        )
+        target = self._create(folder=str(folder.id), locale="en", name="Target")
+        source = self._create(folder=str(folder.id), locale="en", name="Source")
+
+        rev = source.revisions.first()
+        rev.content = f"See [Target](document:{target.container_id}) for details."
+        rev.save()
+
+        assert DocumentReference.objects.filter(
+            source_container=source.container, target_container=target.container
+        ).exists()
+        # self-links and dangling ids are dropped
+        rev.content += " and [self](document:%s)" % source.container_id
+        rev.save()
+        assert not DocumentReference.objects.filter(
+            source_container=source.container, target_container=source.container
+        ).exists()
+        # removing the link drops the edge
+        rev.content = "no links here"
+        rev.save()
+        assert not DocumentReference.objects.filter(
+            source_container=source.container
+        ).exists()

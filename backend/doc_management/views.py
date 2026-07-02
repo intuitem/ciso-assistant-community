@@ -123,6 +123,7 @@ class DocumentContainerViewSet(BaseModelViewSet):
 
     model = DocumentContainer
     filterset_class = DocumentContainerFilter
+    search_fields = ["name"]
     serializers_module = "doc_management.serializers"
 
     @action(detail=False, name="Get document type choices")
@@ -142,6 +143,21 @@ class DocumentContainerViewSet(BaseModelViewSet):
                 for v, label in DocumentRevision.Status.choices
             ]
         )
+
+    @action(detail=True, methods=["get"])
+    def references(self, request, pk=None):
+        """Computed doc-to-doc references for a container: outgoing (this links
+        to) and incoming (linked from)."""
+        container = self.get_object()
+        outgoing = [
+            {"id": str(r.target_container_id), "str": r.target_container.name}
+            for r in container.outgoing_references.select_related("target_container")
+        ]
+        incoming = [
+            {"id": str(r.source_container_id), "str": r.source_container.name}
+            for r in container.incoming_references.select_related("source_container")
+        ]
+        return Response({"references": outgoing, "referenced_by": incoming})
 
     @action(detail=False, methods=["get"])
     def catalog(self, request):

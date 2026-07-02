@@ -137,6 +137,14 @@ export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
 	let endpoint: string;
 
 	switch (action) {
+		case 'references': {
+			const containerId = url.searchParams.get('container_id');
+			const refRes = await fetch(`${BASE_API_URL}/document-containers/${containerId}/references/`);
+			if (!refRes.ok) {
+				error(refRes.status as NumericRange<400, 599>, await refRes.json());
+			}
+			return json(await refRes.json());
+		}
 		case 'templates': {
 			const lang = url.searchParams.get('lang') || '';
 			const templatesEndpoint = `${BASE_API_URL}/managed-documents/templates/${lang ? `?lang=${lang}` : ''}`;

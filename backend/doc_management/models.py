@@ -1,3 +1,5 @@
+import re
+
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils import timezone
@@ -185,6 +187,9 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
             if existing.exists():
                 raise ValidationError("Only one draft revision allowed per document.")
         super().save(*args, **kwargs)
+        # Keep the computed doc-to-doc references in sync with the content.
+        if self.document.container_id:
+            recompute_references(self.document.container)
 
     def validate(self, reviewer=None):
         """Validate this revision: mark as approved, pending publication."""
@@ -332,3 +337,81 @@ class DocumentTemplate(AbstractBaseModel, FolderMixin, I18nObjectMixin):
 
     def __str__(self):
         return f"{self.name} ({self.locale})"
+
+
+# --- Document-to-document references (computed from content hyperlinks) --------
+
+# Canonical internal link scheme authored in markdown: [Label](document:<uuid>)
+DOCUMENT_LINK_RE = re.compile(
+    r"document:([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-"
+    r"[0-9a-fA-F]{4}-[0-9a-fA-F]{12})"
+)
+
+
+def parse_document_links(content: str) -> set[str]:
+    """Extract referenced container ids from markdown content."""
+    return set(DOCUMENT_LINK_RE.findall(content or ""))
+
+
+class DocumentReference(AbstractBaseModel):
+    """A directed edge between two DocumentContainers, derived from the content's
+    `document:<id>` hyperlinks. System-maintained (never user-edited)."""
+
+    source_container = models.ForeignKey(
+        "DocumentContainer",
+        on_delete=models.CASCADE,
+        related_name="outgoing_references",
+    )
+    target_container = models.ForeignKey(
+        "DocumentContainer",
+        on_delete=models.CASCADE,
+        related_name="incoming_references",
+    )
+    fields_to_check = []
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["source_container", "target_container"],
+                name="unique_document_reference",
+            )
+        ]
+        verbose_name = _("Document reference")
+        verbose_name_plural = _("Document references")
+
+    def __str__(self):
+        return f"{self.source_container_id} -> {self.target_container_id}"
+
+
+def recompute_references(container) -> None:
+    """Rebuild `container`'s outgoing references from the current content of its
+    per-locale documents. Drops self-links and dangling ids. Idempotent."""
+    target_ids: set[str] = set()
+    for doc in container.documents.all():
+        rev = doc.revisions.first()  # latest by version_number (Meta ordering)
+        if rev and rev.content:
+            target_ids |= parse_document_links(rev.content)
+    target_ids.discard(str(container.id))
+    valid = set(
+        str(i)
+        for i in DocumentContainer.objects.filter(id__in=target_ids).values_list(
+            "id", flat=True
+        )
+    )
+    with transaction.atomic():
+        DocumentReference.objects.filter(source_container=container).exclude(
+            target_container_id__in=valid
+        ).delete()
+        existing = set(
+            str(t)
+            for t in DocumentReference.objects.filter(
+                source_container=container
+            ).values_list("target_container_id", flat=True)
+        )
+        DocumentReference.objects.bulk_create(
+            [
+                DocumentReference(source_container=container, target_container_id=t)
+                for t in (valid - existing)
+            ],
+            ignore_conflicts=True,
+        )

@@ -2,6 +2,7 @@
 	import { m } from '$paraglide/messages';
 	import { LOCALE_MAP } from '$lib/utils/locales';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import DocumentReferencesPanel from '$lib/components/DocumentEditor/DocumentReferencesPanel.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -72,4 +73,6 @@
 	{:else}
 		<p class="text-surface-500">{m.noPublishedDocuments()}</p>
 	{/if}
+
+	<DocumentReferencesPanel refs={data.refs} />
 </div>

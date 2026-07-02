@@ -31,5 +31,8 @@ export const load: PageServerLoad = async ({ fetch, params, url, locals }) => {
 		}
 	}
 
-	return { container, docs, selected, content, revision };
+	const refsRes = await fetch(`${BASE_API_URL}/document-containers/${params.id}/references/`);
+	const refs = refsRes.ok ? await refsRes.json() : { references: [], referenced_by: [] };
+
+	return { container, docs, selected, content, revision, refs };
 };

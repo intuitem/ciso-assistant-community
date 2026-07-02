@@ -66,7 +66,13 @@
 	function processContent(content: string | null | undefined): string {
 		if (!content || content.trim() === '') return '';
 
-		let html = marked(content) as string;
+		// Resolve canonical document links [label](document:<uuid>) to the reader.
+		const src = content.replace(
+			/\]\(document:([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\)/g,
+			'](/documents/$1/read)'
+		);
+
+		let html = marked(src) as string;
 
 		// Temporarily give internal image URLs an https scheme so they survive
 		// sanitize-html's allowedSchemes check, then strip the fake origin after.

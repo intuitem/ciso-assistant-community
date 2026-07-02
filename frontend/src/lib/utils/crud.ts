@@ -418,6 +418,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [
 			{
 				field: 'applied_controls',
+				urlModel: 'document-containers'
+			},
+			{
+				field: 'applied_controls',
 				urlModel: 'evidences',
 				addExisting: {
 					parentField: 'evidences'
@@ -502,6 +506,12 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'owner', urlModel: 'actors' }
+		],
+		reverseForeignKeyFields: [
+			{
+				field: 'policies',
+				urlModel: 'document-containers'
+			}
 		],
 		detailViewFields: [
 			{ field: 'folder' },
@@ -1543,6 +1553,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		reverseForeignKeyFields: [
 			{
+				field: 'processings',
+				urlModel: 'document-containers'
+			},
+			{
 				field: 'processing',
 				urlModel: 'personal-data',
 				batchCreate: {
@@ -2317,6 +2331,10 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		reverseForeignKeyFields: [
+			{
+				field: 'task_templates',
+				urlModel: 'document-containers'
+			},
 			{
 				field: 'task_template',
 				urlModel: 'task-nodes',
