@@ -19,10 +19,12 @@ When Force SSO Login is enabled, local password authentication is disabled for e
 
 To keep a few accounts able to log in locally (typically break-glass administrators, or a service account used while the identity provider is being set up), enable the per-user **Keep local login** flag on their user record. These accounts continue to work through the standard password form even while SSO is forced.
 
-Some accounts are exempt automatically and always keep local login:
+Some accounts get **Keep local login** enabled by default when they are created:
 
-* **Superusers**, so an administrator can never be locked out.
+* **Superusers** created with `createsuperuser` (or at first boot), so the initial administrator is not locked out.
 * **Third-party users** (portal / TPRM accounts).
+
+Note that this is only a default on the flag, not a permanent exemption: a regular user promoted to superuser afterwards does not get it automatically, and unticking **Keep local login** on any of these accounts removes their local access like anyone else.
 
 SCIM-provisioned users, by contrast, are SSO-only by design.
 
