@@ -702,9 +702,8 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
     @action(detail=False, methods=["get"], name="Export TPRM ecosystem")
     def export_ecosystem(self, request):
         """
-        Export the TPRM ecosystem as a multi-sheet Excel file with three sheets
-        (Entities, Solutions, Contracts) using the same column layout as the
-        data-wizard import
+        Export the TPRM ecosystem as a multi-sheet Excel file with 4 sheets
+        (Entities, Solutions, Contracts, Representatives).
         """
         import pandas as pd  # imported lazily: optional/heavy dependency
 
@@ -722,9 +721,9 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
         )
 
         # Honor the filters/search applied on the entities list page so the
-        # exported "Entities" sheet matches what the user is viewing. The
-        # Solutions/Contracts sheets stay on the full IAM-scoped set since
-        # entity-level filters don't translate to those models.
+        # exported "Entities" sheet matches what the user is viewing.
+        # Solutions/Contracts/Representatives stay on the IAM-scoped set, with
+        # Representatives further limited to the exported entities.
         entities = self.filter_queryset(
             Entity.objects.filter(id__in=viewable_entity_ids).select_related(
                 "folder", "parent_entity"
