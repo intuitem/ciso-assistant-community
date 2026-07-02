@@ -3350,7 +3350,7 @@ class LoadFileView(APIView):
             total_failed = (
                 overall_results["entities"]["failed"]
                 + overall_results["solutions"]["failed"]
-                + overall_results["contracts"]["successful"]
+                + overall_results["contracts"]["failed"]
                 + overall_results["representatives"]["failed"]
             )
 
