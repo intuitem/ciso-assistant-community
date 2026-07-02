@@ -19,7 +19,9 @@ class DocumentContainerReadSerializer(BaseModelSerializer):
     applied_controls = FieldsRelatedField(many=True)
     task_templates = FieldsRelatedField(many=True)
     processings = FieldsRelatedField(many=True)
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     document_count = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = DocumentContainer
@@ -28,10 +30,32 @@ class DocumentContainerReadSerializer(BaseModelSerializer):
     def get_document_count(self, obj):
         return obj.documents.count()
 
+    def get_status(self, obj):
+        """Workflow state of the container, taken from the default-locale
+        document's current revision (falls back to any document)."""
+        doc = obj.documents.filter(default_locale=True).first() or obj.documents.first()
+        if doc and doc.current_revision_id:
+            return doc.current_revision.status
+        return None
+
 
 class DocumentContainerWriteSerializer(BaseModelSerializer):
     class Meta:
         model = DocumentContainer
+        fields = "__all__"
+
+
+class DocumentTemplateReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = DocumentTemplate
+        fields = "__all__"
+
+
+class DocumentTemplateWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = DocumentTemplate
         fields = "__all__"
 
 

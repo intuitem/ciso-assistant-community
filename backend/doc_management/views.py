@@ -24,9 +24,11 @@ from rest_framework.response import Response
 import weasyprint
 from weasyprint import HTML
 
+import django_filters as df
+
 from core.net_safety import BlockedRequestError, assert_public_url
 from core.validators import validate_file_name, validate_file_size
-from core.views import BaseModelViewSet
+from core.views import BaseModelViewSet, GenericFilterSet
 from iam.models import RoleAssignment, Folder
 
 from .models import (
@@ -37,6 +39,16 @@ from .models import (
     DocumentTemplate,
     ManagedDocument,
 )
+
+
+class DocumentTemplateViewSet(BaseModelViewSet):
+    """CRUD for reusable document content templates (built-in + custom)."""
+
+    model = DocumentTemplate
+    filterset_fields = ["document_type", "folder", "locale", "builtin", "ref_id"]
+    serializers_module = "doc_management.serializers"
+
+
 from .serializers import DocumentContainerReadSerializer
 
 logger = structlog.get_logger(__name__)
@@ -75,6 +87,34 @@ def _safe_url_fetcher(url, timeout=10, ssl_context=None):
     return {"string": content, "mime_type": mime, "redirected_url": final_url}
 
 
+class DocumentContainerFilter(GenericFilterSet):
+    # Container status = its default-locale document's current-revision status
+    # (matches the `status` shown in the read serializer / table).
+    status = df.MultipleChoiceFilter(
+        choices=DocumentRevision.Status.choices, method="filter_status"
+    )
+
+    class Meta:
+        model = DocumentContainer
+        fields = [
+            "document_type",
+            "folder",
+            "filtering_labels",
+            "policies",
+            "applied_controls",
+            "task_templates",
+            "processings",
+        ]
+
+    def filter_status(self, queryset, name, value):
+        if not value:
+            return queryset
+        return queryset.filter(
+            documents__default_locale=True,
+            documents__current_revision__status__in=value,
+        ).distinct()
+
+
 class DocumentContainerViewSet(BaseModelViewSet):
     """
     API endpoint that allows document containers (the language-independent
@@ -82,15 +122,26 @@ class DocumentContainerViewSet(BaseModelViewSet):
     """
 
     model = DocumentContainer
-    filterset_fields = [
-        "document_type",
-        "folder",
-        "policies",
-        "applied_controls",
-        "task_templates",
-        "processings",
-    ]
+    filterset_class = DocumentContainerFilter
     serializers_module = "doc_management.serializers"
+
+    @action(detail=False, name="Get document type choices")
+    def document_type(self, request):
+        return Response(
+            [
+                {"value": v, "label": str(label)}
+                for v, label in DocumentContainer.DocumentType.choices
+            ]
+        )
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(
+            [
+                {"value": v, "label": str(label)}
+                for v, label in DocumentRevision.Status.choices
+            ]
+        )
 
     @action(detail=False, methods=["get"])
     def catalog(self, request):
@@ -183,20 +234,21 @@ class DocumentContainerViewSet(BaseModelViewSet):
                 or DocumentContainer.DocumentType.POLICY,
                 name=request.data.get("name") or getattr(upload, "name", ""),
                 folder=folder,
-                is_published=True,
+                is_published=False,
             )
             document = ManagedDocument.objects.create(
                 container=container,
                 locale=request.data.get("locale") or "en",
                 default_locale=True,
             )
+            # Starts as a draft — goes through the same review/publish lifecycle
+            # as authored documents.
             revision = DocumentRevision.objects.create(
                 document=document,
                 version_number=1,
                 source=DocumentRevision.Source.UPLOADED,
                 file=upload,
-                status=DocumentRevision.Status.PUBLISHED,
-                published_at=timezone.now(),
+                status=DocumentRevision.Status.DRAFT,
                 author=request.user if request.user.is_authenticated else None,
             )
             document.current_revision = revision
@@ -337,6 +389,64 @@ class ManagedDocumentViewSet(BaseModelViewSet):
                 author=request.user,
                 status=DocumentRevision.Status.DRAFT,
             )
+        return Response(
+            {
+                "id": str(revision.id),
+                "version_number": revision.version_number,
+                "status": revision.status,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="upload-revision",
+        parser_classes=[MultiPartParser, FormParser],
+    )
+    def upload_revision(self, request, pk=None):
+        """Upload a file as a new draft revision — or replace the current draft's
+        file. Uploaded revisions follow the same review/publish lifecycle."""
+        document = self.get_object()
+        upload = request.data.get("file")
+        if not upload:
+            return Response({"file": "Required."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            validate_file_size(upload)
+            validate_file_name(upload)
+        except DjangoValidationError as e:
+            return Response({"file": e.messages}, status=status.HTTP_400_BAD_REQUEST)
+
+        with transaction.atomic():
+            revisions_qs = DocumentRevision.objects.select_for_update().filter(
+                document=document
+            )
+            draft = revisions_qs.filter(status=DocumentRevision.Status.DRAFT).first()
+            if draft:
+                if draft.file:
+                    draft.file.delete(save=False)
+                draft.source = DocumentRevision.Source.UPLOADED
+                draft.content = ""
+                draft.file = upload
+                draft.save()
+                revision = draft
+            else:
+                max_version = (
+                    revisions_qs.aggregate(models.Max("version_number"))[
+                        "version_number__max"
+                    ]
+                    or 0
+                )
+                revision = DocumentRevision.objects.create(
+                    document=document,
+                    version_number=max_version + 1,
+                    source=DocumentRevision.Source.UPLOADED,
+                    file=upload,
+                    status=DocumentRevision.Status.DRAFT,
+                    author=request.user,
+                )
+            document.current_revision = revision
+            document.save()
         return Response(
             {
                 "id": str(revision.id),
@@ -653,11 +763,12 @@ class DocumentRevisionViewSet(BaseModelViewSet):
             )
         revision.publish()
 
-        # Generate PDF snapshot
-        try:
-            self._generate_pdf_snapshot(revision, request.user)
-        except Exception as e:
-            logger.warning("Failed to generate PDF snapshot", error=str(e))
+        # Uploaded revisions ARE the artifact (a file) — no markdown to snapshot.
+        if revision.source == DocumentRevision.Source.AUTHORED:
+            try:
+                self._generate_pdf_snapshot(revision, request.user)
+            except Exception as e:
+                logger.warning("Failed to generate PDF snapshot", error=e)
 
         return Response({"status": "published"})
 

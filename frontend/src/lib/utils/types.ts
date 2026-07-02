@@ -155,6 +155,7 @@ export const URL_MODEL = [
 	'dashboard-builtin-widgets',
 	// document management
 	'document-containers',
+	'document-templates',
 	'managed-documents',
 	'document-revisions',
 	// presets/journeys

@@ -4,12 +4,12 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from core.base_models import AbstractBaseModel
-from core.models import I18nObjectMixin
+from core.models import FilteringLabelMixin, I18nObjectMixin
 from core.validators import validate_file_name, validate_file_size
 from iam.models import FolderMixin, User
 
 
-class DocumentContainer(AbstractBaseModel, FolderMixin):
+class DocumentContainer(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
     """Language-independent identity of a managed document.
 
     Groups its per-locale ``ManagedDocument`` realizations and owns the
@@ -23,6 +23,7 @@ class DocumentContainer(AbstractBaseModel, FolderMixin):
         PROCEDURE = "procedure", _("Procedure")
         CHARTER = "charter", _("Charter")
         RECORD = "record", _("Record")
+        MEETING_MINUTES = "meeting_minutes", _("Meeting minutes")
         OTHER = "other", _("Other")
 
     document_type = models.CharField(

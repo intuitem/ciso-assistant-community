@@ -37,6 +37,8 @@ export const actions: Actions = {
 		if (!res.ok) {
 			return fail(res.status, { error: await res.text() });
 		}
-		redirect(303, '/documents');
+		const container = await res.json();
+		// Uploaded docs start as a draft — open the editor to review/publish.
+		redirect(303, `/document-containers/${container.id}/document`);
 	}
 };

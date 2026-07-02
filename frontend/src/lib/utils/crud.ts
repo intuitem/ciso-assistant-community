@@ -992,7 +992,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'policies', urlModel: 'policies' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'task_templates', urlModel: 'task-templates' },
-			{ field: 'processings', urlModel: 'processings' }
+			{ field: 'processings', urlModel: 'processings' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		reverseForeignKeyFields: [{ field: 'container', urlModel: 'managed-documents' }],
 		selectFields: [{ field: 'document_type' }],
@@ -1004,6 +1005,28 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'applied_controls' },
 			{ field: 'task_templates' },
 			{ field: 'processings' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		]
+	},
+	'document-templates': {
+		name: 'documenttemplate',
+		localName: 'documentTemplate',
+		localNamePlural: 'documentTemplates',
+		verboseName: 'Document template',
+		verboseNamePlural: 'Document templates',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+		],
+		selectFields: [{ field: 'document_type' }],
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'document_type' },
+			{ field: 'locale' },
+			{ field: 'category' },
+			{ field: 'folder' },
+			{ field: 'builtin' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' }
 		]

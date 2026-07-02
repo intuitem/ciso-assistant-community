@@ -26,6 +26,8 @@
 	"korean": "Coréen",
 	"estonian": "Estonien",
 	"addThreat": "Ajouter une menace",
+	"addDocumentContainer": "Nouveau document",
+	"meetingMinutes": "Compte rendu",
 	"addVulnerability": "Ajouter une vulnérabilité",
 	"addReferenceControl": "Ajouter une mesure de référence",
 	"addAppliedControl": "Ajouter une mesure appliquée",

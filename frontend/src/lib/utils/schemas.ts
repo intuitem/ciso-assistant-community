@@ -1841,7 +1841,19 @@ export const DocumentContainerSchema = z.object({
 	policies: z.array(z.string().uuid()).optional().default([]),
 	applied_controls: z.array(z.string().uuid()).optional().default([]),
 	task_templates: z.array(z.string().uuid()).optional().default([]),
-	processings: z.array(z.string().uuid()).optional().default([])
+	processings: z.array(z.string().uuid()).optional().default([]),
+	filtering_labels: z.array(z.string().optional()).optional().default([])
+});
+
+export const DocumentTemplateSchema = z.object({
+	ref_id: z.string().max(100),
+	name: z.string().max(200),
+	description: z.string().optional().default(''),
+	document_type: z.string().optional().default('policy'),
+	category: z.string().optional().default(''),
+	content: z.string().optional().default(''),
+	locale: z.string().optional().default('en'),
+	folder: z.string()
 });
 
 export const ManagedDocumentSchema = z.object({
@@ -1961,6 +1973,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'dashboard-builtin-widgets': DashboardWidgetSchema,
 	teams: teamSchema,
 	'document-containers': DocumentContainerSchema,
+	'document-templates': DocumentTemplateSchema,
 	'managed-documents': ManagedDocumentSchema,
 	'document-revisions': DocumentRevisionSchema
 };

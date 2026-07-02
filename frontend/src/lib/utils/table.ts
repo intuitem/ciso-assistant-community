@@ -202,6 +202,30 @@ export const DOMAIN_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const DOCUMENT_TYPE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'document-containers/document_type',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'documentType',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+export const DOCUMENT_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'document-containers/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 export const LABELS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1943,8 +1967,22 @@ export const listViewFields = {
 		body: ['version_number', 'status_display', 'author', 'change_summary', 'created_at']
 	},
 	'document-containers': {
-		head: ['name', 'documentType', 'domain'],
-		body: ['name', 'document_type', 'folder']
+		head: ['name', 'documentType', 'status', 'domain', 'labels'],
+		body: ['name', 'document_type', 'status', 'folder', 'filtering_labels'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			document_type: DOCUMENT_TYPE_FILTER,
+			status: DOCUMENT_STATUS_FILTER,
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	'document-templates': {
+		head: ['name', 'refId', 'documentType', 'language', 'domain'],
+		body: ['name', 'ref_id', 'document_type', 'locale', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			document_type: DOCUMENT_TYPE_FILTER
+		}
 	},
 	'managed-documents': {
 		head: ['name', 'documentType', 'locale', 'domain'],

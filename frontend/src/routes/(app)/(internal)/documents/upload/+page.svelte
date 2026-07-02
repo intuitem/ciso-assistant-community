@@ -6,12 +6,13 @@
 
 	let { data, form }: { data: PageData; form: { error?: string } | null } = $props();
 
-	const DOC_TYPES = ['policy', 'procedure', 'charter', 'record', 'other'];
+	const DOC_TYPES = ['policy', 'procedure', 'charter', 'record', 'meeting_minutes', 'other'];
 	const TYPE_LABEL: Record<string, () => string> = {
 		policy: m.policy,
 		procedure: m.procedure,
 		charter: m.charter,
 		record: m.record,
+		meeting_minutes: m.meetingMinutes,
 		other: m.other
 	};
 

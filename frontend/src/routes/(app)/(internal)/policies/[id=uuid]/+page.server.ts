@@ -25,7 +25,7 @@ export const load: PageServerLoad = async (event) => {
 	try {
 		const userLocale = event.cookies.get('LOCALE') || 'en';
 		const docRes = await event.fetch(
-			`${BASE_API_URL}/managed-documents/?policy=${event.params.id}`
+			`${BASE_API_URL}/managed-documents/?container__policies=${event.params.id}`
 		);
 		if (docRes.ok) {
 			const docData = await docRes.json();
