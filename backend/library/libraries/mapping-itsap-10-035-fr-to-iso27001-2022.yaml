@@ -1,0 +1,548 @@
+urn: urn:intuitem:risk:library:mapping-fr-to-iso27001-2022
+locale: fr
+ref_id: mapping-fr-to-iso27001-2022
+name: ITSAP.10.035 -> ISO/IEC 27001:2022
+description: "Mapping from Cybers\xE9curitaire Canada \u2013 Contr\xF4les de cybers\xE9\
+  curit\xE9 de base to International standard ISO/IEC 27001:2022"
+copyright: https://www.cyber.gc.ca/sites/default/files/itsap.10.035-f_0.pdf
+version: 1
+publication_date: 2026-06-06
+provider: "Centre canadien pour la cybers\xE9curit\xE9 (CCCS)"
+packager: "Cambron-Legastelois \u2013 INF810 DESS Cybers\xE9curit\xE9 UdeS"
+dependencies:
+- urn:cccs:risk:framework:itsap10035_2024_fr
+- urn:intuitem:risk:library:iso27001-2022
+objects:
+  requirement_mapping_sets:
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-fr-to-iso27001-2022
+    ref_id: mapping-fr-to-iso27001-2022
+    name: ITSAP.10.035 -> ISO/IEC 27001:2022
+    description: "Mapping from Cybers\xE9curitaire Canada \u2013 Contr\xF4les de cybers\xE9\
+      curit\xE9 de base to International standard ISO/IEC 27001:2022"
+    source_framework_urn: urn:cccs:risk:framework:itsap10035_2024_fr
+    target_framework_urn: urn:intuitem:risk:framework:iso27001-2022
+    requirement_mappings:
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:1.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:1.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:1.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.37
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:1.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:1.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:1.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.5
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:1.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:1.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:1.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.29
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:1.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:1.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.29
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:1.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.27
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:1.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:2.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:2.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:2.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:2.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:2.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:2.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:3.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:3.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:3.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:3.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:3.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:3.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:4.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:4.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:4.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:4.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:4.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:5.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:5.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:5.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:5.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:5.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:6.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:6.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:6.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:6.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.5
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:7.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:7.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:7.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:7.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:7.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:7.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:8.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:8.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:8.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:8.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:8.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:8.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:8.1.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:8.1.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:9.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:9.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:9.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:9.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:9.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:10.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:10.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:10.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:10.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.8
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:11.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:11.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:11.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:11.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:11.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:11.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:11.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:11.1.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:11.1.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:12.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:12.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:12.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:12.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:12.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:12.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:12.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:13.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:13.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:13.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:13.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:13.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+    - source_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:13.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
+      relationship: intersect
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-fr-to-iso27001-2022-revert
+    ref_id: mapping-fr-to-iso27001-2022-revert
+    name: ITSAP.10.035 -> ISO/IEC 27001:2022
+    description: "Mapping from Cybers\xE9curitaire Canada \u2013 Contr\xF4les de cybers\xE9\
+      curit\xE9 de base to International standard ISO/IEC 27001:2022"
+    target_framework_urn: urn:cccs:risk:framework:itsap10035_2024_fr
+    source_framework_urn: urn:intuitem:risk:framework:iso27001-2022
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:1.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:1.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.37
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:1.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:1.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:1.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.5
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:1.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:1.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:1.1.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.29
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:1.1.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:1.2.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.29
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:1.2.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.27
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:1.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:1.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:2.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:2.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:2.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:2.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:2.1.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:2.1.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:3.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:3.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:3.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:3.2.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:3.2.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:3.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:4.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:4.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:4.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:4.2.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:4.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:5.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:5.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:5.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:5.1.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:5.1.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:6.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:6.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:6.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:6.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:6.1.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.5
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:6.1.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:7.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:7.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:7.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:7.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:7.1.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:7.1.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:8.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:8.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:8.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:8.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:8.1.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:8.1.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:8.1.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:8.1.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:9.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:9.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:9.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:9.1.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:9.1.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:10.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:10.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:10.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.8
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:10.1.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:11.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:11.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:11.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:11.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:11.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:11.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:11.1.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:11.1.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:11.1.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:12.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:12.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:12.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:12.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:12.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:12.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:12.1.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:13.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:13.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:13.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:13.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:13.1.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
+      target_requirement_urn: urn:cccs:risk:framework:itsap10035_2024_fr:13.1.4
+      relationship: intersect
