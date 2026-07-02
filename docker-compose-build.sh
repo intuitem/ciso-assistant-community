@@ -1,8 +1,33 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DOCKER_COMPOSE_FILE=docker-compose-build.yml
+DOCKER_COMPOSE_FILE="docker-compose-build.yml"
 EXPECTED_OWNER="1001:1001"
+MIGRATION_CHECK_ATTEMPTS=60
+MIGRATION_CHECK_DELAY_SECONDS=10
+UNKNOWN_ARGUMENTS=()
+
+while (($#)); do
+  case "$1" in
+    -f)
+      shift
+      if (($# == 0)); then
+        printf 'Argument -f requires a compose file path.\n' >&2
+        exit 1
+      fi
+      DOCKER_COMPOSE_FILE="$1"
+      ;;
+    *)
+      UNKNOWN_ARGUMENTS+=("$1")
+      ;;
+  esac
+  shift
+done
+
+if ((${#UNKNOWN_ARGUMENTS[@]} > 0)); then
+  printf 'Unknown argument(s): %s. Supported arguments: -f <compose-file>.\n' "${UNKNOWN_ARGUMENTS[*]}" >&2
+  exit 1
+fi
 
 prepare_meta_file() {
   VERSION=$(git describe --tags --always)
@@ -23,9 +48,29 @@ get_owner_linux() {
   stat -c '%u:%g' "$1"
 }
 
+wait_for_migrations() {
+  for i in $(seq 1 "$MIGRATION_CHECK_ATTEMPTS"); do
+    if docker compose -f "${DOCKER_COMPOSE_FILE}" exec -T backend python manage.py migrate --check >/dev/null 2>&1; then
+      echo "Migrations complete."
+      return
+    fi
+
+    if [ "$i" -eq "$MIGRATION_CHECK_ATTEMPTS" ]; then
+      timeout_seconds=$((MIGRATION_CHECK_ATTEMPTS * MIGRATION_CHECK_DELAY_SECONDS))
+      echo "Migrations did not complete within ${timeout_seconds}s. Recent backend logs:"
+      docker compose -f "${DOCKER_COMPOSE_FILE}" logs --tail=50 backend
+      exit 1
+    fi
+
+    sleep "$MIGRATION_CHECK_DELAY_SECONDS"
+  done
+}
+
 # Enable BuildKit for faster builds
 export DOCKER_BUILDKIT=1
 export COMPOSE_DOCKER_CLI_BUILD=1
+
+echo "Using Docker Compose file: \"${DOCKER_COMPOSE_FILE}\""
 
 # Check if database already exists
 if [ -f db/ciso-assistant.sqlite3 ]; then
@@ -56,21 +101,10 @@ else
   docker compose -f "${DOCKER_COMPOSE_FILE}" up -d
 
   echo "Giving some time for the database to be ready, please wait ..."
-  for i in $(seq 1 60); do
-    if docker compose -f "${DOCKER_COMPOSE_FILE}" exec -T backend python manage.py migrate --check >/dev/null 2>&1; then
-      echo "Migrations complete."
-      break
-    fi
-    if [ "$i" -eq 60 ]; then
-      echo "Migrations did not complete within 600s. Recent backend logs:"
-      docker compose -f "${DOCKER_COMPOSE_FILE}" logs --tail=50 backend
-      exit 1
-    fi
-    sleep 10
-  done
+  wait_for_migrations
 
   echo "Initialize your superuser account..."
-  docker compose -f "${DOCKER_COMPOSE_FILE}" exec -T backend python manage.py createsuperuser
+  docker compose -f "${DOCKER_COMPOSE_FILE}" exec backend python manage.py createsuperuser
 
   echo "🚀 CISO Assistant is ready!"
   echo "Connect to CISO Assistant on https://localhost:8443"

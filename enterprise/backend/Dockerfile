@@ -48,7 +48,7 @@ RUN apt-get update && apt-get install -y \
   && locale-gen sv_SE.UTF-8 \
   && locale-gen id_ID.UTF-8
 
-COPY backend/pyproject.toml backend/uv.lock ./
+COPY pyproject.toml uv.lock ./
 
 # torch is pinned to the PyTorch CPU index in pyproject.toml/uv.lock, so the CUDA
 # wheels are never resolved or downloaded — a plain locked sync is enough.
@@ -61,7 +61,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # on first use, which breaks fully offline / air-gapped instances).
 # Model IDs come from chat/embedding_models.py (single source of truth). It is copied
 # first so this layer re-bakes whenever the IDs change. Network is needed at BUILD time only.
-COPY backend/chat/embedding_models.py ./chat/embedding_models.py
+COPY chat/embedding_models.py ./chat/embedding_models.py
 ENV HF_HOME=/opt/hf-cache \
   SENTENCE_TRANSFORMERS_HOME=/opt/hf-cache
 RUN uv run python -c "import chat.embedding_models as m; from sentence_transformers import SentenceTransformer, CrossEncoder; SentenceTransformer(m.DEFAULT_EMBEDDING_MODEL); CrossEncoder(m.RERANKER_MODEL)" \
@@ -73,9 +73,9 @@ RUN uv run python -c "import chat.embedding_models as m; from sentence_transform
 ENV HF_HUB_OFFLINE=1 \
   TRANSFORMERS_OFFLINE=1
 
-COPY backend /code/
-COPY enterprise/backend/enterprise_core /code/enterprise_core
-COPY backend/startup.sh /code/
+COPY . /code/
+COPY --from=enterprise_backend /enterprise_core /code/enterprise_core
+COPY startup.sh /code/
 
 RUN groupadd -g 1001 app && useradd -u 1001 -g 1001 -m -s /bin/bash app
 # USER app  # not activated by default to keep compatibility

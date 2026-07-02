@@ -1,11 +1,24 @@
 #Requires -Version 5.0
 
+[CmdletBinding(PositionalBinding = $false)]
+param(
+    [Alias("f")]
+    [string] $DockerComposeFile = "docker-compose-build.yml",
+
+    [Parameter(ValueFromRemainingArguments = $true, DontShow = $true)]
+    [string[]] $UnsupportedArguments = @()
+)
+
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
-$DockerComposeFile = "docker-compose-build.yml"
 $MigrationCheckAttempts = 60
 $MigrationCheckDelaySeconds = 10
+
+if ($UnsupportedArguments.Count -gt 0) {
+    Write-Host "Unknown argument(s): $($UnsupportedArguments -join ', '). Supported arguments: -f <compose-file>." -ForegroundColor Red
+    exit 1
+}
 
 function Invoke-Checked {
     param(
@@ -50,7 +63,7 @@ function Prepare-MetaFile {
 
 function Wait-ForMigrations {
     for ($i = 1; $i -le $MigrationCheckAttempts; $i++) {
-        & docker compose -f $DockerComposeFile exec -T backend uv run python manage.py migrate --check *> $null
+        & docker compose -f $DockerComposeFile exec -T backend python manage.py migrate --check *> $null
         if ($LASTEXITCODE -eq 0) {
             Write-Host "Migrations complete!" -ForegroundColor Green
             return
@@ -84,6 +97,9 @@ try {
     $env:DOCKER_BUILDKIT = "1"
     $env:COMPOSE_DOCKER_CLI_BUILD = "1"
 
+    Write-Host "Using Docker Compose file: `"$DockerComposeFile`"" -ForegroundColor Cyan
+    Write-Host ""
+
     if (Test-Path -Path "db\ciso-assistant.sqlite3" -PathType Leaf) {
         Write-Host "The database seems already created." -ForegroundColor Yellow
         Write-Host "For successive runs, you can now use `"docker compose -f $DockerComposeFile up`"." -ForegroundColor Yellow
@@ -108,7 +124,7 @@ try {
     Write-Host ""
     Write-Host "Initialize your superuser account..." -ForegroundColor Cyan
     # Keep TTY allocation for the interactive Django prompts in Windows terminals.
-    Invoke-DockerCompose exec backend uv run python manage.py createsuperuser
+    Invoke-DockerCompose exec backend python manage.py createsuperuser
 
     Write-Host ""
     Write-Host "CISO Assistant is ready!" -ForegroundColor Green

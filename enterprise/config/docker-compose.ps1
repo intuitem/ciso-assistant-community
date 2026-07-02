@@ -1,6 +1,6 @@
 #Requires -Version 5.0
 
-$DockerComposeFile = "docker-compose.yml"
+$DockerComposeFile = ".\docker-compose.yml"
 $MigrationCheckAttempts = 60
 $MigrationCheckDelaySeconds = 10
 
@@ -24,7 +24,7 @@ function Wait-ForMigrations {
 }
 
 if (-not (Test-Path -Path $DockerComposeFile -PathType Leaf)) {
-    Write-Host "Compose file not found: $DockerComposeFile" -ForegroundColor Red
+    Write-Host "Docker compose file doesn't exist. Run 'python3 make_config.py' first." -ForegroundColor Red
     exit 1
 }
 

@@ -1,6 +1,7 @@
 #Requires -Version 5.0
 
-$DockerComposeFile = "docker-compose.yml"
+$DockerComposeFile = ".\docker-compose-custom.yml"
+$RootDockerComposeFile = "..\docker-compose.yml"
 $MigrationCheckAttempts = 60
 $MigrationCheckDelaySeconds = 10
 
@@ -24,16 +25,18 @@ function Wait-ForMigrations {
 }
 
 if (-not (Test-Path -Path $DockerComposeFile -PathType Leaf)) {
-    Write-Host "Compose file not found: $DockerComposeFile" -ForegroundColor Red
+    Write-Host "Docker compose file doesn't exist. Run 'python3 make_config.py' first." -ForegroundColor Red
     exit 1
 }
 
-# Check if database file exists
-if (Test-Path "db/ciso-assistant.sqlite3") {
+# Check if database folder exists
+if (Test-Path -Path ".\db" -PathType Container) {
     Write-Host "The database seems already created. You should launch 'docker compose up -d' instead." -ForegroundColor Yellow
     Write-Host "For a clean start, you can remove the db folder, and then run 'docker compose rm -fs' and start over" -ForegroundColor Yellow
     exit 1
 }
+
+Copy-Item -Path $DockerComposeFile -Destination $RootDockerComposeFile -Force
 
 Write-Host "Starting CISO Assistant services..." -ForegroundColor Cyan
 docker compose -f $DockerComposeFile pull

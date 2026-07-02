@@ -2,6 +2,9 @@
 set -euo pipefail
 
 EXPECTED_OWNER="1001:1001"
+DOCKER_COMPOSE_FILE="./docker-compose.yml"
+MIGRATION_CHECK_ATTEMPTS=60
+MIGRATION_CHECK_DELAY_SECONDS=10
 
 is_linux_gnu_stat() {
   stat -c '%u:%g' . >/dev/null 2>&1
@@ -11,7 +14,25 @@ get_owner_linux() {
   stat -c '%u:%g' "$1"
 }
 
-if [ ! -f ./docker-compose.yml ]; then
+wait_for_migrations() {
+  for i in $(seq 1 "$MIGRATION_CHECK_ATTEMPTS"); do
+    if docker compose -f "$DOCKER_COMPOSE_FILE" exec -T backend python manage.py migrate --check >/dev/null 2>&1; then
+      echo "Migrations complete."
+      return
+    fi
+
+    if [ "$i" -eq "$MIGRATION_CHECK_ATTEMPTS" ]; then
+      timeout_seconds=$((MIGRATION_CHECK_ATTEMPTS * MIGRATION_CHECK_DELAY_SECONDS))
+      echo "Migrations did not complete within ${timeout_seconds}s. Recent backend logs:"
+      docker compose -f "$DOCKER_COMPOSE_FILE" logs --tail=50 backend
+      exit 1
+    fi
+
+    sleep "$MIGRATION_CHECK_DELAY_SECONDS"
+  done
+}
+
+if [ ! -f "$DOCKER_COMPOSE_FILE" ]; then
   echo "Docker compose file doesn't exist. Run 'python3 make_config.py' first."
   exit 1
 fi
@@ -38,19 +59,14 @@ else
 fi
 
 echo "Starting CISO Assistant services..."
-docker compose -f ./docker-compose.yml pull
-echo "Initializing the database. This can take up to 2 minutes, please wait.."
-docker compose -f ./docker-compose.yml up -d
+docker compose -f "$DOCKER_COMPOSE_FILE" pull
+echo "Giving some time for the database to be ready, please wait ..."
+docker compose -f "$DOCKER_COMPOSE_FILE" up -d
 
-echo "Waiting for CISO Assistant backend to be ready..."
-until docker compose -f ./docker-compose.yml exec -T backend curl -f http://localhost:8000/api/health/ >/dev/null 2>&1; do
-  echo "Backend is not ready - waiting 10s..."
-  sleep 10
-done
+wait_for_migrations
 
-echo -e "Backend is ready!"
 echo "Creating superuser..."
-docker compose -f ./docker-compose.yml exec backend python manage.py createsuperuser
+docker compose -f "$DOCKER_COMPOSE_FILE" exec backend python manage.py createsuperuser
 
 echo -e "Initialization complete!"
 echo "You can now access CISO Assistant at https://localhost:8443 (or the host:port you've specified)"
