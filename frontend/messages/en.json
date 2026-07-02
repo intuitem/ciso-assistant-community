@@ -127,6 +127,7 @@
 	"references": "References",
 	"referencedBy": "Referenced by",
 	"linkToDocument": "Link to document",
+	"clearFilters": "Clear filters",
 	"policyDocumentRevision": "Policy document revision",
 	"policyDocumentRevisions": "Policy document revisions",
 	"editDocument": "Edit document",
