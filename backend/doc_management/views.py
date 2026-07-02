@@ -1,11 +1,9 @@
 import difflib
 import mimetypes
-from pathlib import Path
 from uuid import UUID
 
 import requests
 import structlog
-import yaml
 from django.contrib.auth.models import Permission
 from django.db import models, transaction
 from django.forms import ValidationError as DjangoValidationError
@@ -36,15 +34,12 @@ from .models import (
     DocumentContainer,
     DocumentEdit,
     DocumentRevision,
+    DocumentTemplate,
     ManagedDocument,
 )
 from .serializers import DocumentContainerReadSerializer
 
 logger = structlog.get_logger(__name__)
-
-TEMPLATES_BASE_DIR = (
-    Path(__file__).resolve().parent.parent / "library" / "policy_templates"
-)
 
 
 def _get_user_lang(request):
@@ -52,14 +47,6 @@ def _get_user_lang(request):
     if hasattr(request, "user") and hasattr(request.user, "get_preferences"):
         return request.user.get_preferences().get("lang", "en")
     return "en"
-
-
-def _get_templates_dir(lang: str) -> Path:
-    """Resolve the templates directory for the given language, falling back to 'en'."""
-    localized = TEMPLATES_BASE_DIR / lang
-    if localized.exists() and any(localized.glob("*.md")):
-        return localized
-    return TEMPLATES_BASE_DIR / "en"
 
 
 _PDF_FETCH_MAX_BYTES = 10 * 1024 * 1024
@@ -239,28 +226,23 @@ class ManagedDocumentViewSet(BaseModelViewSet):
 
     @action(detail=False, methods=["get"])
     def templates(self, request):
-        """List available document templates. Accepts optional ?lang= query parameter."""
+        """List available document templates (DB-backed) for a language, falling
+        back to English when the requested language has none."""
         lang = request.query_params.get("lang") or _get_user_lang(request)
-        template_dir = _get_templates_dir(lang)
-        templates = []
-        if template_dir.exists():
-            for f in sorted(template_dir.glob("*.md")):
-                content = f.read_text(encoding="utf-8")
-                metadata = {
-                    "id": f.stem,
-                    "title": f.stem.replace("_", " ").title(),
-                    "lang": template_dir.name,
-                }
-                if content.startswith("---"):
-                    parts = content.split("---", 2)
-                    if len(parts) >= 3:
-                        try:
-                            fm = yaml.safe_load(parts[1])
-                            if isinstance(fm, dict):
-                                metadata.update(fm)
-                        except yaml.YAMLError:
-                            pass
-                templates.append(metadata)
+        qs = DocumentTemplate.objects.filter(locale=lang)
+        if not qs.exists():
+            qs = DocumentTemplate.objects.filter(locale="en")
+        templates = [
+            {
+                "id": t.ref_id,
+                "title": t.name,
+                "description": t.description,
+                "lang": t.locale,
+                "document_type": t.document_type,
+                "builtin": t.builtin,
+            }
+            for t in qs.order_by("name")
+        ]
         return Response(templates)
 
     @action(

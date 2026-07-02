@@ -76,3 +76,21 @@ class TestContainerGrouping:
         assert doc.container.policies.count() == 0
         assert doc.container.document_type == "charter"
         assert doc.folder_id == folder.id
+
+    def test_template_used_seeds_content_from_db(self):
+        from doc_management.models import DocumentTemplate
+
+        folder = Folder.objects.create(
+            name="DT", parent_folder=Folder.get_root_folder()
+        )
+        DocumentTemplate.objects.create(
+            ref_id="my_tmpl",
+            locale="en",
+            name="My Template",
+            content="# Hello from template",
+            folder=Folder.get_root_folder(),
+        )
+        doc = self._create(
+            folder=str(folder.id), locale="en", template_used="my_tmpl", name="D"
+        )
+        assert doc.revisions.first().content == "# Hello from template"

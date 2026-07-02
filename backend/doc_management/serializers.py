@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from django.db import models, transaction
 from rest_framework import serializers
 
@@ -7,7 +5,12 @@ from core.models import Policy
 from core.serializer_fields import FieldsRelatedField
 from core.serializers import BaseModelSerializer
 
-from .models import DocumentContainer, DocumentRevision, ManagedDocument
+from .models import (
+    DocumentContainer,
+    DocumentRevision,
+    DocumentTemplate,
+    ManagedDocument,
+)
 
 
 class DocumentContainerReadSerializer(BaseModelSerializer):
@@ -51,17 +54,6 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
         model = ManagedDocument
         fields = "__all__"
 
-    def _resolve_template_path(self, template_name, locale):
-        """Find the template file for the given locale, falling back to 'en'."""
-        base_dir = (
-            Path(__file__).resolve().parent.parent / "library" / "policy_templates"
-        )
-        for try_lang in [locale, "en"]:
-            path = base_dir / try_lang / f"{template_name}.md"
-            if path.exists():
-                return path
-        return None
-
     def create(self, validated_data):
         # Default locale to user's preferred language
         request = self.context.get("request")
@@ -86,20 +78,17 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
         author = request.user if request else None
         content = ""
         if template_name := validated_data.get("template_used"):
-            template_path = self._resolve_template_path(
-                template_name, validated_data.get("locale", "en")
+            locale = validated_data.get("locale", "en")
+            template = (
+                DocumentTemplate.objects.filter(
+                    ref_id=template_name, locale=locale
+                ).first()
+                or DocumentTemplate.objects.filter(
+                    ref_id=template_name, locale="en"
+                ).first()
             )
-            if template_path:
-                raw = template_path.read_text(encoding="utf-8")
-                # Strip YAML frontmatter
-                if raw.startswith("---"):
-                    parts = raw.split("---", 2)
-                    if len(parts) >= 3:
-                        content = parts[2].strip()
-                    else:
-                        content = raw
-                else:
-                    content = raw
+            if template:
+                content = template.content
         with transaction.atomic():
             # Resolve the container that groups this document's locale variants.
             # Legacy/policy flow: one container per policy. Standalone: a fresh one.

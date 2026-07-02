@@ -297,3 +297,38 @@ class DocumentEdit(AbstractBaseModel, FolderMixin):
     def __str__(self):
         editor_str = self.editor.email if self.editor else "unknown"
         return f"Edit by {editor_str} on {self.created_at}"
+
+
+class DocumentTemplate(AbstractBaseModel, FolderMixin, I18nObjectMixin):
+    """A reusable content skeleton for seeding a document's markdown.
+
+    Built-ins are synced from ``backend/library/policy_templates/`` by the
+    ``sync_document_templates`` management command; customers can add their own.
+    Locale variants of one logical template share a ``ref_id``.
+    """
+
+    document_type = models.CharField(
+        max_length=20,
+        choices=DocumentContainer.DocumentType.choices,
+        default=DocumentContainer.DocumentType.POLICY,
+        verbose_name=_("Document type"),
+    )
+    ref_id = models.CharField(max_length=100, verbose_name=_("Reference"))
+    name = models.CharField(max_length=200, verbose_name=_("Name"))
+    description = models.TextField(blank=True, verbose_name=_("Description"))
+    content = models.TextField(blank=True)
+    category = models.CharField(max_length=100, blank=True)
+    builtin = models.BooleanField(default=False)
+    fields_to_check = ["ref_id", "locale"]
+
+    class Meta:
+        verbose_name = _("Document template")
+        verbose_name_plural = _("Document templates")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["ref_id", "locale"], name="unique_template_ref_locale"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.name} ({self.locale})"
