@@ -743,13 +743,10 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
                 )
             )
         )
-        representatives = (
-            Representative.objects.filter(
-                id__in=viewable_representative_ids,
-                entity__in=entities,
-            )
-            .select_related("entity")
-        )
+        representatives = Representative.objects.filter(
+            id__in=viewable_representative_ids,
+            entity__in=entities,
+        ).select_related("entity")
 
         esc = escape_excel_formula
 
@@ -837,7 +834,7 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
                     "domain": esc(contract.folder.name) if contract.folder else "",
                 }
             )
-            
+
         # --- Representatives sheet ---
         representatives_rows = []
         for representative in representatives:
@@ -894,7 +891,7 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
             "currency",
             "domain",
         ]
-        
+
         representative_columns = [
             "email",
             "first_name",
