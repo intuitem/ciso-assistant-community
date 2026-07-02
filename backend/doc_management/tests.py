@@ -123,3 +123,61 @@ class TestContainerGrouping:
         assert not DocumentReference.objects.filter(
             source_container=source.container
         ).exists()
+
+    def test_custom_html_override_used_when_active(self):
+        from core.models import CustomDocHtmlTemplate
+        from django.core.files.base import ContentFile
+        from doc_management.views import DocumentRevisionViewSet
+
+        folder = Folder.objects.create(
+            name="OV", parent_folder=Folder.get_root_folder()
+        )
+        doc = self._create(folder=str(folder.id), locale="en", name="Doc")
+        rev = doc.revisions.first()
+
+        vs = DocumentRevisionViewSet()
+        # no override -> built-in template
+        default_html = vs._resolve_document_html(
+            rev, {"title": "T", "content": "<p>C</p>"}
+        )
+        assert "OVERRIDE-MARKER" not in default_html
+
+        tmpl = CustomDocHtmlTemplate.objects.create(
+            template_key="document_pdf",
+            language="en",
+            is_active=True,
+            folder=Folder.get_root_folder(),
+        )
+        tmpl.file.save("ov.html", ContentFile(b"<h1>OVERRIDE-MARKER {{ title }}</h1>"))
+
+        html = vs._resolve_document_html(rev, {"title": "Hello", "content": "<p>C</p>"})
+        assert "OVERRIDE-MARKER Hello" in html
+        # inactive override is ignored
+        tmpl.is_active = False
+        tmpl.save()
+        assert "OVERRIDE-MARKER" not in vs._resolve_document_html(rev, {"title": "T"})
+
+    def test_sync_parses_document_type_from_frontmatter(self, tmp_path, monkeypatch):
+        from django.core.management import call_command
+        from doc_management.management.commands import sync_document_templates as cmd
+        from doc_management.models import DocumentTemplate
+
+        en = tmp_path / "en"
+        en.mkdir()
+        (en / "my_charter.md").write_text(
+            "---\ntitle: My Charter\ndocument_type: charter\n---\nbody",
+            encoding="utf-8",
+        )
+        (en / "plain.md").write_text("# no frontmatter", encoding="utf-8")
+        (en / "bad_type.md").write_text(
+            "---\ndocument_type: nonsense\n---\nx", encoding="utf-8"
+        )
+        monkeypatch.setattr(cmd, "TEMPLATES_DIR", tmp_path)
+        call_command("sync_document_templates")
+
+        get = lambda ref: DocumentTemplate.objects.get(ref_id=ref, locale="en")
+        assert get("my_charter").document_type == "charter"
+        # no frontmatter -> default policy
+        assert get("plain").document_type == "policy"
+        # invalid type -> falls back to policy
+        assert get("bad_type").document_type == "policy"

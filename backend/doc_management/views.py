@@ -950,8 +950,16 @@ class DocumentRevisionViewSet(BaseModelViewSet):
                 f"{revision.author.first_name} {revision.author.last_name}".strip()
                 or revision.author.email
             )
+        doc = revision.document
+        container = getattr(doc, "container", None)
+        document_type_label = ""
+        if container:
+            document_type_label = dict(container.DocumentType.choices).get(
+                container.document_type, container.document_type
+            )
+        logo_base64, logo_mime_type = self._client_logo()
         context = {
-            "policy_name": revision.document.display_name,
+            "policy_name": doc.display_name,
             "version_number": revision.version_number,
             "status": revision.status,
             "status_display": revision.get_status_display(),
@@ -963,12 +971,55 @@ class DocumentRevisionViewSet(BaseModelViewSet):
             ),
             "date": timezone.now().strftime("%Y-%m-%d"),
             "content_html": content_html,
+            # Aliases exposed to custom override templates (DOC_HTML_TEMPLATE_REGISTRY).
+            "title": doc.display_name,
+            "content": content_html,
+            "version": revision.version_number,
+            "document_type": document_type_label,
+            "logo_base64": logo_base64,
+            "logo_mime_type": logo_mime_type,
         }
-        html_string = render_to_string(
-            "doc_management/policy_document_pdf.html", context
-        )
+        html_string = self._resolve_document_html(revision, context)
 
         return HTML(string=html_string, url_fetcher=_safe_url_fetcher).write_pdf()
+
+    def _client_logo(self):
+        """Return (base64, mime_type) of the org logo, or ('', '') in the
+        community edition where ClientSettings is not installed."""
+        try:
+            from enterprise_core.models import ClientSettings
+        except Exception:
+            return "", ""
+        cs = ClientSettings.objects.first()
+        if not cs or not cs.logo:
+            return "", ""
+        return cs.logo_base64 or "", cs.logo_mime_type or ""
+
+    def _resolve_document_html(self, revision, context):
+        """Render the document PDF HTML, preferring an active per-language
+        custom override (enterprise) over the built-in template."""
+        from core.models import CustomDocHtmlTemplate
+        from django.template import Template, Context
+
+        locale = getattr(revision.document, "locale", None) or "en"
+        override = (
+            CustomDocHtmlTemplate.objects.filter(
+                template_key="document_pdf", language=locale, is_active=True
+            )
+            .exclude(file="")
+            .first()
+        )
+        if override and override.file:
+            try:
+                override.file.open("rb")
+                template_source = override.file.read().decode("utf-8")
+                return Template(template_source).render(Context(context))
+            except Exception as e:
+                logger.warning(
+                    "Failed to render custom document template, falling back to default",
+                    error=e,
+                )
+        return render_to_string("doc_management/policy_document_pdf.html", context)
 
     def _generate_pdf_snapshot(self, revision, user):
         """Generate and save a PDF snapshot for a revision."""
