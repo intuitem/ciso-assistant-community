@@ -56,10 +56,13 @@
 	cacheLock={cacheLocks['locale']}
 	bind:cachedValue={formDataCache['locale']}
 />
-<MarkdownField
-	{form}
-	field="content"
-	label={m.content()}
-	cacheLock={cacheLocks['content']}
-	bind:cachedValue={formDataCache['content']}
-/>
+<!-- Content is authored on the edit view, not in the cramped create modal. -->
+{#if object?.id}
+	<MarkdownField
+		{form}
+		field="content"
+		label={m.content()}
+		cacheLock={cacheLocks['content']}
+		bind:cachedValue={formDataCache['content']}
+	/>
+{/if}
