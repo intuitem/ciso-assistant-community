@@ -206,6 +206,7 @@ class DataBreachReadSerializer(BaseModelSerializer):
     affected_personal_data = FieldsRelatedField(many=True)
     remediation_measures = FieldsRelatedField(["id", "name"], many=True)
     incident = FieldsRelatedField()
+    evidences = FieldsRelatedField(many=True)
 
     class Meta:
         model = DataBreach

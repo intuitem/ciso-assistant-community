@@ -660,6 +660,7 @@ class DataBreachViewSet(BaseModelViewSet):
         "authorities",
         "affected_processings",
         "incident",
+        "evidences",
     ]
 
     @action(detail=False, name="Get breach type choices")
