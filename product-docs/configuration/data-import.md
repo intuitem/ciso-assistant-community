@@ -583,7 +583,7 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 * `description` 
 * `phone`
 * `role`
-* `provider_entity_ref_id`
+* `provider_entity_ref_id` <mark style="color:$danger;">\*</mark>
 
 > [!NOTE]
 > Conflict detection: by `email`
