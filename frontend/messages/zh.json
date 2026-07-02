@@ -980,7 +980,7 @@
 	"thirdParty": "第三方",
 	"thirdPartyCategory": "第三方",
 	"thirdPartyDescription": "管理第三方实体及其代表、合同、解决方案和评估。",
-	"thirdPartiesImportHelpText": "从多工作表Excel模板导入第三方的实体、解决方案和合同",
+	"thirdPartiesImportHelpText": "从多工作表Excel模板导入第三方的实体、代表、解决方案和合同",
 	"entityAssessment": "实体评估",
 	"entityAssessments": "实体评估",
 	"addEntityAssessment": "添加实体评估",

@@ -1291,7 +1291,7 @@
 	"thirdParty": "Kolmas osapool",
 	"thirdPartyCategory": "Kolmandad osapooled",
 	"thirdPartyDescription": "Kolmandate osapoolte üksuste ning nende esindajate, lepingute, lahenduste ja hinnangute haldus.",
-	"thirdPartiesImportHelpText": "Impordi kolmandate osapoolte üksused, lahendused ja lepingud mitmelehelisest Exceli mallist",
+	"thirdPartiesImportHelpText": "Impordi kolmandate osapoolte üksused, esindajad, lahendused ja lepingud mitmelehelisest Exceli mallist",
 	"entityAssessment": "Üksuse hinnang",
 	"entityAssessments": "Üksuse hinnangud",
 	"addEntityAssessment": "Lisa üksuse hinnang",
