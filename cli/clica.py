@@ -530,7 +530,7 @@ DATA_WIZARD_COMMANDS = [
         "model_type": "TPRM",
         "help": (
             "Import TPRM records from a multi-sheet Excel file.\n"
-            "Expected sheets: Entities, Solutions, Contracts (processed in order).\n"
+            "Expected sheets: Entities, Solutions, Contracts, Representatives (processed in order).\n"
             "\nEntities columns: name*, ref_id, description, domain\n"
             "Solutions columns: name*, ref_id, description, provider_entity_ref_id*\n"
             "Contracts columns: name*, ref_id, description, provider_entity_ref_id*, solution_ref_id\n"
