@@ -3194,7 +3194,7 @@
 	"servicenow": "ServiceNow",
 	"tableName": "Nombre de la tabla",
 	"targetTable": "Tabla de destino",
-	"thirdPartiesImportHelpText": "Importa entidades, soluciones y contratos de terceros desde una plantilla de Excel con varias hojas.",
+	"thirdPartiesImportHelpText": "Importa entidades, representantes, soluciones y contratos de terceros desde una plantilla de Excel con varias hojas.",
 	"username": "Nombre de usuario",
 	"valueMapping": "Mapeo de valores",
 	"valueMappingForField": "Mapeo de {field}",

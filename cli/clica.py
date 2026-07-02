@@ -530,11 +530,12 @@ DATA_WIZARD_COMMANDS = [
         "model_type": "TPRM",
         "help": (
             "Import TPRM records from a multi-sheet Excel file.\n"
-            "Expected sheets: Entities, Solutions, Contracts (processed in order).\n"
+            "Expected sheets: Entities, Solutions, Contracts, Representatives (processed in order).\n"
             "\nEntities columns: name*, ref_id, description, domain\n"
             "Solutions columns: name*, ref_id, description, provider_entity_ref_id*\n"
             "Contracts columns: name*, ref_id, description, provider_entity_ref_id*, solution_ref_id\n"
-            "\nConflict detection: by name + folder (entities/solutions/contracts)"
+            "Representatives columns: email*, first_name, last_name, description, phone, role, provider_entity_ref_id*\n"
+            "\nConflict detection: by name + folder (entities/solutions/contracts), by email (representatives)"
         ),
         "requires_folder": True,
         "requires_perimeter": False,

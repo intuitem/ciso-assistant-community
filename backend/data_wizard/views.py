@@ -76,11 +76,12 @@ from .egerie_xml_helpers import (
 )
 from core.models import Terminology
 from data_wizard.arm_helpers import process_arm_file
-from tprm.models import Entity, Solution, Contract
+from tprm.models import Entity, Solution, Contract, Representative
 from tprm.serializers import (
     EntityWriteSerializer,
     SolutionWriteSerializer,
     ContractWriteSerializer,
+    RepresentativeWriteSerializer,
 )
 from resilience.models import (
     BusinessImpactAnalysis,
@@ -3339,6 +3340,7 @@ class LoadFileView(APIView):
                 "entities": {"successful": 0, "failed": 0, "errors": []},
                 "solutions": {"successful": 0, "failed": 0, "errors": []},
                 "contracts": {"successful": 0, "failed": 0, "errors": []},
+                "representatives": {"successful": 0, "failed": 0, "errors": []},
             }
 
             # Track ref_id to actual ID mappings
@@ -3402,16 +3404,37 @@ class LoadFileView(APIView):
             else:
                 logger.warning("No 'Contracts' sheet found in Excel file")
 
+            # Process Representatives sheet last (requires entities to exist)
+            if "Representatives" in excel_data.sheet_names:
+                logger.info("Processing Representatives sheet")
+                representatives_df = normalize_datetime_columns(
+                    pd.read_excel(excel_file, sheet_name="Representatives")
+                ).fillna("")
+                representatives_records = representatives_df.to_dict(orient="records")
+                representatives_result = self._process_representatives(
+                    request,
+                    representatives_records,
+                    folders_map,
+                    folder_id,
+                    entity_ref_map,
+                    on_conflict,
+                )
+                overall_results["representatives"] = representatives_result
+            else:
+                logger.warning("No 'Representatives' sheet found in Excel file")
+
             # Calculate totals
             total_successful = (
                 overall_results["entities"]["successful"]
                 + overall_results["solutions"]["successful"]
                 + overall_results["contracts"]["successful"]
+                + overall_results["representatives"]["successful"]
             )
             total_failed = (
                 overall_results["entities"]["failed"]
                 + overall_results["solutions"]["failed"]
                 + overall_results["contracts"]["failed"]
+                + overall_results["representatives"]["failed"]
             )
 
             logger.info(
@@ -3430,6 +3453,7 @@ class LoadFileView(APIView):
                 },
                 "solutions": {"successful": 0, "failed": 0, "errors": []},
                 "contracts": {"successful": 0, "failed": 0, "errors": []},
+                "representatives": {"successful": 0, "failed": 0, "errors": []},
             }
 
     def _process_entities(
@@ -3985,6 +4009,137 @@ class LoadFileView(APIView):
 
         logger.info(
             f"Contract import complete. Success: {results['successful']}, Failed: {results['failed']}"
+        )
+        return results
+
+    def _process_representatives(
+        self,
+        request,
+        records,
+        folders_map,
+        folder_id,
+        entity_ref_map,
+        on_conflict=ConflictMode.STOP,
+    ):
+        """Process representatives from TPRM import."""
+        results = {
+            "successful": 0,
+            "failed": 0,
+            "skipped": 0,
+            "updated": 0,
+            "errors": [],
+        }
+
+        for record in records:
+            try:
+                email = str(record.get("email", "")).strip()
+                if not email:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "error": "email field is mandatory"}
+                    )
+                    continue
+
+                provider_ref_id = str(record.get("provider_entity_ref_id", "")).strip()
+                if not provider_ref_id:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {
+                            "record": record,
+                            "error": "provider_entity_ref_id field is mandatory",
+                        }
+                    )
+                    continue
+
+                provider_entity_id = entity_ref_map.get(provider_ref_id)
+
+                if not provider_entity_id:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {
+                            "record": record,
+                            "error": (
+                                f"Provider entity with ref_id '{provider_ref_id}' "
+                                "not found"
+                            ),
+                        }
+                    )
+                    continue
+
+                representative_data = {
+                    "email": email,
+                    "entity": provider_entity_id,
+                    "first_name": str(record.get("first_name", "")).strip(),
+                    "last_name": str(record.get("last_name", "")).strip(),
+                    "description": record.get("description", ""),
+                    "phone": str(record.get("phone", "")).strip(),
+                    "role": str(record.get("role", "")).strip(),
+                }
+
+                existing_representative = Representative.objects.filter(
+                    email__iexact=email
+                ).first()
+
+                if existing_representative:
+                    match on_conflict:
+                        case ConflictMode.SKIP:
+                            results["skipped"] += 1
+                            continue
+                        case ConflictMode.STOP:
+                            results["failed"] += 1
+                            results["errors"].append(
+                                {
+                                    "record": record,
+                                    "error": (
+                                        "Representative already exists "
+                                        "(conflict policy: stop)"
+                                    ),
+                                }
+                            )
+                            results["stopped"] = True
+                            break
+                        case ConflictMode.UPDATE:
+                            serializer = RepresentativeWriteSerializer(
+                                instance=existing_representative,
+                                data=representative_data,
+                                partial=True,
+                                context={"request": request},
+                            )
+                            if serializer.is_valid():
+                                serializer.save()
+                                results["updated"] += 1
+                            else:
+                                results["failed"] += 1
+                                results["errors"].append(
+                                    {"record": record, "errors": serializer.errors}
+                                )
+                            continue
+
+                serializer = RepresentativeWriteSerializer(
+                    data=representative_data, context={"request": request}
+                )
+
+                if serializer.is_valid(raise_exception=True):
+                    representative = serializer.save()
+                    results["successful"] += 1
+                    logger.debug(
+                        "Created representative: "
+                        f"{representative.email} for entity ref_id: {provider_ref_id}"
+                    )
+                else:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "errors": serializer.errors}
+                    )
+
+            except Exception as e:
+                logger.warning(f"Error creating representative: {str(e)}")
+                results["failed"] += 1
+                results["errors"].append({"record": record, "error": str(e)})
+
+        logger.info(
+            "Representative import complete. "
+            f"Success: {results['successful']}, Failed: {results['failed']}"
         )
         return results
 
