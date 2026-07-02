@@ -5,6 +5,7 @@
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import DocumentReferencesPanel from './DocumentReferencesPanel.svelte';
 	import DocumentLinkModal from './DocumentLinkModal.svelte';
+	import { documentTypeLabel } from '$lib/utils/documentTypes';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import {
 		getModalStore,
@@ -31,6 +32,10 @@
 	let revisions: any[] = $state(data.revisions);
 	let currentRevision: any = $state(data.currentRevision);
 	let templates: any[] = $state(data.templates || []);
+	// The container's type scopes the template picker to relevant templates.
+	let documentType = $derived(
+		parent?.document_type ?? (createParentField === 'policy' ? 'policy' : '')
+	);
 	let availableLocales: string[] = $state(data.availableLocales || []);
 	let currentLocale = $state(data.document?.locale || data.userLocale || 'en');
 	let showLocalePicker = $state(false);
@@ -196,7 +201,11 @@
 		}
 		// Fetch templates for the target locale (falls back to English on the backend)
 		try {
-			const res = await proxyGet({ _action: 'templates', lang: newTranslationLocale });
+			const res = await proxyGet({
+				_action: 'templates',
+				lang: newTranslationLocale,
+				document_type: documentType
+			});
 			if (res.ok) {
 				templates = await res.json();
 			}
@@ -945,7 +954,15 @@
 						<i class="fa-solid fa-file-pen text-2xl text-surface-500"></i>
 					</div>
 					<h2 class="text-xl font-semibold mb-2">{m.documentEditor()}</h2>
-					<p class="text-surface-500">{m.chooseDocumentTemplate()}</p>
+					<p class="text-surface-500">
+						{#if documentType}
+							{m.chooseDocumentTemplateForType({
+								type: documentTypeLabel(documentType).toLowerCase()
+							})}
+						{:else}
+							{m.chooseDocumentTemplate()}
+						{/if}
+					</p>
 				</div>
 
 				{#if addingTranslationLocale}

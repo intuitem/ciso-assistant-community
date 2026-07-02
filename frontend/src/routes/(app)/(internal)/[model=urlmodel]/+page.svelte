@@ -359,6 +359,15 @@
 										}}>🇪🇺</button
 									>
 								{/if}
+								{#if URLModel === 'document-templates'}
+									<a
+										href="{URLModel}/import"
+										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+										title={m.importTemplates()}
+										aria-label={m.importTemplates()}
+										data-testid="import-templates-button"><i class="fa-solid fa-file-import"></i></a
+									>
+								{/if}
 								{#if URLModel === 'cwes'}
 									<button
 										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"

@@ -90,7 +90,9 @@ export const load: PageServerLoad = async (event) => {
 	// Load available templates
 	let templates: any[] = [];
 	try {
-		const templatesRes = await fetch(`${BASE_API_URL}/managed-documents/templates/`);
+		const templatesRes = await fetch(
+			`${BASE_API_URL}/managed-documents/templates/?document_type=policy`
+		);
 		if (templatesRes.ok) {
 			templates = await templatesRes.json();
 		}

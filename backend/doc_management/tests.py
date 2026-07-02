@@ -181,3 +181,37 @@ class TestContainerGrouping:
         assert get("plain").document_type == "policy"
         # invalid type -> falls back to policy
         assert get("bad_type").document_type == "policy"
+
+    def test_import_templates_from_zip(self):
+        import io
+        import zipfile
+        from doc_management.template_import import import_templates_from_zip
+        from doc_management.models import DocumentTemplate
+
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w") as zf:
+            zf.writestr(
+                "en/access_ctl.md",
+                "---\ntitle: Access Control\ndocument_type: procedure\n---\n# body",
+            )
+            zf.writestr("fr/access_ctl.md", "---\ntitle: Contrôle\n---\n# corps")
+            zf.writestr("en/notes.txt", "ignored non-markdown")
+            zf.writestr("toplevel.md", "no locale dir")
+        buf.seek(0)
+
+        result = import_templates_from_zip(buf, Folder.get_root_folder())
+        assert result["created"] == 2
+        en = DocumentTemplate.objects.get(ref_id="access_ctl", locale="en")
+        assert en.document_type == "procedure"
+        assert en.builtin is False
+        assert en.default_locale is True
+        assert (
+            DocumentTemplate.objects.get(ref_id="access_ctl", locale="fr").document_type
+            == "policy"
+        )
+        assert any("toplevel.md" in e for e in result["errors"])
+
+        # re-import upserts (no duplicates)
+        buf.seek(0)
+        again = import_templates_from_zip(buf, Folder.get_root_folder())
+        assert again["updated"] == 2 and again["created"] == 0

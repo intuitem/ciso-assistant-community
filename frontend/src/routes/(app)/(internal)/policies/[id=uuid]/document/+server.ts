@@ -123,7 +123,11 @@ export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
 		}
 		case 'templates': {
 			const lang = url.searchParams.get('lang') || '';
-			const templatesEndpoint = `${BASE_API_URL}/managed-documents/templates/${lang ? `?lang=${lang}` : ''}`;
+			const docType = url.searchParams.get('document_type') || '';
+			const qp = new URLSearchParams();
+			if (lang) qp.set('lang', lang);
+			if (docType) qp.set('document_type', docType);
+			const templatesEndpoint = `${BASE_API_URL}/managed-documents/templates/${qp.toString() ? `?${qp}` : ''}`;
 			const templatesRes = await fetch(templatesEndpoint);
 			if (!templatesRes.ok) {
 				error(templatesRes.status as NumericRange<400, 599>, await templatesRes.json());

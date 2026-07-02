@@ -48,6 +48,42 @@ class DocumentTemplateViewSet(BaseModelViewSet):
     filterset_fields = ["document_type", "folder", "locale", "builtin", "ref_id"]
     serializers_module = "doc_management.serializers"
 
+    @action(detail=False, methods=["post"], url_path="import")
+    def import_templates(self, request):
+        """Bulk-import custom templates from a .zip of ``<locale>/<name>.md``
+        files (same layout as the built-in library)."""
+        import zipfile
+
+        from .template_import import import_templates_from_zip
+
+        uploaded = request.FILES.get("file")
+        if not uploaded:
+            return Response(
+                {"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        if not uploaded.name.lower().endswith(".zip"):
+            return Response(
+                {"file": "invalidFileType"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        folder_id = request.data.get("folder")
+        folder = Folder.objects.filter(id=folder_id).first() if folder_id else None
+        if folder is None:
+            folder = Folder.get_root_folder()
+
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_documenttemplate"),
+            folder=folder,
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            result = import_templates_from_zip(uploaded, folder)
+        except zipfile.BadZipFile:
+            return Response({"file": "invalidZip"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(result)
+
 
 from .serializers import DocumentContainerReadSerializer
 
@@ -297,9 +333,30 @@ class ManagedDocumentViewSet(BaseModelViewSet):
         """List available document templates (DB-backed) for a language, falling
         back to English when the requested language has none."""
         lang = request.query_params.get("lang") or _get_user_lang(request)
-        qs = DocumentTemplate.objects.filter(locale=lang)
-        if not qs.exists():
-            qs = DocumentTemplate.objects.filter(locale="en")
+        document_type = request.query_params.get("document_type")
+
+        # Folder-scope to templates the user can access; built-ins are the shared
+        # library and stay visible regardless of domain.
+        # TODO(revisit): custom templates in Global aren't shared to domain-only
+        # users (only built-ins are). If Global should act as a shared library,
+        # also OR in root-folder templates here.
+        accessible_ids = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, DocumentTemplate
+        )[0]
+
+        def for_locale(locale):
+            qs = DocumentTemplate.objects.filter(locale=locale).filter(
+                models.Q(id__in=accessible_ids) | models.Q(builtin=True)
+            )
+            if document_type:
+                qs = qs.filter(document_type=document_type)
+            return qs
+
+        # Fall back to English per (locale, type), not all-or-nothing: an English
+        # template of the requested type shows even when the locale has other types.
+        qs = for_locale(lang)
+        if not qs.exists() and lang != "en":
+            qs = for_locale("en")
         templates = [
             {
                 "id": t.ref_id,
