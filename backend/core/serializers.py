@@ -18,6 +18,7 @@ from core.serializer_fields import (
 from core.utils import time_state
 from ebios_rm.models import EbiosRMStudy, Stakeholder
 from tprm.models import Contract, Solution
+from pmbok.models import GenericCollection
 from global_settings.utils import ff_is_enabled
 from iam.models import *
 from django.contrib.auth.models import Permission
@@ -69,12 +70,47 @@ class SerializerFactory:
 class BaseModelSerializer(serializers.ModelSerializer):
     FLAGGED_FIELDS: dict[str, str] = {}
 
+    # Fields a third-party *respondent* must never write on this model. They are
+    # stripped centrally (see `_strip_respondent_protected_fields`) for any user
+    # whose access to the target object's folder is respondent-scoped.
+    # The per-audit-configurable equivalent for RequirementAssessment
+    # fields lives in the compliance assessment's `field_visibility`.
+    RESPONDENT_PROTECTED_FIELDS: set[str] = set()
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         for field_name, flag_name in self.FLAGGED_FIELDS.items():
             if not ff_is_enabled(flag_name):
                 self.fields.pop(field_name)
+
+    def _strip_respondent_protected_fields(self, attrs: dict) -> dict:
+        """Drop `RESPONDENT_PROTECTED_FIELDS` from *attrs* when the requesting
+        user is a respondent on the target object's folder.
+
+        Stripping is silent: full PUT bodies carry every field, so raising would
+        turn unrelated respondent edits into 400s. Resolves the folder from the
+        existing instance on update, or the incoming payload on create.
+        """
+        if not self.RESPONDENT_PROTECTED_FIELDS:
+            return attrs
+        request = self.context.get("request")
+        if request is None or not getattr(request.user, "is_authenticated", False):
+            return attrs
+        folder = (
+            Folder.get_folder(self.instance)
+            if self.instance is not None
+            else attrs.get("folder")
+        )
+        if folder is None:
+            return attrs
+        from core.utils import get_respondent_scoped_folder_ids
+
+        if folder.id not in get_respondent_scoped_folder_ids(request.user):
+            return attrs
+        for field_name in self.RESPONDENT_PROTECTED_FIELDS:
+            attrs.pop(field_name, None)
+        return attrs
 
     def _check_object_perm(
         self, instance_or_data, action: str, *, folder: Folder | None = None
@@ -101,11 +137,16 @@ class BaseModelSerializer(serializers.ModelSerializer):
             )
 
     def _ensure_immutable(self, field_name: str, value) -> None:
-        """Raise PermissionDenied if a field's value is changing on update."""
+        """Raise PermissionDenied if a field differs from the persisted value.
+
+        This treats null transitions as changes: None -> value, value -> None,
+        and value -> different value are all blocked on update.
+        """
         if self.instance is None:
             return
         current_id = getattr(self.instance, f"{field_name}_id", None)
-        if current_id and str(value.id) != str(current_id):
+        new_id = getattr(value, "id", None)
+        if str(new_id) != str(current_id):
             raise PermissionDenied({field_name: "This field is immutable"})
 
     def validate_folder(self, folder: Folder) -> Folder:
@@ -169,6 +210,7 @@ class BaseModelSerializer(serializers.ModelSerializer):
     def validate(self, data):
         data = super().validate(data)
         self._check_m2m_visibility(data)
+        data = self._strip_respondent_protected_fields(data)
         return data
 
     def delete(self, instance: models.Model) -> None:
@@ -466,6 +508,13 @@ class PerimeterImportExportSerializer(BaseModelSerializer):
 
 
 class RiskAssessmentWriteSerializer(BaseModelSerializer):
+    genericcollection = serializers.PrimaryKeyRelatedField(
+        source="genericcollection_set",
+        many=True,
+        required=False,
+        queryset=GenericCollection.objects.all(),
+    )
+
     def validate(self, attrs):
         if hasattr(self, "instance") and self.instance and self.instance.is_locked:
             # If we're unlocking (setting is_locked to False), allow the operation
@@ -1785,6 +1834,13 @@ class AppliedControlImportExportSerializer(BaseModelSerializer):
 
 
 class PolicyWriteSerializer(AppliedControlWriteSerializer):
+    genericcollection = serializers.PrimaryKeyRelatedField(
+        source="genericcollection_set",
+        many=True,
+        required=False,
+        queryset=GenericCollection.objects.all(),
+    )
+
     class Meta:
         model = Policy
         fields = "__all__"
@@ -1856,6 +1912,7 @@ class TeamReadSerializer(BaseModelSerializer):
 
 class UserReadSerializer(BaseModelSerializer):
     user_groups = FieldsRelatedField(fields=["builtin", "id"], many=True)
+    idp_groups = FieldsRelatedField(many=True)
     has_mfa_enabled = serializers.BooleanField(read_only=True)
 
     class Meta:
@@ -1868,6 +1925,7 @@ class UserReadSerializer(BaseModelSerializer):
             "is_active",
             "date_joined",
             "user_groups",
+            "idp_groups",
             "keep_local_login",
             "is_third_party",
             "observation",
@@ -1893,6 +1951,7 @@ class UserRolesOnFolderSerializer(BaseModelSerializer):
 
 class UserWriteSerializer(BaseModelSerializer):
     is_local = serializers.BooleanField(required=False)
+    has_mfa_enabled = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = User
@@ -1910,6 +1969,7 @@ class UserWriteSerializer(BaseModelSerializer):
             "observation",
             "expiry_date",
             "is_superuser",
+            "has_mfa_enabled",
         ]
 
     def validate_email(self, email):
@@ -1982,6 +2042,21 @@ class UserGroupReadSerializer(BaseModelSerializer):
 class UserGroupWriteSerializer(BaseModelSerializer):
     class Meta:
         model = UserGroup
+        fields = "__all__"
+
+
+class IdPGroupReadSerializer(BaseModelSerializer):
+    user_groups = FieldsRelatedField(many=True)
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = IdPGroup
+        fields = "__all__"
+
+
+class IdPGroupWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = IdPGroup
         fields = "__all__"
 
 
@@ -2325,11 +2400,21 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     contracts = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Contract.objects.all(), required=False
     )
+    genericcollection = serializers.PrimaryKeyRelatedField(
+        source="genericcollection_set",
+        many=True,
+        required=False,
+        queryset=GenericCollection.objects.all(),
+    )
     owner = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Actor.objects.all(), required=False
     )
     attachment = serializers.FileField(required=False)
     link = serializers.URLField(required=False)
+
+    # A respondent deposits evidence but must not adjudicate it: the status
+    # (in_review / approved / rejected / …) is an auditor-side decision.
+    RESPONDENT_PROTECTED_FIELDS = {"status"}
 
     class Meta:
         model = Evidence
@@ -2755,6 +2840,12 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
 
 
 class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
+    genericcollection = serializers.PrimaryKeyRelatedField(
+        source="genericcollection_set",
+        many=True,
+        required=False,
+        queryset=GenericCollection.objects.all(),
+    )
     baseline = serializers.PrimaryKeyRelatedField(
         write_only=True,
         queryset=ComplianceAssessment.objects.all(),
@@ -2884,6 +2975,14 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
         with transaction.atomic():
             # Perform the main update (fields + M2M)
             updated_instance = super().update(instance, validated_data)
+
+            # For dynamic frameworks, recompute IGs from current answers so the
+            # answer-driven calc always wins over any manual override submitted
+            # here. Manual (non-dynamic) IGs are preserved inside the helper.
+            if updated_instance.framework and updated_instance.framework.is_dynamic():
+                from core.utils import update_selected_implementation_groups
+
+                update_selected_implementation_groups(updated_instance)
 
             # Cascade folder change to requirement assessments
             if old_folder_id != updated_instance.folder_id:
@@ -3139,6 +3238,22 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                     for k, v in data.items()
                     if is_field_editable_by(ca, k, "respondent")
                 }
+
+        # On update, treat an empty required-choice value as "unchanged" instead
+        # of failing validation. The respondent view (`requirements_list`) strips
+        # auditor-only fields like `status` from the read, so the Select-evidence /
+        # Select-applied-controls modals — which resubmit the *whole* RA form —
+        # send those fields back as "".
+        if self.instance is not None:
+            data = {
+                k: v
+                for k, v in data.items()
+                if not (
+                    v == ""
+                    and isinstance(self.fields.get(k), serializers.ChoiceField)
+                    and not getattr(self.fields[k], "allow_blank", False)
+                )
+            }
         return super().to_internal_value(data)
 
     def validate_answers(self, value):
@@ -3728,49 +3843,26 @@ class RequirementMappingSetReadSerializer(BaseModelSerializer):
             "frameworks_available",
         ]
 
+    @staticmethod
+    def _framework_info(urn):
+        from core.mappings.engine import engine
+
+        fw = engine.frameworks.get(urn)
+        if fw is None:
+            return {"str": urn, "urn": urn}
+        return {"str": fw.get("name", urn), "urn": urn}
+
     def get_source_framework(self, obj):
         mapping_set = obj.content.get(
             "requirement_mapping_sets", [obj.content.get("requirement_mapping_set", {})]
         )[0]
-        source_urn = mapping_set.get("source_framework_urn", "")
-        framework_lib = StoredLibrary.objects.filter(
-            content__framework__urn=source_urn,
-            content__framework__isnull=False,
-            content__requirement_mapping_set__isnull=True,
-            content__requirement_mapping_sets__isnull=True,
-        ).first()
-        if framework_lib is None:
-            return {
-                "str": source_urn,
-                "urn": source_urn,
-            }
-        framework = framework_lib.content.get("framework")
-        return {
-            "str": framework.get("name", framework.get("urn")),
-            "urn": framework.get("urn"),
-        }
+        return self._framework_info(mapping_set.get("source_framework_urn", ""))
 
     def get_target_framework(self, obj):
         mapping_set = obj.content.get(
             "requirement_mapping_sets", [obj.content.get("requirement_mapping_set", {})]
         )[0]
-        target_urn = mapping_set.get("target_framework_urn", "")
-        framework_lib = StoredLibrary.objects.filter(
-            content__framework__urn=target_urn,
-            content__framework__isnull=False,
-            content__requirement_mapping_set__isnull=True,
-            content__requirement_mapping_sets__isnull=True,
-        ).first()
-        if framework_lib is None:
-            return {
-                "str": target_urn,
-                "urn": target_urn,
-            }
-        framework = framework_lib.content.get("framework")
-        return {
-            "str": framework.get("name", framework.get("urn")),
-            "urn": framework.get("urn"),
-        }
+        return self._framework_info(mapping_set.get("target_framework_urn", ""))
 
     def get_urn(self, obj):
         rms = obj.content.get(
@@ -4176,6 +4268,12 @@ class LibraryFilteringLabelWriteSerializer(BaseModelSerializer):
 
 
 class SecurityExceptionWriteSerializer(BaseModelSerializer):
+    genericcollection = serializers.PrimaryKeyRelatedField(
+        source="genericcollection_set",
+        many=True,
+        required=False,
+        queryset=GenericCollection.objects.all(),
+    )
     requirement_assessments = serializers.PrimaryKeyRelatedField(
         many=True, queryset=RequirementAssessment.objects.all(), required=False
     )
@@ -4340,6 +4438,13 @@ class SecurityExceptionReadSerializer(BaseModelSerializer):
 
 
 class FindingsAssessmentWriteSerializer(BaseModelSerializer):
+    genericcollection = serializers.PrimaryKeyRelatedField(
+        source="genericcollection_set",
+        many=True,
+        required=False,
+        queryset=GenericCollection.objects.all(),
+    )
+
     def validate(self, attrs):
         if hasattr(self, "instance") and self.instance and self.instance.is_locked:
             # If we're unlocking (setting is_locked to False), allow the operation
@@ -4716,15 +4821,10 @@ class TimelineEntryReadSerializer(TimelineEntryWriteSerializer):
 
 
 class CommentWriteSerializer(BaseModelSerializer):
-    PARENT_FIELDS = [
-        "requirement_assessment",
-        "risk_scenario",
-        "applied_control",
-        "finding",
-    ]
+    PARENT_FIELDS = Comment.PARENT_FIELDS
 
     def validate(self, data):
-        # Only enforce the one-parent constraint on creation, not partial updates
+        data = super().validate(data)
         if self.instance is None:
             parent_count = sum(1 for f in self.PARENT_FIELDS if data.get(f) is not None)
             if parent_count != 1:
@@ -4732,6 +4832,10 @@ class CommentWriteSerializer(BaseModelSerializer):
                     "Exactly one parent (requirement_assessment, risk_scenario, "
                     "applied_control, or finding) must be set."
                 )
+        else:
+            for field_name in self.PARENT_FIELDS:
+                if field_name in data:
+                    self._ensure_immutable(field_name, data[field_name])
         return data
 
     def create(self, validated_data):

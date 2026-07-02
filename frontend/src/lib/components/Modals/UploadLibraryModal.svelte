@@ -34,7 +34,7 @@
 				type="button"
 				class="flex items-center justify-center w-8 h-8 rounded-md text-surface-400-600 hover:text-surface-600-400 hover:bg-surface-100-900 transition-colors"
 				onclick={parent.onClose}
-				aria-label="Close"
+				aria-label={m.close()}
 			>
 				<i class="fa-solid fa-xmark"></i>
 			</button>

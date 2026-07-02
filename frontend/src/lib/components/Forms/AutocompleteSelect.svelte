@@ -134,6 +134,24 @@
 	// Clamp to supported CSS range (chip-max-1 through chip-max-5 in app.css)
 	const maxVisibleChips = Math.max(1, Math.min(5, _maxVisibleChips));
 
+	const inputId = `form-input-${field.replaceAll('_', '-')}`;
+
+	// Patch svelte-multiselect's internal DOM (it exposes no props for these): name
+	// the role="searchbox" wrapper and re-role its chips <ul>, which holds the <input>.
+	let outerDiv: HTMLElement | null = $state(null);
+	$effect(() => {
+		if (!outerDiv) return;
+		const a11yName = label?.trim() || placeholder?.trim() || field.replaceAll('_', ' ');
+		if (!outerDiv.getAttribute('aria-label')) outerDiv.setAttribute('aria-label', a11yName);
+		outerDiv.querySelector('ul.selected')?.setAttribute('role', 'group');
+		// No visible <label> (e.g. column filters) — name the input directly.
+		if (label === undefined) {
+			outerDiv
+				.querySelector('ul.selected input:not([aria-hidden])')
+				?.setAttribute('aria-label', a11yName);
+		}
+	});
+
 	if (translateOptions) {
 		options = options.map((option) => {
 			const fromLabel = safeTranslate(option.label);
@@ -156,7 +174,12 @@
 	type SelectValue = string | number | undefined;
 
 	let selected: Option[] = $state([]);
-	let selectedValues: SelectValue[] = $derived(selected.map((item) => item.value));
+	// svelte-multiselect creates user options as `{ label }` without a value key
+	let selectedValues: SelectValue[] = $derived(
+		selected.map((item: any) =>
+			item != null && typeof item === 'object' ? (item.value ?? item.label) : item
+		)
+	);
 	let isInternalUpdate = false;
 	let optionsLoaded = $state(Boolean(options.length));
 	const default_value = nullable ? null : '';
@@ -532,8 +555,7 @@
 	});
 
 	run(() => {
-		const mapped = selected.map((option) => option.value);
-		cachedValue = mapped.length > 0 ? mapped : undefined;
+		cachedValue = selectedValues.length > 0 ? selectedValues : undefined;
 		cachedOptions = selected;
 	});
 
@@ -639,11 +661,11 @@
 <div class={baseClass} hidden={hidden || undefined}>
 	{#if label !== undefined}
 		{#if $constraints?.required || mandatory}
-			<label class="text-sm font-semibold" for={field}
+			<label class="text-sm font-semibold" for={inputId}
 				>{label} <span class="text-red-500">*</span></label
 			>
 		{:else}
-			<label class="text-sm font-semibold" for={field}>{label}</label>
+			<label class="text-sm font-semibold" for={inputId}>{label}</label>
 		{/if}
 	{/if}
 	{#if $errors && $errors._errors}
@@ -674,6 +696,8 @@
 		<MultiSelect
 			bind:selected
 			bind:open={multiSelectOpen}
+			bind:outerDiv
+			id={inputId}
 			options={new Proxy(
 				effectiveLazy && selected.length > 0 && !lazyHasSearched
 					? [...options, { label: m.typeToSearch(), value: LAZY_HINT_VALUE, disabled: true }]

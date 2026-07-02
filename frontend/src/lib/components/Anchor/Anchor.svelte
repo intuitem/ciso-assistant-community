@@ -37,6 +37,6 @@
 	};
 </script>
 
-<a onclick={handleClick} {href} {...rest}>
+<a aria-label={label || undefined} onclick={handleClick} {href} {...rest}>
 	{@render children?.()}
 </a>

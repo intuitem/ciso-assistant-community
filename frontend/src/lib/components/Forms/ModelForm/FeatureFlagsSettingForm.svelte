@@ -33,6 +33,11 @@
 					field: 'journeys',
 					label: m.journeys(),
 					description: m.journeysDescription()
+				},
+				{
+					field: 'custom_portals',
+					label: m.customPortals(),
+					description: m.customPortalsDescription()
 				}
 			].filter(({ field }) => availableKeys.includes(field))
 		},
@@ -240,6 +245,11 @@
 					field: 'focus_mode',
 					label: m.focusMode(),
 					description: m.focusModeTooltip()
+				},
+				{
+					field: 'idp_groups',
+					label: m.idpGroups(),
+					description: m.idpGroupsDescription()
 				},
 				{
 					field: 'terminologies',

@@ -2512,7 +2512,7 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
         return self._is_dynamic_cache
 
     def __str__(self) -> str:
-        return f"{self.provider} - {self.name}"
+        return f"{self.provider} - {self.get_name_translated}"
 
 
 class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
@@ -4919,6 +4919,13 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
 
 
 class Comment(AbstractBaseModel, FolderMixin):
+    PARENT_FIELDS = (
+        "requirement_assessment",
+        "risk_scenario",
+        "applied_control",
+        "finding",
+    )
+
     body = models.TextField(verbose_name=_("Body"))
     is_tainted = models.BooleanField(default=False, verbose_name=_("Edited"))
     is_active = models.BooleanField(default=True, verbose_name=_("Active"))
@@ -5014,6 +5021,11 @@ class Comment(AbstractBaseModel, FolderMixin):
         if not self._state.adding and self.pk:
             try:
                 old = Comment.objects.get(pk=self.pk)
+                for field_name in self.PARENT_FIELDS:
+                    if getattr(old, f"{field_name}_id") != getattr(
+                        self, f"{field_name}_id"
+                    ):
+                        raise ValidationError(_("Comment parent cannot be changed."))
                 if old.body != self.body:
                     self.is_tainted = True
             except Comment.DoesNotExist:

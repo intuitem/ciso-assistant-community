@@ -1212,10 +1212,23 @@ def _build_answer_context(questions_qs, answers_qs):
 
 
 def update_selected_implementation_groups(compliance_assessment):
-    """Recalculate selected IGs based on all visible answers in the assessment."""
-    from core.models import Answer, Question
+    """Recalculate dynamic IGs from visible answers, preserving manually-picked ones.
 
-    igs_to_select = set()
+    An IG is "dynamic" iff at least one QuestionChoice in the framework lists it in
+    select_implementation_groups. Those get fully recomputed here. Any other IG already
+    on the assessment is treated as a manual pick and left untouched.
+    """
+    from core.models import Answer, Question, QuestionChoice
+
+    dynamic_eligible_igs: set[str] = set()
+    for select_list in QuestionChoice.objects.filter(
+        question__requirement_node__framework=compliance_assessment.framework,
+        select_implementation_groups__isnull=False,
+    ).values_list("select_implementation_groups", flat=True):
+        if select_list:
+            dynamic_eligible_igs.update(select_list)
+
+    igs_to_select: set[str] = set()
 
     requirement_assessments = (
         compliance_assessment.requirement_assessments.select_related(
@@ -1261,7 +1274,12 @@ def update_selected_implementation_groups(compliance_assessment):
                 if ig.get("default_selected"):
                     igs_to_select.add(ig["ref_id"])
 
-    compliance_assessment.selected_implementation_groups = list(igs_to_select)
+    current = set(compliance_assessment.selected_implementation_groups or [])
+    manual_only = current - dynamic_eligible_igs
+
+    compliance_assessment.selected_implementation_groups = list(
+        manual_only | igs_to_select
+    )
     compliance_assessment.save(update_fields=["selected_implementation_groups"])
 
 
