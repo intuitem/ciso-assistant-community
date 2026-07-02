@@ -246,6 +246,17 @@
 					label={m.remediationMeasures()}
 				/>
 
+				<AutocompleteSelect
+					{form}
+					field="evidences"
+					multiple
+					optionsEndpoint="evidences"
+					optionsExtraFields={[['folder', 'str']]}
+					cacheLock={cacheLocks['evidences']}
+					bind:cachedValue={formDataCache['evidences']}
+					label={m.evidences()}
+				/>
+
 				<TextField
 					{form}
 					field="reference_link"
