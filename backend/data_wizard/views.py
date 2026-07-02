@@ -4052,12 +4052,6 @@ class LoadFileView(APIView):
                     continue
 
                 provider_entity_id = entity_ref_map.get(provider_ref_id)
-                if not provider_entity_id:
-                    provider_entity = Entity.objects.filter(
-                        ref_id=provider_ref_id
-                    ).first()
-                    if provider_entity:
-                        provider_entity_id = str(provider_entity.id)
 
                 if not provider_entity_id:
                     results["failed"] += 1
