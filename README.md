@@ -564,6 +564,16 @@ export AUTH_TOKEN_AUTO_REFRESH=True # optional, default value is True. It define
 export AUTH_TOKEN_AUTO_REFRESH_TTL=36000 # optional, default value is 36000 seconds (10 hours). It defines the time to live of the authentication token after auto refresh. You can disable it by setting it to 0.
 ```
 
+<details>
+<summary>[EXPERIMENTAL] Other variable for development on Windows without WSL2</summary>
+
+Only PostgreSQL custom variables can be configured.
+
+Use the helper scripts documented in [`tools/.windows/README.md`](tools/.windows/README.md) for more information.
+
+</details>
+
+
 3. Install uv
 
 Visit the uv website for instructions: <https://docs.astral.sh/uv/getting-started/installation/>
@@ -593,6 +603,13 @@ pre-commit install
   - `create user ciso-assistantuser with password '<POSTGRES_PASSWORD>';`
   - `grant all privileges on database ciso-assistant to ciso-assistantuser;`
 
+<details>
+<summary>[EXPERIMENTAL] Setup PostgreSQL on Windows</summary>
+
+For more information, see the documentation in [`tools/.windows/README.md`](tools/.windows/README.md).
+
+</details>
+
 7. If you want to setup s3 bucket:
 
 - Choose your s3 provider or try s3 feature with miniO with this command:
@@ -607,6 +624,12 @@ pre-commit install
 ```sh
 uv run python manage.py migrate
 ```
+<details>
+<summary>[EXPERIMENTAL] Apply migration on Windows without WSL2</summary>
+
+For more information, see the documentation in [`tools/.windows/README.md`](tools/.windows/README.md).
+
+</details>
 
 9. Create a Django superuser, that will be CISO Assistant administrator.
 
@@ -615,6 +638,13 @@ uv run python manage.py migrate
 ```sh
 uv run python manage.py createsuperuser
 ```
+
+<details>
+<summary>[EXPERIMENTAL] Create a Django superuser on Windows without WSL2</summary>
+
+For more information, see the documentation in [`tools/.windows/README.md`](tools/.windows/README.md).
+
+</details>
 
 10. Run development server.
 
