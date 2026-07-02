@@ -1977,11 +1977,13 @@ export const listViewFields = {
 		}
 	},
 	'document-templates': {
-		head: ['name', 'refId', 'documentType', 'language', 'domain'],
-		body: ['name', 'ref_id', 'document_type', 'locale', 'folder'],
+		head: ['name', 'refId', 'documentType', 'language', 'builtin', 'domain'],
+		body: ['name', 'ref_id', 'document_type', 'locale', 'builtin', 'folder'],
+		meta: ['id', 'builtin'],
 		filters: {
 			folder: DOMAIN_FILTER,
-			document_type: DOCUMENT_TYPE_FILTER
+			document_type: DOCUMENT_TYPE_FILTER,
+			builtin: BUILTIN_FILTER
 		}
 	},
 	'managed-documents': {

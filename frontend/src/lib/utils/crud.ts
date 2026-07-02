@@ -1024,7 +1024,6 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'name' },
 			{ field: 'document_type' },
 			{ field: 'locale' },
-			{ field: 'category' },
 			{ field: 'folder' },
 			{ field: 'builtin' },
 			{ field: 'created_at', type: 'datetime' },

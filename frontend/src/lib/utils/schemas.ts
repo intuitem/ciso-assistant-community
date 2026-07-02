@@ -1850,7 +1850,6 @@ export const DocumentTemplateSchema = z.object({
 	name: z.string().max(200),
 	description: z.string().optional().default(''),
 	document_type: z.string().optional().default('policy'),
-	category: z.string().optional().default(''),
 	content: z.string().optional().default(''),
 	locale: z.string().optional().default('en'),
 	folder: z.string()
