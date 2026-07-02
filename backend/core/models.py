@@ -364,6 +364,14 @@ class ReferentialObjectMixin(AbstractBaseModel, FolderMixin):
         return extract_node_id(self.urn)
 
     @property
+    def is_referenceable(self) -> bool:
+        """Whether this object can travel as a library `dependencies` reference
+        (vs being embedded by value on export). Only builtin libraries are
+        guaranteed present in any target instance, so only their objects qualify;
+        custom objects and non-builtin-library ones must be embedded."""
+        return bool(getattr(self, "library_id", None)) and self.library.builtin
+
+    @property
     def get_name_translated(self) -> str:
         translations = self.translations if self.translations else {}
         locale_translations = translations.get(get_language(), {})

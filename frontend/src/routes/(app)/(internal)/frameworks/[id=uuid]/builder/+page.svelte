@@ -122,6 +122,8 @@
 			framework={data.framework}
 			requirementNodes={data.requirementNodes}
 			questions={data.questions}
+			referenceControlCatalog={data.referenceControlCatalog}
+			threatCatalog={data.threatCatalog}
 			{editingDraft}
 		/>
 	{/if}

@@ -8,7 +8,10 @@ import {
 	validateDraft,
 	buildTree,
 	serializeDraft,
+	hydrateDraft,
 	createBuilderState,
+	makeInlineReferential,
+	setInlineReferentialTranslation,
 	type Framework,
 	type BuilderNode,
 	type RequirementNode,
@@ -155,6 +158,8 @@ function makeNode(overrides: Partial<RequirementNode> = {}): RequirementNode {
 		display_mode: 'default',
 		framework: 'fw-1',
 		folder: 'folder-1',
+		reference_controls: [],
+		threats: [],
 		...overrides
 	};
 }
@@ -523,6 +528,62 @@ describe('serializeDraft round-trip', () => {
 		const ids = draft.nodes.map((x) => x.id);
 		expect(new Set(ids).size).toBe(ids.length);
 		expect(ids).toEqual(['n1']);
+	});
+});
+
+describe('reference controls & threats round-trip', () => {
+	it('preserves node links and inline collections through serialize/hydrate', () => {
+		const fw = makeFramework({
+			inline_reference_controls: [
+				{
+					id: 'rc-1',
+					urn: 'urn:custom:risk:reference_control:fw:c1',
+					ref_id: 'C1',
+					name: 'Inline C1',
+					description: null,
+					annotation: null,
+					category: 'policy',
+					csf_function: 'govern',
+					typical_evidence: null,
+					translations: null
+				}
+			],
+			inline_threats: [
+				{
+					id: 't-1',
+					urn: 'urn:custom:risk:threat:fw:t1',
+					ref_id: 'T1',
+					name: 'Inline T1',
+					description: null,
+					annotation: null,
+					translations: null
+				}
+			]
+		});
+		const node = makeNode({
+			parent_urn: null,
+			reference_controls: [
+				'urn:custom:risk:reference_control:fw:c1',
+				'urn:intuitem:risk:function:doc-pol:a.5.1'
+			],
+			threats: ['urn:custom:risk:threat:fw:t1']
+		});
+		const tree = buildTree([node], []);
+
+		const draft = serializeDraft(fw, tree);
+		expect(draft.nodes[0].reference_controls).toEqual(node.reference_controls);
+		expect(draft.nodes[0].threats).toEqual(node.threats);
+		expect(draft.reference_controls).toHaveLength(1);
+		expect(draft.threats).toHaveLength(1);
+
+		const { frameworkPatch, nodes } = hydrateDraft(draft, fw.id);
+		expect(nodes[0].reference_controls).toEqual(node.reference_controls);
+		expect(nodes[0].threats).toEqual(node.threats);
+		expect(frameworkPatch.inline_reference_controls).toHaveLength(1);
+		expect(frameworkPatch.inline_threats).toHaveLength(1);
+		expect(frameworkPatch.inline_reference_controls?.[0].urn).toBe(
+			'urn:custom:risk:reference_control:fw:c1'
+		);
 	});
 });
 
@@ -1280,5 +1341,179 @@ describe('URN rewrite & repair — gap coverage', () => {
 
 		const choiceUrns = get(store.rootNodes)[0].questions[0].question.choices.map((c) => c.urn);
 		expect(new Set(choiceUrns).size).toBe(2);
+	});
+});
+
+describe('inline object field round-trip (pass 1: description, annotation, csf_function)', () => {
+	it('serialize/hydrate preserves description, annotation and csf_function', () => {
+		const fw = makeFramework({
+			inline_reference_controls: [
+				{
+					id: 'rc-1',
+					urn: 'urn:custom:risk:reference_control:fw:c1',
+					ref_id: 'C1',
+					name: 'Inline C1',
+					description: 'a description',
+					annotation: 'an annotation',
+					category: 'policy',
+					csf_function: 'govern',
+					typical_evidence: null,
+					translations: null
+				}
+			],
+			inline_threats: [
+				{
+					id: 't-1',
+					urn: 'urn:custom:risk:threat:fw:t1',
+					ref_id: 'T1',
+					name: 'Inline T1',
+					description: 'threat desc',
+					annotation: 'threat ann',
+					translations: null
+				}
+			]
+		});
+
+		const draft = serializeDraft(fw, []);
+		const rc = (draft.reference_controls ?? [])[0] as Record<string, unknown>;
+		expect(rc.description).toBe('a description');
+		expect(rc.annotation).toBe('an annotation');
+		expect(rc.csf_function).toBe('govern');
+		const th = (draft.threats ?? [])[0] as Record<string, unknown>;
+		expect(th.description).toBe('threat desc');
+		expect(th.annotation).toBe('threat ann');
+
+		const { frameworkPatch } = hydrateDraft(draft, fw.id);
+		const hrc = frameworkPatch.inline_reference_controls?.[0];
+		expect(hrc?.description).toBe('a description');
+		expect(hrc?.annotation).toBe('an annotation');
+		expect(hrc?.csf_function).toBe('govern');
+		const hth = frameworkPatch.inline_threats?.[0];
+		expect(hth?.description).toBe('threat desc');
+		expect(hth?.annotation).toBe('threat ann');
+	});
+});
+
+describe('inline reference control typical_evidence (pass 2: list support)', () => {
+	it('serialize/hydrate preserves typical_evidence as a list', () => {
+		const fw = makeFramework({
+			inline_reference_controls: [
+				{
+					id: 'rc-1',
+					urn: 'urn:custom:risk:reference_control:fw:c1',
+					ref_id: 'C1',
+					name: 'C1',
+					description: null,
+					annotation: null,
+					category: 'policy',
+					csf_function: null,
+					typical_evidence: ['Signed document', 'Review records'],
+					translations: null
+				}
+			],
+			inline_threats: []
+		});
+
+		const draft = serializeDraft(fw, []);
+		const rc = (draft.reference_controls ?? [])[0] as Record<string, unknown>;
+		expect(rc.typical_evidence).toEqual(['Signed document', 'Review records']);
+
+		const { frameworkPatch } = hydrateDraft(draft, fw.id);
+		expect(frameworkPatch.inline_reference_controls?.[0].typical_evidence).toEqual([
+			'Signed document',
+			'Review records'
+		]);
+	});
+});
+
+describe('makeInlineReferential (inline-defined object)', () => {
+	const base = {
+		namespace: 'custom',
+		slug: 'fw',
+		urnType: 'reference_control' as const,
+		isControl: true
+	};
+
+	it('mints a framework-owned URN from the ref_id and carries all fields', () => {
+		const entry = makeInlineReferential({
+			...base,
+			refId: 'A.5.1',
+			name: 'Policies',
+			description: 'desc',
+			annotation: 'ann',
+			category: 'policy',
+			csfFunction: 'govern',
+			typicalEvidence: ['Signed doc', 'Review'],
+			translations: { fr: { name: 'Politiques' } }
+		});
+		expect(entry.urn).toBe('urn:custom:risk:reference_control:fw:a.5.1');
+		expect(entry.ref_id).toBe('A.5.1');
+		expect(entry.name).toBe('Policies');
+		expect(entry.description).toBe('desc');
+		expect(entry.annotation).toBe('ann');
+		expect(entry.category).toBe('policy');
+		expect(entry.csf_function).toBe('govern');
+		expect(entry.typical_evidence).toEqual(['Signed doc', 'Review']);
+		expect(entry.translations).toEqual({ fr: { name: 'Politiques' } });
+	});
+
+	it('omits control-only fields for a threat', () => {
+		const entry = makeInlineReferential({
+			...base,
+			urnType: 'threat',
+			isControl: false,
+			refId: 'T1',
+			name: 'Threat'
+		});
+		expect(entry.urn).toBe('urn:custom:risk:threat:fw:t1');
+		expect(entry.category).toBeUndefined();
+		expect(entry.csf_function).toBeUndefined();
+		expect(entry.typical_evidence).toBeUndefined();
+	});
+
+	it('mints a ref_id when none is given', () => {
+		const entry = makeInlineReferential({ ...base, refId: '' });
+		expect(entry.ref_id?.startsWith('imported-')).toBe(true);
+		expect(entry.urn).toContain(':reference_control:fw:imported-');
+	});
+
+	it('trims leading/trailing dashes from the minted suffix (matches backend)', () => {
+		const entry = makeInlineReferential({ ...base, refId: '-Foo Bar-' });
+		// "-Foo Bar-" -> "foo-bar" (lowercased, space collapsed, dashes trimmed).
+		expect(entry.urn).toBe('urn:custom:risk:reference_control:fw:foo-bar');
+	});
+});
+
+describe('setInlineReferentialTranslation', () => {
+	const entries = [
+		{ id: 'a', urn: 'urn:a', ref_id: 'A', name: 'Alpha', translations: null },
+		{ id: 'b', urn: 'urn:b', ref_id: 'B', name: 'Beta', translations: null }
+	];
+
+	it('sets a translation field on the matching entry only', () => {
+		const out = setInlineReferentialTranslation(entries, 'a', 'fr', 'name', 'Alpha-fr');
+		expect(out.find((e) => e.id === 'a')?.translations).toEqual({ fr: { name: 'Alpha-fr' } });
+		expect(out.find((e) => e.id === 'b')?.translations).toBeNull();
+	});
+
+	it('does not mutate the input entries', () => {
+		setInlineReferentialTranslation(entries, 'a', 'fr', 'name', 'X');
+		expect(entries[0].translations).toBeNull();
+	});
+
+	it('merges fields and locales without clobbering existing ones', () => {
+		let out = setInlineReferentialTranslation(entries, 'a', 'fr', 'name', 'Alpha-fr');
+		out = setInlineReferentialTranslation(out, 'a', 'fr', 'description', 'desc-fr');
+		out = setInlineReferentialTranslation(out, 'a', 'de', 'name', 'Alpha-de');
+		expect(out.find((e) => e.id === 'a')?.translations).toEqual({
+			fr: { name: 'Alpha-fr', description: 'desc-fr' },
+			de: { name: 'Alpha-de' }
+		});
+	});
+
+	it('clears a field when set to empty (drops the key)', () => {
+		let out = setInlineReferentialTranslation(entries, 'a', 'fr', 'name', 'Alpha-fr');
+		out = setInlineReferentialTranslation(out, 'a', 'fr', 'name', '');
+		expect(out.find((e) => e.id === 'a')?.translations).toEqual({ fr: {} });
 	});
 });

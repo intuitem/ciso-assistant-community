@@ -986,6 +986,32 @@ class ReferenceControlReadSerializer(ReferentialSerializer):
         exclude = ["translations"]
 
 
+class ReferenceControlBuilderCatalogSerializer(BaseModelSerializer):
+    """Catalog payload for the framework builder's reference-control picker:
+    the full copyable field set plus `referenceable` (whether the object can be
+    carried as a library dependency rather than embedded by value on export)."""
+
+    library = FieldsRelatedField(["name", "id"])
+    referenceable = serializers.BooleanField(source="is_referenceable", read_only=True)
+
+    class Meta:
+        model = ReferenceControl
+        fields = [
+            "id",
+            "urn",
+            "ref_id",
+            "name",
+            "description",
+            "annotation",
+            "category",
+            "csf_function",
+            "typical_evidence",
+            "translations",
+            "library",
+            "referenceable",
+        ]
+
+
 class ReferenceControlImportExportSerializer(BaseModelSerializer):
     library = serializers.SlugRelatedField(slug_field="urn", read_only=True)
 
@@ -1045,6 +1071,28 @@ class ThreatReadSerializer(ReferentialSerializer):
     class Meta:
         model = Threat
         exclude = ["translations"]
+
+
+class ThreatBuilderCatalogSerializer(BaseModelSerializer):
+    """Catalog payload for the framework builder's threat picker (see
+    ReferenceControlBuilderCatalogSerializer)."""
+
+    library = FieldsRelatedField(["name", "id"])
+    referenceable = serializers.BooleanField(source="is_referenceable", read_only=True)
+
+    class Meta:
+        model = Threat
+        fields = [
+            "id",
+            "urn",
+            "ref_id",
+            "name",
+            "description",
+            "annotation",
+            "translations",
+            "library",
+            "referenceable",
+        ]
 
 
 class ThreatImportExportSerializer(BaseModelSerializer):

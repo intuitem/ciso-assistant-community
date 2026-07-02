@@ -5035,6 +5035,17 @@
 	"builderVisibilityExpressionTooltip": "Expression CEL qui doit être évaluée à vrai pour que cette exigence soit visible. Exemple : requirements[\"urn:...\"].score > 50",
 	"builderVisibilityExpressionPlaceholder": "ex. requirements[\"urn:...\"].score > 50",
 	"builderImplementationGroupsLabel": "Groupes d'implémentation :",
+	"builderReferenceControlsLabel": "Mesures de référence :",
+	"builderThreatsLabel": "Menaces :",
+	"builderAddReferenceControl": "Ajouter une mesure de référence",
+	"builderAddThreat": "Ajouter une menace",
+	"builderLinkExistingControl": "Associer une mesure existante",
+	"builderLinkExistingThreat": "Associer une menace existante",
+	"builderDefineInlineControl": "Définir une nouvelle mesure",
+	"builderDefineInlineThreat": "Définir une nouvelle menace",
+	"builderNoCatalogMatches": "Aucune correspondance",
+	"builderAddTypicalEvidence": "Ajouter une preuve typique",
+	"builderWillBeCopied": "copie",
 	"builderAddQuestion": "Ajouter une question",
 	"builderChildrenHidden": [
 		{

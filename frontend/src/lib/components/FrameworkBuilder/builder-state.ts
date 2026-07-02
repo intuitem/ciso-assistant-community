@@ -94,6 +94,30 @@ export interface RequirementNode {
 	translations?: Translations | null;
 	framework: string | { id: string };
 	folder: { id: string; str: string } | string;
+	// URN lists, mirroring the library YAML. They point at inline-defined
+	// objects (see Framework.inline_*) or library-backed ones resolved on publish.
+	reference_controls: string[];
+	threats: string[];
+}
+
+/**
+ * An inline-defined (library-less) reference control or threat owned by the
+ * framework being built. Emitted under objects.* on export.
+ */
+export interface InlineReferential {
+	id: string;
+	urn: string;
+	ref_id: string;
+	name: string | null;
+	description: string | null;
+	annotation: string | null;
+	translations?: Translations | null;
+	// Reference-control only.
+	category?: string | null;
+	csf_function?: string | null;
+	// Reference-control only. A JSONField on the backend: real YAML uses both a
+	// single string and a list of evidence items (doc-pol), so accept both.
+	typical_evidence?: string | string[] | null;
 }
 
 export interface OutcomeRule {
@@ -133,6 +157,9 @@ export interface Framework {
 	ref_id: string | null;
 	editing_version: number;
 	has_compliance_assessments: boolean;
+	// Inline-defined reference controls / threats owned by this framework.
+	inline_reference_controls: InlineReferential[];
+	inline_threats: InlineReferential[];
 }
 
 /**
@@ -239,6 +266,19 @@ export function generateUrn(
 	urnNamespace: string = 'custom'
 ): string {
 	return `urn:${urnNamespace}:risk:${type}:${slug}:${refId}`;
+}
+
+/**
+ * Normalize free text into a URN suffix segment: lowercase, non-`[a-z0-9._-]`
+ * runs collapsed to `-`, and leading/trailing `-` trimmed. Mirrors the backend
+ * `_urn_suffix` (`re.sub(...).strip("-")`) so the same object mints the same URN
+ * whichever path touches it.
+ */
+export function urnSuffix(text: string): string {
+	return text
+		.toLowerCase()
+		.replace(/[^a-z0-9._-]+/g, '-')
+		.replace(/^-+|-+$/g, '');
 }
 
 /**
@@ -548,6 +588,22 @@ export function withTranslation(
 	return { ...current, [lang]: langDict };
 }
 
+/**
+ * Return a new inline-referential list with one translation field updated on the
+ * entry identified by `id`. Pure helper backing the picker's translation mode.
+ */
+export function setInlineReferentialTranslation(
+	entries: InlineReferential[],
+	id: string,
+	lang: string,
+	field: string,
+	value: string
+): InlineReferential[] {
+	return entries.map((e) =>
+		e.id === id ? { ...e, translations: withTranslation(e.translations, lang, field, value) } : e
+	);
+}
+
 /** Serialize a single RequirementNode into its flat persistence shape. */
 export function serializeNode(n: RequirementNode): Record<string, unknown> {
 	return {
@@ -567,7 +623,9 @@ export function serializeNode(n: RequirementNode): Record<string, unknown> {
 		importance: n.importance,
 		display_mode: n.display_mode,
 		folder_id: extractFolderId(n.folder),
-		translations: n.translations ?? null
+		translations: n.translations ?? null,
+		reference_controls: n.reference_controls ?? [],
+		threats: n.threats ?? []
 	};
 }
 
@@ -653,7 +711,12 @@ export function serializeDraft(fw: Framework, rootNodes: BuilderNode[]): DraftJS
 		},
 		nodes,
 		questions,
-		choices
+		choices,
+		reference_controls: (fw.inline_reference_controls ?? []) as unknown as Record<
+			string,
+			unknown
+		>[],
+		threats: (fw.inline_threats ?? []) as unknown as Record<string, unknown>[]
 	};
 }
 
@@ -684,7 +747,9 @@ export function hydrateDraft(
 		outcomes_definition: meta.outcomes_definition as OutcomeRule[] | null,
 		field_visibility: meta.field_visibility ?? {},
 		urn_namespace: meta.urn_namespace ?? 'custom',
-		ref_id: meta.ref_id ?? null
+		ref_id: meta.ref_id ?? null,
+		inline_reference_controls: (draft.reference_controls ?? []) as unknown as InlineReferential[],
+		inline_threats: (draft.threats ?? []) as unknown as InlineReferential[]
 	};
 
 	// Build a lookup from question_id to choices
@@ -749,7 +814,9 @@ export function hydrateDraft(
 		display_mode: (n.display_mode ?? 'default') as 'default' | 'splash',
 		translations: (n.translations ?? null) as Translations | null,
 		framework: (n.framework ?? frameworkId) as string,
-		folder: (n.folder_id ?? n.folder ?? '') as string
+		folder: (n.folder_id ?? n.folder ?? '') as string,
+		reference_controls: (n.reference_controls ?? []) as string[],
+		threats: (n.threats ?? []) as string[]
 	}));
 
 	return { frameworkPatch, nodes, questions };
@@ -1211,7 +1278,9 @@ export function createBuilderState(
 			importance: '',
 			display_mode: defaults.display_mode,
 			framework: frameworkId,
-			folder: folderId
+			folder: folderId,
+			reference_controls: [],
+			threats: []
 		};
 		const newBn: BuilderNode = { node: newNode, questions: [], children: [], depth };
 
@@ -2040,4 +2109,96 @@ export function setBuilderContext(store: BuilderStore) {
 
 export function getBuilderContext(): BuilderStore {
 	return getContext<BuilderStore>(CONTEXT_KEY);
+}
+
+/**
+ * A catalog entry the node picker can link: any existing reference control or
+ * threat in scope. `referenceable` is true only for objects from a builtin
+ * library (carried as a dependency on export); everything else is copied into
+ * the framework as an inline object, so the full field set is included to clone.
+ */
+export interface ReferentialCatalogEntry {
+	id: string;
+	urn: string;
+	ref_id: string | null;
+	name: string | null;
+	description?: string | null;
+	annotation?: string | null;
+	category?: string | null;
+	csf_function?: string | null;
+	typical_evidence?: string | string[] | null;
+	translations?: Translations | null;
+	library?: { id: string; name?: string; str?: string } | string | null;
+	referenceable?: boolean;
+}
+
+export interface ReferentialCatalog {
+	referenceControls: ReferentialCatalogEntry[];
+	threats: ReferentialCatalogEntry[];
+	/** Precomputed `token -> label` over the whole catalog (token = URN, or id
+	 *  for URN-less custom objects), built once so the per-node picker doesn't
+	 *  rebuild it. Framework-local inline objects are overlaid by the component. */
+	labelByToken?: Map<string, string>;
+}
+
+/** Display label for a referential: `ref_id name`, falling back to name/urn. */
+export function referentialLabel(entry: {
+	ref_id?: string | null;
+	name?: string | null;
+	urn?: string | null;
+}): string {
+	if (entry.ref_id) return entry.name ? `${entry.ref_id} ${entry.name}` : entry.ref_id;
+	return entry.name ?? entry.urn ?? '';
+}
+
+/**
+ * Mint a framework-owned inline referential for the inline-define form. The URN
+ * is minted from the ref_id in the framework's namespace/slug.
+ */
+export function makeInlineReferential(opts: {
+	namespace: string;
+	slug: string;
+	urnType: 'reference_control' | 'threat';
+	isControl: boolean;
+	refId: string;
+	name?: string | null;
+	description?: string | null;
+	annotation?: string | null;
+	category?: string | null;
+	csfFunction?: string | null;
+	typicalEvidence?: string | string[] | null;
+	translations?: Translations | null;
+}): InlineReferential {
+	const refId = opts.refId.trim() || `imported-${crypto.randomUUID().slice(0, 8)}`;
+	return {
+		id: crypto.randomUUID(),
+		urn: `urn:${opts.namespace}:risk:${opts.urnType}:${opts.slug}:${urnSuffix(refId)}`,
+		ref_id: refId,
+		name: opts.name ?? null,
+		description: opts.description ?? null,
+		annotation: opts.annotation ?? null,
+		translations: opts.translations ?? null,
+		...(opts.isControl
+			? {
+					category: opts.category ?? null,
+					csf_function: opts.csfFunction ?? null,
+					typical_evidence: opts.typicalEvidence ?? null
+				}
+			: {})
+	};
+}
+
+const CATALOG_CONTEXT_KEY = Symbol('framework-builder-catalog');
+
+export function setReferentialCatalogContext(catalog: ReferentialCatalog) {
+	setContext(CATALOG_CONTEXT_KEY, catalog);
+}
+
+export function getReferentialCatalogContext(): ReferentialCatalog {
+	return (
+		getContext<ReferentialCatalog>(CATALOG_CONTEXT_KEY) ?? {
+			referenceControls: [],
+			threats: []
+		}
+	);
 }

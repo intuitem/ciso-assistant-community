@@ -4,12 +4,15 @@
 	import {
 		createBuilderState,
 		setBuilderContext,
+		setReferentialCatalogContext,
 		getTranslation,
 		withTranslation,
+		referentialLabel,
 		type Framework,
 		type BuilderNode,
 		type RequirementNode,
-		type Question
+		type Question,
+		type ReferentialCatalogEntry
 	} from './builder-state';
 	import type { DraftJSON } from './builder-api';
 	import {
@@ -40,12 +43,32 @@
 		requirementNodes: RequirementNode[];
 		questions: Question[];
 		editingDraft?: DraftJSON | null;
+		referenceControlCatalog?: ReferentialCatalogEntry[];
+		threatCatalog?: ReferentialCatalogEntry[];
 	}
 
-	let { framework, requirementNodes, questions, editingDraft = null }: Props = $props();
+	let {
+		framework,
+		requirementNodes,
+		questions,
+		editingDraft = null,
+		referenceControlCatalog = [],
+		threatCatalog = []
+	}: Props = $props();
 
 	const builder = createBuilderState(framework, requirementNodes, questions, editingDraft);
 	setBuilderContext(builder);
+	// Build the catalog token -> label index once here (token = URN, or id for
+	// URN-less custom objects), rather than rebuilding it in every per-node picker.
+	const catalogLabelByToken = new Map<string, string>();
+	for (const e of [...referenceControlCatalog, ...threatCatalog]) {
+		catalogLabelByToken.set(e.urn || e.id, referentialLabel(e));
+	}
+	setReferentialCatalogContext({
+		referenceControls: referenceControlCatalog,
+		threats: threatCatalog,
+		labelByToken: catalogLabelByToken
+	});
 
 	const cardCollapsed = createCollapsedStore(`fw-builder:${framework.id}:cards:collapsed`);
 	setCardCollapsedContext(cardCollapsed);

@@ -15,6 +15,7 @@ from core.models import (
     Answer,
     ComplianceAssessment,
     Framework,
+    LoadedLibrary,
     Perimeter,
     Question,
     QuestionChoice,
@@ -2382,14 +2383,21 @@ class TestFrameworkDuplicateBehavior:
             question__requirement_node__framework_id=new_fw_id
         ).exists()
 
-    def test_duplicate_does_not_copy_attachments_or_m2m_today(
+    def test_duplicate_carries_node_m2m_but_not_attachments(
         self, authenticated_client, app_config
     ):
-        """Documents current behavior: attachments, threats, and
-        reference_controls are NOT carried over by the duplicate action.
-        If this test ever fails, the scope of duplicate changed — audit
-        whether the new behavior is intended and update accordingly."""
+        """Duplicate carries node threat/reference-control links so a framework
+        ingested from a library can be edited and re-exported. Library-backed
+        objects are shared by reference (not cloned). Attachments are still not
+        copied."""
         folder = Folder.get_root_folder()
+        lib = LoadedLibrary.objects.create(
+            urn="urn:intuitem:risk:library:doc-pol",
+            name="doc-pol",
+            version=1,
+            folder=folder,
+            locale="en",
+        )
         fw = Framework.objects.create(
             name="Attach FW",
             folder=folder,
@@ -2411,8 +2419,20 @@ class TestFrameworkDuplicateBehavior:
             file=SimpleUploadedFile("x.png", REAL_PNG, content_type="image/png"),
             folder=folder,
         )
-        threat = Threat.objects.create(name="t1", folder=folder)
-        reference_control = ReferenceControl.objects.create(name="rc1", folder=folder)
+        threat = Threat.objects.create(
+            name="t1",
+            ref_id="T1",
+            urn="urn:intuitem:risk:threat:doc-pol:t1",
+            folder=folder,
+            library=lib,
+        )
+        reference_control = ReferenceControl.objects.create(
+            name="rc1",
+            ref_id="RC1",
+            urn="urn:intuitem:risk:function:doc-pol:rc1",
+            folder=folder,
+            library=lib,
+        )
         rn.threats.add(threat)
         rn.reference_controls.add(reference_control)
 
@@ -2424,8 +2444,54 @@ class TestFrameworkDuplicateBehavior:
         assert response.status_code == 201
         new_rn = RequirementNode.objects.get(framework_id=response.data["id"])
         assert new_rn.attachments.count() == 0
-        assert new_rn.threats.count() == 0
-        assert new_rn.reference_controls.count() == 0
+        # Library-backed objects are shared by reference, not cloned.
+        assert set(new_rn.threats.values_list("urn", flat=True)) == {threat.urn}
+        assert set(new_rn.reference_controls.values_list("urn", flat=True)) == {
+            reference_control.urn
+        }
+
+    def test_duplicate_clones_inline_owned_objects(
+        self, authenticated_client, app_config
+    ):
+        """Inline-owned (library=None) controls/threats are cloned into the copy
+        with rewritten URNs so the two frameworks stay independent."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Inline Owner FW",
+            folder=folder,
+            is_published=True,
+            urn_namespace="custom",
+            ref_id="inline-owner",
+        )
+        rn = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:custom:risk:req_node:inline-owner:n1",
+            ref_id="n1",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        rc = ReferenceControl.objects.create(
+            name="Inline RC",
+            ref_id="IRC",
+            urn="urn:custom:risk:reference_control:inline-owner:irc",
+            folder=folder,
+        )
+        rn.reference_controls.add(rc)
+
+        response = authenticated_client.post(
+            reverse("frameworks-duplicate", args=[fw.id]),
+            {"name": "Inline Owner FW copy"},
+            format="json",
+        )
+        assert response.status_code == 201, response.data
+        new_rn = RequirementNode.objects.get(framework_id=response.data["id"])
+        new_links = list(new_rn.reference_controls.all())
+        assert len(new_links) == 1
+        # A distinct clone, not the original.
+        assert new_links[0].id != rc.id
+        assert new_links[0].library_id is None
+        assert new_links[0].urn != rc.urn
 
 
 def test_rewrite_child_urns_unit_idempotent_and_preserves_node_id():
@@ -3369,3 +3435,750 @@ class TestFrameworkBuilderDraftValidation:
             term in response.data["error"].lower()
             for term in ("identifier", "duplicate", "urn")
         ), response.data["error"]
+
+
+@pytest.mark.django_db
+class TestFrameworkBuilderControlsThreats:
+    """Reference controls and threats can be attached to requirement nodes in
+    the builder: referenced from existing (library) objects by URN, or defined
+    inline at the framework level. They round-trip through draft → publish →
+    export-yaml → import."""
+
+    @pytest.fixture
+    def builder_fw(self, app_config):
+        """A custom (editable) framework with a single requirement node."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Controls FW",
+            folder=folder,
+            is_published=True,
+            urn_namespace="custom",
+            ref_id="controls-fw",
+        )
+        rn = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:custom:risk:req_node:controls-fw:1",
+            ref_id="1",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        return fw, rn, folder
+
+    @staticmethod
+    def _start_and_get_draft(client, fw):
+        response = client.post(reverse("frameworks-start-editing", args=[fw.id]))
+        assert response.status_code == 200, response.data
+        return response.data["editing_draft"]
+
+    @staticmethod
+    def _save_and_publish(client, fw, draft):
+        save_url = reverse("frameworks-save-draft", args=[fw.id])
+        response = client.patch(save_url, {"editing_draft": draft}, format="json")
+        assert response.status_code == 200, response.data
+        return client.post(reverse("frameworks-publish-draft", args=[fw.id]))
+
+    def test_publish_links_existing_controls_and_threats(
+        self, authenticated_client, builder_fw
+    ):
+        """A node referencing existing control/threat URNs has its M2M set on
+        publish (the reference-existing path)."""
+        fw, rn, folder = builder_fw
+        rc = ReferenceControl.objects.create(
+            name="Existing RC",
+            ref_id="ERC",
+            urn="urn:intuitem:risk:function:doc-pol:erc",
+            folder=folder,
+        )
+        threat = Threat.objects.create(
+            name="Existing Threat",
+            ref_id="ET",
+            urn="urn:intuitem:risk:threat:doc-pol:et",
+            folder=folder,
+        )
+
+        draft = self._start_and_get_draft(authenticated_client, fw)
+        draft["nodes"][0]["reference_controls"] = [rc.urn]
+        draft["nodes"][0]["threats"] = [threat.urn]
+
+        response = self._save_and_publish(authenticated_client, fw, draft)
+        assert response.status_code == 200, response.data
+
+        rn.refresh_from_db()
+        assert set(rn.reference_controls.values_list("urn", flat=True)) == {rc.urn}
+        assert set(rn.threats.values_list("urn", flat=True)) == {threat.urn}
+
+    def test_publish_creates_inline_defined_control_and_threat(
+        self, authenticated_client, builder_fw
+    ):
+        """Inline-defined controls/threats in the draft top-level collections are
+        created as custom (library=None) objects in the framework folder and
+        linked to the node."""
+        fw, rn, folder = builder_fw
+        rc_urn = "urn:custom:risk:reference_control:controls-fw:c1"
+        th_urn = "urn:custom:risk:threat:controls-fw:t1"
+
+        draft = self._start_and_get_draft(authenticated_client, fw)
+        draft["reference_controls"] = [
+            {
+                "id": str(uuid.uuid4()),
+                "urn": rc_urn,
+                "ref_id": "C1",
+                "name": "Inline control",
+                "description": "Defined in the builder",
+                "annotation": "Control annotation",
+                "category": "policy",
+                "csf_function": "govern",
+                "typical_evidence": ["Signed document", "Review records"],
+            }
+        ]
+        draft["threats"] = [
+            {
+                "id": str(uuid.uuid4()),
+                "urn": th_urn,
+                "ref_id": "T1",
+                "name": "Inline threat",
+                "description": "Threat description",
+                "annotation": "Threat annotation",
+            }
+        ]
+        draft["nodes"][0]["reference_controls"] = [rc_urn]
+        draft["nodes"][0]["threats"] = [th_urn]
+
+        response = self._save_and_publish(authenticated_client, fw, draft)
+        assert response.status_code == 200, response.data
+
+        rc = ReferenceControl.objects.get(urn=rc_urn)
+        assert rc.library_id is None
+        assert rc.folder_id == fw.folder_id
+        assert rc.description == "Defined in the builder"
+        assert rc.annotation == "Control annotation"
+        assert rc.category == "policy"
+        assert rc.csf_function == "govern"
+        assert rc.typical_evidence == ["Signed document", "Review records"]
+        th = Threat.objects.get(urn=th_urn)
+        assert th.library_id is None
+        assert th.description == "Threat description"
+        assert th.annotation == "Threat annotation"
+
+        rn.refresh_from_db()
+        assert set(rn.reference_controls.values_list("urn", flat=True)) == {rc_urn}
+        assert set(rn.threats.values_list("urn", flat=True)) == {th_urn}
+
+    def test_publish_updates_and_deletes_inline_objects(
+        self, authenticated_client, builder_fw
+    ):
+        """Editing an inline object updates it; dropping it from the draft
+        deletes the owned (library=None) object."""
+        fw, rn, folder = builder_fw
+        keep = ReferenceControl.objects.create(
+            name="Keep",
+            ref_id="K",
+            urn="urn:custom:risk:reference_control:controls-fw:keep",
+            folder=folder,
+        )
+        drop = ReferenceControl.objects.create(
+            name="Drop",
+            ref_id="D",
+            urn="urn:custom:risk:reference_control:controls-fw:drop",
+            folder=folder,
+        )
+        rn.reference_controls.set([keep, drop])
+
+        draft = self._start_and_get_draft(authenticated_client, fw)
+        # start_editing should surface both inline objects; rename "keep" and
+        # drop "drop" entirely.
+        inline = {c["urn"]: c for c in draft["reference_controls"]}
+        assert set(inline) == {keep.urn, drop.urn}
+        inline[keep.urn]["name"] = "Keep renamed"
+        draft["reference_controls"] = [inline[keep.urn]]
+        draft["nodes"][0]["reference_controls"] = [keep.urn]
+
+        response = self._save_and_publish(authenticated_client, fw, draft)
+        assert response.status_code == 200, response.data
+
+        keep.refresh_from_db()
+        assert keep.name == "Keep renamed"
+        assert not ReferenceControl.objects.filter(urn=drop.urn).exists()
+        rn.refresh_from_db()
+        assert set(rn.reference_controls.values_list("urn", flat=True)) == {keep.urn}
+
+    def test_publish_keeps_inline_object_after_its_only_node_is_deleted(
+        self, authenticated_client, builder_fw
+    ):
+        """Deleting the only node linking an inline object, while keeping the
+        object in the draft collection, must update (not re-create) the existing
+        row — a regression guard against an IntegrityError on the shared PK."""
+        fw, rn, folder = builder_fw
+        rc = ReferenceControl.objects.create(
+            name="Inline RC",
+            ref_id="IRC",
+            urn="urn:custom:risk:reference_control:controls-fw:irc",
+            folder=folder,
+        )
+        rn.reference_controls.set([rc])
+
+        draft = self._start_and_get_draft(authenticated_client, fw)
+        assert {c["urn"] for c in draft["reference_controls"]} == {rc.urn}
+        # Drop the only node but keep the inline definition.
+        draft["nodes"] = []
+
+        response = self._save_and_publish(authenticated_client, fw, draft)
+        assert response.status_code == 200, response.data
+        rc.refresh_from_db()
+        assert rc.library_id is None
+        assert not RequirementNode.objects.filter(framework=fw).exists()
+
+    def test_publish_rejects_unresolved_control_urn(
+        self, authenticated_client, builder_fw
+    ):
+        """A node referencing a control URN that is neither inline nor in the DB
+        is rejected with an actionable error rather than a silent drop."""
+        fw, rn, folder = builder_fw
+        draft = self._start_and_get_draft(authenticated_client, fw)
+        draft["nodes"][0]["reference_controls"] = [
+            "urn:custom:risk:reference_control:controls-fw:ghost"
+        ]
+
+        response = self._save_and_publish(authenticated_client, fw, draft)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "ghost" in response.data["error"]
+
+    def test_start_editing_serializes_links_and_inline_only(
+        self, authenticated_client, builder_fw
+    ):
+        """start_editing emits per-node URN lists and a top-level collection that
+        holds only inline (library=None) objects, never library-backed ones."""
+        fw, rn, folder = builder_fw
+        lib = LoadedLibrary.objects.create(
+            urn="urn:intuitem:risk:library:doc-pol",
+            name="doc-pol",
+            version=1,
+            folder=folder,
+            locale="en",
+        )
+        lib_rc = ReferenceControl.objects.create(
+            name="Library RC",
+            ref_id="LRC",
+            urn="urn:intuitem:risk:function:doc-pol:lrc",
+            folder=folder,
+            library=lib,
+        )
+        inline_rc = ReferenceControl.objects.create(
+            name="Inline RC",
+            ref_id="IRC",
+            urn="urn:custom:risk:reference_control:controls-fw:irc",
+            folder=folder,
+        )
+        rn.reference_controls.set([lib_rc, inline_rc])
+
+        draft = self._start_and_get_draft(authenticated_client, fw)
+        node = draft["nodes"][0]
+        assert set(node["reference_controls"]) == {lib_rc.urn, inline_rc.urn}
+        inline_urns = {c["urn"] for c in draft["reference_controls"]}
+        assert inline_urns == {inline_rc.urn}
+
+    def test_export_yaml_builtin_library_object_becomes_dependency(
+        self, authenticated_client, builder_fw
+    ):
+        """A control from a BUILTIN library is emitted as a node URN + dependency
+        (the library is guaranteed present in any target instance), never inlined."""
+        fw, rn, folder = builder_fw
+        lib = LoadedLibrary.objects.create(
+            urn="urn:intuitem:risk:library:doc-pol",
+            name="doc-pol",
+            version=1,
+            folder=folder,
+            locale="en",
+            builtin=True,
+        )
+        rc = ReferenceControl.objects.create(
+            name="Library RC",
+            ref_id="LRC",
+            urn="urn:intuitem:risk:function:doc-pol:lrc",
+            folder=folder,
+            library=lib,
+        )
+        rn.reference_controls.set([rc])
+
+        response = authenticated_client.get(
+            reverse("frameworks-export-yaml", args=[fw.id])
+        )
+        assert response.status_code == 200
+        data = yaml.safe_load(response.content)
+
+        node = data["objects"]["framework"]["requirement_nodes"][0]
+        assert node["reference_controls"] == [rc.urn]
+        assert lib.urn in data["dependencies"]
+        assert "reference_controls" not in data["objects"]
+
+    def test_export_yaml_non_builtin_library_object_remitted_and_embedded(
+        self, authenticated_client, builder_fw
+    ):
+        """A control from a NON-builtin library can't be relied on in the target,
+        so it is embedded by value under objects.* — and re-minted to a
+        framework-owned URN so it can never collide with the source library's
+        object on re-import."""
+        fw, rn, folder = builder_fw
+        lib = LoadedLibrary.objects.create(
+            urn="urn:acme:risk:library:custom-lib",
+            name="custom-lib",
+            version=1,
+            folder=folder,
+            locale="en",
+            builtin=False,
+        )
+        rc = ReferenceControl.objects.create(
+            name="Custom-lib RC",
+            ref_id="CLRC",
+            urn="urn:acme:risk:function:custom-lib:clrc",
+            description="from a non-builtin library",
+            folder=folder,
+            library=lib,
+        )
+        rn.reference_controls.set([rc])
+
+        response = authenticated_client.get(
+            reverse("frameworks-export-yaml", args=[fw.id])
+        )
+        assert response.status_code == 200
+        data = yaml.safe_load(response.content)
+
+        node = data["objects"]["framework"]["requirement_nodes"][0]
+        # URN is re-minted into the framework's own namespace/slug, not the
+        # source library's URN.
+        emitted_urn = "urn:custom:risk:reference_control:controls-fw:clrc"
+        assert node["reference_controls"] == [emitted_urn]
+        assert rc.urn not in node["reference_controls"]
+        assert not data.get("dependencies")
+        emitted = {c["urn"]: c for c in data["objects"]["reference_controls"]}
+        assert emitted_urn in emitted
+        assert rc.urn not in emitted
+        assert emitted[emitted_urn]["description"] == "from a non-builtin library"
+
+    def test_export_non_builtin_object_round_trips_into_fresh_instance(
+        self, authenticated_client, builder_fw
+    ):
+        """The portability gate: a framework embedding a NON-builtin library
+        object exports + re-imports into a clean instance (no dependency on the
+        source library), and the imported node links the re-minted control."""
+        fw, rn, folder = builder_fw
+        lib = LoadedLibrary.objects.create(
+            urn="urn:acme:risk:library:custom-lib",
+            name="custom-lib",
+            version=1,
+            folder=folder,
+            locale="en",
+            builtin=False,
+        )
+        rc = ReferenceControl.objects.create(
+            name="Custom-lib RC",
+            ref_id="CLRC",
+            urn="urn:acme:risk:function:custom-lib:clrc",
+            folder=folder,
+            library=lib,
+        )
+        rn.reference_controls.set([rc])
+
+        response = authenticated_client.get(
+            reverse("frameworks-export-yaml", args=[fw.id])
+        )
+        assert response.status_code == 200
+        content = response.content
+
+        # Clean target instance: drop the framework AND the source library.
+        fw.delete()
+        lib.delete()  # cascades the library control
+        assert not ReferenceControl.objects.filter(urn=rc.urn).exists()
+
+        stored, error = StoredLibrary.store_library_content(content)
+        assert error is None, f"Exported YAML failed to store: {error}"
+        load_error = stored.load()
+        assert load_error is None, f"Exported YAML failed to load: {load_error}"
+
+        emitted_urn = "urn:custom:risk:reference_control:controls-fw:clrc"
+        imported_rc = ReferenceControl.objects.get(urn=emitted_urn)
+        imported_node = RequirementNode.objects.get(
+            urn="urn:custom:risk:req_node:controls-fw:1"
+        )
+        assert imported_rc in imported_node.reference_controls.all()
+
+    def test_export_remints_distinct_objects_sharing_a_ref_id(
+        self, authenticated_client, builder_fw
+    ):
+        """Two embedded objects that share a ref_id get distinct framework-owned
+        URNs (collision-suffixed) — neither is silently dropped."""
+        fw, rn, folder = builder_fw
+        lib_a = LoadedLibrary.objects.create(
+            urn="urn:acme:risk:library:lib-a",
+            name="lib-a",
+            version=1,
+            folder=folder,
+            locale="en",
+            builtin=False,
+        )
+        lib_b = LoadedLibrary.objects.create(
+            urn="urn:acme:risk:library:lib-b",
+            name="lib-b",
+            version=1,
+            folder=folder,
+            locale="en",
+            builtin=False,
+        )
+        rc_a = ReferenceControl.objects.create(
+            name="A",
+            ref_id="DUP",
+            urn="urn:acme:risk:function:lib-a:dup",
+            folder=folder,
+            library=lib_a,
+        )
+        rc_b = ReferenceControl.objects.create(
+            name="B",
+            ref_id="DUP",
+            urn="urn:acme:risk:function:lib-b:dup",
+            folder=folder,
+            library=lib_b,
+        )
+        rn.reference_controls.set([rc_a, rc_b])
+
+        response = authenticated_client.get(
+            reverse("frameworks-export-yaml", args=[fw.id])
+        )
+        assert response.status_code == 200
+        data = yaml.safe_load(response.content)
+
+        node = data["objects"]["framework"]["requirement_nodes"][0]
+        emitted = [c["urn"] for c in data["objects"]["reference_controls"]]
+        assert set(node["reference_controls"]) == {
+            "urn:custom:risk:reference_control:controls-fw:dup",
+            "urn:custom:risk:reference_control:controls-fw:dup-2",
+        }
+        assert sorted(emitted) == sorted(set(node["reference_controls"]))
+
+    def test_builder_catalog_referenceable_and_fields(
+        self, authenticated_client, builder_fw
+    ):
+        """The builder catalog flags only builtin-library objects as
+        referenceable, and exposes the full copyable field set (incl.
+        typical_evidence + translations) the picker needs to clone."""
+        fw, rn, folder = builder_fw
+        builtin_lib = LoadedLibrary.objects.create(
+            urn="urn:intuitem:risk:library:doc-pol",
+            name="doc-pol",
+            version=1,
+            folder=folder,
+            locale="en",
+            builtin=True,
+        )
+        custom_lib = LoadedLibrary.objects.create(
+            urn="urn:acme:risk:library:custom-lib",
+            name="custom-lib",
+            version=1,
+            folder=folder,
+            locale="en",
+            builtin=False,
+        )
+        builtin_rc = ReferenceControl.objects.create(
+            name="Builtin RC",
+            ref_id="BRC",
+            urn="urn:intuitem:risk:function:doc-pol:brc",
+            folder=folder,
+            library=builtin_lib,
+        )
+        nonbuiltin_rc = ReferenceControl.objects.create(
+            name="Custom-lib RC",
+            ref_id="NLRC",
+            urn="urn:acme:risk:function:custom-lib:nlrc",
+            folder=folder,
+            library=custom_lib,
+        )
+        custom_rc = ReferenceControl.objects.create(
+            name="Custom RC",
+            ref_id="CRC",
+            description="desc",
+            typical_evidence=["E1", "E2"],
+            translations={"fr": {"name": "RC perso"}},
+            folder=folder,
+        )
+
+        resp = authenticated_client.get(reverse("reference-controls-builder-catalog"))
+        assert resp.status_code == 200
+        by_id = {str(e["id"]): e for e in resp.data}
+        assert by_id[str(builtin_rc.id)]["referenceable"] is True
+        assert by_id[str(nonbuiltin_rc.id)]["referenceable"] is False
+        entry = by_id[str(custom_rc.id)]
+        assert entry["referenceable"] is False
+        assert entry["typical_evidence"] == ["E1", "E2"]
+        assert entry["translations"] == {"fr": {"name": "RC perso"}}
+
+        # Threats catalog exposes referenceable too.
+        builtin_threat = Threat.objects.create(
+            name="Builtin Threat",
+            ref_id="BT",
+            urn="urn:intuitem:risk:threat:doc-pol:bt",
+            folder=folder,
+            library=builtin_lib,
+        )
+        custom_threat = Threat.objects.create(
+            name="Custom Threat", ref_id="CT", folder=folder
+        )
+        tresp = authenticated_client.get(reverse("threats-builder-catalog"))
+        assert tresp.status_code == 200
+        tby_id = {str(e["id"]): e for e in tresp.data}
+        assert tby_id[str(builtin_threat.id)]["referenceable"] is True
+        assert tby_id[str(custom_threat.id)]["referenceable"] is False
+
+    def test_export_yaml_inline_object_emitted_in_objects(
+        self, authenticated_client, builder_fw
+    ):
+        """A custom (library=None) control is emitted as a full definition under
+        objects.reference_controls, with no dependency."""
+        fw, rn, folder = builder_fw
+        rc = ReferenceControl.objects.create(
+            name="Inline RC",
+            ref_id="IRC",
+            urn="urn:custom:risk:reference_control:controls-fw:irc",
+            description="desc",
+            annotation="ann",
+            category="technical",
+            csf_function="protect",
+            typical_evidence=["Signed document", "Review records"],
+            folder=folder,
+        )
+        rn.reference_controls.set([rc])
+
+        response = authenticated_client.get(
+            reverse("frameworks-export-yaml", args=[fw.id])
+        )
+        assert response.status_code == 200
+        data = yaml.safe_load(response.content)
+
+        node = data["objects"]["framework"]["requirement_nodes"][0]
+        assert node["reference_controls"] == [rc.urn]
+        assert not data.get("dependencies")
+        emitted = {c["urn"]: c for c in data["objects"]["reference_controls"]}
+        assert rc.urn in emitted
+        assert emitted[rc.urn]["category"] == "technical"
+        assert emitted[rc.urn]["csf_function"] == "protect"
+        assert emitted[rc.urn]["description"] == "desc"
+        assert emitted[rc.urn]["annotation"] == "ann"
+        # JSONField list survives the YAML export as a list.
+        assert emitted[rc.urn]["typical_evidence"] == [
+            "Signed document",
+            "Review records",
+        ]
+
+    def test_export_inline_round_trips_through_import(
+        self, authenticated_client, builder_fw
+    ):
+        """Build a framework with an inline control + threat, export, then feed
+        the YAML through the real import path. The imported requirement node must
+        carry the same control/threat links (the equivalence gate).
+
+        The source objects are deleted before import because control/threat URNs
+        are globally unique — a true round-trip is export-from-A, import-into-B,
+        which we simulate by clearing A first.
+        """
+        fw, rn, folder = builder_fw
+        rc = ReferenceControl.objects.create(
+            name="Inline RC",
+            ref_id="IRC",
+            urn="urn:custom:risk:reference_control:controls-fw:irc",
+            category="policy",
+            typical_evidence=["Signed document", "Review records"],
+            folder=folder,
+        )
+        threat = Threat.objects.create(
+            name="Inline Threat",
+            ref_id="IT",
+            urn="urn:custom:risk:threat:controls-fw:it",
+            folder=folder,
+        )
+        rn.reference_controls.set([rc])
+        rn.threats.set([threat])
+        node_urn, rc_urn, threat_urn = rn.urn, rc.urn, threat.urn
+
+        response = authenticated_client.get(
+            reverse("frameworks-export-yaml", args=[fw.id])
+        )
+        assert response.status_code == 200
+        content = response.content
+
+        # Clear the source instance so the unique URNs are free to re-import.
+        fw.delete()
+        rc.delete()
+        threat.delete()
+
+        stored, error = StoredLibrary.store_library_content(content)
+        assert error is None, f"Exported YAML failed to store: {error}"
+        load_error = stored.load()
+        assert load_error is None, f"Exported YAML failed to load: {load_error}"
+
+        imported = RequirementNode.objects.get(urn=node_urn)
+        assert set(imported.reference_controls.values_list("urn", flat=True)) == {
+            rc_urn
+        }
+        assert set(imported.threats.values_list("urn", flat=True)) == {threat_urn}
+        # The list-form typical_evidence survives export → import unchanged.
+        imported_rc = ReferenceControl.objects.get(urn=rc_urn)
+        assert imported_rc.typical_evidence == ["Signed document", "Review records"]
+
+    def test_export_inline_referential_translations_round_trip(
+        self, authenticated_client, builder_fw
+    ):
+        """Translations set on an inline referential (the picker's translation
+        mode writes these) are emitted under objects.* and survive re-import."""
+        fw, rn, folder = builder_fw
+        translations = {"fr": {"name": "RC en ligne", "description": "desc fr"}}
+        rc = ReferenceControl.objects.create(
+            name="Inline RC",
+            ref_id="IRC",
+            urn="urn:custom:risk:reference_control:controls-fw:irc",
+            translations=translations,
+            folder=folder,
+        )
+        rn.reference_controls.set([rc])
+        rc_urn = rc.urn
+
+        response = authenticated_client.get(
+            reverse("frameworks-export-yaml", args=[fw.id])
+        )
+        assert response.status_code == 200
+        data = yaml.safe_load(response.content)
+        emitted = {c["urn"]: c for c in data["objects"]["reference_controls"]}
+        assert emitted[rc_urn]["translations"] == translations
+
+        fw.delete()
+        rc.delete()
+        stored, error = StoredLibrary.store_library_content(response.content)
+        assert error is None, f"Exported YAML failed to store: {error}"
+        assert stored.load() is None
+        assert ReferenceControl.objects.get(urn=rc_urn).translations == translations
+
+    # --- Model A: pick an existing object = a reference (by pk for URN-less
+    # custom objects), embedded by value only on export. No in-instance copy. ---
+
+    def test_publish_references_custom_object_by_pk(
+        self, authenticated_client, builder_fw
+    ):
+        """A node referencing a custom (library=None, URN-less) control by its pk
+        links the existing object on publish — no duplicate, no collision."""
+        fw, rn, folder = builder_fw
+        custom = ReferenceControl.objects.create(
+            name="Custom RC", ref_id="CUST", folder=folder
+        )
+        assert custom.urn is None and custom.library_id is None
+
+        draft = self._start_and_get_draft(authenticated_client, fw)
+        draft["nodes"][0]["reference_controls"] = [str(custom.id)]
+        response = self._save_and_publish(authenticated_client, fw, draft)
+        assert response.status_code == 200, response.data
+
+        rn.refresh_from_db()
+        assert set(rn.reference_controls.values_list("id", flat=True)) == {custom.id}
+        # Original is reused, not duplicated, and left untouched.
+        assert (
+            ReferenceControl.objects.filter(ref_id="CUST", library__isnull=True).count()
+            == 1
+        )
+        custom.refresh_from_db()
+        assert custom.urn is None and custom.library_id is None
+
+    def test_unlinking_referenced_custom_does_not_delete_it(
+        self, authenticated_client, builder_fw
+    ):
+        """Removing a referenced custom object from the framework unlinks it but
+        never deletes the user's standalone object."""
+        fw, rn, folder = builder_fw
+        custom = ReferenceControl.objects.create(
+            name="Custom RC", ref_id="CUST", folder=folder
+        )
+        draft = self._start_and_get_draft(authenticated_client, fw)
+        draft["nodes"][0]["reference_controls"] = [str(custom.id)]
+        assert (
+            self._save_and_publish(authenticated_client, fw, draft).status_code == 200
+        )
+
+        draft = self._start_and_get_draft(authenticated_client, fw)
+        draft["nodes"][0]["reference_controls"] = []
+        assert (
+            self._save_and_publish(authenticated_client, fw, draft).status_code == 200
+        )
+
+        assert ReferenceControl.objects.filter(id=custom.id).exists()
+        rn.refresh_from_db()
+        assert rn.reference_controls.count() == 0
+
+    def test_start_editing_emits_pk_token_for_urnless_custom(
+        self, authenticated_client, builder_fw
+    ):
+        """start_editing surfaces a URN-less custom link as its pk token, and does
+        not list it among the editable inline-defined collection."""
+        fw, rn, folder = builder_fw
+        custom = ReferenceControl.objects.create(
+            name="Custom RC", ref_id="CUST", folder=folder
+        )
+        rn.reference_controls.set([custom])
+
+        draft = self._start_and_get_draft(authenticated_client, fw)
+        assert draft["nodes"][0]["reference_controls"] == [str(custom.id)]
+        assert all(
+            e["id"] != str(custom.id) for e in draft.get("reference_controls", [])
+        )
+
+    def test_export_embeds_referenced_custom_reflecting_live_edits(
+        self, authenticated_client, builder_fw
+    ):
+        """Export embeds a referenced custom object under a re-minted framework
+        URN, and reflects later edits to the source (the reference is live)."""
+        fw, rn, folder = builder_fw
+        custom = ReferenceControl.objects.create(
+            name="Custom RC", ref_id="CUST", description="orig", folder=folder
+        )
+        rn.reference_controls.set([custom])
+        emitted_urn = "urn:custom:risk:reference_control:controls-fw:cust"
+
+        def _export():
+            resp = authenticated_client.get(
+                reverse("frameworks-export-yaml", args=[fw.id])
+            )
+            assert resp.status_code == 200
+            return yaml.safe_load(resp.content)
+
+        data = _export()
+        node = data["objects"]["framework"]["requirement_nodes"][0]
+        assert node["reference_controls"] == [emitted_urn]
+        emitted = {c["urn"]: c for c in data["objects"]["reference_controls"]}
+        assert emitted[emitted_urn]["description"] == "orig"
+
+        custom.description = "updated"
+        custom.save()
+        emitted2 = {c["urn"]: c for c in _export()["objects"]["reference_controls"]}
+        assert emitted2[emitted_urn]["description"] == "updated"
+
+    def test_duplicate_references_custom_object_not_clone(
+        self, authenticated_client, builder_fw
+    ):
+        """Duplicating a framework that references a custom (URN-less) object
+        points the copy at the same object rather than cloning it."""
+        fw, rn, folder = builder_fw
+        custom = ReferenceControl.objects.create(
+            name="Custom RC", ref_id="CUST", folder=folder
+        )
+        rn.reference_controls.set([custom])
+
+        response = authenticated_client.post(
+            reverse("frameworks-duplicate", args=[fw.id]),
+            {"name": "Controls FW Copy"},
+            format="json",
+        )
+        assert response.status_code == 201, response.data
+
+        assert (
+            ReferenceControl.objects.filter(ref_id="CUST", library__isnull=True).count()
+            == 1
+        )
+        new_node = RequirementNode.objects.get(
+            framework_id=response.data["id"], reference_controls=custom
+        )
+        assert custom in new_node.reference_controls.all()

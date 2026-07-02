@@ -12,6 +12,7 @@
 	import QuestionEditor from './QuestionEditor.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import AddNodeMenu from './AddNodeMenu.svelte';
+	import ReferentialLinks from './ReferentialLinks.svelte';
 	import { m } from '$paraglide/messages';
 
 	interface Props {
@@ -909,6 +910,11 @@
 					{/each}
 				</div>
 			{/if}
+
+			<!-- Reference controls & threats: link existing (library or custom)
+			     objects by URN or define new ones inline on the framework. -->
+			<ReferentialLinks {node} kind="reference_controls" />
+			<ReferentialLinks {node} kind="threats" />
 		{/if}
 
 		<!-- CEL visibility expression: inside Advanced for default nodes, always-on for splash -->
