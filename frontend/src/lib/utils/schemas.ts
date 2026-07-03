@@ -1015,6 +1015,7 @@ export const dataBreachSchema = z.object({
 	subjects_notified_on: z.string().optional(),
 	potential_consequences: z.string().optional(),
 	remediation_measures: z.array(z.string()).optional().default([]),
+	evidences: z.string().optional().array().optional(),
 	incident: z.string().optional(),
 	reference_link: z.string().url().optional().or(z.literal('')),
 	observation: z.string().optional()
