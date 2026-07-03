@@ -629,6 +629,11 @@ class IntegrationLinkSerializerMixin(serializers.Serializer):
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
+        # Only run the sync-mapping lookup on detail reads. Skipping it for
+        # list/create/update avoids a per-object SELECT that almost always
+        # returns nothing (mirrors AppliedControlReadSerializer).
+        if self.context.get("action") != "retrieve":
+            return ret
         from django.contrib.contenttypes.models import ContentType
 
         content_type = ContentType.objects.get_for_model(instance.__class__)

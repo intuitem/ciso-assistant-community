@@ -80,8 +80,10 @@ class BaseFieldMapper(ABC):
         self.model_settings = get_model_settings(
             configuration.settings or {}, model_key
         )
-        # Allow per-instance custom mappings
-        self.custom_mappings = self.model_settings.get("field_mappings", {})
+        # Allow per-instance custom mappings. Uses the same "field_map" key the
+        # settings layer writes and is_model_configured() reads. (Providers that
+        # override _get_mappings don't consult this, but keep it consistent.)
+        self.custom_mappings = self.model_settings.get("field_map", {})
 
     def _field_operations(self) -> dict[str, dict[str, set]]:
         """Per-model pull/push operation gating.

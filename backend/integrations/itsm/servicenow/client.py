@@ -142,7 +142,9 @@ class ServiceNowClient(BaseIntegrationClient):
         url = f"{self.base_url}/api/now/table/{self.table}"
         params = {
             "sysparm_query": sysparm_query,
-            "sysparm_fields": "sys_id,number,short_description,sys_updated_on",
+            # Superset of common display fields so labels work across tables
+            # (incident uses number/short_description, CMDB/asset tables use name).
+            "sysparm_fields": "sys_id,number,name,short_description,sys_updated_on",
             "sysparm_limit": query_params.get("max_results", 100),
         }
 
@@ -171,7 +173,7 @@ class ServiceNowClient(BaseIntegrationClient):
                         {
                             "key": sys_id,
                             "id": sys_id,
-                            "summary": f"{record.get('number')} - {record.get('short_description')}",
+                            "summary": self._display_label(record, sys_id),
                         }
                     )
             return results
@@ -179,6 +181,19 @@ class ServiceNowClient(BaseIntegrationClient):
         except requests.exceptions.RequestException:
             logger.error("Failed to search ServiceNow", exc_info=True)
             raise
+
+    @staticmethod
+    def _display_label(record: dict[str, Any], sys_id: str) -> str:
+        """Human-readable label for a remote row, working across table types.
+
+        Prefers incident-style ``number - short_description``, falls back to a
+        generic ``name`` (CMDB/asset tables), then the sys_id.
+        """
+        number = record.get("number")
+        short_description = record.get("short_description")
+        if number or short_description:
+            return f"{number or ''} - {short_description or ''}".strip(" -")
+        return record.get("name") or sys_id
 
     def get_available_tables(self) -> list[dict]:
         """

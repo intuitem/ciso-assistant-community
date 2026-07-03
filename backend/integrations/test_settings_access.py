@@ -54,6 +54,10 @@ def test_is_model_configured():
 
     assert is_model_configured({}, "applied_control") is False
 
+    # A field_map with no remote target is NOT enough to count as configured.
+    field_map_only = {"models": {"asset": {"field_map": {"name": "u_name"}}}}
+    assert is_model_configured(field_map_only, "asset") is False
+
 
 def test_configured_model_keys():
     settings = {

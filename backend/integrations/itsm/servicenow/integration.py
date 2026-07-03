@@ -138,6 +138,16 @@ class ServiceNowOrchestrator(BaseITSMOrchestrator):
             get_model_settings,
         )
 
+        # A manual refresh should be authoritative: drop obsolete per-table
+        # column/choice entries (e.g. from a table the user has since changed)
+        # so nothing stale survives. Configured tables are re-warmed below;
+        # anything else re-populates lazily on the next get_columns/get_choices.
+        if force:
+            cache = self._get_cache()
+            cache.columns = {}
+            cache.choices = {}
+            cache.save(update_fields=["columns", "choices", "updated_at"])
+
         tables = self._cached_tables(force=force)
 
         for model_key in configured_model_keys(self.configuration.settings):

@@ -151,10 +151,23 @@ class JiraOrchestrator(BaseITSMOrchestrator):
         return payload.get("webhookEvent")
 
     def get_interactive_actions(self):
-        return ["get_tables", "get_columns", "get_choices", "suggest_mapping"]
+        return [
+            "get_tables",
+            "get_columns",
+            "get_choices",
+            "suggest_mapping",
+            "refresh_schema",
+        ]
 
     def execute_action(self, action: str, params: dict):
         model_key = params.get("model_key", self.DEFAULT_MODEL_KEY)
+
+        if action == "refresh_schema":
+            # Jira fetches schema live (no cache), so refresh is a harmless no-op
+            # that keeps the shared FieldMapper's refresh button from erroring.
+            # Resolved before building a client so it never opens a connection.
+            return self.refresh_schema()
+
         client = self.client_for(model_key)
 
         if action == "get_tables":

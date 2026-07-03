@@ -64,6 +64,12 @@
 			undefined
 	} = $props();
 
+	// Namespace the `field` attribute (id / label-for / hidden input name /
+	// missing-constraint key) so two mappers on one page don't collide. Binding
+	// is by valuePath, so this only affects those DOM/aria identifiers. Empty for
+	// applied_control to keep its existing ids/testids unchanged.
+	const fieldPrefix = modelKey === 'applied_control' ? '' : `${modelKey}_`;
+
 	let selectedTable = $state(initialConfig?.table_name || '');
 	let fieldMap = $state(initialConfig?.field_map || {});
 	let valueMap = $state(initialConfig?.value_map || {});
@@ -163,26 +169,30 @@
 	async function refreshSchema() {
 		if (!integrationId || isRefreshing) return;
 		isRefreshing = true;
-		const result = await fetchRpc('refresh_schema');
-		if (result !== null) {
-			// Drop component-local caches so reloads read the refreshed data.
-			columns = [];
-			choicesCache = {};
-			await loadTables();
-			if (selectedTable) {
-				await loadColumns(selectedTable);
-				// Repopulate choice lists explicitly rather than relying on the
-				// reactive $effect to re-fire (table/field_map are unchanged here).
-				await Promise.all(
-					activeChoiceFields.map((f) => {
-						const remoteField = fieldMap[f.key];
-						return remoteField ? loadChoices(selectedTable, remoteField) : undefined;
-					})
-				);
+		try {
+			const result = await fetchRpc('refresh_schema');
+			if (result !== null) {
+				// Drop component-local caches so reloads read the refreshed data.
+				columns = [];
+				choicesCache = {};
+				await loadTables();
+				if (selectedTable) {
+					await loadColumns(selectedTable);
+					// Repopulate choice lists explicitly rather than relying on the
+					// reactive $effect to re-fire (table/field_map are unchanged here).
+					await Promise.all(
+						activeChoiceFields.map((f) => {
+							const remoteField = fieldMap[f.key];
+							return remoteField ? loadChoices(selectedTable, remoteField) : undefined;
+						})
+					);
+				}
+				toastStore.trigger({ message: m.schemaRefreshed(), preset: 'success' });
 			}
-			toastStore.trigger({ message: m.schemaRefreshed(), preset: 'success' });
+		} finally {
+			// Always clear the spinner, even if a reload step throws.
+			isRefreshing = false;
 		}
-		isRefreshing = false;
 	}
 
 	onMount(() => {
@@ -287,7 +297,7 @@
 		{#key tables}
 			<AutocompleteSelect
 				{form}
-				field="table_name"
+				field={`${fieldPrefix}table_name`}
 				valuePath={`${valuePathPrefix}.table_name`}
 				label={m.targetTable()}
 				optionsValueField="value"
@@ -333,7 +343,7 @@
 								{#key columns}
 									<AutocompleteSelect
 										{form}
-										field={field.key}
+										field={`${fieldPrefix}${field.key}`}
 										valuePath={`${valuePathPrefix}.field_map.${field.key}`}
 										options={columns}
 										cachedValue={fieldMap[field.key]}
@@ -380,7 +390,7 @@
 											{#key choices}
 												<AutocompleteSelect
 													{form}
-													field={String(choice.value)}
+													field={`${fieldPrefix}${choice.value}`}
 													valuePath={`${valuePathPrefix}.value_map.${field.key}.${choice.value}`}
 													options={choices}
 													optionsValueField="value"

@@ -39,13 +39,14 @@ def get_model_settings(config_settings: dict | None, model_key: str) -> dict:
 
 
 def is_model_configured(config_settings: dict | None, model_key: str) -> bool:
-    """True if the config has a usable target for ``model_key``.
+    """True if the config has a usable remote target for ``model_key``.
 
-    A model counts as configured once it has a remote target (a ServiceNow
-    table_name, or a Jira project_key) or any field mapping.
+    A model counts as configured only once it points at a remote target (a
+    ServiceNow ``table_name`` or a Jira ``project_key``). A field_map without a
+    target is not enough to sync, so it does not count.
     """
     ms = get_model_settings(config_settings, model_key)
-    return bool(ms.get("table_name") or ms.get("project_key") or ms.get("field_map"))
+    return bool(ms.get("table_name") or ms.get("project_key"))
 
 
 def configured_model_keys(config_settings: dict | None) -> list[str]:

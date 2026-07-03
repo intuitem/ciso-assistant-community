@@ -2049,12 +2049,17 @@ class IntegrationLinkViewSetMixin:
         from django.contrib.contenttypes.models import ContentType
 
         try:
-            sync_mapping = SyncMapping.objects.create(
+            # SyncMapping is unique on (configuration, content_type,
+            # local_object_id); relinking must reuse the row, not INSERT a
+            # duplicate (which would raise IntegrityError).
+            sync_mapping, _ = SyncMapping.objects.update_or_create(
                 configuration=integration_config,
                 content_type=ContentType.objects.get_for_model(self.model),
                 local_object_id=serializer.instance.id,
-                remote_id=remote_object_id,
-                sync_status=SyncMapping.SyncStatus.PENDING,
+                defaults={
+                    "remote_id": remote_object_id,
+                    "sync_status": SyncMapping.SyncStatus.PENDING,
+                },
             )
             # Empty changed_fields: establish the mapping and refresh the cached
             # remote_data without overwriting the linked remote record.

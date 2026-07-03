@@ -7,7 +7,9 @@ assert that Jira's AppliedControl defaults do NOT leak into other models.
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
+from integrations.itsm.jira.integration import JiraOrchestrator
 from integrations.itsm.jira.mapper import JiraFieldMapper
+from integrations.itsm.servicenow.client import ServiceNowClient
 from integrations.itsm.servicenow.mapper import ServiceNowFieldMapper
 
 
@@ -82,3 +84,24 @@ def test_jira_applied_control_defaults_still_apply():
     mapper = JiraFieldMapper(_config({}), "applied_control")
     assert mapper.field_map["name"] == "summary"
     assert mapper.value_map_to_remote["status"]["to_do"] == "To Do"
+
+
+def test_jira_refresh_schema_action_is_noop():
+    # The shared FieldMapper refresh button hits every provider; Jira must not
+    # error (and must not build a client) — it returns the base no-op [].
+    orchestrator = JiraOrchestrator(MagicMock())
+    assert orchestrator.execute_action("refresh_schema", {}) == []
+
+
+def test_servicenow_display_label_is_table_agnostic():
+    # incident-style rows
+    assert (
+        ServiceNowClient._display_label(
+            {"number": "INC1", "short_description": "desc"}, "sys"
+        )
+        == "INC1 - desc"
+    )
+    assert ServiceNowClient._display_label({"number": "INC2"}, "sys") == "INC2"
+    # CMDB/asset rows fall back to name, then sys_id
+    assert ServiceNowClient._display_label({"name": "DB Server"}, "sys") == "DB Server"
+    assert ServiceNowClient._display_label({}, "sys-123") == "sys-123"
