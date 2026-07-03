@@ -23,7 +23,7 @@ Choose **Add document template** and set its reference, name, **Document type**,
 
 **Import templates** uploads a `.zip` of Markdown files and creates one custom template per file. The zip mirrors the built-in library layout:
 
-```
+```text
 templates.zip
 ├── en/
 │   ├── access_control.md

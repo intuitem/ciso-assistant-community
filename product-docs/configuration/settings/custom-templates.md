@@ -48,7 +48,7 @@ Document layout templates control how a managed document is rendered to PDF — 
 
 When an active template exists for the document's language, the platform renders the document's content into your layout instead of the built-in one — letting you add a **cover page**, **headers and footers**, and your **organisation's logo** (from [Branding](branding.md)). The template receives the document's `title`, rendered `content`, `version`, `document_type`, `date`, and the organisation logo.
 
-Download the built-in default first (from the setting) to use as a starting point, then upload your customised version. If no active template exists for a language, the built-in layout is used.
+Download the built-in default first (from the setting) to use as a starting point, then upload your customised version. The built-in layout is used as a fallback when no active template exists for a language, and also if a custom template contains a disallowed tag or fails to render — a broken template never blocks a document from being published or exported.
 
 ## Operational notes
 
