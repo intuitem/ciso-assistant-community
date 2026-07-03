@@ -8,7 +8,7 @@ import type { RequestHandler } from './$types';
 // fetches to /document-containers/{id} need explicit method handlers here.
 
 export const GET: RequestHandler = async ({ fetch, params, locals }) => {
-	if (locals.featureflags?.document_management === false) error(404, 'Not found');
+	if (!locals.featureflags?.document_management) error(404, 'Not found');
 	const res = await fetch(`${BASE_API_URL}/document-containers/${params.id}/`);
 	if (!res.ok) {
 		error(res.status as NumericRange<400, 599>, await res.json());
@@ -21,7 +21,7 @@ export const GET: RequestHandler = async ({ fetch, params, locals }) => {
 };
 
 export const PATCH: RequestHandler = async ({ fetch, params, request, locals }) => {
-	if (locals.featureflags?.document_management === false) error(404, 'Not found');
+	if (!locals.featureflags?.document_management) error(404, 'Not found');
 	const res = await fetch(`${BASE_API_URL}/document-containers/${params.id}/`, {
 		method: 'PATCH',
 		headers: { 'Content-Type': 'application/json' },
@@ -38,7 +38,7 @@ export const PATCH: RequestHandler = async ({ fetch, params, request, locals }) 
 };
 
 export const DELETE: RequestHandler = async ({ fetch, params, locals }) => {
-	if (locals.featureflags?.document_management === false) error(404, 'Not found');
+	if (!locals.featureflags?.document_management) error(404, 'Not found');
 	const res = await fetch(`${BASE_API_URL}/document-containers/${params.id}/`, {
 		method: 'DELETE'
 	});

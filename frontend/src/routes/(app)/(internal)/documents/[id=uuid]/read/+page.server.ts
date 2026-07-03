@@ -3,7 +3,7 @@ import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, params, url, locals }) => {
-	if (locals.featureflags?.document_management === false) {
+	if (!locals.featureflags?.document_management) {
 		redirect(302, '/');
 	}
 
