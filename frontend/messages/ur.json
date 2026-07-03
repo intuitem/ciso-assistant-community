@@ -1,4 +1,7 @@
 {
+	"licenseExpiresToday": "آپ کا لائسنس آج ختم ہو رہا ہے۔",
+	"licenseExpiresTomorrow": "آپ کا لائسنس کل ختم ہو رہا ہے۔",
+	"licenseExpiresInDays": "آپ کا لائسنس {days_left} دنوں میں ختم ہو رہا ہے۔",
 	"mapToFramework": "کسی فریم ورک پر نقشہ بنائیں",
 	"mapToFrameworkDescription": "اس سے نقشہ بنا کر کسی اور فریم ورک میں نیا آڈٹ بنائیں۔",
 	"mapFromAudit": "کسی آڈٹ سے نقشہ بنائیں",

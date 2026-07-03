@@ -1,4 +1,7 @@
 {
+	"licenseExpiresToday": "Din licens går ut idag.",
+	"licenseExpiresTomorrow": "Din licens går ut imorgon.",
+	"licenseExpiresInDays": "Din licens går ut om {days_left} dagar.",
 	"mapToFramework": "Mappa till ett ramverk",
 	"mapToFrameworkDescription": "Skapa en ny revision i ett annat ramverk, mappad från denna.",
 	"mapFromAudit": "Mappa från en revision",
