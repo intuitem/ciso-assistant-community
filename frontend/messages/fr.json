@@ -5263,5 +5263,7 @@
 	"errorDisablingMFA": "Impossible de désactiver la MFA pour cet utilisateur",
 	"userHasNoMFAEnabled": "Cet utilisateur n'a pas la MFA activée",
 	"decisionNotes": "Notes de décision",
-	"addIdpGroup": "Ajouter un groupe IdP"
+	"addIdpGroup": "Ajouter un groupe IdP",
+	"redTeaming": "Red teaming",
+	"threatHunting": "Threat hunting"
 }
