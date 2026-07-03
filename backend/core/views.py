@@ -16519,10 +16519,11 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
 
         framework_urns = set()
         for obj in queryset:
-            mapping_set = obj.content.get(
+            rms_list = obj.content.get(
                 "requirement_mapping_sets",
                 [obj.content.get("requirement_mapping_set", {})],
-            )[0]
+            )
+            mapping_set = rms_list[0] if rms_list else {}
             for key in ("source_framework_urn", "target_framework_urn"):
                 urn = mapping_set.get(key)
                 if urn:

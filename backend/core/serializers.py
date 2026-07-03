@@ -3866,11 +3866,15 @@ class RequirementMappingSetReadSerializer(BaseModelSerializer):
             return {"str": urn, "urn": urn}
         # On list requests the viewset pre-populates `framework_map` (O(1) lookup).
         framework_map = (self.context.get("optimized_data") or {}).get("framework_map")
-        name = (
-            framework_map.get(urn)
-            if framework_map is not None
-            else self._resolve_framework_name(urn)
-        )
+        if framework_map is not None:
+            name = framework_map.get(urn)
+        else:
+            # Retrieve path: cache per-instance so the duplicate calls from
+            # get_frameworks_available don't re-issue the DB lookup.
+            cache = self.__dict__.setdefault("_framework_name_cache", {})
+            if urn not in cache:
+                cache[urn] = self._resolve_framework_name(urn)
+            name = cache[urn]
         return {"str": name or urn, "urn": urn}
 
     def get_source_framework(self, obj):
