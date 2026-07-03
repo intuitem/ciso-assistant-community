@@ -1,9 +1,10 @@
 import { BASE_API_URL } from '$lib/utils/constants';
-import { fail } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 import { m } from '$paraglide/messages';
 import type { Actions, PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ fetch }) => {
+export const load: PageServerLoad = async ({ fetch, locals }) => {
+	if (locals.featureflags?.document_management === false) redirect(302, '/');
 	const res = await fetch(`${BASE_API_URL}/folders/?content_type=DO&content_type=GL`);
 	const json = res.ok ? await res.json() : {};
 	const raw: any[] = json.results ?? (Array.isArray(json) ? json : []);
@@ -12,7 +13,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
 };
 
 export const actions: Actions = {
-	default: async ({ request, fetch }) => {
+	default: async ({ request, fetch, locals }) => {
+		if (locals.featureflags?.document_management === false) redirect(302, '/');
 		const form = await request.formData();
 		const file = form.get('file') as File | null;
 		if (!file || file.size === 0) return fail(400, { error: m.zipFileRequired() });

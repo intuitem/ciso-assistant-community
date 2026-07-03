@@ -507,12 +507,6 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'owner', urlModel: 'actors' }
 		],
-		reverseForeignKeyFields: [
-			{
-				field: 'policies',
-				urlModel: 'document-containers'
-			}
-		],
 		detailViewFields: [
 			{ field: 'folder' },
 			{ field: 'id' },
@@ -535,6 +529,10 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'sync_mappings' }
 		],
 		reverseForeignKeyFields: [
+			{
+				field: 'policies',
+				urlModel: 'document-containers'
+			},
 			{
 				field: 'applied_controls',
 				urlModel: 'evidences',

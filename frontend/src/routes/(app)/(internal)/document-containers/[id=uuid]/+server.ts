@@ -7,7 +7,8 @@ import type { RequestHandler } from './$types';
 // +page.server.ts redirects to the editor), so the table's edit/delete client
 // fetches to /document-containers/{id} need explicit method handlers here.
 
-export const GET: RequestHandler = async ({ fetch, params }) => {
+export const GET: RequestHandler = async ({ fetch, params, locals }) => {
+	if (locals.featureflags?.document_management === false) error(404, 'Not found');
 	const res = await fetch(`${BASE_API_URL}/document-containers/${params.id}/`);
 	if (!res.ok) {
 		error(res.status as NumericRange<400, 599>, await res.json());
@@ -19,7 +20,8 @@ export const GET: RequestHandler = async ({ fetch, params }) => {
 	});
 };
 
-export const PATCH: RequestHandler = async ({ fetch, params, request }) => {
+export const PATCH: RequestHandler = async ({ fetch, params, request, locals }) => {
+	if (locals.featureflags?.document_management === false) error(404, 'Not found');
 	const res = await fetch(`${BASE_API_URL}/document-containers/${params.id}/`, {
 		method: 'PATCH',
 		headers: { 'Content-Type': 'application/json' },
@@ -35,7 +37,8 @@ export const PATCH: RequestHandler = async ({ fetch, params, request }) => {
 	});
 };
 
-export const DELETE: RequestHandler = async ({ fetch, params }) => {
+export const DELETE: RequestHandler = async ({ fetch, params, locals }) => {
+	if (locals.featureflags?.document_management === false) error(404, 'Not found');
 	const res = await fetch(`${BASE_API_URL}/document-containers/${params.id}/`, {
 		method: 'DELETE'
 	});

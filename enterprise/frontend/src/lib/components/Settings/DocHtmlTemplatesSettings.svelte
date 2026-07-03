@@ -147,6 +147,8 @@
 			body: m.confirmResetTemplate(),
 			response: async (confirmed: boolean) => {
 				if (!confirmed) return;
+				error = '';
+				successMessage = '';
 				try {
 					const res = await fetch(`/fe-api/custom-doc-html-templates/${existing.id}`, {
 						method: 'DELETE'

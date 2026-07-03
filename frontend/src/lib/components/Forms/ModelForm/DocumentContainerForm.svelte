@@ -5,6 +5,7 @@
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import { m } from '$paraglide/messages';
+	import { DOCUMENT_TYPES } from '$lib/utils/documentTypes';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -26,14 +27,10 @@
 		context = ''
 	}: Props = $props();
 
-	const documentTypeOptions = [
-		{ label: m.policy(), value: 'policy' },
-		{ label: m.procedure(), value: 'procedure' },
-		{ label: m.charter(), value: 'charter' },
-		{ label: m.record(), value: 'record' },
-		{ label: m.meetingMinutes(), value: 'meeting_minutes' },
-		{ label: m.other(), value: 'other' }
-	];
+	const documentTypeOptions = DOCUMENT_TYPES.map((t) => ({
+		label: t.label(),
+		value: t.key
+	}));
 </script>
 
 <Select

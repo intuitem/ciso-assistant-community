@@ -255,11 +255,12 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
             if self.document_id and self.document.container_id
             else None
         )
+        super().delete(*args, **kwargs)
+        # Only drop the blobs once the row deletion is durable.
         if self.pdf_snapshot:
             self.pdf_snapshot.delete(save=False)
         if self.file:
             self.file.delete(save=False)
-        super().delete(*args, **kwargs)
         if container:
             recompute_references(container)
 

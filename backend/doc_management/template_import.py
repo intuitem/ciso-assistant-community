@@ -42,6 +42,7 @@ def parse_template_markdown(raw: str, stem: str) -> dict:
                     if dt in VALID_DOCUMENT_TYPES:
                         document_type = dt
             except yaml.YAMLError:
+                # Malformed frontmatter: keep the derived defaults.
                 pass
             content = parts[2].strip()
     return {

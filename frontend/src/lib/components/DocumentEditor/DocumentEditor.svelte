@@ -68,6 +68,11 @@
 		const incomingId = data.document?.id ?? null;
 		if (incomingId === syncedDocId) return;
 		syncedDocId = incomingId;
+		// Release the lock on the revision we're navigating away from (onDestroy's
+		// releaseLock won't fire — this component is reused, not remounted).
+		if (hasLock && currentRevision?.id) {
+			proxyPost({ _action: 'stop-editing', revision_id: currentRevision.id }).catch(() => {});
+		}
 		stopHeartbeat();
 		hasLock = false;
 		lockedBy = null;

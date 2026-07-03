@@ -215,11 +215,13 @@ class DocumentContainerViewSet(BaseModelViewSet):
         for c in containers:
             languages = []
             for doc in c.documents.all():
-                pub = (
-                    doc.revisions.filter(status=DocumentRevision.Status.PUBLISHED)
-                    .order_by("-version_number")
-                    .first()
-                )
+                # Use the prefetched revisions; filter()/order_by() would re-query.
+                published = [
+                    r
+                    for r in doc.revisions.all()
+                    if r.status == DocumentRevision.Status.PUBLISHED
+                ]
+                pub = max(published, key=lambda r: r.version_number, default=None)
                 if pub:
                     languages.append(
                         {

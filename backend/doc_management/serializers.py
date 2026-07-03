@@ -94,6 +94,10 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
 
         # Container inputs (write-only, not model fields).
         policy = validated_data.pop("policy", None)
+        if policy is not None and validated_data.get("container") is not None:
+            raise serializers.ValidationError(
+                "Provide either policy or container, not both."
+            )
         document_type = (
             validated_data.pop("document_type", None)
             or DocumentContainer.DocumentType.POLICY
@@ -169,6 +173,10 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
                 .exists()
             )
             validated_data.setdefault("default_locale", not has_siblings)
+
+            # Gate the add-permission check on the container's folder rather than
+            # letting BaseModelSerializer fall back to the root folder.
+            validated_data["folder"] = container.folder
 
             document = super().create(validated_data)
             revision = DocumentRevision.objects.create(

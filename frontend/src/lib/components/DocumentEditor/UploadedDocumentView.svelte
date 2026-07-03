@@ -47,6 +47,10 @@
 				body: JSON.stringify(body)
 			});
 			if (res.ok) await invalidateAll();
+			else {
+				const data = await res.json().catch(() => null);
+				window.alert(data?.detail || data?.error || m.error());
+			}
 			return res;
 		} finally {
 			busy = false;

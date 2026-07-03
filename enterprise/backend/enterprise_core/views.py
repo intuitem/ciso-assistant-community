@@ -858,7 +858,7 @@ class CustomDocHtmlTemplateViewSet(BaseModelViewSet):
             return CustomDocHtmlTemplate.objects.none()
         return CustomDocHtmlTemplate.objects.all()
 
-    def get_serializer_class(self):
+    def get_serializer_class(self, **kwargs):
         if self.request.method in ("POST", "PUT", "PATCH"):
             return CustomDocHtmlTemplateWriteSerializer
         return CustomDocHtmlTemplateReadSerializer
@@ -958,8 +958,15 @@ class CustomDocHtmlTemplateViewSet(BaseModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             template.save()
+            # Keep a single active override per (template_key, language) so the
+            # resolver's .first() is deterministic.
+            CustomDocHtmlTemplate.objects.filter(
+                template_key=template.template_key,
+                language=template.language,
+                is_active=True,
+            ).exclude(pk=template.pk).update(is_active=False)
             return Response(status=status.HTTP_200_OK)
-        except CustomDocHtmlTemplate.DoesNotExist:
+        except CustomDocHtmlTemplate.DoesNotExist, ValidationError, ValueError:
             return Response(
                 {"error": "Template not found"}, status=status.HTTP_404_NOT_FOUND
             )
@@ -986,7 +993,7 @@ class CustomDocHtmlTemplateViewSet(BaseModelViewSet):
                 as_attachment=True,
                 filename=f"{template.template_key}_{template.language}.html",
             )
-        except CustomDocHtmlTemplate.DoesNotExist:
+        except CustomDocHtmlTemplate.DoesNotExist, ValidationError, ValueError:
             return Response(
                 {"error": "Template not found"}, status=status.HTTP_404_NOT_FOUND
             )
