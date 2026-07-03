@@ -1255,6 +1255,8 @@
 	"sum": "Soma",
 	"tableOfContents": "Índice",
 	"yes": "Sim",
+	"confirmYes": "Confirme digitando '{word}' abaixo:",
+	"confirmYesPlaceHolder": "Digite '{word}' para confirmar",
 	"boolean": "Booleano",
 	"builderEmptyStateTitle": "Como você deseja estruturar este framework?",
 	"builderEmptyStateSubtitle": "Escolha uma estrutura inicial — você pode alterá-la a qualquer momento.",

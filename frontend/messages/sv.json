@@ -1229,6 +1229,8 @@
 	"expirationDate": "Utgångsdatum",
 	"expirationDateIsInThePastWarning": "Det angivna utgångsdatumet ligger i det förflutna",
 	"yes": "Ja",
+	"confirmYes": "Bekräfta genom att skriva '{word}' nedan:",
+	"confirmYesPlaceHolder": "Skriv '{word}' för att bekräfta",
 	"no": "Nej",
 	"aggregation": "Aggregering",
 	"average": "Medelvärde",
