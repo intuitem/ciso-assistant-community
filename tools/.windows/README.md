@@ -61,10 +61,11 @@ We can't use the `tools/convert_library_v2.py` symlink, as symlinks don't work o
 
 ### Prerequisites
 
-1. Check the [section explaining where to place the necessary scripts.](#-for-backendps1--win_native_dev_runserverpy)
-2. Check the [section about .venv.](#about-python-virtual-environment-venv)
-3. If you want to use PostgreSQL, [see this section.](#about-using-postgresql)
-4. If you want to run the Enterprise Edition, check the very end of the dedicated documentation in [`enterprise/README.md`](../../enterprise/README.md#experimental-setting-up-ciso-assistant-enterprise-for-development-on-windows-without-wsl2).
+1. Check the [`Requirements` section for Windows in the main README.md file.](../../README.md#requirements) 
+2. Check the [section explaining where to place the necessary scripts.](#-for-backendps1--win_native_dev_runserverpy)
+3. Check the [section about .venv.](#about-python-virtual-environment-venv)
+4. If you want to use PostgreSQL, [see this section.](#about-using-postgresql)
+5. If you want to run the Enterprise Edition, check the very end of the dedicated documentation in [`enterprise/README.md`](../../enterprise/README.md#experimental-setting-up-ciso-assistant-enterprise-for-development-on-windows-without-wsl2).
 
 
 ### If you're starting the backend for the first time

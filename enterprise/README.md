@@ -100,8 +100,10 @@ make dev
 
 > [!NOTE]
 > This section assumes that you have already set up the community frontend and backend, and use uv for managing the backend dependencies.
-> 
+>
 > If you have already used the Community Edition, we strongly recommend that you clone the repository to a dedicated folder to avoid any conflicts with backend dependencies.
+>
+> Before running any of the commands below, check the `Prerequisites` Section of `How to run the backend on Windows?` in [`tools/.windows/README.md`](../tools/.windows/README.md#prerequisites).
 
 ### Running the backend
 
