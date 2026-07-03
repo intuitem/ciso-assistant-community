@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
                     ("--", "Undefined"),
                     ("pentest", "Pentest"),
                     ("threat_hunting", "Threat hunting"),
-                    ("red_teaming", "Read teaming"),
+                    ("red_teaming", "Red teaming"),
                     ("audit", "Audit"),
                     ("self_identified", "Self-identified"),
                 ],

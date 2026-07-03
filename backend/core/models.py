@@ -8937,7 +8937,7 @@ class FindingsAssessment(Assessment):
         UNDEFINED = "--", "Undefined"
         PENTEST = "pentest", "Pentest"
         THREAT_HUNTING = "threat_hunting", "Threat hunting"
-        RED_TEAMING = "red_teaming", "Read teaming"
+        RED_TEAMING = "red_teaming", "Red teaming"
         AUDIT = "audit", "Audit"
         SELF_IDENTIFIED = "self_identified", "Self-identified"
 
