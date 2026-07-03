@@ -3091,6 +3091,7 @@ class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMi
         DRAFT = "draft", "draft"
         IN_REVIEW = "in_review", "in review"
         APPROVED = "approved", "approved"
+        REJECTED = "rejected", "rejected"
         RESOLVED = "resolved", "resolved"
         EXPIRED = "expired", "expired"
         DEPRECATED = "deprecated", "deprecated"
@@ -8935,6 +8936,8 @@ class FindingsAssessment(Assessment):
     class Category(models.TextChoices):
         UNDEFINED = "--", "Undefined"
         PENTEST = "pentest", "Pentest"
+        THREAT_HUNTING = "threat_hunting", "Threat hunting"
+        RED_TEAMING = "red_teaming", "Red teaming"
         AUDIT = "audit", "Audit"
         SELF_IDENTIFIED = "self_identified", "Self-identified"
 
