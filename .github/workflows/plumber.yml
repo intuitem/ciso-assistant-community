@@ -1,0 +1,29 @@
+name: Plumber
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  id-token: write # mint the OIDC token so the score can be published (score-push)
+
+jobs:
+  plumber:
+    name: Plumber
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: getplumber/plumber@5302ddc7d9f1c9edb3f617bff04a09be452bcfe2 # v0.3.79
+        with:
+          github-token: ${{ secrets.PLUMBER_TOKEN || github.token }}
+          threshold: 85
+          # Publish this repo's Plumber Score to score.getplumber.io so the
+          # README badge stays live. Only publishes on the default branch;
+          # never fails the build. All published scores are public.
+          score-push: true

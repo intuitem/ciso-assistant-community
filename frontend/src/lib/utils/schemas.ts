@@ -109,7 +109,6 @@ const NameDescriptionMixin = {
 
 export const FolderSchema = z.object({
 	...NameDescriptionMixin,
-	ref_id: z.string().optional(),
 	parent_folder: z.string(),
 	create_iam_groups: z.boolean().default(false),
 	filtering_labels: z.array(z.string()).optional()
@@ -600,6 +599,7 @@ export const GeneralSettingsSchema = z.object({
 		.default('none')
 		.optional(),
 	default_landing: z.enum(['analytics', 'respondent', 'portal']).default('analytics').optional(),
+	disable_partially_compliant_result: z.boolean().default(false).optional(),
 	personal_folders_parent: z.string().uuid().optional().nullable(),
 	currency: z.enum(CURRENCY_SYMBOLS).default('€'),
 	daily_rate: z.number().default(500).optional(),

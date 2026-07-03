@@ -13,6 +13,7 @@
 	import { initThemeFromUser } from '$lib/utils/theme';
 	import { invalidateAll } from '$app/navigation';
 	import Breadcrumbs from '$lib/components/Breadcrumbs/Breadcrumbs.svelte';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import SideBar from '$lib/components/SideBar/SideBar.svelte';
 	import FocusModeSelector from '$lib/components/FocusMode/FocusModeSelector.svelte';
 	import { deleteCookie, getCookie } from '$lib/utils/cookies';
@@ -133,6 +134,7 @@
 	});
 
 	const licenseExpirationNotifyDays = data.LICENSE_EXPIRATION_NOTIFY_DAYS;
+	const licenseExpirationMessage = data.LICENSE_EXPIRATION_MESSAGE;
 	const licenseStatus: Record<string, any> = data.licenseStatus;
 
 	const licenseAboutToExpire =
@@ -174,10 +176,22 @@
 		{#if data.licenseStatus.status === 'expired'}
 			<aside class="preset-tonal-warning text-center w-full items-center py-2">
 				{m.licenseExpiredMessage()}
+				{#if licenseExpirationMessage}
+					<MarkdownRenderer content={licenseExpirationMessage} class="text-center" />
+				{/if}
 			</aside>
 		{:else if licenseAboutToExpire}
 			<aside class="preset-tonal-warning text-center w-full items-center py-2">
-				{m.licenseAboutToExpireWarning({ days_left: licenseStatus.days_left })}
+				{#if licenseStatus.days_left === 0}
+					{m.licenseExpiresToday()}
+				{:else if licenseStatus.days_left === 1}
+					{m.licenseExpiresTomorrow()}
+				{:else}
+					{m.licenseExpiresInDays({ days_left: licenseStatus.days_left })}
+				{/if}
+				{#if licenseExpirationMessage}
+					<MarkdownRenderer content={licenseExpirationMessage} class="text-center" />
+				{/if}
 			</aside>
 		{/if}
 		<AppBar class="border-b border-surface-200-800 bg-surface-50-950 w-auto">

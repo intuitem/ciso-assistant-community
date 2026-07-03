@@ -205,7 +205,7 @@
 	);
 
 	function addSection() {
-		sections.push({ title: 'New group', description: '', items: [] });
+		sections.push({ title: m.newGroup(), description: '', items: [] });
 	}
 	function removeSection(i: number) {
 		sections.splice(i, 1);
@@ -218,7 +218,7 @@
 	function addItem(si: number) {
 		sections[si].items.push({
 			icon: 'fa-star',
-			title: 'New item',
+			title: m.newItem(),
 			description: '',
 			kind: KINDS[0] as Item['kind'],
 			target: {}
@@ -242,7 +242,7 @@
 
 <div class="space-y-6 pb-28">
 	<div class="flex flex-wrap items-center gap-x-2 gap-y-3">
-		<a href="/portal-editor" class="btn-icon btn-sm preset-tonal shrink-0" aria-label="Back">
+		<a href="/portal-editor" class="btn-icon btn-sm preset-tonal shrink-0" aria-label={m.back()}>
 			<i class="fa-solid fa-arrow-left"></i>
 		</a>
 		<input
@@ -255,7 +255,7 @@
 			class="shrink-0 text-[10px] uppercase rounded-full px-2 py-0.5 {data.portal.status ===
 			'published'
 				? 'bg-success-500/15 text-success-700'
-				: 'bg-surface-200-800 text-surface-500'}">{data.portal.status}</span
+				: 'bg-surface-200-800 text-surface-500'}">{safeTranslate(data.portal.status)}</span
 		>
 		<div class="ml-auto flex items-center gap-2">
 			<div class="flex items-center gap-1 rounded-lg bg-surface-100-900 p-1">
@@ -285,7 +285,7 @@
 				<a
 					href="/portal/{data.portal.id}"
 					class="btn-icon btn-sm preset-tonal"
-					aria-label="Open portal"><i class="fa-solid fa-arrow-up-right-from-square"></i></a
+					aria-label={m.openPortal()}><i class="fa-solid fa-arrow-up-right-from-square"></i></a
 				>
 			{/if}
 			<form method="POST" action="?/duplicate" use:enhance>

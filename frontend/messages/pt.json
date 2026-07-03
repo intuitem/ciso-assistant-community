@@ -1,4 +1,7 @@
 {
+	"licenseExpiresToday": "A sua licença expira hoje.",
+	"licenseExpiresTomorrow": "A sua licença expira amanhã.",
+	"licenseExpiresInDays": "A sua licença expira em {days_left} dias.",
 	"mapToFramework": "Mapear para um framework",
 	"mapToFrameworkDescription": "Criar uma nova auditoria noutro framework, mapeada a partir desta.",
 	"mapFromAudit": "Mapear a partir de uma auditoria",

@@ -1,4 +1,7 @@
 {
+	"licenseExpiresToday": "आपका लाइसेंस आज समाप्त हो रहा है।",
+	"licenseExpiresTomorrow": "आपका लाइसेंस कल समाप्त हो रहा है।",
+	"licenseExpiresInDays": "आपका लाइसेंस {days_left} दिनों में समाप्त हो रहा है।",
 	"mapToFramework": "फ्रेमवर्क में मैप करें",
 	"mapToFrameworkDescription": "इससे मैप करके किसी अन्य फ्रेमवर्क में नया ऑडिट बनाएं।",
 	"mapFromAudit": "ऑडिट से मैप करें",

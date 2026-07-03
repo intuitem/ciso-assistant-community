@@ -44,18 +44,18 @@
 		<i class="fa-solid fa-layer-group text-surface-400"></i>
 		<input
 			bind:value={section.title}
-			placeholder="Group title"
+			placeholder={m.groupTitle()}
 			class="grow rounded-md border border-transparent bg-transparent px-2 py-1 text-base font-semibold hover:bg-surface-100-900 focus:border-surface-300-700 focus:bg-surface-100-900 focus:outline-none"
 		/>
 		<button
 			onclick={() => onMoveSection(-1)}
 			class="btn-icon btn-sm preset-tonal"
-			aria-label="Move group up"><i class="fa-solid fa-chevron-up"></i></button
+			aria-label={m.moveGroupUp()}><i class="fa-solid fa-chevron-up"></i></button
 		>
 		<button
 			onclick={() => onMoveSection(1)}
 			class="btn-icon btn-sm preset-tonal"
-			aria-label="Move group down"><i class="fa-solid fa-chevron-down"></i></button
+			aria-label={m.moveGroupDown()}><i class="fa-solid fa-chevron-down"></i></button
 		>
 		<button
 			onclick={onRemoveSection}

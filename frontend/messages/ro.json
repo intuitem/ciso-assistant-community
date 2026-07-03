@@ -1,4 +1,7 @@
 {
+	"licenseExpiresToday": "Licența dvs. expiră astăzi.",
+	"licenseExpiresTomorrow": "Licența dvs. expiră mâine.",
+	"licenseExpiresInDays": "Licența dvs. expiră în {days_left} zile.",
 	"mapToFramework": "Mapează către un cadru",
 	"mapToFrameworkDescription": "Creează un audit nou într-un alt cadru, mapat din acesta.",
 	"mapFromAudit": "Mapează dintr-un audit",

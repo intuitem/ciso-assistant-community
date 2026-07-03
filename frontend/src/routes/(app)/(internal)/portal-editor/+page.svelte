@@ -4,6 +4,7 @@
 	import { getModalStore } from '$lib/components/Modals/stores';
 	import Overlay from '$lib/components/PortalEditor/Overlay.svelte';
 	import { confirmDeleteForm } from '$lib/utils/portalActions';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -39,9 +40,10 @@
 			<span
 				class="text-[10px] uppercase rounded-full px-2 py-0.5 {p.status === 'published'
 					? 'bg-success-500/15 text-success-700'
-					: 'bg-surface-200-800 text-surface-500'}">{p.status}</span
+					: 'bg-surface-200-800 text-surface-500'}">{safeTranslate(p.status)}</span
 			>
-			{#if p.is_default}<span class="text-[10px] uppercase text-surface-400">default</span>{/if}
+			{#if p.is_default}<span class="text-[10px] uppercase text-surface-400">{m.default()}</span
+				>{/if}
 		</div>
 		<div class="flex items-center gap-2">
 			<a href="/portal-editor/{p.id}" class="btn btn-sm preset-tonal">{m.edit()}</a>
