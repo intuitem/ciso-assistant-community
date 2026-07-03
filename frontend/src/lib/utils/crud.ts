@@ -953,7 +953,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableDelete: true
 			},
 			{ field: 'evidences', urlModel: 'findings', disableCreate: true, disableDelete: true },
-			{ field: 'evidences', urlModel: 'task-templates', disableCreate: true, disableDelete: true }
+			{ field: 'evidences', urlModel: 'task-templates', disableCreate: true, disableDelete: true },
+			{ field: 'evidences', urlModel: 'data-breaches', disableCreate: true, disableDelete: true }
 		],
 		selectFields: [{ field: 'status' }],
 		detailViewFields: [
@@ -1582,7 +1583,17 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'affected_personal_data', urlModel: 'personal-data' },
 			{ field: 'authorities', urlModel: 'entities' },
 			{ field: 'remediation_measures', urlModel: 'applied-controls' },
+			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'incident', urlModel: 'incidents' }
+		],
+		reverseForeignKeyFields: [
+			{
+				field: 'data_breaches',
+				urlModel: 'evidences',
+				addExisting: {
+					parentField: 'evidences'
+				}
+			}
 		],
 		detailViewFields: [
 			{ field: 'id' },
@@ -1604,6 +1615,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'subjects_notified_on', type: 'datetime' },
 			{ field: 'potential_consequences' },
 			{ field: 'remediation_measures' },
+			{ field: 'evidences' },
 			{ field: 'incident' },
 			{ field: 'reference_link' },
 			{ field: 'observation' },
