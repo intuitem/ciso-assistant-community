@@ -3844,13 +3844,34 @@ class RequirementMappingSetReadSerializer(BaseModelSerializer):
         ]
 
     @staticmethod
-    def _framework_info(urn):
-        from core.mappings.engine import engine
+    def _resolve_framework_name(urn):
+        """Look up a framework's display name from its library content.
 
-        fw = engine.frameworks.get(urn)
-        if fw is None:
+        Fallback used on the retrieve path, where no pre-built map is in
+        context. Resolves regardless of whether the framework is imported.
+        """
+        lib = StoredLibrary.objects.filter(
+            content__framework__urn=urn,
+            content__framework__isnull=False,
+            content__requirement_mapping_set__isnull=True,
+            content__requirement_mapping_sets__isnull=True,
+        ).first()
+        if lib is None:
+            return None
+        framework = lib.content.get("framework") or {}
+        return framework.get("name", urn)
+
+    def _framework_info(self, urn):
+        if not urn:
             return {"str": urn, "urn": urn}
-        return {"str": fw.get("name", urn), "urn": urn}
+        # On list requests the viewset pre-populates `framework_map` (O(1) lookup).
+        framework_map = (self.context.get("optimized_data") or {}).get("framework_map")
+        name = (
+            framework_map.get(urn)
+            if framework_map is not None
+            else self._resolve_framework_name(urn)
+        )
+        return {"str": name or urn, "urn": urn}
 
     def get_source_framework(self, obj):
         mapping_set = obj.content.get(
