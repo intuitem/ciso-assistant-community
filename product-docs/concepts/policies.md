@@ -48,6 +48,7 @@ Policies have their own lifecycle — drafting, review, approval, publication, p
 
 ## Related
 
+- [Documents](documents.md)
 - [Applied controls](applied-controls.md)
 - [Audits](audits.md)
 - [Evidence](evidence.md)

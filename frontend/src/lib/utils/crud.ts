@@ -1009,6 +1009,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		selectFields: [{ field: 'document_type' }],
 		detailViewFields: [
 			{ field: 'name' },
+			{ field: 'description' },
 			{ field: 'document_type' },
 			{ field: 'folder' },
 			{ field: 'policies' },
@@ -1032,6 +1033,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		detailViewFields: [
 			{ field: 'ref_id' },
 			{ field: 'name' },
+			{ field: 'description' },
 			{ field: 'document_type' },
 			{ field: 'locale' },
 			{ field: 'folder' },

@@ -1925,6 +1925,13 @@ def startup(sender=None, **kwargs):
     call_command("autoloadlibraries")
     call_command("sync_event_types")
 
+    # Runs here (not in doc_management post_migrate) so the root folder the
+    # template folder FK needs already exists.
+    try:
+        call_command("sync_document_templates")
+    except Exception as e:
+        logger.error("Error syncing built-in document templates", exc_info=True)
+
     try:
         call_command("backfill_builtin_metrics")
     except Exception as e:

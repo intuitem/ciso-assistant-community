@@ -45,7 +45,11 @@ def backfill_containers(apps, schema_editor):
         container.policies.add(policy_id)
         for d in docs:
             d.container = container
-        ManagedDocument.objects.using(db).bulk_update(docs, ["container"])
+            d.folder_id = container.folder_id
+            d.is_published = container.is_published
+        ManagedDocument.objects.using(db).bulk_update(
+            docs, ["container", "folder", "is_published"]
+        )
 
     for doc in orphans:
         container = DocumentContainer.objects.using(db).create(

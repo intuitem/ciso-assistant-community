@@ -928,11 +928,21 @@ class CustomDocHtmlTemplateViewSet(BaseModelViewSet):
                 from django.template import Template
 
                 uploaded.seek(0)
-                Template(uploaded.read().decode("utf-8"))
+                source = uploaded.read().decode("utf-8")
+                Template(source)
                 uploaded.seek(0)
             except Exception:
                 return Response(
                     {"file": "invalidHtmlTemplate"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Reject tags a PDF layout never needs (defense-in-depth).
+            from doc_management.html_templates import find_forbidden_template_tags
+
+            if find_forbidden_template_tags(source):
+                return Response(
+                    {"file": "forbiddenTemplateTags"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 

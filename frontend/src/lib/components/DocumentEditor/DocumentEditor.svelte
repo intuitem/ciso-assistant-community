@@ -61,6 +61,36 @@
 	let hasLock = $state(false);
 	let lastLoadedAt = $state(currentRevision?.updated_at || '');
 
+	// This component is reused (not remounted) when navigating document→document
+	// via reference links, so resync local state when the loaded doc changes.
+	let syncedDocId = $state(data.document?.id ?? null);
+	$effect(() => {
+		const incomingId = data.document?.id ?? null;
+		if (incomingId === syncedDocId) return;
+		syncedDocId = incomingId;
+		stopHeartbeat();
+		hasLock = false;
+		lockedBy = null;
+		document = data.document;
+		revisions = data.revisions;
+		currentRevision = data.currentRevision;
+		templates = data.templates || [];
+		content = data.currentRevision?.content || '';
+		lastLoadedAt = data.currentRevision?.updated_at || '';
+		availableLocales = data.availableLocales || [];
+		currentLocale = data.document?.locale || data.userLocale || 'en';
+		showTemplateSelector = !data.document;
+		showPreview = false;
+		showDiff = false;
+		previewContent = '';
+		const status = data.currentRevision?.status;
+		if (status === 'draft' || status === 'change_requested') {
+			checkAndAcquireLock().then(() => {
+				if (!lockedBy) startHeartbeat();
+			});
+		}
+	});
+
 	const statusStyles: Record<string, { bg: string; text: string; icon: string }> = {
 		draft: {
 			bg: 'bg-amber-50 border-amber-200 dark:bg-amber-500/15 dark:border-amber-500/30',
@@ -521,8 +551,14 @@
 	// Release lock when leaving the page
 	function releaseLock() {
 		if (currentRevision?.id && hasLock) {
-			// Use sendBeacon for beforeunload (fire-and-forget), fetch for normal nav
-			proxyPost({ _action: 'stop-editing', revision_id: currentRevision.id }).catch(() => {});
+			// keepalive lets the request survive beforeunload/tab-close, where a
+			// normal fetch may be cancelled as the page tears down.
+			fetch(proxyUrl, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ _action: 'stop-editing', revision_id: currentRevision.id }),
+				keepalive: true
+			}).catch(() => {});
 		}
 	}
 
@@ -702,6 +738,18 @@
 			}
 			textareaEl?.focus();
 		});
+	}
+
+	function handleEditorKeydown(e: KeyboardEvent) {
+		if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
+		const key = e.key.toLowerCase();
+		if (key === 'b') {
+			e.preventDefault();
+			wrapSelection('**', '**');
+		} else if (key === 'i') {
+			e.preventDefault();
+			wrapSelection('*', '*');
+		}
 	}
 
 	function insertLinePrefix(prefix: string) {
@@ -1309,6 +1357,7 @@
 						bind:value={content}
 						bind:this={textareaEl}
 						onpaste={handlePaste}
+						onkeydown={handleEditorKeydown}
 						class="input w-full flex-1 min-h-[500px] resize-y font-mono text-sm leading-relaxed p-4 {!canEdit
 							? 'bg-surface-50-950 cursor-not-allowed'
 							: ''}"

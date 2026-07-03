@@ -60,11 +60,12 @@
 		try {
 			const fd = new FormData();
 			fd.append('file', file);
-			await fetch(`${proxyBase}?_action=upload-revision&document_id=${document.id}`, {
+			const res = await fetch(`${proxyBase}?_action=upload-revision&document_id=${document.id}`, {
 				method: 'POST',
 				body: fd
 			});
-			await invalidateAll();
+			if (res.ok) await invalidateAll();
+			else window.alert(m.uploadFailed());
 		} finally {
 			busy = false;
 			if (fileInput) fileInput.value = '';
@@ -89,8 +90,11 @@
 		if (!window.confirm(m.deleteConfirm())) return;
 		busy = true;
 		try {
-			await fetch(`${proxyBase}?_type=document&id=${document.id}`, { method: 'DELETE' });
-			await goto(backHref);
+			const res = await fetch(`${proxyBase}?_type=document&id=${document.id}`, {
+				method: 'DELETE'
+			});
+			if (res.ok) await goto(backHref);
+			else window.alert(m.deleteFailed());
 		} finally {
 			busy = false;
 		}

@@ -4,7 +4,10 @@ import type { RequestHandler } from './$types';
 
 // Endpoint-only route (no +page here) so an <iframe>/<a download> — which send
 // Accept: text/html — reach this handler instead of rendering the app page.
-export const GET: RequestHandler = async ({ fetch, url }) => {
+export const GET: RequestHandler = async ({ fetch, url, locals }) => {
+	if (!locals.featureflags?.document_management) {
+		error(403, { message: 'Document management feature is disabled' });
+	}
 	const rev = url.searchParams.get('rev');
 	if (!rev) error(400, { message: 'Missing rev' });
 	const res = await fetch(`${BASE_API_URL}/document-revisions/${rev}/file/`);

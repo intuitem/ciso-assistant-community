@@ -1,5 +1,6 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import { fail, redirect } from '@sveltejs/kit';
+import { m } from '$paraglide/messages';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, locals }) => {
@@ -17,9 +18,9 @@ export const actions: Actions = {
 	default: async ({ request, fetch }) => {
 		const form = await request.formData();
 		const file = form.get('file') as File | null;
-		if (!file || file.size === 0) return fail(400, { error: 'A file is required.' });
+		if (!file || file.size === 0) return fail(400, { error: m.fileRequired() });
 		const folder = form.get('folder');
-		if (!folder) return fail(400, { error: 'A domain is required.' });
+		if (!folder) return fail(400, { error: m.domainRequired() });
 
 		// Rebuild FormData with a concrete Blob so fetch serialises it correctly.
 		const bytes = new Uint8Array(await file.arrayBuffer());

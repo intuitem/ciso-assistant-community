@@ -4,6 +4,7 @@ from rest_framework import serializers
 from core.models import Policy
 from core.serializer_fields import FieldsRelatedField
 from core.serializers import BaseModelSerializer
+from iam.models import Folder, RoleAssignment
 
 from .models import (
     DocumentContainer,
@@ -103,13 +104,19 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
         content = ""
         if template_name := validated_data.get("template_used"):
             locale = validated_data.get("locale", "en")
+            accessible_ids = (
+                RoleAssignment.get_accessible_object_ids(
+                    Folder.get_root_folder(), request.user, DocumentTemplate
+                )[0]
+                if request
+                else []
+            )
+            visible = DocumentTemplate.objects.filter(
+                models.Q(id__in=accessible_ids) | models.Q(builtin=True)
+            )
             template = (
-                DocumentTemplate.objects.filter(
-                    ref_id=template_name, locale=locale
-                ).first()
-                or DocumentTemplate.objects.filter(
-                    ref_id=template_name, locale="en"
-                ).first()
+                visible.filter(ref_id=template_name, locale=locale).first()
+                or visible.filter(ref_id=template_name, locale="en").first()
             )
             if template:
                 content = template.content
@@ -119,6 +126,9 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
             container = validated_data.get("container")
             if container is None:
                 if policy is not None:
+                    # Lock the policy row so concurrent creates for the same
+                    # policy can't each build a duplicate container.
+                    policy = Policy.objects.select_for_update().get(pk=policy.pk)
                     container = (
                         DocumentContainer.objects.select_for_update()
                         .filter(policies=policy)
@@ -144,6 +154,11 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
                             else {}
                         ),
                     )
+                validated_data["container"] = container
+            else:
+                container = DocumentContainer.objects.select_for_update().get(
+                    pk=container.pk
+                )
                 validated_data["container"] = container
 
             # Set default_locale inside the transaction to avoid race conditions

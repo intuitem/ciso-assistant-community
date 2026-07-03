@@ -83,11 +83,14 @@ class TestContainerGrouping:
         folder = Folder.objects.create(
             name="DT", parent_folder=Folder.get_root_folder()
         )
+        # builtin -> resolvable without a request (the create() path scopes custom
+        # templates to the requesting user's accessible folders).
         DocumentTemplate.objects.create(
             ref_id="my_tmpl",
             locale="en",
             name="My Template",
             content="# Hello from template",
+            builtin=True,
             folder=Folder.get_root_folder(),
         )
         doc = self._create(
@@ -215,3 +218,30 @@ class TestContainerGrouping:
         buf.seek(0)
         again = import_templates_from_zip(buf, Folder.get_root_folder())
         assert again["updated"] == 2 and again["created"] == 0
+
+    def test_custom_html_forbidden_tags_fall_back(self):
+        from core.models import CustomDocHtmlTemplate
+        from django.core.files.base import ContentFile
+        from doc_management.views import DocumentRevisionViewSet
+        from doc_management.html_templates import find_forbidden_template_tags
+
+        assert find_forbidden_template_tags("{% load x %}{{ title }}") == ["load"]
+        assert find_forbidden_template_tags("<h1>{{ title }}</h1>") == []
+
+        folder = Folder.objects.create(
+            name="FT", parent_folder=Folder.get_root_folder()
+        )
+        doc = self._create(folder=str(folder.id), locale="en", name="Doc")
+        rev = doc.revisions.first()
+        tmpl = CustomDocHtmlTemplate.objects.create(
+            template_key="document_pdf",
+            language="en",
+            is_active=True,
+            folder=Folder.get_root_folder(),
+        )
+        tmpl.file.save(
+            "bad.html", ContentFile(b"{% include 'x.html' %}OVERRIDE-MARKER")
+        )
+        # a forbidden tag -> the override is skipped, built-in layout used
+        html = DocumentRevisionViewSet()._resolve_document_html(rev, {"title": "T"})
+        assert "OVERRIDE-MARKER" not in html

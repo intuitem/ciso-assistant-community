@@ -185,13 +185,20 @@ class DocumentContainerViewSet(BaseModelViewSet):
         """Computed doc-to-doc references for a container: outgoing (this links
         to) and incoming (linked from)."""
         container = self.get_object()
+        accessible = set(
+            RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), request.user, DocumentContainer
+            )[0]
+        )
         outgoing = [
             {"id": str(r.target_container_id), "str": r.target_container.name}
             for r in container.outgoing_references.select_related("target_container")
+            if r.target_container_id in accessible
         ]
         incoming = [
             {"id": str(r.source_container_id), "str": r.source_container.name}
             for r in container.incoming_references.select_related("source_container")
+            if r.source_container_id in accessible
         ]
         return Response({"references": outgoing, "referenced_by": incoming})
 
@@ -280,10 +287,17 @@ class DocumentContainerViewSet(BaseModelViewSet):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
+        document_type = (
+            request.data.get("document_type") or DocumentContainer.DocumentType.POLICY
+        )
+        if document_type not in DocumentContainer.DocumentType.values:
+            return Response(
+                {"document_type": "Invalid."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
         with transaction.atomic():
             container = DocumentContainer.objects.create(
-                document_type=request.data.get("document_type")
-                or DocumentContainer.DocumentType.POLICY,
+                document_type=document_type,
                 name=request.data.get("name") or getattr(upload, "name", ""),
                 folder=folder,
                 is_published=False,
@@ -496,13 +510,15 @@ class ManagedDocumentViewSet(BaseModelViewSet):
             )
             draft = revisions_qs.filter(status=DocumentRevision.Status.DRAFT).first()
             if draft:
-                if draft.file:
-                    draft.file.delete(save=False)
+                old_file = draft.file if draft.file else None
                 draft.source = DocumentRevision.Source.UPLOADED
                 draft.content = ""
                 draft.file = upload
                 draft.save()
                 revision = draft
+                # Only drop the previous blob once the swap is durably committed.
+                if old_file:
+                    transaction.on_commit(lambda f=old_file: f.delete(save=False))
             else:
                 max_version = (
                     revisions_qs.aggregate(models.Max("version_number"))[
@@ -1057,6 +1073,7 @@ class DocumentRevisionViewSet(BaseModelViewSet):
         custom override (enterprise) over the built-in template."""
         from core.models import CustomDocHtmlTemplate
         from django.template import Template, Context
+        from .html_templates import find_forbidden_template_tags
 
         locale = getattr(revision.document, "locale", None) or "en"
         override = (
@@ -1070,7 +1087,14 @@ class DocumentRevisionViewSet(BaseModelViewSet):
             try:
                 override.file.open("rb")
                 template_source = override.file.read().decode("utf-8")
-                return Template(template_source).render(Context(context))
+                forbidden = find_forbidden_template_tags(template_source)
+                if forbidden:
+                    logger.warning(
+                        "Custom document template uses forbidden tags, falling back",
+                        tags=forbidden,
+                    )
+                else:
+                    return Template(template_source).render(Context(context))
             except Exception as e:
                 logger.warning(
                     "Failed to render custom document template, falling back to default",

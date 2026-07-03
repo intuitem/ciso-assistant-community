@@ -59,6 +59,31 @@ class DocumentContainer(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
         verbose_name = _("Document container")
         verbose_name_plural = _("Document containers")
 
+    def save(self, *args, **kwargs):
+        propagate = False
+        if self.pk:
+            old = (
+                DocumentContainer.objects.filter(pk=self.pk)
+                .values("folder_id", "is_published")
+                .first()
+            )
+            if old and (
+                old["folder_id"] != self.folder_id
+                or old["is_published"] != self.is_published
+            ):
+                propagate = True
+        super().save(*args, **kwargs)
+        # Children denormalize folder/is_published from the container, so a
+        # container move/publish must reach the already-saved rows too.
+        if propagate:
+            fields = {"folder_id": self.folder_id, "is_published": self.is_published}
+            self.documents.update(**fields)
+            DocumentRevision.objects.filter(document__container=self).update(**fields)
+            DocumentAttachment.objects.filter(document__container=self).update(**fields)
+            DocumentEdit.objects.filter(revision__document__container=self).update(
+                **fields
+            )
+
     def __str__(self):
         return self.name or str(self.id)
 
@@ -180,6 +205,8 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
     def save(self, *args, **kwargs):
         self.folder = self.document.folder
         self.is_published = self.document.is_published
+        if self.source == self.Source.UPLOADED and not self.file:
+            raise ValidationError("Uploaded revisions require a file.")
         if self.status == self.Status.DRAFT:
             existing = self.document.revisions.filter(status=self.Status.DRAFT).exclude(
                 pk=self.pk
@@ -223,11 +250,18 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
         self.save()
 
     def delete(self, *args, **kwargs):
+        container = (
+            self.document.container
+            if self.document_id and self.document.container_id
+            else None
+        )
         if self.pdf_snapshot:
             self.pdf_snapshot.delete(save=False)
         if self.file:
             self.file.delete(save=False)
         super().delete(*args, **kwargs)
+        if container:
+            recompute_references(container)
 
     def __str__(self):
         return f"{self.document.display_name} v{self.version_number}"

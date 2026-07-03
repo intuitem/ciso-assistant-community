@@ -134,12 +134,17 @@ export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
 
 	const action = url.searchParams.get('_action');
 
+	const req = (key: string): string => {
+		const value = url.searchParams.get(key);
+		if (!value) error(400, { message: `Missing ${key}` });
+		return value;
+	};
+
 	let endpoint: string;
 
 	switch (action) {
 		case 'references': {
-			const containerId = url.searchParams.get('container_id');
-			const refRes = await fetch(`${BASE_API_URL}/document-containers/${containerId}/references/`);
+			const refRes = await fetch(`${BASE_API_URL}/document-containers/${params.id}/references/`);
 			if (!refRes.ok) {
 				error(refRes.status as NumericRange<400, 599>, await refRes.json());
 			}
@@ -159,9 +164,9 @@ export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
 			return json(await templatesRes.json());
 		}
 		case 'documents-by-locale': {
-			const locale = url.searchParams.get('locale');
-			const docsEndpoint = `${BASE_API_URL}/managed-documents/?container=${params.id}&locale=${locale}`;
-			const docsRes = await fetch(docsEndpoint);
+			const locale = req('locale');
+			const qp = new URLSearchParams({ container: params.id, locale });
+			const docsRes = await fetch(`${BASE_API_URL}/managed-documents/?${qp}`);
 			if (!docsRes.ok) {
 				error(docsRes.status as NumericRange<400, 599>, await docsRes.json());
 			}
@@ -170,40 +175,32 @@ export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
 			return json(doc);
 		}
 		case 'revisions': {
-			const documentId = url.searchParams.get('document');
+			const documentId = req('document');
 			endpoint = `${BASE_API_URL}/document-revisions/?document=${documentId}&ordering=-version_number`;
 			break;
 		}
 		case 'revision': {
-			const revisionId = url.searchParams.get('revision_id');
-			endpoint = `${BASE_API_URL}/document-revisions/${revisionId}/`;
+			endpoint = `${BASE_API_URL}/document-revisions/${req('revision_id')}/`;
 			break;
 		}
 		case 'diff': {
-			const revisionId = url.searchParams.get('revision_id');
-			const otherId = url.searchParams.get('other_id');
-			endpoint = `${BASE_API_URL}/document-revisions/${revisionId}/diff/${otherId}/`;
+			endpoint = `${BASE_API_URL}/document-revisions/${req('revision_id')}/diff/${req('other_id')}/`;
 			break;
 		}
 		case 'editing-status': {
-			const revisionId = url.searchParams.get('revision_id');
-			endpoint = `${BASE_API_URL}/document-revisions/${revisionId}/editing-status/`;
+			endpoint = `${BASE_API_URL}/document-revisions/${req('revision_id')}/editing-status/`;
 			break;
 		}
 		case 'edit-history': {
-			const revisionId = url.searchParams.get('revision_id');
-			endpoint = `${BASE_API_URL}/document-revisions/${revisionId}/edit-history/`;
+			endpoint = `${BASE_API_URL}/document-revisions/${req('revision_id')}/edit-history/`;
 			break;
 		}
 		case 'edit-snapshot': {
-			const revisionId = url.searchParams.get('revision_id');
-			const editId = url.searchParams.get('edit_id');
-			endpoint = `${BASE_API_URL}/document-revisions/${revisionId}/edit-snapshot/${editId}/`;
+			endpoint = `${BASE_API_URL}/document-revisions/${req('revision_id')}/edit-snapshot/${req('edit_id')}/`;
 			break;
 		}
 		case 'export-pdf': {
-			const revisionId = url.searchParams.get('revision_id');
-			endpoint = `${BASE_API_URL}/document-revisions/${revisionId}/export-pdf/`;
+			endpoint = `${BASE_API_URL}/document-revisions/${req('revision_id')}/export-pdf/`;
 			const res = await fetch(endpoint);
 			if (!res.ok) {
 				error(res.status as NumericRange<400, 599>, 'PDF export failed');
@@ -218,7 +215,7 @@ export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
 			});
 		}
 		case 'serve-image': {
-			const attachmentId = url.searchParams.get('attachment_id');
+			const attachmentId = req('attachment_id');
 			const imageEndpoint = `${BASE_API_URL}/document-attachments/${attachmentId}/file/`;
 			const res = await fetch(imageEndpoint);
 			if (!res.ok) {
@@ -234,10 +231,7 @@ export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
 			});
 		}
 		case 'edit-diff': {
-			const revisionId = url.searchParams.get('revision_id');
-			const editAId = url.searchParams.get('edit_a_id');
-			const editBId = url.searchParams.get('edit_b_id');
-			endpoint = `${BASE_API_URL}/document-revisions/${revisionId}/edit-diff/${editAId}/${editBId}/`;
+			endpoint = `${BASE_API_URL}/document-revisions/${req('revision_id')}/edit-diff/${req('edit_a_id')}/${req('edit_b_id')}/`;
 			break;
 		}
 		default:

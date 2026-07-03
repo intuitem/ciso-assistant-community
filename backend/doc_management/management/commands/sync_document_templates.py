@@ -22,6 +22,13 @@ class Command(BaseCommand):
                 continue
             locale = locale_dir.name
             for f in sorted(locale_dir.glob("*.md")):
+                # A custom template shares the (ref_id, locale) unique key; don't
+                # let the built-in sync overwrite it and flip it to builtin.
+                existing = DocumentTemplate.objects.filter(
+                    ref_id=f.stem, locale=locale
+                ).first()
+                if existing and not existing.builtin:
+                    continue
                 data = parse_template_markdown(f.read_text(encoding="utf-8"), f.stem)
                 data.pop("ref_id")
                 DocumentTemplate.objects.update_or_create(
