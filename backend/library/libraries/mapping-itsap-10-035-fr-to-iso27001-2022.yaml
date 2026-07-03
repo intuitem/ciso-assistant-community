@@ -282,9 +282,9 @@ objects:
       relationship: intersect
   - urn: urn:intuitem:risk:req_mapping_set:mapping-fr-to-iso27001-2022-revert
     ref_id: mapping-fr-to-iso27001-2022-revert
-    name: ITSAP.10.035 -> ISO/IEC 27001:2022
-    description: "Mapping from Cybers\xE9curitaire Canada \u2013 Contr\xF4les de cybers\xE9\
-      curit\xE9 de base to International standard ISO/IEC 27001:2022"
+    name: ISO/IEC 27001:2022 -> ITSAP.10.035
+    description: "Mapping from International standard ISO/IEC 27001:2022 to Cybers\xE9\
+      curitaire Canada \u2013 Contr\xF4les de cybers\xE9curit\xE9 de base"
     target_framework_urn: urn:cccs:risk:framework:itsap10035_2024_fr
     source_framework_urn: urn:intuitem:risk:framework:iso27001-2022
     requirement_mappings:
