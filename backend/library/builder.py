@@ -50,9 +50,12 @@ URN_TYPE_TOKENS = {
     "requirement_mapping_sets": "req_mapping_set",
     "metric_definitions": "metric",
 }
-# Fields that hold at most one object in the overwhelming majority of
-# libraries: a single selected object of these kinds gets the bare family URN.
-SINGLETON_OBJECT_FIELDS = {"frameworks", "risk_matrices", "requirement_mapping_sets"}
+# Kinds the builder allows at most ONE of per library (enforced at the API
+# layer; adopted legacy documents may carry more): a single selected object
+# of these kinds gets the bare family URN. Mapping sets are deliberately NOT
+# here — a library legitimately holds several (e.g. both directions of a
+# crosswalk), so they always mint with their own leaf.
+SINGLETON_OBJECT_FIELDS = {"frameworks", "risk_matrices"}
 
 POLICY_STRIP = "strip"
 POLICY_PULL = "pull"
@@ -115,6 +118,104 @@ def normalize_objects(objects: dict) -> dict:
         else:
             normalized[canonical] = value
     return normalized
+
+
+def check_document_shape(objects: dict) -> list:
+    """Structural validation of a (normalized) objects container.
+
+    Shape only — completeness stays a validate/publish concern: a field may
+    be absent or empty, but when present it must have the right type. This
+    runs at every door content can enter through (draft save, adopt, import
+    source), so everything past the boundary can assume well-formed
+    structure instead of defending against arbitrary JSON. Unknown fields
+    are ignored (round-trip tolerance).
+    """
+    errors = []
+
+    def type_error(path, expected):
+        errors.append(f"{path}: must be {expected}")
+
+    def check_str_list(value, path):
+        if not isinstance(value, list):
+            type_error(path, "a list of URN strings")
+            return
+        for index, item in enumerate(value):
+            if not isinstance(item, str):
+                type_error(f"{path}[{index}]", "a URN string")
+
+    def check_dict_list(value, path):
+        """Report non-conforming entries; yield the well-formed ones."""
+        if not isinstance(value, list):
+            type_error(path, "a list of objects")
+            return []
+        entries = []
+        for index, item in enumerate(value):
+            if isinstance(item, dict):
+                entries.append((index, item))
+            else:
+                type_error(f"{path}[{index}]", "an object")
+        return entries
+
+    top_level = {}
+    for field in LIST_OBJECT_FIELDS:
+        if field not in objects:
+            continue
+        top_level[field] = check_dict_list(objects[field], f"content.{field}")
+        for index, obj in top_level[field]:
+            urn = obj.get("urn")
+            if urn is not None and not isinstance(urn, str):
+                type_error(f"content.{field}[{index}].urn", "a string")
+
+    preset = objects.get("preset")
+    if preset is not None:
+        if not isinstance(preset, dict):
+            type_error("content.preset", "an object")
+        else:
+            journey = preset.get("journey")
+            if journey is not None and not isinstance(journey, dict):
+                type_error("content.preset.journey", "an object")
+
+    for index, framework in top_level.get("frameworks", []):
+        path = f"content.frameworks[{index}]"
+        nodes = framework.get("requirement_nodes")
+        if nodes is None:
+            continue
+        for node_index, node in check_dict_list(nodes, f"{path}.requirement_nodes"):
+            node_path = f"{path}.requirement_nodes[{node_index}]"
+            for str_field in ("urn", "parent_urn"):
+                value = node.get(str_field)
+                if value is not None and not isinstance(value, str):
+                    type_error(f"{node_path}.{str_field}", "a string")
+            for ref_field in ("threats", "reference_controls"):
+                refs = node.get(ref_field)
+                if refs is not None:
+                    check_str_list(refs, f"{node_path}.{ref_field}")
+            questions = node.get("questions")
+            if questions is None:
+                continue
+            if not isinstance(questions, dict):
+                type_error(f"{node_path}.questions", "an object keyed by URN")
+                continue
+            for q_urn, question in questions.items():
+                q_path = f"{node_path}.questions[{q_urn}]"
+                if not isinstance(question, dict):
+                    type_error(q_path, "an object")
+                    continue
+                choices = question.get("choices")
+                if choices is not None:
+                    check_dict_list(choices, f"{q_path}.choices")
+
+    for index, mapping_set in top_level.get("requirement_mapping_sets", []):
+        path = f"content.requirement_mapping_sets[{index}]"
+        for ref_field in ("source_framework_urn", "target_framework_urn"):
+            value = mapping_set.get(ref_field)
+            if value is not None and not isinstance(value, str):
+                type_error(f"{path}.{ref_field}", "a string")
+        mappings = mapping_set.get("requirement_mappings")
+        if mappings is not None:
+            check_dict_list(mappings, f"{path}.requirement_mappings")
+
+    return errors
 
 
 def index_objects(objects: dict) -> dict:
@@ -603,13 +704,19 @@ def validate_draft_document(draft) -> dict:
         errors.append("The library holds no object yet")
 
     if draft.content:
+        normalized = normalize_objects(draft.content)
+        # Shape gate: the deeper checks (and the loader shim) assume a
+        # well-formed structure; report structural garbage as errors
+        # instead of crashing on it.
+        if shape_errors := check_document_shape(normalized):
+            return {"errors": errors + shape_errors, "warnings": warnings}
         shim = StoredLibrary(
             name=draft.name or "",
             urn=library["urn"],
             locale=draft.locale,
             version=draft.version,
             ref_id=draft.ref_id,
-            content=normalize_objects(draft.content),
+            content=normalized,
             dependencies=list(draft.dependencies or []),
         )
         try:

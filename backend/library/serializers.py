@@ -205,7 +205,13 @@ class LibraryDraftWriteSerializer(BaseModelSerializer):
     def validate_content(self, content):
         if not isinstance(content, dict):
             raise serializers.ValidationError("contentMustBeAnObject")
-        return builder.normalize_objects(content)
+        normalized = builder.normalize_objects(content)
+        # Shape boundary: stored draft content is always well-formed, so
+        # everything reading it can assume structure. Completeness (names,
+        # references, …) stays a validate/publish concern.
+        if errors := builder.check_document_shape(normalized):
+            raise serializers.ValidationError(errors)
+        return normalized
 
     def validate_dependencies(self, dependencies):
         if not isinstance(dependencies, list) or not all(

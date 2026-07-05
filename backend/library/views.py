@@ -896,7 +896,7 @@ def _get_stored_library(pk_or_urn) -> StoredLibrary | None:
     key = "urn" if str(pk_or_urn).startswith("urn:") else "id"
     try:
         libraries = list(StoredLibrary.objects.filter(**{key: pk_or_urn}))
-    except (ValidationError, ValueError):
+    except ValidationError, ValueError:
         return None
     if not libraries:
         return None
@@ -947,7 +947,18 @@ class LibraryDraftViewSet(BaseModelViewSet):
 
     @action(detail=False, methods=["get"], url_path="check-identity")
     def check_identity(self, request):
-        """Advisory identity check for the creation form, before a draft exists."""
+        """Advisory identity check for the creation form, before a draft exists.
+
+        Collection actions bypass the object-level RBAC machinery, so the
+        check is explicit — and the answer spans the whole corpus (stored,
+        loaded, drafts), so it is reserved for root-level draft creators.
+        """
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_librarydraft"),
+            folder=Folder.get_root_folder(),
+        ):
+            return Response(status=HTTP_403_FORBIDDEN)
         packager = request.query_params.get("packager", "")
         ref_id = request.query_params.get("ref_id", "")
         if not (
@@ -1018,7 +1029,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 if folder_id
                 else Folder.get_root_folder()
             )
-        except (Folder.DoesNotExist, ValidationError, ValueError):
+        except Folder.DoesNotExist, ValidationError, ValueError:
             return Response({"error": "folderNotFound"}, status=HTTP_404_NOT_FOUND)
         if not RoleAssignment.is_access_allowed(
             user=request.user,
@@ -1042,6 +1053,15 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 status=HTTP_409_CONFLICT,
             )
 
+        content = builder.normalize_objects(source.content or {})
+        if shape_errors := builder.check_document_shape(content):
+            # Adoption bypasses the write serializer: don't seed a draft
+            # from a structurally malformed stored library.
+            return Response(
+                {"error": "adoptInvalidContent", "details": shape_errors},
+                status=HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+
         urn_groups = match_urn(source.urn)
         draft = LibraryDraft.objects.create(
             name=source.name,
@@ -1058,7 +1078,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
             translations=source.translations or {},
             dependencies=list(source.dependencies or []),
             labels=[label.label for label in source.filtering_labels.all()],
-            content=builder.normalize_objects(source.content or {}),
+            content=content,
             urn=source.urn,
             # The identity already exists in the wild: frozen from the start.
             first_published_at=now(),
@@ -1074,6 +1094,15 @@ class LibraryDraftViewSet(BaseModelViewSet):
         source = _get_stored_library(request.data.get("source"))
         if source is None:
             return Response({"error": "libraryNotFound"}, status=HTTP_404_NOT_FOUND)
+        if builder.check_document_shape(
+            builder.normalize_objects(source.content or {})
+        ):
+            # Extraction assumes well-formed structure; a structurally
+            # malformed stored library cannot be used as a clone source.
+            return Response(
+                {"error": "sourceLibraryMalformed"},
+                status=HTTP_422_UNPROCESSABLE_ENTITY,
+            )
         if not (
             re.match(LibraryDraft.IDENTITY_REGEX, draft.packager)
             and re.match(LibraryDraft.IDENTITY_REGEX, draft.ref_id)
@@ -1096,6 +1125,22 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 per_urn_policies=request.data.get("policies"),
                 resolve_owner=builder.find_owning_library_urn,
             )
+            # The builder allows at most one framework and one risk matrix per
+            # library. An import may replace the existing one (same minted
+            # URN + overwrite) but never take the draft beyond one.
+            current = builder.normalize_objects(draft.content or {})
+            for field in builder.SINGLETON_OBJECT_FIELDS:
+                combined = {
+                    str(obj.get("urn", "")).lower()
+                    for obj in (extraction["objects"].get(field) or [])
+                } | {
+                    str(obj.get("urn", "")).lower() for obj in current.get(field) or []
+                }
+                if len(combined) > 1:
+                    return Response(
+                        {"error": "singleObjectOfKindPerLibrary", "field": field},
+                        status=HTTP_400_BAD_REQUEST,
+                    )
             draft.content = builder.merge_objects(
                 draft.content,
                 extraction["objects"],
@@ -1233,7 +1278,11 @@ class LibraryDraftViewSet(BaseModelViewSet):
             else {}
         )
         doc_nodes = {
-            node["urn"]: node for node in framework.get("requirement_nodes") or []
+            # urn absence is legal WIP (completeness, not shape): an urnless
+            # node simply has no live counterpart yet.
+            node["urn"]: node
+            for node in framework.get("requirement_nodes") or []
+            if node.get("urn")
         }
         added = [urn for urn in doc_nodes if urn not in live_nodes]
         removed = [urn for urn in live_nodes if urn not in doc_nodes]
@@ -1315,22 +1364,15 @@ class LibraryDraftViewSet(BaseModelViewSet):
             )
         content = builder.normalize_objects(draft.content or {})
         frameworks = content.setdefault("frameworks", [])
-        base = builder.object_urn_base(draft.packager, draft.ref_id, "frameworks")
-        existing_urns = {str(f.get("urn", "")).lower() for f in frameworks}
-        if not frameworks:
-            framework_urn = base
-        else:
-            leaf = (
-                builder.urn_safe_leaf(
-                    request.data.get("ref_id") or request.data.get("name") or ""
-                )
-                or f"framework-{len(frameworks) + 1}"
+        if frameworks:
+            # Single-framework convention: one framework per library.
+            return Response(
+                {"error": "singleObjectOfKindPerLibrary", "field": "frameworks"},
+                status=HTTP_400_BAD_REQUEST,
             )
-            framework_urn = f"{base}:{leaf}"
-            suffix = 2
-            while framework_urn in existing_urns:
-                framework_urn = f"{base}:{leaf}-{suffix}"
-                suffix += 1
+        framework_urn = builder.object_urn_base(
+            draft.packager, draft.ref_id, "frameworks"
+        )
         frameworks.append(
             {
                 "urn": framework_urn,
@@ -1513,14 +1555,27 @@ class LibraryDraftViewSet(BaseModelViewSet):
                     merged[key] = value
             candidate = merged
         else:
-            leaf = builder.urn_safe_leaf(str(payload.get("ref_id") or ""))
-            if not leaf:
-                return Response({"error": "refIdRequired"}, status=HTTP_400_BAD_REQUEST)
+            if field in builder.SINGLETON_OBJECT_FIELDS and items:
+                # Single-object convention (one risk matrix per library).
+                return Response(
+                    {"error": "singleObjectOfKindPerLibrary", "field": field},
+                    status=HTTP_400_BAD_REQUEST,
+                )
             try:
                 base = builder.leaf_object_base(draft.effective_urn, field)
             except builder.BuilderError as e:
                 return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
-            urn = f"{base}:{leaf}"
+            if field in builder.SINGLETON_OBJECT_FIELDS:
+                # The single object of its kind takes the bare family URN,
+                # matching the shipped-library convention.
+                urn = base
+            else:
+                leaf = builder.urn_safe_leaf(str(payload.get("ref_id") or ""))
+                if not leaf:
+                    return Response(
+                        {"error": "refIdRequired"}, status=HTTP_400_BAD_REQUEST
+                    )
+                urn = f"{base}:{leaf}"
             if any(str(item.get("urn", "")).lower() == urn for item in items):
                 return Response(
                     {"error": "objectUrnAlreadyExists", "urn": urn},
@@ -1695,21 +1750,16 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
             )
         if error is not None:
-            # This exact content (or version) is already stored. If the stored
-            # copy is ahead of the loaded one, this publish resumes a pending
-            # update (e.g. after a score-change conflict); otherwise there is
-            # nothing new to publish.
-            stored = (
-                StoredLibrary.objects.filter(urn=urn, locale=draft.locale)
-                .order_by("-version")
-                .first()
-            )
-            loaded = LoadedLibrary.objects.filter(urn=urn, locale=draft.locale).first()
-            if stored is None or (
-                loaded is not None and stored.version <= loaded.version
-            ):
-                return Response({"error": error}, status=HTTP_409_CONFLICT)
+            # Publish is stateless (failed attempts leave no stored row
+            # behind), so a store refusal genuinely means the content or
+            # version already exists — nothing new to publish.
+            return Response({"error": error}, status=HTTP_409_CONFLICT)
 
+        # Publish is all-or-nothing: if loading does not complete, remove the
+        # stored row this request created so the version guard is back to its
+        # pre-publish state and a retry (e.g. with a score-change strategy,
+        # same version) starts from a clean slate — no phantom "update
+        # available" rows, no skipped version numbers.
         loaded = LoadedLibrary.objects.filter(urn=urn, locale=draft.locale).first()
         try:
             if loaded is not None:
@@ -1717,6 +1767,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
             else:
                 error_msg = stored.load()
         except LibraryUpdater.ScoreChangeDetected as e:
+            stored.delete()
             return Response(
                 {
                     "error": "score_change_detected",
@@ -1730,19 +1781,17 @@ class LibraryDraftViewSet(BaseModelViewSet):
             )
         except Exception as e:
             logger.exception("Failed to load published draft", urn=urn)
-            if loaded is None:
-                stored.delete()
+            stored.delete()
             return Response(
                 {"error": "libraryLoadFailed", "detail": str(e)},
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
             )
         if error_msg is not None:
+            stored.delete()
             if error_msg == "libraryHasNoUpdate":
                 return Response(
                     {"error": "noChangesToPublish"}, status=HTTP_409_CONFLICT
                 )
-            if loaded is None:
-                stored.delete()
             return Response(
                 {"error": "libraryLoadFailed", "detail": error_msg},
                 status=HTTP_422_UNPROCESSABLE_ENTITY,

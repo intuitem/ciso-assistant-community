@@ -55,22 +55,49 @@
 		return JSON.stringify({ meta, dependenciesText, labelsText });
 	}
 
-	function resetForms() {
-		meta = {
-			name: draft.name ?? '',
-			description: draft.description ?? '',
-			packager: draft.packager ?? '',
-			ref_id: draft.ref_id ?? '',
-			locale: draft.locale ?? 'en',
-			version: draft.version ?? 1,
-			provider: draft.provider ?? '',
-			copyright: draft.copyright ?? '',
-			publication_date: draft.publication_date ?? '',
-			annotation: draft.annotation ?? ''
+	function serverFormState() {
+		return {
+			meta: {
+				name: draft.name ?? '',
+				description: draft.description ?? '',
+				packager: draft.packager ?? '',
+				ref_id: draft.ref_id ?? '',
+				locale: draft.locale ?? 'en',
+				version: draft.version ?? 1,
+				provider: draft.provider ?? '',
+				copyright: draft.copyright ?? '',
+				publication_date: draft.publication_date ?? '',
+				annotation: draft.annotation ?? ''
+			} as Record<string, any>,
+			dependenciesText: (draft.dependencies ?? []).join('\n'),
+			labelsText: (draft.labels ?? []).join(', ')
 		};
-		dependenciesText = (draft.dependencies ?? []).join('\n');
-		labelsText = (draft.labels ?? []).join(', ');
-		metaBaseline = metaSnapshot();
+	}
+
+	function resetForms() {
+		const server = serverFormState();
+		// The draft is refreshed by every card action (imports, object
+		// upserts, publish, …). Merge rather than reset: fields the user
+		// edited since the last baseline keep their unsaved value, untouched
+		// fields take the fresh server value.
+		if (metaBaseline) {
+			const baseline = JSON.parse(metaBaseline);
+			for (const key of Object.keys(server.meta)) {
+				if (meta[key] !== baseline.meta[key]) {
+					server.meta[key] = meta[key];
+				}
+			}
+			if (dependenciesText !== baseline.dependenciesText) {
+				server.dependenciesText = dependenciesText;
+			}
+			if (labelsText !== baseline.labelsText) {
+				server.labelsText = labelsText;
+			}
+		}
+		metaBaseline = JSON.stringify(serverFormState());
+		meta = server.meta;
+		dependenciesText = server.dependenciesText;
+		labelsText = server.labelsText;
 	}
 	resetForms();
 
@@ -269,6 +296,12 @@
 
 	function objectCount(type: string): number {
 		return draft.objects_meta?.[type] ?? 0;
+	}
+
+	// Kinds the builder allows at most one of per library.
+	const SINGLE_KINDS = ['frameworks', 'risk_matrices', 'preset'];
+	function singleKindFull(type: string): boolean {
+		return SINGLE_KINDS.includes(type) && objectCount(type) > 0;
 	}
 
 	// --- Visual framework editor -----------------------------------------------
@@ -580,8 +613,7 @@
 					<button
 						type="button"
 						class="btn btn-sm variant-ghost-warning"
-						onclick={() =>
-							publish({ strategy: strategy.action, bump_version: true, _presetChecked: true })}
+						onclick={() => publish({ strategy: strategy.action, _presetChecked: true })}
 					>
 						{strategy.name}
 					</button>
@@ -720,12 +752,17 @@
 			</select>
 			<div class="flex flex-wrap gap-3 text-sm">
 				{#each OBJECT_TYPES as type}
-					<label class="flex items-center gap-1">
+					{@const atLimit = singleKindFull(type)}
+					<label class="flex items-center gap-1 {atLimit ? 'opacity-50' : ''}">
 						<input
 							type="checkbox"
 							class="checkbox"
 							checked={importTypes.includes(type)}
 							onchange={() => toggleType(type)}
+							disabled={atLimit}
+							title={atLimit
+								? 'The library already holds one — a library has at most one of this kind.'
+								: undefined}
 						/>
 						{type.replaceAll('_', ' ')}
 					</label>
@@ -790,19 +827,21 @@
 	<div class="card p-4 space-y-3">
 		<div class="flex items-center justify-between">
 			<h3 class="text-lg font-semibold">
-				<i class="fa-solid fa-sitemap mr-1"></i>Frameworks
+				<i class="fa-solid fa-sitemap mr-1"></i>Framework
 			</h3>
-			<button
-				type="button"
-				class="btn btn-sm variant-ghost-primary"
-				onclick={addFramework}
-				disabled={addingFramework}
-			>
-				{#if addingFramework}<i class="fa-solid fa-spinner fa-spin mr-1"></i>{:else}<i
-						class="fa-solid fa-plus mr-1"
-					></i>{/if}
-				Add framework
-			</button>
+			{#if frameworks.length === 0}
+				<button
+					type="button"
+					class="btn btn-sm variant-ghost-primary"
+					onclick={addFramework}
+					disabled={addingFramework}
+				>
+					{#if addingFramework}<i class="fa-solid fa-spinner fa-spin mr-1"></i>{:else}<i
+							class="fa-solid fa-plus mr-1"
+						></i>{/if}
+					Add framework
+				</button>
+			{/if}
 		</div>
 		{#if frameworks.length > 0}
 			<ul class="divide-y divide-surface-200-800">
@@ -834,19 +873,21 @@
 	<div class="card p-4 space-y-3">
 		<div class="flex items-center justify-between">
 			<h3 class="text-lg font-semibold">
-				<i class="fa-solid fa-table-cells mr-1"></i>Risk matrices
+				<i class="fa-solid fa-table-cells mr-1"></i>Risk matrix
 			</h3>
-			<button
-				type="button"
-				class="btn btn-sm variant-ghost-primary"
-				onclick={addMatrix}
-				disabled={addingMatrix}
-			>
-				{#if addingMatrix}<i class="fa-solid fa-spinner fa-spin mr-1"></i>{:else}<i
-						class="fa-solid fa-plus mr-1"
-					></i>{/if}
-				Add matrix
-			</button>
+			{#if riskMatrices.length === 0}
+				<button
+					type="button"
+					class="btn btn-sm variant-ghost-primary"
+					onclick={addMatrix}
+					disabled={addingMatrix}
+				>
+					{#if addingMatrix}<i class="fa-solid fa-spinner fa-spin mr-1"></i>{:else}<i
+							class="fa-solid fa-plus mr-1"
+						></i>{/if}
+					Add matrix
+				</button>
+			{/if}
 		</div>
 		{#if riskMatrices.length > 0}
 			<ul class="divide-y divide-surface-200-800">

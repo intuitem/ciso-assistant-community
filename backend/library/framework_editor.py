@@ -286,36 +286,62 @@ def editor_doc_to_framework_object(editor_doc: dict, *, existing: dict) -> dict:
         )
 
     question_id_to_urn: dict = {}
-    question_leaves_taken: dict = {}
+    # URNs claimed by questions during this save, per node. Minting must
+    # avoid both these and every URN existing anywhere in the document —
+    # existing questions keep their URN verbatim (whatever their position),
+    # and a deleted question's URN must not be revived for new content.
+    claimed_questions: dict = {}
     for question in sorted(doc_questions, key=lambda q: q.get("order") or 0):
         node_key = str(question.get("requirement_node_id") or "").lower()
         node_urn = node_ids_to_urn.get(node_key) or urn_map.get(node_key) or node_key
+        claimed = claimed_questions.setdefault(node_urn, set())
         q_urn = str(question.get("urn") or "").lower()
-        if not (q_urn and q_urn in existing_question_urns):
-            taken = question_leaves_taken.setdefault(node_urn, set())
-            leaf = urn_safe_leaf(question.get("ref_id") or "") or str(len(taken) + 1)
+        if q_urn and q_urn in existing_question_urns and q_urn not in claimed:
+            claimed.add(q_urn)
+        else:
+            leaf = urn_safe_leaf(question.get("ref_id") or "") or str(len(claimed) + 1)
+            candidate = f"{node_urn}:question:{leaf}"
+            suffix = 2
+            while candidate in existing_question_urns or candidate in claimed:
+                candidate = f"{node_urn}:question:{leaf}-{suffix}"
+                suffix += 1
             old_q_urn = q_urn
-            q_urn = f"{node_urn}:question:{_dedup_leaf(leaf, taken)}"
+            q_urn = candidate
+            claimed.add(q_urn)
             if old_q_urn:
                 urn_map[old_q_urn] = q_urn
         question_id_to_urn[str(question.get("id") or "").lower()] = q_urn
 
+        # For existing questions the editor id IS the urn: only add the
+        # urn-keyed bucket when it differs, or every choice appears twice.
+        question_id = str(question.get("id") or "")
+        raw = list(choices_by_question.get(question_id, []))
+        question_urn_key = str(question.get("urn") or "")
+        if question_urn_key and question_urn_key != question_id:
+            raw += choices_by_question.get(question_urn_key, [])
+        raw_choices = sorted(raw, key=lambda c: c.get("order") or 0)
+
         q_choices = []
-        raw_choices = sorted(
-            choices_by_question.get(str(question.get("id") or ""), [])
-            + choices_by_question.get(question.get("urn") or "", []),
-            key=lambda c: c.get("order") or 0,
-        )
+        claimed_choices: set = set()
+        next_index = 1
         seen_choice_ids = set()
-        for c_order, choice in enumerate(raw_choices):
+        for choice in raw_choices:
             choice_key = id(choice)
             if choice_key in seen_choice_ids:
                 continue
             seen_choice_ids.add(choice_key)
             c_urn = str(choice.get("urn") or "").lower()
-            if not (c_urn and c_urn in existing_choice_urns):
+            if c_urn and c_urn in existing_choice_urns and c_urn not in claimed_choices:
+                claimed_choices.add(c_urn)
+            else:
                 old_c_urn = c_urn
-                c_urn = f"{q_urn}:choice:{c_order + 1}"
+                candidate = f"{q_urn}:choice:{next_index}"
+                while candidate in existing_choice_urns or candidate in claimed_choices:
+                    next_index += 1
+                    candidate = f"{q_urn}:choice:{next_index}"
+                c_urn = candidate
+                claimed_choices.add(c_urn)
+                next_index += 1
                 if old_c_urn:
                     urn_map[old_c_urn] = c_urn
             q_choices.append(
@@ -350,12 +376,30 @@ def editor_doc_to_framework_object(editor_doc: dict, *, existing: dict) -> dict:
         )
 
     # --- Rebuild the requirement_nodes list in editor order ----------------
+    # The node list is a pre-order tree serialization (the sequence+depth
+    # convention shared with the Excel pipeline): every parent_urn must
+    # reference a node that appears EARLIER in the list. Documents violating
+    # this — possible only through raw API payloads, never through the editor
+    # UI — are rejected as malformed rather than silently reinterpreted.
+    # Forward references being rejected also makes parent cycles impossible.
+    known_node_urns = set(minted)
     requirement_nodes = []
     depths: dict = {}
     for index, node in enumerate(doc_nodes):
         canonical = minted[index]
         parent = map_ref(node.get("parent_urn"))
-        depth = depths.get(parent, 0) + 1 if parent else 1
+        if parent is not None:
+            if parent not in known_node_urns:
+                raise BuilderError(
+                    f"Node {canonical} references unknown parent "
+                    f"{node.get('parent_urn')}"
+                )
+            if parent not in depths:
+                raise BuilderError(
+                    f"Malformed node order: {canonical} appears before "
+                    f"its parent {parent}"
+                )
+        depth = depths[parent] + 1 if parent else 1
         depths[canonical] = depth
         node_dict = _clean(
             {

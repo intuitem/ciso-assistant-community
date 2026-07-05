@@ -231,6 +231,50 @@ def test_extract_individual_selection_of_leaf_objects_is_clean():
     assert result["dependencies"] == []
 
 
+def test_check_document_shape_reports_structural_garbage():
+    # a well-formed document (incl. questions/choices/mappings) passes
+    assert (
+        builder.check_document_shape(
+            builder.normalize_objects(SOURCE_LIBRARY["objects"])
+        )
+        == []
+    )
+
+    errors = builder.check_document_shape(
+        {
+            "threats": "hello",
+            "reference_controls": [42],
+            "preset": [],
+            "frameworks": [
+                {
+                    "urn": "urn:me:risk:framework:x",
+                    "requirement_nodes": [
+                        {
+                            "urn": {"nested": True},
+                            "threats": [{"not": "a string"}],
+                            "questions": ["not-a-dict"],
+                        }
+                    ],
+                }
+            ],
+            "requirement_mapping_sets": [
+                {"source_framework_urn": 7, "requirement_mappings": "nope"}
+            ],
+            "someone_elses_extension_field": "left alone",
+        }
+    )
+    assert "content.threats: must be a list of objects" in errors
+    assert "content.reference_controls[0]: must be an object" in errors
+    assert "content.preset: must be an object" in errors
+    assert any("requirement_nodes[0].urn" in error for error in errors)
+    assert any("requirement_nodes[0].threats[0]" in error for error in errors)
+    assert any("requirement_nodes[0].questions" in error for error in errors)
+    assert any("source_framework_urn" in error for error in errors)
+    assert any("requirement_mappings" in error for error in errors)
+    # unknown fields are tolerated (round-trip)
+    assert not any("extension_field" in error for error in errors)
+
+
 def test_merge_objects_reports_collisions():
     content = {"threats": [{"urn": "urn:me:risk:threat:fork:t2", "ref_id": "T2"}]}
     incoming = {"threats": [{"urn": "urn:me:risk:threat:fork:t2", "ref_id": "T2"}]}
@@ -371,6 +415,67 @@ def test_identity_rename_rebases_the_document(admin_client):
 
 
 @pytest.mark.django_db
+def test_malformed_content_is_rejected_at_every_door(admin_client):
+    # Door 1: draft save — a 400 naming the offending path, not a stored
+    # time bomb.
+    draft = _create_draft(admin_client)
+    detail_url = reverse("library-drafts-detail", args=[draft["id"]])
+    bad_patch = admin_client.patch(
+        detail_url, {"content": {"threats": "hello"}}, format="json"
+    )
+    assert bad_patch.status_code == status.HTTP_400_BAD_REQUEST
+    assert "content.threats" in str(bad_patch.data)
+    # the draft is untouched, and validate/publish still answer cleanly
+    validate = admin_client.get(reverse("library-drafts-validate", args=[draft["id"]]))
+    assert validate.status_code == status.HTTP_200_OK
+
+    # Doors 2 and 3: adopt / clone from a structurally malformed stored
+    # library (store_library_content only checks top-level fields).
+    malformed_library = {
+        **SOURCE_LIBRARY,
+        "urn": "urn:acme:risk:library:malformed-lib",
+        "ref_id": "malformed-lib",
+        "name": "Malformed library",
+        "objects": {"threats": ["not-an-object"]},
+    }
+    stored, error = StoredLibrary.store_library_content(
+        yaml.safe_dump(malformed_library).encode()
+    )
+    assert error is None, error
+    adopted = admin_client.post(
+        reverse("library-drafts-adopt"),
+        {"stored_library": str(stored.id)},
+        format="json",
+    )
+    assert adopted.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert adopted.data["error"] == "adoptInvalidContent"
+    imported = admin_client.post(
+        reverse("library-drafts-import-objects", args=[draft["id"]]),
+        {"source": str(stored.id)},
+        format="json",
+    )
+    assert imported.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert imported.data["error"] == "sourceLibraryMalformed"
+
+
+@pytest.mark.django_db
+def test_check_identity_requires_draft_creation_permission(app_config):
+    """Any authenticated account without library permissions (e.g. a
+    third-party respondent) must not be able to probe the corpus."""
+    user = User.objects.create_user("nobody@builder-tests.com")
+    user.is_published = True
+    user.save()
+    client = APIClient()
+    _auth_token = AuthToken.objects.create(user=user)
+    client.credentials(HTTP_AUTHORIZATION=f"Token {_auth_token[1]}")
+    response = client.get(
+        reverse("library-drafts-check-identity"),
+        {"packager": "acme", "ref_id": "source-lib"},
+    )
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+@pytest.mark.django_db
 def test_check_identity_reports_conflicts_with_stored_libraries(admin_client):
     stored, error = StoredLibrary.store_library_content(
         yaml.safe_dump(SOURCE_LIBRARY).encode()
@@ -461,6 +566,81 @@ def test_publish_loads_through_the_existing_import_path(admin_client):
     framework.refresh_from_db()
     assert framework.name == "My framework v2"
     assert Framework.objects.filter(urn="urn:me:risk:framework:mylib").count() == 1
+
+
+@pytest.mark.django_db
+def test_publish_score_change_retry_keeps_the_same_version(admin_client):
+    """The 409 score_change_detected contract: retrying with just the chosen
+    strategy must succeed at the SAME version — the failed attempt leaves no
+    stored row behind to trip the version guard."""
+    from core.models import ComplianceAssessment
+    from iam.models import Folder
+    from core.models import Perimeter
+
+    draft = _create_draft(
+        admin_client,
+        content={
+            "frameworks": [
+                {
+                    "urn": "urn:me:risk:framework:mylib",
+                    "ref_id": "MYFW",
+                    "name": "My framework",
+                    "min_score": 0,
+                    "max_score": 100,
+                    "requirement_nodes": [
+                        {
+                            "urn": "urn:me:risk:req_node:mylib:r1",
+                            "ref_id": "R1",
+                            "name": "Requirement 1",
+                            "assessable": True,
+                            "depth": 1,
+                        }
+                    ],
+                }
+            ],
+        },
+    )
+    publish_url = reverse("library-drafts-publish", args=[draft["id"]])
+    assert admin_client.post(publish_url, {}, format="json").status_code == 200
+
+    # An audit pinned to the published score boundaries makes a boundary
+    # change require a migration strategy.
+    framework = Framework.objects.get(urn="urn:me:risk:framework:mylib")
+    perimeter = Perimeter.objects.create(name="P1", folder=Folder.get_root_folder())
+    ComplianceAssessment.objects.create(
+        name="Audit",
+        perimeter=perimeter,
+        framework=framework,
+        min_score=0,
+        max_score=100,
+        folder=Folder.get_root_folder(),
+    )
+
+    detail_url = reverse("library-drafts-detail", args=[draft["id"]])
+    current = admin_client.get(detail_url).data
+    content = current["content"]
+    content["frameworks"][0]["max_score"] = 5
+    assert (
+        admin_client.patch(
+            detail_url, {"content": content, "version": 2}, format="json"
+        ).status_code
+        == 200
+    )
+
+    conflict = admin_client.post(publish_url, {}, format="json")
+    assert conflict.status_code == status.HTTP_409_CONFLICT, conflict.content
+    assert conflict.data["error"] == "score_change_detected"
+    assert {s["action"] for s in conflict.data["strategies"]} >= {"clamp"}
+    # all-or-nothing: the failed attempt left no stored v2 behind
+    assert not StoredLibrary.objects.filter(
+        urn="urn:me:risk:library:mylib", version=2
+    ).exists()
+
+    # the documented retry — same version, strategy only — succeeds
+    retried = admin_client.post(publish_url, {"strategy": "clamp"}, format="json")
+    assert retried.status_code == status.HTTP_200_OK, retried.content
+    assert retried.data["version"] == 2
+    assert LoadedLibrary.objects.get(urn="urn:me:risk:library:mylib").version == 2
 
 
 @pytest.mark.django_db
@@ -659,6 +839,97 @@ def test_framework_editor_doc_mints_urns_for_new_items():
     assert choice["urn"] == "urn:acme:risk:req_node:source-lib:b:question:1:choice:1"
 
 
+def test_new_question_never_overwrites_an_existing_one():
+    from library import framework_editor as fw_editor
+
+    original = builder.normalize_objects(SOURCE_LIBRARY["objects"])["frameworks"][0]
+    doc = fw_editor.framework_to_editor_doc(original, locale="en")
+    node_urn = "urn:acme:risk:req_node:source-lib:a.1"
+    # A question added in the editor: no urn, no ref_id — its minted leaf
+    # must not collide with the node's existing ...question:1.
+    doc["questions"].append(
+        {
+            "id": "tmp-q-new",
+            "urn": None,
+            "ref_id": None,
+            "text": "Second question?",
+            "type": "unique_choice",
+            "order": 1,
+            "requirement_node_id": node_urn,
+        }
+    )
+    rebuilt = fw_editor.editor_doc_to_framework_object(doc, existing=original)
+    questions = {
+        node["urn"]: node.get("questions") or {}
+        for node in rebuilt["requirement_nodes"]
+    }[node_urn]
+    assert len(questions) == 2
+    existing = questions[f"{node_urn}:question:1"]
+    assert existing["text"] == "Is it done?"  # untouched
+    assert questions[f"{node_urn}:question:2"]["text"] == "Second question?"
+
+
+def test_malformed_node_order_is_rejected():
+    from library import framework_editor as fw_editor
+
+    original = builder.normalize_objects(SOURCE_LIBRARY["objects"])["frameworks"][0]
+    # Child listed before its parent: the pre-order invariant is violated —
+    # only raw API payloads can produce this, and they must be rejected.
+    doc = fw_editor.framework_to_editor_doc(original, locale="en")
+    doc["nodes"].reverse()
+    with pytest.raises(builder.BuilderError, match="Malformed node order"):
+        fw_editor.editor_doc_to_framework_object(doc, existing=original)
+
+    # A parent_urn pointing at no node in the document is equally malformed.
+    doc = fw_editor.framework_to_editor_doc(original, locale="en")
+    doc["nodes"][1]["parent_urn"] = "urn:acme:risk:req_node:source-lib:ghost"
+    with pytest.raises(builder.BuilderError, match="unknown parent"):
+        fw_editor.editor_doc_to_framework_object(doc, existing=original)
+
+
+def test_new_choice_urns_avoid_collisions_and_stay_sequential():
+    from library import framework_editor as fw_editor
+
+    original = builder.normalize_objects(SOURCE_LIBRARY["objects"])["frameworks"][0]
+    doc = fw_editor.framework_to_editor_doc(original, locale="en")
+    q_urn = "urn:acme:risk:req_node:source-lib:a.1:question:1"
+    # Two choices added in the editor on the existing question (whose editor
+    # id equals its urn — the double-bucket case): one ordered BEFORE the
+    # kept ...choice:1, one after.
+    doc["choices"].append(
+        {
+            "id": "tmp-c0",
+            "urn": None,
+            "value": "First",
+            "order": -1,
+            "question_id": q_urn,
+        }
+    )
+    doc["choices"].append(
+        {
+            "id": "tmp-c1",
+            "urn": None,
+            "value": "Maybe",
+            "order": 5,
+            "question_id": q_urn,
+        }
+    )
+    rebuilt = fw_editor.editor_doc_to_framework_object(doc, existing=original)
+    node = next(
+        n
+        for n in rebuilt["requirement_nodes"]
+        if n["urn"] == "urn:acme:risk:req_node:source-lib:a.1"
+    )
+    choices = node["questions"][q_urn]["choices"]
+    by_value = {choice["value"]: choice["urn"] for choice in choices}
+    # kept choice keeps its urn; minted ones never collide and don't skip
+    # indexes (no duplicate-inflated positions)
+    assert by_value["Yes"] == f"{q_urn}:choice:1"
+    assert by_value["First"] == f"{q_urn}:choice:2"
+    assert by_value["Maybe"] == f"{q_urn}:choice:3"
+    assert len({choice["urn"] for choice in choices}) == 3
+
+
 @pytest.mark.django_db
 def test_framework_editor_endpoints_edit_the_document(admin_client):
     draft = _create_draft(
@@ -684,6 +955,64 @@ def test_framework_editor_endpoints_edit_the_document(admin_client):
     assert node["name"] == "Edited requirement"
     # untouched by the editor, still there
     assert node["threats"] == ["urn:acme:risk:threat:source-lib:t1"]
+
+
+def test_mapping_sets_always_mint_with_their_own_leaf():
+    # A library legitimately holds several mapping sets (both directions of
+    # a crosswalk): they never take the bare family URN, so importing them
+    # one at a time can never collide.
+    single = {
+        "requirement_mapping_sets": [
+            {"urn": "urn:x:risk:req_mapping_set:a-to-b", "ref_id": "a-to-b"}
+        ]
+    }
+    urn_map = builder.build_urn_map(
+        single, {"urn:x:risk:req_mapping_set:a-to-b"}, "me", "mylib"
+    )
+    assert urn_map["urn:x:risk:req_mapping_set:a-to-b"] == (
+        "urn:me:risk:req_mapping_set:mylib:a-to-b"
+    )
+
+
+@pytest.mark.django_db
+def test_single_framework_per_library_is_enforced(admin_client):
+    draft = _create_draft(admin_client, content=dict(SOURCE_LIBRARY["objects"]))
+
+    # add-framework on a draft that already has one
+    added = admin_client.post(
+        reverse("library-drafts-add-framework", args=[draft["id"]]),
+        {"name": "Second"},
+        format="json",
+    )
+    assert added.status_code == status.HTTP_400_BAD_REQUEST
+    assert added.data["error"] == "singleObjectOfKindPerLibrary"
+
+    # importing another framework from a second source
+    other_library = {
+        **SOURCE_LIBRARY,
+        "urn": "urn:acme:risk:library:other-lib",
+        "ref_id": "other-lib",
+        "name": "Other library",
+        "objects": {
+            "framework": {
+                "urn": "urn:acme:risk:framework:other-lib",
+                "ref_id": "OTHER",
+                "name": "Other framework",
+                "requirement_nodes": [],
+            }
+        },
+    }
+    stored, error = StoredLibrary.store_library_content(
+        yaml.safe_dump(other_library).encode()
+    )
+    assert error is None, error
+    imported = admin_client.post(
+        reverse("library-drafts-import-objects", args=[draft["id"]]),
+        {"source": str(stored.id), "object_types": ["frameworks"]},
+        format="json",
+    )
+    assert imported.status_code == status.HTTP_400_BAD_REQUEST
+    assert imported.data["error"] == "singleObjectOfKindPerLibrary"
 
 
 @pytest.mark.django_db
@@ -879,8 +1208,27 @@ def test_upsert_matrix_validates_the_definition(admin_client):
         format="json",
     )
     assert good.status_code == status.HTTP_200_OK, good.content
-    assert good.data["object"]["urn"] == "urn:me:risk:matrix:mylib:m1"
+    # The single matrix of a library takes the bare family URN.
+    assert good.data["object"]["urn"] == "urn:me:risk:matrix:mylib"
     assert good.data["draft"]["objects_meta"]["risk_matrices"] == 1
+
+    # Single-object convention: a second matrix is refused.
+    second = admin_client.post(
+        url,
+        {
+            "field": "risk_matrices",
+            "object": {
+                "ref_id": "m2",
+                "probability": levels,
+                "impact": levels,
+                "risk": levels,
+                "grid": [[0, 1], [1, 1]],
+            },
+        },
+        format="json",
+    )
+    assert second.status_code == status.HTTP_400_BAD_REQUEST
+    assert second.data["error"] == "singleObjectOfKindPerLibrary"
 
 
 @pytest.mark.django_db
