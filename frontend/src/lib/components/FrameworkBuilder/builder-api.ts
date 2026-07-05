@@ -1,10 +1,17 @@
 /**
  * API functions for the framework builder draft workflow.
- * All calls go to /frameworks/{frameworkId}/builder which proxies to Django.
  *
- * Framework ID is passed explicitly to each function (not stored as module state)
- * to avoid issues with Vite HMR resetting module-level variables.
+ * The target is passed explicitly to each function (not stored as module
+ * state) to avoid issues with Vite HMR resetting module-level variables.
+ * A framework UUID targets /frameworks/{id}/builder; a path (starting with
+ * '/') is used verbatim, which lets other hosts speaking the same _action
+ * protocol (e.g. the library builder editing a framework inside a
+ * LibraryDraft document) reuse the whole editor.
  */
+
+function apiUrl(target: string): string {
+	return target.startsWith('/') ? target : `/frameworks/${target}/builder`;
+}
 
 export interface DraftJSON {
 	schema_version?: number;
@@ -45,7 +52,7 @@ export interface StartEditingResult {
 }
 
 export async function apiStartEditing(frameworkId: string): Promise<StartEditingResult> {
-	const res = await fetch(`/frameworks/${frameworkId}/builder`, {
+	const res = await fetch(apiUrl(frameworkId), {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ _action: 'start-editing' })
@@ -59,7 +66,7 @@ export async function apiStartEditing(frameworkId: string): Promise<StartEditing
 
 /** Save draft: PATCH to persist the current draft state */
 export async function apiSaveDraft(frameworkId: string, draft: DraftJSON): Promise<void> {
-	const res = await fetch(`/frameworks/${frameworkId}/builder`, {
+	const res = await fetch(apiUrl(frameworkId), {
 		method: 'PATCH',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ _action: 'save-draft', editing_draft: draft })
@@ -86,7 +93,7 @@ export interface PublishPreview {
 }
 
 export async function apiPublishDraftPreview(frameworkId: string): Promise<PublishPreview> {
-	const res = await fetch(`/frameworks/${frameworkId}/builder`, {
+	const res = await fetch(apiUrl(frameworkId), {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ _action: 'publish-draft-preview' })
@@ -97,7 +104,7 @@ export async function apiPublishDraftPreview(frameworkId: string): Promise<Publi
 /** Publish draft: POST to reconcile draft into relational DB.
  * Returns non-fatal warnings from the backend (e.g. URN disambiguation). */
 export async function apiPublishDraft(frameworkId: string): Promise<string[]> {
-	const res = await fetch(`/frameworks/${frameworkId}/builder`, {
+	const res = await fetch(apiUrl(frameworkId), {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ _action: 'publish-draft' })
@@ -108,7 +115,7 @@ export async function apiPublishDraft(frameworkId: string): Promise<string[]> {
 
 /** Discard draft: POST to throw away the draft */
 export async function apiDiscardDraft(frameworkId: string): Promise<void> {
-	const res = await fetch(`/frameworks/${frameworkId}/builder`, {
+	const res = await fetch(apiUrl(frameworkId), {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ _action: 'discard-draft' })

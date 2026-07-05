@@ -7,7 +7,11 @@
 	import { TYPE_TO_MODEL, MODEL_TO_TYPE, SCAFFOLD_TYPES } from '$lib/utils/modelTargets';
 
 	let { data }: { data: PageData } = $props();
-	$pageTitle = `Preset Editor — ${data.preset.name}`;
+	$pageTitle = `Library Builder — ${data.preset.name}`;
+
+	// The _action protocol adapter serving the journey preset stored inside
+	// this library draft's document.
+	const apiBase = `/experimental/library-builder/${data.draft.id}/preset`;
 
 	type Scaffold = {
 		type: string;
@@ -80,12 +84,8 @@
 	let initialJson = $state('');
 	let loading = $state(true);
 	let saving = $state(false);
-	let publishing = $state(false);
 	let errorMsg = $state('');
-	let previewDeletions: any[] = $state([]);
-	let showPreview = $state(false);
 	let confirmDiscard = $state(false);
-	let publishSuccess = $state(false);
 	let isReadOnly = $derived(!data.preset.is_user_authored);
 
 	const dirty = $derived(draft != null && JSON.stringify(draft) !== initialJson);
@@ -129,7 +129,7 @@
 		loading = true;
 		errorMsg = '';
 		try {
-			const r = await fetch(`/experimental/preset-editor/${data.preset.id}`, {
+			const r = await fetch(apiBase, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ action: 'start-editing' })
@@ -177,7 +177,7 @@
 		saving = true;
 		errorMsg = '';
 		try {
-			const r = await fetch(`/experimental/preset-editor/${data.preset.id}`, {
+			const r = await fetch(apiBase, {
 				method: 'PATCH',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(draft)
@@ -196,58 +196,9 @@
 		}
 	}
 
+	/** Revert: throw away local edits and reload the saved document state. */
 	async function discard() {
-		await fetch(`/experimental/preset-editor/${data.preset.id}`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ action: 'discard-draft' })
-		});
 		confirmDiscard = false;
-		await loadDraft();
-	}
-
-	async function publishPreview() {
-		errorMsg = '';
-		const r = await fetch(`/experimental/preset-editor/${data.preset.id}`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ action: 'publish-preview' })
-		});
-		const j = await r.json();
-		if (!r.ok) {
-			errorMsg = formatError(j);
-			return;
-		}
-		previewDeletions = j.deleted_steps ?? [];
-		if (previewDeletions.length === 0) {
-			await publishConfirmed();
-		} else {
-			showPreview = true;
-		}
-	}
-
-	async function publishConfirmed() {
-		showPreview = false;
-		publishing = true;
-		errorMsg = '';
-		try {
-			const r = await fetch(`/experimental/preset-editor/${data.preset.id}`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ action: 'publish' })
-			});
-			const j = await r.json().catch(() => ({}));
-			if (!r.ok) {
-				errorMsg = formatError(j) || `Failed to publish: ${r.status}`;
-				return;
-			}
-			publishSuccess = true;
-			setTimeout(() => (publishSuccess = false), 3000);
-		} catch (e) {
-			errorMsg = `Failed to publish: ${(e as Error).message ?? e}`;
-		} finally {
-			publishing = false;
-		}
 		await loadDraft();
 	}
 
@@ -696,8 +647,9 @@
 		<div class="bg-yellow-50 border border-yellow-300 rounded p-4">
 			<p class="font-semibold">Library-backed presets are read-only.</p>
 			<p class="text-sm mt-1">
-				Fork this preset (from <a href="/experimental/preset-editor" class="underline"
-					>the editor home</a
+				Fork this preset (from <a
+					href="/experimental/library-builder/{data.draft.id}"
+					class="underline">the editor home</a
 				>) to create an editable copy.
 			</p>
 		</div>
@@ -726,7 +678,7 @@
 		<div class="sticky top-0 z-40 bg-surface-50-950 border-b border-surface-200-800 px-4 py-2.5">
 			<div class="flex items-center gap-3 flex-wrap">
 				<a
-					href="/experimental/preset-editor"
+					href="/experimental/library-builder/{data.draft.id}"
 					class="text-sm text-surface-500 hover:text-surface-600-400 transition-colors shrink-0"
 					title="Back to preset list"
 				>
@@ -734,7 +686,8 @@
 				</a>
 				<div class="h-4 w-px bg-surface-200-800 shrink-0"></div>
 
-				<!-- Status pill -->
+				<!-- Status pill: the library-draft document is the single draft
+				     layer; publishing happens on the library page. -->
 				{#if dirty}
 					<span
 						class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 inline-flex items-center gap-1"
@@ -743,27 +696,13 @@
 						<i class="fa-solid fa-pen-nib text-[10px]"></i>
 						Unsaved changes
 					</span>
-				{:else if (data.preset.editing_version ?? 1) > 1}
-					<span
-						class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 inline-flex items-center gap-1"
-						title="Draft matches the published version."
-					>
-						<i class="fa-solid fa-circle-check text-[10px]"></i>
-						Published v{data.preset.editing_version}
-					</span>
 				{:else}
 					<span
-						class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-surface-100-900 text-surface-600-400 inline-flex items-center gap-1"
-						title="Nothing has been published yet."
+						class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 inline-flex items-center gap-1"
+						title="All edits are saved to the library draft. Publish from the library page."
 					>
-						<i class="fa-solid fa-file-lines text-[10px]"></i>
-						Draft
-					</span>
-				{/if}
-
-				{#if publishSuccess}
-					<span class="shrink-0 text-xs text-green-600 inline-flex items-center gap-1">
-						<i class="fa-solid fa-check text-[10px]"></i> Published!
+						<i class="fa-solid fa-circle-check text-[10px]"></i>
+						Saved to draft
 					</span>
 				{/if}
 
@@ -778,9 +717,9 @@
 						: dirty
 							? 'bg-gray-700 text-white hover:bg-gray-800'
 							: 'bg-surface-100-900 text-surface-500 cursor-not-allowed'}"
-					disabled={!dirty || saving || publishing}
+					disabled={!dirty || saving}
 					onclick={save}
-					title="Save draft"
+					title="Save to the library draft"
 				>
 					{#if saving}
 						<i class="fa-solid fa-circle-notch fa-spin text-[10px]"></i> Saving…
@@ -789,53 +728,37 @@
 					{/if}
 				</button>
 
-				<!-- Discard (inline confirm) -->
-				{#if confirmDiscard}
-					<span class="shrink-0 text-xs text-red-600 font-medium">Discard draft?</span>
-					<button
-						type="button"
-						class="shrink-0 text-xs font-medium px-2 py-1 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition-colors"
-						onclick={discard}
-					>
-						Yes, discard
-					</button>
-					<button
-						type="button"
-						class="shrink-0 text-xs text-surface-600-400 px-2 py-1 hover:text-surface-700-300"
-						onclick={() => (confirmDiscard = false)}
-					>
-						Cancel
-					</button>
-				{:else}
-					<button
-						type="button"
-						class="shrink-0 text-xs font-medium px-3 py-1.5 rounded-lg text-surface-600-400 hover:text-red-600 hover:bg-red-50 transition-colors inline-flex items-center gap-1.5"
-						onclick={() => (confirmDiscard = true)}
-						disabled={saving || publishing}
-						title="Discard the current draft"
-					>
-						<i class="fa-solid fa-rotate-left text-[10px]"></i>
-						Discard
-					</button>
-				{/if}
-
-				<!-- Publish -->
-				<button
-					type="button"
-					class="shrink-0 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors inline-flex items-center gap-1.5 {dirty ||
-					publishing
-						? 'bg-violet-300 text-white cursor-not-allowed'
-						: 'bg-violet-600 dark:bg-violet-700 text-white hover:bg-violet-700'}"
-					disabled={dirty || publishing}
-					onclick={publishPreview}
-					title={dirty ? 'Save the draft first' : 'Publish the draft'}
-				>
-					{#if publishing}
-						<i class="fa-solid fa-circle-notch fa-spin text-[10px]"></i> Publishing…
+				<!-- Revert unsaved edits (inline confirm) -->
+				{#if dirty}
+					{#if confirmDiscard}
+						<span class="shrink-0 text-xs text-red-600 font-medium">Revert unsaved edits?</span>
+						<button
+							type="button"
+							class="shrink-0 text-xs font-medium px-2 py-1 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition-colors"
+							onclick={discard}
+						>
+							Yes, revert
+						</button>
+						<button
+							type="button"
+							class="shrink-0 text-xs text-surface-600-400 px-2 py-1 hover:text-surface-700-300"
+							onclick={() => (confirmDiscard = false)}
+						>
+							Cancel
+						</button>
 					{:else}
-						<i class="fa-solid fa-rocket text-[10px]"></i> Publish
+						<button
+							type="button"
+							class="shrink-0 text-xs font-medium px-3 py-1.5 rounded-lg text-surface-600-400 hover:text-red-600 hover:bg-red-50 transition-colors inline-flex items-center gap-1.5"
+							onclick={() => (confirmDiscard = true)}
+							disabled={saving}
+							title="Throw away the edits since the last save"
+						>
+							<i class="fa-solid fa-rotate-left text-[10px]"></i>
+							Revert
+						</button>
 					{/if}
-				</button>
+				{/if}
 			</div>
 		</div>
 
@@ -1305,57 +1228,4 @@
 			</section>
 		</div>
 	</div>
-
-	{#if showPreview}
-		<div class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" role="dialog">
-			<div class="bg-surface-50-950 rounded-lg shadow-xl max-w-lg w-full overflow-hidden">
-				<div class="px-5 py-4 border-b border-surface-100-900 flex items-center gap-3">
-					<div
-						class="w-9 h-9 rounded-full bg-amber-100 inline-flex items-center justify-center shrink-0"
-					>
-						<i class="fa-solid fa-triangle-exclamation text-amber-600"></i>
-					</div>
-					<div>
-						<h3 class="font-semibold text-surface-800-200">Confirm publish</h3>
-						<p class="text-xs text-surface-600-400 mt-0.5">
-							The following step ref_ids will be removed. Existing journeys with state on these
-							steps will lose that state on next upgrade.
-						</p>
-					</div>
-				</div>
-				<ul class="text-sm max-h-64 overflow-auto divide-y divide-surface-100-900">
-					{#each previewDeletions as d (d.key)}
-						<li class="px-5 py-2.5 flex items-center justify-between gap-3">
-							<span class="font-mono text-xs bg-surface-100-900 rounded px-1.5 py-0.5">{d.key}</span
-							>
-							<span class="text-xs text-surface-600-400">
-								used in {d.journey_step_count} journey step(s),
-								<span class={d.with_user_state ? 'text-amber-600 font-medium' : ''}>
-									{d.with_user_state} with user state
-								</span>
-							</span>
-						</li>
-					{/each}
-				</ul>
-				<div
-					class="px-5 py-3 bg-surface-50-950 flex justify-end gap-2 border-t border-surface-100-900"
-				>
-					<button
-						type="button"
-						class="text-xs font-medium px-3 py-1.5 rounded-lg text-surface-600-400 hover:bg-surface-200-800 transition-colors"
-						onclick={() => (showPreview = false)}
-					>
-						Cancel
-					</button>
-					<button
-						type="button"
-						class="text-xs font-medium px-3 py-1.5 rounded-lg bg-violet-600 dark:bg-violet-700 text-white hover:bg-violet-700 transition-colors inline-flex items-center gap-1.5"
-						onclick={publishConfirmed}
-					>
-						<i class="fa-solid fa-rocket text-[10px]"></i> Confirm publish
-					</button>
-				</div>
-			</div>
-		</div>
-	{/if}
 {/if}

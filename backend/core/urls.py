@@ -8,6 +8,7 @@ from tprm.views import (
     ContractViewSet,
 )
 from library.views import (
+    LibraryDraftViewSet,
     MappingLibrariesList,
     StoredLibraryViewSet,
     LoadedLibraryViewSet,
@@ -104,6 +105,7 @@ router.register(
 )
 router.register(r"stored-libraries", StoredLibraryViewSet, basename="stored-libraries")
 router.register(r"loaded-libraries", LoadedLibraryViewSet, basename="loaded-libraries")
+router.register(r"library-drafts", LibraryDraftViewSet, basename="library-drafts")
 router.register(
     r"requirement-mapping-sets",
     RequirementMappingSetViewSet,

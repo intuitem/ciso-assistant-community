@@ -36,8 +36,13 @@ def upsert_preset_from_stored_library(stored_library: StoredLibrary) -> Preset:
     preset_content = stored_library.content.get("preset", {}) or {}
     journey = preset_content.get("journey", {}) or {}
     defaults = {
-        "name": stored_library.name,
-        "description": stored_library.description or "",
+        # The preset object may carry its own name/description (authored in
+        # the library builder); legacy preset libraries fall back to the
+        # library metadata, with which they are one-to-one.
+        "name": preset_content.get("name") or stored_library.name,
+        "description": preset_content.get("description")
+        or stored_library.description
+        or "",
         "ref_id": stored_library.ref_id,
         "version": stored_library.version,
         "provider": stored_library.provider,

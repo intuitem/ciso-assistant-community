@@ -26,28 +26,16 @@
 		tags={['assets', 'entities', 'ebios-rm', 'bulk']}
 	/>
 	<Article
-		title={m.matrixEditor()}
-		desc={m.matrixEditorDescription()}
-		link="/experimental/matrix-editor"
-		tags={['risk', 'matrix', 'editor']}
-	/>
-	<Article
-		title="Framework Builder"
-		desc="Create and edit compliance frameworks with a visual builder"
-		link="/experimental/framework-builder"
-		tags={['frameworks', 'builder', 'editor']}
+		title="Library Builder"
+		desc="Author a whole library (framework, controls, threats, matrices…) as a draft document, then publish it through the standard library loader. Adopt your custom libraries or clone from existing ones."
+		link="/experimental/library-builder"
+		tags={['libraries', 'builder', 'packager']}
 	/>
 	<Article
 		title="Bulk evidence upload"
 		desc="Upload multiple files or a whole directory as evidences, with conflict-resolution strategies (skip, add revision, replace, rename) and SHA-256 duplicate detection."
 		link="/experimental/evidence-bulk-upload"
 		tags={['evidences', 'bulk', 'upload']}
-	/>
-	<Article
-		title="Preset Editor"
-		desc="Author presets — scaffolds and steps. Create from scratch or fork a library preset."
-		link="/experimental/preset-editor"
-		tags={['presets', 'journey', 'editor']}
 	/>
 	<Article
 		title="Questionnaire Autopilot"

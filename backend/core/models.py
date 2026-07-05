@@ -725,6 +725,104 @@ class StoredLibrary(LibraryMixin):
             library_label.garbage_collect()
 
 
+class LibraryDraft(NameDescriptionMixin, FolderMixin):
+    """
+    Work-in-progress library authored in the builder.
+
+    A draft is a document: it serializes to the same library YAML the tools/
+    Excel convertor produces, and publishing means feeding that YAML to the
+    existing StoredLibrary/loader path. The builder never writes live
+    referential objects (Framework/ReferenceControl/Threat/...) itself.
+
+    Identity is (packager, ref_id): both are URN-safe slugs from which the
+    draft's whole URN family is derived. They are freely editable while the
+    draft has never been published; once published (or adopted from an
+    existing library), the identity is frozen because external artifacts may
+    reference it by URN.
+    """
+
+    # Segments used to mint URNs, hence stricter than the display-oriented
+    # packager/ref_id columns of LibraryMixin (legacy libraries hold values
+    # like "Paul Flatt" there).
+    IDENTITY_REGEX = r"^[a-z0-9_-]+$"
+
+    packager = models.CharField(
+        max_length=100,
+        validators=[
+            RegexValidator(regex=IDENTITY_REGEX, message="invalidLibraryIdentity")
+        ],
+        verbose_name=_("Packager"),
+    )
+    ref_id = models.CharField(
+        max_length=100,
+        validators=[
+            RegexValidator(regex=IDENTITY_REGEX, message="invalidLibraryIdentity")
+        ],
+        verbose_name=_("Reference ID"),
+    )
+    # Set when the draft adopts an existing library whose URN predates the
+    # minted urn:{packager}:risk:library:{ref_id} convention; null otherwise.
+    urn = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("URN"))
+    locale = models.CharField(max_length=100, default="en", verbose_name=_("Locale"))
+    version = models.IntegerField(
+        default=1, validators=[MinValueValidator(1)], verbose_name=_("Version")
+    )
+    provider = models.CharField(
+        max_length=200, blank=True, null=True, verbose_name=_("Provider")
+    )
+    copyright = models.CharField(
+        max_length=4096, blank=True, null=True, verbose_name=_("Copyright")
+    )
+    publication_date = models.DateField(null=True, blank=True)
+    annotation = models.TextField(null=True, blank=True, verbose_name=_("Annotation"))
+    translations = models.JSONField(default=dict, blank=True)
+    dependencies = models.JSONField(default=list, blank=True)
+    labels = models.JSONField(default=list, blank=True)
+    # The library "objects" document (framework, threats, reference_controls,
+    # risk_matrices, requirement_mapping_sets, metric_definitions, preset).
+    content = models.JSONField(default=dict, blank=True)
+    # Builder lifecycle markers — never overload is_published (IAM visibility).
+    first_published_at = models.DateTimeField(null=True, blank=True)
+    last_published_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = _("Library draft")
+        verbose_name_plural = _("Library drafts")
+
+    @property
+    def effective_urn(self) -> str:
+        return self.urn or f"urn:{self.packager}:risk:library:{self.ref_id}"
+
+    @property
+    def identity_locked(self) -> bool:
+        return self.first_published_at is not None
+
+    def to_library_dict(self) -> dict:
+        """Assemble the full library document (the YAML shape) from the draft."""
+        library = {
+            "urn": self.effective_urn,
+            "locale": self.locale,
+            "ref_id": self.ref_id,
+            "name": self.name,
+            "description": self.description,
+            "copyright": self.copyright,
+            "version": self.version,
+            "publication_date": self.publication_date or now().date(),
+            "provider": self.provider,
+            "packager": self.packager,
+            "annotation": self.annotation,
+        }
+        library = {key: value for key, value in library.items() if value is not None}
+        if self.translations:
+            library["translations"] = self.translations
+        if self.dependencies:
+            library["dependencies"] = self.dependencies
+        if self.labels:
+            library["labels"] = self.labels
+        library["objects"] = self.content or {}
+        return library
+
+
 class LibraryUpdater:
     class ScoreChangeDetected(Exception):
         """Exception raised when score boundaries change, requiring user decision"""
@@ -10090,6 +10188,12 @@ auditlog.register(
 auditlog.register(
     PresetJourneyStep,
     exclude_fields=common_exclude,
+)
+auditlog.register(
+    LibraryDraft,
+    # The document blob changes on every autosave; the auditable event is the
+    # publication, captured on the stored/loaded library side.
+    exclude_fields=common_exclude + ["content"],
 )
 
 

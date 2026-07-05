@@ -40,11 +40,28 @@
 		requirementNodes: RequirementNode[];
 		questions: Question[];
 		editingDraft?: DraftJSON | null;
+		/** Adapter path for the _action protocol (defaults to the live-framework builder) */
+		apiTarget?: string | null;
+		/** Toolbar link overrides for non-live hosts (null preview hides the link) */
+		links?: { back?: string; preview?: string | null; exportYaml?: string } | null;
 	}
 
-	let { framework, requirementNodes, questions, editingDraft = null }: Props = $props();
+	let {
+		framework,
+		requirementNodes,
+		questions,
+		editingDraft = null,
+		apiTarget = null,
+		links = null
+	}: Props = $props();
 
-	const builder = createBuilderState(framework, requirementNodes, questions, editingDraft);
+	const builder = createBuilderState(
+		framework,
+		requirementNodes,
+		questions,
+		editingDraft,
+		apiTarget ? { apiTarget } : undefined
+	);
 	setBuilderContext(builder);
 
 	const cardCollapsed = createCollapsedStore(`fw-builder:${framework.id}:cards:collapsed`);
@@ -59,7 +76,6 @@
 		errors: errorsStore,
 		saving: savingStore,
 		unsaved: unsavedStore,
-		unpublished: unpublishedStore,
 		activeLanguage: activeLanguageStore
 	} = builder;
 
@@ -204,19 +220,15 @@
 		}
 	}
 
-	// Warn on SvelteKit navigation — different message depending on save state
+	// Warn on SvelteKit navigation only for unsaved local edits: once saved,
+	// the library-draft document is the persisted state (publishing is a
+	// separate, library-level concern).
 	beforeNavigate((navigation) => {
 		if (navigation.to?.route?.id === navigation.from?.route?.id) return;
 		let hasUnsaved = false;
-		let hasUnpublished = false;
 		unsavedStore.subscribe((v) => (hasUnsaved = v))();
-		unpublishedStore.subscribe((v) => (hasUnpublished = v))();
 		if (hasUnsaved) {
 			if (!confirm(m.builderUnsavedChangesNavigation())) {
-				navigation.cancel();
-			}
-		} else if (hasUnpublished) {
-			if (!confirm(m.builderUnpublishedChangesNavigation())) {
 				navigation.cancel();
 			}
 		}
@@ -304,6 +316,7 @@
 <div class="card !p-0 bg-surface-50-950 shadow-lg overflow-visible">
 	<BuilderMinimap
 		frameworkId={framework.id}
+		{links}
 		onOpenHelp={() => (helpOpen = true)}
 		onExpandAllCards={() => cardCollapsed.expandAll()}
 		onCollapseAllCards={() => cardCollapsed.collapseAll(collectAllParentIds($rootNodesStore))}

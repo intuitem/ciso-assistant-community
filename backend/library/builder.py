@@ -1,0 +1,691 @@
+"""
+Library builder helpers.
+
+The builder treats a work-in-progress library as a document (core.LibraryDraft)
+that serializes to the same library YAML the tools/ Excel convertor produces.
+Publishing routes that YAML through the existing StoredLibrary/loader path —
+the builder never writes live referential objects itself.
+
+This module holds the document-level operations:
+
+- URN minting from the draft identity (packager, ref_id)
+- identity rebasing of a whole document (rename while unpublished)
+- selective extraction ("clone") of objects out of an existing library's
+  content, with per-reference policies (strip / pull / reference)
+- merging extracted objects into a draft document
+- advisory identity-conflict checks against the existing library corpus
+- reference/dependency integrity checks used by the validate action
+"""
+
+import copy
+import re
+
+import structlog
+
+logger = structlog.get_logger(__name__)
+
+# Canonical (plural, list-valued) spellings for the objects container.
+# The loader accepts the deprecated singular spellings; the builder normalizes
+# to the canonical ones at ingestion so editing code handles a single shape.
+CANONICAL_OBJECT_FIELDS = {
+    "framework": "frameworks",
+    "risk_matrix": "risk_matrices",
+    "requirement_mapping_set": "requirement_mapping_sets",
+}
+LIST_OBJECT_FIELDS = [
+    "frameworks",
+    "threats",
+    "reference_controls",
+    "risk_matrices",
+    "requirement_mapping_sets",
+    "metric_definitions",
+]
+# URN type tokens per object field. "function" is the legacy spelling of
+# "reference_control": recognized on input, never minted.
+URN_TYPE_TOKENS = {
+    "frameworks": "framework",
+    "threats": "threat",
+    "reference_controls": "reference_control",
+    "risk_matrices": "matrix",
+    "requirement_mapping_sets": "req_mapping_set",
+    "metric_definitions": "metric",
+}
+# Fields that hold at most one object in the overwhelming majority of
+# libraries: a single selected object of these kinds gets the bare family URN.
+SINGLETON_OBJECT_FIELDS = {"frameworks", "risk_matrices", "requirement_mapping_sets"}
+
+POLICY_STRIP = "strip"
+POLICY_PULL = "pull"
+POLICY_REFERENCE = "reference"
+REFERENCE_POLICIES = (POLICY_STRIP, POLICY_PULL, POLICY_REFERENCE)
+
+# Characters allowed in the last URN segment (see core.models.URN_REGEX),
+# minus ":" which is the segment separator.
+_LEAF_FORBIDDEN = re.compile(r"[^0-9a-z\[\]\(\)\-\._]+")
+
+
+class BuilderError(ValueError):
+    """Document-level operation error, safe to surface to the client."""
+
+
+def urn_safe_leaf(value: str) -> str:
+    """Turn a ref_id into a string usable as the last URN segment."""
+    leaf = _LEAF_FORBIDDEN.sub("-", str(value).lower().strip()).strip("-")
+    return leaf
+
+
+def library_urn(packager: str, ref_id: str) -> str:
+    return f"urn:{packager}:risk:library:{ref_id}"
+
+
+def object_urn_base(packager: str, ref_id: str, field: str) -> str:
+    return f"urn:{packager}:risk:{URN_TYPE_TOKENS[field]}:{ref_id}"
+
+
+def leaf_object_base(library_urn: str, field: str) -> str:
+    """Derive the URN base for a library's objects of a given field from the
+    library URN itself. Works for minted identities (…:risk:library:{ref})
+    and adopted legacy identities (arbitrary type token, dotted ref) alike:
+    only the type token is swapped.
+    """
+    match = re.match(
+        r"^urn:([a-z0-9_-]+):([a-z0-9_-]+):([a-z0-9_-]+):(.+)$", library_urn.lower()
+    )
+    if not match:
+        raise BuilderError(f"Cannot derive object URNs from {library_urn}")
+    packager, domain, _, ref = match.groups()
+    return f"urn:{packager}:{domain}:{URN_TYPE_TOKENS[field]}:{ref}"
+
+
+def normalize_objects(objects: dict) -> dict:
+    """Return a copy of an objects container with canonical field spellings.
+
+    Deprecated singular fields are renamed to their plural form and their
+    value wrapped into a list when needed. Unknown fields are kept verbatim
+    so no construct the YAML schema can express is dropped.
+    """
+    normalized = {}
+    for field, value in (objects or {}).items():
+        canonical = CANONICAL_OBJECT_FIELDS.get(field, field)
+        if canonical in LIST_OBJECT_FIELDS and isinstance(value, dict):
+            value = [value]
+        if canonical in normalized and isinstance(normalized[canonical], list):
+            # e.g. both "framework" and "frameworks" present
+            normalized[canonical] = normalized[canonical] + list(value)
+        else:
+            normalized[canonical] = value
+    return normalized
+
+
+def index_objects(objects: dict) -> dict:
+    """Map every top-level object URN (lowercased) to its (field, object)."""
+    index = {}
+    for field in LIST_OBJECT_FIELDS:
+        for obj in objects.get(field) or []:
+            urn = str(obj.get("urn", "")).lower()
+            if urn:
+                index[urn] = (field, obj)
+    return index
+
+
+def _dedup(leaf: str, taken: set) -> str:
+    candidate = leaf
+    suffix = 2
+    while candidate in taken:
+        candidate = f"{leaf}-{suffix}"
+        suffix += 1
+    taken.add(candidate)
+    return candidate
+
+
+def _object_leaf(obj: dict) -> str:
+    leaf = urn_safe_leaf(obj.get("ref_id") or "")
+    if not leaf:
+        old_urn = str(obj.get("urn", ""))
+        leaf = urn_safe_leaf(old_urn.rsplit(":", 1)[-1]) if old_urn else ""
+    return leaf or "object"
+
+
+def build_urn_map(
+    objects: dict, selected_urns: set, packager: str, ref_id: str
+) -> dict:
+    """Compute old URN → new URN for the selected top-level objects.
+
+    Frameworks additionally get one entry per requirement node, so that
+    parent_urn links and question/choice URNs (which extend node URNs)
+    follow through prefix substitution.
+    """
+    urn_map = {}
+    for field in LIST_OBJECT_FIELDS:
+        candidates = [
+            obj
+            for obj in objects.get(field) or []
+            if str(obj.get("urn", "")).lower() in selected_urns
+        ]
+        if not candidates:
+            continue
+        base = object_urn_base(packager, ref_id, field)
+        bare_base = field in SINGLETON_OBJECT_FIELDS and len(candidates) == 1
+        taken_leaves = set()
+        for obj in candidates:
+            old_urn = str(obj["urn"]).lower()
+            if bare_base:
+                new_urn = base
+            else:
+                new_urn = f"{base}:{_dedup(_object_leaf(obj), taken_leaves)}"
+            urn_map[old_urn] = new_urn
+            if field == "frameworks":
+                node_base = new_urn.replace(":framework:", ":req_node:", 1)
+                _map_requirement_nodes(obj, old_urn, node_base, urn_map)
+    return urn_map
+
+
+def _map_requirement_nodes(
+    framework: dict, old_framework_urn: str, node_base: str, urn_map: dict
+) -> None:
+    # Conventional node namespace of the source framework: keeping each
+    # node's suffix relative to it preserves hierarchical ref schemes.
+    old_node_base = old_framework_urn.replace(":framework:", ":req_node:", 1) + ":"
+    taken_leaves = set()
+    for node in framework.get("requirement_nodes") or []:
+        old_urn = str(node.get("urn", "")).lower()
+        if not old_urn:
+            continue
+        if old_urn.startswith(old_node_base):
+            leaf = old_urn[len(old_node_base) :]
+        else:
+            leaf = _object_leaf(node)
+        urn_map[old_urn] = f"{node_base}:{_dedup(leaf, taken_leaves)}"
+
+
+def rebase_string(value: str, urn_map: dict) -> str:
+    """Rewrite a string if it is a mapped URN or extends one (urn + ':...')."""
+    lowered = value.lower()
+    if lowered in urn_map:
+        return urn_map[lowered]
+    # Question/choice URNs extend a node URN: walk prefixes at ':' boundaries.
+    prefix = lowered
+    while ":" in prefix:
+        prefix = prefix.rsplit(":", 1)[0]
+        if prefix in urn_map:
+            return urn_map[prefix] + lowered[len(prefix) :]
+    return value
+
+
+def rebase_tree(value, urn_map: dict):
+    """Recursively rewrite mapped URNs in strings, list items and dict keys."""
+    if isinstance(value, str):
+        return rebase_string(value, urn_map)
+    if isinstance(value, list):
+        return [rebase_tree(item, urn_map) for item in value]
+    if isinstance(value, dict):
+        return {
+            rebase_string(key, urn_map) if isinstance(key, str) else key: rebase_tree(
+                item, urn_map
+            )
+            for key, item in value.items()
+        }
+    return value
+
+
+def rebase_document(objects: dict, packager: str, ref_id: str) -> dict:
+    """Rebase a whole draft document onto a new identity (draft rename).
+
+    Every object is 'selected': the URN family is regenerated across the
+    document; URNs pointing outside the document (dependencies) are kept.
+    """
+    normalized = normalize_objects(objects)
+    selected = set(index_objects(normalized).keys())
+    urn_map = build_urn_map(normalized, selected, packager, ref_id)
+    return rebase_tree(copy.deepcopy(normalized), urn_map)
+
+
+def _iter_framework_reference_lists(framework: dict):
+    for node in framework.get("requirement_nodes") or []:
+        for ref_field in ("threats", "reference_controls"):
+            refs = node.get(ref_field)
+            if refs:
+                yield node, ref_field, refs
+
+
+def extract_objects(
+    *,
+    source_content: dict,
+    source_library_urn,
+    source_dependencies,
+    target_packager: str,
+    target_ref_id: str,
+    selected_types=None,
+    selected_urns=None,
+    default_policy: str = POLICY_STRIP,
+    per_urn_policies=None,
+    resolve_owner=None,
+) -> dict:
+    """Selective extraction: copy objects by value out of a library's content,
+    rebased onto the target identity. Document → document; never touches live
+    objects.
+
+    Only frameworks (and mapping sets) carry references. A reference pointing
+    at a source object *outside* the selection is resolved per policy:
+    - strip: drop the link
+    - pull: extract the referenced object too (closure)
+    - reference: keep the source URN and add a dependency on the source library
+    References already pointing outside the source library are kept and their
+    owning libraries recorded as dependencies.
+
+    Returns {"objects", "dependencies", "urn_map", "report"}.
+    """
+    if default_policy not in REFERENCE_POLICIES:
+        raise BuilderError(f"Unknown reference policy: {default_policy}")
+    per_urn_policies = {
+        str(urn).lower(): policy for urn, policy in (per_urn_policies or {}).items()
+    }
+    for urn, policy in per_urn_policies.items():
+        if policy not in REFERENCE_POLICIES:
+            raise BuilderError(f"Unknown reference policy for {urn}: {policy}")
+
+    objects = normalize_objects(copy.deepcopy(source_content))
+    index = index_objects(objects)
+
+    # Resolve the selection to a set of top-level object URNs (+ preset flag).
+    selected_types = list(selected_types or [])
+    include_preset = False
+    selection = set()
+    if not selected_types and not selected_urns:
+        selection = set(index.keys())
+        include_preset = "preset" in objects
+    else:
+        for field in selected_types:
+            canonical = CANONICAL_OBJECT_FIELDS.get(field, field)
+            if canonical == "preset":
+                include_preset = "preset" in objects
+                continue
+            if canonical not in LIST_OBJECT_FIELDS:
+                raise BuilderError(f"Unknown object type: {field}")
+            selection.update(urn for urn, (f, _) in index.items() if f == canonical)
+        for urn in selected_urns or []:
+            lowered = str(urn).lower()
+            if lowered not in index:
+                raise BuilderError(f"Object not found in source library: {urn}")
+            selection.add(lowered)
+
+    report = {
+        "pulled": [],
+        "stripped": [],
+        "referenced": [],
+        "external": [],
+        "unresolved": [],
+    }
+
+    def policy_for(ref: str) -> str:
+        return per_urn_policies.get(ref, default_policy)
+
+    # Closure pass: pull-in referenced source objects until stable.
+    worklist = True
+    while worklist:
+        worklist = False
+        for urn in list(selection):
+            field, obj = index[urn]
+            internal_refs = []
+            if field == "frameworks":
+                internal_refs = [
+                    ref
+                    for _, _, refs in _iter_framework_reference_lists(obj)
+                    for ref in refs
+                ]
+            elif field == "requirement_mapping_sets":
+                internal_refs = [
+                    obj.get("source_framework_urn"),
+                    obj.get("target_framework_urn"),
+                ]
+            for ref in internal_refs:
+                lowered = str(ref or "").lower()
+                if (
+                    lowered in index
+                    and lowered not in selection
+                    and policy_for(lowered) == POLICY_PULL
+                ):
+                    selection.add(lowered)
+                    report["pulled"].append(lowered)
+                    worklist = True
+
+    dependencies = set()
+
+    def note_external(ref: str) -> None:
+        """Record the dependency covering a reference kept by URN."""
+        owner = resolve_owner(ref) if resolve_owner else None
+        if owner:
+            dependencies.add(owner)
+            report["external"].append({"urn": ref, "library": owner})
+        else:
+            report["unresolved"].append(ref)
+            dependencies.update(source_dependencies or [])
+
+    # Reference resolution pass on the objects being extracted.
+    for urn in selection:
+        field, obj = index[urn]
+        if field == "frameworks":
+            for node, ref_field, refs in _iter_framework_reference_lists(obj):
+                kept = []
+                for ref in refs:
+                    lowered = str(ref).lower()
+                    if lowered in selection:
+                        kept.append(lowered)
+                    elif lowered in index:  # internal to source, not selected
+                        policy = policy_for(lowered)
+                        if policy == POLICY_STRIP:
+                            report["stripped"].append(
+                                {
+                                    "node": str(node.get("urn", "")).lower(),
+                                    "ref": lowered,
+                                }
+                            )
+                        else:  # reference (pull already handled in closure)
+                            if not source_library_urn:
+                                raise BuilderError(
+                                    "Cannot keep a reference to the source library: "
+                                    "its URN is unknown"
+                                )
+                            kept.append(lowered)
+                            dependencies.add(source_library_urn)
+                            report["referenced"].append(lowered)
+                    else:  # already external to the source library
+                        kept.append(lowered)
+                        note_external(lowered)
+                node[ref_field] = kept
+        elif field == "requirement_mapping_sets":
+            for ref_field in ("source_framework_urn", "target_framework_urn"):
+                ref = str(obj.get(ref_field) or "").lower()
+                if not ref or ref in selection:
+                    continue
+                if ref in index:
+                    # A mapping set cannot exist without its frameworks:
+                    # strip is not applicable, keep the reference instead.
+                    if not source_library_urn:
+                        raise BuilderError(
+                            "Cannot keep a reference to the source library: "
+                            "its URN is unknown"
+                        )
+                    dependencies.add(source_library_urn)
+                    report["referenced"].append(ref)
+                else:
+                    note_external(ref)
+
+    urn_map = build_urn_map(objects, selection, target_packager, target_ref_id)
+
+    extracted = {}
+    for field in LIST_OBJECT_FIELDS:
+        picked = [
+            obj
+            for obj in objects.get(field) or []
+            if str(obj.get("urn", "")).lower() in selection
+        ]
+        if picked:
+            extracted[field] = rebase_tree(picked, urn_map)
+    if include_preset:
+        extracted["preset"] = copy.deepcopy(objects["preset"])
+        # Presets scaffold other libraries' objects by URN: carry the source
+        # dependency list rather than deep-inspecting the preset document.
+        dependencies.update(source_dependencies or [])
+
+    dependencies.discard(library_urn(target_packager, target_ref_id))
+    return {
+        "objects": extracted,
+        "dependencies": sorted(dependencies),
+        "urn_map": urn_map,
+        "report": report,
+    }
+
+
+def merge_objects(content: dict, new_objects: dict, overwrite: bool = False) -> dict:
+    """Merge extracted objects into a draft document, keyed by URN.
+
+    Raises BuilderError listing collisions unless overwrite is set, in which
+    case colliding objects are replaced.
+    """
+    merged = normalize_objects(copy.deepcopy(content))
+    collisions = []
+    for field, incoming in new_objects.items():
+        if field == "preset":
+            if merged.get("preset") and not overwrite:
+                collisions.append("preset")
+            else:
+                merged["preset"] = incoming
+            continue
+        existing = merged.setdefault(field, [])
+        by_urn = {
+            str(obj.get("urn", "")).lower(): pos for pos, obj in enumerate(existing)
+        }
+        for obj in incoming:
+            urn = str(obj.get("urn", "")).lower()
+            if urn in by_urn:
+                if overwrite:
+                    existing[by_urn[urn]] = obj
+                else:
+                    collisions.append(urn)
+            else:
+                by_urn[urn] = len(existing)
+                existing.append(obj)
+    if collisions:
+        raise BuilderError(
+            "Objects already present in the draft: {}".format(", ".join(collisions))
+        )
+    return merged
+
+
+def find_owning_library_urn(urn: str):
+    """Best-effort resolution of the loaded library owning an object URN."""
+    from core.models import (
+        Framework,
+        ReferenceControl,
+        RequirementMappingSet,
+        RequirementNode,
+        RiskMatrix,
+        Threat,
+    )
+    from metrology.models import MetricDefinition
+
+    lowered = str(urn).lower()
+    for model in (Threat, ReferenceControl, Framework, RiskMatrix, MetricDefinition):
+        obj = (
+            model.objects.filter(urn=lowered, library__isnull=False)
+            .select_related("library")
+            .first()
+        )
+        if obj:
+            return obj.library.urn
+    node = (
+        RequirementNode.objects.filter(urn=lowered)
+        .select_related("framework__library")
+        .first()
+    )
+    if node and node.framework and node.framework.library:
+        return node.framework.library.urn
+    mapping_set = (
+        RequirementMappingSet.objects.filter(urn=lowered)
+        .select_related("library")
+        .first()
+    )
+    if mapping_set and mapping_set.library:
+        return mapping_set.library.urn
+    return None
+
+
+def check_identity_conflicts(packager: str, ref_id: str, exclude_draft_id=None) -> list:
+    """Advisory check of a draft identity against the existing corpus.
+
+    Library-level conflicts are checked against StoredLibrary (broader than
+    loaded), LoadedLibrary and other drafts. Object-level conflicts are
+    checked against the loaded referential tables. The hard gate remains the
+    loader's own uniqueness checks at publish time.
+    """
+    from core.models import (
+        Framework,
+        LibraryDraft,
+        LoadedLibrary,
+        ReferenceControl,
+        RequirementMappingSet,
+        RiskMatrix,
+        StoredLibrary,
+        Threat,
+    )
+    from django.db.models import Q
+    from metrology.models import MetricDefinition
+
+    conflicts = []
+    lib_urn = library_urn(packager, ref_id)
+    for model, kind in (
+        (StoredLibrary, "stored_library"),
+        (LoadedLibrary, "loaded_library"),
+    ):
+        for hit in model.objects.filter(urn=lib_urn):
+            conflicts.append(
+                {
+                    "kind": kind,
+                    "urn": hit.urn,
+                    "name": hit.name,
+                    "version": hit.version,
+                }
+            )
+    drafts = LibraryDraft.objects.filter(
+        Q(urn=lib_urn) | Q(urn__isnull=True, packager=packager, ref_id=ref_id)
+    )
+    if exclude_draft_id:
+        drafts = drafts.exclude(id=exclude_draft_id)
+    for draft in drafts:
+        conflicts.append(
+            {
+                "kind": "library_draft",
+                "urn": draft.effective_urn,
+                "name": draft.name,
+                "version": draft.version,
+            }
+        )
+
+    object_models = {
+        "frameworks": Framework,
+        "threats": Threat,
+        "reference_controls": ReferenceControl,
+        "risk_matrices": RiskMatrix,
+        "requirement_mapping_sets": RequirementMappingSet,
+        "metric_definitions": MetricDefinition,
+    }
+    for field, model in object_models.items():
+        base = object_urn_base(packager, ref_id, field)
+        hits = model.objects.filter(
+            Q(urn=base) | Q(urn__startswith=base + ":")
+        ).select_related("library")[:10]
+        for hit in hits:
+            conflicts.append(
+                {
+                    "kind": "loaded_object",
+                    "urn": hit.urn,
+                    "name": hit.name,
+                    "library": hit.library.urn if hit.library else None,
+                }
+            )
+    return conflicts
+
+
+def validate_draft_document(draft) -> dict:
+    """Dry-run validation of a draft: loader field validation + reference
+    integrity + advisory identity conflicts. Never writes anything."""
+    from core.models import StoredLibrary
+    from library.utils import LibraryImporter
+
+    errors = []
+    warnings = []
+
+    library = draft.to_library_dict()
+    if not draft.name:
+        errors.append("The library needs a name")
+    if not draft.content:
+        errors.append("The library holds no object yet")
+
+    if draft.content:
+        shim = StoredLibrary(
+            name=draft.name or "",
+            urn=library["urn"],
+            locale=draft.locale,
+            version=draft.version,
+            ref_id=draft.ref_id,
+            content=normalize_objects(draft.content),
+            dependencies=list(draft.dependencies or []),
+        )
+        try:
+            error_msg = LibraryImporter(shim).init()
+            if error_msg:
+                errors.append(error_msg)
+        except Exception as exc:
+            errors.append(str(exc))
+
+    errors.extend(_check_reference_integrity(draft))
+
+    if not draft.identity_locked:
+        for conflict in check_identity_conflicts(
+            draft.packager, draft.ref_id, exclude_draft_id=draft.id
+        ):
+            warnings.append(
+                "Identity conflict with {kind} {urn}".format(
+                    kind=conflict["kind"], urn=conflict["urn"]
+                )
+            )
+    return {"errors": errors, "warnings": warnings}
+
+
+def _check_reference_integrity(draft) -> list:
+    """Internal references must resolve within the draft; references leaving
+    the draft must resolve to a known library, which must be a dependency."""
+    from core.models import StoredLibrary
+
+    errors = []
+    objects = normalize_objects(draft.content)
+    internal = set(index_objects(objects).keys())
+    node_urns = set()
+    for framework in objects.get("frameworks") or []:
+        for node in framework.get("requirement_nodes") or []:
+            node_urns.add(str(node.get("urn", "")).lower())
+    internal |= node_urns
+
+    declared_dependencies = {str(dep).lower() for dep in draft.dependencies or []}
+    dependency_contents = None  # lazily-built URN index of dependency libraries
+
+    def dependency_urns() -> set:
+        nonlocal dependency_contents
+        if dependency_contents is None:
+            dependency_contents = set()
+            for stored in StoredLibrary.objects.filter(urn__in=declared_dependencies):
+                dependency_contents.update(index_objects(stored.content or {}).keys())
+        return dependency_contents
+
+    def check_ref(ref: str, where: str) -> None:
+        lowered = str(ref).lower()
+        if lowered in internal:
+            return
+        owner = find_owning_library_urn(lowered)
+        if owner is None and lowered not in dependency_urns():
+            errors.append(f"{where}: unresolved reference {ref}")
+            return
+        if owner and owner.lower() not in declared_dependencies:
+            errors.append(f"{where}: reference {ref} requires a dependency on {owner}")
+
+    for framework in objects.get("frameworks") or []:
+        fw_urn = str(framework.get("urn", "")).lower()
+        for node in framework.get("requirement_nodes") or []:
+            node_urn = str(node.get("urn", "")).lower()
+            parent = node.get("parent_urn")
+            if parent and str(parent).lower() not in node_urns:
+                errors.append(
+                    f"{node_urn}: parent_urn {parent} is not a node of {fw_urn}"
+                )
+            for ref in node.get("threats") or []:
+                check_ref(ref, node_urn)
+            for ref in node.get("reference_controls") or []:
+                check_ref(ref, node_urn)
+    for mapping_set in objects.get("requirement_mapping_sets") or []:
+        ms_urn = str(mapping_set.get("urn", "")).lower()
+        for ref_field in ("source_framework_urn", "target_framework_urn"):
+            ref = mapping_set.get(ref_field)
+            if ref:
+                check_ref(ref, ms_urn)
+    return errors

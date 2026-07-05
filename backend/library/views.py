@@ -1,9 +1,13 @@
 from itertools import chain
 import json
+import re
+
+import yaml
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.db.models import F, Q, IntegerField, OuterRef, Subquery, Exists
 from django.db import models
+from django.utils.timezone import now
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, generics
 from django.conf import settings
@@ -26,10 +30,23 @@ from django.http import HttpResponse
 import django_filters as df
 from core.excel import ExcelUploadHandler
 from core.helpers import get_sorted_requirement_nodes
-from core.models import StoredLibrary, LoadedLibrary, LibraryUpdater
+from core.models import (
+    ComplianceAssessment,
+    Framework,
+    LibraryDraft,
+    LibraryUpdater,
+    LoadedLibrary,
+    Question,
+    QuestionChoice,
+    RequirementNode,
+    StoredLibrary,
+    match_urn,
+)
 from core.sandbox import SandboxTimeoutError, SandboxViolationError
 from core.views import BaseModelViewSet, GenericFilterSet
 from iam.models import RoleAssignment, Folder, Permission
+from library import builder
+from library import framework_editor as fw_editor
 from library.validators import validate_file_extension
 from .helpers import update_translations
 from .utils import LibraryImporter, preview_library
@@ -39,6 +56,8 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.response import Response
 from .serializers import (
+    LibraryDraftReadSerializer,
+    LibraryDraftWriteSerializer,
     StoredLibraryDetailedSerializer,
     LoadedLibraryDetailedSerializer,
     LoadedLibrarySerializer,
@@ -868,3 +887,886 @@ class MappingLibrariesList(generics.ListAPIView):
             StoredLibrary,
         )
         return qs.filter(id__in=viewable_libraries)
+
+
+def _get_stored_library(pk_or_urn) -> StoredLibrary | None:
+    """Fetch a stored library by id or URN; latest version when several."""
+    if not pk_or_urn:
+        return None
+    key = "urn" if str(pk_or_urn).startswith("urn:") else "id"
+    try:
+        libraries = list(StoredLibrary.objects.filter(**{key: pk_or_urn}))
+    except (ValidationError, ValueError):
+        return None
+    if not libraries:
+        return None
+    return max(libraries, key=lambda lib: lib.version)
+
+
+class LibraryDraftViewSet(BaseModelViewSet):
+    """
+    Interactive library packager. A draft is a document that serializes to
+    the same library YAML the tools/ Excel convertor produces; publishing
+    feeds that YAML to the existing stored-library loader — the single
+    writer of live referential objects. The builder never touches live
+    Framework/ReferenceControl/Threat/... rows itself.
+    """
+
+    model = LibraryDraft
+    filterset_fields = ["folder", "packager", "locale"]
+    search_fields = ["name", "description", "packager", "ref_id"]
+
+    # Detail actions default to the perms_map of their HTTP method (POST →
+    # add_librarydraft); align them with what they actually do to the draft.
+    permission_overrides = {
+        "publish": "change_librarydraft",
+        "import_objects": "change_librarydraft",
+        "validate": "view_librarydraft",
+        "conflicts": "view_librarydraft",
+        "export": "view_librarydraft",
+        "framework_editor_preview": "view_librarydraft",
+        "add_framework": "change_librarydraft",
+        "upsert_object": "change_librarydraft",
+        "delete_object": "change_librarydraft",
+        "preset_editor_preview": "view_librarydraft",
+    }
+
+    # Object kinds editable through the generic upsert action; frameworks go
+    # through the visual framework editor, mapping sets have their own tooling.
+    UPSERTABLE_FIELDS = (
+        "threats",
+        "reference_controls",
+        "risk_matrices",
+        "metric_definitions",
+    )
+
+    def get_serializer_class(self):
+        if self.action in ("create", "update", "partial_update"):
+            return LibraryDraftWriteSerializer
+        return LibraryDraftReadSerializer
+
+    @action(detail=False, methods=["get"], url_path="check-identity")
+    def check_identity(self, request):
+        """Advisory identity check for the creation form, before a draft exists."""
+        packager = request.query_params.get("packager", "")
+        ref_id = request.query_params.get("ref_id", "")
+        if not (
+            re.match(LibraryDraft.IDENTITY_REGEX, packager)
+            and re.match(LibraryDraft.IDENTITY_REGEX, ref_id)
+        ):
+            return Response(
+                {"error": "invalidLibraryIdentity"}, status=HTTP_400_BAD_REQUEST
+            )
+        return Response(
+            {
+                "urn": builder.library_urn(packager, ref_id),
+                "conflicts": builder.check_identity_conflicts(
+                    packager,
+                    ref_id,
+                    exclude_draft_id=request.query_params.get("exclude_draft"),
+                ),
+            }
+        )
+
+    @action(detail=True, methods=["get"])
+    def conflicts(self, request, pk):
+        draft = self.get_object()
+        if draft.identity_locked:
+            # The identity is published: hitting the existing stored/loaded
+            # rows again is the update-by-URN path, not a conflict.
+            return Response({"identity_locked": True, "conflicts": []})
+        return Response(
+            {
+                "identity_locked": False,
+                "conflicts": builder.check_identity_conflicts(
+                    draft.packager, draft.ref_id, exclude_draft_id=draft.id
+                ),
+            }
+        )
+
+    @action(detail=True, methods=["get"])
+    def validate(self, request, pk):
+        """Dry-run the loader-level validation and reference integrity checks."""
+        draft = self.get_object()
+        return Response(builder.validate_draft_document(draft))
+
+    @action(detail=True, methods=["get"])
+    def export(self, request, pk):
+        draft = self.get_object()
+        library_yaml = yaml.safe_dump(
+            draft.to_library_dict(), sort_keys=False, allow_unicode=True
+        )
+        response = HttpResponse(library_yaml, content_type="application/yaml")
+        safe_ref = re.sub(r"[^A-Za-z0-9._-]+", "-", draft.ref_id or "library")
+        response["Content-Disposition"] = (
+            f'attachment; filename="{safe_ref}-v{draft.version}.yaml"'
+        )
+        return response
+
+    @action(detail=False, methods=["post"])
+    def adopt(self, request):
+        """Import a custom library into a draft, identity preserved.
+
+        The inverse of publish (YAML → draft): the library is then maintained
+        in the builder and re-published as updates of the same URN family.
+        Built-in libraries can never acquire an identity-preserving draft.
+        """
+        folder_id = request.data.get("folder")
+        try:
+            folder = (
+                Folder.objects.get(id=folder_id)
+                if folder_id
+                else Folder.get_root_folder()
+            )
+        except (Folder.DoesNotExist, ValidationError, ValueError):
+            return Response({"error": "folderNotFound"}, status=HTTP_404_NOT_FOUND)
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_librarydraft"),
+            folder=folder,
+        ):
+            return Response(status=HTTP_403_FORBIDDEN)
+
+        source = _get_stored_library(request.data.get("stored_library"))
+        if source is None:
+            return Response({"error": "libraryNotFound"}, status=HTTP_404_NOT_FOUND)
+        if source.builtin:
+            return Response(
+                {"error": "builtinLibrariesCannotBeAdopted"},
+                status=HTTP_400_BAD_REQUEST,
+            )
+        existing_draft = LibraryDraft.objects.filter(urn=source.urn).first()
+        if existing_draft is not None:
+            return Response(
+                {"error": "draftAlreadyExists", "draft": str(existing_draft.id)},
+                status=HTTP_409_CONFLICT,
+            )
+
+        urn_groups = match_urn(source.urn)
+        draft = LibraryDraft.objects.create(
+            name=source.name,
+            description=source.description,
+            folder=folder,
+            packager=source.packager or (urn_groups[0] if urn_groups else "unknown"),
+            ref_id=source.ref_id or source.urn.rsplit(":", 1)[-1],
+            locale=source.locale,
+            version=source.version,
+            provider=source.provider,
+            copyright=source.copyright,
+            publication_date=source.publication_date,
+            annotation=source.annotation,
+            translations=source.translations or {},
+            dependencies=list(source.dependencies or []),
+            labels=[label.label for label in source.filtering_labels.all()],
+            content=builder.normalize_objects(source.content or {}),
+            urn=source.urn,
+            # The identity already exists in the wild: frozen from the start.
+            first_published_at=now(),
+            last_published_at=now(),
+        )
+        return Response(LibraryDraftReadSerializer(draft).data, status=HTTP_201_CREATED)
+
+    @action(detail=True, methods=["post"], url_path="import-objects")
+    def import_objects(self, request, pk):
+        """Selective extraction (clone): copy objects from a stored library
+        into this draft, rebased onto the draft's URN family."""
+        draft = self.get_object()
+        source = _get_stored_library(request.data.get("source"))
+        if source is None:
+            return Response({"error": "libraryNotFound"}, status=HTTP_404_NOT_FOUND)
+        if not (
+            re.match(LibraryDraft.IDENTITY_REGEX, draft.packager)
+            and re.match(LibraryDraft.IDENTITY_REGEX, draft.ref_id)
+        ):
+            # Adopted legacy identities may not be URN-safe; they cannot mint
+            # new object URNs.
+            return Response(
+                {"error": "identityNotMintable"}, status=HTTP_400_BAD_REQUEST
+            )
+        try:
+            extraction = builder.extract_objects(
+                source_content=source.content or {},
+                source_library_urn=source.urn,
+                source_dependencies=source.dependencies or [],
+                target_packager=draft.packager,
+                target_ref_id=draft.ref_id,
+                selected_types=request.data.get("object_types"),
+                selected_urns=request.data.get("urns"),
+                default_policy=request.data.get("default_policy", builder.POLICY_STRIP),
+                per_urn_policies=request.data.get("policies"),
+                resolve_owner=builder.find_owning_library_urn,
+            )
+            draft.content = builder.merge_objects(
+                draft.content,
+                extraction["objects"],
+                overwrite=bool(request.data.get("overwrite")),
+            )
+        except builder.BuilderError as e:
+            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+        dependencies = set(draft.dependencies or []) | set(extraction["dependencies"])
+        dependencies.discard(draft.effective_urn)
+        draft.dependencies = sorted(dependencies)
+        draft.save()
+        return Response(
+            {
+                "status": "success",
+                "report": extraction["report"],
+                "draft": LibraryDraftReadSerializer(draft).data,
+            }
+        )
+
+    @staticmethod
+    def _pick_framework(content: dict, framework_urn):
+        """Resolve the target framework object from a normalized document.
+
+        Returns (framework, error_response): exactly one of the two is None.
+        """
+        frameworks = content.get("frameworks") or []
+        if not frameworks:
+            return None, Response(
+                {"error": "noFrameworkInDraft"}, status=HTTP_404_NOT_FOUND
+            )
+        if framework_urn:
+            lowered = str(framework_urn).lower()
+            for framework in frameworks:
+                if str(framework.get("urn", "")).lower() == lowered:
+                    return framework, None
+            return None, Response(
+                {"error": "frameworkNotFoundInDraft"}, status=HTTP_404_NOT_FOUND
+            )
+        if len(frameworks) > 1:
+            return None, Response(
+                {
+                    "error": "frameworkUrnRequired",
+                    "frameworks": [
+                        {"urn": f.get("urn"), "name": f.get("name")} for f in frameworks
+                    ],
+                },
+                status=HTTP_400_BAD_REQUEST,
+            )
+        return frameworks[0], None
+
+    @action(detail=True, methods=["get", "put"], url_path="framework-editor")
+    def framework_editor(self, request, pk):
+        """Bridge to the visual framework editor.
+
+        GET returns the framework object of the draft converted to the
+        editor-doc shape; PUT converts an editor doc back and saves it into
+        the draft document. No live Framework rows are involved.
+        """
+        draft = self.get_object()
+        content = builder.normalize_objects(draft.content or {})
+
+        if request.method == "GET":
+            framework, error = self._pick_framework(
+                content, request.query_params.get("framework_urn")
+            )
+            if error is not None:
+                return error
+            framework_urn = str(framework.get("urn", "")).lower()
+            live = Framework.objects.filter(urn=framework_urn).first()
+            return Response(
+                {
+                    "status": "ok",
+                    "framework_urn": framework_urn,
+                    "frameworks": [
+                        {"urn": f.get("urn"), "name": f.get("name")}
+                        for f in content.get("frameworks") or []
+                    ],
+                    "has_compliance_assessments": bool(
+                        live
+                        and ComplianceAssessment.objects.filter(framework=live).exists()
+                    ),
+                    "editing_draft": fw_editor.framework_to_editor_doc(
+                        framework, locale=draft.locale
+                    ),
+                }
+            )
+
+        editor_doc = request.data.get("editing_draft")
+        if not isinstance(editor_doc, dict):
+            return Response(
+                {"error": "editingDraftMustBeAnObject"}, status=HTTP_400_BAD_REQUEST
+            )
+        framework, error = self._pick_framework(
+            content, request.data.get("framework_urn")
+        )
+        if error is not None:
+            return error
+        try:
+            new_framework = fw_editor.editor_doc_to_framework_object(
+                editor_doc, existing=framework
+            )
+        except builder.BuilderError as e:
+            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+        frameworks = content["frameworks"]
+        frameworks[frameworks.index(framework)] = new_framework
+        draft.content = content
+        draft.save(update_fields=["content", "updated_at"])
+        return Response({"status": "ok", "framework_urn": new_framework["urn"]})
+
+    @action(detail=True, methods=["post"], url_path="framework-editor-preview")
+    def framework_editor_preview(self, request, pk):
+        """What would change on the live (loaded) framework if the draft were
+        published now — diffed by URN against the loaded rows."""
+        draft = self.get_object()
+        content = builder.normalize_objects(draft.content or {})
+        framework, error = self._pick_framework(
+            content, request.data.get("framework_urn")
+        )
+        if error is not None:
+            return error
+        editor_doc = request.data.get("editing_draft")
+        if isinstance(editor_doc, dict):
+            try:
+                framework = fw_editor.editor_doc_to_framework_object(
+                    editor_doc, existing=framework
+                )
+            except builder.BuilderError as e:
+                return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+
+        framework_urn = str(framework.get("urn", "")).lower()
+        live = Framework.objects.filter(urn=framework_urn).first()
+        live_nodes = (
+            {node.urn: node for node in RequirementNode.objects.filter(framework=live)}
+            if live
+            else {}
+        )
+        doc_nodes = {
+            node["urn"]: node for node in framework.get("requirement_nodes") or []
+        }
+        added = [urn for urn in doc_nodes if urn not in live_nodes]
+        removed = [urn for urn in live_nodes if urn not in doc_nodes]
+
+        doc_question_urns = set()
+        doc_choice_urns = set()
+        for node in doc_nodes.values():
+            for q_urn, q_data in (node.get("questions") or {}).items():
+                doc_question_urns.add(str(q_urn).lower())
+                for choice in q_data.get("choices") or []:
+                    if choice.get("urn"):
+                        doc_choice_urns.add(str(choice["urn"]).lower())
+        live_question_urns = (
+            set(
+                Question.objects.filter(requirement_node__framework=live).values_list(
+                    "urn", flat=True
+                )
+            )
+            if live
+            else set()
+        )
+        live_choice_urns = (
+            set(
+                QuestionChoice.objects.filter(
+                    question__requirement_node__framework=live
+                ).values_list("urn", flat=True)
+            )
+            if live
+            else set()
+        )
+
+        def details(urns, source, limit=20):
+            entries = []
+            for urn in urns[:limit]:
+                node = source[urn]
+                name = node.get("name") if isinstance(node, dict) else node.name
+                assessable = (
+                    node.get("assessable")
+                    if isinstance(node, dict)
+                    else node.assessable
+                )
+                entries.append({"name": name or urn, "assessable": bool(assessable)})
+            return entries
+
+        return Response(
+            {
+                "added": {
+                    "requirements": len(added),
+                    "questions": len(doc_question_urns - live_question_urns),
+                    "choices": len(doc_choice_urns - live_choice_urns),
+                    "details": details(added, doc_nodes),
+                },
+                "removed": {
+                    "requirements": len(removed),
+                    "questions": len(live_question_urns - doc_question_urns),
+                    "choices": len(live_choice_urns - doc_choice_urns),
+                    "details": details(removed, live_nodes),
+                },
+                "breaking_changes": [],
+                "affected_audits": [
+                    {"id": str(audit.id), "name": audit.name}
+                    for audit in ComplianceAssessment.objects.filter(framework=live)
+                ]
+                if live
+                else [],
+            }
+        )
+
+    @action(detail=True, methods=["post"], url_path="add-framework")
+    def add_framework(self, request, pk):
+        """Add a skeleton framework object to the draft document."""
+        draft = self.get_object()
+        if not (
+            re.match(LibraryDraft.IDENTITY_REGEX, draft.packager)
+            and re.match(LibraryDraft.IDENTITY_REGEX, draft.ref_id)
+        ):
+            return Response(
+                {"error": "identityNotMintable"}, status=HTTP_400_BAD_REQUEST
+            )
+        content = builder.normalize_objects(draft.content or {})
+        frameworks = content.setdefault("frameworks", [])
+        base = builder.object_urn_base(draft.packager, draft.ref_id, "frameworks")
+        existing_urns = {str(f.get("urn", "")).lower() for f in frameworks}
+        if not frameworks:
+            framework_urn = base
+        else:
+            leaf = (
+                builder.urn_safe_leaf(
+                    request.data.get("ref_id") or request.data.get("name") or ""
+                )
+                or f"framework-{len(frameworks) + 1}"
+            )
+            framework_urn = f"{base}:{leaf}"
+            suffix = 2
+            while framework_urn in existing_urns:
+                framework_urn = f"{base}:{leaf}-{suffix}"
+                suffix += 1
+        frameworks.append(
+            {
+                "urn": framework_urn,
+                "ref_id": request.data.get("ref_id") or draft.ref_id,
+                "name": request.data.get("name") or draft.name,
+                "requirement_nodes": [],
+            }
+        )
+        draft.content = content
+        draft.save(update_fields=["content", "updated_at"])
+        return Response(
+            {"status": "ok", "framework_urn": framework_urn},
+            status=HTTP_201_CREATED,
+        )
+
+    def _preset_editor_draft(self, draft, content: dict) -> dict:
+        """The preset object viewed in the editor-draft shape.
+
+        The preset carries its own name/description; legacy preset libraries
+        (which are one-to-one with their preset) fall back to the library
+        metadata, mirroring upsert_preset_from_stored_library.
+        """
+        preset = content.get("preset") or {}
+        journey = preset.get("journey") or {}
+        return {
+            "journey_meta": {
+                "name": preset.get("name") or draft.name or "",
+                "description": preset.get("description") or draft.description or "",
+            },
+            "scaffolded_objects": list(preset.get("scaffolded_objects") or []),
+            "steps": list(journey.get("steps") or []),
+        }
+
+    @action(detail=True, methods=["get", "put"], url_path="preset-editor")
+    def preset_editor(self, request, pk):
+        """Bridge to the journey preset editor.
+
+        GET returns the draft's preset object in the editor-draft shape
+        ({journey_meta, scaffolded_objects, steps}); PUT validates an editor
+        draft and saves it back into the document, creating the preset object
+        on first save. profile/feature_flags and unknown keys are preserved.
+        """
+        from core.preset_editor import validate_draft as validate_preset_draft
+
+        draft = self.get_object()
+        content = builder.normalize_objects(draft.content or {})
+
+        if request.method == "GET":
+            return Response(
+                {"editing_draft": self._preset_editor_draft(draft, content)}
+            )
+
+        editor_draft = request.data.get("editing_draft")
+        if not isinstance(editor_draft, dict):
+            return Response(
+                {"error": "editingDraftMustBeAnObject"}, status=HTTP_400_BAD_REQUEST
+            )
+        try:
+            normalized = validate_preset_draft(editor_draft, strict=False)
+        except ValidationError as e:
+            detail = getattr(e, "message_dict", None) or {
+                "detail": "; ".join(getattr(e, "messages", [str(e)]))
+            }
+            return Response(detail, status=HTTP_400_BAD_REQUEST)
+
+        preset = dict(content.get("preset") or {})
+        preset["scaffolded_objects"] = normalized["scaffolded_objects"]
+        journey = dict(preset.get("journey") or {})
+        journey["steps"] = normalized["steps"]
+        preset["journey"] = journey
+        # The preset's own title, independent from the library name. Empty
+        # values are dropped: the loader falls back to the library metadata.
+        for field in ("name", "description"):
+            if normalized["journey_meta"][field]:
+                preset[field] = normalized["journey_meta"][field]
+            else:
+                preset.pop(field, None)
+        content["preset"] = preset
+        draft.content = content
+        draft.save(update_fields=["content", "updated_at"])
+        return Response({"editing_draft": self._preset_editor_draft(draft, content)})
+
+    @action(detail=True, methods=["post"], url_path="preset-editor-preview")
+    def preset_editor_preview(self, request, pk):
+        """Steps removed from the document's preset compared to the loaded
+        Preset, with the user journey state that would be lost — mirrors the
+        retired standalone preset editor's publish preview."""
+        from core.models import Preset, PresetJourneyStep
+
+        draft = self.get_object()
+        content = builder.normalize_objects(draft.content or {})
+        preset = content.get("preset") or {}
+        draft_keys = {
+            step.get("key")
+            for step in (preset.get("journey") or {}).get("steps") or []
+            if step.get("key")
+        }
+        live = Preset.objects.filter(urn=draft.effective_urn).first()
+        if live is None:
+            return Response({"deleted_steps": []})
+        live_keys = {step.get("key") for step in (live.steps or []) if step.get("key")}
+        warnings = []
+        for key in sorted(live_keys - draft_keys):
+            journey_steps = PresetJourneyStep.objects.filter(
+                journey__preset=live, key=key
+            )
+            with_user_state = journey_steps.exclude(
+                status=PresetJourneyStep.Status.NOT_STARTED, notes=""
+            ).count()
+            warnings.append(
+                {
+                    "key": key,
+                    "journey_step_count": journey_steps.count(),
+                    "with_user_state": with_user_state,
+                }
+            )
+        return Response({"deleted_steps": warnings})
+
+    @action(detail=True, methods=["post"], url_path="upsert-object")
+    def upsert_object(self, request, pk):
+        """Create or update a leaf object (threat, reference control, risk
+        matrix, metric definition) in the draft document.
+
+        Without `urn` a new object is created, its URN minted server-side
+        under the library's family base; with `urn` the matching object is
+        updated (URN untouched, unknown keys preserved, null values clear
+        their key). Payloads are validated with the loader's own importers.
+        """
+        from library.utils import (
+            MetricDefinitionImporter,
+            ReferenceControlImporter,
+            RiskMatrixImporter,
+            ThreatImporter,
+        )
+
+        importers = {
+            "threats": ThreatImporter,
+            "reference_controls": ReferenceControlImporter,
+            "risk_matrices": RiskMatrixImporter,
+            "metric_definitions": MetricDefinitionImporter,
+        }
+
+        draft = self.get_object()
+        field = builder.CANONICAL_OBJECT_FIELDS.get(
+            request.data.get("field"), request.data.get("field")
+        )
+        if field not in self.UPSERTABLE_FIELDS:
+            return Response(
+                {"error": "unsupportedObjectField"}, status=HTTP_400_BAD_REQUEST
+            )
+        payload = request.data.get("object")
+        if not isinstance(payload, dict):
+            return Response({"error": "objectMustBeADict"}, status=HTTP_400_BAD_REQUEST)
+
+        content = builder.normalize_objects(draft.content or {})
+        items = content.setdefault(field, [])
+        target_urn = request.data.get("urn")
+
+        if target_urn:
+            target_urn = str(target_urn).lower()
+            index = next(
+                (
+                    i
+                    for i, item in enumerate(items)
+                    if str(item.get("urn", "")).lower() == target_urn
+                ),
+                None,
+            )
+            if index is None:
+                return Response(
+                    {"error": "objectNotFoundInDraft"}, status=HTTP_404_NOT_FOUND
+                )
+            merged = dict(items[index])
+            for key, value in payload.items():
+                if key == "urn":
+                    continue  # pinned identity, never rewritten from a payload
+                if value is None:
+                    merged.pop(key, None)
+                else:
+                    merged[key] = value
+            candidate = merged
+        else:
+            leaf = builder.urn_safe_leaf(str(payload.get("ref_id") or ""))
+            if not leaf:
+                return Response({"error": "refIdRequired"}, status=HTTP_400_BAD_REQUEST)
+            try:
+                base = builder.leaf_object_base(draft.effective_urn, field)
+            except builder.BuilderError as e:
+                return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+            urn = f"{base}:{leaf}"
+            if any(str(item.get("urn", "")).lower() == urn for item in items):
+                return Response(
+                    {"error": "objectUrnAlreadyExists", "urn": urn},
+                    status=HTTP_409_CONFLICT,
+                )
+            candidate = {"urn": urn}
+            for key, value in payload.items():
+                if key != "urn" and value is not None:
+                    candidate[key] = value
+            index = None
+
+        if error := importers[field](candidate).is_valid():
+            return Response({"error": error}, status=HTTP_400_BAD_REQUEST)
+        if field == "risk_matrices":
+            # RiskMatrixImporter.is_valid is currently a no-op; reuse the
+            # matrix editor's structural validation instead.
+            from core.views import RiskMatrixViewSet
+
+            definition = {
+                key: candidate.get(key)
+                for key in ("probability", "impact", "risk", "grid")
+            }
+            if matrix_errors := RiskMatrixViewSet._validate_json_definition(definition):
+                return Response(
+                    {"error": " ".join(matrix_errors)}, status=HTTP_400_BAD_REQUEST
+                )
+
+        if index is None:
+            items.append(candidate)
+        else:
+            items[index] = candidate
+        draft.content = content
+        draft.save(update_fields=["content", "updated_at"])
+        return Response(
+            {
+                "status": "ok",
+                "object": candidate,
+                "draft": LibraryDraftReadSerializer(draft).data,
+            }
+        )
+
+    @action(detail=True, methods=["post"], url_path="delete-object")
+    def delete_object(self, request, pk):
+        """Remove a top-level object from the draft document.
+
+        Framework-node links to the object block the deletion unless `force`
+        is set, in which case they are stripped. A requirement mapping set
+        pointing at the object always blocks (its framework fields are
+        mandatory): delete the mapping set first.
+        """
+        draft = self.get_object()
+        target_urn = str(request.data.get("urn") or "").lower()
+        if not target_urn:
+            return Response({"error": "urnRequired"}, status=HTTP_400_BAD_REQUEST)
+
+        content = builder.normalize_objects(draft.content or {})
+        located = next(
+            (
+                (field, index)
+                for field in builder.LIST_OBJECT_FIELDS
+                for index, item in enumerate(content.get(field) or [])
+                if str(item.get("urn", "")).lower() == target_urn
+            ),
+            None,
+        )
+        if located is None:
+            return Response(
+                {"error": "objectNotFoundInDraft"}, status=HTTP_404_NOT_FOUND
+            )
+        field, index = located
+
+        node_references = []
+        for framework in content.get("frameworks") or []:
+            for node in framework.get("requirement_nodes") or []:
+                for ref_field in ("threats", "reference_controls"):
+                    refs = [str(ref).lower() for ref in node.get(ref_field) or []]
+                    if target_urn in refs:
+                        node_references.append(str(node.get("urn", "")).lower())
+        mapping_references = [
+            str(mapping_set.get("urn", "")).lower()
+            for mapping_set in content.get("requirement_mapping_sets") or []
+            if target_urn
+            in (
+                str(mapping_set.get("source_framework_urn", "")).lower(),
+                str(mapping_set.get("target_framework_urn", "")).lower(),
+            )
+        ]
+
+        if mapping_references:
+            return Response(
+                {
+                    "error": "objectIsReferencedByMappingSet",
+                    "references": mapping_references,
+                },
+                status=HTTP_409_CONFLICT,
+            )
+        if node_references and not request.data.get("force"):
+            return Response(
+                {"error": "objectIsReferenced", "references": node_references},
+                status=HTTP_409_CONFLICT,
+            )
+        if node_references:
+            for framework in content.get("frameworks") or []:
+                for node in framework.get("requirement_nodes") or []:
+                    for ref_field in ("threats", "reference_controls"):
+                        refs = node.get(ref_field)
+                        if refs:
+                            node[ref_field] = [
+                                ref for ref in refs if str(ref).lower() != target_urn
+                            ]
+
+        del content[field][index]
+        if not content[field]:
+            del content[field]
+        draft.content = content
+        draft.save(update_fields=["content", "updated_at"])
+        return Response(
+            {"status": "ok", "draft": LibraryDraftReadSerializer(draft).data}
+        )
+
+    @action(detail=True, methods=["post"])
+    def publish(self, request, pk):
+        """Publish = load: serialize the draft to library YAML and feed it to
+        the existing stored-library loader. Re-publishing an already-loaded
+        URN goes through the loader's update path (update-by-URN)."""
+        draft = self.get_object()
+        for codename in ("add_storedlibrary", "add_loadedlibrary"):
+            if not RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename=codename),
+                folder=Folder.get_root_folder(),
+            ):
+                return Response(status=HTTP_403_FORBIDDEN)
+
+        validation = builder.validate_draft_document(draft)
+        if validation["errors"]:
+            return Response(
+                {"error": "draftValidationFailed", "details": validation["errors"]},
+                status=HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+
+        urn = draft.effective_urn
+        max_existing = max(
+            [
+                *StoredLibrary.objects.filter(urn=urn, locale=draft.locale).values_list(
+                    "version", flat=True
+                ),
+                *LoadedLibrary.objects.filter(urn=urn, locale=draft.locale).values_list(
+                    "version", flat=True
+                ),
+            ],
+            default=None,
+        )
+        if max_existing is not None and max_existing >= draft.version:
+            if request.data.get("bump_version"):
+                draft.version = max_existing + 1
+                draft.save(update_fields=["version", "updated_at"])
+            else:
+                return Response(
+                    {"error": "libraryVersionOutdated", "max_version": max_existing},
+                    status=HTTP_409_CONFLICT,
+                )
+
+        library_yaml = yaml.safe_dump(
+            draft.to_library_dict(), sort_keys=False, allow_unicode=True
+        ).encode()
+        try:
+            stored, error = StoredLibrary.store_library_content(library_yaml)
+        except (ValueError, ValidationError, yaml.YAMLError) as e:
+            return Response(
+                {"error": "libraryPublishFailed", "detail": str(e)},
+                status=HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+        if error is not None:
+            # This exact content (or version) is already stored. If the stored
+            # copy is ahead of the loaded one, this publish resumes a pending
+            # update (e.g. after a score-change conflict); otherwise there is
+            # nothing new to publish.
+            stored = (
+                StoredLibrary.objects.filter(urn=urn, locale=draft.locale)
+                .order_by("-version")
+                .first()
+            )
+            loaded = LoadedLibrary.objects.filter(urn=urn, locale=draft.locale).first()
+            if stored is None or (
+                loaded is not None and stored.version <= loaded.version
+            ):
+                return Response({"error": error}, status=HTTP_409_CONFLICT)
+
+        loaded = LoadedLibrary.objects.filter(urn=urn, locale=draft.locale).first()
+        try:
+            if loaded is not None:
+                error_msg = loaded.update(strategy=request.data.get("strategy"))
+            else:
+                error_msg = stored.load()
+        except LibraryUpdater.ScoreChangeDetected as e:
+            return Response(
+                {
+                    "error": "score_change_detected",
+                    "framework_urn": e.framework_urn,
+                    "prev_scores": e.prev_scores,
+                    "new_scores": e.new_scores,
+                    "affected_assessments": e.affected_assessments,
+                    "strategies": e.strategies,
+                },
+                status=HTTP_409_CONFLICT,
+            )
+        except Exception as e:
+            logger.exception("Failed to load published draft", urn=urn)
+            if loaded is None:
+                stored.delete()
+            return Response(
+                {"error": "libraryLoadFailed", "detail": str(e)},
+                status=HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+        if error_msg is not None:
+            if error_msg == "libraryHasNoUpdate":
+                return Response(
+                    {"error": "noChangesToPublish"}, status=HTTP_409_CONFLICT
+                )
+            if loaded is None:
+                stored.delete()
+            return Response(
+                {"error": "libraryLoadFailed", "detail": error_msg},
+                status=HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+
+        draft.urn = urn
+        if draft.first_published_at is None:
+            draft.first_published_at = now()
+        draft.last_published_at = now()
+        draft.save(
+            update_fields=[
+                "urn",
+                "first_published_at",
+                "last_published_at",
+                "updated_at",
+            ]
+        )
+        loaded = LoadedLibrary.objects.filter(urn=urn, locale=draft.locale).first()
+        return Response(
+            {
+                "status": "success",
+                "urn": urn,
+                "version": stored.version,
+                "stored_library": str(stored.id),
+                "loaded_library": str(loaded.id) if loaded else None,
+            }
+        )

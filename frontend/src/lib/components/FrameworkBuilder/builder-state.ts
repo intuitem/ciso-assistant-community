@@ -887,6 +887,8 @@ const CONTEXT_KEY = 'framework-builder';
 export type NodePreset = 'blank' | 'group' | 'requirement' | 'splash';
 
 export interface BuilderStore {
+	/** Target of the _action protocol calls (framework id or adapter path) */
+	apiTarget: string;
 	framework: Writable<Framework>;
 	rootNodes: Writable<BuilderNode[]>;
 	saving: Writable<boolean>;
@@ -938,11 +940,15 @@ export function createBuilderState(
 	frameworkData: Framework,
 	nodes: RequirementNode[],
 	questions: Question[],
-	editingDraft?: DraftJSON | null
+	editingDraft?: DraftJSON | null,
+	options?: { apiTarget?: string }
 ): BuilderStore {
 	const folderId =
 		typeof frameworkData.folder === 'string' ? frameworkData.folder : frameworkData.folder.id;
 	const frameworkId = frameworkData.id;
+	// Where the _action protocol calls go. Defaults to the live-framework
+	// builder proxy; the library builder passes its own adapter path.
+	const apiTarget = options?.apiTarget ?? frameworkId;
 	function getUrnNs(): string {
 		return get(framework).urn_namespace || 'custom';
 	}
@@ -1045,7 +1051,7 @@ export function createBuilderState(
 			try {
 				const draft = serializeDraft(get(framework), get(rootNodes));
 				(draft as any)._dirty = true; // mark draft as having user changes
-				await apiSaveDraft(frameworkId, draft);
+				await apiSaveDraft(apiTarget, draft);
 				unsaved.set(false); // saved to draft, but still unpublished
 				clearError('save-draft');
 				return true;
@@ -1107,7 +1113,7 @@ export function createBuilderState(
 				return false;
 			}
 
-			const warnings = await apiPublishDraft(frameworkId);
+			const warnings = await apiPublishDraft(apiTarget);
 			// Reflect the server-side bump locally so reactive status (e.g.,
 			// "Live" vs "Draft — nothing live yet") updates without a refresh.
 			framework.update((f) => ({ ...f, editing_version: (f.editing_version ?? 1) + 1 }));
@@ -1124,9 +1130,9 @@ export function createBuilderState(
 	async function discard() {
 		try {
 			// Clear the draft on the server
-			await apiDiscardDraft(frameworkId);
+			await apiDiscardDraft(apiTarget);
 			// Re-create a fresh draft from live relational data
-			const { draft: freshDraft } = await apiStartEditing(frameworkId);
+			const { draft: freshDraft } = await apiStartEditing(apiTarget);
 			// Re-hydrate stores from the fresh draft
 			const hydrated = hydrateDraft(freshDraft, frameworkId);
 			const freshFramework = { ...frameworkData, ...hydrated.frameworkPatch } as Framework;
@@ -1991,6 +1997,7 @@ export function createBuilderState(
 	}
 
 	return {
+		apiTarget,
 		framework,
 		rootNodes,
 		saving,

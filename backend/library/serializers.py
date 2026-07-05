@@ -2,9 +2,10 @@ from typing import Optional
 
 from rest_framework import serializers
 
-from core.models import LoadedLibrary, StoredLibrary
+from core.models import LibraryDraft, LoadedLibrary, StoredLibrary
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
 from core.serializers import BaseModelSerializer, ReferentialSerializer
+from library import builder
 
 
 class StoredLibrarySerializer(ReferentialSerializer):
@@ -139,3 +140,101 @@ class LibraryUploadSerializer(serializers.Serializer):
 
     class Meta:
         fields = ["file"]
+
+
+class LibraryDraftReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    urn = serializers.CharField(source="effective_urn", read_only=True)
+    identity_locked = serializers.BooleanField(read_only=True)
+    objects_meta = serializers.SerializerMethodField()
+
+    def get_objects_meta(self, obj) -> dict:
+        objects = builder.normalize_objects(obj.content or {})
+        meta = {
+            field: len(value)
+            for field, value in objects.items()
+            if isinstance(value, list)
+        }
+        if "preset" in objects:
+            meta["preset"] = 1
+        return meta
+
+    class Meta:
+        model = LibraryDraft
+        fields = [
+            "id",
+            "name",
+            "description",
+            "folder",
+            "urn",
+            "packager",
+            "ref_id",
+            "locale",
+            "version",
+            "provider",
+            "copyright",
+            "publication_date",
+            "annotation",
+            "translations",
+            "dependencies",
+            "labels",
+            "content",
+            "objects_meta",
+            "identity_locked",
+            "first_published_at",
+            "last_published_at",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class LibraryDraftWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = LibraryDraft
+        # urn and the published timestamps are lifecycle fields, only ever set
+        # by the adopt/publish actions.
+        exclude = [
+            "created_at",
+            "updated_at",
+            "is_published",
+            "urn",
+            "first_published_at",
+            "last_published_at",
+        ]
+
+    def validate_content(self, content):
+        if not isinstance(content, dict):
+            raise serializers.ValidationError("contentMustBeAnObject")
+        return builder.normalize_objects(content)
+
+    def validate_dependencies(self, dependencies):
+        if not isinstance(dependencies, list) or not all(
+            isinstance(dep, str) for dep in dependencies
+        ):
+            raise serializers.ValidationError("dependenciesMustBeAListOfUrns")
+        return dependencies
+
+    def validate(self, data):
+        data = super().validate(data)
+        if self.instance is not None and self.instance.identity_locked:
+            for field in ("packager", "ref_id"):
+                if field in data and data[field] != getattr(self.instance, field):
+                    raise serializers.ValidationError(
+                        {field: "identityFrozenAfterPublication"}
+                    )
+        return data
+
+    def update(self, instance, validated_data):
+        self._check_object_perm(instance, "change")
+        # Deliberately not calling BaseModelSerializer.update: its urn-based
+        # immutability guard targets imported live objects, whereas a draft's
+        # urn records an adopted identity and the draft stays editable.
+        new_packager = validated_data.get("packager", instance.packager)
+        new_ref_id = validated_data.get("ref_id", instance.ref_id)
+        if (new_packager, new_ref_id) != (instance.packager, instance.ref_id):
+            # Renaming a draft regenerates its URN family across the document.
+            content = validated_data.get("content", instance.content)
+            validated_data["content"] = builder.rebase_document(
+                content, new_packager, new_ref_id
+            )
+        return serializers.ModelSerializer.update(self, instance, validated_data)
