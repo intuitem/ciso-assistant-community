@@ -1372,8 +1372,8 @@
   "expirationDateMustBeOnOrAfterStartDate": "Dátum vypršania platnosti musí byť rovnaký alebo neskorší ako dátum začiatku",
   "backupLoadingError": "Pri načítavaní zálohy sa vyskytla chyba.",
   "backupVersionError": "Zálohu nie je možné načítať, verzia zálohy je neplatná",
-  "confirmYes": "Potvrďte zadaním „áno“ nižšie:",
-  "confirmYesPlaceHolder": "Potvrďte zadaním „áno“.",
+  "confirmYes": "Potvrďte zadaním „{word}“ nižšie:",
+  "confirmYesPlaceHolder": "Zadajte „{word}“ na potvrdenie",
   "backupGreaterVersionError": "Zálohu nie je možné načítať, verzia zálohy je vyššia ako aktuálna verzia vašej aplikácie.",
   "backupLowerVersionError": "Vyskytla sa chyba, verzia zálohy môže byť príliš stará, ak áno, musíte ju pred opätovným pokusom aktualizovať.",
   "entityAssessmentEvidenceHelpText": "Externý dotazník",
@@ -1474,7 +1474,7 @@
   "copy": "Kopírovať",
   "incorrectCode": "Nesprávny kód",
   "tooManyLoginAttempts": "Príliš veľa pokusov o prihlásenie. Skúste to znova neskôr.",
-  "step": "Krok {číslo}",
+  "step": "Krok {number}",
   "critical": "Kritické",
   "isCritical": "Je kritický",
   "isBusinessFunction": "Je to obchodná funkcia",
@@ -2639,7 +2639,7 @@
 			"match": {
 				"countPlural=one": "{count} Minúta",
 				"countPlural=few": "{count} Minúty",
-				"countPlural=many": "{count} Minút",	
+				"countPlural=many": "{count} Minút",
 				"countPlural=other": "{count} Minút"
 			}
 		}
@@ -2651,7 +2651,7 @@
 			"match": {
 				"countPlural=one": "{count} Deň",
 				"countPlural=few": "{count} Dni",
-				"countPlural=many": "{count} Dní",	
+				"countPlural=many": "{count} Dní",
 				"countPlural=other": "{count} Dní"
 			}
 		}
@@ -2661,7 +2661,7 @@
 			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": ["countPlural"],
 			"match": {
-				"countPlural=one": "{count} objekt je skrytý. Pri úprave môže dôjsť k strate odkazu.",				
+				"countPlural=one": "{count} objekt je skrytý. Pri úprave môže dôjsť k strate odkazu.",
 				"countPlural=few": "{count} objekty sú skryté. Odkazy sa môžu pri úprave stratiť.",
 				"countPlural=many": "{count} objekty sú skryté. Odkazy sa môžu pri úprave stratiť.",
 				"countPlural=other": "{count} objekty sú skryté. Odkazy sa môžu pri úprave stratiť."
@@ -2835,7 +2835,7 @@
   "cellCycleTooltip": "{role} – kliknutie pre cyklus, Shift-kliknutie pre späť",
   "cellEmptyHint": "Kliknutím priradíte prvú rolu",
   "removeActorPrompt": "Chcete odobrať {actor}?",
-  "removeActorPromptWithCells": "Chcete odobrať {aktéra}? Existujúce bunky tohto aktéra budú vymazané.",
+  "removeActorPromptWithCells": "Chcete odobrať {actor}? Existujúce bunky tohto aktéra budú vymazané.",
   "savesOnBlur": "Ušetrí na rozmazaní.",
   "changesAutoPersisted": "Zmeny budú automaticky pretrvávať.",
   "clickToCycleHint": "kliknutím cyklujte",
@@ -3234,7 +3234,7 @@
   "assessable": "Hodnotiteľné",
   "noCurveDataAvailable": "Nie sú k dispozícii žiadne údaje o krivke. Spustite simulácie na svojich hypotézach a vytvorte LEC grafy",
   "combinedCurrentRisk": "Kombinované aktuálne riziko",
-  "permissionDisplay": "{operácia} {model}",
+  "permissionDisplay": "{operation} {model}",
   "event": "Udalosť",
   "evidenceRevision": "Revízia dôkazov",
   "loadedLibrary": "Načítaná knižnica",
@@ -4414,7 +4414,7 @@
   "builderEmptyGroupedHint": "časti obsahujúce požiadavky. Ako OWASP MASVS (8 sekcií → 24 požiadaviek).",
   "builderEmptyHierarchy": "Hierarchia",
   "builderEmptyHierarchyHint": "Viacúrovňová hierarchia, napr. NIST CSF 2.0 (6 → 23 → 106).",
-  "builderEmptyBlank": "Prázdne plátno",  
+  "builderEmptyBlank": "Prázdne plátno",
   "builderEmptyBlankHint": "Začať od začiatku – vytvorí sa jeden prázdny uzol.",
   "builderAddTopLevelNode": "+ Pridať uzol najvyššej úrovne",
   "builderAddChild": "+ Pridať podriadený uzol",
@@ -4562,7 +4562,7 @@
   "builderHasUntranslatedItems": "Má nepreložené položky",
   "builderNoNodesYet": "Zatiaľ žiadne uzly",
   "builderNoMatchingNodes": "Žiadne zodpovedajúce uzly",
-  "builderNodesOf": "{filtred} z {total} uzlov",
+  "builderNodesOf": "{filtered} z {total} uzlov",
   "builderExpand": "Rozbaliť",
   "builderCollapse": "kolaps",
   "builderFrameworkNamePlaceholder": "Názov rámca",
@@ -4830,8 +4830,8 @@
   "builderFrameworkNameRequired": "Vyžaduje sa názov rámca.",
   "builderFrameworkNameTooLong": "Názov rámca je {length} znakov (max. 200).",
   "builderNodeNameTooLong": "Názov presahuje 200 znakov ({length}/200). Presuňte dlhý text do poľa popisu.",
-  "builderRefIdTooLong": "'{label}': ref_id je {dĺžka} znakov (max. 100).",
-  "builderUrnTooLong": "'{label}': URN má {dĺžku} znakov (max. 255).",
+  "builderRefIdTooLong": "'{label}': ref_id je {length} znakov (max. 100).",
+  "builderUrnTooLong": "'{label}': URN má {length} znakov (max. 255).",
   "builderFailedToSaveDraftBeforePublish": "Koncept pred zverejnením sa nepodarilo uložiť.",
   "builderUnsavedChangesNavigation": "Máte neuložené zmeny, ktoré sa stratia. Napriek tomu odísť?",
   "builderUnpublishedChangesNavigation": "Máte nezverejnené zmeny. Váš koncept sa uloží a môžete v ňom pokračovať neskôr. Napriek tomu odísť?",
@@ -4872,7 +4872,7 @@
   "noResultReturnedForFile": "Pre tento súbor nebol vrátený žiadny výsledok.",
   "sameContentAs": "Rovnaký obsah ako \"{name}\"",
   "networkErrorWithMessage": "Chyba siete: {message}",
-  "batchDoneSummary": "Dokončené – {vytvorené} vytvorené, revízie: {revízie}, {nahradené} nahradené, {premenované} premenované, {nezmenené} nezmenené, chyby: {chyby}.",
+  "batchDoneSummary": "Dokončené – {created} vytvorené, {revisions} revízia(-e), {replaced} nahradené, {renamed} premenované, {unchanged} nezmenené, {errors} chyba(-y).",
   "skip": "Preskočiť",
   "fieldVisibility": "Viditeľnosť poľa",
   "fieldVisibilityHelpText": "Ovládajte, ktoré polia hodnotenia môžu jednotlivé role diváka vidieť a upravovať.",
@@ -5071,7 +5071,7 @@
   "auditTreeInheritanceDescription": "Kombinovať výsledky auditu s auditmi nadradených domén pre rovnaký rámec.",
   "atLeastOneColumnRequired": "Musí zostať zobrazený aspoň jeden stĺpec",
   "hidden": "Skryté",
-  
+
   "complianceDescription": "Vykonávajte audity, kampane a analýzy súvisiace s auditmi.",
   "riskManagement": "Riadenie rizík",
   "riskManagementDescription": "Posudzujte a ošetrujte riziká naprieč scenármi, zraniteľnosťami a dopadmi.",
@@ -5103,7 +5103,7 @@
   "jiraField": "Pole Jira",
   "scoreScale": "Hodnotiaca škála",
   "downloadExcelTemplate": "Stiahnuť šablónu Excel",
-  "frameworkActionsHelp": "Šablóna Excel je určená pre tretie strany alebo externé subjekty na offline vyplnenie a následný import výsledkov prostredníctvom {dataWizard}.",  
+  "frameworkActionsHelp": "Šablóna Excel je určená pre tretie strany alebo externé subjekty na offline vyplnenie a následný import výsledkov prostredníctvom {dataWizard}.",
   "customFields": "Vlastné polia",
   "customFieldsDescription": "Definujte vlastné typované a filtrovateľné polia objektov (projekty, aktíva a implementované opatrenia).",
   "customField": "Vlastné pole",
@@ -5141,7 +5141,7 @@
   "projectedState": "Cieľový stav",
   "confirmMapping": "Potvrdiť mapovanie",
   "mapFromPreview": "Náhľad mapovania",
-  "requirementsUpdated": "{count} požiadaviek bude aktualizovaných",
+  "requirementsUpdated": "požiadavky budú aktualizované",
   "noMappingPath": "Medzi týmito rámcami nebola nájdená cesta mapovania",
   "mapFromNoChanges": "Zdrojový audit by v aktuálnom audite nespôsobil žiadne zmeny.",
   "sourceRequirement": "Zdrojová požiadavka",
