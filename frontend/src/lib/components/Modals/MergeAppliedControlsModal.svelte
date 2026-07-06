@@ -443,7 +443,7 @@
 
 		<div class="space-y-1 border-t border-surface-200-800 pt-4">
 			<label for="merge-confirm-input" class="text-sm font-medium text-red-600">
-				{m.confirmYes()}
+				{m.confirmYes({ word: m.yes() })}
 			</label>
 			<input
 				id="merge-confirm-input"
@@ -451,7 +451,7 @@
 				data-testid="merge-confirm-input"
 				class="input w-full border border-surface-300-700 rounded px-3 py-1.5 text-sm"
 				bind:value={confirmPhrase}
-				placeholder={m.confirmYesPlaceHolder()}
+				placeholder={m.confirmYesPlaceHolder({ word: m.yes() })}
 				autocomplete="off"
 			/>
 		</div>
