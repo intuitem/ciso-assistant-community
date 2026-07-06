@@ -1229,6 +1229,8 @@
 	"text": "متن",
 	"uniqueChoice": "واحد انتخاب",
 	"yes": "ہاں",
+	"confirmYes": "تصدیق کے لیے نیچے '{word}' لکھیں:",
+	"confirmYesPlaceHolder": "تصدیق کے لیے '{word}' لکھیں",
 	"builderEmptyStateTitle": "آپ اس فریم ورک کو کیسے ترتیب دینا چاہتے ہیں؟",
 	"builderEmptyStateSubtitle": "ابتدائی ساخت منتخب کریں — آپ اسے کسی بھی وقت تبدیل کر سکتے ہیں۔",
 	"builderEmptyFlat": "سادہ فہرست",

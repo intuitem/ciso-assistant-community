@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { contentDispositionHeader } from '$lib/utils/contentDisposition';
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
@@ -34,7 +35,6 @@ export const GET: RequestHandler = async ({ fetch, params }) => {
 	const datePart = formatDateForFilename(); // e.g. 2025-06-26_16-45-12
 	const sanitizedName = sanitizeFileName(namePart);
 	const finalFileName = `${sanitizedName}-${datePart}.zip`;
-	const urlEncodedFileName = encodeURIComponent(finalFileName);
 
 	// Fetch the ZIP blob
 	const blobData = await fetch(endpoint).then((res) => {
@@ -44,17 +44,11 @@ export const GET: RequestHandler = async ({ fetch, params }) => {
 		return res.blob();
 	});
 
-	// ASCII-safe fallback: strip anything outside printable ASCII
-	const asciiFileName = finalFileName
-		.replace(/[^\x20-\x7E]/g, '-') // strip non-printable / non-ASCII
-		.replace(/[;"%\\]/g, '-') // strip header-delimiter and quoting chars
-		.replace(/-+/g, '-'); // collapse consecutive dashes
-
 	// Return the file with proper headers
 	return new Response(blobData, {
 		headers: {
 			'Content-Type': 'application/zip',
-			'Content-Disposition': `attachment; filename="${asciiFileName}"; filename*=utf-8''${urlEncodedFileName}`
+			'Content-Disposition': contentDispositionHeader(finalFileName)
 		}
 	});
 };
