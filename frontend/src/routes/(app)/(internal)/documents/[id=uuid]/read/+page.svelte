@@ -103,7 +103,9 @@
 			>
 				<i class="fa-solid fa-arrow-up-right-from-square mr-2"></i>{m.openLink()}
 			</a>
-			<p class="break-all text-sm text-surface-500"><i class="fa-solid fa-link mr-1"></i>{linkUrl}</p>
+			<p class="break-all text-sm text-surface-500">
+				<i class="fa-solid fa-link mr-1"></i>{linkUrl}
+			</p>
 		</div>
 	{:else if isUploaded && fileUrl}
 		<div class="space-y-4">
