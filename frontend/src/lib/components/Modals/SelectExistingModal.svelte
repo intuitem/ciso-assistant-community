@@ -106,6 +106,7 @@
 			</header>
 			<button
 				type="button"
+				aria-label={m.close()}
 				class="flex items-center hover:text-primary-500 cursor-pointer"
 				onclick={parent.onClose}
 			>

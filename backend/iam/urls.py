@@ -7,10 +7,13 @@ from .views import (
     ChangePasswordView,
     CurrentUserView,
     PasswordResetView,
+    DisableMFAView,
     ResetPasswordConfirmView,
     SessionTokenView,
     SetPasswordView,
     RevokeOtherSessionsView,
+    SCIMTokenViewSet,
+    SCIMTokenDeleteView,
 )
 
 urlpatterns = [
@@ -25,6 +28,7 @@ urlpatterns = [
         name="password-reset-confirm",
     ),
     path("set-password/", SetPasswordView.as_view(), name="set-password"),
+    path("disable-mfa/", DisableMFAView.as_view(), name="disable-mfa"),
     path("revoke-sessions/", RevokeOtherSessionsView.as_view()),
     path("sso/", include("iam.sso.urls")),
     path(
@@ -37,5 +41,11 @@ urlpatterns = [
         "auth-tokens/<str:pk>/",
         AuthTokenDetailView.as_view(),
         name="auth-token-detail",
+    ),
+    path("scim-token/", SCIMTokenViewSet.as_view(), name="scim-token"),
+    path(
+        "scim-token/<int:token_id>/",
+        SCIMTokenDeleteView.as_view(),
+        name="scim-token-delete",
     ),
 ]

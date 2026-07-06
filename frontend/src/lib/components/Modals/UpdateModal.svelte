@@ -1,4 +1,5 @@
 <script lang="ts">
+	import * as m from '$paraglide/messages';
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { FormDataShape } from '$lib/utils/schemas';
@@ -26,6 +27,7 @@
 		selectOptions?: Record<string, any>;
 		debug?: boolean;
 		customNameDescription?: boolean;
+		customFolder?: boolean;
 	}
 
 	let {
@@ -39,7 +41,8 @@
 		suggestions = {},
 		selectOptions = {},
 		debug = false,
-		customNameDescription = true
+		customNameDescription = true,
+		customFolder = false
 	}: Props = $props();
 </script>
 
@@ -51,6 +54,7 @@
 			</header>
 			<button
 				type="button"
+				aria-label={m.close()}
 				class="flex items-center hover:text-primary-500 cursor-pointer"
 				onclick={parent.onClose}
 			>
@@ -59,6 +63,7 @@
 		</div>
 		<ModelForm
 			{customNameDescription}
+			{customFolder}
 			{form}
 			{object}
 			{suggestions}

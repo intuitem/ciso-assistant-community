@@ -2,13 +2,13 @@
 	import HiddenInput from '../HiddenInput.svelte';
 	import FileInput from '../FileInput.svelte';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { onMount } from 'svelte';
 	import { m } from '$paraglide/messages';
+	import { page } from '$app/state';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -72,19 +72,6 @@
 		allowedExtensions={'*'}
 	/>
 {/if}
-<FolderTreeSelect
-	{form}
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-	optionsInfoFields={{
-		fields: [{ field: 'content_type', translate: true }],
-		position: 'suffix',
-		classes: 'text-xxs bg-surface-200-800 px-1.5 py-0.5 rounded'
-	}}
-	contentTypes={['DO', 'GL', 'EN']}
-/>
 {#if context !== 'edit'}
 	<TextField
 		{form}
@@ -123,15 +110,19 @@
 	label={m.owner()}
 />
 
-<Select
-	{form}
-	options={model.selectOptions?.status}
-	field="status"
-	label={m.status()}
-	disableDoubleDash={true}
-	cacheLock={cacheLocks['status']}
-	bind:cachedValue={formDataCache['status']}
-/>
+<!-- Evidence status is an auditor-side review decision: respondents deposit
+	 evidence but must not set/change its status (e.g. self-approve). -->
+{#if !page.data?.user?.is_third_party}
+	<Select
+		{form}
+		options={model.selectOptions?.status}
+		field="status"
+		label={m.status()}
+		disableDoubleDash={true}
+		cacheLock={cacheLocks['status']}
+		bind:cachedValue={formDataCache['status']}
+	/>
+{/if}
 
 <TextField
 	type="date"

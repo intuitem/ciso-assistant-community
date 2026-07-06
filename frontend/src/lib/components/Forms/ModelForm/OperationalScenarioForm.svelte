@@ -3,7 +3,6 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
 	import { m } from '$paraglide/messages';
 	import TextArea from '../TextArea.svelte';
 	import Select from '../Select.svelte';
@@ -51,14 +50,6 @@
 	bind:cachedValue={formDataCache['ebios_rm_study']}
 	label={m.ebiosRmStudy()}
 	hidden={initialData.ebios_rm_study}
-/>
-<FolderTreeSelect
-	{form}
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.folder()}
-	hidden
 />
 <div
 	class="relative p-2 space-y-2 rounded-md {activeActivity === 'one'
