@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { marked } from 'marked';
 	import sanitizeHtml from 'sanitize-html';
+	import * as m from '$paraglide/messages';
 
 	interface Props {
 		content: string | null | undefined;
@@ -72,6 +73,13 @@
 		html = html.replace(INTERNAL_IMG_RE, (_, path) => `src="${INTERNAL_PLACEHOLDER}${path}"`);
 		html = sanitizeHtml(html, sanitizeConfig);
 		html = html.replace(new RegExp(`src="${INTERNAL_PLACEHOLDER}`, 'g'), 'src="');
+
+		// Name GFM task-list checkboxes, which render unlabeled.
+		html = html.replace(/<input\b([^>]*?\btype="checkbox"[^>]*?)\s*\/?>/g, (full, attrs) =>
+			/aria-label/.test(attrs)
+				? full
+				: `<input${attrs} aria-label="${/\bchecked\b/.test(attrs) ? m.taskItemChecked() : m.taskItemUnchecked()}" />`
+		);
 
 		// Clean up excessive spacing
 		html = html

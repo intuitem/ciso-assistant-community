@@ -835,6 +835,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'users',
 		verboseName: 'User',
 		verboseNamePlural: 'Users',
+		flaggedFields: {
+			idp_groups: 'idp_groups'
+		},
 		foreignKeyFields: [{ field: 'user_groups', urlModel: 'user-groups' }],
 		filters: []
 	},
@@ -869,6 +872,18 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableDelete: true,
 				folderPermsNeeded: [{ model: 'folder', action: 'change' }]
 			}
+		],
+		filters: []
+	},
+	'idp-groups': {
+		name: 'idpgroup',
+		localName: 'idpGroup',
+		localNamePlural: 'idpGroups',
+		verboseName: 'IdP group',
+		verboseNamePlural: 'IdP groups',
+		foreignKeyFields: [{ field: 'user_groups', urlModel: 'user-groups' }],
+		reverseForeignKeyFields: [
+			{ field: 'idp_groups', urlModel: 'users', disableCreate: true, disableDelete: true }
 		],
 		filters: []
 	},
@@ -938,7 +953,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableDelete: true
 			},
 			{ field: 'evidences', urlModel: 'findings', disableCreate: true, disableDelete: true },
-			{ field: 'evidences', urlModel: 'task-templates', disableCreate: true, disableDelete: true }
+			{ field: 'evidences', urlModel: 'task-templates', disableCreate: true, disableDelete: true },
+			{ field: 'evidences', urlModel: 'data-breaches', disableCreate: true, disableDelete: true }
 		],
 		selectFields: [{ field: 'status' }],
 		detailViewFields: [
@@ -1567,7 +1583,17 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'affected_personal_data', urlModel: 'personal-data' },
 			{ field: 'authorities', urlModel: 'entities' },
 			{ field: 'remediation_measures', urlModel: 'applied-controls' },
+			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'incident', urlModel: 'incidents' }
+		],
+		reverseForeignKeyFields: [
+			{
+				field: 'data_breaches',
+				urlModel: 'evidences',
+				addExisting: {
+					parentField: 'evidences'
+				}
+			}
 		],
 		detailViewFields: [
 			{ field: 'id' },
@@ -1589,6 +1615,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'subjects_notified_on', type: 'datetime' },
 			{ field: 'potential_consequences' },
 			{ field: 'remediation_measures' },
+			{ field: 'evidences' },
 			{ field: 'incident' },
 			{ field: 'reference_link' },
 			{ field: 'observation' },
@@ -2080,7 +2107,11 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'perimeter', urlModel: 'perimeters' },
-			{ field: 'vulnerabilities', urlModel: 'vulnerabilities' }
+			{ field: 'vulnerabilities', urlModel: 'vulnerabilities' },
+			{ field: 'threats', urlModel: 'threats' },
+			{ field: 'reference_controls', urlModel: 'reference-controls' },
+			{ field: 'applied_controls', urlModel: 'applied-controls' },
+			{ field: 'evidences', urlModel: 'evidences' }
 		],
 		reverseForeignKeyFields: [
 			{
@@ -2653,25 +2684,67 @@ export const URL_MODEL_MAP: ModelMap = {
 		endpointUrl: 'pmbok/generic-collections',
 		detailViewFields: [
 			{ field: 'id' },
+			{ field: 'folder' },
+			{ field: 'ref_id' },
 			{ field: 'name' },
 			{ field: 'description' },
-			{ field: 'ref_id' },
-			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
-			{ field: 'folder' },
+			{ field: 'projects' },
 			{ field: 'created_at', type: 'datetime' },
-			{ field: 'updated_at', type: 'datetime' }
+			{ field: 'updated_at', type: 'datetime' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
-		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'projects', urlModel: 'projects' }
+		],
 		reverseForeignKeyFields: [
-			{ field: 'genericcollection', urlModel: 'compliance-assessments' },
-			{ field: 'genericcollection', urlModel: 'risk-assessments' },
-			{ field: 'genericcollection', urlModel: 'quantitative-risk-studies' },
-			{ field: 'genericcollection', urlModel: 'ebios-rm' },
-			{ field: 'genericcollection', urlModel: 'entity-assessments' },
-			{ field: 'genericcollection', urlModel: 'findings-assessments' },
-			{ field: 'genericcollection', urlModel: 'evidences' },
-			{ field: 'genericcollection', urlModel: 'security-exceptions' },
-			{ field: 'genericcollection', urlModel: 'policies' }
+			{
+				field: 'genericcollection',
+				urlModel: 'compliance-assessments',
+				addExisting: { parentField: 'compliance_assessments' }
+			},
+			{
+				field: 'genericcollection',
+				urlModel: 'risk-assessments',
+				addExisting: { parentField: 'risk_assessments' }
+			},
+			{
+				field: 'genericcollection',
+				urlModel: 'quantitative-risk-studies',
+				addExisting: { parentField: 'crq_studies' }
+			},
+			{
+				field: 'genericcollection',
+				urlModel: 'ebios-rm',
+				addExisting: { parentField: 'ebios_studies' }
+			},
+			{
+				field: 'genericcollection',
+				urlModel: 'entity-assessments',
+				addExisting: { parentField: 'entity_assessments' }
+			},
+			{
+				field: 'genericcollection',
+				urlModel: 'findings-assessments',
+				addExisting: { parentField: 'findings_assessments' }
+			},
+			{
+				field: 'genericcollection',
+				urlModel: 'evidences',
+				addExisting: {
+					parentField: 'documents'
+				}
+			},
+			{
+				field: 'genericcollection',
+				urlModel: 'security-exceptions',
+				addExisting: { parentField: 'security_exceptions' }
+			},
+			{
+				field: 'genericcollection',
+				urlModel: 'policies',
+				addExisting: { parentField: 'policies' }
+			}
 		],
 		selectFields: [{ field: 'folder' }, { field: 'ref_id' }]
 	},

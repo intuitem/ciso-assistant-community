@@ -71,7 +71,8 @@
 				form: data.updateForm,
 				model: data.updatedModel,
 				object: data.object,
-				context: 'selectAsset'
+				context: 'selectAsset',
+				customFolder: true
 			}
 		};
 		let modal: ModalSettings = {

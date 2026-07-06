@@ -13,6 +13,7 @@
 		values: any[]; // Set the types for these variables later on
 		colors?: string[];
 		showPercentage?: boolean;
+		showLegend?: boolean;
 	}
 
 	let {
@@ -25,7 +26,8 @@
 		orientation = 'vertical',
 		values = $bindable(),
 		colors = [],
-		showPercentage = false
+		showPercentage = false,
+		showLegend = true
 	}: Props = $props();
 	for (const index in values) {
 		if (values[index].localName) {
@@ -79,17 +81,19 @@
 							saveAsImage: { show: false }
 						}
 					},
-					legend: {
-						top: 'bottom',
-						right: '0',
-						orient: orientation
-					},
+					legend: showLegend
+						? {
+								top: 'bottom',
+								right: '0',
+								orient: orientation
+							}
+						: { show: false },
 					series: [
 						{
 							name: s_label,
 							type: 'pie',
 							radius: showPercentage ? ['30%', '55%'] : ['40%', '70%'],
-							center: ['50%', '45%'],
+							center: showLegend ? ['50%', '45%'] : ['50%', '50%'],
 							avoidLabelOverlap: true,
 							itemStyle: {
 								borderRadius: 10,

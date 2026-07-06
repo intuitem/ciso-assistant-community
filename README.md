@@ -57,6 +57,7 @@ We’re constantly evolving with input from users and customers. Like an octopus
 [![API Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-api-tests.yml/badge.svg)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-api-tests.yml)
 [![Functional Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml/badge.svg?branch=main)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community.svg?type=small)](https://app.fossa.com/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community?ref=badge_small)
+[![Plumber Score](https://score.getplumber.io/github.com/intuitem/ciso-assistant-community.svg)](https://score.getplumber.io/github.com/intuitem/ciso-assistant-community)
 
 ---
 
@@ -99,6 +100,92 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 ## Features
 
 ![Current features](features.png)
+
+<!-- FEATURES:START -->
+<details>
+<summary><strong>📋 Full feature list</strong> — click to expand (searchable, 57 features)</summary>
+
+**Compliance & frameworks**
+- Audit and campaigns management
+- Automatic mapping
+- Mapping explorer
+- Custom frameworks supported
+- +167 frameworks included
+- Policies management
+- Evidence management
+
+**Risk management**
+- Risk assessments and registers
+- EBIOS RM module
+- Risk acceptance workflows
+- Business Impact Analysis
+- Cyber Risk Quantification
+- Vulnerability management
+- Vulnerability enrichment
+
+**Third-party risk**
+- Third-party risk management
+
+**Operations & remediation**
+- Action plan tracking and prioritization
+- Findings tracking
+- Recommendations engine
+- Control plan
+- Task management
+- Kanban boards
+- Periodic checks
+- Exceptions tracking
+- Incidents management
+- Validation & approval flows
+- Email reminders
+
+**Reporting & analytics**
+- Analytics and dashboards
+- Reports generation
+- Automated quality checks
+- Advanced insights
+- Custom metrics tracking
+
+**Collaboration & productivity**
+- Assignments & respondent mode
+- Comments & collaboration
+- Universal search
+- Command palette
+
+**Automation & integrations**
+- Comprehensive REST API
+- CLI for automation
+- Data import wizard
+- Kafka integration
+- MCP support
+- Outgoing webhooks
+- Jira & ServiceNow integrations
+- Consultant features (e.g. single-domain export/import)
+
+**Security & access**
+- Flexible RBAC
+- SSO with SAML or OIDC
+- MFA with TOTP and security keys
+- SCIM provisioning
+- Audit log
+
+**Privacy**
+- GDPR processings
+
+**Programme management**
+- Project management
+- Responsibility matrices
+
+**Platform**
+- Portals & trust center
+- Custom fields
+- Multi-level domains
+- Kubernetes (Helm) deployment
+- Open Source
+- Available in +26 languages
+
+</details>
+<!-- FEATURES:END -->
 
 Upcoming features are listed on the roadmap.
 
@@ -717,12 +804,12 @@ The goal of the test harness is to prevent any regression, i.e. all the tests sh
 
 To interact with the API via Swagger or directly with HTTP calls:
 
-1. Authenticate by sending a POST request to `/api/iam/login/` with your credentials in the request body. The response will include an authentication token.
+1. Create a Personal Access Token (PAT) from your user profile in the application.
 2. Include this token in the header of subsequent requests as: `Authorization: Token <token>`
 
 ⚠️ Note: use `Token`, **not** `Bearer`.
 
-When using the interactive Swagger UI, simply log in, the token will be automatically handled for subsequent requests.
+PATs respect MFA: they are issued from an authenticated session, so an account protected by MFA stays protected. For interactive/browser flows, authentication goes through the standard login (which enforces MFA when enabled).
 
 ## Setting CISO Assistant for production
 

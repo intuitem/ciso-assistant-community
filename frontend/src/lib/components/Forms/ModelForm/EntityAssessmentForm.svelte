@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import Select from '../Select.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
@@ -30,15 +29,10 @@
 		object = {}
 	}: Props = $props();
 
-	let selectedFolder = $state<string | undefined>(undefined);
-	let folderKey = $state(0);
-	let isAutoFillingFolder = $state(false);
-
 	let createAudit = $state(form.data?.create_audit ?? false);
 	let selectedEntity = $state<string | undefined>(form.data?.entity || initialData.entity);
 	let implementationGroupsChoices = $state<{ label: string; value: string }[]>([]);
 
-	// Reactive audit data that updates when object.compliance_assessment changes
 	let auditData = $derived(
 		object.compliance_assessment && typeof object.compliance_assessment === 'object'
 			? object.compliance_assessment
@@ -46,69 +40,8 @@
 				? { id: object.compliance_assessment, str: '', name: '' }
 				: null
 	);
-
-	function handleFolderChange(folderId: string) {
-		selectedFolder = folderId;
-		// Clear perimeter when folder changes (unless we're auto-filling from perimeter)
-		if (!isAutoFillingFolder && form.data?.perimeter) {
-			form.form.update((currentData) => ({
-				...currentData,
-				perimeter: undefined
-			}));
-		}
-		isAutoFillingFolder = false;
-	}
-
-	async function handlePerimeterChange(perimeterId: string) {
-		if (perimeterId && !selectedFolder) {
-			// Fetch perimeter to get its folder and auto-fill
-			try {
-				const response = await fetch(`/perimeters/${perimeterId}`);
-				if (response.ok) {
-					const perimeter = await response.json();
-					if (perimeter.folder?.id) {
-						isAutoFillingFolder = true;
-						selectedFolder = perimeter.folder.id;
-						// Update form data and force folder component to re-render
-						form.form.update((currentData) => ({
-							...currentData,
-							folder: perimeter.folder.id
-						}));
-						folderKey++;
-					}
-				}
-			} catch (error) {
-				console.error('Error fetching perimeter:', error);
-			}
-		}
-	}
 </script>
 
-{#key folderKey}
-	<FolderTreeSelect
-		{form}
-		field="folder"
-		cacheLock={cacheLocks['folder']}
-		bind:cachedValue={formDataCache['folder']}
-		label={m.folder()}
-		onChange={handleFolderChange}
-		mount={handleFolderChange}
-	/>
-{/key}
-{#key selectedFolder}
-	<AutocompleteSelect
-		{form}
-		optionsEndpoint="perimeters"
-		optionsDetailedUrlParameters={selectedFolder ? [['folder', selectedFolder]] : []}
-		optionsExtraFields={[['folder', 'str']]}
-		field="perimeter"
-		nullable
-		cacheLock={cacheLocks['perimeter']}
-		bind:cachedValue={formDataCache['perimeter']}
-		label={m.perimeter()}
-		onChange={handlePerimeterChange}
-	/>
-{/key}
 {#if auditData}
 	<AutocompleteSelect
 		{form}
