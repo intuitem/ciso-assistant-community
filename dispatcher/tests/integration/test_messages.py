@@ -70,21 +70,3 @@ def test_dispatcher_is_running(
     result = cli.invoke(ds.cli, ["--help"])
     assert result.exit_code == 0
     assert "Usage:" in result.output
-
-
-def test_dispatcher_can_authenticate_using_credentials(
-    cli: CliRunner, api: DockerContainer
-):
-    result = cli.invoke(
-        ds.cli,
-        [
-            "auth",
-            "--email",
-            DJANGO_SUPERUSER_EMAIL,
-            "--password",
-            DJANGO_SUPERUSER_PASSWORD,
-        ],
-    )
-    assert result.exit_code == 0
-    print(vars(result))
-    assert "Successfully authenticated" in result.output

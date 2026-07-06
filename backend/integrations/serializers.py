@@ -4,7 +4,8 @@ from django.urls import reverse
 from django.utils.crypto import get_random_string
 from rest_framework import serializers
 
-from iam.models import Folder
+from core.serializers import BaseModelSerializer
+from iam.models import Folder, RoleAssignment
 from .models import IntegrationProvider, IntegrationConfiguration, SyncMapping
 from .registry import IntegrationRegistry
 
@@ -69,7 +70,7 @@ class ConnectionTestSerializer(serializers.Serializer):
         return data
 
 
-class IntegrationConfigurationSerializer(serializers.ModelSerializer):
+class IntegrationConfigurationSerializer(BaseModelSerializer):
     """
     Serializer for creating, reading, and updating IntegrationConfiguration instances.
     """
@@ -87,7 +88,7 @@ class IntegrationConfigurationSerializer(serializers.ModelSerializer):
     folder = serializers.StringRelatedField(read_only=True)
     # On write, accept the folder's primary key
     folder_id = serializers.PrimaryKeyRelatedField(
-        queryset=Folder.objects.all(),  # You might want to filter this based on user permissions
+        queryset=Folder.objects.all(),
         source="folder",
         label="Folder ID",
     )
@@ -99,6 +100,17 @@ class IntegrationConfigurationSerializer(serializers.ModelSerializer):
 
     has_api_token = serializers.SerializerMethodField()
     has_webhook_secret = serializers.SerializerMethodField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request is not None and "folder_id" in self.fields:
+            accessible_folders = RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), request.user, Folder
+            )[0]
+            self.fields["folder_id"].queryset = Folder.objects.filter(
+                id__in=accessible_folders
+            )
 
     class Meta:
         model = IntegrationConfiguration
@@ -187,7 +199,7 @@ class IntegrationConfigurationSerializer(serializers.ModelSerializer):
             # Raise a validation error that DRF can render nicely
             raise serializers.ValidationError({"provider_specific_errors": errors})
 
-        return data
+        return super().validate(data)
 
 
 # Aliases expected by BaseModelViewSet's SerializerFactory

@@ -144,14 +144,14 @@
 		{#if actionType === 'delete'}
 			<article>{m.batchActionConfirmDelete({ count })}</article>
 			<div class="space-y-2">
-				<p class="text-sm font-medium text-red-600">{m.confirmYes()}</p>
+				<p class="text-sm font-medium text-red-600">{m.confirmYes({ word: m.yes() })}</p>
 				<input
 					type="text"
 					data-testid="batch-delete-confirm-textfield"
 					bind:value={deleteConfirmInput}
-					placeholder={m.confirmYesPlaceHolder()}
+					placeholder={m.confirmYesPlaceHolder({ word: m.yes() })}
 					class="input w-full"
-					aria-label={m.confirmYes()}
+					aria-label={m.confirmYes({ word: m.yes() })}
 				/>
 			</div>
 		{:else}
@@ -164,6 +164,7 @@
 					<input
 						type="text"
 						class="input w-full border border-surface-300-700 rounded px-3 py-2 text-sm"
+						aria-label={m.search()}
 						placeholder={m.searchPlaceholder()}
 						bind:value={searchQuery}
 					/>
@@ -178,6 +179,7 @@
 										{translateOption(opt)}
 										<button
 											type="button"
+											aria-label="{m.remove()} {translateOption(opt)}"
 											class="hover:text-primary-600"
 											onclick={() => toggleValue(val)}
 										>

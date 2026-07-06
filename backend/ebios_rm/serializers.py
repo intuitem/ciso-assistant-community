@@ -4,6 +4,7 @@ from core.serializers import (
 from django.db import transaction
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
 from core.models import RiskMatrix
+from pmbok.models import GenericCollection
 from .models import (
     EbiosRMStudy,
     FearedEvent,
@@ -20,6 +21,12 @@ from rest_framework import serializers
 
 
 class EbiosRMStudyWriteSerializer(BaseModelSerializer):
+    genericcollection = serializers.PrimaryKeyRelatedField(
+        source="genericcollection_set",
+        many=True,
+        required=False,
+        queryset=GenericCollection.objects.all(),
+    )
     risk_matrix = serializers.PrimaryKeyRelatedField(
         queryset=RiskMatrix.objects.all(), required=False
     )

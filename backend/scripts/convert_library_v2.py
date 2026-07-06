@@ -26,6 +26,7 @@ import datetime
 import argparse
 import unicodedata
 import openpyxl
+from copy import deepcopy
 from typing import Any, Dict, List
 from pathlib import Path
 from collections import Counter
@@ -249,8 +250,114 @@ def expand_urns_from_prefixed_list(
 # --- question management ------------------------------------------------------------
 
 
+def _parse_multiline_with_pipe(raw: Any) -> list[str]:
+    """Parse newline-separated values, with "|" lines continuing the previous value."""
+    values: list[str] = []
+    for line in str(raw or "").split("\n"):
+        line = line.strip()
+        if not line:
+            continue
+        if line.startswith("|") and values:
+            values[-1] += "\n" + line[1:].strip()
+        else:
+            values.append(line)
+    return values
+
+
+def _translated_lines(
+    raw: Any,
+    expected_count: int,
+    context: str,
+    field: str,
+    lang: str,
+) -> list[str] | None:
+    if not raw or not str(raw).strip():
+        return None
+    lines = _parse_multiline_with_pipe(raw)
+    if len(lines) == 1:
+        lines *= expected_count
+    if len(lines) != expected_count:
+        raise ValueError(
+            f"({context}) Invalid translated {field} count for locale '{lang}': "
+            f"{len(lines)} values for {expected_count} expected values."
+        )
+    return lines
+
+
+def _attach_question_translations(
+    question_entry: dict,
+    row_translations: dict | None,
+    question_index: int,
+    question_count: int,
+) -> None:
+    if not row_translations:
+        return
+    for lang, tr in row_translations.items():
+        lines = _translated_lines(
+            tr.get("questions"),
+            question_count,
+            "framework_content",
+            "questions",
+            lang,
+        )
+        if not lines:
+            continue
+        translated_text = lines[question_index].strip()
+        if translated_text and translated_text != "/":
+            question_entry.setdefault("translations", {}).setdefault(lang, {})[
+                "text"
+            ] = translated_text
+
+
+def _attach_choice_translations(
+    choices: list[dict], answer_translations: dict, answer_id: str
+) -> None:
+    if not answer_translations:
+        return
+    for lang, tr in answer_translations.items():
+        value_lines = _translated_lines(
+            tr.get("question_choices"),
+            len(choices),
+            "answers_definition",
+            "question_choices",
+            lang,
+        )
+        if value_lines:
+            for i, value in enumerate(value_lines):
+                translated_value = value.strip()
+                if translated_value and translated_value != "/":
+                    choices[i].setdefault("translations", {}).setdefault(lang, {})[
+                        "value"
+                    ] = translated_value
+
+        description_lines = _per_choice_lines(
+            {"description": tr.get("description")},
+            "description",
+            len(choices),
+            answer_id,
+        )
+        if description_lines:
+            for i, description in enumerate(description_lines):
+                if description and description != "/":
+                    choices[i].setdefault("translations", {}).setdefault(lang, {})[
+                        "description"
+                    ] = description
+
+
+def _node_translations_without_questions(translations: dict) -> dict:
+    node_level_translations = {}
+    for lang, fields in translations.items():
+        filtered = {key: value for key, value in fields.items() if key != "questions"}
+        if filtered:
+            node_level_translations[lang] = filtered
+    return node_level_translations
+
+
 def inject_questions_into_node(
-    qa_data: dict[str, Any], node: Dict[str, Any], answers_dict: dict
+    qa_data: dict[str, Any],
+    node: Dict[str, Any],
+    answers_dict: dict,
+    row_translations: dict | None = None,
 ) -> None:
     """
     Injects parsed questions and their metadata into a requirement node.
@@ -271,7 +378,7 @@ def inject_questions_into_node(
 
     allowed_types = {"unique_choice", "multiple_choice", "text", "date"}
 
-    question_lines = [q.strip() for q in str(raw_question_str).split("\n") if q.strip()]
+    question_lines = _parse_multiline_with_pipe(raw_question_str)
 
     depends_on_lines = None
     if raw_depends_on_str:
@@ -351,6 +458,12 @@ def inject_questions_into_node(
         }
 
         question_entry["text"] = question_text
+        _attach_question_translations(
+            question_entry,
+            row_translations,
+            idx,
+            len(question_lines),
+        )
 
         # Optional: depends_on
         depends_on_block = {}
@@ -418,8 +531,8 @@ def inject_questions_into_node(
         if qtype in {"unique_choice", "multiple_choice"}:
             choices = []
             for j, choice in enumerate(answer_meta["choices"]):
-                # make a shallow copy so we don't mutate the original dict
-                entry = choice.copy()
+                # Keep nested choice translations independent per question.
+                entry = deepcopy(choice)
                 # overwrite / add the per-question urn
                 entry["urn"] = f"{q_urn}:choice:{j + 1}"
                 choices.append(entry)
@@ -788,16 +901,12 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                 if not answer_id or not answer_type or not choices_raw:
                     continue  # Incomplete row
 
-                choices = []
-                for line in choices_raw.split("\n"):
-                    line = line.strip()
-                    if not line:
-                        continue
-                    if line.startswith("|") and choices:
-                        # Multi-line value, append to previous
-                        choices[-1]["value"] += "\n" + line[1:].strip()
-                    else:
-                        choices.append({"urn": "", "value": line})
+                choices = [
+                    {"urn": "", "value": line}
+                    for line in _parse_multiline_with_pipe(choices_raw)
+                ]
+                answer_translations = extract_translations_from_row(header, row)
+                _attach_choice_translations(choices, answer_translations, answer_id)
 
                 # --- Optional: description ---------------------------
                 description_lines = _per_choice_lines(
@@ -1224,13 +1333,18 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                 )
                 if rc:
                     node["reference_controls"] = rc
+            translations = extract_translations_from_row(header, row)
             if "questions" in data and data["questions"]:
                 inject_questions_into_node(
                     data,
                     node,
                     answers_dict,
+                    translations,
                 )
-            attach_translations_from_row(node, header, row)
+            if translations:
+                node_translations = _node_translations_without_questions(translations)
+                if node_translations:
+                    node["translations"] = node_translations
             if node.get("urn") in all_urns:
                 raise ValueError(f"urn already used: {node.get('urn')}")
             all_urns.add(node.get("urn"))

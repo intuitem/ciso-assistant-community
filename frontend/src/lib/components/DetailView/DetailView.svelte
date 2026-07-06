@@ -542,6 +542,7 @@
 								? 'hidden'
 								: ''}"
 						>
+							<!-- Keys column -->
 							<dt
 								class="font-medium text-surface-950-50 flex items-center gap-2"
 								data-testid="{key.replace('_', '-')}-field-title"
@@ -566,6 +567,7 @@
 									</Tooltip>
 								{/if}
 							</dt>
+							<!-- Value column -->
 							<dd class="text-surface-700-300 sm:col-span-4">
 								<ul class="">
 									<li
@@ -635,6 +637,7 @@
 												{:else}
 													--
 												{/if}
+												<!-- Values that are Arrays -->
 											{:else if Array.isArray(value)}
 												{@const visibleValues = isRelatedField
 													? value.filter((item) => !isMaskedPlaceholder(item))
@@ -663,6 +666,11 @@
 																	{@const [securityObjectiveName, securityObjectiveValue] =
 																		Object.entries(val)[0]}
 																	{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
+																{:else if key === 'choices_definition'}
+																	<span class="font-mono text-xs bg-surface-200-800 px-1 rounded"
+																		>{val.ref_id}</span
+																	>
+																	- {val.name}
 																{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship' && key !== 'nature'}
 																	{@const itemHref = `/${
 																		data.model?.foreignKeyFields?.find((item) => item.field === key)

@@ -319,7 +319,7 @@ class TestAssetListIAMScope:
         client, assets = self._build_export_fixture()
         r = client.get("/api/assets/export_csv/?type=PR")
         assert r.status_code == status.HTTP_200_OK, r.content
-        assert r["Content-Type"] == "text/csv"
+        assert r["Content-Type"] == "text/csv; charset=utf-8"
         content = r.content.decode("utf-8")
 
         assert assets["a_pr"].name in content, (

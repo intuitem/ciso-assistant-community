@@ -942,7 +942,13 @@ class TestFolderConsumer:
 @pytest.mark.django_db
 class TestFindingsAssessmentConsumer:
     def _findings_context(
-        self, domain_folder, admin_user, perimeter=None, perimeter_id=None
+        self,
+        domain_folder,
+        admin_user,
+        perimeter=None,
+        perimeter_id=None,
+        target_id=None,
+        on_conflict=ConflictMode.STOP,
     ):
         request = MagicMock()
         request.user = admin_user
@@ -952,8 +958,11 @@ class TestFindingsAssessmentConsumer:
             request=request,
             folder_id=str(domain_folder.id),
             folders_map={},
-            on_conflict=ConflictMode.STOP,
-            perimeter_id=str(perimeter_id or (perimeter.id if perimeter else "")),
+            on_conflict=on_conflict,
+            perimeter_id=(
+                str(perimeter_id or (perimeter.id if perimeter else "")) or None
+            ),
+            target_id=str(target_id) if target_id else None,
         )
 
     def test_create_context_fails_with_invalid_perimeter(
@@ -992,6 +1001,99 @@ class TestFindingsAssessmentConsumer:
         )
         assert result.created == 1
         assert FindingsAssessment.objects.filter(folder=domain_folder).exists()
+
+    def test_folder_fallback_without_perimeter(self, domain_folder, admin_user):
+        """Perimeter is optional: with no perimeter the explicit folder is used."""
+        ctx = self._findings_context(domain_folder, admin_user)  # perimeter empty
+        result = _run(
+            FindingsAssessmentRecordConsumer,
+            ctx,
+            [{"name": "Orphan Finding", "ref_id": "FIND-NP", "status": "identified"}],
+        )
+        assert result.created == 1
+        assert FindingsAssessment.objects.filter(folder=domain_folder).exists()
+
+    def test_target_reuse_updates_existing_and_adds_new(
+        self, domain_folder, admin_user
+    ):
+        """target_id reconciles into the existing container: matched findings
+        update, unmatched rows create, no new container is made."""
+        perimeter = Perimeter.objects.create(
+            name="Reuse Perimeter", folder=domain_folder
+        )
+        # Seed an assessment with one finding.
+        seed_ctx = self._findings_context(
+            domain_folder, admin_user, perimeter=perimeter
+        )
+        _run(
+            FindingsAssessmentRecordConsumer,
+            seed_ctx,
+            [
+                {
+                    "name": "Initial",
+                    "ref_id": "F-1",
+                    "observation": "old",
+                    "status": "identified",
+                }
+            ],
+        )
+        fa = FindingsAssessment.objects.get(folder=domain_folder)
+        assert fa.findings.count() == 1
+
+        # Reconcile into it: update F-1, add F-2.
+        target_ctx = self._findings_context(
+            domain_folder,
+            admin_user,
+            target_id=fa.id,
+            on_conflict=ConflictMode.UPDATE,
+        )
+        result = _run(
+            FindingsAssessmentRecordConsumer,
+            target_ctx,
+            [
+                {
+                    "name": "Initial",
+                    "ref_id": "F-1",
+                    "observation": "new",
+                    "status": "identified",
+                },
+                {"name": "Second", "ref_id": "F-2", "status": "identified"},
+            ],
+        )
+        assert FindingsAssessment.objects.filter(folder=domain_folder).count() == 1
+        assert result.updated == 1
+        assert result.created == 1
+        fa.refresh_from_db()
+        assert fa.findings.count() == 2
+        assert fa.findings.get(ref_id="F-1").observation == "new"
+
+    def test_target_invalid_id_fails(self, domain_folder, admin_user):
+        ctx = self._findings_context(
+            domain_folder,
+            admin_user,
+            target_id="00000000-0000-0000-0000-000000000000",
+        )
+        result = _run(
+            FindingsAssessmentRecordConsumer, ctx, [{"name": "X", "ref_id": "F-X"}]
+        )
+        assert result.failed == 1
+        assert result.created == 0
+        assert not FindingsAssessment.objects.filter(folder=domain_folder).exists()
+
+    def test_target_not_accessible_fails(self, domain_folder, admin_user):
+        """A real target the user cannot change must not be writable."""
+        fa = FindingsAssessment.objects.create(name="Locked", folder=domain_folder)
+        ctx = self._findings_context(domain_folder, admin_user, target_id=fa.id)
+        with patch(
+            "data_wizard.views.RoleAssignment.get_accessible_object_ids",
+            return_value=([], [], []),
+        ):
+            result = FindingsAssessmentRecordConsumer(ctx).process_records(
+                [{"name": "X", "ref_id": "F-X", "status": "identified"}]
+            )
+        assert result.failed == 1
+        assert result.created == 0
+        assert fa.findings.count() == 0
 
 
 # ─────────────────────────────────────────────────────────────────────────────

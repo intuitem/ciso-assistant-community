@@ -113,7 +113,7 @@
 	}
 
 	let {
-		source = { head: [], body: [] },
+		source = { head: {}, body: [] },
 		interactive = true,
 		search = true,
 		thFilter = false,
@@ -222,6 +222,14 @@
 			? visibleColumns
 			: allColumnKeys.filter((key) => fields.length === 0 || fields.includes(key))
 	);
+	$effect(() => {
+		if (fields.length > 0 && allColumnKeys.length > 0 && renderColumnKeys.length === 0) {
+			console.warn(
+				`ModelTable(${URLModel}): none of \`fields\` [${fields.join(', ')}] match source.head keys [${allColumnKeys.join(', ')}] — table will render no columns. Build head with headData().`
+			);
+		}
+	});
+
 	// Order-sensitive so a pure reorder of the default set still persists instead of resetting.
 	const sameAsDefault = (cols: string[]) =>
 		cols.length === defaultColumns.length && cols.every((key, i) => defaultColumns[i] === key);
@@ -280,6 +288,22 @@
 	const user = page.data.user;
 
 	const isRelatedField = (fieldName: string): boolean => relatedFieldNames.has(fieldName);
+	const nonNavigableRelatedFields = new Set(['qualifications', 'relationship', 'nature']);
+	const getRelatedFieldHref = (
+		fieldName: string,
+		id: string,
+		options: { fallbackToDashedField?: boolean } = {}
+	): string | undefined => {
+		if (nonNavigableRelatedFields.has(fieldName)) return undefined;
+		const relatedUrlModel = model?.foreignKeyFields?.find(
+			(field) => field.field === fieldName
+		)?.urlModel;
+		const urlModel =
+			relatedUrlModel ?? (options.fallbackToDashedField ? fieldName.replace(/_/g, '-') : undefined);
+
+		if (!urlModel) return undefined;
+		return `/${urlModel}/${id}`;
+	};
 
 	let classProp = ''; // Replacing $$props.class
 
@@ -508,7 +532,7 @@
 	);
 
 	let contextMenuCanDeleteObject = $derived(
-		!preventDelete(contextMenuOpenRow ?? { head: [], body: [], meta: [] }) &&
+		!preventDelete(contextMenuOpenRow ?? { head: {}, body: [], meta: [] }) &&
 			(model
 				? page.params.id
 					? canPerformAction({
@@ -867,6 +891,7 @@
 							<input
 								type="checkbox"
 								class="checkbox pointer-events-none"
+								aria-label={m.selectAll()}
 								checked={selectAllChecked}
 								tabindex={-1}
 							/>
@@ -925,6 +950,7 @@
 											<input
 												type="checkbox"
 												class="checkbox pointer-events-none"
+												aria-label={m.selectRow()}
 												checked={selectedIds.has(meta?.id)}
 												tabindex={-1}
 											/>
@@ -968,11 +994,17 @@
 																			{@const [securityObjectiveName, securityObjectiveValue] =
 																				Object.entries(val)[0]}
 																			{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
-																		{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship' && key !== 'nature'}
-																			{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key.replace(/_/g, '-')}/${val.id}`}
-																			<Anchor href={itemHref} class="anchor" stopPropagation
-																				>{safeTranslate(val.str)}</Anchor
-																			>
+																		{:else if val.str && val.id}
+																			{@const itemHref = getRelatedFieldHref(key, val.id, {
+																				fallbackToDashedField: true
+																			})}
+																			{#if itemHref}
+																				<Anchor href={itemHref} class="anchor" stopPropagation
+																					>{safeTranslate(val.str)}</Anchor
+																				>
+																			{:else}
+																				{safeTranslate(val.str)}
+																			{/if}
 																		{:else if val.str}
 																			{safeTranslate(val.str)}
 																		{:else if typeof val === 'string' && val.includes(':') && unsafeTranslate(val.split(':')[0])}
@@ -1007,8 +1039,10 @@
 															--
 														{/if}
 													{:else if value && value.str}
-														{#if value.id}
-															{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${value.id}`}
+														{@const itemHref = value.id
+															? getRelatedFieldHref(key, value.id)
+															: undefined}
+														{#if itemHref}
 															{#if key === 'ro_to_couple'}
 																<Anchor
 																	breadcrumbAction="push"
@@ -1047,7 +1081,7 @@
 													{:else if value === 'YES' || value === 'NO'}
 														{@const bd = booleanDisplay(value === 'YES', key, URLModel)}
 														<span class="ml-4"><i class="{bd.icon} {bd.colorClass}"></i></span>
-													{:else if key === 'progress' || key === 'treatment_progress'}
+													{:else if key === 'progress' || key === 'treatment_progress' || key === 'progress_field'}
 														<span class="ml-9"
 															>{value != null
 																? safeTranslate('percentageDisplay', { number: value })

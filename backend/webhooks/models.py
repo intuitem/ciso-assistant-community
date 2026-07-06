@@ -134,7 +134,7 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
         super().clean()
         if self.transport != self.Transport.HTTP:
             return
-        if getattr(settings, "WEBHOOK_ALLOW_PRIVATE_IPS", False):
+        if getattr(settings, "ALLOW_PRIVATE_NETWORK_REQUESTS", False):
             return
         try:
             assert_public_url(self.url, allowed_schemes=("http", "https"))

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import MarkdownField from '../MarkdownField.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
@@ -149,13 +148,6 @@
 	<!-- 		label={m.dependencies()} -->
 	<!-- 	/> -->
 {:else}
-	<FolderTreeSelect
-		{form}
-		field="folder"
-		cacheLock={cacheLocks['folder']}
-		bind:cachedValue={formDataCache['folder']}
-		label={m.domain()}
-	/>
 	<AutocompleteSelect
 		multiple
 		{form}

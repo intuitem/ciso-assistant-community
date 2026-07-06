@@ -606,6 +606,12 @@ class DataBreach(NameDescriptionFolderMixin):
     remediation_measures = models.ManyToManyField(
         AppliedControl, blank=True, related_name="data_breaches_remediated"
     )
+    evidences = models.ManyToManyField(
+        Evidence,
+        verbose_name="Evidences",
+        blank=True,
+        related_name="data_breaches",
+    )
 
     # Investigation
     incident = models.ForeignKey(
