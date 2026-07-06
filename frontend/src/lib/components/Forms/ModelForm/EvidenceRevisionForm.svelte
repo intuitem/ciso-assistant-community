@@ -2,7 +2,6 @@
 	import HiddenInput from '../HiddenInput.svelte';
 	import FileInput from '../FileInput.svelte';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
@@ -66,27 +65,6 @@
 	label={m.attachment()}
 	allowedExtensions={'*'}
 />
-<FolderTreeSelect
-	{form}
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-/>
-<!-- {#if !(initialData.applied_controls || initialData.requirement_assessments || initialData.evidence)}
-	<FolderTreeSelect
-		{form}
-		field="folder"
-		cacheLock={cacheLocks['folder']}
-		bind:cachedValue={formDataCache['folder']}
-		label={m.domain()}
-		hidden={initialData.applied_controls ||
-			initialData.requirement_assessments ||
-			initialData.folder}
-	/>
-{:else}
-	<HiddenInput {form} field="folder" />
-{/if} -->
 <TextField
 	{form}
 	field="link"

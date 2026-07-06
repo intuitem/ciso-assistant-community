@@ -49,7 +49,8 @@
 				form: data.updateForm,
 				model: data.updatedModel,
 				object: data.object,
-				context: 'selectAudit'
+				context: 'selectAudit',
+				customFolder: true
 			}
 		};
 		let modal: ModalSettings = {

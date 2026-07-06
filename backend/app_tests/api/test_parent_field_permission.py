@@ -6,13 +6,22 @@ for models that inherit folder from a parent (Folder, RiskScenario, Representati
 """
 
 import pytest
+from django.core.exceptions import ValidationError
 from rest_framework import status
 
 from api.test_utils import EndpointTestsUtils
-from iam.models import Folder
-from core.models import Perimeter, RiskAssessment, RiskMatrix, RiskScenario
+from core.models import (
+    AppliedControl,
+    Comment,
+    Perimeter,
+    RiskAssessment,
+    RiskMatrix,
+    RiskScenario,
+)
+from iam.models import Folder, User
 from tprm.models import Entity, Representative, Solution
 from test_fixtures import RISK_MATRIX_JSON_DEFINITION
+from test_vars import TEST_USER_EMAIL
 
 
 def _build_risk_assessment(name: str, folder: Folder) -> RiskAssessment:
@@ -27,6 +36,35 @@ def _build_risk_assessment(name: str, folder: Folder) -> RiskAssessment:
         perimeter=perimeter,
         risk_matrix=risk_matrix,
     )
+
+
+def _expected_update_status(
+    user_group: str,
+    scope_folder: Folder,
+    model_verbose_name: str,
+) -> int:
+    view_fails, _, view_reason = EndpointTestsUtils.expected_request_response(
+        "view",
+        model_verbose_name,
+        str(scope_folder),
+        user_group,
+    )
+    if view_reason == "outside_scope" or view_fails:
+        return status.HTTP_404_NOT_FOUND
+
+    change_fails, change_status, change_reason = (
+        EndpointTestsUtils.expected_request_response(
+            "change",
+            model_verbose_name,
+            str(scope_folder),
+            user_group,
+        )
+    )
+    if change_reason == "outside_scope":
+        return status.HTTP_404_NOT_FOUND
+    if change_fails:
+        return change_status
+    return status.HTTP_200_OK
 
 
 def _expected_parent_change_status(
@@ -78,6 +116,35 @@ def _expected_parent_change_status(
         if add_fails:
             return status.HTTP_403_FORBIDDEN
     return status.HTTP_200_OK
+
+
+@pytest.mark.django_db
+def test_comment_model_save_rejects_parent_change():
+    """Test that direct ORM saves cannot re-home a Comment"""
+    root = Folder.get_root_folder()
+    folder_a = Folder.objects.create(name="Comment source folder", parent_folder=root)
+    folder_b = Folder.objects.create(name="Comment target folder", parent_folder=root)
+    accessible_control = AppliedControl.objects.create(
+        name="Accessible control",
+        folder=folder_a,
+    )
+    blocked_control = AppliedControl.objects.create(
+        name="Blocked control",
+        folder=folder_b,
+    )
+    comment = Comment.objects.create(
+        body="Original comment",
+        applied_control=accessible_control,
+    )
+
+    comment.applied_control = blocked_control
+
+    with pytest.raises(ValidationError):
+        comment.save()
+
+    comment.refresh_from_db()
+    assert comment.applied_control_id == accessible_control.id
+    assert comment.folder_id == accessible_control.folder_id
 
 
 @pytest.mark.django_db
@@ -202,6 +269,187 @@ class TestParentFieldPermissionValidation:
         if expected_status == status.HTTP_200_OK:
             solution.refresh_from_db()
             assert solution.provider_entity_id == entity_blocked.id
+
+    def test_comment_parent_change_blocked(self, test):
+        """Test that changing a Comment parent does not re-home the comment"""
+        root = Folder.get_root_folder()
+        folder_b = Folder.objects.create(name="Folder B Outside", parent_folder=root)
+
+        accessible_control = AppliedControl.objects.create(
+            name="Accessible control",
+            folder=test.folder,
+        )
+        blocked_control = AppliedControl.objects.create(
+            name="Blocked control",
+            folder=folder_b,
+        )
+        author = User.objects.get(email=TEST_USER_EMAIL)
+        comment = Comment.objects.create(
+            body="Original comment",
+            applied_control=accessible_control,
+            author=author,
+        )
+
+        response = test.client.patch(
+            f"/api/comments/{comment.id}/",
+            {"applied_control": str(blocked_control.id)},
+            format="json",
+        )
+
+        expected_status = _expected_parent_change_status(
+            test.user_group,
+            accessible_control.folder,
+            "Comments",
+            client=test.client,
+            object_url=f"/api/comments/{comment.id}/",
+        )
+        assert response.status_code == expected_status
+        comment.refresh_from_db()
+        assert comment.applied_control_id == accessible_control.id
+        assert comment.folder_id == accessible_control.folder_id
+
+    def test_comment_cross_type_parent_change_blocked(self, test):
+        """Test that changing a Comment parent type is blocked"""
+        root = Folder.get_root_folder()
+        folder_b = Folder.objects.create(name="Folder B Outside", parent_folder=root)
+
+        accessible_control = AppliedControl.objects.create(
+            name="Accessible control",
+            folder=test.folder,
+        )
+        blocked_assessment = _build_risk_assessment("RA blocked", folder_b)
+        blocked_scenario = RiskScenario.objects.create(
+            name="Blocked scenario",
+            risk_assessment=blocked_assessment,
+        )
+        author = User.objects.get(email=TEST_USER_EMAIL)
+        comment = Comment.objects.create(
+            body="Original comment",
+            applied_control=accessible_control,
+            author=author,
+        )
+
+        response = test.client.patch(
+            f"/api/comments/{comment.id}/",
+            {
+                "applied_control": None,
+                "risk_scenario": str(blocked_scenario.id),
+            },
+            format="json",
+        )
+
+        expected_status = _expected_parent_change_status(
+            test.user_group,
+            accessible_control.folder,
+            "Comments",
+            client=test.client,
+            object_url=f"/api/comments/{comment.id}/",
+        )
+        assert response.status_code == expected_status
+        comment.refresh_from_db()
+        assert comment.applied_control_id == accessible_control.id
+        assert comment.risk_scenario_id is None
+        assert comment.folder_id == accessible_control.folder_id
+
+    def test_comment_orphaning_parent_blocked(self, test):
+        """Test that clearing a Comment parent is blocked"""
+        accessible_control = AppliedControl.objects.create(
+            name="Accessible control",
+            folder=test.folder,
+        )
+        author = User.objects.get(email=TEST_USER_EMAIL)
+        comment = Comment.objects.create(
+            body="Original comment",
+            applied_control=accessible_control,
+            author=author,
+        )
+
+        response = test.client.patch(
+            f"/api/comments/{comment.id}/",
+            {"applied_control": None},
+            format="json",
+        )
+
+        expected_status = _expected_parent_change_status(
+            test.user_group,
+            accessible_control.folder,
+            "Comments",
+            client=test.client,
+            object_url=f"/api/comments/{comment.id}/",
+        )
+        assert response.status_code == expected_status
+        comment.refresh_from_db()
+        assert comment.applied_control_id == accessible_control.id
+        assert comment.folder_id == accessible_control.folder_id
+
+    def test_comment_full_update_same_parent_allowed(self, test):
+        """Test that a full update can resend the unchanged Comment parent"""
+        accessible_control = AppliedControl.objects.create(
+            name="Accessible control",
+            folder=test.folder,
+        )
+        author = User.objects.get(email=TEST_USER_EMAIL)
+        comment = Comment.objects.create(
+            body="Original comment",
+            applied_control=accessible_control,
+            author=author,
+        )
+
+        response = test.client.put(
+            f"/api/comments/{comment.id}/",
+            {
+                "body": "Updated comment",
+                "applied_control": str(accessible_control.id),
+            },
+            format="json",
+        )
+
+        expected_status = _expected_update_status(
+            test.user_group,
+            accessible_control.folder,
+            "Comments",
+        )
+        assert response.status_code == expected_status
+        comment.refresh_from_db()
+        assert comment.applied_control_id == accessible_control.id
+        assert comment.folder_id == accessible_control.folder_id
+        if expected_status == status.HTTP_200_OK:
+            assert comment.body == "Updated comment"
+        else:
+            assert comment.body == "Original comment"
+
+    def test_comment_body_only_partial_update_allowed(self, test):
+        """Test that a partial update can edit body without parent fields"""
+        accessible_control = AppliedControl.objects.create(
+            name="Accessible control",
+            folder=test.folder,
+        )
+        author = User.objects.get(email=TEST_USER_EMAIL)
+        comment = Comment.objects.create(
+            body="Original comment",
+            applied_control=accessible_control,
+            author=author,
+        )
+
+        response = test.client.patch(
+            f"/api/comments/{comment.id}/",
+            {"body": "Updated comment"},
+            format="json",
+        )
+
+        expected_status = _expected_update_status(
+            test.user_group,
+            accessible_control.folder,
+            "Comments",
+        )
+        assert response.status_code == expected_status
+        comment.refresh_from_db()
+        assert comment.applied_control_id == accessible_control.id
+        assert comment.folder_id == accessible_control.folder_id
+        if expected_status == status.HTTP_200_OK:
+            assert comment.body == "Updated comment"
+        else:
+            assert comment.body == "Original comment"
 
     def test_parent_field_not_changing_allowed(self, test):
         """Test that updating other fields without changing parent is allowed"""

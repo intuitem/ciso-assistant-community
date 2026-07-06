@@ -101,6 +101,8 @@
 				{/if}
 				<input
 					data-testid="range-slider-input"
+					id={field}
+					aria-label={label}
 					name={field}
 					type="range"
 					class="input px-0"

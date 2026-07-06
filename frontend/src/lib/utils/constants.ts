@@ -1,11 +1,18 @@
 import { env } from '$env/dynamic/public';
 import { m } from '$paraglide/messages';
 
-export const BASE_API_URL = `${
-	Object.hasOwn(env, 'PUBLIC_BACKEND_API_URL')
-		? env.PUBLIC_BACKEND_API_URL
-		: 'http://localhost:8000/api'
-}`;
+const rawBackendApiUrl = Object.hasOwn(env, 'PUBLIC_BACKEND_API_URL')
+	? env.PUBLIC_BACKEND_API_URL
+	: 'http://localhost:8000/api';
+
+// Strip default ports so this matches request.url in handleFetch's startsWith check (issue #4422).
+export const BASE_API_URL = (() => {
+	try {
+		return new URL(rawBackendApiUrl).href.replace(/\/$/, '');
+	} catch {
+		return rawBackendApiUrl;
+	}
+})();
 
 export const DEFAULT_LANGUAGE = `${
 	Object.hasOwn(env, 'PUBLIC_DEFAULT_LANGUAGE') ? env.PUBLIC_DEFAULT_LANGUAGE : 'en'
@@ -165,7 +172,8 @@ export const LOCALE_DISPLAY_MAP = {
 	zh: '🇨🇳 简体中文',
 	lt: '🇱🇹 Lietuvių',
 	ko: '🇰🇷 한국어',
-	et: '🇪🇪 Eesti'
+	et: '🇪🇪 Eesti',
+	sk: '🇸🇰 Slovenčina'
 };
 
 export const ISO_8601_REGEX =
