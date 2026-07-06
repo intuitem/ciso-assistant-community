@@ -4065,7 +4065,7 @@ class LoadFileView(APIView):
                     "entity": provider_entity_id,
                     "first_name": str(record.get("first_name", "")).strip(),
                     "last_name": str(record.get("last_name", "")).strip(),
-                    "description": record.get("description", ""),
+                    "description": str(record.get("description", "")).strip(),
                     "phone": str(record.get("phone", "")).strip(),
                     "role": str(record.get("role", "")).strip(),
                 }
