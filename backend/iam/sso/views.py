@@ -75,9 +75,10 @@ class SSOSettingsViewSet(BaseModelViewSet):
         force_sso = serializer.validated_data.get("force_sso", False)
 
         if is_enabled and force_sso:
-            for user in User.objects.all():
-                if not user.keep_local_login:
-                    user.set_unusable_password()
+            users = list(User.objects.filter(keep_local_login=False))
+            for user in users:
+                user.set_unusable_password()
+            User.objects.bulk_update(users, ["password"])
 
         return Response(serializer.data)
 

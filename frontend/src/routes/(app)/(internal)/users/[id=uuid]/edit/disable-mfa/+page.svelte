@@ -26,14 +26,14 @@
 
 		<form method="POST" use:enhance class="flex flex-col w-full space-y-3">
 			<label class="label">
-				<span class="text-sm font-medium text-red-600">{m.confirmYes()}</span>
+				<span class="text-sm font-medium text-red-600">{m.confirmYes({ word: m.yes() })}</span>
 				<input
 					type="text"
 					data-testid="disable-mfa-confirm-textfield"
 					bind:value={userInput}
-					placeholder={m.confirmYesPlaceHolder()}
+					placeholder={m.confirmYesPlaceHolder({ word: m.yes() })}
 					class="input w-full"
-					aria-label={m.confirmYes()}
+					aria-label={m.confirmYes({ word: m.yes() })}
 				/>
 			</label>
 

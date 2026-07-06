@@ -1254,6 +1254,8 @@
 	"sum": "Sumă",
 	"tableOfContents": "Cuprins",
 	"yes": "Da",
+	"confirmYes": "Confirmați scriind '{word}' mai jos:",
+	"confirmYesPlaceHolder": "Scrieți '{word}' pentru a confirma",
 	"builderEmptyStateTitle": "Cum doriți să structurați acest cadru?",
 	"builderEmptyStateSubtitle": "Alegeți o structură de pornire — o puteți modifica oricând.",
 	"builderEmptyFlat": "Listă plată",

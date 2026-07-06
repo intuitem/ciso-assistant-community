@@ -1232,6 +1232,8 @@
 	"text": "نص",
 	"uniqueChoice": "اختيار فريد",
 	"yes": "نعم",
+	"confirmYes": "أكّد بكتابة '{word}' أدناه:",
+	"confirmYesPlaceHolder": "اكتب '{word}' للتأكيد",
 	"boolean": "قيمة منطقية",
 	"builderEmptyStateTitle": "كيف تريد هيكلة هذا الإطار؟",
 	"builderEmptyStateSubtitle": "اختر شكلاً مبدئيًا — يمكنك تغيير الهيكل في أي وقت.",
