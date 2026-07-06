@@ -1672,8 +1672,8 @@ export const listViewFields = {
 			'filtering_labels'
 		],
 		optionalFields: {
-			head: ['startDate', 'expiryDate', 'createdAt', 'updatedAt'],
-			body: ['start_date', 'expiry_date', 'created_at', 'updated_at']
+			head: ['progress', 'startDate', 'expiryDate', 'createdAt', 'updatedAt'],
+			body: ['progress_field', 'start_date', 'expiry_date', 'created_at', 'updated_at']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -1807,6 +1807,7 @@ export const listViewFields = {
 			'firstName',
 			'lastName',
 			'userGroups',
+			'idpGroups',
 			'isActive',
 			'expiryDate',
 			'keep_local_login',
@@ -1818,6 +1819,7 @@ export const listViewFields = {
 			'first_name',
 			'last_name',
 			'user_groups',
+			'idp_groups',
 			'is_active',
 			'expiry_date',
 			'keep_local_login',
@@ -1837,6 +1839,10 @@ export const listViewFields = {
 		head: ['name'],
 		body: ['name'],
 		meta: ['id', 'builtin']
+	},
+	'idp-groups': {
+		head: ['name', 'userGroups'],
+		body: ['name', 'user_groups']
 	},
 	roles: {
 		head: ['name', 'description'],
@@ -2014,13 +2020,14 @@ export const listViewFields = {
 			'default_criticality'
 		],
 		optionalFields: {
-			head: ['referenceLink', 'createdAt', 'updatedAt'],
-			body: ['reference_link', 'created_at', 'updated_at']
+			head: ['filteringLabels', 'referenceLink', 'createdAt', 'updatedAt'],
+			body: ['filtering_labels', 'reference_link', 'created_at', 'updated_at']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			parent_entity: PARENT_ENTITY_FILTER,
-			relationship: ENTITY_RELATIONSHIP_FILTER
+			relationship: ENTITY_RELATIONSHIP_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'entity-assessments': {
@@ -2871,8 +2878,8 @@ export const listViewFields = {
 		}
 	},
 	'generic-collections': {
-		head: ['ref_id', 'name', 'description', 'labels', 'folder'],
-		body: ['ref_id', 'name', 'description', 'filtering_labels', 'folder'],
+		head: ['ref_id', 'name', 'description', 'project', 'labels', 'folder'],
+		body: ['ref_id', 'name', 'description', 'projects', 'filtering_labels', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			filtering_labels: LABELS_FILTER
@@ -3761,8 +3768,11 @@ export function getListViewFields({
 	};
 }
 
-export const headData = (model: urlModel) =>
-	listViewFields[model].body.reduce((obj, key, index) => {
-		obj[key] = listViewFields[model].head[index];
-		return obj;
-	}, {});
+export const headData = (model: urlModel): Record<string, string> =>
+	listViewFields[model].body.reduce(
+		(obj, key, index) => {
+			obj[key] = listViewFields[model].head[index];
+			return obj;
+		},
+		{} as Record<string, string>
+	);

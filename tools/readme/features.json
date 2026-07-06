@@ -1,0 +1,85 @@
+{
+  "_comment": "SINGLE SOURCE OF TRUTH for the README features bento AND the collapsible list. Edit `features` only, then run: pnpm --dir frontend readme:features. `groups` sets the order and headings of the collapsible list; the bento image renders features in array order.",
+  "groups": [
+    "Compliance & frameworks",
+    "Risk management",
+    "Third-party risk",
+    "Operations & remediation",
+    "Reporting & analytics",
+    "Collaboration & productivity",
+    "Automation & integrations",
+    "Security & access",
+    "Privacy",
+    "Programme management",
+    "Platform"
+  ],
+  "features": [
+    { "name": "Audit and campaigns management", "group": "Compliance & frameworks" },
+    { "name": "Automatic mapping", "group": "Compliance & frameworks" },
+    { "name": "Mapping explorer", "group": "Compliance & frameworks" },
+    { "name": "Custom frameworks supported", "group": "Compliance & frameworks" },
+    { "name": "+167 frameworks included", "group": "Compliance & frameworks" },
+    { "name": "Policies management", "group": "Compliance & frameworks" },
+    { "name": "Evidence management", "group": "Compliance & frameworks" },
+
+    { "name": "Risk assessments and registers", "group": "Risk management" },
+    { "name": "EBIOS RM module", "group": "Risk management" },
+    { "name": "Risk acceptance workflows", "group": "Risk management" },
+    { "name": "Business Impact Analysis", "group": "Risk management" },
+    { "name": "Cyber Risk Quantification", "group": "Risk management" },
+    { "name": "Vulnerability management", "group": "Risk management" },
+    { "name": "Vulnerability enrichment", "group": "Risk management" },
+
+    { "name": "Third-party risk management", "group": "Third-party risk" },
+
+    { "name": "Action plan tracking and prioritization", "group": "Operations & remediation" },
+    { "name": "Findings tracking", "group": "Operations & remediation" },
+    { "name": "Recommendations engine", "group": "Operations & remediation" },
+    { "name": "Control plan", "group": "Operations & remediation" },
+    { "name": "Task management", "group": "Operations & remediation" },
+    { "name": "Kanban boards", "group": "Operations & remediation" },
+    { "name": "Periodic checks", "group": "Operations & remediation" },
+    { "name": "Exceptions tracking", "group": "Operations & remediation" },
+    { "name": "Incidents management", "group": "Operations & remediation" },
+    { "name": "Validation & approval flows", "group": "Operations & remediation" },
+    { "name": "Email reminders", "group": "Operations & remediation" },
+
+    { "name": "Analytics and dashboards", "group": "Reporting & analytics" },
+    { "name": "Reports generation", "group": "Reporting & analytics" },
+    { "name": "Automated quality checks", "group": "Reporting & analytics" },
+    { "name": "Advanced insights", "group": "Reporting & analytics" },
+    { "name": "Custom metrics tracking", "group": "Reporting & analytics" },
+
+    { "name": "Assignments & respondent mode", "group": "Collaboration & productivity" },
+    { "name": "Comments & collaboration", "group": "Collaboration & productivity" },
+    { "name": "Universal search", "group": "Collaboration & productivity" },
+    { "name": "Command palette", "group": "Collaboration & productivity" },
+
+    { "name": "Comprehensive REST API", "group": "Automation & integrations" },
+    { "name": "CLI for automation", "group": "Automation & integrations" },
+    { "name": "Data import wizard", "group": "Automation & integrations" },
+    { "name": "Kafka integration", "group": "Automation & integrations" },
+    { "name": "MCP support", "group": "Automation & integrations" },
+    { "name": "Outgoing webhooks", "group": "Automation & integrations" },
+    { "name": "Jira & ServiceNow integrations", "group": "Automation & integrations" },
+    { "name": "Consultant features (e.g. single-domain export/import)", "group": "Automation & integrations" },
+
+    { "name": "Flexible RBAC", "group": "Security & access" },
+    { "name": "SSO with SAML or OIDC", "group": "Security & access" },
+    { "name": "MFA with TOTP and security keys", "group": "Security & access" },
+    { "name": "SCIM provisioning", "group": "Security & access" },
+    { "name": "Audit log", "group": "Security & access" },
+
+    { "name": "GDPR processings", "group": "Privacy" },
+
+    { "name": "Project management", "group": "Programme management" },
+    { "name": "Responsibility matrices", "group": "Programme management" },
+
+    { "name": "Portals & trust center", "group": "Platform" },
+    { "name": "Custom fields", "group": "Platform" },
+    { "name": "Multi-level domains", "group": "Platform" },
+    { "name": "Kubernetes (Helm) deployment", "group": "Platform" },
+    { "name": "Open Source", "group": "Platform" },
+    { "name": "Available in +26 languages", "group": "Platform" }
+  ]
+}

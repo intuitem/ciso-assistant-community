@@ -1,25 +1,13 @@
 import structlog
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from django.contrib.auth.models import Permission
-
+from core.permissions import IsGlobalAdmin
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
-from iam.models import Folder, RoleAssignment
 from .models import SecurityAdvisory, CWE
 
 logger = structlog.get_logger(__name__)
-
-
-def _is_admin(user) -> bool:
-    """Check if user has admin-level access (change_globalsettings on root folder)."""
-    try:
-        perm = Permission.objects.get(codename="change_globalsettings")
-        return RoleAssignment.is_access_allowed(
-            user=user, perm=perm, folder=Folder.get_root_folder()
-        )
-    except Permission.DoesNotExist:
-        return False
 
 
 class BaseModelViewSet(AbstractBaseModelViewSet):
@@ -80,11 +68,14 @@ class SecurityAdvisoryViewSet(BaseModelViewSet):
             return self.get_paginated_response(data)
         return Response(data)
 
-    @action(detail=False, methods=["post"], url_path="sync-kev")
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="sync-kev",
+        permission_classes=[IsAuthenticated, IsGlobalAdmin],
+    )
     def sync_kev(self, request):
         """Sync KEV feed synchronously. Scheduled async via Huey periodic tasks."""
-        if not _is_admin(request.user):
-            return Response({"error": "Admin permission required"}, status=403)
         from sec_intel.feeds import KEVFeed
 
         try:
@@ -102,11 +93,14 @@ class SecurityAdvisoryViewSet(BaseModelViewSet):
                 status=502,
             )
 
-    @action(detail=False, methods=["post"], url_path="sync-euvd")
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="sync-euvd",
+        permission_classes=[IsAuthenticated, IsGlobalAdmin],
+    )
     def sync_euvd(self, request):
         """Sync EUVD exploited vulnerabilities synchronously."""
-        if not _is_admin(request.user):
-            return Response({"error": "Admin permission required"}, status=403)
         from sec_intel.feeds import EUVDFeed
 
         try:
@@ -247,11 +241,14 @@ class CWEViewSet(BaseModelViewSet):
             return self.get_paginated_response(data)
         return Response(data)
 
-    @action(detail=False, methods=["post"], url_path="sync-catalog")
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="sync-catalog",
+        permission_classes=[IsAuthenticated, IsGlobalAdmin],
+    )
     def sync_catalog(self, request):
         """Sync CWE catalog from MITRE."""
-        if not _is_admin(request.user):
-            return Response({"error": "Admin permission required"}, status=403)
         from sec_intel.feeds import CWEFeed
 
         try:

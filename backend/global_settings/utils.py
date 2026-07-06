@@ -6,13 +6,6 @@ logger = structlog.get_logger(__name__)
 
 
 def ff_is_enabled(feature_flag: str):
-    """
-    Checks if a feature flag is enabled.
-    Parameters:
-        `feature_flag` (str): The name of the feature flag to check.
-    Returns:
-        `True` if the feature flag is enabled, `False` otherwise.
-    """
     ff_settings = GlobalSettings.objects.filter(
         name=GlobalSettings.Names.FEATURE_FLAGS
     ).first()
@@ -32,3 +25,12 @@ def ff_is_enabled(feature_flag: str):
         return False
 
     return flag
+
+
+def general_setting_is_enabled(key: str) -> bool:
+    """Check whether a boolean key in the 'general' GlobalSettings is enabled.
+    Returns False when the settings row or the key is missing."""
+    gs = GlobalSettings.objects.filter(name="general").only("value").first()
+    if gs is None or not isinstance(gs.value, dict):
+        return False
+    return bool(gs.value.get(key, False))

@@ -40,7 +40,8 @@
 		computeRequirementScoreAndResult,
 		formatScoreValue,
 		displayScoreColor,
-		resultBadgeStyle
+		resultBadgeStyle,
+		filterResultChoices
 	} from '$lib/utils/helpers';
 
 	interface Props {
@@ -756,7 +757,11 @@
 							{:else}
 								<Select
 									{form}
-									options={page.data.model.selectOptions['result']}
+									options={filterResultChoices(
+										page.data.model.selectOptions['result'],
+										page.data.settings?.disable_partially_compliant_result,
+										data.result
+									)}
 									field="result"
 									label={m.result()}
 									helpText={m.requirementAssessmentResultHelpText()}

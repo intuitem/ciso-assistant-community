@@ -1,5 +1,6 @@
 <script lang="ts">
 	// Stores
+	import * as m from '$paraglide/messages';
 	import type { ModelInfo } from '$lib/utils/types';
 	import type { ModalStore } from '@skeletonlabs/skeleton-svelte';
 	const modalStore: ModalStore = getModalStore();
@@ -72,6 +73,7 @@
 			</header>
 			<button
 				type="button"
+				aria-label={m.close()}
 				class="flex items-center hover:text-primary-500 cursor-pointer"
 				onclick={parent.onClose}
 			>
