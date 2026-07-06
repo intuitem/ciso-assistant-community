@@ -3373,8 +3373,6 @@ class LoadFileView(APIView):
                 solutions_result, solution_ref_map = self._process_solutions(
                     request,
                     solutions_records,
-                    folders_map,
-                    folder_id,
                     entity_ref_map,
                     on_conflict,
                 )
@@ -3416,8 +3414,6 @@ class LoadFileView(APIView):
                 representatives_result = self._process_representatives(
                     request,
                     representatives_records,
-                    folders_map,
-                    folder_id,
                     entity_ref_map,
                     on_conflict,
                 )
@@ -3652,8 +3648,6 @@ class LoadFileView(APIView):
         self,
         request,
         records,
-        folders_map,
-        folder_id,
         entity_ref_map,
         on_conflict=ConflictMode.STOP,
     ):
@@ -4018,8 +4012,6 @@ class LoadFileView(APIView):
         self,
         request,
         records,
-        folders_map,
-        folder_id,
         entity_ref_map,
         on_conflict=ConflictMode.STOP,
     ):
