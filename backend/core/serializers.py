@@ -137,11 +137,16 @@ class BaseModelSerializer(serializers.ModelSerializer):
             )
 
     def _ensure_immutable(self, field_name: str, value) -> None:
-        """Raise PermissionDenied if a field's value is changing on update."""
+        """Raise PermissionDenied if a field differs from the persisted value.
+
+        This treats null transitions as changes: None -> value, value -> None,
+        and value -> different value are all blocked on update.
+        """
         if self.instance is None:
             return
         current_id = getattr(self.instance, f"{field_name}_id", None)
-        if current_id and str(value.id) != str(current_id):
+        new_id = getattr(value, "id", None)
+        if str(new_id) != str(current_id):
             raise PermissionDenied({field_name: "This field is immutable"})
 
     def validate_folder(self, folder: Folder) -> Folder:
@@ -3839,13 +3844,38 @@ class RequirementMappingSetReadSerializer(BaseModelSerializer):
         ]
 
     @staticmethod
-    def _framework_info(urn):
-        from core.mappings.engine import engine
+    def _resolve_framework_name(urn):
+        """Look up a framework's display name from its library content.
 
-        fw = engine.frameworks.get(urn)
-        if fw is None:
+        Fallback used on the retrieve path, where no pre-built map is in
+        context. Resolves regardless of whether the framework is imported.
+        """
+        lib = StoredLibrary.objects.filter(
+            content__framework__urn=urn,
+            content__framework__isnull=False,
+            content__requirement_mapping_set__isnull=True,
+            content__requirement_mapping_sets__isnull=True,
+        ).first()
+        if lib is None:
+            return None
+        framework = lib.content.get("framework") or {}
+        return framework.get("name", urn)
+
+    def _framework_info(self, urn):
+        if not urn:
             return {"str": urn, "urn": urn}
-        return {"str": fw.get("name", urn), "urn": urn}
+        # On list requests the viewset pre-populates `framework_map` (O(1) lookup).
+        framework_map = (self.context.get("optimized_data") or {}).get("framework_map")
+        if framework_map is not None:
+            name = framework_map.get(urn)
+        else:
+            # Retrieve path: cache per-instance so the duplicate calls from
+            # get_frameworks_available don't re-issue the DB lookup.
+            cache = self.__dict__.setdefault("_framework_name_cache", {})
+            if urn not in cache:
+                cache[urn] = self._resolve_framework_name(urn)
+            name = cache[urn]
+        return {"str": name or urn, "urn": urn}
 
     def get_source_framework(self, obj):
         mapping_set = obj.content.get(
@@ -4816,15 +4846,10 @@ class TimelineEntryReadSerializer(TimelineEntryWriteSerializer):
 
 
 class CommentWriteSerializer(BaseModelSerializer):
-    PARENT_FIELDS = [
-        "requirement_assessment",
-        "risk_scenario",
-        "applied_control",
-        "finding",
-    ]
+    PARENT_FIELDS = Comment.PARENT_FIELDS
 
     def validate(self, data):
-        # Only enforce the one-parent constraint on creation, not partial updates
+        data = super().validate(data)
         if self.instance is None:
             parent_count = sum(1 for f in self.PARENT_FIELDS if data.get(f) is not None)
             if parent_count != 1:
@@ -4832,6 +4857,10 @@ class CommentWriteSerializer(BaseModelSerializer):
                     "Exactly one parent (requirement_assessment, risk_scenario, "
                     "applied_control, or finding) must be set."
                 )
+        else:
+            for field_name in self.PARENT_FIELDS:
+                if field_name in data:
+                    self._ensure_immutable(field_name, data[field_name])
         return data
 
     def create(self, validated_data):
