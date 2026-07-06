@@ -175,6 +175,7 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
     class Source(models.TextChoices):
         AUTHORED = "authored", _("Authored")
         UPLOADED = "uploaded", _("Uploaded")
+        LINK = "link", _("Linked")
 
     source = models.CharField(
         max_length=20, choices=Source.choices, default=Source.AUTHORED
@@ -186,6 +187,8 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
         blank=True,
         validators=[validate_file_size, validate_file_name],
     )
+    # Source-of-truth URL for linked revisions (the document lives externally).
+    url = models.URLField(blank=True)
     published_at = models.DateTimeField(null=True, blank=True)
     editing_user = models.ForeignKey(
         User,

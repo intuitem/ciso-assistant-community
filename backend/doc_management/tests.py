@@ -245,3 +245,17 @@ class TestContainerGrouping:
         # a forbidden tag -> the override is skipped, built-in layout used
         html = DocumentRevisionViewSet()._resolve_document_html(rev, {"title": "T"})
         assert "OVERRIDE-MARKER" not in html
+
+    def test_linked_document_revision(self):
+        folder = Folder.objects.create(
+            name="LK", parent_folder=Folder.get_root_folder()
+        )
+        doc = self._create(folder=str(folder.id), locale="en", name="External")
+        rev = doc.revisions.first()
+        rev.source = "link"
+        rev.content = ""
+        rev.url = "https://example.com/policy"
+        rev.save()  # exercises recompute_references with no content
+        rev.refresh_from_db()
+        assert rev.source == "link"
+        assert rev.url == "https://example.com/policy"

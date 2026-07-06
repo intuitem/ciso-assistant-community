@@ -88,6 +88,9 @@
 				<a href="/documents/upload" class="btn btn-sm variant-filled-primary">
 					<i class="fa-solid fa-upload mr-2"></i>{m.uploadDocument()}
 				</a>
+				<a href="/documents/link" class="btn btn-sm variant-soft">
+					<i class="fa-solid fa-link mr-2"></i>{m.linkDocument()}
+				</a>
 				<a href="/document-containers" class="btn btn-sm variant-soft">
 					<i class="fa-solid fa-table-list mr-2"></i>{m.manage()}
 				</a>

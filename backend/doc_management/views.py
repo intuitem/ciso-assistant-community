@@ -234,6 +234,7 @@ class DocumentContainerViewSet(BaseModelViewSet):
                             "source": pub.source,
                             "has_pdf": bool(pub.pdf_snapshot),
                             "has_file": bool(pub.file),
+                            "url": pub.url,
                         }
                     )
             if not languages:
@@ -316,6 +317,76 @@ class DocumentContainerViewSet(BaseModelViewSet):
                 version_number=1,
                 source=DocumentRevision.Source.UPLOADED,
                 file=upload,
+                status=DocumentRevision.Status.DRAFT,
+                author=request.user if request.user.is_authenticated else None,
+            )
+            document.current_revision = revision
+            document.save()
+        return Response(
+            DocumentContainerReadSerializer(
+                container, context={"request": request}
+            ).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(detail=False, methods=["post"], url_path="link")
+    def link(self, request):
+        """Create a document that points at an external URL, versioned and
+        lifecycle-managed like authored/uploaded documents."""
+        from django.core.validators import URLValidator
+
+        url = (request.data.get("url") or "").strip()
+        try:
+            URLValidator(schemes=["http", "https"])(url)
+        except DjangoValidationError:
+            return Response(
+                {"url": "Enter a valid http(s) URL."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        folder_id = request.data.get("folder")
+        try:
+            folder = Folder.objects.get(id=folder_id)
+        except Folder.DoesNotExist, ValueError:
+            return Response(
+                {"folder": "Required / not found."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_documentcontainer"),
+            folder=folder,
+        ):
+            return Response(
+                {"folder": "You do not have permission to add documents here."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        document_type = (
+            request.data.get("document_type") or DocumentContainer.DocumentType.POLICY
+        )
+        if document_type not in DocumentContainer.DocumentType.values:
+            return Response(
+                {"document_type": "Invalid."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        with transaction.atomic():
+            container = DocumentContainer.objects.create(
+                document_type=document_type,
+                name=request.data.get("name") or "",
+                folder=folder,
+                is_published=False,
+            )
+            document = ManagedDocument.objects.create(
+                container=container,
+                locale=request.data.get("locale") or "en",
+                default_locale=True,
+            )
+            revision = DocumentRevision.objects.create(
+                document=document,
+                version_number=1,
+                source=DocumentRevision.Source.LINK,
+                url=url,
                 status=DocumentRevision.Status.DRAFT,
                 author=request.user if request.user.is_authenticated else None,
             )
@@ -533,6 +604,63 @@ class ManagedDocumentViewSet(BaseModelViewSet):
                     version_number=max_version + 1,
                     source=DocumentRevision.Source.UPLOADED,
                     file=upload,
+                    status=DocumentRevision.Status.DRAFT,
+                    author=request.user,
+                )
+            document.current_revision = revision
+            document.save()
+        return Response(
+            {
+                "id": str(revision.id),
+                "version_number": revision.version_number,
+                "status": revision.status,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(detail=True, methods=["post"], url_path="link-revision")
+    def link_revision(self, request, pk=None):
+        """Set an external URL as a new draft revision — or replace the current
+        draft's URL. Follows the same review/publish lifecycle."""
+        from django.core.validators import URLValidator
+
+        document = self.get_object()
+        url = (request.data.get("url") or "").strip()
+        try:
+            URLValidator(schemes=["http", "https"])(url)
+        except DjangoValidationError:
+            return Response(
+                {"url": "Enter a valid http(s) URL."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        with transaction.atomic():
+            revisions_qs = DocumentRevision.objects.select_for_update().filter(
+                document=document
+            )
+            draft = revisions_qs.filter(status=DocumentRevision.Status.DRAFT).first()
+            if draft:
+                old_file = draft.file if draft.file else None
+                draft.source = DocumentRevision.Source.LINK
+                draft.content = ""
+                draft.file = None
+                draft.url = url
+                draft.save()
+                revision = draft
+                if old_file:
+                    transaction.on_commit(lambda f=old_file: f.delete(save=False))
+            else:
+                max_version = (
+                    revisions_qs.aggregate(models.Max("version_number"))[
+                        "version_number__max"
+                    ]
+                    or 0
+                )
+                revision = DocumentRevision.objects.create(
+                    document=document,
+                    version_number=max_version + 1,
+                    source=DocumentRevision.Source.LINK,
+                    url=url,
                     status=DocumentRevision.Status.DRAFT,
                     author=request.user,
                 )

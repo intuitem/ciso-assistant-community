@@ -78,6 +78,10 @@ export const POST: RequestHandler = async ({ fetch, request, url, locals }) => {
 			endpoint = `${BASE_API_URL}/managed-documents/${body.document_id}/create-new-draft/`;
 			delete body.document_id;
 			break;
+		case 'link-revision':
+			endpoint = `${BASE_API_URL}/managed-documents/${body.document_id}/link-revision/`;
+			delete body.document_id;
+			break;
 		case 'save-revision':
 			endpoint = `${BASE_API_URL}/document-revisions/${body.revision_id}/`;
 			delete body.revision_id;

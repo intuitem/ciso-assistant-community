@@ -18,6 +18,8 @@
 	);
 
 	let docType = $derived(data.container?.document_type ?? 'other');
+	let isLinked = $derived(data.revision?.source === 'link');
+	let linkUrl = $derived((data.revision?.url ?? '') as string);
 	let isUploaded = $derived(data.revision?.source === 'uploaded');
 	let fileUrl = $derived(
 		data.revision?.id ? `/documents/${data.container?.id}/read/file?rev=${data.revision.id}` : ''
@@ -91,7 +93,19 @@
 		</div>
 	</header>
 
-	{#if isUploaded && fileUrl}
+	{#if isLinked && linkUrl}
+		<div class="space-y-2">
+			<a
+				href={linkUrl}
+				target="_blank"
+				rel="noopener noreferrer"
+				class="btn btn-sm variant-filled-primary"
+			>
+				<i class="fa-solid fa-arrow-up-right-from-square mr-2"></i>{m.openLink()}
+			</a>
+			<p class="break-all text-sm text-surface-500"><i class="fa-solid fa-link mr-1"></i>{linkUrl}</p>
+		</div>
+	{:else if isUploaded && fileUrl}
 		<div class="space-y-4">
 			<a href={fileUrl} target="_blank" rel="noopener" class="btn btn-sm variant-filled-primary">
 				<i class="fa-solid fa-download mr-2"></i>{m.download()}
