@@ -285,6 +285,7 @@ def check_evidences_expired():
 
 # Security exceptions in a terminal state should not trigger expiry reminders.
 SECURITY_EXCEPTION_TERMINAL_STATUSES = [
+    SecurityException.Status.REJECTED,
     SecurityException.Status.RESOLVED,
     SecurityException.Status.EXPIRED,
     SecurityException.Status.DEPRECATED,
