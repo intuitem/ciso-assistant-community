@@ -2,12 +2,19 @@
 	import { getModalStore } from './stores';
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/stores';
+	import { onDestroy } from 'svelte';
+	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
 
 	interface Props {
 		parent: any;
-		presetName: string;
+		presetName?: string;
+		presets?: { id: string; name: string }[];
 		domains: { id: string; name: string }[];
 		onApply: (data: {
+			preset_id?: string;
 			folder_name?: string;
 			folder_id?: string;
 			create_objects?: boolean;
@@ -15,7 +22,7 @@
 		}) => Promise<{ ok: boolean; error?: string }>;
 	}
 
-	let { parent, presetName, domains, onApply }: Props = $props();
+	let { parent, presetName = '', presets = [], domains, onApply }: Props = $props();
 
 	const modalStore = getModalStore();
 
@@ -23,13 +30,40 @@
 		Object.hasOwn($page.data.user?.permissions ?? {}, 'change_globalsettings')
 	);
 
+	// When no preset is pre-selected (e.g. opened from the journeys list "Start a journey"
+	// button), let the user pick which preset to apply.
+	const showPresetPicker = $derived(presets.length > 0);
+
 	let mode: 'new' | 'existing' = $state('new');
+	let selectedPresetId: string = $state('');
 	let folderName: string = $state(presetName);
 	let selectedFolderId: string = $state('');
 	let createObjects: boolean = $state(true);
 	let applyFeatureFlags: boolean = $state(true);
 	let errorMessage: string = $state('');
 	let submitting: boolean = $state(false);
+
+	// Standalone SPA form backing the hierarchical domain picker (FolderTreeSelect
+	// requires a SuperForm); we mirror its value into selectedFolderId.
+	const folderSchema = z.object({ folder: z.string() });
+	const _form = superForm(defaults({ folder: '' }, zod(folderSchema)), {
+		dataType: 'json',
+		taintedMessage: false,
+		validators: zod(folderSchema),
+		SPA: true
+	});
+	const unsubscribeFolder = _form.form.subscribe((v) => {
+		selectedFolderId = v.folder ?? '';
+	});
+	onDestroy(unsubscribeFolder);
+
+	// Default the new-domain name to the chosen preset's name.
+	$effect(() => {
+		if (showPresetPicker && selectedPresetId) {
+			const p = presets.find((x) => x.id === selectedPresetId);
+			if (p) folderName = p.name;
+		}
+	});
 
 	async function handleSubmit(event: SubmitEvent) {
 		event.preventDefault();
@@ -38,6 +72,7 @@
 
 		try {
 			let payload: {
+				preset_id?: string;
 				folder_name?: string;
 				folder_id?: string;
 				create_objects?: boolean;
@@ -51,12 +86,20 @@
 					apply_feature_flags: canChangeSettings && applyFeatureFlags
 				};
 			} else {
-				if (!selectedFolderId) return;
+				if (!selectedFolderId) {
+					errorMessage = m.selectDomain();
+					return;
+				}
 				payload = {
 					folder_id: selectedFolderId,
 					create_objects: createObjects,
 					apply_feature_flags: canChangeSettings && applyFeatureFlags
 				};
+			}
+			// Only carry preset_id when the picker is in use, so we never clobber a
+			// preset_id the caller already supplied (standard per-card apply).
+			if (showPresetPicker && selectedPresetId) {
+				payload.preset_id = selectedPresetId;
 			}
 
 			const result = await onApply(payload);
@@ -87,6 +130,24 @@
 		{/if}
 
 		<form class="space-y-4" onsubmit={handleSubmit}>
+			<!-- Preset picker (only when no preset was pre-selected) -->
+			{#if showPresetPicker}
+				<label class="label">
+					<span class="text-sm">{m.preset()}</span>
+					<select
+						class="select"
+						bind:value={selectedPresetId}
+						data-testid="apply-preset-select"
+						required
+					>
+						<option value="" disabled>{m.preset()}...</option>
+						{#each presets as preset}
+							<option value={preset.id}>{preset.name}</option>
+						{/each}
+					</select>
+				</label>
+			{/if}
+
 			<!-- Radio toggle -->
 			<div class="flex gap-4">
 				<label class="flex items-center gap-2 cursor-pointer">
@@ -121,15 +182,7 @@
 					/>
 				</label>
 			{:else}
-				<label class="label">
-					<span class="text-sm">{m.selectDomain()}</span>
-					<select class="select" bind:value={selectedFolderId} required>
-						<option value="" disabled>{m.selectDomain()}...</option>
-						{#each domains as domain}
-							<option value={domain.id}>{domain.name}</option>
-						{/each}
-					</select>
-				</label>
+				<FolderTreeSelect form={_form} field="folder" label={m.selectDomain()} />
 			{/if}
 
 			<!-- Create objects toggle -->

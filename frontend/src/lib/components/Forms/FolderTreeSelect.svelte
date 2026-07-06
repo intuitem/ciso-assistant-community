@@ -2,8 +2,11 @@
 	import { getContext, onMount } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import * as m from '$paraglide/messages';
+	import { page } from '$app/state';
 	import type { CacheLock } from '$lib/utils/types';
 	import FolderTreeNode, { type TreeNode } from '../FocusMode/FolderTreeNode.svelte';
+
+	const PERSONAL_SENTINEL = '__personal__';
 
 	interface Props {
 		form: SuperForm<any>;
@@ -31,6 +34,12 @@
 		 * previous optionsEndpoint="folders?content_type=DO&content_type=GL".
 		 */
 		contentTypes?: string[];
+		/**
+		 * Override the write-permission filter inherited from ModelForm context.
+		 * Pass `null` to make every accessible folder selectable (e.g. when picking a
+		 * folder as a setting reference, where write access on it isn't required).
+		 */
+		writePermission?: string | null;
 	}
 
 	let {
@@ -49,13 +58,22 @@
 		onChange = () => {},
 		mount: mountCallback = () => null,
 		optionsSelf = null,
-		contentTypes = ['DO', 'GL']
+		contentTypes = ['DO', 'GL'],
+		writePermission = undefined
 	}: Props = $props();
 
 	// Write permission is inferred from ModelForm context: add_<model.name>.
 	const defaultWritePermission = getContext<string | undefined>('folderTreeDefaultWritePermission');
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
+
+	// "My space" (personal folder) is offered only for an object's own folder field,
+	// and only once an admin has configured the personal-folders parent.
+	const showMySpace = $derived(
+		field === 'folder' &&
+			!!page.data?.settings?.personal_folders &&
+			!!page.data?.settings?.personal_folders_parent
+	);
 
 	let orgTree = $state<TreeNode | undefined>(undefined);
 	let isOpen = $state(false);
@@ -209,9 +227,8 @@
 
 		isLoading = true;
 		const includeEnclaves = contentTypes.includes('EN');
-		const writePerm = defaultWritePermission
-			? `&write_perm=${encodeURIComponent(defaultWritePermission)}`
-			: '';
+		const effectivePerm = writePermission !== undefined ? writePermission : defaultWritePermission;
+		const writePerm = effectivePerm ? `&write_perm=${encodeURIComponent(effectivePerm)}` : '';
 		fetch(
 			`/folders/org_tree/?include_perimeters=false${includeEnclaves ? '&include_enclaves=true' : ''}${writePerm}`
 		)
@@ -407,6 +424,30 @@
 							</li>
 						{/if}
 					{:else}
+						{#if showMySpace}
+							<li class="list-none">
+								<button
+									type="button"
+									role="option"
+									aria-selected={$value === PERSONAL_SENTINEL}
+									class="w-full px-2 py-1.5 text-left hover:bg-indigo-50 dark:hover:bg-indigo-950 rounded transition-colors
+										{$value === PERSONAL_SENTINEL ? 'bg-indigo-100 dark:bg-indigo-900' : ''}"
+									onclick={(e) => {
+										e.stopPropagation();
+										handleSelect(PERSONAL_SENTINEL, m.mySpace(), []);
+									}}
+								>
+									<div class="flex items-center gap-1.5">
+										<i class="fa-solid fa-user flex-shrink-0 text-xs text-violet-500"></i>
+										<span class="truncate text-sm font-semibold">{m.mySpace()}</span>
+										{#if $value === PERSONAL_SENTINEL}
+											<i class="fa-solid fa-check ml-auto flex-shrink-0 text-violet-500 text-xs"
+											></i>
+										{/if}
+									</div>
+								</button>
+							</li>
+						{/if}
 						{#each sortedTopNodes as node (node.uuid ?? node.name)}
 							<FolderTreeNode
 								{node}

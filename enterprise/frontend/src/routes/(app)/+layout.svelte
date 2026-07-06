@@ -13,6 +13,7 @@
 	import { initThemeFromUser } from '$lib/utils/theme';
 	import { invalidateAll } from '$app/navigation';
 	import Breadcrumbs from '$lib/components/Breadcrumbs/Breadcrumbs.svelte';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import SideBar from '$lib/components/SideBar/SideBar.svelte';
 	import FocusModeSelector from '$lib/components/FocusMode/FocusModeSelector.svelte';
 	import { deleteCookie, getCookie } from '$lib/utils/cookies';
@@ -133,6 +134,7 @@
 	});
 
 	const licenseExpirationNotifyDays = data.LICENSE_EXPIRATION_NOTIFY_DAYS;
+	const licenseExpirationMessage = data.LICENSE_EXPIRATION_MESSAGE;
 	const licenseStatus: Record<string, any> = data.licenseStatus;
 
 	const licenseAboutToExpire =
@@ -174,10 +176,22 @@
 		{#if data.licenseStatus.status === 'expired'}
 			<aside class="preset-tonal-warning text-center w-full items-center py-2">
 				{m.licenseExpiredMessage()}
+				{#if licenseExpirationMessage}
+					<MarkdownRenderer content={licenseExpirationMessage} class="text-center" />
+				{/if}
 			</aside>
 		{:else if licenseAboutToExpire}
 			<aside class="preset-tonal-warning text-center w-full items-center py-2">
-				{m.licenseAboutToExpireWarning({ days_left: licenseStatus.days_left })}
+				{#if licenseStatus.days_left === 0}
+					{m.licenseExpiresToday()}
+				{:else if licenseStatus.days_left === 1}
+					{m.licenseExpiresTomorrow()}
+				{:else}
+					{m.licenseExpiresInDays({ days_left: licenseStatus.days_left })}
+				{/if}
+				{#if licenseExpirationMessage}
+					<MarkdownRenderer content={licenseExpirationMessage} class="text-center" />
+				{/if}
 			</aside>
 		{/if}
 		<AppBar class="border-b border-surface-200-800 bg-surface-50-950 w-auto">
@@ -202,6 +216,17 @@
 				</div>
 				<div class="flex items-center gap-3 shrink-0">
 					<ThemeToggle />
+					{#if data?.featureflags?.custom_portals && !data?.user?.is_third_party}
+						<a
+							href="/portal"
+							class="flex items-center gap-2 shrink-0 rounded-lg border border-surface-200-800 bg-surface-100-900/80 px-3 py-1.5
+				text-xs text-surface-600-400 hover:bg-surface-200-800 hover:border-surface-300-700 hover:text-surface-700-300
+				transition-all duration-150"
+						>
+							<i class="fa-solid fa-table-cells-large text-surface-500"></i>
+							<span class="hidden sm:inline">{m.portals()}</span>
+						</a>
+					{/if}
 					<button
 						onclick={() => commandPalette?.toggle()}
 						class="flex items-center gap-2 shrink-0 rounded-lg border border-surface-200-800 bg-surface-100-900/80 px-3 py-1.5
@@ -218,7 +243,7 @@
 					{#if data?.featureflags?.focus_mode}
 						<FocusModeSelector orgTree={data?.orgTree} />
 					{/if}
-					{#if data?.user?.is_admin}
+					{#if data?.user?.is_admin && data?.settings?.show_get_started !== false}
 						<button
 							onclick={() => getStartedTrigger.set(true)}
 							class="shrink-0 px-3 py-1.5 rounded-full bg-violet-500 text-white text-xs font-semibold shadow-lg

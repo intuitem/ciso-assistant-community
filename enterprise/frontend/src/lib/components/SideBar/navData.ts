@@ -135,6 +135,11 @@ export const navData = {
 					href: '/user-groups'
 				},
 				{
+					name: 'idpGroups',
+					fa_icon: 'fa-solid fa-id-badge',
+					href: '/idp-groups'
+				},
+				{
 					name: 'roles',
 					fa_icon: 'fa-solid fa-shield-halved',
 					href: '/roles',
@@ -541,6 +546,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-flask',
 					href: '/experimental',
 					permissions: ['change_globalsettings']
+				},
+				{
+					name: 'managePortals',
+					fa_icon: 'fa-solid fa-table-cells-large',
+					href: '/portal-editor',
+					permissions: ['change_portal']
 				}
 			]
 		}

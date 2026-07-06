@@ -1,7 +1,7 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import Select from '../Select.svelte';
+	import Checkbox from '../Checkbox.svelte';
 	import CustomFieldsSection from '../CustomFieldsSection.svelte';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import type { SuperValidated } from 'sveltekit-superforms';
@@ -39,14 +39,6 @@
 	disableDoubleDash={true}
 />
 
-<FolderTreeSelect
-	{form}
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-/>
-
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="actors?user__is_third_party=False"
@@ -71,3 +63,14 @@
 />
 
 <CustomFieldsSection {form} model="pmbok.project" folderId={$folderId} />
+
+{#if !object?.id}
+	<Checkbox
+		{form}
+		field="create_collection"
+		label={m.createCollection()}
+		helpText={m.createCollectionHelpText()}
+		cacheLock={cacheLocks['create_collection']}
+		bind:cachedValue={formDataCache['create_collection']}
+	/>
+{/if}

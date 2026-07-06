@@ -432,6 +432,7 @@ INSTALLED_APPS = [
     "metrology",
     "chat",
     "doc_management",
+    "portals",
     "core",
     "cal",
     "django_filters",
@@ -683,6 +684,7 @@ LANGUAGES = [
     ("lt", "Lithuanian"),
     ("ko", "Korean"),
     ("et", "Estonian"),
+    ("sk", "Slovak"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))

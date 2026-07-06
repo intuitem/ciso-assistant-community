@@ -120,6 +120,14 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		errors: false
 	});
 
+	// Only the enterprise build surfaces the SCIM tab (idp_groups flag); skip
+	// the token fetch entirely where the feature is off.
+	const scimTokens = featureFlagSettings?.idp_groups
+		? await fetch(`${BASE_API_URL}/iam/scim-token/`)
+				.then((res) => (res.ok ? res.json() : []))
+				.catch(() => [])
+		: [];
+
 	return {
 		ssoSettings,
 		ssoForm,
@@ -141,6 +149,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		webhookEndpointCreateForm,
 		auditSinks,
 		auditSinkCreateForm,
+		scimTokens,
 		title: m.settings()
 	};
 };
@@ -515,6 +524,31 @@ export const actions: Actions = {
 			},
 			event
 		);
+		return { success: true };
+	},
+	generateScimToken: async (event) => {
+		const response = await event.fetch(`${BASE_API_URL}/iam/scim-token/`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ name: 'SCIM provisioning token' })
+		});
+		if (!response.ok) {
+			setFlash({ type: 'error', message: m.scimTokenGenerationFailed() }, event);
+			return fail(response.status, { error: 'Failed to generate SCIM token' });
+		}
+		const data = await response.json();
+		return { token: data.token, id: data.id, name: data.name };
+	},
+	revokeScimToken: async (event) => {
+		const formData = await event.request.formData();
+		const id = formData.get('id');
+		if (!id) return fail(400, { error: 'Missing token id' });
+		const response = await event.fetch(`${BASE_API_URL}/iam/scim-token/${id}/`, {
+			method: 'DELETE'
+		});
+		if (!response.ok && response.status !== 204)
+			return fail(response.status, { error: 'Failed to revoke SCIM token' });
+		setFlash({ type: 'success', message: m.scimTokenRevoked() }, event);
 		return { success: true };
 	}
 };

@@ -16,6 +16,15 @@
                 "config": {
                     "type": "object",
                     "properties": {
+                        "chat": {
+                            "type": "object",
+                            "properties": {
+                                "enabled": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "additionalProperties": false
+                        },
                         "databaseType": {
                             "type": "string"
                         },
@@ -354,6 +363,24 @@
                 "extraAllowedHosts": {
                     "type": "string"
                 },
+                "extraCerts": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "fileName": {
+                            "type": "string"
+                        },
+                        "mountPath": {
+                            "type": "string"
+                        },
+                        "secretName": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
+                },
                 "image": {
                     "type": "object",
                     "properties": {
@@ -434,6 +461,31 @@
         "nameOverride": {
             "type": "string"
         },
+        "networkPolicy": {
+            "type": "object",
+            "properties": {
+                "egress": {
+                    "type": "array"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "ingress": {
+                    "type": "array"
+                },
+                "podSelector": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "policyTypes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "additionalProperties": false
+        },
         "postgresql": {
             "type": "object",
             "properties": {
@@ -484,6 +536,86 @@
                         }
                     },
                     "additionalProperties": true
+                }
+            },
+            "additionalProperties": true
+        },
+        "qdrant": {
+            "type": "object",
+            "properties": {
+                "config": {
+                    "type": "object",
+                    "properties": {
+                        "cluster": {
+                            "type": "object",
+                            "properties": {
+                                "consensus": {
+                                    "type": "object",
+                                    "properties": {
+                                        "tick_period_ms": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "additionalProperties": true
+                                },
+                                "enabled": {
+                                    "type": "boolean"
+                                },
+                                "p2p": {
+                                    "type": "object",
+                                    "properties": {
+                                        "enable_tls": {
+                                            "type": "boolean"
+                                        },
+                                        "port": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "additionalProperties": true
+                                }
+                            },
+                            "additionalProperties": true
+                        },
+                        "service": {
+                            "type": "object",
+                            "properties": {
+                                "enable_tls": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "additionalProperties": true
+                        }
+                    },
+                    "additionalProperties": true
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "persistence": {
+                    "type": "object",
+                    "properties": {
+                        "accessModes": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "additionalLabels": {
+                            "type": "object",
+                            "additionalProperties": true
+                        },
+                        "annotations": {
+                            "type": "object",
+                            "additionalProperties": true
+                        },
+                        "size": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": true
+                },
+                "replicaCount": {
+                    "type": "integer"
                 }
             },
             "additionalProperties": true
