@@ -101,6 +101,92 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 
 ![Current features](features.png)
 
+<!-- FEATURES:START -->
+<details>
+<summary><strong>📋 Full feature list</strong> — click to expand (searchable, 57 features)</summary>
+
+**Compliance & frameworks**
+- Audit and campaigns management
+- Automatic mapping
+- Mapping explorer
+- Custom frameworks supported
+- +167 frameworks included
+- Policies management
+- Evidence management
+
+**Risk management**
+- Risk assessments and registers
+- EBIOS RM module
+- Risk acceptance workflows
+- Business Impact Analysis
+- Cyber Risk Quantification
+- Vulnerability management
+- Vulnerability enrichment
+
+**Third-party risk**
+- Third-party risk management
+
+**Operations & remediation**
+- Action plan tracking and prioritization
+- Findings tracking
+- Recommendations engine
+- Control plan
+- Task management
+- Kanban boards
+- Periodic checks
+- Exceptions tracking
+- Incidents management
+- Validation & approval flows
+- Email reminders
+
+**Reporting & analytics**
+- Analytics and dashboards
+- Reports generation
+- Automated quality checks
+- Advanced insights
+- Custom metrics tracking
+
+**Collaboration & productivity**
+- Assignments & respondent mode
+- Comments & collaboration
+- Universal search
+- Command palette
+
+**Automation & integrations**
+- Comprehensive REST API
+- CLI for automation
+- Data import wizard
+- Kafka integration
+- MCP support
+- Outgoing webhooks
+- Jira & ServiceNow integrations
+- Consultant features (e.g. single-domain export/import)
+
+**Security & access**
+- Flexible RBAC
+- SSO with SAML or OIDC
+- MFA with TOTP and security keys
+- SCIM provisioning
+- Audit log
+
+**Privacy**
+- GDPR processings
+
+**Programme management**
+- Project management
+- Responsibility matrices
+
+**Platform**
+- Portals & trust center
+- Custom fields
+- Multi-level domains
+- Kubernetes (Helm) deployment
+- Open Source
+- Available in +26 languages
+
+</details>
+<!-- FEATURES:END -->
+
 Upcoming features are listed on the roadmap.
 
 CISO Assistant is developed and maintained by [Intuitem](https://intuitem.com/), a company specialized in Cybersecurity, Cloud, and Data/AI.
