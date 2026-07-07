@@ -846,6 +846,7 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
                     "phone": esc(representative.phone),
                     "role": esc(representative.role),
                     "provider_entity_ref_id": esc(representative.entity.ref_id),
+                    "provider": esc(representative.entity.name),
                 }
             )
 
@@ -899,6 +900,7 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
             "phone",
             "role",
             "provider_entity_ref_id",
+            "provider",
         ]
 
         buffer = io.BytesIO()
@@ -1213,6 +1215,11 @@ class RepresentativeViewSet(ExportMixin, BaseModelViewSet):
             "provider_entity_ref_id": {
                 "source": "entity.ref_id",
                 "label": "provider_entity_ref_id",
+                "escape": True,
+            },
+            "provider": {
+                "source": "entity.name",
+                "label": "provider",
                 "escape": True,
             },
         },
