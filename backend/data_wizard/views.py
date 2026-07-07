@@ -3454,36 +3454,57 @@ class LoadFileView(APIView):
                 "representatives": {"successful": 0, "failed": 0, "errors": []},
             }
 
-    def _process_entities(
-        self, request, records, folders_map, folder_id, on_conflict=ConflictMode.STOP
-    ):
-        """Process entities from TPRM import"""
-        results = {
+    def _empty_tprm_results(self) -> dict[str, Any]:
+        return {
             "successful": 0,
             "failed": 0,
             "skipped": 0,
             "updated": 0,
             "errors": [],
         }
+
+    def _add_tprm_record_error(self, results, record, error) -> None:
+        results["failed"] += 1
+        results["errors"].append({"record": record, "error": error})
+
+    def _check_missing_tprm_required_fields(self, record, required_fields) -> list[str]:
+        missing_fields = []
+        for field in required_fields:
+            value = record.get(field, "")
+            if value is None or not str(value).strip():
+                missing_fields.append(field)
+        return missing_fields
+
+    def _add_tprm_missing_fields_error(self, results, record, missing_fields) -> None:
+        if len(missing_fields) == 1:
+            error = f"{missing_fields[0]} field is mandatory"
+        else:
+            error = "Missing mandatory fields: " + ", ".join(missing_fields)
+        self._add_tprm_record_error(results, record, error)
+
+    def _log_tprm_import_results(self, label, results) -> None:
+        logger.info(
+            f"{label} import complete. "
+            f"Success: {results['successful']}, Failed: {results['failed']}"
+        )
+
+    def _process_entities(
+        self, request, records, folders_map, folder_id, on_conflict=ConflictMode.STOP
+    ):
+        """Process entities from TPRM import"""
+        results = self._empty_tprm_results()
         ref_id_map = {}  # Map ref_id to actual UUID
 
         for record in records:
             try:
-                ref_id = record.get("ref_id", "").strip()
-                if not ref_id:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "error": "ref_id field is mandatory"}
-                    )
+                missing_fields = self._check_missing_tprm_required_fields(
+                    record, ["ref_id", "name"]
+                )
+                if missing_fields:
+                    self._add_tprm_missing_fields_error(results, record, missing_fields)
                     continue
 
-                # Check if name is provided
-                if not record.get("name"):
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "error": "name field is mandatory"}
-                    )
-                    continue
+                ref_id = record.get("ref_id", "").strip()
 
                 # Get domain from record or use fallback
                 domain = folder_id
@@ -3507,12 +3528,10 @@ class LoadFileView(APIView):
                             results["skipped"] += 1
                             continue
                         case ConflictMode.STOP:
-                            results["failed"] += 1
-                            results["errors"].append(
-                                {
-                                    "record": record,
-                                    "error": "Entity already exists (conflict policy: stop)",
-                                }
+                            self._add_tprm_record_error(
+                                results,
+                                record,
+                                "Entity already exists (conflict policy: stop)",
                             )
                             results["stopped"] = True
                             break
@@ -3602,21 +3621,15 @@ class LoadFileView(APIView):
                     data=entity_data, context={"request": request}
                 )
 
-                if serializer.is_valid(raise_exception=True):
-                    entity = serializer.save()
-                    ref_id_map[ref_id] = str(entity.id)
-                    results["successful"] += 1
-                    logger.debug(f"Created entity: {entity.name} with ref_id: {ref_id}")
-                else:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "errors": serializer.errors}
-                    )
+                serializer.is_valid(raise_exception=True)
+                entity = serializer.save()
+                ref_id_map[ref_id] = str(entity.id)
+                results["successful"] += 1
+                logger.debug(f"Created entity: {entity.name} with ref_id: {ref_id}")
 
             except Exception as e:
                 logger.warning(f"Error creating entity: {str(e)}")
-                results["failed"] += 1
-                results["errors"].append({"record": record, "error": str(e)})
+                self._add_tprm_record_error(results, record, str(e))
 
         # Second pass: handle parent_entity relationships
         for record in records:
@@ -3639,9 +3652,7 @@ class LoadFileView(APIView):
             except Exception as e:
                 logger.warning(f"Error linking parent entity: {str(e)}")
 
-        logger.info(
-            f"Entity import complete. Success: {results['successful']}, Failed: {results['failed']}"
-        )
+        self._log_tprm_import_results("Entity", results)
         return results, ref_id_map
 
     def _process_solutions(
@@ -3652,53 +3663,27 @@ class LoadFileView(APIView):
         on_conflict=ConflictMode.STOP,
     ):
         """Process solutions from TPRM import"""
-        results = {
-            "successful": 0,
-            "failed": 0,
-            "skipped": 0,
-            "updated": 0,
-            "errors": [],
-        }
+        results = self._empty_tprm_results()
         ref_id_map = {}  # Map ref_id to actual UUID
 
         for record in records:
             try:
+                missing_fields = self._check_missing_tprm_required_fields(
+                    record, ["ref_id", "name", "provider_entity_ref_id"]
+                )
+                if missing_fields:
+                    self._add_tprm_missing_fields_error(results, record, missing_fields)
+                    continue
+
                 ref_id = record.get("ref_id", "").strip()
-                if not ref_id:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "error": "ref_id field is mandatory"}
-                    )
-                    continue
-
-                # Check if name is provided
-                if not record.get("name"):
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "error": "name field is mandatory"}
-                    )
-                    continue
-
-                # Check provider_entity_ref_id
                 provider_ref_id = record.get("provider_entity_ref_id", "").strip()
-                if not provider_ref_id:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {
-                            "record": record,
-                            "error": "provider_entity_ref_id field is mandatory",
-                        }
-                    )
-                    continue
 
                 # Lookup provider entity UUID
                 if provider_ref_id not in entity_ref_map:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {
-                            "record": record,
-                            "error": f"Provider entity with ref_id '{provider_ref_id}' not found",
-                        }
+                    self._add_tprm_record_error(
+                        results,
+                        record,
+                        f"Provider entity with ref_id '{provider_ref_id}' not found",
                     )
                     continue
 
@@ -3718,12 +3703,10 @@ class LoadFileView(APIView):
                             results["skipped"] += 1
                             continue
                         case ConflictMode.STOP:
-                            results["failed"] += 1
-                            results["errors"].append(
-                                {
-                                    "record": record,
-                                    "error": "Solution already exists (conflict policy: stop)",
-                                }
+                            self._add_tprm_record_error(
+                                results,
+                                record,
+                                "Solution already exists (conflict policy: stop)",
                             )
                             results["stopped"] = True
                             break
@@ -3783,27 +3766,17 @@ class LoadFileView(APIView):
                     data=solution_data, context={"request": request}
                 )
 
-                if serializer.is_valid(raise_exception=True):
-                    solution = serializer.save()
-                    ref_id_map[ref_id] = str(solution.id)
-                    results["successful"] += 1
-                    logger.debug(
-                        f"Created solution: {solution.name} with ref_id: {ref_id}"
-                    )
-                else:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "errors": serializer.errors}
-                    )
+                serializer.is_valid(raise_exception=True)
+                solution = serializer.save()
+                ref_id_map[ref_id] = str(solution.id)
+                results["successful"] += 1
+                logger.debug(f"Created solution: {solution.name} with ref_id: {ref_id}")
 
             except Exception as e:
                 logger.warning(f"Error creating solution: {str(e)}")
-                results["failed"] += 1
-                results["errors"].append({"record": record, "error": str(e)})
+                self._add_tprm_record_error(results, record, str(e))
 
-        logger.info(
-            f"Solution import complete. Success: {results['successful']}, Failed: {results['failed']}"
-        )
+        self._log_tprm_import_results("Solution", results)
         return results, ref_id_map
 
     def _process_contracts(
@@ -3817,52 +3790,26 @@ class LoadFileView(APIView):
         on_conflict=ConflictMode.STOP,
     ):
         """Process contracts from TPRM import"""
-        results = {
-            "successful": 0,
-            "failed": 0,
-            "skipped": 0,
-            "updated": 0,
-            "errors": [],
-        }
+        results = self._empty_tprm_results()
 
         for record in records:
             try:
+                missing_fields = self._check_missing_tprm_required_fields(
+                    record, ["ref_id", "name", "provider_entity_ref_id"]
+                )
+                if missing_fields:
+                    self._add_tprm_missing_fields_error(results, record, missing_fields)
+                    continue
+
                 ref_id = record.get("ref_id", "").strip()
-                if not ref_id:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "error": "ref_id field is mandatory"}
-                    )
-                    continue
-
-                # Check if name is provided
-                if not record.get("name"):
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "error": "name field is mandatory"}
-                    )
-                    continue
-
-                # Check provider_entity_ref_id
                 provider_ref_id = record.get("provider_entity_ref_id", "").strip()
-                if not provider_ref_id:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {
-                            "record": record,
-                            "error": "provider_entity_ref_id field is mandatory",
-                        }
-                    )
-                    continue
 
                 # Lookup provider entity UUID
                 if provider_ref_id not in entity_ref_map:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {
-                            "record": record,
-                            "error": f"Provider entity with ref_id '{provider_ref_id}' not found",
-                        }
+                    self._add_tprm_record_error(
+                        results,
+                        record,
+                        f"Provider entity with ref_id '{provider_ref_id}' not found",
                     )
                     continue
 
@@ -3951,12 +3898,10 @@ class LoadFileView(APIView):
                             results["skipped"] += 1
                             continue
                         case ConflictMode.STOP:
-                            results["failed"] += 1
-                            results["errors"].append(
-                                {
-                                    "record": record,
-                                    "error": "Contract already exists (conflict policy: stop)",
-                                }
+                            self._add_tprm_record_error(
+                                results,
+                                record,
+                                "Contract already exists (conflict policy: stop)",
                             )
                             results["stopped"] = True
                             break
@@ -3984,28 +3929,18 @@ class LoadFileView(APIView):
                     data=contract_data, context={"request": request}
                 )
 
-                if serializer.is_valid(raise_exception=True):
-                    contract = serializer.save()
-                    if solution_ids:
-                        contract.solutions.set(solution_ids)
-                    results["successful"] += 1
-                    logger.debug(
-                        f"Created contract: {contract.name} with ref_id: {ref_id}"
-                    )
-                else:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "errors": serializer.errors}
-                    )
+                serializer.is_valid(raise_exception=True)
+                contract = serializer.save()
+                if solution_ids:
+                    contract.solutions.set(solution_ids)
+                results["successful"] += 1
+                logger.debug(f"Created contract: {contract.name} with ref_id: {ref_id}")
 
             except Exception as e:
                 logger.warning(f"Error creating contract: {str(e)}")
-                results["failed"] += 1
-                results["errors"].append({"record": record, "error": str(e)})
+                self._add_tprm_record_error(results, record, str(e))
 
-        logger.info(
-            f"Contract import complete. Success: {results['successful']}, Failed: {results['failed']}"
-        )
+        self._log_tprm_import_results("Contract", results)
         return results
 
     def _process_representatives(
@@ -4016,47 +3951,26 @@ class LoadFileView(APIView):
         on_conflict=ConflictMode.STOP,
     ):
         """Process representatives from TPRM import."""
-        results = {
-            "successful": 0,
-            "failed": 0,
-            "skipped": 0,
-            "updated": 0,
-            "errors": [],
-        }
+        results = self._empty_tprm_results()
 
         for record in records:
             try:
+                missing_fields = self._check_missing_tprm_required_fields(
+                    record, ["email", "provider_entity_ref_id"]
+                )
+                if missing_fields:
+                    self._add_tprm_missing_fields_error(results, record, missing_fields)
+                    continue
+
                 email = str(record.get("email", "")).strip()
-                if not email:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "error": "email field is mandatory"}
-                    )
-                    continue
-
                 provider_ref_id = str(record.get("provider_entity_ref_id", "")).strip()
-                if not provider_ref_id:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {
-                            "record": record,
-                            "error": "provider_entity_ref_id field is mandatory",
-                        }
-                    )
-                    continue
-
                 provider_entity_id = entity_ref_map.get(provider_ref_id)
 
                 if not provider_entity_id:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {
-                            "record": record,
-                            "error": (
-                                f"Provider entity with ref_id '{provider_ref_id}' "
-                                "not found"
-                            ),
-                        }
+                    self._add_tprm_record_error(
+                        results,
+                        record,
+                        f"Provider entity with ref_id '{provider_ref_id}' not found",
                     )
                     continue
 
@@ -4080,15 +3994,13 @@ class LoadFileView(APIView):
                             results["skipped"] += 1
                             continue
                         case ConflictMode.STOP:
-                            results["failed"] += 1
-                            results["errors"].append(
-                                {
-                                    "record": record,
-                                    "error": (
-                                        "Representative already exists "
-                                        "(conflict policy: stop)"
-                                    ),
-                                }
+                            self._add_tprm_record_error(
+                                results,
+                                record,
+                                (
+                                    "Representative already exists "
+                                    "(conflict policy: stop)"
+                                ),
                             )
                             results["stopped"] = True
                             break
@@ -4113,28 +4025,18 @@ class LoadFileView(APIView):
                     data=representative_data, context={"request": request}
                 )
 
-                if serializer.is_valid(raise_exception=True):
-                    representative = serializer.save()
-                    results["successful"] += 1
-                    logger.debug(
-                        "Created representative: "
-                        f"{representative.email} for entity ref_id: {provider_ref_id}"
-                    )
-                else:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "errors": serializer.errors}
-                    )
+                serializer.is_valid(raise_exception=True)
+                representative = serializer.save()
+                results["successful"] += 1
+                logger.debug(
+                    f"Created representative: {representative.email} for entity ref_id: {provider_ref_id}"
+                )
 
             except Exception as e:
                 logger.warning(f"Error creating representative: {str(e)}")
-                results["failed"] += 1
-                results["errors"].append({"record": record, "error": str(e)})
+                self._add_tprm_record_error(results, record, str(e))
 
-        logger.info(
-            "Representative import complete. "
-            f"Success: {results['successful']}, Failed: {results['failed']}"
-        )
+        self._log_tprm_import_results("Representative", results)
         return results
 
     def post(self, request, *args, **kwargs) -> Response:
