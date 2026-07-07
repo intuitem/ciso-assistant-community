@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/intuitem-ciso-assistant-community-badge.png)](https://mseep.ai/app/intuitem-ciso-assistant-community)
+
 <p align="center">
 Star the project 🌟 to get releases notification and help growing the community!
 </p>
