@@ -2,8 +2,11 @@
 	import { getContext, onMount } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import * as m from '$paraglide/messages';
+	import { page } from '$app/state';
 	import type { CacheLock } from '$lib/utils/types';
 	import FolderTreeNode, { type TreeNode } from '../FocusMode/FolderTreeNode.svelte';
+
+	const PERSONAL_SENTINEL = '__personal__';
 
 	interface Props {
 		form: SuperForm<any>;
@@ -31,6 +34,12 @@
 		 * previous optionsEndpoint="folders?content_type=DO&content_type=GL".
 		 */
 		contentTypes?: string[];
+		/**
+		 * Override the write-permission filter inherited from ModelForm context.
+		 * Pass `null` to make every accessible folder selectable (e.g. when picking a
+		 * folder as a setting reference, where write access on it isn't required).
+		 */
+		writePermission?: string | null;
 	}
 
 	let {
@@ -49,13 +58,22 @@
 		onChange = () => {},
 		mount: mountCallback = () => null,
 		optionsSelf = null,
-		contentTypes = ['DO', 'GL']
+		contentTypes = ['DO', 'GL'],
+		writePermission = undefined
 	}: Props = $props();
 
 	// Write permission is inferred from ModelForm context: add_<model.name>.
 	const defaultWritePermission = getContext<string | undefined>('folderTreeDefaultWritePermission');
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
+
+	// "My space" (personal folder) is offered only for an object's own folder field,
+	// and only once an admin has configured the personal-folders parent.
+	const showMySpace = $derived(
+		field === 'folder' &&
+			!!page.data?.settings?.personal_folders &&
+			!!page.data?.settings?.personal_folders_parent
+	);
 
 	let orgTree = $state<TreeNode | undefined>(undefined);
 	let isOpen = $state(false);
@@ -209,9 +227,8 @@
 
 		isLoading = true;
 		const includeEnclaves = contentTypes.includes('EN');
-		const writePerm = defaultWritePermission
-			? `&write_perm=${encodeURIComponent(defaultWritePermission)}`
-			: '';
+		const effectivePerm = writePermission !== undefined ? writePermission : defaultWritePermission;
+		const writePerm = effectivePerm ? `&write_perm=${encodeURIComponent(effectivePerm)}` : '';
 		fetch(
 			`/folders/org_tree/?include_perimeters=false${includeEnclaves ? '&include_enclaves=true' : ''}${writePerm}`
 		)
@@ -267,28 +284,28 @@
 				type="button"
 				onclick={toggleDropdown}
 				{disabled}
-				class="input bg-surface-100 flex items-center gap-2 w-full text-left px-3 py-2 text-sm
+				class="input bg-surface-100-900 flex items-center gap-2 w-full text-left px-3 py-2 text-sm
 					{disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
 					{$errors && $errors.length > 0 ? 'border-red-400' : ''}"
 			>
-				<i class="fa-solid fa-folder text-slate-400 flex-shrink-0 text-xs"></i>
+				<i class="fa-solid fa-folder text-surface-500 flex-shrink-0 text-xs"></i>
 				<span class="flex-1 min-w-0 truncate">
 					{#if selectedName}
 						{#if selectedPath.length > 0}
-							<span class="text-surface-400 text-xs">{selectedPath.join(' / ')} / </span>
+							<span class="text-surface-400-600 text-xs">{selectedPath.join(' / ')} / </span>
 						{/if}
-						<span class="text-surface-900">{selectedName}</span>
+						<span class="text-surface-900-300">{selectedName}</span>
 					{:else}
 						<span class="text-surface-500">{m.selectDomain()}</span>
 					{/if}
 				</span>
 				{#if isLoading}
-					<i class="fa-solid fa-spinner animate-spin text-slate-400 text-xs flex-shrink-0"></i>
+					<i class="fa-solid fa-spinner animate-spin text-surface-500 text-xs flex-shrink-0"></i>
 				{:else if selectedName && nullable}
 					<!-- clear button rendered separately below -->
 				{:else}
 					<i
-						class="fa-solid fa-chevron-down text-slate-400 text-xs flex-shrink-0 transition-transform {isOpen
+						class="fa-solid fa-chevron-down text-surface-500 text-xs flex-shrink-0 transition-transform {isOpen
 							? 'rotate-180'
 							: ''}"
 					></i>
@@ -300,7 +317,7 @@
 				<button
 					type="button"
 					onclick={handleClear}
-					class="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-slate-200 transition-colors z-10 text-slate-400 hover:text-slate-600"
+					class="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-surface-200-800 transition-colors z-10 text-surface-500 hover:text-surface-600-400"
 					title={m.clearSelection()}
 				>
 					<i class="fa-solid fa-xmark text-xs"></i>
@@ -315,19 +332,19 @@
 		<!-- Dropdown -->
 		{#if isOpen}
 			<div
-				class="absolute left-0 top-full mt-1 w-full min-w-64 bg-white rounded-lg shadow-lg border border-slate-200 z-50 flex flex-col"
+				class="absolute left-0 top-full mt-1 w-full min-w-64 bg-surface-50-950 rounded-lg shadow-lg border border-surface-200-800 z-50 flex flex-col"
 				style="max-height: 22rem"
 			>
 				<!-- Header: sort toggle + search input -->
-				<div class="p-2 border-b border-slate-100 space-y-2 flex-shrink-0">
+				<div class="p-2 border-b border-surface-100-900 space-y-2 flex-shrink-0">
 					<div class="flex items-center justify-between gap-1">
 						<div class="relative w-full">
 							<i
-								class="fa-solid fa-magnifying-glass absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"
+								class="fa-solid fa-magnifying-glass absolute left-2 top-1/2 -translate-y-1/2 text-surface-500 text-xs pointer-events-none"
 							></i>
 							<input
 								type="text"
-								class="w-full pl-6 pr-2 py-1 text-sm border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-indigo-300"
+								class="w-full pl-6 pr-2 py-1 text-sm border border-surface-200-800 bg-surface-50-950 text-surface-900-100 rounded focus:outline-none focus:ring-1 focus:ring-indigo-300"
 								placeholder={m.searchPlaceholder()}
 								bind:value={searchQuery}
 								bind:this={searchInputEl}
@@ -341,7 +358,7 @@
 									e.stopPropagation();
 									sortAsc = !sortAsc;
 								}}
-								class="flex items-center gap-1 text-xs text-slate-500 hover:text-indigo-600 transition-colors"
+								class="flex items-center gap-1 text-xs text-surface-600-400 hover:text-indigo-600 transition-colors"
 								title={sortAsc ? m.sortDescending() : m.sortAscending()}
 							>
 								<i class={sortAsc ? 'fa-solid fa-arrow-down-a-z' : 'fa-solid fa-arrow-down-z-a'}
@@ -355,7 +372,7 @@
 				<!-- List -->
 				<ul class="list-none p-0 m-0 overflow-y-auto flex-1 py-1 px-1">
 					{#if !hasNodes && !isLoading}
-						<li class="px-3 py-2 text-sm text-slate-400 text-center list-none">
+						<li class="px-3 py-2 text-sm text-surface-500 text-center list-none">
 							{m.noDomainsAvailable()}
 						</li>
 					{:else if searchData}
@@ -366,8 +383,8 @@
 									type="button"
 									role="option"
 									aria-selected={$value === String(result.node.uuid)}
-									class="w-full px-2 py-1.5 text-left hover:bg-indigo-50 rounded transition-colors
-										{$value === String(result.node.uuid) ? 'bg-indigo-100' : ''}"
+									class="w-full px-2 py-1.5 text-left hover:bg-indigo-50 dark:hover:bg-indigo-950 rounded transition-colors
+										{$value === String(result.node.uuid) ? 'bg-indigo-100 dark:bg-indigo-900' : ''}"
 									onclick={(e) => {
 										e.stopPropagation();
 										handleSelect(String(result.node.uuid), result.node.name, result.path);
@@ -375,7 +392,7 @@
 									title={[...result.path, result.node.name].join(' / ')}
 								>
 									{#if result.path.length > 0}
-										<div class="text-[10px] text-slate-400 truncate leading-tight mb-0.5">
+										<div class="text-[10px] text-surface-500 truncate leading-tight mb-0.5">
 											{result.path.length > 2
 												? '… / ' + result.path.slice(-2).join(' / ')
 												: result.path.join(' / ')}
@@ -386,9 +403,11 @@
 											class="fa-solid fa-folder flex-shrink-0 text-xs {$value ===
 											String(result.node.uuid)
 												? 'text-indigo-500'
-												: 'text-slate-400'}"
+												: 'text-surface-500'}"
 										></i>
-										<span class="truncate text-sm font-semibold text-indigo-700">
+										<span
+											class="truncate text-sm font-semibold text-indigo-700 dark:text-indigo-300"
+										>
 											{result.node.name}
 										</span>
 										{#if $value === String(result.node.uuid)}
@@ -400,11 +419,35 @@
 							</li>
 						{/each}
 						{#if searchData.length === 0}
-							<li class="px-3 py-2 text-sm text-slate-400 text-center list-none">
+							<li class="px-3 py-2 text-sm text-surface-500 text-center list-none">
 								{m.noResultFound()}
 							</li>
 						{/if}
 					{:else}
+						{#if showMySpace}
+							<li class="list-none">
+								<button
+									type="button"
+									role="option"
+									aria-selected={$value === PERSONAL_SENTINEL}
+									class="w-full px-2 py-1.5 text-left hover:bg-indigo-50 dark:hover:bg-indigo-950 rounded transition-colors
+										{$value === PERSONAL_SENTINEL ? 'bg-indigo-100 dark:bg-indigo-900' : ''}"
+									onclick={(e) => {
+										e.stopPropagation();
+										handleSelect(PERSONAL_SENTINEL, m.mySpace(), []);
+									}}
+								>
+									<div class="flex items-center gap-1.5">
+										<i class="fa-solid fa-user flex-shrink-0 text-xs text-violet-500"></i>
+										<span class="truncate text-sm font-semibold">{m.mySpace()}</span>
+										{#if $value === PERSONAL_SENTINEL}
+											<i class="fa-solid fa-check ml-auto flex-shrink-0 text-violet-500 text-xs"
+											></i>
+										{/if}
+									</div>
+								</button>
+							</li>
+						{/if}
 						{#each sortedTopNodes as node (node.uuid ?? node.name)}
 							<FolderTreeNode
 								{node}

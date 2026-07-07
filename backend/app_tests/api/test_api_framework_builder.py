@@ -3144,6 +3144,22 @@ class TestFrameworkBuilderDraftValidation:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "Duplicate URN" in response.data["error"]
 
+    def test_publish_rejects_duplicate_choice_urn(
+        self, authenticated_client, fw_with_tree
+    ):
+        """An exact-URN duplicate choice must report "Duplicate URN" (the
+        skip-exact-urn guard lets it fall through to the duplicate-URN check),
+        not the divergent-slug "internal identifier" message."""
+        fw, rn, q, c, folder = fw_with_tree
+        draft = self._start_and_get_draft(authenticated_client, fw)
+        dup = copy.deepcopy(draft["choices"][0])
+        dup["id"] = str(uuid.uuid4())  # new choice, same URN
+        draft["choices"].append(dup)
+
+        response = self._save_and_publish(authenticated_client, fw, draft)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Duplicate URN" in response.data["error"]
+
     def test_duplicate_node_id_error_names_both_requirements(
         self, authenticated_client, fw_with_tree
     ):
@@ -3278,6 +3294,21 @@ class TestFrameworkBuilderDraftValidation:
         assert "would erase" in response.data["error"]
         assert RequirementNode.objects.filter(framework=fw).exists()
 
+    def test_publish_coalesces_null_outcomes_definition(
+        self, authenticated_client, fw_with_tree
+    ):
+        """outcomes_definition is a NOT NULL column. A draft carrying None for it
+        (malformed/hand-crafted/API) must be coalesced to [] rather than crashing
+        the publish with an opaque IntegrityError."""
+        fw, rn, q, c, folder = fw_with_tree
+        draft = self._start_and_get_draft(authenticated_client, fw)
+        draft["framework_meta"]["outcomes_definition"] = None
+
+        response = self._save_and_publish(authenticated_client, fw, draft)
+        assert response.status_code == 200, response.data
+        fw.refresh_from_db()
+        assert fw.outcomes_definition == []
+
     def test_publish_rejects_draft_from_newer_schema(
         self, authenticated_client, fw_with_tree
     ):
@@ -3288,3 +3319,53 @@ class TestFrameworkBuilderDraftValidation:
         response = self._save_and_publish(authenticated_client, fw, draft)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "newer version" in response.data["error"]
+
+    def test_publish_rejects_questions_sharing_node_id_across_slugs(
+        self, authenticated_client, fw_with_tree
+    ):
+        """Two questions sharing a node_id under divergent slugs pass the
+        pre-rewrite duplicate-URN check (distinct full URNs), but a ref_id
+        rename collapses both to the same URN. This must surface as an
+        actionable 400, not the generic 'Failed to publish' catch-all (today an
+        IntegrityError swallowed by the broad except)."""
+        fw, rn, q, c, folder = fw_with_tree
+        draft = self._start_and_get_draft(authenticated_client, fw)
+
+        # A second question reusing the first's node_id but with a different
+        # slug — a mixed-slug draft the rename will collapse.
+        q2 = copy.deepcopy(draft["questions"][0])
+        q2["id"] = str(uuid.uuid4())
+        q2["urn"] = "urn:custom:risk:question:other-slug:q1"  # node_id 'q1'
+        draft["questions"].append(q2)
+        # Rename forces every child URN onto the new slug → q and q2 collide.
+        draft["framework_meta"]["ref_id"] = "renamed-fw"
+
+        response = self._save_and_publish(authenticated_client, fw, draft)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        # The message must point at the real problem, not the opaque fallback.
+        assert response.data["error"] != "Failed to publish draft. Please try again."
+        assert any(
+            term in response.data["error"].lower()
+            for term in ("identifier", "duplicate", "urn")
+        ), response.data["error"]
+
+    def test_publish_rejects_choices_sharing_node_id_across_slugs(
+        self, authenticated_client, fw_with_tree
+    ):
+        """Same collapse hazard for question choices."""
+        fw, rn, q, c, folder = fw_with_tree
+        draft = self._start_and_get_draft(authenticated_client, fw)
+
+        c2 = copy.deepcopy(draft["choices"][0])
+        c2["id"] = str(uuid.uuid4())
+        c2["urn"] = "urn:custom:risk:question_choice:other-slug:c1"  # node_id 'c1'
+        draft["choices"].append(c2)
+        draft["framework_meta"]["ref_id"] = "renamed-fw"
+
+        response = self._save_and_publish(authenticated_client, fw, draft)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data["error"] != "Failed to publish draft. Please try again."
+        assert any(
+            term in response.data["error"].lower()
+            for term in ("identifier", "duplicate", "urn")
+        ), response.data["error"]

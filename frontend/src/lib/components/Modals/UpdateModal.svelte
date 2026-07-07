@@ -1,4 +1,5 @@
 <script lang="ts">
+	import * as m from '$paraglide/messages';
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { FormDataShape } from '$lib/utils/schemas';
@@ -10,7 +11,7 @@
 	let closeModal = true;
 
 	// Base Classes
-	const cBase = 'card bg-surface-50 p-4 w-modal shadow-xl space-y-4';
+	const cBase = 'card bg-surface-50-950 p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 
 	interface Props {
@@ -26,6 +27,7 @@
 		selectOptions?: Record<string, any>;
 		debug?: boolean;
 		customNameDescription?: boolean;
+		customFolder?: boolean;
 	}
 
 	let {
@@ -39,7 +41,8 @@
 		suggestions = {},
 		selectOptions = {},
 		debug = false,
-		customNameDescription = true
+		customNameDescription = true,
+		customFolder = false
 	}: Props = $props();
 </script>
 
@@ -49,18 +52,18 @@
 			<header class={cHeader} data-testid="modal-title">
 				{$modalStore[0].title ?? '(title missing)'}
 			</header>
-			<div
-				role="button"
-				tabindex="0"
+			<button
+				type="button"
+				aria-label={m.close()}
 				class="flex items-center hover:text-primary-500 cursor-pointer"
 				onclick={parent.onClose}
-				onkeydown={parent.onClose}
 			>
 				<i class="fa-solid fa-xmark"></i>
-			</div>
+			</button>
 		</div>
 		<ModelForm
 			{customNameDescription}
+			{customFolder}
 			{form}
 			{object}
 			{suggestions}

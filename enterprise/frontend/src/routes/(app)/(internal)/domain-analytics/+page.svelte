@@ -8,6 +8,6 @@
 	let { data }: Props = $props();
 </script>
 
-<main class="bg-white card p-4">
+<main class="bg-surface-50-950 card p-4">
 	<TreeView tree={data.data} />
 </main>

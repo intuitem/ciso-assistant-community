@@ -45,7 +45,7 @@
 		{#if widgets.length > 0}
 			<DashboardGrid {widgets} />
 		{:else}
-			<div class="card p-12 bg-white dark:bg-surface-900 text-center">
+			<div class="card p-12 bg-surface-50-950 text-center">
 				<i class="fa-solid fa-chart-line text-8xl text-surface-300 mb-6"></i>
 				<p class="text-surface-500 text-lg mb-6">{m.noWidgetsYet()}</p>
 				<a href="/dashboards/{dashboard.id}/layout" class="btn preset-filled-primary-500">

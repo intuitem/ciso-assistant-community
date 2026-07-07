@@ -5,8 +5,11 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from rest_framework.filters import SearchFilter
+
 from core.constants import CURRENCY_CHOICES
 from core.views import BaseModelViewSet
+from custom_fields.filters import CustomFieldFilterBackend, CustomFieldSearchFilter
 from pmbok.models import (
     GenericCollection,
     Accreditation,
@@ -77,6 +80,10 @@ class AccreditationViewSet(BaseModelViewSet):
 class ProjectViewSet(BaseModelViewSet):
     model = Project
     serializers_module = "pmbok.serializers"
+    filter_backends = [
+        CustomFieldSearchFilter if backend is SearchFilter else backend
+        for backend in BaseModelViewSet.filter_backends
+    ] + [CustomFieldFilterBackend]
     filterset_fields = [
         "folder",
         "kind",
@@ -91,6 +98,13 @@ class ProjectViewSet(BaseModelViewSet):
     ]
     search_fields = ["name", "description", "ref_id", "purpose", "objectives"]
     ordering = ["created_at"]
+
+    def get_queryset(self):
+        # Prefetch custom field values so the serializer's custom_fields dict
+        # doesn't trigger one query per row.
+        return (
+            super().get_queryset().prefetch_related("custom_field_values__definition")
+        )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get Project priority choices")

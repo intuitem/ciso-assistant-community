@@ -214,7 +214,7 @@
 </script>
 
 <div class="flex flex-col gap-6">
-	<span class="text-gray-500">{m.wordTemplatesDescription()}</span>
+	<span class="text-surface-600-400">{m.wordTemplatesDescription()}</span>
 
 	{#if successMessage}
 		<div class="alert preset-filled-success-500 p-3">
@@ -234,8 +234,8 @@
 		</div>
 	{:else if editingKey}
 		<!-- Upload panel -->
-		<div class="card bg-white shadow-lg">
-			<header class="flex items-center justify-between p-4 border-b border-surface-200">
+		<div class="card bg-surface-50-950 shadow-lg">
+			<header class="flex items-center justify-between p-4 border-b border-surface-200-800">
 				<div class="flex items-center gap-3">
 					<button
 						class="btn btn-sm preset-outlined-surface-500"
@@ -247,7 +247,7 @@
 					</button>
 					<div>
 						<h3 class="h4 font-semibold">{templateName(editingKey)}</h3>
-						<p class="text-sm text-gray-500">{templateDescription(editingKey)}</p>
+						<p class="text-sm text-surface-600-400">{templateDescription(editingKey)}</p>
 					</div>
 				</div>
 				<div class="flex items-center gap-2">
@@ -284,7 +284,7 @@
 
 				<!-- Current file info -->
 				{#if getOverride(editingKey, editingLang)?.file}
-					<div class="flex items-center gap-2 text-sm text-gray-600">
+					<div class="flex items-center gap-2 text-sm text-surface-600-400">
 						<i class="fa-solid fa-file-word text-primary-500"></i>
 						<span>{getOverride(editingKey, editingLang)?.file}</span>
 					</div>
@@ -301,7 +301,7 @@
 						onchange={handleFileInput}
 						disabled={uploading}
 					/>
-					<p class="text-xs text-gray-500 mt-1">{m.wordTemplateUploadHelp()}</p>
+					<p class="text-xs text-surface-600-400 mt-1">{m.wordTemplateUploadHelp()}</p>
 				</div>
 
 				{#if uploading}
@@ -318,10 +318,10 @@
 							<i class="fa-solid fa-code text-xs mr-1"></i>
 							{m.templateVariables()}
 						</summary>
-						<p class="text-xs text-gray-500 mt-2 mb-3">
+						<p class="text-xs text-surface-600-400 mt-2 mb-3">
 							{m.wordTemplateSyntaxHelp()}
 						</p>
-						<div class="text-xs text-gray-500 mb-3 space-y-1 font-mono">
+						<div class="text-xs text-surface-600-400 mb-3 space-y-1 font-mono">
 							<p>{'{{variable}}'} &mdash; simple value</p>
 							<p>{'{{image}}'} &mdash; inline image</p>
 							<p>
@@ -331,14 +331,14 @@
 						<div class="space-y-2 mt-2">
 							{#each getTemplateVariables(editingKey) as variable}
 								<div class="flex items-start gap-2 text-sm">
-									<code class="bg-surface-200 px-2 py-0.5 rounded text-xs font-mono shrink-0"
+									<code class="bg-surface-200-800 px-2 py-0.5 rounded text-xs font-mono shrink-0"
 										>{variable.name}</code
 									>
 									<span
 										class="badge text-xs shrink-0 {TYPE_BADGE_CLASSES[variable.type] ??
 											'preset-filled-surface-500'}">{variable.type}</span
 									>
-									<span class="text-gray-600 text-xs">{variable.description}</span>
+									<span class="text-surface-600-400 text-xs">{variable.description}</span>
 								</div>
 							{/each}
 						</div>
@@ -346,7 +346,7 @@
 				{/if}
 			</div>
 
-			<footer class="flex items-center gap-2 p-4 border-t border-surface-200">
+			<footer class="flex items-center gap-2 p-4 border-t border-surface-200-800">
 				<a
 					href="/fe-api/custom-word-templates/download-default/{editingKey}/{editingLang}"
 					class="btn preset-outlined-surface-500"
@@ -363,13 +363,13 @@
 		</div>
 	{:else}
 		<!-- Templates list -->
-		<div class="card bg-white shadow-lg overflow-hidden">
+		<div class="card bg-surface-50-950 shadow-lg overflow-hidden">
 			{#each availableTemplates as template, i}
 				{@const customLangs = getCustomizedLanguages(template.template_key)}
 				{#if i > 0}
-					<hr class="border-surface-200" />
+					<hr class="border-surface-200-800" />
 				{/if}
-				<div class="flex items-center gap-4 px-4 py-3 hover:bg-surface-50 transition-colors">
+				<div class="flex items-center gap-4 px-4 py-3 hover:bg-surface-100-900 transition-colors">
 					<i class="fa-solid fa-file-word text-primary-500"></i>
 					<div class="flex-1 min-w-0">
 						<div class="flex items-center gap-2">
@@ -382,7 +382,7 @@
 								{/each}
 							{/if}
 						</div>
-						<p class="text-sm text-gray-500 truncate">
+						<p class="text-sm text-surface-600-400 truncate">
 							{templateDescription(template.template_key)}
 						</p>
 					</div>

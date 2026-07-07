@@ -11,7 +11,7 @@
 
 @source './**/*.{html,js,svelte,ts}';
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:is(.dark, .dark *));
 
 /*
   The default border color has changed to `currentcolor` in Tailwind CSS v4,
@@ -27,21 +27,23 @@
 	::before,
 	::backdrop,
 	::file-selector-button {
-		border-color: var(--color-gray-200, currentcolor);
+		border-color: var(--color-surface-200-800, currentcolor);
 	}
 }
 
 @utility btn-mini-primary {
-	@apply text-gray-50 bg-violet-600 hover:bg-violet-500;
+	/* Follows the theme primary like preset-filled-primary-500 (bg + contrast text), with the
+	   same Skeleton btn hover (brightness 125% light / 75% dark) rather than a bg shift. */
+	@apply text-primary-contrast-500 bg-primary-500 hover:brightness-125 dark:hover:brightness-75;
 }
 @utility btn-mini-secondary {
-	@apply text-gray-50 bg-pink-500 hover:bg-pink-400;
+	@apply text-gray-50 bg-pink-500 hover:bg-pink-400 dark:bg-pink-600 dark:hover:bg-pink-500;
 }
 @utility btn-mini-tertiary {
-	@apply text-gray-50 bg-sky-500 hover:bg-sky-400;
+	@apply text-gray-50 bg-sky-500 hover:bg-sky-400 dark:bg-sky-600 dark:hover:bg-sky-500;
 }
 @utility btn-mini-quaternary {
-	@apply text-gray-50 bg-teal-500 hover:bg-teal-400;
+	@apply text-gray-50 bg-teal-500 hover:bg-teal-400 dark:bg-teal-600 dark:hover:bg-teal-500;
 }
 
 @layer utilities {
@@ -62,12 +64,14 @@
 	.select,
 	.multiselect,
 	.textarea {
-		background-color: var(--color-surface-100);
+		background-color: var(--color-surface-100-900);
+		/* adaptive text so native field values stay readable in dark mode */
+		color: var(--color-surface-950-50);
 	}
 
 	.checkbox,
 	.radio {
-		background-color: var(--color-surface-100);
+		background-color: var(--color-surface-100-900);
 	}
 }
 
@@ -75,6 +79,38 @@
 	[data-popup] {
 		transition: none;
 	}
+}
+
+/* svelte-multiselect dropdown: align the options panel with the app surface in both
+   themes (off-white surface-100 instead of pure white in light, surface-900 in dark). */
+div.multiselect > ul.options {
+	background-color: var(--color-surface-100-900);
+	color: var(--color-surface-950-50);
+}
+div.multiselect > ul.options > li.active {
+	background-color: var(--color-surface-200-800);
+}
+div.multiselect > ul.options > li:not(.active):hover {
+	background-color: var(--color-surface-200-800);
+}
+/* Selected values/chips: keep text readable in dark mode. Single-select uses a
+   transparent li (text sits on the dark input bg); multi-select uses a filled
+   chip. The chip's own contrast color is preserved; only bare/transparent
+   selected text inherits this adaptive color. */
+.dark div.multiselect > ul.selected > li:not(.chip) {
+	color: var(--color-surface-50);
+}
+
+/* Tailwind prose dark mode */
+.dark .prose {
+	color: var(--color-surface-50);
+}
+.dark .prose th,
+.dark .prose td {
+	border-color: var(--color-surface-700);
+}
+.dark .prose thead {
+	border-color: var(--color-surface-600);
 }
 
 /* AutocompleteSelect: collapse overflow chips when chip-max-N class is on outerDiv.

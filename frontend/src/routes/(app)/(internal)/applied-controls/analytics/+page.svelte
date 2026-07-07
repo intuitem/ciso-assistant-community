@@ -19,7 +19,7 @@
 				<i class="fa-solid fa-arrow-left mr-2" aria-hidden="true"></i>
 				{safeTranslate(data.backLabel) || data.backLabel}
 			</Anchor>
-			<h1 class="text-2xl font-bold text-gray-900">{m.appliedControlsAnalytics()}</h1>
+			<h1 class="text-2xl font-bold text-surface-900-100">{m.appliedControlsAnalytics()}</h1>
 		</div>
 		{#if data.hasFilters}
 			<span

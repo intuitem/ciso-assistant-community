@@ -173,7 +173,7 @@
 							{#if testConnectionState.loading}
 								<LoadingSpinner />
 							{:else if testConnectionState.success === true}
-								<span class="text-success-700 font-semibold">{m.connectionSuccessful()}</span>
+								<span class="text-success-700-300 font-semibold">{m.connectionSuccessful()}</span>
 							{:else if testConnectionState.success === false}
 								<span class="text-error-500 font-semibold">{m.connectionFailed()}</span>
 							{/if}

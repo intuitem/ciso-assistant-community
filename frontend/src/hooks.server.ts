@@ -163,7 +163,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 			applyUserLocale(event, event.locals.user);
 			return await resolve(event, {
 				transformPageChunk: ({ html }) => {
-					return html.replace('%lang%', locale);
+					return html
+						.replace('%lang%', locale)
+						.replace('%theme%', event.locals.user?.preferences?.ui?.theme ?? '');
 				}
 			});
 		}
@@ -209,7 +211,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 		return await resolve(event, {
 			transformPageChunk: ({ html }) => {
-				return html.replace('%lang%', locale);
+				return html
+					.replace('%lang%', locale)
+					.replace('%theme%', event.locals.user?.preferences?.ui?.theme ?? '');
 			}
 		});
 	});

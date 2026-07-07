@@ -24,13 +24,12 @@
 	const reportTiles: ReportTileData[] = [
 		{
 			id: 'dora-roi',
-			title: 'DORA Register of Information',
-			description:
-				'Generate DORA-compliant Register of Information (ROI) containing entity data required by the Digital Operational Resilience Act',
+			title: m.doraRegisterOfInformation(),
+			description: m.doraRoiDescription(),
 			icon: 'fa-solid fa-building-shield',
 			category: 'compliance',
 			href: '/reports/dora-roi',
-			tags: ['DORA', 'Regulation', 'Entities', 'Beta']
+			tags: ['DORA', 'Regulation', 'Entities']
 		},
 		{
 			id: 'soa',
@@ -58,7 +57,7 @@
 	<!-- Header -->
 
 	<!-- Reports Grid with White Background -->
-	<div class="bg-white card border border-gray-200 p-6">
+	<div class="bg-surface-50-950 card border border-surface-200-800 p-6">
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 			{#each reportTiles as tile}
 				<ReportTile
@@ -75,19 +74,19 @@
 	</div>
 
 	<!-- Info Section -->
-	<div class="bg-gradient-to-br from-gray-50 to-gray-100 card border border-gray-200 p-6">
+	<div
+		class="bg-gradient-to-br from-surface-50-950 to-surface-100-900 card border border-surface-200-800 p-6"
+	>
 		<div class="flex items-start gap-4">
 			<div class="flex-shrink-0">
 				<i class="fas fa-info-circle text-2xl text-blue-600"></i>
 			</div>
 			<div>
-				<h3 class="text-lg font-semibold text-gray-900 mb-2">
-					{m.aboutReports ? m.aboutReports() : 'About Reports'}
+				<h3 class="text-lg font-semibold text-surface-950-50 mb-2">
+					{m.aboutReports()}
 				</h3>
-				<p class="text-gray-700">
-					{m.aboutReportsDescription
-						? m.aboutReportsDescription()
-						: 'Reports provide a simple tools to generate specialized reports useful for key insights or required by authorities for specific standards.\nMore specialized capabilities will be added as we identify specific cases.'}
+				<p class="text-surface-700-300 whitespace-pre-line">
+					{m.aboutReportsDescription()}
 				</p>
 			</div>
 		</div>

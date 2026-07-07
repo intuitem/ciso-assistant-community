@@ -49,7 +49,7 @@
 	<Anchor
 		breadcrumbAction="push"
 		href={`/ebios-rm/${data.data.id}`}
-		class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+		class="flex items-center space-x-2 text-primary-800-200 hover:text-primary-600-400"
 	>
 		<i class="fa-solid fa-arrow-left"></i>
 		<p>{m.goBackToEbiosRmStudy()}</p>
@@ -58,7 +58,7 @@
 
 <div class="space-y-2">
 	<Accordion
-		class="bg-white rounded-md border hover:text-primary-700 text-gray-800"
+		class="bg-surface-50-950 rounded-md border hover:text-primary-700 text-surface-950-50"
 		{value}
 		onValueChange={(e) => (value = e.value)}
 		collapsible
@@ -79,7 +79,7 @@
 				>
 			</Accordion.ItemTrigger>
 			<Accordion.ItemContent>
-				<div class="bg-white flex flex-col space-y-4">
+				<div class="bg-surface-50-950 flex flex-col space-y-4">
 					<div class="flex w-full h-fit">
 						<EcosystemCircularRadarChart
 							title={m.current()}

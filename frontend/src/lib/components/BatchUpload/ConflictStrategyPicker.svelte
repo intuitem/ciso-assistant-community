@@ -39,8 +39,8 @@
 		<label
 			class="flex items-start gap-3 p-3 rounded-lg border cursor-pointer
 				{strategy === opt.value
-				? 'border-indigo-500 bg-indigo-50'
-				: 'border-gray-200 hover:border-gray-300'}
+				? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30'
+				: 'border-surface-200-800 hover:border-surface-300-700'}
 				{disabled ? 'opacity-50 cursor-not-allowed' : ''}"
 		>
 			<input
@@ -53,9 +53,9 @@
 			/>
 			<div class="flex-1">
 				<div class="font-medium text-sm">
-					<i class="fa-solid {opt.icon} mr-1.5 text-gray-600"></i>{opt.label}
+					<i class="fa-solid {opt.icon} mr-1.5 text-surface-600-400"></i>{opt.label}
 				</div>
-				<div class="text-xs text-gray-600 mt-0.5">{opt.desc}</div>
+				<div class="text-xs text-surface-600-400 mt-0.5">{opt.desc}</div>
 			</div>
 		</label>
 	{/each}

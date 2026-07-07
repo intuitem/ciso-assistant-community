@@ -115,21 +115,21 @@
 		submitted: 'bg-blue-100 text-blue-800',
 		accepted: 'bg-green-100 text-green-800',
 		rejected: 'bg-red-100 text-red-800',
-		revoked: 'bg-gray-100 text-gray-800',
+		revoked: 'bg-surface-100-900 text-surface-950-50',
 		expired: 'bg-orange-100 text-orange-800',
-		dropped: 'bg-gray-100 text-gray-800',
+		dropped: 'bg-surface-100-900 text-surface-950-50',
 		change_requested: 'bg-yellow-100 text-yellow-800'
 	};
 </script>
 
 <div class="flex flex-col space-y-4">
-	<div class="card px-6 py-4 bg-white shadow-lg">
+	<div class="card px-6 py-4 bg-surface-50-950 shadow-lg">
 		<div class="flex justify-between items-start mb-4">
 			<div class="flex flex-col space-y-2">
 				<h1 class="text-2xl font-bold">{validation_flow.str}</h1>
 				<span
 					class="badge {statusColors[validation_flow.status] ||
-						'bg-gray-100 text-gray-800'} px-3 py-1 rounded-full text-sm font-medium w-fit"
+						'bg-surface-100-900 text-surface-950-50'} px-3 py-1 rounded-full text-sm font-medium w-fit"
 				>
 					{safeTranslate(validation_flow.status)}
 				</span>
@@ -210,7 +210,7 @@
 					</div>
 				{:else if ['rejected', 'revoked', 'expired', 'dropped'].includes(validation_flow.status)}
 					<!-- Terminal states - no actions available -->
-					<div class="text-sm text-gray-500 italic">
+					<div class="text-sm text-surface-600-400 italic">
 						{m.noActionsAvailableForThisStatus()}
 					</div>
 				{:else if validation_flow.status === 'submitted' && isRequester}
@@ -254,8 +254,8 @@
 
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 			<div class="space-y-2">
-				<div class="text-sm font-medium text-gray-700">{m.domain()}</div>
-				<div class="text-sm text-gray-600">
+				<div class="text-sm font-medium text-surface-700-300">{m.domain()}</div>
+				<div class="text-sm text-surface-600-400">
 					<Anchor href="/folders/{validation_flow.folder.id}" class="anchor">
 						{validation_flow.folder.str}
 					</Anchor>
@@ -264,7 +264,7 @@
 
 			{#if validation_flow.filtering_labels && validation_flow.filtering_labels.length > 0}
 				<div class="space-y-2">
-					<div class="text-sm font-medium text-gray-700">{m.filteringLabels()}</div>
+					<div class="text-sm font-medium text-surface-700-300">{m.filteringLabels()}</div>
 					<div class="flex flex-wrap gap-2">
 						{#each validation_flow.filtering_labels as label}
 							<Anchor href="/filtering-labels/{label.id}" class="anchor">
@@ -278,13 +278,13 @@
 			{/if}
 
 			<div class="space-y-2">
-				<div class="text-sm font-medium text-gray-700">{m.requester()}</div>
-				<div class="text-sm text-gray-600">
+				<div class="text-sm font-medium text-surface-700-300">{m.requester()}</div>
+				<div class="text-sm text-surface-600-400">
 					{#if validation_flow.requester}
 						{#if validation_flow.requester.first_name || validation_flow.requester.last_name}
 							{validation_flow.requester.first_name}
 							{validation_flow.requester.last_name}
-							<span class="text-gray-500">({validation_flow.requester.email})</span>
+							<span class="text-surface-600-400">({validation_flow.requester.email})</span>
 						{:else}
 							{validation_flow.requester.email}
 						{/if}
@@ -295,13 +295,13 @@
 			</div>
 
 			<div class="space-y-2">
-				<div class="text-sm font-medium text-gray-700">{m.approver()}</div>
-				<div class="text-sm text-gray-600">
+				<div class="text-sm font-medium text-surface-700-300">{m.approver()}</div>
+				<div class="text-sm text-surface-600-400">
 					{#if validation_flow.approver !== null}
 						{#if validation_flow.approver.first_name || validation_flow.approver.last_name}
 							{validation_flow.approver.first_name}
 							{validation_flow.approver.last_name}
-							<span class="text-gray-500">({validation_flow.approver.email})</span>
+							<span class="text-surface-600-400">({validation_flow.approver.email})</span>
 						{:else}
 							{validation_flow.approver.email}
 						{/if}
@@ -313,23 +313,23 @@
 
 			{#if validation_flow.validation_deadline}
 				<div class="space-y-2">
-					<div class="text-sm font-medium text-gray-700">{m.validationDeadline()}</div>
-					<div class="text-sm text-gray-600">
+					<div class="text-sm font-medium text-surface-700-300">{m.validationDeadline()}</div>
+					<div class="text-sm text-surface-600-400">
 						{formatDateOrDateTime(validation_flow.validation_deadline, getLocale())}
 					</div>
 				</div>
 			{/if}
 
 			<div class="space-y-2">
-				<div class="text-sm font-medium text-gray-700">{m.createdAt()}</div>
-				<div class="text-sm text-gray-600">
+				<div class="text-sm font-medium text-surface-700-300">{m.createdAt()}</div>
+				<div class="text-sm text-surface-600-400">
 					{formatDateOrDateTime(validation_flow.created_at, getLocale())}
 				</div>
 			</div>
 
 			<div class="space-y-2">
-				<div class="text-sm font-medium text-gray-700">{m.updatedAt()}</div>
-				<div class="text-sm text-gray-600">
+				<div class="text-sm font-medium text-surface-700-300">{m.updatedAt()}</div>
+				<div class="text-sm text-surface-600-400">
 					{formatDateOrDateTime(validation_flow.updated_at, getLocale())}
 				</div>
 			</div>
@@ -337,8 +337,8 @@
 
 		{#if validation_flow.request_notes}
 			<div class="mt-4 space-y-2">
-				<div class="text-sm font-medium text-gray-700">{m.requestNotes()}</div>
-				<div class="p-3 bg-gray-50 rounded-lg text-sm">
+				<div class="text-sm font-medium text-surface-700-300">{m.requestNotes()}</div>
+				<div class="p-3 bg-surface-50-950 rounded-lg text-sm">
 					<MarkdownRenderer content={validation_flow.request_notes} />
 				</div>
 			</div>
@@ -346,16 +346,18 @@
 	</div>
 
 	<!-- Associated Links Section -->
-	<div class="card px-6 py-4 bg-white shadow-lg mb-4">
+	<div class="card px-6 py-4 bg-surface-50-950 shadow-lg mb-4">
 		<h2 class="text-xl font-semibold mb-4">{m.associatedObjects()}</h2>
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 			{#each Object.entries(validation_flow) as [key, value]}
 				{#if Array.isArray(value) && value.length > 0 && modelDisplayNames[key]}
 					<div class="space-y-2">
-						<h3 class="text-sm font-medium text-gray-700">{modelDisplayNames[key]}</h3>
+						<h3 class="text-sm font-medium text-surface-700-300">{modelDisplayNames[key]}</h3>
 						<div class="space-y-2">
 							{#each value as item}
-								<div class="border rounded-lg p-3 bg-gray-50 hover:bg-gray-100 transition">
+								<div
+									class="border rounded-lg p-3 bg-surface-50-950 hover:bg-surface-100-900 transition"
+								>
 									<div class="flex items-start justify-between gap-2 mb-2">
 										<Anchor href={getItemHref(key, item)} class="anchor text-sm font-medium">
 											{item.str}
@@ -363,16 +365,16 @@
 										{#if item.status}
 											<span
 												class="badge {statusColors[item.status] ||
-													'bg-gray-100 text-gray-800'} px-2 py-1 rounded text-xs font-medium whitespace-nowrap flex-shrink-0"
+													'bg-surface-100-900 text-surface-950-50'} px-2 py-1 rounded text-xs font-medium whitespace-nowrap flex-shrink-0"
 											>
 												{safeTranslate(item.status)}
 											</span>
 										{/if}
 									</div>
-									<div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-600">
+									<div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-surface-600-400">
 										{#if item.perimeter}
 											<div class="flex items-center gap-1">
-												<i class="fa-solid fa-draw-polygon text-gray-400"></i>
+												<i class="fa-solid fa-draw-polygon text-surface-400-600"></i>
 												<span>{m.perimeter()}:</span>
 												<Anchor href="/perimeters/{item.perimeter.id}" class="anchor">
 													{item.perimeter.str}
@@ -381,7 +383,7 @@
 										{/if}
 										{#if item.updated_at}
 											<div class="flex items-center gap-1">
-												<i class="fa-solid fa-clock text-gray-400"></i>
+												<i class="fa-solid fa-clock text-surface-400-600"></i>
 												<span>{m.lastUpdate()}:</span>
 												<span>{formatDateOrDateTime(item.updated_at, getLocale())}</span>
 											</div>
@@ -399,7 +401,7 @@
 
 <!-- Events History Section -->
 {#if validation_flow.events && validation_flow.events.length > 0}
-	<div class="card px-6 py-4 bg-white shadow-lg">
+	<div class="card px-6 py-4 bg-surface-50-950 shadow-lg">
 		<h2 class="text-xl font-semibold mb-4">{m.eventsHistory()}</h2>
 		<div class="space-y-4">
 			{#each validation_flow.events as event}
@@ -408,11 +410,11 @@
 						<div>
 							<span
 								class="badge {statusColors[event.event_type] ||
-									'bg-gray-100 text-gray-800'} px-2 py-1 rounded text-xs font-medium mr-2"
+									'bg-surface-100-900 text-surface-950-50'} px-2 py-1 rounded text-xs font-medium mr-2"
 							>
 								{safeTranslate(event.event_type)}
 							</span>
-							<span class="text-sm font-medium text-gray-700">
+							<span class="text-sm font-medium text-surface-700-300">
 								{#if event.event_actor}
 									{#if event.event_actor.first_name || event.event_actor.last_name}
 										{event.event_actor.first_name}
@@ -423,12 +425,12 @@
 								{/if}
 							</span>
 						</div>
-						<div class="text-xs text-gray-500">
+						<div class="text-xs text-surface-600-400">
 							{formatDateOrDateTime(event.created_at, getLocale())}
 						</div>
 					</div>
 					{#if event.event_notes}
-						<div class="text-sm text-gray-600">
+						<div class="text-sm text-surface-600-400">
 							<MarkdownRenderer content={event.event_notes} />
 						</div>
 					{/if}

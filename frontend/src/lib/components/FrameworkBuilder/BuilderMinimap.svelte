@@ -163,18 +163,18 @@
 </script>
 
 <div
-	class="sticky z-40 bg-white border-b border-gray-200 shadow-sm rounded-t-lg"
+	class="sticky z-40 bg-surface-50-950 border-b border-surface-200-800 shadow-sm rounded-t-lg"
 	style="top: {topOffset}px"
 >
 	<div class="flex items-center gap-3 py-2 px-4">
 		<a
 			href="/frameworks/{frameworkId}"
-			class="text-sm text-gray-400 hover:text-gray-600 transition-colors shrink-0"
+			class="text-sm text-surface-500 hover:text-surface-600-400 transition-colors shrink-0"
 		>
 			<i class="fa-solid fa-arrow-left"></i>
 		</a>
 
-		<div class="h-4 w-px bg-gray-200 shrink-0"></div>
+		<div class="h-4 w-px bg-surface-200-800 shrink-0"></div>
 
 		<!--
 			Live-vs-draft status badge. The framework is always pickable by audit
@@ -206,7 +206,7 @@
 			</span>
 		{:else}
 			<span
-				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 inline-flex items-center gap-1"
+				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-surface-100-900 text-surface-600-400 inline-flex items-center gap-1"
 				title={m.builderStatusEmptyTitle()}
 			>
 				<i class="fa-solid fa-file-lines text-[10px]"></i>
@@ -239,7 +239,7 @@
 		<!-- Export YAML button -->
 		<a
 			href="/frameworks/{frameworkId}/builder?_action=export-yaml"
-			class="shrink-0 text-xs text-gray-500 hover:text-gray-700 transition-colors px-2 py-1 flex items-center gap-1"
+			class="shrink-0 text-xs text-surface-600-400 hover:text-surface-700-300 transition-colors px-2 py-1 flex items-center gap-1"
 			download
 			title={$unpublishedStore
 				? m.builderExportYamlUnpublishedWarning()
@@ -254,12 +254,12 @@
 
 		<!-- Language selector -->
 		{#if ($frameworkStore.available_languages ?? []).length > 0}
-			<div class="h-4 w-px bg-gray-200 shrink-0"></div>
+			<div class="h-4 w-px bg-surface-200-800 shrink-0"></div>
 			<div class="flex items-center gap-1.5 shrink-0">
-				<i class="fa-solid fa-language text-gray-400 text-xs"></i>
+				<i class="fa-solid fa-language text-surface-500 text-xs"></i>
 				<select
 					value={$activeLanguageStore ?? ''}
-					class="text-xs border border-gray-200 rounded px-1.5 py-1 focus:border-blue-500 outline-none bg-white cursor-pointer"
+					class="text-xs border border-surface-200-800 rounded px-1.5 py-1 focus:border-blue-500 outline-none bg-surface-50-950 cursor-pointer"
 					onchange={(e) => builder.setActiveLanguage(e.currentTarget.value || null)}
 				>
 					<option value="">{m.builderNoTranslation()}</option>
@@ -292,7 +292,7 @@
 						</button>
 						<button
 							type="button"
-							class="text-xs text-gray-500 px-1"
+							class="text-xs text-surface-600-400 px-1"
 							onclick={() => (confirmCopyBase = false)}
 						>
 							{m.no()}
@@ -300,7 +300,7 @@
 					{:else}
 						<button
 							type="button"
-							class="text-xs text-gray-400 hover:text-amber-600 transition-colors px-1.5 py-0.5"
+							class="text-xs text-surface-500 hover:text-amber-600 transition-colors px-1.5 py-0.5"
 							title={m.builderCopyBaseTitle({ lang: $activeLanguageStore?.toUpperCase() ?? '' })}
 							onclick={() => (confirmCopyBase = true)}
 						>
@@ -318,7 +318,7 @@
 		{#if onCollapseAllCards}
 			<button
 				type="button"
-				class="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-md text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+				class="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-md text-xs text-surface-500 hover:text-surface-600-400 hover:bg-surface-100-900 transition-colors"
 				onclick={onCollapseAllCards}
 				title={m.builderCollapseAllCards()}
 				aria-label={m.builderCollapseAllCards()}
@@ -329,7 +329,7 @@
 		{#if onExpandAllCards}
 			<button
 				type="button"
-				class="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-md text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+				class="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-md text-xs text-surface-500 hover:text-surface-600-400 hover:bg-surface-100-900 transition-colors"
 				onclick={onExpandAllCards}
 				title={m.builderExpandAllCards()}
 				aria-label={m.builderExpandAllCards()}
@@ -342,7 +342,7 @@
 		{#if onOpenHelp}
 			<button
 				type="button"
-				class="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-full text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+				class="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-full text-xs text-surface-500 hover:text-surface-600-400 hover:bg-surface-100-900 transition-colors"
 				onclick={onOpenHelp}
 				title={m.builderKeyboardShortcutsHint()}
 				aria-label={m.builderShowKeyboardShortcuts()}
@@ -410,7 +410,7 @@
 			</button>
 			<button
 				type="button"
-				class="shrink-0 text-xs text-gray-500 px-2 py-1"
+				class="shrink-0 text-xs text-surface-600-400 px-2 py-1"
 				onclick={() => (confirmDiscard = false)}
 			>
 				{m.cancel()}
@@ -418,7 +418,7 @@
 		{:else}
 			<button
 				type="button"
-				class="shrink-0 text-xs text-gray-400 hover:text-red-500 transition-colors px-2 py-1"
+				class="shrink-0 text-xs text-surface-500 hover:text-red-500 transition-colors px-2 py-1"
 				title={m.builderDiscardDraftTitle()}
 				onclick={() => (confirmDiscard = true)}
 			>
@@ -427,12 +427,12 @@
 		{/if}
 
 		{#if $unpublishedStore && !$unsavedStore}
-			<div class="h-4 w-px bg-gray-200 shrink-0"></div>
+			<div class="h-4 w-px bg-surface-200-800 shrink-0"></div>
 
 			<!-- Publish button (hidden until draft is saved) -->
 			<button
 				type="button"
-				class="shrink-0 text-xs text-white font-medium px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors flex items-center gap-1.5"
+				class="shrink-0 text-xs text-white font-medium px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 transition-colors flex items-center gap-1.5"
 				title={m.builderPublishDraftToLiveTitle()}
 				disabled={loadingPreview}
 				onclick={async () => {
@@ -500,12 +500,12 @@
 	>
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<div
-			class="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden"
+			class="bg-surface-50-950 rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden"
 			onclick={(e) => e.stopPropagation()}
 		>
-			<div class="px-5 py-4 border-b border-gray-200">
-				<h3 class="text-lg font-semibold text-gray-900">{m.builderPublishModalTitle()}</h3>
-				<p class="text-sm text-gray-500 mt-1">
+			<div class="px-5 py-4 border-b border-surface-200-800">
+				<h3 class="text-lg font-semibold text-surface-900-100">{m.builderPublishModalTitle()}</h3>
+				<p class="text-sm text-surface-600-400 mt-1">
 					{m.builderPublishModalDescription()}
 				</p>
 			</div>
@@ -559,8 +559,8 @@
 					{/if}
 
 					{#if publishPreview.added.requirements === 0 && publishPreview.removed.requirements === 0}
-						<div class="p-3 bg-gray-50 border-l-2 border-gray-300 rounded-r">
-							<div class="text-sm text-gray-600">
+						<div class="p-3 bg-surface-50-950 border-l-2 border-surface-300-700 rounded-r">
+							<div class="text-sm text-surface-600-400">
 								<i class="fa-solid fa-equals mr-1"></i>
 								{m.builderNoStructuralChanges()}
 							</div>
@@ -622,7 +622,7 @@
 						</div>
 					{/if}
 				{:else}
-					<div class="p-3 bg-gray-50 rounded text-sm text-gray-600">
+					<div class="p-3 bg-surface-50-950 rounded text-sm text-surface-600-400">
 						{m.builderCouldNotLoadPreview()}
 						{#if previewError}
 							<p class="mt-1 text-xs text-red-600">{previewError}</p>
@@ -642,17 +642,17 @@
 				</div>
 			{/if}
 
-			<div class="px-5 py-3 border-t border-gray-200 flex justify-end gap-2">
+			<div class="px-5 py-3 border-t border-surface-200-800 flex justify-end gap-2">
 				<button
 					type="button"
-					class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+					class="px-4 py-2 text-sm font-medium text-surface-700-300 bg-surface-50-950 border border-surface-300-700 rounded-lg hover:bg-surface-50-950"
 					onclick={closePublishModal}
 				>
 					{m.cancel()}
 				</button>
 				<button
 					type="button"
-					class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+					class="px-4 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-700 rounded-lg hover:bg-blue-700"
 					disabled={publishing}
 					onclick={handlePublish}
 				>

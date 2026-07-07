@@ -1,11 +1,18 @@
 import { env } from '$env/dynamic/public';
 import { m } from '$paraglide/messages';
 
-export const BASE_API_URL = `${
-	Object.hasOwn(env, 'PUBLIC_BACKEND_API_URL')
-		? env.PUBLIC_BACKEND_API_URL
-		: 'http://localhost:8000/api'
-}`;
+const rawBackendApiUrl = Object.hasOwn(env, 'PUBLIC_BACKEND_API_URL')
+	? env.PUBLIC_BACKEND_API_URL
+	: 'http://localhost:8000/api';
+
+// Strip default ports so this matches request.url in handleFetch's startsWith check (issue #4422).
+export const BASE_API_URL = (() => {
+	try {
+		return new URL(rawBackendApiUrl).href.replace(/\/$/, '');
+	} catch {
+		return rawBackendApiUrl;
+	}
+})();
 
 export const DEFAULT_LANGUAGE = `${
 	Object.hasOwn(env, 'PUBLIC_DEFAULT_LANGUAGE') ? env.PUBLIC_DEFAULT_LANGUAGE : 'en'
@@ -28,10 +35,10 @@ export const complianceResultColorMap: { [key: string]: string } = {
 };
 
 export const complianceResultTailwindColorMap: { [key: string]: string } = {
-	not_assessed: 'bg-gray-300',
-	partially_compliant: 'bg-yellow-300',
-	non_compliant: 'bg-red-300',
-	compliant: 'bg-green-300',
+	not_assessed: 'bg-surface-300-700',
+	partially_compliant: 'bg-yellow-300 dark:bg-yellow-600',
+	non_compliant: 'bg-red-300 dark:bg-red-800',
+	compliant: 'bg-green-300 dark:bg-green-700',
 	not_applicable: 'bg-black text-white'
 };
 
@@ -43,10 +50,10 @@ export const complianceStatusColorMap: { [key: string]: string } = {
 };
 
 export const complianceStatusTailwindColorMap = {
-	to_do: 'bg-gray-400',
-	in_progress: 'bg-amber-500',
+	to_do: 'bg-surface-400-600',
+	in_progress: 'bg-amber-500 dark:bg-amber-600',
 	in_review: 'bg-blue-500',
-	done: 'bg-green-300'
+	done: 'bg-green-300 dark:bg-green-700'
 };
 
 export const extendedResultColorMap: { [key: string]: string } = {
@@ -165,7 +172,8 @@ export const LOCALE_DISPLAY_MAP = {
 	zh: '🇨🇳 简体中文',
 	lt: '🇱🇹 Lietuvių',
 	ko: '🇰🇷 한국어',
-	et: '🇪🇪 Eesti'
+	et: '🇪🇪 Eesti',
+	sk: '🇸🇰 Slovenčina'
 };
 
 export const ISO_8601_REGEX =

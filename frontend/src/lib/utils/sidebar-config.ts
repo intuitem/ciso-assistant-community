@@ -18,6 +18,7 @@ type SidebarBackendKeys = {
 	organisation_issues: boolean;
 	quantitative_risk_studies: boolean;
 	terminologies: boolean;
+	custom_fields: boolean;
 	bia: boolean;
 	project_management: boolean;
 	contracts: boolean;
@@ -34,6 +35,8 @@ type SidebarBackendKeys = {
 	policy_documents: boolean;
 	security_advisories: boolean;
 	cwes: boolean;
+	custom_portals: boolean;
+	idp_groups: boolean;
 };
 
 type SidebarFrontendKeys = {
@@ -56,6 +59,7 @@ type SidebarFrontendKeys = {
 	organisationIssues: boolean;
 	quantitativeRiskStudies: boolean;
 	terminologies: boolean;
+	customFields: boolean;
 	businessImpactAnalysis: boolean;
 	projectManagement: boolean;
 	contracts: boolean;
@@ -70,6 +74,8 @@ type SidebarFrontendKeys = {
 	presets: boolean;
 	securityAdvisories: boolean;
 	cwes: boolean;
+	managePortals: boolean;
+	idpGroups: boolean;
 };
 
 export function getSidebarVisibleItems(
@@ -95,6 +101,7 @@ export function getSidebarVisibleItems(
 		organisationIssues: featureFlags?.organisation_issues ?? false,
 		quantitativeRiskStudies: featureFlags?.quantitative_risk_studies ?? false,
 		terminologies: featureFlags?.terminologies ?? true,
+		customFields: featureFlags?.custom_fields ?? false,
 		businessImpactAnalysis: featureFlags?.bia ?? true,
 		projectManagement: featureFlags?.project_management ?? false,
 		contracts: featureFlags?.contracts ?? false,
@@ -108,6 +115,8 @@ export function getSidebarVisibleItems(
 		auditDashboard: featureFlags?.auditee_mode ?? false,
 		presets: featureFlags?.journeys ?? true,
 		securityAdvisories: featureFlags?.security_advisories ?? true,
-		cwes: featureFlags?.cwes ?? true
+		cwes: featureFlags?.cwes ?? true,
+		managePortals: featureFlags?.custom_portals ?? false,
+		idpGroups: featureFlags?.idp_groups ?? false
 	};
 }

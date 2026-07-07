@@ -95,7 +95,7 @@
 			class="flex items-center gap-2 rounded-lg text-sm font-medium transition-all duration-200
 				{$focusMode.id
 				? 'bg-indigo-100 text-indigo-700 ring-2 ring-indigo-300 hover:bg-indigo-200 pl-3 pr-8 py-1.5'
-				: 'bg-slate-100 text-slate-600 hover:bg-slate-200 px-3 py-1.5'}"
+				: 'bg-surface-100-900 text-surface-600-400 hover:bg-surface-200-800 px-3 py-1.5'}"
 			title={m.focusModeTooltip()}
 		>
 			<i class="fa-solid fa-crosshairs text-xs"></i>
@@ -122,13 +122,13 @@
 
 	{#if isOpen && hasNodes}
 		<div
-			class="absolute right-0 top-full mt-1 w-72 bg-white rounded-lg shadow-lg border border-slate-200 z-50 flex flex-col"
+			class="absolute right-0 top-full mt-1 w-72 bg-surface-50-950 rounded-lg shadow-lg border border-surface-200-800 z-50 flex flex-col"
 			style="max-height: 26rem"
 		>
 			<!-- Header: label + sort toggle -->
-			<div class="p-2 border-b border-slate-100 space-y-2 flex-shrink-0">
+			<div class="p-2 border-b border-surface-100-900 space-y-2 flex-shrink-0">
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+					<span class="text-xs font-semibold text-surface-500-500 uppercase tracking-wide">
 						{m.selectDomain()}
 					</span>
 					{#if !searchData}
@@ -138,7 +138,7 @@
 								e.stopPropagation();
 								sortAsc = !sortAsc;
 							}}
-							class="flex items-center gap-1 text-xs text-slate-500 hover:text-indigo-600 transition-colors"
+							class="flex items-center gap-1 text-xs text-surface-500-500 hover:text-indigo-600 transition-colors"
 							title={sortAsc ? m.sortDescending() : m.sortAscending()}
 						>
 							<i class={sortAsc ? 'fa-solid fa-arrow-down-a-z' : 'fa-solid fa-arrow-down-z-a'}></i>
@@ -148,11 +148,11 @@
 				</div>
 				<div class="relative">
 					<i
-						class="fa-solid fa-magnifying-glass absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"
+						class="fa-solid fa-magnifying-glass absolute left-2 top-1/2 -translate-y-1/2 text-surface-400-600 text-xs pointer-events-none"
 					></i>
 					<input
 						type="search"
-						class="w-full pl-6 pr-2 py-1 text-sm border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-indigo-300"
+						class="w-full pl-6 pr-2 py-1 text-sm border border-surface-200-800 rounded focus:outline-none focus:ring-1 focus:ring-indigo-300"
 						placeholder={m.searchPlaceholder()}
 						bind:value={searchQuery}
 						onclick={(e) => e.stopPropagation()}
@@ -160,12 +160,12 @@
 				</div>
 			</div>
 			{#if $focusMode.id}
-				<div class="flex-shrink-0 border-b border-slate-100">
+				<div class="flex-shrink-0 border-b border-surface-100-900">
 					<button
 						onclick={handleClear}
-						class="w-full px-3 py-2 text-left text-sm hover:bg-slate-50 flex items-center gap-2 text-slate-600"
+						class="w-full px-3 py-2 text-left text-sm hover:bg-surface-100-900 flex items-center gap-2 text-surface-600-400"
 					>
-						<i class="fa-solid fa-globe text-slate-400"></i>
+						<i class="fa-solid fa-globe text-surface-400-600"></i>
 						{m.allDomains()}
 					</button>
 				</div>
@@ -187,7 +187,7 @@
 								title={[...result.path, result.node.name].join(' / ')}
 							>
 								{#if result.path.length > 0}
-									<div class="text-[10px] text-slate-400 truncate leading-tight mb-0.5">
+									<div class="text-[10px] text-surface-400-600 truncate leading-tight mb-0.5">
 										{result.path.length > 2
 											? '… / ' + result.path.slice(-2).join(' / ')
 											: result.path.join(' / ')}
@@ -198,7 +198,7 @@
 										class="fa-solid fa-folder flex-shrink-0 text-xs {$focusMode.id ===
 										String(result.node.uuid)
 											? 'text-indigo-500'
-											: 'text-slate-400'}"
+											: 'text-surface-400-600'}"
 									></i>
 									<span class="truncate text-sm font-semibold text-indigo-700"
 										>{result.node.name}</span
@@ -211,7 +211,7 @@
 						</li>
 					{/each}
 					{#if searchData.length === 0}
-						<li class="px-3 py-2 text-sm text-slate-400 text-center list-none">
+						<li class="px-3 py-2 text-sm text-surface-400-600 text-center list-none">
 							{m.noResultFound()}
 						</li>
 					{/if}
@@ -231,9 +231,9 @@
 		</div>
 	{:else if isOpen && !hasNodes}
 		<div
-			class="absolute right-0 top-full mt-1 w-72 bg-white rounded-lg shadow-lg border border-slate-200 z-50 p-4"
+			class="absolute right-0 top-full mt-1 w-72 bg-surface-50-950 rounded-lg shadow-lg border border-surface-200-800 z-50 p-4"
 		>
-			<p class="text-sm text-slate-500 text-center">
+			<p class="text-sm text-surface-500-500 text-center">
 				{m.noDomainsAvailable()}
 			</p>
 		</div>

@@ -12,6 +12,7 @@ from library.views import (
     StoredLibraryViewSet,
     LoadedLibraryViewSet,
 )
+from custom_fields.views import CustomFieldDefinitionViewSet
 import importlib
 
 
@@ -22,6 +23,11 @@ from django.conf import settings
 
 router = routers.DefaultRouter()
 router.register(r"folders", FolderViewSet, basename="folders")
+router.register(
+    r"custom-fields",
+    CustomFieldDefinitionViewSet,
+    basename="custom-fields",
+)
 router.register(r"entities", EntityViewSet, basename="entities")
 router.register(
     r"entity-assessments", EntityAssessmentViewSet, basename="entity-assessments"
@@ -58,6 +64,7 @@ router.register(r"teams", TeamViewSet, basename="teams")
 
 router.register(r"users", UserViewSet, basename="users")
 router.register(r"user-groups", UserGroupViewSet, basename="user-groups")
+router.register(r"idp-groups", IdPGroupViewSet, basename="idp-groups")
 router.register(r"role-assignments", RoleAssignmentViewSet, basename="role-assignments")
 router.register(r"frameworks", FrameworkViewSet, basename="frameworks")
 router.register(r"evidences", EvidenceViewSet, basename="evidences")
@@ -161,6 +168,7 @@ urlpatterns = [
     path("crq/", include("crq.urls")),
     path("pmbok/", include("pmbok.urls")),
     path("metrology/", include("metrology.urls")),
+    path("", include("portals.urls")),
     path("csrf/", get_csrf_token, name="get_csrf_token"),
     path("health/", healthcheck, name="healthcheck"),
     path("build/", get_build, name="get_build"),

@@ -32,6 +32,7 @@ export interface ListViewFilterConfig {
 		optionsEndpoint?: string;
 		multiple?: boolean;
 		options?: Option[];
+		enableDoubleDash?: boolean;
 		[key: string]: unknown;
 	};
 	hide?: boolean;
@@ -87,6 +88,43 @@ const RISK_STAGE_OPTIONS = [
 	{ label: 'Current', value: 'current' },
 	{ label: 'Residual', value: 'residual' }
 ];
+const CUSTOM_FIELD_BOOLEAN_OPTIONS = [
+	{ label: 'yes', value: 'true' },
+	{ label: 'no', value: 'false' }
+];
+
+/**
+ * Build ModelTable filter configs for enumerable custom fields (choice / multi_choice / boolean).
+ * The filter key carries the backend lookup: `cf__<key>__in` (any-of) for choices, `cf__<key>` for
+ * booleans — both handled by the backend CustomFieldFilterBackend. The dotless `cf__` prefix keeps
+ * the key a flat field name (superforms treats "." as a nested path). Text/number/date fields
+ * filter via the API but have no dropdown UI here.
+ */
+export function buildCustomFieldFilters(
+	defs: import('./customFields').CustomFieldDef[]
+): Record<string, ListViewFilterConfig> {
+	const filters: Record<string, ListViewFilterConfig> = {};
+	for (const def of defs ?? []) {
+		if (def.filterable === false) continue;
+		if (def.field_type === 'choice' || def.field_type === 'multi_choice') {
+			filters[`cf__${def.key}__in`] = {
+				component: AutocompleteSelect,
+				props: {
+					label: def.label_localized,
+					multiple: true,
+					options: def.choices.map((c) => ({ label: c.label_localized, value: c.value }))
+				}
+			};
+		} else if (def.field_type === 'boolean') {
+			filters[`cf__${def.key}`] = {
+				component: AutocompleteSelect,
+				props: { label: def.label_localized, options: CUSTOM_FIELD_BOOLEAN_OPTIONS }
+			};
+		}
+	}
+	return filters;
+}
+
 export const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -201,6 +239,7 @@ export const PRIORITY_FILTER: ListViewFilterConfig = {
 		optionsValueField: 'value',
 		browserCache: 'force-cache',
 		label: 'priority',
+		enableDoubleDash: true,
 		multiple: true
 	}
 };
@@ -213,6 +252,7 @@ export const EFFORT_FILTER: ListViewFilterConfig = {
 		optionsValueField: 'value',
 		browserCache: 'force-cache',
 		label: 'effort',
+		enableDoubleDash: true,
 		multiple: true
 	}
 };
@@ -326,6 +366,7 @@ export const APPLIED_CONTROL_IMPACT_FILTER: ListViewFilterConfig = {
 		optionsValueField: 'value',
 		label: 'controlImpact',
 		browserCache: 'force-cache',
+		enableDoubleDash: true,
 		multiple: true
 	}
 };
@@ -1084,6 +1125,7 @@ export const APPLIED_CONTROL_CATEGORY_FILTER: ListViewFilterConfig = {
 		multiple: true,
 		optionsLabelField: 'label',
 		browserCache: 'force-cache',
+		enableDoubleDash: true,
 		optionsValueField: 'value'
 	}
 };
@@ -1096,6 +1138,7 @@ export const APPLIED_CONTROL_CSF_FUNCTION_FILTER: ListViewFilterConfig = {
 		optionsValueField: 'value',
 		label: 'csfFunction',
 		browserCache: 'force-cache',
+		enableDoubleDash: true,
 		multiple: true
 	}
 };
@@ -1398,6 +1441,7 @@ export const listViewFields = {
 		head: [
 			'ref_id',
 			'name',
+			'description',
 			'riskMatrix',
 			'status',
 			'riskScenarios',
@@ -1408,6 +1452,7 @@ export const listViewFields = {
 		body: [
 			'ref_id',
 			'str',
+			'description',
 			'risk_matrix',
 			'status',
 			'risk_scenarios_count',
@@ -1627,8 +1672,8 @@ export const listViewFields = {
 			'filtering_labels'
 		],
 		optionalFields: {
-			head: ['startDate', 'expiryDate', 'createdAt', 'updatedAt'],
-			body: ['start_date', 'expiry_date', 'created_at', 'updated_at']
+			head: ['progress', 'startDate', 'expiryDate', 'createdAt', 'updatedAt'],
+			body: ['progress_field', 'start_date', 'expiry_date', 'created_at', 'updated_at']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -1762,6 +1807,7 @@ export const listViewFields = {
 			'firstName',
 			'lastName',
 			'userGroups',
+			'idpGroups',
 			'isActive',
 			'expiryDate',
 			'keep_local_login',
@@ -1773,6 +1819,7 @@ export const listViewFields = {
 			'first_name',
 			'last_name',
 			'user_groups',
+			'idp_groups',
 			'is_active',
 			'expiry_date',
 			'keep_local_login',
@@ -1792,6 +1839,10 @@ export const listViewFields = {
 		head: ['name'],
 		body: ['name'],
 		meta: ['id', 'builtin']
+	},
+	'idp-groups': {
+		head: ['name', 'userGroups'],
+		body: ['name', 'user_groups']
 	},
 	roles: {
 		head: ['name', 'description'],
@@ -1969,13 +2020,14 @@ export const listViewFields = {
 			'default_criticality'
 		],
 		optionalFields: {
-			head: ['referenceLink', 'createdAt', 'updatedAt'],
-			body: ['reference_link', 'created_at', 'updated_at']
+			head: ['filteringLabels', 'referenceLink', 'createdAt', 'updatedAt'],
+			body: ['filtering_labels', 'reference_link', 'created_at', 'updated_at']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			parent_entity: PARENT_ENTITY_FILTER,
-			relationship: ENTITY_RELATIONSHIP_FILTER
+			relationship: ENTITY_RELATIONSHIP_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'entity-assessments': {
@@ -2310,8 +2362,18 @@ export const listViewFields = {
 		}
 	},
 	'ebios-rm': {
-		head: ['name', 'description', 'domain', 'status', 'quotationMethod', 'createdAt', 'updatedAt'],
+		head: [
+			'refId',
+			'name',
+			'description',
+			'domain',
+			'status',
+			'quotationMethod',
+			'createdAt',
+			'updatedAt'
+		],
 		body: [
+			'ref_id',
 			'name',
 			'description',
 			'folder',
@@ -2672,8 +2734,8 @@ export const listViewFields = {
 		}
 	},
 	'quantitative-risk-studies': {
-		head: ['name', 'description', 'status', 'updatedAt', 'domain'],
-		body: ['name', 'description', 'status', 'updated_at', 'folder'],
+		head: ['refId', 'name', 'description', 'status', 'updatedAt', 'domain'],
+		body: ['ref_id', 'name', 'description', 'status', 'updated_at', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: RISK_ASSESSMENT_STATUS_FILTER
@@ -2798,6 +2860,13 @@ export const listViewFields = {
 		head: ['name', 'abbreviation'],
 		body: ['name', 'abbreviation']
 	},
+	'custom-fields': {
+		head: ['model', 'key', 'label', 'fieldType', 'required', 'domain'],
+		body: ['model_label', 'key', 'label', 'field_type', 'required', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER
+		}
+	},
 	terminologies: {
 		head: ['field_path', 'name', 'description', 'translations', 'is_visible'],
 		body: ['field_path', 'name', 'description', 'translations', 'is_visible'],
@@ -2808,8 +2877,8 @@ export const listViewFields = {
 		}
 	},
 	'generic-collections': {
-		head: ['ref_id', 'name', 'description', 'labels', 'folder'],
-		body: ['ref_id', 'name', 'description', 'filtering_labels', 'folder'],
+		head: ['ref_id', 'name', 'description', 'project', 'labels', 'folder'],
+		body: ['ref_id', 'name', 'description', 'projects', 'filtering_labels', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			filtering_labels: LABELS_FILTER
@@ -3114,6 +3183,7 @@ export interface BatchActionConfig {
 	icon: string;
 	field?: string;
 	optionsEndpoint?: string;
+	enableDoubleDash?: boolean;
 	multiSelect?: boolean;
 	children?: BatchActionConfig[];
 	minSelection?: number;
@@ -3139,14 +3209,16 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 					label: 'batchChangePriority',
 					icon: 'fa-solid fa-arrow-up-wide-short',
 					field: 'priority',
-					optionsEndpoint: 'applied-controls/priority'
+					optionsEndpoint: 'applied-controls/priority',
+					enableDoubleDash: true
 				},
 				{
 					type: 'change_field',
 					label: 'changeCsfFunction',
 					icon: 'fa-solid fa-shield-halved',
 					field: 'csf_function',
-					optionsEndpoint: 'applied-controls/csf_function'
+					optionsEndpoint: 'applied-controls/csf_function',
+					enableDoubleDash: true
 				}
 			]
 		},
@@ -3695,8 +3767,11 @@ export function getListViewFields({
 	};
 }
 
-export const headData = (model: urlModel) =>
-	listViewFields[model].body.reduce((obj, key, index) => {
-		obj[key] = listViewFields[model].head[index];
-		return obj;
-	}, {});
+export const headData = (model: urlModel): Record<string, string> =>
+	listViewFields[model].body.reduce(
+		(obj, key, index) => {
+			obj[key] = listViewFields[model].head[index];
+			return obj;
+		},
+		{} as Record<string, string>
+	);

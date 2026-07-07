@@ -11,6 +11,11 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
+	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
 
 	interface Props {
 		data: PageData;
@@ -29,6 +34,40 @@
 	let showModelDropdown = $state(false);
 	let searchInputRef: HTMLInputElement | null = $state(null);
 	let onConflict = $state('stop');
+
+	// SPA form backing the scope pickers; each renders its own name={field} hidden
+	// input, so the values post with the upload form.
+	const scopeSchema = z.object({
+		folder: z.string().nullish(),
+		perimeter: z.string().nullish(),
+		framework: z.string().nullish(),
+		matrix: z.string().nullish(),
+		target: z.string().nullish()
+	});
+	const scopeForm = superForm(
+		defaults(
+			{ folder: null, perimeter: null, framework: null, matrix: null, target: null },
+			zod(scopeSchema)
+		),
+		{ dataType: 'json', taintedMessage: false, validators: zod(scopeSchema), SPA: true }
+	);
+	const scope = scopeForm.form;
+
+	// Composite models: perimeter optional, domain derived from it when set.
+	const ASSESSMENT_MODELS = [
+		'ComplianceAssessment',
+		'RiskAssessment',
+		'FindingsAssessment',
+		'BusinessImpactAnalysis'
+	];
+
+	// Models offering an explicit "update existing" target, mapped to their list
+	// endpoint. BIA is excluded: it already reconciles by name on import.
+	const TARGET_ENDPOINTS: Record<string, string> = {
+		ComplianceAssessment: 'compliance-assessments',
+		RiskAssessment: 'risk-assessments',
+		FindingsAssessment: 'findings-assessments'
+	};
 
 	// Model configuration
 	const modelOptions = [
@@ -116,14 +155,12 @@
 		}
 	}
 
-	// Determine if domain selection should be disabled
+	// Assessment domain is derived from the perimeter; with none picked the user
+	// selects a fallback domain directly.
 	let isDomainDisabled = $derived(
-		selectedModel === 'ComplianceAssessment' ||
-			selectedModel === 'BusinessImpactAnalysis' ||
-			selectedModel === 'FindingsAssessment' ||
-			selectedModel === 'RiskAssessment' ||
-			selectedModel === 'User' ||
-			selectedModel === 'Folder'
+		selectedModel === 'User' ||
+			selectedModel === 'Folder' ||
+			(ASSESSMENT_MODELS.includes(selectedModel) && !!$scope.perimeter)
 	);
 
 	let isFrameworkDisabled = $derived(selectedModel !== 'ComplianceAssessment');
@@ -160,6 +197,17 @@
 	// Determine if perimeter selection should be disabled
 	let isPerimeterDisabled = $derived(modelsWithoutPerimeter.includes(selectedModel));
 
+	let targetEndpoint = $derived(TARGET_ENDPOINTS[selectedModel]);
+	let isTargetEnabled = $derived(!!targetEndpoint);
+
+	// Scope required to create a NEW assessment. A chosen target reuses the
+	// existing container's framework/matrix, so neither is needed then.
+	let isScopeIncomplete = $derived(
+		!$scope.target &&
+			((selectedModel === 'RiskAssessment' && !$scope.matrix) ||
+				(selectedModel === 'ComplianceAssessment' && !$scope.framework))
+	);
+
 	// Fixed: Check files correctly
 	let uploadButtonStyles = $derived(files && files.length > 0 ? '' : 'chip-disabled');
 
@@ -171,6 +219,8 @@
 	$effect(() => {
 		selectedModel;
 		files = null;
+		// Model-specific scope is no longer valid; keep the chosen domain.
+		scope.update((v) => ({ ...v, perimeter: null, framework: null, matrix: null, target: null }));
 		if (fileInputRef) fileInputRef.value = '';
 	});
 
@@ -204,14 +254,14 @@
 </script>
 
 <div class="grid grid-cols-4 gap-4" onclick={handleClickOutside}>
-	<div class=" col-span-2 bg-white shadow-sm py-4 px-6 space-y-2">
+	<div class=" col-span-2 bg-surface-50-950 shadow-sm py-4 px-6 space-y-2">
 		<form enctype="multipart/form-data" method="post" use:enhance bind:this={formElement}>
 			<div>
 				<h4 class="h4 font-bold">
 					<i class="fa-solid fa-file-import mr-2"></i>{m.dataWizardLoadData()}
 				</h4>
 				<a
-					class="text-indigo-600 hover:text-indigo-400"
+					class="text-indigo-600 hover:text-indigo-400 dark:text-indigo-300"
 					href="https://intuitem.gitbook.io/ciso-assistant/guide/data-import-wizard"
 					>{m.dataWizardTemplatesAndGuidelines()}</a
 				>
@@ -238,30 +288,30 @@
 				/>
 				<label
 					for="file"
-					class="flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-6 text-center hover:border-gray-400 hover:bg-gray-100 transition-colors"
+					class="flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-surface-300-700 bg-surface-50-950 p-6 text-center hover:border-gray-400 hover:bg-surface-100-900 transition-colors"
 					class:border-blue-500={files && files.length > 0}
 					class:bg-blue-50={files && files.length > 0}
 				>
 					<div class="space-y-2">
 						<div
-							class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gray-100"
+							class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-surface-100-900"
 						>
-							<i class="fas fa-file-import text-indigo-600 text-xl"></i>
+							<i class="fas fa-file-import text-indigo-600 text-xl dark:text-indigo-300"></i>
 						</div>
 						<div class="text-sm">
 							{#if files && files.length > 0}
-								<p class="font-medium text-blue-600">
+								<p class="font-medium text-blue-600 dark:text-blue-300">
 									<i class="fas fa-check-circle mr-1"></i>
 									{files[0].name}
 								</p>
-								<p class="text-gray-500">
+								<p class="text-surface-600-400">
 									{(files[0].size / 1024 / 1024).toFixed(2)} MB
 								</p>
 							{:else}
-								<p class="font-medium text-gray-900">
-									<span class="text-blue-600">{m.clickToUpload()}</span>
+								<p class="font-medium text-surface-900-100">
+									<span class="text-blue-600 dark:text-blue-300">{m.clickToUpload()}</span>
 								</p>
-								<p class="text-gray-500">
+								<p class="text-surface-600-400">
 									{m.fileAcceptOnly({ extensions: authorizedExtensions.join(', ') })}
 								</p>
 							{/if}
@@ -271,12 +321,12 @@
 			</div>
 
 			<div
-				class="rounded-lg p-6 mt-6 border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-white"
+				class="rounded-lg p-6 mt-6 border-2 border-indigo-200 dark:border-indigo-500/30 bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-500/10 dark:to-surface-950"
 			>
 				<!-- Model Selection Header -->
 				<div class="mb-4">
-					<label class="block text-sm font-semibold text-gray-900 mb-2">{m.object()}</label>
-					<p class="text-xs text-gray-600 mb-3">{m.dataWizardChooseModel()}</p>
+					<label class="block text-sm font-semibold text-surface-900-100 mb-2">{m.object()}</label>
+					<p class="text-xs text-surface-600-400 mb-3">{m.dataWizardChooseModel()}</p>
 				</div>
 
 				<!-- Searchable Model Selector -->
@@ -285,21 +335,25 @@
 					<button
 						type="button"
 						onclick={() => (showModelDropdown = !showModelDropdown)}
-						class="w-full px-4 py-3 text-left bg-white border-2 border-gray-300 rounded-lg hover:border-indigo-400 transition-colors focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+						class="w-full px-4 py-3 text-left bg-surface-50-950 border-2 border-surface-300-700 rounded-lg hover:border-indigo-400 transition-colors focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
 					>
 						<div class="flex items-center justify-between">
 							<div class="flex items-center gap-3 flex-1 min-w-0">
 								{#if selectedModelInfo}
 									<div class="flex-1 min-w-0">
-										<p class="font-medium text-gray-900 truncate">{selectedModelInfo.label}</p>
+										<p class="font-medium text-surface-900-100 truncate">
+											{selectedModelInfo.label}
+										</p>
 										{#if selectedModelInfo.description}
-											<p class="text-xs text-gray-500 truncate">{selectedModelInfo.description}</p>
+											<p class="text-xs text-surface-600-400 truncate">
+												{selectedModelInfo.description}
+											</p>
 										{/if}
 									</div>
 								{/if}
 							</div>
 							<svg
-								class="h-5 w-5 text-gray-400 transition-transform {showModelDropdown
+								class="h-5 w-5 text-surface-500 transition-transform {showModelDropdown
 									? 'rotate-180'
 									: ''}"
 								fill="none"
@@ -319,18 +373,20 @@
 					<!-- Dropdown Panel -->
 					{#if showModelDropdown}
 						<div
-							class="absolute z-50 w-full mt-2 bg-white border-2 border-indigo-300 rounded-lg shadow-lg"
+							class="absolute z-50 w-full mt-2 bg-surface-50-950 border-2 border-indigo-300 dark:border-indigo-500/30 rounded-lg shadow-lg"
 							onclick={(e) => e.stopPropagation()}
 						>
 							<!-- Search Input -->
-							<div class="p-3 border-b border-gray-200 sticky top-0 bg-white rounded-t-lg">
+							<div
+								class="p-3 border-b border-surface-200-800 sticky top-0 bg-surface-50-950 rounded-t-lg"
+							>
 								<input
 									type="text"
 									placeholder={m.searchPlaceholder()}
 									bind:this={searchInputRef}
 									bind:value={searchQuery}
 									autofocus
-									class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200"
+									class="w-full px-3 py-2 border border-surface-300-700 bg-surface-50-950 text-surface-900-100 rounded-md text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200"
 								/>
 							</div>
 
@@ -345,19 +401,21 @@
 												showModelDropdown = false;
 												searchQuery = '';
 											}}
-											class="w-full px-4 py-3 text-left hover:bg-indigo-50 border-b border-gray-100 last:border-b-0 transition-colors group"
+											class="w-full px-4 py-3 text-left hover:bg-indigo-50 dark:hover:bg-indigo-950 border-b border-surface-100-900 last:border-b-0 transition-colors group"
 											class:bg-indigo-100={model.id === selectedModel}
+											class:dark:bg-indigo-900={model.id === selectedModel}
 										>
 											<div class="flex items-start gap-3">
 												<div class="flex-1 min-w-0 pt-0.5">
 													<p
-														class="font-medium text-gray-900 group-hover:text-indigo-700 transition-colors"
+														class="font-medium text-surface-900-100 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors"
 														class:text-indigo-700={model.id === selectedModel}
+														class:dark:text-indigo-300={model.id === selectedModel}
 													>
 														{model.label}
 													</p>
 													{#if model.description}
-														<p class="text-xs text-gray-500 mt-0.5">{model.description}</p>
+														<p class="text-xs text-surface-600-400 mt-0.5">{model.description}</p>
 													{/if}
 												</div>
 												{#if model.id === selectedModel}
@@ -379,7 +437,7 @@
 										</button>
 									{/each}
 								{:else}
-									<div class="px-4 py-8 text-center text-gray-500">
+									<div class="px-4 py-8 text-center text-surface-600-400">
 										<p class="text-sm">{m.noResultsFound?.() ?? 'No results found'}</p>
 									</div>
 								{/if}
@@ -397,25 +455,27 @@
 
 				<!-- Selected Model Description -->
 				{#if selectedModelInfo?.description}
-					<div class="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
-						<p class="text-xs text-blue-900">{selectedModelInfo.description}</p>
+					<div
+						class="mt-3 p-3 bg-blue-50 dark:bg-blue-500/15 border border-blue-200 dark:border-blue-500/30 rounded-md"
+					>
+						<p class="text-xs text-blue-900 dark:text-blue-300">{selectedModelInfo.description}</p>
 					</div>
 				{/if}
 			</div>
 
 			<!-- On-Conflict Handling -->
 			<div
-				class="rounded-lg p-6 mt-6 border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-white"
+				class="rounded-lg p-6 mt-6 border-2 border-warning-200-800 bg-gradient-to-br from-amber-50 to-white dark:from-amber-500/10 dark:to-surface-950"
 			>
-				<label class="block text-sm font-semibold text-gray-900 mb-3"
+				<label class="block text-sm font-semibold text-surface-900-100 mb-3"
 					>{m.dataWizardOnConflict()}</label
 				>
 				<div class="flex gap-2">
 					<label
 						class="flex-1 cursor-pointer rounded-lg border-2 px-3 py-2 text-center text-sm transition-colors {onConflict ===
 						'stop'
-							? 'border-amber-500 bg-amber-100 font-semibold text-amber-800'
-							: 'border-gray-200 bg-white text-gray-700 hover:border-amber-300'}"
+							? 'border-amber-500 bg-warning-100-900 font-semibold text-warning-800-200'
+							: 'border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:border-amber-300'}"
 					>
 						<input
 							type="radio"
@@ -425,15 +485,15 @@
 							class="sr-only"
 						/>
 						<div class="font-medium">{m.dataWizardOnConflictStop()}</div>
-						<div class="text-xs text-gray-500 mt-0.5">
+						<div class="text-xs text-surface-600-400 mt-0.5">
 							{m.dataWizardOnConflictStopDescription()}
 						</div>
 					</label>
 					<label
 						class="flex-1 cursor-pointer rounded-lg border-2 px-3 py-2 text-center text-sm transition-colors {onConflict ===
 						'skip'
-							? 'border-amber-500 bg-amber-100 font-semibold text-amber-800'
-							: 'border-gray-200 bg-white text-gray-700 hover:border-amber-300'}"
+							? 'border-amber-500 bg-warning-100-900 font-semibold text-warning-800-200'
+							: 'border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:border-amber-300'}"
 					>
 						<input
 							type="radio"
@@ -443,15 +503,15 @@
 							class="sr-only"
 						/>
 						<div class="font-medium">{m.dataWizardOnConflictSkip()}</div>
-						<div class="text-xs text-gray-500 mt-0.5">
+						<div class="text-xs text-surface-600-400 mt-0.5">
 							{m.dataWizardOnConflictSkipDescription()}
 						</div>
 					</label>
 					<label
 						class="flex-1 cursor-pointer rounded-lg border-2 px-3 py-2 text-center text-sm transition-colors {onConflict ===
 						'update'
-							? 'border-amber-500 bg-amber-100 font-semibold text-amber-800'
-							: 'border-gray-200 bg-white text-gray-700 hover:border-amber-300'}"
+							? 'border-amber-500 bg-warning-100-900 font-semibold text-warning-800-200'
+							: 'border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:border-amber-300'}"
 					>
 						<input
 							type="radio"
@@ -461,7 +521,7 @@
 							class="sr-only"
 						/>
 						<div class="font-medium">{m.dataWizardOnConflictUpdate()}</div>
-						<div class="text-xs text-gray-500 mt-0.5">
+						<div class="text-xs text-surface-600-400 mt-0.5">
 							{m.dataWizardOnConflictUpdateDescription()}
 						</div>
 					</label>
@@ -470,111 +530,89 @@
 			</div>
 
 			<div
-				class="rounded-lg p-6 mt-6 border-2 border-rose-200 bg-gradient-to-br from-rose-50 to-white space-y-4"
+				class="rounded-lg p-6 mt-6 border-2 border-rose-200 dark:border-rose-500/30 bg-gradient-to-br from-rose-50 to-white dark:from-rose-500/10 dark:to-surface-950 space-y-4"
 			>
 				<!-- Targets Section -->
 				<div>
-					<h3 class="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+					<h3 class="text-sm font-semibold text-surface-900-100 mb-4 flex items-center gap-2">
 						<i class="fa-regular fa-circle-dot mr-2"></i>
 						{m.dataWizardSelectScope()}
 					</h3>
 				</div>
 
 				<!-- Domain Selection -->
-				<div>
-					<label for="folder" class="block text-sm font-medium text-gray-900 mb-2"
-						>{m.dataWizardSelectFallbackDomain()}</label
-					>
-					{#if !isDomainDisabled}
-						<select
-							id="folder"
-							name="folder"
-							class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg text-gray-900 text-sm hover:border-rose-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-colors"
+				{#if !isDomainDisabled}
+					<FolderTreeSelect
+						form={scopeForm}
+						field="folder"
+						nullable
+						label={m.dataWizardSelectFallbackDomain()}
+					/>
+				{:else}
+					<div>
+						<span class="block text-sm font-medium text-surface-900-100 mb-2"
+							>{m.dataWizardSelectFallbackDomain()}</span
 						>
-							{#each data.data.folders as folder}
-								<option value={folder.id}>{folder.name}</option>
-							{/each}
-						</select>
-					{:else}
 						<div
-							class="px-4 py-2.5 bg-gray-100 border-2 border-gray-200 rounded-lg text-gray-500 text-sm"
+							class="px-4 py-2.5 bg-surface-100-900 border-2 border-surface-200-800 rounded-lg text-surface-600-400 text-sm"
 						>
 							{m.automatic?.() ?? 'Automatic'}
 						</div>
-					{/if}
-				</div>
+					</div>
+				{/if}
 
 				<!-- Perimeter Selection -->
-				<div>
-					<label for="perimeter" class="block text-sm font-medium text-gray-900 mb-2"
-						>{m.dataWizardSelectPerimeter()}</label
-					>
-					{#if !isPerimeterDisabled}
-						<select
-							id="perimeter"
-							name="perimeter"
-							class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg text-gray-900 text-sm hover:border-rose-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-colors"
-						>
-							{#each data.data.perimeters as perimeter}
-								<option value={perimeter.id}>{perimeter.name}</option>
-							{/each}
-						</select>
-					{:else}
-						<div
-							class="px-4 py-2.5 bg-gray-100 border-2 border-gray-200 rounded-lg text-gray-500 text-sm"
-						>
-							{m.notRequired?.() ?? 'Not required'}
-						</div>
-					{/if}
-				</div>
+				{#if !isPerimeterDisabled}
+					<AutocompleteSelect
+						form={scopeForm}
+						field="perimeter"
+						optionsEndpoint="perimeters"
+						optionsExtraFields={[['folder', 'str']]}
+						nullable
+						label={m.dataWizardSelectPerimeter()}
+					/>
+				{/if}
 
 				<!-- Framework Selection -->
-				<div>
-					<label for="framework" class="block text-sm font-medium text-gray-900 mb-2"
-						>{m.dataWizardSelectFramework()}</label
-					>
-					{#if !isFrameworkDisabled}
-						<select
-							id="framework"
-							name="framework"
-							class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg text-gray-900 text-sm hover:border-rose-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-colors"
-						>
-							{#each data.data.frameworks as framework}
-								<option value={framework.id}>{framework.name}</option>
-							{/each}
-						</select>
-					{:else}
-						<div
-							class="px-4 py-2.5 bg-gray-100 border-2 border-gray-200 rounded-lg text-gray-500 text-sm"
-						>
-							{m.notRequired?.() ?? 'Not required'}
-						</div>
-					{/if}
-				</div>
+				{#if !isFrameworkDisabled}
+					<AutocompleteSelect
+						form={scopeForm}
+						field="framework"
+						optionsEndpoint="frameworks"
+						mandatory={!$scope.target}
+						label={m.dataWizardSelectFramework()}
+					/>
+				{/if}
 
 				<!-- Risk Matrix Selection -->
-				<div>
-					<label for="matrix" class="block text-sm font-medium text-gray-900 mb-2"
-						>{m.dataWizardSelectRiskMatrix()}</label
-					>
-					{#if !isMatrixDisabled}
-						<select
-							id="matrix"
-							name="matrix"
-							class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg text-gray-900 text-sm hover:border-rose-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-colors"
-						>
-							{#each data.data.risk_matrices || [] as matrix}
-								<option value={matrix.id}>{matrix.name}</option>
-							{/each}
-						</select>
-					{:else}
-						<div
-							class="px-4 py-2.5 bg-gray-100 border-2 border-gray-200 rounded-lg text-gray-500 text-sm"
-						>
-							{m.notRequired?.() ?? 'Not required'}
+				{#if !isMatrixDisabled}
+					<AutocompleteSelect
+						form={scopeForm}
+						field="matrix"
+						optionsEndpoint="risk-matrices"
+						mandatory={selectedModel === 'RiskAssessment' && !$scope.target}
+						label={m.dataWizardSelectRiskMatrix()}
+					/>
+				{/if}
+
+				{#if isTargetEnabled}
+					{#key selectedModel}
+						<div>
+							<AutocompleteSelect
+								form={scopeForm}
+								field="target"
+								optionsEndpoint={targetEndpoint}
+								optionsExtraFields={[['folder', 'str']]}
+								nullable
+								label={m.dataWizardUpdateExisting?.() ?? 'Update existing assessment'}
+							/>
+							<p class="text-xs text-surface-600-400 mt-1">
+								{m.dataWizardUpdateExistingHint?.() ??
+									'Leave empty to create a fresh assessment. Pick an existing one to reconcile the imported rows into it; the conflict strategy then applies to its children.'}
+							</p>
 						</div>
-					{/if}
-				</div>
+					{/key}
+				{/if}
 			</div>
 
 			<!-- Upload Button -->
@@ -582,7 +620,7 @@
 				<button
 					class="flex-1 px-6 py-3 bg-gradient-to-r {uploadButtonStyles} from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
 					type="button"
-					disabled={!files || files.length === 0}
+					disabled={!files || files.length === 0 || isScopeIncomplete}
 					onclick={modalConfirm}
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

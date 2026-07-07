@@ -9,8 +9,8 @@
 	const modalStore: ModalStore = getModalStore();
 	const toastStore = getToastStore();
 
-	const cBase = 'card bg-white p-6 w-modal-wide space-y-6';
-	const cHeader = 'text-xl font-medium text-gray-900';
+	const cBase = 'card bg-surface-50-950 p-6 w-modal-wide space-y-6';
+	const cHeader = 'text-xl font-medium text-surface-900-100';
 
 	interface Props {
 		parent: any;
@@ -264,14 +264,14 @@
 
 		{#if loading}
 			<div class="flex items-center justify-center py-8">
-				<i class="fa-solid fa-spinner fa-spin text-2xl text-gray-400"></i>
+				<i class="fa-solid fa-spinner fa-spin text-2xl text-surface-500"></i>
 			</div>
 		{:else}
 			<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 				<!-- Left: Category selection -->
 				<div class="space-y-3">
 					<div class="flex items-center justify-between">
-						<span class="text-sm font-medium text-gray-700">
+						<span class="text-sm font-medium text-surface-700-300">
 							{m.selectCategories()} ({selectedCategories.length})
 						</span>
 						<div class="flex gap-2">
@@ -284,7 +284,7 @@
 							</button>
 							<button
 								type="button"
-								class="text-xs text-gray-500 hover:text-gray-700"
+								class="text-xs text-surface-600-400 hover:text-surface-700-300"
 								onclick={deselectAll}
 							>
 								{m.deselectAll()}
@@ -292,17 +292,17 @@
 						</div>
 					</div>
 
-					<div class="max-h-96 overflow-y-auto border border-gray-200 rounded-lg">
+					<div class="max-h-96 overflow-y-auto border border-surface-200-800 rounded-lg">
 						{#each categoryGroups as group}
 							{@const groupValues = group.categories.map((c) => c.value)}
 							{@const allGroupSelected = groupValues.every((v) => selectedCategories.includes(v))}
 							{@const someGroupSelected =
 								!allGroupSelected && groupValues.some((v) => selectedCategories.includes(v))}
 
-							<div class="border-b border-gray-100 last:border-b-0">
+							<div class="border-b border-surface-100-900 last:border-b-0">
 								<!-- Group header -->
 								<label
-									class="flex items-center gap-2 px-3 py-2 bg-gray-50 cursor-pointer font-medium text-sm"
+									class="flex items-center gap-2 px-3 py-2 bg-surface-50-950 cursor-pointer font-medium text-sm"
 								>
 									<input
 										type="checkbox"
@@ -316,7 +316,7 @@
 								<!-- Category items -->
 								{#each group.categories as category}
 									<label
-										class="flex items-center gap-2 px-6 py-1.5 hover:bg-gray-50 cursor-pointer"
+										class="flex items-center gap-2 px-6 py-1.5 hover:bg-surface-50-950 cursor-pointer"
 									>
 										<input
 											type="checkbox"
@@ -335,26 +335,29 @@
 				<!-- Right: Common fields -->
 				<div class="space-y-4">
 					<div>
-						<label for="retention" class="block text-sm font-medium text-gray-700 mb-1">
+						<label for="retention" class="block text-sm font-medium text-surface-700-300 mb-1">
 							{m.retention()}
 						</label>
 						<input
 							id="retention"
 							type="text"
 							bind:value={retention}
-							class="input w-full border border-gray-300 rounded px-3 py-2 text-sm"
+							class="input w-full border border-surface-300-700 rounded px-3 py-2 text-sm"
 							placeholder={m.retentionPlaceholder()}
 						/>
 					</div>
 
 					<div>
-						<label for="deletion-policy" class="block text-sm font-medium text-gray-700 mb-1">
+						<label
+							for="deletion-policy"
+							class="block text-sm font-medium text-surface-700-300 mb-1"
+						>
 							{m.deletionPolicy()}
 						</label>
 						<select
 							id="deletion-policy"
 							bind:value={deletionPolicy}
-							class="select w-full border border-gray-300 rounded px-3 py-2"
+							class="select w-full border border-surface-300-700 rounded px-3 py-2"
 						>
 							<option value="">--</option>
 							{#each deletionPolicyOptions as option}
@@ -366,23 +369,23 @@
 					<div>
 						<label class="flex items-center gap-2 cursor-pointer">
 							<input type="checkbox" bind:checked={isSensitive} class="checkbox" />
-							<span class="text-sm font-medium text-gray-700">{m.isSensitive()}</span>
+							<span class="text-sm font-medium text-surface-700-300">{m.isSensitive()}</span>
 						</label>
 					</div>
 				</div>
 			</div>
 		{/if}
 
-		<footer class="flex gap-3 justify-end pt-4 border-t border-gray-200">
+		<footer class="flex gap-3 justify-end pt-4 border-t border-surface-200-800">
 			<button
 				type="button"
-				class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
+				class="px-4 py-2 text-sm font-medium text-surface-700-300 bg-surface-50-950 border border-surface-300-700 hover:bg-surface-50-950"
 				onclick={parent.onClose}
 			>
 				{m.cancel()}
 			</button>
 			<button
-				class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
+				class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 disabled:opacity-50"
 				disabled={!canSubmit}
 				onclick={handleSubmit}
 			>

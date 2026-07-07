@@ -5,14 +5,17 @@
 	import ClientSettings from './client-settings/+page.svelte';
 	import InfraConfig from './infra-config/+page.svelte';
 	import { goto, preloadData, pushState } from '$app/navigation';
+	import { browser } from '$app/environment';
 	import GeneralSettings from '$lib/components/Settings/GeneralSettings.svelte';
 	import SSOSettings from '$lib/components/Settings/SSOSettings.svelte';
+	import SCIMSettings from '$lib/components/Settings/SCIMSettings.svelte';
 	import FeatureFlagsSettings from '$lib/components/Settings/FeatureFlagsSettings.svelte';
 	import WebhooksSettings from '$lib/components/Settings/WebhooksSettings.svelte';
 	import VulnerabilitySlaSettings from '$lib/components/Settings/VulnerabilitySlaSettings.svelte';
 	import SecIntelFeedsSettings from '$lib/components/Settings/SecIntelFeedsSettings.svelte';
 	import EmailTemplatesSettings from '$lib/components/Settings/EmailTemplatesSettings.svelte';
 	import WordTemplatesSettings from '$lib/components/Settings/WordTemplatesSettings.svelte';
+	import AuditLogForwardingSettings from '$lib/components/Settings/AuditLogForwardingSettings.svelte';
 
 	// Tabs whose content lives in a dedicated sub-route and is preloaded into
 	// page.state instead of being loaded by the main settings page.
@@ -21,10 +24,52 @@
 		infraConfig: { href: '/settings/infra-config', stateKey: 'infraConfig' }
 	};
 
+	// page.state (shallow routing) is dropped by server form-action POSTs, which
+	// would otherwise snap the active tab back to "general". sessionStorage keeps
+	// the selection across those round-trips.
+	const SETTINGS_TAB_STORAGE_KEY = 'settingsActiveTab';
+
+	// Tabs that only exist when their feature flag is enabled. A persisted or
+	// stale tab is restored only when it is actually available, so the settings
+	// page never initialises on a hidden tab (e.g. `scim` with idp_groups off).
+	const FLAG_GATED_TABS: Record<string, string> = {
+		scim: 'idp_groups',
+		webhooks: 'outgoing_webhooks',
+		auditLogForwarding: 'audit_log_forwarding',
+		infraConfig: 'infra_config_management'
+	};
+	const KNOWN_TABS = new Set([
+		'general',
+		'sso',
+		'scim',
+		'featureFlags',
+		'vulnerabilitySla',
+		'secIntelFeeds',
+		'webhooks',
+		'auditLogForwarding',
+		'emailTemplates',
+		'integrations',
+		'clientSettings',
+		'infraConfig'
+	]);
+
+	function tabAvailable(tab: string | null | undefined): tab is string {
+		if (!tab || !KNOWN_TABS.has(tab)) return false;
+		const flag = FLAG_GATED_TABS[tab];
+		return flag ? Boolean(page.data?.featureflags?.[flag]) : true;
+	}
+
 	function deriveInitialTab(): string {
-		if (page.state?.settingsTab) return page.state.settingsTab;
+		if (tabAvailable(page.state?.settingsTab)) return page.state.settingsTab;
 		for (const [tab, { href }] of Object.entries(PRELOAD_TABS)) {
 			if (page.url.pathname.endsWith(href.replace('/settings', ''))) return tab;
+		}
+		if (browser) {
+			const saved = sessionStorage.getItem(SETTINGS_TAB_STORAGE_KEY);
+			if (tabAvailable(saved)) {
+				const preload = PRELOAD_TABS[saved];
+				if (!preload || page.state?.[preload.stateKey]) return saved;
+			}
 		}
 		return 'general';
 	}
@@ -44,6 +89,7 @@
 	// Centralized handler for tab changes.
 	async function handleTabChange(newValue: string) {
 		group = newValue;
+		if (browser) sessionStorage.setItem(SETTINGS_TAB_STORAGE_KEY, newValue);
 		const nextState = { ...page.state, settingsTab: newValue };
 
 		// Tabs backed by a sub-route preload their data into page.state instead of
@@ -76,6 +122,9 @@
 	<Tabs.List class="flex-nowrap overflow-x-auto gap-2">
 		<Tabs.Trigger value="general"><i class="fa-solid fa-globe"></i> {m.general()}</Tabs.Trigger>
 		<Tabs.Trigger value="sso"><i class="fa-solid fa-key"></i> {m.sso()}</Tabs.Trigger>
+		{#if page.data?.featureflags?.idp_groups}
+			<Tabs.Trigger value="scim"><i class="fa-solid fa-arrows-rotate"></i> {m.scim()}</Tabs.Trigger>
+		{/if}
 		<Tabs.Trigger value="featureFlags"
 			><i class="fa-solid fa-flag"></i> {m.featureFlags()}</Tabs.Trigger
 		>
@@ -88,7 +137,13 @@
 		{#if page.data?.featureflags?.outgoing_webhooks}
 			<Tabs.Trigger value="webhooks"
 				><span class="flex flex-row gap-2 items-center ml-0"
-					><svg width="20px" height="20px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+					><svg
+						width="20px"
+						height="20px"
+						viewBox="0 0 24 24"
+						xmlns="http://www.w3.org/2000/svg"
+						fill="currentColor"
+					>
 						<title>webhook</title>
 						<rect width="24" height="24" fill="none" />
 						<path
@@ -97,6 +152,11 @@
 					</svg>
 					{m.webhooks()}</span
 				></Tabs.Trigger
+			>
+		{/if}
+		{#if page.data?.featureflags?.audit_log_forwarding}
+			<Tabs.Trigger value="auditLogForwarding"
+				><i class="fa-solid fa-shield-halved"></i> {m.auditLogForwarding()}</Tabs.Trigger
 			>
 		{/if}
 		<Tabs.Trigger value="emailTemplates"
@@ -122,6 +182,11 @@
 	<Tabs.Content value="sso">
 		<SSOSettings {data} />
 	</Tabs.Content>
+	{#if page.data?.featureflags?.idp_groups}
+		<Tabs.Content value="scim">
+			<SCIMSettings {data} />
+		</Tabs.Content>
+	{/if}
 	<Tabs.Content value="featureFlags">
 		<FeatureFlagsSettings {data} />
 	</Tabs.Content>
@@ -133,6 +198,9 @@
 	</Tabs.Content>
 	<Tabs.Content value="webhooks">
 		<WebhooksSettings {data} allowMultiple />
+	</Tabs.Content>
+	<Tabs.Content value="auditLogForwarding">
+		<AuditLogForwardingSettings {data} />
 	</Tabs.Content>
 	<Tabs.Content value="emailTemplates">
 		<div class="space-y-8">
@@ -153,17 +221,17 @@
 	</Tabs.Content>
 	<Tabs.Content value="integrations">
 		<div>
-			<span class="text-gray-500">{m.configureIntegrations()}</span>
+			<span class="text-surface-600-400">{m.configureIntegrations()}</span>
 			<div class="flow-root">
-				<dl class="divide-y divide-surface-100 text-sm">
+				<dl class="divide-y divide-surface-100-900 text-sm">
 					<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
 						<dt class="font-medium">{m.itsm()}</dt>
-						<dd class="text-surface-900 sm:col-span-2">
+						<dd class="text-surface-900-100 sm:col-span-2">
 							<div class="card p-4 bg-inherit flex flex-col space-y-3">
 								<a class="unstyled" href="/settings/integrations/jira">
-									<div class="flex flex-col space-y-2 hover:bg-primary-50 card p-4">
+									<div class="flex flex-col space-y-2 hover:bg-primary-50-950 card p-4">
 										<span class="flex flex-row justify-between text-xl">
-											<i class="text-blue-700 fab fa-jira"></i>
+											<i class="text-blue-700 dark:text-blue-300 fab fa-jira"></i>
 											{#if page.data.settings?.enabled_integrations?.some((integration: Record<string, any>) => integration.name === 'jira' && integration.configurations?.length)}
 												<i class="fa-solid fa-circle-check text-success-600-400"></i>
 											{/if}
@@ -176,9 +244,9 @@
 							</div>
 							<div class="card p-4 bg-inherit flex flex-col space-y-3">
 								<a class="unstyled" href="/settings/integrations/servicenow">
-									<div class="flex flex-col space-y-2 hover:bg-primary-50 card p-4">
+									<div class="flex flex-col space-y-2 hover:bg-primary-50-950 card p-4">
 										<span class="flex flex-row justify-between text-xl">
-											<i class="text-green-700 fa-solid fa-o"></i>
+											<i class="text-green-700 dark:text-green-300 fa-solid fa-o"></i>
 											{#if page.data.settings?.enabled_integrations?.some((integration: Record<string, any>) => integration.name === 'servicenow' && integration.configurations?.length)}
 												<i class="fa-solid fa-circle-check text-success-600-400"></i>
 											{/if}

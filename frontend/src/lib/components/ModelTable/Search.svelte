@@ -20,7 +20,7 @@
 </script>
 
 <input
-	class="input bg-surface-50 max-w-2xl"
+	class="input bg-surface-50-950 max-w-2xl"
 	placeholder={m.searchPlaceholder()}
 	data-testid="search-input"
 	id="search-input"

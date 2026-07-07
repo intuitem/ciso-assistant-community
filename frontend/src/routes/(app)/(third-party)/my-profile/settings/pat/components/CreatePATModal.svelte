@@ -48,7 +48,7 @@
 	});
 
 	// Base Classes
-	const cBase = 'card bg-surface-50 p-4 w-fit shadow-xl space-y-4 max-w-[80ch] overflow-auto';
+	const cBase = 'card bg-surface-50-950 p-4 w-fit shadow-xl space-y-4 max-w-[80ch] overflow-auto';
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'p-4 space-y-4 rounded-container-token';
 
@@ -66,7 +66,7 @@
 		<article class="flex flex-row space-x-8">
 			<div class="flex flex-col space-y-4 items-center">
 				<div class="flex flex-col space-y-4 items-center self-center">
-					<p class="text-surface-900">{m.personalAccessTokenCreateDescription()}</p>
+					<p class="text-surface-900-100">{m.personalAccessTokenCreateDescription()}</p>
 					<SuperForm
 						dataType="json"
 						action={formAction}

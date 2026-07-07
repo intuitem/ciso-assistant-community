@@ -3,9 +3,7 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
 	import { m } from '$paraglide/messages';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import { page } from '$app/state';
@@ -31,6 +29,14 @@
 	}: Props = $props();
 
 	let activeActivity: string | null = $state(null);
+	let hasEntities = $state(false);
+
+	fetch('/entities?limit=1')
+		.then((r) => r.json())
+		.then((data) => {
+			hasEntities = (data.count ?? 0) > 0;
+		})
+		.catch(() => {});
 
 	page.url.searchParams.forEach((value, key) => {
 		if (key === 'activity' && value === 'one') {
@@ -41,16 +47,6 @@
 	});
 </script>
 
-{#if context != 'selectAudit' && context != 'selectAsset'}
-	<TextField
-		{form}
-		field="name"
-		label={m.name()}
-		cacheLock={cacheLocks['name']}
-		bind:cachedValue={formDataCache['name']}
-		data-focusindex="0"
-	/>
-{/if}
 {#if context !== 'ebiosRmStudy' && context !== 'selectAudit' && context !== 'selectAsset'}
 	<TextField
 		{form}
@@ -76,13 +72,16 @@
 		cacheLock={cacheLocks['status']}
 		bind:cachedValue={formDataCache['status']}
 	/>
-	<FolderTreeSelect
-		{form}
-		field="folder"
-		cacheLock={cacheLocks['folder']}
-		bind:cachedValue={formDataCache['folder']}
-		label={m.domain()}
-	/>
+	{#if hasEntities}
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="entities"
+			field="reference_entity"
+			cacheLock={cacheLocks['reference_entity']}
+			bind:cachedValue={formDataCache['reference_entity']}
+			label={m.referenceEntity()}
+		/>
+	{/if}
 	<AutocompleteSelect
 		{form}
 		optionsEndpoint="risk-matrices?is_enabled=true"
@@ -96,12 +95,12 @@
 	<div
 		class="relative p-2 space-y-2 rounded-md {activeActivity === 'one'
 			? 'border-2 border-primary-500'
-			: 'border-2 border-gray-300 border-dashed'}"
+			: 'border-2 border-surface-300-700 border-dashed'}"
 	>
 		<p
-			class="absolute -top-3 bg-white font-bold {activeActivity === 'one'
+			class="absolute -top-3 bg-surface-50-950 font-bold {activeActivity === 'one'
 				? 'text-primary-500'
-				: 'text-gray-500'}"
+				: 'text-surface-600-400'}"
 		>
 			{m.activityOne()}
 		</p>
@@ -122,14 +121,6 @@
 			label={m.riskMatrix()}
 			helpText={m.ebiosRmMatrixHelpText() + '\n' + m.riskAssessmentMatrixHelpText()}
 		/>
-		<MarkdownField
-			{form}
-			field="description"
-			label={m.description()}
-			cacheLock={cacheLocks['description']}
-			bind:cachedValue={formDataCache['description']}
-			data-focusindex="1"
-		/>
 		<TextField
 			{form}
 			field="version"
@@ -146,6 +137,16 @@
 			cacheLock={cacheLocks['quotation_method']}
 			bind:cachedValue={formDataCache['quotation_method']}
 		/>
+		{#if hasEntities}
+			<AutocompleteSelect
+				{form}
+				optionsEndpoint="entities"
+				field="reference_entity"
+				cacheLock={cacheLocks['reference_entity']}
+				bind:cachedValue={formDataCache['reference_entity']}
+				label={m.referenceEntity()}
+			/>
+		{/if}
 		<AutocompleteSelect
 			multiple
 			{form}
@@ -178,12 +179,12 @@
 	<div
 		class="relative p-2 space-y-2 rounded-md {activeActivity === 'two'
 			? 'border-2 border-primary-500'
-			: 'border-2 border-gray-300 border-dashed'}"
+			: 'border-2 border-surface-300-700 border-dashed'}"
 	>
 		<p
-			class="absolute -top-3 bg-white font-bold {activeActivity === 'two'
+			class="absolute -top-3 bg-surface-50-950 font-bold {activeActivity === 'two'
 				? 'text-primary-500'
-				: 'text-gray-500'}"
+				: 'text-surface-600-400'}"
 		>
 			{m.activityTwo()}
 		</p>

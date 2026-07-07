@@ -246,6 +246,33 @@ class MappingEngine:
 
         return coverage
 
+    def get_source_framework_urns(
+        self, target_urn: str, max_depth: int = 3
+    ) -> set[str]:
+        """Return all framework URNs that can reach *target_urn* via mapping
+        paths (reverse BFS on the framework_mappings graph).
+
+        The target framework itself is always included (same-framework mapping).
+        """
+        reverse_graph: defaultdict[str, list[str]] = defaultdict(list)
+        for src, targets in self.framework_mappings.items():
+            for tgt in targets:
+                reverse_graph[tgt].append(src)
+
+        reachable: set[str] = {target_urn}
+        queue: deque[tuple[str, int]] = deque([(target_urn, 0)])
+
+        while queue:
+            current, depth = queue.popleft()
+            if depth >= max_depth - 1:
+                continue
+            for predecessor in reverse_graph.get(current, []):
+                if predecessor not in reachable:
+                    reachable.add(predecessor)
+                    queue.append((predecessor, depth + 1))
+
+        return reachable
+
     def all_paths_from(self, source_urn, max_depth=None):
         """
         Breadth-first search returning shortest paths from a source to all reachable targets.
@@ -579,6 +606,11 @@ class MappingEngine:
                     },
                 )
             else:
+                # Coverage is weakest-link along a path: an earlier-hop source
+                # can only remain "full" through this hop if this hop is also
+                # full (equal/superset). Otherwise it degrades to "partial".
+                hop_full = rel in ("equal", "superset")
+
                 # Propagate sources from earlier hops.
                 for mif_id, mif_value in (
                     src_assessment.get("mapping_inference", {})
@@ -586,6 +618,8 @@ class MappingEngine:
                     .items()
                 ):
                     copied_value = mif_value.copy()
+                    if not hop_full and copied_value.get("coverage") == "full":
+                        copied_value["coverage"] = "partial"
                     if mapping_set_info and not copied_value.get("used_mapping_set"):
                         copied_value["used_mapping_set"] = mapping_set_info
                     merge_source_requirement_assessment(mif_id, copied_value)

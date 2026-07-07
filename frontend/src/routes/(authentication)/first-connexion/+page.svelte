@@ -16,14 +16,17 @@
 	let { data }: Props = $props();
 </script>
 
-<div class="flex mx-auto justify-center items-center h-screen w-screen bg-slate-200">
+<div class="flex mx-auto justify-center items-center h-screen w-screen bg-surface-200-800">
 	<div class="absolute top-5 left-5">
 		<div class="flex flex-row w-full space-x-4 pb-3">
 			<Logo />
 		</div>
 	</div>
 	<div class="flex w-full items-center justify-center">
-		<div id="hellothere" class="flex flex-col justify-center items-center w-3/5 text-gray-900">
+		<div
+			id="hellothere"
+			class="flex flex-col justify-center items-center w-3/5 text-surface-950-50"
+		>
 			<Typewriter mode="loopOnce" cursor={false} interval={50}>
 				<div class="text-2xl unstyled text-center pb-4">
 					<span class="text-2xl text-center">{m.helloThere()} 👋</span>
@@ -38,11 +41,11 @@
 				</div>
 			</Typewriter>
 		</div>
-		<div class="flex flex-col bg-white p-12 rounded-lg shadow-lg items-center space-y-4">
+		<div class="flex flex-col bg-surface-50-950 p-12 rounded-lg shadow-lg items-center space-y-4">
 			<div class="bg-primary-300 px-6 py-5 rounded-full text-3xl">
 				<i class="fa-solid fa-key"></i>
 			</div>
-			<p class="text-gray-600 text-sm text-center">
+			<p class="text-surface-600-400 text-sm text-center">
 				{m.youCanSetPasswordHere()}<br />
 			</p>
 			<!-- SuperForm with dataType 'form' -->

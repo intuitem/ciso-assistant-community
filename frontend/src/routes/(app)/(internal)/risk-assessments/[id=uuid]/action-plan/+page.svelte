@@ -42,7 +42,7 @@
 	);
 </script>
 
-<div class="bg-white p-2 shadow rounded-lg space-x-2 flex flex-row justify-center mb-2">
+<div class="bg-surface-50-950 p-2 shadow rounded-lg space-x-2 flex flex-row justify-center mb-2">
 	<p class="font-semibold text-lg">
 		{#if data.risk_assessment.perimeter}
 			{m.perimeter()}:
@@ -72,11 +72,11 @@
 <ActionPlanBudgetOverview
 	budgetEndpoint={`/risk-assessments/${page.params.id}/action-plan/budget-overview`}
 />
-<div class="flex flex-col space-y-4 bg-white p-4 shadow rounded-lg space-x-2">
+<div class="flex flex-col space-y-4 bg-surface-50-950 p-4 shadow rounded-lg space-x-2">
 	<div class="flex justify-between items-center w-full">
 		<div class="flex-1">
 			<p class="text-xl font-extrabold">{m.associatedAppliedControls()}</p>
-			<p class="text-sm text-gray-500">
+			<p class="text-sm text-surface-600-400">
 				{m.actionPlanHelpText()}
 			</p>
 		</div>

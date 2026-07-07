@@ -76,7 +76,7 @@
 	<header class="flex items-start justify-between gap-3">
 		<div>
 			<h1 class="text-2xl font-semibold">Preset Editor</h1>
-			<p class="text-sm text-gray-600 mt-1">
+			<p class="text-sm text-surface-600-400 mt-1">
 				Create and edit user-authored presets. Library-backed presets are read-only — fork one to
 				start from.
 			</p>
@@ -89,11 +89,11 @@
 		</div>
 	{/if}
 
-	<section class="bg-white rounded shadow-sm p-4">
+	<section class="bg-surface-50-950 rounded shadow-sm p-4">
 		<h2 class="font-semibold mb-2">Start something new</h2>
 		<div class="flex flex-col md:flex-row gap-3 md:items-end">
 			<label class="flex flex-col text-sm flex-1">
-				<span class="text-gray-700 mb-1">Name (optional)</span>
+				<span class="text-surface-700-300 mb-1">Name (optional)</span>
 				<input
 					class="input"
 					type="text"
@@ -123,19 +123,19 @@
 	</section>
 
 	{#if showFork}
-		<section class="bg-white rounded shadow-sm p-4">
+		<section class="bg-surface-50-950 rounded shadow-sm p-4">
 			<h2 class="font-semibold mb-3">Fork from a library preset</h2>
 			{#if data.libraryPresets.length === 0}
-				<p class="text-sm text-gray-500">No library presets loaded.</p>
+				<p class="text-sm text-surface-600-400">No library presets loaded.</p>
 			{:else}
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-2">
 					{#each data.libraryPresets as p (p.id)}
 						<div class="border rounded p-3 flex items-start justify-between gap-2">
 							<div class="flex-1">
 								<p class="font-medium text-sm">{p.name}</p>
-								<p class="text-xs text-gray-500 mt-0.5">v{p.version} · {p.urn}</p>
+								<p class="text-xs text-surface-600-400 mt-0.5">v{p.version} · {p.urn}</p>
 								{#if p.description}
-									<p class="text-xs text-gray-700 mt-1 line-clamp-2">{p.description}</p>
+									<p class="text-xs text-surface-700-300 mt-1 line-clamp-2">{p.description}</p>
 								{/if}
 							</div>
 							<button
@@ -153,15 +153,15 @@
 		</section>
 	{/if}
 
-	<section class="bg-white rounded shadow-sm p-4">
+	<section class="bg-surface-50-950 rounded shadow-sm p-4">
 		<h2 class="font-semibold mb-3">Your presets</h2>
 		{#if data.userAuthored.length === 0}
-			<div class="text-sm text-gray-500 py-6 text-center">
+			<div class="text-sm text-surface-600-400 py-6 text-center">
 				No user-authored presets yet. Create a blank one or fork a library preset above.
 			</div>
 		{:else}
 			<table class="w-full text-sm">
-				<thead class="text-xs text-gray-600 border-b">
+				<thead class="text-xs text-surface-600-400 border-b">
 					<tr>
 						<th class="text-left py-2 px-2">Name</th>
 						<th class="text-left py-2 px-2">Version</th>
@@ -171,7 +171,7 @@
 				</thead>
 				<tbody>
 					{#each data.userAuthored as p (p.id)}
-						<tr class="border-b last:border-b-0 hover:bg-gray-50">
+						<tr class="border-b last:border-b-0 hover:bg-surface-50-950">
 							<td class="py-2 px-2">
 								<a
 									href="/experimental/preset-editor/{p.id}"
@@ -180,11 +180,11 @@
 									{p.name}
 								</a>
 								{#if p.description}
-									<p class="text-xs text-gray-500 line-clamp-1">{p.description}</p>
+									<p class="text-xs text-surface-600-400 line-clamp-1">{p.description}</p>
 								{/if}
 							</td>
-							<td class="py-2 px-2 text-gray-700">v{p.version}</td>
-							<td class="py-2 px-2 text-gray-500 text-xs">{fmtDate(p.updated_at)}</td>
+							<td class="py-2 px-2 text-surface-700-300">v{p.version}</td>
+							<td class="py-2 px-2 text-surface-600-400 text-xs">{fmtDate(p.updated_at)}</td>
 							<td class="py-2 px-2 text-right">
 								<a href="/experimental/preset-editor/{p.id}" class="btn btn-sm variant-soft">
 									Open

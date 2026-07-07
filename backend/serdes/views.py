@@ -20,9 +20,7 @@ from core.utils import compare_schema_versions
 from iam.models import User
 from serdes.serializers import LoadBackupSerializer
 
-from auditlog.models import LogEntry
 from django.db.models.signals import post_save
-from core.custom_middleware import add_user_info_to_log_entry
 from django.apps import apps
 from django.conf import settings
 from auditlog.context import disable_auditlog
@@ -77,9 +75,9 @@ class LoadBackupView(APIView):
     serializer_class = LoadBackupSerializer
 
     def load_backup(self, request, decompressed_data, backup_version, current_version):
-        # Temporarily disconnect the problematic signal
-        post_save.disconnect(add_user_info_to_log_entry, sender=LogEntry)
-
+        # The LogEntry enrichment receiver disconnected here in #1707 is gone:
+        # folder is now captured inline via AbstractBaseModel.get_additional_data,
+        # so loaddata of auditlog.logentry fixtures no longer triggers enrichment.
         backup_buffer = io.StringIO()
         try:
             management.call_command(
@@ -178,7 +176,6 @@ class LoadBackupView(APIView):
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
         finally:
             post_save.disconnect(fixture_callback)
-            post_save.connect(add_user_info_to_log_entry, sender=LogEntry)
 
         # Enforce LICENSE_SEATS after successful restore
         license_seats = getattr(settings, "LICENSE_SEATS", None)

@@ -132,7 +132,7 @@
 				<input type="hidden" name={field} value={currentValue} />
 			{/if}
 			<div
-				class="p-3 border border-surface-300 rounded-md min-h-[120px] overflow-auto max-h-[75dvh] bg-surface-50"
+				class="p-3 border border-surface-300-700 rounded-md min-h-[120px] overflow-auto max-h-[75dvh] bg-surface-50-950"
 				ondblclick={() => !disabled && (showPreview = false)}
 				role="button"
 				tabindex="0"
@@ -147,7 +147,7 @@
 				{#if currentValue}
 					<MarkdownRenderer content={currentValue} />
 				{:else}
-					<p class="text-gray-500 italic">{m.markdownCTA()}</p>
+					<p class="text-surface-600-400 italic">{m.markdownCTA()}</p>
 				{/if}
 			</div>
 		{:else if formCoupled && proxyValue}
@@ -183,10 +183,10 @@
 		{/if}
 	</div>
 	{#if helpText}
-		<p class="text-sm text-gray-500">{helpText}</p>
+		<p class="text-sm text-surface-600-400">{helpText}</p>
 	{/if}
 	{#if !showPreview}
-		<p class="text-xs text-gray-400 mt-1">
+		<p class="text-xs text-surface-400-600 mt-1">
 			{m.markdownHelpText()}
 		</p>
 	{/if}
