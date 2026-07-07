@@ -1898,6 +1898,11 @@ def startup(sender=None, **kwargs):
         logger.error("Error creating default Project Health", exc_info=True)
 
     try:
+        ObjectClassification.create_default_classifications()
+    except Exception as e:
+        logger.error("Error creating default classifications", exc_info=True)
+
+    try:
         from pmbok.models import ResponsibilityRole
 
         ResponsibilityRole.create_default_roles()
