@@ -2188,8 +2188,8 @@ export const listViewFields = {
 		head: ['refId', 'name', 'description', 'status', 'processingNature', 'labels', 'folder'],
 		body: ['ref_id', 'name', 'description', 'status', 'nature', 'filtering_labels', 'folder'],
 		optionalFields: {
-			head: ['personalDataCategories', 'dataSubjectCategories'],
-			body: ['personal_data_categories', 'data_subject_categories']
+			head: ['personalDataCategories', 'dataSubjectCategories', 'updatedAt'],
+			body: ['personal_data_categories', 'data_subject_categories', 'updated_at']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
