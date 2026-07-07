@@ -3488,6 +3488,53 @@ class LoadFileView(APIView):
             f"Success: {results['successful']}, Failed: {results['failed']}"
         )
 
+    def _handle_tprm_conflict(
+        self,
+        request,
+        results,
+        record,
+        on_conflict,
+        label,
+        serializer_class,
+        instance,
+        data,
+        post_update=None,
+    ) -> str:
+        """Apply the conflict policy to an existing record.
+
+        Returns the action taken: "skipped", "stopped", "updated" or "failed".
+        """
+        match on_conflict:
+            case ConflictMode.SKIP:
+                results["skipped"] += 1
+                return "skipped"
+            case ConflictMode.STOP:
+                self._add_tprm_record_error(
+                    results,
+                    record,
+                    f"{label} already exists (conflict policy: stop)",
+                )
+                results["stopped"] = True
+                return "stopped"
+            case ConflictMode.UPDATE:
+                serializer = serializer_class(
+                    instance=instance,
+                    data=data,
+                    partial=True,
+                    context={"request": request},
+                )
+                if not serializer.is_valid():
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "errors": serializer.errors}
+                    )
+                    return "failed"
+                updated_instance = serializer.save()
+                if post_update:
+                    post_update(updated_instance)
+                results["updated"] += 1
+                return "updated"
+
     def _process_entities(
         self, request, records, folders_map, folder_id, on_conflict=ConflictMode.STOP
     ):
@@ -3513,76 +3560,7 @@ class LoadFileView(APIView):
                         str(record.get("domain")).lower(), folder_id
                     )
 
-                # Check for existing entity by ref_id or name
-                existing_entity = Entity.objects.filter(ref_id=ref_id).first()
-                if not existing_entity:
-                    existing_entity = Entity.objects.filter(
-                        name__iexact=record.get("name"),
-                        folder_id=domain,
-                    ).first()
-
-                if existing_entity:
-                    ref_id_map[ref_id] = str(existing_entity.id)
-                    match on_conflict:
-                        case ConflictMode.SKIP:
-                            results["skipped"] += 1
-                            continue
-                        case ConflictMode.STOP:
-                            self._add_tprm_record_error(
-                                results,
-                                record,
-                                "Entity already exists (conflict policy: stop)",
-                            )
-                            results["stopped"] = True
-                            break
-                        case ConflictMode.UPDATE:
-                            update_data = {
-                                "ref_id": ref_id,
-                                "name": record.get("name"),
-                                "description": record.get("description", ""),
-                                "mission": record.get("mission", ""),
-                                "folder": domain,
-                            }
-                            if record.get("country"):
-                                update_data["country"] = record.get("country")
-                            if record.get("currency"):
-                                update_data["currency"] = record.get("currency")
-                            for field in [
-                                "dependency",
-                                "penetration",
-                                "maturity",
-                                "trust",
-                            ]:
-                                value = record.get(field)
-                                if value != "" and value is not None:
-                                    try:
-                                        update_data[f"default_{field}"] = int(value)
-                                    except ValueError, TypeError:
-                                        pass
-                            legal_ids = {}
-                            for id_type in ["lei", "euid", "duns", "vat"]:
-                                value = record.get(id_type, "")
-                                if value and str(value).strip():
-                                    legal_ids[id_type.upper()] = str(value).strip()
-                            if legal_ids:
-                                update_data["legal_identifiers"] = legal_ids
-                            serializer = EntityWriteSerializer(
-                                instance=existing_entity,
-                                data=update_data,
-                                partial=True,
-                                context={"request": request},
-                            )
-                            if serializer.is_valid():
-                                serializer.save()
-                                results["updated"] += 1
-                            else:
-                                results["failed"] += 1
-                                results["errors"].append(
-                                    {"record": record, "errors": serializer.errors}
-                                )
-                            continue
-
-                # Prepare entity data
+                # Prepare entity data (used by both update and create)
                 entity_data = {
                     "ref_id": ref_id,
                     "name": record.get("name"),
@@ -3615,6 +3593,30 @@ class LoadFileView(APIView):
 
                 if legal_identifiers:
                     entity_data["legal_identifiers"] = legal_identifiers
+
+                # Check for existing entity by ref_id or name
+                existing_entity = Entity.objects.filter(ref_id=ref_id).first()
+                if not existing_entity:
+                    existing_entity = Entity.objects.filter(
+                        name__iexact=record.get("name"),
+                        folder_id=domain,
+                    ).first()
+
+                if existing_entity:
+                    ref_id_map[ref_id] = str(existing_entity.id)
+                    action = self._handle_tprm_conflict(
+                        request,
+                        results,
+                        record,
+                        on_conflict,
+                        label="Entity",
+                        serializer_class=EntityWriteSerializer,
+                        instance=existing_entity,
+                        data=entity_data,
+                    )
+                    if action == "stopped":
+                        break
+                    continue
 
                 # Create the entity first, then handle parent relationship
                 serializer = EntityWriteSerializer(
@@ -3689,61 +3691,7 @@ class LoadFileView(APIView):
 
                 provider_entity_id = entity_ref_map[provider_ref_id]
 
-                # Check for existing solution by ref_id or name
-                existing_solution = Solution.objects.filter(ref_id=ref_id).first()
-                if not existing_solution:
-                    existing_solution = Solution.objects.filter(
-                        name__iexact=record.get("name"),
-                    ).first()
-
-                if existing_solution:
-                    ref_id_map[ref_id] = str(existing_solution.id)
-                    match on_conflict:
-                        case ConflictMode.SKIP:
-                            results["skipped"] += 1
-                            continue
-                        case ConflictMode.STOP:
-                            self._add_tprm_record_error(
-                                results,
-                                record,
-                                "Solution already exists (conflict policy: stop)",
-                            )
-                            results["stopped"] = True
-                            break
-                        case ConflictMode.UPDATE:
-                            update_data = {
-                                "ref_id": ref_id,
-                                "name": record.get("name"),
-                                "description": record.get("description", ""),
-                                "provider_entity": provider_entity_id,
-                            }
-                            if (
-                                record.get("criticality") != ""
-                                and record.get("criticality") is not None
-                            ):
-                                try:
-                                    update_data["criticality"] = int(
-                                        record.get("criticality")
-                                    )
-                                except ValueError, TypeError:
-                                    pass
-                            serializer = SolutionWriteSerializer(
-                                instance=existing_solution,
-                                data=update_data,
-                                partial=True,
-                                context={"request": request},
-                            )
-                            if serializer.is_valid():
-                                serializer.save()
-                                results["updated"] += 1
-                            else:
-                                results["failed"] += 1
-                                results["errors"].append(
-                                    {"record": record, "errors": serializer.errors}
-                                )
-                            continue
-
-                # Prepare solution data
+                # Prepare solution data (used by both update and create)
                 solution_data = {
                     "ref_id": ref_id,
                     "name": record.get("name"),
@@ -3760,6 +3708,29 @@ class LoadFileView(APIView):
                         solution_data["criticality"] = int(record.get("criticality"))
                     except ValueError, TypeError:
                         pass
+
+                # Check for existing solution by ref_id or name
+                existing_solution = Solution.objects.filter(ref_id=ref_id).first()
+                if not existing_solution:
+                    existing_solution = Solution.objects.filter(
+                        name__iexact=record.get("name"),
+                    ).first()
+
+                if existing_solution:
+                    ref_id_map[ref_id] = str(existing_solution.id)
+                    action = self._handle_tprm_conflict(
+                        request,
+                        results,
+                        record,
+                        on_conflict,
+                        label="Solution",
+                        serializer_class=SolutionWriteSerializer,
+                        instance=existing_solution,
+                        data=solution_data,
+                    )
+                    if action == "stopped":
+                        break
+                    continue
 
                 # Create the solution
                 serializer = SolutionWriteSerializer(
@@ -3884,6 +3855,10 @@ class LoadFileView(APIView):
                 if record.get("currency"):
                     contract_data["currency"] = record.get("currency")
 
+                def link_solutions(contract):
+                    if solution_ids:
+                        contract.solutions.set(solution_ids)
+
                 # Check for existing contract by ref_id or name
                 existing_contract = Contract.objects.filter(ref_id=ref_id).first()
                 if not existing_contract:
@@ -3893,36 +3868,20 @@ class LoadFileView(APIView):
                     ).first()
 
                 if existing_contract:
-                    match on_conflict:
-                        case ConflictMode.SKIP:
-                            results["skipped"] += 1
-                            continue
-                        case ConflictMode.STOP:
-                            self._add_tprm_record_error(
-                                results,
-                                record,
-                                "Contract already exists (conflict policy: stop)",
-                            )
-                            results["stopped"] = True
-                            break
-                        case ConflictMode.UPDATE:
-                            serializer = ContractWriteSerializer(
-                                instance=existing_contract,
-                                data=contract_data,
-                                partial=True,
-                                context={"request": request},
-                            )
-                            if serializer.is_valid():
-                                contract = serializer.save()
-                                if solution_ids:
-                                    contract.solutions.set(solution_ids)
-                                results["updated"] += 1
-                            else:
-                                results["failed"] += 1
-                                results["errors"].append(
-                                    {"record": record, "errors": serializer.errors}
-                                )
-                            continue
+                    action = self._handle_tprm_conflict(
+                        request,
+                        results,
+                        record,
+                        on_conflict,
+                        label="Contract",
+                        serializer_class=ContractWriteSerializer,
+                        instance=existing_contract,
+                        data=contract_data,
+                        post_update=link_solutions,
+                    )
+                    if action == "stopped":
+                        break
+                    continue
 
                 # Create the contract
                 serializer = ContractWriteSerializer(
@@ -3931,8 +3890,7 @@ class LoadFileView(APIView):
 
                 serializer.is_valid(raise_exception=True)
                 contract = serializer.save()
-                if solution_ids:
-                    contract.solutions.set(solution_ids)
+                link_solutions(contract)
                 results["successful"] += 1
                 logger.debug(f"Created contract: {contract.name} with ref_id: {ref_id}")
 
@@ -3989,37 +3947,19 @@ class LoadFileView(APIView):
                 ).first()
 
                 if existing_representative:
-                    match on_conflict:
-                        case ConflictMode.SKIP:
-                            results["skipped"] += 1
-                            continue
-                        case ConflictMode.STOP:
-                            self._add_tprm_record_error(
-                                results,
-                                record,
-                                (
-                                    "Representative already exists "
-                                    "(conflict policy: stop)"
-                                ),
-                            )
-                            results["stopped"] = True
-                            break
-                        case ConflictMode.UPDATE:
-                            serializer = RepresentativeWriteSerializer(
-                                instance=existing_representative,
-                                data=representative_data,
-                                partial=True,
-                                context={"request": request},
-                            )
-                            if serializer.is_valid():
-                                serializer.save()
-                                results["updated"] += 1
-                            else:
-                                results["failed"] += 1
-                                results["errors"].append(
-                                    {"record": record, "errors": serializer.errors}
-                                )
-                            continue
+                    action = self._handle_tprm_conflict(
+                        request,
+                        results,
+                        record,
+                        on_conflict,
+                        label="Representative",
+                        serializer_class=RepresentativeWriteSerializer,
+                        instance=existing_representative,
+                        data=representative_data,
+                    )
+                    if action == "stopped":
+                        break
+                    continue
 
                 serializer = RepresentativeWriteSerializer(
                     data=representative_data, context={"request": request}
