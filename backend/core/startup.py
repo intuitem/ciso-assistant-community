@@ -1683,7 +1683,7 @@ def startup(sender=None, **kwargs):
     from core.models import AssetCapability, AssetClass, Terminology
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
     from tprm.models import Entity
-    from privacy.models import ProcessingNature
+    from privacy.models import create_default_privacy_terminologies
     from global_settings.models import GlobalSettings
     from integrations.models import IntegrationProvider
 
@@ -1820,11 +1820,11 @@ def startup(sender=None, **kwargs):
     except Exception as e:
         logger.error("Error creating default accreditation category", exc_info=True)
 
-    # Create default Processing natures
+    # Create default privacy terminologies (processing natures, personal data categories)
     try:
-        ProcessingNature.create_default_values()
+        create_default_privacy_terminologies()
     except Exception as e:
-        logger.error("Error creating default ProcessingNature", exc_info=True)
+        logger.error("Error creating default privacy terminologies", exc_info=True)
 
     # Create default AssetClass
     try:
