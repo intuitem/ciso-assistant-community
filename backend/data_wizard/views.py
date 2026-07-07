@@ -3534,6 +3534,14 @@ class LoadFileView(APIView):
                     post_update(updated_instance)
                 results["updated"] += 1
                 return "updated"
+            case _:
+                self._add_tprm_record_error(
+                    results,
+                    record,
+                    f"Unsupported conflict policy: {on_conflict}",
+                )
+                results["stopped"] = True
+                return "stopped"
 
     def _process_entities(
         self, request, records, folders_map, folder_id, on_conflict=ConflictMode.STOP
