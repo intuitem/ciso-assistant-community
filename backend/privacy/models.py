@@ -134,10 +134,7 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
         return {}
 
 
-class ProcessingChildMixin(models.Model):
-    class Meta:
-        abstract = True
-
+class ProcessingChildMixin:
     def _touch_processing(self):
         if self.processing_id:
             Processing.objects.filter(pk=self.processing_id).update(
@@ -155,7 +152,7 @@ class ProcessingChildMixin(models.Model):
         return result
 
 
-class Purpose(NameDescriptionFolderMixin, ProcessingChildMixin):
+class Purpose(ProcessingChildMixin, NameDescriptionFolderMixin):
     name = models.CharField(
         max_length=200, verbose_name=_("Name"), null=True, blank=True
     )
@@ -183,7 +180,7 @@ class Purpose(NameDescriptionFolderMixin, ProcessingChildMixin):
         super().save(*args, **kwargs)
 
 
-class PersonalData(NameDescriptionFolderMixin, ProcessingChildMixin):
+class PersonalData(ProcessingChildMixin, NameDescriptionFolderMixin):
     DELETION_POLICY_CHOICES = (
         ("privacy_automatic_deletion", "Automatic Deletion"),
         ("privacy_anonymization", "Anonymization"),
@@ -265,7 +262,7 @@ class PersonalData(NameDescriptionFolderMixin, ProcessingChildMixin):
         return result
 
 
-class DataSubject(NameDescriptionFolderMixin, ProcessingChildMixin):
+class DataSubject(ProcessingChildMixin, NameDescriptionFolderMixin):
     CATEGORY_CHOICES = (
         # Core Categories
         ("privacy_customer", "Customer/Client"),
@@ -304,7 +301,7 @@ class DataSubject(NameDescriptionFolderMixin, ProcessingChildMixin):
         super().save(*args, **kwargs)
 
 
-class DataRecipient(NameDescriptionFolderMixin, ProcessingChildMixin):
+class DataRecipient(ProcessingChildMixin, NameDescriptionFolderMixin):
     CATEGORY_CHOICES = (
         # Internal Recipients
         ("privacy_internal_team", "Internal Team/Department"),
@@ -363,7 +360,7 @@ class DataRecipient(NameDescriptionFolderMixin, ProcessingChildMixin):
         super().save(*args, **kwargs)
 
 
-class DataContractor(NameDescriptionFolderMixin, ProcessingChildMixin):
+class DataContractor(ProcessingChildMixin, NameDescriptionFolderMixin):
     RELATIONSHIP_TYPE_CHOICES = (
         ("privacy_data_processor", "Data Processor"),
         ("privacy_sub_processor", "Sub-processor"),
@@ -401,7 +398,7 @@ class DataContractor(NameDescriptionFolderMixin, ProcessingChildMixin):
         super().save(*args, **kwargs)
 
 
-class DataTransfer(NameDescriptionFolderMixin, ProcessingChildMixin):
+class DataTransfer(ProcessingChildMixin, NameDescriptionFolderMixin):
     name = models.CharField(
         max_length=200, verbose_name=_("Name"), null=True, blank=True
     )
