@@ -92,7 +92,7 @@ from resilience.serializers import (
     AssetAssessmentWriteSerializer,
     EscalationThresholdWriteSerializer,
 )
-from privacy.models import Processing, ProcessingNature
+from privacy.models import Processing
 from privacy.serializers import ProcessingWriteSerializer
 from iam.models import RoleAssignment, User
 from core.models import FilteringLabel
@@ -2056,9 +2056,10 @@ class ProcessingRecordConsumer(RecordConsumer):
                 for nature_name in str(record_processing_nature).split(",")
             ]
             data["nature"] = list(
-                ProcessingNature.objects.filter(name__in=nature_names).values_list(
-                    "id", flat=True
-                )
+                Terminology.objects.filter(
+                    field_path=Terminology.FieldPath.PROCESSING_NATURE,
+                    name__in=nature_names,
+                ).values_list("id", flat=True)
             )
 
         # Resolve M2M: assigned_to (by user email → Actor)

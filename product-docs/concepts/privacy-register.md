@@ -26,9 +26,11 @@ Privacy operations also need to record events as they happen:
 - A privacy register lives in a **domain** with its own RBAC scoping — typically a DPO-led folder.
 - Findings from GDPR audits surface in the register as actions on processings.
 - Data contractors cross-reference TPRM entities, so a sub-processor's security review feeds both worlds.
+- A processing's **nature** and its personal-data **categories** draw from the [terminology](terminology.md) layer, so you can align them to your own internal vocabulary.
 
 ## Related
 
 - [Domains](domains.md)
 - [Third-party risk](third-party-risk.md)
+- [Terminology](terminology.md) — customise processing nature and personal-data category labels
 - [Vocabulary → Processing / Personal data / Purpose / Right request / Data breach](../introduction/vocabulary.md)

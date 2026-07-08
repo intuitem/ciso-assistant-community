@@ -1,7 +1,7 @@
 import uuid
 
 from core.constants import COUNTRY_CHOICES
-from core.models import Actor
+from core.models import Actor, Terminology
 from core.serializers import ActorReadSerializer
 from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
@@ -20,7 +20,6 @@ from core.utils import camel_case
 from iam.models import Folder, RoleAssignment
 
 from .models import (
-    ProcessingNature,
     Purpose,
     PersonalData,
     DataSubject,
@@ -95,10 +94,6 @@ class PersonalDataViewSet(BaseModelViewSet):
     model = PersonalData
     filterset_fields = ["processing", "category", "assets"]
 
-    @action(detail=False, name="Get category choices")
-    def category(self, request):
-        return Response(dict(PersonalData.PERSONAL_DATA_CHOICES))
-
     @action(detail=False, name="Get deletion policy choices")
     def deletion_policy(self, request):
         return Response(dict(PersonalData.DELETION_POLICY_CHOICES))
@@ -162,7 +157,13 @@ class PersonalDataViewSet(BaseModelViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        valid_categories = {c[0] for c in PersonalData.PERSONAL_DATA_CHOICES}
+        category_terms = {
+            str(t.id): t
+            for t in Terminology.objects.filter(
+                field_path=Terminology.FieldPath.PERSONAL_DATA_CATEGORY,
+                is_visible=True,
+            )
+        }
         valid_deletion_policies = {c[0] for c in PersonalData.DELETION_POLICY_CHOICES}
 
         if deletion_policy and deletion_policy not in valid_deletion_policies:
@@ -171,30 +172,33 @@ class PersonalDataViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        existing_categories = set(
-            PersonalData.objects.filter(processing=processing).values_list(
+        existing_categories = {
+            str(c)
+            for c in PersonalData.objects.filter(processing=processing).values_list(
                 "category", flat=True
             )
-        )
+        }
 
         created_items = []
         skipped_items = []
         errors = []
 
         for category in categories:
-            if category not in valid_categories:
+            category = str(category)
+            term = category_terms.get(category)
+            if term is None:
                 errors.append({"category": category, "error": "Invalid category"})
                 continue
 
             if category in existing_categories:
                 existing = PersonalData.objects.filter(
-                    processing=processing, category=category
+                    processing=processing, category=term
                 ).first()
                 if existing:
                     skipped_items.append(
                         {
                             "id": str(existing.id),
-                            "category": existing.category,
+                            "category": str(existing.category),
                             "name": str(existing),
                         }
                     )
@@ -202,7 +206,7 @@ class PersonalDataViewSet(BaseModelViewSet):
 
             pd = PersonalData.objects.create(
                 processing=processing,
-                category=category,
+                category=term,
                 retention=retention,
                 deletion_policy=deletion_policy,
                 is_sensitive=is_sensitive,
@@ -210,7 +214,7 @@ class PersonalDataViewSet(BaseModelViewSet):
             created_items.append(
                 {
                     "id": str(pd.id),
-                    "category": pd.category,
+                    "category": str(pd.category),
                     "name": str(pd),
                 }
             )
@@ -328,7 +332,16 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
         "filtering_labels",
         "assigned_to",
         "perimeters",
+        "personal_data__category",
+        "data_subjects__category",
     ]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .prefetch_related("personal_data__category", "data_subjects")
+        )
 
     export_config = {
         "fields": {
@@ -506,13 +519,13 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
 
         # Get all personal data with their processings and legal bases
         personal_data = (
-            PersonalData.objects.select_related("processing")
+            PersonalData.objects.select_related("processing", "category")
             .prefetch_related("processing__purposes", "processing__data_transfers")
             .filter(id__in=viewable_personal_data)
         )
 
         for pd in personal_data:
-            pd_category = pd.category
+            pd_category = pd.category.name
             processing_name = (
                 pd.processing.name if pd.processing else "Unknown Processing"
             )
@@ -605,11 +618,6 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                 "sankey_links": sankey_links,
             }
         )
-
-
-class ProcessingNatureViewSet(BaseModelViewSet):
-    model = ProcessingNature
-    search_fields = ["name"]
 
 
 class RightRequestViewSet(BaseModelViewSet):

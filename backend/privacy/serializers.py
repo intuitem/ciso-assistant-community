@@ -1,8 +1,8 @@
-from core.serializers import BaseModelSerializer, ReferentialSerializer
+from core.serializers import BaseModelSerializer
 from django.db import transaction
+from rest_framework import serializers
 from core.serializer_fields import FieldsRelatedField
 from .models import (
-    ProcessingNature,
     Purpose,
     PersonalData,
     DataSubject,
@@ -41,6 +41,7 @@ class PersonalDataWriteSerializer(BaseModelSerializer):
 class PersonalDataReadSerializer(BaseModelSerializer):
     processing = FieldsRelatedField()
     folder = FieldsRelatedField()
+    category = FieldsRelatedField()
     assets = FieldsRelatedField(["id", "name", "type", "folder"], many=True)
 
     class Meta:
@@ -143,11 +144,27 @@ class ProcessingWriteSerializer(BaseModelSerializer):
 class ProcessingReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     filtering_labels = FieldsRelatedField(many=True)
-    nature = FieldsRelatedField(["id", "name"], many=True)
+    nature = FieldsRelatedField(many=True)
     associated_controls = FieldsRelatedField(["id", "name"], many=True)
     assigned_to = FieldsRelatedField(many=True)
     purposes = FieldsRelatedField(["name", "id", "legal_basis"], many=True)
     perimeters = FieldsRelatedField(many=True)
+    personal_data_categories = serializers.SerializerMethodField()
+    data_subject_categories = serializers.SerializerMethodField()
+
+    def get_personal_data_categories(self, obj):
+        seen = {}
+        for pd in obj.personal_data.all():
+            if pd.category_id:
+                seen[pd.category_id] = pd.category.name
+        return [{"str": name} for name in sorted(seen.values())]
+
+    def get_data_subject_categories(self, obj):
+        return [
+            {"str": category}
+            for category in sorted({ds.category for ds in obj.data_subjects.all()})
+        ]
+
     validation_flows = FieldsRelatedField(
         many=True,
         fields=[
@@ -162,16 +179,6 @@ class ProcessingReadSerializer(BaseModelSerializer):
     class Meta:
         model = Processing
         fields = "__all__"
-
-
-class ProcessingNatureReadSerializer(ReferentialSerializer):
-    class Meta:
-        model = ProcessingNature
-        exclude = ["translations"]
-
-
-class ProcessingNatureWriteSerializer(ProcessingNatureReadSerializer):
-    pass
 
 
 # RightRequest Serializers
