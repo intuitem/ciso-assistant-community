@@ -296,7 +296,7 @@ class DocumentContainerViewSet(BaseModelViewSet):
         folder_id = request.data.get("folder")
         try:
             folder = Folder.objects.get(id=folder_id)
-        except Folder.DoesNotExist, ValueError:
+        except Folder.DoesNotExist, DjangoValidationError, ValueError:
             return Response(
                 {"folder": "Required / not found."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -368,7 +368,7 @@ class DocumentContainerViewSet(BaseModelViewSet):
         folder_id = request.data.get("folder")
         try:
             folder = Folder.objects.get(id=folder_id)
-        except Folder.DoesNotExist, ValueError:
+        except Folder.DoesNotExist, DjangoValidationError, ValueError:
             return Response(
                 {"folder": "Required / not found."},
                 status=status.HTTP_400_BAD_REQUEST,

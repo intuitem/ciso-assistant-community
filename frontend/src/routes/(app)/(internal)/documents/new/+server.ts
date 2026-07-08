@@ -66,11 +66,16 @@ export const POST: RequestHandler = async ({ request, fetch, locals }) => {
 	// upload/link go through custom actions that don't accept object-links or
 	// classification — set them in a follow-up PATCH when present.
 	if (source !== 'author' && (classification || LINK_FIELDS.some((f) => links[f].length))) {
-		await fetch(`${BASE_API_URL}/document-containers/${data.id}/`, {
+		const patchRes = await fetch(`${BASE_API_URL}/document-containers/${data.id}/`, {
 			method: 'PATCH',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ ...links, ...(classification ? { classification } : {}) })
 		});
+		if (!patchRes.ok) {
+			return json(await patchRes.json().catch(() => ({ error: 'Failed to set links' })), {
+				status: patchRes.status
+			});
+		}
 	}
 	return json(data);
 };
