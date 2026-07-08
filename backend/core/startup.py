@@ -78,7 +78,6 @@ READER_PERMISSIONS_LIST = [
     "view_assetcapability",
     # privacy,
     "view_processing",
-    "view_processingnature",
     "view_purpose",
     "view_personaldata",
     "view_datasubject",
@@ -206,7 +205,6 @@ APPROVER_PERMISSIONS_LIST = [
     "view_campaign",
     # privacy,
     "view_processing",
-    "view_processingnature",
     "view_purpose",
     "view_personaldata",
     "view_datasubject",
@@ -452,7 +450,6 @@ ANALYST_PERMISSIONS_LIST = [
     "change_processing",
     "view_processing",
     "delete_processing",
-    "view_processingnature",
     "add_purpose",
     "change_purpose",
     "view_purpose",
@@ -878,7 +875,6 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_processing",
     "view_processing",
     "delete_processing",
-    "view_processingnature",
     "add_purpose",
     "change_purpose",
     "view_purpose",
@@ -1328,7 +1324,6 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_processing",
     "view_processing",
     "delete_processing",
-    "view_processingnature",
     "add_purpose",
     "change_purpose",
     "view_purpose",
@@ -1683,7 +1678,7 @@ def startup(sender=None, **kwargs):
     from core.models import AssetCapability, AssetClass, Terminology
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
     from tprm.models import Entity
-    from privacy.models import ProcessingNature
+    from privacy.models import create_default_privacy_terminologies
     from global_settings.models import GlobalSettings
     from integrations.models import IntegrationProvider
 
@@ -1820,11 +1815,11 @@ def startup(sender=None, **kwargs):
     except Exception as e:
         logger.error("Error creating default accreditation category", exc_info=True)
 
-    # Create default Processing natures
+    # Create default privacy terminologies (processing natures, personal data categories)
     try:
-        ProcessingNature.create_default_values()
+        create_default_privacy_terminologies()
     except Exception as e:
-        logger.error("Error creating default ProcessingNature", exc_info=True)
+        logger.error("Error creating default privacy terminologies", exc_info=True)
 
     # Create default AssetClass
     try:

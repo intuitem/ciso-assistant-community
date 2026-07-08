@@ -29,7 +29,8 @@
 <AutocompleteSelect
 	{form}
 	field="category"
-	options={model.selectOptions['category']}
+	optionsEndpoint="terminologies?field_path=personal_data.category&is_visible=true"
+	optionsLabelField="translated_name"
 	cacheLock={cacheLocks['category']}
 	bind:cachedValue={formDataCache['category']}
 	label={m.category()}
