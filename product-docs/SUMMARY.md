@@ -50,6 +50,7 @@
   * [Privacy register](concepts/privacy-register.md)
   * [Project management](concepts/project-management.md)
   * [Terminology](concepts/terminology.md)
+  * [Object classifications](concepts/object-classification.md)
 
 ## Installation
 

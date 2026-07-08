@@ -17,10 +17,15 @@ Documents require the `document_management` [feature flag](../../configuration/s
 
 ## Create a document
 
-From the document list, choose **New document** and set its **Document type** (Policy, Procedure, Charter, Record, Meeting minutes, Other), name, and domain. You land straight in the editor's **template picker**, where you can:
+Choose **New document** — from the **Documents** catalogue or the document list — and fill in the essentials: a name, a **Document type** (Policy, Procedure, Charter, Record, Meeting minutes, Other), a **Domain**, and optionally a **Classification** (see [Object classifications](../../concepts/object-classification.md)).
 
-- **Start from scratch** — a blank document, or
-- pick a **template** — the picker only offers templates matching the document's type and language.
+Then pick a **Content source**:
+
+- **Author** — write the document in-platform. You land in the editor's **template picker**, where you **Start from scratch** (a blank document) or pick a **template** — the picker only offers templates matching the document's type and language.
+- **Upload** — attach an existing file (e.g. a signed PDF). It runs through the same lifecycle and version history but is served as-is rather than rendered from Markdown; you can upload a new version at any time.
+- **Link** — point at a document that lives in another system (Confluence, SharePoint, a DMS, …) by entering its URL. Readers open it in place.
+
+The rest of this guide follows the **Author** path.
 
 ## Write
 
@@ -55,10 +60,6 @@ The **Version history** sidebar lists every revision; you can read any past vers
 ## Add a language
 
 Use **Add translation** to create another language version of the same document. Each language has its own lifecycle and revisions, so a translation can stay in draft while the original is published. One language is the default (used for the catalogue title and status).
-
-## Upload instead of authoring
-
-If the document already exists as a file, choose **Upload document** on the Documents page instead. The uploaded file (e.g. a signed PDF) runs through the same lifecycle and version history, but is served as-is rather than rendered from Markdown. You can upload a new version at any time.
 
 ## Export
 
