@@ -113,7 +113,7 @@
 	}
 
 	let {
-		source = { head: [], body: [] },
+		source = { head: {}, body: [] },
 		interactive = true,
 		search = true,
 		thFilter = false,
@@ -222,6 +222,14 @@
 			? visibleColumns
 			: allColumnKeys.filter((key) => fields.length === 0 || fields.includes(key))
 	);
+	$effect(() => {
+		if (fields.length > 0 && allColumnKeys.length > 0 && renderColumnKeys.length === 0) {
+			console.warn(
+				`ModelTable(${URLModel}): none of \`fields\` [${fields.join(', ')}] match source.head keys [${allColumnKeys.join(', ')}] — table will render no columns. Build head with headData().`
+			);
+		}
+	});
+
 	// Order-sensitive so a pure reorder of the default set still persists instead of resetting.
 	const sameAsDefault = (cols: string[]) =>
 		cols.length === defaultColumns.length && cols.every((key, i) => defaultColumns[i] === key);
@@ -524,7 +532,7 @@
 	);
 
 	let contextMenuCanDeleteObject = $derived(
-		!preventDelete(contextMenuOpenRow ?? { head: [], body: [], meta: [] }) &&
+		!preventDelete(contextMenuOpenRow ?? { head: {}, body: [], meta: [] }) &&
 			(model
 				? page.params.id
 					? canPerformAction({

@@ -953,7 +953,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableDelete: true
 			},
 			{ field: 'evidences', urlModel: 'findings', disableCreate: true, disableDelete: true },
-			{ field: 'evidences', urlModel: 'task-templates', disableCreate: true, disableDelete: true }
+			{ field: 'evidences', urlModel: 'task-templates', disableCreate: true, disableDelete: true },
+			{ field: 'evidences', urlModel: 'data-breaches', disableCreate: true, disableDelete: true }
 		],
 		selectFields: [{ field: 'status' }],
 		detailViewFields: [
@@ -1462,11 +1463,11 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'processings',
 		verboseName: 'processing',
 		verboseNamePlural: 'processings',
-		selectFields: [{ field: 'status' }, { field: 'nature' }],
+		selectFields: [{ field: 'status' }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'purposes', urlModel: 'purposes' },
-			{ field: 'nature', urlModel: 'natures' },
+			{ field: 'nature', urlModel: 'terminologies' },
 			{ field: 'assigned_to', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'perimeters', urlModel: 'perimeters' },
@@ -1530,14 +1531,6 @@ export const URL_MODEL_MAP: ModelMap = {
 			}
 		]
 	},
-	'processing-natures': {
-		endpointUrl: 'privacy/processing-natures',
-		name: 'processingnature',
-		localName: 'processingNature',
-		localNamePlural: 'processingNatures',
-		verboseName: 'processing nature',
-		verboseNamePlural: 'processing natures'
-	},
 	'right-requests': {
 		endpointUrl: 'privacy/right-requests',
 		name: 'rightrequest',
@@ -1582,7 +1575,17 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'affected_personal_data', urlModel: 'personal-data' },
 			{ field: 'authorities', urlModel: 'entities' },
 			{ field: 'remediation_measures', urlModel: 'applied-controls' },
+			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'incident', urlModel: 'incidents' }
+		],
+		reverseForeignKeyFields: [
+			{
+				field: 'data_breaches',
+				urlModel: 'evidences',
+				addExisting: {
+					parentField: 'evidences'
+				}
+			}
 		],
 		detailViewFields: [
 			{ field: 'id' },
@@ -1604,6 +1607,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'subjects_notified_on', type: 'datetime' },
 			{ field: 'potential_consequences' },
 			{ field: 'remediation_measures' },
+			{ field: 'evidences' },
 			{ field: 'incident' },
 			{ field: 'reference_link' },
 			{ field: 'observation' },
@@ -1633,6 +1637,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		customNameDescription: true,
 		foreignKeyFields: [
 			{ field: 'processing', urlModel: 'processings', endpointUrl: 'processings' },
+			{ field: 'category', urlModel: 'terminologies' },
 			{ field: 'assets', urlModel: 'assets', endpointUrl: 'assets' }
 		],
 		reverseForeignKeyFields: [
@@ -1651,7 +1656,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'created_at' },
 			{ field: 'updated_at' }
 		],
-		selectFields: [{ field: 'category' }, { field: 'deletion_policy' }],
+		selectFields: [{ field: 'deletion_policy' }],
 		filters: [{ field: 'processing' }, { field: 'category' }, { field: 'assets' }]
 	},
 	'data-subjects': {
