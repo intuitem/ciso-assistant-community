@@ -1680,6 +1680,8 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         METRIC_UNIT = "metric_definition.unit", "metricUnit"
         PROJECT_STATUS = "project.status", "projectStatus"
         PROJECT_HEALTH = "project.health", "projectHealth"
+        PROCESSING_NATURE = "processing.nature", "processingNature"
+        PERSONAL_DATA_CATEGORY = "personal_data.category", "personalDataCategory"
 
     DEFAULT_ROTO_RISK_ORIGINS = [
         {
@@ -3091,6 +3093,7 @@ class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMi
         DRAFT = "draft", "draft"
         IN_REVIEW = "in_review", "in review"
         APPROVED = "approved", "approved"
+        REJECTED = "rejected", "rejected"
         RESOLVED = "resolved", "resolved"
         EXPIRED = "expired", "expired"
         DEPRECATED = "deprecated", "deprecated"
@@ -5415,15 +5418,15 @@ class AppliedControl(
             if (cost_data := self.cost.get(cost_type)) is None:
                 continue
 
-            if (cost := cost_data.get("fixed_cost", 0)) == 0:
+            fixed_cost = cost_data.get("fixed_cost", 0)
+            people_days = cost_data.get("people_days", 0)
+            if not fixed_cost and not people_days:
                 continue
 
-            people_days = cost_data.get("people_days", 0)
             cost_parts: list[str] = []
-
-            stringified_cost = self._stringify_cost(cost, currency)
-            cost_parts.append(stringified_cost)
-            if people_days > 0:
+            if fixed_cost:
+                cost_parts.append(self._stringify_cost(fixed_cost, currency))
+            if people_days:
                 cost_parts.append(f"{people_days} people days")
 
             cost_string = ", ".join(cost_parts)
@@ -8935,6 +8938,8 @@ class FindingsAssessment(Assessment):
     class Category(models.TextChoices):
         UNDEFINED = "--", "Undefined"
         PENTEST = "pentest", "Pentest"
+        THREAT_HUNTING = "threat_hunting", "Threat hunting"
+        RED_TEAMING = "red_teaming", "Red teaming"
         AUDIT = "audit", "Audit"
         SELF_IDENTIFIED = "self_identified", "Self-identified"
 
