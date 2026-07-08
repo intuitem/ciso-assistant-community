@@ -9,7 +9,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0174_alter_terminology_field_path"),
         ("iam", "0023_alter_folder_content_type"),
