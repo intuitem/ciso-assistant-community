@@ -38,7 +38,7 @@
 	"documentTemplates": "Modèles de document",
 	"addDocumentTemplate": "Ajouter un modèle de document",
 	"importTemplates": "Importer des modèles",
-	"importTemplatesHelp": "Téléversez un .zip de fichiers <locale>/<nom>.md (par ex. en/access_control.md). Le titre, la description et le document_type de l'en-tête de chaque fichier sont lus ; le nom de fichier devient la référence.",
+	"importTemplatesHelp": "Téléversez un .zip de fichiers `<locale>/<nom>.md` (ex. `fr/controle_acces.md`). Le frontmatter de chaque fichier — titre, description, document_type et locale — est lu, et le nom de fichier devient la référence.",
 	"templatesImported": "{created} créé(s) · {updated} mis à jour",
 	"fileRequired": "Un fichier est requis.",
 	"zipFileRequired": "Un fichier .zip est requis.",
@@ -5320,5 +5320,7 @@
 	"classificationLevels": "Niveaux de classification",
 	"add-objectClassification": "Ajouter une classification d'objet",
 	"add-classificationLevel": "Ajouter un niveau de classification",
-	"classification": "Classification"
+	"classification": "Classification",
+	"importTemplatesSubtitle": "Importez en lot des modèles de documents depuis une archive .zip.",
+	"importTemplatesSingleNote": "Un seul modèle à importer ? Il est plus simple de le créer directement depuis la liste des modèles."
 }

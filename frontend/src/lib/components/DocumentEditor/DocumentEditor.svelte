@@ -32,6 +32,14 @@
 	let revisions: any[] = $state(data.revisions);
 	let currentRevision: any = $state(data.currentRevision);
 	let templates: any[] = $state(data.templates || []);
+	let templateSearch = $state('');
+	let filteredTemplates = $derived.by(() => {
+		const q = templateSearch.trim().toLowerCase();
+		if (!q) return templates;
+		return templates.filter((t: any) =>
+			`${t.title ?? ''} ${t.description ?? ''}`.toLowerCase().includes(q)
+		);
+	});
 	// The container's type scopes the template picker to relevant templates.
 	let documentType = $derived(
 		parent?.document_type ?? (createParentField === 'policy' ? 'policy' : '')
@@ -1031,6 +1039,20 @@
 					</div>
 				{/if}
 
+				{#if templates.length > 8}
+					<div class="relative mb-3">
+						<i
+							class="fa-solid fa-magnifying-glass pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-surface-400"
+						></i>
+						<input
+							type="search"
+							bind:value={templateSearch}
+							placeholder={m.search()}
+							class="input w-full rounded-lg pl-10"
+						/>
+					</div>
+				{/if}
+
 				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
 					<button
 						class="group card p-5 border-2 border-dashed border-surface-300-700 hover:border-primary-400 hover:shadow-md transition-all text-left"
@@ -1047,7 +1069,7 @@
 						<p class="text-xs text-surface-500 mt-1">{m.startWithBlankDocument()}</p>
 					</button>
 
-					{#each templates as template}
+					{#each filteredTemplates as template}
 						<button
 							class="group card p-5 border border-surface-200-800 hover:border-primary-400 hover:shadow-md transition-all text-left"
 							onclick={() => createDocument(template.id, addingTranslationLocale || undefined)}

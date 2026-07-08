@@ -31,6 +31,9 @@ class Command(BaseCommand):
                     continue
                 data = parse_template_markdown(f.read_text(encoding="utf-8"), f.stem)
                 data.pop("ref_id")
+                data.pop(
+                    "locale", None
+                )  # locale comes from the directory, not the file
                 DocumentTemplate.objects.update_or_create(
                     ref_id=f.stem,
                     locale=locale,

@@ -135,7 +135,7 @@
 	"documentTemplates": "Document templates",
 	"addDocumentTemplate": "Add document template",
 	"importTemplates": "Import templates",
-	"importTemplatesHelp": "Upload a .zip of <locale>/<name>.md files (e.g. en/access_control.md). Each file's frontmatter title, description and document_type are read; the filename becomes the reference.",
+	"importTemplatesHelp": "Upload a .zip of `<locale>/<name>.md` files (e.g. `en/access_control.md`). Each file's frontmatter — title, description, document_type and locale — is read, and the filename becomes the reference.",
 	"templatesImported": "{created} created · {updated} updated",
 	"fileRequired": "A file is required.",
 	"zipFileRequired": "A .zip file is required.",
@@ -5324,5 +5324,7 @@
 	"classificationLevels": "Classification levels",
 	"add-objectClassification": "Add object classification",
 	"add-classificationLevel": "Add classification level",
-	"classification": "Classification"
+	"classification": "Classification",
+	"importTemplatesSubtitle": "Bulk-import document templates from a .zip bundle.",
+	"importTemplatesSingleNote": "Importing just one template? It's quicker to create it directly from the Templates list."
 }

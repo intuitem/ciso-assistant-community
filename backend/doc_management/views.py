@@ -51,7 +51,6 @@ class DocumentTemplateViewSet(BaseModelViewSet):
         "locale",
         "builtin",
         "ref_id",
-        "classification",
     ]
     serializers_module = "doc_management.serializers"
 
@@ -142,6 +141,7 @@ class DocumentContainerFilter(GenericFilterSet):
         fields = [
             "document_type",
             "folder",
+            "classification",
             "filtering_labels",
             "policies",
             "applied_controls",

@@ -22,13 +22,15 @@ MAX_TEMPLATE_TOTAL_BYTES = 50 * 1024 * 1024
 def parse_template_markdown(raw: str, stem: str) -> dict:
     """Parse a template markdown file into DocumentTemplate fields.
 
-    Reads an optional YAML frontmatter block for ``title``, ``description`` and
-    ``document_type`` (validated, defaults to ``policy``); the remainder is the
-    content. ``ref_id`` is derived from the filename stem.
+    Reads an optional YAML frontmatter block for ``title``, ``description``,
+    ``document_type`` (validated, defaults to ``policy``) and ``locale``; the
+    remainder is the content. ``ref_id`` is derived from the filename stem.
+    ``locale`` is None when absent (the caller resolves it, e.g. from the path).
     """
     title = stem.replace("_", " ").title()
     description = ""
     document_type = DocumentContainer.DocumentType.POLICY
+    locale = None
     content = raw
     if raw.startswith("---"):
         parts = raw.split("---", 2)
@@ -41,6 +43,9 @@ def parse_template_markdown(raw: str, stem: str) -> dict:
                     dt = fm.get("document_type")
                     if dt in VALID_DOCUMENT_TYPES:
                         document_type = dt
+                    loc = fm.get("locale")
+                    if isinstance(loc, str) and loc.strip():
+                        locale = loc.strip().lower()
             except yaml.YAMLError:
                 # Malformed frontmatter: keep the derived defaults.
                 pass
@@ -50,6 +55,7 @@ def parse_template_markdown(raw: str, stem: str) -> dict:
         "name": title,
         "description": description,
         "document_type": document_type,
+        "locale": locale,
         "content": content,
     }
 
@@ -72,11 +78,6 @@ def import_templates_from_zip(zip_file, folder) -> dict:
         total_bytes = 0
         for info in members:
             path = Path(info.filename)
-            # The immediate parent directory is the locale (robust to a wrapper
-            # folder, e.g. "bundle/en/foo.md" → locale "en").
-            if len(path.parts) < 2:
-                errors.append(f"{info.filename}: expected <locale>/<name>.md")
-                continue
             if info.file_size > MAX_TEMPLATE_BYTES:
                 errors.append(f"{info.filename}: exceeds size limit")
                 continue
@@ -84,12 +85,23 @@ def import_templates_from_zip(zip_file, folder) -> dict:
             if total_bytes > MAX_TEMPLATE_TOTAL_BYTES:
                 errors.append("import exceeds total size limit")
                 break
-            locale = path.parts[-2]
             stem = path.stem
             try:
                 raw = zf.read(info).decode("utf-8")
             except UnicodeDecodeError, KeyError:
                 errors.append(f"{info.filename}: not valid UTF-8")
+                continue
+
+            data = parse_template_markdown(raw, stem)
+            # The <locale>/<name>.md directory (robust to a wrapper folder, e.g.
+            # "bundle/en/foo.md") is the primary locale source; a `locale:`
+            # frontmatter key is the fallback for flat, single-file bundles.
+            fm_locale = data.pop("locale", None)
+            locale = path.parts[-2] if len(path.parts) >= 2 else fm_locale
+            if not locale:
+                errors.append(
+                    f"{info.filename}: no locale (use <locale>/<name>.md or a `locale:` frontmatter)"
+                )
                 continue
 
             # Never let a custom import clobber a built-in template that shares
@@ -100,7 +112,6 @@ def import_templates_from_zip(zip_file, folder) -> dict:
                 errors.append(f"{info.filename}: conflicts with a built-in template")
                 continue
 
-            data = parse_template_markdown(raw, stem)
             data.pop("ref_id")
             _, was_created = DocumentTemplate.objects.update_or_create(
                 ref_id=stem,
