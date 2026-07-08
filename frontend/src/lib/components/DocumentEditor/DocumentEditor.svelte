@@ -37,7 +37,7 @@
 		const q = templateSearch.trim().toLowerCase();
 		if (!q) return templates;
 		return templates.filter((t: any) =>
-			`${t.title ?? ''} ${t.description ?? ''}`.toLowerCase().includes(q)
+			`${t.title ?? ''} ${t.description ?? ''} ${t.provider ?? ''}`.toLowerCase().includes(q)
 		);
 	});
 	// The container's type scopes the template picker to relevant templates.
@@ -1082,6 +1082,13 @@
 							<h3 class="font-medium text-sm">{template.title}</h3>
 							{#if template.description}
 								<p class="text-xs text-surface-500 mt-1">{template.description}</p>
+							{/if}
+							{#if template.provider}
+								<span
+									class="mt-2 inline-block rounded bg-surface-100-900 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-surface-500"
+								>
+									{template.provider}
+								</span>
 							{/if}
 						</button>
 					{/each}

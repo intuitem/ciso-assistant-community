@@ -51,8 +51,14 @@ class DocumentTemplateViewSet(BaseModelViewSet):
         "locale",
         "builtin",
         "ref_id",
+        "provider",
     ]
     serializers_module = "doc_management.serializers"
+
+    @action(detail=False, name="Get locale choices")
+    def locale(self, request):
+        locales = DocumentTemplate.objects.values_list("locale", flat=True).distinct()
+        return Response({loc: loc for loc in sorted(set(filter(None, locales)))})
 
     @action(detail=False, methods=["post"], url_path="import")
     def import_templates(self, request):
@@ -464,6 +470,7 @@ class ManagedDocumentViewSet(BaseModelViewSet):
                 "id": t.ref_id,
                 "title": t.name,
                 "description": t.description,
+                "provider": t.provider,
                 "lang": t.locale,
                 "document_type": t.document_type,
                 "builtin": t.builtin,

@@ -368,6 +368,9 @@ class DocumentTemplate(AbstractBaseModel, FolderMixin, I18nObjectMixin):
     ref_id = models.CharField(max_length=100, verbose_name=_("Reference"))
     name = models.CharField(max_length=200, verbose_name=_("Name"))
     description = models.TextField(blank=True, verbose_name=_("Description"))
+    provider = models.CharField(
+        max_length=200, blank=True, default="", verbose_name=_("Provider")
+    )
     content = models.TextField(blank=True)
     builtin = models.BooleanField(default=False)
     fields_to_check = ["ref_id", "locale"]

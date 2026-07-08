@@ -31,6 +31,7 @@ def parse_template_markdown(raw: str, stem: str) -> dict:
     description = ""
     document_type = DocumentContainer.DocumentType.POLICY
     locale = None
+    provider = ""
     content = raw
     if raw.startswith("---"):
         parts = raw.split("---", 2)
@@ -46,6 +47,9 @@ def parse_template_markdown(raw: str, stem: str) -> dict:
                     loc = fm.get("locale")
                     if isinstance(loc, str) and loc.strip():
                         locale = loc.strip().lower()
+                    prov = fm.get("provider")
+                    if isinstance(prov, str):
+                        provider = prov.strip()
             except yaml.YAMLError:
                 # Malformed frontmatter: keep the derived defaults.
                 pass
@@ -56,6 +60,7 @@ def parse_template_markdown(raw: str, stem: str) -> dict:
         "description": description,
         "document_type": document_type,
         "locale": locale,
+        "provider": provider,
         "content": content,
     }
 

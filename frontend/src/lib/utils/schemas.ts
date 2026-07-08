@@ -1867,6 +1867,7 @@ export const DocumentTemplateSchema = z.object({
 	ref_id: z.string().max(100),
 	name: z.string().max(200),
 	description: z.string().optional().default(''),
+	provider: z.string().max(200).optional().default(''),
 	document_type: z.string().optional().default('policy'),
 	content: z.string().optional().default(''),
 	locale: z.string().optional().default('en'),

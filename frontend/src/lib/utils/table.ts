@@ -1085,6 +1085,18 @@ export const LANGUAGE_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const DOC_TEMPLATE_LANGUAGE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'language',
+		optionsEndpoint: 'document-templates/locale',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 export const ASSET_TYPE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1999,12 +2011,13 @@ export const listViewFields = {
 		}
 	},
 	'document-templates': {
-		head: ['name', 'refId', 'documentType', 'language', 'builtin', 'domain'],
-		body: ['name', 'ref_id', 'document_type', 'locale', 'builtin', 'folder'],
+		head: ['name', 'refId', 'documentType', 'provider', 'language', 'builtin', 'domain'],
+		body: ['name', 'ref_id', 'document_type', 'provider', 'locale', 'builtin', 'folder'],
 		meta: ['id', 'builtin'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			document_type: DOCUMENT_TYPE_FILTER,
+			locale: DOC_TEMPLATE_LANGUAGE_FILTER,
 			builtin: BUILTIN_FILTER
 		}
 	},
@@ -3280,6 +3293,7 @@ export interface BatchActionConfig {
 }
 
 export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
+	'document-templates': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
 	'applied-controls': [
 		{
 			type: 'group',

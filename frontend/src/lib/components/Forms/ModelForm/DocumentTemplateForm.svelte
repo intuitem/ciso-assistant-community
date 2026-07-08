@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Select from '../Select.svelte';
+	import TextField from '../TextField.svelte';
 	import MarkdownField from '../MarkdownField.svelte';
 	import { LOCALE_MAP } from '$lib/utils/locales';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
@@ -52,6 +53,13 @@
 	label={m.language()}
 	cacheLock={cacheLocks['locale']}
 	bind:cachedValue={formDataCache['locale']}
+/>
+<TextField
+	{form}
+	field="provider"
+	label={m.provider()}
+	cacheLock={cacheLocks['provider']}
+	bind:cachedValue={formDataCache['provider']}
 />
 <!-- Content is authored on the edit view, not in the cramped create modal. -->
 {#if object?.id}

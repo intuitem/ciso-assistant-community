@@ -1035,6 +1035,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'ref_id' },
 			{ field: 'name' },
 			{ field: 'description' },
+			{ field: 'provider' },
 			{ field: 'document_type' },
 			{ field: 'locale' },
 			{ field: 'folder' },

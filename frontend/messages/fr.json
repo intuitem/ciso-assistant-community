@@ -5322,5 +5322,6 @@
 	"add-classificationLevel": "Ajouter un niveau de classification",
 	"classification": "Classification",
 	"importTemplatesSubtitle": "Importez en lot des modèles de documents depuis une archive .zip.",
-	"importTemplatesSingleNote": "Un seul modèle à importer ? Il est plus simple de le créer directement depuis la liste des modèles."
+	"importTemplatesSingleNote": "Un seul modèle à importer ? Il est plus simple de le créer directement depuis la liste des modèles.",
+	"record": "Enregistrement"
 }
