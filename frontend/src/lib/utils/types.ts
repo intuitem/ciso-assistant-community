@@ -95,7 +95,6 @@ export const URL_MODEL = [
 	'operating-modes',
 	'kill-chains',
 	'processings',
-	'processing-natures',
 	'security-exceptions',
 	'findings',
 	'findings-assessments',
