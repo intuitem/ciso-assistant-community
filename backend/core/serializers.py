@@ -2437,11 +2437,8 @@ class EvidenceWriteSerializer(BaseModelSerializer):
         old_folder_id = instance.folder_id
 
         # Handle properly owner field cleaning
-        owners = validated_data.get("owner", None)
         with transaction.atomic():
             instance = super().update(instance, validated_data)
-            if not owners:
-                instance.owner.set([])
 
             # Update all EvidenceRevisions' folder if the Evidence's folder changed
             if old_folder_id != instance.folder_id:
