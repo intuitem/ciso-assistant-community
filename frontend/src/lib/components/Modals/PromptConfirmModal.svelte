@@ -222,14 +222,14 @@
 		{/if}
 
 		<div class="space-y-2">
-			<p class="text-sm font-medium text-error-600-400">{m.confirmYes()}</p>
+			<p class="text-sm font-medium text-error-600-400">{m.confirmYes({ word: m.yes() })}</p>
 			<input
 				type="text"
 				data-testid="delete-prompt-confirm-textfield"
 				bind:value={userInput}
-				placeholder={m.confirmYesPlaceHolder()}
+				placeholder={m.confirmYesPlaceHolder({ word: m.yes() })}
 				class="input w-full"
-				aria-label={m.confirmYes()}
+				aria-label={m.confirmYes({ word: m.yes() })}
 			/>
 		</div>
 

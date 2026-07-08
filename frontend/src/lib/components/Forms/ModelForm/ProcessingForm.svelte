@@ -50,7 +50,8 @@
 <AutocompleteSelect
 	multiple
 	{form}
-	optionsEndpoint="processing-natures"
+	optionsEndpoint="terminologies?field_path=processing.nature&is_visible=true"
+	optionsLabelField="translated_name"
 	field="nature"
 	label={m.processingNature()}
 />
