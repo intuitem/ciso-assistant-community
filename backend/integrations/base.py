@@ -85,16 +85,27 @@ class BaseFieldMapper(ABC):
         # override _get_mappings don't consult this, but keep it consistent.)
         self.custom_mappings = self.model_settings.get("field_map", {})
 
+    # Optional per-provider, per-model operation gating for models other than
+    # applied_control: {model_key: {field: {"pull": {...}, "push": {...}}}}.
+    # Operations are provider-specific (e.g. Jira's name is pull-on-create only
+    # while ServiceNow's is not), which is why they live on the mapper classes
+    # rather than in the provider-agnostic syncable registry.
+    FIELD_MAPPINGS_OPERATIONS_BY_MODEL: dict[str, dict[str, dict[str, set]]] = {}
+
     def _field_operations(self) -> dict[str, dict[str, set]]:
         """Per-model pull/push operation gating.
 
         applied_control keeps the provider's explicit FIELD_MAPPINGS_OPERATIONS
         (preserves immutability nuances like Jira name being pull-on-create).
-        Other models allow every mappable field on create+update both ways.
+        Other models use FIELD_MAPPINGS_OPERATIONS_BY_MODEL when the provider
+        declares one, else every mappable field on create+update both ways.
         """
         ops = getattr(self, "FIELD_MAPPINGS_OPERATIONS", None)
         if self.model_key == "applied_control" and ops:
             return ops
+        per_model = self.FIELD_MAPPINGS_OPERATIONS_BY_MODEL.get(self.model_key)
+        if per_model:
+            return per_model
         from integrations.syncable import mappable_field_keys
 
         return {
@@ -306,7 +317,19 @@ class BaseSyncOrchestrator(ABC):
 
         content_type = ContentType.objects.get_for_model(local_object)
         model_key = model_key_for_content_type(content_type)
-        if not model_key or not is_model_configured(
+        if not model_key:
+            logger.info(
+                "Skipping push: model is not syncable",
+                model=content_type.model,
+                config_id=str(self.configuration.id),
+            )
+            return False
+        # applied_control is exempt from the configured-target gate: historic
+        # behavior pushed AC changes on every active config, relying on the
+        # providers' built-in defaults (Jira field map, ServiceNow 'incident'
+        # table). The gate protects new models (asset, ...), which have no
+        # defaults and must not sync without an explicit remote target.
+        if model_key != self.DEFAULT_MODEL_KEY and not is_model_configured(
             self.configuration.settings, model_key
         ):
             logger.info(

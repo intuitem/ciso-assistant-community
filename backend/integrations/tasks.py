@@ -1,7 +1,7 @@
 import uuid
 
 from django.contrib.contenttypes.models import ContentType
-from huey.contrib.djhuey import HUEY, task
+from huey.contrib.djhuey import HUEY, lock_task, task
 from structlog import get_logger
 
 from integrations.itsm.jira.integration import *
@@ -42,27 +42,29 @@ def sync_object_to_integrations(
 
 
 @task()
-def warm_servicenow_schema_cache():
-    """Pre-fetch ServiceNow schema (tables, columns, choices) into the DB cache
-    so the integration settings page loads without live ServiceNow latency.
+@lock_task("warm-integration-schema")
+def warm_integration_schema_cache():
+    """Pre-fetch remote schema into the DB cache so integration settings pages
+    load without live latency.
 
-    Enqueued on Huey consumer startup. Populate-if-empty (force=False) so a
-    restart with an already-populated cache costs no live calls, and the
-    once-per-worker enqueue from on_startup is a cheap no-op after the first.
-    Each config is isolated so one failure (bad credentials, network) doesn't
-    abort the rest.
+    Provider-agnostic: refresh_schema(force=False) is populate-if-empty for
+    providers that cache (ServiceNow) and the base no-op for the rest (Jira),
+    so a restart with a populated cache costs no live calls. The lock makes the
+    once-per-worker enqueue from on_startup fail fast instead of racing
+    last-write-wins on the cache row when the cache is cold. Each config is
+    isolated so one failure (bad credentials, network) doesn't abort the rest.
     """
     configs = IntegrationConfiguration.objects.filter(
-        is_active=True, provider__name="servicenow"
+        is_active=True, provider__provider_type="itsm"
     )
     for config in configs:
         try:
             orchestrator = IntegrationRegistry.get_orchestrator(config)
             orchestrator.refresh_schema(force=False)
-            logger.info("Warmed ServiceNow schema cache", config_id=str(config.id))
+            logger.info("Warmed integration schema cache", config_id=str(config.id))
         except Exception as e:
             logger.error(
-                f"Failed to warm ServiceNow schema cache for config {config.id}: {e}",
+                f"Failed to warm schema cache for config {config.id}: {e}",
                 exc_info=True,
             )
 
@@ -72,9 +74,9 @@ def _enqueue_schema_cache_warmup():
     """Warm the schema cache once the Huey consumer is up. Enqueued (not run
     inline) so worker startup isn't blocked by remote HTTP calls."""
     try:
-        warm_servicenow_schema_cache()
+        warm_integration_schema_cache()
     except Exception as e:
-        logger.error(f"Failed to enqueue ServiceNow schema cache warmup: {e}")
+        logger.error(f"Failed to enqueue integration schema cache warmup: {e}")
 
 
 @task()

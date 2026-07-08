@@ -241,18 +241,6 @@
 						description={m.jiraIntegrationMappingsHelpText()}
 						remoteFieldLabel={m.jiraField()}
 						tableHelpText={m.jiraTableHelpText()}
-						onMapsChange={({ field_map, value_map }) => {
-							// Top-level reassignment so the writable store fires .set() and
-							// every formFieldProxy(settings.field_map.*) subscriber re-reads.
-							$formStore = {
-								...$formStore,
-								settings: {
-									...$formStore.settings,
-									field_map,
-									value_map
-								}
-							};
-						}}
 					/>
 					<FieldMapper
 						{form}
@@ -264,22 +252,6 @@
 						title={m.assets()}
 						remoteFieldLabel={m.jiraField()}
 						tableHelpText={m.jiraTableHelpText()}
-						onMapsChange={({ field_map, value_map }) => {
-							$formStore = {
-								...$formStore,
-								settings: {
-									...$formStore.settings,
-									models: {
-										...($formStore.settings.models ?? {}),
-										asset: {
-											...($formStore.settings.models?.asset ?? {}),
-											field_map,
-											value_map
-										}
-									}
-								}
-							};
-						}}
 					/>
 				{/if}
 				<button

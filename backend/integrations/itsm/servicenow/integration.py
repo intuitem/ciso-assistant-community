@@ -138,24 +138,30 @@ class ServiceNowOrchestrator(BaseITSMOrchestrator):
             get_model_settings,
         )
 
-        # A manual refresh should be authoritative: drop obsolete per-table
+        # Batched: load the cache row once, do every fetch in memory, save once
+        # at the end. Also makes the refresh all-or-nothing — a mid-way fetch
+        # failure keeps the previous cache instead of persisting a partial one.
+        cache = self._get_cache()
+
+        # A manual refresh is authoritative: drop obsolete per-table
         # column/choice entries (e.g. from a table the user has since changed)
         # so nothing stale survives. Configured tables are re-warmed below;
         # anything else re-populates lazily on the next get_columns/get_choices.
         if force:
-            cache = self._get_cache()
             cache.columns = {}
             cache.choices = {}
-            cache.save(update_fields=["columns", "choices", "updated_at"])
 
-        tables = self._cached_tables(force=force)
+        if force or not cache.tables:
+            cache.tables = self.client.get_available_tables()
 
         for model_key in configured_model_keys(self.configuration.settings):
             ms = get_model_settings(self.configuration.settings, model_key)
             table = ms.get("table_name")
             if not table:
                 continue
-            self._cached_columns(table, force=force)
+            client = self.client_for(model_key)
+            if table not in cache.columns:
+                cache.columns[table] = client.get_table_columns(table)
 
             # Warm choices for every mapped choice field of this model, mirroring
             # what the page loads (any choice-type field with a field_map entry).
@@ -163,14 +169,23 @@ class ServiceNowOrchestrator(BaseITSMOrchestrator):
             model_choice_fields = syncable.choice_fields(model_key)
             for local_field, remote_field in field_map.items():
                 if local_field in model_choice_fields and remote_field:
-                    self._cached_choices(table, remote_field, force=force)
+                    key = f"{table}:{remote_field}"
+                    if key not in cache.choices:
+                        cache.choices[key] = client.get_field_choices(
+                            table, remote_field
+                        )
+
+        cache.fetched_at = timezone.now()
+        cache.save(
+            update_fields=["tables", "columns", "choices", "fetched_at", "updated_at"]
+        )
 
         logger.info(
             "Refreshed ServiceNow schema cache",
             config_id=str(self.configuration.id),
             force=force,
         )
-        return tables
+        return cache.tables
 
     def execute_action(self, action: str, params: dict):
         if action == "get_tables":

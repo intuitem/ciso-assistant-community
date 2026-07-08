@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { get } from 'svelte/store';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
 	import { getToastStore } from '$lib/components/Toast/stores';
@@ -56,12 +57,12 @@
 		remoteFieldLabel = m.remoteField(),
 		tableHelpText = m.integrationTableHelpText(),
 		onSave = (config) => console.log('Saved:', config),
-		// Fires after handleTableChange so the parent page can sync field_map /
-		// value_map into the superform store. Without this, the per-row
-		// AutocompleteSelect rebinds happen on the next tick but the form's
-		// field_map / value_map keep stale values.
-		onMapsChange = (_maps: { field_map: Record<string, any>; value_map: Record<string, any> }) =>
-			undefined
+		// Fires after handleTableChange. By default the maps are merged into the
+		// superform store at valuePathPrefix (see mergeMapsIntoForm); pages can
+		// still override for custom behavior.
+		onMapsChange = null as
+			| ((maps: { field_map: Record<string, any>; value_map: Record<string, any> }) => void)
+			| null
 	} = $props();
 
 	// Namespace the `field` attribute (id / label-for / hidden input name /
@@ -69,6 +70,38 @@
 	// is by valuePath, so this only affects those DOM/aria identifiers. Empty for
 	// applied_control to keep its existing ids/testids unchanged.
 	const fieldPrefix = modelKey === 'applied_control' ? '' : `${modelKey}_`;
+
+	// Immutably set a dotted path in an object, cloning each level touched.
+	function setNested(obj: Record<string, any>, path: string, value: any) {
+		const keys = path.split('.');
+		const root = { ...obj };
+		let cur = root;
+		for (let i = 0; i < keys.length - 1; i++) {
+			cur[keys[i]] = { ...(cur[keys[i]] ?? {}) };
+			cur = cur[keys[i]];
+		}
+		cur[keys[keys.length - 1]] = value;
+		return root;
+	}
+
+	// Default maps sink: write field_map/value_map into the superform store at
+	// valuePathPrefix. Top-level store reassignment so every formFieldProxy
+	// subscriber re-reads (per-row selects otherwise keep stale values).
+	function mergeMapsIntoForm(maps: {
+		field_map: Record<string, any>;
+		value_map: Record<string, any>;
+	}) {
+		const store = form.form;
+		let data = get(store);
+		data = setNested(data, `${valuePathPrefix}.field_map`, maps.field_map);
+		data = setNested(data, `${valuePathPrefix}.value_map`, maps.value_map);
+		store.set(data);
+	}
+
+	const emitMapsChange = (maps: {
+		field_map: Record<string, any>;
+		value_map: Record<string, any>;
+	}) => (onMapsChange ?? mergeMapsIntoForm)(maps);
 
 	let selectedTable = $state(initialConfig?.table_name || '');
 	let fieldMap = $state(initialConfig?.field_map || {});
@@ -233,7 +266,7 @@
 		if (!val) {
 			fieldMap = {};
 			valueMap = {};
-			onMapsChange({ field_map: {}, value_map: {} });
+			emitMapsChange({ field_map: {}, value_map: {} });
 			return;
 		}
 
@@ -262,7 +295,7 @@
 
 		fieldMap = finalFieldMap;
 		valueMap = finalValueMap;
-		onMapsChange({ field_map: finalFieldMap, value_map: finalValueMap });
+		emitMapsChange({ field_map: finalFieldMap, value_map: finalValueMap });
 	}
 </script>
 

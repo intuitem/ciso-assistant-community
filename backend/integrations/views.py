@@ -312,36 +312,6 @@ class IntegrationWebhookView(View):
         return HttpResponse(status=202)
 
 
-class SyncableModelListView(APIView):
-    """List the local models that can be synced with a remote system, with their
-    mappable fields, types and choice values. Source of truth for the frontend
-    FieldMapper (so the local field list isn't duplicated client-side)."""
-
-    def get(self, request, *args, **kwargs):
-        from integrations.syncable import all_specs
-
-        data = [
-            {
-                "key": spec.key,
-                "label": spec.label,
-                "fields": [
-                    {
-                        "key": f.key,
-                        "type": f.type,
-                        "required": f.required,
-                        "choices": [
-                            {"value": value, "label": label}
-                            for value, label in f.choices
-                        ],
-                    }
-                    for f in spec.fields
-                ],
-            }
-            for spec in all_specs()
-        ]
-        return Response(data)
-
-
 class SyncMappingDeleteView(generics.DestroyAPIView):
     """
     An API endpoint to delete a SyncMapping.

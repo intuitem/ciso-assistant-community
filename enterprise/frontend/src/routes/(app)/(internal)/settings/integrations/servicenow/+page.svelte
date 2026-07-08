@@ -242,22 +242,6 @@
 						title={m.assets()}
 						remoteFieldLabel={m.serviceNowColumn()}
 						tableHelpText={m.serviceNowTableHelpText()}
-						onMapsChange={({ field_map, value_map }) => {
-							$formStore = {
-								...$formStore,
-								settings: {
-									...$formStore.settings,
-									models: {
-										...($formStore.settings.models ?? {}),
-										asset: {
-											...($formStore.settings.models?.asset ?? {}),
-											field_map,
-											value_map
-										}
-									}
-								}
-							};
-						}}
 					/>
 				{/if}
 				<button

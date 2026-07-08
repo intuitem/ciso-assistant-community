@@ -5588,12 +5588,17 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
                     applied_control_id=serializer.instance.id,
                     remote_id=remote_object_id,
                 )
-                sync_mapping = SyncMapping.objects.create(
+                # Upsert: SyncMapping is unique on (configuration, content_type,
+                # local_object_id); relinking must reuse the row instead of
+                # raising IntegrityError (swallowed below → silent relink loss).
+                sync_mapping, _ = SyncMapping.objects.update_or_create(
                     configuration=integration_config,
                     content_type=ContentType.objects.get_for_model(self.model),
                     local_object_id=serializer.instance.id,
-                    remote_id=remote_object_id,
-                    sync_status=SyncMapping.SyncStatus.PENDING,
+                    defaults={
+                        "remote_id": remote_object_id,
+                        "sync_status": SyncMapping.SyncStatus.PENDING,
+                    },
                 )
                 sync_object_to_integrations.schedule(
                     args=(

@@ -3978,7 +3978,9 @@ class Asset(
     def save(self, *args, **kwargs) -> None:
         # Capture changed syncable fields before writing, for outbound sync.
         changed_fields = self._capture_sync_changed_fields()
-        is_new = self.pk is None
+        # _state.adding, not `pk is None`: the UUID pk is defaulted at
+        # instantiation, so pk is never None even for unsaved rows.
+        is_new = self._state.adding
         # ``skip_sync`` lets the inbound pull path write without re-triggering a
         # push (set by the orchestrator's _update_local_object).
         skip_sync = kwargs.pop("skip_sync", False)
@@ -5295,8 +5297,9 @@ class AppliedControl(
         if self.status == "active":
             self.progress_field = 100
 
-        # Save first
-        is_new = self.pk is None
+        # Save first. _state.adding, not `pk is None`: the UUID pk is defaulted
+        # at instantiation, so pk is never None even for unsaved rows.
+        is_new = self._state.adding
         skip_sync = kwargs.pop("skip_sync", False)
         super(AppliedControl, self).save(*args, **kwargs)
 

@@ -26,10 +26,21 @@ class IntegrationSyncableMixin:
         return changed
 
     def _capture_sync_changed_fields(self) -> list[str]:
-        """Changed syncable fields vs the persisted row ([] when new)."""
-        if self.pk is None:
+        """Changed syncable fields vs the persisted row ([] when new).
+
+        Uses ``_state.adding`` (not ``pk is None``: AbstractBaseModel's UUID pk
+        has ``default=uuid.uuid4``, so pk is set before the first save). Skips
+        the DB read entirely on creation and loads only the syncable columns on
+        update, keeping bulk imports cheap.
+        """
+        if self._state.adding:
             return []
-        old = type(self).objects.filter(pk=self.pk).first()
+        old = (
+            type(self)
+            .objects.filter(pk=self.pk)
+            .only(*self.INTEGRATION_SYNCABLE_FIELDS)
+            .first()
+        )
         return self._get_changed_fields(old) if old else []
 
     def _trigger_sync(self, is_new: bool, changed_fields: list[str]) -> None:

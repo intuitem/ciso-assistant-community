@@ -33,10 +33,5 @@ urlpatterns = [
         views.SyncMappingDeleteView.as_view(),
         name="sync-mapping-delete",
     ),
-    path(
-        "syncable-models/",
-        views.SyncableModelListView.as_view(),
-        name="syncable-models",
-    ),
     path("", include(router.urls)),
 ]

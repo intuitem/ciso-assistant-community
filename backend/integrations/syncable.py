@@ -101,10 +101,6 @@ def get_spec(model_key: str) -> SyncableModelSpec | None:
     return SYNCABLE_MODELS.get(model_key)
 
 
-def all_specs() -> list[SyncableModelSpec]:
-    return list(SYNCABLE_MODELS.values())
-
-
 def model_key_for_content_type(content_type: ContentType) -> str | None:
     for spec in SYNCABLE_MODELS.values():
         if (
@@ -115,25 +111,11 @@ def model_key_for_content_type(content_type: ContentType) -> str | None:
     return None
 
 
-def content_type_for_model_key(model_key: str) -> ContentType | None:
-    spec = get_spec(model_key)
-    if not spec:
-        return None
-    return ContentType.objects.get_by_natural_key(spec.app_label, spec.model_name)
-
-
 def choice_fields(model_key: str) -> set[str]:
     spec = get_spec(model_key)
     if not spec:
         return set()
     return {f.key for f in spec.fields if f.type == CHOICE}
-
-
-def date_fields(model_key: str) -> set[str]:
-    spec = get_spec(model_key)
-    if not spec:
-        return set()
-    return {f.key for f in spec.fields if f.type == DATE}
 
 
 def mappable_field_keys(model_key: str) -> set[str]:
