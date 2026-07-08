@@ -240,7 +240,7 @@ export const CLASSIFICATION_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'classification-levels',
-		optionsLabelField: 'abbreviation',
+		optionsLabelField: 'label',
 		label: 'classification',
 		multiple: true
 	}

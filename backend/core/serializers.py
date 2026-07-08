@@ -5252,6 +5252,7 @@ class TerminologyWriteSerializer(BaseModelSerializer):
 
 class ClassificationLevelReadSerializer(BaseModelSerializer):
     object_classification = FieldsRelatedField()
+    label = serializers.ReadOnlyField()
 
     class Meta:
         model = ClassificationLevel
@@ -5267,11 +5268,12 @@ class ClassificationLevelWriteSerializer(BaseModelSerializer):
 
 
 class ObjectClassificationReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
     levels = ClassificationLevelReadSerializer(many=True, read_only=True)
 
     class Meta:
         model = ObjectClassification
-        exclude = ["folder"]
+        fields = "__all__"
 
 
 class ObjectClassificationWriteSerializer(BaseModelSerializer):

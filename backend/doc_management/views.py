@@ -1176,8 +1176,21 @@ class DocumentRevisionViewSet(BaseModelViewSet):
                 container.document_type, container.document_type
             )
         logo_base64, logo_mime_type = self._client_logo()
+        cls = getattr(container, "classification", None) if container else None
+        classification = (
+            {
+                "abbreviation": cls.abbreviation,
+                "name": cls.name,
+                "hexcolor": cls.hexcolor or "#000000",
+                "scheme": cls.object_classification.ref_id
+                or cls.object_classification.name,
+            }
+            if cls
+            else None
+        )
         context = {
             "policy_name": doc.display_name,
+            "classification": classification,
             "version_number": revision.version_number,
             "status": revision.status,
             "status_display": revision.get_status_display(),

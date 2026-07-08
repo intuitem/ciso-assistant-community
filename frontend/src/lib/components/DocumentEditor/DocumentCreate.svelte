@@ -138,7 +138,7 @@
 		form={_form}
 		field="classification"
 		optionsEndpoint="classification-levels"
-		optionsLabelField="abbreviation"
+		optionsLabelField="label"
 		label={m.classification()}
 		nullable
 	/>

@@ -26,6 +26,7 @@
 		data.revision?.id ? `/documents/${data.container?.id}/read/file?rev=${data.revision.id}` : ''
 	);
 	let isPdf = $derived((data.revision?.file ?? '').toLowerCase().endsWith('.pdf'));
+	let canPdf = $derived(!isUploaded && !isLinked && Boolean(data.revision?.id));
 </script>
 
 <div class="mx-auto max-w-4xl space-y-6 p-4 sm:p-6">
@@ -53,9 +54,20 @@
 						<h1 class="text-2xl font-bold leading-tight tracking-tight">
 							{data.container?.name || m.untitled()}
 						</h1>
-						{#if data.container?.classification}
-							<ClassificationBadge classification={data.container.classification} class="shrink-0" />
-						{/if}
+						<div class="flex shrink-0 items-center gap-2">
+							{#if data.container?.classification}
+								<ClassificationBadge classification={data.container.classification} />
+							{/if}
+							{#if canPdf}
+								<a
+									href={`/documents/${data.container?.id}/read/pdf?rev=${data.revision.id}`}
+									data-sveltekit-reload
+									class="btn btn-sm variant-soft"
+								>
+									<i class="fa-solid fa-file-pdf mr-2"></i>{m.exportPdf()}
+								</a>
+							{/if}
+						</div>
 					</div>
 					<div class="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-surface-500">
 						<span class="font-semibold uppercase tracking-wide text-primary-500">

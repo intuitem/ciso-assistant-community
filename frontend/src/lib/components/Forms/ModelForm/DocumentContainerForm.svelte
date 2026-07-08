@@ -58,7 +58,7 @@
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="classification-levels"
-	optionsLabelField="abbreviation"
+	optionsLabelField="label"
 	field="classification"
 	label={m.classification()}
 	nullable

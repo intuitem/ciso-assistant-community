@@ -2726,8 +2726,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'description' },
 			{ field: 'ref_id' },
 			{ field: 'builtin' },
-			{ field: 'is_visible' },
-			{ field: 'translations' }
+			{ field: 'is_visible' }
 		]
 	},
 	'classification-levels': {
@@ -2737,19 +2736,15 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Classification level',
 		verboseNamePlural: 'Classification levels',
 		customNameDescription: true,
-		foreignKeyFields: [
-			{ field: 'object_classification', urlModel: 'object-classifications' }
-		],
+		foreignKeyFields: [{ field: 'object_classification', urlModel: 'object-classifications' }],
 		detailViewFields: [
 			{ field: 'abbreviation' },
 			{ field: 'name' },
-			{ field: 'description' },
 			{ field: 'rank' },
 			{ field: 'hexcolor' },
 			{ field: 'object_classification' },
 			{ field: 'builtin' },
-			{ field: 'is_visible' },
-			{ field: 'translations' }
+			{ field: 'is_visible' }
 		]
 	},
 	roles: {

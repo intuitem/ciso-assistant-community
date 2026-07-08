@@ -933,7 +933,14 @@
 		{:else if URLModel === 'terminologies'}
 			<TerminologyForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
 		{:else if URLModel === 'object-classifications'}
-			<ObjectClassificationForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
+			<ObjectClassificationForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+			/>
 		{:else if URLModel === 'classification-levels'}
 			<ClassificationLevelForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
 		{:else if URLModel === 'custom-fields'}
