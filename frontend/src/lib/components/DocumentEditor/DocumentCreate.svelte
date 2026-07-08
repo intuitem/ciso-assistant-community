@@ -110,6 +110,8 @@
 			const container = await res.json();
 			if (onCreated) onCreated({ id: container.id, source });
 			else goto(`/document-containers/${container.id}/document`);
+		} catch {
+			error = m.error();
 		} finally {
 			busy = false;
 		}

@@ -230,7 +230,7 @@ export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
 				status: 200,
 				headers: {
 					'Content-Type': res.headers.get('Content-Type') || 'application/octet-stream',
-					'Cache-Control': 'public, max-age=3600'
+					'Cache-Control': 'private, max-age=3600'
 				}
 			});
 		}

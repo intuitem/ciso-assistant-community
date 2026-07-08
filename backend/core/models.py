@@ -67,6 +67,7 @@ from .utils import (
 )
 from .validators import (
     validate_file_name,
+    validate_html_template_file_name,
     validate_file_size,
     JSONSchemaInstanceValidator,
 )
@@ -10315,7 +10316,7 @@ class CustomDocHtmlTemplate(AbstractBaseModel, FolderMixin):
         validators=[
             FileExtensionValidator(["html"]),
             validate_file_size,
-            validate_file_name,
+            validate_html_template_file_name,
         ],
         help_text=_("Custom .html template file (Django template syntax)"),
     )

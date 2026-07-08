@@ -100,8 +100,8 @@
 					})
 				});
 				if (!createRes.ok) {
-					const errData = await createRes.json();
-					error = JSON.stringify(errData);
+					const errData = await createRes.json().catch(() => ({}));
+					error = errData.detail || errData.error || Object.values(errData).flat()[0] || m.error();
 					uploading = false;
 					return;
 				}
@@ -243,8 +243,8 @@
 						<i class="fa-solid fa-arrow-left text-xs"></i>
 					</button>
 					<div>
-						<h3 class="h4 font-semibold">{templateName(editingKey)}</h3>
-						<p class="text-sm text-surface-600-400">{templateDescription(editingKey)}</p>
+						<h3 class="text-base font-semibold">{templateName(editingKey)}</h3>
+						<p class="text-xs text-surface-600-400">{langLabel(editingLang)}</p>
 					</div>
 				</div>
 				<div class="flex items-center gap-2">

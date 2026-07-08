@@ -67,7 +67,7 @@
 		const other = levels[j];
 		busy = true;
 		try {
-			await Promise.all([
+			const results = await Promise.all([
 				fetch(base(), {
 					method: 'PATCH',
 					headers: { 'Content-Type': 'application/json' },
@@ -79,6 +79,10 @@
 					body: JSON.stringify({ id: other.id, rank: l.rank })
 				})
 			]);
+			if (results.some((r) => !r.ok)) window.alert(m.error());
+			await invalidateAll();
+		} catch {
+			window.alert(m.error());
 			await invalidateAll();
 		} finally {
 			busy = false;
@@ -160,13 +164,13 @@
 							class="hover:text-primary-500 disabled:opacity-30"
 							disabled={busy || i === 0}
 							onclick={() => move(l, -1)}
-							aria-label="up"><i class="fa-solid fa-chevron-up text-xs"></i></button
+							aria-label={m.moveUp()}><i class="fa-solid fa-chevron-up text-xs"></i></button
 						>
 						<button
 							class="hover:text-primary-500 disabled:opacity-30"
 							disabled={busy || i === levels.length - 1}
 							onclick={() => move(l, 1)}
-							aria-label="down"><i class="fa-solid fa-chevron-down text-xs"></i></button
+							aria-label={m.moveDown()}><i class="fa-solid fa-chevron-down text-xs"></i></button
 						>
 					</div>
 					<span class="w-5 text-center text-xs tabular-nums text-surface-400">{l.rank}</span>
@@ -204,13 +208,13 @@
 								class="text-surface-400 hover:text-primary-500"
 								disabled={busy}
 								onclick={() => startEdit(l)}
-								aria-label="edit"><i class="fa-solid fa-pen"></i></button
+								aria-label={m.edit()}><i class="fa-solid fa-pen"></i></button
 							>
 							<button
 								class="text-surface-400 hover:text-error-500"
 								disabled={busy}
 								onclick={() => del(l)}
-								aria-label="delete"><i class="fa-solid fa-trash"></i></button
+								aria-label={m.delete()}><i class="fa-solid fa-trash"></i></button
 							>
 						{:else}
 							<span class="w-4 text-center text-[10px] text-surface-400" title={m.builtin()}>

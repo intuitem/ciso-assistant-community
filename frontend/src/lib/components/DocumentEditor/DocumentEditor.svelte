@@ -267,22 +267,19 @@
 		if (!document) return;
 
 		const revRes = await proxyGet({ _action: 'revisions', document: document.id });
+		if (!revRes.ok) return;
 		const revData = await revRes.json();
 		revisions = revData.results || [];
 
 		const activeStatuses = ['draft', 'change_requested', 'in_review', 'validated'];
-		const editable = revisions.find((r: any) => activeStatuses.includes(r.status));
-		if (editable) {
-			const fullRes = await proxyGet({ _action: 'revision', revision_id: editable.id });
-			currentRevision = await fullRes.json();
-			content = currentRevision.content || '';
-			lastLoadedAt = currentRevision.updated_at || '';
-		} else if (revisions.length > 0) {
-			const fullRes = await proxyGet({ _action: 'revision', revision_id: revisions[0].id });
-			currentRevision = await fullRes.json();
-			content = currentRevision.content || '';
-			lastLoadedAt = currentRevision.updated_at || '';
-		}
+		const target = revisions.find((r: any) => activeStatuses.includes(r.status)) ?? revisions[0];
+		if (!target) return;
+
+		const fullRes = await proxyGet({ _action: 'revision', revision_id: target.id });
+		if (!fullRes.ok) return;
+		currentRevision = await fullRes.json();
+		content = currentRevision.content || '';
+		lastLoadedAt = currentRevision.updated_at || '';
 	}
 
 	let saveConflict = $state('');
@@ -1134,7 +1131,7 @@
 						await refreshData();
 					}}
 				>
-					<i class="fa-solid fa-rotate mr-1"></i> Reload
+					<i class="fa-solid fa-rotate mr-1"></i>{m.refresh()}
 				</button>
 			</div>
 		{/if}

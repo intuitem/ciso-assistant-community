@@ -1160,6 +1160,7 @@ class DocumentRevisionViewSet(BaseModelViewSet):
     def _render_pdf_bytes(self, revision, user):
         """Render a revision to PDF bytes (shared by export and snapshot)."""
         import markdown as md_lib
+        from django.utils.safestring import mark_safe
 
         content_html = md_lib.markdown(
             revision.content,
@@ -1168,7 +1169,7 @@ class DocumentRevisionViewSet(BaseModelViewSet):
         accessible_ids = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), user, DocumentAttachment
         )[0]
-        content_html = self._inline_images(content_html, set(accessible_ids))
+        content_html = mark_safe(self._inline_images(content_html, set(accessible_ids)))
         author_name = ""
         if revision.author:
             author_name = (
@@ -1250,8 +1251,8 @@ class DocumentRevisionViewSet(BaseModelViewSet):
         )
         if override and override.file:
             try:
-                override.file.open("rb")
-                template_source = override.file.read().decode("utf-8")
+                with override.file.open("rb") as fh:
+                    template_source = fh.read().decode("utf-8")
                 forbidden = find_forbidden_template_tags(template_source)
                 if forbidden:
                     logger.warning(
