@@ -5250,6 +5250,38 @@ class TerminologyWriteSerializer(BaseModelSerializer):
         exclude = ["folder", "is_published"]
 
 
+class ClassificationLevelReadSerializer(BaseModelSerializer):
+    object_classification = FieldsRelatedField()
+
+    class Meta:
+        model = ClassificationLevel
+        exclude = ["folder"]
+
+
+class ClassificationLevelWriteSerializer(BaseModelSerializer):
+    builtin = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        model = ClassificationLevel
+        exclude = ["folder", "is_published"]
+
+
+class ObjectClassificationReadSerializer(BaseModelSerializer):
+    levels = ClassificationLevelReadSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = ObjectClassification
+        exclude = ["folder"]
+
+
+class ObjectClassificationWriteSerializer(BaseModelSerializer):
+    builtin = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        model = ObjectClassification
+        exclude = ["folder", "is_published"]
+
+
 class ValidationFlowWriteSerializer(BaseModelSerializer):
     ref_id = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     event_notes = serializers.CharField(

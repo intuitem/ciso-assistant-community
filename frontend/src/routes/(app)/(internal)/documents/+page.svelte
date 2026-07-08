@@ -6,6 +6,7 @@
 		documentTypeLabel as typeLabel,
 		documentTypeIcon as typeIcon
 	} from '$lib/utils/documentTypes';
+	import ClassificationBadge from '$lib/components/ClassificationBadge.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -196,6 +197,13 @@
 							<p class="flex items-center gap-1.5 truncate text-xs text-surface-500">
 								<i class="fa-solid fa-folder-tree opacity-70"></i>{doc.folder.str}
 							</p>
+						{/if}
+
+						{#if doc.classification}
+							<ClassificationBadge
+								classification={doc.classification}
+								class="relative z-10 self-start"
+							/>
 						{/if}
 
 						<div

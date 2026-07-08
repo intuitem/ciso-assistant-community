@@ -63,6 +63,8 @@ READER_PERMISSIONS_LIST = [
     "view_attackpath",
     "view_operationalscenario",
     "view_terminology",
+    "view_objectclassification",
+    "view_classificationlevel",
     "view_globalsettings",
     "view_securityexception",
     "view_finding",
@@ -192,6 +194,8 @@ APPROVER_PERMISSIONS_LIST = [
     "view_attackpath",
     "view_operationalscenario",
     "view_terminology",
+    "view_objectclassification",
+    "view_classificationlevel",
     "view_globalsettings",
     "view_securityexception",
     "view_finding",
@@ -397,6 +401,8 @@ ANALYST_PERMISSIONS_LIST = [
     "change_operationalscenario",
     "delete_operationalscenario",
     "view_terminology",
+    "view_objectclassification",
+    "view_classificationlevel",
     "view_globalsettings",
     "view_securityexception",
     "add_securityexception",
@@ -817,6 +823,8 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_operationalscenario",
     "delete_operationalscenario",
     "view_terminology",
+    "view_objectclassification",
+    "view_classificationlevel",
     "view_globalsettings",
     "view_securityexception",
     "add_securityexception",
@@ -1463,8 +1471,17 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     # terminologies
     "add_terminology",
     "view_terminology",
+    "view_objectclassification",
+    "view_classificationlevel",
     "change_terminology",
     "delete_terminology",
+    # classifications
+    "add_objectclassification",
+    "change_objectclassification",
+    "delete_objectclassification",
+    "add_classificationlevel",
+    "change_classificationlevel",
+    "delete_classificationlevel",
     # pmbok
     "view_genericcollection",
     "add_genericcollection",
@@ -1712,7 +1729,12 @@ def startup(sender=None, **kwargs):
 
     from django.contrib.auth.models import Permission
 
-    from core.models import AssetCapability, AssetClass, Terminology
+    from core.models import (
+        AssetCapability,
+        AssetClass,
+        ObjectClassification,
+        Terminology,
+    )
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
     from tprm.models import Entity
     from privacy.models import ProcessingNature

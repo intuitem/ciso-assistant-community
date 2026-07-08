@@ -19,6 +19,7 @@ export const POST: RequestHandler = async ({ request, fetch, locals }) => {
 	const document_type = String(fd.get('document_type') ?? 'policy');
 	const folder = String(fd.get('folder') ?? '');
 	const locale = String(fd.get('locale') ?? 'en');
+	const classification = String(fd.get('classification') ?? '');
 	const links: Record<string, string[]> = {};
 	for (const f of LINK_FIELDS) links[f] = fd.getAll(f).map(String);
 
@@ -49,20 +50,26 @@ export const POST: RequestHandler = async ({ request, fetch, locals }) => {
 		res = await fetch(`${BASE_API_URL}/document-containers/`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ name, document_type, folder, ...links })
+			body: JSON.stringify({
+				name,
+				document_type,
+				folder,
+				...links,
+				...(classification ? { classification } : {})
+			})
 		});
 	}
 
 	const data = await res.json().catch(() => null);
 	if (!res.ok) return json(data ?? { error: 'Failed' }, { status: res.status });
 
-	// upload/link go through custom actions that don't accept object-links —
-	// set them in a follow-up PATCH when present.
-	if (source !== 'author' && LINK_FIELDS.some((f) => links[f].length)) {
+	// upload/link go through custom actions that don't accept object-links or
+	// classification — set them in a follow-up PATCH when present.
+	if (source !== 'author' && (classification || LINK_FIELDS.some((f) => links[f].length))) {
 		await fetch(`${BASE_API_URL}/document-containers/${data.id}/`, {
 			method: 'PATCH',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(links)
+			body: JSON.stringify({ ...links, ...(classification ? { classification } : {}) })
 		});
 	}
 	return json(data);

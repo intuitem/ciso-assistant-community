@@ -3,6 +3,7 @@
 	import { LOCALE_MAP } from '$lib/utils/locales';
 	import { documentTypeLabel, documentTypeIcon } from '$lib/utils/documentTypes';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import ClassificationBadge from '$lib/components/ClassificationBadge.svelte';
 	import DocumentReferencesPanel from '$lib/components/DocumentEditor/DocumentReferencesPanel.svelte';
 	import type { PageData } from './$types';
 
@@ -48,9 +49,14 @@
 					<i class="fa-solid {documentTypeIcon(docType)}"></i>
 				</div>
 				<div class="min-w-0 flex-1 space-y-2">
-					<h1 class="text-2xl font-bold leading-tight tracking-tight">
-						{data.container?.name || m.untitled()}
-					</h1>
+					<div class="flex items-start justify-between gap-3">
+						<h1 class="text-2xl font-bold leading-tight tracking-tight">
+							{data.container?.name || m.untitled()}
+						</h1>
+						{#if data.container?.classification}
+							<ClassificationBadge classification={data.container.classification} class="shrink-0" />
+						{/if}
+					</div>
 					<div class="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-surface-500">
 						<span class="font-semibold uppercase tracking-wide text-primary-500">
 							{documentTypeLabel(docType)}

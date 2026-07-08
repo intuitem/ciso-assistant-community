@@ -468,6 +468,12 @@ export const navData = {
 					permissions: ['view_terminology']
 				},
 				{
+					name: 'objectClassifications',
+					fa_icon: 'fa-solid fa-shield-halved',
+					href: '/object-classifications',
+					permissions: ['view_objectclassification']
+				},
+				{
 					name: 'settings',
 					fa_icon: 'fa-solid fa-cog',
 					href: '/settings',

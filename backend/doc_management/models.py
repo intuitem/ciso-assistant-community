@@ -36,6 +36,14 @@ class DocumentContainer(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
     )
     name = models.CharField(max_length=200, blank=True, verbose_name=_("Name"))
     description = models.TextField(blank=True, verbose_name=_("Description"))
+    classification = models.ForeignKey(
+        "core.ClassificationLevel",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("Classification"),
+    )
 
     # Typed object links (Stream E.1). Policy is a proxy of AppliedControl, so the
     # two M2Ms must use distinct reverse names or Django's E304 check fails (the

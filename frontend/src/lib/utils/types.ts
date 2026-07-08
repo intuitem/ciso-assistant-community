@@ -133,6 +133,9 @@ export const URL_MODEL = [
 	'quantitative-risk-hypotheses',
 	// terminologies
 	'terminologies',
+	// classifications
+	'object-classifications',
+	'classification-levels',
 	// roles,
 	'roles',
 	'permissions',

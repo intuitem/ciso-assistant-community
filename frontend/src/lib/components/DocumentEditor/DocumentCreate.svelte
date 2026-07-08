@@ -42,6 +42,7 @@
 		folder: z.string().default(defaultFolder),
 		locale: z.string().default('en'),
 		url: z.string().optional().default(''),
+		classification: z.string().optional().default(''),
 		policies: z.array(z.string()).optional().default(boundIds('policies')),
 		applied_controls: z.array(z.string()).optional().default(boundIds('applied_controls')),
 		task_templates: z.array(z.string()).optional().default(boundIds('task_templates')),
@@ -87,6 +88,7 @@
 			fd.append('document_type', $form.document_type);
 			fd.append('folder', $form.folder);
 			fd.append('locale', $form.locale);
+			if ($form.classification) fd.append('classification', $form.classification);
 			if (source === 'link') fd.append('url', $form.url.trim());
 			if (source === 'upload' && file) fd.append('file', file);
 			for (const f of [
@@ -131,6 +133,15 @@
 	{/if}
 
 	<FolderTreeSelect form={_form} field="folder" label={m.domain()} />
+
+	<AutocompleteSelect
+		form={_form}
+		field="classification"
+		optionsEndpoint="classification-levels"
+		optionsLabelField="abbreviation"
+		label={m.classification()}
+		nullable
+	/>
 
 	<!-- Content source: the same document, provided three ways -->
 	<div>

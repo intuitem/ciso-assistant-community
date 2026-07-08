@@ -1002,7 +1002,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'task_templates', urlModel: 'task-templates' },
 			{ field: 'processings', urlModel: 'processings' },
-			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
+			{ field: 'classification', urlModel: 'classification-levels' }
 		],
 		reverseForeignKeyFields: [{ field: 'container', urlModel: 'managed-documents' }],
 		selectFields: [{ field: 'document_type' }],
@@ -1011,6 +1012,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'description' },
 			{ field: 'document_type' },
 			{ field: 'folder' },
+			{ field: 'classification' },
 			{ field: 'policies' },
 			{ field: 'applied_controls' },
 			{ field: 'task_templates' },
@@ -2711,6 +2713,47 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'field_path' },
 			{ field: 'created_at' },
 			{ field: 'updated_at' },
+			{ field: 'builtin' },
+			{ field: 'is_visible' },
+			{ field: 'translations' }
+		]
+	},
+	'object-classifications': {
+		name: 'objectClassification',
+		localName: 'objectClassification',
+		localNamePlural: 'objectClassifications',
+		verboseName: 'Object classification',
+		verboseNamePlural: 'Object classifications',
+		customNameDescription: true,
+		reverseForeignKeyFields: [
+			{ field: 'object_classification', urlModel: 'classification-levels' }
+		],
+		detailViewFields: [
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'ref_id' },
+			{ field: 'builtin' },
+			{ field: 'is_visible' },
+			{ field: 'translations' }
+		]
+	},
+	'classification-levels': {
+		name: 'classificationLevel',
+		localName: 'classificationLevel',
+		localNamePlural: 'classificationLevels',
+		verboseName: 'Classification level',
+		verboseNamePlural: 'Classification levels',
+		customNameDescription: true,
+		foreignKeyFields: [
+			{ field: 'object_classification', urlModel: 'object-classifications' }
+		],
+		detailViewFields: [
+			{ field: 'abbreviation' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'rank' },
+			{ field: 'hexcolor' },
+			{ field: 'object_classification' },
 			{ field: 'builtin' },
 			{ field: 'is_visible' },
 			{ field: 'translations' }

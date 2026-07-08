@@ -19602,6 +19602,20 @@ class TerminologyViewSet(BaseModelViewSet):
         return Response(dict(Terminology.FieldPath.choices))
 
 
+class ObjectClassificationViewSet(BaseModelViewSet):
+    model = ObjectClassification
+    filterset_fields = ["folder", "is_visible", "builtin"]
+    search_fields = ["name", "description", "ref_id"]
+    ordering = ["name"]
+
+
+class ClassificationLevelViewSet(BaseModelViewSet):
+    model = ClassificationLevel
+    filterset_fields = ["object_classification", "folder", "is_visible", "builtin"]
+    search_fields = ["name", "description", "abbreviation"]
+    ordering = ["object_classification", "rank"]
+
+
 class RequirementAssignmentViewSet(BaseModelViewSet):
     """
     API endpoint that allows requirement assignments to be viewed or edited.

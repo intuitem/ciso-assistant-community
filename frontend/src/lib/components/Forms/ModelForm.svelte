@@ -73,6 +73,8 @@
 	import QuantitativeRiskScenarioForm from './ModelForm/QuantitativeRiskScenarioForm.svelte';
 	import QuantitativeRiskHypothesisForm from './ModelForm/QuantitativeRiskHypothesisForm.svelte';
 	import TerminologyForm from './ModelForm/TerminologyForm.svelte';
+	import ObjectClassificationForm from './ModelForm/ObjectClassificationForm.svelte';
+	import ClassificationLevelForm from './ModelForm/ClassificationLevelForm.svelte';
 	import CustomFieldDefinitionForm from './ModelForm/CustomFieldDefinitionForm.svelte';
 	import RoleForm from './ModelForm/RoleForm.svelte';
 	import EvidenceRevisionForm from './ModelForm/EvidenceRevisionForm.svelte';
@@ -930,6 +932,10 @@
 			<OrganisationObjectiveForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 		{:else if URLModel === 'terminologies'}
 			<TerminologyForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
+		{:else if URLModel === 'object-classifications'}
+			<ObjectClassificationForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
+		{:else if URLModel === 'classification-levels'}
+			<ClassificationLevelForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
 		{:else if URLModel === 'custom-fields'}
 			<CustomFieldDefinitionForm
 				{form}

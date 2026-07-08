@@ -236,6 +236,16 @@ export const LABELS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const CLASSIFICATION_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'classification-levels',
+		optionsLabelField: 'abbreviation',
+		label: 'classification',
+		multiple: true
+	}
+};
+
 export const LIBRARY_LABELS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1967,12 +1977,13 @@ export const listViewFields = {
 		body: ['version_number', 'status_display', 'author', 'change_summary', 'created_at']
 	},
 	'document-containers': {
-		head: ['name', 'documentType', 'status', 'domain', 'labels'],
-		body: ['name', 'document_type', 'status', 'folder', 'filtering_labels'],
+		head: ['name', 'documentType', 'status', 'classification', 'domain', 'labels'],
+		body: ['name', 'document_type', 'status', 'classification', 'folder', 'filtering_labels'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			document_type: DOCUMENT_TYPE_FILTER,
 			status: DOCUMENT_STATUS_FILTER,
+			classification: CLASSIFICATION_FILTER,
 			filtering_labels: LABELS_FILTER
 		}
 	},
@@ -2917,6 +2928,22 @@ export const listViewFields = {
 		body: ['field_path', 'name', 'description', 'translations', 'is_visible'],
 		filters: {
 			field_path: FIELD_PATH_FILTER,
+			builtin: BUILTIN_FILTER,
+			is_visible: IS_VISIBLE_FILTER
+		}
+	},
+	'object-classifications': {
+		head: ['name', 'description', 'ref_id', 'is_visible'],
+		body: ['name', 'description', 'ref_id', 'is_visible'],
+		filters: {
+			builtin: BUILTIN_FILTER,
+			is_visible: IS_VISIBLE_FILTER
+		}
+	},
+	'classification-levels': {
+		head: ['rank', 'abbreviation', 'name', 'hexcolor', 'is_visible'],
+		body: ['rank', 'abbreviation', 'name', 'hexcolor', 'is_visible'],
+		filters: {
 			builtin: BUILTIN_FILTER,
 			is_visible: IS_VISIBLE_FILTER
 		}

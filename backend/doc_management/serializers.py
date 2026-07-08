@@ -21,12 +21,26 @@ class DocumentContainerReadSerializer(BaseModelSerializer):
     task_templates = FieldsRelatedField(many=True)
     processings = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
+    classification = serializers.SerializerMethodField()
     document_count = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
 
     class Meta:
         model = DocumentContainer
         fields = "__all__"
+
+    def get_classification(self, obj):
+        lvl = obj.classification
+        if not lvl:
+            return None
+        # No "str" key on purpose: the table renders a related-object link when a
+        # truthy `str` is present, but a colored chip (using `name`) when it isn't.
+        return {
+            "id": str(lvl.id),
+            "name": lvl.label,
+            "abbreviation": lvl.abbreviation,
+            "hexcolor": lvl.hexcolor,
+        }
 
     def get_document_count(self, obj):
         return obj.documents.count()

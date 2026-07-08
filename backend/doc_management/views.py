@@ -45,7 +45,14 @@ class DocumentTemplateViewSet(BaseModelViewSet):
     """CRUD for reusable document content templates (built-in + custom)."""
 
     model = DocumentTemplate
-    filterset_fields = ["document_type", "folder", "locale", "builtin", "ref_id"]
+    filterset_fields = [
+        "document_type",
+        "folder",
+        "locale",
+        "builtin",
+        "ref_id",
+        "classification",
+    ]
     serializers_module = "doc_management.serializers"
 
     @action(detail=False, methods=["post"], url_path="import")
@@ -208,6 +215,7 @@ class DocumentContainerViewSet(BaseModelViewSet):
         published revision, with the latest published revision per locale."""
         containers = (
             self.get_queryset()
+            .select_related("classification")
             .prefetch_related("documents__revisions", "folder")
             .distinct()
         )
@@ -247,6 +255,13 @@ class DocumentContainerViewSet(BaseModelViewSet):
                     "document_type": c.document_type,
                     "folder": {"id": str(c.folder_id), "str": c.folder.name}
                     if c.folder_id
+                    else None,
+                    "classification": {
+                        "abbreviation": c.classification.abbreviation,
+                        "hexcolor": c.classification.hexcolor,
+                        "name": c.classification.label,
+                    }
+                    if c.classification_id
                     else None,
                     "languages": languages,
                 }

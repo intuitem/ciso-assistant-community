@@ -1634,6 +1634,23 @@ export const TerminologySchema = z.object({
 	translations: z.record(z.string().min(1), z.string().min(1))
 });
 
+export const ObjectClassificationSchema = z.object({
+	...NameDescriptionMixin,
+	ref_id: z.string().optional().default(''),
+	is_visible: z.boolean().default(true),
+	translations: z.record(z.string().min(1), z.string().min(1)).optional()
+});
+
+export const ClassificationLevelSchema = z.object({
+	...NameDescriptionMixin,
+	object_classification: z.string(),
+	rank: z.number().int().min(0).default(0),
+	abbreviation: z.string().optional().default(''),
+	hexcolor: z.string().optional().default(''),
+	is_visible: z.boolean().default(true),
+	translations: z.record(z.string().min(1), z.string().min(1)).optional()
+});
+
 export const RoleSchema = z.object({
 	...NameDescriptionMixin,
 	permissions: z.array(z.number()).optional()
@@ -1838,6 +1855,7 @@ export const DocumentContainerSchema = z.object({
 	description: z.string().optional().default(''),
 	document_type: z.string().optional().default('policy'),
 	folder: z.string(),
+	classification: z.string().uuid().optional().nullable(),
 	policies: z.array(z.string().uuid()).optional().default([]),
 	applied_controls: z.array(z.string().uuid()).optional().default([]),
 	task_templates: z.array(z.string().uuid()).optional().default([]),
@@ -1953,6 +1971,8 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'quantitative-risk-scenarios': quantitativeRiskScenarioSchema,
 	'quantitative-risk-hypotheses': quantitativeRiskHypothesisSchema,
 	terminologies: TerminologySchema,
+	'object-classifications': ObjectClassificationSchema,
+	'classification-levels': ClassificationLevelSchema,
 	'custom-fields': CustomFieldDefinitionSchema,
 	roles: RoleSchema,
 	'generic-collections': GenericCollectionSchema,

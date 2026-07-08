@@ -55,6 +55,17 @@
 	allowUserOptions="append"
 />
 
+<AutocompleteSelect
+	{form}
+	optionsEndpoint="classification-levels"
+	optionsLabelField="abbreviation"
+	field="classification"
+	label={m.classification()}
+	nullable
+	cacheLock={cacheLocks['classification']}
+	bind:cachedValue={formDataCache['classification']}
+/>
+
 <Dropdown
 	open={false}
 	style="hover:text-primary-700"

@@ -1789,6 +1789,14 @@ class ClassificationLevel(NameDescriptionMixin, FolderMixin):
             self.folder = self.object_classification.folder
         super().save(*args, **kwargs)
 
+    def __str__(self):
+        return self.abbreviation or self.name
+
+    @property
+    def label(self):
+        t = (self.translations or {}).get(get_language(), {})
+        return t.get("name") or self.abbreviation or self.name
+
 
 class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     """
