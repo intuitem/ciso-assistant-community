@@ -517,7 +517,7 @@ Reference controls can be bundled also as a library.
 
 Adding entities, solutions and contracts go through the same file to be able to keep consistent relationships. Each concept needs to be on a separate tab of the excel sheet.<br>
 
-{% file src="../.gitbook/assets/third_parties_ecosystem_template (1).xlsx" %}
+{% file src="../.gitbook/assets/third_parties_ecosystem_template.xlsx" %}
 
 The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Contracts"
 
@@ -540,6 +540,9 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 * `trust`  (Interger in \[1,4])
 * `domain` <mark style="color:$danger;">\*</mark>
 
+> [!NOTE]
+> Conflict detection: by `name` + `folder`
+
 #### Solutions
 
 * `ref_id`
@@ -547,6 +550,9 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 * `description`
 * `provider_entity_ref_id` <mark style="color:$danger;">\*</mark>
 * `criticality`  (Integer in \[1,4])
+
+> [!NOTE]
+> Conflict detection: by `name` + `folder`
 
 #### Contracts
 
@@ -565,6 +571,22 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 * `euid`
 * `vat`
 * `duns`
+
+> [!NOTE]
+> Conflict detection: by `name` + `folder`
+
+#### Representatives
+
+* `email` <mark style="color:$danger;">\*</mark>
+* `first_name`
+* `last_name`
+* `description` 
+* `phone`
+* `role`
+* `provider_entity_ref_id` <mark style="color:$danger;">\*</mark>
+
+> [!NOTE]
+> Conflict detection: by `email`
 
 ## Processings
 
