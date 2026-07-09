@@ -56,6 +56,10 @@ LOGGING = {
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
+            # Write to stdout so systemd/journald tags normal logs as info
+            # (PRIORITY=6). The default StreamHandler stream is stderr, which
+            # journald classifies as error (PRIORITY=3) regardless of level.
+            "stream": "ext://sys.stdout",
             "formatter": LOG_FORMAT,
         },
     },
