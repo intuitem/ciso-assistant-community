@@ -122,3 +122,64 @@ export async function apiDiscardDraft(frameworkId: string): Promise<void> {
 	});
 	await handleResponse(res);
 }
+
+/** Reference catalog: pickable threats / reference controls for node links. */
+export interface ReferentialCatalogItem {
+	urn: string;
+	ref_id: string | null;
+	name: string | null;
+	category?: string | null;
+	csf_function?: string | null;
+}
+
+export interface ReferentialCatalogSource {
+	library_urn: string;
+	name: string;
+	kind: 'draft' | 'dependency' | 'external';
+	missing?: boolean;
+	threats: ReferentialCatalogItem[];
+	reference_controls: ReferentialCatalogItem[];
+}
+
+export interface ReferentialCatalog {
+	sources: ReferentialCatalogSource[];
+	libraries: { id: string; library_urn: string; name: string; provider: string | null }[];
+}
+
+export async function apiReferenceCatalog(frameworkId: string): Promise<ReferentialCatalog> {
+	const res = await fetch(apiUrl(frameworkId), {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ _action: 'reference-catalog' })
+	});
+	return (await handleResponse(res)) as ReferentialCatalog;
+}
+
+/** One library's objects, browsed on demand (undeclared dependencies). */
+export async function apiBrowseReferenceLibrary(
+	frameworkId: string,
+	library: string
+): Promise<ReferentialCatalogSource> {
+	const res = await fetch(apiUrl(frameworkId), {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ _action: 'reference-catalog', library })
+	});
+	const data = (await handleResponse(res)) as { source: ReferentialCatalogSource };
+	return data.source;
+}
+
+/** Create a threat / reference control owned by the hosting library draft. */
+export async function apiCreateReferential(
+	frameworkId: string,
+	field: 'threats' | 'reference_controls',
+	object: Record<string, unknown>
+): Promise<ReferentialCatalogItem> {
+	const res = await fetch(apiUrl(frameworkId), {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ _action: 'create-referential', field, object })
+	});
+	const data = (await handleResponse(res)) as { object: Record<string, unknown> };
+	return data.object as unknown as ReferentialCatalogItem;
+}

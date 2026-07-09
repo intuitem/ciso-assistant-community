@@ -544,7 +544,7 @@
 				>
 					<i class="fa-solid fa-list-check mr-1"></i>Validate
 				</button>
-				<a href="{base()}?action=export" class="btn btn-sm variant-ghost-surface">
+				<a href="{base()}/export" class="btn btn-sm variant-ghost-surface">
 					<i class="fa-solid fa-file-arrow-down mr-1"></i>Export YAML
 				</a>
 				<button

@@ -34,6 +34,7 @@
 	import OutcomesEditor from './OutcomesEditor.svelte';
 	import ImplementationGroupsEditor from './ImplementationGroupsEditor.svelte';
 	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
+	import { initReferentialCatalog } from './referential-catalog';
 
 	interface Props {
 		framework: Framework;
@@ -63,6 +64,9 @@
 		apiTarget ? { apiTarget } : undefined
 	);
 	setBuilderContext(builder);
+	// Threats / reference controls pickable on nodes; hosts without the
+	// reference-catalog action leave the store errored and the UI hidden.
+	initReferentialCatalog(builder.apiTarget);
 
 	const cardCollapsed = createCollapsedStore(`fw-builder:${framework.id}:cards:collapsed`);
 	setCardCollapsedContext(cardCollapsed);

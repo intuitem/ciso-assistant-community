@@ -27,7 +27,7 @@
 	/>
 	<Article
 		title="Library Builder"
-		desc="Author a whole library (framework, controls, threats, matrices…) as a draft document, then publish it through the standard library loader. Adopt your custom libraries or clone from existing ones."
+		desc="Author, adopt or clone custom libraries and publish them through the standard loader"
 		link="/experimental/library-builder"
 		tags={['libraries', 'builder', 'packager']}
 	/>

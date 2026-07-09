@@ -37,6 +37,27 @@ export const POST: RequestHandler = async ({ params, request, url, fetch }) => {
 		return json(data, { status });
 	}
 
+	if (action === 'reference-catalog') {
+		const query = body.library ? `?library=${encodeURIComponent(body.library)}` : '';
+		const { status, data } = await backend(
+			`${base}/reference-catalog/${query}`,
+			'GET',
+			undefined,
+			fetch
+		);
+		return json(data, { status });
+	}
+
+	if (action === 'create-referential') {
+		const { status, data } = await backend(
+			`${base}/upsert-object/`,
+			'POST',
+			{ field: body.field, object: body.object },
+			fetch
+		);
+		return json(data, { status });
+	}
+
 	return json({ error: `unknown action '${action}'` }, { status: 400 });
 };
 

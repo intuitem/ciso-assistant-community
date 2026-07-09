@@ -219,10 +219,20 @@ def check_document_shape(objects: dict) -> list:
 
 
 def index_objects(objects: dict) -> dict:
-    """Map every top-level object URN (lowercased) to its (field, object)."""
+    """Map every top-level object URN (lowercased) to its (field, object).
+
+    Tolerates malformed containers (non-list fields, non-dict entries):
+    draft content is shape-checked at its doors, but this also runs over
+    stored-library content, which is not.
+    """
     index = {}
     for field in LIST_OBJECT_FIELDS:
-        for obj in objects.get(field) or []:
+        value = objects.get(field)
+        if not isinstance(value, list):
+            continue
+        for obj in value:
+            if not isinstance(obj, dict):
+                continue
             urn = str(obj.get("urn", "")).lower()
             if urn:
                 index[urn] = (field, obj)
@@ -612,6 +622,56 @@ def find_owning_library_urn(urn: str):
     return None
 
 
+def find_stored_owner_urn(urn: str, *, index_cache: dict | None = None):
+    """Best-effort resolution of the *stored* library owning an object URN.
+
+    Complements find_owning_library_urn for libraries that are stored but
+    not loaded: inverts the URN-family convention (the library URN is the
+    object URN with its type token swapped to `library`, minus trailing
+    leaf segments) and verifies membership in the candidate's content.
+
+    `index_cache` maps candidate library URNs to their content's URN set
+    (None when no such stored library exists). Callers resolving many
+    references pass one shared dict so each candidate library's content is
+    fetched and indexed once, not once per reference.
+    """
+    from core.models import StoredLibrary
+
+    lowered = str(urn).lower()
+    match = re.match(r"^urn:([a-z0-9_-]+):([a-z0-9_-]+):[a-z0-9_-]+:(.+)$", lowered)
+    if not match:
+        return None
+    packager, domain, tail = match.groups()
+    segments = tail.split(":")
+    # Most specific candidate first: leaf objects carry extra segments after
+    # the library ref (e.g. …:reference_control:doc-pol:pol.educ → doc-pol).
+    candidates = [
+        f"urn:{packager}:{domain}:library:{':'.join(segments[:i])}"
+        for i in range(len(segments), 0, -1)
+    ]
+    if index_cache is None:
+        index_cache = {}
+    unknown = [candidate for candidate in candidates if candidate not in index_cache]
+    if unknown:
+        rows: dict = {}
+        for stored in StoredLibrary.objects.filter(urn__in=unknown):
+            current = rows.get(stored.urn)
+            if current is None or stored.version > current.version:
+                rows[stored.urn] = stored
+        for candidate in unknown:
+            stored = rows.get(candidate)
+            index_cache[candidate] = (
+                set(index_objects(normalize_objects(stored.content or {})).keys())
+                if stored
+                else None
+            )
+    for candidate in candidates:
+        members = index_cache.get(candidate)
+        if members and lowered in members:
+            return candidate
+    return None
+
+
 def check_identity_conflicts(packager: str, ref_id: str, exclude_draft_id=None) -> list:
     """Advisory check of a draft identity against the existing corpus.
 
@@ -755,6 +815,8 @@ def _check_reference_integrity(draft) -> list:
     internal |= node_urns
 
     declared_dependencies = {str(dep).lower() for dep in draft.dependencies or []}
+    own_urn = str(draft.effective_urn or "").lower()
+    stored_index_cache: dict = {}  # shared across refs, see find_stored_owner_urn
     dependency_contents = None  # lazily-built URN index of dependency libraries
 
     def dependency_urns() -> set:
@@ -762,7 +824,9 @@ def _check_reference_integrity(draft) -> list:
         if dependency_contents is None:
             dependency_contents = set()
             for stored in StoredLibrary.objects.filter(urn__in=declared_dependencies):
-                dependency_contents.update(index_objects(stored.content or {}).keys())
+                dependency_contents.update(
+                    index_objects(normalize_objects(stored.content or {})).keys()
+                )
         return dependency_contents
 
     def check_ref(ref: str, where: str) -> None:
@@ -771,6 +835,16 @@ def _check_reference_integrity(draft) -> list:
             return
         owner = find_owning_library_urn(lowered)
         if owner is None and lowered not in dependency_urns():
+            # Not loaded, not covered by a declared dependency: a stored
+            # library may still own it (better message than "unresolved").
+            owner = find_stored_owner_urn(lowered, index_cache=stored_index_cache)
+            if owner is None:
+                errors.append(f"{where}: unresolved reference {ref}")
+                return
+        if owner and owner.lower() == own_urn:
+            # A stored/loaded copy of THIS library still holds the object:
+            # the reference dangles in the draft — never suggest depending
+            # on the library's own previous version.
             errors.append(f"{where}: unresolved reference {ref}")
             return
         if owner and owner.lower() not in declared_dependencies:

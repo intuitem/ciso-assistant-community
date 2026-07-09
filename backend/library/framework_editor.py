@@ -14,9 +14,12 @@ Rules:
 - New items get URNs minted under the framework's conventional node base
   (framework urn with :framework: replaced by :req_node:); whatever the
   editor minted client-side is remapped.
-- Fields the editor does not model (threats, reference_controls, min_score,
-  max_score, scores_definition_ref, any unknown key) are preserved from the
-  existing document object, matched by canonical URN.
+- Fields the editor does not model (min_score, max_score,
+  scores_definition_ref, any unknown key) are preserved from the existing
+  document object, matched by canonical URN.
+- Node links to threats/reference controls are lists of full URNs, exactly
+  as in the library YAML. A payload node that omits the key keeps the
+  existing links (older clients don't model them); an empty list detaches.
 """
 
 import copy
@@ -42,6 +45,8 @@ EDITOR_NODE_KEYS = {
     "translations",
     "questions",
     "depth",
+    "threats",
+    "reference_controls",
 }
 
 # Framework-level keys owned by the editor (urn and ref_id are identity,
@@ -131,6 +136,16 @@ def framework_to_editor_doc(framework: dict, *, locale: str = "en") -> dict:
                 "display_mode": node.get("display_mode", "default"),
                 "folder_id": "",
                 "translations": node.get("translations"),
+                # Deduplicated (case variants collapse): the pill UI keys on
+                # the URN, and adopted/raw-PATCHed content may carry repeats.
+                "threats": list(
+                    dict.fromkeys(str(ref).lower() for ref in node.get("threats") or [])
+                ),
+                "reference_controls": list(
+                    dict.fromkeys(
+                        str(ref).lower() for ref in node.get("reference_controls") or []
+                    )
+                ),
             }
         )
         questions_data = node.get("questions")
@@ -427,9 +442,30 @@ def editor_doc_to_framework_object(editor_doc: dict, *, existing: dict) -> dict:
         node_questions = questions_by_node.get(canonical)
         if node_questions:
             node_dict["questions"] = node_questions
-        # Preserve what the editor does not model (threats,
-        # reference_controls, min_score, scores_definition_ref, …).
         previous = existing_nodes.get(canonical)
+        # Threat / reference-control links: lists of full URNs, as in the
+        # library YAML. Key absent (or null) → the payload does not model
+        # links, keep the existing ones; empty list → deliberate detach-all.
+        for ref_field in ("threats", "reference_controls"):
+            refs = node.get(ref_field)
+            if ref_field in node and refs is not None:
+                if not isinstance(refs, list) or not all(
+                    isinstance(ref, str) for ref in refs
+                ):
+                    raise BuilderError(
+                        f"{canonical}: {ref_field} must be a list of URN strings"
+                    )
+                cleaned = []
+                for ref in refs:
+                    lowered = ref.strip().lower()
+                    if lowered and lowered not in cleaned:
+                        cleaned.append(lowered)
+                if cleaned:
+                    node_dict[ref_field] = cleaned
+            elif previous and previous.get(ref_field):
+                node_dict[ref_field] = copy.deepcopy(previous[ref_field])
+        # Preserve what the editor does not model (min_score,
+        # scores_definition_ref, …).
         if previous:
             for key, value in previous.items():
                 if key not in EDITOR_NODE_KEYS and key not in node_dict:

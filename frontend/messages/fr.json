@@ -5035,6 +5035,16 @@
 	"builderVisibilityExpressionTooltip": "Expression CEL qui doit être évaluée à vrai pour que cette exigence soit visible. Exemple : requirements[\"urn:...\"].score > 50",
 	"builderVisibilityExpressionPlaceholder": "ex. requirements[\"urn:...\"].score > 50",
 	"builderImplementationGroupsLabel": "Groupes d'implémentation :",
+	"refIdRequired": "Un identifiant de r\u00e9f\u00e9rence valide est requis",
+	"objectUrnAlreadyExists": "Un objet avec cet identifiant existe d\u00e9j\u00e0 dans le brouillon",
+	"builderThreatsLabel": "Menaces :",
+	"builderReferenceControlsLabel": "Contr\u00f4les de r\u00e9f\u00e9rence :",
+	"builderLinkExisting": "Lier un objet existant",
+	"builderCreateNew": "Cr\u00e9er",
+	"builderNoCatalogMatches": "Aucun r\u00e9sultat",
+	"builderBrowseLibrary": "Parcourir une autre biblioth\u00e8que\u2026",
+	"builderCatalogUnavailable": "Catalogue de r\u00e9f\u00e9rences indisponible",
+	"builderLinkDependencyHint": "Lier un objet d'une autre biblioth\u00e8que ajoute cette biblioth\u00e8que comme d\u00e9pendance.",
 	"builderAddQuestion": "Ajouter une question",
 	"builderChildrenHidden": [
 		{

@@ -29,18 +29,10 @@ async function forward(url: string, method: string, body: unknown, fetchFn: type
 }
 
 export const GET: RequestHandler = async ({ params, url, fetch }) => {
+	// The YAML download lives at the page-less ./export subroute: this route
+	// has a +page, so browser navigations get HTML and could never reach an
+	// export branch here.
 	const action = url.searchParams.get('action') ?? 'read';
-	if (action === 'export') {
-		// Stream the YAML through, keeping the attachment headers.
-		const r = await fetch(`${BASE_API_URL}/library-drafts/${params.id}/export/`);
-		return new Response(await r.blob(), {
-			status: r.status,
-			headers: {
-				'Content-Type': r.headers.get('Content-Type') ?? 'application/yaml',
-				'Content-Disposition': r.headers.get('Content-Disposition') ?? 'attachment'
-			}
-		});
-	}
 	const path = GET_ACTIONS[action];
 	if (path === undefined) {
 		return json({ error: `unknown action '${action}'` }, { status: 400 });

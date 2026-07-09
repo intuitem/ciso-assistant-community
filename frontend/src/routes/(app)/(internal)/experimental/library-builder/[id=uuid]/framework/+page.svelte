@@ -46,7 +46,7 @@
 	const links = {
 		back: `/experimental/library-builder/${draft.id}`,
 		preview: null,
-		exportYaml: `/experimental/library-builder/${draft.id}?action=export`
+		exportYaml: `/experimental/library-builder/${draft.id}/export`
 	};
 </script>
 

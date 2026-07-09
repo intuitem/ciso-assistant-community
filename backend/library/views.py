@@ -929,6 +929,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
         "upsert_object": "change_librarydraft",
         "delete_object": "change_librarydraft",
         "preset_editor_preview": "view_librarydraft",
+        "reference_catalog": "view_librarydraft",
     }
 
     # Object kinds editable through the generic upsert action; frameworks go
@@ -1247,8 +1248,51 @@ class LibraryDraftViewSet(BaseModelViewSet):
         frameworks = content["frameworks"]
         frameworks[frameworks.index(framework)] = new_framework
         draft.content = content
-        draft.save(update_fields=["content", "updated_at"])
+        update_fields = ["content", "updated_at"]
+        if self._sync_link_dependencies(draft, content, new_framework):
+            update_fields.append("dependencies")
+        draft.save(update_fields=update_fields)
         return Response({"status": "ok", "framework_urn": new_framework["urn"]})
+
+    @staticmethod
+    def _sync_link_dependencies(draft, content, framework) -> bool:
+        """Auto-declare the dependencies backing external node links.
+
+        References are dependency-scoped: linking a threat/reference control
+        from a library that is not yet a dependency of the draft declares it
+        (the picker offers external objects; the save records the provenance).
+        Unresolvable references are left for validate/publish to flag.
+        """
+        refs = set()
+        for node in framework.get("requirement_nodes") or []:
+            for ref_field in ("threats", "reference_controls"):
+                refs.update(str(ref).lower() for ref in node.get(ref_field) or [])
+        refs -= set(builder.index_objects(content).keys())
+        if not refs:
+            return False
+        declared = {str(dep).lower() for dep in draft.dependencies or []}
+        covered = set()
+        if declared:
+            for stored in StoredLibrary.objects.filter(urn__in=declared):
+                covered.update(
+                    builder.index_objects(
+                        builder.normalize_objects(stored.content or {})
+                    ).keys()
+                )
+        own_urn = draft.effective_urn.lower()
+        added = set()
+        stored_index_cache: dict = {}  # one content parse per candidate library
+        for ref in refs - covered:
+            owner = builder.find_owning_library_urn(
+                ref
+            ) or builder.find_stored_owner_urn(ref, index_cache=stored_index_cache)
+            if owner and owner.lower() not in declared and owner.lower() != own_urn:
+                declared.add(owner.lower())
+                added.add(owner.lower())
+        if not added:
+            return False
+        draft.dependencies = sorted(set(draft.dependencies or []) | added)
+        return True
 
     @action(detail=True, methods=["post"], url_path="framework-editor-preview")
     def framework_editor_preview(self, request, pk):
@@ -1350,6 +1394,121 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 else [],
             }
         )
+
+    @action(detail=True, methods=["get"], url_path="reference-catalog")
+    def reference_catalog(self, request, pk):
+        """Pickable threats and reference controls for framework-node links.
+
+        Without a parameter: the draft's own objects, each declared
+        dependency's, and the list of other stored libraries holding such
+        objects. With ?library=<id or urn>: that library's objects alone
+        (browse-on-demand; linking from it auto-declares the dependency on
+        the next framework-editor save).
+        """
+        draft = self.get_object()
+
+        def source_entry(library_urn, name, kind, objects) -> dict:
+            entry = {
+                "library_urn": library_urn,
+                "name": name,
+                "kind": kind,
+                "threats": [],
+                "reference_controls": [],
+            }
+            for field in ("threats", "reference_controls"):
+                items = objects.get(field)
+                if not isinstance(items, list):
+                    continue  # stored content is not shape-checked
+                for item in items:
+                    if not isinstance(item, dict):
+                        continue
+                    urn = str(item.get("urn", "")).lower()
+                    if not urn:
+                        continue  # work-in-progress objects cannot be linked
+                    picked = {
+                        "urn": urn,
+                        "ref_id": item.get("ref_id"),
+                        "name": item.get("name"),
+                    }
+                    if field == "reference_controls":
+                        picked["category"] = item.get("category")
+                        picked["csf_function"] = item.get("csf_function")
+                    entry[field].append(picked)
+            return entry
+
+        browse = request.query_params.get("library")
+        if browse:
+            stored = _get_stored_library(browse)
+            if stored is None:
+                return Response({"error": "libraryNotFound"}, status=HTTP_404_NOT_FOUND)
+            return Response(
+                {
+                    "source": source_entry(
+                        stored.urn,
+                        stored.name,
+                        "external",
+                        builder.normalize_objects(stored.content or {}),
+                    )
+                }
+            )
+
+        sources = [
+            source_entry(
+                draft.effective_urn,
+                draft.name,
+                "draft",
+                builder.normalize_objects(draft.content or {}),
+            )
+        ]
+        for dep_urn in draft.dependencies or []:
+            stored = _get_stored_library(str(dep_urn).lower())
+            if stored is None:
+                sources.append(
+                    {
+                        "library_urn": dep_urn,
+                        "name": dep_urn,
+                        "kind": "dependency",
+                        "missing": True,
+                        "threats": [],
+                        "reference_controls": [],
+                    }
+                )
+                continue
+            sources.append(
+                source_entry(
+                    stored.urn,
+                    stored.name,
+                    "dependency",
+                    builder.normalize_objects(stored.content or {}),
+                )
+            )
+
+        known = {str(s.get("library_urn", "")).lower() for s in sources}
+        latest: dict = {}
+        rows = StoredLibrary.objects.filter(
+            Q(content__threats__isnull=False)
+            | Q(content__reference_controls__isnull=False)
+        ).only("id", "urn", "name", "provider", "version")
+        for row in rows:
+            lowered = str(row.urn or "").lower()
+            if not lowered or lowered in known:
+                continue
+            current = latest.get(lowered)
+            if current is None or row.version > current.version:
+                latest[lowered] = row
+        libraries = sorted(
+            (
+                {
+                    "id": str(row.id),
+                    "library_urn": row.urn,
+                    "name": row.name,
+                    "provider": row.provider,
+                }
+                for row in latest.values()
+            ),
+            key=lambda entry: str(entry["name"] or "").lower(),
+        )
+        return Response({"sources": sources, "libraries": libraries})
 
     @action(detail=True, methods=["post"], url_path="add-framework")
     def add_framework(self, request, pk):

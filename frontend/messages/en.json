@@ -5031,6 +5031,16 @@
 	"builderVisibilityExpressionTooltip": "CEL expression that must evaluate to true for this requirement to be visible. Example: requirements[\"urn:...\"].score > 50",
 	"builderVisibilityExpressionPlaceholder": "e.g. requirements[\"urn:...\"].score > 50",
 	"builderImplementationGroupsLabel": "Implementation groups:",
+	"refIdRequired": "A valid ref ID is required",
+	"objectUrnAlreadyExists": "An object with this ref ID already exists in the draft",
+	"builderThreatsLabel": "Threats:",
+	"builderReferenceControlsLabel": "Reference controls:",
+	"builderLinkExisting": "Link existing",
+	"builderCreateNew": "Create new",
+	"builderNoCatalogMatches": "No matches",
+	"builderBrowseLibrary": "Browse another library\u2026",
+	"builderCatalogUnavailable": "Reference catalog unavailable",
+	"builderLinkDependencyHint": "Linking an object from another library adds that library as a dependency.",
 	"builderAddQuestion": "Add question",
 	"builderChildrenHidden": [
 		{

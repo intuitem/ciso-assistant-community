@@ -92,6 +92,9 @@ export interface RequirementNode {
 	importance: string;
 	display_mode: 'default' | 'splash';
 	translations?: Translations | null;
+	// Links to threats / reference controls: full URNs, as in the library YAML.
+	threats: string[];
+	reference_controls: string[];
 	framework: string | { id: string };
 	folder: { id: string; str: string } | string;
 }
@@ -566,6 +569,8 @@ export function serializeNode(n: RequirementNode): Record<string, unknown> {
 		weight: n.weight,
 		importance: n.importance,
 		display_mode: n.display_mode,
+		threats: n.threats ?? [],
+		reference_controls: n.reference_controls ?? [],
 		folder_id: extractFolderId(n.folder),
 		translations: n.translations ?? null
 	};
@@ -748,6 +753,8 @@ export function hydrateDraft(
 		importance: (n.importance ?? '') as string,
 		display_mode: (n.display_mode ?? 'default') as 'default' | 'splash',
 		translations: (n.translations ?? null) as Translations | null,
+		threats: (n.threats ?? []) as string[],
+		reference_controls: (n.reference_controls ?? []) as string[],
 		framework: (n.framework ?? frameworkId) as string,
 		folder: (n.folder_id ?? n.folder ?? '') as string
 	}));
@@ -1216,6 +1223,8 @@ export function createBuilderState(
 			weight: 1,
 			importance: '',
 			display_mode: defaults.display_mode,
+			threats: [],
+			reference_controls: [],
 			framework: frameworkId,
 			folder: folderId
 		};

@@ -117,6 +117,11 @@
 <div class="space-y-6">
 	<!-- Top bar -->
 	<div class="card p-4">
+		<p class="text-xs text-surface-600-400 mb-4">
+			Author a whole library (framework, controls, threats, matrices…) as a draft document, then
+			publish it through the standard library loader. Adopt your custom libraries or clone from
+			existing ones.
+		</p>
 		<div class="flex flex-wrap items-center justify-between gap-4">
 			<div class="flex items-center gap-2">
 				<button

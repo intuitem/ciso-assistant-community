@@ -1273,3 +1273,249 @@ def test_export_returns_a_loadable_yaml(admin_client):
     document = yaml.safe_load(response.content)
     assert document["urn"] == "urn:me:risk:library:mylib"
     assert document["objects"]["threats"][0]["ref_id"] == "T1"
+
+
+# ---------------------------------------------------------------------------
+# Node links to threats / reference controls (the reference picker)
+# ---------------------------------------------------------------------------
+
+
+def test_editor_doc_exposes_and_edits_node_links():
+    from library import framework_editor as fw_editor
+
+    original = builder.normalize_objects(SOURCE_LIBRARY["objects"])["frameworks"][0]
+    doc = fw_editor.framework_to_editor_doc(original, locale="en")
+    editor_node = next(n for n in doc["nodes"] if n["ref_id"] == "A.1")
+    assert editor_node["threats"] == ["urn:acme:risk:threat:source-lib:t1"]
+    assert editor_node["reference_controls"] == [
+        "urn:acme:risk:reference_control:source-lib:c1",
+        "urn:other:risk:reference_control:ext-lib:x1",
+    ]
+
+    # Attach a second threat, detach every control; duplicates and case
+    # are normalized away.
+    editor_node["threats"] = [
+        "urn:acme:risk:threat:source-lib:t1",
+        "URN:ACME:RISK:THREAT:SOURCE-LIB:T2",
+        "urn:acme:risk:threat:source-lib:t2",
+    ]
+    editor_node["reference_controls"] = []
+    rebuilt = fw_editor.editor_doc_to_framework_object(doc, existing=original)
+    node = {n["ref_id"]: n for n in rebuilt["requirement_nodes"]}["A.1"]
+    assert node["threats"] == [
+        "urn:acme:risk:threat:source-lib:t1",
+        "urn:acme:risk:threat:source-lib:t2",
+    ]
+    assert "reference_controls" not in node  # empty list detaches, key dropped
+
+
+def test_editor_doc_without_link_keys_preserves_existing_links():
+    from library import framework_editor as fw_editor
+
+    original = builder.normalize_objects(SOURCE_LIBRARY["objects"])["frameworks"][0]
+    doc = fw_editor.framework_to_editor_doc(original, locale="en")
+    # An older client that does not model links omits the keys entirely.
+    for node in doc["nodes"]:
+        node.pop("threats", None)
+        node.pop("reference_controls", None)
+    rebuilt = fw_editor.editor_doc_to_framework_object(doc, existing=original)
+    node = {n["ref_id"]: n for n in rebuilt["requirement_nodes"]}["A.1"]
+    assert node["threats"] == ["urn:acme:risk:threat:source-lib:t1"]
+    assert node["reference_controls"] == [
+        "urn:acme:risk:reference_control:source-lib:c1",
+        "urn:other:risk:reference_control:ext-lib:x1",
+    ]
+
+
+def test_editor_doc_malformed_links_are_rejected():
+    from library import framework_editor as fw_editor
+
+    original = builder.normalize_objects(SOURCE_LIBRARY["objects"])["frameworks"][0]
+    doc = fw_editor.framework_to_editor_doc(original, locale="en")
+    next(n for n in doc["nodes"] if n["ref_id"] == "A.1")["threats"] = "not-a-list"
+    with pytest.raises(builder.BuilderError, match="must be a list of URN strings"):
+        fw_editor.editor_doc_to_framework_object(doc, existing=original)
+
+
+@pytest.mark.django_db
+def test_find_stored_owner_urn_inverts_urn_families(app_config):
+    # Legacy type token (function) and stored-but-not-loaded library.
+    assert (
+        builder.find_stored_owner_urn("urn:intuitem:risk:function:doc-pol:pol.educ")
+        == "urn:intuitem:risk:library:doc-pol"
+    )
+    assert builder.find_stored_owner_urn("urn:nobody:risk:threat:ghost:t1") is None
+    assert builder.find_stored_owner_urn("not-a-urn") is None
+
+
+@pytest.mark.django_db
+def test_framework_editor_save_auto_declares_link_dependencies(admin_client):
+    draft = _create_draft(admin_client, content=dict(SOURCE_LIBRARY["objects"]))
+    url = reverse("library-drafts-framework-editor", args=[draft["id"]])
+    doc = admin_client.get(url).data["editing_draft"]
+    node = next(n for n in doc["nodes"] if n["ref_id"] == "A.1")
+    # Link a control owned by a stored (not loaded, not declared) library.
+    node["reference_controls"] = [
+        "urn:acme:risk:reference_control:source-lib:c1",
+        "urn:intuitem:risk:function:doc-pol:pol.educ",
+    ]
+    put = admin_client.put(url, {"editing_draft": doc}, format="json")
+    assert put.status_code == status.HTTP_200_OK, put.content
+
+    saved = admin_client.get(reverse("library-drafts-detail", args=[draft["id"]])).data
+    assert "urn:intuitem:risk:library:doc-pol" in saved["dependencies"]
+    node = saved["content"]["frameworks"][0]["requirement_nodes"][1]
+    assert node["reference_controls"] == [
+        "urn:acme:risk:reference_control:source-lib:c1",
+        "urn:intuitem:risk:function:doc-pol:pol.educ",
+    ]
+    # The declared dependency satisfies reference integrity.
+    validate = admin_client.get(reverse("library-drafts-validate", args=[draft["id"]]))
+    assert not [e for e in validate.data["errors"] if "doc-pol" in e], validate.data[
+        "errors"
+    ]
+
+
+@pytest.mark.django_db
+def test_validate_asks_for_a_dependency_on_the_stored_owner(admin_client):
+    content = dict(SOURCE_LIBRARY["objects"])
+    draft = _create_draft(admin_client, content=content)
+    detail_url = reverse("library-drafts-detail", args=[draft["id"]])
+    current = admin_client.get(detail_url).data["content"]
+    node = current["frameworks"][0]["requirement_nodes"][1]
+    node["reference_controls"] = ["urn:intuitem:risk:function:doc-pol:pol.educ"]
+    assert (
+        admin_client.patch(detail_url, {"content": current}, format="json").status_code
+        == status.HTTP_200_OK
+    )
+    validate = admin_client.get(reverse("library-drafts-validate", args=[draft["id"]]))
+    assert any(
+        "requires a dependency on urn:intuitem:risk:library:doc-pol" in e
+        for e in validate.data["errors"]
+    ), validate.data["errors"]
+
+
+@pytest.mark.django_db
+def test_reference_catalog_lists_draft_dependencies_and_libraries(admin_client):
+    draft = _create_draft(
+        admin_client,
+        content=dict(SOURCE_LIBRARY["objects"]),
+        dependencies=["urn:intuitem:risk:library:doc-pol"],
+    )
+    url = reverse("library-drafts-reference-catalog", args=[draft["id"]])
+    response = admin_client.get(url)
+    assert response.status_code == status.HTTP_200_OK, response.content
+
+    sources = response.data["sources"]
+    assert sources[0]["kind"] == "draft"
+    assert {t["urn"] for t in sources[0]["threats"]} == {
+        "urn:acme:risk:threat:source-lib:t1",
+        "urn:acme:risk:threat:source-lib:t2",
+    }
+    dep = next(s for s in sources if s["kind"] == "dependency")
+    assert dep["library_urn"] == "urn:intuitem:risk:library:doc-pol"
+    dep_controls = {c["urn"] for c in dep["reference_controls"]}
+    assert "urn:intuitem:risk:function:doc-pol:pol.educ" in dep_controls
+
+    libraries = response.data["libraries"]
+    assert libraries, "other stored libraries with linkable objects expected"
+    listed = {lib["library_urn"] for lib in libraries}
+    assert "urn:intuitem:risk:library:doc-pol" not in listed  # already a source
+    assert draft["urn"] not in listed
+
+    # Browse a specific undeclared library on demand.
+    browsable = libraries[0]["library_urn"]
+    browse = admin_client.get(url, {"library": browsable})
+    assert browse.status_code == status.HTTP_200_OK
+    assert browse.data["source"]["kind"] == "external"
+    assert browse.data["source"]["library_urn"] == browsable
+
+    missing = admin_client.get(url, {"library": "urn:nobody:risk:library:ghost"})
+    assert missing.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.django_db
+def test_malformed_dependency_content_is_tolerated(admin_client):
+    # Stored-library content is not shape-checked (the update-upload path
+    # stores without loading): the catalog, the editor save and validate
+    # must degrade gracefully, never 500.
+    StoredLibrary.objects.create(
+        urn="urn:junky:risk:library:junk",
+        ref_id="junk",
+        name="Junk library",
+        locale="en",
+        version=1,
+        content={"threats": "garbage", "reference_controls": [["nested"]]},
+        objects_meta={},
+    )
+    draft = _create_draft(
+        admin_client,
+        content=dict(SOURCE_LIBRARY["objects"]),
+        dependencies=["urn:junky:risk:library:junk"],
+    )
+    catalog = admin_client.get(
+        reverse("library-drafts-reference-catalog", args=[draft["id"]])
+    )
+    assert catalog.status_code == status.HTTP_200_OK, catalog.content
+    dep = next(s for s in catalog.data["sources"] if s["kind"] == "dependency")
+    assert dep["threats"] == [] and dep["reference_controls"] == []
+
+    url = reverse("library-drafts-framework-editor", args=[draft["id"]])
+    doc = admin_client.get(url).data["editing_draft"]
+    put = admin_client.put(url, {"editing_draft": doc}, format="json")
+    assert put.status_code == status.HTTP_200_OK, put.content
+
+    validate = admin_client.get(reverse("library-drafts-validate", args=[draft["id"]]))
+    assert validate.status_code == status.HTTP_200_OK
+
+
+@pytest.mark.django_db
+def test_validate_never_suggests_depending_on_the_drafts_own_library(admin_client):
+    # A published draft has a stored copy under its own URN; a reference to
+    # an object deleted from the draft (but still in that copy) is a
+    # dangling internal ref — not a reason to self-depend.
+    content = {
+        "frameworks": [
+            {
+                "urn": "urn:me:risk:framework:mylib",
+                "ref_id": "FW",
+                "name": "FW",
+                "requirement_nodes": [
+                    {
+                        "urn": "urn:me:risk:req_node:mylib:a",
+                        "assessable": True,
+                        "depth": 1,
+                        "threats": ["urn:me:risk:threat:mylib:gone"],
+                    }
+                ],
+            }
+        ]
+    }
+    draft = _create_draft(admin_client, content=content)
+    StoredLibrary.objects.create(
+        urn="urn:me:risk:library:mylib",
+        ref_id="mylib",
+        name="My library",
+        locale="en",
+        version=1,
+        content={
+            "threats": [
+                {"urn": "urn:me:risk:threat:mylib:gone", "ref_id": "G", "name": "Gone"}
+            ]
+        },
+        objects_meta={},
+    )
+    validate = admin_client.get(reverse("library-drafts-validate", args=[draft["id"]]))
+    errors = validate.data["errors"]
+    assert any(
+        "unresolved reference urn:me:risk:threat:mylib:gone" in e for e in errors
+    ), errors
+    assert not any("requires a dependency on" in e for e in errors), errors
+
+    # The editor save must not auto-declare the self-dependency either.
+    url = reverse("library-drafts-framework-editor", args=[draft["id"]])
+    doc = admin_client.get(url).data["editing_draft"]
+    put = admin_client.put(url, {"editing_draft": doc}, format="json")
+    assert put.status_code == status.HTTP_200_OK, put.content
+    saved = admin_client.get(reverse("library-drafts-detail", args=[draft["id"]])).data
+    assert saved["dependencies"] in ([], None)
