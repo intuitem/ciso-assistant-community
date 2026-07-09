@@ -573,7 +573,9 @@ class PublicDocumentServeView(PublicPortalAPIView):
             handle,
             content_type=doc.mime_type or "application/octet-stream",
             as_attachment=True,
-            filename=_safe_download_name(doc.name or doc.file.name.rsplit("/", 1)[-1]),
+            filename=_safe_download_name(
+                doc.filename or doc.file.name.rsplit("/", 1)[-1] or doc.name
+            ),
         )
 
 
