@@ -975,6 +975,15 @@ class LibraryUpdater:
                 requirement_node_objects_to_update = []
                 order_id = 0
                 all_fields_to_update = set()
+                clearable_requirement_node_fields = {
+                    "ref_id": None,
+                    "name": None,
+                    "description": None,
+                    "annotation": None,
+                    "typical_evidence": None,
+                    "visibility_expression": None,
+                    "implementation_groups": None,
+                }
 
                 # Check if score boundaries changed (triggers warning + strategy prompt)
                 score_boundaries_changed = (
@@ -1091,13 +1100,19 @@ class LibraryUpdater:
 
                     if urn in existing_requirement_node_objects:
                         requirement_node_object = existing_requirement_node_objects[urn]
+                        for field, default in clearable_requirement_node_fields.items():
+                            requirement_node_dict.setdefault(field, default)
+                        changed_fields = set()
                         for key, value in requirement_node_dict.items():
-                            setattr(requirement_node_object, key, value)
-                        requirement_node_object.clean()
-                        all_fields_to_update.update(requirement_node_dict.keys())
-                        requirement_node_objects_to_update.append(
-                            requirement_node_object
-                        )
+                            if getattr(requirement_node_object, key) != value:
+                                setattr(requirement_node_object, key, value)
+                                changed_fields.add(key)
+                        if changed_fields:
+                            requirement_node_object.clean()
+                            all_fields_to_update.update(changed_fields)
+                            requirement_node_objects_to_update.append(
+                                requirement_node_object
+                            )
                     else:
                         requirement_node_object = RequirementNode.objects.create(
                             urn=urn,
@@ -1315,18 +1330,7 @@ class LibraryUpdater:
 
                 # Fix for the dual bulk_update issue - consolidate into one update
                 if requirement_node_objects_to_update:
-                    # Ensure all needed fields are included
-                    fields_to_update = sorted(
-                        all_fields_to_update.union(
-                            {
-                                "name",
-                                "description",
-                                "order_id",
-                                "implementation_groups",
-                                "visibility_expression",
-                            }
-                        )
-                    )
+                    fields_to_update = sorted(all_fields_to_update)
                     RequirementNode.objects.bulk_update(
                         requirement_node_objects_to_update,
                         fields_to_update,
