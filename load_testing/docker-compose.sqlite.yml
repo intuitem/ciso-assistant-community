@@ -1,0 +1,142 @@
+services:
+  backend:
+    container_name: load-backend-sqlite
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      - ALLOWED_HOSTS=backend,caddy,localhost,127.0.0.1
+      - CISO_ASSISTANT_URL=http://localhost:8080
+      - DJANGO_DEBUG=False
+      - AUTH_TOKEN_TTL=86400
+      - SQLITE_FILE=/code/db/ciso-assistant.sqlite3
+      - GUNICORN_WORKERS=${GUNICORN_WORKERS:-3}
+      - GUNICORN_TIMEOUT=${GUNICORN_TIMEOUT:-100}
+      - GUNICORN_KEEPALIVE=${GUNICORN_KEEPALIVE:-30}
+      - HOME=/tmp
+      - XDG_CACHE_HOME=/tmp/.cache
+      - XDG_CONFIG_HOME=/tmp/.config
+      - XDG_DATA_HOME=/tmp/.local/share
+      - QDRANT_URL=http://qdrant:6333
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev
+    volumes:
+      - ./data/sqlite/db:/code/db
+      - ./:/code/load_testing
+    user: "1001:1001"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://backend:8000/api/health/ || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 120s
+
+  huey:
+    container_name: load-huey-sqlite
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      - ALLOWED_HOSTS=backend,caddy,localhost,127.0.0.1
+      - CISO_ASSISTANT_URL=http://localhost:8080
+      - DJANGO_DEBUG=False
+      - AUTH_TOKEN_TTL=86400
+      - SQLITE_FILE=/code/db/ciso-assistant.sqlite3
+      - HUEY_WORKERS=${HUEY_WORKERS:-2}
+      - HOME=/tmp
+      - XDG_CACHE_HOME=/tmp/.cache
+      - XDG_CONFIG_HOME=/tmp/.config
+      - XDG_DATA_HOME=/tmp/.local/share
+      - QDRANT_URL=http://qdrant:6333
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev
+    volumes:
+      - ./data/sqlite/db:/code/db
+      - ./:/code/load_testing
+    entrypoint: ["/bin/sh", "-c", "python manage.py run_huey -w ${HUEY_WORKERS:-2} --scheduler-interval 60"]
+    user: "1001:1001"
+
+  frontend:
+    container_name: load-frontend-sqlite
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      - PUBLIC_BACKEND_API_URL=http://backend:8000/api
+      - PUBLIC_BACKEND_API_EXPOSED_URL=http://localhost:8080/api
+      - PROTOCOL_HEADER=x-forwarded-proto
+      - HOST_HEADER=x-forwarded-host
+      - HOME=/tmp
+      - XDG_CACHE_HOME=/tmp/.cache
+      - XDG_CONFIG_HOME=/tmp/.config
+      - XDG_DATA_HOME=/tmp/.local/share
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev
+    user: "1001:1001"
+
+  qdrant:
+    container_name: load-qdrant-sqlite
+    image: qdrant/qdrant:v1.14.0
+    restart: unless-stopped
+    volumes:
+      - sqlite_qdrant_data:/qdrant/storage
+
+  caddy:
+    container_name: load-caddy-sqlite
+    image: caddy:2.11.2
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_started
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    command: |
+      sh -c 'cat > Caddyfile <<EOF
+      :8080 {
+        reverse_proxy /api/* backend:8000
+        reverse_proxy /* frontend:3000
+      }
+      EOF
+      caddy run --config Caddyfile --adapter caddyfile'
+
+  locust:
+    container_name: load-locust-sqlite
+    image: locustio/locust:2.42.1
+    depends_on:
+      caddy:
+        condition: service_started
+    ports:
+      - "8089:8089"
+    environment:
+      - LOAD_USERS_CSV=/mnt/load_testing/users.csv
+      - LOAD_WORKLOAD_JSON=/mnt/load_testing/workload.json
+      - API_PREFIX=/api
+      - ENABLE_WRITES=${ENABLE_WRITES:-false}
+    volumes:
+      - ./locust:/mnt/locust
+      - ./:/mnt/load_testing:ro
+      - ./results:/mnt/locust/results
+    command: ["-f", "/mnt/locust/locustfile.py", "--host", "http://caddy:8080"]
+
+volumes:
+  sqlite_qdrant_data:
