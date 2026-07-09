@@ -182,7 +182,7 @@
     </tr>
     {% empty %}
     <tr class="text-black p-4 text-center">
-      <td colspan="11" class="py-2">
+      <td colspan="{% if feature_flags.inherent_risk %}11{% else %}10{% endif %}" class="py-2">
         <i class="inline fas fa-exclamation-triangle"></i>
         <p class="inline test-gray-900">{% trans "No scenario found." %}</p>
       </td>
