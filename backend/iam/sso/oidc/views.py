@@ -32,9 +32,9 @@ logger = structlog.get_logger(__name__)
 
 # State and nonce parameters. allauth's default state is 16 chars and sends no
 # nonce. We generate both from this alphabet at a length that satisfies the
-# OIDC-standard `^[A-Za-z0-9-._~,]{36,128}$` form.
-_OIDC_TOKEN_ALPHABET = string.ascii_letters + string.digits + "-._~,"
-_OIDC_TOKEN_LENGTH = 40
+# `^[A-Za-z0-9-._~]{43,128}$` form (the RFC 7636 PKCE code_verifier grammar).
+_OIDC_TOKEN_ALPHABET = string.ascii_letters + string.digits + "-._~"
+_OIDC_TOKEN_LENGTH = 43
 _OIDC_NONCE_SESSION_PREFIX = "oidc_nonce::"
 # Cap stashed nonces per session so abandoned login attempts can't grow the
 # session bag indefinitely. Mirrors allauth's MAX_STATES (statekit.py).
@@ -101,8 +101,8 @@ def oidc_redirect(
     **state_kwargs,
 ) -> HttpResponseRedirect:
     """Builds the authorization redirect mirroring `OAuth2Provider.redirect`,
-    but with a state_id and nonce that match the OIDC-standard regex
-    `^[A-Za-z0-9-._~,]{36,128}$`. The nonce is stashed in the session so the
+    but with a state_id and nonce that match the regex
+    `^[A-Za-z0-9-._~]{43,128}$`. The nonce is stashed in the session so the
     callback adapter can verify it against the id_token claim. Extra
     `state_kwargs` (e.g. `headless=True`) are forwarded to allauth's state
     stash so downstream flow behavior is preserved."""

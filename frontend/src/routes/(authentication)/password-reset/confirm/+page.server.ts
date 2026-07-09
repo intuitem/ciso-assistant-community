@@ -26,6 +26,7 @@ export const actions: Actions = {
 		form.data.uidb64 = event.url.searchParams.get('uidb64');
 		const requestInitOptions: RequestInit = {
 			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(form.data)
 		};
 

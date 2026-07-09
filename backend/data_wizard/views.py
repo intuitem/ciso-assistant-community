@@ -17,11 +17,13 @@ from core.utils import build_questions_dict
 from core.models import (
     Actor,
     Asset,
+    ComplianceAssessment,
     Evidence,
     Folder,
     Perimeter,
     RequirementAssessment,
     RequirementNode,
+    RiskAssessment,
     RiskMatrix,
     AppliedControl,
     ComplianceAssessment,
@@ -82,11 +84,12 @@ from .egerie_xml_helpers import (
 )
 from core.models import Terminology
 from data_wizard.arm_helpers import process_arm_file
-from tprm.models import Entity, Solution, Contract
+from tprm.models import Entity, Solution, Contract, Representative
 from tprm.serializers import (
     EntityWriteSerializer,
     SolutionWriteSerializer,
     ContractWriteSerializer,
+    RepresentativeWriteSerializer,
 )
 from resilience.models import (
     BusinessImpactAnalysis,
@@ -98,7 +101,7 @@ from resilience.serializers import (
     AssetAssessmentWriteSerializer,
     EscalationThresholdWriteSerializer,
 )
-from privacy.models import Processing, ProcessingNature
+from privacy.models import Processing
 from privacy.serializers import ProcessingWriteSerializer
 from iam.models import RoleAssignment, User
 from core.models import FilteringLabel
@@ -135,6 +138,17 @@ def resolve_container_name(request, default_prefix: str) -> str:
         return custom_name
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     return f"{default_prefix}_{timestamp}"
+
+
+def resolve_accessible_target(model_class, target_id, user):
+    """Resolve a client-supplied reconciliation target, scoped to the objects the
+    user may change. Returns None when the id is unknown or out of reach."""
+    if not target_id:
+        return None
+    (_, change_ids, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, model_class
+    )
+    return model_class.objects.filter(id=target_id, id__in=change_ids).first()
 
 
 def get_accessible_folders_map(user: User) -> dict[str, UUID]:
@@ -500,6 +514,8 @@ class BaseContext:
     matrix_id: Optional[str] = None
     framework_id: Optional[str] = None
     on_conflict: ConflictMode = ConflictMode.STOP
+    # Existing composite container to reconcile the import into, if any.
+    target_id: Optional[str] = None
 
 
 class RecordConsumer[Context = None](ABC):
@@ -516,6 +532,7 @@ class RecordConsumer[Context = None](ABC):
         self.matrix_id = base_context.matrix_id
         self.framework_id = base_context.framework_id
         self.on_conflict = base_context.on_conflict
+        self.target_id = base_context.target_id
 
     def __init_subclass__(cls):
         provided_class = getattr(cls, "SERIALIZER_CLASS", None)
@@ -1351,15 +1368,42 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
 
     def create_context(self):
         try:
-            perimeter_id = self.perimeter_id
-            perimeter = Perimeter.objects.get(id=perimeter_id)
-            folder_id = perimeter.folder.id
+            if self.target_id:
+                # Reconcile into an existing follow-up instead of creating one.
+                findings_assessment = resolve_accessible_target(
+                    FindingsAssessment, self.target_id, self.request.user
+                )
+                if findings_assessment is None:
+                    return None, Error(
+                        record={},
+                        error=f"Target findings assessment with ID {self.target_id} does not exist",
+                    )
+                self._container = findings_assessment
+                return FindingsAssessmentContext(
+                    findings_assessment=findings_assessment,
+                    folder=findings_assessment.folder,
+                ), None
+
+            # Perimeter is optional: fall back to the explicit folder when absent.
+            perimeter = None
+            if self.perimeter_id:
+                perimeter = Perimeter.objects.get(id=self.perimeter_id)
+
+            if perimeter is not None:
+                folder = perimeter.folder
+            elif self.folder_id:
+                folder = Folder.objects.get(id=self.folder_id)
+            else:
+                return None, Error(
+                    record={},
+                    error="A folder must be specified when there's no perimeter!",
+                )
 
             assessment_name = resolve_container_name(self.request, "Followup")
             assessment_data = {
                 "name": assessment_name,
-                "perimeter": perimeter_id,
-                "folder": folder_id,
+                "perimeter": self.perimeter_id,
+                "folder": folder.id,
             }
 
             serializer = FindingsAssessmentWriteSerializer(
@@ -1373,14 +1417,35 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
                     f"Created follow-up: {assessment_name} with ID {findings_assessment.id}"
                 )
 
+                self._container = findings_assessment
                 return FindingsAssessmentContext(
                     findings_assessment=findings_assessment,
-                    folder=perimeter.folder,
+                    folder=folder,
                 ), None
             return None, Error(record=assessment_data, error=str(serializer.errors))
 
         except Exception as e:
             return None, Error(record={}, error=str(e))
+
+    def find_existing(self, record_data: dict):
+        # Match only within this follow-up, never a sibling assessment's finding.
+        container = getattr(self, "_container", None)
+        if container is None:
+            return None
+        model_class = self.SERIALIZER_CLASS.Meta.model
+        ref_id = record_data.get("ref_id")
+        if ref_id:
+            existing = model_class.objects.filter(
+                findings_assessment=container, ref_id=ref_id
+            ).first()
+            if existing:
+                return existing
+        name = record_data.get("name")
+        if name:
+            return model_class.objects.filter(
+                findings_assessment=container, name__iexact=name
+            ).first()
+        return None
 
     def prepare_create(
         self, record: dict, context: FindingsAssessmentContext
@@ -2233,9 +2298,10 @@ class ProcessingRecordConsumer(RecordConsumer):
                 for nature_name in str(record_processing_nature).split(",")
             ]
             data["nature"] = list(
-                ProcessingNature.objects.filter(name__in=nature_names).values_list(
-                    "id", flat=True
-                )
+                Terminology.objects.filter(
+                    field_path=Terminology.FieldPath.PROCESSING_NATURE,
+                    name__in=nature_names,
+                ).values_list("id", flat=True)
             )
 
         # Resolve M2M: assigned_to (by user email → Actor)
@@ -2820,10 +2886,12 @@ class LoadFileView(APIView):
         # Note: I can still pick the request.user for extra checks on the legit access for write operations
         model_type_string = request.META.get("HTTP_X_MODEL_TYPE")
         model_type = ModelType.from_string(model_type_string)
-        folder_id = request.META.get("HTTP_X_FOLDER_ID")
-        perimeter_id = request.META.get("HTTP_X_PERIMETER_ID")
-        framework_id = request.META.get("HTTP_X_FRAMEWORK_ID")
-        matrix_id = request.META.get("HTTP_X_MATRIX_ID")
+        folder_id = request.META.get("HTTP_X_FOLDER_ID") or None
+        # Empty header -> None, so a blank optional selector never reaches get(id="").
+        perimeter_id = request.META.get("HTTP_X_PERIMETER_ID") or None
+        framework_id = request.META.get("HTTP_X_FRAMEWORK_ID") or None
+        matrix_id = request.META.get("HTTP_X_MATRIX_ID") or None
+        target_id = request.META.get("HTTP_X_TARGET_ID") or None
         on_conflict_str = request.META.get("HTTP_X_ON_CONFLICT", "stop")
         try:
             on_conflict = ConflictMode(on_conflict_str)
@@ -2917,7 +2985,9 @@ class LoadFileView(APIView):
                         ).fillna("")
                     else:
                         file_type = RecordFileType.CSV
-                        df = read_csv_file(record_file)
+                        # utf-8-sig transparently strips a leading BOM (added to our
+                        # CSV exports for Excel) so the first column header is not corrupted.
+                        df = pd.read_csv(record_file, encoding="utf-8-sig").fillna("")
 
                     try:
                         df = normalize_df_columns(df)
@@ -2938,6 +3008,7 @@ class LoadFileView(APIView):
                         matrix_id=matrix_id,
                         framework_id=framework_id,
                         on_conflict=on_conflict,
+                        target_id=target_id,
                     )
                     records = df.to_dict(orient="records")
 
@@ -3047,6 +3118,8 @@ class LoadFileView(APIView):
                                 perimeter_id,
                                 framework_id,
                                 matrix_id,
+                                on_conflict,
+                                target_id,
                             )
 
         except Exception as e:
@@ -3070,16 +3143,30 @@ class LoadFileView(APIView):
         perimeter_id,
         framework_id,
         matrix_id=None,
+        on_conflict=ConflictMode.STOP,
+        target_id=None,
     ):
         # Dispatch to appropriate handler
         match model_type:
             case ModelType.COMPLIANCE_ASSESSMENT:
                 return self._process_compliance_assessment(
-                    request, records, folder_id, perimeter_id, framework_id
+                    request,
+                    records,
+                    folder_id,
+                    perimeter_id,
+                    framework_id,
+                    on_conflict,
+                    target_id,
                 )
             case ModelType.RISK_ASSESSMENT:
                 return self._process_risk_assessment(
-                    request, records, folder_id, perimeter_id, matrix_id
+                    request,
+                    records,
+                    folder_id,
+                    perimeter_id,
+                    matrix_id,
+                    on_conflict,
+                    target_id,
                 )
             case _:
                 return {
@@ -3089,10 +3176,37 @@ class LoadFileView(APIView):
                 }
 
     def _process_compliance_assessment(
-        self, request, records, folder_id, perimeter_id, framework_id
+        self,
+        request,
+        records,
+        folder_id,
+        perimeter_id,
+        framework_id,
+        on_conflict=ConflictMode.STOP,
+        target_id=None,
     ):
         results = {"successful": 0, "failed": 0, "errors": []}
         try:
+            if target_id is not None:
+                # Reconcile into an existing audit (and its already generated
+                # requirement assessments); the framework is fixed by that audit.
+                compliance_assessment = resolve_accessible_target(
+                    ComplianceAssessment, target_id, request.user
+                )
+                if compliance_assessment is None:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"error": f"Target audit with ID {target_id} does not exist"}
+                    )
+                    return results
+                framework_id = compliance_assessment.framework_id
+                logger.info(
+                    f"Reconciling import into existing compliance assessment {compliance_assessment.id}"
+                )
+                return self._reconcile_compliance_requirements(
+                    request, records, compliance_assessment, framework_id, results
+                )
+
             # Get the perimeter object to extract its folder ID
             perimeter = None
             if perimeter_id is not None:
@@ -3131,215 +3245,10 @@ class LoadFileView(APIView):
                     f"Created compliance assessment: {assessment_name} with ID {compliance_assessment.id}"
                 )
 
-                # Now process all the requirement assessments from the records
-                for record in records:
-                    # Check if we have a requirement reference
-                    ref_id = record.get("ref_id")
-                    urn = record.get("urn")
-                    if not record.get("assessable"):
-                        logger.debug("Skipping unassessable item.")
-                        continue
-                    if not (ref_id or urn):
-                        results["failed"] += 1
-                        results["errors"].append(
-                            {
-                                "record": record,
-                                "error": "Neither ref_id nor urn provided for requirement",
-                            }
-                        )
-                        continue
-
-                    try:
-                        requirement_assessment = None
-                        # Try to find the requirement assessment using ref_id first, then urn
-                        if ref_id:
-                            ReqNode = RequirementNode.objects.filter(
-                                framework__id=framework_id, ref_id=ref_id
-                            ).first()
-                            if ReqNode:
-                                requirement_assessment = (
-                                    RequirementAssessment.objects.filter(
-                                        compliance_assessment=compliance_assessment
-                                    )
-                                    .filter(requirement=ReqNode)
-                                    .first()
-                                )
-                            else:
-                                logger.warning("Import attempt: unknown ref_id ")
-                        elif urn:
-                            ReqNode = RequirementNode.objects.filter(
-                                framework__id=framework_id, urn=urn
-                            ).first()
-                            if ReqNode:
-                                requirement_assessment = (
-                                    RequirementAssessment.objects.filter(
-                                        compliance_assessment=compliance_assessment
-                                    )
-                                    .filter(requirement=ReqNode)
-                                    .first()
-                                )
-                            else:
-                                logger.error("Import attempt: unknown urn")
-
-                        if requirement_assessment:
-                            # Update the requirement assessment with the data from the record
-                            compliance_result = record.get("compliance_result")
-                            requirement_progress = record.get("requirement_progress")
-                            requirement_data = {
-                                "result": compliance_result
-                                if compliance_result not in (None, "")
-                                else "not_assessed",
-                                "status": requirement_progress
-                                if requirement_progress not in (None, "")
-                                else "to_do",
-                                "observation": record.get("observations", ""),
-                            }
-                            impl_score = record.get("implementation_score")
-                            doc_score = record.get("documentation_score")
-                            score = record.get("score")
-                            enable_doc_score = False
-                            if impl_score not in (None, "") and doc_score not in (
-                                None,
-                                "",
-                            ):
-                                requirement_data.update(
-                                    {
-                                        "score": impl_score,
-                                        "documentation_score": doc_score,
-                                        "is_scored": True,
-                                    }
-                                )
-                                enable_doc_score = True
-                            elif score not in (None, ""):
-                                requirement_data.update(
-                                    {"score": score, "is_scored": True}
-                                )
-                            else:
-                                requirement_data.update({"is_scored": False})
-
-                            # Build answers from the "answers" cell
-                            answers_cell = record.get("answers")
-                            questions_dict = (
-                                build_questions_dict(ReqNode) if ReqNode else None
-                            )
-                            if answers_cell not in (None, "") and questions_dict:
-                                text_to_question = {}
-                                for q_urn, qdef in questions_dict.items():
-                                    q_text = qdef.get("text", "")
-                                    if q_text:
-                                        text_to_question[q_text] = (
-                                            q_urn,
-                                            qdef,
-                                        )
-
-                                answers = {}
-                                has_any_answer = False
-
-                                for line in str(answers_cell).split("\n"):
-                                    line = line.strip()
-                                    if ">>" not in line:
-                                        continue
-                                    q_part, _, a_part = line.partition(">>")
-                                    q_text = q_part.replace("(multiple)", "").strip()
-                                    a_value = a_part.strip()
-                                    # Skip template hints
-                                    if a_value.startswith("[") and a_value.endswith(
-                                        "]"
-                                    ):
-                                        continue
-                                    if not a_value:
-                                        continue
-
-                                    matched = text_to_question.get(q_text)
-                                    if not matched:
-                                        continue
-                                    q_urn, qdef = matched
-                                    q_type = qdef.get("type")
-
-                                    if q_type in ("text", "date"):
-                                        answers[q_urn] = a_value
-                                        has_any_answer = True
-                                    elif q_type == "multiple_choice":
-                                        selected = [
-                                            v.strip()
-                                            for v in a_value.split("|")
-                                            if v.strip()
-                                        ]
-                                        value_to_urn = {
-                                            c.get("value", ""): c["urn"]
-                                            for c in qdef.get("choices", [])
-                                        }
-                                        choice_urns = [
-                                            value_to_urn[v]
-                                            for v in selected
-                                            if v in value_to_urn
-                                        ]
-                                        if choice_urns:
-                                            answers[q_urn] = choice_urns
-                                            has_any_answer = True
-                                    elif q_type == "unique_choice":
-                                        value_to_urn = {
-                                            c.get("value", ""): c["urn"]
-                                            for c in qdef.get("choices", [])
-                                        }
-                                        if a_value in value_to_urn:
-                                            answers[q_urn] = value_to_urn[a_value]
-                                            has_any_answer = True
-
-                                if has_any_answer:
-                                    requirement_data["answers"] = answers
-
-                            # Use the serializer for validation and saving
-                            req_serializer = RequirementAssessmentWriteSerializer(
-                                instance=requirement_assessment,
-                                data=requirement_data,
-                                partial=True,
-                                context={"request": request},
-                            )
-                            if req_serializer.is_valid():
-                                req_serializer.save()
-                                if (
-                                    enable_doc_score
-                                    and not compliance_assessment.show_documentation_score
-                                ):
-                                    # show_documentation_score is a @property
-                                    # backed by `field_visibility`; the setter
-                                    # mutates that JSON column, so update_fields
-                                    # must point at the actual concrete field.
-                                    compliance_assessment.show_documentation_score = (
-                                        True
-                                    )
-                                    compliance_assessment.save(
-                                        update_fields=["field_visibility"]
-                                    )
-                                results["successful"] += 1
-                            else:
-                                results["failed"] += 1
-                                results["errors"].append(
-                                    {
-                                        "record": record,
-                                        "errors": req_serializer.errors,
-                                    }
-                                )
-                        else:
-                            results["failed"] += 1
-                            results["errors"].append(
-                                {
-                                    "record": record,
-                                    "error": f"No matching requirement found with ref_id '{ref_id}' or urn '{urn}'",
-                                }
-                            )
-                    except Exception as e:
-                        logger.warning(
-                            f"Error updating requirement assessment: {str(e)}"
-                        )
-                        results["failed"] += 1
-                        results["errors"].append({"record": record, "error": str(e)})
-                logger.info(
-                    f"Compliance Assessment import complete. Success: {results['successful']}, Failed: {results['failed']}"
+                # Reconcile the audit's requirement assessments from the rows.
+                return self._reconcile_compliance_requirements(
+                    request, records, compliance_assessment, framework_id, results
                 )
-                # print(results)
-                return results
 
         except Perimeter.DoesNotExist:
             logger.error(f"Perimeter with ID {perimeter_id} does not exist")
@@ -3550,6 +3459,182 @@ class LoadFileView(APIView):
         overall_results["task_nodes"] = task_nodes_result.to_dict()
         return overall_results
 
+    def _reconcile_compliance_requirements(
+        self, request, records, compliance_assessment, framework_id, results
+    ):
+        """Update matched requirement assessments from the rows; only populated
+        cells are written, so blanks never clobber existing audit data."""
+        for record in records:
+            ref_id = record.get("ref_id")
+            urn = record.get("urn")
+            if not record.get("assessable"):
+                logger.debug("Skipping unassessable item.")
+                continue
+            if not (ref_id or urn):
+                results["failed"] += 1
+                results["errors"].append(
+                    {
+                        "record": record,
+                        "error": "Neither ref_id nor urn provided for requirement",
+                    }
+                )
+                continue
+
+            try:
+                # ref_id wins, but a stale ref_id must still fall back to urn.
+                ReqNode = None
+                if ref_id:
+                    ReqNode = RequirementNode.objects.filter(
+                        framework__id=framework_id, ref_id=ref_id
+                    ).first()
+                if ReqNode is None and urn:
+                    ReqNode = RequirementNode.objects.filter(
+                        framework__id=framework_id, urn=urn
+                    ).first()
+
+                requirement_assessment = None
+                if ReqNode:
+                    requirement_assessment = RequirementAssessment.objects.filter(
+                        compliance_assessment=compliance_assessment,
+                        requirement=ReqNode,
+                    ).first()
+                else:
+                    logger.warning("Import attempt: unknown ref_id/urn")
+
+                if requirement_assessment:
+                    compliance_result = record.get("compliance_result")
+                    requirement_progress = record.get("requirement_progress")
+                    observations = record.get("observations")
+                    requirement_data = {}
+                    if compliance_result not in (None, ""):
+                        requirement_data["result"] = compliance_result
+                    if requirement_progress not in (None, ""):
+                        requirement_data["status"] = requirement_progress
+                    if observations not in (None, ""):
+                        requirement_data["observation"] = observations
+                    impl_score = record.get("implementation_score")
+                    doc_score = record.get("documentation_score")
+                    score = record.get("score")
+                    enable_doc_score = False
+                    if impl_score not in (None, "") and doc_score not in (None, ""):
+                        requirement_data.update(
+                            {
+                                "score": impl_score,
+                                "documentation_score": doc_score,
+                                "is_scored": True,
+                            }
+                        )
+                        enable_doc_score = True
+                    elif score not in (None, ""):
+                        requirement_data.update({"score": score, "is_scored": True})
+
+                    # Build answers from the "answers" cell
+                    answers_cell = record.get("answers")
+                    questions_dict = build_questions_dict(ReqNode) if ReqNode else None
+                    if answers_cell not in (None, "") and questions_dict:
+                        text_to_question = {}
+                        for q_urn, qdef in questions_dict.items():
+                            q_text = qdef.get("text", "")
+                            if q_text:
+                                text_to_question[q_text] = (q_urn, qdef)
+
+                        answers = {}
+                        has_any_answer = False
+
+                        for line in str(answers_cell).split("\n"):
+                            line = line.strip()
+                            if ">>" not in line:
+                                continue
+                            q_part, _, a_part = line.partition(">>")
+                            q_text = q_part.replace("(multiple)", "").strip()
+                            a_value = a_part.strip()
+                            # Skip template hints
+                            if a_value.startswith("[") and a_value.endswith("]"):
+                                continue
+                            if not a_value:
+                                continue
+
+                            matched = text_to_question.get(q_text)
+                            if not matched:
+                                continue
+                            q_urn, qdef = matched
+                            q_type = qdef.get("type")
+
+                            if q_type in ("text", "date"):
+                                answers[q_urn] = a_value
+                                has_any_answer = True
+                            elif q_type == "multiple_choice":
+                                selected = [
+                                    v.strip() for v in a_value.split("|") if v.strip()
+                                ]
+                                value_to_urn = {
+                                    c.get("value", ""): c["urn"]
+                                    for c in qdef.get("choices", [])
+                                }
+                                choice_urns = [
+                                    value_to_urn[v]
+                                    for v in selected
+                                    if v in value_to_urn
+                                ]
+                                if choice_urns:
+                                    answers[q_urn] = choice_urns
+                                    has_any_answer = True
+                            elif q_type == "unique_choice":
+                                value_to_urn = {
+                                    c.get("value", ""): c["urn"]
+                                    for c in qdef.get("choices", [])
+                                }
+                                if a_value in value_to_urn:
+                                    answers[q_urn] = value_to_urn[a_value]
+                                    has_any_answer = True
+
+                        if has_any_answer:
+                            requirement_data["answers"] = answers
+
+                    req_serializer = RequirementAssessmentWriteSerializer(
+                        instance=requirement_assessment,
+                        data=requirement_data,
+                        partial=True,
+                        context={"request": request},
+                    )
+                    if req_serializer.is_valid():
+                        req_serializer.save()
+                        if (
+                            enable_doc_score
+                            and not compliance_assessment.show_documentation_score
+                        ):
+                            # show_documentation_score is a @property backed by
+                            # `field_visibility`; the setter mutates that JSON
+                            # column, so update_fields must point at the concrete
+                            # field.
+                            compliance_assessment.show_documentation_score = True
+                            compliance_assessment.save(
+                                update_fields=["field_visibility"]
+                            )
+                        results["successful"] += 1
+                    else:
+                        results["failed"] += 1
+                        results["errors"].append(
+                            {"record": record, "errors": req_serializer.errors}
+                        )
+                else:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {
+                            "record": record,
+                            "error": f"No matching requirement found with ref_id '{ref_id}' or urn '{urn}'",
+                        }
+                    )
+            except Exception as e:
+                logger.warning(f"Error updating requirement assessment: {str(e)}")
+                results["failed"] += 1
+                results["errors"].append({"record": record, "error": str(e)})
+
+        logger.info(
+            f"Compliance Assessment import complete. Success: {results['successful']}, Failed: {results['failed']}"
+        )
+        return results
+
     def _process_bia_excel(
         self,
         request,
@@ -3719,6 +3804,7 @@ class LoadFileView(APIView):
                 "entities": {"successful": 0, "failed": 0, "errors": []},
                 "solutions": {"successful": 0, "failed": 0, "errors": []},
                 "contracts": {"successful": 0, "failed": 0, "errors": []},
+                "representatives": {"successful": 0, "failed": 0, "errors": []},
             }
 
             # Track ref_id to actual ID mappings
@@ -3751,8 +3837,6 @@ class LoadFileView(APIView):
                 solutions_result, solution_ref_map = self._process_solutions(
                     request,
                     solutions_records,
-                    folders_map,
-                    folder_id,
                     entity_ref_map,
                     on_conflict,
                 )
@@ -3779,19 +3863,40 @@ class LoadFileView(APIView):
                     on_conflict,
                 )
                 overall_results["contracts"] = contracts_result
+                if contracts_result.get("stopped"):
+                    return overall_results
             else:
                 logger.warning("No 'Contracts' sheet found in Excel file")
+
+            # Process Representatives sheet last (requires entities to exist)
+            if "Representatives" in excel_data.sheet_names:
+                logger.info("Processing Representatives sheet")
+                representatives_df = normalize_datetime_columns(
+                    pd.read_excel(excel_file, sheet_name="Representatives")
+                ).fillna("")
+                representatives_records = representatives_df.to_dict(orient="records")
+                representatives_result = self._process_representatives(
+                    request,
+                    representatives_records,
+                    entity_ref_map,
+                    on_conflict,
+                )
+                overall_results["representatives"] = representatives_result
+            else:
+                logger.warning("No 'Representatives' sheet found in Excel file")
 
             # Calculate totals
             total_successful = (
                 overall_results["entities"]["successful"]
                 + overall_results["solutions"]["successful"]
                 + overall_results["contracts"]["successful"]
+                + overall_results["representatives"]["successful"]
             )
             total_failed = (
                 overall_results["entities"]["failed"]
                 + overall_results["solutions"]["failed"]
                 + overall_results["contracts"]["failed"]
+                + overall_results["representatives"]["failed"]
             )
 
             logger.info(
@@ -3810,38 +3915,115 @@ class LoadFileView(APIView):
                 },
                 "solutions": {"successful": 0, "failed": 0, "errors": []},
                 "contracts": {"successful": 0, "failed": 0, "errors": []},
+                "representatives": {"successful": 0, "failed": 0, "errors": []},
             }
 
-    def _process_entities(
-        self, request, records, folders_map, folder_id, on_conflict=ConflictMode.STOP
-    ):
-        """Process entities from TPRM import"""
-        results = {
+    def _empty_tprm_results(self) -> dict[str, Any]:
+        return {
             "successful": 0,
             "failed": 0,
             "skipped": 0,
             "updated": 0,
             "errors": [],
         }
+
+    def _add_tprm_record_error(self, results, record, error) -> None:
+        results["failed"] += 1
+        results["errors"].append({"record": record, "error": error})
+
+    def _check_missing_tprm_required_fields(self, record, required_fields) -> list[str]:
+        missing_fields = []
+        for field in required_fields:
+            value = record.get(field, "")
+            if value is None or not str(value).strip():
+                missing_fields.append(field)
+        return missing_fields
+
+    def _add_tprm_missing_fields_error(self, results, record, missing_fields) -> None:
+        if len(missing_fields) == 1:
+            error = f"{missing_fields[0]} field is mandatory"
+        else:
+            error = "Missing mandatory fields: " + ", ".join(missing_fields)
+        self._add_tprm_record_error(results, record, error)
+
+    def _log_tprm_import_results(self, label, results) -> None:
+        logger.info(
+            f"{label} import complete. "
+            f"Success: {results['successful']}, Failed: {results['failed']}"
+        )
+
+    def _handle_tprm_conflict(
+        self,
+        request,
+        results,
+        record,
+        on_conflict,
+        label,
+        serializer_class,
+        instance,
+        data,
+        post_update=None,
+    ) -> str:
+        """Apply the conflict policy to an existing record.
+
+        Returns the action taken: "skipped", "stopped", "updated" or "failed".
+        """
+        match on_conflict:
+            case ConflictMode.SKIP:
+                results["skipped"] += 1
+                return "skipped"
+            case ConflictMode.STOP:
+                self._add_tprm_record_error(
+                    results,
+                    record,
+                    f"{label} already exists (conflict policy: stop)",
+                )
+                results["stopped"] = True
+                return "stopped"
+            case ConflictMode.UPDATE:
+                serializer = serializer_class(
+                    instance=instance,
+                    data=data,
+                    partial=True,
+                    context={"request": request},
+                )
+                if not serializer.is_valid():
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "errors": serializer.errors}
+                    )
+                    return "failed"
+                updated_instance = serializer.save()
+                if post_update:
+                    post_update(updated_instance)
+                results["updated"] += 1
+                return "updated"
+            case _:
+                self._add_tprm_record_error(
+                    results,
+                    record,
+                    f"Unsupported conflict policy: {on_conflict}",
+                )
+                results["stopped"] = True
+                return "stopped"
+
+    def _process_entities(
+        self, request, records, folders_map, folder_id, on_conflict=ConflictMode.STOP
+    ):
+        """Process entities from TPRM import"""
+        results = self._empty_tprm_results()
         ref_id_map = {}  # Map ref_id to actual UUID
 
         for record in records:
             try:
-                ref_id = record.get("ref_id", "").strip()
-                if not ref_id:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "error": "ref_id field is mandatory"}
-                    )
+                missing_fields = self._check_missing_tprm_required_fields(
+                    record, ["ref_id", "name"]
+                )
+                if missing_fields:
+                    self._add_tprm_missing_fields_error(results, record, missing_fields)
                     continue
 
-                # Check if name is provided
-                if not record.get("name"):
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "error": "name field is mandatory"}
-                    )
-                    continue
+                ref_id = record.get("ref_id", "").strip()
 
                 # Get domain from record or use fallback
                 domain = folder_id
@@ -3850,78 +4032,7 @@ class LoadFileView(APIView):
                         str(record.get("domain")).lower(), folder_id
                     )
 
-                # Check for existing entity by ref_id or name
-                existing_entity = Entity.objects.filter(ref_id=ref_id).first()
-                if not existing_entity:
-                    existing_entity = Entity.objects.filter(
-                        name__iexact=record.get("name"),
-                        folder_id=domain,
-                    ).first()
-
-                if existing_entity:
-                    ref_id_map[ref_id] = str(existing_entity.id)
-                    match on_conflict:
-                        case ConflictMode.SKIP:
-                            results["skipped"] += 1
-                            continue
-                        case ConflictMode.STOP:
-                            results["failed"] += 1
-                            results["errors"].append(
-                                {
-                                    "record": record,
-                                    "error": "Entity already exists (conflict policy: stop)",
-                                }
-                            )
-                            results["stopped"] = True
-                            break
-                        case ConflictMode.UPDATE:
-                            update_data = {
-                                "ref_id": ref_id,
-                                "name": record.get("name"),
-                                "description": record.get("description", ""),
-                                "mission": record.get("mission", ""),
-                                "folder": domain,
-                            }
-                            if record.get("country"):
-                                update_data["country"] = record.get("country")
-                            if record.get("currency"):
-                                update_data["currency"] = record.get("currency")
-                            for field in [
-                                "dependency",
-                                "penetration",
-                                "maturity",
-                                "trust",
-                            ]:
-                                value = record.get(field)
-                                if value != "" and value is not None:
-                                    try:
-                                        update_data[f"default_{field}"] = int(value)
-                                    except ValueError, TypeError:
-                                        pass
-                            legal_ids = {}
-                            for id_type in ["lei", "euid", "duns", "vat"]:
-                                value = record.get(id_type, "")
-                                if value and str(value).strip():
-                                    legal_ids[id_type.upper()] = str(value).strip()
-                            if legal_ids:
-                                update_data["legal_identifiers"] = legal_ids
-                            serializer = EntityWriteSerializer(
-                                instance=existing_entity,
-                                data=update_data,
-                                partial=True,
-                                context={"request": request},
-                            )
-                            if serializer.is_valid():
-                                serializer.save()
-                                results["updated"] += 1
-                            else:
-                                results["failed"] += 1
-                                results["errors"].append(
-                                    {"record": record, "errors": serializer.errors}
-                                )
-                            continue
-
-                # Prepare entity data
+                # Prepare entity data (used by both update and create)
                 entity_data = {
                     "ref_id": ref_id,
                     "name": record.get("name"),
@@ -3955,26 +4066,44 @@ class LoadFileView(APIView):
                 if legal_identifiers:
                     entity_data["legal_identifiers"] = legal_identifiers
 
+                # Check for existing entity by ref_id or name
+                existing_entity = Entity.objects.filter(ref_id=ref_id).first()
+                if not existing_entity:
+                    existing_entity = Entity.objects.filter(
+                        name__iexact=record.get("name"),
+                        folder_id=domain,
+                    ).first()
+
+                if existing_entity:
+                    ref_id_map[ref_id] = str(existing_entity.id)
+                    action = self._handle_tprm_conflict(
+                        request,
+                        results,
+                        record,
+                        on_conflict,
+                        label="Entity",
+                        serializer_class=EntityWriteSerializer,
+                        instance=existing_entity,
+                        data=entity_data,
+                    )
+                    if action == "stopped":
+                        break
+                    continue
+
                 # Create the entity first, then handle parent relationship
                 serializer = EntityWriteSerializer(
                     data=entity_data, context={"request": request}
                 )
 
-                if serializer.is_valid(raise_exception=True):
-                    entity = serializer.save()
-                    ref_id_map[ref_id] = str(entity.id)
-                    results["successful"] += 1
-                    logger.debug(f"Created entity: {entity.name} with ref_id: {ref_id}")
-                else:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "errors": serializer.errors}
-                    )
+                serializer.is_valid(raise_exception=True)
+                entity = serializer.save()
+                ref_id_map[ref_id] = str(entity.id)
+                results["successful"] += 1
+                logger.debug(f"Created entity: {entity.name} with ref_id: {ref_id}")
 
             except Exception as e:
                 logger.warning(f"Error creating entity: {str(e)}")
-                results["failed"] += 1
-                results["errors"].append({"record": record, "error": str(e)})
+                self._add_tprm_record_error(results, record, str(e))
 
         # Second pass: handle parent_entity relationships
         for record in records:
@@ -3997,130 +4126,44 @@ class LoadFileView(APIView):
             except Exception as e:
                 logger.warning(f"Error linking parent entity: {str(e)}")
 
-        logger.info(
-            f"Entity import complete. Success: {results['successful']}, Failed: {results['failed']}"
-        )
+        self._log_tprm_import_results("Entity", results)
         return results, ref_id_map
 
     def _process_solutions(
         self,
         request,
         records,
-        folders_map,
-        folder_id,
         entity_ref_map,
         on_conflict=ConflictMode.STOP,
     ):
         """Process solutions from TPRM import"""
-        results = {
-            "successful": 0,
-            "failed": 0,
-            "skipped": 0,
-            "updated": 0,
-            "errors": [],
-        }
+        results = self._empty_tprm_results()
         ref_id_map = {}  # Map ref_id to actual UUID
 
         for record in records:
             try:
+                missing_fields = self._check_missing_tprm_required_fields(
+                    record, ["ref_id", "name", "provider_entity_ref_id"]
+                )
+                if missing_fields:
+                    self._add_tprm_missing_fields_error(results, record, missing_fields)
+                    continue
+
                 ref_id = record.get("ref_id", "").strip()
-                if not ref_id:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "error": "ref_id field is mandatory"}
-                    )
-                    continue
-
-                # Check if name is provided
-                if not record.get("name"):
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "error": "name field is mandatory"}
-                    )
-                    continue
-
-                # Check provider_entity_ref_id
                 provider_ref_id = record.get("provider_entity_ref_id", "").strip()
-                if not provider_ref_id:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {
-                            "record": record,
-                            "error": "provider_entity_ref_id field is mandatory",
-                        }
-                    )
-                    continue
 
                 # Lookup provider entity UUID
                 if provider_ref_id not in entity_ref_map:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {
-                            "record": record,
-                            "error": f"Provider entity with ref_id '{provider_ref_id}' not found",
-                        }
+                    self._add_tprm_record_error(
+                        results,
+                        record,
+                        f"Provider entity with ref_id '{provider_ref_id}' not found",
                     )
                     continue
 
                 provider_entity_id = entity_ref_map[provider_ref_id]
 
-                # Check for existing solution by ref_id or name
-                existing_solution = Solution.objects.filter(ref_id=ref_id).first()
-                if not existing_solution:
-                    existing_solution = Solution.objects.filter(
-                        name__iexact=record.get("name"),
-                    ).first()
-
-                if existing_solution:
-                    ref_id_map[ref_id] = str(existing_solution.id)
-                    match on_conflict:
-                        case ConflictMode.SKIP:
-                            results["skipped"] += 1
-                            continue
-                        case ConflictMode.STOP:
-                            results["failed"] += 1
-                            results["errors"].append(
-                                {
-                                    "record": record,
-                                    "error": "Solution already exists (conflict policy: stop)",
-                                }
-                            )
-                            results["stopped"] = True
-                            break
-                        case ConflictMode.UPDATE:
-                            update_data = {
-                                "ref_id": ref_id,
-                                "name": record.get("name"),
-                                "description": record.get("description", ""),
-                                "provider_entity": provider_entity_id,
-                            }
-                            if (
-                                record.get("criticality") != ""
-                                and record.get("criticality") is not None
-                            ):
-                                try:
-                                    update_data["criticality"] = int(
-                                        record.get("criticality")
-                                    )
-                                except ValueError, TypeError:
-                                    pass
-                            serializer = SolutionWriteSerializer(
-                                instance=existing_solution,
-                                data=update_data,
-                                partial=True,
-                                context={"request": request},
-                            )
-                            if serializer.is_valid():
-                                serializer.save()
-                                results["updated"] += 1
-                            else:
-                                results["failed"] += 1
-                                results["errors"].append(
-                                    {"record": record, "errors": serializer.errors}
-                                )
-                            continue
-
-                # Prepare solution data
+                # Prepare solution data (used by both update and create)
                 solution_data = {
                     "ref_id": ref_id,
                     "name": record.get("name"),
@@ -4138,32 +4181,45 @@ class LoadFileView(APIView):
                     except ValueError, TypeError:
                         pass
 
+                # Check for existing solution by ref_id or name
+                existing_solution = Solution.objects.filter(ref_id=ref_id).first()
+                if not existing_solution:
+                    existing_solution = Solution.objects.filter(
+                        name__iexact=record.get("name"),
+                    ).first()
+
+                if existing_solution:
+                    ref_id_map[ref_id] = str(existing_solution.id)
+                    action = self._handle_tprm_conflict(
+                        request,
+                        results,
+                        record,
+                        on_conflict,
+                        label="Solution",
+                        serializer_class=SolutionWriteSerializer,
+                        instance=existing_solution,
+                        data=solution_data,
+                    )
+                    if action == "stopped":
+                        break
+                    continue
+
                 # Create the solution
                 serializer = SolutionWriteSerializer(
                     data=solution_data, context={"request": request}
                 )
 
-                if serializer.is_valid(raise_exception=True):
-                    solution = serializer.save()
-                    ref_id_map[ref_id] = str(solution.id)
-                    results["successful"] += 1
-                    logger.debug(
-                        f"Created solution: {solution.name} with ref_id: {ref_id}"
-                    )
-                else:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "errors": serializer.errors}
-                    )
+                serializer.is_valid(raise_exception=True)
+                solution = serializer.save()
+                ref_id_map[ref_id] = str(solution.id)
+                results["successful"] += 1
+                logger.debug(f"Created solution: {solution.name} with ref_id: {ref_id}")
 
             except Exception as e:
                 logger.warning(f"Error creating solution: {str(e)}")
-                results["failed"] += 1
-                results["errors"].append({"record": record, "error": str(e)})
+                self._add_tprm_record_error(results, record, str(e))
 
-        logger.info(
-            f"Solution import complete. Success: {results['successful']}, Failed: {results['failed']}"
-        )
+        self._log_tprm_import_results("Solution", results)
         return results, ref_id_map
 
     def _process_contracts(
@@ -4177,52 +4233,26 @@ class LoadFileView(APIView):
         on_conflict=ConflictMode.STOP,
     ):
         """Process contracts from TPRM import"""
-        results = {
-            "successful": 0,
-            "failed": 0,
-            "skipped": 0,
-            "updated": 0,
-            "errors": [],
-        }
+        results = self._empty_tprm_results()
 
         for record in records:
             try:
+                missing_fields = self._check_missing_tprm_required_fields(
+                    record, ["ref_id", "name", "provider_entity_ref_id"]
+                )
+                if missing_fields:
+                    self._add_tprm_missing_fields_error(results, record, missing_fields)
+                    continue
+
                 ref_id = record.get("ref_id", "").strip()
-                if not ref_id:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "error": "ref_id field is mandatory"}
-                    )
-                    continue
-
-                # Check if name is provided
-                if not record.get("name"):
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "error": "name field is mandatory"}
-                    )
-                    continue
-
-                # Check provider_entity_ref_id
                 provider_ref_id = record.get("provider_entity_ref_id", "").strip()
-                if not provider_ref_id:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {
-                            "record": record,
-                            "error": "provider_entity_ref_id field is mandatory",
-                        }
-                    )
-                    continue
 
                 # Lookup provider entity UUID
                 if provider_ref_id not in entity_ref_map:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {
-                            "record": record,
-                            "error": f"Provider entity with ref_id '{provider_ref_id}' not found",
-                        }
+                    self._add_tprm_record_error(
+                        results,
+                        record,
+                        f"Provider entity with ref_id '{provider_ref_id}' not found",
                     )
                     continue
 
@@ -4297,6 +4327,10 @@ class LoadFileView(APIView):
                 if record.get("currency"):
                     contract_data["currency"] = record.get("currency")
 
+                def link_solutions(contract):
+                    if solution_ids:
+                        contract.solutions.set(solution_ids)
+
                 # Check for existing contract by ref_id or name
                 existing_contract = Contract.objects.filter(ref_id=ref_id).first()
                 if not existing_contract:
@@ -4306,66 +4340,115 @@ class LoadFileView(APIView):
                     ).first()
 
                 if existing_contract:
-                    match on_conflict:
-                        case ConflictMode.SKIP:
-                            results["skipped"] += 1
-                            continue
-                        case ConflictMode.STOP:
-                            results["failed"] += 1
-                            results["errors"].append(
-                                {
-                                    "record": record,
-                                    "error": "Contract already exists (conflict policy: stop)",
-                                }
-                            )
-                            results["stopped"] = True
-                            break
-                        case ConflictMode.UPDATE:
-                            serializer = ContractWriteSerializer(
-                                instance=existing_contract,
-                                data=contract_data,
-                                partial=True,
-                                context={"request": request},
-                            )
-                            if serializer.is_valid():
-                                contract = serializer.save()
-                                if solution_ids:
-                                    contract.solutions.set(solution_ids)
-                                results["updated"] += 1
-                            else:
-                                results["failed"] += 1
-                                results["errors"].append(
-                                    {"record": record, "errors": serializer.errors}
-                                )
-                            continue
+                    action = self._handle_tprm_conflict(
+                        request,
+                        results,
+                        record,
+                        on_conflict,
+                        label="Contract",
+                        serializer_class=ContractWriteSerializer,
+                        instance=existing_contract,
+                        data=contract_data,
+                        post_update=link_solutions,
+                    )
+                    if action == "stopped":
+                        break
+                    continue
 
                 # Create the contract
                 serializer = ContractWriteSerializer(
                     data=contract_data, context={"request": request}
                 )
 
-                if serializer.is_valid(raise_exception=True):
-                    contract = serializer.save()
-                    if solution_ids:
-                        contract.solutions.set(solution_ids)
-                    results["successful"] += 1
-                    logger.debug(
-                        f"Created contract: {contract.name} with ref_id: {ref_id}"
-                    )
-                else:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "errors": serializer.errors}
-                    )
+                serializer.is_valid(raise_exception=True)
+                contract = serializer.save()
+                link_solutions(contract)
+                results["successful"] += 1
+                logger.debug(f"Created contract: {contract.name} with ref_id: {ref_id}")
 
             except Exception as e:
                 logger.warning(f"Error creating contract: {str(e)}")
-                results["failed"] += 1
-                results["errors"].append({"record": record, "error": str(e)})
+                self._add_tprm_record_error(results, record, str(e))
 
-        logger.info(
-            f"Contract import complete. Success: {results['successful']}, Failed: {results['failed']}"
-        )
+        self._log_tprm_import_results("Contract", results)
+        return results
+
+    def _process_representatives(
+        self,
+        request,
+        records,
+        entity_ref_map,
+        on_conflict=ConflictMode.STOP,
+    ):
+        """Process representatives from TPRM import."""
+        results = self._empty_tprm_results()
+
+        for record in records:
+            try:
+                missing_fields = self._check_missing_tprm_required_fields(
+                    record, ["email", "provider_entity_ref_id"]
+                )
+                if missing_fields:
+                    self._add_tprm_missing_fields_error(results, record, missing_fields)
+                    continue
+
+                email = str(record.get("email", "")).strip()
+                provider_ref_id = str(record.get("provider_entity_ref_id", "")).strip()
+                provider_entity_id = entity_ref_map.get(provider_ref_id)
+
+                if not provider_entity_id:
+                    self._add_tprm_record_error(
+                        results,
+                        record,
+                        f"Provider entity with ref_id '{provider_ref_id}' not found",
+                    )
+                    continue
+
+                representative_data = {
+                    "email": email,
+                    "entity": provider_entity_id,
+                    "first_name": str(record.get("first_name", "")).strip(),
+                    "last_name": str(record.get("last_name", "")).strip(),
+                    "description": str(record.get("description", "")).strip(),
+                    "phone": str(record.get("phone", "")).strip(),
+                    "role": str(record.get("role", "")).strip(),
+                }
+
+                existing_representative = Representative.objects.filter(
+                    email__iexact=email
+                ).first()
+
+                if existing_representative:
+                    action = self._handle_tprm_conflict(
+                        request,
+                        results,
+                        record,
+                        on_conflict,
+                        label="Representative",
+                        serializer_class=RepresentativeWriteSerializer,
+                        instance=existing_representative,
+                        data=representative_data,
+                    )
+                    if action == "stopped":
+                        break
+                    continue
+
+                serializer = RepresentativeWriteSerializer(
+                    data=representative_data, context={"request": request}
+                )
+
+                serializer.is_valid(raise_exception=True)
+                representative = serializer.save()
+                results["successful"] += 1
+                logger.debug(
+                    f"Created representative: {representative.email} for entity ref_id: {provider_ref_id}"
+                )
+
+            except Exception as e:
+                logger.warning(f"Error creating representative: {str(e)}")
+                self._add_tprm_record_error(results, record, str(e))
+
+        self._log_tprm_import_results("Representative", results)
         return results
 
     def post(self, request, *args, **kwargs) -> Response:
@@ -4401,66 +4484,93 @@ class LoadFileView(APIView):
         return self.process_excel_file(request, io.BytesIO(file_data))
 
     def _process_risk_assessment(
-        self, request, records, folder_id, perimeter_id, matrix_id
+        self,
+        request,
+        records,
+        folder_id,
+        perimeter_id,
+        matrix_id,
+        on_conflict=ConflictMode.STOP,
+        target_id=None,
     ):
         """Process risk assessment import with the specified column structure"""
         results = {"successful": 0, "failed": 0, "errors": []}
 
         try:
-            # Get the perimeter and its domain
-            perimeter = None
-            if perimeter_id is not None:
-                perimeter = Perimeter.objects.get(id=perimeter_id)
-
-            if perimeter is not None:
-                domain = perimeter.folder
-            else:
-                if folder_id is None:
+            if target_id is not None:
+                # Reconcile into an existing risk assessment, reusing its domain
+                # and matrix.
+                risk_assessment = resolve_accessible_target(
+                    RiskAssessment, target_id, request.user
+                )
+                if risk_assessment is None:
                     results["failed"] += 1
                     results["errors"].append(
                         {
-                            "error": "A folder must be specified when there's no perimeter!"
+                            "error": f"Target risk assessment with ID {target_id} does not exist"
                         }
                     )
                     return results
+                domain = risk_assessment.folder
+                risk_matrix = risk_assessment.risk_matrix
+                logger.info(
+                    f"Reconciling import into existing risk assessment {risk_assessment.id}"
+                )
+            else:
+                # Get the perimeter and its domain
+                perimeter = None
+                if perimeter_id is not None:
+                    perimeter = Perimeter.objects.get(id=perimeter_id)
+
+                if perimeter is not None:
+                    domain = perimeter.folder
                 else:
-                    domain = Folder.objects.get(id=folder_id)
+                    if folder_id is None:
+                        results["failed"] += 1
+                        results["errors"].append(
+                            {
+                                "error": "A folder must be specified when there's no perimeter!"
+                            }
+                        )
+                        return results
+                    else:
+                        domain = Folder.objects.get(id=folder_id)
 
-            # Get the risk matrix
-            risk_matrix = RiskMatrix.objects.get(id=matrix_id)
+                # Get the risk matrix
+                risk_matrix = RiskMatrix.objects.get(id=matrix_id)
 
-            assessment_name = resolve_container_name(request, "Risk_Assessment")
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                assessment_name = resolve_container_name(request, "Risk_Assessment")
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-            # Create the risk assessment
-            assessment_data = {
-                "name": assessment_name,
-                "perimeter": perimeter_id,
-                "risk_matrix": matrix_id,
-                "folder": domain.id,
-                "description": f"Imported risk assessment from Excel on {timestamp}",
-            }
-
-            risk_assessment_serializer = RiskAssessmentWriteSerializer(
-                data=assessment_data, context={"request": request}
-            )
-
-            if not risk_assessment_serializer.is_valid():
-                return {
-                    "successful": 0,
-                    "failed": len(records),
-                    "errors": [
-                        {
-                            "error": "Failed to create risk assessment",
-                            "details": risk_assessment_serializer.errors,
-                        }
-                    ],
+                # Create the risk assessment
+                assessment_data = {
+                    "name": assessment_name,
+                    "perimeter": perimeter_id,
+                    "risk_matrix": matrix_id,
+                    "folder": domain.id,
+                    "description": f"Imported risk assessment from Excel on {timestamp}",
                 }
 
-            risk_assessment = risk_assessment_serializer.save()
-            logger.info(
-                f"Created risk assessment: {assessment_name} with ID {risk_assessment.id}"
-            )
+                risk_assessment_serializer = RiskAssessmentWriteSerializer(
+                    data=assessment_data, context={"request": request}
+                )
+
+                if not risk_assessment_serializer.is_valid():
+                    return {
+                        "successful": 0,
+                        "failed": len(records),
+                        "errors": [
+                            {
+                                "error": "Failed to create risk assessment",
+                                "details": risk_assessment_serializer.errors,
+                            }
+                        ],
+                    }
+
+                risk_assessment = risk_assessment_serializer.save()
+                logger.info(
+                    f"Created risk assessment: {assessment_name} with ID {risk_assessment.id}"
+                )
 
             # Build matrix mapping dictionaries
             matrix_mappings = self._build_matrix_mappings(risk_matrix)
@@ -4492,18 +4602,32 @@ class LoadFileView(APIView):
                 list(all_controls), domain, request
             )
 
-            # Process each record to create risk scenarios
+            # Process each record to create or reconcile risk scenarios
+            results["skipped"] = 0
             for record in records:
                 try:
-                    scenario_data = self._process_risk_scenario_record(
+                    scenario, action = self._process_risk_scenario_record(
                         record,
                         risk_assessment,
                         matrix_mappings,
                         control_mapping,
                         request,
                         domain,
+                        on_conflict,
                     )
-                    if scenario_data:
+                    if action == "stopped":
+                        results["failed"] += 1
+                        results["errors"].append(
+                            {
+                                "record": record,
+                                "error": "Risk scenario already exists",
+                            }
+                        )
+                        results["stopped"] = True
+                        break
+                    elif action == "skipped":
+                        results["skipped"] += 1
+                    elif action in ("created", "updated"):
                         results["successful"] += 1
                     else:
                         results["failed"] += 1
@@ -4651,16 +4775,35 @@ class LoadFileView(APIView):
         control_mapping,
         request,
         domain,
+        on_conflict=ConflictMode.STOP,
     ):
-        """Process a single risk scenario record"""
+        """Process one row, returning (scenario, action) where action is one of
+        created/updated/skipped/stopped/failed. Existing scenarios are matched by
+        ref_id, then name."""
         try:
-            # Extract basic fields
             ref_id = record.get("ref_id", "")
             name = record.get("name", "")
             description = record.get("description", "")
 
             if not name:
                 raise ValueError("Risk scenario name is required")
+
+            existing_scenario = None
+            if ref_id:
+                existing_scenario = RiskScenario.objects.filter(
+                    risk_assessment=risk_assessment, ref_id=ref_id
+                ).first()
+            if existing_scenario is None:
+                existing_scenario = RiskScenario.objects.filter(
+                    risk_assessment=risk_assessment, name__iexact=name
+                ).first()
+
+            if existing_scenario is not None:
+                if on_conflict == ConflictMode.SKIP:
+                    return existing_scenario, "skipped"
+                if on_conflict == ConflictMode.STOP:
+                    return existing_scenario, "stopped"
+                # UPDATE: fall through and update the existing scenario in place.
 
             # Map risk values using matrix mappings. Accept both the short form
             # (`*_proba`, used historically) and the long form (`*_probability`,
@@ -4725,10 +4868,18 @@ class LoadFileView(APIView):
                 "justification": record.get("justification", "") or "",
             }
 
-            # Create the risk scenario
-            scenario_serializer = RiskScenarioWriteSerializer(
-                data=scenario_data, context={"request": request}
-            )
+            # Create or update the risk scenario
+            if existing_scenario is not None:
+                scenario_serializer = RiskScenarioWriteSerializer(
+                    instance=existing_scenario,
+                    data=scenario_data,
+                    partial=True,
+                    context={"request": request},
+                )
+            else:
+                scenario_serializer = RiskScenarioWriteSerializer(
+                    data=scenario_data, context={"request": request}
+                )
 
             logger.debug(
                 f"Validating scenario serializer for '{name}' with data: {scenario_serializer.initial_data}"
@@ -4738,7 +4889,7 @@ class LoadFileView(APIView):
                 logger.warning(
                     f"Risk scenario validation failed: {scenario_serializer.errors}"
                 )
-                return None
+                return None, "failed"
 
             risk_scenario = scenario_serializer.save()
 
@@ -4774,7 +4925,9 @@ class LoadFileView(APIView):
                 risk_scenario, record.get("assets", ""), domain
             )
 
-            return risk_scenario
+            return risk_scenario, (
+                "updated" if existing_scenario is not None else "created"
+            )
 
         except Exception as e:
             logger.warning(f"Error processing risk scenario record: {str(e)}")

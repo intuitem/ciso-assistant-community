@@ -530,7 +530,8 @@ export const LEGAL_BASIS_FILTER: ListViewFilterConfig = {
 export const PROCESSING_NATURE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		optionsEndpoint: 'processing-natures',
+		optionsEndpoint: 'terminologies?field_path=processing.nature&is_visible=true',
+		optionsLabelField: 'translated_name',
 		label: 'nature',
 		browserCache: 'force-cache',
 		multiple: true
@@ -745,10 +746,20 @@ export const QUALIFICATION_FILTER: ListViewFilterConfig = {
 export const PERSONAL_DATA_CATEGORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		optionsEndpoint: 'personal-data/category',
+		optionsEndpoint: 'terminologies?field_path=personal_data.category&is_visible=true',
+		optionsLabelField: 'translated_name',
+		label: 'category',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+export const DATA_SUBJECT_CATEGORY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'data-subjects/category',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
-		label: 'category',
+		label: 'dataSubjectCategory',
 		browserCache: 'force-cache',
 		multiple: true
 	}
@@ -1672,8 +1683,8 @@ export const listViewFields = {
 			'filtering_labels'
 		],
 		optionalFields: {
-			head: ['startDate', 'expiryDate', 'createdAt', 'updatedAt'],
-			body: ['start_date', 'expiry_date', 'created_at', 'updated_at']
+			head: ['progress', 'startDate', 'expiryDate', 'createdAt', 'updatedAt'],
+			body: ['progress_field', 'start_date', 'expiry_date', 'created_at', 'updated_at']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -1807,6 +1818,7 @@ export const listViewFields = {
 			'firstName',
 			'lastName',
 			'userGroups',
+			'idpGroups',
 			'isActive',
 			'expiryDate',
 			'keep_local_login',
@@ -1818,6 +1830,7 @@ export const listViewFields = {
 			'first_name',
 			'last_name',
 			'user_groups',
+			'idp_groups',
 			'is_active',
 			'expiry_date',
 			'keep_local_login',
@@ -1837,6 +1850,10 @@ export const listViewFields = {
 		head: ['name'],
 		body: ['name'],
 		meta: ['id', 'builtin']
+	},
+	'idp-groups': {
+		head: ['name', 'userGroups'],
+		body: ['name', 'user_groups']
 	},
 	roles: {
 		head: ['name', 'description'],
@@ -2014,13 +2031,14 @@ export const listViewFields = {
 			'default_criticality'
 		],
 		optionalFields: {
-			head: ['referenceLink', 'createdAt', 'updatedAt'],
-			body: ['reference_link', 'created_at', 'updated_at']
+			head: ['filteringLabels', 'referenceLink', 'createdAt', 'updatedAt'],
+			body: ['filtering_labels', 'reference_link', 'created_at', 'updated_at']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			parent_entity: PARENT_ENTITY_FILTER,
-			relationship: ENTITY_RELATIONSHIP_FILTER
+			relationship: ENTITY_RELATIONSHIP_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'entity-assessments': {
@@ -2073,6 +2091,7 @@ export const listViewFields = {
 			'status',
 			'startDate',
 			'endDate',
+			'annualExpense',
 			'providerEntity',
 			'beneficiaryEntity',
 			'solutions'
@@ -2084,6 +2103,7 @@ export const listViewFields = {
 			'status',
 			'start_date',
 			'end_date',
+			'annual_expense',
 			'provider_entity',
 			'beneficiary_entity',
 			'solutions'
@@ -2169,6 +2189,10 @@ export const listViewFields = {
 	processings: {
 		head: ['refId', 'name', 'description', 'status', 'processingNature', 'labels', 'folder'],
 		body: ['ref_id', 'name', 'description', 'status', 'nature', 'filtering_labels', 'folder'],
+		optionalFields: {
+			head: ['personalDataCategories', 'dataSubjectCategories', 'updatedAt'],
+			body: ['personal_data_categories', 'data_subject_categories', 'updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			assigned_to: {
@@ -2182,6 +2206,8 @@ export const listViewFields = {
 			},
 			status: PROCESSING_STATUS_FILTER,
 			nature: PROCESSING_NATURE_FILTER,
+			personal_data__category: PERSONAL_DATA_CATEGORY_FILTER,
+			data_subjects__category: DATA_SUBJECT_CATEGORY_FILTER,
 			filtering_labels: LABELS_FILTER
 		}
 	},
@@ -2863,7 +2889,7 @@ export const listViewFields = {
 	},
 	terminologies: {
 		head: ['field_path', 'name', 'description', 'translations', 'is_visible'],
-		body: ['field_path', 'name', 'description', 'translations', 'is_visible'],
+		body: ['field_path', 'translated_name', 'description', 'translations', 'is_visible'],
 		filters: {
 			field_path: FIELD_PATH_FILTER,
 			builtin: BUILTIN_FILTER,
@@ -2871,8 +2897,8 @@ export const listViewFields = {
 		}
 	},
 	'generic-collections': {
-		head: ['ref_id', 'name', 'description', 'labels', 'folder'],
-		body: ['ref_id', 'name', 'description', 'filtering_labels', 'folder'],
+		head: ['ref_id', 'name', 'description', 'project', 'labels', 'folder'],
+		body: ['ref_id', 'name', 'description', 'projects', 'filtering_labels', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			filtering_labels: LABELS_FILTER
@@ -3761,8 +3787,11 @@ export function getListViewFields({
 	};
 }
 
-export const headData = (model: urlModel) =>
-	listViewFields[model].body.reduce((obj, key, index) => {
-		obj[key] = listViewFields[model].head[index];
-		return obj;
-	}, {});
+export const headData = (model: urlModel): Record<string, string> =>
+	listViewFields[model].body.reduce(
+		(obj, key, index) => {
+			obj[key] = listViewFields[model].head[index];
+			return obj;
+		},
+		{} as Record<string, string>
+	);

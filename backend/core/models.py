@@ -47,6 +47,7 @@ from library.helpers import (
 
 from core.utils import format_currency as _fmt_currency
 from global_settings.models import GlobalSettings
+from integrations.sync_mixin import IntegrationSyncableMixin
 
 from .base_models import (
     AbstractBaseModel,
@@ -1680,6 +1681,8 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         METRIC_UNIT = "metric_definition.unit", "metricUnit"
         PROJECT_STATUS = "project.status", "projectStatus"
         PROJECT_HEALTH = "project.health", "projectHealth"
+        PROCESSING_NATURE = "processing.nature", "processingNature"
+        PERSONAL_DATA_CATEGORY = "personal_data.category", "personalDataCategory"
 
     DEFAULT_ROTO_RISK_ORIGINS = [
         {
@@ -2512,7 +2515,7 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
         return self._is_dynamic_cache
 
     def __str__(self) -> str:
-        return f"{self.provider} - {self.name}"
+        return f"{self.provider} - {self.get_name_translated}"
 
 
 class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
@@ -3091,6 +3094,7 @@ class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMi
         DRAFT = "draft", "draft"
         IN_REVIEW = "in_review", "in review"
         APPROVED = "approved", "approved"
+        REJECTED = "rejected", "rejected"
         RESOLVED = "resolved", "resolved"
         EXPIRED = "expired", "expired"
         DEPRECATED = "deprecated", "deprecated"
@@ -3173,12 +3177,23 @@ class AssetCapability(ReferentialObjectMixin, I18nObjectMixin):
 
 
 class Asset(
+    IntegrationSyncableMixin,
     NameDescriptionMixin,
     FolderMixin,
     PublishInRootFolderMixin,
     FilteringLabelMixin,
     CustomFieldsMixin,
 ):
+    INTEGRATION_MODEL_KEY = "asset"
+    INTEGRATION_SYNCABLE_FIELDS: Final[set[str]] = {
+        "name",
+        "description",
+        "ref_id",
+        "type",
+        "reference_link",
+        "observation",
+    }
+
     class Type(models.TextChoices):
         """
         The type of the asset.
@@ -3963,8 +3978,18 @@ class Asset(
         ]
 
     def save(self, *args, **kwargs) -> None:
+        # Capture changed syncable fields before writing, for outbound sync.
+        changed_fields = self._capture_sync_changed_fields()
+        # _state.adding, not `pk is None`: the UUID pk is defaulted at
+        # instantiation, so pk is never None even for unsaved rows.
+        is_new = self._state.adding
+        # ``skip_sync`` lets the inbound pull path write without re-triggering a
+        # push (set by the orchestrator's _update_local_object).
+        skip_sync = kwargs.pop("skip_sync", False)
         self.full_clean()
-        return super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
+        if not skip_sync:
+            self._trigger_sync(is_new=is_new, changed_fields=changed_fields)
 
     def get_security_objectives_comparison(
         self, security_objectives=None, security_capabilities=None
@@ -4919,6 +4944,13 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
 
 
 class Comment(AbstractBaseModel, FolderMixin):
+    PARENT_FIELDS = (
+        "requirement_assessment",
+        "risk_scenario",
+        "applied_control",
+        "finding",
+    )
+
     body = models.TextField(verbose_name=_("Body"))
     is_tainted = models.BooleanField(default=False, verbose_name=_("Edited"))
     is_active = models.BooleanField(default=True, verbose_name=_("Active"))
@@ -5014,6 +5046,11 @@ class Comment(AbstractBaseModel, FolderMixin):
         if not self._state.adding and self.pk:
             try:
                 old = Comment.objects.get(pk=self.pk)
+                for field_name in self.PARENT_FIELDS:
+                    if getattr(old, f"{field_name}_id") != getattr(
+                        self, f"{field_name}_id"
+                    ):
+                        raise ValidationError(_("Comment parent cannot be changed."))
                 if old.body != self.body:
                     self.is_tainted = True
             except Comment.DoesNotExist:
@@ -5035,12 +5072,15 @@ def _get_default_applied_control_cost():
 
 
 class AppliedControl(
+    IntegrationSyncableMixin,
     NameDescriptionMixin,
     FolderMixin,
     PublishInRootFolderMixin,
     FilteringLabelMixin,
     CustomFieldsMixin,
 ):
+    INTEGRATION_MODEL_KEY = "applied_control"
+
     class Status(models.TextChoices):
         TO_DO = "to_do", _("To do")
         IN_PROGRESS = "in_progress", _("In progress")
@@ -5249,11 +5289,8 @@ class AppliedControl(
         verbose_name_plural = _("Applied controls")
 
     def save(self, *args, **kwargs):
-        # Track what changed
-        changed_fields = []
-        old_instance = AppliedControl.objects.filter(pk=self.pk).first()
-        if old_instance:
-            changed_fields = self._get_changed_fields(old_instance)
+        # Track what changed (vs the persisted row) for outbound sync.
+        changed_fields = self._capture_sync_changed_fields()
 
         if self.reference_control and self.category is None:
             self.category = self.reference_control.category
@@ -5262,8 +5299,9 @@ class AppliedControl(
         if self.status == "active":
             self.progress_field = 100
 
-        # Save first
-        is_new = self.pk is None
+        # Save first. _state.adding, not `pk is None`: the UUID pk is defaulted
+        # at instantiation, so pk is never None even for unsaved rows.
+        is_new = self._state.adding
         skip_sync = kwargs.pop("skip_sync", False)
         super(AppliedControl, self).save(*args, **kwargs)
 
@@ -5278,47 +5316,6 @@ class AppliedControl(
         from metrology.models import BuiltinMetricSample
 
         BuiltinMetricSample.update_or_create_snapshot(self.folder)
-
-    def _get_changed_fields(self, old_instance) -> list[str]:
-        """Detect which fields changed"""
-        changed = []
-
-        for field in self.INTEGRATION_SYNCABLE_FIELDS:
-            old_val = getattr(old_instance, field)
-            new_val = getattr(self, field)
-            if old_val != new_val:
-                changed.append(field)
-
-        return changed
-
-    def _trigger_sync(self, is_new: bool, changed_fields: List[str]):
-        """Queue sync tasks for all active integrations"""
-        from integrations.tasks import sync_object_to_integrations
-        from integrations.models import IntegrationConfiguration
-
-        # Find all active ITSM integrations for this folder
-        configurations = IntegrationConfiguration.objects.filter(
-            folder=Folder.get_root_folder(),
-            provider__provider_type="itsm",
-            is_active=True,
-        )
-
-        if configurations.exists() and (is_new or changed_fields):
-            # Dispatch async task
-            logger.debug(
-                "Dispatching remote object sync task", applied_control_id=self.pk
-            )
-            transaction.on_commit(
-                lambda: sync_object_to_integrations.schedule(
-                    args=(
-                        ContentType.objects.get_for_model(self),
-                        self.pk,
-                        list(configurations.values_list("id", flat=True)),
-                        changed_fields,
-                    ),
-                    delay=1,
-                )
-            )
 
     @property
     def risk_scenarios(self):
@@ -5403,15 +5400,15 @@ class AppliedControl(
             if (cost_data := self.cost.get(cost_type)) is None:
                 continue
 
-            if (cost := cost_data.get("fixed_cost", 0)) == 0:
+            fixed_cost = cost_data.get("fixed_cost", 0)
+            people_days = cost_data.get("people_days", 0)
+            if not fixed_cost and not people_days:
                 continue
 
-            people_days = cost_data.get("people_days", 0)
             cost_parts: list[str] = []
-
-            stringified_cost = self._stringify_cost(cost, currency)
-            cost_parts.append(stringified_cost)
-            if people_days > 0:
+            if fixed_cost:
+                cost_parts.append(self._stringify_cost(fixed_cost, currency))
+            if people_days:
                 cost_parts.append(f"{people_days} people days")
 
             cost_string = ", ".join(cost_parts)
@@ -8923,6 +8920,8 @@ class FindingsAssessment(Assessment):
     class Category(models.TextChoices):
         UNDEFINED = "--", "Undefined"
         PENTEST = "pentest", "Pentest"
+        THREAT_HUNTING = "threat_hunting", "Threat hunting"
+        RED_TEAMING = "red_teaming", "Red teaming"
         AUDIT = "audit", "Audit"
         SELF_IDENTIFIED = "self_identified", "Self-identified"
 
