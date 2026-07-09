@@ -1,0 +1,12 @@
+# Generated load-test state
+/data/
+/results/*
+!/results/.gitignore
+/users.csv
+/workload.json
+/locust/users.csv
+/locust/results/
+
+# Python cache
+__pycache__/
+*.py[cod]
