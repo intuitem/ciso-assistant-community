@@ -2949,6 +2949,14 @@ export const listViewFields = {
 		body: ['activity', 'actor', 'role'],
 		filters: {}
 	},
+	workflows: {
+		head: ['name', 'description', 'folder'],
+		body: ['name', 'description', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			filtering_labels: LABELS_FILTER
+		}
+	},
 	'metric-definitions': {
 		head: ['ref_id', 'name', 'description', 'category', 'unit', 'provider', 'labels', 'folder'],
 		body: [
