@@ -551,7 +551,7 @@ class ExportMixin:
             return response
 
         except Exception as e:
-            logger.error(f"Error exporting {self.model.__name__} to CSV: {str(e)}")
+            logger.error("Error exporting to CSV", model=self.model.__name__, error=e)
             return HttpResponse(
                 status=500, content="An error occurred while generating the CSV export."
             )
@@ -2732,7 +2732,7 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
             )
 
         except Exception as e:
-            logger.error(f"Error in batch asset creation: {str(e)}")
+            logger.error("Error in batch asset creation", error=e)
             return Response(
                 {"error": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -4778,7 +4778,9 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     )
                 except Exception as e:
                     logger.error(
-                        f"Failed to run simulation for scenario {scenario.name}: {str(e)}"
+                        "Failed to run simulation for scenario",
+                        scenario=scenario.name,
+                        error=e,
                     )
 
             # Create residual hypothesis if residual values are set
@@ -4822,7 +4824,9 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     )
                 except Exception as e:
                     logger.error(
-                        f"Failed to run simulation for residual scenario {scenario.name}: {str(e)}"
+                        "Failed to run simulation for residual scenario",
+                        scenario=scenario.name,
+                        error=e,
                     )
 
             scenarios_converted += 1
@@ -7190,7 +7194,7 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
             default_ref_id = RiskScenario.get_default_ref_id(risk_assessment)
             return Response({"results": default_ref_id})
         except Exception as e:
-            logger.error("Error in default_ref_id: %s", str(e))
+            logger.error("Error in default_ref_id", error=e)
             return Response(
                 {"error": "Error in default_ref_id has occurred."}, status=400
             )
@@ -7631,7 +7635,7 @@ class ValidationFlowViewSet(BaseModelViewSet):
             default_ref_id = ValidationFlow.get_default_ref_id()
             return Response({"results": default_ref_id})
         except Exception as e:
-            logger.error("Error in default_ref_id: %s", str(e))
+            logger.error("Error in default_ref_id", error=e)
             return Response(
                 {"error": "Error in default_ref_id has occurred."}, status=400
             )
@@ -11995,7 +11999,7 @@ class EvidenceViewSet(BaseModelViewSet):
             evidence = serializer.save()
         except PermissionDenied as e:
             result["outcome"] = "error"
-            result["error"] = e.detail if hasattr(e, "detail") else str(e)
+            result["error"] = e.detail
             summary["errors"] += 1
             return
         revision = evidence.revisions.first()
@@ -12033,7 +12037,7 @@ class EvidenceViewSet(BaseModelViewSet):
             revision = rev_serializer.save()
         except PermissionDenied as e:
             result["outcome"] = "error"
-            result["error"] = e.detail if hasattr(e, "detail") else str(e)
+            result["error"] = e.detail
             summary["errors"] += 1
             return
         result["outcome"] = "revision_added"
@@ -14005,7 +14009,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 {"error": "invalid input provided"}, status=status.HTTP_400_BAD_REQUEST
             )
         except Exception as e:
-            logger.error(f"Unexpected error in update_requirement: {str(e)}")
+            logger.error("Unexpected error in update_requirement", error=e)
             return Response(
                 {"error": "An unexpected error occurred"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
