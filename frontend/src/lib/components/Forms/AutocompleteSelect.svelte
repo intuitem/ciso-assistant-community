@@ -689,6 +689,13 @@
 			{#each $value as val}
 				<input type="hidden" name={field} value={val} />
 			{/each}
+			{#if $value.length === 0}
+				<!-- Empty arrays render no inputs, so in `dataType: 'form'` mode the field
+				     vanishes from the submission (superForm skips absent keys) and the backend
+				     never clears the relation. Emit a marker the write action turns back into
+				     an explicit empty array. -->
+				<input type="hidden" name="__empty_arrays" value={field} />
+			{/if}
 		{:else if $value}
 			<input type="hidden" name={field} value={$value} />
 		{/if}
