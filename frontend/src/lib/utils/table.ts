@@ -2159,6 +2159,7 @@ export const listViewFields = {
 			'status',
 			'startDate',
 			'endDate',
+			'annualExpense',
 			'providerEntity',
 			'beneficiaryEntity',
 			'solutions'
@@ -2170,6 +2171,7 @@ export const listViewFields = {
 			'status',
 			'start_date',
 			'end_date',
+			'annual_expense',
 			'provider_entity',
 			'beneficiary_entity',
 			'solutions'
