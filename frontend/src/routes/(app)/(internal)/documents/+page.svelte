@@ -96,6 +96,17 @@
 		</div>
 	</header>
 
+	{#if data.unpublishedCount > 0}
+		<a
+			href="/document-containers"
+			class="flex items-center gap-3 rounded-xl border border-surface-200-800 bg-surface-50-950 px-4 py-3 text-sm transition-colors hover:border-primary-500/40"
+		>
+			<i class="fa-solid fa-pen-ruler text-primary-500"></i>
+			<span>{m.unpublishedDocumentsNotice({ count: data.unpublishedCount })}</span>
+			<i class="fa-solid fa-arrow-right ml-auto text-surface-400"></i>
+		</a>
+	{/if}
+
 	<!-- Toolbar: search + type filters -->
 	<div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
 		<div class="relative w-full lg:max-w-sm">

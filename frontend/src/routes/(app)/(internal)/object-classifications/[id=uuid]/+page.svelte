@@ -141,9 +141,6 @@
 					</div>
 				</div>
 			</div>
-			<a href="{base()}/edit?next={encodeURIComponent(base())}" class="btn btn-sm variant-soft">
-				<i class="fa-solid fa-pen mr-2"></i>{m.edit()}
-			</a>
 		</div>
 	</header>
 

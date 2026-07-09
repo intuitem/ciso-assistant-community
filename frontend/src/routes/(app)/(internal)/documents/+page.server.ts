@@ -8,5 +8,11 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
 	}
 	const res = await fetch(`${BASE_API_URL}/document-containers/catalog/`);
 	const catalog = res.ok ? await res.json() : [];
-	return { catalog };
+
+	const unpubRes = await fetch(
+		`${BASE_API_URL}/document-containers/?status=draft&status=in_review&status=change_requested&status=validated&limit=1`
+	);
+	const unpublishedCount = unpubRes.ok ? ((await unpubRes.json()).count ?? 0) : 0;
+
+	return { catalog, unpublishedCount };
 };
