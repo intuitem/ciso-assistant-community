@@ -37,7 +37,12 @@ export function unsafeTranslate(
 		// captured by the prefix:suffix branch below before reaching the camelCase
 		// lookup; try a punctuation-stripped camelCase key first so they can translate.
 		if (typeof key === 'string' && key.includes(':')) {
-			const sanitizedKey = toCamelCase(key.replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ').trim());
+			const sanitizedKey = toCamelCase(
+				key
+					.replace(/[^\w\s]/g, ' ')
+					.replace(/\s+/g, ' ')
+					.trim()
+			);
 			if (sanitizedKey && Object.hasOwn(m, sanitizedKey) && typeof m[sanitizedKey] === 'function') {
 				return m[sanitizedKey](params, options);
 			}
