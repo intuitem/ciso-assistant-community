@@ -167,6 +167,7 @@ urlpatterns = [
     path("resilience/", include("resilience.urls")),
     path("crq/", include("crq.urls")),
     path("pmbok/", include("pmbok.urls")),
+    path("workflows/", include("workflows.urls")),
     path("metrology/", include("metrology.urls")),
     path("", include("portals.urls")),
     path("csrf/", get_csrf_token, name="get_csrf_token"),
