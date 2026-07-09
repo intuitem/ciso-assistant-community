@@ -188,9 +188,10 @@ Detailed results are in `load_testing/BENCHMARK_RESULTS.md`.
 | SQLite 50u / 50 CA / 5m | `6286` | `0` | `39 ms` | `65 ms` | `260 ms` | `500 ms` | Passed short target run |
 | PostgreSQL 50u / 50 CA / 5m | `6329` | `0` | `22 ms` | `40 ms` | `120 ms` | `390 ms` | Better normal latency |
 | SQLite 100u / 100 CA / 10m | `23782` | `2` | `66 ms` | `113 ms` | `420 ms` | `1300 ms` | 2 write-path `502`s; Gunicorn worker `SIGBUS`; no `database is locked` observed |
-| PostgreSQL 100u / 100 CA / 10m | `24174` | `0` | `39 ms` | `61 ms` | `170 ms` | `630 ms` | Passed 100-user headroom run |
+| PostgreSQL 100u / 100 CA / 10m, 3 workers | `24174` | `0` | `39 ms` | `61 ms` | `170 ms` | `630 ms` | Passed 100-user headroom run |
+| PostgreSQL 100u / 100 CA / 10m, 5 workers | `24234` | `0` | `43 ms` | `71 ms` | `200 ms` | `700 ms` | No failures, but tail latency did not improve vs 3 workers |
 
-The 100-user comparison reinforces PostgreSQL as the safer production default for concurrent writes. SQLite completed the run but showed worker instability and worse tail latency.
+The 100-user comparison reinforces PostgreSQL as the safer production default for concurrent writes. SQLite completed the run but showed worker instability and worse tail latency. In the first Gunicorn comparison, 5 workers did not beat 3 workers for this 100-user workload; test 7 workers only if you need more data, otherwise keep 3 as the current baseline.
 
 ## Infra knobs to test
 

@@ -130,17 +130,17 @@ ENABLE_WRITES=true docker compose -f load_testing/docker-compose.postgres.yml ru
 
 ### Aggregate results
 
-| Metric | SQLite 50u / 50 CA / 5m | PostgreSQL 50u / 50 CA / 5m | SQLite 100u / 100 CA / 10m | PostgreSQL 100u / 100 CA / 10m |
-|---|---:|---:|---:|---:|
-| Requests | `6286` | `6329` | `23782` | `24174` |
-| Failures | `0` | `0` | `2` | `0` |
-| Failure rate | `0.00%` | `0.00%` | `0.01%` | `0.00%` |
-| Requests/s | `21.03` | `21.17` | `39.65` | `40.36` |
-| Median response time | `39 ms` | `22 ms` | `66 ms` | `39 ms` |
-| Average response time | `65 ms` | `40 ms` | `113 ms` | `61 ms` |
-| p95 response time | `260 ms` | `120 ms` | `420 ms` | `170 ms` |
-| p99 response time | `500 ms` | `390 ms` | `1300 ms` | `630 ms` |
-| Max response time | `698 ms` | `2269 ms` | `3525 ms` | `1060 ms` |
+| Metric | SQLite 50u / 50 CA / 5m | PostgreSQL 50u / 50 CA / 5m | SQLite 100u / 100 CA / 10m | PostgreSQL 100u / 100 CA / 10m, 3 workers | PostgreSQL 100u / 100 CA / 10m, 5 workers |
+|---|---:|---:|---:|---:|---:|
+| Requests | `6286` | `6329` | `23782` | `24174` | `24234` |
+| Failures | `0` | `0` | `2` | `0` | `0` |
+| Failure rate | `0.00%` | `0.00%` | `0.01%` | `0.00%` | `0.00%` |
+| Requests/s | `21.03` | `21.17` | `39.65` | `40.36` | `40.47` |
+| Median response time | `39 ms` | `22 ms` | `66 ms` | `39 ms` | `43 ms` |
+| Average response time | `65 ms` | `40 ms` | `113 ms` | `61 ms` | `71 ms` |
+| p95 response time | `260 ms` | `120 ms` | `420 ms` | `170 ms` | `200 ms` |
+| p99 response time | `500 ms` | `390 ms` | `1300 ms` | `630 ms` | `700 ms` |
+| Max response time | `698 ms` | `2269 ms` | `3525 ms` | `1060 ms` | `2359 ms` |
 
 ### Requirement-assessment update results
 
@@ -150,15 +150,15 @@ Endpoint:
 PATCH /api/requirement-assessments/:id/
 ```
 
-| Metric | SQLite 50u / 50 CA / 5m | PostgreSQL 50u / 50 CA / 5m | SQLite 100u / 100 CA / 10m | PostgreSQL 100u / 100 CA / 10m |
-|---|---:|---:|---:|---:|
-| Requests | `1375` | `1367` | `5443` | `5594` |
-| Failures | `0` | `0` | `2` | `0` |
-| Median response time | `61 ms` | `44 ms` | `94 ms` | `70 ms` |
-| Average response time | `67 ms` | `50 ms` | `118 ms` | `84 ms` |
-| p95 response time | `100 ms` | `76 ms` | `190 ms` | `130 ms` |
-| p99 response time | `190 ms` | `94 ms` | `610 ms` | `200 ms` |
-| Max response time | `428 ms` | `735 ms` | `2565 ms` | `982 ms` |
+| Metric | SQLite 50u / 50 CA / 5m | PostgreSQL 50u / 50 CA / 5m | SQLite 100u / 100 CA / 10m | PostgreSQL 100u / 100 CA / 10m, 3 workers | PostgreSQL 100u / 100 CA / 10m, 5 workers |
+|---|---:|---:|---:|---:|---:|
+| Requests | `1375` | `1367` | `5443` | `5594` | `5591` |
+| Failures | `0` | `0` | `2` | `0` | `0` |
+| Median response time | `61 ms` | `44 ms` | `94 ms` | `70 ms` | `71 ms` |
+| Average response time | `67 ms` | `50 ms` | `118 ms` | `84 ms` | `86 ms` |
+| p95 response time | `100 ms` | `76 ms` | `190 ms` | `130 ms` | `140 ms` |
+| p99 response time | `190 ms` | `94 ms` | `610 ms` | `200 ms` | `210 ms` |
+| Max response time | `428 ms` | `735 ms` | `2565 ms` | `982 ms` | `984 ms` |
 
 ### Smoke test result
 
@@ -191,7 +191,7 @@ Checked for:
 
 SQLite had no `database is locked` errors during the 5-minute run.
 
-The PostgreSQL 100-user / 100-compliance-assessment / 10-minute run also had no relevant backend or PostgreSQL errors.
+The PostgreSQL 100-user / 100-compliance-assessment / 10-minute runs with 3 and 5 Gunicorn workers also had no relevant backend or PostgreSQL errors.
 
 The SQLite 100-user / 100-compliance-assessment / 10-minute run did not show `database is locked`, but it did produce 2 `502 Bad Gateway` failures on `PATCH /api/requirement-assessments/:id/`. Backend logs showed two Gunicorn workers receiving `SIGBUS` and being restarted around the failure window.
 
@@ -209,6 +209,8 @@ PostgreSQL was clearly better for normal latency in the 50-user comparison:
 SQLite performed surprisingly well for this short test, but this does not prove it is the right production choice for 50 concurrent users. SQLite's concurrency risks usually appear under longer sustained write pressure, heavier background jobs, imports, uploads, or lock-heavy transactions.
 
 PostgreSQL is still the safer recommendation for a 50-concurrent-user production target. The 100-user comparison strengthens that recommendation: PostgreSQL had no failures and lower tail latency, while SQLite showed worker instability and a small number of failed write requests.
+
+In the first Gunicorn worker-count comparison, `GUNICORN_WORKERS=5` did not improve the 100-user PostgreSQL result over `GUNICORN_WORKERS=3`; aggregate p95/p99 and PATCH p95/p99 were slightly worse. Treat 3 workers as the current baseline unless longer tests show a different trend.
 
 ## Caveats
 
