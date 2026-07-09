@@ -147,6 +147,7 @@
 	<NumberField
 		{form}
 		field="annual_expense"
+		step="any"
 		label={m.annualExpense()}
 		cacheLock={cacheLocks['annual_expense']}
 		bind:cachedValue={formDataCache['annual_expense']}
