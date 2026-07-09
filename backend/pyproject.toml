@@ -64,6 +64,7 @@ dev = [
     "mypy>=1.9.0,<2",
     "coverage==7.5.4",
     "pre-commit==3.7.1",
+    "django-querycount>=0.8.3",
 ]
 
 [tool.uv]
