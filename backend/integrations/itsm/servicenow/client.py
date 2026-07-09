@@ -11,8 +11,8 @@ logger = get_logger(__name__)
 
 
 class ServiceNowClient(BaseIntegrationClient):
-    def __init__(self, configuration):
-        super().__init__(configuration)
+    def __init__(self, configuration, model_key="applied_control"):
+        super().__init__(configuration, model_key)
         self.base_url = self.credentials.get("instance_url", "").rstrip("/")
         try:
             check_integration_url(self.base_url, "ServiceNow instance_url")
@@ -22,9 +22,10 @@ class ServiceNowClient(BaseIntegrationClient):
         username = self.credentials.get("username", "")
         password = self.credentials.get("password", "")
         self.auth = (username, password)
-        # Default to 'incident' if not specified, but for AppliedControl likely 'sn_compliance_control' or custom
-        self.table = self.settings.get("table_name", "incident")
-        self.mapper = ServiceNowFieldMapper(configuration)
+        # Per-model target table (e.g. 'incident' for controls, a CMDB table for
+        # assets). Defaults to 'incident' when unset.
+        self.table = self.model_settings.get("table_name", "incident")
+        self.mapper = ServiceNowFieldMapper(configuration, model_key)
 
     def _get_headers(self):
         return {
@@ -136,12 +137,14 @@ class ServiceNowClient(BaseIntegrationClient):
 
         # Build Encoded Query
         # Example: active=true^sys_updated_on>=2024-01-01
-        sysparm_query = self.settings.get("base_query", "active=true")
+        sysparm_query = self.model_settings.get("base_query", "active=true")
 
         url = f"{self.base_url}/api/now/table/{self.table}"
         params = {
             "sysparm_query": sysparm_query,
-            "sysparm_fields": "sys_id,number,short_description,sys_updated_on",
+            # Superset of common display fields so labels work across tables
+            # (incident uses number/short_description, CMDB/asset tables use name).
+            "sysparm_fields": "sys_id,number,name,short_description,sys_updated_on",
             "sysparm_limit": query_params.get("max_results", 100),
         }
 
@@ -170,7 +173,7 @@ class ServiceNowClient(BaseIntegrationClient):
                         {
                             "key": sys_id,
                             "id": sys_id,
-                            "summary": f"{record.get('number')} - {record.get('short_description')}",
+                            "summary": self._display_label(record, sys_id),
                         }
                     )
             return results
@@ -178,6 +181,19 @@ class ServiceNowClient(BaseIntegrationClient):
         except requests.exceptions.RequestException:
             logger.error("Failed to search ServiceNow", exc_info=True)
             raise
+
+    @staticmethod
+    def _display_label(record: dict[str, Any], sys_id: str) -> str:
+        """Human-readable label for a remote row, working across table types.
+
+        Prefers incident-style ``number - short_description``, falls back to a
+        generic ``name`` (CMDB/asset tables), then the sys_id.
+        """
+        number = record.get("number")
+        short_description = record.get("short_description")
+        if number or short_description:
+            return f"{number or ''} - {short_description or ''}".strip(" -")
+        return record.get("name") or sys_id
 
     def get_available_tables(self) -> list[dict]:
         """
