@@ -622,7 +622,7 @@ if DEBUG:
 
     if DB_LOG:
         LOGGING["loggers"]["django.db.backends"] = {
-            "handlers": ["console"],
+            "handlers": ["stdout", "stderr"],
             "level": "DEBUG",
             "propagate": False,
         }
