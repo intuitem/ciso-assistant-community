@@ -198,6 +198,7 @@ class PublicDocumentReadSerializer(BaseModelSerializer):
             "description",
             "folder",
             "token",
+            "filename",
             "mime_type",
             "size",
             "created_at",
@@ -217,6 +218,11 @@ class PublicDocumentWriteSerializer(BaseModelSerializer):
         if f is not None:
             validated_data["size"] = getattr(f, "size", 0) or 0
             validated_data["mime_type"] = getattr(f, "content_type", "") or ""
+            # Basename only: the client-supplied name may carry a path on some browsers.
+            original = (
+                (getattr(f, "name", "") or "").replace("\\", "/").rsplit("/", 1)[-1]
+            )
+            validated_data["filename"] = original
 
     def create(self, validated_data):
         self._apply_file_meta(validated_data)

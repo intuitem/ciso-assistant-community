@@ -1463,11 +1463,11 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'processings',
 		verboseName: 'processing',
 		verboseNamePlural: 'processings',
-		selectFields: [{ field: 'status' }, { field: 'nature' }],
+		selectFields: [{ field: 'status' }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'purposes', urlModel: 'purposes' },
-			{ field: 'nature', urlModel: 'natures' },
+			{ field: 'nature', urlModel: 'terminologies' },
 			{ field: 'assigned_to', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'perimeters', urlModel: 'perimeters' },
@@ -1530,14 +1530,6 @@ export const URL_MODEL_MAP: ModelMap = {
 				}
 			}
 		]
-	},
-	'processing-natures': {
-		endpointUrl: 'privacy/processing-natures',
-		name: 'processingnature',
-		localName: 'processingNature',
-		localNamePlural: 'processingNatures',
-		verboseName: 'processing nature',
-		verboseNamePlural: 'processing natures'
 	},
 	'right-requests': {
 		endpointUrl: 'privacy/right-requests',
@@ -1645,6 +1637,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		customNameDescription: true,
 		foreignKeyFields: [
 			{ field: 'processing', urlModel: 'processings', endpointUrl: 'processings' },
+			{ field: 'category', urlModel: 'terminologies' },
 			{ field: 'assets', urlModel: 'assets', endpointUrl: 'assets' }
 		],
 		reverseForeignKeyFields: [
@@ -1663,7 +1656,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'created_at' },
 			{ field: 'updated_at' }
 		],
-		selectFields: [{ field: 'category' }, { field: 'deletion_policy' }],
+		selectFields: [{ field: 'deletion_policy' }],
 		filters: [{ field: 'processing' }, { field: 'category' }, { field: 'assets' }]
 	},
 	'data-subjects': {
