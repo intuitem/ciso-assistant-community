@@ -64,9 +64,11 @@ class GlobalSettings(AbstractBaseModel, FolderMixin):
 
 
 # value holds all settings/flags; masked to scrub secrets while keeping the diff.
+# ssosettings is the reverse MTI relation to the unmanaged SSOSettings child;
+# tracking it makes auditlog query its non-existent table on create/delete.
 auditlog.register(
     GlobalSettings,
-    exclude_fields=["created_at", "updated_at", "is_published"],
+    exclude_fields=["created_at", "updated_at", "is_published", "ssosettings"],
     mask_fields=["value"],
     mask_callable="global_settings.utils.mask_sensitive_settings",
 )
