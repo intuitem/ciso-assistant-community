@@ -26,8 +26,8 @@
 		tags={['assets', 'entities', 'ebios-rm', 'bulk']}
 	/>
 	<Article
-		title="Library Builder"
-		desc="Author, adopt or clone custom libraries and publish them through the standard loader"
+		title={m.lbListLibraryBuilder()}
+		desc={m.lbListCardDesc()}
 		link="/experimental/library-builder"
 		tags={['libraries', 'builder', 'packager']}
 	/>

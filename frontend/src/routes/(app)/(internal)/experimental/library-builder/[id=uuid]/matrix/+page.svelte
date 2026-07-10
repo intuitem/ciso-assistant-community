@@ -2,6 +2,8 @@
 	import LevelEditor from '$lib/components/RiskMatrixEditor/LevelEditor.svelte';
 	import GridEditor from '$lib/components/RiskMatrixEditor/GridEditor.svelte';
 	import { pageTitle } from '$lib/utils/stores';
+	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface Level {
 		id: number;
@@ -16,7 +18,7 @@
 	const draft = data.draft;
 	const matrix = data.matrix;
 
-	$pageTitle = `Library Builder — ${matrix.name || matrix.ref_id}`;
+	$pageTitle = m.lbMatrixPageTitle({ name: matrix.name || matrix.ref_id });
 
 	const baseLang = draft.locale ?? 'en';
 
@@ -161,9 +163,9 @@
 			const result = await res.json();
 			if (!res.ok) throw new Error(result.error || JSON.stringify(result));
 			unsaved = false;
-			setStatus('Matrix saved to the draft', 'success');
+			setStatus(m.lbMatrixSavedToDraft(), 'success');
 		} catch (e: any) {
-			setStatus(e.message, 'error');
+			setStatus(safeTranslate(e.message), 'error');
 		} finally {
 			saving = false;
 		}
@@ -183,7 +185,7 @@
 					</a>
 					<h2 class="text-xl font-semibold">{name || matrix.ref_id}</h2>
 					{#if unsaved}
-						<span class="badge variant-filled-warning text-xs">Unsaved changes</span>
+						<span class="badge variant-filled-warning text-xs">{m.lbMatrixUnsavedChanges()}</span>
 					{/if}
 				</div>
 				<p class="text-xs font-mono text-surface-500 mt-1">{matrix.urn}</p>
@@ -207,17 +209,17 @@
 					{#if saving}<i class="fa-solid fa-spinner fa-spin mr-1"></i>{:else}<i
 							class="fa-solid fa-floppy-disk mr-1"
 						></i>{/if}
-					Save to draft
+					{m.lbMatrixSaveToDraft()}
 				</button>
 			</div>
 		</div>
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
 			<label class="label text-sm">
-				<span>Name</span>
+				<span>{m.name()}</span>
 				<input class="input" type="text" bind:value={name} oninput={() => (unsaved = true)} />
 			</label>
 			<label class="label text-sm">
-				<span>Description</span>
+				<span>{m.description()}</span>
 				<input
 					class="input"
 					type="text"
@@ -232,7 +234,7 @@
 		<div class="card p-4">
 			<LevelEditor
 				bind:levels={probabilityLevels}
-				title="Probability"
+				title={m.lbMatrixProbability()}
 				onchange={onProbabilityChange}
 				activeLang={baseLang}
 				{baseLang}
@@ -241,7 +243,7 @@
 		<div class="card p-4">
 			<LevelEditor
 				bind:levels={impactLevels}
-				title="Impact"
+				title={m.lbMatrixImpact()}
 				onchange={onImpactChange}
 				activeLang={baseLang}
 				{baseLang}
@@ -250,7 +252,7 @@
 		<div class="card p-4">
 			<LevelEditor
 				bind:levels={riskLevels}
-				title="Risk"
+				title={m.lbMatrixRisk()}
 				onchange={onRiskChange}
 				activeLang={baseLang}
 				{baseLang}
@@ -260,7 +262,7 @@
 
 	<div class="card p-4">
 		<h3 class="text-lg font-semibold mb-3">
-			<i class="fa-solid fa-table-cells mr-1"></i>Grid
+			<i class="fa-solid fa-table-cells mr-1"></i>{m.grid()}
 		</h3>
 		<GridEditor bind:grid {probabilityLevels} {impactLevels} {riskLevels} onchange={onGridChange} />
 	</div>

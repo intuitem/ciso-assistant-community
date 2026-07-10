@@ -285,7 +285,7 @@
 							>
 								<option value="">{m.category()}: —</option>
 								{#each CATEGORIES as category}
-									<option value={category}>{category}</option>
+									<option value={category}>{safeTranslate(category)}</option>
 								{/each}
 							</select>
 							<select
@@ -294,7 +294,7 @@
 							>
 								<option value="">{m.csfFunction()}: —</option>
 								{#each CSF_FUNCTIONS as csfFunction}
-									<option value={csfFunction}>{csfFunction}</option>
+									<option value={csfFunction}>{safeTranslate(csfFunction)}</option>
 								{/each}
 							</select>
 						</div>

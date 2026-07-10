@@ -2,13 +2,15 @@
 	import { onMount } from 'svelte';
 	import { pageTitle } from '$lib/utils/stores';
 	import { defaultMatrixObject } from '../builder-helpers';
+	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	let { data } = $props();
 	let draft: any = $state(data.draft);
 	let storedLibraries: any[] = $state(data.storedLibraries ?? []);
 	let otherDrafts: any[] = $state(data.otherDrafts ?? []);
 
-	$pageTitle = 'Library Builder';
+	$pageTitle = m.lbDraftPageTitle();
 
 	const OBJECT_TYPES = [
 		'frameworks',
@@ -144,7 +146,7 @@
 				delete payload.packager;
 				delete payload.ref_id;
 			}
-			if (await patch(payload)) setStatus('Metadata saved', 'success');
+			if (await patch(payload)) setStatus(m.lbDraftMetadataSaved(), 'success');
 		} finally {
 			savingMeta = false;
 		}
@@ -185,9 +187,9 @@
 			importReport = result.report;
 			draft = result.draft;
 			resetForms();
-			setStatus('Objects imported', 'success');
+			setStatus(m.lbDraftObjectsImported(), 'success');
 		} catch (e: any) {
-			setStatus(e.message, 'error');
+			setStatus(safeTranslate(e.message), 'error');
 		} finally {
 			importing = false;
 		}
@@ -253,9 +255,10 @@
 					);
 					if (
 						!confirm(
-							`Publishing removes ${deleted.length} journey step(s) from the preset` +
-								(withState ? `, ${withState} with user progress that will be lost` : '') +
-								'. Continue?'
+							m.lbDraftPublishRemovesSteps({ count: deleted.length }) +
+								(withState ? m.lbDraftStepsWithUserProgress({ count: withState }) : '') +
+								'. ' +
+								m.lbDraftContinueQuestion()
 						)
 					) {
 						return;
@@ -269,7 +272,7 @@
 			});
 			const result = await res.json();
 			if (res.ok) {
-				setStatus(`Published ${result.urn} v${result.version}`, 'success');
+				setStatus(m.lbDraftPublished({ urn: result.urn, version: result.version }), 'success');
 				validation = null;
 				await reload();
 				return;
@@ -277,8 +280,11 @@
 			if (result.error === 'libraryVersionOutdated') {
 				if (
 					confirm(
-						`Version ${draft.version} is not newer than the published v${result.max_version}. ` +
-							`Bump to v${result.max_version + 1} and publish?`
+						m.lbDraftVersionOutdatedConfirm({
+							version: draft.version,
+							maxVersion: result.max_version,
+							nextVersion: result.max_version + 1
+						})
 					)
 				) {
 					await publish({ ...extra, bump_version: true, _presetChecked: true });
@@ -291,12 +297,12 @@
 			}
 			if (result.error === 'draftValidationFailed') {
 				validation = { errors: result.details ?? [], warnings: [] };
-				setStatus('Validation failed — see the validation panel', 'error');
+				setStatus(m.lbDraftValidationFailedSeePanel(), 'error');
 				return;
 			}
-			setStatus(result.detail || result.error || JSON.stringify(result), 'error');
+			setStatus(result.detail || safeTranslate(result.error) || JSON.stringify(result), 'error');
 		} catch (e: any) {
-			setStatus(e.message, 'error');
+			setStatus(safeTranslate(e.message), 'error');
 		} finally {
 			publishing = false;
 		}
@@ -405,16 +411,19 @@
 			draft = result.draft;
 			resetForms();
 			leafForm = null;
-			setStatus('Saved', 'success');
+			setStatus(m.saved(), 'success');
 		} catch (e: any) {
-			setStatus(e.message, 'error');
+			setStatus(safeTranslate(e.message), 'error');
 		} finally {
 			savingLeaf = false;
 		}
 	}
 
 	async function deleteObject(item: any, force = false) {
-		if (!force && !confirm(`Delete "${item.name || item.ref_id || item.urn}" from the draft?`)) {
+		if (
+			!force &&
+			!confirm(m.lbDraftDeleteObjectConfirm({ name: item.name || item.ref_id || item.urn }))
+		) {
 			return;
 		}
 		const res = await fetch(base(), {
@@ -426,7 +435,10 @@
 		if (res.status === 409 && result.error === 'objectIsReferenced') {
 			if (
 				confirm(
-					`"${item.name || item.ref_id}" is linked from ${result.references.length} requirement node(s). Remove the links and delete it?`
+					m.lbDraftObjectReferencedConfirm({
+						name: item.name || item.ref_id,
+						count: result.references.length
+					})
 				)
 			) {
 				await deleteObject(item, true);
@@ -434,17 +446,17 @@
 			return;
 		}
 		if (!res.ok) {
-			setStatus(result.error || JSON.stringify(result), 'error');
+			setStatus(safeTranslate(result.error) || JSON.stringify(result), 'error');
 			return;
 		}
 		draft = result.draft;
 		resetForms();
-		setStatus('Deleted', 'success');
+		setStatus(m.deleted(), 'success');
 	}
 
 	// The journey preset is a singular top-level key, removed by name.
 	async function deletePreset() {
-		if (!confirm('Remove the journey preset from this library?')) return;
+		if (!confirm(m.lbDraftRemovePresetConfirm())) return;
 		const res = await fetch(base(), {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
@@ -452,12 +464,12 @@
 		});
 		const result = await res.json();
 		if (!res.ok) {
-			setStatus(result.error || JSON.stringify(result), 'error');
+			setStatus(safeTranslate(result.error) || JSON.stringify(result), 'error');
 			return;
 		}
 		draft = result.draft;
 		resetForms();
-		setStatus('Deleted', 'success');
+		setStatus(m.deleted(), 'success');
 	}
 
 	// --- Risk matrices ------------------------------------------------------------
@@ -489,7 +501,7 @@
 				result.object.urn
 			)}`;
 		} catch (e: any) {
-			setStatus(e.message, 'error');
+			setStatus(safeTranslate(e.message), 'error');
 			addingMatrix = false;
 		}
 	}
@@ -514,7 +526,7 @@
 				result.framework_urn
 			)}`;
 		} catch (e: any) {
-			setStatus(e.message, 'error');
+			setStatus(safeTranslate(e.message), 'error');
 			addingFramework = false;
 		}
 	}
@@ -532,17 +544,17 @@
 					<h2 class="text-xl font-semibold">{draft.name}</h2>
 					{#if draft.identity_locked}
 						<span class="badge variant-filled-success text-xs">
-							<i class="fa-solid fa-lock mr-0.5"></i>Identity frozen
+							<i class="fa-solid fa-lock mr-0.5"></i>{m.lbDraftIdentityFrozen()}
 						</span>
 					{:else}
-						<span class="badge variant-ghost-surface text-xs">Draft</span>
+						<span class="badge variant-ghost-surface text-xs">{m.draft()}</span>
 					{/if}
 					<span class="badge variant-ghost-surface text-xs">v{draft.version}</span>
 				</div>
 				<p class="text-xs font-mono text-surface-500 mt-1">{draft.urn}</p>
 				{#if draft.last_published_at}
 					<p class="text-xs text-surface-500">
-						Last published {new Date(draft.last_published_at).toLocaleString()}
+						{m.lbDraftLastPublished({ date: new Date(draft.last_published_at).toLocaleString() })}
 					</p>
 				{/if}
 			</div>
@@ -561,12 +573,10 @@
 						type="button"
 						class="btn btn-sm variant-ghost-surface"
 						onclick={() => setView(view === 'simple' ? 'full' : 'simple')}
-						title={view === 'simple'
-							? 'Show the whole library: metadata, imports, all content types'
-							: 'Back to the focused single-object view'}
+						title={view === 'simple' ? m.lbDraftFullViewTitle() : m.lbDraftSimpleViewTitle()}
 					>
 						<i class="fa-solid {view === 'simple' ? 'fa-layer-group' : 'fa-minimize'} mr-1"></i>
-						{view === 'simple' ? 'Full view' : 'Simple view'}
+						{view === 'simple' ? m.lbDraftFullView() : m.lbDraftSimpleView()}
 					</button>
 				{/if}
 				<button
@@ -575,10 +585,10 @@
 					onclick={validateDraft}
 					disabled={validating}
 				>
-					<i class="fa-solid fa-list-check mr-1"></i>Validate
+					<i class="fa-solid fa-list-check mr-1"></i>{m.validate()}
 				</button>
 				<a href="{base()}/export" class="btn btn-sm variant-ghost-surface">
-					<i class="fa-solid fa-file-arrow-down mr-1"></i>Export YAML
+					<i class="fa-solid fa-file-arrow-down mr-1"></i>{m.exportYaml()}
 				</a>
 				<button
 					type="button"
@@ -591,7 +601,7 @@
 					{:else}
 						<i class="fa-solid fa-cloud-arrow-up mr-1"></i>
 					{/if}
-					Publish
+					{m.publish()}
 				</button>
 			</div>
 		</div>
@@ -612,7 +622,7 @@
 						{/if}
 					{/each}
 				{:else}
-					<span>Empty library — add or import objects below.</span>
+					<span>{m.lbDraftEmptyLibrary()}</span>
 				{/if}
 			</div>
 		{/if}
@@ -623,8 +633,7 @@
 		<div class="card p-4 bg-amber-50 border border-amber-300">
 			<p class="text-sm text-amber-800">
 				<i class="fa-solid fa-triangle-exclamation mr-1"></i>
-				This identity collides with {conflicts.length} existing object(s). Publishing will conflict —
-				rename the draft (packager / reference ID) while it is still cheap.
+				{m.lbDraftIdentityCollides({ count: conflicts.length })}
 			</p>
 			<ul class="text-xs font-mono text-amber-700 mt-2 space-y-0.5">
 				{#each conflicts.slice(0, 5) as conflict}
@@ -640,8 +649,10 @@
 		<div class="card p-4 bg-amber-50 border border-amber-300 space-y-2">
 			<p class="text-sm text-amber-800">
 				<i class="fa-solid fa-triangle-exclamation mr-1"></i>
-				Score boundaries changed for {scoreConflict.framework_urn} and
-				{scoreConflict.affected_assessments?.length ?? 0} assessment(s) are affected. Choose a strategy:
+				{m.lbDraftScoreChanged({
+					urn: scoreConflict.framework_urn,
+					count: scoreConflict.affected_assessments?.length ?? 0
+				})}
 			</p>
 			<div class="flex gap-2">
 				{#each scoreConflict.strategies ?? [] as strategy}
@@ -661,11 +672,11 @@
 	{#if validation}
 		<div class="card p-4">
 			<h3 class="text-lg font-semibold mb-2">
-				<i class="fa-solid fa-list-check mr-1"></i>Validation
+				<i class="fa-solid fa-list-check mr-1"></i>{m.lbDraftValidation()}
 			</h3>
 			{#if validation.errors.length === 0 && validation.warnings.length === 0}
 				<p class="text-sm text-green-700">
-					<i class="fa-solid fa-circle-check mr-1"></i>The draft is publishable.
+					<i class="fa-solid fa-circle-check mr-1"></i>{m.lbDraftIsPublishable()}
 				</p>
 			{/if}
 			{#each validation.errors as error}
@@ -684,19 +695,19 @@
 			<!-- Metadata -->
 			<div class="card p-4 space-y-3">
 				<h3 class="text-lg font-semibold">
-					<i class="fa-solid fa-tags mr-1"></i>Library metadata
+					<i class="fa-solid fa-tags mr-1"></i>{m.lbDraftLibraryMetadata()}
 				</h3>
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 					<label class="label text-sm md:col-span-2">
-						<span>Name</span>
+						<span>{m.name()}</span>
 						<input class="input" type="text" bind:value={meta.name} />
 					</label>
 					<label class="label text-sm md:col-span-2">
-						<span>Description</span>
+						<span>{m.description()}</span>
 						<textarea class="textarea" rows="2" bind:value={meta.description}></textarea>
 					</label>
 					<label class="label text-sm">
-						<span>Packager {draft.identity_locked ? '(frozen)' : ''}</span>
+						<span>{m.packager()} {draft.identity_locked ? m.lbDraftFrozenSuffix() : ''}</span>
 						<input
 							class="input"
 							type="text"
@@ -705,7 +716,7 @@
 						/>
 					</label>
 					<label class="label text-sm">
-						<span>Reference ID {draft.identity_locked ? '(frozen)' : ''}</span>
+						<span>{m.refId()} {draft.identity_locked ? m.lbDraftFrozenSuffix() : ''}</span>
 						<input
 							class="input"
 							type="text"
@@ -714,45 +725,44 @@
 						/>
 					</label>
 					<label class="label text-sm">
-						<span>Version</span>
+						<span>{m.version()}</span>
 						<input class="input" type="number" min="1" bind:value={meta.version} />
 					</label>
 					<label class="label text-sm">
-						<span>Locale</span>
+						<span>{m.locale()}</span>
 						<input class="input" type="text" bind:value={meta.locale} />
 					</label>
 					<label class="label text-sm">
-						<span>Provider</span>
+						<span>{m.provider()}</span>
 						<input class="input" type="text" bind:value={meta.provider} />
 					</label>
 					<label class="label text-sm">
-						<span>Publication date</span>
+						<span>{m.publicationDate()}</span>
 						<input class="input" type="date" bind:value={meta.publication_date} />
 					</label>
 					<label class="label text-sm md:col-span-2">
-						<span>Copyright</span>
+						<span>{m.copyright()}</span>
 						<input class="input" type="text" bind:value={meta.copyright} />
 					</label>
 					<label class="label text-sm md:col-span-2">
-						<span>Dependencies (one library URN per line)</span>
+						<span>{m.lbDraftDependenciesLabel()}</span>
 						<textarea class="textarea font-mono text-xs" rows="3" bind:value={dependenciesText}
 						></textarea>
 					</label>
 					<label class="label text-sm md:col-span-2">
-						<span>Labels (comma-separated)</span>
+						<span>{m.lbDraftLabelsLabel()}</span>
 						<input class="input" type="text" bind:value={labelsText} />
 					</label>
 				</div>
 				{#if !draft.identity_locked}
 					<p class="text-xs text-surface-500">
-						Renaming packager / reference ID regenerates every URN of the document. Once published,
-						the identity is frozen.
+						{m.lbDraftIdentityHelp()}
 					</p>
 				{/if}
 				<div class="flex items-center justify-end gap-2 pt-1">
 					{#if metaDirty}
 						<span class="text-xs text-amber-600">
-							<i class="fa-solid fa-pen-nib mr-1"></i>Unsaved changes
+							<i class="fa-solid fa-pen-nib mr-1"></i>{m.unsavedChanges()}
 						</span>
 					{/if}
 					<button
@@ -764,7 +774,7 @@
 						{#if savingMeta}<i class="fa-solid fa-spinner fa-spin mr-1"></i>{:else}<i
 								class="fa-solid fa-floppy-disk mr-1"
 							></i>{/if}
-						Save metadata
+						{m.lbDraftSaveMetadata()}
 					</button>
 				</div>
 			</div>
@@ -772,25 +782,26 @@
 			<!-- Import objects -->
 			<div class="card p-4 space-y-3">
 				<h3 class="text-lg font-semibold">
-					<i class="fa-solid fa-file-import mr-1"></i>Import objects (clone)
+					<i class="fa-solid fa-file-import mr-1"></i>{m.lbDraftImportObjects()}
 				</h3>
 				<p class="text-xs text-surface-500">
-					Copy objects by value from an existing library, rebased onto this draft's URN family.
-					References leaving the selection follow the chosen policy.
+					{m.lbDraftImportObjectsHelp()}
 				</p>
 				<select class="select text-sm" bind:value={importSource}>
-					<option value="">Source library…</option>
+					<option value="">{m.lbDraftSourceLibrary()}</option>
 					{#if storedLibraries.length > 0}
-						<optgroup label="Stored libraries">
+						<optgroup label={m.lbDraftStoredLibraries()}>
 							{#each storedLibraries as library}
 								<option value={library.id}>
-									{library.name} (v{library.version}){library.builtin ? ' — builtin' : ''}
+									{library.name} (v{library.version}){library.builtin
+										? m.lbDraftBuiltinSuffix()
+										: ''}
 								</option>
 							{/each}
 						</optgroup>
 					{/if}
 					{#if otherDrafts.length > 0}
-						<optgroup label="Your drafts">
+						<optgroup label={m.lbDraftYourDrafts()}>
 							{#each otherDrafts as other}
 								<option value={'draft:' + other.id}>{other.name}</option>
 							{/each}
@@ -807,32 +818,30 @@
 								checked={importTypes.includes(type)}
 								onchange={() => toggleType(type)}
 								disabled={atLimit}
-								title={atLimit
-									? 'The library already holds one — a library has at most one of this kind.'
-									: undefined}
+								title={atLimit ? m.lbDraftSingleKindTitle() : undefined}
 							/>
 							{type.replaceAll('_', ' ')}
 						</label>
 					{/each}
 				</div>
-				<p class="text-xs text-surface-500">Nothing checked = import everything.</p>
+				<p class="text-xs text-surface-500">{m.lbDraftNothingChecked()}</p>
 				<div class="flex flex-wrap items-center gap-4 text-sm">
-					<span class="font-medium">Out-of-selection references:</span>
+					<span class="font-medium">{m.lbDraftOutOfSelectionRefs()}</span>
 					<label class="flex items-center gap-1">
 						<input type="radio" class="radio" bind:group={importPolicy} value="strip" />
-						strip
+						{m.lbDraftPolicyStrip()}
 					</label>
 					<label class="flex items-center gap-1">
 						<input type="radio" class="radio" bind:group={importPolicy} value="pull" />
-						pull in
+						{m.lbDraftPolicyPull()}
 					</label>
 					<label class="flex items-center gap-1">
 						<input type="radio" class="radio" bind:group={importPolicy} value="reference" />
-						keep as reference
+						{m.lbDraftPolicyReference()}
 					</label>
 					<label class="flex items-center gap-1 ml-auto">
 						<input type="checkbox" class="checkbox" bind:checked={importOverwrite} />
-						overwrite existing
+						{m.lbDraftOverwriteExisting()}
 					</label>
 				</div>
 				<button
@@ -844,25 +853,25 @@
 					{#if importing}<i class="fa-solid fa-spinner fa-spin mr-1"></i>{:else}<i
 							class="fa-solid fa-file-import mr-1"
 						></i>{/if}
-					Import
+					{m.lbDraftImport()}
 				</button>
 				{#if importReport}
 					<div class="text-xs text-surface-600-400 space-y-1 border-t border-surface-200-800 pt-2">
 						{#if importReport.pulled?.length}
-							<p>Pulled in: {importReport.pulled.length} object(s)</p>
+							<p>{m.lbDraftReportPulled({ count: importReport.pulled.length })}</p>
 						{/if}
 						{#if importReport.stripped?.length}
-							<p>Stripped links: {importReport.stripped.length}</p>
+							<p>{m.lbDraftReportStripped({ count: importReport.stripped.length })}</p>
 						{/if}
 						{#if importReport.referenced?.length}
-							<p>Kept as reference: {importReport.referenced.length}</p>
+							<p>{m.lbDraftReportReferenced({ count: importReport.referenced.length })}</p>
 						{/if}
 						{#if importReport.external?.length}
-							<p>External references: {importReport.external.length}</p>
+							<p>{m.lbDraftReportExternal({ count: importReport.external.length })}</p>
 						{/if}
 						{#if importReport.unresolved?.length}
 							<p class="text-amber-600">
-								Unresolved external references: {importReport.unresolved.join(', ')}
+								{m.lbDraftReportUnresolved({ list: importReport.unresolved.join(', ') })}
 							</p>
 						{/if}
 					</div>
@@ -876,7 +885,7 @@
 		<div class="card p-4 space-y-3">
 			<div class="flex items-center justify-between">
 				<h3 class="text-lg font-semibold">
-					<i class="fa-solid fa-sitemap mr-1"></i>Framework
+					<i class="fa-solid fa-sitemap mr-1"></i>{m.framework()}
 				</h3>
 				{#if frameworks.length === 0}
 					<button
@@ -888,7 +897,7 @@
 						{#if addingFramework}<i class="fa-solid fa-spinner fa-spin mr-1"></i>{:else}<i
 								class="fa-solid fa-plus mr-1"
 							></i>{/if}
-						Add framework
+						{m.addFramework()}
 					</button>
 				{/if}
 			</div>
@@ -900,19 +909,19 @@
 								<p class="font-medium truncate">{framework.name || framework.ref_id}</p>
 								<p class="text-xs font-mono text-surface-500 truncate">{framework.urn}</p>
 								<p class="text-xs text-surface-500">
-									{(framework.requirement_nodes ?? []).length} requirement node(s)
+									{m.lbDraftNodeCount({ count: (framework.requirement_nodes ?? []).length })}
 								</p>
 							</div>
 							<div class="flex items-center gap-1">
 								<a href={frameworkEditorHref(framework)} class="btn btn-sm variant-filled-primary">
 									<i class="fa-solid fa-pen-to-square mr-1"></i>
-									Edit visually
+									{m.lbDraftEditVisually()}
 								</a>
 								<button
 									type="button"
 									class="btn btn-sm variant-ghost-error"
 									onclick={() => deleteObject(framework)}
-									aria-label="Delete framework"
+									aria-label={m.lbDraftDeleteFramework()}
 								>
 									<i class="fa-solid fa-trash"></i>
 								</button>
@@ -922,8 +931,7 @@
 				</ul>
 			{:else}
 				<p class="text-sm text-surface-500">
-					No framework in this library yet. Add one to author it in the visual editor, or import one
-					from an existing library above.
+					{m.lbDraftNoFramework()}
 				</p>
 			{/if}
 		</div>
@@ -934,7 +942,7 @@
 		<div class="card p-4 space-y-3">
 			<div class="flex items-center justify-between">
 				<h3 class="text-lg font-semibold">
-					<i class="fa-solid fa-table-cells mr-1"></i>Risk matrix
+					<i class="fa-solid fa-table-cells mr-1"></i>{m.riskMatrix()}
 				</h3>
 				{#if riskMatrices.length === 0}
 					<button
@@ -946,7 +954,7 @@
 						{#if addingMatrix}<i class="fa-solid fa-spinner fa-spin mr-1"></i>{:else}<i
 								class="fa-solid fa-plus mr-1"
 							></i>{/if}
-						Add matrix
+						{m.lbDraftAddMatrix()}
 					</button>
 				{/if}
 			</div>
@@ -958,20 +966,23 @@
 								<p class="font-medium truncate">{matrix.name || matrix.ref_id}</p>
 								<p class="text-xs font-mono text-surface-500 truncate">{matrix.urn}</p>
 								<p class="text-xs text-surface-500">
-									{(matrix.probability ?? []).length}×{(matrix.impact ?? []).length},
-									{(matrix.risk ?? []).length} risk level(s)
+									{m.lbDraftMatrixDims({
+										probability: (matrix.probability ?? []).length,
+										impact: (matrix.impact ?? []).length,
+										risk: (matrix.risk ?? []).length
+									})}
 								</p>
 							</div>
 							<div class="flex items-center gap-1">
 								<a href={matrixEditorHref(matrix)} class="btn btn-sm variant-filled-primary">
 									<i class="fa-solid fa-pen-to-square mr-1"></i>
-									Edit visually
+									{m.lbDraftEditVisually()}
 								</a>
 								<button
 									type="button"
 									class="btn btn-sm variant-ghost-error"
 									onclick={() => deleteObject(matrix)}
-									aria-label="Delete matrix"
+									aria-label={m.lbDraftDeleteMatrix()}
 								>
 									<i class="fa-solid fa-trash"></i>
 								</button>
@@ -980,7 +991,7 @@
 					{/each}
 				</ul>
 			{:else}
-				<p class="text-sm text-surface-500">No risk matrix in this library yet.</p>
+				<p class="text-sm text-surface-500">{m.lbDraftNoMatrix()}</p>
 			{/if}
 		</div>
 	{/if}
@@ -990,7 +1001,7 @@
 		<div class="card p-4 space-y-3">
 			<div class="flex items-center justify-between">
 				<h3 class="text-lg font-semibold">
-					<i class="fa-solid fa-route mr-1"></i>Journey preset
+					<i class="fa-solid fa-route mr-1"></i>{m.lbDraftJourneyPreset()}
 				</h3>
 				<div class="flex items-center gap-1">
 					<a
@@ -1000,14 +1011,14 @@
 							: 'variant-ghost-primary'}"
 					>
 						<i class="fa-solid fa-pen-to-square mr-1"></i>
-						{draft.content?.preset ? 'Edit journey' : 'Create journey'}
+						{draft.content?.preset ? m.lbDraftEditJourney() : m.lbDraftCreateJourney()}
 					</a>
 					{#if draft.content?.preset}
 						<button
 							type="button"
 							class="btn btn-sm variant-ghost-error"
 							onclick={deletePreset}
-							aria-label="Remove journey preset"
+							aria-label={m.lbDraftRemovePreset()}
 						>
 							<i class="fa-solid fa-trash"></i>
 						</button>
@@ -1019,19 +1030,20 @@
 					{#if draft.content.preset.name}
 						<span class="font-medium">{draft.content.preset.name}</span> —
 					{/if}
-					{(draft.content.preset.journey?.steps ?? []).length} step(s),
-					{(draft.content.preset.scaffolded_objects ?? []).length} scaffolded object(s)
+					{m.lbDraftPresetSummary({
+						steps: (draft.content.preset.journey?.steps ?? []).length,
+						objects: (draft.content.preset.scaffolded_objects ?? []).length
+					})}
 				</p>
 			{:else}
 				<p class="text-sm text-surface-500">
-					No journey preset in this library yet. A preset scaffolds objects and guides users through
-					an onboarding journey when the library is loaded.
+					{m.lbDraftNoPreset()}
 				</p>
 			{/if}
 		</div>
 
 		<!-- Threats + Reference controls: inline table editors -->
-		{#each [{ field: 'threats' as const, label: 'Threats', icon: 'fa-bolt', items: threats }, { field: 'reference_controls' as const, label: 'Reference controls', icon: 'fa-shield-halved', items: referenceControls }] as kind}
+		{#each [{ field: 'threats' as const, label: m.threats(), icon: 'fa-bolt', items: threats }, { field: 'reference_controls' as const, label: m.referenceControls(), icon: 'fa-shield-halved', items: referenceControls }] as kind}
 			<div class="card p-4 space-y-3">
 				<div class="flex items-center justify-between">
 					<h3 class="text-lg font-semibold">
@@ -1043,7 +1055,7 @@
 						onclick={() => openLeafForm(kind.field)}
 					>
 						<i class="fa-solid fa-plus mr-1"></i>
-						Add
+						{kind.field === 'threats' ? m.addThreat() : m.addReferenceControl()}
 					</button>
 				</div>
 
@@ -1052,7 +1064,7 @@
 						class="border border-primary-200-800 rounded p-3 grid grid-cols-1 md:grid-cols-3 gap-3 bg-primary-50-950/30"
 					>
 						<label class="label text-sm">
-							<span>Reference ID {leafForm.urn ? '' : '(used to mint the URN)'}</span>
+							<span>{m.refId()} {leafForm.urn ? '' : m.lbDraftMintUrnSuffix()}</span>
 							<input
 								class="input"
 								type="text"
@@ -1061,17 +1073,17 @@
 							/>
 						</label>
 						<label class="label text-sm md:col-span-2">
-							<span>Name</span>
+							<span>{m.name()}</span>
 							<input class="input" type="text" bind:value={leafForm.values.name} />
 						</label>
 						<label class="label text-sm md:col-span-3">
-							<span>Description</span>
+							<span>{m.description()}</span>
 							<textarea class="textarea" rows="2" bind:value={leafForm.values.description}
 							></textarea>
 						</label>
 						{#if kind.field === 'reference_controls'}
 							<label class="label text-sm">
-								<span>Category</span>
+								<span>{m.category()}</span>
 								<select class="select" bind:value={leafForm.values.category}>
 									<option value="">—</option>
 									{#each CATEGORIES as category}
@@ -1080,7 +1092,7 @@
 								</select>
 							</label>
 							<label class="label text-sm">
-								<span>CSF function</span>
+								<span>{m.csfFunction()}</span>
 								<select class="select" bind:value={leafForm.values.csf_function}>
 									<option value="">—</option>
 									{#each CSF_FUNCTIONS as fn}
@@ -1089,7 +1101,7 @@
 								</select>
 							</label>
 							<label class="label text-sm">
-								<span>Typical evidence</span>
+								<span>{m.typicalEvidence()}</span>
 								<input class="input" type="text" bind:value={leafForm.values.typical_evidence} />
 							</label>
 						{/if}
@@ -1099,7 +1111,7 @@
 								class="btn btn-sm variant-ghost-surface"
 								onclick={() => (leafForm = null)}
 							>
-								Cancel
+								{m.cancel()}
 							</button>
 							<button
 								type="button"
@@ -1108,7 +1120,7 @@
 								disabled={savingLeaf || (!leafForm.urn && !leafForm.values.ref_id.trim())}
 							>
 								{#if savingLeaf}<i class="fa-solid fa-spinner fa-spin mr-1"></i>{/if}
-								{leafForm.urn ? 'Save' : 'Create'}
+								{leafForm.urn ? m.save() : m.create()}
 							</button>
 						</div>
 					</div>
@@ -1119,13 +1131,13 @@
 						<table class="table table-compact w-full">
 							<thead>
 								<tr>
-									<th class="w-28">Ref</th>
-									<th>Name</th>
+									<th class="w-28">{m.lbDraftColRef()}</th>
+									<th>{m.name()}</th>
 									{#if kind.field === 'reference_controls'}
-										<th class="w-28">Category</th>
-										<th class="w-28">CSF</th>
+										<th class="w-28">{m.category()}</th>
+										<th class="w-28">{m.lbDraftColCsf()}</th>
 									{/if}
-									<th>Description</th>
+									<th>{m.description()}</th>
 									<th class="w-24"></th>
 								</tr>
 							</thead>
@@ -1146,7 +1158,7 @@
 												type="button"
 												class="btn-icon btn-icon-sm variant-ghost-surface"
 												onclick={() => openLeafForm(kind.field, item)}
-												aria-label="Edit"
+												aria-label={m.edit()}
 											>
 												<i class="fa-solid fa-pen"></i>
 											</button>
@@ -1154,7 +1166,7 @@
 												type="button"
 												class="btn-icon btn-icon-sm variant-ghost-error"
 												onclick={() => deleteObject(item)}
-												aria-label="Delete"
+												aria-label={m.delete()}
 											>
 												<i class="fa-solid fa-trash"></i>
 											</button>
@@ -1165,7 +1177,7 @@
 						</table>
 					</div>
 				{:else}
-					<p class="text-sm text-surface-500">None yet.</p>
+					<p class="text-sm text-surface-500">{m.lbDraftNoneYet()}</p>
 				{/if}
 			</div>
 		{/each}
@@ -1174,7 +1186,7 @@
 		{#if mappingSets.length > 0}
 			<div class="card p-4 space-y-3">
 				<h3 class="text-lg font-semibold">
-					<i class="fa-solid fa-arrows-left-right mr-1"></i>Requirement mapping sets
+					<i class="fa-solid fa-arrows-left-right mr-1"></i>{m.lbDraftMappingSets()}
 				</h3>
 				<ul class="divide-y divide-surface-200-800">
 					{#each mappingSets as mappingSet}
@@ -1186,14 +1198,16 @@
 									<span class="font-mono">{urnLeaf(mappingSet.source_framework_urn)}</span>
 									<i class="fa-solid fa-arrow-right mx-1"></i>
 									<span class="font-mono">{urnLeaf(mappingSet.target_framework_urn)}</span>
-									— {(mappingSet.requirement_mappings ?? []).length} mapping(s)
+									— {m.lbDraftMappingCount({
+										count: (mappingSet.requirement_mappings ?? []).length
+									})}
 								</p>
 							</div>
 							<button
 								type="button"
 								class="btn btn-sm variant-ghost-error shrink-0"
 								onclick={() => deleteObject(mappingSet)}
-								aria-label="Delete mapping set"
+								aria-label={m.lbDraftDeleteMappingSet()}
 							>
 								<i class="fa-solid fa-trash"></i>
 							</button>
@@ -1207,7 +1221,7 @@
 		{#if metricDefinitions.length > 0}
 			<div class="card p-4 space-y-3">
 				<h3 class="text-lg font-semibold">
-					<i class="fa-solid fa-gauge-high mr-1"></i>Metric definitions
+					<i class="fa-solid fa-gauge-high mr-1"></i>{m.lbDraftMetricDefinitions()}
 				</h3>
 				<ul class="divide-y divide-surface-200-800">
 					{#each metricDefinitions as metric}
@@ -1220,7 +1234,7 @@
 								type="button"
 								class="btn btn-sm variant-ghost-error shrink-0"
 								onclick={() => deleteObject(metric)}
-								aria-label="Delete metric definition"
+								aria-label={m.lbDraftDeleteMetricDefinition()}
 							>
 								<i class="fa-solid fa-trash"></i>
 							</button>
@@ -1233,9 +1247,7 @@
 
 	{#if view === 'simple'}
 		<p class="text-xs text-surface-500 text-center">
-			This {primaryKind} is packaged as the library
-			<span class="font-mono">{draft.urn}</span> — switch to the full view for metadata, dependencies,
-			imports and the other content types.
+			{m.lbDraftSimpleViewPackaged({ kind: primaryKind, urn: draft.urn })}
 		</p>
 	{/if}
 </div>

@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { pageTitle } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { defaultMatrixObject, identitySlug } from './builder-helpers';
 
-	$pageTitle = 'Library Builder';
+	$pageTitle = m.lbListLibraryBuilder();
 
 	let { data } = $props();
 	let drafts: any[] = $state(data.drafts ?? []);
@@ -64,7 +65,8 @@
 				})
 			});
 			const result = await res.json();
-			if (!res.ok) throw new Error(JSON.stringify(result));
+			if (!res.ok)
+				throw new Error(result.error ? safeTranslate(result.error) : JSON.stringify(result));
 			window.location.href = `/experimental/library-builder/${result.id}`;
 		} catch (e: any) {
 			setStatus(e.message, 'error');
@@ -89,7 +91,10 @@
 				body: form
 			});
 			const result = await res.json();
-			if (!res.ok) throw new Error(result.detail || result.error || JSON.stringify(result));
+			if (!res.ok)
+				throw new Error(
+					result.detail || (result.error ? safeTranslate(result.error) : JSON.stringify(result))
+				);
 			window.location.href = `/experimental/library-builder/${result.id}`;
 		} catch (e: any) {
 			setStatus(e.message, 'error');
@@ -122,7 +127,8 @@
 				window.location.href = `/experimental/library-builder/${result.draft}`;
 				return;
 			}
-			if (!res.ok) throw new Error(result.error || JSON.stringify(result));
+			if (!res.ok)
+				throw new Error(result.error ? safeTranslate(result.error) : JSON.stringify(result));
 			window.location.href = `/experimental/library-builder/${result.id}`;
 		} catch (e: any) {
 			setStatus(e.message, 'error');
@@ -196,7 +202,8 @@
 				body: JSON.stringify({ action: 'create', name: quickName, packager, ref_id: refId })
 			});
 			const created = await createRes.json();
-			if (!createRes.ok) throw new Error(created.error || JSON.stringify(created));
+			if (!createRes.ok)
+				throw new Error(created.error ? safeTranslate(created.error) : JSON.stringify(created));
 			const draftBase = `/experimental/library-builder/${created.id}`;
 
 			if (kind === 'framework') {
@@ -206,7 +213,8 @@
 					body: JSON.stringify({ action: 'add-framework' })
 				});
 				const result = await res.json();
-				if (!res.ok) throw new Error(result.error || JSON.stringify(result));
+				if (!res.ok)
+					throw new Error(result.error ? safeTranslate(result.error) : JSON.stringify(result));
 				window.location.href = `${draftBase}/framework?framework_urn=${encodeURIComponent(
 					result.framework_urn
 				)}`;
@@ -221,7 +229,8 @@
 					})
 				});
 				const result = await res.json();
-				if (!res.ok) throw new Error(result.error || JSON.stringify(result));
+				if (!res.ok)
+					throw new Error(result.error ? safeTranslate(result.error) : JSON.stringify(result));
 				window.location.href = `${draftBase}/matrix?matrix_urn=${encodeURIComponent(
 					result.object.urn
 				)}`;
@@ -234,21 +243,36 @@
 
 	// --- Delete ------------------------------------------------------------
 	async function deleteDraft(draft: any) {
-		if (!confirm(`Delete draft "${draft.name}"? The published library, if any, is not affected.`))
-			return;
+		if (!confirm(m.lbListDeleteConfirm({ name: draft.name }))) return;
 		const res = await fetch(`/experimental/library-builder?id=${draft.id}`, { method: 'DELETE' });
 		if (res.ok) {
 			drafts = drafts.filter((d) => d.id !== draft.id);
-			setStatus('Draft deleted', 'success');
+			setStatus(m.lbListDraftDeleted(), 'success');
 		} else {
-			setStatus('Failed to delete draft', 'error');
+			setStatus(m.lbListDeleteDraftFailed(), 'error');
 		}
 	}
 
+	// Each object kind gets a count-aware, localized label (singular/plural
+	// handled by the message). Unknown keys fall back to the raw key.
+	const OBJECT_LABELS: Record<string, (args: { count: number }) => string> = {
+		frameworks: m.lbCountFrameworks,
+		threats: m.lbCountThreats,
+		reference_controls: m.lbCountReferenceControls,
+		risk_matrices: m.lbCountRiskMatrices,
+		requirement_mapping_sets: m.lbCountRequirementMappingSets,
+		preset: m.lbCountPreset
+	};
+
 	function objectsSummary(draft: any): string {
 		const meta = draft.objects_meta ?? {};
-		const parts = Object.entries(meta).map(([k, v]) => `${v} ${k.replaceAll('_', ' ')}`);
-		return parts.length ? parts.join(', ') : 'empty';
+		const parts = Object.entries(meta)
+			.filter(([, v]) => (v as number) > 0)
+			.map(([k, v]) => {
+				const label = OBJECT_LABELS[k];
+				return label ? label({ count: v as number }) : `${v} ${k.replaceAll('_', ' ')}`;
+			});
+		return parts.length ? parts.join(', ') : m.lbListEmpty();
 	}
 </script>
 
@@ -256,9 +280,7 @@
 	<!-- Top bar -->
 	<div class="card p-4">
 		<p class="text-xs text-surface-600-400 mb-4">
-			Author a whole library (framework, controls, threats, matrices…) as a draft document, then
-			publish it through the standard library loader. Adopt your custom libraries or clone from
-			existing ones.
+			{m.lbListIntro()}
 		</p>
 		<div class="flex flex-wrap items-center justify-between gap-4">
 			<div class="flex items-center gap-2">
@@ -268,7 +290,7 @@
 					onclick={() => openQuick('framework')}
 				>
 					<i class="fa-solid fa-sitemap mr-1"></i>
-					New framework
+					{m.lbListNewFramework()}
 				</button>
 				<button
 					type="button"
@@ -276,7 +298,7 @@
 					onclick={() => openQuick('matrix')}
 				>
 					<i class="fa-solid fa-table-cells mr-1"></i>
-					New matrix
+					{m.lbListNewMatrix()}
 				</button>
 				<button
 					type="button"
@@ -288,18 +310,18 @@
 					}}
 				>
 					<i class="fa-solid fa-plus mr-1"></i>
-					New Library Draft
+					{m.lbListNewLibraryDraft()}
 				</button>
 				<label
 					class="btn btn-sm variant-ghost-primary cursor-pointer"
-					title="Import a library YAML file into a new editable draft"
+					title={m.lbListImportYamlTooltip()}
 				>
 					{#if importingYaml}
 						<i class="fa-solid fa-spinner fa-spin mr-1"></i>
 					{:else}
 						<i class="fa-solid fa-file-arrow-up mr-1"></i>
 					{/if}
-					Import YAML
+					{m.lbListImportYaml()}
 					<input
 						type="file"
 						accept=".yaml,.yml"
@@ -310,9 +332,9 @@
 				</label>
 				{#if customLibraries.length > 0 || orphanFrameworks.length > 0}
 					<select class="select w-64 text-sm" bind:value={adoptSource}>
-						<option value="">Adopt a custom library…</option>
+						<option value="">{m.lbListAdoptPlaceholder()}</option>
 						{#if customLibraries.length > 0}
-							<optgroup label="Custom libraries">
+							<optgroup label={m.lbListCustomLibraries()}>
 								{#each customLibraries as library}
 									<option value={'library:' + library.id}>
 										{library.name} (v{library.version})
@@ -321,7 +343,7 @@
 							</optgroup>
 						{/if}
 						{#if orphanFrameworks.length > 0}
-							<optgroup label="Custom frameworks (no library yet)">
+							<optgroup label={m.lbListCustomFrameworksNoLibrary()}>
 								{#each orphanFrameworks as framework}
 									<option value={'framework:' + framework.id}>{framework.name}</option>
 								{/each}
@@ -339,7 +361,7 @@
 						{:else}
 							<i class="fa-solid fa-file-import mr-1"></i>
 						{/if}
-						Adopt
+						{m.lbListAdopt()}
 					</button>
 				{/if}
 			</div>
@@ -359,19 +381,21 @@
 		{#if quickKind}
 			<div class="mt-4 border-t border-surface-200-800 pt-4 flex flex-wrap items-end gap-3">
 				<label class="label text-sm grow max-w-md">
-					<span>{quickKind === 'framework' ? 'Framework name' : 'Matrix name'}</span>
+					<span>{quickKind === 'framework' ? m.lbListFrameworkName() : m.lbListMatrixName()}</span>
 					<!-- svelte-ignore a11y_autofocus -->
 					<input
 						class="input"
 						type="text"
 						bind:value={quickName}
-						placeholder={quickKind === 'framework' ? 'My SOC 2 framework' : 'My 4x4 matrix'}
+						placeholder={quickKind === 'framework'
+							? m.lbListFrameworkNamePlaceholder()
+							: m.lbListMatrixNamePlaceholder()}
 						autofocus
 						onkeydown={(e) => e.key === 'Enter' && createQuick()}
 					/>
 				</label>
 				<label class="label text-sm w-48">
-					<span>Packager</span>
+					<span>{m.packager()}</span>
 					<input
 						class="input"
 						type="text"
@@ -393,11 +417,11 @@
 					{:else}
 						<i class="fa-solid fa-wand-magic-sparkles mr-1"></i>
 					{/if}
-					Create and edit
+					{m.lbListCreateAndEdit()}
 				</button>
 				<div class="basis-full text-xs space-y-1">
 					{#if quickPackager && !IDENTITY_RE.test(quickPackager.trim())}
-						<p class="text-red-600">Packager must match [a-z0-9_-]+</p>
+						<p class="text-red-600">{m.lbListPackagerPattern()}</p>
 					{/if}
 					{#if identitySlug(quickName) && IDENTITY_RE.test(quickPackager.trim())}
 						<p class="text-surface-500 font-mono">
@@ -405,9 +429,9 @@
 						</p>
 					{/if}
 					<p class="text-surface-500">
-						Name and packager determine every URN of the {quickKind}. The packager is remembered for
-						next time; the wrapping library stays out of the way and remains editable in the draft's
-						full view until first publication.
+						{m.lbListQuickHelp({
+							kind: quickKind === 'framework' ? m.framework() : m.riskMatrix()
+						})}
 					</p>
 				</div>
 			</div>
@@ -417,10 +441,15 @@
 			<div class="mt-4 border-t border-surface-200-800 pt-4 grid grid-cols-1 md:grid-cols-4 gap-3">
 				<label class="label text-sm">
 					<span>{m.name()}</span>
-					<input class="input" type="text" bind:value={newName} placeholder="My security library" />
+					<input
+						class="input"
+						type="text"
+						bind:value={newName}
+						placeholder={m.lbListLibraryNamePlaceholder()}
+					/>
 				</label>
 				<label class="label text-sm">
-					<span>Packager</span>
+					<span>{m.packager()}</span>
 					<input
 						class="input"
 						type="text"
@@ -430,7 +459,7 @@
 					/>
 				</label>
 				<label class="label text-sm">
-					<span>Reference ID</span>
+					<span>{m.lbListReferenceId()}</span>
 					<input
 						class="input"
 						type="text"
@@ -449,31 +478,33 @@
 						{#if creating}
 							<i class="fa-solid fa-spinner fa-spin mr-1"></i>
 						{/if}
-						Create
+						{m.create()}
 					</button>
 				</div>
 				<div class="md:col-span-4 text-xs space-y-1">
 					{#if newPackager && !IDENTITY_RE.test(newPackager)}
-						<p class="text-red-600">Packager must match [a-z0-9_-]+</p>
+						<p class="text-red-600">{m.lbListPackagerPattern()}</p>
 					{/if}
 					{#if newRefId && !IDENTITY_RE.test(newRefId)}
-						<p class="text-red-600">Reference ID must match [a-z0-9_-]+</p>
+						<p class="text-red-600">{m.lbListReferenceIdPattern()}</p>
 					{/if}
 					{#if identityCheck?.urn}
 						<p class="text-surface-500 font-mono">{identityCheck.urn}</p>
 						{#if identityCheck.conflicts?.length}
 							<p class="text-amber-600">
 								<i class="fa-solid fa-triangle-exclamation mr-1"></i>
-								This identity collides with {identityCheck.conflicts.length} existing object(s):
-								{identityCheck.conflicts
-									.slice(0, 3)
-									.map((c: any) => `${c.kind} ${c.urn}`)
-									.join('; ')}{identityCheck.conflicts.length > 3 ? '…' : ''}
-								— publishing will conflict unless you pick another identity.
+								{m.lbListIdentityCollides({
+									count: identityCheck.conflicts.length,
+									objects:
+										identityCheck.conflicts
+											.slice(0, 3)
+											.map((c: any) => `${c.kind} ${c.urn}`)
+											.join('; ') + (identityCheck.conflicts.length > 3 ? '…' : '')
+								})}
 							</p>
 						{:else}
 							<p class="text-green-600">
-								<i class="fa-solid fa-circle-check mr-1"></i>Identity is free.
+								<i class="fa-solid fa-circle-check mr-1"></i>{m.lbListIdentityFree()}
 							</p>
 						{/if}
 					{/if}
@@ -486,7 +517,7 @@
 	<div class="card p-4">
 		<h3 class="text-lg font-semibold mb-3">
 			<i class="fa-solid fa-boxes-packing mr-1"></i>
-			Library Drafts
+			{m.lbListLibraryDrafts()}
 		</h3>
 		{#if drafts.length > 0}
 			<div class="table-container">
@@ -496,7 +527,7 @@
 							<th>{m.name()}</th>
 							<th>URN</th>
 							<th>{m.version()}</th>
-							<th>Contents</th>
+							<th>{m.lbListContents()}</th>
 							<th>{m.status()}</th>
 							<th class="w-40"></th>
 						</tr>
@@ -513,10 +544,10 @@
 								<td>
 									{#if draft.identity_locked}
 										<span class="badge variant-filled-success text-xs">
-											<i class="fa-solid fa-cloud-arrow-up mr-0.5"></i>Published
+											<i class="fa-solid fa-cloud-arrow-up mr-0.5"></i>{m.lbListPublished()}
 										</span>
 									{:else}
-										<span class="badge variant-ghost-surface text-xs">Draft</span>
+										<span class="badge variant-ghost-surface text-xs">{m.lbListDraft()}</span>
 									{/if}
 								</td>
 								<td class="space-x-1">
@@ -525,13 +556,13 @@
 										class="btn btn-sm variant-filled-primary"
 									>
 										<i class="fa-solid fa-pen-to-square mr-1"></i>
-										Edit
+										{m.edit()}
 									</a>
 									<button
 										type="button"
 										class="btn btn-sm variant-ghost-error"
 										onclick={() => deleteDraft(draft)}
-										aria-label="Delete draft"
+										aria-label={m.lbListDeleteDraft()}
 									>
 										<i class="fa-solid fa-trash"></i>
 									</button>
@@ -543,7 +574,7 @@
 			</div>
 		{:else}
 			<p class="text-sm text-surface-500 py-4 text-center">
-				No library drafts yet. Create one from scratch or adopt one of your custom libraries.
+				{m.lbListNoDrafts()}
 			</p>
 		{/if}
 	</div>

@@ -4,10 +4,11 @@
 	import { beforeNavigate } from '$app/navigation';
 	import { pageTitle } from '$lib/utils/stores';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { m } from '$paraglide/messages';
 	import { TYPE_TO_MODEL, MODEL_TO_TYPE, SCAFFOLD_TYPES } from '$lib/utils/modelTargets';
 
 	let { data }: { data: PageData } = $props();
-	$pageTitle = `Library Builder — ${data.preset.name}`;
+	$pageTitle = m.lbPresetPageTitle({ name: data.preset.name });
 
 	// The _action protocol adapter serving the journey preset stored inside
 	// this library draft's document.
@@ -97,7 +98,7 @@
 	);
 
 	beforeNavigate(({ cancel }) => {
-		if (dirty && !confirm('You have unsaved changes. Leave anyway?')) cancel();
+		if (dirty && !confirm(m.lbPresetUnsavedLeaveConfirm())) cancel();
 	});
 
 	// beforeNavigate only catches in-app route changes; tab close, refresh, or
@@ -135,14 +136,14 @@
 				body: JSON.stringify({ action: 'start-editing' })
 			});
 			if (!r.ok) {
-				errorMsg = `Failed to load draft: ${r.status}`;
+				errorMsg = m.lbPresetFailedToLoadDraft({ detail: r.status });
 				return;
 			}
 			const j = await r.json();
 			draft = normalize(j.editing_draft);
 			initialJson = JSON.stringify(draft);
 		} catch (e) {
-			errorMsg = `Failed to load draft: ${(e as Error).message ?? e}`;
+			errorMsg = m.lbPresetFailedToLoadDraft({ detail: (e as Error).message ?? e });
 		} finally {
 			loading = false;
 		}
@@ -184,13 +185,14 @@
 			});
 			const j = await r.json().catch(() => ({}));
 			if (!r.ok) {
-				errorMsg = formatError(j) || `Failed to save draft: ${r.status}`;
+				errorMsg =
+					safeTranslate(formatError(j)) || m.lbPresetFailedToSaveDraft({ detail: r.status });
 				return;
 			}
 			draft = normalize(j.editing_draft);
 			initialJson = JSON.stringify(draft);
 		} catch (e) {
-			errorMsg = `Failed to save draft: ${(e as Error).message ?? e}`;
+			errorMsg = m.lbPresetFailedToSaveDraft({ detail: (e as Error).message ?? e });
 		} finally {
 			saving = false;
 		}
@@ -203,7 +205,7 @@
 	}
 
 	function formatError(j: any): string {
-		if (!j) return 'Unknown error';
+		if (!j) return m.lbPresetUnknownError();
 		if (typeof j === 'string') return j;
 		if (j.detail) return j.detail;
 		try {
@@ -328,8 +330,12 @@
 		const owned = draft.scaffolded_objects.filter((s) => s.step_ref_id === step.key);
 		const msg =
 			owned.length > 0
-				? `Delete step "${step.title}"? Its ${owned.length} scaffolded object${owned.length === 1 ? '' : 's'} will also be removed.`
-				: `Delete step "${step.title}"?`;
+				? m.lbPresetDeleteStepWithObjectsConfirm({
+						title: step.title,
+						count: owned.length,
+						s: owned.length === 1 ? '' : 's'
+					})
+				: m.lbPresetDeleteStepConfirm({ title: step.title });
 		if (!confirm(msg)) return;
 		// Drop owned scaffolds
 		const ownedRefs = new Set(owned.map((s) => s.ref).filter(Boolean));
@@ -488,14 +494,14 @@
 {#snippet scaffoldFields(scaffold: Scaffold, idx: number)}
 	{#if scaffold.type === 'compliance_assessment'}
 		<label class="flex flex-col gap-1 text-sm md:col-span-2">
-			<span class="text-xs text-surface-600-400">Framework</span>
+			<span class="text-xs text-surface-600-400">{m.framework()}</span>
 			<select
 				class="text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
 				value={scaffold.framework ?? ''}
 				onchange={(e) =>
 					updateScaffoldByIndex(idx, { framework: (e.target as HTMLSelectElement).value })}
 			>
-				<option value="">Select a framework…</option>
+				<option value="">{m.lbPresetSelectFramework()}</option>
 				{#each data.frameworks as fw (fw.id)}
 					<option value={fw.urn}>{fw.name}</option>
 				{/each}
@@ -505,7 +511,7 @@
 			{@const fw = selectedFramework(scaffold.framework)}
 			{#if fw?.implementation_groups_definition?.length}
 				<div class="md:col-span-2">
-					<span class="text-xs text-surface-600-400 block mb-1.5">Implementation groups</span>
+					<span class="text-xs text-surface-600-400 block mb-1.5">{m.implementationGroups()}</span>
 					<div class="flex flex-wrap gap-1.5">
 						{#each fw.implementation_groups_definition as ig (ig.ref_id)}
 							{@const checked = scaffold.implementation_groups?.includes(ig.ref_id)}
@@ -538,14 +544,14 @@
 		{/if}
 	{:else if scaffold.type === 'risk_assessment' || scaffold.type === 'business_impact_analysis' || scaffold.type === 'ebios_rm_study'}
 		<label class="flex flex-col gap-1 text-sm md:col-span-2">
-			<span class="text-xs text-surface-600-400">Risk matrix</span>
+			<span class="text-xs text-surface-600-400">{m.riskMatrix()}</span>
 			<select
 				class="text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
 				value={scaffold.risk_matrix ?? ''}
 				onchange={(e) =>
 					updateScaffoldByIndex(idx, { risk_matrix: (e.target as HTMLSelectElement).value })}
 			>
-				<option value="">Select a matrix…</option>
+				<option value="">{m.lbPresetSelectMatrix()}</option>
 				{#each data.riskMatrices as rm (rm.id)}
 					<option value={rm.urn}>{rm.name}</option>
 				{/each}
@@ -553,7 +559,7 @@
 		</label>
 	{:else if scaffold.type === 'findings_assessment'}
 		<label class="flex flex-col gap-1 text-sm">
-			<span class="text-xs text-surface-600-400">Category</span>
+			<span class="text-xs text-surface-600-400">{m.category()}</span>
 			<select
 				class="text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
 				value={scaffold.category ?? 'pentest'}
@@ -567,7 +573,7 @@
 		</label>
 	{:else if scaffold.type === 'asset'}
 		<label class="flex flex-col gap-1 text-sm">
-			<span class="text-xs text-surface-600-400">Asset type</span>
+			<span class="text-xs text-surface-600-400">{m.lbPresetAssetType()}</span>
 			<select
 				class="text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
 				value={scaffold.asset_type ?? 'SP'}
@@ -581,14 +587,14 @@
 		</label>
 	{:else if scaffold.type === 'applied_control'}
 		<label class="flex flex-col gap-1 text-sm">
-			<span class="text-xs text-surface-600-400">Category</span>
+			<span class="text-xs text-surface-600-400">{m.category()}</span>
 			<select
 				class="text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
 				value={scaffold.category ?? ''}
 				onchange={(e) =>
 					updateScaffoldByIndex(idx, { category: (e.target as HTMLSelectElement).value })}
 			>
-				<option value="">Any category…</option>
+				<option value="">{m.lbPresetAnyCategory()}</option>
 				{#each APPLIED_CONTROL_CATEGORIES as c (c)}
 					<option value={c}>{safeTranslate(c)}</option>
 				{/each}
@@ -596,7 +602,7 @@
 		</label>
 	{:else if scaffold.type === 'project'}
 		<label class="flex flex-col gap-1 text-sm">
-			<span class="text-xs text-surface-600-400">Kind</span>
+			<span class="text-xs text-surface-600-400">{m.kind()}</span>
 			<select
 				class="text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
 				value={scaffold.kind ?? 'project'}
@@ -610,7 +616,7 @@
 		</label>
 	{:else if scaffold.type === 'responsibility_matrix'}
 		<label class="flex flex-col gap-1 text-sm">
-			<span class="text-xs text-surface-600-400">Matrix preset</span>
+			<span class="text-xs text-surface-600-400">{m.lbPresetMatrixPreset()}</span>
 			<select
 				class="text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
 				value={scaffold.matrix_preset ?? 'raci'}
@@ -624,7 +630,7 @@
 		</label>
 	{:else if scaffold.type === 'security_exception'}
 		<label class="flex flex-col gap-1 text-sm">
-			<span class="text-xs text-surface-600-400">Severity</span>
+			<span class="text-xs text-surface-600-400">{m.severity()}</span>
 			<select
 				class="text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
 				value={scaffold.severity === undefined ? '' : String(scaffold.severity)}
@@ -633,7 +639,7 @@
 					updateScaffoldByIndex(idx, { severity: v === '' ? undefined : Number(v) });
 				}}
 			>
-				<option value="">Undefined</option>
+				<option value="">{m.lbPresetUndefined()}</option>
 				{#each SECURITY_EXCEPTION_SEVERITIES as s (s.value)}
 					<option value={String(s.value)}>{safeTranslate(s.labelKey)}</option>
 				{/each}
@@ -645,19 +651,19 @@
 {#if isReadOnly}
 	<div class="p-6">
 		<div class="bg-yellow-50 border border-yellow-300 rounded p-4">
-			<p class="font-semibold">Library-backed presets are read-only.</p>
+			<p class="font-semibold">{m.lbPresetReadOnlyTitle()}</p>
 			<p class="text-sm mt-1">
-				Fork this preset (from <a
-					href="/experimental/library-builder/{data.draft.id}"
-					class="underline">the editor home</a
-				>) to create an editable copy.
+				{m.lbPresetReadOnlyForkPrefix()}
+				<a href="/experimental/library-builder/{data.draft.id}" class="underline"
+					>{m.lbPresetEditorHomeLink()}</a
+				>{m.lbPresetReadOnlyForkSuffix()}
 			</p>
 		</div>
 	</div>
 {:else if loading}
-	<div class="p-6">Loading draft…</div>
+	<div class="p-6">{m.lbPresetLoadingDraft()}</div>
 {:else if !draft}
-	<div class="p-6 text-red-700">Failed to load draft.</div>
+	<div class="p-6 text-red-700">{m.lbPresetFailedToLoadDraftShort()}</div>
 {:else}
 	{#if needsProjectManagement}
 		<div
@@ -665,11 +671,12 @@
 		>
 			<i class="fa-solid fa-triangle-exclamation mt-0.5 text-amber-500"></i>
 			<span>
-				This preset scaffolds projects or responsibility matrices, which require the
-				<span class="font-medium">project management</span> feature. Make sure the preset's
-				<span class="font-mono text-xs">feature_flags</span> enable
-				<span class="font-mono text-xs">project_management</span>, otherwise the created objects
-				won't be visible.
+				{m.lbPresetProjectMgmtWarnPart1()}
+				<span class="font-medium">{m.lbPresetProjectMgmtFeatureName()}</span>
+				{m.lbPresetProjectMgmtWarnPart2()}
+				<span class="font-mono text-xs">feature_flags</span>
+				{m.lbPresetProjectMgmtWarnPart3()}
+				<span class="font-mono text-xs">project_management</span>{m.lbPresetProjectMgmtWarnPart4()}
 			</span>
 		</div>
 	{/if}
@@ -680,7 +687,7 @@
 				<a
 					href="/experimental/library-builder/{data.draft.id}"
 					class="text-sm text-surface-500 hover:text-surface-600-400 transition-colors shrink-0"
-					title="Back to preset list"
+					title={m.lbPresetBackToList()}
 				>
 					<i class="fa-solid fa-arrow-left"></i>
 				</a>
@@ -691,18 +698,18 @@
 				{#if dirty}
 					<span
 						class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 inline-flex items-center gap-1"
-						title="You have unsaved changes."
+						title={m.lbPresetUnsavedChangesTitle()}
 					>
 						<i class="fa-solid fa-pen-nib text-[10px]"></i>
-						Unsaved changes
+						{m.lbPresetUnsavedChanges()}
 					</span>
 				{:else}
 					<span
 						class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 inline-flex items-center gap-1"
-						title="All edits are saved to the library draft. Publish from the library page."
+						title={m.lbPresetSavedTooltip()}
 					>
 						<i class="fa-solid fa-circle-check text-[10px]"></i>
-						Saved to draft
+						{m.lbPresetSavedToDraft()}
 					</span>
 				{/if}
 
@@ -719,32 +726,34 @@
 							: 'bg-surface-100-900 text-surface-500 cursor-not-allowed'}"
 					disabled={!dirty || saving}
 					onclick={save}
-					title="Save to the library draft"
+					title={m.lbPresetSaveTooltip()}
 				>
 					{#if saving}
-						<i class="fa-solid fa-circle-notch fa-spin text-[10px]"></i> Saving…
+						<i class="fa-solid fa-circle-notch fa-spin text-[10px]"></i> {m.lbPresetSaving()}
 					{:else}
-						<i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
+						<i class="fa-solid fa-floppy-disk text-[10px]"></i> {m.save()}
 					{/if}
 				</button>
 
 				<!-- Revert unsaved edits (inline confirm) -->
 				{#if dirty}
 					{#if confirmDiscard}
-						<span class="shrink-0 text-xs text-red-600 font-medium">Revert unsaved edits?</span>
+						<span class="shrink-0 text-xs text-red-600 font-medium"
+							>{m.lbPresetRevertConfirm()}</span
+						>
 						<button
 							type="button"
 							class="shrink-0 text-xs font-medium px-2 py-1 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition-colors"
 							onclick={discard}
 						>
-							Yes, revert
+							{m.lbPresetYesRevert()}
 						</button>
 						<button
 							type="button"
 							class="shrink-0 text-xs text-surface-600-400 px-2 py-1 hover:text-surface-700-300"
 							onclick={() => (confirmDiscard = false)}
 						>
-							Cancel
+							{m.cancel()}
 						</button>
 					{:else}
 						<button
@@ -752,10 +761,10 @@
 							class="shrink-0 text-xs font-medium px-3 py-1.5 rounded-lg text-surface-600-400 hover:text-red-600 hover:bg-red-50 transition-colors inline-flex items-center gap-1.5"
 							onclick={() => (confirmDiscard = true)}
 							disabled={saving}
-							title="Throw away the edits since the last save"
+							title={m.lbPresetRevertTooltip()}
 						>
 							<i class="fa-solid fa-rotate-left text-[10px]"></i>
-							Revert
+							{m.lbPresetRevert()}
 						</button>
 					{/if}
 				{/if}
@@ -777,12 +786,12 @@
 				<input
 					type="text"
 					bind:value={draft.journey_meta.name}
-					placeholder="Preset name"
+					placeholder={m.lbPresetNamePlaceholder()}
 					class="w-full text-2xl font-bold bg-transparent border-0 border-b-2 border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors py-1"
 				/>
 				<textarea
 					bind:value={draft.journey_meta.description}
-					placeholder="Preset description (optional)"
+					placeholder={m.lbPresetDescriptionPlaceholder()}
 					rows="2"
 					class="w-full text-sm text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1"
 				></textarea>
@@ -792,10 +801,9 @@
 			<section class="space-y-4">
 				<div class="flex items-end justify-between">
 					<div>
-						<h2 class="text-base font-semibold text-surface-800-200">Steps</h2>
+						<h2 class="text-base font-semibold text-surface-800-200">{m.lbPresetSteps()}</h2>
 						<p class="text-xs text-surface-600-400 mt-0.5">
-							A preset is a sequence of steps. Each step can scaffold objects, point to a model or
-							URL, or both.
+							{m.lbPresetStepsHelp()}
 						</p>
 					</div>
 					<button
@@ -803,7 +811,8 @@
 						class="text-xs font-medium px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors inline-flex items-center gap-1.5"
 						onclick={addStep}
 					>
-						<i class="fa-solid fa-plus text-[10px]"></i> Add step
+						<i class="fa-solid fa-plus text-[10px]"></i>
+						{m.lbPresetAddStep()}
 					</button>
 				</div>
 
@@ -812,7 +821,9 @@
 						class="border-2 border-dashed border-surface-200-800 rounded-lg p-10 text-center text-sm text-surface-500"
 					>
 						<i class="fa-solid fa-list-check text-3xl mb-3 text-gray-300 block"></i>
-						No steps yet. Click <span class="font-medium text-surface-600-400">Add step</span> to begin.
+						{m.lbPresetNoStepsPrefix()}
+						<span class="font-medium text-surface-600-400">{m.lbPresetAddStep()}</span>
+						{m.lbPresetNoStepsSuffix()}
 					</div>
 				{/if}
 
@@ -822,15 +833,16 @@
 							type="button"
 							class="group w-full flex items-center justify-center py-1.5 my-0.5 transition-opacity opacity-30 hover:opacity-100 focus-visible:opacity-100"
 							onclick={() => insertStep(at)}
-							title="Insert step"
-							aria-label="Insert step here"
+							title={m.lbPresetInsertStep()}
+							aria-label={m.lbPresetInsertStepHere()}
 						>
 							<span class="h-px flex-1 bg-blue-200 group-hover:bg-blue-400 transition-colors"
 							></span>
 							<span
 								class="mx-2 text-[11px] font-medium text-blue-700 px-2 py-0.5 rounded-full bg-blue-50 group-hover:bg-blue-100 transition-colors inline-flex items-center gap-1"
 							>
-								<i class="fa-solid fa-plus text-[9px]"></i> Insert step
+								<i class="fa-solid fa-plus text-[9px]"></i>
+								{m.lbPresetInsertStep()}
 							</span>
 							<span class="h-px flex-1 bg-blue-200 group-hover:bg-blue-400 transition-colors"
 							></span>
@@ -868,8 +880,8 @@
 										class="w-6 h-6 inline-flex items-center justify-center rounded text-xs text-surface-500 hover:text-surface-700-300 hover:bg-surface-100-900 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
 										onclick={() => moveStep(i, -1)}
 										disabled={i === 0}
-										title="Move up"
-										aria-label="Move up"
+										title={m.lbPresetMoveUp()}
+										aria-label={m.lbPresetMoveUp()}
 									>
 										<i class="fa-solid fa-chevron-up"></i>
 									</button>
@@ -878,8 +890,8 @@
 										class="w-6 h-6 inline-flex items-center justify-center rounded text-xs text-surface-500 hover:text-surface-700-300 hover:bg-surface-100-900 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
 										onclick={() => moveStep(i, 1)}
 										disabled={i === draft.steps.length - 1}
-										title="Move down"
-										aria-label="Move down"
+										title={m.lbPresetMoveDown()}
+										aria-label={m.lbPresetMoveDown()}
 									>
 										<i class="fa-solid fa-chevron-down"></i>
 									</button>
@@ -888,21 +900,21 @@
 									<input
 										type="text"
 										value={step.title}
-										placeholder="Step name"
+										placeholder={m.lbPresetStepNamePlaceholder()}
 										class="w-full text-base font-semibold bg-transparent border-0 border-b-2 border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors py-0.5"
 										oninput={(e) =>
 											setStepField(i, { title: (e.target as HTMLInputElement).value })}
 									/>
 									<textarea
 										value={step.description ?? ''}
-										placeholder="Description (optional)"
+										placeholder={m.lbPresetDescriptionOptional()}
 										rows="2"
 										class="w-full text-sm text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-200-800 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-0.5"
 										oninput={(e) =>
 											setStepField(i, { description: (e.target as HTMLTextAreaElement).value })}
 									></textarea>
 									<div class="flex items-center gap-2 text-xs">
-										<span class="text-surface-500 font-mono">ref_id</span>
+										<span class="text-surface-500 font-mono">{m.refId()}</span>
 										<input
 											type="text"
 											value={step.key}
@@ -916,8 +928,8 @@
 									type="button"
 									class="w-8 h-8 inline-flex items-center justify-center rounded-lg text-surface-500 hover:text-red-600 hover:bg-red-50 transition-colors"
 									onclick={() => removeStep(i)}
-									title="Remove step"
-									aria-label="Remove step"
+									title={m.lbPresetRemoveStep()}
+									aria-label={m.lbPresetRemoveStep()}
 								>
 									<i class="fa-solid fa-trash text-xs"></i>
 								</button>
@@ -931,8 +943,10 @@
 										class="text-[11px] font-medium text-surface-600-400 uppercase tracking-wider mb-2 flex items-center gap-1.5"
 									>
 										<i class="fa-solid fa-arrow-right-to-bracket text-[10px]"></i>
-										Pointer<span class="text-surface-500 normal-case font-normal tracking-normal">
-											— where the step takes the user</span
+										{m.lbPresetPointer()}<span
+											class="text-surface-500 normal-case font-normal tracking-normal"
+										>
+											{m.lbPresetPointerHint()}</span
 										>
 									</div>
 									<div
@@ -950,7 +964,7 @@
 												checked={ptrMode === 'none'}
 												onchange={() => setPointerMode(i, 'none')}
 											/>
-											None
+											{m.lbPresetNone()}
 										</label>
 										<label
 											class="px-3 py-1.5 cursor-pointer border-l border-surface-200-800 transition-colors {ptrMode ===
@@ -965,7 +979,8 @@
 												checked={ptrMode === 'model'}
 												onchange={() => setPointerMode(i, 'model')}
 											/>
-											<i class="fa-solid fa-list-ul mr-1 text-[10px]"></i> Model
+											<i class="fa-solid fa-list-ul mr-1 text-[10px]"></i>
+											{m.model()}
 										</label>
 										<label
 											class="px-3 py-1.5 cursor-pointer border-l border-surface-200-800 transition-colors {ptrMode ===
@@ -980,7 +995,8 @@
 												checked={ptrMode === 'url'}
 												onchange={() => setPointerMode(i, 'url')}
 											/>
-											<i class="fa-solid fa-link mr-1 text-[10px]"></i> URL / report
+											<i class="fa-solid fa-link mr-1 text-[10px]"></i>
+											{m.lbPresetUrlReport()}
 										</label>
 									</div>
 									{#if ptrMode === 'model'}
@@ -988,7 +1004,7 @@
 										{@const crossCands = crossStepCandidates(step)}
 										<div class="space-y-3">
 											<label class="flex flex-col gap-1">
-												<span class="text-xs text-surface-600-400">Model</span>
+												<span class="text-xs text-surface-600-400">{m.model()}</span>
 												<select
 													class="text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
 													value={step.target_model ?? ''}
@@ -996,7 +1012,9 @@
 														changeTargetModel(i, (e.target as HTMLSelectElement).value || null)}
 												>
 													{#each ALL_MODELS as tm (tm)}
-														<option value={tm}>{tm ? safeTranslate(tm) : '— pick one —'}</option>
+														<option value={tm}
+															>{tm ? safeTranslate(tm) : m.lbPresetPickOne()}</option
+														>
 													{/each}
 												</select>
 											</label>
@@ -1007,9 +1025,9 @@
 														class="text-[11px] font-medium text-surface-600-400 uppercase tracking-wider mb-2 flex items-center gap-1.5"
 													>
 														<i class="fa-solid fa-cubes text-[10px]"></i>
-														Objects to create
+														{m.lbPresetObjectsToCreate()}
 														<span class="text-surface-500 normal-case font-normal tracking-normal">
-															— created on apply; pick one to focus the step on it
+															{m.lbPresetObjectsToCreateHint()}
 														</span>
 													</div>
 
@@ -1025,7 +1043,7 @@
 															checked={!step.target_ref}
 															onchange={() => setStepField(i, { target_ref: null })}
 														/>
-														Open the list (don't open a specific scaffold)
+														{m.lbPresetOpenList()}
 													</label>
 
 													<div class="space-y-2">
@@ -1053,7 +1071,9 @@
 																		}}
 																	/>
 																	<span class="text-xs text-surface-600-400"
-																		>{focused ? 'Scaffold and open' : 'Scaffold'}</span
+																		>{focused
+																			? m.lbPresetScaffoldAndOpen()
+																			: m.lbPresetScaffold()}</span
 																	>
 																	<span
 																		class="ml-auto text-[10px] uppercase text-surface-500 tracking-wider"
@@ -1063,15 +1083,15 @@
 																		type="button"
 																		class="w-7 h-7 inline-flex items-center justify-center rounded-lg text-surface-500 hover:text-red-600 hover:bg-red-50 transition-colors"
 																		onclick={() => removeScaffoldByIndex(idx)}
-																		title="Remove object"
-																		aria-label="Remove object"
+																		title={m.lbPresetRemoveObject()}
+																		aria-label={m.lbPresetRemoveObject()}
 																	>
 																		<i class="fa-solid fa-trash text-[11px]"></i>
 																	</button>
 																</div>
 																<div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
 																	<label class="flex flex-col gap-1">
-																		<span class="text-xs text-surface-600-400">Name</span>
+																		<span class="text-xs text-surface-600-400">{m.name()}</span>
 																		<input
 																			class="text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
 																			type="text"
@@ -1083,7 +1103,7 @@
 																		/>
 																	</label>
 																	<label class="flex flex-col gap-1">
-																		<span class="text-xs text-surface-600-400">ref_id</span>
+																		<span class="text-xs text-surface-600-400">{m.refId()}</span>
 																		<input
 																			class="text-sm font-mono bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
 																			type="text"
@@ -1095,7 +1115,9 @@
 																		/>
 																	</label>
 																	<label class="flex flex-col gap-1 md:col-span-2">
-																		<span class="text-xs text-surface-600-400">Description</span>
+																		<span class="text-xs text-surface-600-400"
+																			>{m.description()}</span
+																		>
 																		<textarea
 																			class="text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors resize-y"
 																			rows="2"
@@ -1117,9 +1139,10 @@
 														class="mt-2 text-xs font-medium px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors inline-flex items-center gap-1.5"
 														onclick={() => addObjectToStep(i)}
 													>
-														<i class="fa-solid fa-plus text-[10px]"></i> Add {safeTranslate(
-															seedType
-														)}
+														<i class="fa-solid fa-plus text-[10px]"></i>
+														{m.lbPresetAddObject({
+															type: safeTranslate(seedType)
+														})}
 													</button>
 												</div>
 											{/if}
@@ -1127,7 +1150,7 @@
 											{#if crossCands.length > 0}
 												<label class="flex flex-col gap-1">
 													<span class="text-xs text-surface-600-400"
-														>Or open a scaffold from another step</span
+														>{m.lbPresetOpenScaffoldFromOtherStep()}</span
 													>
 													<select
 														class="text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
@@ -1139,7 +1162,7 @@
 															setStepField(i, { target_ref: v });
 														}}
 													>
-														<option value="">— none —</option>
+														<option value="">{m.lbPresetNoneOption()}</option>
 														{#each crossCands as c (c.ref)}
 															<option value={c.ref}>{c.ref} — {c.name}</option>
 														{/each}
@@ -1150,9 +1173,7 @@
 									{:else if ptrMode === 'url'}
 										<div class="space-y-3">
 											<label class="flex flex-col gap-1">
-												<span class="text-xs text-surface-600-400"
-													>URL (path, e.g. /reports/soa/results)</span
-												>
+												<span class="text-xs text-surface-600-400">{m.lbPresetUrlPathLabel()}</span>
 												<input
 													class="text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors font-mono"
 													type="text"
@@ -1165,7 +1186,7 @@
 											</label>
 											<div>
 												<div class="flex items-center justify-between mb-1.5">
-													<span class="text-xs text-surface-600-400">Params</span>
+													<span class="text-xs text-surface-600-400">{m.lbPresetParams()}</span>
 													<button
 														type="button"
 														class="text-xs text-surface-600-400 hover:text-blue-600 transition-colors inline-flex items-center gap-1"
@@ -1175,14 +1196,15 @@
 															setStepField(i, { target_params: rowsToParams(rows) });
 														}}
 													>
-														<i class="fa-solid fa-plus text-[9px]"></i> Add param
+														<i class="fa-solid fa-plus text-[9px]"></i>
+														{m.lbPresetAddParam()}
 													</button>
 												</div>
 												{#each paramsToRows(step.target_params) as row, ri (ri)}
 													<div class="flex gap-2 mb-1.5">
 														<input
 															class="flex-1 text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors font-mono"
-															placeholder="key"
+															placeholder={m.lbPresetParamKeyPlaceholder()}
 															value={row.k}
 															oninput={(e) => {
 																const rows = paramsToRows(step.target_params);
@@ -1192,7 +1214,7 @@
 														/>
 														<input
 															class="flex-1 text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
-															placeholder="value (comma-separated for lists)"
+															placeholder={m.lbPresetParamValuePlaceholder()}
 															value={row.v}
 															oninput={(e) => {
 																const rows = paramsToRows(step.target_params);
@@ -1209,8 +1231,8 @@
 																);
 																setStepField(i, { target_params: rowsToParams(rows) });
 															}}
-															title="Remove param"
-															aria-label="Remove param"
+															title={m.lbPresetRemoveParam()}
+															aria-label={m.lbPresetRemoveParam()}
 														>
 															<i class="fa-solid fa-xmark text-xs"></i>
 														</button>
