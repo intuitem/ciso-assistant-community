@@ -908,6 +908,7 @@ class LibraryUpdater:
                 framework_dict["urn"] = framework_dict["urn"].lower()
                 if "outcomes_definition" not in framework_dict:
                     framework_dict["outcomes_definition"] = []
+                # An omitted IG definition means that the framework no longer defines implementation groups.
                 framework_dict.setdefault("implementation_groups_definition", None)
                 prev_fw = Framework.objects.filter(urn=framework_dict["urn"]).first()
                 prev_min = getattr(prev_fw, "min_score", None)
@@ -973,6 +974,7 @@ class LibraryUpdater:
                 removed_implementation_groups = (
                     previous_implementation_groups - valid_implementation_groups
                 )
+                # Fix audit's selected IGs only when at least one previously defined IG disappeared.
                 if removed_implementation_groups:
                     assessments_with_stale_implementation_groups = []
                     for compliance_assessment in compliance_assessments:
@@ -1019,6 +1021,7 @@ class LibraryUpdater:
                 requirement_node_objects_to_update = []
                 order_id = 0
                 all_fields_to_update = set()
+                # Omitting one of these nullable fields in a new version must clear its previous value.
                 clearable_requirement_node_fields = {
                     "ref_id": None,
                     "name": None,
@@ -1144,6 +1147,7 @@ class LibraryUpdater:
 
                     if urn in existing_requirement_node_objects:
                         requirement_node_object = existing_requirement_node_objects[urn]
+                        # Consider omissions before comparing imported and stored values.
                         for field, default in clearable_requirement_node_fields.items():
                             requirement_node_dict.setdefault(field, default)
                         changed_fields = set()
@@ -1151,6 +1155,7 @@ class LibraryUpdater:
                             if getattr(requirement_node_object, key) != value:
                                 setattr(requirement_node_object, key, value)
                                 changed_fields.add(key)
+                        # Avoid validating and writing nodes whose values did not change.
                         if changed_fields:
                             requirement_node_object.clean()
                             all_fields_to_update.update(changed_fields)
