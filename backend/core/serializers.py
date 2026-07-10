@@ -1770,6 +1770,8 @@ class ComplianceAssessmentActionPlanSerializer(ActionPlanSerializer):
             "evidences",
             "evidence_attachments",
             "owner",
+            "created_at",
+            "updated_at",
         ]
 
 
@@ -1816,6 +1818,8 @@ class RiskAssessmentActionPlanSerializer(ActionPlanSerializer):
             "reference_control",
             "evidences",
             "owner",
+            "created_at",
+            "updated_at",
         ]
 
 

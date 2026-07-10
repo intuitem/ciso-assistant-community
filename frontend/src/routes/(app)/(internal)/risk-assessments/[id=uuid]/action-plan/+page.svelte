@@ -21,7 +21,9 @@
 		control_impact: 'controlImpact',
 		effort: 'effort',
 		annual_cost: 'cost',
-		risk_scenarios: 'matchingScenarios'
+		risk_scenarios: 'matchingScenarios',
+		created_at: 'createdAt',
+		updated_at: 'updatedAt'
 	};
 
 	const appliedControls: TableSource = {
@@ -109,6 +111,7 @@
 			rowsPerPage={true}
 			orderBy={{ identifier: 'eta', direction: 'desc' }}
 			baseEndpoint="/risk-assessments/{page.params.id}/action-plan"
+			columnSelector={true}
 			fields={[
 				'ref_id',
 				'name',

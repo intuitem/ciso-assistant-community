@@ -198,18 +198,21 @@
 		Object.entries(tableSource.head).map(([key, label]) => ({ key, label: label as string }))
 	);
 	const allColumnKeys = $derived(allColumns.map((c) => c.key));
+	// A page-provided `fields` curation is the default visible set; otherwise the generic list-view default.
 	const defaultColumns = $derived(
-		(URLModel && listViewFields[URLModel]?.body
-			? listViewFields[URLModel].body
-			: allColumnKeys
+		(fields.length > 0
+			? fields
+			: URLModel && listViewFields[URLModel]?.body
+				? listViewFields[URLModel].body
+				: allColumnKeys
 		).filter((key) => allColumnKeys.includes(key))
 	);
-	// Selector is offered on standalone list pages only; curated embedded tables pass `fields`.
+	// Offered on standalone list pages, or wherever a page opts in explicitly (even alongside `fields`).
 	const showColumnSelector = $derived(
 		(columnSelector ?? Boolean(deleteForm)) &&
 			Boolean(URLModel) &&
 			(columnSelector === true || isStandaloneTable) &&
-			fields.length === 0 &&
+			(columnSelector === true || fields.length === 0) &&
 			allColumns.length > 1
 	);
 	// Stored choice, with stale keys dropped and a fallback to defaults so a table is never empty.
@@ -344,7 +347,9 @@
 			URLModel,
 			endpoint: baseEndpoint,
 			fields:
-				fields.length > 0
+				showColumnSelector && allColumnKeys.length > 0
+					? { head: allColumnKeys, body: allColumnKeys }
+					: fields.length > 0
 					? { head: fields, body: fields }
 					: {
 							head:
