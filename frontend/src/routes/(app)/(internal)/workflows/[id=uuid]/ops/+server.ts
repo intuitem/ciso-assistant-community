@@ -74,11 +74,7 @@ export const POST: RequestHandler = async ({ fetch, request, url }) => {
 
 		case 'get-graph': {
 			const versionId = requireUuid(body.version, 'version');
-			return proxy(
-				fetch,
-				`${BASE_API_URL}/workflows/workflow-versions/${versionId}/graph/`,
-				'GET'
-			);
+			return proxy(fetch, `${BASE_API_URL}/workflows/workflow-versions/${versionId}/graph/`, 'GET');
 		}
 
 		case 'run': {
@@ -94,6 +90,26 @@ export const POST: RequestHandler = async ({ fetch, request, url }) => {
 				fetch,
 				`${BASE_API_URL}/workflows/workflow-instances/?workflow=${workflowId}`,
 				'GET'
+			);
+		}
+
+		case 'list-secrets': {
+			return proxy(fetch, `${BASE_API_URL}/workflows/workflow-secrets/`, 'GET');
+		}
+
+		case 'create-secret': {
+			return proxy(fetch, `${BASE_API_URL}/workflows/workflow-secrets/`, 'POST', {
+				name: body.name,
+				folder: body.folder,
+				value: body.value
+			});
+		}
+
+		case 'delete-secret': {
+			return proxy(
+				fetch,
+				`${BASE_API_URL}/workflows/workflow-secrets/${requireUuid(body.id, 'id')}/`,
+				'DELETE'
 			);
 		}
 

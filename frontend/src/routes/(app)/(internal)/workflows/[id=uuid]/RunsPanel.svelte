@@ -116,7 +116,9 @@
 							{relativeTime(run.created_at)}
 						</span>
 						<i
-							class="fa-solid fa-chevron-{expandedId === run.id ? 'up' : 'down'} text-surface-400-600"
+							class="fa-solid fa-chevron-{expandedId === run.id
+								? 'up'
+								: 'down'} text-surface-400-600"
 						></i>
 					</button>
 					{#if expandedId === run.id}
@@ -147,9 +149,23 @@
 										{#if entry.message}
 											<span class="text-surface-500 truncate">{entry.message}</span>
 										{/if}
+										{#if entry.data?.message}
+											<span class="text-surface-700-300 italic truncate">
+												“{entry.data.message}”
+											</span>
+										{/if}
 										{#if entry.data?.created_object_name}
 											<span class="badge preset-tonal-success text-[9px]">
 												+ {entry.data.created_object_name}
+											</span>
+										{/if}
+										{#if entry.data?.status !== undefined && entry.event_type === 'action_executed'}
+											<span
+												class="badge {entry.data.status >= 400
+													? 'preset-tonal-error'
+													: 'preset-tonal-success'} text-[9px]"
+											>
+												HTTP {entry.data.status}
 											</span>
 										{/if}
 									</li>

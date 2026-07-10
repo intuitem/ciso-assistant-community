@@ -27,6 +27,7 @@
 		graph: any;
 		workflowId: string;
 		versionId: string;
+		folderId: string;
 		readonly: boolean;
 		roles: any[];
 		actors: any[];
@@ -41,6 +42,7 @@
 		graph,
 		workflowId,
 		versionId,
+		folderId,
 		readonly,
 		roles,
 		actors,
@@ -72,9 +74,23 @@
 				);
 			case 'action': {
 				const config = domain.action_config ?? {};
-				return config.type === 'create_object' && config.model
-					? `${config.type} · ${config.model}`
-					: (config.type ?? null);
+				switch (config.type) {
+					case 'create_object':
+						return config.model ? `${config.type} · ${config.model}` : config.type;
+					case 'http_request': {
+						const url = (config.url ?? '').replace(/^https?:\/\//, '');
+						const short = url.length > 30 ? `${url.slice(0, 30)}…` : url;
+						return short ? `${config.method ?? 'GET'} ${short}` : config.type;
+					}
+					case 'provision_folder':
+						return config.name || config.type;
+					case 'provision_user':
+						return config.email || config.type;
+					case 'manage_group_membership':
+						return `${config.operation ?? 'add'} ${config.builtin_group ?? ''}`.trim();
+					default:
+						return config.type ?? null;
+				}
 			}
 			case 'subprocess':
 				return (
@@ -119,7 +135,9 @@
 		if (conditions.length === 1) {
 			const condition = conditions[0];
 			const key = variables.find((v) => v.id === condition.variable)?.key ?? '?';
-			return condition.op === 'is_null' ? `${key} is null` : `${key} ${condition.op} ${condition.value}`;
+			return condition.op === 'is_null'
+				? `${key} is null`
+				: `${key} ${condition.op} ${condition.value}`;
 		}
 		return `${conditions.length} ${m.edgeConditions().toLowerCase()}`;
 	}
@@ -414,6 +432,43 @@
 		markDirty();
 	}
 
+	// ---------- secrets ----------
+
+	let secrets = $state<any[]>([]);
+
+	async function refreshSecrets() {
+		const res = await fetch(opsUrl('list-secrets'), {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({})
+		});
+		if (!res.ok) return;
+		const data = await res.json().catch(() => null);
+		secrets = Array.isArray(data) ? data : (data?.results ?? []);
+	}
+
+	async function addSecret(name: string, value: string) {
+		const res = await fetch(opsUrl('create-secret'), {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ name, value, folder: folderId })
+		});
+		if (res.ok) await refreshSecrets();
+	}
+
+	async function removeSecret(id: string) {
+		const res = await fetch(opsUrl('delete-secret'), {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ id })
+		});
+		if (res.ok) await refreshSecrets();
+	}
+
+	$effect(() => {
+		if (!readonly) refreshSecrets();
+	});
+
 	setContext('workflowEditor', {
 		get readonly() {
 			return readonly;
@@ -449,154 +504,157 @@
 		<Palette
 			{hasStart}
 			{variables}
+			{secrets}
 			onAdd={addNode}
 			onAddVariable={addVariable}
 			onRemoveVariable={removeVariable}
+			onAddSecret={addSecret}
+			onRemoveSecret={removeSecret}
 		/>
 	{/if}
 
 	<div class="flex-1 min-w-0 min-h-0 flex flex-col">
 		<div class="flex-1 min-h-0 relative">
 			<SvelteFlow
-			bind:nodes
-			bind:edges
-			colorMode={isDark ? 'dark' : 'light'}
-			{nodeTypes}
-			isValidConnection={readonly ? () => false : isValidConnection}
-			onconnect={readonly ? undefined : handleConnect}
-			onnodedragstop={readonly ? undefined : markDirty}
-			ondelete={readonly ? undefined : markDirty}
-			onnodeclick={({ node }) => {
-				selectedNodeId = node.id;
-				selectedEdgeId = null;
-			}}
-			onedgeclick={({ edge }) => {
-				selectedEdgeId = edge.id;
-				selectedNodeId = null;
-			}}
-			onpaneclick={() => {
-				selectedNodeId = null;
-				selectedEdgeId = null;
-			}}
-			ondragover={readonly ? undefined : handleDragOver}
-			ondrop={readonly ? undefined : handleDrop}
-			nodesDraggable={!readonly}
-			nodesConnectable={!readonly}
-			elementsSelectable={true}
-			oninit={handleFlowInit}
-			snapGrid={[10, 10]}
-			minZoom={0.2}
-			proOptions={{ hideAttribution: true }}
-			defaultEdgeOptions={{ markerEnd: EDGE_MARKER, style: EDGE_STYLE }}
-		>
-			<Background variant={BackgroundVariant.Dots} gap={20} />
-			<Controls showLock={false} />
-			<MiniMap />
+				bind:nodes
+				bind:edges
+				colorMode={isDark ? 'dark' : 'light'}
+				{nodeTypes}
+				isValidConnection={readonly ? () => false : isValidConnection}
+				onconnect={readonly ? undefined : handleConnect}
+				onnodedragstop={readonly ? undefined : markDirty}
+				ondelete={readonly ? undefined : markDirty}
+				onnodeclick={({ node }) => {
+					selectedNodeId = node.id;
+					selectedEdgeId = null;
+				}}
+				onedgeclick={({ edge }) => {
+					selectedEdgeId = edge.id;
+					selectedNodeId = null;
+				}}
+				onpaneclick={() => {
+					selectedNodeId = null;
+					selectedEdgeId = null;
+				}}
+				ondragover={readonly ? undefined : handleDragOver}
+				ondrop={readonly ? undefined : handleDrop}
+				nodesDraggable={!readonly}
+				nodesConnectable={!readonly}
+				elementsSelectable={true}
+				oninit={handleFlowInit}
+				snapGrid={[10, 10]}
+				minZoom={0.2}
+				proOptions={{ hideAttribution: true }}
+				defaultEdgeOptions={{ markerEnd: EDGE_MARKER, style: EDGE_STYLE }}
+			>
+				<Background variant={BackgroundVariant.Dots} gap={20} />
+				<Controls showLock={false} />
+				<MiniMap />
 
-			<Panel position="top-right">
-				<div class="flex items-center gap-2">
-					<button
-						type="button"
-						class="btn preset-tonal text-sm"
-						class:preset-filled-secondary-500={runsOpen}
-						onclick={() => (runsOpen = !runsOpen)}
-						data-testid="toggle-runs"
-					>
-						<i class="fa-solid fa-list-check mr-1"></i>
-						{m.workflowRuns()}
-					</button>
-					<button
-						type="button"
-						class="btn preset-tonal text-sm"
-						disabled={running}
-						onclick={runWorkflow}
-						data-testid="run-workflow"
-					>
-						{#if running}
-							<i class="fa-solid fa-spinner fa-spin mr-1"></i>
-						{:else}
-							<i class="fa-solid fa-play mr-1"></i>
-						{/if}
-						{m.runWorkflow()}
-					</button>
-					{#if !readonly}
-						{#if saveState === 'saving' || saveState === 'dirty'}
-							<span class="text-xs text-surface-500 flex items-center gap-1">
-								<i class="fa-solid fa-spinner fa-spin"></i>
-								{m.graphSaving()}
-							</span>
-						{:else if saveState === 'saved'}
-							<span class="text-xs text-success-600 flex items-center gap-1">
-								<i class="fa-solid fa-check"></i>
-								{m.graphSaved()}
-							</span>
-						{:else if saveState === 'error'}
-							<button
-								type="button"
-								class="text-xs text-error-500 flex items-center gap-1 cursor-pointer"
-								title={saveError}
-								onclick={save}
-							>
-								<i class="fa-solid fa-triangle-exclamation"></i>
-								{saveError}
-							</button>
-						{/if}
+				<Panel position="top-right">
+					<div class="flex items-center gap-2">
 						<button
 							type="button"
-							class="btn preset-filled-primary-500 text-sm"
-							disabled={publishing || saveState === 'saving'}
-							onclick={publish}
-							data-testid="publish-workflow"
+							class="btn preset-tonal text-sm"
+							class:preset-filled-secondary-500={runsOpen}
+							onclick={() => (runsOpen = !runsOpen)}
+							data-testid="toggle-runs"
 						>
-							{#if publishing}
+							<i class="fa-solid fa-list-check mr-1"></i>
+							{m.workflowRuns()}
+						</button>
+						<button
+							type="button"
+							class="btn preset-tonal text-sm"
+							disabled={running}
+							onclick={runWorkflow}
+							data-testid="run-workflow"
+						>
+							{#if running}
 								<i class="fa-solid fa-spinner fa-spin mr-1"></i>
 							{:else}
-								<i class="fa-solid fa-rocket mr-1"></i>
+								<i class="fa-solid fa-play mr-1"></i>
 							{/if}
-							{m.publishWorkflow()}
+							{m.runWorkflow()}
 						</button>
-					{:else}
-						<button
-							type="button"
-							class="btn preset-filled-primary-500 text-sm"
-							onclick={newDraft}
-							data-testid="new-draft"
-						>
-							<i class="fa-solid fa-pen mr-1"></i>
-							{m.newDraft()}
-						</button>
-					{/if}
-				</div>
-			</Panel>
-
-			{#if validationErrors.length}
-				<Panel position="bottom-right">
-					<div
-						class="w-72 max-h-56 overflow-y-auto rounded-base border border-error-300 dark:border-error-700 bg-surface-50-950 shadow-lg"
-					>
-						<p
-							class="px-3 py-2 text-xs font-semibold text-error-600 border-b border-surface-200-800"
-						>
-							<i class="fa-solid fa-triangle-exclamation mr-1"></i>
-							{m.publishValidationFailed()}
-						</p>
-						<ul>
-							{#each validationErrors as validationError}
-								<li>
-									<button
-										type="button"
-										class="w-full text-left px-3 py-1.5 text-xs text-surface-800-200 hover:bg-surface-100-900 cursor-pointer"
-										onclick={() => focusError(validationError)}
-									>
-										{validationError.message}
-									</button>
-								</li>
-							{/each}
-						</ul>
+						{#if !readonly}
+							{#if saveState === 'saving' || saveState === 'dirty'}
+								<span class="text-xs text-surface-500 flex items-center gap-1">
+									<i class="fa-solid fa-spinner fa-spin"></i>
+									{m.graphSaving()}
+								</span>
+							{:else if saveState === 'saved'}
+								<span class="text-xs text-success-600 flex items-center gap-1">
+									<i class="fa-solid fa-check"></i>
+									{m.graphSaved()}
+								</span>
+							{:else if saveState === 'error'}
+								<button
+									type="button"
+									class="text-xs text-error-500 flex items-center gap-1 cursor-pointer"
+									title={saveError}
+									onclick={save}
+								>
+									<i class="fa-solid fa-triangle-exclamation"></i>
+									{saveError}
+								</button>
+							{/if}
+							<button
+								type="button"
+								class="btn preset-filled-primary-500 text-sm"
+								disabled={publishing || saveState === 'saving'}
+								onclick={publish}
+								data-testid="publish-workflow"
+							>
+								{#if publishing}
+									<i class="fa-solid fa-spinner fa-spin mr-1"></i>
+								{:else}
+									<i class="fa-solid fa-rocket mr-1"></i>
+								{/if}
+								{m.publishWorkflow()}
+							</button>
+						{:else}
+							<button
+								type="button"
+								class="btn preset-filled-primary-500 text-sm"
+								onclick={newDraft}
+								data-testid="new-draft"
+							>
+								<i class="fa-solid fa-pen mr-1"></i>
+								{m.newDraft()}
+							</button>
+						{/if}
 					</div>
 				</Panel>
-			{/if}
-		</SvelteFlow>
+
+				{#if validationErrors.length}
+					<Panel position="bottom-right">
+						<div
+							class="w-72 max-h-56 overflow-y-auto rounded-base border border-error-300 dark:border-error-700 bg-surface-50-950 shadow-lg"
+						>
+							<p
+								class="px-3 py-2 text-xs font-semibold text-error-600 border-b border-surface-200-800"
+							>
+								<i class="fa-solid fa-triangle-exclamation mr-1"></i>
+								{m.publishValidationFailed()}
+							</p>
+							<ul>
+								{#each validationErrors as validationError}
+									<li>
+										<button
+											type="button"
+											class="w-full text-left px-3 py-1.5 text-xs text-surface-800-200 hover:bg-surface-100-900 cursor-pointer"
+											onclick={() => focusError(validationError)}
+										>
+											{validationError.message}
+										</button>
+									</li>
+								{/each}
+							</ul>
+						</div>
+					</Panel>
+				{/if}
+			</SvelteFlow>
 		</div>
 
 		{#if runsOpen}

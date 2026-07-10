@@ -16,10 +16,7 @@ function listResults(data: unknown): any[] {
 }
 
 export const load: PageServerLoad = async ({ fetch, params }) => {
-	const workflow = await fetchJson(
-		fetch,
-		`${BASE_API_URL}/workflows/workflows/${params.id}/`
-	);
+	const workflow = await fetchJson(fetch, `${BASE_API_URL}/workflows/workflows/${params.id}/`);
 	if (!workflow) error(404, 'Workflow not found');
 
 	const versions: { id: string; version_number: number; status: string }[] = (
@@ -31,33 +28,30 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 		versions[0];
 	if (!activeVersion) error(404, 'This workflow has no version');
 
-	const [graph, roles, actors, taskTemplates, workflows, creatableModelsRaw] =
-		await Promise.all([
-			fetchJson(
-				fetch,
-				`${BASE_API_URL}/workflows/workflow-versions/${activeVersion.id}/graph/`
-			),
-			fetchJson(fetch, `${BASE_API_URL}/pmbok/responsibility-roles/?is_visible=true`),
-			fetchJson(fetch, `${BASE_API_URL}/actors/`),
-			fetchJson(fetch, `${BASE_API_URL}/task-templates/`),
-			fetchJson(fetch, `${BASE_API_URL}/workflows/workflows/`),
-			fetchJson(fetch, `${BASE_API_URL}/workflows/workflows/creatable-models/`)
-		]);
+	const [graph, roles, actors, taskTemplates, workflows, creatableModelsRaw] = await Promise.all([
+		fetchJson(fetch, `${BASE_API_URL}/workflows/workflow-versions/${activeVersion.id}/graph/`),
+		fetchJson(fetch, `${BASE_API_URL}/pmbok/responsibility-roles/?is_visible=true`),
+		fetchJson(fetch, `${BASE_API_URL}/actors/`),
+		fetchJson(fetch, `${BASE_API_URL}/task-templates/`),
+		fetchJson(fetch, `${BASE_API_URL}/workflows/workflows/`),
+		fetchJson(fetch, `${BASE_API_URL}/workflows/workflows/creatable-models/`)
+	]);
 	if (!graph) error(404, 'Graph not found');
 
 	// Options for the create_object FK selects, driven by the backend registry.
+	// Folders are always fetched: the provisioning actions need them regardless
+	// of what the registry declares.
 	const creatableModels = listResults(creatableModelsRaw);
 	const fkEndpoints = [
-		...new Set(
-			creatableModels.flatMap((entry: any) => Object.values(entry.fk_fields ?? {}))
-		)
+		...new Set([
+			...creatableModels.flatMap((entry: any) => Object.values(entry.fk_fields ?? {})),
+			'folders'
+		])
 	] as string[];
 	const fkOptions: Record<string, any[]> = {};
 	await Promise.all(
 		fkEndpoints.map(async (endpoint) => {
-			fkOptions[endpoint] = listResults(
-				await fetchJson(fetch, `${BASE_API_URL}/${endpoint}/`)
-			);
+			fkOptions[endpoint] = listResults(await fetchJson(fetch, `${BASE_API_URL}/${endpoint}/`));
 		})
 	);
 
@@ -73,9 +67,7 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 		actors: listResults(actors),
 		taskTemplates: listResults(taskTemplates),
 		// A workflow can't be its own subprocess.
-		subprocessCandidates: listResults(workflows).filter(
-			(w: any) => w.id !== workflow.id
-		),
+		subprocessCandidates: listResults(workflows).filter((w: any) => w.id !== workflow.id),
 		creatableModels,
 		fkOptions,
 		title: workflow.name

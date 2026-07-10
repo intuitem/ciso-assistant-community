@@ -39,7 +39,26 @@
 
 	// emit_event is hidden pending the event-node redesign (correlation +
 	// buffering); the engine still executes it for graphs that carry it.
-	const ACTION_TYPES = ['create_object', 'send_email', 'set_variables', 'log'];
+	const ACTION_TYPES = [
+		'create_object',
+		'http_request',
+		'send_email',
+		'provision_folder',
+		'provision_user',
+		'manage_group_membership',
+		'set_variables',
+		'log'
+	];
+
+	const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
+
+	const BUILTIN_GROUPS = [
+		{ code: 'BI-UG-AUD', label: 'reader' },
+		{ code: 'BI-UG-APP', label: 'approver' },
+		{ code: 'BI-UG-ANA', label: 'analyst' },
+		{ code: 'BI-UG-DMA', label: 'domainManager' },
+		{ code: 'BI-UG-ADE', label: 'auditee' }
+	];
 
 	const CONDITION_OPS = [
 		'eq',
@@ -61,8 +80,23 @@
 	const ACTION_CONFIG_DEFAULTS: Record<string, object> = {
 		log: { message: '' },
 		set_variables: { variables: {} },
-		create_object: { model: 'applied_control', fields: { name: '' } },
+		create_object: { model: 'applied_control', fields: { name: '' }, upsert: false },
+		http_request: { method: 'GET', url: '', headers: {}, body: '', timeout: 15 },
 		send_email: { recipients: '', subject: '', body: '' },
+		provision_folder: { name: '', parent: '', create_default_groups: true },
+		provision_user: {
+			email: '',
+			first_name: '',
+			last_name: '',
+			is_active: true,
+			send_onboarding_email: false
+		},
+		manage_group_membership: {
+			user: '',
+			folder: '',
+			builtin_group: 'BI-UG-ANA',
+			operation: 'add'
+		},
 		emit_event: { event_key: '' }
 	};
 
@@ -134,6 +168,45 @@
 		onChange();
 	}
 
+	// HTTP headers are a plain dict in the config, but editing keys in place
+	// would recreate the inputs on every keystroke. Edit an entries array
+	// instead and write the whole dict back on every change.
+	let headerEntries = $state<{ key: string; value: string }[]>([]);
+	let headerEntriesNodeId: string | null = null;
+	$effect(() => {
+		const nodeId =
+			nodeDomain?.type === 'action' && actionConfig?.type === 'http_request'
+				? selectedNode.id
+				: null;
+		if (nodeId !== headerEntriesNodeId) {
+			headerEntriesNodeId = nodeId;
+			headerEntries = nodeId
+				? Object.entries(actionConfig.headers ?? {}).map(([key, value]) => ({
+						key,
+						value: String(value)
+					}))
+				: [];
+		}
+	});
+
+	function syncHeaders() {
+		const headers: Record<string, string> = {};
+		for (const entry of headerEntries) {
+			if (entry.key.trim()) headers[entry.key.trim()] = entry.value;
+		}
+		actionConfig.headers = headers;
+		onChange();
+	}
+
+	function addHeaderRow() {
+		headerEntries = [...headerEntries, { key: '', value: '' }];
+	}
+
+	function removeHeaderRow(index: number) {
+		headerEntries = headerEntries.filter((_, i) => i !== index);
+		syncHeaders();
+	}
+
 	function optionLabel(option: Option): string {
 		return option.name ?? option.str ?? option.id;
 	}
@@ -155,9 +228,7 @@
 	}
 
 	function removeAssignment(index: number) {
-		nodeDomain.assignments = nodeDomain.assignments.filter(
-			(_: unknown, i: number) => i !== index
-		);
+		nodeDomain.assignments = nodeDomain.assignments.filter((_: unknown, i: number) => i !== index);
 		onChange();
 	}
 
@@ -169,9 +240,7 @@
 
 	function rootGroup() {
 		if (!edgeDomain.condition_groups.length) {
-			edgeDomain.condition_groups = [
-				{ operator: 'and', order: 0, conditions: [], children: [] }
-			];
+			edgeDomain.condition_groups = [{ operator: 'and', order: 0, conditions: [], children: [] }];
 		}
 		return edgeDomain.condition_groups[0];
 	}
@@ -280,6 +349,18 @@
 							{/each}
 						</select>
 					</label>
+					<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+						<input
+							type="checkbox"
+							class="checkbox scale-75"
+							bind:checked={actionConfig.upsert}
+							onchange={onChange}
+						/>
+						{m.upsertExisting()}
+						{#if creatableEntry?.match_on}
+							<span class="text-[10px] text-surface-500">(match on {creatableEntry.match_on})</span>
+						{/if}
+					</label>
 					{#each creatableEntry?.fields ?? [] as field (field)}
 						<label>
 							{@render fieldLabel(safeTranslate(field))}
@@ -329,6 +410,89 @@
 							</select>
 						</label>
 					{/each}
+				{:else if actionConfig.type === 'http_request'}
+					<label>
+						{@render fieldLabel(m.httpMethod())}
+						<select
+							class="select w-full text-sm"
+							bind:value={actionConfig.method}
+							onchange={onChange}
+						>
+							{#each HTTP_METHODS as method}
+								<option value={method}>{method}</option>
+							{/each}
+						</select>
+					</label>
+					<label>
+						{@render fieldLabel(m.httpUrl())}
+						<input
+							type="text"
+							class="input w-full text-sm font-mono"
+							placeholder="https://api.acme.com/tickets"
+							bind:value={actionConfig.url}
+							oninput={onChange}
+						/>
+					</label>
+					<div>
+						<div class="flex items-center justify-between mb-1">
+							{@render fieldLabel(m.httpHeaders())}
+							<button
+								type="button"
+								class="text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer font-semibold"
+								onclick={addHeaderRow}
+							>
+								<i class="fa-solid fa-plus mr-0.5"></i>{m.addHeader()}
+							</button>
+						</div>
+						{#each headerEntries as entry, index (index)}
+							<div class="flex items-center gap-1 mb-1">
+								<input
+									type="text"
+									class="input text-xs w-24 min-w-0 font-mono shrink-0"
+									placeholder="Header"
+									bind:value={entry.key}
+									oninput={syncHeaders}
+								/>
+								<input
+									type="text"
+									class="input text-xs flex-1 min-w-0 font-mono"
+									bind:value={entry.value}
+									oninput={syncHeaders}
+								/>
+								<button
+									type="button"
+									aria-label="Remove header"
+									class="text-error-500 hover:text-error-600 cursor-pointer text-xs shrink-0"
+									onclick={() => removeHeaderRow(index)}
+								>
+									<i class="fa-solid fa-xmark"></i>
+								</button>
+							</div>
+						{/each}
+					</div>
+					<label>
+						{@render fieldLabel(m.httpBody())}
+						<textarea
+							class="input w-full text-sm font-mono"
+							rows="3"
+							bind:value={actionConfig.body}
+							oninput={onChange}
+						></textarea>
+					</label>
+					<label>
+						{@render fieldLabel(m.httpTimeout())}
+						<input
+							type="number"
+							class="input w-full text-sm"
+							min="1"
+							max="30"
+							bind:value={actionConfig.timeout}
+							oninput={onChange}
+						/>
+					</label>
+					<p class="text-[10px] text-surface-500 leading-relaxed">
+						<i class="fa-solid fa-key mr-1"></i>{m.secretsHint({ syntax: '{{secrets.name}}' })}
+					</p>
 				{:else if actionConfig.type === 'send_email'}
 					<label>
 						{@render fieldLabel(m.emailRecipients())}
@@ -358,6 +522,161 @@
 							oninput={onChange}
 						></textarea>
 					</label>
+				{:else if actionConfig.type === 'provision_folder'}
+					<label>
+						{@render fieldLabel(m.provisionFolderName())}
+						<input
+							type="text"
+							class="input w-full text-sm"
+							placeholder={'HR — {{department}}'}
+							bind:value={actionConfig.name}
+							oninput={onChange}
+						/>
+					</label>
+					<label>
+						{@render fieldLabel(m.parentFolder())}
+						<select
+							class="select w-full text-sm"
+							bind:value={actionConfig.parent}
+							onchange={onChange}
+						>
+							<option value={''}>—</option>
+							{#if fkOptions['folders']?.length}
+								<optgroup label={safeTranslate('folders')}>
+									{#each fkOptions['folders'] as option (option.id)}
+										<option value={option.id}>{optionLabel(option)}</option>
+									{/each}
+								</optgroup>
+							{/if}
+							{#if variables.length}
+								<optgroup label={m.workflowVariables()}>
+									{#each variables as variable (variable.id)}
+										<option value={'{{' + variable.key + '}}'}>
+											{'{{' + variable.key + '}}'}
+										</option>
+									{/each}
+								</optgroup>
+							{/if}
+						</select>
+					</label>
+					<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+						<input
+							type="checkbox"
+							class="checkbox scale-75"
+							bind:checked={actionConfig.create_default_groups}
+							onchange={onChange}
+						/>
+						{m.createDefaultGroups()}
+					</label>
+				{:else if actionConfig.type === 'provision_user'}
+					<label>
+						{@render fieldLabel(m.userEmail())}
+						<input
+							type="text"
+							class="input w-full text-sm"
+							placeholder="jane@acme.com or {'{{contact_email}}'}"
+							bind:value={actionConfig.email}
+							oninput={onChange}
+						/>
+					</label>
+					<label>
+						{@render fieldLabel(m.firstName())}
+						<input
+							type="text"
+							class="input w-full text-sm"
+							bind:value={actionConfig.first_name}
+							oninput={onChange}
+						/>
+					</label>
+					<label>
+						{@render fieldLabel(m.lastName())}
+						<input
+							type="text"
+							class="input w-full text-sm"
+							bind:value={actionConfig.last_name}
+							oninput={onChange}
+						/>
+					</label>
+					<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+						<input
+							type="checkbox"
+							class="checkbox scale-75"
+							bind:checked={actionConfig.is_active}
+							onchange={onChange}
+						/>
+						{m.isActiveUser()}
+					</label>
+					<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+						<input
+							type="checkbox"
+							class="checkbox scale-75"
+							bind:checked={actionConfig.send_onboarding_email}
+							onchange={onChange}
+						/>
+						{m.sendOnboardingEmail()}
+					</label>
+				{:else if actionConfig.type === 'manage_group_membership'}
+					<label>
+						{@render fieldLabel(m.membershipUser())}
+						<input
+							type="text"
+							class="input w-full text-sm"
+							placeholder="jane@acme.com or {'{{contact_email}}'}"
+							bind:value={actionConfig.user}
+							oninput={onChange}
+						/>
+					</label>
+					<label>
+						{@render fieldLabel(m.folder())}
+						<select
+							class="select w-full text-sm"
+							bind:value={actionConfig.folder}
+							onchange={onChange}
+						>
+							<option value={''}>—</option>
+							{#if fkOptions['folders']?.length}
+								<optgroup label={safeTranslate('folders')}>
+									{#each fkOptions['folders'] as option (option.id)}
+										<option value={option.id}>{optionLabel(option)}</option>
+									{/each}
+								</optgroup>
+							{/if}
+							{#if variables.length}
+								<optgroup label={m.workflowVariables()}>
+									{#each variables as variable (variable.id)}
+										<option value={'{{' + variable.key + '}}'}>
+											{'{{' + variable.key + '}}'}
+										</option>
+									{/each}
+								</optgroup>
+							{/if}
+						</select>
+					</label>
+					<div class="grid grid-cols-2 gap-2">
+						<label>
+							{@render fieldLabel(m.builtinGroup())}
+							<select
+								class="select w-full text-xs"
+								bind:value={actionConfig.builtin_group}
+								onchange={onChange}
+							>
+								{#each BUILTIN_GROUPS as group (group.code)}
+									<option value={group.code}>{safeTranslate(group.label)}</option>
+								{/each}
+							</select>
+						</label>
+						<label>
+							{@render fieldLabel(m.membershipOperation())}
+							<select
+								class="select w-full text-xs"
+								bind:value={actionConfig.operation}
+								onchange={onChange}
+							>
+								<option value="add">{m.operationAdd()}</option>
+								<option value="remove">{m.operationRemove()}</option>
+							</select>
+						</label>
+					</div>
 				{:else if actionConfig.type === 'emit_event'}
 					<label>
 						{@render fieldLabel(m.eventKey())}
@@ -546,7 +865,9 @@
 					</div>
 					<div class="space-y-2">
 						{#each nodeDomain.assignments as assignment, index}
-							<div class="rounded-base border border-surface-200-800 bg-surface-50-950 p-2 space-y-1.5">
+							<div
+								class="rounded-base border border-surface-200-800 bg-surface-50-950 p-2 space-y-1.5"
+							>
 								<div class="flex items-center gap-1.5">
 									<select
 										class="select text-xs w-20 shrink-0"

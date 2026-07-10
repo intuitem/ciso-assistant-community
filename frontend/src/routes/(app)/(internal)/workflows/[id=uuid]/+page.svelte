@@ -32,6 +32,7 @@
 				graph={data.graph}
 				workflowId={data.workflow.id}
 				versionId={data.activeVersion.id}
+				folderId={data.workflow.folder.id}
 				{readonly}
 				roles={data.roles}
 				actors={data.actors}

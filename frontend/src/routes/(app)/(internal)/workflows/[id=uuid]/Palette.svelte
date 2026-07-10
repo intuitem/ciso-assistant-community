@@ -7,20 +7,35 @@
 		type: string;
 	}
 
+	interface Secret {
+		id: string;
+		name: string;
+	}
+
 	interface Props {
 		hasStart: boolean;
 		variables: Variable[];
+		secrets: Secret[];
 		onAdd: (nodeType: string) => void;
 		onAddVariable: (key: string, type: string) => void;
 		onRemoveVariable: (id: string) => void;
+		onAddSecret: (name: string, value: string) => void;
+		onRemoveSecret: (id: string) => void;
 	}
 
-	let { hasStart, variables, onAdd, onAddVariable, onRemoveVariable }: Props = $props();
+	let {
+		hasStart,
+		variables,
+		secrets,
+		onAdd,
+		onAddVariable,
+		onRemoveVariable,
+		onAddSecret,
+		onRemoveSecret
+	}: Props = $props();
 
 	const PALETTE = $derived([
-		...(hasStart
-			? []
-			: [{ type: 'start', icon: 'fa-play', label: m.workflowNodeStart() }]),
+		...(hasStart ? [] : [{ type: 'start', icon: 'fa-play', label: m.workflowNodeStart() }]),
 		{ type: 'task', icon: 'fa-clipboard-check', label: m.workflowNodeTask() },
 		{ type: 'condition', icon: 'fa-code-branch', label: m.workflowNodeCondition() },
 		{ type: 'action', icon: 'fa-bolt', label: m.workflowNodeAction() },
@@ -39,6 +54,18 @@
 		if (!key) return;
 		onAddVariable(key, newVariableType);
 		newVariableKey = '';
+	}
+
+	let newSecretName = $state('');
+	let newSecretValue = $state('');
+
+	function submitSecret(event: Event) {
+		event.preventDefault();
+		const name = newSecretName.trim();
+		if (!name || !newSecretValue) return;
+		onAddSecret(name, newSecretValue);
+		newSecretName = '';
+		newSecretValue = '';
 	}
 
 	function handleDragStart(event: DragEvent, nodeType: string) {
@@ -111,6 +138,48 @@
 				aria-label={m.addVariable()}
 				class="btn-icon preset-tonal w-6 h-6 text-xs"
 				disabled={!newVariableKey.trim()}
+			>
+				<i class="fa-solid fa-plus"></i>
+			</button>
+		</form>
+	</div>
+
+	<div class="p-3 border-t border-surface-200-800">
+		<h3 class="text-xs font-semibold uppercase tracking-wide text-surface-600-400 mb-2">
+			<i class="fa-solid fa-lock mr-1"></i>{m.workflowSecrets()}
+		</h3>
+		{#each secrets as secret (secret.id)}
+			<div class="flex items-center gap-1.5 py-1 text-xs group">
+				<i class="fa-solid fa-key text-[9px] text-surface-500"></i>
+				<span class="font-mono text-surface-800-200 truncate">{secret.name}</span>
+				<button
+					type="button"
+					aria-label="Remove secret"
+					class="ml-auto opacity-0 group-hover:opacity-100 text-error-500 hover:text-error-600 cursor-pointer text-[10px] transition-opacity"
+					onclick={() => onRemoveSecret(secret.id)}
+				>
+					<i class="fa-solid fa-xmark"></i>
+				</button>
+			</div>
+		{/each}
+		<form class="flex items-center gap-1 mt-2" onsubmit={submitSecret}>
+			<input
+				type="text"
+				class="input text-xs px-1.5 py-1 min-w-0 flex-1"
+				placeholder={m.secretName()}
+				bind:value={newSecretName}
+			/>
+			<input
+				type="password"
+				class="input text-xs px-1.5 py-1 min-w-0 flex-1"
+				placeholder={m.secretValue()}
+				bind:value={newSecretValue}
+			/>
+			<button
+				type="submit"
+				aria-label={m.addSecret()}
+				class="btn-icon preset-tonal w-6 h-6 text-xs shrink-0"
+				disabled={!newSecretName.trim() || !newSecretValue}
 			>
 				<i class="fa-solid fa-plus"></i>
 			</button>
