@@ -186,6 +186,23 @@ class DocumentContainerViewSet(BaseModelViewSet):
     search_fields = ["name", "ref_id"]
     serializers_module = "doc_management.serializers"
 
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("folder", "classification")
+            .prefetch_related(
+                "policies",
+                "applied_controls",
+                "task_templates",
+                "processings",
+                models.Prefetch(
+                    "documents",
+                    queryset=ManagedDocument.objects.select_related("current_revision"),
+                ),
+            )
+        )
+
     @action(detail=False, name="Get document type choices")
     def document_type(self, request):
         return Response(

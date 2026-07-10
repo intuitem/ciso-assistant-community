@@ -30,8 +30,16 @@ class DocumentContainerReadSerializer(BaseModelSerializer):
         model = DocumentContainer
         fields = "__all__"
 
+    def _default_doc(self, obj):
+        if not hasattr(obj, "_cached_default_doc"):
+            docs = list(obj.documents.all())
+            obj._cached_default_doc = next(
+                (d for d in docs if d.default_locale), docs[0] if docs else None
+            )
+        return obj._cached_default_doc
+
     def get_source(self, obj):
-        doc = obj.documents.filter(default_locale=True).first() or obj.documents.first()
+        doc = self._default_doc(obj)
         if doc and doc.current_revision_id:
             return doc.current_revision.source
         return None
@@ -50,12 +58,12 @@ class DocumentContainerReadSerializer(BaseModelSerializer):
         }
 
     def get_document_count(self, obj):
-        return obj.documents.count()
+        return len(obj.documents.all())
 
     def get_status(self, obj):
         """Workflow state of the container, taken from the default-locale
         document's current revision (falls back to any document)."""
-        doc = obj.documents.filter(default_locale=True).first() or obj.documents.first()
+        doc = self._default_doc(obj)
         if doc and doc.current_revision_id:
             return doc.current_revision.status
         return None
