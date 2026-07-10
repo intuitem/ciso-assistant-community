@@ -622,7 +622,9 @@ def find_owning_library_urn(urn: str):
     return None
 
 
-def find_stored_owner_urn(urn: str, *, index_cache: dict | None = None):
+def find_stored_owner_urn(
+    urn: str, *, index_cache: dict | None = None, accessible_ids=None
+):
     """Best-effort resolution of the *stored* library owning an object URN.
 
     Complements find_owning_library_urn for libraries that are stored but
@@ -633,7 +635,12 @@ def find_stored_owner_urn(urn: str, *, index_cache: dict | None = None):
     `index_cache` maps candidate library URNs to their content's URN set
     (None when no such stored library exists). Callers resolving many
     references pass one shared dict so each candidate library's content is
-    fetched and indexed once, not once per reference.
+    fetched and indexed once, not once per reference. The cache embeds the
+    visibility scope — never share it across users.
+
+    `accessible_ids` restricts resolution to those stored-library ids
+    (reading with the requesting user's eyes — an unreadable library is
+    indistinguishable from a missing one); None means system context.
     """
     from core.models import StoredLibrary
 
@@ -653,8 +660,11 @@ def find_stored_owner_urn(urn: str, *, index_cache: dict | None = None):
         index_cache = {}
     unknown = [candidate for candidate in candidates if candidate not in index_cache]
     if unknown:
+        queryset = StoredLibrary.objects.filter(urn__in=unknown)
+        if accessible_ids is not None:
+            queryset = queryset.filter(id__in=accessible_ids)
         rows: dict = {}
-        for stored in StoredLibrary.objects.filter(urn__in=unknown):
+        for stored in queryset:
             current = rows.get(stored.urn)
             if current is None or stored.version > current.version:
                 rows[stored.urn] = stored
@@ -670,6 +680,25 @@ def find_stored_owner_urn(urn: str, *, index_cache: dict | None = None):
         if members and lowered in members:
             return candidate
     return None
+
+
+def accessible_stored_library_ids(user):
+    """The stored-library ids the user may read, or None for system context.
+
+    Resolution helpers accept this as their visibility scope so corpus
+    lookups made on behalf of a user request never see more than the user
+    could read directly.
+    """
+    if user is None:
+        return None
+    from core.models import StoredLibrary
+    from iam.models import Folder, RoleAssignment
+
+    return set(
+        RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), user, StoredLibrary
+        )[0]
+    )
 
 
 def check_identity_conflicts(packager: str, ref_id: str, exclude_draft_id=None) -> list:
@@ -748,9 +777,14 @@ def check_identity_conflicts(packager: str, ref_id: str, exclude_draft_id=None) 
     return conflicts
 
 
-def validate_draft_document(draft) -> dict:
+def validate_draft_document(draft, *, user=None) -> dict:
     """Dry-run validation of a draft: loader field validation + reference
-    integrity + advisory identity conflicts. Never writes anything."""
+    integrity + advisory identity conflicts. Never writes anything.
+
+    When `user` is given, corpus lookups (stored-library contents backing
+    dependencies and reference resolution) are scoped to what that user may
+    read; hidden libraries behave as missing and their references come back
+    unresolved. None means system context (unscoped)."""
     from core.models import StoredLibrary
     from library.utils import LibraryImporter
 
@@ -786,7 +820,7 @@ def validate_draft_document(draft) -> dict:
         except Exception as exc:
             errors.append(str(exc))
 
-    errors.extend(_check_reference_integrity(draft))
+    errors.extend(_check_reference_integrity(draft, user=user))
 
     if not draft.identity_locked:
         for conflict in check_identity_conflicts(
@@ -800,9 +834,13 @@ def validate_draft_document(draft) -> dict:
     return {"errors": errors, "warnings": warnings}
 
 
-def _check_reference_integrity(draft) -> list:
+def _check_reference_integrity(draft, user=None) -> list:
     """Internal references must resolve within the draft; references leaving
-    the draft must resolve to a known library, which must be a dependency."""
+    the draft must resolve to a known library, which must be a dependency.
+
+    Corpus lookups are scoped to `user` when given (see
+    validate_draft_document): a hidden stored library neither covers
+    references nor gets named in error messages."""
     from core.models import StoredLibrary
 
     errors = []
@@ -816,6 +854,7 @@ def _check_reference_integrity(draft) -> list:
 
     declared_dependencies = {str(dep).lower() for dep in draft.dependencies or []}
     own_urn = str(draft.effective_urn or "").lower()
+    accessible = accessible_stored_library_ids(user)
     stored_index_cache: dict = {}  # shared across refs, see find_stored_owner_urn
     dependency_contents = None  # lazily-built URN index of dependency libraries
 
@@ -823,7 +862,10 @@ def _check_reference_integrity(draft) -> list:
         nonlocal dependency_contents
         if dependency_contents is None:
             dependency_contents = set()
-            for stored in StoredLibrary.objects.filter(urn__in=declared_dependencies):
+            queryset = StoredLibrary.objects.filter(urn__in=declared_dependencies)
+            if accessible is not None:
+                queryset = queryset.filter(id__in=accessible)
+            for stored in queryset:
                 dependency_contents.update(
                     index_objects(normalize_objects(stored.content or {})).keys()
                 )
@@ -837,7 +879,9 @@ def _check_reference_integrity(draft) -> list:
         if owner is None and lowered not in dependency_urns():
             # Not loaded, not covered by a declared dependency: a stored
             # library may still own it (better message than "unresolved").
-            owner = find_stored_owner_urn(lowered, index_cache=stored_index_cache)
+            owner = find_stored_owner_urn(
+                lowered, index_cache=stored_index_cache, accessible_ids=accessible
+            )
             if owner is None:
                 errors.append(f"{where}: unresolved reference {ref}")
                 return

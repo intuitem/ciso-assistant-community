@@ -1004,7 +1004,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
     def validate(self, request, pk):
         """Dry-run the loader-level validation and reference integrity checks."""
         draft = self.get_object()
-        return Response(builder.validate_draft_document(draft))
+        return Response(builder.validate_draft_document(draft, user=request.user))
 
     @action(detail=True, methods=["get"])
     def export(self, request, pk):
@@ -1255,19 +1255,21 @@ class LibraryDraftViewSet(BaseModelViewSet):
         frameworks[frameworks.index(framework)] = new_framework
         draft.content = content
         update_fields = ["content", "updated_at"]
-        if self._sync_link_dependencies(draft, content, new_framework):
+        if self._sync_link_dependencies(draft, content, new_framework, request.user):
             update_fields.append("dependencies")
         draft.save(update_fields=update_fields)
         return Response({"status": "ok", "framework_urn": new_framework["urn"]})
 
     @staticmethod
-    def _sync_link_dependencies(draft, content, framework) -> bool:
+    def _sync_link_dependencies(draft, content, framework, user) -> bool:
         """Auto-declare the dependencies backing external node links.
 
         References are dependency-scoped: linking a threat/reference control
         from a library that is not yet a dependency of the draft declares it
         (the picker offers external objects; the save records the provenance).
-        Unresolvable references are left for validate/publish to flag.
+        Resolution reads with the requesting user's eyes — a stored library
+        the user cannot read is never named in the dependencies. Unresolvable
+        references are left for validate/publish to flag.
         """
         refs = set()
         for node in framework.get("requirement_nodes") or []:
@@ -1277,9 +1279,13 @@ class LibraryDraftViewSet(BaseModelViewSet):
         if not refs:
             return False
         declared = {str(dep).lower() for dep in draft.dependencies or []}
+        accessible = builder.accessible_stored_library_ids(user)
         covered = set()
         if declared:
-            for stored in StoredLibrary.objects.filter(urn__in=declared):
+            queryset = StoredLibrary.objects.filter(urn__in=declared)
+            if accessible is not None:
+                queryset = queryset.filter(id__in=accessible)
+            for stored in queryset:
                 covered.update(
                     builder.index_objects(
                         builder.normalize_objects(stored.content or {})
@@ -1291,7 +1297,9 @@ class LibraryDraftViewSet(BaseModelViewSet):
         for ref in refs - covered:
             owner = builder.find_owning_library_urn(
                 ref
-            ) or builder.find_stored_owner_urn(ref, index_cache=stored_index_cache)
+            ) or builder.find_stored_owner_urn(
+                ref, index_cache=stored_index_cache, accessible_ids=accessible
+            )
             if owner and owner.lower() not in declared and owner.lower() != own_urn:
                 declared.add(owner.lower())
                 added.add(owner.lower())
@@ -1883,7 +1891,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
             ):
                 return Response(status=HTTP_403_FORBIDDEN)
 
-        validation = builder.validate_draft_document(draft)
+        validation = builder.validate_draft_document(draft, user=request.user)
         if validation["errors"]:
             return Response(
                 {"error": "draftValidationFailed", "details": validation["errors"]},

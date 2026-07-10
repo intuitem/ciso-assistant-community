@@ -1630,3 +1630,68 @@ def test_stored_library_reads_stay_open_for_standard_roles(admin_client):
     assert detail.status_code == status.HTTP_200_OK
     content = admin_client.get(reverse("stored-libraries-content", args=[source_urn]))
     assert content.status_code == status.HTTP_200_OK
+
+
+@pytest.mark.django_db
+def test_validation_and_dependency_sync_read_with_the_users_eyes(builder_only_client):
+    """A hidden stored library is never named by validation, never covers
+    declared dependencies, and is never auto-declared by the editor save."""
+    hidden_ref = "urn:intuitem:risk:function:doc-pol:pol.educ"
+    content = {
+        "frameworks": [
+            {
+                "urn": "urn:me:risk:framework:problib",
+                "ref_id": "FW",
+                "name": "FW",
+                "requirement_nodes": [
+                    {
+                        "urn": "urn:me:risk:req_node:problib:a",
+                        "assessable": True,
+                        "depth": 1,
+                        "name": "A",
+                        "reference_controls": [hidden_ref],
+                    }
+                ],
+            }
+        ]
+    }
+    created = builder_only_client.post(
+        reverse("library-drafts-list"),
+        {"name": "Probe", "packager": "me", "ref_id": "problib", "content": content},
+        format="json",
+    )
+    assert created.status_code == status.HTTP_201_CREATED, created.content
+    draft_id = created.data["id"]
+    detail_url = reverse("library-drafts-detail", args=[draft_id])
+    validate_url = reverse("library-drafts-validate", args=[draft_id])
+
+    # 1. No existence oracle: the reference comes back unresolved (echoing
+    # the user's own input), never "requires a dependency on <hidden lib>".
+    validation = builder_only_client.get(validate_url).data
+    assert any("unresolved reference" in e for e in validation["errors"]), validation
+    assert not any("requires a dependency" in e for e in validation["errors"]), (
+        validation
+    )
+
+    # 2. Declaring the hidden library does not cover the reference.
+    patched = builder_only_client.patch(
+        detail_url,
+        {"dependencies": ["urn:intuitem:risk:library:doc-pol"]},
+        format="json",
+    )
+    assert patched.status_code == status.HTTP_200_OK, patched.content
+    validation = builder_only_client.get(validate_url).data
+    assert any("unresolved reference" in e for e in validation["errors"]), validation
+
+    # 3. The editor save never auto-declares the hidden library.
+    assert (
+        builder_only_client.patch(
+            detail_url, {"dependencies": []}, format="json"
+        ).status_code
+        == status.HTTP_200_OK
+    )
+    editor_url = reverse("library-drafts-framework-editor", args=[draft_id])
+    doc = builder_only_client.get(editor_url).data["editing_draft"]
+    put = builder_only_client.put(editor_url, {"editing_draft": doc}, format="json")
+    assert put.status_code == status.HTTP_200_OK, put.content
+    assert builder_only_client.get(detail_url).data["dependencies"] in ([], None)
