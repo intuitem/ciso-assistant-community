@@ -208,7 +208,7 @@
 	const showColumnSelector = $derived(
 		(columnSelector ?? Boolean(deleteForm)) &&
 			Boolean(URLModel) &&
-			isStandaloneTable &&
+			(columnSelector === true || isStandaloneTable) &&
 			fields.length === 0 &&
 			allColumns.length > 1
 	);
@@ -377,7 +377,7 @@
 		(Object.hasOwn(row?.meta, 'reference_count') && row?.meta?.reference_count > 0) ||
 		['severity_changed', 'status_changed'].includes(row?.meta?.entry_type) ||
 		forcePreventDelete;
-	const preventEdit = (row: TableSource) => forcePreventEdit;
+	const preventEdit = (row: TableSource) => row?.meta?.builtin || forcePreventEdit;
 
 	const tableURLModel = URLModel;
 
@@ -758,9 +758,11 @@
 		}
 		previousRowSignature = sig;
 	});
+
+	let tableWrapEl: HTMLElement | undefined = $state();
 </script>
 
-<div class="card table-wrap {classesBase}">
+<div class="card table-wrap {classesBase}" bind:this={tableWrapEl}>
 	<header class="flex items-center justify-between gap-2 px-2 h-16">
 		{#if hasBatchActions && selectedIds.size > 0}
 			<BatchActionBar
@@ -1264,7 +1266,7 @@
 			<RowCount {handler} />
 		{/if}
 		{#if pagination}
-			<Pagination {handler} {URLModel} />
+			<Pagination {handler} {URLModel} scrollTarget={tableWrapEl} />
 		{/if}
 	</footer>
 </div>

@@ -683,6 +683,7 @@ export const FeatureFlagsSchema = z.object({
 	comments: z.boolean().optional(),
 	journeys: z.boolean().optional(),
 	policy_documents: z.boolean().optional(),
+	document_management: z.boolean().optional(),
 	security_advisories: z.boolean().optional(),
 	cwes: z.boolean().optional(),
 	object_audit_trail: z.boolean().optional(),
@@ -1634,6 +1635,23 @@ export const TerminologySchema = z.object({
 	translations: z.record(z.string().min(1), z.string().min(1))
 });
 
+export const ObjectClassificationSchema = z.object({
+	...NameDescriptionMixin,
+	ref_id: z.string().optional().default(''),
+	is_visible: z.boolean().default(true),
+	translations: z.record(z.string().min(1), z.string().min(1)).optional()
+});
+
+export const ClassificationLevelSchema = z.object({
+	...NameDescriptionMixin,
+	object_classification: z.string(),
+	rank: z.number().int().min(0).default(0),
+	abbreviation: z.string().optional().default(''),
+	hexcolor: z.string().optional().default(''),
+	is_visible: z.boolean().default(true),
+	translations: z.record(z.string().min(1), z.string().min(1)).optional()
+});
+
 export const RoleSchema = z.object({
 	...NameDescriptionMixin,
 	permissions: z.array(z.number()).optional()
@@ -1833,6 +1851,31 @@ export const teamSchema = z.object({
 	deputies: z.array(z.string().uuid().optional()).optional()
 });
 
+export const DocumentContainerSchema = z.object({
+	ref_id: z.string().max(100).optional().default(''),
+	name: z.string().max(200).optional().default(''),
+	description: z.string().optional().default(''),
+	document_type: z.string().optional().default('policy'),
+	folder: z.string(),
+	classification: z.string().uuid().optional().nullable(),
+	policies: z.array(z.string().uuid()).optional().default([]),
+	applied_controls: z.array(z.string().uuid()).optional().default([]),
+	task_templates: z.array(z.string().uuid()).optional().default([]),
+	processings: z.array(z.string().uuid()).optional().default([]),
+	filtering_labels: z.array(z.string()).optional().default([])
+});
+
+export const DocumentTemplateSchema = z.object({
+	ref_id: z.string().max(100),
+	name: z.string().max(200),
+	description: z.string().optional().default(''),
+	provider: z.string().max(200).optional().default(''),
+	document_type: z.string().optional().default('policy'),
+	content: z.string().optional().default(''),
+	locale: z.string().optional().default('en'),
+	folder: z.string()
+});
+
 export const ManagedDocumentSchema = z.object({
 	name: z.string().max(200).optional().default(''),
 	description: z.string().optional().default(''),
@@ -1931,6 +1974,8 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'quantitative-risk-scenarios': quantitativeRiskScenarioSchema,
 	'quantitative-risk-hypotheses': quantitativeRiskHypothesisSchema,
 	terminologies: TerminologySchema,
+	'object-classifications': ObjectClassificationSchema,
+	'classification-levels': ClassificationLevelSchema,
 	'custom-fields': CustomFieldDefinitionSchema,
 	roles: RoleSchema,
 	'generic-collections': GenericCollectionSchema,
@@ -1949,6 +1994,8 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'dashboard-text-widgets': DashboardWidgetSchema,
 	'dashboard-builtin-widgets': DashboardWidgetSchema,
 	teams: teamSchema,
+	'document-containers': DocumentContainerSchema,
+	'document-templates': DocumentTemplateSchema,
 	'managed-documents': ManagedDocumentSchema,
 	'document-revisions': DocumentRevisionSchema
 };

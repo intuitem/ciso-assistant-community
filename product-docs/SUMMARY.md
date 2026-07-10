@@ -33,6 +33,7 @@
   * [Incidents](concepts/incidents.md)
 * Governance
   * [Policies](concepts/policies.md)
+  * [Documents](concepts/documents.md)
   * [Findings assessments](concepts/findings-assessments.md)
   * [Validation flows](concepts/validation-flows.md)
 * Risk
@@ -49,6 +50,7 @@
   * [Privacy register](concepts/privacy-register.md)
   * [Project management](concepts/project-management.md)
   * [Terminology](concepts/terminology.md)
+  * [Object classifications](concepts/object-classification.md)
 
 ## Installation
 
@@ -142,6 +144,9 @@
   * [Managing a collection](guides/collections.md)
   * [Managing an accreditation](guides/accreditations.md)
   * [Managing a responsibility matrix](guides/responsibility-matrix.md)
+* Documents
+  * [Authoring documents](guides/documents/authoring-documents.md)
+  * [Document templates](guides/documents/document-templates.md)
 * Third-party
   * [Third-Party Risk Management](guides/tprm.md)
   * [Common TPRM pitfalls](guides/tprm-challenges.md)

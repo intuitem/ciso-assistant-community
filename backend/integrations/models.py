@@ -1,3 +1,4 @@
+from auditlog.registry import auditlog
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.db import models
@@ -134,3 +135,16 @@ class SyncEvent(models.Model):
     error_details = models.TextField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+# Sync state (SyncMapping/SyncEvent) is high-volume and intentionally untracked.
+auditlog.register(
+    IntegrationProvider,
+    exclude_fields=["created_at", "updated_at", "is_published"],
+)
+auditlog.register(
+    IntegrationConfiguration,
+    exclude_fields=["created_at", "updated_at", "is_published", "last_sync_at"],
+    mask_fields=["credentials", "webhook_secret"],
+    mask_callable="global_settings.utils.redact_secret_value",
+)

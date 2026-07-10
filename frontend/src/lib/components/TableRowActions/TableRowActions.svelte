@@ -164,7 +164,7 @@
 		canEditObject &&
 			!disableEdit &&
 			URLModel &&
-			!['frameworks', 'risk-matrices', 'ebios-rm'].includes(URLModel) &&
+			!['frameworks', 'risk-matrices'].includes(URLModel) &&
 			editURL
 	);
 	let displayDelete = $derived(canDeleteObject && deleteForm !== null);
