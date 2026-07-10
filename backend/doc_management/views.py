@@ -458,6 +458,93 @@ class DocumentContainerViewSet(BaseModelViewSet):
             status=status.HTTP_201_CREATED,
         )
 
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="add-locale",
+        parser_classes=[JSONParser, MultiPartParser, FormParser],
+    )
+    def add_locale(self, request, pk=None):
+        """Add a new locale variant to this container with its first revision
+        (link or uploaded) in a single transaction. Atomic on purpose: creating
+        the locale document and then attaching the link/file as two calls could
+        leave an orphaned empty authored document if the second call failed."""
+        from django.core.validators import URLValidator
+
+        # get_object() enforces add_documentcontainer on the container's folder.
+        container = self.get_object()
+
+        locale = (request.data.get("locale") or "").strip()
+        if not locale:
+            return Response({"locale": "Required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        source = request.data.get("source")
+        if source == DocumentRevision.Source.LINK:
+            url = (request.data.get("url") or "").strip()
+            try:
+                URLValidator(schemes=["http", "https"])(url)
+            except DjangoValidationError:
+                return Response(
+                    {"url": "Enter a valid http(s) URL."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            revision_fields = {"source": DocumentRevision.Source.LINK, "url": url}
+        elif source == DocumentRevision.Source.UPLOADED:
+            upload = request.data.get("file")
+            if not upload:
+                return Response(
+                    {"file": "Required."}, status=status.HTTP_400_BAD_REQUEST
+                )
+            try:
+                validate_file_size(upload)
+                validate_file_name(upload)
+            except DjangoValidationError as e:
+                return Response(
+                    {"file": e.messages}, status=status.HTTP_400_BAD_REQUEST
+                )
+            revision_fields = {
+                "source": DocumentRevision.Source.UPLOADED,
+                "file": upload,
+            }
+        else:
+            return Response(
+                {"source": "Must be 'link' or 'uploaded'."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        with transaction.atomic():
+            siblings = ManagedDocument.objects.select_for_update().filter(
+                container=container
+            )
+            if siblings.filter(locale=locale).exists():
+                return Response(
+                    {"locale": "This language already exists."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            document = ManagedDocument.objects.create(
+                container=container,
+                locale=locale,
+                folder=container.folder,
+                default_locale=not siblings.exists(),
+            )
+            revision = DocumentRevision.objects.create(
+                document=document,
+                version_number=1,
+                status=DocumentRevision.Status.DRAFT,
+                author=request.user if request.user.is_authenticated else None,
+                **revision_fields,
+            )
+            document.current_revision = revision
+            document.save()
+        return Response(
+            {
+                "id": str(document.id),
+                "locale": document.locale,
+                "revision_id": str(revision.id),
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
 
 class ManagedDocumentViewSet(BaseModelViewSet):
     """
@@ -667,8 +754,12 @@ class ManagedDocumentViewSet(BaseModelViewSet):
                     status=DocumentRevision.Status.DRAFT,
                     author=request.user,
                 )
-            document.current_revision = revision
-            document.save()
+            # Don't repoint current_revision at an in-progress draft: it feeds the
+            # reader and the container's status, which must stay on the published
+            # revision (matches create-new-draft). Only set it for the first one.
+            if document.current_revision_id is None:
+                document.current_revision = revision
+                document.save()
         return Response(
             {
                 "id": str(revision.id),
@@ -724,8 +815,12 @@ class ManagedDocumentViewSet(BaseModelViewSet):
                     status=DocumentRevision.Status.DRAFT,
                     author=request.user,
                 )
-            document.current_revision = revision
-            document.save()
+            # Don't repoint current_revision at an in-progress draft: it feeds the
+            # reader and the container's status, which must stay on the published
+            # revision (matches create-new-draft). Only set it for the first one.
+            if document.current_revision_id is None:
+                document.current_revision = revision
+                document.save()
         return Response(
             {
                 "id": str(revision.id),
@@ -834,6 +929,19 @@ class DocumentRevisionViewSet(BaseModelViewSet):
 
     def perform_update(self, serializer):
         instance = self.get_object()
+        # Payload edits are only allowed while a revision is being drafted.
+        # Once it is submitted/validated/published, content is frozen — a new
+        # version must go through `create-new-draft`. Guards against tampering
+        # with an approved/published revision via a direct PATCH.
+        if instance.status not in (
+            DocumentRevision.Status.DRAFT,
+            DocumentRevision.Status.CHANGE_REQUESTED,
+        ):
+            raise ValidationError(
+                {
+                    "__all__": "This revision is locked. Create a new draft to make changes."
+                }
+            )
         # Optimistic concurrency: check updated_at hasn't changed
         expected_updated_at = self.request.data.get("expected_updated_at")
         if expected_updated_at and instance.status == DocumentRevision.Status.DRAFT:

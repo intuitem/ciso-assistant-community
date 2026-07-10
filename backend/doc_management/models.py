@@ -216,6 +216,12 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
         verbose_name = _("Document revision")
         verbose_name_plural = _("Document revisions")
 
+    @classmethod
+    def from_db(cls, db, field_names, values):
+        instance = super().from_db(db, field_names, values)
+        instance._loaded_content = instance.content
+        return instance
+
     def save(self, *args, **kwargs):
         self.folder = self.document.folder
         self.is_published = self.document.is_published
@@ -227,9 +233,12 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
             )
             if existing.exists():
                 raise ValidationError("Only one draft revision allowed per document.")
+        content_changed = getattr(self, "_loaded_content", None) != self.content
         super().save(*args, **kwargs)
-        # Keep the computed doc-to-doc references in sync with the content.
-        if self.document.container_id:
+        self._loaded_content = self.content
+        # References are derived from content only — skip the recompute (and its
+        # per-document scan) on status-only transitions and other no-content saves.
+        if content_changed and self.document.container_id:
             recompute_references(self.document.container)
 
     def validate(self, reviewer=None):

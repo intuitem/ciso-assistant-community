@@ -2,6 +2,14 @@
 	import { m } from '$paraglide/messages';
 	import { invalidateAll, goto } from '$app/navigation';
 	import { LOCALE_MAP } from '$lib/utils/locales';
+	import { getToastStore } from '$lib/components/Toast/stores';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
+	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 
 	interface Props {
 		parent: { id: string; name: string };
@@ -12,6 +20,9 @@
 
 	let { parent, data, proxyBase, backHref }: Props = $props();
 
+	const toastStore = getToastStore();
+	const modalStore: ModalStore = getModalStore();
+
 	let document = $derived(data.document);
 	let currentRevision = $derived(data.currentRevision);
 	let revisions = $derived((data.revisions ?? []) as any[]);
@@ -19,6 +30,7 @@
 
 	let editing = $state(false);
 	let editUrl = $state('');
+	let reviewerComments = $state('');
 
 	let availableLocales = $derived((data.availableLocales ?? []) as string[]);
 	let currentLocale = $derived((document?.locale ?? 'en') as string);
@@ -49,6 +61,10 @@
 	// Only a draft (or a brand-new locale with no revision yet) may change the link.
 	let canEditLink = $derived(isDraft || !currentRevision);
 
+	function notifyError(msg: string) {
+		toastStore.trigger({ message: msg, preset: 'error' });
+	}
+
 	async function proxyPost(body: Record<string, any>) {
 		busy = true;
 		try {
@@ -60,7 +76,7 @@
 			if (res.ok) await invalidateAll();
 			else {
 				const err = await res.json().catch(() => null);
-				window.alert(err?.url || err?.detail || err?.error || m.error());
+				notifyError(err?.url || err?.detail || err?.error || m.error());
 			}
 			return res;
 		} finally {
@@ -95,31 +111,17 @@
 		if (!loc || !url) return;
 		busy = true;
 		try {
-			const folderId = data.container?.folder?.id ?? data.container?.folder;
-			const createRes = await fetch(proxyBase, {
+			// Single atomic call: the backend creates the locale document and its
+			// link revision in one transaction, so a rejected link can't strand
+			// an empty authored document.
+			const res = await fetch(proxyBase, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					_action: 'create-document',
-					container: parent.id,
-					folder: folderId,
-					locale: loc
-				})
+				body: JSON.stringify({ _action: 'add-locale', locale: loc, source: 'link', url })
 			});
-			if (!createRes.ok) {
-				const e = await createRes.json().catch(() => null);
-				window.alert(e?.locale || e?.detail || e?.error || m.error());
-				return;
-			}
-			const newDoc = await createRes.json();
-			const linkRes = await fetch(proxyBase, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ _action: 'link-revision', document_id: newDoc.id, url })
-			});
-			if (!linkRes.ok) {
-				const e = await linkRes.json().catch(() => null);
-				window.alert(e?.url || e?.detail || e?.error || m.error());
+			if (!res.ok) {
+				const e = await res.json().catch(() => null);
+				notifyError(e?.url || e?.locale || e?.detail || e?.error || m.error());
 				return;
 			}
 			addingLang = false;
@@ -133,25 +135,39 @@
 		proxyPost({ _action: 'submit-for-review', revision_id: currentRevision.id });
 	const approve = () => proxyPost({ _action: 'approve', revision_id: currentRevision.id });
 	const publish = () => proxyPost({ _action: 'publish', revision_id: currentRevision.id });
-	function requestChanges() {
-		const comments = window.prompt(m.requestChanges());
-		if (comments === null) return;
-		proxyPost({
+	async function requestChanges() {
+		const res = await proxyPost({
 			_action: 'request-changes',
 			revision_id: currentRevision.id,
-			reviewer_comments: comments
+			reviewer_comments: reviewerComments
 		});
+		if (res?.ok) reviewerComments = '';
 	}
 
-	async function deleteDocument() {
-		if (!window.confirm(m.deleteConfirm())) return;
+	function deleteDocument() {
+		const modalComponent: ModalComponent = {
+			ref: PromptConfirmModal,
+			props: { bodyComponent: undefined }
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.deleteDocumentTitle(),
+			body: m.deleteDocumentConfirmation(),
+			response: (confirmed: boolean) => {
+				if (confirmed) performDelete();
+			}
+		};
+		modalStore.trigger(modal);
+	}
+	async function performDelete() {
 		busy = true;
 		try {
 			const res = await fetch(`${proxyBase}?_type=document&id=${document.id}`, {
 				method: 'DELETE'
 			});
 			if (res.ok) await goto(backHref);
-			else window.alert(m.deleteFailed());
+			else notifyError(m.deleteFailed());
 		} finally {
 			busy = false;
 		}
@@ -294,6 +310,26 @@
 					<i class="fa-solid fa-plus mr-2"></i>{m.add()}
 				</button>
 			{/if}
+		{/if}
+
+		<!-- Reviewer comments (shown while under review) -->
+		{#if isInReview}
+			<div
+				class="flex items-start gap-3 rounded-lg border border-primary-500/30 bg-primary-500/5 px-4 py-3"
+			>
+				<i class="fa-solid fa-pen-to-square mt-0.5 text-primary-400"></i>
+				<label class="min-w-0 flex-1 text-sm">
+					<span class="mb-1 block font-medium text-primary-700 dark:text-primary-300">
+						{m.reviewerComments()}
+					</span>
+					<textarea
+						bind:value={reviewerComments}
+						class="input w-full text-sm"
+						rows="2"
+						placeholder={m.addReviewerComments()}
+					></textarea>
+				</label>
+			</div>
 		{/if}
 
 		<!-- Lifecycle actions -->

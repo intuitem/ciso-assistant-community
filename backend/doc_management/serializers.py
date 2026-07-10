@@ -107,6 +107,11 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
     class Meta:
         model = ManagedDocument
         fields = "__all__"
+        # default_locale is derived in create() (one default per container) and
+        # current_revision is maintained by publish()/upload/link actions — never
+        # client-settable, else a PATCH could create two defaults or repoint the
+        # served revision.
+        read_only_fields = ["default_locale", "current_revision"]
 
     def create(self, validated_data):
         # Default locale to user's preferred language

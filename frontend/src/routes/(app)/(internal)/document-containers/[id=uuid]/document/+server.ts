@@ -9,8 +9,29 @@ function assertFeatureEnabled(locals: App.Locals) {
 }
 
 // Create a document or upload image
-export const POST: RequestHandler = async ({ fetch, request, url, locals }) => {
+export const POST: RequestHandler = async ({ fetch, request, url, locals, params }) => {
 	assertFeatureEnabled(locals);
+
+	// Add a new locale variant with an uploaded file, atomically (multipart).
+	if (url.searchParams.get('_action') === 'add-locale') {
+		const incoming = await request.formData();
+		const file = incoming.get('file') as File | null;
+		const outgoing = new FormData();
+		if (file) {
+			const bytes = new Uint8Array(await file.arrayBuffer());
+			outgoing.append('file', new Blob([bytes], { type: file.type }), file.name);
+		}
+		outgoing.append('locale', String(incoming.get('locale') ?? ''));
+		outgoing.append('source', String(incoming.get('source') ?? 'uploaded'));
+		const res = await fetch(`${BASE_API_URL}/document-containers/${params.id}/add-locale/`, {
+			method: 'POST',
+			body: outgoing
+		});
+		if (!res.ok) {
+			error(res.status as NumericRange<400, 599>, await res.text());
+		}
+		return json(await res.json(), { status: res.status });
+	}
 
 	// Handle image uploads — read file into memory and forward as multipart
 	if (url.searchParams.get('_action') === 'upload-image') {
@@ -73,6 +94,9 @@ export const POST: RequestHandler = async ({ fetch, request, url, locals }) => {
 	switch (action) {
 		case 'create-document':
 			endpoint = `${BASE_API_URL}/managed-documents/`;
+			break;
+		case 'add-locale':
+			endpoint = `${BASE_API_URL}/document-containers/${params.id}/add-locale/`;
 			break;
 		case 'create-new-draft':
 			endpoint = `${BASE_API_URL}/managed-documents/${body.document_id}/create-new-draft/`;

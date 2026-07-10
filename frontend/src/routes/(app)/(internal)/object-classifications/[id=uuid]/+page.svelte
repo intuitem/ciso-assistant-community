@@ -2,11 +2,25 @@
 	import { m } from '$paraglide/messages';
 	import { invalidateAll } from '$app/navigation';
 	import { isDark } from '$lib/utils/helpers';
+	import { getToastStore } from '$lib/components/Toast/stores';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
+	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 
 	let { data } = $props();
 	let scheme = $derived(data.scheme);
 	let levels = $derived([...(scheme.levels ?? [])].sort((a: any, b: any) => a.rank - b.rank));
 	let busy = $state(false);
+
+	const toastStore = getToastStore();
+	const modalStore: ModalStore = getModalStore();
+	function notifyError(msg: string) {
+		toastStore.trigger({ message: msg, preset: 'error' });
+	}
 
 	let newAbbr = $state('');
 	let newName = $state('');
@@ -30,7 +44,7 @@
 			if (res.ok) await invalidateAll();
 			else {
 				const d = await res.json().catch(() => null);
-				window.alert(d?.detail || d?.error || d?.abbreviation || m.error());
+				notifyError(d?.detail || d?.error || d?.abbreviation || m.error());
 			}
 			return res.ok;
 		} finally {
@@ -57,7 +71,20 @@
 	const toggleVisible = (l: any) => op('PATCH', { id: l.id, is_visible: !l.is_visible });
 
 	const del = (l: any) => {
-		if (window.confirm(m.deleteConfirm())) op('DELETE', null, `?level=${l.id}`);
+		const modalComponent: ModalComponent = {
+			ref: PromptConfirmModal,
+			props: { bodyComponent: undefined }
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.delete(),
+			body: m.deleteConfirm(),
+			response: (confirmed: boolean) => {
+				if (confirmed) op('DELETE', null, `?level=${l.id}`);
+			}
+		};
+		modalStore.trigger(modal);
 	};
 
 	async function move(l: any, dir: number) {
@@ -79,10 +106,10 @@
 					body: JSON.stringify({ id: other.id, rank: l.rank })
 				})
 			]);
-			if (results.some((r) => !r.ok)) window.alert(m.error());
+			if (results.some((r) => !r.ok)) notifyError(m.error());
 			await invalidateAll();
 		} catch {
-			window.alert(m.error());
+			notifyError(m.error());
 			await invalidateAll();
 		} finally {
 			busy = false;
