@@ -437,9 +437,32 @@ class VulnerabilityImportExportSerializer(BaseModelSerializer):
 
 
 class RiskAcceptanceWriteSerializer(BaseModelSerializer):
+    # Write-only flag so a new acceptance can be submitted for approval directly
+    # from the creation form, instead of creating a draft then submitting it.
+    submit = serializers.BooleanField(write_only=True, required=False, default=False)
+
     class Meta:
         model = RiskAcceptance
         exclude = ["accepted_at", "rejected_at", "revoked_at", "state"]
+
+    def validate(self, data):
+        # `submit` is only honoured on create; don't reject updates that carry it.
+        if not self.instance and data.get("submit") and not data.get("approver"):
+            raise serializers.ValidationError(
+                {"approver": "An approver is required to submit for approval."}
+            )
+        return super().validate(data)
+
+    def create(self, validated_data):
+        submit = validated_data.pop("submit", False)
+        instance = super().create(validated_data)
+        if submit:
+            instance.set_state("submitted")
+        return instance
+
+    def update(self, instance, validated_data):
+        validated_data.pop("submit", False)
+        return super().update(instance, validated_data)
 
 
 class RiskAcceptanceReadSerializer(BaseModelSerializer):
@@ -1770,6 +1793,8 @@ class ComplianceAssessmentActionPlanSerializer(ActionPlanSerializer):
             "evidences",
             "evidence_attachments",
             "owner",
+            "created_at",
+            "updated_at",
         ]
 
 
@@ -1816,6 +1841,8 @@ class RiskAssessmentActionPlanSerializer(ActionPlanSerializer):
             "reference_control",
             "evidences",
             "owner",
+            "created_at",
+            "updated_at",
         ]
 
 

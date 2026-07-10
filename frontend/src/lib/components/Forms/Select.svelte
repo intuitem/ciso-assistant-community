@@ -7,6 +7,14 @@
 	import type { FormDataShape } from '$lib/utils/schemas';
 	import * as m from '$paraglide/messages.js';
 	import { toCamelCase } from '$lib/utils/locales';
+	import { isDark } from '$lib/utils/helpers';
+
+	// Background + readable text color for a colored option (e.g. risk probability/impact).
+	// Returns an empty string when no color is mapped, so plain selects are untouched.
+	function colorStyle(bg: string | undefined): string {
+		if (!bg) return '';
+		return `background-color: ${bg}; color: ${isDark(bg) ? '#ffffff' : '#0a0a0a'};`;
+	}
 
 	let selectElement: HTMLElement | null = $state(null);
 
@@ -96,7 +104,7 @@
 			name={field}
 			aria-invalid={$errors ? 'true' : undefined}
 			placeholder=""
-			style="background-color: {color_map[$value]}"
+			style={colorStyle(color_map[$value])}
 			bind:value={$value}
 			bind:this={selectElement}
 			{...$constraints}
@@ -108,7 +116,7 @@
 			{/if}
 			{#each options || [] as option}
 				{@const camelKey = toCamelCase(option.value)}
-				<option value={option.value} style="background-color: {color_map[option.value]}">
+				<option value={option.value} style={colorStyle(color_map[option.value])}>
 					{#if !translateOptions}
 						{option.label}
 					{:else if option.label === option.value && camelKey !== 'm' && m[camelKey]}
