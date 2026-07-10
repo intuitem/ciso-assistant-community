@@ -33,9 +33,7 @@
 
 	// --- Splash-specific state (only used when display_mode === 'splash') ---
 	let splashMode: 'edit' | 'preview' = $state('edit');
-	let uploading = $state(false);
 	let textareaEl: HTMLTextAreaElement | undefined = $state();
-	let fileInputEl: HTMLInputElement | undefined = $state();
 	let splashDescription = $state(node.node.description ?? '');
 	let splashTransDescription = $state('');
 
@@ -89,11 +87,6 @@
 		});
 	}
 
-	// Framework ID for splash-screen image upload proxy
-	const frameworkId =
-		typeof node.node.framework === 'string' ? node.node.framework : (node.node.framework?.id ?? '');
-	const proxyUrl = `/frameworks/${frameworkId}/builder`;
-
 	const allQuestions = $derived(node.questions.map((q) => q.question));
 	let nameLength = $derived((node.node.name ?? '').length);
 
@@ -112,26 +105,6 @@
 	});
 
 	// ===== Markdown editor helpers (ported from SplashScreenBlock.svelte) =====
-
-	async function uploadImage(file: File) {
-		uploading = true;
-		try {
-			const formData = new FormData();
-			formData.append('file', file);
-			const res = await fetch(`${proxyUrl}?_action=upload-image`, {
-				method: 'POST',
-				body: formData
-			});
-			if (res.ok) {
-				const data = await res.json();
-				const imageUrl = `${proxyUrl}?_action=serve-image&attachment_id=${data.id}`;
-				insertAtCursor(`![image](${imageUrl})`);
-				await saveDescription();
-			}
-		} finally {
-			uploading = false;
-		}
-	}
 
 	function insertAtCursor(text: string) {
 		if (!textareaEl) {
@@ -185,27 +158,6 @@
 			textareaEl?.setSelectionRange(newPos, newPos);
 			textareaEl?.focus();
 		});
-	}
-
-	function handlePaste(e: ClipboardEvent) {
-		if (!e.clipboardData) return;
-		const items = e.clipboardData.items;
-		for (const item of items) {
-			if (item.type.startsWith('image/')) {
-				e.preventDefault();
-				const file = item.getAsFile();
-				if (file) uploadImage(file);
-				return;
-			}
-		}
-	}
-
-	function handleFileInput(e: Event) {
-		const input = e.target as HTMLInputElement;
-		if (input.files?.[0]) {
-			uploadImage(input.files[0]);
-			input.value = '';
-		}
 	}
 
 	/** Auto-grow a textarea to fit its content */
@@ -756,25 +708,6 @@
 								>
 									<i class="fa-solid fa-table text-xs"></i>
 								</button>
-								<button
-									class="p-1.5 rounded text-surface-500 hover:text-surface-600-400 hover:bg-surface-100-900 transition-colors"
-									onclick={() => fileInputEl?.click()}
-									title={m.builderSplashInsertImage()}
-									disabled={uploading}
-								>
-									{#if uploading}
-										<i class="fa-solid fa-spinner fa-spin text-xs"></i>
-									{:else}
-										<i class="fa-solid fa-image text-xs"></i>
-									{/if}
-								</button>
-								<input
-									type="file"
-									accept="image/*"
-									class="hidden"
-									bind:this={fileInputEl}
-									onchange={handleFileInput}
-								/>
 							</div>
 						{/if}
 					</div>
@@ -784,7 +717,6 @@
 						<textarea
 							bind:value={splashDescription}
 							bind:this={textareaEl}
-							onpaste={handlePaste}
 							onblur={saveDescription}
 							placeholder={m.builderSplashEditPlaceholder()}
 							rows="6"
