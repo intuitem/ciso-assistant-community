@@ -271,6 +271,151 @@ class TestScoringCalculationMethods:
             assert scores["maturity_score"] == -1
 
 
+@pytest.mark.django_db
+class TestMedianScoringMethod:
+    """Tests for the MEDIAN scoring method."""
+
+    def test_median_returns_middle_value(self, scoring_setup):
+        """
+        MEDIAN: finds the middle value.
+
+        Scores: A1=80, A2=60, B1=40, B2=100
+        Sorted: 40, 60, 80, 100
+        Median = (60 + 80) / 2 = 70.0
+        """
+        ca = scoring_setup["ca"]
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.MEDIAN
+        ca.save()
+
+        scores = ca.get_global_score()
+        assert scores["implementation_score"] == 70.0
+
+    def test_median_with_odd_number_of_requirements(self, scoring_setup):
+        """
+        With odd number of requirements, median is the middle value.
+
+        Scores: A1=80, A2=60, B1=40
+        Sorted: 40, 60, 80
+        Median = 60
+        """
+        ca = scoring_setup["ca"]
+
+        # Mark B2 as not scored to get only 3 requirements
+        ra_b2 = scoring_setup["ra_b2"]
+        ra_b2.is_scored = False
+        ra_b2.save()
+
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.MEDIAN
+        ca.save()
+
+        scores = ca.get_global_score()
+        assert scores["implementation_score"] == 60
+
+    def test_median_not_applicable_excluded(self, scoring_setup):
+        """
+        Requirements with NOT_APPLICABLE result should be excluded from median.
+
+        Scores after exclusion: A1=80, A2=60, B1=40
+        Sorted: 40, 60, 80
+        Median = 60
+        """
+        ca = scoring_setup["ca"]
+        ra_b2 = scoring_setup["ra_b2"]
+
+        ra_b2.result = RequirementAssessment.Result.NOT_APPLICABLE
+        ra_b2.save()
+
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.MEDIAN
+        ca.save()
+
+        scores = ca.get_global_score()
+        assert scores["implementation_score"] == 60
+
+    def test_median_unscored_excluded(self, scoring_setup):
+        """
+        Requirements with is_scored=False should be excluded from median.
+
+        Scores after exclusion: A1=80, A2=60, B1=40
+        Sorted: 40, 60, 80
+        Median = 60
+        """
+        ca = scoring_setup["ca"]
+        ra_b2 = scoring_setup["ra_b2"]
+
+        RequirementAssessment.objects.filter(pk=ra_b2.pk).update(is_scored=False)
+
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.MEDIAN
+        ca.save()
+
+        scores = ca.get_global_score()
+        assert scores["implementation_score"] == 60
+
+    def test_median_returns_minus_one_when_no_scored_requirements(self, scoring_setup):
+        """When there are no scored requirements, median should return -1."""
+        ca = scoring_setup["ca"]
+
+        RequirementAssessment.objects.filter(compliance_assessment=ca).update(
+            is_scored=False
+        )
+
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.MEDIAN
+        ca.save()
+
+        scores = ca.get_global_score()
+        assert scores["implementation_score"] == -1
+
+    def test_median_max_score(self, scoring_setup):
+        """Median max score should always be the framework max_score."""
+        ca = scoring_setup["ca"]
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.MEDIAN
+        ca.save()
+
+        assert ca.get_total_max_score() == 100
+
+    def test_median_with_documentation_scoring(self, scoring_setup):
+        """
+        Test median with documentation scoring enabled.
+
+        Implementation scores: 80, 60, 40, 100 → median = 70
+        Documentation scores: 90, 70, 50, 80 → median = 75
+        Maturity: (70 + 75) / 2 = 72.5
+        """
+        ca = scoring_setup["ca"]
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.MEDIAN
+        ca.show_documentation_score = True
+        ca.save()
+
+        # Set documentation scores
+        scoring_setup["ra_a1"].documentation_score = 90
+        scoring_setup["ra_a1"].save()
+        scoring_setup["ra_a2"].documentation_score = 70
+        scoring_setup["ra_a2"].save()
+        scoring_setup["ra_b1"].documentation_score = 50
+        scoring_setup["ra_b1"].save()
+        scoring_setup["ra_b2"].documentation_score = 80
+        scoring_setup["ra_b2"].save()
+
+        scores = ca.get_global_score()
+        assert scores["implementation_score"] == 70.0
+        assert scores["documentation_score"] == 75.0
+        assert scores["maturity_score"] == 72.5
+
+    def test_median_single_requirement(self, scoring_setup):
+        """With only one scored requirement, median equals that score."""
+        ca = scoring_setup["ca"]
+
+        # Mark all but one as not scored
+        RequirementAssessment.objects.filter(compliance_assessment=ca).exclude(
+            pk=scoring_setup["ra_a1"].pk
+        ).update(is_scored=False)
+
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.MEDIAN
+        ca.save()
+
+        scores = ca.get_global_score()
+        assert scores["implementation_score"] == 80
+
+
 @pytest.fixture
 def deep_tree_setup():
     """
