@@ -1,3 +1,4 @@
+from auditlog.registry import auditlog
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.db import models
@@ -41,6 +42,27 @@ class IntegrationConfiguration(AbstractBaseModel, FolderMixin):
 
     class Meta:
         unique_together = ["provider", "folder"]
+
+
+class IntegrationSchemaCache(AbstractBaseModel):
+    """Cached remote schema (tables, columns, choices) for an integration.
+
+    Populated lazily on RPC cache misses, warmed on backend startup, and
+    refreshed on demand via the 'refresh_schema' action. DB-backed so it is
+    shared across web workers and the Huey consumer and survives restarts.
+    """
+
+    configuration = models.OneToOneField(
+        IntegrationConfiguration,
+        related_name="schema_cache",
+        on_delete=models.CASCADE,
+    )
+
+    tables = models.JSONField(default=list)  # [{name, label}, ...]
+    columns = models.JSONField(default=dict)  # {table_name: [{name, label, ...}], ...}
+    choices = models.JSONField(default=dict)  # {"table:field": [{value, label}], ...}
+
+    fetched_at = models.DateTimeField(null=True, blank=True)
 
 
 class SyncMapping(AbstractBaseModel, FolderMixin):
@@ -113,3 +135,16 @@ class SyncEvent(models.Model):
     error_details = models.TextField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+# Sync state (SyncMapping/SyncEvent) is high-volume and intentionally untracked.
+auditlog.register(
+    IntegrationProvider,
+    exclude_fields=["created_at", "updated_at", "is_published"],
+)
+auditlog.register(
+    IntegrationConfiguration,
+    exclude_fields=["created_at", "updated_at", "is_published", "last_sync_at"],
+    mask_fields=["credentials", "webhook_secret"],
+    mask_callable="global_settings.utils.redact_secret_value",
+)

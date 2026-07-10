@@ -428,7 +428,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
                     except SandboxViolationError as e:
                         logger.warning(
                             "Security violation in Excel upload",
-                            error=str(e),
+                            error=e,
                             filename=attachment.name,
                             user=request.user.username,
                             exc_info=True,

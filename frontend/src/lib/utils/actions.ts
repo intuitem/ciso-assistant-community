@@ -121,6 +121,21 @@ export async function defaultWriteFormAction({
 		return message(form, { status: 400 });
 	}
 
+	// `dataType: 'form'` submissions (models with a file field, e.g. Evidence) can't
+	// encode an empty array: a cleared multiselect renders no inputs, so superValidate
+	// drops the field and the relation would never be cleared. AutocompleteSelect emits
+	// `__empty_arrays` markers for such fields — restore them as explicit empty arrays.
+	const schemaShape = (schema as any).shape ?? {};
+	for (const emptyField of formData.getAll('__empty_arrays')) {
+		if (
+			typeof emptyField === 'string' &&
+			emptyField in schemaShape &&
+			form.data[emptyField] === undefined
+		) {
+			form.data[emptyField] = [];
+		}
+	}
+
 	const endpoint = getEndpoint({ action, urlModel, event });
 	const model = getModelInfo(urlModel!);
 

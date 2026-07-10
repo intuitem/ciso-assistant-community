@@ -23,7 +23,8 @@ const schema = z.object({
 		enable_incoming_sync: z.boolean().default(false),
 		table_name: z.string(),
 		field_map: z.record(z.string(), z.any()).default({}).optional(),
-		value_map: z.record(z.string(), z.any()).default({}).optional()
+		value_map: z.record(z.string(), z.any()).default({}).optional(),
+		models: z.record(z.string(), z.any()).default({}).optional()
 	})
 });
 
@@ -45,6 +46,15 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
 			provider_id: provider.id
 		};
 	}
+	// Seed the nested per-model structure so the asset FieldMapper's form paths
+	// (settings.models.asset.*) exist for binding.
+	config.settings = config.settings ?? {};
+	config.settings.models = config.settings.models ?? {};
+	config.settings.models.asset = config.settings.models.asset ?? {
+		field_map: {},
+		value_map: {}
+	};
+
 	const form = await superValidate(config, zod(schema), { errors: false });
 	return {
 		form,

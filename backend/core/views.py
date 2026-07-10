@@ -11,6 +11,7 @@ import re
 import yaml
 from django_filters.filterset import filterset_factory
 from django_filters.utils import try_dbfield
+from django_filters.widgets import QueryArrayWidget
 import regex
 import os
 import uuid
@@ -109,6 +110,7 @@ from django.core.files.storage import default_storage
 from django.contrib.auth.base_user import AbstractBaseUser
 
 from django.db import models, transaction
+from django.forms import IntegerField as FormIntegerField
 from django.forms import ValidationError
 from django.http import FileResponse, HttpResponse, StreamingHttpResponse
 from django.middleware import csrf
@@ -549,7 +551,7 @@ class ExportMixin:
             return response
 
         except Exception as e:
-            logger.error(f"Error exporting {self.model.__name__} to CSV: {str(e)}")
+            logger.error("Error exporting to CSV", model=self.model.__name__, error=e)
             return HttpResponse(
                 status=500, content="An error occurred while generating the CSV export."
             )
@@ -1991,7 +1993,92 @@ class AssetCapabilityViewSet(BaseModelViewSet):
     search_fields = ["name"]
 
 
-class AssetViewSet(ExportMixin, BaseModelViewSet):
+class IntegrationLinkViewSetMixin:
+    """Viewset hooks to link a local object to a remote ITSM record.
+
+    Reads the write-only integration_config/remote_object_id/create_remote_object
+    fields and, after the local object is saved, either creates a remote object
+    (create_remote_object) or links to an existing one (remote_object_id). The
+    push field list is derived from the model's syncable spec. Requires the
+    model to define INTEGRATION_MODEL_KEY.
+    """
+
+    def _integration_initial_fields(self) -> list[str]:
+        from integrations.syncable import mappable_field_keys
+
+        key = getattr(self.model, "INTEGRATION_MODEL_KEY", None)
+        return list(mappable_field_keys(key)) if key else []
+
+    def perform_create(self, serializer):
+        create_remote_object = serializer.validated_data.pop(
+            "create_remote_object", False
+        )
+        integration_config = serializer.validated_data.pop("integration_config", None)
+        serializer.validated_data.pop("remote_object_id", None)
+
+        super().perform_create(serializer)
+
+        if create_remote_object and integration_config:
+            from django.contrib.contenttypes.models import ContentType
+
+            try:
+                sync_object_to_integrations.schedule(
+                    args=(
+                        ContentType.objects.get_for_model(self.model),
+                        serializer.instance.id,
+                        [integration_config.id],
+                        self._integration_initial_fields(),
+                    ),
+                    delay=1,
+                )
+            except Exception:
+                logger.error(
+                    "Error creating remote object",
+                    object_id=serializer.instance.id,
+                    exc_info=True,
+                )
+
+    def perform_update(self, serializer):
+        integration_config = serializer.validated_data.pop("integration_config", None)
+        remote_object_id = serializer.validated_data.pop("remote_object_id", None)
+        serializer.validated_data.pop("create_remote_object", None)
+
+        super().perform_update(serializer)
+
+        if not (integration_config and remote_object_id):
+            return
+
+        from django.contrib.contenttypes.models import ContentType
+
+        try:
+            # SyncMapping is unique on (configuration, content_type,
+            # local_object_id); relinking must reuse the row, not INSERT a
+            # duplicate (which would raise IntegrityError).
+            sync_mapping, _ = SyncMapping.objects.update_or_create(
+                configuration=integration_config,
+                content_type=ContentType.objects.get_for_model(self.model),
+                local_object_id=serializer.instance.id,
+                defaults={
+                    "remote_id": remote_object_id,
+                    "sync_status": SyncMapping.SyncStatus.PENDING,
+                },
+            )
+            # Empty changed_fields: establish the mapping and refresh the cached
+            # remote_data without overwriting the linked remote record.
+            sync_object_to_integrations.schedule(
+                args=(
+                    sync_mapping.content_type,
+                    serializer.instance.id,
+                    [integration_config.id],
+                    [],
+                ),
+                delay=1,
+            )
+        except Exception:
+            logger.error("Error creating SyncMapping", exc_info=True)
+
+
+class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
     """
     API endpoint that allows assets to be viewed or edited.
     """
@@ -2730,7 +2817,7 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
             )
 
         except Exception as e:
-            logger.error(f"Error in batch asset creation: {str(e)}")
+            logger.error("Error in batch asset creation", error=e)
             return Response(
                 {"error": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -4776,7 +4863,9 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     )
                 except Exception as e:
                     logger.error(
-                        f"Failed to run simulation for scenario {scenario.name}: {str(e)}"
+                        "Failed to run simulation for scenario",
+                        scenario=scenario.name,
+                        error=e,
                     )
 
             # Create residual hypothesis if residual values are set
@@ -4820,7 +4909,9 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     )
                 except Exception as e:
                     logger.error(
-                        f"Failed to run simulation for residual scenario {scenario.name}: {str(e)}"
+                        "Failed to run simulation for residual scenario",
+                        scenario=scenario.name,
+                        error=e,
                     )
 
             scenarios_converted += 1
@@ -5447,9 +5538,6 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             request=request,
             lookup_queryset=self.get_queryset(),
             dry_run=serializer.validated_data.get("dry_run", False),
-            managed_document_resolution=serializer.validated_data.get(
-                "managed_document_resolution"
-            ),
         )
         return Response(result)
 
@@ -5503,12 +5591,17 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
                     applied_control_id=serializer.instance.id,
                     remote_id=remote_object_id,
                 )
-                sync_mapping = SyncMapping.objects.create(
+                # Upsert: SyncMapping is unique on (configuration, content_type,
+                # local_object_id); relinking must reuse the row instead of
+                # raising IntegrityError (swallowed below → silent relink loss).
+                sync_mapping, _ = SyncMapping.objects.update_or_create(
                     configuration=integration_config,
                     content_type=ContentType.objects.get_for_model(self.model),
                     local_object_id=serializer.instance.id,
-                    remote_id=remote_object_id,
-                    sync_status=SyncMapping.SyncStatus.PENDING,
+                    defaults={
+                        "remote_id": remote_object_id,
+                        "sync_status": SyncMapping.SyncStatus.PENDING,
+                    },
                 )
                 sync_object_to_integrations.schedule(
                     args=(
@@ -6820,9 +6913,29 @@ class PolicyViewSet(AppliedControlViewSet):
         return Response(dict(AppliedControl.CSF_FUNCTION))
 
 
+class IntegerInFilter(df.BaseInFilter, df.NumberFilter):
+    """Integer ``__in`` filter accepting repeated query params (``?foo=1&foo=2``).
+
+    ``QueryArrayWidget`` collects the repeated values into a list and each one is
+    cleaned through ``IntegerField`` (so non-integer input such as ``1.9`` is
+    rejected with a 400 rather than silently truncated), then ``BaseInFilter``
+    builds a single ``field IN (...)`` predicate. A form ``IntegerField`` is used
+    instead of ``NumberFilter``'s default ``DecimalField`` because the target
+    columns are ``SmallIntegerField``s.
+    """
+
+    field_class = FormIntegerField
+
+
 class RiskScenarioFilter(GenericFilterSet):
     risk_assessment = df.ModelMultipleChoiceFilter(
         queryset=RiskAssessment.objects.all()
+    )
+    # Multi-value level filters: the matrix levels are dynamic (no fixed choices),
+    # so we validate that values are integers without constraining them to a choice set.
+    current_level = IntegerInFilter(field_name="current_level", widget=QueryArrayWidget)
+    residual_level = IntegerInFilter(
+        field_name="residual_level", widget=QueryArrayWidget
     )
     # Aliased filters for user-friendly query params
     folder = df.UUIDFilter(
@@ -7168,7 +7281,7 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
             default_ref_id = RiskScenario.get_default_ref_id(risk_assessment)
             return Response({"results": default_ref_id})
         except Exception as e:
-            logger.error("Error in default_ref_id: %s", str(e))
+            logger.error("Error in default_ref_id", error=e)
             return Response(
                 {"error": "Error in default_ref_id has occurred."}, status=400
             )
@@ -7609,7 +7722,7 @@ class ValidationFlowViewSet(BaseModelViewSet):
             default_ref_id = ValidationFlow.get_default_ref_id()
             return Response({"results": default_ref_id})
         except Exception as e:
-            logger.error("Error in default_ref_id: %s", str(e))
+            logger.error("Error in default_ref_id", error=e)
             return Response(
                 {"error": "Error in default_ref_id has occurred."}, status=400
             )
@@ -11973,7 +12086,7 @@ class EvidenceViewSet(BaseModelViewSet):
             evidence = serializer.save()
         except PermissionDenied as e:
             result["outcome"] = "error"
-            result["error"] = e.detail if hasattr(e, "detail") else str(e)
+            result["error"] = e.detail
             summary["errors"] += 1
             return
         revision = evidence.revisions.first()
@@ -12011,7 +12124,7 @@ class EvidenceViewSet(BaseModelViewSet):
             revision = rev_serializer.save()
         except PermissionDenied as e:
             result["outcome"] = "error"
-            result["error"] = e.detail if hasattr(e, "detail") else str(e)
+            result["error"] = e.detail
             summary["errors"] += 1
             return
         result["outcome"] = "revision_added"
@@ -13983,7 +14096,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 {"error": "invalid input provided"}, status=status.HTTP_400_BAD_REQUEST
             )
         except Exception as e:
-            logger.error(f"Unexpected error in update_requirement: {str(e)}")
+            logger.error("Unexpected error in update_requirement", error=e)
             return Response(
                 {"error": "An unexpected error occurred"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -18612,10 +18725,41 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                 "label": "schedule_interval",
                 "format": lambda s: str(s.get("interval", "")) if s else "",
             },
+            "schedule_days_of_week": {
+                "source": "schedule",
+                "label": "schedule_days_of_week",
+                "format": lambda s: (
+                    ",".join(str(d) for d in s.get("days_of_week", [])) if s else ""
+                ),
+            },
+            "schedule_weeks_of_month": {
+                "source": "schedule",
+                "label": "schedule_weeks_of_month",
+                "format": lambda s: (
+                    ",".join(str(d) for d in s.get("weeks_of_month", [])) if s else ""
+                ),
+            },
+            "schedule_months_of_year": {
+                "source": "schedule",
+                "label": "schedule_months_of_year",
+                "format": lambda s: (
+                    ",".join(str(d) for d in s.get("months_of_year", [])) if s else ""
+                ),
+            },
             "schedule_end_date": {
                 "source": "schedule",
                 "label": "schedule_end_date",
                 "format": lambda s: s.get("end_date", "") if s else "",
+            },
+            "schedule_occurrences": {
+                "source": "schedule",
+                "label": "schedule_occurrences",
+                "format": lambda s: str(s.get("occurrences", "")) if s else "",
+            },
+            "schedule_overdue_behavior": {
+                "source": "schedule",
+                "label": "schedule_overdue_behavior",
+                "format": lambda s: s.get("overdue_behavior", "") if s else "",
             },
             "next_occurrence": {
                 "source": "get_next_occurrence",
@@ -18706,6 +18850,11 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             "due_date": {
                 "source": "due_date",
                 "label": "due_date",
+                "format": lambda x: x.strftime("%Y-%m-%d") if x else "",
+            },
+            "scheduled_date": {
+                "source": "scheduled_date",
+                "label": "scheduled_date",
                 "format": lambda x: x.strftime("%Y-%m-%d") if x else "",
             },
             "status": {"source": "status", "label": "status"},
@@ -19153,10 +19302,10 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                 .order_by("due_date")
             )
 
+            template_counter += 1
+
             if not task_nodes.exists():
                 continue
-
-            template_counter += 1
             task_name = obj.name or f"Template_{obj.pk}"
             # Format: "1-task_name", "2-task_name", etc.
             base_name = f"{template_counter}-{task_name}"
@@ -19603,6 +19752,20 @@ class TerminologyViewSet(BaseModelViewSet):
     @action(detail=False, name="Get class name choices")
     def field_path(self, request):
         return Response(dict(Terminology.FieldPath.choices))
+
+
+class ObjectClassificationViewSet(BaseModelViewSet):
+    model = ObjectClassification
+    filterset_fields = ["folder", "is_visible", "builtin"]
+    search_fields = ["name", "description", "ref_id"]
+    ordering = ["name"]
+
+
+class ClassificationLevelViewSet(BaseModelViewSet):
+    model = ClassificationLevel
+    filterset_fields = ["object_classification", "folder", "is_visible", "builtin"]
+    search_fields = ["name", "description", "abbreviation"]
+    ordering = ["object_classification", "rank"]
 
 
 class RequirementAssignmentViewSet(BaseModelViewSet):

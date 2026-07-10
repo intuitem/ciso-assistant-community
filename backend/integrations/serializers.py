@@ -154,6 +154,29 @@ class IntegrationConfigurationSerializer(BaseModelSerializer):
     def get_has_webhook_secret(self, obj: IntegrationConfiguration) -> bool:
         return bool(obj.webhook_secret)
 
+    def update(self, instance, validated_data):
+        """Invalidate the cached remote schema when credentials change.
+
+        Repointing instance_url (or swapping accounts) makes the cached
+        tables/columns/choices describe the wrong instance; drop the row so the
+        next page load lazily re-fetches from the new target.
+        """
+        old_credentials = dict(instance.credentials or {})
+        instance = super().update(instance, validated_data)
+        new_credentials = instance.credentials or {}
+        if "credentials" in validated_data and new_credentials != old_credentials:
+            from integrations.models import IntegrationSchemaCache
+
+            deleted, _ = IntegrationSchemaCache.objects.filter(
+                configuration=instance
+            ).delete()
+            if deleted:
+                logger.info(
+                    "Invalidated schema cache after credential change",
+                    config_id=str(instance.id),
+                )
+        return instance
+
     def to_representation(self, instance):
         """
         Modify the output representation to protect sensitive credentials.
