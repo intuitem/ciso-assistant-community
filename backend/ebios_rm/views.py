@@ -3,7 +3,7 @@ import uuid
 
 import django_filters as df
 import pandas as pd
-from django.db.models import Case, F, FloatField, Value, When
+from django.db.models import Case, F, FloatField, ProtectedError, Value, When
 from django.http import HttpResponse
 from core.serializers import RiskMatrixReadSerializer
 from core.views import (
@@ -36,6 +36,7 @@ from django.views.decorators.cache import cache_page
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
+from rest_framework.status import HTTP_409_CONFLICT
 
 
 import structlog
@@ -1154,6 +1155,29 @@ class ElementaryActionViewSet(BaseModelViewSet):
     model = ElementaryAction
 
     filterset_class = ElementaryActionFilter
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        try:
+            return super().destroy(request, *args, **kwargs)
+        except ProtectedError:
+            operating_modes = list(
+                OperatingMode.objects.filter(
+                    kill_chain_steps__elementary_action=instance
+                ).distinct()
+            )
+            names = ", ".join(om.name for om in operating_modes[:10])
+            return Response(
+                {
+                    "detail": (
+                        f"Cannot delete elementary action '{instance.name}' — it is "
+                        f"used in {len(operating_modes)} operating mode kill chain(s)"
+                        + (f": {names}" if names else "")
+                        + ". Remove it from those kill chains first."
+                    ),
+                },
+                status=HTTP_409_CONFLICT,
+            )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get icon choices")

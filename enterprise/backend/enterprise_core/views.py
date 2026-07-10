@@ -38,7 +38,7 @@ import shutil
 from pathlib import Path
 import humanize
 
-from core.models import CustomEmailTemplate, CustomWordTemplate
+from core.models import CustomEmailTemplate, CustomWordTemplate, CustomDocHtmlTemplate
 from .models import ClientSettings
 from .serializers import (
     ClientSettingsReadSerializer,
@@ -46,9 +46,15 @@ from .serializers import (
     CustomEmailTemplateWriteSerializer,
     CustomWordTemplateReadSerializer,
     CustomWordTemplateWriteSerializer,
+    CustomDocHtmlTemplateReadSerializer,
+    CustomDocHtmlTemplateWriteSerializer,
     LogEntrySerializer,
 )
-from .template_registry import EMAIL_TEMPLATE_REGISTRY, WORD_TEMPLATE_REGISTRY
+from .template_registry import (
+    EMAIL_TEMPLATE_REGISTRY,
+    WORD_TEMPLATE_REGISTRY,
+    DOC_HTML_TEMPLATE_REGISTRY,
+)
 from .license import effective_expiration
 
 from auditlog.models import LogEntry
@@ -827,6 +833,208 @@ class CustomWordTemplateViewSet(BaseModelViewSet):
             content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             as_attachment=True,
             filename=f"{template_key}_template_{resolved_language}.docx",
+        )
+
+
+class CustomDocHtmlTemplateViewSet(BaseModelViewSet):
+    """
+    API endpoint for managing custom HTML render-template overrides
+    (WeasyPrint PDF layouts, ...). Gated by change_globalsettings.
+    """
+
+    model = CustomDocHtmlTemplate
+    filterset_fields = ["template_key", "language", "is_active", "folder"]
+    search_fields = ["template_key", "language"]
+
+    def _has_permission(self, request):
+        return RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_globalsettings"),
+            folder=Folder.get_root_folder(),
+        )
+
+    def get_queryset(self):
+        if not self._has_permission(self.request):
+            return CustomDocHtmlTemplate.objects.none()
+        return CustomDocHtmlTemplate.objects.all()
+
+    def get_serializer_class(self, **kwargs):
+        if self.request.method in ("POST", "PUT", "PATCH"):
+            return CustomDocHtmlTemplateWriteSerializer
+        return CustomDocHtmlTemplateReadSerializer
+
+    def perform_create(self, serializer):
+        """New records start inactive until a file is uploaded."""
+        serializer.save(is_active=False)
+
+    @action(methods=["get"], detail=False, url_path="available")
+    def available(self, request):
+        """Return the registry of all overridable HTML templates."""
+        if not self._has_permission(request):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        overrides = (
+            CustomDocHtmlTemplate.objects.filter(is_active=True)
+            .exclude(file="")
+            .values_list("template_key", "language")
+        )
+        override_set = {(k, l) for k, l in overrides}
+
+        result = []
+        for key, meta in DOC_HTML_TEMPLATE_REGISTRY.items():
+            result.append(
+                {
+                    "template_key": key,
+                    "description": meta["description"],
+                    "default_languages": meta["default_languages"],
+                    "variables": meta.get("variables", []),
+                    "overrides": [
+                        lang
+                        for lang in meta["default_languages"]
+                        if (key, lang) in override_set
+                    ],
+                }
+            )
+        return Response(result)
+
+    @action(
+        methods=["post"],
+        detail=True,
+        url_path="upload",
+        parser_classes=(FileUploadParser,),
+    )
+    def upload_file(self, request, pk):
+        """Upload a .html file for an existing override record."""
+        if not self._has_permission(request):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        if "file" not in request.FILES:
+            return Response(
+                {"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            template = CustomDocHtmlTemplate.objects.get(id=pk)
+            uploaded = request.FILES["file"]
+
+            if not uploaded.name.endswith(".html"):
+                return Response(
+                    {"file": "invalidFileType"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Validate the template compiles as a Django template.
+            try:
+                from django.template import Template
+
+                uploaded.seek(0)
+                source = uploaded.read().decode("utf-8")
+                Template(source)
+                uploaded.seek(0)
+            except Exception:
+                return Response(
+                    {"file": "invalidHtmlTemplate"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Reject tags a PDF layout never needs (defense-in-depth).
+            from doc_management.html_templates import find_forbidden_template_tags
+
+            if find_forbidden_template_tags(source):
+                return Response(
+                    {"file": "forbiddenTemplateTags"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            template.file = uploaded
+            template.is_active = True
+            try:
+                template.full_clean()
+            except ValidationError as e:
+                return Response(
+                    e.message_dict
+                    if hasattr(e, "message_dict")
+                    else {"file": "invalidHtmlTemplate"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            template.save()
+            # Keep a single active override per (template_key, language) so the
+            # resolver's .first() is deterministic.
+            CustomDocHtmlTemplate.objects.filter(
+                template_key=template.template_key,
+                language=template.language,
+                is_active=True,
+            ).exclude(pk=template.pk).update(is_active=False)
+            return Response(status=status.HTTP_200_OK)
+        except CustomDocHtmlTemplate.DoesNotExist, ValidationError, ValueError:
+            return Response(
+                {"error": "Template not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+    @action(methods=["get"], detail=True, url_path="download")
+    def download_file(self, request, pk):
+        """Download the current custom template file."""
+        if not self._has_permission(request):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            template = CustomDocHtmlTemplate.objects.get(id=pk)
+            if not template.file:
+                return Response(
+                    {"error": "No file uploaded"}, status=status.HTTP_404_NOT_FOUND
+                )
+
+            from django.http import FileResponse
+
+            template.file.open("rb")
+            return FileResponse(
+                template.file,
+                content_type="text/html",
+                as_attachment=True,
+                filename=f"{template.template_key}_{template.language}.html",
+            )
+        except CustomDocHtmlTemplate.DoesNotExist, ValidationError, ValueError:
+            return Response(
+                {"error": "Template not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+    @action(
+        methods=["get"],
+        detail=False,
+        url_path="download-default/(?P<template_key>[^/]+)/(?P<language>[^/]+)",
+    )
+    def download_default(self, request, template_key=None, language=None):
+        """Download the built-in default HTML template."""
+        if not self._has_permission(request):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        if template_key not in DOC_HTML_TEMPLATE_REGISTRY:
+            return Response(
+                {"error": "Unknown template key"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        from django.http import FileResponse
+        import doc_management as doc_module
+
+        # The built-in document PDF layout is a single, language-agnostic template.
+        template_path = (
+            Path(doc_module.__file__).resolve().parent
+            / "templates"
+            / "doc_management"
+            / "policy_document_pdf.html"
+        )
+        if not template_path.exists():
+            return Response(
+                {"error": "Default template not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        return FileResponse(
+            open(template_path, "rb"),
+            content_type="text/html",
+            as_attachment=True,
+            filename=f"{template_key}_{language}.html",
         )
 
 

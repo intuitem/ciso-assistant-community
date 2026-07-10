@@ -425,6 +425,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "coverage", specifier = "==7.5.4" },
+    { name = "django-querycount", specifier = ">=0.8.3" },
     { name = "django-stubs", specifier = "==5.2.9" },
     { name = "mypy", specifier = ">=1.9.0,<2" },
     { name = "pre-commit", specifier = "==3.7.1" },

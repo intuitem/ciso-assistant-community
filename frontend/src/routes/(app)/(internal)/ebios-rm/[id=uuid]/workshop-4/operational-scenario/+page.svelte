@@ -76,6 +76,7 @@
 	{URLModel}
 	detailQueryParameter={`activity=${activeActivity}`}
 	baseEndpoint="/operational-scenarios?ebios_rm_study={page.params.id}"
+	columnSelector={true}
 >
 	{#snippet addButton()}
 		<div>
