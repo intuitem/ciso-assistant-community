@@ -22,7 +22,6 @@ from core.models import (
     TaskNode,
     TaskTemplate,
 )
-from iam.models import Folder
 
 from data_wizard.tests.conftest import make_excel_file
 from data_wizard.views import (
