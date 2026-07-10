@@ -13605,18 +13605,14 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         """
         Word report generation (Exec)
         """
-        lang = "en"
-        if request.user.preferences.get("lang") is not None:
-            lang = request.user.preferences.get("lang")
-            if lang not in ["fr", "en"]:
-                lang = "en"
+        user_lang = request.user.preferences.get("lang") or "en"
 
-        # Check for custom Word template override
+        # Custom overrides support any language; auto-generated strings only en/fr.
         doc = None
         try:
             custom = CustomWordTemplate.objects.filter(
                 template_key="audit_report",
-                language=lang,
+                language=user_lang,
                 is_active=True,
             ).first()
             if custom and custom.file:
@@ -13629,12 +13625,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             )
 
         if doc is None:
-            template_path = (
-                Path(__file__).resolve().parent
-                / "templates"
-                / "core"
-                / f"audit_report_template_{lang}.docx"
-            )
+            core_templates = Path(__file__).resolve().parent / "templates" / "core"
+            template_path = core_templates / f"audit_report_template_{user_lang}.docx"
+            if not template_path.exists():
+                template_path = core_templates / "audit_report_template_en.docx"
             doc = DocxTemplate(template_path)
         audit_obj = self.get_object()
         _framework = audit_obj.framework
@@ -13654,7 +13648,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         # children in place but the returned dict drops them).
         filter_graph_by_implementation_groups(tree, implementation_groups)
         annotate_tree_with_aggregated_scores(tree, audit_obj)
-        context = gen_audit_context(pk, doc, tree, lang)
+        context = gen_audit_context(pk, doc, tree, user_lang)
         doc.render(context, jinja_env=SandboxedEnvironment())
         buffer_doc = io.BytesIO()
         doc.save(buffer_doc)
