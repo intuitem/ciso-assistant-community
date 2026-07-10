@@ -49,6 +49,12 @@ Once you've retrieved the **IdP Entity ID,** the **Metadata URL** and the **Enti
 {% endtab %}
 {% endtabs %}
 
+### Single Logout
+
+To close the SAML session at the identity provider when users log out of CISO Assistant, fill the **SLO URL** field with the identity provider's Single Logout Service URL.
+
+Some identity providers require signed logout requests. In that case, enable **Logout request signed** in the advanced SAML settings and configure the SP private key and certificate.
+
 {% hint style="warning" %}
 <mark style="color:orange;">Be aware that the user needs to be created on CISO Assistant to be authenticated with SSO.</mark>
 {% endhint %}

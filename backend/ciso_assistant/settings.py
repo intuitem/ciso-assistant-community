@@ -808,6 +808,8 @@ HEADLESS_FRONTEND_URLS = {
     "socialaccount_login_error": CISO_ASSISTANT_URL + "/login",
 }
 
+ACCOUNT_LOGOUT_REDIRECT_URL = CISO_ASSISTANT_URL + "/login"
+
 SOCIALACCOUNT_PROVIDERS = {
     "saml": {
         "EMAIL_AUTHENTICATION": True,

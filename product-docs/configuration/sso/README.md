@@ -11,6 +11,22 @@ description: Configure Single Sign-On with different SAML or OpenID Connect prov
 * [Keycloak](identity-providers/keycloak.md)
 * [Google Workspace](identity-providers/google-workspace.md)
 
+### Single Logout
+
+When a user logs out of CISO Assistant after authenticating with SSO, CISO Assistant redirects the browser through the identity provider logout endpoint so the identity provider session is closed too.
+
+For OIDC, the provider must expose an `end_session_endpoint` in its OpenID configuration, and the client must allow this post-logout redirect URI:
+
+```
+<frontend_url>/login
+```
+
+For SAML, configure the identity provider **SLO URL** in the CISO Assistant SAML settings. If your identity provider requires signed logout requests, enable **Logout request signed** and configure the SP key and certificate in the advanced SAML settings.
+
+{% hint style="info" %}
+Keep `CISO_ASSISTANT_URL` set to the public frontend URL.
+{% endhint %}
+
 ### Forcing SSO and local-login exceptions
 
 Enabling SSO adds the **Log in with SSO** button but leaves the email/password form in place, so users can still authenticate locally. To make SSO the only way in, turn on **Force SSO Login** in the SSO settings.

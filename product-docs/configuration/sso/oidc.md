@@ -35,3 +35,13 @@ Once you've retrieved the **Client ID**, the **Client Secret** and the **Issuer 
 {% hint style="info" %}
 CISO Assistant automatically sends a standards-compliant `state` and `nonce` on every OIDC authorization request (43 characters matching `^[A-Za-z0-9-._~]{43,128}$`), and validates the `nonce` claim returned in the `id_token`. No configuration is required. This is helpful for identity providers that enforce format or length constraints on these parameters. Per OIDC Core 3.1.3.7, the `nonce` sent in the authorization request must be present and match in the `id_token` — a missing or mismatched nonce will reject the login.
 {% endhint %}
+
+### Single Logout
+
+To close the OIDC session at the identity provider when users log out of CISO Assistant, register this post-logout redirect URI on the OIDC client:
+
+```
+<frontend_url>/login
+```
+
+The provider's OpenID configuration must expose an `end_session_endpoint`. CISO Assistant uses this endpoint with `client_id`, `id_token_hint`, and the post-logout redirect URI above.
