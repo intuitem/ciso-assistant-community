@@ -1726,6 +1726,7 @@ auditlog.register(SCIMToken)
 def _skip_builtin_rbac(sender, instance, **kwargs):
     if getattr(instance, "builtin", False):
         return False
+    return True
 
 
 for _rbac_model in (RoleAssignment, Role, UserGroup):
