@@ -33,6 +33,7 @@ type SidebarBackendKeys = {
 	advanced_analytics: boolean;
 	journeys: boolean;
 	policy_documents: boolean;
+	document_management: boolean;
 	security_advisories: boolean;
 	cwes: boolean;
 	custom_portals: boolean;
@@ -117,6 +118,9 @@ export function getSidebarVisibleItems(
 		securityAdvisories: featureFlags?.security_advisories ?? true,
 		cwes: featureFlags?.cwes ?? true,
 		managePortals: featureFlags?.custom_portals ?? false,
-		idpGroups: featureFlags?.idp_groups ?? false
+		idpGroups: featureFlags?.idp_groups ?? false,
+		documents: featureFlags?.document_management ?? true,
+		documentTemplates: featureFlags?.document_management ?? true,
+		objectClassifications: featureFlags?.document_management ?? true
 	};
 }

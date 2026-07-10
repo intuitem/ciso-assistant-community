@@ -8,9 +8,10 @@
 	interface Props {
 		handler: DataHandler;
 		URLModel: string;
+		scrollTarget?: HTMLElement;
 	}
 
-	let { handler, URLModel }: Props = $props();
+	let { handler, URLModel, scrollTarget }: Props = $props();
 
 	const pageNumber = handler.getPageNumber();
 	const rowsPerPage = handler.getRowsPerPage();
@@ -30,6 +31,7 @@
 			breadcrumbs.updateCrumb(hrefPattern, { href: fullPath });
 		}
 		handler.invalidate();
+		scrollTarget?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 	};
 
 	let currentEndpoint: string | null = $state(null);

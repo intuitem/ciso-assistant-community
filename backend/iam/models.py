@@ -45,6 +45,7 @@ import structlog
 logger = structlog.get_logger(__name__)
 
 from auditlog.registry import auditlog
+from auditlog.signals import pre_log
 from allauth.mfa.models import Authenticator
 from core.context import focus_folder_id_var
 from django.shortcuts import get_object_or_404
@@ -1711,3 +1712,22 @@ auditlog.register(
     m2m_fields={"user_groups"},
     exclude_fields=common_exclude,
 )
+auditlog.register(
+    RoleAssignment,
+    m2m_fields={"perimeter_folders"},
+    exclude_fields=common_exclude,
+)
+auditlog.register(Role, exclude_fields=common_exclude)
+auditlog.register(UserGroup, exclude_fields=common_exclude)
+auditlog.register(PersonalAccessToken)
+auditlog.register(SCIMToken)
+
+
+def _skip_builtin_rbac(sender, instance, **kwargs):
+    if getattr(instance, "builtin", False):
+        return False
+    return True
+
+
+for _rbac_model in (RoleAssignment, Role, UserGroup):
+    pre_log.connect(_skip_builtin_rbac, sender=_rbac_model)

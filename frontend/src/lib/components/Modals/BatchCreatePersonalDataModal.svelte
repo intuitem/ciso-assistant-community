@@ -122,6 +122,8 @@
 	];
 
 	let categoryLabels: Record<string, string> = $state({});
+	let codeToId: Record<string, string> = $state({});
+	let customCategories: { value: string; label: string }[] = $state([]);
 	let selectedCategories: string[] = $state([]);
 	let retention = $state('');
 	let deletionPolicy = $state('');
@@ -130,14 +132,15 @@
 	let loading = $state(true);
 	let deletionPolicyOptions: { value: string; label: string }[] = $state([]);
 
-	const categoryGroups = $derived(
-		groupDefinitions.map((g) => ({
+	const categoryGroups = $derived([
+		...groupDefinitions.map((g) => ({
 			label: g.label,
 			categories: g.keys
 				.filter((k) => k in categoryLabels)
 				.map((k) => ({ value: k, label: categoryLabels[k] }))
-		}))
-	);
+		})),
+		...(customCategories.length ? [{ label: 'pd_group_custom', categories: customCategories }] : [])
+	]);
 
 	const canSubmit = $derived(selectedCategories.length > 0 && !submitting);
 
@@ -155,11 +158,19 @@
 	onMount(async () => {
 		try {
 			const [catRes, delRes] = await Promise.all([
-				fetch(`/${urlModel}/batch-create?options=category`),
+				fetch(`/terminologies?field_path=personal_data.category&is_visible=true`),
 				fetch(`/${urlModel}/batch-create?options=deletion_policy`)
 			]);
 			if (catRes.ok) {
-				categoryLabels = parseChoices(await catRes.json());
+				const terms = (await catRes.json()).results ?? [];
+				const knownKeys = new Set(groupDefinitions.flatMap((g) => g.keys));
+				for (const t of terms) {
+					categoryLabels[t.name] = t.translated_name ?? t.name;
+					codeToId[t.name] = t.id;
+					if (!knownKeys.has(t.name)) {
+						customCategories.push({ value: t.name, label: t.translated_name ?? t.name });
+					}
+				}
 			}
 			if (delRes.ok) {
 				const choices = parseChoices(await delRes.json());
@@ -210,7 +221,7 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					processing: processingId,
-					categories: selectedCategories,
+					categories: selectedCategories.map((c) => codeToId[c]).filter(Boolean),
 					retention,
 					deletion_policy: deletionPolicy,
 					is_sensitive: isSensitive

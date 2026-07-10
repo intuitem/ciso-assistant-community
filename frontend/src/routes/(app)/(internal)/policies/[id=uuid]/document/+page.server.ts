@@ -23,7 +23,9 @@ export const load: PageServerLoad = async (event) => {
 	// Gracefully degrade if doc_management is unavailable
 	let allDocuments: any[] = [];
 	try {
-		const allDocsRes = await fetch(`${BASE_API_URL}/managed-documents/?policy=${params.id}`);
+		const allDocsRes = await fetch(
+			`${BASE_API_URL}/managed-documents/?container__policies=${params.id}`
+		);
 		if (allDocsRes.ok) {
 			const allDocsData = await allDocsRes.json();
 			allDocuments = allDocsData.results || [];
@@ -88,7 +90,9 @@ export const load: PageServerLoad = async (event) => {
 	// Load available templates
 	let templates: any[] = [];
 	try {
-		const templatesRes = await fetch(`${BASE_API_URL}/managed-documents/templates/`);
+		const templatesRes = await fetch(
+			`${BASE_API_URL}/managed-documents/templates/?document_type=policy`
+		);
 		if (templatesRes.ok) {
 			templates = await templatesRes.json();
 		}

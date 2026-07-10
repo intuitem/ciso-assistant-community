@@ -530,11 +530,12 @@ DATA_WIZARD_COMMANDS = [
         "model_type": "TPRM",
         "help": (
             "Import TPRM records from a multi-sheet Excel file.\n"
-            "Expected sheets: Entities, Solutions, Contracts (processed in order).\n"
+            "Expected sheets: Entities, Solutions, Contracts, Representatives (processed in order).\n"
             "\nEntities columns: name*, ref_id, description, domain\n"
             "Solutions columns: name*, ref_id, description, provider_entity_ref_id*\n"
             "Contracts columns: name*, ref_id, description, provider_entity_ref_id*, solution_ref_id\n"
-            "\nConflict detection: by name + folder (entities/solutions/contracts)"
+            "Representatives columns: email*, first_name, last_name, description, phone, role, provider_entity_ref_id*\n"
+            "\nConflict detection: by name + folder (entities/solutions/contracts), by email (representatives)"
         ),
         "requires_folder": True,
         "requires_perimeter": False,
@@ -613,6 +614,16 @@ DATA_WIZARD_COMMANDS = [
         "show_folder_option": True,
         "show_perimeter_option": True,
         "show_matrix_option": True,
+    },
+    {
+        "command": "import_tasks",
+        "model_type": "TaskTemplate",
+        "help": "Import task templates and past task node occurrences (multi-sheet Excel or CSV) using the Data Wizard backend.",
+        "requires_folder": False,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+        "show_folder_option": True,
     },
 ]
 

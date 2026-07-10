@@ -95,7 +95,6 @@ export const URL_MODEL = [
 	'operating-modes',
 	'kill-chains',
 	'processings',
-	'processing-natures',
 	'security-exceptions',
 	'findings',
 	'findings-assessments',
@@ -133,6 +132,9 @@ export const URL_MODEL = [
 	'quantitative-risk-hypotheses',
 	// terminologies
 	'terminologies',
+	// classifications
+	'object-classifications',
+	'classification-levels',
 	// roles,
 	'roles',
 	'permissions',
@@ -153,7 +155,9 @@ export const URL_MODEL = [
 	'dashboard-widgets',
 	'dashboard-text-widgets',
 	'dashboard-builtin-widgets',
-	// policy documents
+	// document management
+	'document-containers',
+	'document-templates',
 	'managed-documents',
 	'document-revisions',
 	// presets/journeys

@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { goto as breadcrumbGoto } from '$lib/utils/breadcrumbs';
+	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { deserialize } from '$app/forms';
 	import { openPortalExternal } from '$lib/utils/external-links';
 	import { m } from '$paraglide/messages';
@@ -98,7 +100,11 @@
 	function trigger(item: PortalItem) {
 		if (openPortalExternal(item)) return;
 		if (item.kind === 'create' && item.target.model) openCreate(item.target.model, item.title);
-		else if (item.kind === 'navigate' && item.target.model) goto(`/${item.target.model}`);
+		else if (item.kind === 'navigate' && item.target.model)
+			breadcrumbGoto(`/${item.target.model}`, {
+				label: URL_MODEL_MAP[item.target.model]?.localNamePlural ?? item.title,
+				breadcrumbAction: 'replace'
+			});
 		else if (item.kind === 'assessment') {
 			// Launch directly only when nothing needs to be asked at click time.
 			if (!item.target.folder || item.target.user_names) openLaunchModal(item);

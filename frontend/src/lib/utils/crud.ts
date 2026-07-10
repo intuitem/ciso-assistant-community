@@ -418,6 +418,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [
 			{
 				field: 'applied_controls',
+				urlModel: 'document-containers'
+			},
+			{
+				field: 'applied_controls',
 				urlModel: 'evidences',
 				addExisting: {
 					parentField: 'evidences'
@@ -525,6 +529,10 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'sync_mappings' }
 		],
 		reverseForeignKeyFields: [
+			{
+				field: 'policies',
+				urlModel: 'document-containers'
+			},
 			{
 				field: 'applied_controls',
 				urlModel: 'evidences',
@@ -980,6 +988,61 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'evidence', urlModel: 'evidences' },
 			{ field: 'task_node', urlModel: 'task-nodes' }
+		]
+	},
+	'document-containers': {
+		name: 'documentcontainer',
+		localName: 'documentContainer',
+		localNamePlural: 'documentContainers',
+		verboseName: 'Document',
+		verboseNamePlural: 'Documents',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'policies', urlModel: 'policies' },
+			{ field: 'applied_controls', urlModel: 'applied-controls' },
+			{ field: 'task_templates', urlModel: 'task-templates' },
+			{ field: 'processings', urlModel: 'processings' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
+			{ field: 'classification', urlModel: 'classification-levels' }
+		],
+		reverseForeignKeyFields: [{ field: 'container', urlModel: 'managed-documents' }],
+		selectFields: [{ field: 'document_type' }],
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'document_type' },
+			{ field: 'folder' },
+			{ field: 'classification' },
+			{ field: 'policies' },
+			{ field: 'applied_controls' },
+			{ field: 'task_templates' },
+			{ field: 'processings' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		]
+	},
+	'document-templates': {
+		name: 'documenttemplate',
+		localName: 'documentTemplate',
+		localNamePlural: 'documentTemplates',
+		verboseName: 'Document template',
+		verboseNamePlural: 'Document templates',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+		],
+		selectFields: [{ field: 'document_type' }],
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'provider' },
+			{ field: 'document_type' },
+			{ field: 'locale' },
+			{ field: 'folder' },
+			{ field: 'builtin' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
 		]
 	},
 	'managed-documents': {
@@ -1463,11 +1526,11 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'processings',
 		verboseName: 'processing',
 		verboseNamePlural: 'processings',
-		selectFields: [{ field: 'status' }, { field: 'nature' }],
+		selectFields: [{ field: 'status' }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'purposes', urlModel: 'purposes' },
-			{ field: 'nature', urlModel: 'natures' },
+			{ field: 'nature', urlModel: 'terminologies' },
 			{ field: 'assigned_to', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'perimeters', urlModel: 'perimeters' },
@@ -1494,6 +1557,10 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'updated_at', type: 'datetime' }
 		],
 		reverseForeignKeyFields: [
+			{
+				field: 'processings',
+				urlModel: 'document-containers'
+			},
 			{
 				field: 'processing',
 				urlModel: 'personal-data',
@@ -1530,14 +1597,6 @@ export const URL_MODEL_MAP: ModelMap = {
 				}
 			}
 		]
-	},
-	'processing-natures': {
-		endpointUrl: 'privacy/processing-natures',
-		name: 'processingnature',
-		localName: 'processingNature',
-		localNamePlural: 'processingNatures',
-		verboseName: 'processing nature',
-		verboseNamePlural: 'processing natures'
 	},
 	'right-requests': {
 		endpointUrl: 'privacy/right-requests',
@@ -1645,6 +1704,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		customNameDescription: true,
 		foreignKeyFields: [
 			{ field: 'processing', urlModel: 'processings', endpointUrl: 'processings' },
+			{ field: 'category', urlModel: 'terminologies' },
 			{ field: 'assets', urlModel: 'assets', endpointUrl: 'assets' }
 		],
 		reverseForeignKeyFields: [
@@ -1663,7 +1723,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'created_at' },
 			{ field: 'updated_at' }
 		],
-		selectFields: [{ field: 'category' }, { field: 'deletion_policy' }],
+		selectFields: [{ field: 'deletion_policy' }],
 		filters: [{ field: 'processing' }, { field: 'category' }, { field: 'assets' }]
 	},
 	'data-subjects': {
@@ -1890,7 +1950,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		detailViewFields: [
 			{ field: 'id' },
 			{ field: 'ref_id' },
-			{ field: 'form_display_name' },
+			{ field: 'name' },
 			{ field: 'description' },
 			{ field: 'strategic_scenario' },
 			{ field: 'ro_to_couple' },
@@ -2281,6 +2341,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		reverseForeignKeyFields: [
 			{
+				field: 'task_templates',
+				urlModel: 'document-containers'
+			},
+			{
 				field: 'task_template',
 				urlModel: 'task-nodes',
 				disableCreate: true,
@@ -2647,6 +2711,42 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'builtin' },
 			{ field: 'is_visible' },
 			{ field: 'translations' }
+		]
+	},
+	'object-classifications': {
+		name: 'objectClassification',
+		localName: 'objectClassification',
+		localNamePlural: 'objectClassifications',
+		verboseName: 'Object classification',
+		verboseNamePlural: 'Object classifications',
+		customNameDescription: true,
+		reverseForeignKeyFields: [
+			{ field: 'object_classification', urlModel: 'classification-levels' }
+		],
+		detailViewFields: [
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'ref_id' },
+			{ field: 'builtin' },
+			{ field: 'is_visible' }
+		]
+	},
+	'classification-levels': {
+		name: 'classificationLevel',
+		localName: 'classificationLevel',
+		localNamePlural: 'classificationLevels',
+		verboseName: 'Classification level',
+		verboseNamePlural: 'Classification levels',
+		customNameDescription: true,
+		foreignKeyFields: [{ field: 'object_classification', urlModel: 'object-classifications' }],
+		detailViewFields: [
+			{ field: 'abbreviation' },
+			{ field: 'name' },
+			{ field: 'rank' },
+			{ field: 'hexcolor' },
+			{ field: 'object_classification' },
+			{ field: 'builtin' },
+			{ field: 'is_visible' }
 		]
 	},
 	roles: {

@@ -17,16 +17,16 @@ class ServiceNowFieldMapper(BaseFieldMapper):
         "ref_id": {"pull": {"create", "update"}, "push": {"create", "update"}},
     }
 
-    def __init__(self, configuration):
-        super().__init__(configuration)
-        self.settings = configuration.settings or {}
+    def __init__(self, configuration, model_key="applied_control"):
+        super().__init__(configuration, model_key)
 
-        # Load Dynamic Maps
+        # Load Dynamic Maps from the per-model settings (legacy top-level shim
+        # applies for applied_control).
         # Format: { "local_field": "remote_field" }
-        self.field_map = self.settings.get("field_map", {})
+        self.field_map = self.model_settings.get("field_map", {})
 
         # Format: { "local_field": { "local_value": "remote_value" } }
-        self.value_map_to_remote = self.settings.get("value_map", {})
+        self.value_map_to_remote = self.model_settings.get("value_map", {})
 
         # Build Reverse Map for Incoming Sync (Remote -> Local)
         # Format: { "local_field": { "remote_value_str": "local_value" } }
@@ -66,13 +66,6 @@ class ServiceNowFieldMapper(BaseFieldMapper):
                 )
 
         return local_data
-
-    def get_allowed_fields(self, direction: str, operation: str) -> set[str]:
-        allowed = set()
-        for field, ops in self.FIELD_MAPPINGS_OPERATIONS.items():
-            if operation in ops.get(direction, set()):
-                allowed.add(field)
-        return allowed
 
     def _transform_value_to_remote(self, field: str, value: Any) -> Any:
         if value is None:
@@ -118,8 +111,8 @@ class ServiceNowFieldMapper(BaseFieldMapper):
             except ValueError:
                 return None
 
-        # Handle Generic Type Conversions
-        if field == "priority":
+        # Handle Generic Type Conversions (AppliedControl priority is an int enum)
+        if self.model_key == "applied_control" and field == "priority":
             # If no map was hit above, try to keep it an integer
             try:
                 if int(value) not in [p[0] for p in AppliedControl.PRIORITY]:

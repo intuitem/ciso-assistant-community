@@ -47,6 +47,7 @@ from library.helpers import (
 
 from core.utils import format_currency as _fmt_currency
 from global_settings.models import GlobalSettings
+from integrations.sync_mixin import IntegrationSyncableMixin
 
 from .base_models import (
     AbstractBaseModel,
@@ -66,6 +67,7 @@ from .utils import (
 )
 from .validators import (
     validate_file_name,
+    validate_html_template_file_name,
     validate_file_size,
     JSONSchemaInstanceValidator,
 )
@@ -1701,6 +1703,138 @@ class LoadedLibrary(LibraryMixin):
         )
 
 
+class ObjectClassification(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+    DEFAULT_TLP_LEVELS = [
+        {
+            "abbreviation": "CLEAR",
+            "name": "clear",
+            "rank": 0,
+            "hexcolor": "#FFFFFF",
+            "translations": {"fr": {"name": "clair"}},
+        },
+        {
+            "abbreviation": "GREEN",
+            "name": "green",
+            "rank": 1,
+            "hexcolor": "#33FF00",
+            "translations": {"fr": {"name": "vert"}},
+        },
+        {
+            "abbreviation": "AMBER",
+            "name": "amber",
+            "rank": 2,
+            "hexcolor": "#FFC000",
+            "translations": {"fr": {"name": "orange"}},
+        },
+        {
+            "abbreviation": "AMBER+STRICT",
+            "name": "amber_strict",
+            "rank": 3,
+            "hexcolor": "#FFC000",
+            "translations": {"fr": {"name": "orange+strict"}},
+        },
+        {
+            "abbreviation": "RED",
+            "name": "red",
+            "rank": 4,
+            "hexcolor": "#FF2B2B",
+            "translations": {"fr": {"name": "rouge"}},
+        },
+    ]
+
+    ref_id = models.CharField(
+        max_length=100, blank=True, verbose_name=_("Reference ID")
+    )
+    builtin = models.BooleanField(default=False, verbose_name=_("Built-in"))
+    is_visible = models.BooleanField(default=True, verbose_name=_("Is Visible"))
+    translations = models.JSONField(
+        default=dict, blank=True, null=True, verbose_name=_("Translations")
+    )
+
+    fields_to_check = ["name"]
+
+    class Meta:
+        verbose_name = _("Object classification")
+        verbose_name_plural = _("Object classifications")
+
+    @classmethod
+    def create_default_classifications(cls):
+        # is_visible is user-controlled: set on insert only, never on re-seed.
+        tlp, _ = cls.objects.update_or_create(
+            ref_id="TLP",
+            defaults={
+                "name": "TLP",
+                "description": "Traffic Light Protocol",
+                "builtin": True,
+                "translations": {
+                    "fr": {
+                        "name": "TLP",
+                        "description": "Protocole des feux de circulation",
+                    }
+                },
+            },
+            create_defaults={
+                "name": "TLP",
+                "description": "Traffic Light Protocol",
+                "builtin": True,
+                "is_visible": True,
+                "translations": {
+                    "fr": {
+                        "name": "TLP",
+                        "description": "Protocole des feux de circulation",
+                    }
+                },
+            },
+        )
+        for level in cls.DEFAULT_TLP_LEVELS:
+            ClassificationLevel.objects.update_or_create(
+                object_classification=tlp,
+                abbreviation=level["abbreviation"],
+                defaults={**level, "builtin": True},
+            )
+
+
+class ClassificationLevel(NameDescriptionMixin, FolderMixin):
+    object_classification = models.ForeignKey(
+        ObjectClassification,
+        on_delete=models.CASCADE,
+        related_name="levels",
+        verbose_name=_("Object classification"),
+    )
+    rank = models.PositiveIntegerField(default=0, verbose_name=_("Rank"))
+    hexcolor = models.CharField(
+        max_length=9, blank=True, default="", verbose_name=_("Color")
+    )
+    abbreviation = models.CharField(
+        max_length=50, blank=True, default="", verbose_name=_("Abbreviation")
+    )
+    builtin = models.BooleanField(default=False, verbose_name=_("Built-in"))
+    is_visible = models.BooleanField(default=True, verbose_name=_("Is Visible"))
+    translations = models.JSONField(
+        default=dict, blank=True, null=True, verbose_name=_("Translations")
+    )
+
+    fields_to_check = ["abbreviation", "object_classification"]
+
+    class Meta:
+        ordering = ["object_classification", "rank"]
+        verbose_name = _("Classification level")
+        verbose_name_plural = _("Classification levels")
+
+    def save(self, *args, **kwargs):
+        if self.object_classification_id:
+            self.folder = self.object_classification.folder
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.abbreviation or self.name
+
+    @property
+    def label(self):
+        t = (self.translations or {}).get(get_language(), {})
+        return t.get("name") or self.abbreviation or self.name
+
+
 class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     """
     Model to store custom terminology for the application
@@ -1715,6 +1849,8 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         METRIC_UNIT = "metric_definition.unit", "metricUnit"
         PROJECT_STATUS = "project.status", "projectStatus"
         PROJECT_HEALTH = "project.health", "projectHealth"
+        PROCESSING_NATURE = "processing.nature", "processingNature"
+        PERSONAL_DATA_CATEGORY = "personal_data.category", "personalDataCategory"
 
     DEFAULT_ROTO_RISK_ORIGINS = [
         {
@@ -3209,12 +3345,23 @@ class AssetCapability(ReferentialObjectMixin, I18nObjectMixin):
 
 
 class Asset(
+    IntegrationSyncableMixin,
     NameDescriptionMixin,
     FolderMixin,
     PublishInRootFolderMixin,
     FilteringLabelMixin,
     CustomFieldsMixin,
 ):
+    INTEGRATION_MODEL_KEY = "asset"
+    INTEGRATION_SYNCABLE_FIELDS: Final[set[str]] = {
+        "name",
+        "description",
+        "ref_id",
+        "type",
+        "reference_link",
+        "observation",
+    }
+
     class Type(models.TextChoices):
         """
         The type of the asset.
@@ -3999,8 +4146,18 @@ class Asset(
         ]
 
     def save(self, *args, **kwargs) -> None:
+        # Capture changed syncable fields before writing, for outbound sync.
+        changed_fields = self._capture_sync_changed_fields()
+        # _state.adding, not `pk is None`: the UUID pk is defaulted at
+        # instantiation, so pk is never None even for unsaved rows.
+        is_new = self._state.adding
+        # ``skip_sync`` lets the inbound pull path write without re-triggering a
+        # push (set by the orchestrator's _update_local_object).
+        skip_sync = kwargs.pop("skip_sync", False)
         self.full_clean()
-        return super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
+        if not skip_sync:
+            self._trigger_sync(is_new=is_new, changed_fields=changed_fields)
 
     def get_security_objectives_comparison(
         self, security_objectives=None, security_capabilities=None
@@ -5083,12 +5240,15 @@ def _get_default_applied_control_cost():
 
 
 class AppliedControl(
+    IntegrationSyncableMixin,
     NameDescriptionMixin,
     FolderMixin,
     PublishInRootFolderMixin,
     FilteringLabelMixin,
     CustomFieldsMixin,
 ):
+    INTEGRATION_MODEL_KEY = "applied_control"
+
     class Status(models.TextChoices):
         TO_DO = "to_do", _("To do")
         IN_PROGRESS = "in_progress", _("In progress")
@@ -5297,11 +5457,8 @@ class AppliedControl(
         verbose_name_plural = _("Applied controls")
 
     def save(self, *args, **kwargs):
-        # Track what changed
-        changed_fields = []
-        old_instance = AppliedControl.objects.filter(pk=self.pk).first()
-        if old_instance:
-            changed_fields = self._get_changed_fields(old_instance)
+        # Track what changed (vs the persisted row) for outbound sync.
+        changed_fields = self._capture_sync_changed_fields()
 
         if self.reference_control and self.category is None:
             self.category = self.reference_control.category
@@ -5310,8 +5467,9 @@ class AppliedControl(
         if self.status == "active":
             self.progress_field = 100
 
-        # Save first
-        is_new = self.pk is None
+        # Save first. _state.adding, not `pk is None`: the UUID pk is defaulted
+        # at instantiation, so pk is never None even for unsaved rows.
+        is_new = self._state.adding
         skip_sync = kwargs.pop("skip_sync", False)
         super(AppliedControl, self).save(*args, **kwargs)
 
@@ -5326,47 +5484,6 @@ class AppliedControl(
         from metrology.models import BuiltinMetricSample
 
         BuiltinMetricSample.update_or_create_snapshot(self.folder)
-
-    def _get_changed_fields(self, old_instance) -> list[str]:
-        """Detect which fields changed"""
-        changed = []
-
-        for field in self.INTEGRATION_SYNCABLE_FIELDS:
-            old_val = getattr(old_instance, field)
-            new_val = getattr(self, field)
-            if old_val != new_val:
-                changed.append(field)
-
-        return changed
-
-    def _trigger_sync(self, is_new: bool, changed_fields: List[str]):
-        """Queue sync tasks for all active integrations"""
-        from integrations.tasks import sync_object_to_integrations
-        from integrations.models import IntegrationConfiguration
-
-        # Find all active ITSM integrations for this folder
-        configurations = IntegrationConfiguration.objects.filter(
-            folder=Folder.get_root_folder(),
-            provider__provider_type="itsm",
-            is_active=True,
-        )
-
-        if configurations.exists() and (is_new or changed_fields):
-            # Dispatch async task
-            logger.debug(
-                "Dispatching remote object sync task", applied_control_id=self.pk
-            )
-            transaction.on_commit(
-                lambda: sync_object_to_integrations.schedule(
-                    args=(
-                        ContentType.objects.get_for_model(self),
-                        self.pk,
-                        list(configurations.values_list("id", flat=True)),
-                        changed_fields,
-                    ),
-                    delay=1,
-                )
-            )
 
     @property
     def risk_scenarios(self):
@@ -10193,8 +10310,78 @@ class CustomWordTemplate(AbstractBaseModel, FolderMixin):
 
     fields_to_check = ["template_key", "language"]
 
+    def delete(self, *args, **kwargs):
+        if self.file:
+            self.file.delete(save=False)
+        super().delete(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.template_key} ({self.language})"
+
+
+class CustomDocHtmlTemplate(AbstractBaseModel, FolderMixin):
+    """
+    Allows admins to override built-in HTML render templates (WeasyPrint PDF
+    layouts, etc.). Each record overrides one template for one language.
+    Access is gated by the enterprise viewset and UI.
+    """
+
+    template_key = models.CharField(
+        max_length=100,
+        help_text=_("Template identifier, e.g. 'document_pdf'"),
+    )
+    language = models.CharField(
+        max_length=10,
+        help_text=_("Language code, e.g. 'en', 'fr'"),
+    )
+    file = models.FileField(
+        upload_to="custom_html_templates/",
+        validators=[
+            FileExtensionValidator(["html"]),
+            validate_file_size,
+            validate_html_template_file_name,
+        ],
+        help_text=_("Custom .html template file (Django template syntax)"),
+    )
+    is_active = models.BooleanField(default=True)
+
+    fields_to_check = ["template_key", "language"]
+
+    def delete(self, *args, **kwargs):
+        if self.file:
+            self.file.delete(save=False)
+        super().delete(*args, **kwargs)
+
     def __str__(self):
         return f"{self.template_key} ({self.language})"
 
 
 # actions - 0: create, 1: update, 2: delete
+
+auditlog.register(
+    Team,
+    m2m_fields={"members", "deputies"},
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    ValidationFlow,
+    m2m_fields={
+        "compliance_assessments",
+        "risk_assessments",
+        "business_impact_analysis",
+        "crq_studies",
+        "ebios_studies",
+        "entity_assessments",
+        "findings_assessments",
+        "evidences",
+        "security_exceptions",
+        "policies",
+        "processings",
+    },
+    exclude_fields=common_exclude,
+)
+auditlog.register(StoredLibrary, exclude_fields=common_exclude)
+auditlog.register(LoadedLibrary, exclude_fields=common_exclude)
+auditlog.register(RiskMatrix, exclude_fields=common_exclude)
+auditlog.register(CustomEmailTemplate, exclude_fields=common_exclude)
+auditlog.register(CustomWordTemplate, exclude_fields=common_exclude)

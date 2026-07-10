@@ -2,7 +2,7 @@ from django.db import models
 from iam.models import User, FolderMixin, PublishInRootFolderMixin
 from tprm.models import Entity
 from core.models import Actor, AppliedControl, Asset, Evidence, Incident, Perimeter
-from core.models import FilteringLabelMixin, I18nObjectMixin, ReferentialObjectMixin
+from core.models import FilteringLabelMixin, Terminology
 from core.base_models import NameDescriptionMixin, AbstractBaseModel
 from core.constants import COUNTRY_CHOICES
 from django.db.models import Count
@@ -10,6 +10,7 @@ from django.db.models import Count
 from auditlog.registry import auditlog
 
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 import uuid
 
 
@@ -60,43 +61,14 @@ TRANSFER_MECHANISM_CHOICES = (
 )
 
 
-class ProcessingNature(
-    ReferentialObjectMixin, I18nObjectMixin, PublishInRootFolderMixin
-):
-    DEFAULT_PROCESSING_NATURE = [
-        "privacy_collection",
-        "privacy_recording",
-        "privacy_organization",
-        "privacy_structuring",
-        "privacy_storage",
-        "privacy_adaptationOrAlteration",
-        "privacy_retrieval",
-        "privacy_consultation",
-        "privacy_use",
-        "privacy_disclosureByTransmission",
-        "privacy_disseminationOrOtherwiseMakingAvailable",
-        "privacy_alignmentOrCombination",
-        "privacy_restriction",
-        "privacy_erasureOrDestruction",
-    ]
+def create_default_privacy_terminologies():
+    from privacy.terminology_seeds import (
+        DEFAULT_PROCESSING_NATURES,
+        DEFAULT_PERSONAL_DATA_CATEGORIES,
+    )
 
-    name = models.CharField(max_length=100, unique=True)
-
-    def __str__(self):
-        return self.name
-
-    @classmethod
-    def create_default_values(cls):
-        for value in cls.DEFAULT_PROCESSING_NATURE:
-            ProcessingNature.objects.update_or_create(
-                name=value,
-                defaults={"is_published": True},
-            )
-
-    class Meta:
-        ordering = ["name"]
-        verbose_name = "Processing Nature"
-        verbose_name_plural = "Processing Natures"
+    Terminology._seed_defaults(DEFAULT_PROCESSING_NATURES)
+    Terminology._seed_defaults(DEFAULT_PERSONAL_DATA_CATEGORIES)
 
 
 class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
@@ -108,7 +80,15 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
     )
 
     ref_id = models.CharField(max_length=100, blank=True)
-    nature = models.ManyToManyField(ProcessingNature, blank=True)
+    nature = models.ManyToManyField(
+        Terminology,
+        blank=True,
+        related_name="processing_natures",
+        limit_choices_to={
+            "field_path": Terminology.FieldPath.PROCESSING_NATURE,
+            "is_visible": True,
+        },
+    )
     status = models.CharField(
         max_length=20, choices=STATUS_CHOICES, default="privacy_draft"
     )
@@ -154,7 +134,25 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
         return {}
 
 
-class Purpose(NameDescriptionFolderMixin):
+class ProcessingChildMixin:
+    def _touch_processing(self):
+        if self.processing_id:
+            Processing.objects.filter(pk=self.processing_id).update(
+                updated_at=timezone.now()
+            )
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self._touch_processing()
+
+    def delete(self, *args, **kwargs):
+        processing_id = self.processing_id
+        result = super().delete(*args, **kwargs)
+        Processing.objects.filter(pk=processing_id).update(updated_at=timezone.now())
+        return result
+
+
+class Purpose(ProcessingChildMixin, NameDescriptionFolderMixin):
     name = models.CharField(
         max_length=200, verbose_name=_("Name"), null=True, blank=True
     )
@@ -182,7 +180,7 @@ class Purpose(NameDescriptionFolderMixin):
         super().save(*args, **kwargs)
 
 
-class PersonalData(NameDescriptionFolderMixin):
+class PersonalData(ProcessingChildMixin, NameDescriptionFolderMixin):
     DELETION_POLICY_CHOICES = (
         ("privacy_automatic_deletion", "Automatic Deletion"),
         ("privacy_anonymization", "Anonymization"),
@@ -190,74 +188,6 @@ class PersonalData(NameDescriptionFolderMixin):
         ("privacy_user_requested_deletion", "User Requested Deletion"),
         ("privacy_legal_regulatory_hold", "Legal/Regulatory Hold"),
         ("privacy_partial_deletion", "Partial Deletion"),
-    )
-    PERSONAL_DATA_CHOICES = (
-        # Basic Identity Information
-        ("privacy_basic_identity", "Basic Identity Information"),
-        ("privacy_name", "Name"),
-        ("privacy_identification_numbers", "Identification Numbers"),
-        ("privacy_online_identifiers", "Online Identifiers"),
-        ("privacy_location_data", "Location Data"),
-        # Contact Information
-        ("privacy_contact_details", "Contact Details"),
-        ("privacy_address", "Address"),
-        ("privacy_email", "Email Address"),
-        ("privacy_phone_number", "Phone Number"),
-        # Financial Information
-        ("privacy_financial_data", "Financial Data"),
-        ("privacy_bank_account", "Bank Account Information"),
-        ("privacy_payment_card", "Payment Card Information"),
-        ("privacy_transaction_history", "Transaction History"),
-        ("privacy_salary_information", "Salary Information"),
-        # Special Categories of Personal Data (Sensitive)
-        ("privacy_health_data", "Health Data"),
-        ("privacy_genetic_data", "Genetic Data"),
-        ("privacy_biometric_data", "Biometric Data"),
-        ("privacy_racial_ethnic_origin", "Racial or Ethnic Origin"),
-        ("privacy_political_opinions", "Political Opinions"),
-        ("privacy_religious_beliefs", "Religious or Philosophical Beliefs"),
-        ("privacy_trade_union_membership", "Trade Union Membership"),
-        ("privacy_sexual_orientation", "Sexual Orientation"),
-        ("privacy_sex_life_data", "Sex Life Data"),
-        # Digital Behavior and Activities
-        ("privacy_browsing_history", "Browsing History"),
-        ("privacy_search_history", "Search History"),
-        ("privacy_cookies", "Cookies Data"),
-        ("privacy_device_information", "Device Information"),
-        ("privacy_ip_address", "IP Address"),
-        ("privacy_user_behavior", "User Behavior"),
-        # Professional Data
-        ("privacy_employment_details", "Employment Details"),
-        ("privacy_education_history", "Education History"),
-        ("privacy_professional_qualifications", "Professional Qualifications"),
-        ("privacy_work_performance", "Work Performance Data"),
-        # Social Relationships
-        ("privacy_family_details", "Family Details"),
-        ("privacy_social_network", "Social Network"),
-        ("privacy_lifestyle_information", "Lifestyle Information"),
-        # Communication Data
-        ("privacy_correspondence", "Correspondence Content"),
-        ("privacy_messaging_content", "Messaging Content"),
-        ("privacy_communication_metadata", "Communication Metadata"),
-        # Government/Official Data
-        ("privacy_government_identifiers", "Government Identifiers"),
-        ("privacy_tax_information", "Tax Information"),
-        ("privacy_social_security", "Social Security Information"),
-        ("privacy_drivers_license", "Driver's License Information"),
-        ("privacy_passport_information", "Passport Information"),
-        # Legal Data
-        ("privacy_legal_records", "Legal Records"),
-        ("privacy_criminal_records", "Criminal Records"),
-        ("privacy_judicial_data", "Judicial Data"),
-        # Preferences and Opinions
-        ("privacy_preferences", "Preferences"),
-        ("privacy_opinions", "Opinions"),
-        ("privacy_feedback", "Feedback"),
-        # Other Types
-        ("privacy_images_photos", "Images and Photos"),
-        ("privacy_voice_recordings", "Voice Recordings"),
-        ("privacy_video_recordings", "Video Recordings"),
-        ("privacy_other", "Other Personal Data"),
     )
 
     name = models.CharField(
@@ -267,7 +197,15 @@ class PersonalData(NameDescriptionFolderMixin):
     processing = models.ForeignKey(
         Processing, on_delete=models.CASCADE, related_name="personal_data"
     )
-    category = models.CharField(max_length=255, choices=PERSONAL_DATA_CHOICES)
+    category = models.ForeignKey(
+        Terminology,
+        on_delete=models.PROTECT,
+        related_name="personal_data_categories",
+        limit_choices_to={
+            "field_path": Terminology.FieldPath.PERSONAL_DATA_CATEGORY,
+            "is_visible": True,
+        },
+    )
     retention = models.CharField(max_length=255, blank=True)
     deletion_policy = models.CharField(
         max_length=50, choices=DELETION_POLICY_CHOICES, blank=True
@@ -292,11 +230,11 @@ class PersonalData(NameDescriptionFolderMixin):
     fields_to_check = ["name", "category", "processing"]
 
     def __str__(self):
-        return self.name if self.name else self.category
+        return self.name if self.name else str(self.category)
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
-        if self.category in self.SENSITIVE_CATEGORIES:
+        if self.category_id and self.category.name in self.SENSITIVE_CATEGORIES:
             self.is_sensitive = True
         super().save(*args, **kwargs)
 
@@ -309,15 +247,14 @@ class PersonalData(NameDescriptionFolderMixin):
     def get_categories_count(cls, filters: dict = {}):
         categories = (
             cls.objects.filter(**filters)
-            .values("category")
+            .values("category__name")
             .annotate(count=Count("id"))
             .order_by("-count")
         )
 
-        # Convert to list of dictionaries with category codes for frontend translation
         result = []
         for item in categories:
-            category_code = item["category"]
+            category_code = item["category__name"]
             result.append(
                 {"id": category_code, "name": category_code, "value": item["count"]}
             )
@@ -325,7 +262,7 @@ class PersonalData(NameDescriptionFolderMixin):
         return result
 
 
-class DataSubject(NameDescriptionFolderMixin):
+class DataSubject(ProcessingChildMixin, NameDescriptionFolderMixin):
     CATEGORY_CHOICES = (
         # Core Categories
         ("privacy_customer", "Customer/Client"),
@@ -364,7 +301,7 @@ class DataSubject(NameDescriptionFolderMixin):
         super().save(*args, **kwargs)
 
 
-class DataRecipient(NameDescriptionFolderMixin):
+class DataRecipient(ProcessingChildMixin, NameDescriptionFolderMixin):
     CATEGORY_CHOICES = (
         # Internal Recipients
         ("privacy_internal_team", "Internal Team/Department"),
@@ -423,7 +360,7 @@ class DataRecipient(NameDescriptionFolderMixin):
         super().save(*args, **kwargs)
 
 
-class DataContractor(NameDescriptionFolderMixin):
+class DataContractor(ProcessingChildMixin, NameDescriptionFolderMixin):
     RELATIONSHIP_TYPE_CHOICES = (
         ("privacy_data_processor", "Data Processor"),
         ("privacy_sub_processor", "Sub-processor"),
@@ -461,7 +398,7 @@ class DataContractor(NameDescriptionFolderMixin):
         super().save(*args, **kwargs)
 
 
-class DataTransfer(NameDescriptionFolderMixin):
+class DataTransfer(ProcessingChildMixin, NameDescriptionFolderMixin):
     name = models.CharField(
         max_length=200, verbose_name=_("Name"), null=True, blank=True
     )
