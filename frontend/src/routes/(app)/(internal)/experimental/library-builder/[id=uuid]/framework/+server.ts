@@ -17,7 +17,12 @@ async function backend(url: string, method: string, body: unknown, fetchFn: type
 		body: body === undefined ? undefined : JSON.stringify(body)
 	});
 	const text = await r.text();
-	return { status: r.status, data: text ? JSON.parse(text) : null };
+	// Bodyless statuses (204): json() would build a body, which the
+	// Response constructor rejects for those statuses.
+	if (!text || r.status === 204) {
+		return new Response(null, { status: r.status });
+	}
+	return json(JSON.parse(text), { status: r.status });
 }
 
 export const POST: RequestHandler = async ({ params, request, url, fetch }) => {
@@ -28,34 +33,21 @@ export const POST: RequestHandler = async ({ params, request, url, fetch }) => {
 
 	if (action === 'start-editing') {
 		const query = frameworkUrn ? `?framework_urn=${encodeURIComponent(frameworkUrn)}` : '';
-		const { status, data } = await backend(
-			`${base}/framework-editor/${query}`,
-			'GET',
-			undefined,
-			fetch
-		);
-		return json(data, { status });
+		return backend(`${base}/framework-editor/${query}`, 'GET', undefined, fetch);
 	}
 
 	if (action === 'reference-catalog') {
 		const query = body.library ? `?library=${encodeURIComponent(body.library)}` : '';
-		const { status, data } = await backend(
-			`${base}/reference-catalog/${query}`,
-			'GET',
-			undefined,
-			fetch
-		);
-		return json(data, { status });
+		return backend(`${base}/reference-catalog/${query}`, 'GET', undefined, fetch);
 	}
 
 	if (action === 'create-referential') {
-		const { status, data } = await backend(
+		return backend(
 			`${base}/upsert-object/`,
 			'POST',
 			{ field: body.field, object: body.object },
 			fetch
 		);
-		return json(data, { status });
 	}
 
 	return json({ error: `unknown action '${action}'` }, { status: 400 });
@@ -63,7 +55,7 @@ export const POST: RequestHandler = async ({ params, request, url, fetch }) => {
 
 export const PATCH: RequestHandler = async ({ params, request, url, fetch }) => {
 	const body = await request.json();
-	const { status, data } = await backend(
+	return backend(
 		`${BASE_API_URL}/library-drafts/${params.id}/framework-editor/`,
 		'PUT',
 		{
@@ -72,5 +64,4 @@ export const PATCH: RequestHandler = async ({ params, request, url, fetch }) => 
 		},
 		fetch
 	);
-	return json(data, { status });
 };

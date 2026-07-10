@@ -16,7 +16,12 @@ async function backend(url: string, method: string, body: unknown, fetchFn: type
 		body: body === undefined ? undefined : JSON.stringify(body)
 	});
 	const text = await r.text();
-	return { status: r.status, data: text ? JSON.parse(text) : null };
+	// Bodyless statuses (204): json() would build a body, which the
+	// Response constructor rejects for those statuses.
+	if (!text || r.status === 204) {
+		return new Response(null, { status: r.status });
+	}
+	return json(JSON.parse(text), { status: r.status });
 }
 
 export const POST: RequestHandler = async ({ params, request, fetch }) => {
@@ -25,8 +30,7 @@ export const POST: RequestHandler = async ({ params, request, fetch }) => {
 	const base = `${BASE_API_URL}/library-drafts/${params.id}`;
 
 	if (action === 'start-editing') {
-		const { status, data } = await backend(`${base}/preset-editor/`, 'GET', undefined, fetch);
-		return json(data, { status });
+		return backend(`${base}/preset-editor/`, 'GET', undefined, fetch);
 	}
 
 	return json({ error: `unknown action '${action}'` }, { status: 400 });
@@ -34,11 +38,10 @@ export const POST: RequestHandler = async ({ params, request, fetch }) => {
 
 export const PATCH: RequestHandler = async ({ params, request, fetch }) => {
 	const body = await request.json();
-	const { status, data } = await backend(
+	return backend(
 		`${BASE_API_URL}/library-drafts/${params.id}/preset-editor/`,
 		'PUT',
 		{ editing_draft: body },
 		fetch
 	);
-	return json(data, { status });
 };

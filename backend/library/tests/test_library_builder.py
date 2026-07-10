@@ -1519,3 +1519,14 @@ def test_validate_never_suggests_depending_on_the_drafts_own_library(admin_clien
     assert put.status_code == status.HTTP_200_OK, put.content
     saved = admin_client.get(reverse("library-drafts-detail", args=[draft["id"]])).data
     assert saved["dependencies"] in ([], None)
+
+
+@pytest.mark.django_db
+def test_created_drafts_default_provider_to_packager(admin_client):
+    draft = _create_draft(admin_client)
+    assert draft["provider"] == "me"
+
+    explicit = _create_draft(
+        admin_client, ref_id="providedlib", provider="Some Provider"
+    )
+    assert explicit["provider"] == "Some Provider"

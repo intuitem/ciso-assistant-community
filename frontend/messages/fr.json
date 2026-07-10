@@ -5037,6 +5037,8 @@
 	"builderImplementationGroupsLabel": "Groupes d'implémentation :",
 	"refIdRequired": "Un identifiant de r\u00e9f\u00e9rence valide est requis",
 	"objectUrnAlreadyExists": "Un objet avec cet identifiant existe d\u00e9j\u00e0 dans le brouillon",
+	"defaultPackager": "Packager par d\u00e9faut",
+	"defaultPackagerHelpText": "Pr\u00e9remplit l'identit\u00e9 de packager lors de la cr\u00e9ation de biblioth\u00e8ques dans le g\u00e9n\u00e9rateur (les URN sont urn:{packager}:risk:\u2026). Minuscules, chiffres, - et _ uniquement.",
 	"builderThreatsLabel": "Menaces :",
 	"builderReferenceControlsLabel": "Contr\u00f4les de r\u00e9f\u00e9rence :",
 	"builderLinkExisting": "Lier un objet existant",

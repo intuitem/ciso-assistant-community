@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { pageTitle } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
+	import { defaultMatrixObject, identitySlug } from './builder-helpers';
 
 	$pageTitle = 'Library Builder';
 
@@ -49,6 +50,7 @@
 	async function createDraft() {
 		creating = true;
 		try {
+			rememberPackager(newPackager);
 			const res = await fetch('/experimental/library-builder', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -94,6 +96,108 @@
 		}
 	}
 
+	// --- Quick create: a single-object library that feels like no library ----
+	// "New framework" / "New matrix" ask for a name and a packager — the two
+	// parameters every URN of the family derives from. The packager is
+	// remembered across uses (typed once); the ref_id is slugged from the
+	// name and deduped against the corpus. The wrapping library is minted
+	// behind the scenes and the user lands straight in the object's editor.
+	const PACKAGER_KEY = 'library-builder:packager';
+	let quickKind: 'framework' | 'matrix' | null = $state(null);
+	let quickName = $state('');
+	let quickPackager = $state('');
+	let quickCreating = $state(false);
+
+	function rememberedPackager(): string {
+		try {
+			return localStorage.getItem(PACKAGER_KEY) ?? '';
+		} catch {
+			return '';
+		}
+	}
+
+	function rememberPackager(packager: string) {
+		try {
+			localStorage.setItem(PACKAGER_KEY, packager);
+		} catch {
+			/* storage unavailable — the value just won't persist */
+		}
+	}
+
+	function openQuick(kind: 'framework' | 'matrix') {
+		quickKind = quickKind === kind ? null : kind;
+		showCreate = false;
+		if (!quickPackager) quickPackager = rememberedPackager() || data.defaultPackager;
+	}
+
+	async function freeIdentity(packager: string, slugBase: string): Promise<string> {
+		let refId = slugBase;
+		for (let suffix = 2; suffix <= 9; suffix++) {
+			const draftTaken = drafts.some((d) => d.packager === packager && d.ref_id === refId);
+			let conflicted = draftTaken;
+			if (!conflicted) {
+				const params = new URLSearchParams({ packager, ref_id: refId });
+				const res = await fetch(`/experimental/library-builder?${params}`);
+				const check = res.ok ? await res.json() : {};
+				conflicted = (check.conflicts?.length ?? 0) > 0;
+			}
+			if (!conflicted) return refId;
+			refId = `${slugBase}-${suffix}`;
+		}
+		return refId;
+	}
+
+	async function createQuick() {
+		const kind = quickKind;
+		const slugBase = identitySlug(quickName);
+		const packager = quickPackager.trim();
+		if (!kind || !slugBase || !IDENTITY_RE.test(packager)) return;
+		quickCreating = true;
+		try {
+			rememberPackager(packager);
+			const refId = await freeIdentity(packager, slugBase);
+			const createRes = await fetch('/experimental/library-builder', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ action: 'create', name: quickName, packager, ref_id: refId })
+			});
+			const created = await createRes.json();
+			if (!createRes.ok) throw new Error(created.error || JSON.stringify(created));
+			const draftBase = `/experimental/library-builder/${created.id}`;
+
+			if (kind === 'framework') {
+				const res = await fetch(draftBase, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ action: 'add-framework' })
+				});
+				const result = await res.json();
+				if (!res.ok) throw new Error(result.error || JSON.stringify(result));
+				window.location.href = `${draftBase}/framework?framework_urn=${encodeURIComponent(
+					result.framework_urn
+				)}`;
+			} else {
+				const res = await fetch(draftBase, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						action: 'upsert-object',
+						field: 'risk_matrices',
+						object: defaultMatrixObject(refId, quickName)
+					})
+				});
+				const result = await res.json();
+				if (!res.ok) throw new Error(result.error || JSON.stringify(result));
+				window.location.href = `${draftBase}/matrix?matrix_urn=${encodeURIComponent(
+					result.object.urn
+				)}`;
+			}
+		} catch (e: any) {
+			setStatus(e.message, 'error');
+			quickCreating = false;
+		}
+	}
+
 	// --- Delete ------------------------------------------------------------
 	async function deleteDraft(draft: any) {
 		if (!confirm(`Delete draft "${draft.name}"? The published library, if any, is not affected.`))
@@ -127,7 +231,27 @@
 				<button
 					type="button"
 					class="btn btn-sm bg-primary-500 text-white hover:bg-primary-600 transition-colors"
-					onclick={() => (showCreate = !showCreate)}
+					onclick={() => openQuick('framework')}
+				>
+					<i class="fa-solid fa-sitemap mr-1"></i>
+					New framework
+				</button>
+				<button
+					type="button"
+					class="btn btn-sm bg-primary-500 text-white hover:bg-primary-600 transition-colors"
+					onclick={() => openQuick('matrix')}
+				>
+					<i class="fa-solid fa-table-cells mr-1"></i>
+					New matrix
+				</button>
+				<button
+					type="button"
+					class="btn btn-sm variant-ghost-primary"
+					onclick={() => {
+						showCreate = !showCreate;
+						quickKind = null;
+						if (!newPackager) newPackager = rememberedPackager() || data.defaultPackager;
+					}}
 				>
 					<i class="fa-solid fa-plus mr-1"></i>
 					New Library Draft
@@ -166,6 +290,63 @@
 				</span>
 			{/if}
 		</div>
+
+		{#if quickKind}
+			<div class="mt-4 border-t border-surface-200-800 pt-4 flex flex-wrap items-end gap-3">
+				<label class="label text-sm grow max-w-md">
+					<span>{quickKind === 'framework' ? 'Framework name' : 'Matrix name'}</span>
+					<!-- svelte-ignore a11y_autofocus -->
+					<input
+						class="input"
+						type="text"
+						bind:value={quickName}
+						placeholder={quickKind === 'framework' ? 'My SOC 2 framework' : 'My 4x4 matrix'}
+						autofocus
+						onkeydown={(e) => e.key === 'Enter' && createQuick()}
+					/>
+				</label>
+				<label class="label text-sm w-48">
+					<span>Packager</span>
+					<input
+						class="input"
+						type="text"
+						bind:value={quickPackager}
+						placeholder="my-org"
+						onkeydown={(e) => e.key === 'Enter' && createQuick()}
+					/>
+				</label>
+				<button
+					type="button"
+					class="btn btn-sm variant-filled-primary"
+					onclick={createQuick}
+					disabled={quickCreating ||
+						!identitySlug(quickName) ||
+						!IDENTITY_RE.test(quickPackager.trim())}
+				>
+					{#if quickCreating}
+						<i class="fa-solid fa-spinner fa-spin mr-1"></i>
+					{:else}
+						<i class="fa-solid fa-wand-magic-sparkles mr-1"></i>
+					{/if}
+					Create and edit
+				</button>
+				<div class="basis-full text-xs space-y-1">
+					{#if quickPackager && !IDENTITY_RE.test(quickPackager.trim())}
+						<p class="text-red-600">Packager must match [a-z0-9_-]+</p>
+					{/if}
+					{#if identitySlug(quickName) && IDENTITY_RE.test(quickPackager.trim())}
+						<p class="text-surface-500 font-mono">
+							urn:{quickPackager.trim()}:risk:{quickKind}:{identitySlug(quickName)}
+						</p>
+					{/if}
+					<p class="text-surface-500">
+						Name and packager determine every URN of the {quickKind}. The packager is remembered for
+						next time; the wrapping library stays out of the way and remains editable in the draft's
+						full view until first publication.
+					</p>
+				</div>
+			</div>
+		{/if}
 
 		{#if showCreate}
 			<div class="mt-4 border-t border-surface-200-800 pt-4 grid grid-cols-1 md:grid-cols-4 gap-3">

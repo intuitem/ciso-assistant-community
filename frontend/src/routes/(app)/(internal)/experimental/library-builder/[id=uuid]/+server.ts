@@ -24,8 +24,12 @@ async function forward(url: string, method: string, body: unknown, fetchFn: type
 		body: body === undefined ? undefined : JSON.stringify(body)
 	});
 	const text = await r.text();
-	const data = text ? JSON.parse(text) : null;
-	return json(data, { status: r.status });
+	// Bodyless statuses (204): json() would build a body, which the
+	// Response constructor rejects for those statuses.
+	if (!text || r.status === 204) {
+		return new Response(null, { status: r.status });
+	}
+	return json(JSON.parse(text), { status: r.status });
 }
 
 export const GET: RequestHandler = async ({ params, url, fetch }) => {

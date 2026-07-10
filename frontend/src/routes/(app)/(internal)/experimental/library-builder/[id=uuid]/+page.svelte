@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { pageTitle } from '$lib/utils/stores';
+	import { defaultMatrixObject } from '../builder-helpers';
 
 	let { data } = $props();
 	let draft: any = $state(data.draft);
@@ -216,6 +217,12 @@
 
 	onMount(() => {
 		if (!draft.identity_locked) loadConflicts();
+		try {
+			const stored = localStorage.getItem(viewKey());
+			if (stored === 'simple' || stored === 'full') viewChoice = stored;
+		} catch {
+			/* storage unavailable */
+		}
 	});
 
 	// --- Publish --------------------------------------------------------------
@@ -302,6 +309,29 @@
 	const SINGLE_KINDS = ['frameworks', 'risk_matrices', 'preset'];
 	function singleKindFull(type: string): boolean {
 		return SINGLE_KINDS.includes(type) && objectCount(type) > 0;
+	}
+
+	// --- Simple / full view ---------------------------------------------------
+	// A library holding exactly one primary object (a framework or a matrix)
+	// and nothing else reads as "editing that object": the library layer is
+	// packaging, folded away behind the full view.
+	let viewChoice: 'simple' | 'full' | null = $state(null);
+	const viewKey = () => `library-builder:view:${draft.id}`;
+	let primaryKind = $derived.by(() => {
+		const populated = OBJECT_TYPES.filter((type) => objectCount(type) > 0);
+		if (populated.length !== 1) return null;
+		if (populated[0] === 'frameworks' && objectCount('frameworks') === 1) return 'framework';
+		if (populated[0] === 'risk_matrices' && objectCount('risk_matrices') === 1) return 'matrix';
+		return null;
+	});
+	let view = $derived(primaryKind ? (viewChoice ?? 'simple') : 'full');
+	function setView(mode: 'simple' | 'full') {
+		viewChoice = mode;
+		try {
+			localStorage.setItem(viewKey(), mode);
+		} catch {
+			/* storage unavailable — the choice just won't persist */
+		}
 	}
 
 	// --- Visual framework editor -----------------------------------------------
@@ -421,15 +451,9 @@
 	}
 
 	async function addMatrix() {
-		const refId = prompt('Reference ID for the new matrix (e.g. custom-3x3):');
-		if (!refId) return;
+		// Single matrix per library: it carries the library's own identity
+		// (bare family URN server-side), same as Add framework.
 		addingMatrix = true;
-		const level = (abbreviation: string, name: string, hexcolor: string) => ({
-			abbreviation,
-			name,
-			description: '',
-			hexcolor
-		});
 		try {
 			const res = await fetch(base(), {
 				method: 'POST',
@@ -437,30 +461,7 @@
 				body: JSON.stringify({
 					action: 'upsert-object',
 					field: 'risk_matrices',
-					object: {
-						ref_id: refId,
-						name: refId,
-						probability: [
-							level('L', 'Low', '#BBF7D0'),
-							level('M', 'Medium', '#FEF08A'),
-							level('H', 'High', '#FECACA')
-						],
-						impact: [
-							level('L', 'Low', '#BBF7D0'),
-							level('M', 'Medium', '#FEF08A'),
-							level('H', 'High', '#FECACA')
-						],
-						risk: [
-							level('L', 'Low', '#22C55E'),
-							level('M', 'Medium', '#F59E0B'),
-							level('H', 'High', '#EF4444')
-						],
-						grid: [
-							[0, 0, 1],
-							[0, 1, 2],
-							[1, 2, 2]
-						]
-					}
+					object: defaultMatrixObject(draft.ref_id, draft.name)
 				})
 			});
 			const result = await res.json();
@@ -536,6 +537,19 @@
 						{statusMessage}
 					</span>
 				{/if}
+				{#if primaryKind}
+					<button
+						type="button"
+						class="btn btn-sm variant-ghost-surface"
+						onclick={() => setView(view === 'simple' ? 'full' : 'simple')}
+						title={view === 'simple'
+							? 'Show the whole library: metadata, imports, all content types'
+							: 'Back to the focused single-object view'}
+					>
+						<i class="fa-solid {view === 'simple' ? 'fa-layer-group' : 'fa-minimize'} mr-1"></i>
+						{view === 'simple' ? 'Full view' : 'Simple view'}
+					</button>
+				{/if}
 				<button
 					type="button"
 					class="btn btn-sm variant-ghost-surface"
@@ -564,23 +578,25 @@
 		</div>
 
 		<!-- Contents summary line -->
-		<div
-			class="flex items-center gap-2 flex-wrap mt-3 pt-3 border-t border-surface-200-800 text-xs text-surface-600-400"
-		>
-			<i class="fa-solid fa-cubes"></i>
-			{#if OBJECT_TYPES.some((type) => objectCount(type) > 0)}
-				{#each OBJECT_TYPES as type}
-					{#if objectCount(type) > 0}
-						<span class="badge variant-ghost-surface text-xs">
-							{objectCount(type)}
-							{type.replaceAll('_', ' ')}
-						</span>
-					{/if}
-				{/each}
-			{:else}
-				<span>Empty library — add or import objects below.</span>
-			{/if}
-		</div>
+		{#if view === 'full'}
+			<div
+				class="flex items-center gap-2 flex-wrap mt-3 pt-3 border-t border-surface-200-800 text-xs text-surface-600-400"
+			>
+				<i class="fa-solid fa-cubes"></i>
+				{#if OBJECT_TYPES.some((type) => objectCount(type) > 0)}
+					{#each OBJECT_TYPES as type}
+						{#if objectCount(type) > 0}
+							<span class="badge variant-ghost-surface text-xs">
+								{objectCount(type)}
+								{type.replaceAll('_', ' ')}
+							</span>
+						{/if}
+					{/each}
+				{:else}
+					<span>Empty library — add or import objects below.</span>
+				{/if}
+			</div>
+		{/if}
 	</div>
 
 	<!-- Advisory identity conflicts -->
@@ -644,513 +660,530 @@
 		</div>
 	{/if}
 
-	<div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-		<!-- Metadata -->
-		<div class="card p-4 space-y-3">
-			<h3 class="text-lg font-semibold">
-				<i class="fa-solid fa-tags mr-1"></i>Library metadata
-			</h3>
-			<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-				<label class="label text-sm md:col-span-2">
-					<span>Name</span>
-					<input class="input" type="text" bind:value={meta.name} />
-				</label>
-				<label class="label text-sm md:col-span-2">
-					<span>Description</span>
-					<textarea class="textarea" rows="2" bind:value={meta.description}></textarea>
-				</label>
-				<label class="label text-sm">
-					<span>Packager {draft.identity_locked ? '(frozen)' : ''}</span>
-					<input
-						class="input"
-						type="text"
-						bind:value={meta.packager}
-						disabled={draft.identity_locked}
-					/>
-				</label>
-				<label class="label text-sm">
-					<span>Reference ID {draft.identity_locked ? '(frozen)' : ''}</span>
-					<input
-						class="input"
-						type="text"
-						bind:value={meta.ref_id}
-						disabled={draft.identity_locked}
-					/>
-				</label>
-				<label class="label text-sm">
-					<span>Version</span>
-					<input class="input" type="number" min="1" bind:value={meta.version} />
-				</label>
-				<label class="label text-sm">
-					<span>Locale</span>
-					<input class="input" type="text" bind:value={meta.locale} />
-				</label>
-				<label class="label text-sm">
-					<span>Provider</span>
-					<input class="input" type="text" bind:value={meta.provider} />
-				</label>
-				<label class="label text-sm">
-					<span>Publication date</span>
-					<input class="input" type="date" bind:value={meta.publication_date} />
-				</label>
-				<label class="label text-sm md:col-span-2">
-					<span>Copyright</span>
-					<input class="input" type="text" bind:value={meta.copyright} />
-				</label>
-				<label class="label text-sm md:col-span-2">
-					<span>Dependencies (one library URN per line)</span>
-					<textarea class="textarea font-mono text-xs" rows="3" bind:value={dependenciesText}
-					></textarea>
-				</label>
-				<label class="label text-sm md:col-span-2">
-					<span>Labels (comma-separated)</span>
-					<input class="input" type="text" bind:value={labelsText} />
-				</label>
-			</div>
-			{#if !draft.identity_locked}
-				<p class="text-xs text-surface-500">
-					Renaming packager / reference ID regenerates every URN of the document. Once published,
-					the identity is frozen.
-				</p>
-			{/if}
-			<div class="flex items-center justify-end gap-2 pt-1">
-				{#if metaDirty}
-					<span class="text-xs text-amber-600">
-						<i class="fa-solid fa-pen-nib mr-1"></i>Unsaved changes
-					</span>
-				{/if}
-				<button
-					type="button"
-					class="btn btn-sm variant-filled-primary"
-					onclick={saveMeta}
-					disabled={savingMeta || !metaDirty}
-				>
-					{#if savingMeta}<i class="fa-solid fa-spinner fa-spin mr-1"></i>{:else}<i
-							class="fa-solid fa-floppy-disk mr-1"
-						></i>{/if}
-					Save metadata
-				</button>
-			</div>
-		</div>
-
-		<!-- Import objects -->
-		<div class="card p-4 space-y-3">
-			<h3 class="text-lg font-semibold">
-				<i class="fa-solid fa-file-import mr-1"></i>Import objects (clone)
-			</h3>
-			<p class="text-xs text-surface-500">
-				Copy objects by value from an existing library, rebased onto this draft's URN family.
-				References leaving the selection follow the chosen policy.
-			</p>
-			<select class="select text-sm" bind:value={importSource}>
-				<option value="">Source library…</option>
-				{#each storedLibraries as library}
-					<option value={library.id}>
-						{library.name} (v{library.version}){library.builtin ? ' — builtin' : ''}
-					</option>
-				{/each}
-			</select>
-			<div class="flex flex-wrap gap-3 text-sm">
-				{#each OBJECT_TYPES as type}
-					{@const atLimit = singleKindFull(type)}
-					<label class="flex items-center gap-1 {atLimit ? 'opacity-50' : ''}">
-						<input
-							type="checkbox"
-							class="checkbox"
-							checked={importTypes.includes(type)}
-							onchange={() => toggleType(type)}
-							disabled={atLimit}
-							title={atLimit
-								? 'The library already holds one — a library has at most one of this kind.'
-								: undefined}
-						/>
-						{type.replaceAll('_', ' ')}
-					</label>
-				{/each}
-			</div>
-			<p class="text-xs text-surface-500">Nothing checked = import everything.</p>
-			<div class="flex flex-wrap items-center gap-4 text-sm">
-				<span class="font-medium">Out-of-selection references:</span>
-				<label class="flex items-center gap-1">
-					<input type="radio" class="radio" bind:group={importPolicy} value="strip" />
-					strip
-				</label>
-				<label class="flex items-center gap-1">
-					<input type="radio" class="radio" bind:group={importPolicy} value="pull" />
-					pull in
-				</label>
-				<label class="flex items-center gap-1">
-					<input type="radio" class="radio" bind:group={importPolicy} value="reference" />
-					keep as reference
-				</label>
-				<label class="flex items-center gap-1 ml-auto">
-					<input type="checkbox" class="checkbox" bind:checked={importOverwrite} />
-					overwrite existing
-				</label>
-			</div>
-			<button
-				type="button"
-				class="btn btn-sm variant-filled-primary"
-				onclick={importObjects}
-				disabled={!importSource || importing}
-			>
-				{#if importing}<i class="fa-solid fa-spinner fa-spin mr-1"></i>{:else}<i
-						class="fa-solid fa-file-import mr-1"
-					></i>{/if}
-				Import
-			</button>
-			{#if importReport}
-				<div class="text-xs text-surface-600-400 space-y-1 border-t border-surface-200-800 pt-2">
-					{#if importReport.pulled?.length}
-						<p>Pulled in: {importReport.pulled.length} object(s)</p>
-					{/if}
-					{#if importReport.stripped?.length}
-						<p>Stripped links: {importReport.stripped.length}</p>
-					{/if}
-					{#if importReport.referenced?.length}
-						<p>Kept as reference: {importReport.referenced.length}</p>
-					{/if}
-					{#if importReport.external?.length}
-						<p>External references: {importReport.external.length}</p>
-					{/if}
-					{#if importReport.unresolved?.length}
-						<p class="text-amber-600">
-							Unresolved external references: {importReport.unresolved.join(', ')}
-						</p>
-					{/if}
-				</div>
-			{/if}
-		</div>
-	</div>
-
-	<!-- Frameworks: visual editor entry points -->
-	<div class="card p-4 space-y-3">
-		<div class="flex items-center justify-between">
-			<h3 class="text-lg font-semibold">
-				<i class="fa-solid fa-sitemap mr-1"></i>Framework
-			</h3>
-			{#if frameworks.length === 0}
-				<button
-					type="button"
-					class="btn btn-sm variant-ghost-primary"
-					onclick={addFramework}
-					disabled={addingFramework}
-				>
-					{#if addingFramework}<i class="fa-solid fa-spinner fa-spin mr-1"></i>{:else}<i
-							class="fa-solid fa-plus mr-1"
-						></i>{/if}
-					Add framework
-				</button>
-			{/if}
-		</div>
-		{#if frameworks.length > 0}
-			<ul class="divide-y divide-surface-200-800">
-				{#each frameworks as framework}
-					<li class="flex items-center justify-between py-2">
-						<div class="min-w-0">
-							<p class="font-medium truncate">{framework.name || framework.ref_id}</p>
-							<p class="text-xs font-mono text-surface-500 truncate">{framework.urn}</p>
-							<p class="text-xs text-surface-500">
-								{(framework.requirement_nodes ?? []).length} requirement node(s)
-							</p>
-						</div>
-						<a href={frameworkEditorHref(framework)} class="btn btn-sm variant-filled-primary">
-							<i class="fa-solid fa-pen-to-square mr-1"></i>
-							Edit visually
-						</a>
-					</li>
-				{/each}
-			</ul>
-		{:else}
-			<p class="text-sm text-surface-500">
-				No framework in this library yet. Add one to author it in the visual editor, or import one
-				from an existing library above.
-			</p>
-		{/if}
-	</div>
-
-	<!-- Risk matrices: visual editor entry points -->
-	<div class="card p-4 space-y-3">
-		<div class="flex items-center justify-between">
-			<h3 class="text-lg font-semibold">
-				<i class="fa-solid fa-table-cells mr-1"></i>Risk matrix
-			</h3>
-			{#if riskMatrices.length === 0}
-				<button
-					type="button"
-					class="btn btn-sm variant-ghost-primary"
-					onclick={addMatrix}
-					disabled={addingMatrix}
-				>
-					{#if addingMatrix}<i class="fa-solid fa-spinner fa-spin mr-1"></i>{:else}<i
-							class="fa-solid fa-plus mr-1"
-						></i>{/if}
-					Add matrix
-				</button>
-			{/if}
-		</div>
-		{#if riskMatrices.length > 0}
-			<ul class="divide-y divide-surface-200-800">
-				{#each riskMatrices as matrix}
-					<li class="flex items-center justify-between py-2">
-						<div class="min-w-0">
-							<p class="font-medium truncate">{matrix.name || matrix.ref_id}</p>
-							<p class="text-xs font-mono text-surface-500 truncate">{matrix.urn}</p>
-							<p class="text-xs text-surface-500">
-								{(matrix.probability ?? []).length}×{(matrix.impact ?? []).length},
-								{(matrix.risk ?? []).length} risk level(s)
-							</p>
-						</div>
-						<div class="flex items-center gap-1">
-							<a href={matrixEditorHref(matrix)} class="btn btn-sm variant-filled-primary">
-								<i class="fa-solid fa-pen-to-square mr-1"></i>
-								Edit visually
-							</a>
-							<button
-								type="button"
-								class="btn btn-sm variant-ghost-error"
-								onclick={() => deleteObject(matrix)}
-								aria-label="Delete matrix"
-							>
-								<i class="fa-solid fa-trash"></i>
-							</button>
-						</div>
-					</li>
-				{/each}
-			</ul>
-		{:else}
-			<p class="text-sm text-surface-500">No risk matrix in this library yet.</p>
-		{/if}
-	</div>
-
-	<!-- Journey preset -->
-	<div class="card p-4 space-y-3">
-		<div class="flex items-center justify-between">
-			<h3 class="text-lg font-semibold">
-				<i class="fa-solid fa-route mr-1"></i>Journey preset
-			</h3>
-			<a
-				href="/experimental/library-builder/{draft.id}/preset"
-				class="btn btn-sm {draft.content?.preset
-					? 'variant-filled-primary'
-					: 'variant-ghost-primary'}"
-			>
-				<i class="fa-solid fa-pen-to-square mr-1"></i>
-				{draft.content?.preset ? 'Edit journey' : 'Create journey'}
-			</a>
-		</div>
-		{#if draft.content?.preset}
-			<p class="text-sm text-surface-600-400">
-				{#if draft.content.preset.name}
-					<span class="font-medium">{draft.content.preset.name}</span> —
-				{/if}
-				{(draft.content.preset.journey?.steps ?? []).length} step(s),
-				{(draft.content.preset.scaffolded_objects ?? []).length} scaffolded object(s)
-			</p>
-		{:else}
-			<p class="text-sm text-surface-500">
-				No journey preset in this library yet. A preset scaffolds objects and guides users through
-				an onboarding journey when the library is loaded.
-			</p>
-		{/if}
-	</div>
-
-	<!-- Threats + Reference controls: inline table editors -->
-	{#each [{ field: 'threats' as const, label: 'Threats', icon: 'fa-bolt', items: threats }, { field: 'reference_controls' as const, label: 'Reference controls', icon: 'fa-shield-halved', items: referenceControls }] as kind}
-		<div class="card p-4 space-y-3">
-			<div class="flex items-center justify-between">
+	{#if view === 'full'}
+		<div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+			<!-- Metadata -->
+			<div class="card p-4 space-y-3">
 				<h3 class="text-lg font-semibold">
-					<i class="fa-solid {kind.icon} mr-1"></i>{kind.label}
+					<i class="fa-solid fa-tags mr-1"></i>Library metadata
 				</h3>
-				<button
-					type="button"
-					class="btn btn-sm variant-ghost-primary"
-					onclick={() => openLeafForm(kind.field)}
-				>
-					<i class="fa-solid fa-plus mr-1"></i>
-					Add
-				</button>
-			</div>
-
-			{#if leafForm && leafForm.field === kind.field}
-				<div
-					class="border border-primary-200-800 rounded p-3 grid grid-cols-1 md:grid-cols-3 gap-3 bg-primary-50-950/30"
-				>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+					<label class="label text-sm md:col-span-2">
+						<span>Name</span>
+						<input class="input" type="text" bind:value={meta.name} />
+					</label>
+					<label class="label text-sm md:col-span-2">
+						<span>Description</span>
+						<textarea class="textarea" rows="2" bind:value={meta.description}></textarea>
+					</label>
 					<label class="label text-sm">
-						<span>Reference ID {leafForm.urn ? '' : '(used to mint the URN)'}</span>
+						<span>Packager {draft.identity_locked ? '(frozen)' : ''}</span>
 						<input
 							class="input"
 							type="text"
-							bind:value={leafForm.values.ref_id}
-							disabled={leafForm.urn !== null}
+							bind:value={meta.packager}
+							disabled={draft.identity_locked}
 						/>
 					</label>
+					<label class="label text-sm">
+						<span>Reference ID {draft.identity_locked ? '(frozen)' : ''}</span>
+						<input
+							class="input"
+							type="text"
+							bind:value={meta.ref_id}
+							disabled={draft.identity_locked}
+						/>
+					</label>
+					<label class="label text-sm">
+						<span>Version</span>
+						<input class="input" type="number" min="1" bind:value={meta.version} />
+					</label>
+					<label class="label text-sm">
+						<span>Locale</span>
+						<input class="input" type="text" bind:value={meta.locale} />
+					</label>
+					<label class="label text-sm">
+						<span>Provider</span>
+						<input class="input" type="text" bind:value={meta.provider} />
+					</label>
+					<label class="label text-sm">
+						<span>Publication date</span>
+						<input class="input" type="date" bind:value={meta.publication_date} />
+					</label>
 					<label class="label text-sm md:col-span-2">
-						<span>Name</span>
-						<input class="input" type="text" bind:value={leafForm.values.name} />
+						<span>Copyright</span>
+						<input class="input" type="text" bind:value={meta.copyright} />
 					</label>
-					<label class="label text-sm md:col-span-3">
-						<span>Description</span>
-						<textarea class="textarea" rows="2" bind:value={leafForm.values.description}></textarea>
+					<label class="label text-sm md:col-span-2">
+						<span>Dependencies (one library URN per line)</span>
+						<textarea class="textarea font-mono text-xs" rows="3" bind:value={dependenciesText}
+						></textarea>
 					</label>
-					{#if kind.field === 'reference_controls'}
-						<label class="label text-sm">
-							<span>Category</span>
-							<select class="select" bind:value={leafForm.values.category}>
-								<option value="">—</option>
-								{#each CATEGORIES as category}
-									<option value={category}>{category}</option>
-								{/each}
-							</select>
-						</label>
-						<label class="label text-sm">
-							<span>CSF function</span>
-							<select class="select" bind:value={leafForm.values.csf_function}>
-								<option value="">—</option>
-								{#each CSF_FUNCTIONS as fn}
-									<option value={fn}>{fn}</option>
-								{/each}
-							</select>
-						</label>
-						<label class="label text-sm">
-							<span>Typical evidence</span>
-							<input class="input" type="text" bind:value={leafForm.values.typical_evidence} />
-						</label>
+					<label class="label text-sm md:col-span-2">
+						<span>Labels (comma-separated)</span>
+						<input class="input" type="text" bind:value={labelsText} />
+					</label>
+				</div>
+				{#if !draft.identity_locked}
+					<p class="text-xs text-surface-500">
+						Renaming packager / reference ID regenerates every URN of the document. Once published,
+						the identity is frozen.
+					</p>
+				{/if}
+				<div class="flex items-center justify-end gap-2 pt-1">
+					{#if metaDirty}
+						<span class="text-xs text-amber-600">
+							<i class="fa-solid fa-pen-nib mr-1"></i>Unsaved changes
+						</span>
 					{/if}
-					<div class="md:col-span-3 flex justify-end gap-2">
-						<button
-							type="button"
-							class="btn btn-sm variant-ghost-surface"
-							onclick={() => (leafForm = null)}
-						>
-							Cancel
-						</button>
-						<button
-							type="button"
-							class="btn btn-sm variant-filled-primary"
-							onclick={saveLeafForm}
-							disabled={savingLeaf || (!leafForm.urn && !leafForm.values.ref_id.trim())}
-						>
-							{#if savingLeaf}<i class="fa-solid fa-spinner fa-spin mr-1"></i>{/if}
-							{leafForm.urn ? 'Save' : 'Create'}
-						</button>
-					</div>
+					<button
+						type="button"
+						class="btn btn-sm variant-filled-primary"
+						onclick={saveMeta}
+						disabled={savingMeta || !metaDirty}
+					>
+						{#if savingMeta}<i class="fa-solid fa-spinner fa-spin mr-1"></i>{:else}<i
+								class="fa-solid fa-floppy-disk mr-1"
+							></i>{/if}
+						Save metadata
+					</button>
 				</div>
-			{/if}
+			</div>
 
-			{#if kind.items.length > 0}
-				<div class="table-container">
-					<table class="table table-compact w-full">
-						<thead>
-							<tr>
-								<th class="w-28">Ref</th>
-								<th>Name</th>
-								{#if kind.field === 'reference_controls'}
-									<th class="w-28">Category</th>
-									<th class="w-28">CSF</th>
-								{/if}
-								<th>Description</th>
-								<th class="w-24"></th>
-							</tr>
-						</thead>
-						<tbody>
-							{#each kind.items as item}
-								<tr>
-									<td class="font-mono text-xs">{item.ref_id}</td>
-									<td class="font-medium">{item.name || '—'}</td>
-									{#if kind.field === 'reference_controls'}
-										<td class="text-xs">{item.category || '—'}</td>
-										<td class="text-xs">{item.csf_function || '—'}</td>
-									{/if}
-									<td class="text-sm text-surface-600-400 max-w-64 truncate">
-										{item.description || '—'}
-									</td>
-									<td class="space-x-1 text-right">
-										<button
-											type="button"
-											class="btn-icon btn-icon-sm variant-ghost-surface"
-											onclick={() => openLeafForm(kind.field, item)}
-											aria-label="Edit"
-										>
-											<i class="fa-solid fa-pen"></i>
-										</button>
-										<button
-											type="button"
-											class="btn-icon btn-icon-sm variant-ghost-error"
-											onclick={() => deleteObject(item)}
-											aria-label="Delete"
-										>
-											<i class="fa-solid fa-trash"></i>
-										</button>
-									</td>
-								</tr>
-							{/each}
-						</tbody>
-					</table>
+			<!-- Import objects -->
+			<div class="card p-4 space-y-3">
+				<h3 class="text-lg font-semibold">
+					<i class="fa-solid fa-file-import mr-1"></i>Import objects (clone)
+				</h3>
+				<p class="text-xs text-surface-500">
+					Copy objects by value from an existing library, rebased onto this draft's URN family.
+					References leaving the selection follow the chosen policy.
+				</p>
+				<select class="select text-sm" bind:value={importSource}>
+					<option value="">Source library…</option>
+					{#each storedLibraries as library}
+						<option value={library.id}>
+							{library.name} (v{library.version}){library.builtin ? ' — builtin' : ''}
+						</option>
+					{/each}
+				</select>
+				<div class="flex flex-wrap gap-3 text-sm">
+					{#each OBJECT_TYPES as type}
+						{@const atLimit = singleKindFull(type)}
+						<label class="flex items-center gap-1 {atLimit ? 'opacity-50' : ''}">
+							<input
+								type="checkbox"
+								class="checkbox"
+								checked={importTypes.includes(type)}
+								onchange={() => toggleType(type)}
+								disabled={atLimit}
+								title={atLimit
+									? 'The library already holds one — a library has at most one of this kind.'
+									: undefined}
+							/>
+							{type.replaceAll('_', ' ')}
+						</label>
+					{/each}
 				</div>
-			{:else}
-				<p class="text-sm text-surface-500">None yet.</p>
-			{/if}
-		</div>
-	{/each}
-
-	<!-- Requirement mapping sets: arrive via import, removable here -->
-	{#if mappingSets.length > 0}
-		<div class="card p-4 space-y-3">
-			<h3 class="text-lg font-semibold">
-				<i class="fa-solid fa-arrows-left-right mr-1"></i>Requirement mapping sets
-			</h3>
-			<ul class="divide-y divide-surface-200-800">
-				{#each mappingSets as mappingSet}
-					<li class="flex items-center justify-between py-2 gap-3">
-						<div class="min-w-0">
-							<p class="font-medium truncate">{mappingSet.name || mappingSet.ref_id}</p>
-							<p class="text-xs font-mono text-surface-500 truncate">{mappingSet.urn}</p>
-							<p class="text-xs text-surface-500">
-								<span class="font-mono">{urnLeaf(mappingSet.source_framework_urn)}</span>
-								<i class="fa-solid fa-arrow-right mx-1"></i>
-								<span class="font-mono">{urnLeaf(mappingSet.target_framework_urn)}</span>
-								— {(mappingSet.requirement_mappings ?? []).length} mapping(s)
+				<p class="text-xs text-surface-500">Nothing checked = import everything.</p>
+				<div class="flex flex-wrap items-center gap-4 text-sm">
+					<span class="font-medium">Out-of-selection references:</span>
+					<label class="flex items-center gap-1">
+						<input type="radio" class="radio" bind:group={importPolicy} value="strip" />
+						strip
+					</label>
+					<label class="flex items-center gap-1">
+						<input type="radio" class="radio" bind:group={importPolicy} value="pull" />
+						pull in
+					</label>
+					<label class="flex items-center gap-1">
+						<input type="radio" class="radio" bind:group={importPolicy} value="reference" />
+						keep as reference
+					</label>
+					<label class="flex items-center gap-1 ml-auto">
+						<input type="checkbox" class="checkbox" bind:checked={importOverwrite} />
+						overwrite existing
+					</label>
+				</div>
+				<button
+					type="button"
+					class="btn btn-sm variant-filled-primary"
+					onclick={importObjects}
+					disabled={!importSource || importing}
+				>
+					{#if importing}<i class="fa-solid fa-spinner fa-spin mr-1"></i>{:else}<i
+							class="fa-solid fa-file-import mr-1"
+						></i>{/if}
+					Import
+				</button>
+				{#if importReport}
+					<div class="text-xs text-surface-600-400 space-y-1 border-t border-surface-200-800 pt-2">
+						{#if importReport.pulled?.length}
+							<p>Pulled in: {importReport.pulled.length} object(s)</p>
+						{/if}
+						{#if importReport.stripped?.length}
+							<p>Stripped links: {importReport.stripped.length}</p>
+						{/if}
+						{#if importReport.referenced?.length}
+							<p>Kept as reference: {importReport.referenced.length}</p>
+						{/if}
+						{#if importReport.external?.length}
+							<p>External references: {importReport.external.length}</p>
+						{/if}
+						{#if importReport.unresolved?.length}
+							<p class="text-amber-600">
+								Unresolved external references: {importReport.unresolved.join(', ')}
 							</p>
-						</div>
-						<button
-							type="button"
-							class="btn btn-sm variant-ghost-error shrink-0"
-							onclick={() => deleteObject(mappingSet)}
-							aria-label="Delete mapping set"
-						>
-							<i class="fa-solid fa-trash"></i>
-						</button>
-					</li>
-				{/each}
-			</ul>
+						{/if}
+					</div>
+				{/if}
+			</div>
 		</div>
 	{/if}
 
-	<!-- Metric definitions: arrive via import, removable here -->
-	{#if metricDefinitions.length > 0}
+	<!-- Frameworks: visual editor entry points -->
+	{#if view === 'full' || primaryKind === 'framework'}
 		<div class="card p-4 space-y-3">
-			<h3 class="text-lg font-semibold">
-				<i class="fa-solid fa-gauge-high mr-1"></i>Metric definitions
-			</h3>
-			<ul class="divide-y divide-surface-200-800">
-				{#each metricDefinitions as metric}
-					<li class="flex items-center justify-between py-2 gap-3">
-						<div class="min-w-0">
-							<p class="font-medium truncate">{metric.name || metric.ref_id}</p>
-							<p class="text-xs font-mono text-surface-500 truncate">{metric.urn}</p>
-						</div>
-						<button
-							type="button"
-							class="btn btn-sm variant-ghost-error shrink-0"
-							onclick={() => deleteObject(metric)}
-							aria-label="Delete metric definition"
-						>
-							<i class="fa-solid fa-trash"></i>
-						</button>
-					</li>
-				{/each}
-			</ul>
+			<div class="flex items-center justify-between">
+				<h3 class="text-lg font-semibold">
+					<i class="fa-solid fa-sitemap mr-1"></i>Framework
+				</h3>
+				{#if frameworks.length === 0}
+					<button
+						type="button"
+						class="btn btn-sm variant-ghost-primary"
+						onclick={addFramework}
+						disabled={addingFramework}
+					>
+						{#if addingFramework}<i class="fa-solid fa-spinner fa-spin mr-1"></i>{:else}<i
+								class="fa-solid fa-plus mr-1"
+							></i>{/if}
+						Add framework
+					</button>
+				{/if}
+			</div>
+			{#if frameworks.length > 0}
+				<ul class="divide-y divide-surface-200-800">
+					{#each frameworks as framework}
+						<li class="flex items-center justify-between py-2">
+							<div class="min-w-0">
+								<p class="font-medium truncate">{framework.name || framework.ref_id}</p>
+								<p class="text-xs font-mono text-surface-500 truncate">{framework.urn}</p>
+								<p class="text-xs text-surface-500">
+									{(framework.requirement_nodes ?? []).length} requirement node(s)
+								</p>
+							</div>
+							<a href={frameworkEditorHref(framework)} class="btn btn-sm variant-filled-primary">
+								<i class="fa-solid fa-pen-to-square mr-1"></i>
+								Edit visually
+							</a>
+						</li>
+					{/each}
+				</ul>
+			{:else}
+				<p class="text-sm text-surface-500">
+					No framework in this library yet. Add one to author it in the visual editor, or import one
+					from an existing library above.
+				</p>
+			{/if}
 		</div>
+	{/if}
+
+	<!-- Risk matrices: visual editor entry points -->
+	{#if view === 'full' || primaryKind === 'matrix'}
+		<div class="card p-4 space-y-3">
+			<div class="flex items-center justify-between">
+				<h3 class="text-lg font-semibold">
+					<i class="fa-solid fa-table-cells mr-1"></i>Risk matrix
+				</h3>
+				{#if riskMatrices.length === 0}
+					<button
+						type="button"
+						class="btn btn-sm variant-ghost-primary"
+						onclick={addMatrix}
+						disabled={addingMatrix}
+					>
+						{#if addingMatrix}<i class="fa-solid fa-spinner fa-spin mr-1"></i>{:else}<i
+								class="fa-solid fa-plus mr-1"
+							></i>{/if}
+						Add matrix
+					</button>
+				{/if}
+			</div>
+			{#if riskMatrices.length > 0}
+				<ul class="divide-y divide-surface-200-800">
+					{#each riskMatrices as matrix}
+						<li class="flex items-center justify-between py-2">
+							<div class="min-w-0">
+								<p class="font-medium truncate">{matrix.name || matrix.ref_id}</p>
+								<p class="text-xs font-mono text-surface-500 truncate">{matrix.urn}</p>
+								<p class="text-xs text-surface-500">
+									{(matrix.probability ?? []).length}×{(matrix.impact ?? []).length},
+									{(matrix.risk ?? []).length} risk level(s)
+								</p>
+							</div>
+							<div class="flex items-center gap-1">
+								<a href={matrixEditorHref(matrix)} class="btn btn-sm variant-filled-primary">
+									<i class="fa-solid fa-pen-to-square mr-1"></i>
+									Edit visually
+								</a>
+								<button
+									type="button"
+									class="btn btn-sm variant-ghost-error"
+									onclick={() => deleteObject(matrix)}
+									aria-label="Delete matrix"
+								>
+									<i class="fa-solid fa-trash"></i>
+								</button>
+							</div>
+						</li>
+					{/each}
+				</ul>
+			{:else}
+				<p class="text-sm text-surface-500">No risk matrix in this library yet.</p>
+			{/if}
+		</div>
+	{/if}
+
+	{#if view === 'full'}
+		<!-- Journey preset -->
+		<div class="card p-4 space-y-3">
+			<div class="flex items-center justify-between">
+				<h3 class="text-lg font-semibold">
+					<i class="fa-solid fa-route mr-1"></i>Journey preset
+				</h3>
+				<a
+					href="/experimental/library-builder/{draft.id}/preset"
+					class="btn btn-sm {draft.content?.preset
+						? 'variant-filled-primary'
+						: 'variant-ghost-primary'}"
+				>
+					<i class="fa-solid fa-pen-to-square mr-1"></i>
+					{draft.content?.preset ? 'Edit journey' : 'Create journey'}
+				</a>
+			</div>
+			{#if draft.content?.preset}
+				<p class="text-sm text-surface-600-400">
+					{#if draft.content.preset.name}
+						<span class="font-medium">{draft.content.preset.name}</span> —
+					{/if}
+					{(draft.content.preset.journey?.steps ?? []).length} step(s),
+					{(draft.content.preset.scaffolded_objects ?? []).length} scaffolded object(s)
+				</p>
+			{:else}
+				<p class="text-sm text-surface-500">
+					No journey preset in this library yet. A preset scaffolds objects and guides users through
+					an onboarding journey when the library is loaded.
+				</p>
+			{/if}
+		</div>
+
+		<!-- Threats + Reference controls: inline table editors -->
+		{#each [{ field: 'threats' as const, label: 'Threats', icon: 'fa-bolt', items: threats }, { field: 'reference_controls' as const, label: 'Reference controls', icon: 'fa-shield-halved', items: referenceControls }] as kind}
+			<div class="card p-4 space-y-3">
+				<div class="flex items-center justify-between">
+					<h3 class="text-lg font-semibold">
+						<i class="fa-solid {kind.icon} mr-1"></i>{kind.label}
+					</h3>
+					<button
+						type="button"
+						class="btn btn-sm variant-ghost-primary"
+						onclick={() => openLeafForm(kind.field)}
+					>
+						<i class="fa-solid fa-plus mr-1"></i>
+						Add
+					</button>
+				</div>
+
+				{#if leafForm && leafForm.field === kind.field}
+					<div
+						class="border border-primary-200-800 rounded p-3 grid grid-cols-1 md:grid-cols-3 gap-3 bg-primary-50-950/30"
+					>
+						<label class="label text-sm">
+							<span>Reference ID {leafForm.urn ? '' : '(used to mint the URN)'}</span>
+							<input
+								class="input"
+								type="text"
+								bind:value={leafForm.values.ref_id}
+								disabled={leafForm.urn !== null}
+							/>
+						</label>
+						<label class="label text-sm md:col-span-2">
+							<span>Name</span>
+							<input class="input" type="text" bind:value={leafForm.values.name} />
+						</label>
+						<label class="label text-sm md:col-span-3">
+							<span>Description</span>
+							<textarea class="textarea" rows="2" bind:value={leafForm.values.description}
+							></textarea>
+						</label>
+						{#if kind.field === 'reference_controls'}
+							<label class="label text-sm">
+								<span>Category</span>
+								<select class="select" bind:value={leafForm.values.category}>
+									<option value="">—</option>
+									{#each CATEGORIES as category}
+										<option value={category}>{category}</option>
+									{/each}
+								</select>
+							</label>
+							<label class="label text-sm">
+								<span>CSF function</span>
+								<select class="select" bind:value={leafForm.values.csf_function}>
+									<option value="">—</option>
+									{#each CSF_FUNCTIONS as fn}
+										<option value={fn}>{fn}</option>
+									{/each}
+								</select>
+							</label>
+							<label class="label text-sm">
+								<span>Typical evidence</span>
+								<input class="input" type="text" bind:value={leafForm.values.typical_evidence} />
+							</label>
+						{/if}
+						<div class="md:col-span-3 flex justify-end gap-2">
+							<button
+								type="button"
+								class="btn btn-sm variant-ghost-surface"
+								onclick={() => (leafForm = null)}
+							>
+								Cancel
+							</button>
+							<button
+								type="button"
+								class="btn btn-sm variant-filled-primary"
+								onclick={saveLeafForm}
+								disabled={savingLeaf || (!leafForm.urn && !leafForm.values.ref_id.trim())}
+							>
+								{#if savingLeaf}<i class="fa-solid fa-spinner fa-spin mr-1"></i>{/if}
+								{leafForm.urn ? 'Save' : 'Create'}
+							</button>
+						</div>
+					</div>
+				{/if}
+
+				{#if kind.items.length > 0}
+					<div class="table-container">
+						<table class="table table-compact w-full">
+							<thead>
+								<tr>
+									<th class="w-28">Ref</th>
+									<th>Name</th>
+									{#if kind.field === 'reference_controls'}
+										<th class="w-28">Category</th>
+										<th class="w-28">CSF</th>
+									{/if}
+									<th>Description</th>
+									<th class="w-24"></th>
+								</tr>
+							</thead>
+							<tbody>
+								{#each kind.items as item}
+									<tr>
+										<td class="font-mono text-xs">{item.ref_id}</td>
+										<td class="font-medium">{item.name || '—'}</td>
+										{#if kind.field === 'reference_controls'}
+											<td class="text-xs">{item.category || '—'}</td>
+											<td class="text-xs">{item.csf_function || '—'}</td>
+										{/if}
+										<td class="text-sm text-surface-600-400 max-w-64 truncate">
+											{item.description || '—'}
+										</td>
+										<td class="space-x-1 text-right">
+											<button
+												type="button"
+												class="btn-icon btn-icon-sm variant-ghost-surface"
+												onclick={() => openLeafForm(kind.field, item)}
+												aria-label="Edit"
+											>
+												<i class="fa-solid fa-pen"></i>
+											</button>
+											<button
+												type="button"
+												class="btn-icon btn-icon-sm variant-ghost-error"
+												onclick={() => deleteObject(item)}
+												aria-label="Delete"
+											>
+												<i class="fa-solid fa-trash"></i>
+											</button>
+										</td>
+									</tr>
+								{/each}
+							</tbody>
+						</table>
+					</div>
+				{:else}
+					<p class="text-sm text-surface-500">None yet.</p>
+				{/if}
+			</div>
+		{/each}
+
+		<!-- Requirement mapping sets: arrive via import, removable here -->
+		{#if mappingSets.length > 0}
+			<div class="card p-4 space-y-3">
+				<h3 class="text-lg font-semibold">
+					<i class="fa-solid fa-arrows-left-right mr-1"></i>Requirement mapping sets
+				</h3>
+				<ul class="divide-y divide-surface-200-800">
+					{#each mappingSets as mappingSet}
+						<li class="flex items-center justify-between py-2 gap-3">
+							<div class="min-w-0">
+								<p class="font-medium truncate">{mappingSet.name || mappingSet.ref_id}</p>
+								<p class="text-xs font-mono text-surface-500 truncate">{mappingSet.urn}</p>
+								<p class="text-xs text-surface-500">
+									<span class="font-mono">{urnLeaf(mappingSet.source_framework_urn)}</span>
+									<i class="fa-solid fa-arrow-right mx-1"></i>
+									<span class="font-mono">{urnLeaf(mappingSet.target_framework_urn)}</span>
+									— {(mappingSet.requirement_mappings ?? []).length} mapping(s)
+								</p>
+							</div>
+							<button
+								type="button"
+								class="btn btn-sm variant-ghost-error shrink-0"
+								onclick={() => deleteObject(mappingSet)}
+								aria-label="Delete mapping set"
+							>
+								<i class="fa-solid fa-trash"></i>
+							</button>
+						</li>
+					{/each}
+				</ul>
+			</div>
+		{/if}
+
+		<!-- Metric definitions: arrive via import, removable here -->
+		{#if metricDefinitions.length > 0}
+			<div class="card p-4 space-y-3">
+				<h3 class="text-lg font-semibold">
+					<i class="fa-solid fa-gauge-high mr-1"></i>Metric definitions
+				</h3>
+				<ul class="divide-y divide-surface-200-800">
+					{#each metricDefinitions as metric}
+						<li class="flex items-center justify-between py-2 gap-3">
+							<div class="min-w-0">
+								<p class="font-medium truncate">{metric.name || metric.ref_id}</p>
+								<p class="text-xs font-mono text-surface-500 truncate">{metric.urn}</p>
+							</div>
+							<button
+								type="button"
+								class="btn btn-sm variant-ghost-error shrink-0"
+								onclick={() => deleteObject(metric)}
+								aria-label="Delete metric definition"
+							>
+								<i class="fa-solid fa-trash"></i>
+							</button>
+						</li>
+					{/each}
+				</ul>
+			</div>
+		{/if}
+	{/if}
+
+	{#if view === 'simple'}
+		<p class="text-xs text-surface-500 text-center">
+			This {primaryKind} is packaged as the library
+			<span class="font-mono">{draft.urn}</span> — switch to the full view for metadata, dependencies,
+			imports and the other content types.
+		</p>
 	{/if}
 </div>

@@ -5033,6 +5033,8 @@
 	"builderImplementationGroupsLabel": "Implementation groups:",
 	"refIdRequired": "A valid ref ID is required",
 	"objectUrnAlreadyExists": "An object with this ref ID already exists in the draft",
+	"defaultPackager": "Default packager",
+	"defaultPackagerHelpText": "Prefills the packager identity when authoring libraries in the library builder (URNs are urn:{packager}:risk:\u2026). Lowercase letters, digits, - and _ only.",
 	"builderThreatsLabel": "Threats:",
 	"builderReferenceControlsLabel": "Reference controls:",
 	"builderLinkExisting": "Link existing",

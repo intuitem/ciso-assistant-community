@@ -230,6 +230,14 @@ class LibraryDraftWriteSerializer(BaseModelSerializer):
                     )
         return data
 
+    def create(self, validated_data):
+        # Authored libraries: the packager is the provider unless stated
+        # otherwise. Plain editable metadata, not a domain rule — adopted
+        # libraries keep their source's provider (adopt bypasses this).
+        if not validated_data.get("provider"):
+            validated_data["provider"] = validated_data.get("packager")
+        return super().create(validated_data)
+
     def update(self, instance, validated_data):
         self._check_object_perm(instance, "change")
         # Deliberately not calling BaseModelSerializer.update: its urn-based

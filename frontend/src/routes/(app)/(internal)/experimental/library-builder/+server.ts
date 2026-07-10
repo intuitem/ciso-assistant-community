@@ -9,8 +9,12 @@ async function forward(url: string, method: string, body: unknown, fetchFn: type
 		body: body === undefined ? undefined : JSON.stringify(body)
 	});
 	const text = await r.text();
-	const data = text ? JSON.parse(text) : null;
-	return json(data, { status: r.status });
+	// Bodyless statuses (204 on DELETE): json() would build a body, which
+	// the Response constructor rejects for those statuses.
+	if (!text || r.status === 204) {
+		return new Response(null, { status: r.status });
+	}
+	return json(JSON.parse(text), { status: r.status });
 }
 
 /** Advisory identity check: GET ?packager=...&ref_id=... */
@@ -46,7 +50,5 @@ export const DELETE: RequestHandler = async ({ url, fetch }) => {
 	if (!id) {
 		return json({ error: 'missing id' }, { status: 400 });
 	}
-	const r = await fetch(`${BASE_API_URL}/library-drafts/${id}/`, { method: 'DELETE' });
-	const text = await r.text();
-	return json(text ? JSON.parse(text) : null, { status: r.status });
+	return forward(`${BASE_API_URL}/library-drafts/${id}/`, 'DELETE', undefined, fetch);
 };
