@@ -31,7 +31,7 @@ from core.models import (
     StoredLibrary,
     Threat,
 )
-from iam.models import User, UserGroup
+from iam.models import Folder, Permission, Role, RoleAssignment, User, UserGroup
 from library import builder
 
 LIBRARIES_DIR = Path(__file__).resolve().parent.parent / "libraries"
@@ -1530,3 +1530,103 @@ def test_created_drafts_default_provider_to_packager(admin_client):
         admin_client, ref_id="providedlib", provider="Some Provider"
     )
     assert explicit["provider"] == "Some Provider"
+
+
+@pytest.fixture
+def builder_only_client(app_config):
+    """A builder-capable user with NO stored-library visibility.
+
+    No shipped role has this shape (they all carry view_storedlibrary) —
+    it can only exist as a custom role, which is exactly the scenario the
+    folder-scoped read checks protect against.
+    """
+    user = User.objects.create_user("builder-only@builder-tests.com")
+    user.is_published = True
+    user.save()
+    role = Role.objects.create(name="BuilderOnly", folder=Folder.get_root_folder())
+    role.permissions.set(
+        Permission.objects.filter(
+            codename__in=[
+                "view_folder",  # baseline of every real role
+                "view_librarydraft",
+                "add_librarydraft",
+                "change_librarydraft",
+                "delete_librarydraft",
+            ]
+        )
+    )
+    root = Folder.get_root_folder()
+    group = UserGroup.objects.create(name="builder-only-group", folder=root)
+    group.user_set.add(user)
+    assignment = RoleAssignment.objects.create(
+        user_group=group, role=role, folder=root, is_recursive=True
+    )
+    assignment.perimeter_folders.add(root)
+    client = APIClient()
+    token = AuthToken.objects.create(user=user)
+    client.credentials(HTTP_AUTHORIZATION=f"Token {token[1]}")
+    return client
+
+
+@pytest.mark.django_db
+def test_stored_library_reads_respect_rbac(builder_only_client):
+    """Every stored-library read path follows the folder-scoped RBAC model:
+    a user without view_storedlibrary sees no library, through any door."""
+    source_urn = "urn:intuitem:risk:library:doc-pol"  # stored by startup
+
+    # Draft-side doors -------------------------------------------------------
+    created = builder_only_client.post(
+        reverse("library-drafts-list"),
+        {"name": "Mine", "packager": "me", "ref_id": "rbaclib", "content": {}},
+        format="json",
+    )
+    assert created.status_code == status.HTTP_201_CREATED, created.content
+    draft_id = created.data["id"]
+
+    adopt = builder_only_client.post(
+        reverse("library-drafts-adopt"),
+        {"stored_library": source_urn},
+        format="json",
+    )
+    assert adopt.status_code == status.HTTP_404_NOT_FOUND
+
+    imported = builder_only_client.post(
+        reverse("library-drafts-import-objects", args=[draft_id]),
+        {"source": source_urn},
+        format="json",
+    )
+    assert imported.status_code == status.HTTP_404_NOT_FOUND
+
+    catalog_url = reverse("library-drafts-reference-catalog", args=[draft_id])
+    catalog = builder_only_client.get(catalog_url)
+    assert catalog.status_code == status.HTTP_200_OK, catalog.content
+    assert catalog.data["libraries"] == []
+
+    browse = builder_only_client.get(catalog_url, {"library": source_urn})
+    assert browse.status_code == status.HTTP_404_NOT_FOUND
+
+    patched = builder_only_client.patch(
+        reverse("library-drafts-detail", args=[draft_id]),
+        {"dependencies": [source_urn]},
+        format="json",
+    )
+    assert patched.status_code == status.HTTP_200_OK, patched.content
+    catalog = builder_only_client.get(catalog_url)
+    dep = next(s for s in catalog.data["sources"] if s["kind"] == "dependency")
+    assert dep["missing"] is True and dep["reference_controls"] == []
+
+    # Catalog-side doors -----------------------------------------------------
+    for route in ("stored-libraries-detail", "stored-libraries-content"):
+        response = builder_only_client.get(reverse(route, args=[source_urn]))
+        assert response.status_code == status.HTTP_404_NOT_FOUND, route
+
+
+@pytest.mark.django_db
+def test_stored_library_reads_stay_open_for_standard_roles(admin_client):
+    """Sanity: for roles holding view_storedlibrary (all shipped ones),
+    the folder-scoped checks change nothing."""
+    source_urn = "urn:intuitem:risk:library:doc-pol"
+    detail = admin_client.get(reverse("stored-libraries-detail", args=[source_urn]))
+    assert detail.status_code == status.HTTP_200_OK
+    content = admin_client.get(reverse("stored-libraries-content", args=[source_urn]))
+    assert content.status_code == status.HTTP_200_OK

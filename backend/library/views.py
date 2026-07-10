@@ -187,24 +187,18 @@ class StoredLibraryViewSet(BaseModelViewSet):
         return StoredLibraryDetailedSerializer
 
     def retrieve(self, request, *args, pk, **kwargs):
-        if "view_storedlibrary" not in request.user.permissions:
-            return Response(status=HTTP_403_FORBIDDEN)
-        try:
-            key = "urn" if pk.startswith("urn:") else "id"
-            lib = StoredLibrary.objects.get(
-                **{key: pk}
-            )  # There is no "locale" value involved in the fetch + we have to handle the exception if the pk urn doesn't exist
-        except:
+        # Folder-scoped RBAC like any other object read (never a bare
+        # permission-possession check); unreadable == missing.
+        lib = _get_readable_stored_library(request.user, pk)
+        if lib is None:
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
         data = StoredLibrarySerializer(lib).data
         return Response(data)
 
     @action(detail=True, methods=["get"])
     def content(self, request, pk):
-        try:
-            key = "urn" if pk.startswith("urn:") else "id"
-            lib = StoredLibrary.objects.get(**{key: pk})
-        except:
+        lib = _get_readable_stored_library(request.user, pk)
+        if lib is None:
             return Response("Library not found.", status=HTTP_404_NOT_FOUND)
         return Response(update_translations(lib.content))
 
@@ -268,15 +262,10 @@ class StoredLibraryViewSet(BaseModelViewSet):
         ):
             return Response(status=HTTP_403_FORBIDDEN)
 
-        try:
-            key = "urn" if pk.startswith("urn:") else "id"
-            libraries = StoredLibrary.objects.filter(  # The get method raise an exception if multiple objects are found
-                **{key: pk}
-            )  # This is only fetching the lib by URN without caring about the locale or the version, this must change in the future.
-            library = max(
-                libraries, key=lambda lib: lib.version
-            )  # Which mean we can only import the latest version of the library, if that so library that has a most recent version stored shouldn't be displayed and should even be erased from the database
-        except:
+        # Loading implies reading the source: same folder-scoped check as
+        # every other stored-library read (latest version when several).
+        library = _get_readable_stored_library(request.user, pk)
+        if library is None:
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
 
         try:
@@ -296,10 +285,8 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"])
     def tree(self, request, pk):
-        try:
-            key = "urn" if pk.startswith("urn:") else "id"
-            lib = StoredLibrary.objects.get(**{key: pk})
-        except:
+        lib = _get_readable_stored_library(request.user, pk)
+        if lib is None:
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
 
         library_objects = lib.content  # We may need caching for this
@@ -903,6 +890,23 @@ def _get_stored_library(pk_or_urn) -> StoredLibrary | None:
     return max(libraries, key=lambda lib: lib.version)
 
 
+def _get_readable_stored_library(user, pk_or_urn) -> StoredLibrary | None:
+    """RBAC-checked variant of _get_stored_library.
+
+    Reading a stored library follows the regular folder-scoped RBAC model
+    like any other object; an unreadable library is indistinguishable from
+    a missing one. (Stored rows are is_published, so any role holding
+    view_storedlibrary keeps seeing the catalog — the check only bites
+    where visibility is actually restricted.)
+    """
+    stored = _get_stored_library(pk_or_urn)
+    if stored is not None and RoleAssignment.is_object_readable(
+        user, StoredLibrary, stored.id
+    ):
+        return stored
+    return None
+
+
 class LibraryDraftViewSet(BaseModelViewSet):
     """
     Interactive library packager. A draft is a document that serializes to
@@ -1039,7 +1043,9 @@ class LibraryDraftViewSet(BaseModelViewSet):
         ):
             return Response(status=HTTP_403_FORBIDDEN)
 
-        source = _get_stored_library(request.data.get("stored_library"))
+        source = _get_readable_stored_library(
+            request.user, request.data.get("stored_library")
+        )
         if source is None:
             return Response({"error": "libraryNotFound"}, status=HTTP_404_NOT_FOUND)
         if source.builtin:
@@ -1092,7 +1098,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
         """Selective extraction (clone): copy objects from a stored library
         into this draft, rebased onto the draft's URN family."""
         draft = self.get_object()
-        source = _get_stored_library(request.data.get("source"))
+        source = _get_readable_stored_library(request.user, request.data.get("source"))
         if source is None:
             return Response({"error": "libraryNotFound"}, status=HTTP_404_NOT_FOUND)
         if builder.check_document_shape(
@@ -1438,7 +1444,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
 
         browse = request.query_params.get("library")
         if browse:
-            stored = _get_stored_library(browse)
+            stored = _get_readable_stored_library(request.user, browse)
             if stored is None:
                 return Response({"error": "libraryNotFound"}, status=HTTP_404_NOT_FOUND)
             return Response(
@@ -1461,7 +1467,8 @@ class LibraryDraftViewSet(BaseModelViewSet):
             )
         ]
         for dep_urn in draft.dependencies or []:
-            stored = _get_stored_library(str(dep_urn).lower())
+            # Unreadable dependencies degrade to the missing presentation.
+            stored = _get_readable_stored_library(request.user, str(dep_urn).lower())
             if stored is None:
                 sources.append(
                     {
@@ -1485,10 +1492,17 @@ class LibraryDraftViewSet(BaseModelViewSet):
 
         known = {str(s.get("library_urn", "")).lower() for s in sources}
         latest: dict = {}
-        rows = StoredLibrary.objects.filter(
-            Q(content__threats__isnull=False)
-            | Q(content__reference_controls__isnull=False)
-        ).only("id", "urn", "name", "provider", "version")
+        accessible_ids = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, StoredLibrary
+        )[0]
+        rows = (
+            StoredLibrary.objects.filter(id__in=accessible_ids)
+            .filter(
+                Q(content__threats__isnull=False)
+                | Q(content__reference_controls__isnull=False)
+            )
+            .only("id", "urn", "name", "provider", "version")
+        )
         for row in rows:
             lowered = str(row.urn or "").lower()
             if not lowered or lowered in known:
