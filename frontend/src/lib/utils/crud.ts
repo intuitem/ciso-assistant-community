@@ -4,7 +4,6 @@ import EvidenceFilePreview from '$lib/components/ModelTable/field/EvidenceFilePr
 import LanguageDisplay from '$lib/components/ModelTable/field/LanguageDisplay.svelte';
 import FrameworkName from '$lib/components/ModelTable/field/FrameworkName.svelte';
 import LibraryActions from '$lib/components/ModelTable/field/LibraryActions.svelte';
-import RiskScenarioActions from '$lib/components/ModelTable/field/RiskScenarioActions.svelte';
 import UserGroupNameDisplay from '$lib/components/ModelTable/field/UserGroupNameDisplay.svelte';
 import LecChartPreview from '$lib/components/ModelTable/field/LecChartPreview.svelte';
 import { listViewFields } from './table';
@@ -3248,9 +3247,6 @@ const FIELD_COMPONENT_MAP = {
 	},
 	'user-groups': {
 		name: UserGroupNameDisplay
-	},
-	'risk-scenarios': {
-		[CUSTOM_ACTIONS_COMPONENT]: RiskScenarioActions
 	},
 	'quantitative-risk-hypotheses': {
 		lec_data: LecChartPreview
