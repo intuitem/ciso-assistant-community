@@ -48,16 +48,19 @@
 				<h4 class="h4">{m.step({ number: 1 })}</h4>
 				<p class="text-surface-900-100">{$modalStore[0].body ?? '(body missing)'}</p>
 				{#if totp?.totp_url}
-					<QR
-						data={totp.totp_url.replace(
-							/issuer=[^&]+/,
-							'issuer=' + encodeURIComponent('CISO Assistant')
-						)}
-						anchorInnerFill="black"
-						anchorOuterFill="black"
-						width="400"
-						height="400"
-					/>
+					<div class="bg-white p-3 rounded-container">
+						<QR
+							data={totp.totp_url.replace(
+								/issuer=[^&]+/,
+								'issuer=' + encodeURIComponent('CISO Assistant')
+							)}
+							moduleFill="black"
+							anchorInnerFill="black"
+							anchorOuterFill="black"
+							width="400"
+							height="400"
+						/>
+					</div>
 
 					<div class="flex items-center justify-center w-full space-x-2">
 						<hr class="w-64 items-center bg-surface-200-800 border-0" />
@@ -67,7 +70,9 @@
 
 					<div>
 						<p class="text-center text-surface-900-100">{m.enterTOTPCodeManually()}</p>
-						<p class="text-center">{totp.secret}</p>
+						<p class="text-center font-mono text-sm break-all text-surface-900-100">
+							{totp.secret}
+						</p>
 					</div>
 				{/if}
 			</div>
