@@ -740,11 +740,11 @@ Folders (domains) are the top-level organisational units in CISO Assistant. Impo
 
 ***
 
-## Tasks (incoming)
+## Tasks
 
 Tasks in CISO Assistant are modelled as **TaskTemplates** (definitions) with **TaskNodes** (individual occurrences). A non-recurrent task has one node; recurrent tasks generate one node per scheduled occurrence.
 
-The wizard imports both in a single multi-sheet Excel file: a **Summary** sheet for the templates, plus one sheet per template that contains its past occurrences. A flat CSV upload is also accepted and imports templates only.
+The wizard imports both in a single multi-sheet Excel file: a **Summary** sheet for the templates, plus one sheet per template that contains its past occurrences. A flat CSV upload is also accepted and imports templates only. On the CLI, the corresponding command is `import-tasks`.
 
 #### Template
 
@@ -764,25 +764,25 @@ The wizard imports both in a single multi-sheet Excel file: a **Summary** sheet 
   * `false` / `no` / `0`
 * `link` - URL
 * `task_date`  (YYYY-MM-DD)
-* `assigned_to` - comma-separated list of user emails and/or team names
+* `assigned_to` - comma- or semicolon-separated list of user emails and/or team names
 * `assets` - comma-separated asset names or ref\_ids
 * `applied_controls` - comma-separated control names or ref\_ids
 * `evidences` - comma-separated evidence names
-* `compliance_assessments` - comma-separated assessment names; the `name - version` format produced by the export is accepted
-* `risk_assessments` - comma-separated assessment names; the `name - version` format produced by the export is accepted
-* `findings_assessment` - comma-separated findings assessment names
+* `compliance_assessments` - comma-separated assessment names or ref\_ids
+* `risk_assessments` - comma-separated assessment names or ref\_ids; the `name - version` format produced by the export is accepted
+* `findings_assessment` - comma-separated findings assessment names or ref\_ids
 * `status` - non-recurrent only; sets the status of the single task node
   * `pending`
   * `in_progress`
   * `completed`
   * `cancelled`
 * `observation` - free-text; non-recurrent only
-* `schedule_frequency` - recurrent only
+* `schedule_frequency` - recurrent only; must be provided together with `schedule_interval`
   * `DAILY`
   * `WEEKLY`
   * `MONTHLY`
   * `YEARLY`
-* `schedule_interval` - integer; repeat every N periods (recurrent only)
+* `schedule_interval` - integer; repeat every N periods (recurrent only); must be provided together with `schedule_frequency`
 * `schedule_days_of_week` - comma-separated integers 1–7 (Mon=1, Sun=7), WEEKLY only
 * `schedule_weeks_of_month` - comma-separated integers -1–4 (1=first, -1=last)
 * `schedule_months_of_year` - comma-separated integers 1–12, YEARLY only
@@ -796,7 +796,7 @@ The wizard imports both in a single multi-sheet Excel file: a **Summary** sheet 
 
 Each sheet is named `N-template name` (truncated to 31 characters) and contains one row per past occurrence.
 
-* `due_date`\* - date (YYYY-MM-DD); rows with a future date are skipped automatically
+* `due_date`\* - date (YYYY-MM-DD); rows with a future date are skipped automatically, rows with an invalid date are reported as errors
 * `scheduled_date` - date (YYYY-MM-DD); defaults to `due_date` when blank
 * `status`
   * `pending`
@@ -808,7 +808,9 @@ Each sheet is named `N-template name` (truncated to 31 characters) and contains 
 #### Special considerations
 
 * **Folder is a fallback.** Each row's `folder` column is resolved first; the domain selected in the wizard is only used when a row has no folder.
-* **Future nodes are skipped.** Rows whose `due_date` is after today are ignored - those occurrences will be regenerated automatically from the schedule.
-* **Round-trip safe.** Exporting then re-importing with **Update** mode overwrites existing task nodes and templates without creating duplicates. With **Skip** mode, existing records are left unchanged.
+* **Linked records are resolved within your accessible domains.** `assigned_to`, `assets`, `applied_controls`, `evidences` and the assessment columns are matched by ref\_id or name inside the domains you can access; an exact ref\_id match wins, then an object in the row's own domain. Unresolved entries are skipped and reported as warnings, they will not block the import.
+* **Future nodes are skipped.** Rows whose `due_date` is after today are ignored - those occurrences will be regenerated automatically from the schedule. Upcoming occurrences of an imported recurrent task are generated when the task is next opened or edited.
+* **Round-trip safe.** Importing a fresh export works with the default **Stop** mode: the node auto-created for a non-recurrent task is updated by its node sheet instead of raising a conflict. Re-importing with **Update** mode overwrites existing task nodes and templates without creating duplicates. With **Skip** mode, existing records are left unchanged.
 * **Clearing relationships.** In **Update** mode, leaving a relation column (e.g. `assigned_to`, `assets`) blank in the file clears the existing links on the template.
-* **CSV upload.** A CSV file is accepted and imports the Summary sheet fields only; no task nodes are processed.
+* **Older exports.** Files exported by previous versions numbered the node sheets differently; the importer re-matches those sheets by name and adds a warning when the sheet number and name disagree.
+* **CSV upload.** A CSV file is accepted and imports the Summary sheet fields only; no task nodes are processed. The delimiter is detected automatically (comma, semicolon, tab or pipe).
