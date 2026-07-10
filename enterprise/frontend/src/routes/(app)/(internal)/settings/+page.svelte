@@ -15,6 +15,7 @@
 	import SecIntelFeedsSettings from '$lib/components/Settings/SecIntelFeedsSettings.svelte';
 	import EmailTemplatesSettings from '$lib/components/Settings/EmailTemplatesSettings.svelte';
 	import WordTemplatesSettings from '$lib/components/Settings/WordTemplatesSettings.svelte';
+	import DocHtmlTemplatesSettings from '$lib/components/Settings/DocHtmlTemplatesSettings.svelte';
 	import AuditLogForwardingSettings from '$lib/components/Settings/AuditLogForwardingSettings.svelte';
 
 	// Tabs whose content lives in a dedicated sub-route and is preloaded into
@@ -209,6 +210,13 @@
 					<i class="fa-solid fa-file-word mr-2"></i>{m.wordTemplates()}
 				</h3>
 				<WordTemplatesSettings />
+			</section>
+			<hr />
+			<section>
+				<h3 class="h4 font-semibold mb-4">
+					<i class="fa-solid fa-file-pdf mr-2"></i>{m.docHtmlTemplates()}
+				</h3>
+				<DocHtmlTemplatesSettings />
 			</section>
 			<hr />
 			<section>

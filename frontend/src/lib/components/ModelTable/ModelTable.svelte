@@ -208,7 +208,7 @@
 	const showColumnSelector = $derived(
 		(columnSelector ?? Boolean(deleteForm)) &&
 			Boolean(URLModel) &&
-			isStandaloneTable &&
+			(columnSelector === true || isStandaloneTable) &&
 			fields.length === 0 &&
 			allColumns.length > 1
 	);
@@ -377,7 +377,7 @@
 		(Object.hasOwn(row?.meta, 'reference_count') && row?.meta?.reference_count > 0) ||
 		['severity_changed', 'status_changed'].includes(row?.meta?.entry_type) ||
 		forcePreventDelete;
-	const preventEdit = (row: TableSource) => forcePreventEdit;
+	const preventEdit = (row: TableSource) => row?.meta?.builtin || forcePreventEdit;
 
 	const tableURLModel = URLModel;
 

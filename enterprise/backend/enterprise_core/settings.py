@@ -773,6 +773,11 @@ ROUTES["custom-word-templates"] = {
     "basename": "custom-word-templates",
 }
 
+ROUTES["custom-doc-html-templates"] = {
+    "viewset": "enterprise_core.views.CustomDocHtmlTemplateViewSet",
+    "basename": "custom-doc-html-templates",
+}
+
 MODULES["enterprise_core"] = {
     "path": "",
     "module": "enterprise_core.urls",

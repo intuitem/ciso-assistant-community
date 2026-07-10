@@ -134,6 +134,16 @@ router.register(r"comments", CommentViewSet, basename="comments")
 router.register(r"task-templates", TaskTemplateViewSet, basename="task-templates")
 router.register(r"task-nodes", TaskNodeViewSet, basename="task-nodes")
 router.register(r"terminologies", TerminologyViewSet, basename="terminologies")
+router.register(
+    r"object-classifications",
+    ObjectClassificationViewSet,
+    basename="object-classifications",
+)
+router.register(
+    r"classification-levels",
+    ClassificationLevelViewSet,
+    basename="classification-levels",
+)
 router.register(r"questions", QuestionViewSet, basename="questions")
 router.register(r"question-choices", QuestionChoiceViewSet, basename="question-choices")
 router.register(r"answers", AnswerViewSet, basename="answers")

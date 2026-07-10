@@ -189,6 +189,12 @@ export const navData = {
 					name: 'riskMatrices',
 					fa_icon: 'fa-solid fa-table-cells-large',
 					href: '/risk-matrices'
+				},
+				{
+					name: 'documentTemplates',
+					fa_icon: 'fa-solid fa-file-code',
+					href: '/document-templates',
+					permissions: ['view_documenttemplate']
 				}
 			]
 		},
@@ -214,6 +220,12 @@ export const navData = {
 					name: 'appliedControls',
 					fa_icon: 'fa-solid fa-fire-extinguisher',
 					href: '/applied-controls'
+				},
+				{
+					name: 'documents',
+					fa_icon: 'fa-solid fa-file-lines',
+					href: '/documents',
+					permissions: ['view_documentcontainer']
 				},
 				{
 					name: 'calendar',
@@ -510,6 +522,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-language',
 					href: '/terminologies',
 					permissions: ['view_terminology']
+				},
+				{
+					name: 'objectClassifications',
+					fa_icon: 'fa-solid fa-shield-halved',
+					href: '/object-classifications',
+					permissions: ['view_objectclassification']
 				},
 				{
 					name: 'customFields',
