@@ -23,8 +23,8 @@ SYNTHETIC_FIELDS = ({"name": "status", "label": "Status", "readonly": False},)
 
 
 class JiraClient(BaseIntegrationClient):
-    def __init__(self, configuration):
-        super().__init__(configuration)
+    def __init__(self, configuration, model_key="applied_control"):
+        super().__init__(configuration, model_key)
         server_url = self.credentials["server_url"]
         try:
             check_integration_url(server_url, "Jira server_url")
@@ -38,7 +38,7 @@ class JiraClient(BaseIntegrationClient):
             max_retries=3,
         )
         self.jira._session.max_redirects = 0
-        self.mapper = JiraFieldMapper(configuration)
+        self.mapper = JiraFieldMapper(configuration, model_key)
 
     # Settings helpers
 
@@ -49,12 +49,12 @@ class JiraClient(BaseIntegrationClient):
         back to the legacy split ``project_key`` / ``issue_type`` settings.
         """
         project_key, issue_type = self._parse_table_name(
-            self.settings.get("table_name")
+            self.model_settings.get("table_name")
         )
         if not project_key:
-            project_key = self.settings.get("project_key", "")
+            project_key = self.model_settings.get("project_key", "")
         if not issue_type:
-            issue_type = self.settings.get("issue_type", "Task")
+            issue_type = self.model_settings.get("issue_type", "Task")
         return project_key, issue_type
 
     @staticmethod
