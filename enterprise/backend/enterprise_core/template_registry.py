@@ -323,3 +323,49 @@ EMAIL_TEMPLATE_REGISTRY = {
         ],
     },
 }
+
+
+# Registry of overridable HTML render templates (WeasyPrint PDF layouts, ...).
+DOC_HTML_TEMPLATE_REGISTRY = {
+    "document_pdf": {
+        "description": "Managed document PDF layout",
+        "default_languages": ["en", "fr"],
+        "variables": [
+            {
+                "name": "title",
+                "type": "string",
+                "description": "Document title",
+            },
+            {
+                "name": "content",
+                "type": "string",
+                "description": "Rendered HTML body of the document (safe)",
+            },
+            {
+                "name": "version",
+                "type": "string",
+                "description": "Version number of the published revision",
+            },
+            {
+                "name": "document_type",
+                "type": "string",
+                "description": "Human-readable document type label",
+            },
+            {
+                "name": "date",
+                "type": "string",
+                "description": "Publication date formatted as DD/MM/YYYY",
+            },
+            {
+                "name": "logo_base64",
+                "type": "string",
+                "description": "Organisation logo as base64 (empty if unset)",
+            },
+            {
+                "name": "logo_mime_type",
+                "type": "string",
+                "description": "MIME type of the organisation logo",
+            },
+        ],
+    },
+}

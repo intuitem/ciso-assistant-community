@@ -5538,9 +5538,6 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             request=request,
             lookup_queryset=self.get_queryset(),
             dry_run=serializer.validated_data.get("dry_run", False),
-            managed_document_resolution=serializer.validated_data.get(
-                "managed_document_resolution"
-            ),
         )
         return Response(result)
 
@@ -19755,6 +19752,20 @@ class TerminologyViewSet(BaseModelViewSet):
     @action(detail=False, name="Get class name choices")
     def field_path(self, request):
         return Response(dict(Terminology.FieldPath.choices))
+
+
+class ObjectClassificationViewSet(BaseModelViewSet):
+    model = ObjectClassification
+    filterset_fields = ["folder", "is_visible", "builtin"]
+    search_fields = ["name", "description", "ref_id"]
+    ordering = ["name"]
+
+
+class ClassificationLevelViewSet(BaseModelViewSet):
+    model = ClassificationLevel
+    filterset_fields = ["object_classification", "folder", "is_visible", "builtin"]
+    search_fields = ["name", "description", "abbreviation"]
+    ordering = ["object_classification", "rank"]
 
 
 class RequirementAssignmentViewSet(BaseModelViewSet):

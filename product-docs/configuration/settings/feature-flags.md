@@ -20,6 +20,7 @@ Flags affect what's visible in the sidebar, what appears in CRUD pages, and whic
 - **organisation_issues** — context register: issues affecting the organisation.
 - **organisation_objectives** — context register: organisational objectives.
 - **policy_documents** — the dedicated Policies surface (a filtered view of applied controls).
+- **document_management** — the standalone [Documents](../../concepts/documents.md) module: the reading catalogue, document list, and templates. Author or upload documents through a draft → published lifecycle, independent of policies.
 
 ## Risk
 

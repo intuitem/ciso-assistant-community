@@ -5,6 +5,9 @@
 @page {
     size: A4 portrait;
     margin: 2cm 2.5cm;
+    @top-center {
+        content: element(classificationMark);
+    }
     @bottom-center {
         content: "Page " counter(page) " of " counter(pages);
         font-size: 9pt;
@@ -22,10 +25,21 @@
     }
 }
 
+/* Title page carries the prominent banner instead, so suppress the running mark there. */
 @page :first {
+    @top-center { content: none; }
     @bottom-center { content: none; }
     @bottom-right { content: none; }
     @bottom-left { content: none; }
+}
+
+.classification-mark {
+    position: running(classificationMark);
+    font-weight: bold;
+    font-size: 8pt;
+    letter-spacing: 1px;
+    padding: 2px 10px;
+    border-radius: 2px;
 }
 
 body {
@@ -195,6 +209,18 @@ body {
 </style>
 </head>
 <body>
+
+{% if classification %}
+<div class="classification-mark" style="background:#000000; color:{{ classification.hexcolor }};">{{ classification.scheme }}:{{ classification.abbreviation }}</div>
+{% endif %}
+
+{% if classification %}
+<div style="text-align:center; background:#000000; color:{{ classification.hexcolor }};
+            font-weight:bold; letter-spacing:1px; padding:6px 4px; margin-bottom:18px;
+            font-size:12px; border-radius:3px;">
+    {{ classification.scheme }}:{{ classification.abbreviation }}
+</div>
+{% endif %}
 
 <div class="title-page">
     <h1>{{ policy_name }}</h1>

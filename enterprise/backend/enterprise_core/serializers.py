@@ -16,7 +16,7 @@ from global_settings.serializers import (
     FeatureFlagsSerializer as CommunityFeatureFlagSerializer,
 )
 
-from core.models import CustomEmailTemplate, CustomWordTemplate
+from core.models import CustomEmailTemplate, CustomWordTemplate, CustomDocHtmlTemplate
 from .models import ClientSettings, LogEntryAction
 from auditlog.models import LogEntry
 from global_settings.serializers import (
@@ -250,6 +250,35 @@ class CustomWordTemplateReadSerializer(BaseModelSerializer):
 class CustomWordTemplateWriteSerializer(BaseModelSerializer):
     class Meta:
         model = CustomWordTemplate
+        fields = ["id", "template_key", "language", "is_active"]
+        read_only_fields = ["id"]
+
+
+class CustomDocHtmlTemplateReadSerializer(BaseModelSerializer):
+    file = serializers.SerializerMethodField()
+
+    def get_file(self, obj):
+        if obj.file:
+            return obj.file.name.split("/")[-1]
+        return None
+
+    class Meta:
+        model = CustomDocHtmlTemplate
+        fields = [
+            "id",
+            "folder",
+            "template_key",
+            "language",
+            "file",
+            "is_active",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class CustomDocHtmlTemplateWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = CustomDocHtmlTemplate
         fields = ["id", "template_key", "language", "is_active"]
         read_only_fields = ["id"]
 

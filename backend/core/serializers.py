@@ -1857,7 +1857,6 @@ class AppliedControlMergeRequestSerializer(serializers.Serializer):
     )
     target = AppliedControlMergeTargetSerializer()
     dry_run = serializers.BooleanField(default=False)
-    managed_document_resolution = serializers.DictField(required=False)
 
     def validate_source_ids(self, value):
         seen: set[str] = set()
@@ -5327,6 +5326,40 @@ class TerminologyWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = Terminology
+        exclude = ["folder", "is_published"]
+
+
+class ClassificationLevelReadSerializer(BaseModelSerializer):
+    object_classification = FieldsRelatedField()
+    label = serializers.ReadOnlyField()
+
+    class Meta:
+        model = ClassificationLevel
+        exclude = ["folder"]
+
+
+class ClassificationLevelWriteSerializer(BaseModelSerializer):
+    builtin = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        model = ClassificationLevel
+        exclude = ["folder", "is_published"]
+
+
+class ObjectClassificationReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    levels = ClassificationLevelReadSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = ObjectClassification
+        fields = "__all__"
+
+
+class ObjectClassificationWriteSerializer(BaseModelSerializer):
+    builtin = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        model = ObjectClassification
         exclude = ["folder", "is_published"]
 
 
