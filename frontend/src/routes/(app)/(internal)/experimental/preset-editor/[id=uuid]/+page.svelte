@@ -56,8 +56,8 @@
 		'incidents',
 		'metric-instances'
 	];
-	const ALL_MODELS = ['', ...NAV_ONLY_MODELS, ...Object.values(TYPE_TO_MODEL)].sort((a, b) =>
-		a.localeCompare(b)
+	const ALL_MODELS = [...new Set(['', ...NAV_ONLY_MODELS, ...Object.values(TYPE_TO_MODEL)])].sort(
+		(a, b) => a.localeCompare(b)
 	);
 
 	const FINDINGS_CATEGORIES = ['pentest', 'audit', 'review', 'other'];
