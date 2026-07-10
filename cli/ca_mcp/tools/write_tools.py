@@ -93,6 +93,15 @@ async def create_asset(
     description: str = "",
     asset_type: str = "PR",
     folder_id: str = None,
+    sec_confidentiality: int = None,
+    sec_confidentiality_enabled: bool = None,
+    sec_integrity: int = None,
+    sec_integrity_enabled: bool = None,
+    sec_availability: int = None,
+    sec_availability_enabled: bool = None,
+    dro_rto: int = None,
+    dro_rpo: int = None,
+    dro_mtd: int = None,
 ) -> str:
     """Create asset in folder
 
@@ -101,6 +110,15 @@ async def create_asset(
         description: Description
         asset_type: PR (Primary) | SP (Supporting)
         folder_id: Folder ID/name
+        sec_confidentiality: Confidentiality value 0-4 (0=undefined,1=low,2=med,3=high,4=critical)
+        sec_confidentiality_enabled: Enable confidentiality objective
+        sec_integrity: Integrity value 0-4
+        sec_integrity_enabled: Enable integrity objective
+        sec_availability: Availability value 0-4
+        sec_availability_enabled: Enable availability objective
+        dro_rto: Recovery Time Objective in seconds
+        dro_rpo: Recovery Point Objective in seconds
+        dro_mtd: Maximum Tolerable Downtime in seconds
     """
     try:
         # If no folder specified, try to get the default folder
@@ -119,6 +137,38 @@ async def create_asset(
 
         if folder_id:
             payload["folder"] = folder_id
+
+        sec_params = [
+            sec_confidentiality, sec_confidentiality_enabled,
+            sec_integrity, sec_integrity_enabled,
+            sec_availability, sec_availability_enabled,
+        ]
+        if any(p is not None for p in sec_params):
+            payload["security_objectives"] = {
+                "objectives": {
+                    "confidentiality": {
+                        "value": sec_confidentiality if sec_confidentiality is not None else 0,
+                        "is_enabled": sec_confidentiality_enabled if sec_confidentiality_enabled is not None else sec_confidentiality is not None,
+                    },
+                    "integrity": {
+                        "value": sec_integrity if sec_integrity is not None else 0,
+                        "is_enabled": sec_integrity_enabled if sec_integrity_enabled is not None else sec_integrity is not None,
+                    },
+                    "availability": {
+                        "value": sec_availability if sec_availability is not None else 0,
+                        "is_enabled": sec_availability_enabled if sec_availability_enabled is not None else sec_availability is not None,
+                    },
+                }
+            }
+
+        if any(p is not None for p in [dro_rto, dro_rpo, dro_mtd]):
+            payload["disaster_recovery_objectives"] = {
+                "objectives": {
+                    "rto": {"value": dro_rto if dro_rto is not None else 0},
+                    "rpo": {"value": dro_rpo if dro_rpo is not None else 0},
+                    "mtd": {"value": dro_mtd if dro_mtd is not None else 0},
+                }
+            }
 
         res = make_post_request("/assets/", payload)
 
@@ -996,3 +1046,78 @@ async def create_task_template(
             return f"Error creating task template: {res.status_code} - {res.text}"
     except Exception as e:
         return f"Error in create_task_template: {str(e)}"
+
+
+async def create_vulnerability(
+    name: str,
+    description: str = None,
+    ref_id: str = None,
+    status: str = "--",
+    severity: int = -1,
+    folder_id: str = None,
+    filtering_labels: list = None,
+    applied_controls: list = None,
+    assets: list = None,
+    security_exceptions: list = None,
+) -> str:
+    """Create a new vulnerability
+
+    Args:
+        name: Vulnerability name (required)
+        description: Description
+        ref_id: Reference ID (e.g. CVE identifier)
+        status: -- | potential | exploitable | mitigated | fixed | not_exploitable | unaffected
+        severity: -1 (undefined) | 0 (info) | 1 (low) | 2 (medium) | 3 (high) | 4 (critical)
+        folder_id: Folder ID/name
+        filtering_labels: List of label UUIDs
+        applied_controls: List of applied control IDs/names
+        assets: List of asset IDs/names
+        security_exceptions: List of security exception UUIDs
+    """
+    try:
+        from ..resolvers import resolve_asset_id, resolve_applied_control_id
+
+        if not folder_id and GLOBAL_FOLDER_ID:
+            folder_id = GLOBAL_FOLDER_ID
+
+        payload = {"name": name}
+
+        if description is not None:
+            payload["description"] = description
+        if ref_id is not None:
+            payload["ref_id"] = ref_id
+        if status is not None:
+            payload["status"] = status
+        if severity is not None:
+            payload["severity"] = severity
+
+        if folder_id:
+            payload["folder"] = resolve_folder_id(folder_id)
+
+        if filtering_labels:
+            payload["filtering_labels"] = filtering_labels
+
+        if applied_controls:
+            resolved_controls = []
+            for control in applied_controls:
+                resolved_controls.append(resolve_applied_control_id(control))
+            payload["applied_controls"] = resolved_controls
+
+        if assets:
+            resolved_assets = []
+            for asset in assets:
+                resolved_assets.append(resolve_asset_id(asset))
+            payload["assets"] = resolved_assets
+
+        if security_exceptions:
+            payload["security_exceptions"] = security_exceptions
+
+        res = make_post_request("/vulnerabilities/", payload)
+
+        if res.status_code == 201:
+            vuln = res.json()
+            return f"Created vulnerability: {vuln.get('name')} (ID: {vuln.get('id')})"
+        else:
+            return f"Error creating vulnerability: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in create_vulnerability: {str(e)}"

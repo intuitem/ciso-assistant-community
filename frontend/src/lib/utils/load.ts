@@ -1,21 +1,62 @@
 import { BASE_API_URL, UUID_REGEX } from '$lib/utils/constants';
-import { getModelInfo, urlParamModelVerboseName, type ModelMapEntry } from '$lib/utils/crud';
+import {
+	getModelInfo,
+	urlParamModelVerboseName,
+	type ModelMapEntry,
+	type SelectField,
+	type SelectFieldData
+} from '$lib/utils/crud';
 import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 
-import { modelSchema } from '$lib/utils/schemas';
+import { modelSchema, type FormDataShape } from '$lib/utils/schemas';
 import { listViewFields } from '$lib/utils/table';
 import type { urlModel } from '$lib/utils/types';
 import type { SuperValidated } from 'sveltekit-superforms';
 import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
-import { z, type AnyZodObject } from 'zod';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
+import { z } from 'zod';
 import { canPerformAction } from './access-control';
+import { error, redirect } from '@sveltejs/kit';
+import { setFlash } from 'sveltekit-flash-message/server';
+import { m } from '$paraglide/messages';
 
 interface LoadValidationFlowFormDataParams {
 	event: { fetch: typeof fetch };
 	folderId: string;
 	targetField: string;
 	targetIds: string[];
+}
+
+/**
+ * Format select field data received by the backend to a valid `SelectFieldData[]` list.
+ * The return value is meant to be assigned to `model.selectOptions[field]` inside load functions.
+ * The data will then be usable by components like `<AutoCompleteSelect {...} />` / `<Select {...} />`.
+ */
+export function formatSelectFieldData(
+	responseData: Record<string, string>,
+	selectField: SelectField
+): SelectFieldData[] {
+	const isNumber = selectField.valueType === 'number';
+	const isOptionList = Array.isArray(responseData);
+
+	let fieldOptions = [];
+
+	if (isOptionList) {
+		fieldOptions = responseData.map((option) => ({
+			label: option.label,
+			value: isNumber ? parseInt(option.value) : option.value
+		}));
+	} else {
+		fieldOptions = Object.entries(responseData).map(([key, value]) => ({
+			label: value,
+			value: isNumber ? parseInt(key) : key
+		}));
+	}
+
+	if (isNumber) {
+		fieldOptions.sort((a, b) => a.value - b.value);
+	}
+	return fieldOptions;
 }
 
 /**
@@ -48,11 +89,10 @@ export const loadValidationFlowFormData = async ({
 				const url = `${BASE_API_URL}/validation-flows/${selectField.field}/`;
 				const response = await event.fetch(url);
 				if (response.ok) {
-					validationFlowSelectOptions[selectField.field] = await response.json().then((data) =>
-						Object.entries(data).map(([key, value]) => ({
-							label: value,
-							value: selectField.valueType === 'number' ? parseInt(key) : key
-						}))
+					const responseData = await response.json();
+					validationFlowSelectOptions[selectField.field] = formatSelectFieldData(
+						responseData,
+						selectField
 					);
 				} else {
 					console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
@@ -69,16 +109,33 @@ export const loadDetail = async ({ event, model, id }) => {
 	const endpoint = `${BASE_API_URL}/${model.endpointUrl ?? model.urlModel}/${id}/`;
 
 	const res = await event.fetch(endpoint);
+	if (!res.ok) {
+		if (res.status === 404) {
+			// Check if focus mode is active
+			const focusFolderId = event.cookies.get('focus_folder_id');
+			const focusModeEnabled = event.locals.featureflags?.focus_mode ?? false;
+			const isFocusModeActive = focusFolderId && focusModeEnabled;
+
+			const message = isFocusModeActive
+				? m.objectNotReachableFromCurrentFocus()
+				: m.objectNotFound();
+			setFlash({ type: 'warning', message }, event);
+			throw redirect(302, `/${model.urlModel}`);
+		}
+		// Let other errors (403, 500, etc.) propagate with appropriate error
+		throw error(res.status, res.statusText || `Failed to load ${model.urlModel}`);
+	}
 	const data = await res.json();
 
 	type RelatedModel = {
 		urlModel: urlModel;
 		info: ModelMapEntry;
 		table: TableSource;
-		deleteForm: SuperValidated<AnyZodObject>;
-		createForm: SuperValidated<AnyZodObject>;
+		deleteForm: SuperValidated<FormDataShape>;
+		createForm: SuperValidated<FormDataShape>;
 		foreignKeys: Record<string, any>;
 		selectOptions: Record<string, any>;
+		count?: number;
 	};
 
 	type RelatedModels = {
@@ -107,12 +164,6 @@ export const loadDetail = async ({ event, model, id }) => {
 						})
 				)
 				.map(async (e) => {
-					if (
-						e.urlModel === 'perimeters' &&
-						model.urlModel === 'folders' &&
-						data.content_type === 'GLOBAL'
-					)
-						return;
 					const tableFieldsRef = listViewFields[e.urlModel];
 					const tableFields = {
 						head: [...tableFieldsRef.head],
@@ -147,7 +198,7 @@ export const loadDetail = async ({ event, model, id }) => {
 							currentSchema instanceof z.ZodOptional ||
 							currentSchema instanceof z.ZodNullable
 						) {
-							currentSchema = currentSchema._def.innerType;
+							currentSchema = currentSchema.unwrap();
 						}
 						isArrayField = currentSchema instanceof z.ZodArray;
 					}
@@ -195,11 +246,10 @@ export const loadDetail = async ({ event, model, id }) => {
 								}
 								const response = await event.fetch(url);
 								if (response.ok) {
-									selectOptions[selectField.field] = await response.json().then((data) =>
-										Object.entries(data).map(([key, value]) => ({
-											label: value,
-											value: selectField.valueType === 'number' ? parseInt(key) : key
-										}))
+									const responseData = await response.json();
+									selectOptions[selectField.field] = formatSelectFieldData(
+										responseData,
+										selectField
 									);
 								} else {
 									console.error(
@@ -224,13 +274,63 @@ export const loadDetail = async ({ event, model, id }) => {
 				})
 		);
 	}
+	// Fetch counts for each reverse FK tab in parallel
+	if (model.reverseForeignKeyFields) {
+		await Promise.all(
+			model.reverseForeignKeyFields
+				.filter((e) => relatedModels[e.urlModel])
+				.map(async (e) => {
+					try {
+						let countUrl: string;
+						if (e.endpointUrl?.startsWith('./')) {
+							const relPath = e.endpointUrl.slice(2);
+							const sep = relPath.includes('?') ? '&' : '?';
+							countUrl = `${BASE_API_URL}/${model.endpointUrl ?? model.urlModel}/${id}/${relPath}${sep}limit=1`;
+						} else {
+							const relatedModelInfo = getModelInfo(e.urlModel);
+							countUrl = `${BASE_API_URL}/${relatedModelInfo.endpointUrl ?? e.urlModel}/?${e.field}=${id}&limit=1`;
+						}
+						const countRes = await event.fetch(countUrl);
+						if (countRes.ok) {
+							const countData = await countRes.json();
+							if (typeof countData.count === 'number') {
+								relatedModels[e.urlModel].count = countData.count;
+							}
+						}
+					} catch {
+						// Graceful degradation — leave count as undefined
+					}
+				})
+		);
+	}
+
+	let title = data.str || data.name || data.email || data.label || data.id;
+	if (model.urlModel === 'reference-controls') {
+		const hasName = typeof data.name === 'string' && data.name.trim().length > 0;
+		title = hasName ? data.name : data.ref_id || title;
+	}
+	// If any reverseForeignKeyField has addExisting, load the parent's updateForm
+	let updateForm: SuperValidated<FormDataShape> | undefined;
+	const hasAddExisting = model.reverseForeignKeyFields?.some((f) => f.addExisting);
+	if (hasAddExisting) {
+		const parentEndpointUrl = model.endpointUrl ?? model.urlModel;
+		const objectEndpoint = `${BASE_API_URL}/${parentEndpointUrl}/${id}/object/`;
+		const objectResponse = await event.fetch(objectEndpoint);
+		if (objectResponse.ok) {
+			const parentObject = await objectResponse.json();
+			const parentSchema = modelSchema(model.urlModel);
+			updateForm = await superValidate(parentObject, zod(parentSchema), { errors: false });
+		}
+	}
+
 	return {
 		data,
-		title: data.str || data.name || data.email || data.label || data.id,
+		title,
 		form,
 		relatedModels,
 		urlModel: model.urlModel as urlModel,
 		model,
-		modelVerboseName: urlParamModelVerboseName(model.urlModel)
+		modelVerboseName: urlParamModelVerboseName(model.urlModel),
+		updateForm
 	};
 };

@@ -65,31 +65,6 @@
 	label={m.attachment()}
 	allowedExtensions={'*'}
 />
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
-	field="folder"
-	pathField="path"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-/>
-<!-- {#if !(initialData.applied_controls || initialData.requirement_assessments || initialData.evidence)}
-	<AutocompleteSelect
-		{form}
-		optionsEndpoint="folders?content_type=DO&content_type=GL"
-		field="folder"
-		pathField="path"
-		cacheLock={cacheLocks['folder']}
-		bind:cachedValue={formDataCache['folder']}
-		label={m.domain()}
-		hidden={initialData.applied_controls ||
-			initialData.requirement_assessments ||
-			initialData.folder}
-	/>
-{:else}
-	<HiddenInput {form} field="folder" />
-{/if} -->
 <TextField
 	{form}
 	field="link"

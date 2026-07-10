@@ -1,0 +1,197 @@
+urn: urn:intuitem:risk:preset:belgian-cyfun
+locale: en
+ref_id: preset-belgian-cyfun
+name: Belgian Organisation - CyFun 2025
+description: CyberFundamentals 2025 (CyFun) compliance journey for Belgian organisations. Includes GDPR privacy management, vendor due diligence, and a guided path through the CCB framework.
+version: 1
+provider: intuitem
+packager: intuitem
+
+translations:
+  fr:
+    name: "Organisation belge - CyFun 2025"
+    description: "Parcours de conformit\xE9 CyberFundamentals 2025 (CyFun) pour les organisations belges. Inclut la gestion de la vie priv\xE9e RGPD, la due diligence fournisseurs et un parcours guid\xE9 \xE0 travers le cadre CCB."
+
+dependencies:
+  - urn:intuitem:risk:library:ccb-cyfun2025
+  - urn:intuitem:risk:library:gdpr
+  - urn:intuitem:risk:library:risk-matrix-5x5-iso27005
+  - urn:intuitem:risk:library:vendor-due-diligence
+  - urn:intuitem:risk:library:intuitem-common-catalog
+
+objects:
+  preset:
+    profile:
+      company_size:
+        - sme
+        - large
+      industry:
+        - general
+      region:
+        - be
+        - eu
+      goal: cyfun-compliance
+
+    feature_flags:
+      enable:
+        - compliance
+        - privacy
+        - tprm
+        - follow_up
+
+    scaffolded_objects:
+      - type: risk_assessment
+        name: "Risk Assessment"
+        risk_matrix: urn:intuitem:risk:library:risk-matrix-5x5-iso27005
+        ref: main_ra
+        translations:
+          fr:
+            name: "Analyse de risques"
+      - type: compliance_assessment
+        name: "CyFun 2025 Assessment"
+        framework: urn:intuitem:risk:library:ccb-cyfun2025
+        create_suggested_controls: true
+        ref: cyfun_audit
+        translations:
+          fr:
+            name: "\xC9valuation CyFun 2025"
+      - type: compliance_assessment
+        name: "GDPR Compliance"
+        framework: urn:intuitem:risk:library:gdpr
+        ref: gdpr_audit
+        translations:
+          fr:
+            name: "Conformit\xE9 RGPD"
+
+      # --- Processings (GDPR Article 30) ---
+      - type: processing
+        name: "Customer and member data management"
+        description: "Collection and processing of personal data for customer or member registration, communication, and service delivery."
+        translations:
+          fr:
+            name: "Gestion des donn\xE9es clients et membres"
+            description: "Collecte et traitement des donn\xE9es personnelles pour l'inscription, la communication et la fourniture de services aux clients ou membres."
+      - type: processing
+        name: "Employee and HR data management"
+        description: "Processing of employee personal data for payroll, contracts, performance management, and legal obligations."
+        translations:
+          fr:
+            name: "Gestion des donn\xE9es employ\xE9s et RH"
+            description: "Traitement des donn\xE9es personnelles des employ\xE9s pour la paie, les contrats, la gestion des performances et les obligations l\xE9gales."
+      - type: processing
+        name: "Marketing and communications"
+        description: "Processing of contact data for newsletters, marketing campaigns, and public communications."
+        translations:
+          fr:
+            name: "Marketing et communications"
+            description: "Traitement des donn\xE9es de contact pour les newsletters, campagnes marketing et communications publiques."
+      - type: processing
+        name: "Website cookies and analytics"
+        description: "Use of cookies, tracking pixels, and analytics tools on the organisation's website for audience measurement and personalisation."
+        translations:
+          fr:
+            name: "Cookies et analyse du site web"
+            description: "Utilisation de cookies, pixels de suivi et outils d'analyse sur le site web de l'organisation pour la mesure d'audience et la personnalisation."
+
+      # --- Typical vendor entities ---
+      - type: entity
+        name: "IT infrastructure provider"
+        description: "Provider of hosting, cloud services, or managed IT infrastructure supporting the organisation's information systems."
+        translations:
+          fr:
+            name: "Fournisseur d'infrastructure IT"
+            description: "Prestataire d'h\xE9bergement, de services cloud ou d'infrastructure IT manag\xE9e supportant les syst\xE8mes d'information de l'organisation."
+      - type: entity
+        name: "Business software provider"
+        description: "Vendor of the primary business application (ERP, CRM, accounting) processing organisational and customer data."
+        translations:
+          fr:
+            name: "\xC9diteur de logiciels m\xE9tier"
+            description: "Fournisseur de l'application m\xE9tier principale (ERP, CRM, comptabilit\xE9) traitant les donn\xE9es organisationnelles et clients."
+      - type: entity
+        name: "Email and collaboration provider"
+        description: "Provider of email, messaging, and collaboration tools (e.g. Microsoft 365, Google Workspace)."
+        translations:
+          fr:
+            name: "Prestataire de messagerie et collaboration"
+            description: "Fournisseur d'outils de messagerie, communication et collaboration (ex. Microsoft 365, Google Workspace)."
+
+      # --- Findings assessment ---
+      - type: findings_assessment
+        name: "Penetration Test Findings"
+        category: pentest
+        ref: pentest_findings
+        translations:
+          fr:
+            name: "R\xE9sultats des tests d'intrusion"
+
+    journey:
+      steps:
+        - key: assets
+          title: "Identify your assets"
+          description: "Inventory primary assets (data, processes) and supporting assets (servers, applications, networks) within scope."
+          target_model: assets
+          translations:
+            fr:
+              title: "Identifier vos actifs"
+              description: "Inventoriez les actifs primaires (donn\xE9es, processus) et les actifs supports (serveurs, applications, r\xE9seaux) dans le p\xE9rim\xE8tre."
+        - key: cyfun_compliance
+          title: "Assess CyFun 2025 compliance"
+          description: "Walk through the CyberFundamentals 2025 framework requirements and assess your current security posture against the CCB baseline."
+          target_model: compliance-assessments
+          target_ref: cyfun_audit
+          translations:
+            fr:
+              title: "\xC9valuer la conformit\xE9 CyFun 2025"
+              description: "Parcourez les exigences du cadre CyberFundamentals 2025 et \xE9valuez votre posture de s\xE9curit\xE9 actuelle par rapport au socle CCB."
+        - key: risk_scenarios
+          title: "Conduct a risk assessment"
+          description: "Create risk scenarios by combining threats with your assets, assess likelihood and impact."
+          target_model: risk-assessments
+          target_ref: main_ra
+          translations:
+            fr:
+              title: "Mener une analyse de risque"
+              description: "Créez des scénarios de risque en combinant les menaces avec vos actifs, évaluez la vraisemblance et l'impact."
+        - key: controls
+          title: "Implement and track security controls"
+          description: "Create applied controls to address identified risks and compliance gaps from the CyFun assessment, and track their progress."
+          target_model: applied-controls
+          translations:
+            fr:
+              title: "Implémenter et suivre les mesures de sécurité"
+              description: "Créez des mesures appliquées pour traiter les risques identifiés et les écarts de conformité de l'évaluation CyFun, et suivez leur avancement."
+        - key: processings
+          title: "Map your data processings"
+          description: "Document your processing activities as required by GDPR Article 30 — what personal data you process, why, and how."
+          target_model: processings
+          translations:
+            fr:
+              title: "Cartographier vos traitements de donn\xE9es"
+              description: "Documentez vos activit\xE9s de traitement comme exig\xE9 par l'article 30 du RGPD \u2014 quelles donn\xE9es personnelles vous traitez, pourquoi et comment."
+        - key: vendors
+          title: "Manage your vendors"
+          description: "Review vendor entities, add missing ones, and create entity assessments using the due diligence framework."
+          target_model: entities
+          translations:
+            fr:
+              title: "G\xE9rer vos fournisseurs"
+              description: "Examinez les entit\xE9s fournisseurs, ajoutez celles manquantes et cr\xE9ez des \xE9valuations en utilisant le cadre de due diligence."
+        - key: gdpr_compliance
+          title: "Assess GDPR compliance"
+          description: "Review GDPR requirements against your practices and link evidence."
+          target_model: compliance-assessments
+          target_ref: gdpr_audit
+          translations:
+            fr:
+              title: "\xC9valuer la conformit\xE9 RGPD"
+              description: "Passez en revue les exigences du RGPD par rapport \xE0 vos pratiques et liez les preuves."
+        - key: findings
+          title: "Track pentest and audit findings"
+          description: "Import or create findings from penetration tests, vulnerability scans, and audits. Assign owners, set priorities, and track remediation progress."
+          target_model: findings-assessments
+          target_ref: pentest_findings
+          translations:
+            fr:
+              title: "Suivre les r\xE9sultats de tests et d'audits"
+              description: "Importez ou cr\xE9ez des r\xE9sultats de tests d'intrusion, de scans de vuln\xE9rabilit\xE9s et d'audits. Attribuez des responsables, d\xE9finissez des priorit\xE9s et suivez la rem\xE9diation."

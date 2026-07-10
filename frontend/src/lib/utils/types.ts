@@ -16,7 +16,12 @@ export interface User {
 	roles: Record<string, any>[];
 	permissions: Record<string, any>[];
 	is_third_party: boolean;
+	is_auditee: boolean;
 	is_admin: boolean;
+	is_local: boolean;
+	is_sso: boolean;
+	is_superuser: boolean;
+	has_mfa_enabled: boolean;
 	accessible_domains: string[];
 	domain_permissions: Record<string, string[]>;
 	root_folder_id: string;
@@ -52,6 +57,7 @@ export const URL_MODEL = [
 	'teams',
 	'users',
 	'user-groups',
+	'idp-groups',
 	'roles',
 	'role-assignments',
 	'compliance-assessments',
@@ -71,8 +77,11 @@ export const URL_MODEL = [
 	'entity-assessments',
 	'solutions',
 	'contracts',
+	'custom-fields',
 	'representatives',
 	'vulnerabilities',
+	'security-advisories',
+	'cwes',
 	'filtering-labels',
 	'library-filtering-labels',
 	// 'ebios-rm',
@@ -86,7 +95,6 @@ export const URL_MODEL = [
 	'operating-modes',
 	'kill-chains',
 	'processings',
-	'processing-natures',
 	'security-exceptions',
 	'findings',
 	'findings-assessments',
@@ -110,6 +118,7 @@ export const URL_MODEL = [
 	'business-impact-analysis',
 	'escalation-thresholds',
 	'asset-assessments',
+	'dora-incident-reports',
 	'asset-class',
 	'asset-capabilities',
 	// campaigns,
@@ -123,12 +132,21 @@ export const URL_MODEL = [
 	'quantitative-risk-hypotheses',
 	// terminologies
 	'terminologies',
+	// classifications
+	'object-classifications',
+	'classification-levels',
 	// roles,
 	'roles',
 	'permissions',
 	// pmbok
 	'generic-collections',
 	'accreditations',
+	'projects',
+	'responsibility-roles',
+	'responsibility-matrices',
+	'responsibility-matrix-activities',
+	'responsibility-matrix-actors',
+	'responsibility-assignments',
 	// metrology
 	'metric-definitions',
 	'metric-instances',
@@ -136,7 +154,15 @@ export const URL_MODEL = [
 	'dashboards',
 	'dashboard-widgets',
 	'dashboard-text-widgets',
-	'dashboard-builtin-widgets'
+	'dashboard-builtin-widgets',
+	// document management
+	'document-containers',
+	'document-templates',
+	'managed-documents',
+	'document-revisions',
+	// presets/journeys
+	'presets',
+	'journeys'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = [

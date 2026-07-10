@@ -29,21 +29,6 @@
 
 <AutocompleteSelect
 	{form}
-	field="folder"
-	optionsEndpoint="folders"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-/>
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
-<AutocompleteSelect
-	{form}
 	field="status"
 	options={model.selectOptions?.status}
 	cacheLock={cacheLocks['status']}
@@ -162,6 +147,7 @@
 	<NumberField
 		{form}
 		field="annual_expense"
+		step="any"
 		label={m.annualExpense()}
 		cacheLock={cacheLocks['annual_expense']}
 		bind:cachedValue={formDataCache['annual_expense']}
@@ -202,5 +188,12 @@
 		label={m.isIntragroup()}
 		cacheLock={cacheLocks['is_intragroup']}
 		bind:cachedValue={formDataCache['is_intragroup']}
+	/>
+	<Checkbox
+		{form}
+		field="dora_exclude"
+		label={m.doraExclude()}
+		cacheLock={cacheLocks['dora_exclude']}
+		bind:cachedValue={formDataCache['dora_exclude']}
 	/>
 </Dropdown>

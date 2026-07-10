@@ -4,6 +4,7 @@
 	import { isQuestionVisible } from '$lib/utils/helpers';
 	import * as m from '$paraglide/messages';
 	import { Tooltip } from '@skeletonlabs/skeleton-svelte';
+	import SliderInput from './SliderInput.svelte';
 
 	interface Props {
 		class?: string;
@@ -15,6 +16,7 @@
 		field: string;
 		helpText?: string;
 		onChange?: (urn: string, newAnswer: any) => void;
+		disabled?: boolean;
 	}
 
 	let {
@@ -26,18 +28,19 @@
 		initialValue = {},
 		field,
 		helpText,
-		onChange = () => {}
+		onChange = () => {},
+		disabled = false
 	}: Props = $props();
 
 	const { value } = form ? formFieldProxy(form, field) : {};
 
-	let internalAnswers = $state(value ? $value : initialValue);
+	let internalAnswers = $state(value ? $value : $state.snapshot(initialValue));
 	let questionBuffers = $state<Record<string, string>>({});
 
 	// Initialize buffers for text questions
 	$effect(() => {
 		Object.entries(questions).forEach(([urn, question]) => {
-			if (question.type === 'text' && !(urn in questionBuffers)) {
+			if ((question.type === 'text' || question.type === 'number') && !(urn in questionBuffers)) {
 				questionBuffers[urn] = internalAnswers[urn] || '';
 			}
 		});
@@ -85,7 +88,7 @@
 	<div class="control whitespace-pre-line">
 		{#each Object.entries(questions) as [urn, question]}
 			<!-- Only render if visible according to depends_on -->
-			{#if isQuestionVisible(question, internalAnswers)}
+			{#if isQuestionVisible(question, internalAnswers, questions)}
 				<li class="flex flex-col justify-between border rounded-xl px-2 pb-2">
 					<p class="font-semibold p-2">{question.text} ({safeTranslate(question.type)})</p>
 
@@ -104,48 +107,75 @@
 							<p class="text-primary-500 font-semibold">
 								{question.choices.find((choice) => choice.urn === internalAnswers[urn]).value}
 							</p>
+						{:else if internalAnswers[urn] === true}
+							<p class="text-primary-500 font-semibold">{m.yes()}</p>
+						{:else if internalAnswers[urn] === false}
+							<p class="text-primary-500 font-semibold">{m.no()}</p>
+						{:else if internalAnswers[urn] != null}
+							<p class="text-primary-500 font-semibold">{internalAnswers[urn]}</p>
 						{:else}
-							<p class="text-gray-400 italic">{m.noAnswer()}</p>
+							<p class="text-surface-400-600 italic">{m.noAnswer()}</p>
 						{/if}
 					{:else if question.type === 'unique_choice'}
-						<div class="flex flex-col gap-1 p-1 border border-surface-500 rounded-base">
-							{#each question.choices as option}
-								{@const selected = internalAnswers[urn] === option.urn}
-								<button
-									type="button"
-									name="question"
-									class="shadow-sm p-1 rounded-base border border-gray-300 transition-all duration-150
-										{selected
-										? 'preset-filled-primary-500 rounded-base'
-										: 'bg-gray-100 rounded-base hover:bg-gray-300'}"
-									style={selected
-										? `background-color: ${sanitizeColor(option.color) ?? ''}; color: white;`
-										: ''}
-									onclick={() => {
-										if (internalAnswers[urn] === option.urn) {
-											internalAnswers[urn] = null;
-											onChange(urn, null);
-										} else {
-											internalAnswers[urn] = option.urn;
-											onChange(urn, option.urn);
-										}
-									}}
-								>
-									{option.value}
-									{#if option.description}
-										<Tooltip
-											positioning={{ placement: 'top' }}
-											triggerBase="underline"
-											contentBase="card preset-filled p-4"
-											openDelay={50}
-										>
-											{#snippet trigger()}<i class="ml-2 fa-solid fa-circle-info"></i>{/snippet}
-											{#snippet content()}{option.description}{/snippet}
-										</Tooltip>
-									{/if}
-								</button>
-							{/each}
-						</div>
+						{#if question.config?.widget === 'slider' && question.choices.length >= 2}
+							<SliderInput
+								mode="choice"
+								choices={question.choices}
+								value={internalAnswers[urn] ?? null}
+								{disabled}
+								ariaLabel={question.text}
+								onChange={(v) => {
+									internalAnswers[urn] = v;
+									onChange(urn, v);
+								}}
+							/>
+						{:else}
+							<div class="flex flex-col gap-1 p-1 border border-surface-500 rounded-base">
+								{#each question.choices as option}
+									{@const selected = internalAnswers[urn] === option.urn}
+									<button
+										type="button"
+										name="question"
+										{disabled}
+										class="shadow-sm p-1 rounded-base border border-surface-300-700 transition-all duration-150
+											{selected
+											? 'preset-filled-primary-500 rounded-base'
+											: 'bg-surface-100-900 rounded-base hover:bg-surface-300-700'}
+											{disabled ? 'opacity-50 cursor-not-allowed' : ''}"
+										style={selected
+											? `background-color: ${sanitizeColor(option.color) ?? ''}; color: white;`
+											: ''}
+										onclick={() => {
+											if (internalAnswers[urn] === option.urn) {
+												internalAnswers[urn] = null;
+												onChange(urn, null);
+											} else {
+												internalAnswers[urn] = option.urn;
+												onChange(urn, option.urn);
+											}
+										}}
+									>
+										{option.value}
+										{#if option.description}
+											<Tooltip positioning={{ placement: 'top' }} openDelay={50}>
+												<Tooltip.Trigger>
+													{#snippet child({ props })}
+														<span {...props} class="underline"
+															><i class="ml-2 fa-solid fa-circle-info"></i></span
+														>
+													{/snippet}
+												</Tooltip.Trigger>
+												<Tooltip.Positioner>
+													<Tooltip.Content class="card preset-filled p-4"
+														>{option.description}</Tooltip.Content
+													>
+												</Tooltip.Positioner>
+											</Tooltip>
+										{/if}
+									</button>
+								{/each}
+							</div>
+						{/if}
 					{:else if question.type === 'multiple_choice'}
 						<div class="flex flex-col gap-1 p-1 border border-surface-500 rounded-base">
 							{#each question.choices as option}
@@ -154,10 +184,12 @@
 								<button
 									type="button"
 									name="question"
-									class="shadow-sm p-1 rounded-base border border-gray-300 transition-all duration-150
+									{disabled}
+									class="shadow-sm p-1 rounded-base border border-surface-300-700 transition-all duration-150
 										{selected
 										? 'preset-filled-primary-500 rounded-base'
-										: 'bg-gray-100 rounded-base hover:bg-gray-300'}"
+										: 'bg-surface-100-900 rounded-base hover:bg-surface-300-700'}
+										{disabled ? 'opacity-50 cursor-not-allowed' : ''}"
 									style={selected
 										? `background-color: ${sanitizeColor(option.color) ?? ''}; color: white;`
 										: ''}
@@ -165,14 +197,19 @@
 								>
 									{option.value}
 									{#if option.description}
-										<Tooltip
-											positioning={{ placement: 'top' }}
-											triggerBase="underline"
-											contentBase="card preset-filled p-4"
-											openDelay={50}
-										>
-											{#snippet trigger()}<i class="ml-2 fa-solid fa-circle-info"></i>{/snippet}
-											{#snippet content()}{option.description}{/snippet}
+										<Tooltip positioning={{ placement: 'top' }} openDelay={50}>
+											<Tooltip.Trigger>
+												{#snippet child({ props })}
+													<span {...props} class="underline"
+														><i class="ml-2 fa-solid fa-circle-info"></i></span
+													>
+												{/snippet}
+											</Tooltip.Trigger>
+											<Tooltip.Positioner>
+												<Tooltip.Content class="card preset-filled p-4"
+													>{option.description}</Tooltip.Content
+												>
+											</Tooltip.Positioner>
 										</Tooltip>
 									{/if}
 								</button>
@@ -182,14 +219,77 @@
 						<input
 							type="date"
 							class="input {_class}"
+							{disabled}
 							bind:value={internalAnswers[urn]}
 							onchange={(e) => onChange(urn, internalAnswers[urn])}
 						/>
+					{:else if question.type === 'boolean'}
+						<div class="flex flex-col gap-1 p-1 border border-surface-500 rounded-base">
+							{#each [{ value: true, label: m.yes() }, { value: false, label: m.no() }] as option}
+								{@const selected = internalAnswers[urn] === option.value}
+								<button
+									type="button"
+									name="question"
+									{disabled}
+									class="shadow-sm p-1 rounded-base border border-surface-300-700 transition-all duration-150
+										{selected
+										? 'preset-filled-primary-500 rounded-base'
+										: 'bg-surface-100-900 rounded-base hover:bg-surface-300-700'}
+										{disabled ? 'opacity-50 cursor-not-allowed' : ''}"
+									onclick={() => {
+										internalAnswers[urn] =
+											internalAnswers[urn] === option.value ? null : option.value;
+										onChange(urn, internalAnswers[urn]);
+									}}
+								>
+									{option.label}
+								</button>
+							{/each}
+						</div>
+					{:else if question.type === 'number'}
+						{#if question.config?.widget === 'slider'}
+							<SliderInput
+								mode="number"
+								min={Number(question.config.min ?? 0)}
+								max={Number(question.config.max ?? 100)}
+								step={Number(question.config.step ?? 1)}
+								value={internalAnswers[urn] ?? null}
+								{disabled}
+								ariaLabel={question.text}
+								onChange={(v) => {
+									internalAnswers[urn] = v;
+									onChange(urn, v);
+								}}
+							/>
+						{:else if form}
+							<input
+								type="number"
+								class="input {_class}"
+								{disabled}
+								bind:value={internalAnswers[urn]}
+								onchange={() => onChange(urn, internalAnswers[urn])}
+							/>
+						{:else}
+							<div>
+								<input
+									type="number"
+									class="input {_class}"
+									{disabled}
+									bind:value={questionBuffers[urn]}
+									onchange={() => {
+										const val = questionBuffers[urn] === '' ? null : Number(questionBuffers[urn]);
+										internalAnswers[urn] = val;
+										onChange(urn, val);
+									}}
+								/>
+							</div>
+						{/if}
 					{:else if question.type === 'text'}
 						{#if form}
 							<textarea
 								placeholder=""
 								class="input w-full {_class}"
+								{disabled}
 								bind:value={internalAnswers[urn]}
 							></textarea>
 						{:else}
@@ -197,9 +297,10 @@
 								<textarea
 									placeholder=""
 									class="input w-full {_class}"
+									{disabled}
 									bind:value={questionBuffers[urn]}
 								></textarea>
-								{#if questionBuffers[urn] !== (internalAnswers[urn] || '')}
+								{#if !disabled && questionBuffers[urn] !== (internalAnswers[urn] || '')}
 									<button
 										class="rounded-md w-8 h-8 border shadow-lg hover:bg-green-300 hover:text-green-500 duration-300"
 										onclick={() => saveTextAnswer(urn)}
@@ -226,6 +327,6 @@
 	</div>
 
 	{#if helpText}
-		<p class="text-sm text-gray-500">{helpText}</p>
+		<p class="text-sm text-surface-600-400">{helpText}</p>
 	{/if}
 </div>

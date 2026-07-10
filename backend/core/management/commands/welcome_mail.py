@@ -2,7 +2,7 @@ import structlog
 from django.core.management.base import BaseCommand
 from core.models import *
 from iam.models import User, Folder
-from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL
+from django.conf import settings
 
 logger = structlog.get_logger(__name__)
 
@@ -11,7 +11,7 @@ class Command(BaseCommand):
     help = "Send welcome email"
 
     def handle(self, *args, **kwargs):
-        admin = User.objects.get(email=CISO_ASSISTANT_SUPERUSER_EMAIL)
+        admin = User.objects.get(email=settings.CISO_ASSISTANT_SUPERUSER_EMAIL)
         logger.info("Attempting to send welcome email", recipient=admin.email)
         try:
             admin.mailing(

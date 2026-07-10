@@ -1,13 +1,21 @@
 import io
+import uuid
 
 import django_filters as df
 import pandas as pd
+from django.db.models import Case, F, FloatField, ProtectedError, Value, When
 from django.http import HttpResponse
 from core.serializers import RiskMatrixReadSerializer
-from core.views import BaseModelViewSet as AbstractBaseModelViewSet, GenericFilterSet
+from core.views import (
+    BaseModelViewSet as AbstractBaseModelViewSet,
+    GenericFilterSet,
+    SmartOrderingFilter,
+)
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
 from core.models import Terminology
-from iam.models import RoleAssignment
 from openpyxl.styles import Alignment
+
 from .helpers import ecosystem_radar_chart_data, ebios_rm_visual_analysis
 from .models import (
     EbiosRMStudy,
@@ -26,9 +34,10 @@ from .serializers import EbiosRMStudyReadSerializer
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
+from rest_framework.status import HTTP_409_CONFLICT
 
-from django.shortcuts import get_object_or_404
 
 import structlog
 
@@ -109,21 +118,25 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Get ecosystem radar chart data")
     def ecosystem_chart_data(self, request, pk):
+        study = self.get_object()
         return Response(
-            ecosystem_radar_chart_data(Stakeholder.objects.filter(ebios_rm_study=pk))
+            ecosystem_radar_chart_data(Stakeholder.objects.filter(ebios_rm_study=study))
         )
 
     @action(detail=True, name="Get ecosystem circular chart data")
     def ecosystem_circular_chart_data(self, request, pk):
         from .helpers import ecosystem_circular_chart_data
 
+        study = self.get_object()
         return Response(
-            ecosystem_circular_chart_data(Stakeholder.objects.filter(ebios_rm_study=pk))
+            ecosystem_circular_chart_data(
+                Stakeholder.objects.filter(ebios_rm_study=study)
+            )
         )
 
     @action(detail=True, name="Get EBIOS RM  study visual analysis")
     def visual_analysis(self, request, pk):
-        study = get_object_or_404(EbiosRMStudy, id=pk)
+        study = self.get_object()
         return Response(ebios_rm_visual_analysis(study))
 
     @action(detail=True, name="Get EBIOS RM study report data", url_path="report-data")
@@ -132,7 +145,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         Endpoint to prepare comprehensive report data for an EBIOS RM study.
         Returns all study attributes and associated objects in a structured format.
         """
-        study = get_object_or_404(EbiosRMStudy, id=pk)
+        study = self.get_object()
 
         from .serializers import (
             EbiosRMStudyReadSerializer,
@@ -148,16 +161,18 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         from core.models import RequirementAssessment
         from .helpers import ecosystem_circular_chart_data
 
-        # Get all related data
+        # Get all related data, sorted per issue #3715
         feared_events = FearedEvent.objects.filter(
             ebios_rm_study=study, is_selected=True
+        ).order_by("-gravity", "name")
+        ro_to_couples = (
+            RoTo.objects.filter(ebios_rm_study=study, is_selected=True)
+            .with_pertinence()
+            .order_by("-pertinence", "risk_origin__name", "target_objective")
         )
-        ro_to_couples = RoTo.objects.filter(
-            ebios_rm_study=study, is_selected=True
-        ).with_pertinence()
         stakeholders = Stakeholder.objects.filter(
             ebios_rm_study=study, is_selected=True
-        )
+        ).order_by("entity__name")
         strategic_scenarios = StrategicScenario.objects.filter(ebios_rm_study=study)
         attack_paths = AttackPath.objects.filter(ebios_rm_study=study, is_selected=True)
         operational_scenarios = OperationalScenario.objects.filter(ebios_rm_study=study)
@@ -169,72 +184,37 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
         # Build graph data for each operating mode
         def build_mode_graph(mo):
-            """Build graph data for a single operating mode"""
-            nodes = []
-            links = []
-            groups = {0: "grp00", 1: "grp10", 2: "grp20", 3: "grp30"}
-            panels = {
-                0: "reconnaissance",
-                1: "initialAccess",
-                2: "discovery",
-                3: "exploitation",
-            }
-            panel_nodes = {panel: [] for panel in panels.values()}
+            """Build kill chain steps and elementary actions"""
+            from .serializers import KillChainReadSerializer
 
-            # Collect all elementary actions that are part of kill chain steps
-            kill_chain_ea_ids = set()
-            for step in mo.kill_chain_steps.all():
-                kill_chain_ea_ids.add(step.elementary_action.id)
-                # Also add antecedents
+            steps = mo.kill_chain_steps.all()
+            if not steps.exists():
+                return None
+
+            kill_chain_steps = KillChainReadSerializer(steps, many=True).data
+
+            # Collect all EAs referenced in kill chain steps
+            ea_ids = set()
+            for step in steps:
+                ea_ids.add(step.elementary_action_id)
                 for ant in step.antecedents.all():
-                    kill_chain_ea_ids.add(ant.id)
+                    ea_ids.add(ant.id)
 
-            # Create nodes only for elementary actions in the kill chain
-            kill_chain_eas = mo.elementary_actions.filter(
-                id__in=kill_chain_ea_ids
-            ).order_by("attack_stage")
+            eas = ElementaryAction.objects.filter(id__in=ea_ids)
+            elementary_actions = [
+                {
+                    "id": str(ea.id),
+                    "name": ea.name,
+                    "attack_stage": ea.attack_stage,
+                    "icon_fa_class": ea.icon_fa_class,
+                }
+                for ea in eas
+            ]
 
-            for ea in kill_chain_eas:
-                stage = ea.attack_stage
-                entry = {"id": str(ea.id), "label": ea.name, "group": groups.get(stage)}
-                if ea.icon:
-                    entry["icon"] = ea.icon_fa_hex
-                nodes.append(entry)
-                panel_name = panels.get(stage)
-                if panel_name:
-                    panel_nodes[panel_name].append(str(ea.id))
-
-            # Build links based on kill chain steps
-            for step in mo.kill_chain_steps.all().order_by(
-                "elementary_action__attack_stage"
-            ):
-                ea = step.elementary_action
-                if step.antecedents.exists():
-                    target = str(ea.id)
-                    if step.logic_operator:
-                        # Get the stage from the first antecedent for panel placement
-                        antecedent_stage = step.antecedents.first().attack_stage
-                        nodes.append(
-                            {
-                                "id": str(step.id),
-                                "icon": step.logic_operator,
-                                "shape": "circle",
-                                "size": 45,
-                            }
-                        )
-                        # Add logic operator to the same panel as its antecedents
-                        panel_name = panels.get(antecedent_stage)
-                        if panel_name:
-                            panel_nodes[panel_name].append(str(step.id))
-                        target = str(step.id)
-                        links.append({"source": str(step.id), "target": str(ea.id)})
-                    for ant in step.antecedents.all().order_by("attack_stage"):
-                        links.append({"source": str(ant.id), "target": target})
-
-            # Only return graph data if there are nodes
-            if nodes:
-                return {"nodes": nodes, "links": links, "panelNodes": panel_nodes}
-            return None
+            return {
+                "kill_chain_steps": kill_chain_steps,
+                "elementary_actions": elementary_actions,
+            }
 
         # Get compliance assessments with their result counts
         compliance_assessments_data = []
@@ -254,7 +234,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                     "eta": assessment.eta,
                     "due_date": assessment.due_date,
                     "status": assessment.status,
-                    "progress": assessment.get_progress(),
+                    "progress": assessment.progress,
                     "result_counts": result_counts,
                 }
             )
@@ -267,7 +247,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 RiskMatrixReadSerializer,
             )
 
-            risk_scenarios = study.last_risk_assessment.risk_scenarios.all()
+            risk_scenarios = study.last_risk_assessment.risk_scenarios.all().order_by(
+                "ref_id"
+            )
             risk_matrix_data = {
                 "risk_assessment": {
                     "id": str(study.last_risk_assessment.id),
@@ -340,19 +322,39 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 mode_data["graph"] = graph_data
             operating_modes_data.append(mode_data)
 
+        # Sort strategic scenarios by gravity desc, then name asc
+        strategic_scenarios_data = sorted(
+            StrategicScenarioReadSerializer(strategic_scenarios, many=True).data,
+            key=lambda s: (-s.get("gravity", {}).get("value", -1), s.get("name", "")),
+        )
+
+        # Sort operational scenarios by gravity desc, likelihood desc, then name asc
+        operational_scenarios_data = sorted(
+            OperationalScenarioReadSerializer(operational_scenarios, many=True).data,
+            key=lambda s: (
+                -s.get("gravity", {}).get("value", -1),
+                -s.get("likelihood", {}).get("value", -1),
+                s.get("str", ""),
+            ),
+        )
+
+        # Sort study assets: primary before support, then alphabetical
+        study_data = EbiosRMStudyReadSerializer(study).data
+        if study_data.get("assets"):
+            study_data["assets"] = sorted(
+                study_data["assets"],
+                key=lambda a: (0 if a.get("type") == "PR" else 1, a.get("str", "")),
+            )
+
         # Build comprehensive report data
         report_data = {
-            "study": EbiosRMStudyReadSerializer(study).data,
+            "study": study_data,
             "feared_events": FearedEventReadSerializer(feared_events, many=True).data,
             "ro_to_couples": RoToReadSerializer(ro_to_couples, many=True).data,
             "stakeholders": StakeholderReadSerializer(stakeholders, many=True).data,
-            "strategic_scenarios": StrategicScenarioReadSerializer(
-                strategic_scenarios, many=True
-            ).data,
+            "strategic_scenarios": strategic_scenarios_data,
             "attack_paths": AttackPathReadSerializer(attack_paths, many=True).data,
-            "operational_scenarios": OperationalScenarioReadSerializer(
-                operational_scenarios, many=True
-            ).data,
+            "operational_scenarios": operational_scenarios_data,
             "operating_modes": operating_modes_data,
             "compliance_assessments": compliance_assessments_data,
             "risk_matrix_data": risk_matrix_data,
@@ -366,8 +368,8 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
     @action(detail=True, name="Export EBIOS RM study as XLSX", url_path="export-xlsx")
     def export_xlsx(self, request, pk):
         """Export EBIOS RM study data to Excel with multiple sheets."""
-        study = get_object_or_404(EbiosRMStudy, id=pk)
 
+        study = self.get_object()
         # Get all related data
         feared_events = FearedEvent.objects.filter(ebios_rm_study=study)
         ro_to_couples = RoTo.objects.filter(ebios_rm_study=study).with_pertinence()
@@ -610,7 +612,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
             # 4.0 Elementary Actions sheet
             elementary_actions = ElementaryAction.objects.filter(
-                operating_modes__operational_scenario__ebios_rm_study=study
+                as_kill_chain__operating_mode__operational_scenario__ebios_rm_study=study
             ).distinct()
             ea_data = []
             for ea in elementary_actions:
@@ -668,7 +670,10 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                         else "",
                         "likelihood": om.get_likelihood_display().get("name", ""),
                         "elementary_actions": "\n".join(
-                            [ea.name for ea in om.elementary_actions.all()]
+                            [
+                                step.elementary_action.name
+                                for step in om.kill_chain_steps.all()
+                            ]
                         ),
                     }
                 )
@@ -761,15 +766,14 @@ class FearedEventViewSet(BaseModelViewSet):
                     status=http_status.HTTP_400_BAD_REQUEST,
                 )
 
-            # Verify study exists and user has access
-            if not RoleAssignment.is_object_readable(
-                request.user, EbiosRMStudy, study_id
-            ):
+            # Verify study exists
+            try:
+                study = EbiosRMStudy.objects.get(id=uuid.UUID(str(study_id)))
+            except ValueError, AttributeError, EbiosRMStudy.DoesNotExist:
                 return Response(
                     {"error": "EBIOS RM Study not found"},
                     status=http_status.HTTP_404_NOT_FOUND,
                 )
-            study = EbiosRMStudy.objects.get(id=study_id)
 
             # Parse the feared events text
             lines = [
@@ -796,7 +800,7 @@ class FearedEventViewSet(BaseModelViewSet):
 
                 # Check if feared event already exists in the study
                 existing_feared_event = FearedEvent.objects.filter(
-                    name=feared_event_name, ebios_rm_study=study_id
+                    name=feared_event_name, ebios_rm_study=study
                 ).first()
 
                 if existing_feared_event:
@@ -813,7 +817,7 @@ class FearedEventViewSet(BaseModelViewSet):
                 # Create new feared event using the serializer to respect IAM
                 feared_event_data = {
                     "name": feared_event_name,
-                    "ebios_rm_study": study_id,
+                    "ebios_rm_study": str(study.id),
                 }
 
                 if ref_id:
@@ -824,7 +828,13 @@ class FearedEventViewSet(BaseModelViewSet):
                 )
 
                 if serializer.is_valid():
-                    feared_event = serializer.save()
+                    try:
+                        feared_event = serializer.save()
+                    except PermissionDenied as e:
+                        return Response(
+                            {"error": e.detail},
+                            status=http_status.HTTP_403_FORBIDDEN,
+                        )
 
                     created_feared_events.append(
                         {
@@ -947,9 +957,67 @@ class StakeholderFilter(df.FilterSet):
         return queryset.filter(id__in=ids)
 
 
+class StakeholderOrderingFilter(SmartOrderingFilter):
+    """Remap ordering fields that don't map directly to DB columns.
+
+    FK fields like ``entity`` are redirected to ``entity__name`` so the sort
+    is alphabetical instead of by UUID.  Computed properties like
+    ``current_criticality`` are backed by SQL annotations so the database
+    can ORDER BY them.
+    """
+
+    field_remap = {
+        "entity": "entity__name",
+        "current_criticality": "_current_criticality",
+        "residual_criticality": "_residual_criticality",
+    }
+
+    @staticmethod
+    def _criticality_annotation(prefix):
+        denom = F(f"{prefix}_maturity") * F(f"{prefix}_trust")
+        return Case(
+            When(**{f"{prefix}_maturity": 0}, then=Value(0.0)),
+            When(**{f"{prefix}_trust": 0}, then=Value(0.0)),
+            default=F(f"{prefix}_dependency")
+            * F(f"{prefix}_penetration")
+            * 1.0
+            / denom,
+            output_field=FloatField(),
+        )
+
+    def get_valid_fields(self, queryset, view, context=None):
+        valid = super().get_valid_fields(queryset, view, context or {})
+        valid += [(src, src) for src in self.field_remap if src not in dict(valid)]
+        return valid
+
+    def filter_queryset(self, request, queryset, view):
+        queryset = queryset.annotate(
+            _current_criticality=self._criticality_annotation("current"),
+            _residual_criticality=self._criticality_annotation("residual"),
+        )
+        return super().filter_queryset(request, queryset, view)
+
+    def get_ordering(self, request, queryset, view):
+        ordering = super().get_ordering(request, queryset, view)
+        if not ordering:
+            return ordering
+        remapped = []
+        for f in ordering:
+            descending = f.startswith("-")
+            field = f[1:] if descending else f
+            mapped = self.field_remap.get(field, field)
+            remapped.append(f"-{mapped}" if descending else mapped)
+        return remapped
+
+
 class StakeholderViewSet(BaseModelViewSet):
     model = Stakeholder
     filterset_class = StakeholderFilter
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        StakeholderOrderingFilter,
+    ]
 
     @action(detail=False, name="Get category choices")
     def category(self, request):
@@ -960,7 +1028,7 @@ class StakeholderViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get chart data")
     def chart_data(self, request):
-        return Response(ecosystem_radar_chart_data(Stakeholder.objects.all()))
+        return Response(ecosystem_radar_chart_data(self.get_queryset()))
 
 
 class StrategicScenarioViewSet(BaseModelViewSet):
@@ -1043,23 +1111,73 @@ class ElementaryActionFilter(GenericFilterSet):
         method="filter_operating_mode_available_actions",
         label="Operating mode available actions",
     )
+    operating_mode_available_antecedents = df.ModelChoiceFilter(
+        queryset=OperatingMode.objects.all(),
+        method="filter_operating_mode_available_antecedents",
+        label="Operating mode available antecedents",
+    )
 
     def filter_operating_mode_available_actions(self, queryset, name, value):
         operating_mode = value
-        used_elementary_actions = KillChain.objects.filter(
-            operating_mode=operating_mode
-        ).values_list("elementary_action", flat=True)
-        return value.elementary_actions.all().exclude(id__in=used_elementary_actions)
+        kc_qs = KillChain.objects.filter(operating_mode=operating_mode)
+        exclude_kill_chain = self.data.get("exclude_kill_chain")
+        if exclude_kill_chain:
+            kc_qs = kc_qs.exclude(id=exclude_kill_chain)
+        used_elementary_actions = kc_qs.values_list("elementary_action", flat=True)
+        return queryset.exclude(id__in=used_elementary_actions)
+
+    def filter_operating_mode_available_antecedents(self, queryset, name, value):
+        operating_mode = value
+        kc_qs = KillChain.objects.filter(operating_mode=operating_mode)
+        action_id = self.data.get("actual_action")
+        action = ElementaryAction.objects.filter(id=action_id).first()
+        used_elementary_actions_ids = kc_qs.values_list("elementary_action", flat=True)
+        used_elementary_actions = ElementaryAction.objects.filter(
+            id__in=used_elementary_actions_ids
+        ).exclude(id=action_id if action else None)
+        if action:
+            precedent_actions = used_elementary_actions.filter(
+                attack_stage__lte=action.attack_stage
+            )
+        else:
+            precedent_actions = used_elementary_actions
+        return queryset.filter(id__in=precedent_actions)
 
     class Meta:
         model = ElementaryAction
-        fields = ["operating_modes", "operating_mode_available_actions"]
+        fields = [
+            "operating_mode_available_actions",
+            "operating_mode_available_antecedents",
+        ]
 
 
 class ElementaryActionViewSet(BaseModelViewSet):
     model = ElementaryAction
 
     filterset_class = ElementaryActionFilter
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        try:
+            return super().destroy(request, *args, **kwargs)
+        except ProtectedError:
+            operating_modes = list(
+                OperatingMode.objects.filter(
+                    kill_chain_steps__elementary_action=instance
+                ).distinct()
+            )
+            names = ", ".join(om.name for om in operating_modes[:10])
+            return Response(
+                {
+                    "detail": (
+                        f"Cannot delete elementary action '{instance.name}' — it is "
+                        f"used in {len(operating_modes)} operating mode kill chain(s)"
+                        + (f": {names}" if names else "")
+                        + ". Remove it from those kill chains first."
+                    ),
+                },
+                status=HTTP_409_CONFLICT,
+            )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get icon choices")
@@ -1121,9 +1239,136 @@ class OperatingModeViewSet(BaseModelViewSet):
                 {"error": "Error in default_ref_id has occurred."}, status=400
             )
 
+    @action(detail=True, methods=["post"], name="Save graph for Operating Mode")
+    def save_graph(self, request, pk):
+        from django.db import transaction
+
+        mo = self.get_object()
+        kill_chain_steps = request.data.get("kill_chain_steps", [])
+        if not isinstance(kill_chain_steps, list):
+            return Response(
+                {"errors": ["kill_chain_steps must be an array."]}, status=400
+            )
+        graph_columns = request.data.get("graph_columns", None)
+
+        # Validate all steps
+        from iam.models import RoleAssignment, Folder
+
+        accessible_ea_ids = set(
+            RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), request.user, ElementaryAction
+            )[0]
+        )
+        seen_ea_ids = set()
+        errors = []
+
+        for i, step in enumerate(kill_chain_steps):
+            if not isinstance(step, dict):
+                errors.append(f"Step {i}: invalid step payload.")
+                continue
+            ea_id = step.get("elementary_action")
+            antecedent_ids = step.get("antecedents", [])
+            logic_operator = step.get("logic_operator")
+
+            if not ea_id:
+                errors.append(f"Step {i}: missing elementary_action.")
+                continue
+
+            try:
+                ea_id = uuid.UUID(str(ea_id))
+            except ValueError, AttributeError:
+                errors.append(f"Step {i}: invalid elementary_action UUID.")
+                continue
+
+            if ea_id not in accessible_ea_ids:
+                errors.append(f"Step {i}: elementary action is not accessible.")
+                continue
+
+            if ea_id in seen_ea_ids:
+                errors.append(f"Step {i}: duplicate elementary action in kill chain.")
+                continue
+            seen_ea_ids.add(ea_id)
+
+            try:
+                ea = ElementaryAction.objects.get(pk=ea_id)
+            except ElementaryAction.DoesNotExist:
+                errors.append(f"Step {i}: elementary action not found.")
+                continue
+
+            # Validate antecedents
+            parsed_antecedents = []
+            for ant_id in antecedent_ids:
+                try:
+                    ant_uuid = uuid.UUID(str(ant_id))
+                except ValueError, AttributeError:
+                    errors.append(f"Step {i}: invalid antecedent UUID.")
+                    continue
+
+                if ant_uuid == ea_id:
+                    errors.append(
+                        f"Step {i}: an elementary action cannot be its own antecedent."
+                    )
+                    continue
+
+                if ant_uuid not in accessible_ea_ids:
+                    errors.append(f"Step {i}: antecedent is not accessible.")
+                    continue
+
+                try:
+                    ant_ea = ElementaryAction.objects.get(pk=ant_uuid)
+                except ElementaryAction.DoesNotExist:
+                    errors.append(f"Step {i}: antecedent not found.")
+                    continue
+
+                if ant_ea.attack_stage > ea.attack_stage:
+                    errors.append(
+                        f"Step {i}: antecedent attack stage must be same or before the action's stage."
+                    )
+                    continue
+
+                parsed_antecedents.append(ant_uuid)
+
+            if logic_operator and logic_operator not in ("AND", "OR"):
+                errors.append(f"Step {i}: logic_operator must be 'AND', 'OR', or null.")
+
+        if errors:
+            return Response({"errors": errors}, status=400)
+
+        # Atomically replace all kill chain steps
+        with transaction.atomic():
+            mo.kill_chain_steps.all().delete()
+            if graph_columns is not None:
+                mo.graph_columns = graph_columns
+                mo.save(update_fields=["graph_columns"])
+
+            for step in kill_chain_steps:
+                ea_id = uuid.UUID(str(step["elementary_action"]))
+                antecedent_ids = [
+                    uuid.UUID(str(a)) for a in step.get("antecedents", [])
+                ]
+                logic_operator = step.get("logic_operator")
+                is_highlighted = step.get("is_highlighted", False)
+                position_x = step.get("position_x", 0)
+                position_y = step.get("position_y", 0)
+
+                kc = KillChain.objects.create(
+                    operating_mode=mo,
+                    elementary_action_id=ea_id,
+                    logic_operator=logic_operator if len(antecedent_ids) > 1 else None,
+                    is_highlighted=is_highlighted,
+                    position_x=position_x,
+                    position_y=position_y,
+                    folder=mo.folder,
+                )
+                if antecedent_ids:
+                    kc.antecedents.set(antecedent_ids)
+
+        # Return updated graph
+        return self.build_graph(request, pk)
+
     @action(detail=True, name="Build graph for Operating Mode")
     def build_graph(self, request, pk):
-        mo = get_object_or_404(OperatingMode, id=pk)
+        mo = self.get_object()
         nodes = []
         links = []
         groups = {0: "grp00", 1: "grp10", 2: "grp20", 3: "grp30"}
@@ -1144,7 +1389,7 @@ class OperatingModeViewSet(BaseModelViewSet):
                 kill_chain_ea_ids.add(ant.id)
 
         # Create nodes only for elementary actions in the kill chain
-        kill_chain_eas = mo.elementary_actions.filter(
+        kill_chain_eas = ElementaryAction.objects.filter(
             id__in=kill_chain_ea_ids
         ).order_by("attack_stage")
 

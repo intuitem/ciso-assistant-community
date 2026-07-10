@@ -48,15 +48,6 @@
 	let isScheduleTainted = $derived(scheduleTaintedHandler($scheduleTainted));
 </script>
 
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
-	field="folder"
-	pathField="path"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-/>
 {#if !$is_recurrent}
 	<TextField
 		type="date"
@@ -91,7 +82,7 @@
 			bind:cachedValue={formDataCache['task_date']}
 		/>
 		<div class="flex w-full items-center space-x-3">
-			<span class="mt-5 font-semibold text-sm text-gray-800">{m.each()}</span>
+			<span class="mt-5 font-semibold text-sm text-surface-950-50">{m.each()}</span>
 			<NumberField
 				{form}
 				field="interval"
@@ -118,7 +109,7 @@
 		</div>
 		<div class="flex w-full items-center space-x-3">
 			{#if $frequency == 'MONTHLY' || $frequency == 'YEARLY'}
-				<span class="mt-5 font-semibold text-sm text-gray-800">{m.the()}</span>
+				<span class="mt-5 font-semibold text-sm text-surface-950-50">{m.the()}</span>
 				<AutocompleteSelect
 					{form}
 					multiple
@@ -165,7 +156,7 @@
 		</div>
 		{#if $frequency == 'YEARLY'}
 			<div class="flex w-full items-center space-x-3">
-				<span class="mt-5 font-semibold text-sm text-gray-800">{m.of()}</span>
+				<span class="mt-5 font-semibold text-sm text-surface-950-50">{m.of()}</span>
 				<AutocompleteSelect
 					{form}
 					multiple
@@ -226,7 +217,6 @@
 	helpText={m.taskTemplateEvidenceHelpText()}
 	field="evidences"
 	label={m.evidences()}
-	allowUserOptions="append"
 	translateOptions={false}
 />
 <AutocompleteSelect
@@ -244,15 +234,9 @@
 	label={m.assignedTo()}
 />
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
-	<TextField
-		{form}
-		field="ref_id"
-		label={m.refId()}
-		cacheLock={cacheLocks['ref_id']}
-		bind:cachedValue={formDataCache['ref_id']}
-	/>
 	<AutocompleteSelect
 		multiple
+		lazy
 		{form}
 		optionsEndpoint="assets"
 		optionsExtraFields={[['folder', 'str']]}
@@ -289,7 +273,7 @@
 		{form}
 		multiple
 		optionsEndpoint="risk-assessments"
-		optionsExtraFields={[['perimeter', 'str']]}
+		optionsExtraFields={[['folder', 'str']]}
 		optionsLabelField="str"
 		field="risk_assessments"
 		cacheLock={cacheLocks['risk_assessments']}
@@ -320,6 +304,18 @@
 		helpText={m.linkHelpText()}
 		cacheLock={cacheLocks['link']}
 		bind:cachedValue={formDataCache['link']}
+	/>
+	<AutocompleteSelect
+		multiple
+		{form}
+		createFromSelection={true}
+		optionsEndpoint="filtering-labels"
+		optionsLabelField="label"
+		field="filtering_labels"
+		helpText={m.labelsHelpText()}
+		label={m.labels()}
+		translateOptions={false}
+		allowUserOptions="append"
 	/>
 </Dropdown>
 <Checkbox {form} field="enabled" label={m.enabled()} />

@@ -1,0 +1,176 @@
+urn: urn:intuitem:risk:preset:small-business-cisa-cpg
+locale: en
+ref_id: preset-small-business-cisa-cpg
+name: "Small Business — CISA CPG 2.0"
+description: "Lightweight cybersecurity baseline for small organisations. Uses the CISA Cross-Sector Cybersecurity Performance Goals aligned with the NIST CSF — practical, actionable controls with built-in reference controls auto-created for you."
+version: 1
+provider: intuitem
+packager: intuitem
+translations:
+  fr:
+    name: "Petite entreprise — CISA CPG 2.0"
+    description: "Socle de cybersécurité léger pour les petites entreprises. Utilise les objectifs de performance en cybersécurité (CPG) de la CISA, alignés sur le NIST CSF — des contrôles pratiques et actionnables avec des mesures de référence créées automatiquement."
+
+dependencies:
+  - urn:intuitem:risk:library:cisa-cpg-2.0
+  - urn:intuitem:risk:library:risk-matrix-3x3-mult
+
+objects:
+  preset:
+    profile:
+      company_size:
+        - micro
+        - startup
+        - sme
+      industry:
+        - general
+      region:
+        - global
+      goal: security-baseline
+
+    feature_flags:
+      enable:
+        - compliance
+
+    scaffolded_objects:
+      - type: risk_assessment
+        name: "Initial Risk Assessment"
+        risk_matrix: urn:intuitem:risk:library:risk-matrix-3x3-mult
+        ref: main_ra
+        translations:
+          fr:
+            name: "Analyse de risques initiale"
+      - type: compliance_assessment
+        name: "CISA CPG 2.0 Assessment"
+        framework: urn:intuitem:risk:library:cisa-cpg-2.0
+        create_suggested_controls: true
+        ref: cpg_audit
+        translations:
+          fr:
+            name: "Évaluation CISA CPG 2.0"
+
+      # --- Assets ---
+      - type: asset
+        name: "Office network"
+        description: "Internet connection, Wi-Fi router, and any local networking equipment."
+        asset_type: SP
+        ref: asset_network
+        translations:
+          fr:
+            name: "Réseau du bureau"
+            description: "Connexion Internet, routeur Wi-Fi et tout équipement réseau local."
+      - type: asset
+        name: "Computers and mobile devices"
+        description: "Laptops, desktops, tablets, and smartphones used by staff."
+        asset_type: SP
+        ref: asset_endpoints
+        translations:
+          fr:
+            name: "Ordinateurs et appareils mobiles"
+            description: "Ordinateurs portables, fixes, tablettes et smartphones utilisés par le personnel."
+      - type: asset
+        name: "Email and collaboration"
+        description: "Email service and shared file storage (e.g. Google Workspace, Microsoft 365)."
+        asset_type: SP
+        ref: asset_email
+        translations:
+          fr:
+            name: "Messagerie et collaboration"
+            description: "Service de messagerie et stockage de fichiers partagé (ex. Google Workspace, Microsoft 365)."
+      - type: asset
+        name: "Business application"
+        description: "Main application used to run the business (invoicing, CRM, e-commerce, etc.)."
+        asset_type: SP
+        ref: asset_app
+        translations:
+          fr:
+            name: "Application métier"
+            description: "Application principale utilisée pour faire fonctionner l'activité (facturation, CRM, e-commerce, etc.)."
+      - type: asset
+        name: "Customer and business data"
+        description: "Customer records, financial data, contracts, and other critical business information."
+        asset_type: PR
+        ref: asset_data
+        translations:
+          fr:
+            name: "Données clients et métier"
+            description: "Fichiers clients, données financières, contrats et autres informations critiques."
+
+      # --- Risk scenarios (using CPG threats) ---
+      - type: risk_scenario
+        name: "Credential theft via phishing"
+        description: "An employee falls for a phishing email and discloses credentials, giving attackers access to email and business applications."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_email, asset_app]
+        threat_urns: [urn:intuitem:risk:threat:cisa-cpg-2.0:t-11]
+        translations:
+          fr:
+            name: "Vol d'identifiants par hameçonnage"
+            description: "Un employé se fait piéger par un email d'hameçonnage et divulgue ses identifiants, donnant accès à la messagerie et aux applications."
+      - type: risk_scenario
+        name: "Malware on business data"
+        description: "Malware encrypts or destroys files on computers and shared storage, blocking access to critical business data."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_endpoints, asset_data]
+        threat_urns: [urn:intuitem:risk:threat:cisa-cpg-2.0:t-14]
+        translations:
+          fr:
+            name: "Logiciel malveillant sur les données métier"
+            description: "Un logiciel malveillant chiffre ou détruit les fichiers sur les ordinateurs et le stockage partagé, bloquant l'accès aux données critiques."
+      - type: risk_scenario
+        name: "Exploitation of unpatched systems"
+        description: "Attackers exploit known vulnerabilities in unpatched software on computers or the business application to gain unauthorized access."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_endpoints, asset_app]
+        threat_urns: [urn:intuitem:risk:threat:cisa-cpg-2.0:t-04]
+        translations:
+          fr:
+            name: "Exploitation de systèmes non mis à jour"
+            description: "Des attaquants exploitent des vulnérabilités connues dans des logiciels non corrigés sur les ordinateurs ou l'application métier pour obtenir un accès non autorisé."
+      - type: risk_scenario
+        name: "Unauthorized access and lateral movement"
+        description: "An attacker gains access to one system and moves laterally across the network, escalating privileges and compromising sensitive data."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_network, asset_data]
+        threat_urns: [urn:intuitem:risk:threat:cisa-cpg-2.0:t-10]
+        translations:
+          fr:
+            name: "Accès non autorisé et mouvement latéral"
+            description: "Un attaquant accède à un système et se déplace latéralement sur le réseau, élevant ses privilèges et compromettant les données sensibles."
+
+    journey:
+      steps:
+        - key: assets
+          title: "Identify your assets"
+          description: "Review and complete the list of devices, applications, and data that matter most to your business."
+          target_model: assets
+          translations:
+            fr:
+              title: "Identifier vos actifs"
+              description: "Examinez et complétez la liste des équipements, applications et données essentiels à votre activité."
+        - key: cpg_assessment
+          title: "Assess your cybersecurity posture"
+          description: "Go through the CISA CPG goals and assess where you stand today — each goal has concrete, actionable recommendations."
+          target_model: compliance-assessments
+          target_ref: cpg_audit
+          translations:
+            fr:
+              title: "Évaluer votre posture cybersécurité"
+              description: "Parcourez les objectifs CPG de la CISA et évaluez votre situation actuelle — chaque objectif propose des recommandations concrètes et actionnables."
+        - key: risk_assessment
+          title: "Conduct a risk assessment"
+          description: "Review the pre-created risk scenarios, adjust likelihood and impact, and add any missing risks."
+          target_model: risk-assessments
+          target_ref: main_ra
+          translations:
+            fr:
+              title: "Mener une analyse de risque"
+              description: "Examinez les scénarios de risque pré-créés, ajustez la vraisemblance et l'impact, et ajoutez les risques manquants."
+        - key: controls
+          title: "Implement and track security controls"
+          description: "Review the auto-created controls from the CPG reference controls, assign owners, and start implementing the most critical ones first."
+          target_model: applied-controls
+          translations:
+            fr:
+              title: "Implémenter et suivre les mesures de sécurité"
+              description: "Examinez les contrôles créés automatiquement à partir des mesures de référence CPG, assignez des responsables et commencez par les plus critiques."

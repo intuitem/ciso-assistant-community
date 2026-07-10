@@ -79,6 +79,7 @@ test.skip('Analytics full flow - creation, validation and cleanup', async ({
 		await complianceAssessmentsPage.goto();
 		await complianceAssessmentsPage.createItem({
 			name: 'test-audit-1',
+			folder: vars.folderName,
 			framework: 'NIST-CSF-2.0',
 			authors: ['admin@tests.com'],
 			perimeter: `${vars.folderName}/${vars.perimeterName}`
@@ -86,6 +87,7 @@ test.skip('Analytics full flow - creation, validation and cleanup', async ({
 		await complianceAssessmentsPage.goto();
 		await complianceAssessmentsPage.createItem({
 			name: 'test-audit-2',
+			folder: vars.folderName,
 			authors: ['admin@tests.com'],
 			framework: 'International standard ISO/IEC 27001:2022',
 			perimeter: `${vars.folderName}/${vars.perimeterName}`
@@ -112,6 +114,7 @@ test.skip('Analytics full flow - creation, validation and cleanup', async ({
 		await riskAssessmentsPage.goto();
 		await riskAssessmentsPage.createItem({
 			name: 'test-risk-assessment',
+			folder: vars.folderName,
 			perimeter: `${vars.folderName}/${vars.perimeterName}`
 		});
 	});

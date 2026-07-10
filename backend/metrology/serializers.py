@@ -1,4 +1,5 @@
 from django.contrib.contenttypes.models import ContentType
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from core.models import OrganisationObjective
@@ -17,6 +18,25 @@ from metrology.builtin_metrics import get_available_metrics_for_model
 
 # MetricDefinition serializers
 class MetricDefinitionWriteSerializer(BaseModelSerializer):
+    def validate_choices_definition(self, value):
+        if value is None:
+            return value
+
+        if isinstance(value, list):
+            for choice in value:
+                if not isinstance(choice, dict):
+                    raise serializers.ValidationError(
+                        _("Each choice definition must include a non-empty REF_ID.")
+                    )
+
+                ref_id = choice.get("ref_id")
+                if not isinstance(ref_id, str) or not ref_id.strip():
+                    raise serializers.ValidationError(
+                        _("Each choice definition must include a non-empty REF_ID.")
+                    )
+
+        return value
+
     class Meta:
         model = MetricDefinition
         exclude = ["translations"]
@@ -42,6 +62,15 @@ class MetricInstanceWriteSerializer(BaseModelSerializer):
         required=False,
     )
 
+    def update(self, instance, validated_data):
+        # Check if folder is being changed
+        new_folder = validated_data.get("folder")
+        if new_folder and new_folder != instance.folder:
+            # Cascade folder change to all child CustomMetricSamples
+            instance.samples.update(folder=new_folder)
+
+        return super().update(instance, validated_data)
+
     class Meta:
         model = MetricInstance
         fields = "__all__"
@@ -64,6 +93,7 @@ class MetricInstanceReadSerializer(BaseModelSerializer):
     owner = FieldsRelatedField(many=True)
     organisation_objectives = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
+    evidences = FieldsRelatedField(["name", "id"])
     status = serializers.CharField(source="get_status_display", read_only=True)
     collection_frequency = serializers.CharField(
         source="get_collection_frequency_display", read_only=True
@@ -97,9 +127,11 @@ class MetricInstanceReadSerializer(BaseModelSerializer):
 
 # CustomMetricSample serializers
 class CustomMetricSampleWriteSerializer(BaseModelSerializer):
-    class Meta:
-        model = CustomMetricSample
-        fields = "__all__"
+    def create(self, validated_data):
+        # Set folder from metric_instance before the permission check in parent class
+        if "metric_instance" in validated_data and validated_data["metric_instance"]:
+            validated_data["folder"] = validated_data["metric_instance"].folder
+        return super().create(validated_data)
 
     def validate_timestamp(self, value):
         """Prevent creating samples with future timestamps"""
@@ -111,10 +143,17 @@ class CustomMetricSampleWriteSerializer(BaseModelSerializer):
             )
         return value
 
+    class Meta:
+        model = CustomMetricSample
+        exclude = ["folder"]
+
 
 class CustomMetricSampleReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
-    metric_instance = FieldsRelatedField(["name", "ref_id", "id"])
+    metric_instance = FieldsRelatedField(
+        ["name", "ref_id", "id", {"evidences": ["id", "name"]}]
+    )
+    evidence_revision = FieldsRelatedField(["id", "name", "version"])
     display_value = serializers.SerializerMethodField()
     raw_value = serializers.SerializerMethodField()
 
@@ -390,7 +429,7 @@ class DashboardWidgetReadSerializer(BaseModelSerializer):
                 model_class = obj.target_content_type.model_class()
                 target_obj = model_class.objects.get(id=obj.target_object_id)
                 return str(target_obj)
-            except (model_class.DoesNotExist, AttributeError):
+            except model_class.DoesNotExist, AttributeError:
                 return None
         return None
 

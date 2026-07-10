@@ -1,7 +1,9 @@
 import { handleErrorResponse, nestedWriteFormAction } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
+import { safeTranslate } from '$lib/utils/i18n';
 import { getSecureRedirect } from '$lib/utils/helpers';
+import { formatSelectFieldData } from '$lib/utils/load';
 import { modelSchema } from '$lib/utils/schemas';
 import { headData } from '$lib/utils/table';
 import { m } from '$paraglide/messages';
@@ -10,7 +12,7 @@ import type { Actions } from '@sveltejs/kit';
 import { fail, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
 
@@ -44,11 +46,26 @@ export const load = (async ({ fetch, params }) => {
 		}
 	});
 
+	// Fetch ordered assessable requirement assessments to find next/previous
+	const requirementsListData = await fetchJson(
+		`${baseUrl}/compliance-assessments/${requirementAssessment.compliance_assessment.id}/requirements_list/?assessable=true`
+	);
+	let nextRequirementAssessmentId: string | null = null;
+	if (requirementsListData?.requirement_assessments) {
+		const raIds = requirementsListData.requirement_assessments.map((ra: any) => ra.id);
+		const currentIndex = raIds.indexOf(params.id);
+		if (currentIndex !== -1 && currentIndex < raIds.length - 1) {
+			nextRequirementAssessmentId = raIds[currentIndex + 1];
+		}
+	}
+
 	const schema = modelSchema(URLModel);
-	object.evidences = object.evidences.map((evidence) => evidence.id);
-	object.applied_controls = object.applied_controls.map((applied_control) => applied_control.id);
+	object.evidences = object.evidences?.map((evidence) => evidence.id) ?? [];
+	object.applied_controls =
+		object.applied_controls?.map((applied_control) => applied_control.id) ?? [];
 	object.security_exceptions =
 		object.security_exceptions?.map((security_exception) => security_exception.id) ?? [];
+	object.nextRequirementAssessmentId = nextRequirementAssessmentId;
 	const form = await superValidate(object, zod(schema), { errors: true });
 
 	const selectOptions: Record<string, any> = {};
@@ -58,10 +75,7 @@ export const load = (async ({ fetch, params }) => {
 				const url = `${baseUrl}/${URLModel}/${selectField.field}/`;
 				const data = await fetchJson(url);
 				if (data) {
-					selectOptions[selectField.field] = Object.entries(data).map(([key, value]) => ({
-						label: value,
-						value: selectField.valueType === 'number' ? parseInt(key) : key
-					}));
+					selectOptions[selectField.field] = formatSelectFieldData(data, selectField);
 				}
 			})
 		);
@@ -84,10 +98,7 @@ export const load = (async ({ fetch, params }) => {
 				const url = `${baseUrl}/applied-controls/${selectField.field}/`;
 				const data = await fetchJson(url);
 				if (data) {
-					measureSelectOptions[selectField.field] = Object.entries(data).map(([key, value]) => ({
-						label: value,
-						value: selectField.valueType === 'number' ? parseInt(key) : key
-					}));
+					measureSelectOptions[selectField.field] = formatSelectFieldData(data, selectField);
 				} else {
 					console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
 				}
@@ -125,10 +136,7 @@ export const load = (async ({ fetch, params }) => {
 				const url = `${baseUrl}/evidences/${selectField.field}/`;
 				const data = await fetchJson(url);
 				if (data) {
-					evidenceSelectOptions[selectField.field] = Object.entries(data).map(([key, value]) => ({
-						label: value,
-						value: selectField.valueType === 'number' ? parseInt(key) : key
-					}));
+					evidenceSelectOptions[selectField.field] = formatSelectFieldData(data, selectField);
 				}
 			})
 		);
@@ -150,11 +158,9 @@ export const load = (async ({ fetch, params }) => {
 				const url = `${baseUrl}/security-exceptions/${selectField.field}/`;
 				const data = await fetchJson(url);
 				if (data) {
-					securityExceptionSelectOptions[selectField.field] = Object.entries(data).map(
-						([key, value]) => ({
-							label: value,
-							value: selectField.valueType === 'number' ? parseInt(key) : key
-						})
+					securityExceptionSelectOptions[selectField.field] = formatSelectFieldData(
+						data,
+						selectField
 					);
 				}
 			})
@@ -177,7 +183,9 @@ export const load = (async ({ fetch, params }) => {
 		evidenceCreateForm,
 		securityExceptionModel,
 		securityExceptionCreateForm,
-		tables
+		tables,
+		nextRequirementAssessmentId,
+		viewerRole: requirementsListData?.viewer_role === 'auditor' ? 'auditor' : 'respondent'
 	};
 }) satisfies PageServerLoad;
 
@@ -193,9 +201,54 @@ export const actions: Actions = {
 			return fail(400, { form: form });
 		}
 
-		const formData = form.data;
+		const formData: Record<string, any> = { ...form.data };
+
+		// Strip fields the backend hid from the GET response. Sending them back as
+		// empty arrays / null would silently wipe data the user could not see.
+		// Fail closed: if we cannot fetch the current state, abort rather than risk
+		// a PATCH that clears hidden relations.
+		let currentRa: Record<string, any>;
+		try {
+			const currentRaResponse = await event.fetch(endpoint);
+			if (!currentRaResponse.ok) {
+				return handleErrorResponse({ event, response: currentRaResponse, form });
+			}
+			currentRa = await currentRaResponse.json();
+		} catch (error) {
+			console.error('Failed to fetch requirement assessment before update', error);
+			return fail(502, { form });
+		}
+
+		const visibilityControlled = [
+			'result',
+			'status',
+			'score',
+			'is_scored',
+			'documentation_score',
+			'observation',
+			'answers',
+			'evidences',
+			'applied_controls',
+			'security_exceptions'
+		];
+		for (const key of visibilityControlled) {
+			if (!(key in currentRa)) {
+				delete formData[key];
+			}
+		}
+		// extended_result is a qualifier on result — strip it alongside a hidden result.
+		if (!('result' in currentRa)) {
+			delete formData.extended_result;
+		}
+		// The Select component's default option renders as <option value={null}>--</option>;
+		// Svelte omits the null attribute so the browser falls back to the text "--",
+		// which the backend rejects as an invalid enum choice. Normalize to null.
+		if (formData.extended_result === '--' || formData.extended_result === '') {
+			formData.extended_result = null;
+		}
+
 		const requestInitOptions: RequestInit = {
-			method: 'PUT',
+			method: 'PATCH',
 			body: JSON.stringify(formData)
 		};
 
@@ -204,9 +257,19 @@ export const actions: Actions = {
 		if (!response.ok) return handleErrorResponse({ event, response, form });
 
 		const object = await response.json();
-		const model: string = urlParamModelVerboseName(URLModel);
+		const model: string = safeTranslate(urlParamModelVerboseName(URLModel));
 		setFlash({ type: 'success', message: m.successfullySavedObject({ object: model }) }, event);
 		if (formData.noRedirect) return;
+
+		// If there's a next requirement assessment, redirect to it
+		if (formData.nextRequirementAssessmentId) {
+			const nextParam = getSecureRedirect(event.url.searchParams.get('next'));
+			redirect(
+				302,
+				`/requirement-assessments/${formData.nextRequirementAssessmentId}/edit${nextParam ? `?next=${nextParam}` : ''}`
+			);
+		}
+
 		redirect(
 			302,
 			getSecureRedirect(event.url.searchParams.get('next')) ||

@@ -41,20 +41,11 @@
 		{form}
 		field="justification"
 		label={m.justification()}
-		helpText={m.riskAcceptanceJusitficationHelpText()}
+		helpText={m.riskAcceptanceJustificationHelpText()}
 		cacheLock={cacheLocks['justification']}
 		bind:cachedValue={formDataCache['justification']}
 	/>
 {/if}
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="folders?content_type=DO"
-	field="folder"
-	pathField="path"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-/>
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="users?is_approver=true"
@@ -70,7 +61,7 @@
 	{form}
 	optionsEndpoint="risk-scenarios"
 	optionsExtraFields={[
-		['perimeter', 'str'],
+		['folder', 'str'],
 		['risk_assessment', 'str']
 	]}
 	field="risk_scenarios"

@@ -10,7 +10,9 @@
 	import { m } from '$paraglide/messages';
 	import { onMount } from 'svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
+	import { formFieldProxy } from 'sveltekit-superforms';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import CustomFieldsSection from '../CustomFieldsSection.svelte';
 	import Duration from '../Duration.svelte';
 	import RadioGroup from '../RadioGroup.svelte';
 	import Select from '../Select.svelte';
@@ -36,7 +38,9 @@
 		data = {}
 	}: Props = $props();
 
-	type SecurityObjectiveScale = '0-3' | '1-4' | 'FIPS-199';
+	const { value: folderId } = formFieldProxy(form, 'folder');
+
+	type SecurityObjectiveScale = keyof typeof SECURITY_OBJECTIVE_SCALE_MAP;
 	const scale: SecurityObjectiveScale = page.data.settings.security_objective_scale;
 	const securityObjectiveScaleMap = SECURITY_OBJECTIVE_SCALE_MAP[scale];
 	const reducedSecurityObjectiveMap = securityObjectiveScaleMap.filter(
@@ -106,14 +110,6 @@
 	bind:cachedValue={formDataCache['asset_class']}
 	label={m.assetClass()}
 />
-<TextField
-	{form}
-	field="ref_id"
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-	label={m.refId()}
-/>
-
 <AutocompleteSelect
 	{form}
 	multiple
@@ -127,15 +123,6 @@
 	cacheLock={cacheLocks['owner']}
 	bind:cachedValue={formDataCache['owner']}
 	label={m.owner()}
-/>
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
-	pathField="path"
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
 />
 <Select
 	{form}
@@ -377,3 +364,5 @@
 		hidden
 	/>
 {/if}
+
+<CustomFieldsSection {form} model="core.asset" folderId={$folderId} />

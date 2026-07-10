@@ -136,7 +136,7 @@ class TestFoldersAuthenticated:
             {
                 "name": "new " + FOLDER_NAME,
                 "description": "new " + FOLDER_DESCRIPTION,
-                "parent_folder": str(Folder.objects.create(name="test2").id),
+                "parent_folder": str(test.folder.id),
             },
             {
                 "parent_folder": {"id": str(test.folder.id), "str": test.folder.name},

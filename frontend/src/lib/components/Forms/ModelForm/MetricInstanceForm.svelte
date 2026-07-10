@@ -29,13 +29,6 @@
 	}: Props = $props();
 </script>
 
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="metric-definitions"
@@ -46,15 +39,6 @@
 	bind:cachedValue={formDataCache['metric_definition']}
 	label={m.metricDefinition()}
 	disabled={!!initialData.metric_definition}
-/>
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="folders?content_type=DO"
-	field="folder"
-	pathField="path"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
 />
 <Select
 	{form}
@@ -94,6 +78,16 @@
 	cacheLock={cacheLocks['owner']}
 	bind:cachedValue={formDataCache['owner']}
 	label={m.owner()}
+/>
+<AutocompleteSelect
+	{form}
+	optionsEndpoint="evidences"
+	optionsLabelField="auto"
+	optionsExtraFields={[['folder', 'str']]}
+	field="evidences"
+	cacheLock={cacheLocks['evidences']}
+	bind:cachedValue={formDataCache['evidences']}
+	label={m.evidence()}
 />
 <Dropdown open={false} class="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 	<AutocompleteSelect

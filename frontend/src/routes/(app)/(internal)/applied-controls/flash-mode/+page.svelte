@@ -35,7 +35,7 @@
 		{ id: 'Small', label: m.small(), dbValue: 'S' },
 		{ id: 'Medium', label: m.medium(), dbValue: 'M' },
 		{ id: 'Large', label: m.large(), dbValue: 'L' },
-		{ id: 'Extra Large', label: 'Extra Large', dbValue: 'XL' }
+		{ id: 'Extra Large', label: m.extraLarge(), dbValue: 'XL' }
 	];
 
 	const priorityOptions = [
@@ -43,7 +43,7 @@
 		{ id: 'P1', label: m.p1(), dbValue: 1 },
 		{ id: 'P2', label: m.p2(), dbValue: 2 },
 		{ id: 'P3', label: m.p3(), dbValue: 3 },
-		{ id: 'P4', label: 'P4', dbValue: 4 }
+		{ id: 'P4', label: m.p4(), dbValue: 4 }
 	];
 
 	const impactOptions = [
@@ -57,12 +57,12 @@
 
 	const csfFunctionOptions = [
 		{ id: '--', label: '--', dbValue: null },
-		{ id: 'Govern', label: 'Govern', dbValue: 'govern' },
-		{ id: 'Identify', label: 'Identify', dbValue: 'identify' },
-		{ id: 'Protect', label: 'Protect', dbValue: 'protect' },
-		{ id: 'Detect', label: 'Detect', dbValue: 'detect' },
-		{ id: 'Respond', label: 'Respond', dbValue: 'respond' },
-		{ id: 'Recover', label: 'Recover', dbValue: 'recover' }
+		{ id: 'Govern', label: m.govern(), dbValue: 'govern' },
+		{ id: 'Identify', label: m.identify(), dbValue: 'identify' },
+		{ id: 'Protect', label: m.protect(), dbValue: 'protect' },
+		{ id: 'Detect', label: m.detect(), dbValue: 'detect' },
+		{ id: 'Respond', label: m.respond(), dbValue: 'respond' },
+		{ id: 'Recover', label: m.recover(), dbValue: 'recover' }
 	];
 
 	// Helper to map server values to display IDs for select value binding
@@ -183,7 +183,7 @@
 
 <div class="flex flex-col min-h-screen justify-center items-center">
 	<div
-		class="flex flex-col bg-white w-3/4 max-w-4xl h-3/4 min-h-[600px] rounded-xl shadow-xl p-4 border-4 border-primary-500"
+		class="flex flex-col bg-surface-50-950 w-3/4 max-w-4xl h-3/4 min-h-[600px] rounded-xl shadow-xl p-4 border-4 border-primary-500"
 	>
 		{#if currentAppliedControl}
 			<!-- Header -->
@@ -191,15 +191,15 @@
 				<div class="">
 					<a
 						href={data.backUrl}
-						class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+						class="flex items-center space-x-2 text-primary-800-200 hover:text-primary-600-400"
 					>
 						<i class="fa-solid fa-arrow-left"></i>
-						<p class="">{data.backLabel}</p>
+						<p class="">{safeTranslate(data.backLabel)}</p>
 					</a>
 				</div>
 				<div class="relative">
 					<button
-						class="font-semibold hover:bg-gray-100 px-2 py-1 rounded cursor-pointer border border-transparent hover:border-gray-300 transition-colors flex items-center space-x-1"
+						class="font-semibold hover:bg-surface-100-900 px-2 py-1 rounded cursor-pointer border border-transparent hover:border-surface-300-700 transition-colors flex items-center space-x-1"
 						onclick={() => (showNavigation = !showNavigation)}
 						title="Click to jump to specific item (or press G)"
 					>
@@ -210,7 +210,7 @@
 
 					{#if showNavigation}
 						<div
-							class="absolute top-full right-0 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg p-4 z-10 min-w-64"
+							class="absolute top-full right-0 mt-2 bg-surface-50-950 border border-surface-300-700 rounded-lg shadow-lg p-4 z-10 min-w-64"
 						>
 							<div class="flex flex-col space-y-3">
 								<div class="text-sm font-medium">Jump to item:</div>
@@ -222,7 +222,7 @@
 										min="1"
 										max={appliedControls.length}
 										placeholder="Item number"
-										class="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
+										class="flex-1 px-2 py-1 border border-surface-300-700 rounded text-sm"
 										onkeydown={(e) => {
 											if (e.key === 'Enter') {
 												e.preventDefault();
@@ -231,13 +231,13 @@
 										}}
 									/>
 									<button
-										class="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+										class="px-3 py-1 bg-blue-500 dark:bg-blue-600 text-white rounded text-sm hover:bg-blue-600"
 										onclick={handleJumpSubmit}
 									>
 										Go
 									</button>
 								</div>
-								<div class="text-xs text-gray-500">
+								<div class="text-xs text-surface-600-400">
 									Press G to toggle, Enter to jump, Esc to close
 								</div>
 							</div>
@@ -258,7 +258,7 @@
 							{currentAppliedControl.name || 'Unnamed Applied Control'}
 						</button>
 
-						<div class="flex flex-col items-center space-y-1 text-sm text-gray-600">
+						<div class="flex flex-col items-center space-y-1 text-sm text-surface-600-400">
 							{#if currentAppliedControl.folder}
 								<div class="flex items-center space-x-1">
 									<i class="fa-solid fa-folder text-xs"></i>
@@ -279,7 +279,7 @@
 
 					<div class="flex flex-col space-y-4 overflow-y-auto flex-1 w-full max-w-4xl px-4">
 						{#if currentAppliedControl.description}
-							<div class="whitespace-pre-wrap leading-relaxed text-gray-700 text-left">
+							<div class="whitespace-pre-wrap leading-relaxed text-surface-700-300 text-left">
 								<MarkdownRenderer content={currentAppliedControl.description} />
 							</div>
 						{/if}
@@ -378,7 +378,7 @@
 
 				<div class="flex justify-between">
 					<button
-						class="bg-gray-400 text-white px-4 py-2 rounded-sm flex items-center space-x-2"
+						class="bg-surface-400-600 text-white px-4 py-2 rounded-sm flex items-center space-x-2"
 						onclick={previousItem}
 					>
 						<span>{m.previous()}</span>

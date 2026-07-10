@@ -57,7 +57,7 @@
 	field="frameworks"
 	cacheLock={cacheLocks['frameworks']}
 	bind:cachedValue={formDataCache['frameworks']}
-	label={m.targetFramework()}
+	label={m.targetFrameworks()}
 	hidden={initialData.frameworks}
 	onChange={async (e) => handleFrameworkChange(e)}
 	mount={async (e) => handleFrameworkChange(e)}
@@ -83,7 +83,7 @@
 	cacheLock={cacheLocks['perimeters']}
 	bind:cachedValue={formDataCache['perimeters']}
 	label={m.perimeters()}
-	disabled={initialData.perimeters}
+	disabled={!!initialData.perimeters?.length}
 />
 <TextField
 	type="date"
@@ -108,14 +108,4 @@
 	label={m.status()}
 	cacheLock={cacheLocks['status']}
 	bind:cachedValue={formDataCache['status']}
-/>
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
-	field="folder"
-	pathField="path"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-	helpText={m.campaignDomainHelpText()}
 />

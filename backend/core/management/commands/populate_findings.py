@@ -3,6 +3,7 @@ from datetime import timedelta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from core.models import (
+    Actor,
     FindingsAssessment,
     Finding,
     Severity,
@@ -11,7 +12,7 @@ from core.models import (
     Vulnerability,
     Perimeter,
 )
-from iam.models import Folder, User
+from iam.models import Folder
 
 
 class Command(BaseCommand):
@@ -75,12 +76,12 @@ class Command(BaseCommand):
         # Get root folder
         root_folder = Folder.get_root_folder()
 
-        # Get active users
-        users = list(User.objects.filter(is_active=True)[:10])
-        if not users:
+        # Get actors (users, teams, entities) for assignment
+        actors = list(Actor.objects.filter(user__is_active=True)[:10])
+        if not actors:
             self.stdout.write(
                 self.style.WARNING(
-                    "No active users found. Using system for assignments."
+                    "No actors found. Skipping owner/author assignments."
                 )
             )
 
@@ -265,10 +266,10 @@ class Command(BaseCommand):
                 version="1.0" if category_key == "audit" else "",
             )
 
-            # Assign owners (1-2)
-            if users:
-                num_owners = random.randint(1, min(2, len(users)))
-                assessment.owner.set(random.sample(users, num_owners))
+            # Assign authors (1-2)
+            if actors:
+                num_authors = random.randint(1, min(2, len(actors)))
+                assessment.authors.set(random.sample(actors, num_authors))
 
             assessments_created.append((assessment, category_key))
 
@@ -327,10 +328,10 @@ class Command(BaseCommand):
                 )
 
                 # Assign owners (0-2)
-                if users:
-                    num_owners = random.randint(0, min(2, len(users)))
+                if actors:
+                    num_owners = random.randint(0, min(2, len(actors)))
                     if num_owners > 0:
-                        finding.owner.set(random.sample(users, num_owners))
+                        finding.owner.set(random.sample(actors, num_owners))
 
                 # Link to controls (0-3 applied controls)
                 if applied_controls:

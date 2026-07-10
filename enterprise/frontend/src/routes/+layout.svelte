@@ -122,6 +122,10 @@
 	// 		faviconB64.set({ data: newfavicon.data, hash: faviconHash, mimeType: newfavicon.mime_type });
 	// 	}
 	// });
+
+	onMount(() => {
+		document.body.dataset.hydrated = 'true';
+	});
 </script>
 
 <svelte:head>

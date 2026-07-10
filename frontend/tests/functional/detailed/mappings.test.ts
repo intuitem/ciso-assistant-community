@@ -7,18 +7,13 @@ import { expect, test, TestContent } from '../../utils/test-utils.js';
 const vars = TestContent.generateTestVars();
 const testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
 const FOLDER_WORKAROUND_SUFFIX = ' foo';
-const PERIMETER_WORKAROUND_SUFFIX = ' bar';
 
-test('user can import mappings', async ({
+test('user can import required libraries and create required objects', async ({
 	page,
 	logedPage,
 	foldersPage,
-	perimetersPage,
-	mappingsPage,
 	librariesPage
 }) => {
-	const importMappingBtn = page.getByTestId('import-button');
-
 	await test.step('create required folder', async () => {
 		await foldersPage.goto();
 		await foldersPage.hasUrl();
@@ -33,44 +28,32 @@ test('user can import mappings', async ({
 		});
 	});
 
-	await test.step('create required perimeter', async () => {
-		await perimetersPage.goto();
-		await perimetersPage.hasUrl();
-		await perimetersPage.createItem({
-			name: vars.perimeterName,
-			description: vars.description,
-			folder: vars.folderName,
-			ref_id: 'R.1234',
-			lc_status: 'Production'
-		});
-		await perimetersPage.createItem({
-			name: vars.perimeterName + PERIMETER_WORKAROUND_SUFFIX,
-			description: vars.description,
-			folder: vars.folderName,
-			ref_id: 'R.12345',
-			lc_status: 'Production'
-		});
-	});
-
-	await test.step('import mapping nist-csf-1.1 -> iso27001:2022', async () => {
-		await mappingsPage.goto();
-		await mappingsPage.hasUrl();
-		await importMappingBtn.click();
+	await test.step('import iso27001-2022 and csf-1.1', async () => {
+		await librariesPage.goto();
 		await librariesPage.hasUrl();
-		await librariesPage.importLibrary('Mapping from nist-csf-1.1 to iso27001-2022');
+		await librariesPage.importLibrary(
+			'International standard ISO/IEC 27001:2022',
+			'urn:intuitem:risk:framework:iso27001-2022'
+		);
+		await librariesPage.goto();
+		await librariesPage.hasUrl();
+		await librariesPage.importLibrary('NIST CSF v1.1', 'urn:intuitem:risk:library:nist-csf-1.1');
 	});
 });
 
-test('user can map csf-1.1 audit to a new iso27001-2022 audit', async ({
+test('user can map iso27001-2022 audit to a new csf-1.1 audit', async ({
 	page,
 	logedPage,
-	mappingsPage,
 	complianceAssessmentsPage
 }) => {
 	const IDAM1Score = {
 		ratio: 0.66,
 		progress: '75',
-		value: 3
+		value: 1
+	};
+
+	const OrgContextScore = {
+		value: 75 / 5 + 1
 	};
 
 	const applyMappingButton = page.getByTestId('apply-mapping-button');
@@ -79,55 +62,69 @@ test('user can map csf-1.1 audit to a new iso27001-2022 audit', async ({
 	const applyMappingForm = new FormContent(page, 'Create audit from baseline', [
 		{ name: 'name', type: FormFieldType.TEXT },
 		{ name: 'description', type: FormFieldType.TEXT },
-		{ name: 'perimeter', type: FormFieldType.SELECT_AUTOCOMPLETE },
+		{ name: 'folder', type: FormFieldType.SELECT_AUTOCOMPLETE },
 		{ name: 'framework', type: FormFieldType.SELECT_AUTOCOMPLETE }
 	]);
 
-	await test.step('create and score nist-csf-1.1 audit', async () => {
+	await test.step('create and score iso27001-2022 audit', async () => {
 		await complianceAssessmentsPage.goto();
 		await complianceAssessmentsPage.hasUrl();
-		await complianceAssessmentsPage.createItem(
-			testObjectsData.complianceAssessmentsPage.build,
-			testObjectsData.complianceAssessmentsPage.dependency
-		);
+		await complianceAssessmentsPage.createItem({
+			name: vars.assessmentName,
+			description: vars.description,
+			folder: vars.folderName,
+			framework: 'International standard ISO/IEC 27001:2022'
+		});
 
-		// Click on the ID.AM-1 tree view item
-		const IDAM1TreeViewItem = await complianceAssessmentsPage.itemDetail.treeViewItem('ID.AM-1', [
-			'ID - Identify',
-			'ID.AM - Asset Management'
-		]);
-		await IDAM1TreeViewItem.content.click();
+		// Enable scoring on the compliance assessment
+		await page.getByTestId('edit-button').click();
+		await page.getByText('More').click();
+		for (const spinner of await page.locator('.loading-spinner').all()) {
+			await expect(spinner).not.toBeVisible({
+				timeout: 10_000
+			});
+		}
+		await page.getByTestId('visibility-score-everyone').click();
+		await page.getByTestId('save-button').click();
+
+		await page.waitForTimeout(5000);
+
+		const OrgContextTree = await complianceAssessmentsPage.itemDetail.treeViewItem(
+			'4.1 - Understanding the organization and its context',
+			['core - Clauses', '4 - Context of the organization']
+		);
+		await OrgContextTree.content.click();
 
 		await page.waitForURL('/requirement-assessments/**');
-		await page.getByTestId('switch').click({ force: true });
-		if (!(await page.getByTestId('progress-ring-svg').isVisible())) {
-			await page.getByTestId('switch').click({ force: true });
-		}
-		await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('aria-valuenow', '1');
+		await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('data-value', '0');
+
+		await page.getByTestId('form-input-result').selectOption('compliant');
 
 		const slider = page.getByTestId('range-slider-input');
 		await expect(slider).toBeVisible();
 		await slider.focus();
-		for (let i = 1; i < IDAM1Score.value; i++) {
+		for (let i = 1; i < OrgContextScore.value; i++) {
 			await slider.press('ArrowRight');
 		}
-		await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute(
-			'aria-valuenow',
-			IDAM1Score.value.toString()
-		);
+		await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('data-value', '75');
 
-		await complianceAssessmentsPage.form.saveButton.click();
+		await page.getByTestId('save-no-continue-button').click();
+		await complianceAssessmentsPage.isToastVisible('successfully saved', 'i');
+		await page.goBack();
 		await page.waitForURL(complianceAssessmentsPage.url + '/**');
-		await expect(IDAM1TreeViewItem.progressRadial).toHaveAttribute(
-			'aria-valuenow',
-			IDAM1Score.progress
+		await expect(OrgContextTree.progressRadial).toHaveAttribute(
+			'data-value',
+			OrgContextScore.progress
 		);
 	});
 
-	await test.step('apply mapping to new iso27001:2022 audit', async () => {
+	await test.step('apply mapping to new csf 1.1 audit', async () => {
 		//NOTE: imitates PageContent.createItem(), since our form is not a "classic"" one
 		// This could be improved
 		await applyMappingButton.click();
+		// "Apply mapping" now opens a direction chooser; pick "Map to a framework"
+		// (create a new audit) to reach the create form.
+		await page.getByTestId('map-to-framework-card').click();
 		await applyMappingForm.hasTitle();
 		if (page) {
 			await page.waitForLoadState('networkidle');
@@ -135,9 +132,12 @@ test('user can map csf-1.1 audit to a new iso27001-2022 audit', async ({
 		await applyMappingForm.fill({
 			name: 'Mapped-' + vars.assessmentName,
 			description: vars.description,
-			perimeter: vars.folderName + '/' + vars.perimeterName,
+			folder: vars.folderName,
 			framework: vars.framework.name
 		});
+		// Enable scoring on the new CA via the visibility editor in the modal.
+		// (The More dropdown is auto-expanded by form.fill() above.)
+		await page.getByTestId('visibility-score-everyone').click();
 		await applyMappingForm.saveButton.click();
 		await expect(applyMappingForm.formTitle).not.toBeVisible();
 		await complianceAssessmentsPage.isToastVisible(
@@ -153,18 +153,87 @@ test('user can map csf-1.1 audit to a new iso27001-2022 audit', async ({
 		await IDAM1TreeViewItem.content.click();
 
 		await page.waitForURL('/requirement-assessments/**');
+		for (const spinner of await page.locator('.loading-spinner').all()) {
+			await expect(spinner).not.toBeVisible({
+				timeout: 10_000
+			});
+		}
 
 		await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute(
-			'aria-valuenow',
+			'data-value',
 			IDAM1Score.value.toString()
 		);
 
-		await complianceAssessmentsPage.form.saveButton.click();
+		await page.getByTestId('save-no-continue-button').click();
+		await complianceAssessmentsPage.isToastVisible('successfully saved', 'i');
+		await page.goBack();
 		await page.waitForURL(complianceAssessmentsPage.url + '/**');
-		await expect(IDAM1TreeViewItem.progressRadial).toHaveAttribute(
-			'aria-valuenow',
-			IDAM1Score.progress
-		);
+	});
+
+	// Map-from = inbound direction (pull a source audit's results INTO the
+	// current one). We create a fresh, empty target audit and pull the
+	// previously-mapped audit into it twice: the first pull applies the data
+	// (changes exist -> confirm), the second is a no-op (idempotent -> the
+	// no-changes notice shows and confirmation is disabled).
+	const pullTargetName = 'PullTarget-' + vars.assessmentName;
+
+	// Helper: open the empty target audit, run "Apply mapping -> Map from an
+	// audit" sourcing the mapped audit, and land on the preview page. The
+	// target is excluded from the picker, and the mapped audit's name is unique,
+	// so the source selection is unambiguous.
+	async function openMapFromPreview() {
+		await complianceAssessmentsPage.goto();
+		await complianceAssessmentsPage.hasUrl();
+		await complianceAssessmentsPage.viewItemDetail(pullTargetName);
+		await applyMappingButton.click();
+		await page.getByTestId('map-from-audit-card').click();
+		const mapFromForm = new FormContent(page, m.mapFromAudit(), [
+			{ name: 'source_audit', type: FormFieldType.SELECT_AUTOCOMPLETE }
+		]);
+		await mapFromForm.hasTitle();
+		await mapFromForm.fill({ source_audit: 'Mapped-' + vars.assessmentName });
+		await page.getByTestId('map-from-submit-button').click();
+		await page.waitForURL(/map-from-preview/);
+	}
+
+	await test.step('create an empty target audit for map-from', async () => {
+		await complianceAssessmentsPage.goto();
+		await complianceAssessmentsPage.hasUrl();
+		await complianceAssessmentsPage.createItem({
+			name: pullTargetName,
+			description: vars.description,
+			folder: vars.folderName,
+			framework: vars.framework.name
+		});
+
+		// Enable scoring so the target accepts scored data from the source.
+		await page.getByTestId('edit-button').click();
+		await page.getByText('More').click();
+		for (const spinner of await page.locator('.loading-spinner').all()) {
+			await expect(spinner).not.toBeVisible({
+				timeout: 10_000
+			});
+		}
+		await page.getByTestId('visibility-score-everyone').click();
+		await page.getByTestId('save-button').click();
+		await page.waitForTimeout(5000);
+	});
+
+	await test.step('map from into the empty target: changes are applied', async () => {
+		await openMapFromPreview();
+		// The target is empty, so the mapping produces changes and confirm is enabled.
+		await expect(page.getByTestId('confirm-mapping-button')).toBeEnabled();
+		await page.getByTestId('confirm-mapping-button').click();
+		await page.waitForURL(/\/compliance-assessments\/[0-9a-f-]{36}/i);
+		await complianceAssessmentsPage.isToastVisible('updated successfully', 'i');
+	});
+
+	await test.step('map from again: no change (idempotent)', async () => {
+		await openMapFromPreview();
+		// The target now mirrors the source, so nothing would change: the
+		// no-changes notice shows and confirmation is disabled.
+		await expect(page.getByTestId('map-from-no-changes')).toBeVisible();
+		await expect(page.getByTestId('confirm-mapping-button')).toBeDisabled();
 	});
 });
 

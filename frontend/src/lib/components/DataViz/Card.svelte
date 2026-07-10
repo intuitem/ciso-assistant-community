@@ -32,7 +32,7 @@
 	<Anchor
 		{href}
 		{label}
-		class="flex flex-col shadow-lg text-purple-800 p-2 h-20 bg-white hover:bg-violet-50 {cEmphasis} {customClass}"
+		class="flex flex-col shadow-lg text-primary-800-200 p-2 h-20 bg-surface-50-950 hover:bg-violet-50 {cEmphasis} {customClass}"
 	>
 		<div class="text-xs">
 			{#if icon}
@@ -48,7 +48,9 @@
 		</div>
 	</Anchor>
 {:else}
-	<div class="flex flex-col shadow-lg text-purple-800 p-2 h-20 bg-white {cEmphasis} {customClass}">
+	<div
+		class="flex flex-col shadow-lg text-primary-800-200 p-2 h-20 bg-surface-50-950 {cEmphasis} {customClass}"
+	>
 		<div class="text-xs">
 			{#if icon}
 				<span><i class={icon}></i></span>
@@ -63,13 +65,3 @@
 		</div>
 	</div>
 {/if}
-
-<style>
-	@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
-
-	.custom-font {
-		font-family: 'Inter', sans-serif;
-		font-optical-sizing: auto;
-		font-style: normal;
-	}
-</style>

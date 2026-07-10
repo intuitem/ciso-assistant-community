@@ -91,10 +91,18 @@
 	/>
 	{#if data.provider !== 'saml'}
 		<Accordion.Item value="idp">
-			{#snippet control()}
-				<span class="font-semibold">{m.IdPConfiguration()}</span>
-			{/snippet}
-			{#snippet panel()}
+			<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+				<span class="font-semibold flex-1 text-left">{m.IdPConfiguration()}</span>
+				<Accordion.ItemIndicator
+					class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+					><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+						><path
+							d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+						/></svg
+					></Accordion.ItemIndicator
+				>
+			</Accordion.ItemTrigger>
+			<Accordion.ItemContent>
 				<div class="p-4 space-y-4">
 					<HiddenInput
 						{form}
@@ -151,13 +159,21 @@
 						cacheLock={cacheLocks['server_url']}
 					/>
 				</div>
-			{/snippet}
+			</Accordion.ItemContent>
 		</Accordion.Item>
 		<Accordion.Item value="oidcAdvanced">
-			{#snippet control()}
-				<span class="font-semibold">{m.advancedSettings()}</span>
-			{/snippet}
-			{#snippet panel()}
+			<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+				<span class="font-semibold flex-1 text-left">{m.advancedSettings()}</span>
+				<Accordion.ItemIndicator
+					class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+					><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+						><path
+							d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+						/></svg
+					></Accordion.ItemIndicator
+				>
+			</Accordion.ItemTrigger>
+			<Accordion.ItemContent>
 				<div class="p-4 space-y-4">
 					<Select
 						{form}
@@ -177,15 +193,23 @@
 						helpText={m.oidcPKCEEnabledHelpText()}
 					/>
 				</div>
-			{/snippet}
+			</Accordion.ItemContent>
 		</Accordion.Item>
 	{/if}
 	{#if data.provider === 'saml'}
 		<Accordion.Item value="saml">
-			{#snippet control()}
-				<span class="font-semibold">{m.SAMLIdPConfiguration()}</span>
-			{/snippet}
-			{#snippet panel()}
+			<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+				<span class="font-semibold flex-1 text-left">{m.SAMLIdPConfiguration()}</span>
+				<Accordion.ItemIndicator
+					class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+					><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+						><path
+							d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+						/></svg
+					></Accordion.ItemIndicator
+				>
+			</Accordion.ItemTrigger>
+			<Accordion.ItemContent>
 				<div class="p-4 space-y-4">
 					<TextField
 						{form}
@@ -195,7 +219,7 @@
 						disabled={!data.is_enabled}
 						cacheLock={cacheLocks['idp_entity_id']}
 					/>
-					<p class="text-gray-600 text-sm">{m.fillMetadataURL()}</p>
+					<p class="text-surface-600-400 text-sm">{m.fillMetadataURL()}</p>
 					<TextField
 						{form}
 						field="metadata_url"
@@ -204,11 +228,11 @@
 						cacheLock={cacheLocks['metadata_url']}
 					/>
 					<div class="flex items-center justify-center w-full space-x-2">
-						<hr class="w-1/2 items-center bg-gray-200 border-0" />
-						<span class="flex items-center text-gray-600 text-sm">{m.or()}</span>
-						<hr class="w-1/2 items-center bg-gray-200 border-0" />
+						<hr class="w-1/2 items-center bg-surface-200-800 border-0" />
+						<span class="flex items-center text-surface-600-400 text-sm">{m.or()}</span>
+						<hr class="w-1/2 items-center bg-surface-200-800 border-0" />
 					</div>
-					<p class="text-gray-600 text-sm">{m.fillSSOSLOURLx509cert()}</p>
+					<p class="text-surface-600-400 text-sm">{m.fillSSOSLOURLx509cert()}</p>
 					<TextField
 						{form}
 						field="sso_url"
@@ -231,14 +255,22 @@
 						cacheLock={cacheLocks['x509cert']}
 					/>
 				</div>
-			{/snippet}
+			</Accordion.ItemContent>
 		</Accordion.Item>
 
 		<Accordion.Item value="sp">
-			{#snippet control()}
-				<span class="font-semibold">{m.SPConfiguration()}</span>
-			{/snippet}
-			{#snippet panel()}
+			<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+				<span class="font-semibold flex-1 text-left">{m.SPConfiguration()}</span>
+				<Accordion.ItemIndicator
+					class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+					><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+						><path
+							d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+						/></svg
+					></Accordion.ItemIndicator
+				>
+			</Accordion.ItemTrigger>
+			<Accordion.ItemContent>
 				<div class="p-4">
 					<TextField
 						{form}
@@ -249,14 +281,22 @@
 						cacheLock={cacheLocks['sp_entity_id']}
 					/>
 				</div>
-			{/snippet}
+			</Accordion.ItemContent>
 		</Accordion.Item>
 
-		<Accordion.Item value="samlAdvanced"
-			>{#snippet control()}
-				<span class="font-semibold">{m.advancedSettings()}</span>
-			{/snippet}
-			{#snippet panel()}
+		<Accordion.Item value="samlAdvanced">
+			<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+				<span class="font-semibold flex-1 text-left">{m.advancedSettings()}</span>
+				<Accordion.ItemIndicator
+					class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+					><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+						><path
+							d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+						/></svg
+					></Accordion.ItemIndicator
+				>
+			</Accordion.ItemTrigger>
+			<Accordion.ItemContent>
 				<div class="p-4 space-y-4">
 					<TextField
 						{form}
@@ -452,7 +492,7 @@
 						</div>
 					</div>
 				</div>
-			{/snippet}
+			</Accordion.ItemContent>
 		</Accordion.Item>
 	{/if}
 </Accordion>

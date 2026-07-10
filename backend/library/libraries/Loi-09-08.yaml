@@ -1,0 +1,1389 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:bassou:risk:library:loi_09-08
+locale: fr
+ref_id: Loi 09-08
+name: "la loi n\xB0 09-08 relative \xE0 la protection des personnes physiques \xE0\
+  \ l\u2019\xE9gard du traitement des donn\xE9es \xE0 caract\xE8re personnel"
+description: "la loi n\xB0 09-08 relative \xE0 la protection des personnes physiques\
+  \ \xE0 l\u2019\xE9gard du traitement des donn\xE9es \xE0 caract\xE8re personnel"
+copyright: Bulletin Officiel du Maroc
+version: 2
+publication_date: 2026-04-19
+provider: Royaume du Maroc
+packager: Oulkhabou Bassou
+objects:
+  framework:
+    urn: urn:bassou:risk:framework:loi_09-08
+    ref_id: Loi 09-08
+    name: "la loi n\xB0 09-08 relative \xE0 la protection des personnes physiques\
+      \ \xE0 l\u2019\xE9gard du traitement des donn\xE9es \xE0 caract\xE8re personnel"
+    description: "la loi n\xB0 09-08 relative \xE0 la protection des personnes physiques\
+      \ \xE0 l\u2019\xE9gard du traitement des donn\xE9es \xE0 caract\xE8re personnel"
+    min_score: 0
+    max_score: 5
+    scores_definition:
+    - score: 0
+      name: Aucun
+      description: null
+    - score: 1
+      name: Initial
+      description: null
+    - score: 2
+      name: Reproductible
+      description: null
+    - score: 3
+      name: "D\xE9fini"
+      description: null
+    - score: 4
+      name: "Maitris\xE9"
+      description: null
+    - score: 5
+      name: "Optimis\xE9"
+      description: null
+    requirement_nodes:
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-premier
+      assessable: false
+      depth: 1
+      name: Chapitre premier
+      description: DISPOSITIONS GENERALES
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-premier:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-premier
+      name: "Section premi\xE8re. \u2013 D\xE9finitions et champ d\u2019application"
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-premier:1:1
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-premier:1
+      name: Article premier
+      description: "L\u2019informatique est au service du citoyen et \xE9volue dans\
+        \ le cadre de la coop\xE9ration\ninternationale. Elle ne doit pas porter atteinte\
+        \ \xE0 l\u2019identit\xE9, aux droits et aux libert\xE9s\ncollectives ou individuelles\
+        \ de l\u2019Homme. Elle ne doit pas constituer un moyen de\ndivulguer des\
+        \ secrets de la vie priv\xE9e des citoyens.\nPour l\u2019application de la\
+        \ pr\xE9sente loi, on entend par :\n1- \xAB donn\xE9es \xE0 caract\xE8re personnel\
+        \ \xBB : toute information, de quelque nature\nqu\u2019elle soit et ind\xE9\
+        pendamment de son support, y compris le son et l\u2019image,\nconcernant une\
+        \ personne physique identifi\xE9e ou identifiable, d\xE9nomm\xE9e ci-\napr\xE8\
+        s \xAB personne concern\xE9e \xBB.\nEst r\xE9put\xE9e identifiable une personne\
+        \ qui peut \xEAtre identifi\xE9e, directement\nou indirectement, notamment\
+        \ par r\xE9f\xE9rence \xE0 un num\xE9ro d\u2019identification ou \xE0\nun\
+        \ ou plusieurs \xE9l\xE9ments sp\xE9cifiques de son identit\xE9 physique,\n\
+        physiologique, g\xE9n\xE9tique, psychique, \xE9conomique, culturelle ou sociale\
+        \ ;\n2- \xAB traitement de donn\xE9es \xE0 caract\xE8re personnel \xBB (\xAB\
+        \ traitement \xBB) : toute\nop\xE9ration ou ensemble d\u2019op\xE9rations\
+        \ effectu\xE9es ou non \xE0 l\u2019aide de proc\xE9d\xE9s\nautomatis\xE9s\
+        \ et appliqu\xE9es \xE0 des donn\xE9es \xE0 caract\xE8re personnel, telles\
+        \ que\nla collecte, l\u2019enregistrement, l\u2019organisation, la conservation,\
+        \ l\u2019adaptation ou\nla modification, l\u2019extraction, la consultation,\
+        \ l\u2019utilisation, la communication\npar transmission, diffusion ou toute\
+        \ autre forme de mise \xE0 disposition, le\nrapprochement ou l\u2019interconnexion,\
+        \ ainsi que le verrouillage, l\u2019effacement ou\nla destruction ;\n3- \xAB\
+        \ donn\xE9es sensibles \xBB : donn\xE9es \xE0 caract\xE8re personnel qui r\xE9\
+        v\xE8lent l\u2019origine\nraciale ou ethnique, les opinions politiques, les\
+        \ convictions religieuses ou\nphilosophiques ou l\u2019appartenance syndicale\
+        \ de la personne concern\xE9e ou qui\nsont relatives \xE0 sa sant\xE9 y compris\
+        \ ses donn\xE9es g\xE9n\xE9tiques ;\n4- \xAB fichier de donn\xE9es \xE0 caract\xE8\
+        re personnel \xBB (\xAB fichier \xBB) : tout ensemble\nstructur\xE9 de donn\xE9\
+        es \xE0 caract\xE8re personnel accessibles selon des crit\xE8res\nd\xE9termin\xE9\
+        s, que cet ensemble soit centralis\xE9, d\xE9centralis\xE9 ou r\xE9parti de\n\
+        mani\xE8re fonctionnelle ou g\xE9ographiques, tels que les archives, les banques\n\
+        de donn\xE9es, les fichiers de recensement ;\n5- \xAB responsable du traitement\
+        \ \xBB : la personne physique ou morale, l\u2019autorit\xE9\npublique, le\
+        \ service ou tout autre organisme qui, seul ou conjointement\navec d\u2019\
+        autres, d\xE9termine les finalit\xE9s et les moyens du traitement de\ndonn\xE9\
+        es \xE0 caract\xE8re personnel. Lorsque les finalit\xE9s et les moyens du\n\
+        traitement sont d\xE9termin\xE9s par des dispositions l\xE9gislatives ou\n\
+        r\xE9glementaires, le responsable du traitement doit \xEAtre indiqu\xE9 dans\
+        \ la loi\nd\u2019organisation et de fonctionnement ou dans le statut de l\u2019\
+        entit\xE9 l\xE9galement\nou statutairement comp\xE9tente pour traiter les\
+        \ donn\xE9es \xE0 caract\xE8re personnel\nen cause ;\n6- \xAB sous-traitant\
+        \ \xBB : la personne physique ou morale, l\u2019autorit\xE9 publique, le\n\
+        service ou tout autre organisme qui traite des donn\xE9es \xE0 caract\xE8\
+        re\npersonnel pour le compte du responsable du traitement ;\n7- \xAB tiers\
+        \ \xBB : la personne physique ou morale, l\u2019autorit\xE9 publique, le service\
+        \ ou\ntout autre organisme autre que la personne concern\xE9e, le responsable\
+        \ du\ntraitement, le sous-traitant et les personnes qui, plac\xE9es sous l\u2019\
+        autorit\xE9\ndirecte du responsable du traitement ou du sous-traitant, sont\
+        \ habilit\xE9es \xE0\ntraiter les donn\xE9es ;\n8- \xAB destinataire \xBB\
+        \ : la personne physique ou morale, l\u2019autorit\xE9 publique, le\nservice\
+        \ ou tout autre organisme qui re\xE7oit communication de donn\xE9es, qu\u2019\
+        il\ns\u2019agisse ou non d\u2019un tiers. Les organismes qui sont susceptibles\
+        \ de recevoir\ncommunication de donn\xE9es dans le cadre d\u2019une disposition\
+        \ l\xE9gale ne sont pas\nconsid\xE9r\xE9es comme destinataires, notamment\
+        \ la Commission nationale de\ncontr\xF4le de la protection des donn\xE9es\
+        \ \xE0 caract\xE8re personnel institu\xE9e \xE0\nl\u2019article 27 ci-apr\xE8\
+        s et d\xE9nomm\xE9e la Commission nationale ;\n9- \xAB consentement de la\
+        \ personne concern\xE9e \xBB : toute manifestation de\nvolont\xE9, libre,\
+        \ sp\xE9cifique et inform\xE9e, par laquelle la personne concern\xE9e\naccepte\
+        \ que les donn\xE9es \xE0 caract\xE8re personnel la concernant fassent l\u2019\
+        objet\nd\u2019un traitement ;\n10- \xAB cession ou communication \xBB : toute\
+        \ divulgation ou information d\u2019une\ndonn\xE9e port\xE9e \xE0 la connaissance\
+        \ d\u2019une personne autre que a personne\nconcern\xE9e ;\n11- \xAB interconnexion\
+        \ de donn\xE9es \xBB : forme de traitement qui consiste \xE0 \xE9tablir\n\
+        un rapport entre les donn\xE9es d\u2019un fichier et les donn\xE9es d\u2019\
+        un fichier ou\nplusieurs fichiers tenus par un autre ou par d\u2019autres\
+        \ responsables, ou tenus\npar le m\xEAme responsable mais dans un autre but."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-premier:1:2
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-premier:1
+      name: Article 2
+      description: "1- La pr\xE9sente loi s\u2019applique au traitement des donn\xE9\
+        es \xE0 caract\xE8re personnel,\nautomatis\xE9 en tout ou en partie, ainsi\
+        \ qu\u2019au traitement non automatis\xE9 de\ndonn\xE9es \xE0 caract\xE8re\
+        \ personnel contenues ou appel\xE9es \xE0 figurer dans des fichiers\nmanuels\
+        \ ;\n2- La pr\xE9sente loi s\u2019applique au traitement des donn\xE9es \xE0\
+        \ caract\xE8re personnel\nr\xE9pondant \xE0 la d\xE9finition du paragraphe\
+        \ 1 ci-dessus :\na) Lorsqu\u2019il est effectu\xE9 par une personne physique\
+        \ ou morale dont le\nresponsable est \xE9tabli sur le territoire marocain.\
+        \ Le responsable d\u2019un\ntraitement qui exerce une activit\xE9 sur le territoire\
+        \ marocain dans le\ncadre d\u2019une installation, qu\u2019elle que soit sa\
+        \ forme juridique, y est\nconsid\xE9r\xE9 comme \xE9tabli ;\nb) Lorsque le\
+        \ responsable n\u2019est pas \xE9tabli sur le territoire marocain mais\nrecourt,\
+        \ \xE0 des fins de traitement des donn\xE9es \xE0 caract\xE8re personnel,\
+        \ \xE0\ndes moyens automatis\xE9s ou non, situ\xE9s sur le territoire marocain,\
+        \ \xE0\nl\u2019exclusion des traitements qui ne sont utilis\xE9s qu\u2019\xE0\
+        \ des fins de transit sur\nle territoire national ou sur celui d\u2019un Etat\
+        \ dont la l\xE9gislation est\nreconnue \xE9quivalente \xE0 celle du Maroc\
+        \ en mati\xE8re de protection des\ndonn\xE9es \xE0 caract\xE8re personnel\
+        \ ;\n3- Dans le cas vis\xE9 au b du paragraphe 2 ci-dessus, le responsable\
+        \ du traitement doit\nnotifier \xE0 la Commission nationale, l\u2019identit\xE9\
+        \ d\u2019un repr\xE9sentant install\xE9 au Maroc\nqui sans pr\xE9judice de\
+        \ sa responsabilit\xE9 personnelle, se substitue \xE0 lui dans tous\nses droits\
+        \ et obligations r\xE9sultant des dispositions de la pr\xE9sente loi et des\
+        \ textes\npris pour son application ;\n4- La pr\xE9sente loi ne s\u2019applique\
+        \ pas :\n- au traitement de donn\xE9es \xE0 caract\xE8re personnel effectu\xE9\
+        \ par une\npersonne physique pour l\u2019exercice d\u2019activit\xE9s exclusivement\
+        \ personnelles\nou domestiques ;\n- aux donn\xE9es \xE0 caract\xE8re personnel\
+        \ recueillies et trait\xE9es dans l\u2019int\xE9r\xEAt de\nla d\xE9fense nationale\
+        \ et de la s\xE9curit\xE9 int\xE9rieure ou ext\xE9rieure de l\u2019Etat.\n\
+        Elle ne s\u2019applique aux donn\xE9es \xE0 caract\xE8re personnel recueillies\
+        \ et trait\xE9es\n\xE0 des fins de pr\xE9vention et de r\xE9pression des crimes\
+        \ et d\xE9lits que dans les\nconditions fix\xE9es par la loi ou le r\xE8glement\
+        \ qui cr\xE9e le fichier en cause ; ce\nr\xE8glement pr\xE9cise le responsable\
+        \ du traitement, la condition de l\xE9gitimit\xE9\ndu traitement, la ou les\
+        \ finalit\xE9s du traitement, la ou les cat\xE9gories de\npersonnes concern\xE9\
+        es et les donn\xE9es ou les cat\xE9gories de donn\xE9es s\u2019y\nrapportant,\
+        \ l\u2019origine de ces donn\xE9es ou les tiers ou les cat\xE9gories de tiers\n\
+        auxquels ces donn\xE9es peuvent \xEAtre communiqu\xE9es et les mesures \xE0\
+        \nprendre pour assurer la s\xE9curit\xE9 du traitement. Il est soumis \xE0\
+        \ l\u2019avis\npr\xE9alable de la Commission nationale ;\n- aux donn\xE9es\
+        \ \xE0 caract\xE8re personnel recueillies en application d\u2019une\nl\xE9\
+        gislation particuli\xE8re. Les projets ou propositions de loi portant cr\xE9\
+        ation\nde fichiers relatifs aux donn\xE9es pr\xE9cit\xE9es sont communiqu\xE9\
+        s \xE0 la\nCommission nationale en pr\xE9cisant l\u2019autorit\xE9 responsable\
+        \ du fichier, la ou\nles finalit\xE9s du traitement, la ou les cat\xE9gories\
+        \ de personnes concern\xE9es et\nles donn\xE9es ou les cat\xE9gories de donn\xE9\
+        es s\u2019y rapportant, l\u2019origine de ces\ndonn\xE9es, les tiers ou les\
+        \ cat\xE9gories de tiers auxquels ces donn\xE9es peuvent\n\xEAtre communiqu\xE9\
+        es et les mesures \xE0 prendre pour assurer la s\xE9curit\xE9 du\ntraitement."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-premier:2
+      assessable: false
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-premier
+      name: "Section 2. \u2013 Qualit\xE9 des donn\xE9es et consentement pr\xE9alable\
+        \ de la personne concern\xE9e"
+      description: "Le prestataire de services doit identifier les risques associ\xE9\
+        s \xE0 des cumules de responsabilit\xE9s ou de taches, les prendre en compte\
+        \ dans l\u2019appr\xE9ciation des risques et mettre en \u0153uvre des mesures\
+        \ pour r\xE9duire ces risques."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-premier:2:1
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-premier:2
+      name: Article 3
+      description: "Les donn\xE9es \xE0 caract\xE8re personnel doivent \xEAtre :\n\
+        a) trait\xE9es loyalement et licitement ;\nb) collect\xE9es pour des finalit\xE9\
+        s d\xE9termin\xE9es explicites et l\xE9gitimes, et ne pas\n\xEAtre trait\xE9\
+        es ult\xE9rieurement de mani\xE8re incompatible avec finalit\xE9s ;\nc) ad\xE9\
+        quates, pertinentes et non excessives, au regard des finalit\xE9s pour\nlesquelles\
+        \ elles sont collect\xE9es, et pour lesquelles, elles sont trait\xE9es\nult\xE9\
+        rieurement ;\nd) exactes et, si n\xE9cessaire, mises \xE0 jour. Toutes les\
+        \ mesures raisonnables\ndoivent \xEAtre prises, pour que les donn\xE9es inexactes\
+        \ ou incompl\xE8tes, au\nregard des finalit\xE9s pour lesquelles elles, sont\
+        \ collect\xE9es et pour lesquelles\nelles sont trait\xE9es ult\xE9rieurement,\
+        \ soient effac\xE9es ou rectifi\xE9es ;\ne) conserv\xE9es sous, une forme\
+        \ permettant l\u2019identification des personnes\nconcern\xE9es pendant une\
+        \ dur\xE9e n\u2019exc\xE9dant pas celle n\xE9cessaire \xE0 la\nr\xE9alisation\
+        \ des finalit\xE9s pour lesquelles elles sont collect\xE9es et pour\nlesquelles\
+        \ elles sont trait\xE9es ult\xE9rieurement.\n2- Sur demande du responsable\
+        \ du traitement et, s\u2019il existe un int\xE9r\xEAt l\xE9gitime, la\nCommission\
+        \ nationale peut autoriser la conservation de donn\xE9es, \xE0 caract\xE8\
+        re\npersonnel \xE0 des fins historiques, statistique, ou scientifique au-del\xE0\
+        \ de la p\xE9riode,\ncit\xE9e au e) du paragraphe pr\xE9c\xE9dent ;\n3- Il\
+        \ incombe au responsable du traitement d\u2019assurer le respect des dispositions\
+        \ des\nparagraphes qui pr\xE9c\xE8dent, sous le contr\xF4le de la Commission\
+        \ nationale."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-premier:2:2
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-premier:2
+      name: Article 4
+      description: "Le traitement des donn\xE9es, \xE0 caract\xE8re personnel ne peut\
+        \ \xEAtre effectu\xE9 que si la\npersonne concern\xE9e a indubitablement donn\xE9\
+        \ son consentement \xE0 l\u2019op\xE9ration ou \xE0\nl\u2019ensemble des op\xE9\
+        rations envisag\xE9es.\nLes donn\xE9es \xE0 caract\xE8re personnel objet du\
+        \ traitement ne peuvent \xEAtre\ncommuniqu\xE9es \xE0 un tiers que pour la\
+        \ r\xE9alisation de fins, directement li\xE9es aux\nfonctions du c\xE9dant\
+        \ et du cessionnaire et sous r\xE9serve du consentement pr\xE9alable,\nde\
+        \ la personne concern\xE9e.\nToutefois, ce consentement n\u2019est pas exig\xE9\
+        \ si le traitement est n\xE9cessaire :\na) au respect d\u2019une obligation\
+        \ l\xE9gale \xE0 laquelle est soumis la personne\nconcern\xE9e ou le responsable\
+        \ du traitement ;\nb) \xE0 l\u2019ex\xE9cution d\u2019un contrat auquel la\
+        \ personne concern\xE9e, est partie ou \xE0\nl\u2019ex\xE9cution de mesures\
+        \ pr\xE9contractuelles prises \xE0 la demande de celle-ci ;\nc) \xE0 la sauvegarde\
+        \ d\u2019int\xE9r\xEAts vitaux de la personne concern\xE9e, si elle est\n\
+        physiquement ou juridiquement dans l\u2019incapacit\xE9 de donner un\nconsentement\
+        \ ;\nd) \xE0 l\u2019ex\xE9cution d\u2019une mission d\u2019int\xE9r\xEAt public\
+        \ ou relevant de l\u2019exercice de\nl\u2019autorit\xE9 publique, dont est\
+        \ investi le responsable du traitement ou le\ntiers auquel les donn\xE9es\
+        \ sont communiqu\xE9es ;\ne) \xE0 la r\xE9alisation de l\u2019int\xE9r\xEA\
+        t l\xE9gitime poursuivi par le responsable du\ntraitement ou par le destinataire,\
+        \ sous r\xE9serve de ne pas m\xE9conna\xEEtre\nl\u2019int\xE9r\xEAt ou les\
+        \ droits et libert\xE9s fondamentaux de la personne concern\xE9e."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-ii
+      assessable: false
+      depth: 1
+      name: Chapitre II
+      description: DES DROITS DE LA PERSONNE CONCERNEE
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-ii:1
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-ii
+      name: Article 5
+      description: "Droit \xE0 l\u2019information lors de la collecte des donn\xE9\
+        es\n1- Toute personne sollicit\xE9e directement, en vue d\u2019une collecte\
+        \ de ses donn\xE9es\npersonnelles, doit \xEAtre pr\xE9alablement inform\xE9\
+        e de mani\xE8re expresse, pr\xE9cise et\nnon \xE9quivoque par le responsable\
+        \ du traitement ou son repr\xE9sentant, sauf si elle\nen a d\xE9j\xE0 eu connaissance,\
+        \ des \xE9l\xE9ments suivants :\na) l\u2019identit\xE9 du responsable du traitement\
+        \ et, le cas \xE9ch\xE9ant, de son\nrepr\xE9sentant ;\nb) les finalit\xE9\
+        s du traitement auquel les donn\xE9es sont destin\xE9es ;\nc) toute information,\
+        \ suppl\xE9mentaires telles que :\n- les destinataires ou les cat\xE9gories\
+        \ de destinataires ;\n- le fait de savoir si la r\xE9ponse aux questions,\
+        \ est obligatoire ou\nfacultative, ainsi que les cons\xE9quences \xE9ventuelles\
+        \ d\u2019un d\xE9faut de\nr\xE9ponse ;\n- l\u2019existence d\u2019un droit\
+        \ d\u2019acc\xE8s aux donn\xE9es \xE0 caract\xE8re personnel la\nconcernant\
+        \ et de rectification de ces donn\xE9es, dans la mesure o\xF9,\ncompte tenu\
+        \ des circonstances particuli\xE8res dans lesquelles les\ndonn\xE9es sont\
+        \ collect\xE9es, ces informations, sont n\xE9cessaires pour\nassurer un traitement\
+        \ loyal des donn\xE9es \xE0 l\u2019\xE9gard de la personne\nconcern\xE9e ;\n\
+        d) les caract\xE9ristiques du r\xE9c\xE9piss\xE9 de la d\xE9claration aupr\xE8\
+        s de la\nCommission nationale ou celles de l\u2019autorisation d\xE9livr\xE9\
+        e par ladite\ncommission ;\n2- Les documents, qui servent de base \xE0 la\
+        \ collecte des donn\xE9es \xE0 caract\xE8re\npersonnel doivent contenir les\
+        \ informations vis\xE9es au paragraphe pr\xE9c\xE9dent ;\n3- Lorsque les donn\xE9\
+        es, \xE0 caract\xE8re personnel n\u2019ont pas \xE9t\xE9 collect\xE9es aupr\xE8\
+        s de la\npersonne concern\xE9e, le responsable du traitement ou son repr\xE9\
+        sentant doit,\navant l\u2019enregistrement des donn\xE9es ou si une communication\
+        \ de donn\xE9es \xE0\nun tiers est envisag\xE9e, au plus tard lors de la premi\xE8\
+        re communication de\ndonn\xE9es, fournir \xE0 la personne concern\xE9e au\
+        \ moins les informations vis\xE9es aux\na), b) et c) ci-dessus, sauf si la\
+        \ personne en a d\xE9j\xE0 eu connaissance.\n4- En cas de collecte de donn\xE9\
+        es, en r\xE9seaux, ouverts, la personne concern\xE9e doit \xEAtre inform\xE9\
+        e, sauf si elle sait d\xE9j\xE0 que les donn\xE9es \xE0 caract\xE8re personnel\
+        \ la\nconcernant peuvent circuler sur les r\xE9seaux sans garanties de s\xE9\
+        curit\xE9 et\nqu\u2019elles risquent d\u2019\xEAtre lues et utilis\xE9es,\
+        \ par des tiers non autoris\xE9s."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-ii:2
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-ii
+      name: Article 6
+      description: "Limites au droit \xE0 l\u2019information\nL\u2019obligation d\u2019\
+        information pr\xE9vue \xE0 l\u2019article 5 ci-dessus n\u2019est pas applicable\
+        \ :\na) aux donn\xE9es \xE0 caract\xE8re personnel dont la collecte et le\
+        \ traitement sont\nn\xE9cessaires \xE0 la d\xE9fense nationale, la s\xFBret\xE9\
+        \ int\xE9rieure ou ext\xE9rieure de\nl\u2019Etat, la pr\xE9vention ou la r\xE9\
+        pression du crime ;\nb) lorsque l\u2019information de la personne concern\xE9\
+        e se r\xE9v\xE8le impossible,\nnotamment en cas de traitement de donn\xE9\
+        es \xE0 caract\xE8re personnel \xE0 des\nfins statistiques, historiques ou\
+        \ scientifiques. Dans ce cas, le responsable\ndu traitement est tenu d\u2019\
+        aviser la Commission de l\u2019impossibilit\xE9\nd\u2019informer la personne\
+        \ concern\xE9e et de lui pr\xE9senter le motif de cette\nimpossibilit\xE9\
+        \ ;\nc) si la l\xE9gislation pr\xE9voit express\xE9ment l\u2019enregistrement\
+        \ ou la\ncommunication des donn\xE9es \xE0 caract\xE8re personnel ;\nd) au\
+        \ traitement de donn\xE9es \xE0 caract\xE8re personnel effectu\xE9es \xE0\
+        \ des fins\nexclusivement journalistiques, artistiques ou litt\xE9raires."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-ii:3
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-ii
+      name: Article 7
+      description: "Droit d\u2019acc\xE8s\nLa personne concern\xE9e, justifiant de\
+        \ son identit\xE9, a le droit d\u2019obtenir du responsable\ndu traitement,\
+        \ \xE0 des intervalles raisonnables, sans d\xE9lais et gratuitement :\na)\
+        \ la confirmation que les donn\xE9es \xE0 caract\xE8re personnel la concernant\
+        \ sont\nou ne sont pas trait\xE9es, ainsi que des informations portant au\
+        \ moins sur\nles finalit\xE9s du traitement, les cat\xE9gories de donn\xE9\
+        es sur lesquelles il porte,\net les destinataires ou les cat\xE9gories de\
+        \ destinataires auxquels les\ndonn\xE9es \xE0 caract\xE8re personnel sont\
+        \ communiqu\xE9es ;\nb) la communication, sous une forme intelligible, des\
+        \ donn\xE9es, \xE0 caract\xE8re\npersonnel faisant l\u2019objet des traitements,\
+        \ ainsi que de toute information\ndisponible sur l\u2019origine des donn\xE9\
+        es.\nLe responsable du traitement peut demander \xE0 la Commission nationale\n\
+        des d\xE9lais de r\xE9ponses aux demandes d\u2019acc\xE8s l\xE9gitimes et\
+        \ peut s\u2019opposer\naux demandes manifestement abusives, notamment, par\
+        \ leur nombre et\nleur caract\xE8re r\xE9p\xE9titif.\nEn cas d\u2019opposition,\
+        \ la charge de la preuve du caract\xE8re manifestement\nabusif, incombe au\
+        \ responsable du traitement aupr\xE8s duquel ces\ndemandes ont \xE9t\xE9 faites.\n\
+        c) La connaissance de la logique qui sous-tend tout traitement automatis\xE9\
+        \ndes donn\xE9es \xE0 caract\xE8re personnel la concernant."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-ii:4
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-ii
+      name: Article 8
+      description: "Droit de rectification\nLa personne concern\xE9e, justifiant de\
+        \ son identit\xE9, a le droit d\u2019obtenir du responsable\ndu traitement\
+        \ :\na) L\u2019actualisation, la rectification, l\u2019effacement ou le verrouillage\
+        \ des\ndonn\xE9es \xE0 caract\xE8re personnel dont le traitement n\u2019est\
+        \ pas conforme \xE0 la\npr\xE9sente loi, notamment en raison du caract\xE8\
+        re incomplet et inexact de\nces donn\xE9es ; le responsable du traitement\
+        \ est tenu de proc\xE9der aux\nrectifications n\xE9cessaires sans frais pour\
+        \ le demandeur et ce, dans un d\xE9lai\nfranc de dix jours.\nEn cas de refus\
+        \ ou de non r\xE9ponse dans le d\xE9lai pr\xE9cit\xE9, la personne\nconcern\xE9\
+        e peut introduire une demande de rectification aupr\xE8s de la\nCommission\
+        \ nationale, laquelle charge l\u2019un de ses membres \xE0 l\u2019effet de\n\
+        mener toutes investigations utiles et faire proc\xE9der aux rectifications\n\
+        n\xE9cessaires, dans les plus brefs d\xE9lais.\nLa personne concern\xE9e est\
+        \ tenue inform\xE9e des suites r\xE9serv\xE9es \xE0 sa\ndemande ;\nb) La notification\
+        \ aux tiers auxquels les donn\xE9es \xE0 caract\xE8re personnel ont\n\xE9\
+        t\xE9 communiqu\xE9es de toute actualisation, toute rectification, tout\n\
+        effacement ou tout verrouillage effectu\xE9 conform\xE9ment au point a) ci-\n\
+        dessus, si cela ne s\u2019av\xE8re pas impossible."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-ii:5
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-ii
+      name: Article 9
+      description: "Droit d\u2019opposition\nLa personne concern\xE9e, justifiant\
+        \ de son identit\xE9, a le droit de s\u2019opposer, pour des\nmotifs l\xE9\
+        gitimes, \xE0 ce que des donn\xE9es la concernant fassent l\u2019objet d\u2019\
+        un traitement.\nElle a le droit de s\u2019opposer, sans frais, \xE0 ce que\
+        \ les donn\xE9es la concernant soient\nutilis\xE9es \xE0 des fins de prospection,\
+        \ notamment commerciale, par le responsable\nactuel du traitement ou celui\
+        \ d\u2019un traitement ult\xE9rieur.\nLes dispositions du premier alin\xE9\
+        a ne s\u2019appliquent pas lorsque le traitement r\xE9pond \xE0\nune obligation\
+        \ l\xE9gale ou lorsque l\u2019application de ces dispositions a \xE9t\xE9\
+        \ \xE9cart\xE9e, par\nune disposition expresse de l\u2019acte autorisant le\
+        \ traitement."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-ii:6
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-ii
+      name: Article 10
+      description: "Interdiction de la prospection directe\nEst interdite la prospection\
+        \ directe au moyen d\u2019un automate d\u2019appel, d\u2019un t\xE9l\xE9copieur\n\
+        ou d\u2019un courrier \xE9lectronique ou d\u2019un moyen employant une technologie\
+        \ de m\xEAme\nnature qui utilise, sous quelque forme que ce soit, les coordonn\xE9\
+        es d\u2019une personne\nphysique qui n\u2019a pas exprim\xE9 son consentement\
+        \ pr\xE9alable \xE0 recevoir des\nprospections directes par ce moyen.\nPour\
+        \ l\u2019application du pr\xE9sent article, on entend par consentement toute\n\
+        manifestation de volont\xE9 libre, sp\xE9cifique et inform\xE9e par laquelle\
+        \ une personne\naccepte que des donn\xE9es \xE0 caract\xE8re personnel la\
+        \ concernant soient utilis\xE9es \xE0 des\nfins de prospection directe.\n\
+        Constitue une prospection directe l\u2019envoi de tout message destin\xE9\
+        \ \xE0 promouvoir,\ndirectement ou indirectement, des biens, des services\
+        \ ou l\u2019image d\u2019une personne\nvendant des biens ou fournissant des\
+        \ services.\nToutefois, la prospection directe par courrier \xE9lectronique\
+        \ est autoris\xE9e, si les\ncoordonn\xE9es du destinataire ont \xE9t\xE9 recueillies\
+        \ directement aupr\xE8s de lui, dans le\nrespect des dispositions de la pr\xE9\
+        sente loi, \xE0 l\u2019occasion d\u2019une vente ou d\u2019une prestation\n\
+        de services, si la prospection directe concerne des produits ou service analogues\n\
+        fournis par la m\xEAme personne physique ou morale, et si le destinataire\
+        \ se voit offrir,\nde mani\xE8re expresse, d\xE9nu\xE9e d\u2019ambigu\xEF\
+        t\xE9 et simple, la possibilit\xE9 de s\u2019opposer, sans\nfrais, hormis\
+        \ ceux li\xE9s \xE0 la transmission du refus, \xE0 l\u2019utilisation de ses\
+        \ coordonn\xE9es\nlorsque celles-ci sont recueillies et chaque foi, qu\u2019\
+        un courrier \xE9lectronique de\nprospection lui est adress\xE9.\nDans tous\
+        \ les cas, il est interdit d\u2019\xE9mettre, \xE0 des fins de prospection\
+        \ directe, des\nmessages au moyen d\u2019automates d\u2019appel, t\xE9l\xE9\
+        copieurs et courriers \xE9lectroniques,\nsans indiquer de coordonn\xE9es valables\
+        \ auxquelles le destinataire puisse utilement\ntransmettre une demande tendant\
+        \ \xE0 obtenir que ces communications, cessent sans\nfrais autre que ceux\
+        \ li\xE9s \xE0 la transmission de celle-ci.\nIl est \xE9galement interdit\
+        \ de dissimuler l\u2019identit\xE9 de la personne pour le compte de\nlaquelle\
+        \ la communication est \xE9mise et de mentionner un objet sans rapport avec\
+        \ la\nprestation ou le service propos\xE9."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-ii:7
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-ii
+      name: Article 11
+      description: "Neutralit\xE9 des effets\nAucune d\xE9cision de justice impliquant\
+        \ une appr\xE9ciation sur le comportement d\u2019une\npersonne ne peut avoir\
+        \ pour fondement un traitement automatis\xE9 de donn\xE9es \xE0\ncaract\xE8\
+        re personnel destin\xE9 \xE0 \xE9valuer certains aspects de sa personnalit\xE9\
+        .\nAucune autre d\xE9cision produisant des effets juridiques \xE0 l\u2019\xE9\
+        gard d\u2019une personne ne\npeut \xEAtre prise sur le seul fondement d\u2019\
+        un traitement automatis\xE9 de donn\xE9es destin\xE9\n\xE0 d\xE9finir le profil\
+        \ de l\u2019int\xE9ress\xE9 ou \xE0 \xE9valuer certains aspects de sa personnalit\xE9\
+        .\nNe sont pas consid\xE9r\xE9es comme prises sur le seul fondement d\u2019\
+        un traitement\nautomatis\xE9 les d\xE9cisions prises dans le cadre de la conclusion\
+        \ ou de l\u2019ex\xE9cution d\u2019un\ncontrat et pour lesquelles la personne\
+        \ concern\xE9e a \xE9t\xE9 mise \xE0 m\xEAme de pr\xE9senter ses\nobservations,\
+        \ ni celles satisfaisant les demandes de la personne concern\xE9e."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii
+      assessable: false
+      depth: 1
+      name: Chapitre III
+      description: 'DES OBLIGATIONS DES RESPONSABLES DU
+
+        TRAITEMENT'
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:1
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii
+      name: Article 12
+      description: "Sauf dispositions l\xE9gislatives particuli\xE8res, le traitement\
+        \ de donn\xE9es \xE0 caract\xE8re\npersonnel doit faire l\u2019objet :\n1-\
+        \ D\u2019une autorisation pr\xE9alable lorsque les traitements concernent\
+        \ :\na) Les donn\xE9es sensibles vis\xE9es \xE0 l\u2019alin\xE9a 3 de l\u2019\
+        article premier ci-dessus.\nToutefois, sont dispens\xE9s de ladite autorisation\
+        \ les traitements mis en\n\u0153uvre par une association ou tout autre groupement\
+        \ \xE0 but non lucratif et\n\xE0 caract\xE8re religieux, philosophique, politique,\
+        \ syndical, culturel ou sportif :\n- pour les seules donn\xE9es qui r\xE9\
+        v\xE8lent l\u2019une ou plusieurs des\ncaract\xE9ristiques vis\xE9es au paragraphe\
+        \ 3 de l\u2019article premier ci-\ndessus et correspondant \xE0 l\u2019objet\
+        \ de ladite association ou\ndudit groupement ;\n- sous, r\xE9serve que les\
+        \ donn\xE9es ne concernent que les membres\nde cette association ou de ce\
+        \ groupement et, le cas \xE9ch\xE9ant, les personnes qui entretiennent avec\
+        \ celui-ci des contacts\nr\xE9guliers dans le cadre de son activit\xE9 ;\n\
+        - et qu\u2019ils ne portent que sur des donn\xE9es non communiqu\xE9es \xE0\
+        \ndes tiers, \xE0 moins que les personnes concern\xE9es n\u2019y\nconsentent\
+        \ express\xE9ment et que le groupement puisse fournir la\npreuve de ce consentement\
+        \ \xE0 la premi\xE8re requ\xEAte de l\u2019autorit\xE9\ncomp\xE9tente ;\n\
+        b) l\u2019utilisation de donn\xE9es \xE0 caract\xE8re personnel \xE0 d\u2019\
+        autres fins que celles\npour lesquelles elles ont \xE9t\xE9 collect\xE9es\
+        \ ;\nc) des donn\xE9es g\xE9n\xE9tiques, \xE0 l\u2019exception de ceux mis\
+        \ en \u0153uvre par des\npersonnels de sant\xE9 et qui r\xE9pondent \xE0 des\
+        \ fins m\xE9dicales, qu\u2019il s\u2019agisse de\nla m\xE9decine pr\xE9ventive,\
+        \ des diagnostics ou des soins ;\nd) des donn\xE9es portant sur les infractions,\
+        \ condamnations ou mesures de\ns\xFBret\xE9, \xE0 l\u2019exception de ceux\
+        \ mis en \u0153uvre par les auxiliaires de justice ;\ne) des donn\xE9es comportant\
+        \ le num\xE9ro de la carte d\u2019identit\xE9 nationale de la\npersonne concern\xE9\
+        e ;\nf) L\u2019interconnexion de fichiers relevant d\u2019une ou de plusieurs\
+        \ personnes\nmorales g\xE9rant un service public et dont les finalit\xE9s\
+        \ d\u2019int\xE9r\xEAt public sont\ndiff\xE9rentes ou l\u2019interconnexion\
+        \ de fichiers relevant d\u2019autres personnes\nmorales et dont les finalit\xE9\
+        s principales sont diff\xE9rentes.\n2- D\u2019une d\xE9claration pr\xE9alable\
+        \ dans les autres cas"
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:2
+      assessable: false
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii
+      name: "Section premi\xE8re. \u2013 D\xE9claration pr\xE9alable"
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:2:1
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:2
+      name: Article 13
+      description: "La d\xE9claration pr\xE9alable pr\xE9vue \xE0 l\u2019article 12\
+        \ ci-dessus, qui comporte l\u2019engagement\nque le traitement sera effectu\xE9\
+        \ conform\xE9ment aux dispositions de la pr\xE9sente loi, est\nd\xE9pos\xE9\
+        e aupr\xE8s de la Commission nationale dans les conditions pr\xE9vues \xE0\
+        \ la pr\xE9sente\nsection.\nCette d\xE9claration a pour objet de permettre\
+        \ \xE0 la Commission nationale d\u2019exercer les\ncomp\xE9tences qui lui\
+        \ sont d\xE9volues par la pr\xE9sente loi, afin de contr\xF4ler le respect\
+        \ de\nses dispositions et d\u2019assurer la publicit\xE9 du traitement des\
+        \ donn\xE9es personnelles."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:2:2
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:2
+      name: Article 14
+      description: "Le responsable du traitement ou, le cas \xE9ch\xE9ant, son repr\xE9\
+        sentant doit adresser une\nd\xE9claration \xE0 la Commission nationale pr\xE9\
+        alablement \xE0 la mise en \u0153uvre d\u2019un\ntraitement enti\xE8rement\
+        \ ou partiellement automatis\xE9 ou d\u2019un ensemble de tels\ntraitements\
+        \ ayant une m\xEAme finalit\xE9 ou des finalit\xE9s li\xE9es."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:2:3
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:2
+      name: Article 15
+      description: "La d\xE9claration pr\xE9vue \xE0 l\u2019article 12 ci-dessus doit\
+        \ comprendre :\na) le nom et l\u2019adresse du responsable du traitement et,\
+        \ le \xE9ch\xE9ant, de son\nrepr\xE9sentant ;\nb) la d\xE9nomination, les\
+        \ caract\xE9ristiques et la ou les finalit\xE9s du traitement\nenvisag\xE9\
+        \ ;\nc) une description de la ou des cat\xE9gories de personnes concern\xE9\
+        es et des\ndonn\xE9es ou des cat\xE9gories de donn\xE9es \xE0 caract\xE8re\
+        \ personnel s\u2019y\nrapportant ;\nd) les destinataires, ou les cat\xE9gories\
+        \ de destinataires auxquels les donn\xE9es\nsont susceptibles d\u2019\xEA\
+        tre communiqu\xE9es ;\ne) les transferts de donn\xE9es envisag\xE9s \xE0 destination\
+        \ d\u2019Etats \xE9trangers ;\nf) la dur\xE9e de conservation des donn\xE9\
+        es ;\ng) le service aupr\xE8s duquel la personne concern\xE9e pourra exercer,\
+        \ le cas\n\xE9ch\xE9ant, les droits qui lui sont reconnus par les dispositions\
+        \ de la pr\xE9sente\nloi, ainsi que les mesures prises pour faciliter l\u2019\
+        exercice de ceux-ci.\nh) Une description g\xE9n\xE9rale permettant d\u2019\
+        appr\xE9cier de fa\xE7on pr\xE9liminaire le\ncaract\xE8re appropri\xE9 des\
+        \ mesures prises pour assurer la confidentialit\xE9 et\nla s\xE9curit\xE9\
+        \ du traitement en application des dispositions des articles 23 et\n24 ci-\
+        \ dessous ;\ni) Les recoupements, les interconnexions, ou toutes autres formes\
+        \ de\nrapprochement des donn\xE9es ainsi que leur cession, sous-traitance,\
+        \ sous\ntoute forme, \xE0 des tiers, \xE0 titre gratuit ou on\xE9reux.\nToute\
+        \ modification aux informations ci-dessus et toute suppression de traitement\n\
+        doivent \xEAtre port\xE9es, sans d\xE9lai, \xE0 la de la connaissance Commission\
+        \ nationale.\nEn cas de cession d\u2019un fichier de donn\xE9es, le cessionnaire\
+        \ est tenu de remplir les\nformalit\xE9s de d\xE9claration pr\xE9vues par\
+        \ la pr\xE9sente loi.\nLes modalit\xE9s de la d\xE9claration \xE0 la Commission\
+        \ nationale des changements affectant\nles informations vis\xE9es \xE0 l\u2019\
+        alin\xE9a ci-dessus sont fix\xE9es par le gouvernement, apr\xE8s\navis de\
+        \ ladite commission."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:2:4
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:2
+      name: Article 16
+      description: "La Commission nationale fixe la liste des cat\xE9gories de traitements\
+        \ de donn\xE9es \xE0\ncaract\xE8re personnel qui, compte tenu des donn\xE9\
+        es \xE0 traiter, ne sont pas susceptibles\nde porter atteinte aux droits et\
+        \ libert\xE9s des personnes concern\xE9s, et pour lesquelles la\nd\xE9claration\
+        \ doit pr\xE9ciser uniquement les \xE9l\xE9ments pr\xE9vus aux b), c), d),\
+        \ e) et f) de\nl\u2019article 15 ci-dessus.\nLa d\xE9cision de la Commission\
+        \ nationale est soumise \xE0 homologation du\ngouvernement."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:2:5
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:2
+      name: Article 17
+      description: "La Commission nationale fixe la liste des traitements non automatis\xE9\
+        s de donn\xE9es \xE0\ncaract\xE8re personnel qui peuvent faire l\u2019objet\
+        \ d\u2019une d\xE9claration simplifi\xE9e, dont elle\npr\xE9cise les \xE9\
+        l\xE9ments par une d\xE9cision homologu\xE9e par le gouvernement."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:2:6
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:2
+      name: Article 18
+      description: "L\u2019obligation de d\xE9claration ne s\u2019applique pas aux\
+        \ traitements ayant pour seul objet la\ntenue d\u2019un registre qui est,\
+        \ en vertu de dispositions l\xE9gislatives ou r\xE9glementaires,\ndestin\xE9\
+        \ \xE0 l\u2019information du public et ouvert \xE0 la consultation du public\
+        \ ou de toute\npersonne justifiant d\u2019un int\xE9r\xEAt l\xE9gitime.\n\
+        Toutefois, dans ce cas, il doit \xEAtre d\xE9sign\xE9 un responsable du traitement\
+        \ des donn\xE9es\ndont l\u2019identit\xE9 est rendue publique et notifi\xE9\
+        e \xE0 la Commission nationale et qui est\nresponsable de l\u2019application\
+        \ des dispositions du chapitre II de la pr\xE9sente loi vis-\xE0-vis\ndes\
+        \ personnes concern\xE9es.\nLe responsable du traitement dispens\xE9 de d\xE9\
+        claration doit communiquer \xE0 toute\npersonne qui en fait la demande les\
+        \ informations relatives \xE0 la d\xE9nomination et \xE0 la\nfinalit\xE9 du\
+        \ traitement, \xE0 l\u2019identit\xE9 du responsable, aux donn\xE9es trait\xE9\
+        es, \xE0 leurs\ndestinataires et, le cas \xE9ch\xE9ant, aux transferts envisag\xE9\
+        s \xE0 destination de l\u2019\xE9changer.\nLa Commission nationale fixe la\
+        \ liste des traitements r\xE9pondant \xE0 la d\xE9finition pr\xE9vue\nci-dessus\
+        \ par une d\xE9cision soumise \xE0 homologation du gouvernement."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:2:7
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:2
+      name: Article 19
+      description: "La Commission nationale d\xE9livre, dans un d\xE9lai de 24 heures\
+        \ courant \xE0 compter de la\ndate du d\xE9p\xF4t de la d\xE9claration un\
+        \ r\xE9c\xE9piss\xE9 de la ladite d\xE9claration, dont les\ncaract\xE9ristiques\
+        \ doivent figurer dans toutes les op\xE9rations de collecte ou de\ntransmission\
+        \ des donn\xE9es. Le responsable du traitement peut mettre ledit traitement\n\
+        en \u0153uvre d\xE8s r\xE9ception dudit r\xE9c\xE9piss\xE9."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:2:8
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:2
+      name: Article 20
+      description: "Lorsqu\u2019il appara\xEEt \xE0 la Commission nationale, \xE0\
+        \ l\u2019examen de la d\xE9claration qui lui est\nfournie, que le traitement\
+        \ envisag\xE9 pr\xE9sente des dangers manifestes pour le respect\net la protection\
+        \ de la vie priv\xE9e et des libert\xE9s et droits fondamentaux des personnes\
+        \ \xE0\nl\u2019\xE9gard du traitement dont ces donn\xE9es font l\u2019objet\
+        \ ou peuvent faire l\u2019objet, elle\nd\xE9cide de soumettre ledit traitement\
+        \ au r\xE9gime d\u2019autorisation pr\xE9alable pr\xE9vu ci-\napr\xE8s.\n\
+        Sa d\xE9cision, motiv\xE9e, est notifi\xE9e au d\xE9clarant dans les huit\
+        \ jours suivant celui du\nd\xE9p\xF4t de la d\xE9claration."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:3
+      assessable: false
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii
+      name: "Section 2. \u2013 Autorisation pr\xE9alable"
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:3:1
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:3
+      name: Article 21
+      description: "1- Le traitement des donn\xE9es sensibles est subordonn\xE9 \xE0\
+        \ une autorisation de la loi\nqui en fixe les conditions. A d\xE9faut, il\
+        \ doit \xEAtre autoris\xE9 par la Commission\nnationale ;\n2- Cette autorisation\
+        \ est accord\xE9e au vu du consentement expr\xE8s de la personne\nconcern\xE9\
+        e ou lorsque le traitement des donn\xE9es est indispensable \xE0 l\u2019exercice\n\
+        des fonctions l\xE9gales ou statutaires du responsable du traitement ;\n3-\
+        \ Outre l\u2019ordre de la loi, le consentement expr\xE8s de la personne concern\xE9\
+        e ou\nl\u2019obligation l\xE9gale ou statutaire du responsable, l\u2019autorisation\
+        \ pr\xE9alable de la\nCommission nationale peut \xE9galement \xEAtre accord\xE9\
+        e dans les cas o\xF9 :\na) le traitement est n\xE9cessaire \xE0 la d\xE9fense\
+        \ d\u2019int\xE9r\xEAt vitaux de la personne\nconcern\xE9e ou d\u2019une personne\
+        \ et si la personne concern\xE9e se trouve dans\nl\u2019incapacit\xE9 physique\
+        \ ou juridique de donner son consentement ;\nb) le traitement porte sur des\
+        \ donn\xE9es manifestement rendues publiques par\nla personne concern\xE9\
+        e et que son consentement au traitement des\ndonn\xE9es peut l\xE9gitimement\
+        \ \xEAtre d\xE9duit de ses d\xE9clarations ;\nc) le traitement est n\xE9cessaire\
+        \ \xE0 la reconnaissance, l\u2019exercice ou la d\xE9fense\nd\u2019un droit\
+        \ en justice et est effectu\xE9 exclusivement \xE0 cette fin."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:3:2
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:3
+      name: Article 22
+      description: "Par d\xE9rogation aux dispositions de l\u2019article 21 ci-dessus,\
+        \ le traitement des donn\xE9es\nrelatives \xE0 la sant\xE9 est subordonn\xE9\
+        \ \xE0 une d\xE9claration \xE0 la Commission nationale,\nlorsqu\u2019il a\
+        \ pour seule finalit\xE9 :\n- la m\xE9decine pr\xE9ventive, les diagnostics\
+        \ m\xE9dicaux, l\u2019administration de\nsoins ou de traitements ou la gestion\
+        \ des services de sant\xE9 et qu\u2019il est\neffectu\xE9 par un praticien\
+        \ de la sant\xE9 soumis au secret professionnel ou par\ntoute autre personne\
+        \ \xE9galement soumise \xE0 une obligation de secret ;\n- de s\xE9lectionner\
+        \ les personnes susceptibles de b\xE9n\xE9ficier d\u2019un droit, d\u2019\
+        une\nprestation ou d\u2019un contrat, d\xE8s lors qu\u2019elles n\u2019en\
+        \ sont exclues par aucune\ndisposition l\xE9gale ou r\xE9glementaire."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:4
+      assessable: false
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii
+      name: "Section 3. \u2013 Des obligations de confidentialit\xE9 et de s\xE9curit\xE9\
+        \ des traitements et de secret professionnel"
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:4:1
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:4
+      name: Article 23
+      description: "1- Le responsable du traitement doit mettre en \u0153uvre les\
+        \ mesures techniques et\norganisationnelles appropri\xE9es pour prot\xE9ger\
+        \ les donn\xE9es \xE0 caract\xE8re personnel\ncontre la destruction accidentelle\
+        \ ou illicite, la perte accidentelle, l\u2019alt\xE9ration, la\ndiffusion\
+        \ ou l\u2019acc\xE8s non autoris\xE9, notamment lorsque le traitement comporte\n\
+        des transmissions de donn\xE9es dans un r\xE9seau, ainsi que contre toute\
+        \ autre forme\nde traitement illicite. Ces mesures doivent assurer, compte\
+        \ tenu de l\u2019Etat de\nl\u2019art et des co\xFBts li\xE9s \xE0 leur mise\
+        \ en \u0153uvre, un niveau de s\xE9curit\xE9 appropri\xE9\nau regard des risques\
+        \ pr\xE9sent\xE9s par le traitement et de la nature des donn\xE9es \xE0\n\
+        prot\xE9ger ;\n2- Le responsable du traitement, lorsque le traitement est\
+        \ effectu\xE9 pour son\ncompte, doit choisir un sous-traitant qui apporte\
+        \ des garanties suffisantes au\nregard des mesures de s\xE9curit\xE9 technique\
+        \ et d\u2019organisation relative aux\ntraitements \xE0 effectuer et il doit\
+        \ veiller au respect de ces mesures ;\n3- La r\xE9alisation du traitement\
+        \ en sous-traitance doit \xEAtre r\xE9gie par un contrat ou\nun acte juridique\
+        \ qui lie le sous-traitant au responsable du traitement et qui\npr\xE9voit\
+        \ notamment que le sous-traitant n\u2019agit que sous la seule instruction\
+        \ du\nresponsable du traitement et que les obligations vis\xE9es au paragraphe\
+        \ 1 ci-\ndessus lui incombent \xE9galement ;\n4- Aux fins de la conservation\
+        \ des preuves, les \xE9l\xE9ments du contrat ou de l\u2019acte\njuridique\
+        \ relatif \xE0 la protection des donn\xE9es et les exigences portant sur les\n\
+        mesures vis\xE9es au paragraphe 1 ci-dessus, sont consign\xE9s par \xE9crit\
+        \ ou sous une\nautre forme \xE9quivalente."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:4:2
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:4
+      name: Article 24
+      description: "1- Les responsables du traitement des donn\xE9es sensibles ou\
+        \ relatives \xE0 la sant\xE9\ndoivent prendre les mesures appropri\xE9es pour\
+        \ :\na) emp\xEAcher l\u2019acc\xE8s de toute personne non autoris\xE9e aux\
+        \ installations\nutilis\xE9es pour le traitement de ces donn\xE9es (contr\xF4\
+        le de l\u2019entr\xE9e dans les\ninstallations) ;\nb) emp\xEAcher que les\
+        \ supports de donn\xE9es puissent \xEAtre lus, copi\xE9s, modifi\xE9s\nou\
+        \ retir\xE9s par des personnes non autoris\xE9es (contr\xF4le des supports\
+        \ de\ndonn\xE9es) ;\nc) emp\xEAcher l\u2019introduction non autoris\xE9e,\
+        \ ainsi que la prise de connaissance,\nla modification ou l\u2019\xE9limination\
+        \ non autoris\xE9es de donn\xE9es \xE0 caract\xE8re\npersonnel introduites\
+        \ (contr\xF4le de l\u2019insertion) ;\nd) emp\xEAcher que les syst\xE8mes\
+        \ de traitements automatis\xE9s de donn\xE9es\npuissent \xEAtre utilis\xE9\
+        s par des personnes non autoris\xE9es au moyen  d\u2019installations de transmission\
+        \ de donn\xE9es (contr\xF4le de l\u2019utilisation) ;\ne) garantir que seules\
+        \ les personnes autoris\xE9es puissent avoir acc\xE8s aux\ndonn\xE9es vis\xE9\
+        es par l\u2019autorisation (contr\xF4le de l\u2019acc\xE8s) ;\nf) garantir\
+        \ la v\xE9rification des entit\xE9s auxquelles les donn\xE9es \xE0 caract\xE8\
+        re\npersonnel peuvent \xEAtre transmises par des installations de transmission\n\
+        de donn\xE9es (contr\xF4le de la transmission) ;\ng) garantir qu\u2019il soit\
+        \ possible de v\xE9rifier a posteriori, dans un d\xE9lai appropri\xE9\nen\
+        \ fonction de la nature du traitement \xE0 fixer dans la r\xE9glementation\n\
+        applicable \xE0 chaque secteur particulier, quelles donn\xE9es \xE0 caract\xE8\
+        re\npersonnel sont introduites, quand elles l\u2019ont \xE9t\xE9 et pour qui\
+        \ (contr\xF4le de\nl\u2019introduction) ;\nh) emp\xEAcher que lors de la transmission\
+        \ de donn\xE9es \xE0 caract\xE8re personnel et\ndu transport des supports,\
+        \ les donn\xE9es puissent \xEAtre lues, reproduites,\nmodifi\xE9es ou \xE9\
+        limin\xE9es sans autorisation (contr\xF4le du transport) ;\n2- Suivant la\
+        \ nature des organismes responsables du traitement et du type\nd\u2019installations\
+        \ avec lequel il est effectu\xE9, la Commission nationale peut\ndispenser\
+        \ de certaines mesures de s\xE9curit\xE9, \xE0 condition que le respect des\n\
+        droits, libert\xE9s et garanties des personnes concern\xE9es soit assur\xE9\
+        ."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:4:3
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:4
+      name: Article 25
+      description: "Toute personne agissant sous l\u2019autorit\xE9 du responsable\
+        \ du traitement ou de celle du\nsous-traitant, ainsi que le sous-traitant\
+        \ lui-m\xEAme qui acc\xE8de \xE0 des donn\xE9es \xE0\ncaract\xE8re personnel\
+        \ ne peut les traiter que sur instruction du responsable du\ntraitement, sauf\
+        \ en vertu d\u2019obligations l\xE9gales."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:4:4
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iii:4
+      name: Article 26
+      description: "Le responsable du traitement de donn\xE9es \xE0 caract\xE8re personnel,\
+        \ ainsi que les\npersonnes qui, dans l\u2019exercice de leurs fonctions, ont\
+        \ connaissance de donn\xE9es \xE0\ncaract\xE8re personnel trait\xE9es, sont\
+        \ tenues de respecter le secret professionnel\nm\xEAme apr\xE8s avoir cess\xE9\
+        \ d\u2019exercer leurs fonctions, dans les termes pr\xE9vus par la loi\np\xE9\
+        nale.\nLes dispositions de l\u2019alin\xE9a premier ci-dessus n\u2019exemptent\
+        \ pas de l\u2019obligation de\nfournir des informations, conform\xE9ment aux\
+        \ dispositions l\xE9gales applicables aux\nfichiers en cause ou conform\xE9\
+        ment \xE0 la l\xE9gislation de droit commun."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv
+      assessable: false
+      depth: 1
+      name: Chapitre IV
+      description: "De la Commission nationale de contr\xF4le de la protection des\
+        \ donn\xE9es \xE0 caract\xE8re personnel"
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv
+      name: "Section premi\xE8re. \u2013 Institution, pouvoirs et attributions"
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:1:1
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:1
+      name: Article 27
+      description: "Il est institu\xE9 aupr\xE8s du Premier ministre une Commission\
+        \ nationale de contr\xF4le de la\nprotection des donn\xE9es \xE0 caract\xE8\
+        re personnel, charg\xE9e de mettre en \u0153uvre et de\nveiller au respect\
+        \ des dispositions de la pr\xE9sente loi et des textes pris pour son\napplication.\n\
+        A cet effet, elle est charg\xE9e de :\nA- Donner son avis :\n1- au gouvernement\
+        \ ou au parlement sur les projets ou propositions de\nlois ou projets de r\xE8\
+        glements relatifs au traitement de donn\xE9es \xE0\ncaract\xE8re personnel\
+        \ dont elle est saisie ;\n2- \xE0 l\u2019autorit\xE9 comp\xE9tente sur les\
+        \ projets de r\xE8glements cr\xE9ant des\nfichiers relatifs aux donn\xE9es\
+        \ \xE0 caract\xE8re personnel recueillies et\ntrait\xE9es \xE0 des fins de\
+        \ pr\xE9vention et de r\xE9pression des crimes et d\xE9lits,\nl\u2019avis\
+        \ demand\xE9, dans le cas d\u2019esp\xE8ce, vaut d\xE9claration ;\n3- \xE0\
+        \ l\u2019autorit\xE9 comp\xE9tente sur les projets et propositions de lois\n\
+        portant cr\xE9ation et traitement des donn\xE9es relatives aux enqu\xEAtes\n\
+        et donn\xE9es statistiques recueillies et trait\xE9es par des autorit\xE9\
+        s\npubliques ;\n4- au gouvernement sur les modalit\xE9s de la d\xE9claration\
+        \ pr\xE9vue au\nparagraphe 2 de l\u2019article 12 ci-dessus ;\n5- au gouvernement\
+        \ sur les modalit\xE9s d\u2019inscription au registre national\ninstitu\xE9\
+        \ par l\u2019article 45 de la pr\xE9sente loi ;\n6- au gouvernement sur les\
+        \ r\xE8gles de proc\xE9dure et de protection des\ndonn\xE9es des traitements\
+        \ de fichiers s\xE9curit\xE9 qui doivent faire l\u2019objet\nd\u2019un enregistrement.\n\
+        B- Recevoir :\n1- notification de l\u2019identit\xE9 du repr\xE9sentant install\xE9\
+        \ au Maroc qui se\nsubstitue au responsable du traitement r\xE9sidant \xE0\
+        \ l\u2019\xE9tranger ;\n2- les d\xE9clarations pr\xE9vues aux articles 12\
+        \ (paragraphe 2) et 13 et\nd\xE9livrer r\xE9c\xE9piss\xE9 de la d\xE9claration\
+        \ ;\n3- l\u2019identit\xE9 du responsable du traitement des registres tenus\
+        \ pour \xEAtre\nouverts au public, pr\xE9vu \xE0 l\u2019article 19 ci-dessus."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:1:2
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:1
+      name: Article 28
+      description: "Aux fins pr\xE9vues \xE0 l\u2019article 27 (1er alin\xE9a) ci-dessus,\
+        \ la Commission nationale est\nhabilit\xE9e \xE0 :\n1- autoriser la conservation\
+        \ des donn\xE9es au-del\xE0 d\u2019une dur\xE9e pr\xE9vue ;\n2- accorder au\
+        \ responsable du traitement un d\xE9lai suppl\xE9mentaire pour\nr\xE9pondre\
+        \ aux demandes de communication pr\xE9sent\xE9e par la personne\nconcern\xE9\
+        e ;\n3- faire proc\xE9der aux rectifications justifi\xE9es lorsque le responsable\
+        \ du\ntraitement refuse d\u2019y proc\xE9der \xE0 la demande de l\u2019int\xE9\
+        ress\xE9 ;\n4- instruire et d\xE9livrer les autorisations pr\xE9vues \xE0\
+        \ l\u2019article 12 ci-dessus ;\n5- fixer la liste des cat\xE9gories de traitements\
+        \ b\xE9n\xE9ficiant d\u2019une d\xE9claration\nsimplifi\xE9e ;\n6- fixer la\
+        \ liste des traitements non automatis\xE9s soumis \xE0 d\xE9claration\nsimplifi\xE9\
+        e ;\n7- fixer la liste des traitements correspondant \xE0 la d\xE9finition\
+        \ de l\u2019article 18 de\nla pr\xE9sente loi ;\n8- d\xE9livrer r\xE9c\xE9\
+        piss\xE9 de la d\xE9claration pr\xE9vue \xE0 l\u2019article 13, en pr\xE9\
+        cisant le\ncontenu ;\n9- d\xE9livrer les autorisations pr\xE9vues \xE0 l\u2019\
+        article 21 ci-dessus ;\n10- \xE9tablir la liste des pays \xE0 l\xE9gislation\
+        \ ad\xE9quate en mati\xE8re de protection\ndes personnes physiques \xE0 l\u2019\
+        \xE9gard du traitement des donn\xE9es \xE0 caract\xE8re\npersonnel ;\n11-\
+        \ autoriser les transferts de donn\xE9es dans les cas pr\xE9vus \xE0 l\u2019\
+        article 43 ci-\ndessous ;\n12- assurer la tenue du registre national de la\
+        \ protection des donn\xE9es pr\xE9vu \xE0\nl\u2019article 45 ci-dessous ;\n\
+        13- accorder les dispenses des mesures de s\xE9curit\xE9 eu \xE9gard \xE0\
+        \ la qualit\xE9 du\nresponsable du traitement et du type d\u2019installation\
+        \ avec lequel ce\ntraitement est effectu\xE9 ;\n14- d\xE9cider de soumettre\
+        \ \xE0 autorisation un traitement l\xE9galement soumis \xE0\nd\xE9claration\
+        \ conform\xE9ment \xE0 l\u2019article 20 ci-dessus ;\n15- proc\xE9der au retrait\
+        \ du r\xE9c\xE9piss\xE9 ou de l\u2019autorisation conform\xE9ment aux\ndispositions\
+        \ de l\u2019article 51 de la pr\xE9sente loi.\nLa Commission nationale est\
+        \ \xE9galement comp\xE9tente pour :\n1- recevoir les plaintes de toute personne\
+        \ concern\xE9e estimant \xEAtre l\xE9s\xE9e par\nla publication d\u2019un\
+        \ traitement de donn\xE9es \xE0 caract\xE8re personnel, de les\ninstruire\
+        \ et de leur donner suite en ordonnant la publication de rectificatifs\nou/et\
+        \ la saisine du procureur du Roi aux fins de poursuites ;\n2- expertiser,\
+        \ \xE0 la demande des autorit\xE9s publiques, notamment des  autorit\xE9s\
+        \ judiciaires, les \xE9l\xE9ments soumis \xE0 leur appr\xE9ciation lors des\n\
+        contentieux n\xE9s de l\u2019application de la pr\xE9sente loi ou des textes\
+        \ pris pour\nson application ;\n3- assister le gouvernement dans la pr\xE9\
+        paration et la d\xE9finition de la position\nmarocaine lors des n\xE9gociations\
+        \ internationales dans le domaine de la\nprotection des donn\xE9es \xE0 caract\xE8\
+        re personnel ;\n4- coop\xE9rer avec les organismes similaires de contr\xF4\
+        le du traitement des\ndonn\xE9es \xE0 caract\xE8re personnel dans les Etats\
+        \ \xE9trangers."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:1:3
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:1
+      name: Article 29
+      description: "Afin de permettre une mise en application appropri\xE9e de la\
+        \ protection des donn\xE9es,\nla Commission nationale m\xE8ne une mission\
+        \ permanente d\u2019information du public et\ndes personnes concern\xE9es\
+        \ sur les droits et obligations \xE9dict\xE9s par la pr\xE9sente loi et\n\
+        les textes pris pour son application."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:1:4
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:1
+      name: Article 30
+      description: "La Commission nationale est dot\xE9e :\n1- des pouvoirs d\u2019\
+        investigation et d\u2019enqu\xEAte permettant \xE0 ses agents,\nr\xE9guli\xE8\
+        rement commissionn\xE9s \xE0 cet effet par le pr\xE9sident, d\u2019avoir acc\xE8\
+        s\naux donn\xE9es faisant l\u2019objet de traitement, de requ\xE9rir l\u2019\
+        acc\xE8s direct aux\nlocaux au sein desquels le traitement est effectu\xE9\
+        , de recueillir et de saisir\ntoutes les informations et tous documents n\xE9\
+        cessaires pour remplir les\nfonctions de contr\xF4le, le tout conform\xE9\
+        ment aux termes de la commission\nqu\u2019ils ex\xE9cutent ;\n2- du pouvoir\
+        \ d\u2019ordonner que lui soient communiqu\xE9s, dans les d\xE9lais et\nselon\
+        \ les modalit\xE9s ou sanctions \xE9ventuelles qu\u2019elle fixe, les documents\
+        \ de\ntoute nature ou sur tous supports lui permettant d\u2019examiner les\
+        \ faits\nconcernant les plaintes dont elle est saisie ;\n3- du pouvoir d\u2019\
+        ordonner ou de proc\xE9der ou de faire proc\xE9der aux\nmodificatifs n\xE9\
+        cessaires pour une tenue loyale des donn\xE9es contenues\ndans le fichier\
+        \ ;\n4- du pouvoir d\u2019ordonner le verrouillage, l\u2019effacement ou la\
+        \ destruction de\ndonn\xE9es et celui d\u2019interdire provisoirement ou d\xE9\
+        finitivement, le\ntraitement de donn\xE9es \xE0 caract\xE8re personnel, m\xEA\
+        me de celles inclues dans\ndes r\xE9seaux ouverts de transmission de donn\xE9\
+        es \xE0 partir de serveurs situ\xE9s\nsur le territoire national."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:1:5
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:1
+      name: Article 31
+      description: "L\u2019exercice des pouvoirs vis\xE9s aux paragraphes 2 et 4 de\
+        \ l\u2019article 30 ci-dessus est\nsubordonn\xE9 au respect d\u2019une proc\xE9\
+        dure disciplinaire garantissant les droits de la\nd\xE9fense et notamment\
+        \ le principe du contradictoire pr\xE9cis\xE9 dans le r\xE8glement\nint\xE9\
+        rieur de la Commission nationale et applicable \xE0 toutes les autres proc\xE9\
+        dures\nmises en \u0153uvre par la Commission nationale et pr\xE9sentant un\
+        \ caract\xE8re disciplinaire."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:2
+      assessable: false
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv
+      name: "Section 2. \u2013 Composition de la commission nationale"
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:2:1
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:2
+      name: Article 32
+      description: "La Commission nationale de contr\xF4le de la protection des donn\xE9\
+        es \xE0 caract\xE8re\npersonnel se compose de sept membres :\n- un pr\xE9\
+        sident nomm\xE9 par Sa Majest\xE9 le Roi ;\n- six membres nomm\xE9s \xE9galement\
+        \ par Sa Majest\xE9 le Roi, sur proposition :\n\u2022 du Premier ministre\
+        \ ;\n\u2022 du pr\xE9sident de la Chambre des repr\xE9sentants ;\n\u2022 du\
+        \ pr\xE9sident de la Chambre des conseillers.\nLa dur\xE9e du mandat des membres\
+        \ de la Commission nationale est de cinq ans\nrenouvelable une seule fois.\n\
+        Les modalit\xE9s et les conditions de nomination des membres de la Commission\n\
+        nationale sont fix\xE9es par d\xE9cret."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:3
+      assessable: false
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv
+      name: "Section 3. \u2013 Organisation et fonctionnement de la Commission nationale"
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:3:1
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:3
+      name: Article 33
+      description: "La Commission nationale se r\xE9unit sur convocation de son pr\xE9\
+        sident, agissant de sa\npropre initiative ou \xE0 la demande de la moiti\xE9\
+        \ des membres. Le pr\xE9sident fixe l\u2019ordre\ndu jour de la r\xE9union."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:3:2
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:3
+      name: Article 34
+      description: "Les r\xE9unions de la Commission nationale se tiennent valablement\
+        \ lorsque les deux\ntiers au moins des membres sont pr\xE9sents. Les d\xE9\
+        cisions sont prises valablement \xE0 la\nmajorit\xE9 des membres pr\xE9sents\
+        \ la voix du pr\xE9sident \xE9tant pr\xE9pond\xE9rante en cas de\npartage\
+        \ \xE9gal des voix."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:4
+      assessable: false
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv
+      name: "Section 4. \u2013 Statut des membres"
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:4:1
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:4
+      name: Article 35
+      description: "Les fonctions de membre de la Commission nationale sont incompatibles\
+        \ avec celles\nd\u2019administrateur, de g\xE9rant, de membre du directoire\
+        \ ou de directeur g\xE9n\xE9ral unique\nou de membre du conseil de surveillance\
+        \ d\u2019une soci\xE9t\xE9 de traitement de donn\xE9es \xE0\ncaract\xE8re\
+        \ personnel.\nUn membre de la Commission nationale ne peut participer \xE0\
+        \ une d\xE9lib\xE9ration ou \xE0\ndes v\xE9rifications relatives \xE0 un organisme\
+        \ au sein duquel il a d\xE9tenu un int\xE9r\xEAt, direct\nou indirect, ou\
+        \ a exerc\xE9 un mandat ou une fonction, si un d\xE9lai de cinq ans ne s\u2019\
+        est\n\xE9coul\xE9 entre la date o\xF9 est intervenue la cessation de fonction,\
+        \ la fin du mandat ou\nde la disposition de l\u2019int\xE9r\xEAt et la date\
+        \ de sa nomination au sein de la Commission\nnationale.\nSi l\u2019incompatibilit\xE9\
+        \ \xE9dict\xE9e par l\u2019alin\xE9a pr\xE9c\xE9dent concerne le pr\xE9sident\
+        \ de la\nCommission nationale, il d\xE9signe un membre de la Commission nationale\
+        \ pour\nexercer la pl\xE9nitude de ses comp\xE9tences lorsque l\u2019affaire\
+        \ concernant l\u2019organisme en\ncause est appel\xE9e devant la Commission\
+        \ nationale. La d\xE9cision du pr\xE9sident est\npubli\xE9e au \xAB Bulletin\
+        \ officiel \xBB."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:4:2
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:4
+      name: Article 36
+      description: "Les membres de la Commission nationale sont tenus au secret professionnel\
+        \ pour les\nfaits, actes et informations dont ils ont pu avoir connaissance\
+        \ \xE0 l\u2019occasion de\nl\u2019accomplissement de leurs fonctions. Ils\
+        \ sont soumis \xE0 la m\xEAme obligation, m\xEAme\napr\xE8s la fin de leur\
+        \ mandat.\nLes fonctionnaires, agents ou techniciens qui exercent des fonctions\
+        \ au sein de la\nCommission nationale ou aupr\xE8s de ses membres sont \xE9\
+        galement soumis \xE0\nl\u2019obligation de respecter le secret professionnel."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:4:3
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:4
+      name: Article 37
+      description: "Les membres et les fonctionnaires ou agents et techniciens de\
+        \ la Commission\nnationale sont prot\xE9g\xE9s contre les outrages ou les\
+        \ atteintes \xE0 leur personne dans les\ntermes des articles 265 et 267 du\
+        \ code p\xE9nal."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:4:4
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:4
+      name: Article 38
+      description: "Lorsque la Commission nationale d\xE9lib\xE8re sur une question\
+        \ mettant en cause une\nadministration, les membres repr\xE9sentants du gouvernement\
+        \ participent aux\nd\xE9lib\xE9rations avec voix consultative."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:4:5
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:4
+      name: Article 39
+      description: "La Commission nationale \xE9labore et approuve son r\xE8glement\
+        \ int\xE9rieur, qui est soumis\n\xE0 l\u2019homologation du gouvernement avant\
+        \ sa publication au \xAB Bulletin officiel \xBB."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:5
+      assessable: false
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv
+      name: "Section 5. \u2013 Administration"
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:5:1
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:5
+      name: Article 40
+      description: "Le pr\xE9sident est assist\xE9, dans l\u2019exercice de ses fonctions\
+        \ administratives et financi\xE8res,\npar un secr\xE9taire g\xE9n\xE9ral nomm\xE9\
+        \ par le gouvernement sur proposition du pr\xE9sident.\nLe secr\xE9taire g\xE9\
+        n\xE9ral, outre les pouvoirs qu\u2019il exerce par d\xE9l\xE9gation du pr\xE9\
+        sident, est\ncharg\xE9 :\n- de g\xE9rer le personnel recrut\xE9 ou d\xE9tach\xE9\
+        \ selon les d\xE9cisions du pr\xE9sident ;\n- de pr\xE9parer et d\u2019ex\xE9\
+        cuter le budget de la Commission nationale dont il est\nsous-ordonnateur ;\n\
+        - de pr\xE9parer et de passer les march\xE9s de la Commission nationale ;\n\
+        - de pr\xE9parer les documents de travail des r\xE9unions de la Commission\n\
+        nationale et de tenir le registre de ses d\xE9cisions ;\n- de suivre les travaux\
+        \ des comit\xE9s mis en place par la Commission\nnationale et de mettre \xE0\
+        \ leur disposition les moyens mat\xE9riels et humains\nn\xE9cessaires \xE0\
+        \ l\u2019accomplissement de leurs missions."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:5:2
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:5
+      name: Article 41
+      description: "Le secr\xE9taire g\xE9n\xE9ral dispose, pour l\u2019exercice de\
+        \ ses attributions, d\u2019un personnel\nadministratif et technique compos\xE9\
+        \ de fonctionnaires des administrations publiques\nou d\u2019agents publics,\
+        \ d\xE9tach\xE9s aupr\xE8s de la Commission nationale, et d\u2019un personnel\n\
+        recrut\xE9 conform\xE9ment aux proc\xE9dures applicables en la mati\xE8re,\
+        \ notamment par\nvoie contractuelle."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:5:3
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-iv:5
+      name: Article 42
+      description: "La Commission nationale cr\xE9e les comit\xE9s permanents ou ad\
+        \ hoc n\xE9cessaires \xE0\nl\u2019accomplissement de ses missions par des\
+        \ dispositions du r\xE8glement int\xE9rieur.\nElle fixe dans le m\xEAme r\xE8\
+        glement les modalit\xE9s de fonctionnement et d\u2019organisation\nde ces\
+        \ comit\xE9s, qui doivent \xEAtre pr\xE9sid\xE9s par un membre de la Commission\
+        \ nationale,\nmais peuvent \xEAtre compos\xE9s de personnalit\xE9s choisies\
+        \ en dehors des membres de la\nCommission nationale ou faisant partie de son\
+        \ personnel."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-v
+      assessable: false
+      depth: 1
+      name: Chapitre V
+      description: "Du transfert de donn\xE9es vers un pays \xE9tranger"
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-v:1
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-v
+      name: Article 43
+      description: "Le responsable d\u2019un traitement ne peut transf\xE9rer des\
+        \ donn\xE9es \xE0 caract\xE8re personnel\nvers un Etat \xE9tranger que si\
+        \ cet Etat assure un niveau de protection suffisant de la vie\npriv\xE9e et\
+        \ des libert\xE9s et droits fondamentaux des personnes \xE0 l\u2019\xE9gard\
+        \ du traitement\ndont ces donn\xE9es font l\u2019objet ou peuvent faire l\u2019\
+        objet.\nLe caract\xE8re suffisant du niveau de protection assur\xE9 par un\
+        \ Etat s\u2019appr\xE9cie\nnotamment en fonction des dispositions en vigueur\
+        \ dans cet Etat, des mesures de\ns\xE9curit\xE9 qui y sont appliqu\xE9es,\
+        \ des caract\xE9ristiques propres du traitement telles que\nses fins et sa\
+        \ dur\xE9e, ainsi que de la nature, de l\u2019origine et de la destination\
+        \ des\ndonn\xE9es trait\xE9es.\nLa Commission nationale \xE9tablit la liste\
+        \ des Etats r\xE9pondant aux crit\xE8res d\xE9finis aux\nalin\xE9as 1 et 2\
+        \ ci-dessus."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-v:2
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-v
+      name: Article 44
+      description: "Par d\xE9rogation aux dispositions de l\u2019article 43 ci-dessus,\
+        \ le responsable d\u2019un\ntraitement peut transf\xE9rer des donn\xE9es \xE0\
+        \ caract\xE8re personnel vers un Etat ne\nr\xE9pondant pas aux conditions\
+        \ pr\xE9vues \xE0 l\u2019article ci-dessus, si la personne \xE0 laquelle se\n\
+        rapportent les donn\xE9es a consenti express\xE9ment \xE0 leur transfert ou\
+        \ :\n1- Si le transfert est n\xE9cessaire :\na) \xE0 la sauvegarde de la vie\
+        \ de cette personne ;\nb) \xE0 la pr\xE9servation de l\u2019int\xE9r\xEAt\
+        \ public ;\nc) au respect d\u2019obligations permettant d\u2019assurer la\
+        \ constatation,\nl\u2019exercice ou la d\xE9fense d\u2019un droit en justice\
+        \ ;\nd) \xE0 l\u2019ex\xE9cution d\u2019un contrat entre le responsable du\
+        \ traitement et\nl\u2019int\xE9ress\xE9, ou de mesures pr\xE9contractuelles\
+        \ prises \xE0 la demande de\ncelui-ci ;\ne) \xE0 la conclusion ou \xE0 l\u2019\
+        ex\xE9cution d\u2019un contrat conclu ou \xE0 conclure, dans\nl\u2019int\xE9\
+        r\xEAt de la personne concern\xE9e, entre le responsable du traitement\net\
+        \ un tiers ;\nf) \xE0 l\u2019ex\xE9cution d\u2019une mesure d\u2019entraide\
+        \ judiciaire internationale ;\ng) \xE0 la pr\xE9vention, le diagnostic ou\
+        \ le traitement d\u2019affections m\xE9dicales.\n2- Si le transfert s\u2019\
+        effectue en application d\u2019un accord bilat\xE9ral ou multilat\xE9ral\n\
+        auquel le Royaume du Maroc est partie ;\n3- Sur autorisation expresse et motiv\xE9\
+        e de la Commission nationale lorsque\nle traitement garantit un niveau de\
+        \ protection suffisant de la vie priv\xE9e\nainsi que des libert\xE9s et droits\
+        \ fondamentaux des personnes, notamment\nen raison des clauses contractuelles\
+        \ ou r\xE8gles internes dont il fait l\u2019objet."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vi
+      assessable: false
+      depth: 1
+      name: Chapitre VI
+      description: "Du registre national de la protection des donn\xE9es \xE0 caract\xE8\
+        re personnel et des limites \xE0\nla cr\xE9ation ou \xE0 l\u2019usage de registres\
+        \ centraux et de fichiers"
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vi:1
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vi
+      name: Article 45
+      description: "Il est institu\xE9 un registre national de la protection des donn\xE9\
+        es \xE0 caract\xE8re personnel,\nd\xE9sign\xE9 ci-apr\xE8s par registre national,\
+        \ dont la tenue est d\xE9volue \xE0 la commission, qui\nen assure la mise\
+        \ \xE0 disposition du public."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vi:2
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vi
+      name: Article 46
+      description: "Sont inscrits au registre national :\na) les fichiers dont sont\
+        \ responsables du traitement les autorit\xE9s publiques ;\nb) les fichiers\
+        \ dont le traitement est effectu\xE9 par des personnes priv\xE9es ;\nc) les\
+        \ r\xE9f\xE9rences aux lois ou r\xE8glement publi\xE9s portant cr\xE9ation\
+        \ de fichiers\npublics ;\nd) les autorisations d\xE9livr\xE9es en application\
+        \ de la pr\xE9sente loi et des textes\npris pour son application ;\ne) les\
+        \ donn\xE9es relatives aux fichiers qui sont n\xE9cessaires pour permettre\
+        \ aux\npersonnes concern\xE9es d\u2019exercer les droits d\u2019information,\
+        \ d\u2019acc\xE8s, de\nrectification, de suppression et d\u2019opposition\
+        \ pr\xE9vus par la pr\xE9sente loi,\nnotamment les pr\xE9cisions que comporte\
+        \ la d\xE9claration, fix\xE9es aux a) \xE0 e)\nde l\u2019article 15 ci-dessus."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vi:3
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vi
+      name: Article 47
+      description: "Les fichiers dont le traitement a pour seul objet la tenue d\u2019\
+        un registre qui, en vertu de\ndispositions l\xE9gislatives ou r\xE9glementaires,\
+        \ est destin\xE9 \xE0 l\u2019information du public et est\nouvert \xE0 la\
+        \ consultation du public sont dispens\xE9s de l\u2019inscription au registre\
+        \ national.\nToutefois, doit figurer audit registre national l\u2019identit\xE9\
+        \ de la personne responsable du\ntraitement aux fins d\u2019exercices par\
+        \ les personnes concern\xE9es des droits pr\xE9vus au\nchapitre II de la pr\xE9\
+        sente loi."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vi:4
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vi
+      name: Article 48
+      description: "Les modalit\xE9s d\u2019inscription des donn\xE9es pr\xE9vues\
+        \ \xE0 l\u2019article 46 ci-dessus au registre\nnational et celles de sa tenue\
+        \ \xE0 jour sont fix\xE9es par le gouvernement, apr\xE8s avis de la\nCommission\
+        \ nationale."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vi:5
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vi
+      name: Article 49
+      description: "Les traitements de donn\xE9es \xE0 caract\xE8re personnel relatives\
+        \ aux infractions,\ncondamnations et mesures de s\xFBret\xE9 ne peuvent \xEA\
+        tre mis en \u0153uvre que par :\n- les juridictions, les autorit\xE9s publiques\
+        \ et les personnes morales g\xE9rant un\nservice public, agissant dans le\
+        \ cadre de leurs attributions l\xE9gales ;\n- les auxiliaires de justice,\
+        \ pour les stricts besoins de l\u2019exercice des missions\nqui leur sont\
+        \ confi\xE9es par la loi ;\n- l\u2019organisme charg\xE9 de la protection\
+        \ des droits d\u2019auteur et des droits\nvoisins vis\xE9 \xE0 l\u2019article\
+        \ 11 (2e alin\xE9a) de la loi n\xB0 34-05 modifiant et\ncompl\xE9tant la loi\
+        \ n\xB0 2-00 relative aux droits d\u2019auteur et droits voisins."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vi:6
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vi
+      name: Article 50
+      description: "La cr\xE9ation, la tenue et le traitement de registres centraux\
+        \ concernant les personnes\nsoup\xE7onn\xE9es d\u2019activit\xE9s illicites,\
+        \ de d\xE9lits et d\u2019infractions administratives et les\nd\xE9cisions\
+        \ pr\xE9voyant des peines, des mesures de s\xFBret\xE9, des amendes et des\n\
+        sanctions accessoires rel\xE8vent des seuls services publics qui ont une comp\xE9\
+        tence\nexpresse en vertu de la loi d\u2019organisation et de fonctionnement\
+        \ et qui doivent\nrespecter les r\xE8gles de proc\xE9dure et de protection\
+        \ des donn\xE9es pr\xE9vues par la loi,\napr\xE8s avis de la Commission nationale."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii
+      assessable: false
+      depth: 1
+      name: Chapitre VII
+      description: Des sanctions
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii:1
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii
+      name: Article 51
+      description: "Sans pr\xE9judice des sanctions p\xE9nales, lorsqu\u2019il appara\xEE\
+        t, \xE0 la suite de la mise en\n\u0153uvre du traitement objet de la d\xE9\
+        claration ou de l\u2019autorisation pr\xE9vue \xE0 l\u2019article 12\nde la\
+        \ pr\xE9sente loi, que ce traitement porte atteinte \xE0 la s\xFBret\xE9 ou\
+        \ \xE0 l\u2019ordre public ou\nest contraire \xE0 la morale et aux bonnes\
+        \ m\u0153urs, la Commission nationale peut, sans\nd\xE9lais, retirer, selon\
+        \ le cas, le r\xE9c\xE9piss\xE9 de la d\xE9claration ou l\u2019autorisation."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii:2
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii
+      name: Article 52
+      description: "Sans pr\xE9judice de la responsabilit\xE9 civile \xE0 l\u2019\xE9\
+        gard des personnes ayant subi des\ndommages du fait de l\u2019infraction,\
+        \ est puni d\u2019une amende de 10.000 \xE0 100.000 DH,\nquiconque aura mis\
+        \ en \u0153uvre un fichier de donn\xE9es \xE0 caract\xE8re personnel sans\
+        \ la\nd\xE9claration ou l\u2019autorisation exig\xE9e \xE0 l\u2019article\
+        \ 12 ci-dessus ou aura continu\xE9 son\nactivit\xE9 de traitement de donn\xE9\
+        es \xE0 caract\xE8re personnel malgr\xE9 le retrait du\nr\xE9c\xE9piss\xE9\
+        \ de la d\xE9claration ou de l\u2019autorisation."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii:3
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii
+      name: Article 53
+      description: "Est puni d\u2019une amende de 20.000 \xE0 200.000 DH par infraction,\
+        \ tout responsable de\ntraitement de donn\xE9es \xE0 caract\xE8re personnel\
+        \ refusant les droits d\u2019acc\xE8s, de\nrectification ou d\u2019opposition\
+        \ pr\xE9vus aux articles 7, 8 et 9 ci-dessus."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii:4
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii
+      name: Article 54
+      description: "Est puni d\u2019un emprisonnement de trois mois \xE0 un an et\
+        \ d\u2019une amende de 20.000 \xE0\n200.000 DH ou de l\u2019une de ces deux\
+        \ peines seulement quiconque, en violation des a),\nb) et c) de l\u2019article\
+        \ 3 de la pr\xE9sente loi, collecte des donn\xE9es \xE0 caract\xE8re personnel\n\
+        par un moyen frauduleux, d\xE9loyal ou illicite, met en \u0153uvre un traitement\
+        \ \xE0 des fins\nautres que celles d\xE9clar\xE9es ou autoris\xE9es ou soumet\
+        \ les donn\xE9es pr\xE9cit\xE9es \xE0 un\ntraitement ult\xE9rieur incompatible\
+        \ avec les finalit\xE9s d\xE9clar\xE9es ou autoris\xE9es."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii:5
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii
+      name: Article 55
+      description: "Est puni d\u2019un emprisonnement de trois mois \xE0 un an et\
+        \ d\u2019une amende de 20.000 \xE0\n200.000 DH ou de l\u2019une de ces deux\
+        \ peines seulement quiconque :\n- conserve des donn\xE9es \xE0 caract\xE8\
+        re personnel au-del\xE0 de la dur\xE9e pr\xE9vue\npar la l\xE9gislation en\
+        \ vigueur ou celle pr\xE9vue dans la d\xE9claration ou\nl\u2019autorisation\
+        \ ;\n- conserve les donn\xE9es pr\xE9cit\xE9es en violation des dispositions\
+        \ du e) de\nl\u2019article 3 de la pr\xE9sente loi.\nEst puni des m\xEAmes\
+        \ peines le fait de traiter \xE0 des fins autres qu\u2019historiques,\nstatistiques\
+        \ ou scientifiques des donn\xE9es \xE0 caract\xE8re personnel conserv\xE9\
+        es au-del\xE0\nde la dur\xE9e mentionn\xE9e au premier alin\xE9a ci-dessus."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii:6
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii
+      name: Article 56
+      description: "Est puni d\u2019un emprisonnement de trois mois \xE0 un an et\
+        \ d\u2019une amende de 20.000 \xE0\n200.000 DH ou de l\u2019une de ces deux\
+        \ peines seulement quiconque proc\xE8de \xE0 un\ntraitement de donn\xE9es\
+        \ \xE0 caract\xE8re personnel en violation des dispositions de l\u2019article\n\
+        4 ci-dessus."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii:7
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii
+      name: Article 57
+      description: "Est puni d\u2019un emprisonnement de trois mois \xE0 un an et\
+        \ d\u2019une amende de 50.000 \xE0\n300.000 DH ou de l\u2019une de ces deux\
+        \ peines seulement quiconque proc\xE8de, sans le\nconsentement expr\xE8s des\
+        \ personnes int\xE9ress\xE9es, au traitement des donn\xE9es \xE0\ncaract\xE8\
+        re personnel qui, directement ou indirectement, font appara\xEEtre les origines\n\
+        raciales ou ethniques, les opinions politiques, philosophiques ou religieuses,\
+        \ les\nappartenances syndicales des personnes ou qui sont relatives \xE0 la\
+        \ sant\xE9 de celle-ci.\nEst puni des m\xEAmes peines quiconque proc\xE8de\
+        \ au traitement des donn\xE9es \xE0\ncaract\xE8re personnel concernant des\
+        \ infractions, des condamnations ou des mesures\nde s\xFBret\xE9."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii:8
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii
+      name: Article 58
+      description: "Est puni d\u2019un emprisonnement de trois mois \xE0 un an et\
+        \ d\u2019une amende de 20.000 \xE0\n200.000 DH ou de l\u2019une de ces deux\
+        \ peines seulement, quiconque aura proc\xE9d\xE9 ou\nfait proc\xE9der \xE0\
+        \ un traitement de donn\xE9es \xE0 caract\xE8re personnel sans mettre en\n\
+        \u0153uvre les mesures visant \xE0 pr\xE9server la s\xE9curit\xE9 des donn\xE9\
+        es pr\xE9vues aux articles 23\net 24 ci-dessus."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii:9
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii
+      name: Article 59
+      description: "Est puni d\u2019un emprisonnement de trois mois \xE0 un an et\
+        \ d\u2019une amende de 20.000 \xE0\n200.000 DH ou de l\u2019une de ces deux\
+        \ peines seulement, quiconque proc\xE8de \xE0 un\ntraitement de donn\xE9es\
+        \ \xE0 caract\xE8re personnel concernant une personne physique\nmalgr\xE9\
+        \ l\u2019opposition de cette personne, lorsque cette opposition est fond\xE9\
+        e sur des\nmotifs l\xE9gitimes ou lorsque ce traitement r\xE9pond \xE0 des\
+        \ fins de prospection,\nnotamment commerciale, tel que mentionn\xE9 \xE0 l\u2019\
+        article 9 ou par voie \xE9lectronique tel\nque pr\xE9vu \xE0 l\u2019article\
+        \ 10 de la pr\xE9sente loi."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii:10
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii
+      name: Article 60
+      description: "Est puni d\u2019un emprisonnement de trois mois \xE0 un an et\
+        \ d\u2019une amende de 20.000 \xE0\n200.000 DH ou de l\u2019une de ces deux\
+        \ peines seulement, quiconque effectue un\ntransfert de donn\xE9es \xE0 caract\xE8\
+        re personnel vers un Etat \xE9tranger, en violation des\ndispositions des\
+        \ articles 43 et 44 de la pr\xE9sente loi."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii:11
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii
+      name: Article 61
+      description: "Est puni d\u2019un emprisonnement de trois mois \xE0 un an et\
+        \ d\u2019une amende de 20.000 \xE0\n200.000 DH ou de l\u2019une de ces deux\
+        \ peines seulement, tout responsable de\ntraitement, tout sous-traitant et\
+        \ toute personne qui, en raison de ses fonctions, est\ncharg\xE9 (e) de traiter\
+        \ des donn\xE9es \xE0 caract\xE8re personnel et qui, m\xEAme par n\xE9gligence,\n\
+        cause ou facilite l\u2019usage abusif ou frauduleux des donn\xE9es trait\xE9\
+        es ou re\xE7ues ou les\ncommunique \xE0 des tiers non habilit\xE9s.\nLe tribunal\
+        \ pourra, en outre, prononcer la saisie du mat\xE9riel ayant servi \xE0 commettre\n\
+        l\u2019infraction ainsi que l\u2019effacement de tout ou partie des donn\xE9\
+        es \xE0 caract\xE8re\npersonnel faisant l\u2019objet du traitement ayant donn\xE9\
+        \ lieu \xE0 l\u2019infraction."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii:12
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii
+      name: Article 62
+      description: "Est puni d\u2019un emprisonnement de trois \xE0 six mois d\u2019\
+        une amende de 10.000 \xE0 50.000\nDH ou de l\u2019une de ces deux peines seulement,\
+        \ quiconque :\n- entrave l\u2019exercice des missions de contr\xF4le de la\
+        \ Commission nationale ;\n- refuse de recevoir les contr\xF4leurs et de les\
+        \ laisser remplir leurs\ncommissions ;\n- refuse d\u2019envoyer les documents\
+        \ ou informations demand\xE9s ;\n- refuse de transmettre les documents pr\xE9\
+        vus par la loi."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii:13
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii
+      name: Article 63
+      description: "Tout responsable qui refuse d\u2019appliquer les d\xE9cisions\
+        \ de la Commission nationale est\npassible d\u2019un emprisonnement de trois\
+        \ mois \xE0 un an et d\u2019une amende de 10.000 \xE0\n100.000 DH ou de l\u2019\
+        une de ces deux peines seulement."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii:14
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii
+      name: Article 64
+      description: "Lorsque l\u2019auteur de l\u2019une des infractions pr\xE9vues\
+        \ et sanctionn\xE9es au titre du pr\xE9sent\nchapitre est une personne morale\
+        \ et sans pr\xE9judice des peines qui peuvent \xEAtre\nappliqu\xE9es \xE0\
+        \ ses dirigeants auteurs de l\u2019une des infractions pr\xE9vues ci-dessus,\
+        \ les\npeines d\u2019amende sont port\xE9es au double.\nEn outre, la personne\
+        \ morale peut \xEAtre punie de l\u2019une des peines suivantes :\n- la confiscation\
+        \ partielle de ses biens ;\n- la confiscation pr\xE9vue \xE0 l\u2019article\
+        \ 89 du code p\xE9nal ;\n- la fermeture du ou des \xE9tablissements de la\
+        \ personne morale o\xF9\nl\u2019infraction a \xE9t\xE9 commise."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii:15
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii
+      name: Article 65
+      description: "En cas de r\xE9cidive, les sanctions pr\xE9vues au pr\xE9sent\
+        \ chapitre sont port\xE9es au double.\nEst en Etat de r\xE9cidive, toute personne\
+        \ ayant \xE9t\xE9 condamn\xE9e par d\xE9cision de justice\ndevenue irr\xE9\
+        vocable pour l\u2019une des infractions pr\xE9vues au pr\xE9sent chapitre\
+        \ a commis\nune infraction de m\xEAme nature dans l\u2019ann\xE9e qui suit\
+        \ le prononc\xE9 d\u2019une telle d\xE9cision."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii:16
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-vii
+      name: Article 66
+      description: "Outre les officiers de police judiciaire, les agents de la Commission\
+        \ nationale\nsp\xE9cialement commissionn\xE9s \xE0 cet effet par le pr\xE9\
+        sident et asserment\xE9s dans les\nformes du droit commun peuvent rechercher\
+        \ et constater, par proc\xE8s-verbal, les\ninfractions aux dispositions de\
+        \ la pr\xE9sente loi et des textes pris pour son application.\nLeurs proc\xE8\
+        s-verbaux sont adress\xE9s au procureur du Roi dans les cinq jours suivant\n\
+        les op\xE9rations de recherche et de constatation."
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-viii
+      assessable: false
+      depth: 1
+      name: Chapitre VIII
+      description: Dispositions transitoires
+    - urn: urn:bassou:risk:req_node:loi_09-08:chapitre-viii:1
+      assessable: true
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:loi_09-08:chapitre-viii
+      name: Article 67
+      description: "Les personnes physiques ou morales dont l\u2019activit\xE9 consistait,\
+        \ avant la date de\npublication de la pr\xE9sente loi au Bulletin officiel\
+        \ \xE0 effectuer, \xE0 titre principal ou\naccessoire, des traitements de\
+        \ donn\xE9es \xE0 caract\xE8re personnel r\xE9pondant \xE0 la d\xE9finition\n\
+        pr\xE9vue \xE0 l\u2019article premier ci-dessus, disposent d\u2019un d\xE9\
+        lai maximum de deux ans,\ncourant \xE0 compter de la date d\u2019installation\
+        \ de la Commission nationale qui sera\nconstat\xE9e par un acte administratif\
+        \ publi\xE9 au Bulletin officiel, pour r\xE9gulariser leur\nsituation en conformit\xE9\
+        \ avec les dispositions de la pr\xE9sente loi.\nA d\xE9faut de cette r\xE9\
+        gularisation dans le d\xE9lai pr\xE9cit\xE9, leurs activit\xE9s sont r\xE9\
+        put\xE9es \xEAtre\nexerc\xE9es sans d\xE9claration ou sans autorisation. Le\
+        \ contrevenant s\u2019expose, dans ce cas,\naux sanctions pr\xE9vues par la\
+        \ pr\xE9sente loi."

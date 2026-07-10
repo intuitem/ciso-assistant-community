@@ -24,13 +24,6 @@
 	}: Props = $props();
 </script>
 
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
 <Select
 	{form}
 	options={model.selectOptions['category']}
@@ -60,15 +53,6 @@
 	label={m.provider()}
 	cacheLock={cacheLocks['provider']}
 	bind:cachedValue={formDataCache['provider']}
-/>
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
-	field="folder"
-	pathField="path"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
 />
 <AutocompleteSelect
 	multiple

@@ -59,7 +59,7 @@
 </script>
 
 <div class="p-5 {accent_color}">
-	<div class="rounded-lg bg-white p-4 flex flex-col justify-between h-full">
+	<div class="rounded-lg bg-surface-50-950 p-4 flex flex-col justify-between h-full">
 		<div class="flex justify-between mb-2">
 			<div class="font-semibold">{title}</div>
 			<div class="text-xl" role="status" title={safeTranslate(workshopStatus())}>
@@ -80,7 +80,7 @@
 		{:else if meta}
 			<div class="flex mx-auto w-full px-6">
 				<div>
-					<ol class="relative text-gray-500 border-s border-gray-200">
+					<ol class="relative text-surface-600-400 border-s border-surface-200-800">
 						{#each steps as step, i}
 							<li class="flex flex-row justify-between items-start gap-8 mb-10 ms-6">
 								{#if createRiskAnalysis && i === 0}
@@ -90,14 +90,14 @@
 										href={step.href}
 										prefixCrumbs={[{ label: safeTranslate(`ebiosWs${workshop}`) }]}
 										label={safeTranslate(`ebiosWs${workshop}_${getStepNumber(i)}`)}
-										class="hover:text-purple-800"
+										class="hover:text-primary-800-200"
 										data-testid="workshop-{workshop}-step-{getStepNumber(i)}-link"
 									>
 										<span
 											class="absolute flex items-center justify-center w-8 h-8 {step.status ===
 											'done'
-												? 'bg-success-200'
-												: 'bg-surface-200'} rounded-full -start-4 ring-4 ring-white"
+												? 'bg-success-300-700 text-success-950'
+												: 'bg-surface-200-800'} rounded-full -start-4 ring-4 ring-surface-300-700"
 										>
 											<i
 												class="fa-solid {step.status === 'done'
@@ -115,16 +115,11 @@
 										{/if}
 									</Anchor>
 								{:else}
-									<Tooltip
-										open={open[i]}
-										onOpenChange={(e) => (open[i] = e.open)}
-										openDelay={0}
-										zIndex="100"
-									>
-										{#snippet trigger()}
-											<div class="text-gray-300 *:pointer-events-none">
+									<Tooltip open={open[i]} onOpenChange={(e) => (open[i] = e.open)} openDelay={0}>
+										<Tooltip.Trigger>
+											<div class="text-surface-300-700 *:pointer-events-none">
 												<span
-													class="absolute flex items-center justify-center w-8 h-8 bg-surface-200 rounded-full -start-4 ring-4 ring-white"
+													class="absolute flex items-center justify-center w-8 h-8 bg-surface-200-800 rounded-full -start-4 ring-4 ring-surface-300-700"
 												>
 													<i class="fa-solid fa-clipboard-check" aria-hidden="true"></i>
 												</span>
@@ -139,57 +134,58 @@
 													<p class="text-sm text-start">{step.title}</p>
 												{/if}
 											</div>
-										{/snippet}
-										{#snippet content()}
-											<div class="transition card bg-white shadow-lg p-4 z-20 duration-300">
-												<p
-													data-testid="activity-tooltip"
-													class="border-l-4 {borderColor} text-gray-500 p-2"
+										</Tooltip.Trigger>
+										<Tooltip.Positioner class="!z-25">
+											<Tooltip.Content>
+												<div
+													class="transition card bg-surface-50-950 shadow-lg p-4 z-20 duration-300"
 												>
-													{step.tooltip}
-												</p>
-												<div class="arrow bg-white"></div>
-											</div>
-										{/snippet}
+													<p
+														data-testid="activity-tooltip"
+														class="border-l-4 {borderColor} text-surface-600-400 p-2"
+													>
+														{step.tooltip}
+													</p>
+												</div>
+											</Tooltip.Content>
+										</Tooltip.Positioner>
 									</Tooltip>
 								{/if}
 
 								{#if !step.disabled}
 									<Popover open={actionsOpen[i]} onOpenChange={(e) => (actionsOpen[i] = e.open)}>
-										{#snippet trigger()}
-											<span
-												role="button"
-												tabindex="0"
-												class="btn bg-initial"
-												aria-label="More options"
-												data-testid="sidebar-more-btn"
-											>
-												<i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
-											</span>
-										{/snippet}
-										{#snippet content()}
-											<div
-												class="card whitespace-nowrap bg-white border border-gray-300 rounded-md py-2 w-fit shadow-lg space-y-1"
-												data-testid="sidebar-more-panel"
-											>
-												<form
-													action="/ebios-rm/{page.params.id}?/changeStepState"
-													method="POST"
-													use:enhance={updateStepStatus(i)}
+										<Popover.Trigger
+											class="btn bg-initial"
+											aria-label="More options"
+											data-testid="sidebar-more-btn"
+										>
+											<i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
+										</Popover.Trigger>
+										<Popover.Positioner>
+											<Popover.Content>
+												<div
+													class="card whitespace-nowrap bg-surface-50-950 border border-surface-300-700 rounded-md py-2 w-fit shadow-lg space-y-1"
+													data-testid="sidebar-more-panel"
 												>
-													<input type="hidden" name="workshop" value={workshop} />
-													<input type="hidden" name="step" value={getStepNumber(i)} />
-													<input
-														type="hidden"
-														name="status"
-														value={step.status === 'done' ? 'in_progress' : 'done'}
-													/>
-													<button type="submit" class="btn bg-initial">
-														{step.status === 'done' ? m.markAsInProgress() : m.markAsDone()}
-													</button>
-												</form>
-											</div>
-										{/snippet}
+													<form
+														action="/ebios-rm/{page.params.id}?/changeStepState"
+														method="POST"
+														use:enhance={updateStepStatus(i)}
+													>
+														<input type="hidden" name="workshop" value={workshop} />
+														<input type="hidden" name="step" value={getStepNumber(i)} />
+														<input
+															type="hidden"
+															name="status"
+															value={step.status === 'done' ? 'in_progress' : 'done'}
+														/>
+														<button type="submit" class="btn bg-initial">
+															{step.status === 'done' ? m.markAsInProgress() : m.markAsDone()}
+														</button>
+													</form>
+												</div>
+											</Popover.Content>
+										</Popover.Positioner>
 									</Popover>
 								{/if}
 							</li>

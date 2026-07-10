@@ -167,8 +167,7 @@
 				buttonTextCancel: m.ebiosRmCreateNew(),
 				response: (confirmed: boolean | undefined) => {
 					if (confirmed === true) {
-						// Sync existing - navigate to sync
-						window.location.href = `${page.url.pathname}/workshop-5/risk-analyses?sync=${riskAssessment.id}`;
+						showSyncPreview(riskAssessment.id);
 					} else if (confirmed === false) {
 						// Create new
 						modalCreateForm();
@@ -181,6 +180,51 @@
 			// No existing assessment, just create
 			modalCreateForm();
 		}
+	}
+
+	function showSyncPreview(riskAssessmentId: string): void {
+		const preview = data.syncPreview;
+
+		if (!preview || preview.error) {
+			const previewErrorModal: ModalSettings = {
+				type: 'alert',
+				title: m.ebiosRmSyncPreviewTitle(),
+				body: preview?.error || m.ebiosRmSyncPreviewError()
+			};
+			modalStore.trigger(previewErrorModal);
+			return;
+		}
+
+		const syncModeMessages: Record<string, (args: { count: number }) => string> = {
+			operational_scenarios: m.ebiosRmSyncModeOperationalScenarios,
+			attack_paths: m.ebiosRmSyncModeAttackPaths,
+			strategic_scenarios: m.ebiosRmSyncModeStrategicScenarios,
+			feared_events: m.ebiosRmSyncModeFearedEvents,
+			mixed: m.ebiosRmSyncModeMixed
+		};
+		const syncModeMessage = (syncModeMessages[preview.sync_mode] ?? syncModeMessages.mixed)({
+			count: preview.count
+		});
+
+		const sourceList = preview.source_objects
+			.map((obj: { name: string; impact: { name: string } | null }) => {
+				const impact = obj.impact ? ` [${obj.impact.name}]` : '';
+				return `• ${obj.name}${impact}`;
+			})
+			.join('\n');
+
+		const previewModal: ModalSettings = {
+			type: 'confirm',
+			title: m.ebiosRmSyncPreviewTitle(),
+			body: `${syncModeMessage}\n\n${sourceList}`,
+			buttonTextConfirm: m.ebiosRmSyncConfirm(),
+			response: (confirmed: boolean | undefined) => {
+				if (confirmed === true) {
+					window.location.href = `${page.url.pathname}/workshop-5/risk-analyses?sync=${riskAssessmentId}`;
+				}
+			}
+		};
+		modalStore.trigger(previewModal);
 	}
 
 	function modalCreateForm(): void {
@@ -203,7 +247,7 @@
 
 <div class="h-full w-full p-8">
 	<div
-		class="card bg-white shadow-lg w-full h-full grid xl:grid-cols-3 lg:grid-cols-2 md:grid-cols-1 gap-8 p-8"
+		class="card bg-surface-50-950 shadow-lg w-full h-full grid xl:grid-cols-3 lg:grid-cols-2 md:grid-cols-1 gap-8 p-8"
 	>
 		<Tile
 			workshop={1}
@@ -245,18 +289,18 @@
 			{#snippet addRiskAnalysis()}
 				<div>
 					<button
-						class="flex flex-col text-left hover:text-purple-800"
+						class="flex flex-col text-left hover:text-primary-800-200"
 						onclick={handleActivityOneClick}
 					>
 						{#if data.data.meta.workshops[4].steps[0].status == 'done'}
 							<span
-								class="absolute flex items-center justify-center w-8 h-8 bg-success-200 rounded-full -start-4 ring-4 ring-white"
+								class="absolute flex items-center justify-center w-8 h-8 bg-success-300-700 text-success-950 rounded-full -start-4 ring-4 ring-surface-300-700"
 							>
 								<i class="fa-solid fa-check"></i>
 							</span>
 						{:else}
 							<span
-								class="absolute flex items-center justify-center w-8 h-8 bg-surface-200 rounded-full -start-4 ring-4 ring-white"
+								class="absolute flex items-center justify-center w-8 h-8 bg-surface-200-800 rounded-full -start-4 ring-4 ring-surface-300-700"
 							>
 								<i class="fa-solid fa-clipboard-check"></i>
 							</span>
@@ -297,11 +341,11 @@
 						</button>
 						{#if exportMenuOpen}
 							<div
-								class="absolute top-full left-0 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-10"
+								class="absolute top-full left-0 mt-1 w-full bg-surface-50-950 border border-surface-200-800 rounded-lg shadow-lg z-10"
 							>
 								<a
 									href={`${page.url.pathname}/export/xlsx`}
-									class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg"
+									class="block px-4 py-2 text-sm text-surface-700-300 hover:bg-surface-100-900 rounded-lg"
 								>
 									<i class="fa-solid fa-file-excel mr-2"></i>
 									{m.exportExcel()}

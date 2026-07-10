@@ -6,6 +6,7 @@
 	import { Popover } from '@skeletonlabs/skeleton-svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { canPerformAction } from '$lib/utils/access-control';
+	import { isDark } from '$lib/utils/helpers';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { countMasked } from '$lib/utils/related-visibility';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
@@ -76,12 +77,12 @@
 	let group = $state(Object.keys(data.relatedModels)[0]);
 </script>
 
-<div class="card p-4 bg-white shadow-lg">
+<div class="card p-4 bg-surface-50-950 shadow-lg">
 	<div class="flex flex-col space-y-4 items-center">
 		<div class="flex items-center justify-between w-full">
 			<a
 				href="/ebios-rm/{operationalScenario.ebios_rm_study.id}"
-				class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+				class="flex items-center space-x-2 text-primary-800-200 hover:text-primary-600-400"
 			>
 				<i class="fa-solid fa-arrow-left"></i>
 				<p class="">{m.goBackToEbiosRmStudy()}</p>
@@ -97,9 +98,13 @@
 				>
 				<p class="flex items-center">
 					{#if operationalScenario.is_selected}
-						<span class="badge bg-green-200 text-green-700">{m.selected()}</span>
+						<span class="badge bg-green-200 text-green-700 dark:bg-green-500/20 dark:text-green-300"
+							>{m.selected()}</span
+						>
 					{:else}
-						<span class="badge bg-red-200 text-red-700">{m.notSelected()}</span>
+						<span class="badge bg-red-200 text-red-700 dark:bg-red-500/20 dark:text-red-300"
+							>{m.notSelected()}</span
+						>
 					{/if}
 				</p>
 			</div>
@@ -118,69 +123,105 @@
 			class="relative p-4 space-y-4 rounded-md w-full flex flex-col items-center justify-center
                 {activeActivity === 'one'
 				? 'border-2 border-primary-500'
-				: 'border-2 border-gray-300 border-dashed'}"
+				: 'border-2 border-surface-300-700 border-dashed'}"
 		>
 			<span
-				class="absolute -top-3 bg-white font-bold {activeActivity === 'one'
+				class="absolute -top-3 bg-surface-50-950 font-bold {activeActivity === 'one'
 					? 'text-primary-500'
-					: 'text-gray-500'}">{m.activityOne()}</span
+					: 'text-surface-600-400'}">{m.activityOne()}</span
 			>
 			<h1
-				class="font-bold text-xl {activeActivity === 'one' ? 'text-primary-500' : 'text-gray-500'}"
+				class="font-bold text-xl {activeActivity === 'one'
+					? 'text-primary-500'
+					: 'text-surface-600-400'}"
 			>
 				{m.ebiosWs4_1()}
 			</h1>
 			{#if operationalScenario.operating_modes_description}
-				<p class="text-gray-600">{operationalScenario.operating_modes_description}</p>
+				<p class="text-surface-600-400">{operationalScenario.operating_modes_description}</p>
 			{:else}
-				<p class="text-gray-600">{m.noDescription()}</p>
+				<p class="text-surface-600-400">{m.noDescription()}</p>
 			{/if}
 			<div class="flex flex-col space-y-2 items-center">
-				<div class="flex flex-col items-center space-x-2">
-					<span class="font-semibold text-lg text-gray-700"
-						><i class="fa-solid fa-shuffle"></i> {m.attackPath()}</span
-					>
-					<p class="text-gray-600">{operationalScenario.attack_path.name}</p>
-					{#if operationalScenario.attack_path.description}
-						<p class="text-gray-600">{operationalScenario.attack_path.description}</p>
+				<div class="flex items-center gap-4">
+					{#if operationalScenario.strategic_scenario}
+						<div
+							class="flex flex-col space-y-2 p-4 bg-amber-100 border-amber-400 dark:bg-amber-900 dark:border-amber-700 border rounded-md shadow-xs text-center min-w-48"
+						>
+							<h4 class="font-semibold text-surface-600-400">{m.strategicScenario()}</h4>
+							<i class="fa-solid fa-chess text-3xl text-amber-600"></i>
+							<a
+								href="/strategic-scenarios/{operationalScenario.strategic_scenario.id}"
+								class="badge text-white bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700"
+								>{operationalScenario.strategic_scenario.name}</a
+							>
+							{#if operationalScenario.strategic_scenario.description}
+								<p class="text-sm text-surface-600-400 italic">
+									{operationalScenario.strategic_scenario.description}
+								</p>
+							{/if}
+						</div>
+					{/if}
+					{#if operationalScenario.strategic_scenario && operationalScenario.attack_path}
+						<i class="fa-solid fa-arrow-right text-2xl text-surface-400-600"></i>
+					{/if}
+					{#if operationalScenario.attack_path}
+						<div
+							class="flex flex-col space-y-2 p-4 bg-teal-100 border-teal-400 dark:bg-teal-900 dark:border-teal-700 border rounded-md shadow-xs text-center min-w-48"
+						>
+							<h4 class="font-semibold text-surface-600-400">{m.attackPath()}</h4>
+							<i class="fa-solid fa-route text-3xl text-teal-600"></i>
+							<a
+								href="/attack-paths/{operationalScenario.attack_path.id}"
+								class="badge text-white bg-teal-500 hover:bg-teal-600 dark:bg-teal-600 dark:hover:bg-teal-700"
+								>{operationalScenario.attack_path.name}</a
+							>
+							{#if operationalScenario.attack_path.description}
+								<p class="text-sm text-surface-600-400 italic">
+									{operationalScenario.attack_path.description}
+								</p>
+							{/if}
+						</div>
 					{/if}
 				</div>
 				<div class="grid grid-cols-3 gap-12 items-center">
 					<div
-						class="flex flex-col space-y-4 p-4 bg-red-200 border-red-400 border rounded-md shadow-xs text-center"
+						class="flex flex-col space-y-4 p-4 bg-red-200 border-red-400 dark:bg-red-900 dark:border-red-700 border rounded-md shadow-xs text-center"
 					>
-						<h4 class="font-semibold text-gray-600">{m.riskOrigin()}</h4>
+						<h4 class="font-semibold text-surface-600-400">{m.riskOrigin()}</h4>
 						<i class="fa-solid fa-skull-crossbones text-3xl"></i>
-						<p class="badge text-white bg-red-500 capitalize">
+						<p class="badge whitespace-normal text-white bg-red-500 dark:bg-red-600 capitalize">
 							{safeTranslate(operationalScenario.ro_to.risk_origin.str)}
 						</p>
 					</div>
 					<div
-						class="flex flex-col space-y-4 p-4 bg-violet-200 border-violet-400 border rounded-md shadow-xs text-center"
+						class="flex flex-col space-y-4 p-4 bg-violet-200 dark:bg-violet-900 border-violet-400 border rounded-md shadow-xs text-center"
 					>
-						<h4 class="font-semibold text-gray-600">{m.stakeholders()}</h4>
+						<h4 class="font-semibold text-surface-600-400">{m.stakeholders()}</h4>
 						<i class="fa-solid fa-globe text-3xl"></i>
 						{#each operationalScenario.stakeholders as stakeholder}
-							<p class="badge text-white bg-violet-500">
+							<p class="badge whitespace-normal text-white bg-violet-500 dark:bg-violet-600">
 								<a class="anchor text-white" href="/stakeholders/{stakeholder.id}"
 									>{stakeholder.str}</a
 								>
 							</p>
 						{:else}
-							<p class="text-gray-500 italic">{m.noStakeholders()}</p>
+							<p class="text-surface-600-400 italic">{m.noStakeholders()}</p>
 						{/each}
 					</div>
 					<div
-						class="flex flex-col space-y-4 p-4 bg-blue-200 border-blue-400 border rounded-md shadow-xs text-center"
+						class="flex flex-col space-y-4 p-4 bg-blue-200 border-blue-400 dark:bg-blue-900 dark:border-blue-700 border rounded-md shadow-xs text-center"
 					>
-						<h4 class="font-semibold text-gray-600">{m.targetObjective()}</h4>
+						<h4 class="font-semibold text-surface-600-400">{m.targetObjective()}</h4>
 						<i class="fa-solid fa-bullseye text-3xl"></i>
-						<p class="badge text-white bg-blue-500">{operationalScenario.ro_to.target_objective}</p>
+						<p class="badge whitespace-normal text-white bg-blue-500 dark:bg-blue-600 break-all">
+							{operationalScenario.ro_to.target_objective}
+						</p>
 					</div>
 				</div>
 			</div>
-			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-xs">
-				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
+			<div class="w-full p-4 bg-surface-50-950 border rounded-md shadow-xs">
+				<h3 class="font-semibold text-lg text-surface-700-300 flex items-center space-x-2">
 					<i class="fa-solid fa-biohazard text-red-500"></i>
 					<span>{m.threats()}</span>
 				</h3>
@@ -190,7 +231,7 @@
 						<span>{m.objectsNotVisible({ count: countMasked(operationalScenario.threats) })}</span>
 					</div>
 				{/if}
-				<ul class="list-disc list-inside text-gray-600">
+				<ul class="list-disc list-inside text-surface-600-400">
 					{#if operationalScenario.threats?.length}
 						{#each operationalScenario.threats as threat}
 							{#if threat.id && threat.str}
@@ -203,59 +244,53 @@
 				</ul>
 			</div>
 			{#if Object.keys(data.relatedModels).length > 0}
-				<div class="card shadow-lg mt-8 bg-white w-full">
+				<div class="card shadow-lg mt-8 bg-surface-50-950 w-full">
 					<Tabs
 						value={group}
 						onValueChange={(e) => {
 							group = e.value;
 						}}
-						listJustify="justify-center"
 					>
-						{#snippet list()}
+						<Tabs.List>
 							{#each Object.entries(data.relatedModels) as [urlmodel, model]}
-								<Tabs.Control value={urlmodel}>
+								<Tabs.Trigger value={urlmodel} data-testid="tabs-control">
 									{safeTranslate(model.info.localNamePlural)}
 									{#if model.table.body.length > 0}
 										<span class="badge preset-tonal-secondary">{model.table.body.length}</span>
 									{/if}
-								</Tabs.Control>
+								</Tabs.Trigger>
 							{/each}
-						{/snippet}
-						{#snippet content()}
-							{#each Object.entries(data.relatedModels) as [urlmodel, model]}
-								<Tabs.Panel value={urlmodel}>
-									<div class="flex flex-row justify-between px-4 py-2">
-										<h4 class="font-semibold lowercase capitalize-first my-auto">
-											{safeTranslate('associated-' + model.info.localNamePlural)}
-										</h4>
-									</div>
-									{#if model.table}
-										<ModelTable
-											source={model.table}
-											deleteForm={model.deleteForm}
-											URLModel={urlmodel}
-											baseEndpoint="/operating-modes?operational_scenario={page.params.id}"
-										>
-											{#snippet addButton()}
-												<div>
-													<span
-														class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
-													>
-														<button
-															class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
-															data-testid="add-button"
-															title={safeTranslate('add-' + model.info.localName)}
-															onclick={(_) => modalCreateForm(model)}
-															><i class="fa-solid fa-file-circle-plus"></i>
-														</button>
-													</span>
-												</div>
-											{/snippet}
-										</ModelTable>
-									{/if}
-								</Tabs.Panel>
-							{/each}
-						{/snippet}
+							<Tabs.Indicator />
+						</Tabs.List>
+						{#each Object.entries(data.relatedModels) as [urlmodel, model]}
+							<Tabs.Content value={urlmodel}>
+								<div class="py-2"></div>
+								{#if model.table}
+									<ModelTable
+										source={model.table}
+										deleteForm={model.deleteForm}
+										URLModel={urlmodel}
+										baseEndpoint="/operating-modes?operational_scenario={page.params.id}"
+									>
+										{#snippet addButton()}
+											<div>
+												<span
+													class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
+												>
+													<button
+														class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+														data-testid="add-button"
+														title={safeTranslate('add-' + model.info.localName)}
+														onclick={(_) => modalCreateForm(model)}
+														><i class="fa-solid fa-file-circle-plus"></i>
+													</button>
+												</span>
+											</div>
+										{/snippet}
+									</ModelTable>
+								{/if}
+							</Tabs.Content>
+						{/each}
 					</Tabs>
 				</div>
 			{/if}
@@ -265,138 +300,149 @@
 			class="relative p-4 space-y-4 rounded-md w-full flex flex-col items-center
                 {activeActivity === 'two'
 				? 'border-2 border-primary-500'
-				: 'border-2 border-gray-300 border-dashed'}"
+				: 'border-2 border-surface-300-700 border-dashed'}"
 		>
 			<span
-				class="absolute -top-3 bg-white font-bold {activeActivity === 'two'
+				class="absolute -top-3 bg-surface-50-950 font-bold {activeActivity === 'two'
 					? 'text-primary-500'
-					: 'text-gray-500'}">{m.activityTwo()}</span
+					: 'text-surface-600-400'}">{m.activityTwo()}</span
 			>
 			<h1
-				class="font-bold text-xl {activeActivity === 'two' ? 'text-primary-500' : 'text-gray-500'}"
+				class="font-bold text-xl {activeActivity === 'two'
+					? 'text-primary-500'
+					: 'text-surface-600-400'}"
 			>
 				{m.ebiosWs4_2()}
 			</h1>
 			<div
-				class="flex items-center w-full p-4 bg-gray-50 border rounded-md shadow-xs space-x-4 justify-between"
+				class="flex items-center w-full p-4 bg-surface-50-950 border rounded-md shadow-xs space-x-4 justify-between"
 			>
 				<div
 					style="background-color: {operationalScenario.likelihood.hexcolor}"
-					class="flex flex-col items-center justify-center border rounded-md p-4 font-semibold w-full"
+					class="flex flex-col items-center justify-center border rounded-md p-4 font-semibold w-full {isDark(
+						operationalScenario.likelihood.hexcolor
+					)
+						? 'text-white'
+						: 'text-surface-950'}"
 				>
 					<Popover
 						open={likelihoodPopupOpen}
 						onOpenChange={(e) =>
 							(likelihoodPopupOpen = operationalScenario.likelihood.description ? e.open : false)}
 						positioning={{ placement: 'bottom' }}
-						zIndex="100"
-						contentBase="max-w-sm"
 					>
-						{#snippet trigger()}
-							<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
+						<Popover.Trigger>
+							<h3 class="font-semibold text-lg flex items-center space-x-2">
 								{#if operationalScenario.likelihood.description}
-									<i class="fa-solid fa-dice text-black opacity-75"></i>
+									<i class="fa-solid fa-dice opacity-75"></i>
 								{/if}
 								<span>{m.likelihood()}</span>
 							</h3>
 							<span>{operationalScenario.likelihood.name}</span>
 							<i class="fa-solid fa-circle-info cursor-pointer hover:opacity-70"></i>
-						{/snippet}
-						{#snippet content()}
-							<div
-								class="card bg-black text-gray-200 p-4 z-20"
-								style="color: {operationalScenario.likelihood.hexcolor}"
-							>
-								<p data-testid="likelihood-description" class="font-semibold">
-									{operationalScenario.likelihood.description}
-								</p>
-								<div class="arrow bg-black"></div>
-							</div>
-						{/snippet}
+						</Popover.Trigger>
+						<Popover.Positioner>
+							<Popover.Content class="max-w-sm">
+								<div
+									class="card bg-black text-surface-200-800 p-4 z-20"
+									style="color: {operationalScenario.likelihood.hexcolor}"
+								>
+									<p data-testid="likelihood-description" class="font-semibold">
+										{operationalScenario.likelihood.description}
+									</p>
+								</div>
+							</Popover.Content>
+						</Popover.Positioner>
 					</Popover>
 				</div>
 				<i class="fa-solid fa-xmark"></i>
 				<div
 					style="background-color: {operationalScenario.gravity.hexcolor}"
-					class="flex flex-col items-center justify-center border rounded-md p-4 font-semibold w-full"
+					class="flex flex-col items-center justify-center border rounded-md p-4 font-semibold w-full {isDark(
+						operationalScenario.gravity.hexcolor
+					)
+						? 'text-white'
+						: 'text-surface-950'}"
 				>
 					<Popover
 						open={gravityPopupOpen}
 						onOpenChange={(e) =>
 							(gravityPopupOpen = operationalScenario.gravity.description ? e.open : false)}
 						positioning={{ placement: 'bottom' }}
-						zIndex="100"
-						contentBase="max-w-sm"
 					>
-						{#snippet trigger()}
-							<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
+						<Popover.Trigger>
+							<h3 class="font-semibold text-lg flex items-center space-x-2">
 								{#if operationalScenario.gravity.description}
-									<i class="fa-solid fa-bomb text-black opacity-75"></i>
+									<i class="fa-solid fa-bomb opacity-75"></i>
 								{/if}
 								<span>{m.gravity()}</span>
 							</h3>
 							<span>{operationalScenario.gravity.name}</span>
 							<i class="fa-solid fa-circle-info cursor-pointer hover:opacity-70"></i>
-						{/snippet}
-						{#snippet content()}
-							<div
-								class="card bg-black text-gray-200 p-4 z-20"
-								style="color: {operationalScenario.gravity.hexcolor}"
-							>
-								<p data-testid="gravity-description" class="font-semibold">
-									{operationalScenario.gravity.description}
-								</p>
-								<div class="arrow bg-black"></div>
-							</div>
-						{/snippet}
+						</Popover.Trigger>
+						<Popover.Positioner>
+							<Popover.Content class="max-w-sm">
+								<div
+									class="card bg-black text-surface-200-800 p-4 z-20"
+									style="color: {operationalScenario.gravity.hexcolor}"
+								>
+									<p data-testid="gravity-description" class="font-semibold">
+										{operationalScenario.gravity.description}
+									</p>
+								</div>
+							</Popover.Content>
+						</Popover.Positioner>
 					</Popover>
 				</div>
 				<i class="fa-solid fa-equals"></i>
 				<div
 					style="background-color: {operationalScenario.risk_level.hexcolor}"
-					class="flex flex-col items-center justify-center border rounded-md p-4 font-semibold w-full"
+					class="flex flex-col items-center justify-center border rounded-md p-4 font-semibold w-full {isDark(
+						operationalScenario.risk_level.hexcolor
+					)
+						? 'text-white'
+						: 'text-surface-950'}"
 				>
 					<Popover
 						open={riskLevelPopupOpen}
 						onOpenChange={(e) =>
 							(riskLevelPopupOpen = operationalScenario.risk_level.description ? e.open : false)}
 						positioning={{ placement: 'bottom' }}
-						zIndex="100"
-						contentBase="max-w-sm"
 					>
-						{#snippet trigger()}
-							<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
+						<Popover.Trigger>
+							<h3 class="font-semibold text-lg flex items-center space-x-2">
 								{#if operationalScenario.risk_level.description}
-									<i class="fa-solid fa-circle-radiation text-black opacity-75"></i>
+									<i class="fa-solid fa-circle-radiation opacity-75"></i>
 								{/if}
 								<span>{m.riskLevel()}</span>
 							</h3>
 							<span>{operationalScenario.risk_level.name}</span>
 							<i class="fa-solid fa-circle-info cursor-pointer hover:opacity-70"></i>
-						{/snippet}
-						{#snippet content()}
-							<div
-								class="card bg-black text-gray-200 p-4 z-20"
-								style="color: {operationalScenario.risk_level.hexcolor}"
-							>
-								<p data-testid="riskLevel-description" class="font-semibold">
-									{operationalScenario.risk_level.description}
-								</p>
-								<div class="arrow bg-black"></div>
-							</div>
-						{/snippet}
+						</Popover.Trigger>
+						<Popover.Positioner>
+							<Popover.Content class="max-w-sm">
+								<div
+									class="card bg-black text-surface-200-800 p-4 z-20"
+									style="color: {operationalScenario.risk_level.hexcolor}"
+								>
+									<p data-testid="riskLevel-description" class="font-semibold">
+										{operationalScenario.risk_level.description}
+									</p>
+								</div>
+							</Popover.Content>
+						</Popover.Positioner>
 					</Popover>
 				</div>
 			</div>
-			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-xs">
-				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
-					<i class="fa-solid fa-eye text-gray-500 opacity-75"></i>
+			<div class="w-full p-4 bg-surface-50-950 border rounded-md shadow-xs">
+				<h3 class="font-semibold text-lg text-surface-700-300 flex items-center space-x-2">
+					<i class="fa-solid fa-eye text-surface-600-400 opacity-75"></i>
 					<span>{m.justification()}</span>
 				</h3>
 				{#if operationalScenario.justification}
-					<p class="text-gray-600">{operationalScenario.justification}</p>
+					<p class="text-surface-600-400">{operationalScenario.justification}</p>
 				{:else}
-					<p class="text-gray-600">{m.noJustification()}</p>
+					<p class="text-surface-600-400">{m.noJustification()}</p>
 				{/if}
 			</div>
 		</div>

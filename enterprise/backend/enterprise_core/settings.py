@@ -15,11 +15,12 @@ from dotenv import load_dotenv
 from datetime import timedelta
 import logging.config
 import structlog
+from django.core.exceptions import ImproperlyConfigured
 from django.core.management.utils import get_random_secret_key
+import ssl
 from ciso_assistant import meta
 
 BASE_DIR = Path(os.getenv("DJANGO_BASE_DIR", Path(__file__).resolve().parent.parent))
-
 load_dotenv(BASE_DIR / ".meta")
 
 VERSION = os.getenv("CISO_ASSISTANT_VERSION", "unset")
@@ -52,14 +53,30 @@ LOGGING = {
             "processor": structlog.dev.ConsoleRenderer(),
         },
     },
+    # Warning and above go to stderr, the rest to stdout, so systemd/journald
+    # assigns error vs info priority correctly.
+    "filters": {
+        "below_warning": {
+            "()": "django.utils.log.CallbackFilter",
+            "callback": lambda record: record.levelno < logging.WARNING,
+        },
+    },
     "handlers": {
-        "console": {
+        "stdout": {
             "class": "logging.StreamHandler",
+            "stream": "ext://sys.stdout",
+            "formatter": LOG_FORMAT,
+            "filters": ["below_warning"],
+        },
+        "stderr": {
+            "class": "logging.StreamHandler",
+            "stream": "ext://sys.stderr",
+            "level": "WARNING",
             "formatter": LOG_FORMAT,
         },
     },
     "loggers": {
-        "": {"handlers": ["console"], "level": LOG_LEVEL},
+        "": {"handlers": ["stdout", "stderr"], "level": LOG_LEVEL},
     },
 }
 
@@ -67,7 +84,7 @@ if LOG_OUTFILE:
     LOGGING["handlers"]["file"] = {
         "level": LOG_LEVEL,
         "class": "logging.handlers.WatchedFileHandler",
-        "filename": "ciso-assistant.log",
+        "filename": LOG_OUTFILE,
         "formatter": "json",
     }
     LOGGING["loggers"][""]["handlers"].append("file")
@@ -115,10 +132,49 @@ logger.info("SCHEMA_VERSION: %s", SCHEMA_VERSION)
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
-MAIL_DEBUG = os.environ.get("MAIL_DEBUG", "False") == "True"
+DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() in ("true", "1", "yes")
+MAIL_DEBUG = os.environ.get("MAIL_DEBUG", "False").lower() in ("true", "1", "yes")
+
+# SECURITY WARNING: Sensitive operations, such as excel file processing, can run in a sandbox.
+# The sandbox is disabled by default; set ENABLE_SANDBOX=true to enable bubblewrap isolation.
+ENABLE_SANDBOX = os.environ.get("ENABLE_SANDBOX", "False").strip().lower() in (
+    "true",
+    "1",
+    "yes",
+)
+
+ENABLE_CHAT = os.environ.get("ENABLE_CHAT", "False").strip().lower() in (
+    "true",
+    "1",
+    "yes",
+)
+
+# Infrastructure configuration management. Disabled by default. When enabled,
+# admins can manage infrastructure configuration settings (e.g. the list of
+# IPs/CIDRs allowed to reach the backend) from the settings UI, and an
+# unauthenticated /infra-config/ endpoint exposes those settings for the
+# infrastructure layer to consume (must never be reachable publicly).
+ENABLE_INFRA_CONFIG_MANAGEMENT = os.environ.get(
+    "ENABLE_INFRA_CONFIG_MANAGEMENT", "False"
+).strip().lower() in (
+    "true",
+    "1",
+    "yes",
+)
+
+EXPOSE_METRICS = os.environ.get("EXPOSE_METRICS", "False").strip().lower() in (
+    "true",
+    "1",
+    "yes",
+)
+
+LIBRARY_COMPATIBILITY_MODES = [0, 1, 2, 3]
 
 logger.info("DEBUG mode: %s", DEBUG)
+logger.info("ENABLE_SANDBOX: %s", ENABLE_SANDBOX)
+logger.info("ENABLE_CHAT: %s", ENABLE_CHAT)
+logger.info("ENABLE_INFRA_CONFIG_MANAGEMENT: %s", ENABLE_INFRA_CONFIG_MANAGEMENT)
+logger.info("EXPOSE_METRICS: %s", EXPOSE_METRICS)
 logger.info("CISO_ASSISTANT_URL: %s", CISO_ASSISTANT_URL)
 # ALLOWED_HOSTS should contain the backend address
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
@@ -129,7 +185,13 @@ LOCAL_STORAGE_DIRECTORY = os.environ.get(
 )
 ATTACHMENT_MAX_SIZE_MB = os.environ.get("ATTACHMENT_MAX_SIZE_MB", 25)
 
-USE_S3 = os.getenv("USE_S3", "False") == "True"
+USE_S3 = os.getenv("USE_S3", "False").lower() in ("true", "1", "yes")
+USE_AZURE = os.getenv("USE_AZURE", "False").lower() in ("true", "1", "yes")
+
+if USE_S3 and USE_AZURE:
+    raise ImproperlyConfigured(
+        "Both USE_S3 and USE_AZURE are enabled. Please configure only one storage backend."
+    )
 
 if USE_S3:
     STORAGES = {
@@ -147,20 +209,158 @@ if USE_S3:
         "AWS_STORAGE_BUCKET_NAME", "ciso-assistant-bucket"
     )
     AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL")
+    AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME")
 
-    if not AWS_ACCESS_KEY_ID:
-        logger.error("AWS_ACCESS_KEY_ID must be set")
-    if not AWS_SECRET_ACCESS_KEY:
-        logger.error("AWS_SECRET_ACCESS_KEY must be set")
-    if not AWS_S3_ENDPOINT_URL:
-        logger.error("AWS_S3_ENDPOINT_URL must be set")
-    if not AWS_ACCESS_KEY_ID or not AWS_SECRET_ACCESS_KEY or not AWS_S3_ENDPOINT_URL:
-        exit(1)
+    # Support for AWS IRSA (IAM Roles for Service Accounts) via web identity token
+    AWS_WEB_IDENTITY_TOKEN_FILE = os.getenv("AWS_WEB_IDENTITY_TOKEN_FILE")
+    AWS_ROLE_ARN = os.getenv("AWS_ROLE_ARN")
+
+    # Check if using explicit credentials (access key) or IRSA (web identity token)
+    using_access_key = AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
+    using_irsa = AWS_WEB_IDENTITY_TOKEN_FILE and AWS_ROLE_ARN
+
+    if using_access_key and using_irsa:
+        raise ImproperlyConfigured(
+            "Ambiguous AWS credentials configuration. Both static access keys "
+            "(AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY) and IRSA credentials "
+            "(AWS_WEB_IDENTITY_TOKEN_FILE/AWS_ROLE_ARN) are set. "
+            "Please configure only one authentication method."
+        )
+
+    if AWS_ACCESS_KEY_ID and not AWS_SECRET_ACCESS_KEY:
+        raise ImproperlyConfigured(
+            "AWS_ACCESS_KEY_ID is set but AWS_SECRET_ACCESS_KEY is missing."
+        )
+    if AWS_SECRET_ACCESS_KEY and not AWS_ACCESS_KEY_ID:
+        raise ImproperlyConfigured(
+            "AWS_SECRET_ACCESS_KEY is set but AWS_ACCESS_KEY_ID is missing."
+        )
+    if AWS_WEB_IDENTITY_TOKEN_FILE and not AWS_ROLE_ARN:
+        raise ImproperlyConfigured(
+            "AWS_WEB_IDENTITY_TOKEN_FILE is set but AWS_ROLE_ARN is missing."
+        )
+    if AWS_ROLE_ARN and not AWS_WEB_IDENTITY_TOKEN_FILE:
+        raise ImproperlyConfigured(
+            "AWS_ROLE_ARN is set but AWS_WEB_IDENTITY_TOKEN_FILE is missing."
+        )
+
+    if not using_access_key and not using_irsa:
+        raise ImproperlyConfigured(
+            "AWS credentials not configured. Either set AWS_ACCESS_KEY_ID and "
+            "AWS_SECRET_ACCESS_KEY for explicit credentials, or AWS_WEB_IDENTITY_TOKEN_FILE "
+            "and AWS_ROLE_ARN for IRSA (IAM Roles for Service Accounts)."
+        )
+
+    if using_irsa:
+        logger.info("Using AWS IRSA (Web Identity Token) for S3 authentication")
+        logger.info("AWS_ROLE_ARN: %s", AWS_ROLE_ARN)
+        # Setting to None so django-storages passes None to boto3, which then
+        # falls through to the credential chain and picks up IRSA web identity.
+        AWS_ACCESS_KEY_ID = None
+        AWS_SECRET_ACCESS_KEY = None
+    else:
+        logger.info("Using AWS Access Key for S3 authentication")
 
     logger.info("AWS_STORAGE_BUCKET_NAME: %s", AWS_STORAGE_BUCKET_NAME)
-    logger.info("AWS_S3_ENDPOINT_URL: %s", AWS_S3_ENDPOINT_URL)
+    if AWS_S3_ENDPOINT_URL:
+        logger.info("AWS_S3_ENDPOINT_URL: %s", AWS_S3_ENDPOINT_URL)
+    if AWS_S3_REGION_NAME:
+        logger.info("AWS_S3_REGION_NAME: %s", AWS_S3_REGION_NAME)
 
+    AWS_LOCATION = os.getenv("AWS_LOCATION", "")
     AWS_S3_FILE_OVERWRITE = False
+
+elif USE_AZURE:
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.azure_storage.AzureStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+
+    AZURE_ACCOUNT_NAME = os.getenv("AZURE_ACCOUNT_NAME")
+    AZURE_ACCOUNT_KEY = os.getenv("AZURE_ACCOUNT_KEY")
+    AZURE_CONNECTION_STRING = os.getenv("AZURE_CONNECTION_STRING")
+    AZURE_CONTAINER = os.getenv("AZURE_CONTAINER", "ciso-assistant-container")
+    AZURE_CUSTOM_DOMAIN = os.getenv("AZURE_CUSTOM_DOMAIN")
+
+    using_managed_identity = os.getenv(
+        "AZURE_USE_MANAGED_IDENTITY", "False"
+    ).lower() in (
+        "true",
+        "1",
+        "yes",
+    )
+
+    # Managed Identity uses AZURE_ACCOUNT_NAME without a key by design, so only
+    # enforce the name+key pairing when Managed Identity is not requested.
+    if not using_managed_identity and bool(AZURE_ACCOUNT_NAME) != bool(
+        AZURE_ACCOUNT_KEY
+    ):
+        missing = (
+            "AZURE_ACCOUNT_NAME" if not AZURE_ACCOUNT_NAME else "AZURE_ACCOUNT_KEY"
+        )
+        present = (
+            "AZURE_ACCOUNT_KEY" if not AZURE_ACCOUNT_NAME else "AZURE_ACCOUNT_NAME"
+        )
+        raise ImproperlyConfigured(
+            f"{present} is set but {missing} is missing. "
+            "Both AZURE_ACCOUNT_NAME and AZURE_ACCOUNT_KEY are required for Account Key authentication."
+        )
+
+    using_account_key = bool(AZURE_ACCOUNT_NAME and AZURE_ACCOUNT_KEY)
+    using_connection_string = bool(AZURE_CONNECTION_STRING)
+
+    active_auth_methods = sum(
+        [using_account_key, using_connection_string, using_managed_identity]
+    )
+
+    if active_auth_methods > 1:
+        raise ImproperlyConfigured(
+            "Ambiguous Azure credentials configuration. Please configure only one "
+            "authentication method: Account Key (AZURE_ACCOUNT_NAME + AZURE_ACCOUNT_KEY), "
+            "Connection String (AZURE_CONNECTION_STRING), or "
+            "Managed Identity (AZURE_USE_MANAGED_IDENTITY=True)."
+        )
+
+    if active_auth_methods == 0:
+        raise ImproperlyConfigured(
+            "Azure credentials not configured. Either set AZURE_ACCOUNT_NAME and "
+            "AZURE_ACCOUNT_KEY for Account Key authentication, AZURE_CONNECTION_STRING "
+            "for Connection String authentication, or AZURE_USE_MANAGED_IDENTITY=True "
+            "for Managed Identity authentication."
+        )
+
+    if using_account_key:
+        logger.info("Using Azure Account Key for Blob Storage authentication")
+
+    elif using_connection_string:
+        logger.info("Using Azure Connection String for Blob Storage authentication")
+
+    else:
+        if not AZURE_ACCOUNT_NAME:
+            raise ImproperlyConfigured(
+                "AZURE_ACCOUNT_NAME is required when using Managed Identity "
+                "(AZURE_USE_MANAGED_IDENTITY=True)."
+            )
+        logger.info("Using Azure Managed Identity for Blob Storage authentication")
+        from azure.identity import ManagedIdentityCredential
+
+        AZURE_TOKEN_CREDENTIAL = ManagedIdentityCredential()
+        # Clear key/connection string so django-storages uses the token credential only
+        AZURE_ACCOUNT_KEY = None
+        AZURE_CONNECTION_STRING = None
+
+    logger.info("AZURE_CONTAINER: %s", AZURE_CONTAINER)
+    if AZURE_ACCOUNT_NAME:
+        logger.info("AZURE_ACCOUNT_NAME: %s", AZURE_ACCOUNT_NAME)
+    if AZURE_CUSTOM_DOMAIN:
+        logger.info("AZURE_CUSTOM_DOMAIN: %s", AZURE_CUSTOM_DOMAIN)
+
+    AZURE_LOCATION = os.getenv("AZURE_LOCATION", "")
+    AZURE_OVERWRITE_FILES = False
 
 else:
     MEDIA_ROOT = LOCAL_STORAGE_DIRECTORY
@@ -180,6 +380,7 @@ INSTALLED_APPS = [
     "auditlog",
     "tailwind",
     "iam",
+    "sec_intel",
     "global_settings",
     "pmbok",
     "ebios_rm",
@@ -187,7 +388,11 @@ INSTALLED_APPS = [
     "privacy",
     "resilience",
     "crq",
+    "custom_fields",
     "metrology",
+    "chat",
+    "doc_management",
+    "portals",
     "core",
     "cal",
     "django_filters",
@@ -215,10 +420,10 @@ MIDDLEWARE = [
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
+    "django_structlog.middlewares.RequestMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "django_structlog.middlewares.RequestMiddleware",
     "core.custom_middleware.AuditlogMiddleware",
     "allauth.account.middleware.AccountMiddleware",
     "core.focus_middleware.FocusModeMiddleware",
@@ -232,9 +437,9 @@ LOGOUT_REDIRECT_URL = "/api"
 AUTH_TOKEN_TTL = int(
     os.environ.get("AUTH_TOKEN_TTL", default=60 * 60)
 )  # defaults to 60 minutes
-AUTH_TOKEN_AUTO_REFRESH = (
-    os.environ.get("AUTH_TOKEN_AUTO_REFRESH", default="True") == "True"
-)  # prevents token from expiring while user is active
+AUTH_TOKEN_AUTO_REFRESH = os.environ.get(
+    "AUTH_TOKEN_AUTO_REFRESH", default="True"
+).lower() in ("true", "1", "yes")  # prevents token from expiring while user is active
 AUTH_TOKEN_AUTO_REFRESH_MAX_TTL = (
     int(os.environ.get("AUTH_TOKEN_AUTO_REFRESH_MAX_TTL", default=60 * 60 * 10)) or None
 )  # absolute timeout for auto-refresh, defaults to 10 hours. token expires after this time even if the user is active.
@@ -246,18 +451,60 @@ DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
 logger.info("DEFAULT_FROM_EMAIL: %s", DEFAULT_FROM_EMAIL)
 
 EMAIL_HOST = os.environ.get("EMAIL_HOST")
+logger.info("EMAIL_HOST: %s", EMAIL_HOST)
 EMAIL_PORT = os.environ.get("EMAIL_PORT")
+logger.info("EMAIL_PORT: %s", EMAIL_PORT)
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
-EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "False") == "True"
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "False").lower() in ("true", "1", "yes")
+logger.info("EMAIL_USE_TLS: %s", EMAIL_USE_TLS)
+EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "False").lower() in ("true", "1", "yes")
+logger.info("EMAIL_USE_SSL: %s", EMAIL_USE_SSL)
+if EMAIL_USE_TLS and EMAIL_USE_SSL:
+    raise ValueError("EMAIL_USE_TLS and EMAIL_USE_SSL are mutually exclusive")
 # rescue mail
 EMAIL_HOST_RESCUE = os.environ.get("EMAIL_HOST_RESCUE")
+logger.info("EMAIL_HOST_RESCUE: %s", EMAIL_HOST_RESCUE)
 EMAIL_PORT_RESCUE = os.environ.get("EMAIL_PORT_RESCUE")
+logger.info("EMAIL_PORT_RESCUE: %s", EMAIL_PORT_RESCUE)
 EMAIL_HOST_USER_RESCUE = os.environ.get("EMAIL_HOST_USER_RESCUE")
 EMAIL_HOST_PASSWORD_RESCUE = os.environ.get("EMAIL_HOST_PASSWORD_RESCUE")
-EMAIL_USE_TLS_RESCUE = os.environ.get("EMAIL_USE_TLS_RESCUE", "False") == "True"
+EMAIL_USE_TLS_RESCUE = os.environ.get("EMAIL_USE_TLS_RESCUE", "False").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+logger.info("EMAIL_USE_TLS_RESCUE: %s", EMAIL_USE_TLS_RESCUE)
+EMAIL_USE_SSL_RESCUE = os.environ.get("EMAIL_USE_SSL_RESCUE", "False").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+logger.info("EMAIL_USE_SSL_RESCUE: %s", EMAIL_USE_SSL_RESCUE)
+if EMAIL_USE_TLS_RESCUE and EMAIL_USE_SSL_RESCUE:
+    raise ValueError(
+        "EMAIL_USE_TLS_RESCUE and EMAIL_USE_SSL_RESCUE are mutually exclusive"
+    )
+EMAIL_FORCE_TLS_1_2 = os.environ.get("EMAIL_FORCE_TLS_1_2", "False").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+logger.info("EMAIL_FORCE_TLS_1_2: %s", EMAIL_FORCE_TLS_1_2)
+
+
+def _build_tls12_context():
+    context = ssl.create_default_context()
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
+    context.maximum_version = ssl.TLSVersion.TLSv1_2
+    context.set_ciphers("ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256")
+    return context
+
+
+EMAIL_SSL_CONTEXT = _build_tls12_context() if EMAIL_FORCE_TLS_1_2 else None
 
 EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", default="5"))  # seconds
+logger.info("EMAIL_TIMEOUT: %s", EMAIL_TIMEOUT)
 
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
@@ -387,6 +634,10 @@ LANGUAGES = [
     ("tr", "Turkish"),
     ("hr", "Croatian"),
     ("zh", "Chinese (Simplified)"),
+    ("lt", "Lithuanian"),
+    ("ko", "Korean"),
+    ("et", "Estonian"),
+    ("sk", "Slovak"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -404,12 +655,15 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # SQLIte file can be changed, useful for tests
 SQLITE_FILE = os.environ.get("SQLITE_FILE", BASE_DIR / "db/ciso-assistant.sqlite3")
-LIBRARIES_PATH = library_path = BASE_DIR / "library/libraries"
+_lib_path = BASE_DIR / "library/libraries"
+if not _lib_path.is_dir():
+    _lib_path = BASE_DIR.parent.parent / "backend" / "library" / "libraries"
+LIBRARIES_PATH = library_path = _lib_path
 
 if "POSTGRES_NAME" in os.environ:
     DATABASES = {
         "default": {
-            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "ENGINE": "django.db.backends.postgresql",
             "NAME": os.environ["POSTGRES_NAME"],
             "USER": os.environ["POSTGRES_USER"],
             "PASSWORD": os.environ["POSTGRES_PASSWORD"],
@@ -418,6 +672,11 @@ if "POSTGRES_NAME" in os.environ:
             "CONN_MAX_AGE": os.environ.get("CONN_MAX_AGE", 300),
         }
     }
+    # Allow for SSL connections to PostgreSQL databases that require it
+    if "POSTGRES_SSL_MODE" in os.environ:
+        DATABASES["default"].setdefault("OPTIONS", {})["sslmode"] = os.environ[
+            "POSTGRES_SSL_MODE"
+        ]
 else:
     DATABASES = {
         "default": {
@@ -492,9 +751,31 @@ SOCIALACCOUNT_PROVIDERS = {
     },
 }
 
+# MFA / WebAuthn settings
+MFA_SUPPORTED_TYPES = ["recovery_codes", "totp", "webauthn"]
+MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN = DEBUG  # Allow http://localhost in dev
+MFA_PASSKEY_LOGIN_ENABLED = False
+MFA_PASSKEY_SIGNUP_ENABLED = False
+MFA_ADAPTER = "iam.adapter.MFAAdapter"
+
 ROUTES["client-settings"] = {
     "viewset": "enterprise_core.views.ClientSettingsViewSet",
     "basename": "client-settings",
+}
+
+ROUTES["custom-email-templates"] = {
+    "viewset": "enterprise_core.views.CustomEmailTemplateViewSet",
+    "basename": "custom-email-templates",
+}
+
+ROUTES["custom-word-templates"] = {
+    "viewset": "enterprise_core.views.CustomWordTemplateViewSet",
+    "basename": "custom-word-templates",
+}
+
+ROUTES["custom-doc-html-templates"] = {
+    "viewset": "enterprise_core.views.CustomDocHtmlTemplateViewSet",
+    "basename": "custom-doc-html-templates",
 }
 
 MODULES["enterprise_core"] = {
@@ -535,6 +816,7 @@ HUEY = {
 AUDITLOG_RETENTION_DAYS = int(os.environ.get("AUDITLOG_RETENTION_DAYS", 90))
 AUDITLOG_MAX_RECORDS = int(os.environ.get("AUDITLOG_MAX_RECORDS", 50000))
 
-WEBHOOK_ALLOW_PRIVATE_IPS = (
-    os.environ.get("WEBHOOK_ALLOW_PRIVATE_IPS", "False") == "True"
-)
+# Allow outbound server-side requests (webhooks, integrations, LLM URLs) to private/loopback addresses
+ALLOW_PRIVATE_NETWORK_REQUESTS = os.environ.get(
+    "ALLOW_PRIVATE_NETWORK_REQUESTS", "False"
+).lower() in ("true", "1", "yes")

@@ -40,21 +40,6 @@
 />
 <AutocompleteSelect
 	{form}
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.folder()}
-	hidden
-/>
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
-<AutocompleteSelect
-	{form}
 	multiple
 	optionsEndpoint="stakeholders"
 	optionsDetailedUrlParameters={$formStore.ebios_rm_study

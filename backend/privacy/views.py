@@ -1,5 +1,7 @@
+import uuid
+
 from core.constants import COUNTRY_CHOICES
-from core.models import Actor
+from core.models import Actor, Terminology
 from core.serializers import ActorReadSerializer
 from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
@@ -7,16 +9,17 @@ from core.views import (
     escape_excel_formula,
 )
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Count
 from itertools import chain
 from collections import defaultdict
 
+from core.utils import camel_case
 from iam.models import Folder, RoleAssignment
 
 from .models import (
-    ProcessingNature,
     Purpose,
     PersonalData,
     DataSubject,
@@ -26,7 +29,9 @@ from .models import (
     Processing,
     RightRequest,
     DataBreach,
-    LEGAL_BASIS_CHOICES,
+    ART6_LAWFUL_BASIS_CHOICES,
+    ART9_SPECIAL_CATEGORY_CONDITION_CHOICES,
+    TRANSFER_MECHANISM_CHOICES,
 )
 
 EU_COUNTRIES_SET = {
@@ -70,11 +75,15 @@ class PurposeViewSet(BaseModelViewSet):
     """
 
     model = Purpose
-    filterset_fields = ["processing", "legal_basis"]
+    filterset_fields = ["processing", "legal_basis", "article_9_condition"]
 
     @action(detail=False, name="Get legal basis choices")
     def legal_basis(self, request):
-        return Response(dict(LEGAL_BASIS_CHOICES))
+        return Response(dict(ART6_LAWFUL_BASIS_CHOICES))
+
+    @action(detail=False, name="Get article 9 condition choices")
+    def article_9_condition(self, request):
+        return Response(dict(ART9_SPECIAL_CATEGORY_CONDITION_CHOICES))
 
 
 class PersonalDataViewSet(BaseModelViewSet):
@@ -85,13 +94,142 @@ class PersonalDataViewSet(BaseModelViewSet):
     model = PersonalData
     filterset_fields = ["processing", "category", "assets"]
 
-    @action(detail=False, name="Get category choices")
-    def category(self, request):
-        return Response(dict(PersonalData.PERSONAL_DATA_CHOICES))
-
     @action(detail=False, name="Get deletion policy choices")
     def deletion_policy(self, request):
         return Response(dict(PersonalData.DELETION_POLICY_CHOICES))
+
+    @action(detail=False, name="Get is_sensitive choices")
+    def is_sensitive(self, request):
+        return Response({"true": "Yes", "false": "No"})
+
+    @action(detail=False, methods=["post"], url_path="batch-create")
+    def batch_create(self, request):
+        """
+        Batch create multiple personal data entries for a processing.
+        Expected format:
+        {
+            "processing": "uuid",
+            "categories": ["privacy_name", "privacy_email", ...],
+            "retention": "2 years",
+            "deletion_policy": "privacy_automatic_deletion",
+            "is_sensitive": false
+        }
+        """
+        processing_id = request.data.get("processing")
+        categories = request.data.get("categories", [])
+        retention = request.data.get("retention", "")
+        deletion_policy = request.data.get("deletion_policy", "")
+        is_sensitive = request.data.get("is_sensitive", False)
+
+        if not processing_id:
+            return Response(
+                {"error": "processing is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not isinstance(categories, list) or not categories:
+            return Response(
+                {"error": "categories is required and must be a non-empty list"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Deduplicate while preserving order
+        categories = list(dict.fromkeys(categories))
+
+        try:
+            processing_uuid = uuid.UUID(str(processing_id))
+        except ValueError, AttributeError:
+            return Response(
+                {"error": "Invalid processing ID"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Processing
+        )
+        try:
+            processing = Processing.objects.filter(id__in=viewable_ids).get(
+                id=processing_uuid
+            )
+        except Processing.DoesNotExist:
+            return Response(
+                {"error": "Processing not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        category_terms = {
+            str(t.id): t
+            for t in Terminology.objects.filter(
+                field_path=Terminology.FieldPath.PERSONAL_DATA_CATEGORY,
+                is_visible=True,
+            )
+        }
+        valid_deletion_policies = {c[0] for c in PersonalData.DELETION_POLICY_CHOICES}
+
+        if deletion_policy and deletion_policy not in valid_deletion_policies:
+            return Response(
+                {"error": f"Invalid deletion_policy: {deletion_policy}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        existing_categories = {
+            str(c)
+            for c in PersonalData.objects.filter(processing=processing).values_list(
+                "category", flat=True
+            )
+        }
+
+        created_items = []
+        skipped_items = []
+        errors = []
+
+        for category in categories:
+            category = str(category)
+            term = category_terms.get(category)
+            if term is None:
+                errors.append({"category": category, "error": "Invalid category"})
+                continue
+
+            if category in existing_categories:
+                existing = PersonalData.objects.filter(
+                    processing=processing, category=term
+                ).first()
+                if existing:
+                    skipped_items.append(
+                        {
+                            "id": str(existing.id),
+                            "category": str(existing.category),
+                            "name": str(existing),
+                        }
+                    )
+                continue
+
+            pd = PersonalData.objects.create(
+                processing=processing,
+                category=term,
+                retention=retention,
+                deletion_policy=deletion_policy,
+                is_sensitive=is_sensitive,
+            )
+            created_items.append(
+                {
+                    "id": str(pd.id),
+                    "category": str(pd.category),
+                    "name": str(pd),
+                }
+            )
+
+        return Response(
+            {
+                "success": True,
+                "created": len(created_items),
+                "skipped": len(skipped_items),
+                "personal_data": created_items,
+                "skipped_personal_data": skipped_items,
+                "errors": errors,
+            },
+            status=status.HTTP_201_CREATED if created_items else status.HTTP_200_OK,
+        )
 
 
 class DataSubjectViewSet(BaseModelViewSet):
@@ -144,16 +282,16 @@ class DataTransferViewSet(BaseModelViewSet):
     """
 
     model = DataTransfer
-    filterset_fields = ["processing"]
+    filterset_fields = ["processing", "transfer_mechanism"]
 
     # this should be cached
     @action(detail=False, name="Get countries list")
     def country(self, request):
         return Response(dict(COUNTRY_CHOICES))
 
-    @action(detail=False, name="Get legal basis choices")
-    def legal_basis(self, request):
-        return Response(dict(LEGAL_BASIS_CHOICES))
+    @action(detail=False, name="Get transfer mechanism choices")
+    def transfer_mechanism(self, request):
+        return Response(dict(TRANSFER_MECHANISM_CHOICES))
 
 
 def agg_countries(viewable_data_transfers, viewable_data_contractors):
@@ -187,7 +325,23 @@ def agg_countries(viewable_data_transfers, viewable_data_contractors):
 class ProcessingViewSet(ExportMixin, BaseModelViewSet):
     model = Processing
 
-    filterset_fields = ["folder", "nature", "status", "filtering_labels", "assigned_to"]
+    filterset_fields = [
+        "folder",
+        "nature",
+        "status",
+        "filtering_labels",
+        "assigned_to",
+        "perimeters",
+        "personal_data__category",
+        "data_subjects__category",
+    ]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .prefetch_related("personal_data__category", "data_subjects")
+        )
 
     export_config = {
         "fields": {
@@ -283,30 +437,33 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
             user=request.user,
             object_type=PersonalData,
         )
-        processings_count = Processing.objects.filter(
-            id__in=viewable_processings
-        ).count()
+        (viewable_data_recipients, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=DataRecipient,
+        )
+        processings_count = len(viewable_processings)
 
         pd_categories = PersonalData.get_categories_count(
             filters={"id__in": viewable_personal_data}
         )
         total_categories = len(pd_categories)
-        # Count distinct entities from data contractors and data transfers
-        contractor_entities = (
-            DataContractor.objects.filter(
-                id__in=viewable_data_contractors, entity__isnull=False
-            )
-            .values_list("entity", flat=True)
-            .distinct()
-        )
-        transfer_entities = (
-            DataTransfer.objects.filter(
-                id__in=viewable_data_transfers, entity__isnull=False
-            )
-            .values_list("entity", flat=True)
-            .distinct()
-        )
-        recipients_count = len(set(list(contractor_entities) + list(transfer_entities)))
+        # Recipients count was previously the sum of distinct entities from data contractors and data transfers
+        # contractor_entities = (
+        #     DataContractor.objects.filter(
+        #         id__in=viewable_data_contractors, entity__isnull=False
+        #     )
+        #     .values_list("entity", flat=True)
+        #     .distinct()
+        # )
+        # transfer_entities = (
+        #     DataTransfer.objects.filter(
+        #         id__in=viewable_data_transfers, entity__isnull=False
+        #     )
+        #     .values_list("entity", flat=True)
+        #     .distinct()
+        # )
+        recipients_count = len(viewable_data_recipients)
 
         open_right_requests_count = (
             RightRequest.objects.filter(id__in=viewable_right_requests)
@@ -320,24 +477,38 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
         )
 
         # Aggregate data breaches by breach type
+        breach_type_labels = dict(DataBreach.BREACH_TYPE_CHOICES)
         breach_types = (
             DataBreach.objects.filter(id__in=viewable_data_breaches)
             .values("breach_type")
             .annotate(count=Count("id"))
         )
         breach_type_data = [
-            {"name": item["breach_type"], "value": item["count"]}
+            {
+                "name": breach_type_labels.get(
+                    item["breach_type"], item["breach_type"]
+                ),
+                "localName": camel_case(item["breach_type"]),
+                "value": item["count"],
+            }
             for item in breach_types
         ]
 
         # Aggregate right requests by request type
+        request_type_labels = dict(RightRequest.REQUEST_TYPE_CHOICES)
         request_types = (
             RightRequest.objects.filter(id__in=viewable_right_requests)
             .values("request_type")
             .annotate(count=Count("id"))
         )
         request_type_data = [
-            {"name": item["request_type"], "value": item["count"]}
+            {
+                "name": request_type_labels.get(
+                    item["request_type"], item["request_type"]
+                ),
+                "localName": camel_case(item["request_type"]),
+                "value": item["count"],
+            }
             for item in request_types
         ]
 
@@ -348,13 +519,13 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
 
         # Get all personal data with their processings and legal bases
         personal_data = (
-            PersonalData.objects.select_related("processing")
+            PersonalData.objects.select_related("processing", "category")
             .prefetch_related("processing__purposes", "processing__data_transfers")
             .filter(id__in=viewable_personal_data)
         )
 
         for pd in personal_data:
-            pd_category = pd.category
+            pd_category = pd.category.name
             processing_name = (
                 pd.processing.name if pd.processing else "Unknown Processing"
             )
@@ -394,15 +565,12 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                     }
                 )
 
-            # Get legal bases from purposes and data transfers
+            # Get legal bases from purposes (Art. 6 legal bases only)
             legal_bases = set()
             if pd.processing:
                 for purpose in pd.processing.purposes.all():
                     if purpose.legal_basis:
                         legal_bases.add(purpose.legal_basis)
-                for transfer in pd.processing.data_transfers.all():
-                    if transfer.legal_basis:
-                        legal_bases.add(transfer.legal_basis)
 
             # Link processing to legal bases (depth 2)
             for legal_basis in legal_bases:
@@ -450,11 +618,6 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                 "sankey_links": sankey_links,
             }
         )
-
-
-class ProcessingNatureViewSet(BaseModelViewSet):
-    model = ProcessingNature
-    search_fields = ["name"]
 
 
 class RightRequestViewSet(BaseModelViewSet):
@@ -505,6 +668,7 @@ class DataBreachViewSet(BaseModelViewSet):
         "authorities",
         "affected_processings",
         "incident",
+        "evidences",
     ]
 
     @action(detail=False, name="Get breach type choices")

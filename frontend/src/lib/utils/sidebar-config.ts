@@ -2,6 +2,7 @@ type SidebarBackendKeys = {
 	xrays: boolean;
 	incidents: boolean;
 	tasks: boolean;
+	control_plan: boolean;
 	risk_acceptances: boolean;
 	exceptions: boolean;
 	follow_up: boolean;
@@ -9,6 +10,7 @@ type SidebarBackendKeys = {
 	scoring_assistant: boolean;
 	vulnerabilities: boolean;
 	compliance: boolean;
+	campaigns: boolean;
 	tprm: boolean;
 	privacy: boolean;
 	experimental: boolean;
@@ -16,6 +18,7 @@ type SidebarBackendKeys = {
 	organisation_issues: boolean;
 	quantitative_risk_studies: boolean;
 	terminologies: boolean;
+	custom_fields: boolean;
 	bia: boolean;
 	project_management: boolean;
 	contracts: boolean;
@@ -26,12 +29,22 @@ type SidebarBackendKeys = {
 	purposes: boolean;
 	right_requests: boolean;
 	data_breaches: boolean;
+	auditee_mode: boolean;
+	advanced_analytics: boolean;
+	journeys: boolean;
+	policy_documents: boolean;
+	document_management: boolean;
+	security_advisories: boolean;
+	cwes: boolean;
+	custom_portals: boolean;
+	idp_groups: boolean;
 };
 
 type SidebarFrontendKeys = {
 	xRays: boolean;
 	incidents: boolean;
 	tasks: boolean;
+	tasksReview: boolean;
 	riskAcceptances: boolean;
 	securityExceptions: boolean;
 	followUp: boolean;
@@ -39,6 +52,7 @@ type SidebarFrontendKeys = {
 	scoringAssistant: boolean;
 	vulnerabilities: boolean;
 	compliance: boolean;
+	campaigns: boolean;
 	thirdPartyCategory: boolean;
 	privacy: boolean;
 	experimental: boolean;
@@ -46,6 +60,7 @@ type SidebarFrontendKeys = {
 	organisationIssues: boolean;
 	quantitativeRiskStudies: boolean;
 	terminologies: boolean;
+	customFields: boolean;
 	businessImpactAnalysis: boolean;
 	projectManagement: boolean;
 	contracts: boolean;
@@ -56,6 +71,12 @@ type SidebarFrontendKeys = {
 	purposes: boolean;
 	rightRequests: boolean;
 	dataBreaches: boolean;
+	auditDashboard: boolean;
+	presets: boolean;
+	securityAdvisories: boolean;
+	cwes: boolean;
+	managePortals: boolean;
+	idpGroups: boolean;
 };
 
 export function getSidebarVisibleItems(
@@ -65,6 +86,7 @@ export function getSidebarVisibleItems(
 		xRays: featureFlags?.xrays ?? false,
 		incidents: featureFlags?.incidents ?? false,
 		tasks: featureFlags?.tasks ?? false,
+		tasksReview: featureFlags?.control_plan ?? true,
 		riskAcceptances: featureFlags?.risk_acceptances ?? false,
 		securityExceptions: featureFlags?.exceptions ?? false,
 		followUp: featureFlags?.follow_up ?? false,
@@ -72,6 +94,7 @@ export function getSidebarVisibleItems(
 		scoringAssistant: featureFlags?.scoring_assistant ?? false,
 		vulnerabilities: featureFlags?.vulnerabilities ?? false,
 		compliance: featureFlags?.compliance ?? false,
+		campaigns: featureFlags?.campaigns ?? false,
 		thirdPartyCategory: featureFlags?.tprm ?? false,
 		privacy: featureFlags?.privacy ?? false,
 		experimental: featureFlags?.experimental ?? false,
@@ -79,6 +102,7 @@ export function getSidebarVisibleItems(
 		organisationIssues: featureFlags?.organisation_issues ?? false,
 		quantitativeRiskStudies: featureFlags?.quantitative_risk_studies ?? false,
 		terminologies: featureFlags?.terminologies ?? true,
+		customFields: featureFlags?.custom_fields ?? false,
 		businessImpactAnalysis: featureFlags?.bia ?? true,
 		projectManagement: featureFlags?.project_management ?? false,
 		contracts: featureFlags?.contracts ?? false,
@@ -88,6 +112,15 @@ export function getSidebarVisibleItems(
 		personalData: featureFlags?.personal_data ?? true,
 		purposes: featureFlags?.purposes ?? true,
 		rightRequests: featureFlags?.right_requests ?? true,
-		dataBreaches: featureFlags?.data_breaches ?? true
+		dataBreaches: featureFlags?.data_breaches ?? true,
+		auditDashboard: featureFlags?.auditee_mode ?? false,
+		presets: featureFlags?.journeys ?? true,
+		securityAdvisories: featureFlags?.security_advisories ?? true,
+		cwes: featureFlags?.cwes ?? true,
+		managePortals: featureFlags?.custom_portals ?? false,
+		idpGroups: featureFlags?.idp_groups ?? false,
+		documents: featureFlags?.document_management ?? true,
+		documentTemplates: featureFlags?.document_management ?? true,
+		objectClassifications: featureFlags?.document_management ?? true
 	};
 }

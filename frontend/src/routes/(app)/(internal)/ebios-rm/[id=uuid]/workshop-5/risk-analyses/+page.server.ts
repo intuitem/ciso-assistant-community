@@ -1,13 +1,14 @@
 import { defaultDeleteFormAction, defaultWriteFormAction } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
+import { formatSelectFieldData } from '$lib/utils/load';
 import { modelSchema } from '$lib/utils/schemas';
 import { listViewFields } from '$lib/utils/table';
 import type { ModelInfo, urlModel } from '$lib/utils/types';
 import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 import { type Actions } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { m } from '$paraglide/messages';
 import type { PageServerLoad } from './$types';
@@ -36,12 +37,8 @@ export const load: PageServerLoad = async ({ params, fetch, url }) => {
 			}${selectField.field}/`;
 			const response = await fetch(url);
 			if (response.ok) {
-				selectOptions[selectField.field] = await response.json().then((data) =>
-					Object.entries(data).map(([key, value]) => ({
-						label: value,
-						value: key
-					}))
-				);
+				const responseData = await response.json();
+				selectOptions[selectField.field] = formatSelectFieldData(responseData, selectField);
 			} else {
 				console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
 			}
@@ -124,7 +121,8 @@ export const actions: Actions = {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
-				}
+				},
+				body: JSON.stringify({})
 			}
 		);
 

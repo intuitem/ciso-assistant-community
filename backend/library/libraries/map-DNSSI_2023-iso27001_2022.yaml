@@ -1,0 +1,839 @@
+urn: urn:intuitem:risk:library:map-dnssi-iso27001-2022
+locale: fr
+ref_id: map-dnssi-iso27001-2022
+name: "Mapping de la DNSSI vers l'ISO 27001:2022"
+description: "Mapping des exigences de la Directive Nationale de Sécurité des Systèmes d'Information (DNSSI) vers la norme ISO 27001:2022"
+version: 1
+publication_date: 2024-07-18
+copyright: "DGSSI Maroc et ISO/IEC"
+provider: "DGSSI Maroc et ISO/IEC"
+packager: "Nadia QOUDHADH"
+dependencies:
+  - urn:intuitem:risk:library:iso27001-2022
+  - urn:intuitem:risk:library:dnssi-2023-2
+objects:
+  requirement_mapping_set:
+    urn: urn:intuitem:risk:req_mapping_set:dnssi-2023-2-to-iso27001-2022
+    ref_id: mapping-dnssi-iso27001-2022
+    name: Mapping DNSSI vers ISO 27001:2022
+    source_framework_urn: urn:intuitem:risk:framework:dnssi-2023-2
+    target_framework_urn: urn:intuitem:risk:framework:iso27001-2022
+    requirement_mappings:
+      # Chapitre 1 - POLITIQUE DE SECURITE DES SYSTEMES D'INFORMATION
+      ## Objectif 1
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:pol-risque
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Analyse des risques de sécurité"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:pol-risque
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Traitement des risques de sécurité"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:pol-risque
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Information des parties intéressées sur les risques"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:pol-formel
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Politiques de sécurité de l'information"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:pol-formel
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Politiques pour la sécurité de l'information"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:pol-pas
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Amélioration continue"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:pol-tdb
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Surveillance, mesure, analyse et évaluation"
+
+      # Chapitre 2 - ORGANISATION DE LA SECURITE DES SYSTEMES D'INFORMATION
+      ## Objectif 2
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:org-inter-gouv
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Direction et engagement"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:org-inter-gouv
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Rôles, responsabilités et autorités"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:org-inter-rssi
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Rôles, responsabilités et autorités"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:org-inter-rssi
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Fonctions et responsabilités liées à la sécurité"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:org-inter-resp
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Rôles, responsabilités et autorités"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:org-inter-resp
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Séparation des tâches"
+
+      ## Objectif 3
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:org-teletrav-sec
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+        relationship: intersect
+        rationale: semantic
+        annotation: "Travail à distance"
+
+      # Chapitre 3 - SECURITE DES RESSOURCES HUMAINES
+      ## Objectif 4
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:rh-avt--person
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Sélection des candidats"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:rh-avt--cond
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Termes et conditions du contrat de travail"
+
+      ## Objectif 5
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:rh-apres--form
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Sensibilisation, enseignement et formation"
+
+      ## Objectif 6
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:rh-fin-gest
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.5
+        relationship: intersect
+        rationale: semantic
+        annotation: "Responsabilités après la fin ou le changement d'un emploi"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:rh-fin-gest
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.11
+        relationship: intersect
+        rationale: semantic
+        annotation: "Restitution des actifs"
+
+      # Chapitre 4 - GESTION DES ACTIFS INFORMATIONNELS
+      ## Objectif 7
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:actif-resp-inv
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+        relationship: intersect
+        rationale: semantic
+        annotation: "Inventaire des informations et autres actifs associés"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:actif-resp-prop
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+        relationship: intersect
+        rationale: semantic
+        annotation: "Inventaire des informations et autres actifs associés"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:actif-resp-charte
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+        relationship: intersect
+        rationale: semantic
+        annotation: "Utilisation correcte des informations et autres actifs associés"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:actif--resp-carto
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+        relationship: intersect
+        rationale: semantic
+        annotation: "Inventaire des informations et autres actifs associés"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:actif--resp-carto
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+        relationship: intersect
+        rationale: semantic
+        annotation: "Gestion de la configuration"
+
+      ## Objectif 8
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:actif--classif-info
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.12
+        relationship: intersect
+        rationale: semantic
+        annotation: "Classification des informations"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:actif--classif-mes
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.12
+        relationship: intersect
+        rationale: semantic
+        annotation: "Classification des informations"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:actif--classif-mes
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+        relationship: intersect
+        rationale: semantic
+        annotation: "Utilisation correcte des informations et autres actifs associés"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:actif--classif--exam
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.12
+        relationship: intersect
+        rationale: semantic
+        annotation: "Classification des informations"
+
+      ## Objectif 9
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:actif-sup-amov
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
+        relationship: intersect
+        rationale: semantic
+        annotation: "Supports de stockage"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:actif-sup-mobil
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Terminaux finaux des utilisateurs"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:actif-sup-nomad
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Terminaux finaux des utilisateurs"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:actif-sup-reb
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.14
+        relationship: intersect
+        rationale: semantic
+        annotation: "Élimination ou recyclage sécurisé(e) du matériel"
+
+      # Chapitre 5 - CONTROLE D'ACCES
+      ## Objectif 10
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:acc-exig-pol
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+        relationship: intersect
+        rationale: semantic
+        annotation: "Contrôle d'accès"
+
+      ## Objectif 11
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:acc-utilis-enregis/desinscri
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+        relationship: intersect
+        rationale: semantic
+        annotation: "Gestion des identités"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:acc-utilis-idf/auth
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+        relationship: intersect
+        rationale: semantic
+        annotation: "Informations d'authentification"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:acc-utilis-idf/auth
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+        relationship: intersect
+        rationale: semantic
+        annotation: "Authentification sécurisée"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:acc-utilis-habilit
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+        relationship: intersect
+        rationale: semantic
+        annotation: "Droits d'accès"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:acc-utilis-generiq
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Droits d'accès privilégiés"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:acc-utilis-revue
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+        relationship: intersect
+        rationale: semantic
+        annotation: "Droits d'accès"
+
+      ## Objectif 12
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:acc-sys/app-acc
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+        relationship: intersect
+        rationale: semantic
+        annotation: "Contrôle d'accès"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:acc-sys/app-acc
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+        relationship: intersect
+        rationale: semantic
+        annotation: "Droits d'accès"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:acc-sys/app-privil
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Droits d'accès privilégiés"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:acc-sys/app-mdp
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+        relationship: intersect
+        rationale: semantic
+        annotation: "Informations d'authentification"
+
+      # Chapitre 6 - CRYPTOGRAPHIE
+      ## Objectif 13
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:crypto-mes-pol
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+        relationship: intersect
+        rationale: semantic
+        annotation: "Utilisation de la cryptographie"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:crypto-mes-gestcle
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+        relationship: intersect
+        rationale: semantic
+        annotation: "Utilisation de la cryptographie"
+
+      # Chapitre 7 - SECURITE PHYSIQUE ET ENVIRONNEMENTALE
+      ## Objectif 14
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:phys-zone-delimit
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Périmètres de sécurité physique"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:phys-zone-proc
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Les entrées physiques"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:phys-zone-dispo
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Les entrées physiques"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:phys-zone--videoprot
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+        relationship: intersect
+        rationale: semantic
+        annotation: "Surveillance de la sécurité physique"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:phys-zone-incen
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.5
+        relationship: intersect
+        rationale: semantic
+        annotation: "Protection contre les menaces physiques et environnementales"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:phys-zone-eau
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.5
+        relationship: intersect
+        rationale: semantic
+        annotation: "Protection contre les menaces physiques et environnementales"
+
+      ## Objectif 15
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:phys-mat--cabl
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.12
+        relationship: intersect
+        rationale: semantic
+        annotation: "Sécurité du câblage"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:phys-mat-ond
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.13
+        relationship: intersect
+        rationale: semantic
+        annotation: "Maintenance du matériel"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:phys-mat-electrog
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.11
+        relationship: intersect
+        rationale: semantic
+        annotation: "Services supports"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:phys-mat-clim
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.11
+        relationship: intersect
+        rationale: semantic
+        annotation: "Services supports"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:phys-mat-equip
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.13
+        relationship: intersect
+        rationale: semantic
+        annotation: "Maintenance du matériel"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:phys-mat-horsloc
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.9
+        relationship: intersect
+        rationale: semantic
+        annotation: "Sécurité des actifs hors des locaux"
+
+      # Chapitre 8 - SECURITE LIEE A L'EXPLOITATION
+      ## Objectif 16
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp-proc-chang
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+        relationship: intersect
+        rationale: semantic
+        annotation: "Gestion des changements"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp--proc-cap
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.6
+        relationship: intersect
+        rationale: semantic
+        annotation: "Dimensionnement"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp-proc-envir
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.31
+        relationship: intersect
+        rationale: semantic
+        annotation: "Séparation des environnements de développement, de test et opérationnels"
+
+      ## Objectif 17
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp-protec-malveil
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+        relationship: intersect
+        rationale: semantic
+        annotation: "Protection contre les programmes malveillants"
+
+      ## Objectif 18
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp-sauv-proc
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+        relationship: intersect
+        rationale: semantic
+        annotation: "Sauvegarde des informations"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp-sauv-restaur
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+        relationship: intersect
+        rationale: semantic
+        annotation: "Sauvegarde des informations"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp-sauv-sec
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+        relationship: intersect
+        rationale: semantic
+        annotation: "Sauvegarde des informations"
+
+      ## Objectif 19
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp--journ/surv-journal
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+        relationship: intersect
+        rationale: semantic
+        annotation: "Journalisation"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp--journ/surv-journal
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+        relationship: intersect
+        rationale: semantic
+        annotation: "Activités de surveillance"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp--journ/surv-privil
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+        relationship: intersect
+        rationale: semantic
+        annotation: "Journalisation"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp-journ/surv-maint
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+        relationship: intersect
+        rationale: semantic
+        annotation: "Journalisation"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp--journ/surv-synchron
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.17
+        relationship: intersect
+        rationale: semantic
+        annotation: "Synchronisation des horloges"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp--journ/surv--dist
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+        relationship: intersect
+        rationale: semantic
+        annotation: "Journalisation"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp--journ/surv--dist
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+        relationship: intersect
+        rationale: semantic
+        annotation: "Sécurité des services réseau"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp--journ/surv---centr
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+        relationship: intersect
+        rationale: semantic
+        annotation: "Activités de surveillance"
+
+      ## Objectif 20
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp-sys-config
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+        relationship: intersect
+        rationale: semantic
+        annotation: "Gestion des configurations"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp-sys-config
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+        relationship: intersect
+        rationale: semantic
+        annotation: "Gestion des changements"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp-sys-durc
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+        relationship: intersect
+        rationale: semantic
+        annotation: "Gestion des configurations"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp-vuln-install
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+        relationship: intersect
+        rationale: semantic
+        annotation: "Installation de logiciels sur des systèmes opérationnels"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp-vuln-gest
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+        relationship: intersect
+        rationale: semantic
+        annotation: "Gestion des vulnérabilités techniques"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp-vuln-correct
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+        relationship: intersect
+        rationale: semantic
+        annotation: "Gestion des vulnérabilités techniques"
+
+      ## Objectif 21
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp-audit-mes
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+        relationship: intersect
+        rationale: semantic
+        annotation: "Révision indépendante de la sécurité de l'information"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp-audit-mes
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.34
+        relationship: intersect
+        rationale: semantic
+        annotation: "Protection des systèmes d'information pendant les tests d'audit"
+
+      # Chapitre 9 - SECURITE DES COMMUNICATIONS
+      ## Objectif 22
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:com-manag-cloison
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+        relationship: intersect
+        rationale: semantic
+        annotation: "Cloisonnement des réseaux"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:com-manag-filtrage
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
+        relationship: intersect
+        rationale: semantic
+        annotation: "Filtrage web"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:com-manag-filtrage
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+        relationship: intersect
+        rationale: semantic
+        annotation: "Sécurité des services réseau"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:com-manag-sysaut
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+        relationship: intersect
+        rationale: semantic
+        annotation: "Sécurité des réseaux"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:com-manag-distant
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+        relationship: intersect
+        rationale: semantic
+        annotation: "Travail à distance"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:com-manag-distant
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
+        relationship: intersect
+        rationale: semantic
+        annotation: "Filtrage web"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:com-manag-tunel
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+        relationship: intersect
+        rationale: semantic
+        annotation: "Utilisation de la cryptographie"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:com-manag-tunel
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+        relationship: intersect
+        rationale: semantic
+        annotation: "Travail à distance"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:com-manag-rsf
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+        relationship: intersect
+        rationale: semantic
+        annotation: "Sécurité des réseaux"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:com-manag-rsf
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+        relationship: intersect
+        rationale: semantic
+        annotation: "Cloisonnement des réseaux"
+
+      ## Objectif 23
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:com-trans-fichier
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+        relationship: intersect
+        rationale: semantic
+        annotation: "Transfert des informations"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:com-trans-mess
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
+        relationship: intersect
+        rationale: semantic
+        annotation: "Filtrage web"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:com-trans-mess
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+        relationship: intersect
+        rationale: semantic
+        annotation: "Utilisation de la cryptographie"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:com-trans-mess
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+        relationship: intersect
+        rationale: semantic
+        annotation: "Utilisation correcte des informations et autres actifs associés"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:com-trans-filtr
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
+        relationship: intersect
+        rationale: semantic
+        annotation: "Filtrage web"
+
+      # Chapitre 10 - ACQUISITION, DEVELOPPEMENT ET MAINTENANCE DES SYSTEMES D'INFORMATION
+      ## Objectif 24
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:dev-exig-projet
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.8
+        relationship: intersect
+        rationale: semantic
+        annotation: "Sécurité de l'information dans la gestion de projet"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:dev-exig-projet
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+        relationship: intersect
+        rationale: semantic
+        annotation: "Exigences de sécurité des applications"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:dev-exig-transac
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+        relationship: intersect
+        rationale: semantic
+        annotation: "Utilisation de la cryptographie"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:dev-exig-transac
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+        relationship: intersect
+        rationale: semantic
+        annotation: "Exigences de sécurité des applications"
+
+      ## Objectif 25
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:dev-proc-pol
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+        relationship: intersect
+        rationale: semantic
+        annotation: "Cycle de vie de développement sécurisé"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:dev-proc-chang
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+        relationship: intersect
+        rationale: semantic
+        annotation: "Gestion des changements"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:dev-proc-envir
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.31
+        relationship: intersect
+        rationale: semantic
+        annotation: "Séparation des environnements de développement, de test et opérationnels"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:dev-proc-test
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
+        relationship: intersect
+        rationale: semantic
+        annotation: "Tests de sécurité dans le développement et l'acceptation"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:dev-proc-code
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.4
+        relationship: intersect
+        rationale: semantic
+        annotation: "Accès aux codes source"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:dev-proc-donnee
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.33
+        relationship: intersect
+        rationale: semantic
+        annotation: "Informations de test"
+
+      # Chapitre 11 - RELATIONS AVEC LES FOURNISSEURS
+      ## Objectif 26
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:fournis-rel-risq
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+        relationship: intersect
+        rationale: semantic
+        annotation: "Sécurité de l'information dans les relations avec les fournisseurs"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:fournis-rel-pol
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+        relationship: intersect
+        rationale: semantic
+        annotation: "Sécurité de l'information dans les accords avec les fournisseurs"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:fournis-rel-exig
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+        relationship: intersect
+        rationale: semantic
+        annotation: "Sécurité de l'information dans les accords"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:fournis-rel-exig
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+        relationship: intersect
+        rationale: semantic
+        annotation: "Exigences légales, statutaires, réglementaires et contractuelles"
+
+      ## Objectif 27
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:fournis-gest-surveil
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+        relationship: intersect
+        rationale: semantic
+        annotation: "Surveillance, révision et gestion des changements des services fournisseurs"
+
+      # Chapitre 12 - GESTION DES INCIDENTS DE CYBERSECURITE
+      ## Objectif 28
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:incid-gest--proc
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+        relationship: intersect
+        rationale: semantic
+        annotation: "Planification et préparation de la gestion des incidents de sécurité de l'information"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:incid-gest--proc
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
+        relationship: intersect
+        rationale: semantic
+        annotation: "Évaluation des événements de sécurité de l'information et prise de décision"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:incid-gest-cat
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
+        relationship: intersect
+        rationale: semantic
+        annotation: "Évaluation des événements de sécurité de l'information et prise de décision"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:incid-gest-signal
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+        relationship: intersect
+        rationale: semantic
+        annotation: "Réponse aux incidents de sécurité"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:incid-gest-signal
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.8
+        relationship: intersect
+        rationale: semantic
+        annotation: "Déclaration des événements"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:incid-gest-qualif
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
+        relationship: intersect
+        rationale: semantic
+        annotation: "Évaluation des événements de sécurité de l'information et prise de décision"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:incid-gest-reponse
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+        relationship: intersect
+        rationale: semantic
+        annotation: "Réponse aux incidents de sécurité"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:incid-gest-alert
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+        relationship: intersect
+        rationale: semantic
+        annotation: "Planification et préparation de la gestion des incidents de sécurité de l'information"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:incid-gest-alert
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.8
+        relationship: intersect
+        rationale: semantic
+        annotation: "Déclaration des événements"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:incid-gest-rep
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.27
+        relationship: intersect
+        rationale: semantic
+        annotation: "Tirer des enseignements des incidents de sécurité de l'information"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:incid-gest-preuv
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.28
+        relationship: intersect
+        rationale: semantic
+        annotation: "Collecte de preuves"
+
+      # Chapitre 13 - GESTION DE LA CONTINUITE DE L'ACTIVITE
+      ## Objectif 29
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:continu-bia
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.29
+        relationship: intersect
+        rationale: semantic
+        annotation: "Sécurité de l'information pendant une perturbation"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:continu-act
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.29
+        relationship: intersect
+        rationale: semantic
+        annotation: "Sécurité de l'information pendant une perturbation"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:continu-act
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.30
+        relationship: intersect
+        rationale: semantic
+        annotation: "Préparation des TIC pour la continuité d'activité"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:continu-plan
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.29
+        relationship: intersect
+        rationale: semantic
+        annotation: "Sécurité de l'information pendant une perturbation"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:continu-exercice
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.29
+        relationship: intersect
+        rationale: semantic
+        annotation: "Sécurité de l'information pendant une perturbation"
+
+      # Chapitre 14 - CONFORMITE
+      ## Objectif 30
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:conf-oblig-idf
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+        relationship: intersect
+        rationale: semantic
+        annotation: "Exigences légales, statutaires, réglementaires et contractuelles"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:conf-oblig-cybersec
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+        relationship: intersect
+        rationale: semantic
+        annotation: "Exigences légales, statutaires, réglementaires et contractuelles"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:conf-oblig-intellect
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.32
+        relationship: intersect
+        rationale: semantic
+        annotation: "Droits de propriété intellectuelle"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:conf-oblig-perso
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+        relationship: intersect
+        rationale: semantic
+        annotation: "Protection de la vie privée et des données à caractère personnel"
+
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:conf-oblig-crypto
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+        relationship: intersect
+        rationale: semantic
+        annotation: "Exigences légales, statutaires, réglementaires et contractuelles"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:conf-oblig-crypto
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+        relationship: intersect
+        rationale: semantic
+        annotation: "Utilisation de la cryptographie"
+
+      ## Objectif 31
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:conf-revu-ssi
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+        relationship: intersect
+        rationale: semantic
+        annotation: "Révision indépendante de la sécurité de l'information"
+      - source_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:conf-revu-ssi
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.36
+        relationship: intersect
+        rationale: semantic
+        annotation: "Conformité aux politiques, règles et normes de sécurité de l'information"

@@ -5,6 +5,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import BarChart from '$lib/components/Chart/BarChart.svelte';
+	import TreemapChart from '$lib/components/Chart/TreemapChart.svelte';
 	import GroupedBarChart from '$lib/components/Chart/GroupedBarChart.svelte';
 	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
 	import NightingaleChart from '$lib/components/Chart/NightingaleChart.svelte';
@@ -17,11 +18,13 @@
 	import Card from '$lib/components/DataViz/Card.svelte';
 	import CardGroup from '$lib/components/DataViz/CardGroup.svelte';
 	import SimpleCard from '$lib/components/DataViz/SimpleCard.svelte';
+	import DashboardGrid from '$lib/components/Dashboard/DashboardGrid.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
 	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
+	import { getToastStore } from '$lib/components/Toast/stores';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData } from './$types';
 	import CounterCard from './CounterCard.svelte';
@@ -32,8 +35,25 @@
 
 	let { data }: Props = $props();
 
+	const toastStore = getToastStore();
+
 	const cur_rsk_label = m.currentRisk();
 	const rsd_rsk_label = m.residualRisk();
+
+	let threatTreemapExpanded = $state(false);
+	let threatTreemapDialog: HTMLDialogElement | undefined = $state();
+	let threatTreeData: any[] = $state([]);
+
+	function openThreatTreemap(tree: any[]) {
+		threatTreeData = tree;
+		threatTreemapExpanded = true;
+		setTimeout(() => threatTreemapDialog?.showModal(), 0);
+	}
+
+	function closeThreatTreemap() {
+		threatTreemapExpanded = false;
+		threatTreemapDialog?.close();
+	}
 
 	function localizeChartLabels(labels: string[]): string[] {
 		return labels.map((label) => safeTranslate(label));
@@ -79,31 +99,112 @@
 	};
 
 	let group = $derived(page.url.searchParams.get('tab') || 'summary');
+	let selectedDashboardId = $derived(page.url.searchParams.get('dashboard') || '');
+	let canChangeSettings = $derived(
+		Object.hasOwn(data.user?.permissions ?? {}, 'change_globalsettings')
+	);
+
+	let dashboardPickerOpen = $state(false);
+	let dashboardPickerSearch = $state('');
+	let dashboardPickerEl: HTMLDivElement | undefined = $state();
+
+	function toggleDashboardPicker() {
+		dashboardPickerOpen = !dashboardPickerOpen;
+		if (dashboardPickerOpen) dashboardPickerSearch = '';
+	}
+
+	function closeDashboardPicker() {
+		dashboardPickerOpen = false;
+	}
+
+	function handleDashboardPickerKeydown(e: KeyboardEvent) {
+		if (e.key === 'Escape') closeDashboardPicker();
+	}
+
+	function handleDashboardPickerOutsideClick(e: MouseEvent) {
+		if (dashboardPickerOpen && dashboardPickerEl && !dashboardPickerEl.contains(e.target as Node)) {
+			closeDashboardPicker();
+		}
+	}
+
+	$effect(() => {
+		if (dashboardPickerOpen) {
+			document.addEventListener('mousedown', handleDashboardPickerOutsideClick);
+			document.addEventListener('keydown', handleDashboardPickerKeydown);
+			return () => {
+				document.removeEventListener('mousedown', handleDashboardPickerOutsideClick);
+				document.removeEventListener('keydown', handleDashboardPickerKeydown);
+			};
+		}
+	});
 
 	function handleTabChange(tabValue: string): void {
 		page.url.searchParams.set('tab', tabValue);
 		goto(page.url);
 	}
+
+	async function handleCustomDashboardChange(dashboardId: string): Promise<void> {
+		// Admins persist the choice as the org-wide default. Non-admins fall through
+		// to a URL-only override (the disabled select prevents this, but kept defensive).
+		if (canChangeSettings) {
+			try {
+				const res = await fetch('/analytics?/setDefaultDashboard', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+					body: new URLSearchParams({ dashboard_id: dashboardId || '' }).toString()
+				});
+				if (!res.ok) {
+					toastStore.trigger({
+						message: `Failed to update default dashboard: ${await res.text()}`,
+						preset: 'error'
+					});
+					return;
+				}
+			} catch (err) {
+				toastStore.trigger({
+					message: `Failed to update default dashboard: ${err}`,
+					preset: 'error'
+				});
+				return;
+			}
+			// Clear URL override so the new global default is the source of truth
+			const url = new URL(page.url);
+			url.searchParams.set('tab', 'custom');
+			url.searchParams.delete('dashboard');
+			goto(url, { invalidateAll: true });
+		} else {
+			const url = new URL(page.url);
+			url.searchParams.set('tab', 'custom');
+			if (dashboardId) {
+				url.searchParams.set('dashboard', dashboardId);
+			} else {
+				url.searchParams.delete('dashboard');
+			}
+			goto(url, { invalidateAll: true });
+		}
+	}
 </script>
 
 <Tabs value={group} onValueChange={(e) => handleTabChange(e.value)}>
-	{#snippet list()}
-		<Tabs.Control value="summary">{m.summary()}</Tabs.Control>
-		<Tabs.Control value="governance">{m.governance()}</Tabs.Control>
-		<Tabs.Control value="risk">{m.risk()}</Tabs.Control>
-		<Tabs.Control value="compliance">{m.compliance()}</Tabs.Control>
-		<Tabs.Control value="operations">{m.operations()}</Tabs.Control>
-	{/snippet}
-	{#snippet content()}
-		{#key group}
-			<div class="px-4 pb-4 space-y-8">
-				<Tabs.Panel value="summary">
-					{#await data.stream.metrics}
-						<div class="col-span-3 lg:col-span-1">
-							<div>Refreshing data ..</div>
-							<LoadingSpinner />
-						</div>
-					{:then metrics}
+	<Tabs.List>
+		<Tabs.Trigger value="summary">{m.summary()}</Tabs.Trigger>
+		<Tabs.Trigger value="governance">{m.governance()}</Tabs.Trigger>
+		<Tabs.Trigger value="risk">{m.risk()}</Tabs.Trigger>
+		<Tabs.Trigger value="compliance">{m.compliance()}</Tabs.Trigger>
+		<Tabs.Trigger value="operations">{m.operations()}</Tabs.Trigger>
+		<Tabs.Trigger value="custom">{m.custom()}</Tabs.Trigger>
+		<Tabs.Indicator />
+	</Tabs.List>
+	{#key group}
+		<div class="px-4 pb-4 space-y-8">
+			<Tabs.Content value="summary">
+				{#await data.stream.metrics}
+					<div class="col-span-3 lg:col-span-1">
+						<div>Refreshing data ..</div>
+						<LoadingSpinner />
+					</div>
+				{:then metrics}
+					{#if metrics}
 						<section id="summary" class="space-y-6">
 							<!-- Controls + CSF Functions Row -->
 							<div class="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
@@ -111,44 +212,49 @@
 								<div class="xl:col-span-3">
 									<CardGroup title={m.sumpageSectionControls()} icon="fa-solid fa-shield-halved">
 										<SimpleCard
-											count={metrics.controls.total}
+											count={metrics.controls?.total}
 											label={m.sumpageTotal()}
 											href="/applied-controls/"
 											emphasis={true}
 										/>
 										<SimpleCard
-											count={metrics.controls.active}
+											count={metrics.controls?.active}
 											label={m.sumpageActive()}
 											href="/applied-controls/?status=active"
 										/>
 										<SimpleCard
-											count={metrics.controls.deprecated}
+											count={metrics.controls?.degraded}
+											label={m.sumpageDegraded()}
+											href="/applied-controls/?status=degraded"
+										/>
+										<SimpleCard
+											count={metrics.controls?.deprecated}
 											label={m.sumpageDeprecated()}
 											href="/applied-controls/?status=deprecated"
 										/>
 										<SimpleCard
-											count={metrics.controls.to_do}
+											count={metrics.controls?.to_do}
 											label={m.sumpageToDo()}
 											href="/applied-controls/?status=to_do"
 										/>
 										<SimpleCard
-											count={metrics.controls.in_progress}
+											count={metrics.controls?.in_progress}
 											label={m.sumpageInProgress()}
 											href="/applied-controls/?status=in_progress"
 										/>
 										<SimpleCard
-											count={metrics.controls.on_hold}
+											count={metrics.controls?.on_hold}
 											label={m.sumpageOnHold()}
 											href="/applied-controls/?status=on_hold"
 										/>
 										<SimpleCard
-											count={metrics.controls.p1}
+											count={metrics.controls?.p1}
 											label={m.sumpageP1()}
-											href="/applied-controls/?priority=1&status=to_do&status=deprecated&status=on_hold&status=in_progress&status=--"
+											href="/applied-controls/?priority=1&status=to_do&status=deprecated&status=degraded&status=on_hold&status=in_progress&status=--"
 											emphasis={true}
 										/>
 										<SimpleCard
-											count={metrics.controls.eta_missed}
+											count={metrics.controls?.eta_missed}
 											label={m.sumpageEtaMissed()}
 											href="/applied-controls/?status=to_do&status=deprecated&status=in_progress&status=--&status=on_hold&eta__lte={new Date()
 												.toISOString()
@@ -160,8 +266,10 @@
 
 								<!-- CSF Functions Chart (2/5 of width) -->
 								<div class="xl:col-span-2">
-									<div class="bg-white rounded-lg p-4 h-80 border border-gray-200">
-										<NightingaleChart name="nightingale" values={metrics.csf_functions} />
+									<div class="bg-surface-50-950 rounded-lg p-4 h-80 border border-surface-200-800">
+										{#if metrics.csf_functions}
+											<NightingaleChart name="nightingale" values={metrics.csf_functions} />
+										{/if}
 									</div>
 								</div>
 							</div>
@@ -175,34 +283,56 @@
 										maxColumns={3}
 									>
 										<SimpleCard
-											count={metrics.compliance.used_frameworks}
+											count={metrics.compliance?.used_frameworks}
 											label={m.usedFrameworks()}
 											href="/frameworks/"
 											emphasis={true}
 										/>
 										<SimpleCard
-											count="{metrics.compliance.active_audits}/{metrics.compliance.audits}"
+											count="{metrics.compliance?.active_audits}/{metrics.compliance?.audits}"
 											label={m.sumpageActiveAudits()}
 											href="/compliance-assessments/"
 											emphasis={true}
 										/>
+										{#await data.stream.auditsMetrics}
+											<SimpleCard
+												count="..."
+												label={m.sumpageAvgProgress()}
+												href="/compliance-assessments/"
+											/>
+										{:then auditsMetrics}
+											{#if auditsMetrics}
+												<SimpleCard
+													count="{auditsMetrics.progress_avg}%"
+													label={m.sumpageAvgProgress()}
+													href="/compliance-assessments/"
+												/>
+											{:else}
+												<SimpleCard
+													count="-"
+													label={m.sumpageAvgProgress()}
+													href="/compliance-assessments/"
+												/>
+											{/if}
+										{:catch}
+											<SimpleCard
+												count="-"
+												label={m.sumpageAvgProgress()}
+												href="/compliance-assessments/"
+											/>
+										{/await}
 										<SimpleCard
-											count="{metrics.compliance.progress_avg}%"
-											label={m.sumpageAvgProgress()}
-											href="/compliance-assessments/"
-										/>
-										<SimpleCard
-											count={metrics.compliance.non_compliant_items}
+											count={metrics.compliance?.non_compliant_items}
 											label={m.sumpageNonCompliantItems()}
-											href="#"
+											href="/requirement-assessments?result=non_compliant"
 										/>
 										<SimpleCard
-											count={metrics.compliance.evidences}
+											count={metrics.compliance?.evidences}
 											label={m.sumpageEvidences()}
 											href="/evidences/"
 										/>
 										<SimpleCard
-											count={metrics.compliance.expired_evidences}
+											count={metrics.compliance?.expired_evidences}
 											label={m.sumpageExpiredEvidences()}
 											href="/evidences/?status=expired"
 											emphasis={true}
@@ -212,14 +342,36 @@
 
 								<!-- Audits Chart (3/5 of width) -->
 								<div class="xl:col-span-3">
-									<div class="bg-white rounded-lg p-4 h-96 border border-gray-200">
-										<StackedBarsNormalized
-											names={metrics.audits_stats.names}
-											data={metrics.audits_stats.data}
-											uuids={metrics.audits_stats.uuids}
-											title={m.recentlyUpdatedAudits()}
-										/>
-									</div>
+									{#await data.stream.auditsMetrics}
+										<div
+											class="bg-surface-50-950 rounded-lg p-4 h-96 border border-surface-200-800 flex items-center justify-center"
+										>
+											<LoadingSpinner />
+										</div>
+									{:then auditsMetrics}
+										<div
+											class="bg-surface-50-950 rounded-lg p-4 h-96 border border-surface-200-800"
+										>
+											{#if auditsMetrics?.audits_stats?.data?.length > 0}
+												<StackedBarsNormalized
+													names={auditsMetrics.audits_stats.names}
+													data={auditsMetrics.audits_stats.data}
+													uuids={auditsMetrics.audits_stats.uuids}
+													title={m.recentlyUpdatedAudits()}
+												/>
+											{:else}
+												<div class="flex items-center justify-center h-full text-surface-600-400">
+													<p>{m.nothingToShowYet()}</p>
+												</div>
+											{/if}
+										</div>
+									{:catch}
+										<div
+											class="bg-surface-50-950 rounded-lg p-4 h-96 border border-surface-200-800 flex items-center justify-center text-red-500"
+										>
+											<p>Error loading audits data</p>
+										</div>
+									{/await}
 								</div>
 							</div>
 							<!-- Risk Section + Charts Row -->
@@ -228,23 +380,23 @@
 								<div class="xl:col-span-2">
 									<CardGroup title={m.sumpageSectionRisk()} icon="fa-solid fa-biohazard">
 										<SimpleCard
-											count={metrics.risk.assessments}
+											count={metrics.risk?.assessments}
 											label={m.sumpageAssessments()}
 											href="/risk-assessments/"
 											emphasis={true}
 										/>
 										<SimpleCard
-											count={metrics.risk.scenarios}
+											count={metrics.risk?.scenarios}
 											label={m.sumpageScenarios()}
 											href="/risk-scenarios/"
 										/>
 										<SimpleCard
-											count={metrics.risk.threats}
+											count={metrics.risk?.threats}
 											label={m.sumpageMappedThreats()}
 											href="/analytics?tab=risk"
 										/>
 										<SimpleCard
-											count={metrics.risk.acceptances}
+											count={metrics.risk?.acceptances}
 											label={m.sumpageRiskAccepted()}
 											href="/risk-acceptances"
 										/>
@@ -253,40 +405,60 @@
 
 								<!-- Risk Charts (3/5 of width) -->
 								<div class="xl:col-span-3">
-									<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-										<div class="bg-white rounded-lg p-4 h-80 border border-gray-200">
-											<HalfDonutChart
-												name="current_h"
-												title={m.sumpageTitleCurrentRisks()}
-												values={data.risks_count_per_level.current}
-												colors={data.risks_count_per_level.current.map((object) => object.color)}
-											/>
+									{#await data.stream.risksCountPerLevel}
+										<div class="flex items-center justify-center h-80">
+											<LoadingSpinner />
 										</div>
-										<div class="bg-white rounded-lg p-4 h-80 border border-gray-200">
-											<HalfDonutChart
-												name="residual_h"
-												title={m.sumpageTitleResidualRisks()}
-												values={data.risks_count_per_level.residual}
-												colors={data.risks_count_per_level.residual.map((object) => object.color)}
-											/>
+									{:then risksCountPerLevel}
+										<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+											<div
+												class="bg-surface-50-950 rounded-lg p-4 h-80 border border-surface-200-800"
+											>
+												<HalfDonutChart
+													name="current_h"
+													title={m.sumpageTitleCurrentRisks()}
+													values={risksCountPerLevel?.current ?? []}
+													colors={(risksCountPerLevel?.current ?? []).map((object) => object.color)}
+												/>
+											</div>
+											<div
+												class="bg-surface-50-950 rounded-lg p-4 h-80 border border-surface-200-800"
+											>
+												<HalfDonutChart
+													name="residual_h"
+													title={m.sumpageTitleResidualRisks()}
+													values={risksCountPerLevel?.residual ?? []}
+													colors={(risksCountPerLevel?.residual ?? []).map(
+														(object) => object.color
+													)}
+												/>
+											</div>
 										</div>
-									</div>
+									{:catch}
+										<div class="text-red-500">Error loading risk level data</div>
+									{/await}
 								</div>
 							</div>
 						</section>
-					{:catch error}
+					{:else}
 						<div class="col-span-3 lg:col-span-1">
 							<p class="text-red-500">Error loading metrics</p>
 						</div>
-					{/await}
-				</Tabs.Panel>
-				<Tabs.Panel value="governance">
-					{#await data.stream.counters}
-						<div class="col-span-3 lg:col-span-1">
-							<div>Refreshing data ..</div>
-							<LoadingSpinner />
-						</div>
-					{:then counters}
+					{/if}
+				{:catch error}
+					<div class="col-span-3 lg:col-span-1">
+						<p class="text-red-500">Error loading metrics</p>
+					</div>
+				{/await}
+			</Tabs.Content>
+			<Tabs.Content value="governance">
+				{#await data.stream.counters}
+					<div class="col-span-3 lg:col-span-1">
+						<div>Refreshing data ..</div>
+						<LoadingSpinner />
+					</div>
+				{:then counters}
+					{#if counters}
 						<section id="stats" class="mb-6">
 							<span class="text-xl font-extrabold">{m.statistics()}</span>
 							<div
@@ -330,221 +502,271 @@
 								/>
 							</div>
 						</section>
-					{:catch}
-						<div>Data load eror</div>
-					{/await}
-					{#await data.stream.combinedAssessmentsStatus}
+					{:else}
 						<div class="col-span-3 lg:col-span-1">
-							<div>Loading assessments data...</div>
+							<p class="text-red-500">Error loading counters</p>
+						</div>
+					{/if}
+				{:catch}
+					<div>Data load error</div>
+				{/await}
+				{#await data.stream.combinedAssessmentsStatus}
+					<div class="col-span-3 lg:col-span-1">
+						<div>Loading assessments data...</div>
+						<LoadingSpinner />
+					</div>
+				{:then combinedAssessmentsStatus}
+					{#if combinedAssessmentsStatus}
+						<section class="bg-surface-50-950 rounded-lg p-4 border border-surface-200-800 mb-6">
+							<GroupedBarChart
+								name="combined_assessments_status"
+								title={m.assessmentsPerStatus()}
+								categories={combinedAssessmentsStatus?.status_labels?.map((label) =>
+									safeTranslate(label)
+								) ?? []}
+								series={combinedAssessmentsStatus?.series?.map((s) => ({
+									name: safeTranslate(s.name),
+									data: s.data
+								})) ?? []}
+								height="h-80"
+							/>
+						</section>
+					{/if}
+				{:catch}
+					<div>Error loading assessments data</div>
+				{/await}
+
+				<!-- Calendar Heatmap -->
+				{#await data.stream.governanceCalendarData}
+					<div
+						class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6 mb-6"
+					>
+						<h3 class="text-lg font-semibold text-surface-900-100 mb-4">{m.activityCalendar()}</h3>
+						<div class="flex items-center justify-center h-64">
 							<LoadingSpinner />
 						</div>
-					{:then combinedAssessmentsStatus}
-						{#if combinedAssessmentsStatus}
-							<section class="bg-white rounded-lg p-4 border border-gray-200 mb-6">
-								<GroupedBarChart
-									name="combined_assessments_status"
-									title={m.assessmentsPerStatus()}
-									categories={combinedAssessmentsStatus.status_labels.map((label) =>
-										safeTranslate(label)
-									)}
-									series={combinedAssessmentsStatus.series.map((s) => ({
-										name: safeTranslate(s.name),
-										data: s.data
-									}))}
-									height="h-80"
-								/>
-							</section>
-						{/if}
-					{:catch}
-						<div>Error loading assessments data</div>
-					{/await}
+					</div>
+				{:then calendarData}
+					<div
+						class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6 mb-6"
+					>
+						<h3 class="text-lg font-semibold text-surface-900-100 mb-4">{m.activityCalendar()}</h3>
+						<CalendarHeatmap
+							name="governance_activity"
+							data={calendarData}
+							year={new Date().getFullYear()}
+							title=""
+							height="h-64"
+						/>
+					</div>
+				{:catch error}
+					<div
+						class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6 mb-6"
+					>
+						<h3 class="text-lg font-semibold text-surface-900-100 mb-4">{m.activityCalendar()}</h3>
+						<div class="flex items-center justify-center h-64 text-surface-600-400">
+							<p>Error loading calendar data</p>
+						</div>
+					</div>
+				{/await}
 
-					<!-- Calendar Heatmap -->
-					{#await data.stream.governanceCalendarData}
-						<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-							<h3 class="text-lg font-semibold text-gray-900 mb-4">{m.activityCalendar()}</h3>
-							<div class="flex items-center justify-center h-64">
-								<LoadingSpinner />
-							</div>
-						</div>
-					{:then calendarData}
-						<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-							<h3 class="text-lg font-semibold text-gray-900 mb-4">{m.activityCalendar()}</h3>
-							<CalendarHeatmap
-								name="governance_activity"
-								data={calendarData}
-								year={new Date().getFullYear()}
-								title=""
-								height="h-64"
-							/>
-						</div>
-					{:catch error}
-						<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-							<h3 class="text-lg font-semibold text-gray-900 mb-4">{m.activityCalendar()}</h3>
-							<div class="flex items-center justify-center h-64 text-gray-500">
-								<p>Error loading calendar data</p>
-							</div>
-						</div>
-					{/await}
-
-					<!-- Applied Controls Status and Assessments Status -->
-					<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-						<!-- Applied Controls Status Donut -->
-						<div class="bg-white rounded-lg p-4 border border-gray-200">
-							<h3 class="text-lg font-semibold text-gray-900 mb-4">
-								{m.appliedControlsStatus()}
-							</h3>
-							<div class="h-80">
-								{#if data.applied_control_status}
+				<!-- Applied Controls Status and Assessments Status -->
+				<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+					<!-- Applied Controls Status Donut -->
+					<div class="bg-surface-50-950 rounded-lg p-4 border border-surface-200-800">
+						<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
+							{m.appliedControlsStatus()}
+						</h3>
+						<div class="h-80">
+							{#await data.stream.appliedControlStatus}
+								<div class="flex items-center justify-center h-full">
+									<LoadingSpinner />
+								</div>
+							{:then applied_control_status}
+								{#if applied_control_status}
 									<DonutChart
 										name="applied_controls_status"
-										values={data.applied_control_status.values.map((v, i) => ({
+										values={applied_control_status.values.map((v, i) => ({
 											...v,
-											name: safeTranslate(data.applied_control_status.labels?.[i] || '')
+											name: safeTranslate(applied_control_status.labels?.[i] || '')
 										}))}
-										colors={data.applied_control_status.values?.map((v) => v.itemStyle.color)}
+										colors={applied_control_status.values?.map((v) => v.itemStyle.color)}
 									/>
 								{:else}
-									<div class="flex items-center justify-center h-full text-gray-500">
+									<div class="flex items-center justify-center h-full text-surface-600-400">
 										<p>No applied controls data available</p>
+									</div>
+								{/if}
+							{:catch}
+								<div class="flex items-center justify-center h-full text-red-500">
+									<p>Error loading data</p>
+								</div>
+							{/await}
+						</div>
+					</div>
+
+					<!-- Findings Assessment Distribution -->
+					<div class="bg-surface-50-950 rounded-lg p-4 border border-surface-200-800">
+						<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
+							{m.findingsAssessmentDistribution()}
+						</h3>
+						<div class="h-80">
+							{#await data.stream.findingsAssessmentSunburstData}
+								<div class="flex items-center justify-center h-full">
+									<LoadingSpinner />
+								</div>
+							{:then chartData}
+								{#if chartData && chartData.length > 0}
+									{@const statuses = [
+										...new Set(chartData.flatMap((d) => d.children.map((c) => c.name)))
+									].map((s) => safeTranslate(s))}
+									{@const categoryColors = {
+										pentest: '#3b82f6',
+										audit: '#10b981',
+										self_identified: '#f59e0b',
+										'--': '#6b7280'
+									}}
+									{@const series = chartData.map((category) => ({
+										name: safeTranslate(category.name),
+										data: statuses.map((status) => {
+											const originalStatus = chartData
+												.flatMap((d) => d.children)
+												.find((c) => safeTranslate(c.name) === status)?.name;
+											return category.children.find((c) => c.name === originalStatus)?.value || 0;
+										}),
+										color: categoryColors[category.name] || '#999'
+									}))}
+									<GroupedBarChart
+										name="findings_assessment_grouped"
+										title=""
+										categories={statuses}
+										{series}
+									/>
+								{:else}
+									<div class="flex items-center justify-center h-full text-surface-600-400">
+										<p>No findings assessment data available</p>
+									</div>
+								{/if}
+							{:catch error}
+								<div class="flex items-center justify-center h-full text-red-500">
+									<p>Error loading findings assessment data</p>
+								</div>
+							{/await}
+						</div>
+					</div>
+				</div>
+
+				<!-- Security Exception Flow -->
+				{#await data.stream.operationsAnalytics}
+					<div class="col-span-3 lg:col-span-1">
+						<div>Loading exceptions data...</div>
+						<LoadingSpinner />
+					</div>
+				{:then operationsAnalytics}
+					{#if operationsAnalytics}
+						<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6">
+							<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
+								{m.securityExceptionFlow()}
+							</h3>
+							<div class="h-80">
+								{#if operationsAnalytics?.exception_sankey?.nodes?.length > 0}
+									<ExceptionSankeyChart
+										name="exception_sankey"
+										title=""
+										nodes={operationsAnalytics?.exception_sankey?.nodes ?? []}
+										links={operationsAnalytics?.exception_sankey?.links ?? []}
+									/>
+								{:else}
+									<div class="flex items-center justify-center h-full text-surface-600-400">
+										<p>{m.noExceptionData()}</p>
 									</div>
 								{/if}
 							</div>
 						</div>
+					{/if}
+				{:catch}
+					<div>Error loading exceptions data</div>
+				{/await}
+			</Tabs.Content>
+			<Tabs.Content value="risk">
+				<!-- Risk tab -->
 
-						<!-- Findings Assessment Distribution -->
-						<div class="bg-white rounded-lg p-4 border border-gray-200">
-							<h3 class="text-lg font-semibold text-gray-900 mb-4">
-								{m.findingsAssessmentDistribution()}
-							</h3>
-							<div class="h-80">
-								{#await data.stream.findingsAssessmentSunburstData}
-									<div class="flex items-center justify-center h-full">
-										<LoadingSpinner />
-									</div>
-								{:then chartData}
-									{#if chartData && chartData.length > 0}
-										{@const statuses = [
-											...new Set(chartData.flatMap((d) => d.children.map((c) => c.name)))
-										].map((s) => safeTranslate(s))}
-										{@const categoryColors = {
-											pentest: '#3b82f6',
-											audit: '#10b981',
-											self_identified: '#f59e0b',
-											'--': '#6b7280'
-										}}
-										{@const series = chartData.map((category) => ({
-											name: safeTranslate(category.name),
-											data: statuses.map((status) => {
-												const originalStatus = chartData
-													.flatMap((d) => d.children)
-													.find((c) => safeTranslate(c.name) === status)?.name;
-												return category.children.find((c) => c.name === originalStatus)?.value || 0;
-											}),
-											color: categoryColors[category.name] || '#999'
-										}))}
-										<GroupedBarChart
-											name="findings_assessment_grouped"
-											title=""
-											categories={statuses}
-											{series}
-										/>
-									{:else}
-										<div class="flex items-center justify-center h-full text-gray-500">
-											<p>No findings assessment data available</p>
-										</div>
-									{/if}
-								{:catch error}
-									<div class="flex items-center justify-center h-full text-red-500">
-										<p>Error loading findings assessment data</p>
-									</div>
-								{/await}
-							</div>
-						</div>
-					</div>
-
-					<!-- Security Exception Flow -->
-					{#await data.stream.operationsAnalytics}
-						<div class="col-span-3 lg:col-span-1">
-							<div>Loading exceptions data...</div>
+				<section>
+					{#await Promise.all( [data.stream.threatsCount, data.stream.qualificationsCount, data.stream.risksCountPerLevel] )}
+						<div class="flex items-center justify-center py-12">
 							<LoadingSpinner />
 						</div>
-					{:then operationsAnalytics}
-						{#if operationsAnalytics}
-							<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-								<h3 class="text-lg font-semibold text-gray-900 mb-4">
-									{m.securityExceptionFlow()}
-								</h3>
-								<div class="h-80">
-									{#if operationsAnalytics.exception_sankey.nodes.length > 0}
-										<ExceptionSankeyChart
-											name="exception_sankey"
-											title=""
-											nodes={operationsAnalytics.exception_sankey.nodes}
-											links={operationsAnalytics.exception_sankey.links}
-										/>
-									{:else}
-										<div class="flex items-center justify-center h-full text-gray-500">
-											<p>{m.noExceptionData()}</p>
-										</div>
-									{/if}
-								</div>
-							</div>
-						{/if}
-					{:catch}
-						<div>Error loading exceptions data</div>
-					{/await}
-				</Tabs.Panel>
-				<Tabs.Panel value="risk">
-					<!-- Risk tab -->
-
-					<section>
+					{:then [threatsCount, qualificationsCount, risksCountPerLevel]}
 						<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-							{#if data.threats_count.results.labels.length > 0}
-								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-									<h3 class="text-lg font-semibold text-gray-900 mb-2">
-										{m.threatRadarChart()}
-									</h3>
+							{#if threatsCount?.results?.tree?.length > 0}
+								<div
+									class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-4"
+								>
+									<div class="flex items-center justify-between mb-2">
+										<h3 class="text-lg font-semibold text-surface-900-100">
+											{m.threatsBreakdown()}
+										</h3>
+										<button
+											class="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-surface-200-800 transition-colors text-surface-400-600 hover:text-surface-600-400"
+											onclick={() => openThreatTreemap(threatsCount.results.tree)}
+											title="Expand"
+										>
+											<i class="fa-solid fa-expand text-sm"></i>
+										</button>
+									</div>
 									<div class="h-96">
-										<RadarChart
-											name="threatRadar"
-											title=""
-											labels={data.threats_count.results.labels}
-											values={data.threats_count.results.values}
+										<TreemapChart
+											name="threatTreemap"
+											tree={threatsCount.results.tree}
+											translate={true}
 										/>
 									</div>
 								</div>
 							{:else}
 								<div
-									class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-center"
+									class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6 flex items-center justify-center"
 								>
-									<p class="text-gray-500">{m.noThreatsMapped()}</p>
+									<p class="text-surface-600-400">{m.noThreatsMapped()}</p>
 								</div>
 							{/if}
-							{#if data.qualifications_count.results.labels.length > 0}
-								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-									<h3 class="text-lg font-semibold text-gray-900 mb-4">
+							{#if qualificationsCount?.results?.labels?.length > 0}
+								{@const qPaired = (qualificationsCount?.results?.labels ?? [])
+									.map((l, i) => ({
+										label: safeTranslate(l),
+										value: (qualificationsCount?.results?.values ?? [])[i] ?? 0
+									}))
+									.sort((a, b) => a.value - b.value)}
+								{@const qLabels = qPaired.map((p) => p.label)}
+								{@const qValues = qPaired.map((p) => p.value)}
+								<div
+									class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6"
+								>
+									<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
 										{m.qualificationsChartTitle()}
 									</h3>
-									<div class="h-80">
-										<BarChart
-											name="qualificationsBar"
-											title=""
-											labels={localizeChartLabels(data.qualifications_count.results.labels)}
-											values={data.qualifications_count.results.values}
-											horizontal={true}
-										/>
+									<div class="overflow-y-auto max-h-[500px]">
+										<div style="height: {Math.max(224, qLabels.length * 28)}px">
+											<BarChart
+												name="qualificationsBar"
+												title=""
+												labels={qLabels}
+												values={qValues}
+												horizontal={true}
+											/>
+										</div>
 									</div>
 								</div>
 							{:else}
 								<div
-									class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-center"
+									class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6 flex items-center justify-center"
 								>
-									<p class="text-gray-500">{m.noQualificationsFoundOnRiskScenarios()}</p>
+									<p class="text-surface-600-400">{m.noQualificationsFoundOnRiskScenarios()}</p>
 								</div>
 							{/if}
 						</div>
-						<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+						<div
+							class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6 mb-6"
+						>
 							<div class="flex flex-wrap lg:flex-nowrap gap-6">
 								{#if page.data?.featureflags?.inherent_risk}
 									<div class="h-96 flex-col grow lg:flex-1">
@@ -553,8 +775,8 @@
 										<DonutChart
 											s_label={m.inherentRisk()}
 											name="inherent_risk_level"
-											values={data.risks_count_per_level.inherent}
-											colors={data.risks_count_per_level.inherent?.map((object) => object.color)}
+											values={risksCountPerLevel?.inherent ?? []}
+											colors={(risksCountPerLevel?.inherent ?? []).map((object) => object.color)}
 										/>
 									</div>
 								{/if}
@@ -564,8 +786,8 @@
 									<DonutChart
 										s_label={cur_rsk_label}
 										name="current_risk_level"
-										values={data.risks_count_per_level.current}
-										colors={data.risks_count_per_level.current?.map((object) => object.color)}
+										values={risksCountPerLevel?.current ?? []}
+										colors={(risksCountPerLevel?.current ?? []).map((object) => object.color)}
 									/>
 								</div>
 								<div class="h-96 flex-col grow lg:flex-1">
@@ -574,81 +796,93 @@
 									<DonutChart
 										s_label={rsd_rsk_label}
 										name="residual_risk_level"
-										values={data.risks_count_per_level.residual}
-										colors={data.risks_count_per_level.residual?.map((object) => object.color)}
+										values={risksCountPerLevel?.residual ?? []}
+										colors={(risksCountPerLevel?.residual ?? []).map((object) => object.color)}
 									/>
 								</div>
 							</div>
 						</div>
-						<!-- Vulnerability Sankey -->
-						{#await data.stream.vulnerabilitySankeyData}
-							<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-								<h3 class="text-lg font-semibold text-gray-900 mb-4">
-									{m.vulnerabilityDistribution()}
-								</h3>
-								<div class="flex items-center justify-center h-80">
-									<LoadingSpinner />
-								</div>
+					{:catch}
+						<div class="text-red-500">Error loading risk data</div>
+					{/await}
+					<!-- Vulnerability Sankey -->
+					{#await data.stream.vulnerabilitySankeyData}
+						<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6">
+							<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
+								{m.vulnerabilityDistribution()}
+							</h3>
+							<div class="flex items-center justify-center h-80">
+								<LoadingSpinner />
 							</div>
-						{:then sankeyData}
-							{#if sankeyData && sankeyData.length > 0}
-								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-									<h3 class="text-lg font-semibold text-gray-900 mb-4">
-										{m.vulnerabilityDistribution()}
-									</h3>
-									<div class="h-96">
-										{#await import('$lib/components/Chart/VulnerabilitySankeyChart.svelte')}
-											<LoadingSpinner />
-										{:then { default: VulnerabilitySankeyChart }}
-											<VulnerabilitySankeyChart {sankeyData} />
-										{/await}
-									</div>
-								</div>
-							{/if}
-						{:catch error}
-							<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-								<h3 class="text-lg font-semibold text-gray-900 mb-4">
-									{m.vulnerabilityDistribution()}
-								</h3>
-								<div class="flex items-center justify-center h-80 text-gray-500">
-									<p>{m.errorLoadingVulnerabilityData()}</p>
-								</div>
-							</div>
-						{/await}
-					</section>
-				</Tabs.Panel>
-				<Tabs.Panel value="compliance">
-					<section class="space-y-6">
-						<div class="flex justify-between items-center mb-6">
-							<h2 class="text-xl font-bold text-gray-900">{m.complianceAnalytics()}</h2>
-							<a
-								href="/recap"
-								class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 hover:border-blue-300 transition-colors"
-							>
-								{m.viewDetailedRecap()}
-								<i class="fas fa-arrow-right text-xs"></i>
-							</a>
 						</div>
+					{:then sankeyData}
+						{#if sankeyData && sankeyData.length > 0}
+							<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6">
+								<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
+									{m.vulnerabilityDistribution()}
+								</h3>
+								<div class="h-96">
+									{#await import('$lib/components/Chart/VulnerabilitySankeyChart.svelte')}
+										<LoadingSpinner />
+									{:then { default: VulnerabilitySankeyChart }}
+										<VulnerabilitySankeyChart {sankeyData} />
+									{/await}
+								</div>
+							</div>
+						{/if}
+					{:catch error}
+						<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6">
+							<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
+								{m.vulnerabilityDistribution()}
+							</h3>
+							<div class="flex items-center justify-center h-80 text-surface-600-400">
+								<p>{m.errorLoadingVulnerabilityData()}</p>
+							</div>
+						</div>
+					{/await}
+				</section>
+			</Tabs.Content>
+			<Tabs.Content value="compliance">
+				<section class="space-y-6">
+					<div class="flex justify-between items-center mb-6">
+						<h2 class="text-xl font-bold text-surface-900-100">{m.complianceAnalytics()}</h2>
+						<a
+							href="/recap"
+							class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 dark:bg-surface-800 dark:text-blue-400 border border-blue-200 dark:border-surface-700 rounded-lg hover:bg-blue-100 dark:hover:bg-surface-700 hover:border-blue-300 transition-colors"
+						>
+							{m.viewDetailedRecap()}
+							<i class="fas fa-arrow-right text-xs"></i>
+						</a>
+					</div>
 
-						{#if data.complianceAnalytics && Object.keys(data.complianceAnalytics).length > 0}
+					{#await data.stream.complianceAnalytics}
+						<div class="flex items-center justify-center py-12">
+							<LoadingSpinner />
+						</div>
+					{:then complianceAnalytics}
+						{#if complianceAnalytics && Object.keys(complianceAnalytics).length > 0}
 							<div class="space-y-6">
-								{#each Object.entries(data.complianceAnalytics) as [frameworkName, frameworkData]}
-									<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+								{#each Object.entries(complianceAnalytics) as [frameworkName, frameworkData]}
+									<div
+										class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 overflow-hidden"
+									>
 										<!-- Framework Header -->
 										<div
-											class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-100"
+											class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-surface-800 dark:to-surface-900 px-6 py-4 border-b border-surface-100-900"
 										>
 											<div class="flex justify-between items-center">
 												<div class="flex items-center gap-3">
 													<div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-													<h3 class="text-lg font-semibold text-gray-900">{frameworkName}</h3>
+													<h3 class="text-lg font-semibold text-surface-900-100">
+														{frameworkName}
+													</h3>
 												</div>
 												<div class="flex items-center gap-2">
-													<span class="text-sm text-gray-600">{m.averageProgress()}:</span>
+													<span class="text-sm text-surface-600-400">{m.averageProgress()}:</span>
 													<div
-														class="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm"
+														class="flex items-center gap-2 px-3 py-1 bg-surface-50-950 rounded-full shadow-sm"
 													>
-														<div class="w-32 bg-gray-200 rounded-full h-1.5">
+														<div class="w-32 bg-surface-200-800 rounded-full h-1.5">
 															<div
 																class="bg-gradient-to-r from-blue-500 to-indigo-500 h-1.5 rounded-full transition-all duration-500"
 																style="width: {frameworkData.framework_average}%"
@@ -668,16 +902,18 @@
 												<div class="relative">
 													<!-- Domain Header -->
 													<div
-														class="flex justify-between items-center mb-3 pb-2 border-b border-gray-100"
+														class="flex justify-between items-center mb-3 pb-2 border-b border-surface-100-900"
 													>
 														<div class="flex items-center gap-2">
 															<i class="fas fa-folder text-amber-500 text-sm"></i>
-															<h4 class="font-medium text-gray-800">{domain.domain}</h4>
+															<h4 class="font-medium text-surface-800-200">{domain.domain}</h4>
 														</div>
 														<div class="flex items-center gap-2">
-															<span class="text-xs text-gray-500">{m.averageProgress()}:</span>
+															<span class="text-xs text-surface-600-400"
+																>{m.averageProgress()}:</span
+															>
 															<div class="flex items-center gap-2">
-																<div class="w-8 bg-gray-200 rounded-full h-1">
+																<div class="w-8 bg-surface-200-800 rounded-full h-1">
 																	<div
 																		class="bg-gradient-to-r from-amber-400 to-orange-500 h-1 rounded-full transition-all duration-300"
 																		style="width: {domain.domain_average}%"
@@ -694,16 +930,18 @@
 													<div class="grid gap-3">
 														{#each domain.assessments as assessment}
 															<div
-																class="group border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-sm transition-all duration-200"
+																class="group border border-surface-200-800 rounded-lg p-4 hover:border-blue-300 hover:shadow-sm transition-all duration-200"
 															>
 																<div class="flex justify-between items-start gap-4">
 																	<div class="flex-1 min-w-0">
-																		<div class="font-medium text-gray-900 mb-1 truncate">
+																		<div class="font-medium text-surface-900-100 mb-1 truncate">
 																			{assessment.assessment_name}
 																		</div>
-																		<div class="flex items-center gap-3 text-xs text-gray-500">
+																		<div
+																			class="flex items-center gap-3 text-xs text-surface-600-400"
+																		>
 																			<div class="flex items-center gap-1">
-																				<i class="fas fa-cubes text-gray-400"></i>
+																				<i class="fas fa-cubes text-surface-400-600"></i>
 																				<span>{assessment.perimeter}</span>
 																			</div>
 																			<div class="flex items-center gap-1">
@@ -714,7 +952,7 @@
 																							? 'bg-blue-400'
 																							: assessment.status === 'in_review'
 																								? 'bg-yellow-400'
-																								: 'bg-gray-400'}"
+																								: 'bg-surface-400-600'}"
 																				></div>
 																				<span class="capitalize"
 																					>{assessment.status?.replace('_', ' ') ||
@@ -726,7 +964,7 @@
 																	<div class="flex items-center gap-3">
 																		<!-- Progress Bar -->
 																		<div class="flex items-center gap-2">
-																			<div class="w-20 bg-gray-200 rounded-full h-2">
+																			<div class="w-20 bg-surface-200-800 rounded-full h-2">
 																				<div
 																					class="h-2 rounded-full transition-all duration-500 {assessment.progress >=
 																					80
@@ -765,242 +1003,447 @@
 							</div>
 						{:else}
 							<div
-								class="text-center py-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-gray-300"
+								class="text-center py-16 bg-gradient-to-br from-surface-50-950 to-surface-100-900 rounded-xl border-2 border-dashed border-surface-300-700"
 							>
-								<div class="text-gray-400 mb-4">
+								<div class="text-surface-400-600 mb-4">
 									<i class="fas fa-chart-bar text-6xl"></i>
 								</div>
-								<div class="text-gray-600">
+								<div class="text-surface-600-400">
 									<p class="text-xl font-semibold mb-2">{m.noComplianceData()}</p>
-									<p class="text-sm text-gray-500">{m.createComplianceAssessment()}</p>
+									<p class="text-sm text-surface-600-400">{m.createComplianceAssessment()}</p>
 								</div>
 								<a
 									href="/compliance-assessments"
-									class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+									class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 transition-colors"
 								>
 									<i class="fas fa-plus text-sm"></i>
 									{m.createAssessment()}
 								</a>
 							</div>
 						{/if}
-					</section>
-				</Tabs.Panel>
-				<Tabs.Panel value="operations">
-					{#await data.stream.operationsAnalytics}
-						<div class="col-span-3 lg:col-span-1">
-							<div>Refreshing data ..</div>
-							<LoadingSpinner />
-						</div>
-					{:then operationsAnalytics}
-						{#if operationsAnalytics}
-							<section class="space-y-6">
-								<!-- First Row: Applied Controls Sunburst and Task Templates Status -->
-								<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-									<!-- Applied Controls Sunburst (2/3 width) -->
-									<div
-										class="xl:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6"
-									>
-										<h3 class="text-lg font-semibold text-gray-900 mb-4">
-											{m.appliedControlsDistribution()}
-										</h3>
-										<div class="h-96">
-											{#if operationsAnalytics.applied_controls_sunburst && operationsAnalytics.applied_controls_sunburst.length > 0}
-												<SunburstChart
-													name="applied_controls_sunburst"
-													title=""
-													data={operationsAnalytics.applied_controls_sunburst}
-												/>
-											{:else}
-												<div class="flex items-center justify-center h-full text-gray-500">
-													<p>No applied controls data available</p>
-												</div>
-											{/if}
-										</div>
-									</div>
-
-									<!-- Task Templates Status Donut (1/3 width) -->
-									<div
-										class="xl:col-span-1 bg-white rounded-xl shadow-sm border border-gray-200 p-6"
-									>
-										<h3 class="text-lg font-semibold text-gray-900 mb-4">
-											{m.tasksStatus()}
-										</h3>
-										<div class="h-96">
-											{#if data.task_template_status}
-												<DonutChart
-													name="task_templates_status"
-													values={data.task_template_status.values.map((v, i) => ({
-														...v,
-														localName: data.task_template_status.localLables[i]
-													}))}
-													colors={data.task_template_status.values?.map((v) => v.itemStyle.color)}
-												/>
-											{:else}
-												<div class="flex items-center justify-center h-full text-gray-500">
-													<p>No tasks data available</p>
-												</div>
-											{/if}
-										</div>
-									</div>
-								</div>
-
-								<!-- Second Row: Findings Breakdown Sankey -->
-								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-									<h3 class="text-lg font-semibold text-gray-900 mb-4">
-										{m.findingsBreakdown()}
+					{:catch}
+						<div class="text-red-500">Error loading compliance data</div>
+					{/await}
+				</section>
+			</Tabs.Content>
+			<Tabs.Content value="operations">
+				{#await data.stream.operationsAnalytics}
+					<div class="col-span-3 lg:col-span-1">
+						<div>Refreshing data ..</div>
+						<LoadingSpinner />
+					</div>
+				{:then operationsAnalytics}
+					{#if operationsAnalytics}
+						<section class="space-y-6">
+							<!-- First Row: Applied Controls Sunburst and Task Templates Status -->
+							<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+								<!-- Applied Controls Sunburst (2/3 width) -->
+								<div
+									class="xl:col-span-2 bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6"
+								>
+									<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
+										{m.appliedControlsDistribution()}
 									</h3>
-									<div class="h-80">
-										{#if operationsAnalytics.findings_sankey && operationsAnalytics.findings_sankey.nodes && operationsAnalytics.findings_sankey.nodes.length > 0}
-											<FindingsSankeyChart
-												name="findings_sankey"
+									<div class="h-96">
+										{#if operationsAnalytics.applied_controls_sunburst && operationsAnalytics.applied_controls_sunburst.length > 0}
+											<SunburstChart
+												name="applied_controls_sunburst"
 												title=""
-												nodes={operationsAnalytics.findings_sankey.nodes}
-												links={operationsAnalytics.findings_sankey.links}
+												data={operationsAnalytics.applied_controls_sunburst}
 											/>
 										{:else}
-											<div class="flex items-center justify-center h-full text-gray-500">
-												<p>{m.noFindingsData()}</p>
+											<div class="flex items-center justify-center h-full text-surface-600-400">
+												<p>No applied controls data available</p>
 											</div>
 										{/if}
 									</div>
 								</div>
 
-								<!-- Third Row: Incident Summary Cards -->
-								<div class="grid grid-cols-1 xl:grid-cols-1 gap-6 items-start">
-									<!-- Summary Cards (full width) -->
-									<div class="xl:col-span-1">
-										<CardGroup title={m.incidentSummary()} icon="fa-solid fa-chart-simple">
-											<SimpleCard
-												count={operationsAnalytics.summary_stats.total_incidents}
-												label={m.totalIncidents()}
-												href="/incidents/"
-												emphasis={true}
-											/>
-											<SimpleCard
-												count={operationsAnalytics.summary_stats.incidents_this_month}
-												label={m.incidentsThisMonth()}
-												href="/incidents/"
-												emphasis={true}
-											/>
-											<SimpleCard
-												count={operationsAnalytics.summary_stats.open_incidents}
-												label={m.openIncidents()}
-												href="/incidents/?status=new&status=ongoing&status=resolved"
-												emphasis={true}
-											/>
-										</CardGroup>
+								<!-- Task Templates Status Donut (1/3 width) -->
+								<div
+									class="xl:col-span-1 bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6"
+								>
+									<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
+										{m.tasksStatus()}
+									</h3>
+									<div class="h-96">
+										{#await data.stream.taskTemplateStatus}
+											<div class="flex items-center justify-center h-full">
+												<LoadingSpinner />
+											</div>
+										{:then task_template_status}
+											{#if task_template_status}
+												<DonutChart
+													name="task_templates_status"
+													values={task_template_status.values.map((v, i) => ({
+														...v,
+														localName: task_template_status.localLables[i]
+													}))}
+													colors={task_template_status.values?.map((v) => v.itemStyle.color)}
+												/>
+											{:else}
+												<div class="flex items-center justify-center h-full text-surface-600-400">
+													<p>No tasks data available</p>
+												</div>
+											{/if}
+										{:catch}
+											<div class="flex items-center justify-center h-full text-red-500">
+												<p>Error loading data</p>
+											</div>
+										{/await}
+									</div>
+								</div>
+							</div>
+
+							<!-- Second Row: Findings Breakdown Sankey -->
+							<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6">
+								<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
+									{m.findingsBreakdown()}
+								</h3>
+								<div class="h-80">
+									{#if operationsAnalytics.findings_sankey && operationsAnalytics.findings_sankey.nodes && operationsAnalytics.findings_sankey.nodes.length > 0}
+										<FindingsSankeyChart
+											name="findings_sankey"
+											title=""
+											nodes={operationsAnalytics.findings_sankey.nodes}
+											links={operationsAnalytics.findings_sankey.links}
+										/>
+									{:else}
+										<div class="flex items-center justify-center h-full text-surface-600-400">
+											<p>{m.noFindingsData()}</p>
+										</div>
+									{/if}
+								</div>
+							</div>
+
+							<!-- Third Row: Incident Summary Cards -->
+							<div class="grid grid-cols-1 xl:grid-cols-1 gap-6 items-start">
+								<!-- Summary Cards (full width) -->
+								<div class="xl:col-span-1">
+									<CardGroup title={m.incidentSummary()} icon="fa-solid fa-chart-simple">
+										<SimpleCard
+											count={operationsAnalytics?.summary_stats?.total_incidents ?? 0}
+											label={m.totalIncidents()}
+											href="/incidents/"
+											emphasis={true}
+										/>
+										<SimpleCard
+											count={operationsAnalytics?.summary_stats?.incidents_this_month ?? 0}
+											label={m.incidentsThisMonth()}
+											href="/incidents/"
+											emphasis={true}
+										/>
+										<SimpleCard
+											count={operationsAnalytics?.summary_stats?.open_incidents ?? 0}
+											label={m.openIncidents()}
+											href="/incidents/?status=new&status=ongoing&status=resolved"
+											emphasis={true}
+										/>
+									</CardGroup>
+								</div>
+							</div>
+
+							<!-- Third Row: Severity Breakdown and Qualifications Radar -->
+							<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+								<!-- Severity Breakdown Chart -->
+								<div
+									class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6"
+								>
+									<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
+										{m.incidentSeverityBreakdown()}
+									</h3>
+									<div class="h-80">
+										<DonutChart
+											name="incident_severity"
+											values={operationsAnalytics?.severity_breakdown ?? []}
+										/>
 									</div>
 								</div>
 
-								<!-- Third Row: Severity Breakdown and Qualifications Radar -->
-								<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-									<!-- Severity Breakdown Chart -->
-									<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-										<h3 class="text-lg font-semibold text-gray-900 mb-4">
-											{m.incidentSeverityBreakdown()}
+								<!-- Qualifications Radar Chart -->
+								<div
+									class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6"
+								>
+									<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
+										{m.incidentQualificationsRadar()}
+									</h3>
+									<div class="h-80">
+										{#if operationsAnalytics?.qualifications_breakdown?.labels?.length > 0}
+											<RadarChart
+												name="incident_qualifications"
+												title=""
+												labels={operationsAnalytics?.qualifications_breakdown?.labels ?? []}
+												values={operationsAnalytics?.qualifications_breakdown?.values ?? []}
+											/>
+										{:else}
+											<div class="flex items-center justify-center h-full text-surface-600-400">
+												<p>{m.noQualificationsData()}</p>
+											</div>
+										{/if}
+									</div>
+								</div>
+							</div>
+
+							<!-- Fourth Row: Monthly Metrics and Detection Breakdown -->
+							<div class="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
+								<!-- Monthly Incident Metrics (3/5 of width) -->
+								<div class="xl:col-span-3">
+									<div
+										class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6"
+									>
+										<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
+											{m.monthlyIncidentMetrics()}
+										</h3>
+										<div class="h-80">
+											<IncidentMonthlyChart
+												name="incident_monthly"
+												title=""
+												months={operationsAnalytics?.monthly_metrics?.months ?? []}
+												monthlyCount={operationsAnalytics?.monthly_metrics?.monthly_counts ?? []}
+												cumulativeCount={operationsAnalytics?.monthly_metrics?.cumulative_counts ??
+													[]}
+											/>
+										</div>
+									</div>
+								</div>
+
+								<!-- Detection Breakdown Chart (2/5 of width) -->
+								<div class="xl:col-span-2">
+									<div
+										class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6"
+									>
+										<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
+											{m.incidentDetectionBreakdown()}
 										</h3>
 										<div class="h-80">
 											<DonutChart
-												name="incident_severity"
-												values={operationsAnalytics.severity_breakdown}
+												name="incident_detection"
+												values={operationsAnalytics?.incident_detection_breakdown ?? []}
+												colors={['#3B82F6', '#EF4444']}
 											/>
 										</div>
 									</div>
-
-									<!-- Qualifications Radar Chart -->
-									<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-										<h3 class="text-lg font-semibold text-gray-900 mb-4">
-											{m.incidentQualificationsRadar()}
+								</div>
+							</div>
+						</section>
+					{:else}
+						<div
+							class="text-center py-16 bg-gradient-to-br from-surface-50-950 to-surface-100-900 rounded-xl border-2 border-dashed border-surface-300-700"
+						>
+							<div class="text-surface-400-600 mb-4">
+								<i class="fas fa-exclamation-triangle text-6xl"></i>
+							</div>
+							<div class="text-surface-600-400">
+								<p class="text-xl font-semibold mb-2">{m.noOperationsData()}</p>
+								<p class="text-sm text-surface-600-400">{m.createIncidents()}</p>
+							</div>
+							<a
+								href="/incidents"
+								class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 transition-colors"
+							>
+								<i class="fas fa-plus text-sm"></i>
+								{m.createIncident()}
+							</a>
+						</div>
+					{/if}
+				{:catch error}
+					<div
+						class="text-center py-16 bg-gradient-to-br from-red-50 to-red-100 dark:from-surface-800 dark:to-surface-900 rounded-xl border-2 border-dashed border-red-300 dark:border-red-900"
+					>
+						<div class="text-red-400 mb-4">
+							<i class="fas fa-exclamation-triangle text-6xl"></i>
+						</div>
+						<div class="text-red-600">
+							<p class="text-xl font-semibold mb-2">Error loading operations data</p>
+							<p class="text-sm text-red-500">Please try refreshing the page</p>
+						</div>
+					</div>
+				{/await}
+			</Tabs.Content>
+			<Tabs.Content value="custom">
+				{#await Promise.all([data.stream.dashboardsList, data.stream.customDashboard])}
+					<div class="flex items-center justify-center py-12">
+						<LoadingSpinner />
+					</div>
+				{:then [dashboardsList, customDashboard]}
+					{#if (dashboardsList || []).length === 0}
+						<div
+							class="text-center py-16 bg-gradient-to-br from-surface-50-950 to-surface-100-900 rounded-xl border-2 border-dashed border-surface-300-700"
+						>
+							<div class="text-surface-400-600 mb-4">
+								<i class="fas fa-chart-line text-6xl"></i>
+							</div>
+							<div class="text-surface-600-400">
+								<p class="text-xl font-semibold mb-2">{m.noDashboardsAvailable()}</p>
+								<p class="text-sm text-surface-600-400">{m.buildYourFirstDashboard()}</p>
+							</div>
+							<a
+								href="/dashboards"
+								class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 transition-colors"
+							>
+								<i class="fas fa-plus text-sm"></i>
+								{m.createDashboard()}
+							</a>
+						</div>
+					{:else}
+						{@const currentSelectionId = customDashboard?.id ?? ''}
+						{@const filteredDashboards = (dashboardsList ?? []).filter((d: any) =>
+							d.name.toLowerCase().includes(dashboardPickerSearch.toLowerCase())
+						)}
+						<div class="space-y-4">
+							<!-- Unified picker: same popover whether or not a dashboard is selected. -->
+							<div class="flex items-center justify-between gap-4 flex-wrap">
+								<div class="relative" bind:this={dashboardPickerEl}>
+									{#if canChangeSettings}
+										<button
+											type="button"
+											class="inline-flex items-center gap-1 text-base font-semibold text-surface-900-100 hover:text-blue-600 transition-colors"
+											onclick={toggleDashboardPicker}
+											aria-haspopup="listbox"
+											aria-expanded={dashboardPickerOpen}
+											title={m.defaultCustomAnalyticsDashboardHelpText()}
+										>
+											{customDashboard?.name ?? m.selectADashboard()}
+											<i
+												class="fa-solid text-xs text-surface-400 transition-transform"
+												class:fa-chevron-down={!dashboardPickerOpen}
+												class:fa-chevron-up={dashboardPickerOpen}
+											></i>
+										</button>
+									{:else}
+										<h3
+											class="text-base font-semibold text-surface-900-100 inline-flex items-center gap-1"
+										>
+											{customDashboard?.name ?? m.noDashboardSelected?.() ?? '—'}
+											<i
+												class="fa-solid fa-lock text-xs text-surface-400 ml-1"
+												title={m.requiresChangeGlobalSettings()}
+											></i>
 										</h3>
-										<div class="h-80">
-											{#if operationsAnalytics.qualifications_breakdown.labels.length > 0}
-												<RadarChart
-													name="incident_qualifications"
-													title=""
-													labels={operationsAnalytics.qualifications_breakdown.labels}
-													values={operationsAnalytics.qualifications_breakdown.values}
+									{/if}
+
+									{#if dashboardPickerOpen && canChangeSettings}
+										<div
+											role="listbox"
+											class="absolute left-0 top-full mt-2 z-30 w-72 bg-surface-50-950 dark:bg-surface-900 border border-surface-300 dark:border-surface-700 rounded-lg shadow-lg flex flex-col max-h-96"
+										>
+											<div class="p-2 border-b border-surface-200-800">
+												<input
+													type="text"
+													class="input input-sm w-full"
+													placeholder={m.search()}
+													bind:value={dashboardPickerSearch}
+													autofocus
 												/>
-											{:else}
-												<div class="flex items-center justify-center h-full text-gray-500">
-													<p>{m.noQualificationsData()}</p>
+											</div>
+											<div class="overflow-y-auto flex-1">
+												{#if filteredDashboards.length === 0}
+													<div class="p-3 text-sm text-surface-500 text-center">
+														{m.noResultsFound?.() || 'No results'}
+													</div>
+												{:else}
+													{#each filteredDashboards as d}
+														<button
+															type="button"
+															role="option"
+															aria-selected={d.id === currentSelectionId}
+															class="w-full text-left px-3 py-2 text-sm hover:bg-surface-100 dark:hover:bg-surface-800 flex items-center justify-between gap-2"
+															class:bg-blue-50={d.id === currentSelectionId}
+															class:dark:bg-surface-800={d.id === currentSelectionId}
+															class:font-semibold={d.id === currentSelectionId}
+															onclick={() => {
+																closeDashboardPicker();
+																if (d.id !== currentSelectionId) handleCustomDashboardChange(d.id);
+															}}
+														>
+															<span class="truncate">{d.name}</span>
+															{#if d.id === currentSelectionId}
+																<i class="fa-solid fa-check text-blue-600 text-xs"></i>
+															{/if}
+														</button>
+													{/each}
+												{/if}
+											</div>
+											{#if currentSelectionId}
+												<div class="border-t border-surface-200-800 p-2">
+													<button
+														type="button"
+														class="w-full text-left px-2 py-1.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-surface-700 rounded inline-flex items-center gap-2"
+														onclick={() => {
+															closeDashboardPicker();
+															handleCustomDashboardChange('');
+														}}
+													>
+														<i class="fa-solid fa-xmark text-xs"></i>
+														{m.clearDefault()}
+													</button>
 												</div>
 											{/if}
 										</div>
-									</div>
+									{/if}
 								</div>
+								{#if customDashboard?.id}
+									<a
+										href="/dashboards/{customDashboard.id}"
+										class="text-xs text-blue-600 hover:text-blue-800 inline-flex items-center gap-1"
+									>
+										<i class="fa-solid fa-up-right-from-square"></i>
+										{m.viewDashboard()}
+									</a>
+								{/if}
+							</div>
 
-								<!-- Fourth Row: Monthly Metrics and Detection Breakdown -->
-								<div class="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
-									<!-- Monthly Incident Metrics (3/5 of width) -->
-									<div class="xl:col-span-3">
-										<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-											<h3 class="text-lg font-semibold text-gray-900 mb-4">
-												{m.monthlyIncidentMetrics()}
-											</h3>
-											<div class="h-80">
-												<IncidentMonthlyChart
-													name="incident_monthly"
-													title=""
-													months={operationsAnalytics.monthly_metrics.months}
-													monthlyCount={operationsAnalytics.monthly_metrics.monthly_counts}
-													cumulativeCount={operationsAnalytics.monthly_metrics.cumulative_counts}
-												/>
-											</div>
-										</div>
-									</div>
-
-									<!-- Detection Breakdown Chart (2/5 of width) -->
-									<div class="xl:col-span-2">
-										<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-											<h3 class="text-lg font-semibold text-gray-900 mb-4">
-												{m.incidentDetectionBreakdown()}
-											</h3>
-											<div class="h-80">
-												<DonutChart
-													name="incident_detection"
-													values={operationsAnalytics.incident_detection_breakdown}
-													colors={['#3B82F6', '#EF4444']}
-												/>
-											</div>
-										</div>
-									</div>
+							{#if customDashboard?.widgets?.length > 0}
+								<div class="bg-surface-50-950 rounded-lg p-4">
+									<DashboardGrid widgets={customDashboard.widgets} />
 								</div>
-							</section>
-						{:else}
-							<div
-								class="text-center py-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-gray-300"
-							>
-								<div class="text-gray-400 mb-4">
-									<i class="fas fa-exclamation-triangle text-6xl"></i>
+							{:else if customDashboard}
+								<div class="card p-12 bg-surface-50-950 dark:bg-surface-900 text-center">
+									<i class="fa-solid fa-chart-line text-8xl text-surface-300 mb-6"></i>
+									<p class="text-surface-500 text-lg mb-6">{m.noWidgetsYet()}</p>
+									<a
+										href="/dashboards/{customDashboard.id}/layout"
+										class="btn preset-filled-primary-500"
+									>
+										<i class="fa-solid fa-pen-to-square"></i>
+										{m.editLayout()}
+									</a>
 								</div>
-								<div class="text-gray-600">
-									<p class="text-xl font-semibold mb-2">{m.noOperationsData()}</p>
-									<p class="text-sm text-gray-500">{m.createIncidents()}</p>
-								</div>
-								<a
-									href="/incidents"
-									class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+							{:else}
+								<div
+									class="card p-12 bg-surface-50-950 dark:bg-surface-900 text-center text-surface-500"
 								>
-									<i class="fas fa-plus text-sm"></i>
-									{m.createIncident()}
-								</a>
-							</div>
-						{/if}
-					{:catch error}
-						<div
-							class="text-center py-16 bg-gradient-to-br from-red-50 to-red-100 rounded-xl border-2 border-dashed border-red-300"
-						>
-							<div class="text-red-400 mb-4">
-								<i class="fas fa-exclamation-triangle text-6xl"></i>
-							</div>
-							<div class="text-red-600">
-								<p class="text-xl font-semibold mb-2">Error loading operations data</p>
-								<p class="text-sm text-red-500">Please try refreshing the page</p>
-							</div>
+									<i class="fa-solid fa-hand-pointer text-6xl text-surface-300 mb-4"></i>
+									<p>{m.selectADashboard()}</p>
+								</div>
+							{/if}
 						</div>
-					{/await}
-				</Tabs.Panel>
-			</div>
-		{/key}
-	{/snippet}
+					{/if}
+				{:catch}
+					<div class="text-red-500 text-center py-8">Error loading dashboards</div>
+				{/await}
+			</Tabs.Content>
+		</div>
+	{/key}
 </Tabs>
+
+{#if threatTreemapExpanded}
+	<dialog
+		bind:this={threatTreemapDialog}
+		class="fixed inset-0 m-auto w-[92vw] max-w-7xl h-[88vh] rounded-2xl bg-surface-50-950 shadow-2xl border border-surface-200-800 p-0 overflow-hidden backdrop:bg-black/40"
+		onclose={() => (threatTreemapExpanded = false)}
+	>
+		<div class="flex items-center justify-between px-6 py-4 border-b border-surface-100-900">
+			<h3 class="text-lg font-bold text-surface-900-100">{m.threatsBreakdown()}</h3>
+			<button
+				class="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-surface-200-800 transition-colors text-surface-600-400 hover:text-surface-700-300"
+				onclick={closeThreatTreemap}
+			>
+				<i class="fa-solid fa-times"></i>
+			</button>
+		</div>
+		<div class="p-4 h-[calc(88vh-64px)]">
+			<TreemapChart name="threatTreemapExpanded" tree={threatTreeData} translate={true} />
+		</div>
+	</dialog>
+{/if}

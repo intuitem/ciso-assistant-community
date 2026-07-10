@@ -1,17 +1,18 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import type { SuperValidated } from 'sveltekit-superforms';
+	import type { SuperForm } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
 
 	interface Props {
-		form: SuperValidated<any>;
+		form: SuperForm<any>;
 		model: ModelInfo;
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
@@ -77,8 +78,8 @@
 />
 {#if object?.id}
 	<div class="space-y-2">
-		<span class="text-sm font-medium text-gray-700">{m.requestNotes()}</span>
-		<MarkdownRenderer content={object.request_notes} class="p-3 bg-gray-50 rounded-lg" />
+		<span class="text-sm font-medium text-surface-700-300">{m.requestNotes()}</span>
+		<MarkdownRenderer content={object.request_notes} class="p-3 bg-surface-50-950 rounded-lg" />
 	</div>
 {:else}
 	<TextArea
@@ -101,20 +102,6 @@
 		multiple
 	/>
 {/if}
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="folders?content_type=DO"
-	field="folder"
-	pathField="path"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-	onChange={async (e) => {
-		if (e && !object?.id) {
-			await fetchDefaultRefId();
-		}
-	}}
-/>
 {#if object?.id}
 	<Select
 		{form}
@@ -129,8 +116,8 @@
 {#if object?.id}
 	{#if object.validation_deadline}
 		<div class="space-y-2">
-			<span class="text-sm font-medium text-gray-700">{m.validationDeadline()}</span>
-			<p class="p-3 bg-gray-50 rounded-lg text-sm">{object.validation_deadline}</p>
+			<span class="text-sm font-medium text-surface-700-300">{m.validationDeadline()}</span>
+			<p class="p-3 bg-surface-50-950 rounded-lg text-sm">{object.validation_deadline}</p>
 		</div>
 	{/if}
 {:else}
@@ -146,14 +133,6 @@
 {/if}
 {#if !hasPresetAssessments}
 	<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
-		<TextField
-			{form}
-			field="ref_id"
-			label={m.refId()}
-			cacheLock={cacheLocks['ref_id']}
-			bind:cachedValue={formDataCache['ref_id']}
-			disabled={initialData.ref_id}
-		/>
 		<AutocompleteSelect
 			{form}
 			optionsEndpoint="compliance-assessments"
@@ -194,5 +173,57 @@
 			multiple
 			disabled={initialData.findings_assessments}
 		/>
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="security-exceptions"
+			field="security_exceptions"
+			cacheLock={cacheLocks['security_exceptions']}
+			bind:cachedValue={formDataCache['security_exceptions']}
+			label={m.securityExceptions()}
+			multiple
+			disabled={initialData.security_exceptions}
+		/>
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="processings"
+			field="processings"
+			cacheLock={cacheLocks['processings']}
+			bind:cachedValue={formDataCache['processings']}
+			label={m.processings()}
+			multiple
+			disabled={initialData.processings}
+		/>
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="accreditations"
+			field="accreditations"
+			cacheLock={cacheLocks['accreditations']}
+			bind:cachedValue={formDataCache['accreditations']}
+			label={m.accreditations()}
+			multiple
+			disabled={initialData.accreditations}
+		/>
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="contracts"
+			field="contracts"
+			cacheLock={cacheLocks['contracts']}
+			bind:cachedValue={formDataCache['contracts']}
+			label={m.contracts()}
+			multiple
+			disabled={initialData.contracts}
+		/>
 	</Dropdown>
 {/if}
+<FolderTreeSelect
+	{form}
+	field="folder"
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.domain()}
+	onChange={async (e) => {
+		if (e && !object?.id) {
+			await fetchDefaultRefId();
+		}
+	}}
+/>

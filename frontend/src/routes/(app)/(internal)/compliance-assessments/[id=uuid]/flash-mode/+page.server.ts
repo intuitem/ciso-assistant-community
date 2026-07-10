@@ -19,14 +19,15 @@ export const load = (async ({ fetch, params }) => {
 		URLModel,
 		compliance_assessment,
 		requirement_assessments,
-		requirements
+		requirements,
+		title: 'flashMode'
 	};
 }) satisfies PageServerLoad;
 
 export const actions: Actions = {
 	updateRequirementAssessment: async (event) => {
 		const data = await event.request.json();
-		const value: { id: string; result: string } = data;
+		const value: { id: string; result?: string; observation?: string } = data;
 		const URLModel = 'requirement-assessments';
 		const endpoint = `${BASE_API_URL}/${URLModel}/${value.id}/`;
 

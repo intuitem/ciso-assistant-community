@@ -49,6 +49,18 @@ export const navData = {
 						'view_assessment',
 						'view_riskassessment'
 					]
+				},
+				{
+					name: 'auditDashboard',
+					fa_icon: 'fa-solid fa-clipboard-check',
+					href: '/auditee-dashboard',
+					permissions: ['view_complianceassessment']
+				},
+				{
+					name: 'presets',
+					fa_icon: 'fa-solid fa-rocket',
+					href: '/presets',
+					permissions: ['add_loadedlibrary', 'view_presetjourney']
 				}
 			]
 		},
@@ -100,7 +112,7 @@ export const navData = {
 					name: 'domains',
 					fa_icon: 'fa-solid fa-sitemap',
 					href: '/folders',
-					exclude: ['BI-RL-TPR']
+					exclude: ['BI-RL-TPR', 'BI-RL-ADE']
 				},
 				{
 					name: 'perimeters',
@@ -121,6 +133,11 @@ export const navData = {
 					name: 'userGroups',
 					fa_icon: 'fa-solid fa-users',
 					href: '/user-groups'
+				},
+				{
+					name: 'idpGroups',
+					fa_icon: 'fa-solid fa-id-badge',
+					href: '/idp-groups'
 				},
 				{
 					name: 'roles',
@@ -149,6 +166,16 @@ export const navData = {
 					href: '/threats'
 				},
 				{
+					name: 'securityAdvisories',
+					fa_icon: 'fa-solid fa-shield-virus',
+					href: '/security-advisories'
+				},
+				{
+					name: 'cwes',
+					fa_icon: 'fa-solid fa-bug-slash',
+					href: '/cwes'
+				},
+				{
 					name: 'referenceControls',
 					fa_icon: 'fa-solid fa-gears',
 					href: '/reference-controls'
@@ -162,6 +189,12 @@ export const navData = {
 					name: 'riskMatrices',
 					fa_icon: 'fa-solid fa-table-cells-large',
 					href: '/risk-matrices'
+				},
+				{
+					name: 'documentTemplates',
+					fa_icon: 'fa-solid fa-file-code',
+					href: '/document-templates',
+					permissions: ['view_documenttemplate']
 				}
 			]
 		},
@@ -189,6 +222,12 @@ export const navData = {
 					href: '/applied-controls'
 				},
 				{
+					name: 'documents',
+					fa_icon: 'fa-solid fa-file-lines',
+					href: '/documents',
+					permissions: ['view_documentcontainer']
+				},
+				{
 					name: 'calendar',
 					fa_icon: 'fa-solid fa-calendar-days',
 					href: '/calendar',
@@ -209,6 +248,12 @@ export const navData = {
 					name: 'tasks',
 					fa_icon: 'fa-solid fa-note-sticky',
 					href: '/task-templates'
+				},
+				{
+					name: 'tasksReview',
+					fa_icon: 'fa-solid fa-table-columns',
+					href: '/tasks-review',
+					permissions: ['view_appliedcontrol']
 				}
 			]
 		},
@@ -307,7 +352,8 @@ export const navData = {
 				{
 					name: 'complianceAssessments',
 					fa_icon: 'fa-solid fa-certificate',
-					href: '/compliance-assessments'
+					href: '/compliance-assessments',
+					exclude: ['BI-RL-ADE']
 				},
 				{
 					name: 'evidences',
@@ -447,6 +493,18 @@ export const navData = {
 					fa_icon: 'fa-solid fa-award',
 					href: '/accreditations',
 					permissions: ['view_accreditation']
+				},
+				{
+					name: 'projects',
+					fa_icon: 'fa-solid fa-diagram-project',
+					href: '/projects',
+					permissions: ['view_project']
+				},
+				{
+					name: 'responsibilityMatrices',
+					fa_icon: 'fa-solid fa-people-arrows',
+					href: '/responsibility-matrices',
+					permissions: ['view_responsibilitymatrix']
 				}
 			]
 		},
@@ -464,6 +522,18 @@ export const navData = {
 					fa_icon: 'fa-solid fa-language',
 					href: '/terminologies',
 					permissions: ['view_terminology']
+				},
+				{
+					name: 'objectClassifications',
+					fa_icon: 'fa-solid fa-shield-halved',
+					href: '/object-classifications',
+					permissions: ['view_objectclassification']
+				},
+				{
+					name: 'customFields',
+					fa_icon: 'fa-solid fa-sliders',
+					href: '/custom-fields',
+					permissions: ['view_customfielddefinition']
 				},
 				{
 					name: 'settings',
@@ -487,13 +557,19 @@ export const navData = {
 					name: 'Audit log',
 					fa_icon: 'fa-solid fa-newspaper',
 					href: '/audit-log',
-					permissions: ['view_logentry']
+					permissions: ['view_central_auditlog']
 				},
 				{
 					name: 'experimental',
 					fa_icon: 'fa-solid fa-flask',
 					href: '/experimental',
 					permissions: ['change_globalsettings']
+				},
+				{
+					name: 'managePortals',
+					fa_icon: 'fa-solid fa-table-cells-large',
+					href: '/portal-editor',
+					permissions: ['change_portal']
 				}
 			]
 		}

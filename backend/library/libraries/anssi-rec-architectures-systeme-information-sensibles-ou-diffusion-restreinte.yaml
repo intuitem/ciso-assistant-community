@@ -1,0 +1,530 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:ii-901
+locale: fr
+ref_id: ANSSI-rec-architectures-Systeme-Information-sensibles-ou-Diffusion-Restreinte
+name: "ANSSI - Recommandations pour les architectures des Syst\xE8mes d'Information\
+  \ (SI) sensibles ou Diffusion Restreinte (DR) - v1.2"
+description: "L'instruction interminist\xE9rielle n\xB0 901/SGDSN/ANSSI (II 901) du\
+  \ 28 janvier 2015 d\xE9finit les objectifs et les mesures de s\xE9curit\xE9 minimales\
+  \ relatifs \xE0 la protection des informations sensibles, notamment celles relevant\
+  \ du niveau Diffusion Restreinte (DR).\n\nL'II 901 s'applique :\n* aux administrations\
+  \ de l'\xC9tat[1] qui mettent en oeuvre des syst\xE8mes d'information sensibles\
+  \ ;\n* aux entit\xE9s publiques ou priv\xE9es soumises \xE0 la r\xE9glementation\
+  \ relative \xE0 la protection du potentiel scientifique et technique de la nation\
+  \ (PPST) qui mettent en oeuvre des syst\xE8mes d'information sensibles ;\n* \xE0\
+  \ toute autre entit\xE9 publique ou priv\xE9e qui met en oeuvre des syst\xE8mes\
+  \ d'information Diffusion Restreinte.\n\nLes recommandations du pr\xE9sent guide\
+  \ sont destin\xE9es en premier lieu \xE0 ces diff\xE9rentes entit\xE9s, pour lesquelles\
+  \ l'II 901 s'applique pleinement. L'II 901 ayant valeur de recommandation pour toute\
+  \ autre entit\xE9 publique ou priv\xE9e qui met en oeuvre des syst\xE8mes d'informations\
+  \ sensibles, ces bonnes pratiques pourront \xEAtre utilement d\xE9clin\xE9es sur\
+  \ tous les types SI sensibles (p.ex. SI h\xE9bergeant des informations prot\xE9\
+  g\xE9es au titre du secret des affaires, SI h\xE9bergeant des informations couvertes\
+  \ par le secret professionnel, etc.). Le pr\xE9sent guide a \xE9t\xE9 con\xE7u comme\
+  \ un outil destin\xE9 \xE0 aider une entit\xE9 \xE0 mettre en oeuvre une architecture\
+  \ de SI conforme \xE0 l'II 901. **Attention toutefois car certains champs de l'II\
+  \ 901 ne sont volontairement pas trait\xE9s dans ce guide[2].** Cette version du\
+  \ guide n'aborde pas la probl\xE9matique de protection des donn\xE9es sensibles\
+  \ ou DR lorsqu'elles sont h\xE9berg\xE9es dans un cloud.\n\nLe guide est accompagn\xE9\
+  \ d'un outil d'aide et de suivi d'impl\xE9mentation de la s\xE9curit\xE9 (OASIS)\
+  \ sous forme de tableur. Ce document aide les entit\xE9s \xE0 donner des priorit\xE9\
+  s aux recommandations, \xE0 les classer selon une approche graduelle, puis \xE0\
+  \ faire le suivi de leur mise en \u0153uvre. Chaque entit\xE9 peut adapter cette\
+  \ approche \xE0 ses enjeux, moyens, comp\xE9tences et SI existants. Pens\xE9 lui-aussi\
+  \ comme un outil, ce fichier tableur a pour vocation de fournir aux personnes en\
+  \ charge de la mise en oeuvre et de l'homologation d'un SI sensible un moyen concret\
+  \ et simple de :\n1. distinguer les mesures de s\xE9curit\xE9 r\xE9glementairement\
+  \ impos\xE9es de celles qui rel\xE8vent des bonnes pratiques ;\n2. justifier des\
+  \ \xE9carts si certaines mesures ne sont pas retenues ou doivent \xEAtre adapt\xE9\
+  es au contexte de l'entit\xE9 ;\n3. \xE9valuer le niveau de mise en oeuvre r\xE9\
+  el des exigences r\xE9glementaires retenues.\n\n[1] Les administrations de l'\xC9\
+  tat au sens de l'II 901 sont les administrations centrales, les \xE9tablissements\
+  \ publics nationaux, les services d\xE9concentr\xE9s de l'\xC9tat et les autorit\xE9\
+  s administratives ind\xE9pendantes.\n[2] Les champs non trait\xE9s sont par exemple\
+  \ la s\xE9curit\xE9 physique et environnementale, la s\xE9curit\xE9 li\xE9e aux\
+  \ d\xE9veloppements informatiques. En cons\xE9quence, il n'est pas suffisant qu'un\
+  \ SI soit conforme aux recommandations de ce guide pour attester de sa conformit\xE9\
+  \ \xE0 l'ensemble des exigences r\xE9glementaires II 901. Un travail compl\xE9mentaire\
+  \ est n\xE9cessaire pour s'assurer de la conformit\xE9 exhaustive du SI consid\xE9\
+  r\xE9, si un niveau d'homologation sensible ou DR est vis\xE9.\n\nSource : https://messervices.cyber.gouv.fr/guides/recommandations-pour-les-architectures-des-si-sensibles-ou-dr"
+copyright: ANSSI
+version: 3
+publication_date: 2026-05-21
+provider: ANSSI
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:igi-901
+    ref_id: ANSSI-rec-architectures-Systeme-Information-sensibles-ou-Diffusion-Restreinte
+    name: "ANSSI - Recommandations pour les architectures des Syst\xE8mes d'Information\
+      \ (SI) sensibles ou Diffusion Restreinte (DR) - v1.2"
+    description: "L'instruction interminist\xE9rielle n\xB0 901/SGDSN/ANSSI (II 901)\
+      \ du 28 janvier 2015 d\xE9finit les objectifs et les mesures de s\xE9curit\xE9\
+      \ minimales relatifs \xE0 la protection des informations sensibles, notamment\
+      \ celles relevant du niveau Diffusion Restreinte (DR).\n\nL'II 901 s'applique\
+      \ :\n* aux administrations de l'\xC9tat[1] qui mettent en oeuvre des syst\xE8\
+      mes d'information sensibles ;\n* aux entit\xE9s publiques ou priv\xE9es soumises\
+      \ \xE0 la r\xE9glementation relative \xE0 la protection du potentiel scientifique\
+      \ et technique de la nation (PPST) qui mettent en oeuvre des syst\xE8mes d'information\
+      \ sensibles ;\n* \xE0 toute autre entit\xE9 publique ou priv\xE9e qui met en\
+      \ oeuvre des syst\xE8mes d'information Diffusion Restreinte.\n\nLes recommandations\
+      \ du pr\xE9sent guide sont destin\xE9es en premier lieu \xE0 ces diff\xE9rentes\
+      \ entit\xE9s, pour lesquelles l'II 901 s'applique pleinement. L'II 901 ayant\
+      \ valeur de recommandation pour toute autre entit\xE9 publique ou priv\xE9e\
+      \ qui met en oeuvre des syst\xE8mes d'informations sensibles, ces bonnes pratiques\
+      \ pourront \xEAtre utilement d\xE9clin\xE9es sur tous les types SI sensibles\
+      \ (p.ex. SI h\xE9bergeant des informations prot\xE9g\xE9es au titre du secret\
+      \ des affaires, SI h\xE9bergeant des informations couvertes par le secret professionnel,\
+      \ etc.). Le pr\xE9sent guide a \xE9t\xE9 con\xE7u comme un outil destin\xE9\
+      \ \xE0 aider une entit\xE9 \xE0 mettre en oeuvre une architecture de SI conforme\
+      \ \xE0 l'II 901. **Attention toutefois car certains champs de l'II 901 ne sont\
+      \ volontairement pas trait\xE9s dans ce guide[2].** Cette version du guide n'aborde\
+      \ pas la probl\xE9matique de protection des donn\xE9es sensibles ou DR lorsqu'elles\
+      \ sont h\xE9berg\xE9es dans un cloud.\n\nLe guide est accompagn\xE9 d'un outil\
+      \ d'aide et de suivi d'impl\xE9mentation de la s\xE9curit\xE9 (OASIS) sous forme\
+      \ de tableur. Ce document aide les entit\xE9s \xE0 donner des priorit\xE9s aux\
+      \ recommandations, \xE0 les classer selon une approche graduelle, puis \xE0\
+      \ faire le suivi de leur mise en \u0153uvre. Chaque entit\xE9 peut adapter cette\
+      \ approche \xE0 ses enjeux, moyens, comp\xE9tences et SI existants. Pens\xE9\
+      \ lui-aussi comme un outil, ce fichier tableur a pour vocation de fournir aux\
+      \ personnes en charge de la mise en oeuvre et de l'homologation d'un SI sensible\
+      \ un moyen concret et simple de :\n1. distinguer les mesures de s\xE9curit\xE9\
+      \ r\xE9glementairement impos\xE9es de celles qui rel\xE8vent des bonnes pratiques\
+      \ ;\n2. justifier des \xE9carts si certaines mesures ne sont pas retenues ou\
+      \ doivent \xEAtre adapt\xE9es au contexte de l'entit\xE9 ;\n3. \xE9valuer le\
+      \ niveau de mise en oeuvre r\xE9el des exigences r\xE9glementaires retenues.\n\
+      \n[1] Les administrations de l'\xC9tat au sens de l'II 901 sont les administrations\
+      \ centrales, les \xE9tablissements publics nationaux, les services d\xE9concentr\xE9\
+      s de l'\xC9tat et les autorit\xE9s administratives ind\xE9pendantes.\n[2] Les\
+      \ champs non trait\xE9s sont par exemple la s\xE9curit\xE9 physique et environnementale,\
+      \ la s\xE9curit\xE9 li\xE9e aux d\xE9veloppements informatiques. En cons\xE9\
+      quence, il n'est pas suffisant qu'un SI soit conforme aux recommandations de\
+      \ ce guide pour attester de sa conformit\xE9 \xE0 l'ensemble des exigences r\xE9\
+      glementaires II 901. Un travail compl\xE9mentaire est n\xE9cessaire pour s'assurer\
+      \ de la conformit\xE9 exhaustive du SI consid\xE9r\xE9, si un niveau d'homologation\
+      \ sensible ou DR est vis\xE9.\n\nSource : https://messervices.cyber.gouv.fr/guides/recommandations-pour-les-architectures-des-si-sensibles-ou-dr"
+    min_score: 1
+    max_score: 5
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:igi-901:r1
+      assessable: true
+      depth: 1
+      ref_id: R1
+      name: "Trier le patrimoine informationnel par niveau de sensibilit\xE9"
+    - urn: urn:intuitem:risk:req_node:igi-901:r2
+      assessable: true
+      depth: 1
+      ref_id: R2
+      name: "Identifier les types de SI n\xE9cessaires"
+    - urn: urn:intuitem:risk:req_node:igi-901:r3
+      assessable: true
+      depth: 1
+      ref_id: R3
+      name: "D\xE9terminer le r\xE9gime de protection des informations sensibles"
+    - urn: urn:intuitem:risk:req_node:igi-901:r4
+      assessable: true
+      depth: 1
+      ref_id: R4
+      name: Homologuer tout SI sensible avant sa mise en production
+    - urn: urn:intuitem:risk:req_node:igi-901:r5_
+      assessable: true
+      depth: 1
+      ref_id: R5+
+      name: Isoler physiquement le SI sensible et le SI usuel
+    - urn: urn:intuitem:risk:req_node:igi-901:r5
+      assessable: true
+      depth: 1
+      ref_id: R5
+      name: Cloisonner physiquement le SI sensible et le SI usuel
+    - urn: urn:intuitem:risk:req_node:igi-901:r5-
+      assessable: true
+      depth: 1
+      ref_id: R5-
+      name: "Cloisonner logiquement les donn\xE9es sensibles au sein d'un SI sensible"
+    - urn: urn:intuitem:risk:req_node:igi-901:r6
+      assessable: true
+      depth: 1
+      ref_id: R6
+      name: "Appliquer le principe de d\xE9fense en profondeur en cas de mutualisation\
+        \ de ressources"
+    - urn: urn:intuitem:risk:req_node:igi-901:r7
+      assessable: true
+      depth: 1
+      ref_id: R7
+      name: Cloisonner les annuaires sensible et usuel
+    - urn: urn:intuitem:risk:req_node:igi-901:r8
+      assessable: true
+      depth: 1
+      ref_id: R8
+      name: "D\xE9finir une strat\xE9gie d'homologation pour chaque interconnexion\
+        \ de SI sensible"
+    - urn: urn:intuitem:risk:req_node:igi-901:r9
+      assessable: true
+      depth: 1
+      ref_id: R9
+      name: "S\xE9curiser les interconnexions de SI DR"
+    - urn: urn:intuitem:risk:req_node:igi-901:r10
+      assessable: true
+      depth: 1
+      ref_id: R10
+      name: "S\xE9curiser les interconnexions de SI sensibles"
+    - urn: urn:intuitem:risk:req_node:igi-901:r11
+      assessable: true
+      depth: 1
+      ref_id: R11
+      name: Filtrer les flux des interconnexions de SI sensibles
+    - urn: urn:intuitem:risk:req_node:igi-901:r12
+      assessable: true
+      depth: 1
+      ref_id: R12
+      name: "Appliquer les recommandations de l'ANSSI relatives \xE0\_ l'interconnexion\
+        \ d'un SI \xE0 Internet"
+    - urn: urn:intuitem:risk:req_node:igi-901:r13
+      assessable: true
+      depth: 1
+      ref_id: R13
+      name: "Passerelle de classe 1 : mettre en oeuvre au moins un pare-feu qualifi\xE9"
+    - urn: urn:intuitem:risk:req_node:igi-901:r14
+      assessable: true
+      depth: 1
+      ref_id: R14
+      name: 'Passerelle de classe 1 : mettre en oeuvre au moins un dispositif de rupture
+        de flux'
+    - urn: urn:intuitem:risk:req_node:igi-901:r15
+      assessable: true
+      depth: 1
+      ref_id: R15
+      name: "Passerelle de classe 1 : mettre en oeuvre un syst\xE8me de d\xE9tection"
+    - urn: urn:intuitem:risk:req_node:igi-901:r16
+      assessable: true
+      depth: 1
+      ref_id: R16
+      name: "Passerelle de classe 1 : mettre en oeuvre des taps qualifi\xE9s passifs"
+    - urn: urn:intuitem:risk:req_node:igi-901:r17
+      assessable: true
+      depth: 1
+      ref_id: R17
+      name: "Passerelle de classe 1 : faire porter les fonctions de s\xE9curit\xE9\
+        \ par des dispositifs distincts"
+    - urn: urn:intuitem:risk:req_node:igi-901:r18
+      assessable: true
+      depth: 1
+      ref_id: R18
+      name: Interdire la navigation Web depuis les SI sensibles
+    - urn: urn:intuitem:risk:req_node:igi-901:r18-
+      assessable: true
+      depth: 1
+      ref_id: R18-
+      name: Permettre la navigation Web depuis des postes de rebond
+    - urn: urn:intuitem:risk:req_node:igi-901:r18---
+      assessable: true
+      depth: 1
+      ref_id: R18- -
+      name: Permettre la navigation Web sans postes de rebond
+    - urn: urn:intuitem:risk:req_node:igi-901:r19
+      assessable: true
+      depth: 1
+      ref_id: R19
+      name: "Chiffrer les informations DR transf\xE9r\xE9es via des SI de classe 0"
+    - urn: urn:intuitem:risk:req_node:igi-901:r20
+      assessable: true
+      depth: 1
+      ref_id: R20
+      name: "Chiffrer les informations sensibles transf\xE9r\xE9es via des SI de classe\
+        \ 0"
+    - urn: urn:intuitem:risk:req_node:igi-901:r21
+      assessable: true
+      depth: 1
+      ref_id: R21
+      name: "Interdire l'acc\xE9s aux applications sensibles depuis les SI non homologu\xE9\
+        s"
+    - urn: urn:intuitem:risk:req_node:igi-901:r22
+      assessable: true
+      depth: 1
+      ref_id: R22
+      name: "Cloisonner l'infrastructure de mise \xE0\_ disposition sur Internet d'informations\
+        \ sensibles"
+    - urn: urn:intuitem:risk:req_node:igi-901:r23
+      assessable: true
+      depth: 1
+      ref_id: R23
+      name: "Ma\xEEtriser les interconnexions descendantes des SI de classe 2"
+    - urn: urn:intuitem:risk:req_node:igi-901:r24
+      assessable: true
+      depth: 1
+      ref_id: R24
+      name: "N'autoriser que des protocoles de transfert vers le syst\xE8me d'\xE9\
+        changes s\xE9curis\xE9s"
+    - urn: urn:intuitem:risk:req_node:igi-901:r25
+      assessable: true
+      depth: 1
+      ref_id: R25
+      name: "Syst\xE8me d'\xE9changes s\xE9curis\xE9s : restreindre les acc\xE8s aux\
+        \ seuls utilisateurs autoris\xE9s"
+    - urn: urn:intuitem:risk:req_node:igi-901:r26
+      assessable: true
+      depth: 1
+      ref_id: R26
+      name: "Syst\xE8me d'\xE9changes s\xE9curis\xE9s : authentifier les utilisateurs\
+        \ avec un compte non sensible"
+    - urn: urn:intuitem:risk:req_node:igi-901:r27
+      assessable: true
+      depth: 1
+      ref_id: R27
+      name: "Syst\xE8me d'\xE9changes s\xE9curis\xE9s : analyser le contenu des donn\xE9\
+        es \xE9chang\xE9es"
+    - urn: urn:intuitem:risk:req_node:igi-901:r28
+      assessable: true
+      depth: 1
+      ref_id: R28
+      name: "Syst\xE8me d'\xE9changes s\xE9curis\xE9s : journaliser et imputer des\
+        \ donn\xE9es \xE9chang\xE9es"
+    - urn: urn:intuitem:risk:req_node:igi-901:r29
+      assessable: true
+      depth: 1
+      ref_id: R29
+      name: "Recourir \xE0 des prestataires de services SSI disposant d'un visa de\
+        \ s\xE9curit\xE9 ANSSI"
+    - urn: urn:intuitem:risk:req_node:igi-901:r30
+      assessable: true
+      depth: 1
+      ref_id: R30
+      name: "Acqu\xE9rir des produits de s\xE9curit\xE9 disposant d'un visa de s\xE9\
+        curit\xE9 ANSSI"
+    - urn: urn:intuitem:risk:req_node:igi-901:r31
+      assessable: true
+      depth: 1
+      ref_id: R31
+      name: "Respecter les conditions d'emploi des \xE9quipements de s\xE9curit\xE9\
+        \ agr\xE9\xE9s"
+    - urn: urn:intuitem:risk:req_node:igi-901:r32
+      assessable: true
+      depth: 1
+      ref_id: R32
+      name: "Cloisonner le SI sensible en zones ayant des niveaux de s\xE9curit\xE9\
+        \ homog\xE8nes"
+    - urn: urn:intuitem:risk:req_node:igi-901:r33
+      assessable: true
+      depth: 1
+      ref_id: R33
+      name: "\xC9viter l'installation de moyens informatiques sensibles dans les zones\
+        \ ouvertes au public"
+    - urn: urn:intuitem:risk:req_node:igi-901:r34
+      assessable: true
+      depth: 1
+      ref_id: R34
+      name: "Bloquer les communications lat\xE9rales"
+    - urn: urn:intuitem:risk:req_node:igi-901:r35
+      assessable: true
+      depth: 1
+      ref_id: R35
+      name: "Durcir la configuration des mat\xE9riels et des logiciels utilis\xE9\
+        s sur les SI sensibles"
+    - urn: urn:intuitem:risk:req_node:igi-901:r36
+      assessable: true
+      depth: 1
+      ref_id: R36
+      name: Marquer les informations sensibles
+    - urn: urn:intuitem:risk:req_node:igi-901:r37
+      assessable: true
+      depth: 1
+      ref_id: R37
+      name: Marquer les supports stockant des informations sensibles
+    - urn: urn:intuitem:risk:req_node:igi-901:r38
+      assessable: true
+      depth: 1
+      ref_id: R38
+      name: "Adopter un code couleur pour le c\xE2blage des \xE9quipements"
+    - urn: urn:intuitem:risk:req_node:igi-901:r39
+      assessable: true
+      depth: 1
+      ref_id: R39
+      name: Activer une authentification initiale forte
+    - urn: urn:intuitem:risk:req_node:igi-901:r40
+      assessable: true
+      depth: 1
+      ref_id: R40
+      name: "Prot\xE9ger les secrets d'authentification"
+    - urn: urn:intuitem:risk:req_node:igi-901:r41
+      assessable: true
+      depth: 1
+      ref_id: R41
+      name: "G\xE9rer avec rigueur l'affectation des droits d'acc\xE8s logiques des\
+        \ comptes informatiques"
+    - urn: urn:intuitem:risk:req_node:igi-901:r42
+      assessable: true
+      depth: 1
+      ref_id: R42
+      name: "Prot\xE9ger le SI sensible des codes malveillants"
+    - urn: urn:intuitem:risk:req_node:igi-901:r43
+      assessable: true
+      depth: 1
+      ref_id: R43
+      name: Adapter la politique de protection contre les codes malveillants
+    - urn: urn:intuitem:risk:req_node:igi-901:r44
+      assessable: true
+      depth: 1
+      ref_id: R44
+      name: "D\xE9ployer des outils r\xE9v\xE8lant des activit\xE9s suspectes"
+    - urn: urn:intuitem:risk:req_node:igi-901:r45
+      assessable: true
+      depth: 1
+      ref_id: R45
+      name: "Supports amovibles : limiter leur usage au strict besoin op\xE9rationnel"
+    - urn: urn:intuitem:risk:req_node:igi-901:r46
+      assessable: true
+      depth: 1
+      ref_id: R46
+      name: "Supports amovibles : ma\xEEtriser leur gestion et leurs conditions d'usage"
+    - urn: urn:intuitem:risk:req_node:igi-901:r47
+      assessable: true
+      depth: 1
+      ref_id: R47
+      name: "Supports amovibles : privil\xE9gier l'utilisation de supports en lecture\
+        \ seule"
+    - urn: urn:intuitem:risk:req_node:igi-901:r48
+      assessable: true
+      depth: 1
+      ref_id: R48
+      name: "Supports amovibles : utiliser des solutions de d\xE9pollution des supports\
+        \ de stockage"
+    - urn: urn:intuitem:risk:req_node:igi-901:r49
+      assessable: true
+      depth: 1
+      ref_id: R49
+      name: "Ma\xEEtriser les moyens informatiques affect\xE9s aux utilisateurs d'un\
+        \ SI sensible"
+    - urn: urn:intuitem:risk:req_node:igi-901:r50
+      assessable: true
+      depth: 1
+      ref_id: R50
+      name: "Connecter les ressources sensibles sur un r\xE9seau physique d\xE9di\xE9"
+    - urn: urn:intuitem:risk:req_node:igi-901:r50-
+      assessable: true
+      depth: 1
+      ref_id: R50-
+      name: "Connecter les ressources sensibles sur un r\xE9seau logique d\xE9di\xE9"
+    - urn: urn:intuitem:risk:req_node:igi-901:r51
+      assessable: true
+      depth: 1
+      ref_id: R51
+      name: "Authentifier les ressources sensibles vis-\xE0\_-vis du r\xE9seau"
+    - urn: urn:intuitem:risk:req_node:igi-901:r52
+      assessable: true
+      depth: 1
+      ref_id: R52
+      name: "Utiliser un poste utilisateur sensible d\xE9di\xE9"
+    - urn: urn:intuitem:risk:req_node:igi-901:r52-
+      assessable: true
+      depth: 1
+      ref_id: R52-
+      name: Utiliser un poste utilisateur multiniveau
+    - urn: urn:intuitem:risk:req_node:igi-901:r52---
+      assessable: true
+      depth: 1
+      ref_id: R52- -
+      name: "Utiliser un poste utilisateur sensible avec acc\xE8s distant au SI usuel"
+    - urn: urn:intuitem:risk:req_node:igi-901:r53
+      assessable: true
+      depth: 1
+      ref_id: R53
+      name: "Appliquer les recommandations de l'ANSSI relatives au nomadisme num\xE9\
+        rique"
+    - urn: urn:intuitem:risk:req_node:igi-901:r54
+      assessable: true
+      depth: 1
+      ref_id: R54
+      name: "Prot\xE9ger physiquement les \xE9quipements d'acc\xE8s nomade"
+    - urn: urn:intuitem:risk:req_node:igi-901:r55
+      assessable: true
+      depth: 1
+      ref_id: R55
+      name: "S\xE9curiser les canaux d'interconnexion nomades des SI DR"
+    - urn: urn:intuitem:risk:req_node:igi-901:r56
+      assessable: true
+      depth: 1
+      ref_id: R56
+      name: "S\xE9curiser les canaux d'interconnexion nomades des SI sensibles"
+    - urn: urn:intuitem:risk:req_node:igi-901:r57
+      assessable: true
+      depth: 1
+      ref_id: R57
+      name: "Chiffrer les donn\xE9es DR stock\xE9es sur des supports amovibles"
+    - urn: urn:intuitem:risk:req_node:igi-901:r58
+      assessable: true
+      depth: 1
+      ref_id: R58
+      name: "Chiffrer les donn\xE9es sensibles stock\xE9es sur des supports amovibles"
+    - urn: urn:intuitem:risk:req_node:igi-901:r59
+      assessable: true
+      depth: 1
+      ref_id: R59
+      name: "Chiffrer les flux r\xE9seau d'un \xE9quipement d'acc\xE8s nomade sensible\
+        \ en toute circonstance"
+    - urn: urn:intuitem:risk:req_node:igi-901:r60
+      assessable: true
+      depth: 1
+      ref_id: R60
+      name: "Mettre en place une architecture de r\xE9seau sans fil cloisonn\xE9e\
+        \ du SI sensible"
+    - urn: urn:intuitem:risk:req_node:igi-901:r61
+      assessable: true
+      depth: 1
+      ref_id: R61
+      name: "Bloquer l'acc\xE8s aux portails captifs publics depuis des \xE9quipements\
+        \ d'acc\xE8s nomades sensibles"
+    - urn: urn:intuitem:risk:req_node:igi-901:r62
+      assessable: true
+      depth: 1
+      ref_id: R62
+      name: "Appliquer les recommandations de l'ANSSI relatives \xE0\_ l'administration\
+        \ s\xE9curis\xE9e des SI"
+    - urn: urn:intuitem:risk:req_node:igi-901:r63
+      assessable: true
+      depth: 1
+      ref_id: R63
+      name: "G\xE9rer les administrateurs d'un SI sensible"
+    - urn: urn:intuitem:risk:req_node:igi-901:r64
+      assessable: true
+      depth: 1
+      ref_id: R64
+      name: "S\xE9curiser la cha\xEEne de connexion pour l'administration \xE0 distance"
+    - urn: urn:intuitem:risk:req_node:igi-901:r64-
+      assessable: true
+      depth: 1
+      ref_id: R64-
+      name: "Ma\xEEtriser les syst\xE8mes de t\xE9l\xE9maintenance connect\xE9s \xE0\
+        \ des SI sensibles"
+    - urn: urn:intuitem:risk:req_node:igi-901:r65
+      assessable: true
+      depth: 1
+      ref_id: R65
+      name: "D\xE9finir et appliquer une politique de MCS"
+    - urn: urn:intuitem:risk:req_node:igi-901:r66
+      assessable: true
+      depth: 1
+      ref_id: R66
+      name: "Isoler les syst\xE8mes obsol\xE8tes"
+    - urn: urn:intuitem:risk:req_node:igi-901:r67
+      assessable: true
+      depth: 1
+      ref_id: R67
+      name: "Appliquer les recommandations de l'ANSSI relatives \xE0\_ la journalisation"
+    - urn: urn:intuitem:risk:req_node:igi-901:r68
+      assessable: true
+      depth: 1
+      ref_id: R68
+      name: Conserver les journaux d'un SI sensible pendant 12 mois
+    - urn: urn:intuitem:risk:req_node:igi-901:r69
+      assessable: true
+      depth: 1
+      ref_id: R69
+      name: "Recourir aux services d'un prestataire qualifi\xE9 pour la supervision\
+        \ de s\xE9curit\xE9"
+    - urn: urn:intuitem:risk:req_node:igi-901:r70
+      assessable: true
+      depth: 1
+      ref_id: R70
+      name: "Formaliser une proc\xE9dure de d\xE9claration des incidents de s\xE9\
+        curit\xE9 \xE0 l'ANSSI"

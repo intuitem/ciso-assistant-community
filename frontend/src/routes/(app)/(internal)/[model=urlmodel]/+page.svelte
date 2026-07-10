@@ -3,14 +3,17 @@
 	import { page } from '$app/state';
 
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import ExportModal, {
+		type ExportGroup,
+		type ExportOption
+	} from '$lib/components/Modals/ExportModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { buildCustomFieldFilters, listViewFields } from '$lib/utils/table';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { driverInstance } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
 	import type { ActionData, PageData } from './$types';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { Popover } from '@skeletonlabs/skeleton-svelte';
-
 	import { onMount } from 'svelte';
 	import {
 		getModalStore,
@@ -18,6 +21,8 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import { getToastStore } from '$lib/components/Toast/stores';
+	import { invalidateAll } from '$app/navigation';
 
 	interface Props {
 		data: PageData;
@@ -25,10 +30,94 @@
 	}
 
 	let { data, form }: Props = $props();
+	const toastStore = getToastStore();
 	let URLModel = $derived(data.URLModel);
-	let exportPopupOpen = $state(false);
+	// Static (per-model) filters merged with dynamic custom-field filters.
+	const tableFilters = $derived({
+		...listViewFields[URLModel]?.filters,
+		...buildCustomFieldFilters(data.customFields ?? [])
+	});
+	let pullCatalogOpen = $state(false);
+	let currentFilterSearch = $state(page.url.search);
+
+	function handleFilterChange(filters: Record<string, any>) {
+		const params = new URLSearchParams();
+		for (const [field, values] of Object.entries(filters)) {
+			if (Array.isArray(values)) {
+				for (const v of values) {
+					if (v?.value) params.append(field, v.value);
+				}
+			}
+		}
+		const search = params.toString();
+		currentFilterSearch = search ? `?${search}` : '';
+	}
 
 	const modalStore: ModalStore = getModalStore();
+
+	function buildTableExportOptions(filterSearch: string): ExportOption[] {
+		const opts: ExportOption[] = [
+			{
+				titleKey: 'exportTableCsv',
+				descriptionKey: 'exportTableCsvDesc',
+				format: 'CSV',
+				href: `${URLModel}/export/${filterSearch}`,
+				testId: filterSearch ? 'export-option-csv-filtered' : 'export-option-csv-all'
+			},
+			{
+				titleKey: 'exportTableXlsx',
+				descriptionKey: 'exportTableXlsxDesc',
+				format: 'XLSX',
+				href: `${URLModel}/export/xlsx/${filterSearch}`,
+				testId: filterSearch ? 'export-option-xlsx-filtered' : 'export-option-xlsx-all'
+			}
+		];
+		if (URLModel === 'entities') {
+			opts.push({
+				titleKey: 'exportTableEcosystem',
+				descriptionKey: 'exportTableEcosystemDesc',
+				format: 'XLSX',
+				href: `/entities/export/ecosystem/${filterSearch}`,
+				testId: filterSearch ? 'export-option-ecosystem-filtered' : 'export-option-ecosystem-all'
+			});
+		}
+		if (URLModel === 'applied-controls') {
+			opts.push({
+				titleKey: 'exportTableMss',
+				descriptionKey: 'exportTableMssDesc',
+				format: 'XLSX',
+				href: `/applied-controls/export/mss-xlsx/${filterSearch}`,
+				testId: filterSearch ? 'export-option-mss-filtered' : 'export-option-mss-all'
+			});
+		}
+		return opts;
+	}
+
+	function modalExport(): void {
+		const hasFilters = currentFilterSearch.length > 0;
+		const groups: ExportGroup[] = hasFilters
+			? [
+					{
+						titleKey: 'exportGroupCurrentView',
+						options: buildTableExportOptions(currentFilterSearch)
+					},
+					{ titleKey: 'exportGroupEntireTable', options: buildTableExportOptions('') }
+				]
+			: [{ titleKey: '', options: buildTableExportOptions('') }];
+
+		const modalComponent: ModalComponent = {
+			ref: ExportModal,
+			props: {
+				title: m.exportOptionsTitle(),
+				groups
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent
+		};
+		modalStore.trigger(modal);
+	}
 
 	function modalCreateForm(): void {
 		let modalComponent: ModalComponent = {
@@ -117,15 +206,26 @@
 		{#key URLModel}
 			<ModelTable
 				source={data.table}
+				{tableFilters}
 				deleteForm={data.deleteForm}
 				{URLModel}
 				disableEdit={['user-groups', 'validation-flows'].includes(URLModel)}
 				disableDelete={['user-groups'].includes(URLModel)}
+				onFilterChange={handleFilterChange}
 			>
 				{#snippet addButton()}
-					<div>
-						<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
-							{#if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments', 'qualifications'].includes(URLModel)}
+					<div class="relative">
+						<div class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs">
+							{#if URLModel === 'document-containers'}
+								<a
+									href="/documents/new"
+									class="inline-block p-3 btn-mini-primary w-12 focus:relative"
+									data-testid="add-button"
+									title={safeTranslate('add-' + data.model.localName)}
+									aria-label={safeTranslate('add-' + data.model.localName)}
+									><i class="fa-solid fa-file-circle-plus"></i>
+								</a>
+							{:else if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments', 'qualifications'].includes(URLModel)}
 								<button
 									class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 									data-testid="add-button"
@@ -135,50 +235,170 @@
 									onclick={handlers(modalCreateForm, handleClickForGT)}
 									><i class="fa-solid fa-file-circle-plus"></i>
 								</button>
-								{#if ['applied-controls', 'assets', 'incidents', 'security-exceptions', 'risk-scenarios', 'processings', 'task-templates'].includes(URLModel)}
-									<Popover
-										open={exportPopupOpen}
-										onOpenChange={(e) => (exportPopupOpen = e.open)}
-										triggerBase="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
-										contentBase="card whitespace-nowrap bg-white py-2 w-fit shadow-lg"
-										positioning={{ placement: 'bottom-end' }}
-										zIndex="1000"
+								{#if ['applied-controls', 'assets', 'incidents', 'security-exceptions', 'risk-scenarios', 'processings', 'task-templates', 'entities', 'solutions', 'contracts', 'representatives'].includes(URLModel)}
+									<button
+										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
+										title={m.exportButton()}
+										data-testid="export-button"
+										onclick={modalExport}
 									>
-										{#snippet trigger()}
-											<span title={m.exportButton()} data-testid="export-button">
-												<i class="fa-solid fa-download"></i>
-											</span>
-										{/snippet}
-										{#snippet content()}
-											<div class="flex flex-col">
-												<a
-													href="{URLModel}/export/"
-													class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-													>... {m.asCSV()}</a
-												>
-												<a
-													href="{URLModel}/export/xlsx/"
-													class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-													>... {m.asXLSX()}</a
-												>
-											</div>
-										{/snippet}
-									</Popover>
+										<i class="fa-solid fa-download"></i>
+									</button>
+								{/if}
+								{#if URLModel === 'vulnerabilities'}
+									<button
+										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
+										title={m.refreshDueDates()}
+										aria-label={m.refreshDueDates()}
+										data-testid="refresh-due-dates-button"
+										onclick={() => {
+											modalStore.trigger({
+												type: 'confirm',
+												title: m.refreshDueDates(),
+												body: m.refreshDueDatesConfirm(),
+												response: async (confirmed) => {
+													if (!confirmed) return;
+													try {
+														const res = await fetch('/vulnerabilities/refresh-due-dates', {
+															method: 'POST'
+														});
+														const result = await res.json();
+														toastStore.trigger({
+															message: result.detail || result.error,
+															preset: res.ok ? 'success' : 'error'
+														});
+														if (res.ok) invalidateAll();
+													} catch {
+														toastStore.trigger({
+															message: m.refreshDueDatesFailed(),
+															preset: 'error'
+														});
+													}
+												}
+											});
+										}}><i class="fa-solid fa-clock-rotate-left"></i></button
+									>
 								{/if}
 								{#if URLModel === 'applied-controls'}
 									<a
-										href="{URLModel}/flash-mode/{page.url.search}"
+										href="{URLModel}/flash-mode/{currentFilterSearch}"
 										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
 										title={m.flashMode()}
 										aria-label={m.flashMode()}
 										data-testid="flash-mode-button"><i class="fa-solid fa-bolt mr-2"></i></a
 									>
 									<a
-										href="{URLModel}/kanban-mode/{page.url.search}"
+										href="{URLModel}/kanban-mode/{currentFilterSearch}"
 										class="inline-block p-3 btn-mini-quaternary w-12 focus:relative"
 										title={m.kanbanMode()}
 										aria-label={m.kanbanMode()}
 										data-testid="kanban-mode-button"><i class="fa-solid fa-table-columns"></i></a
+									>
+									<a
+										href="{URLModel}/analytics/{currentFilterSearch}"
+										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+										title={m.appliedControlsAnalytics()}
+										aria-label={m.appliedControlsAnalytics()}
+										data-testid="analytics-button"><i class="fa-solid fa-chart-pie"></i></a
+									>
+								{/if}
+								{#if URLModel === 'security-advisories'}
+									<button
+										class="inline-block p-3 w-12 focus:relative bg-blue-100 hover:bg-blue-200 dark:bg-blue-500/20 dark:hover:bg-blue-500/30"
+										title={m.syncKev()}
+										aria-label={m.syncKev()}
+										data-testid="sync-kev-button"
+										onclick={() => {
+											modalStore.trigger({
+												type: 'confirm',
+												title: m.pullCatalog(),
+												body: m.syncKev(),
+												response: async (confirmed) => {
+													if (!confirmed) return;
+													try {
+														const res = await fetch('/security-advisories/sync-kev', {
+															method: 'POST'
+														});
+														const result = await res.json();
+														toastStore.trigger({
+															message: result.detail || result.error,
+															preset: res.ok ? 'success' : 'error'
+														});
+														if (res.ok) invalidateAll();
+													} catch {
+														toastStore.trigger({
+															message: m.syncKevFailed(),
+															preset: 'error'
+														});
+													}
+												}
+											});
+										}}>🇺🇸</button
+									>
+									<button
+										class="inline-block p-3 w-12 focus:relative bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-500/20 dark:hover:bg-yellow-500/30"
+										title={m.syncEuvd()}
+										aria-label={m.syncEuvd()}
+										data-testid="sync-euvd-button"
+										onclick={() => {
+											modalStore.trigger({
+												type: 'confirm',
+												title: m.pullCatalog(),
+												body: m.syncEuvd(),
+												response: async (confirmed) => {
+													if (!confirmed) return;
+													try {
+														const res = await fetch('/security-advisories/sync-euvd', {
+															method: 'POST'
+														});
+														const result = await res.json();
+														toastStore.trigger({
+															message: result.detail || result.error,
+															preset: res.ok ? 'success' : 'error'
+														});
+														if (res.ok) invalidateAll();
+													} catch {
+														toastStore.trigger({
+															message: m.syncEuvdFailed(),
+															preset: 'error'
+														});
+													}
+												}
+											});
+										}}>🇪🇺</button
+									>
+								{/if}
+								{#if URLModel === 'document-templates'}
+									<a
+										href="{URLModel}/import"
+										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+										title={m.importTemplates()}
+										aria-label={m.importTemplates()}
+										data-testid="import-templates-button"><i class="fa-solid fa-file-import"></i></a
+									>
+								{/if}
+								{#if URLModel === 'cwes'}
+									<button
+										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
+										title={m.syncCweCatalog()}
+										aria-label={m.syncCweCatalog()}
+										data-testid="sync-cwe-button"
+										onclick={async () => {
+											try {
+												const res = await fetch('/cwes/sync-catalog', { method: 'POST' });
+												const result = await res.json();
+												toastStore.trigger({
+													message: result.detail || result.error,
+													preset: res.ok ? 'success' : 'error'
+												});
+												if (res.ok) invalidateAll();
+											} catch {
+												toastStore.trigger({
+													message: m.syncCweCatalogFailed(),
+													preset: 'error'
+												});
+											}
+										}}><i class="fa-solid fa-satellite-dish"></i></button
 									>
 								{/if}
 								{#if ['threats', 'reference-controls', 'metric-definitions'].includes(URLModel)}
@@ -217,7 +437,7 @@
 								{/if}
 								{#if URLModel === 'folders'}
 									<button
-										class="text-gray-50 inline-block border-e p-3 bg-sky-400 hover:bg-sky-300 w-12 focus:relative"
+										class="text-white inline-block border-e p-3 bg-sky-400 hover:bg-sky-300 w-12 focus:relative"
 										data-testid="import-button"
 										title={safeTranslate('importFolder')}
 										aria-label={safeTranslate('importFolder')}
@@ -268,7 +488,7 @@
 									>
 								{/if}
 							{/if}
-						</span>
+						</div>
 					</div>
 				{/snippet}
 				{#snippet badge(key, row)}

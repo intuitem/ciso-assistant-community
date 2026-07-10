@@ -59,11 +59,11 @@ rm -rf "$PYTHON_BUILD_DIR"
 echo "[3/8] Installing Python dependencies..."
 cd "$PROJECT_ROOT/backend"
 
-# Export poetry dependencies to requirements.txt
-if command -v poetry &> /dev/null; then
-    poetry export -f requirements.txt --output "$BUILD_DIR/requirements.txt" --without-hashes
+# Export uv dependencies to requirements.txt
+if command -v uv &> /dev/null; then
+    uv export --format requirements.txt --no-hashes --no-dev -o "$BUILD_DIR/requirements.txt"
 else
-    echo "ERROR: Poetry not found. Please install poetry to build RPM."
+    echo "ERROR: uv not found. Please install uv to build RPM."
     exit 1
 fi
 

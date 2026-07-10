@@ -9,29 +9,37 @@
 
 	import SideBar from '$lib/components/SideBar/SideBar.svelte';
 	import Breadcrumbs from '$lib/components/Breadcrumbs/Breadcrumbs.svelte';
-	import { pageTitle, modelName, modelDescription, clientSideToast } from '$lib/utils/stores';
+	import {
+		pageTitle,
+		modelName,
+		modelDescription,
+		clientSideToast,
+		getStartedTrigger
+	} from '$lib/utils/stores';
 	import { getCookie, deleteCookie } from '$lib/utils/cookies';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import { m } from '$paraglide/messages';
 
 	import type { PageData, ActionData } from './$types';
-	import QuickStartModal from '$lib/components/SideBar/QuickStart/QuickStartModal.svelte';
-
 	import { getSidebarVisibleItems } from '$lib/utils/sidebar-config';
-	import {
-		getModalStore,
-		type ModalComponent,
-		type ModalSettings,
-		type ModalStore
-	} from '$lib/components/Modals/stores';
+	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 
 	import CommandPalette from '$lib/components/CommandPalette/CommandPalette.svelte';
+	import ThemeToggle from '$lib/components/ThemeToggle/ThemeToggle.svelte';
+	import ChatWidget from '$lib/components/ChatWidget/ChatWidget.svelte';
 	import {
 		interceptExternalLinks,
 		setGlobalModalStore,
 		setShowWarningExternalLinks
 	} from '$lib/utils/external-links';
+	import { onMount } from 'svelte';
+	import { initThemeFromUser } from '$lib/utils/theme';
+
+	const isMac = browser && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+	const modifierKey = isMac ? '⌘' : 'Ctrl';
+
+	let commandPalette: ReturnType<typeof CommandPalette> | undefined = $state();
 
 	let sidebarOpen = $state(true);
 
@@ -91,7 +99,8 @@
 	const displayModelDescription = $derived(
 		(() => {
 			// Only show description on list pages (not on detail pages with object titles)
-			if (hasObjectTitle) return '';
+			// Exception: pages that explicitly provide a modelDescriptionKey
+			if (hasObjectTitle && !$page.data?.modelDescriptionKey) return '';
 			if (!matchesListUrl && !$page.data?.modelDescriptionKey) return '';
 
 			// List pages: get description from i18n
@@ -116,6 +125,12 @@
 		}
 	});
 
+	// Apply the theme persisted in the user's server-side preferences (ui.theme).
+	// Falls back to localStorage / system preference when no server value is set.
+	onMount(() => {
+		initThemeFromUser(data.user?.preferences);
+	});
+
 	// Handle login-specific logic
 	run(() => {
 		if (browser) {
@@ -126,32 +141,11 @@
 					const data = await res.json();
 					const number = data.count ?? 0;
 					if (number <= 0) return;
-					// clientSideToast.set({
-					// 	message: m.waitingRiskAcceptances({
-					// 		number: number,
-					// 		s: number > 1 ? 's' : '',
-					// 		itPlural: number > 1 ? 'i' : 'e'
-					// 	}),
-					// 	type: 'info'
-					// });
 				});
 			}
 		}
 	});
 
-	function modalQuickStart(): void {
-		let modalComponent: ModalComponent = {
-			ref: QuickStartModal,
-			props: {}
-		};
-		let modal: ModalSettings = {
-			type: 'component',
-			component: modalComponent,
-			// Data
-			title: m.quickStart()
-		};
-		modalStore.trigger(modal);
-	}
 	// $inspect(data);
 </script>
 
@@ -160,49 +154,89 @@
 </svelte:head>
 
 <!-- App Shell -->
-<div class="overflow-x-hidden">
+<div class="overflow-x-clip">
 	<SideBar bind:open={sidebarOpen} {sideBarVisibleItems} />
 	<AppBar
-		base="relative transition-all duration-300 {classesSidebarOpen(sidebarOpen)}"
-		background="bg-white"
-		padding="pb-2 px-4"
+		class="sticky top-0 z-50 border-b border-surface-200-800 transition-all duration-300 bg-surface-50-950 w-auto pb-2 px-4 {classesSidebarOpen(
+			sidebarOpen
+		)}"
 	>
-		{#snippet headline()}
-			<div
-				class="text-2xl font-bold pb-1 bg-linear-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
-				id="page-title"
-			>
-				{safeTranslate(displayTitle)}
-			</div>
-			{#if displayModelName}
-				<div class="text-sm text-slate-500 font-medium">
-					{safeTranslate(displayModelName)}
-				</div>
-			{/if}
-			{#if displayModelDescription}
-				<div class="text-xs text-slate-400 italic">
-					{safeTranslate(displayModelDescription)}
-				</div>
-			{/if}
-			{#if data?.user?.is_admin}
-				<button
-					onclick={modalQuickStart}
-					class="absolute top-7 right-9 p-2 rounded-full bg-violet-500 text-white text-xs shadow-lg
-        ring-2 ring-violet-400 ring-offset-2 transition-all duration-300 hover:bg-violet-600
-        hover:ring-violet-300 hover:ring-offset-violet-100 hover:shadow-violet-500/50
-        focus:outline-hidden focus:ring-violet-500"
+		<div class="flex items-start justify-between px-4">
+			<div>
+				<div
+					class="text-2xl font-bold pb-1 bg-linear-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
+					id="page-title"
 				>
-					{m.quickStart()}
-				</button>
-			{/if}
-			<hr class="w-screen my-1" />
+					{safeTranslate(displayTitle)}
+				</div>
+				{#if displayModelName}
+					<div class="text-sm text-surface-600-400 font-medium">
+						{safeTranslate(displayModelName)}
+					</div>
+				{/if}
+				{#if displayModelDescription}
+					<div class="text-xs text-surface-600-400 italic">
+						{safeTranslate(displayModelDescription)}
+					</div>
+				{/if}
+			</div>
+			<div class="flex items-center gap-2">
+				<ThemeToggle />
+				{#if data?.featureflags?.custom_portals && !data?.user?.is_third_party}
+					<a
+						href="/portal"
+						class="flex items-center gap-2 shrink-0 rounded-lg border border-surface-200-800 bg-surface-100-900/80 px-3 py-1.5
+			text-xs text-surface-600-400 hover:bg-surface-200-800 hover:border-surface-300-700 hover:text-surface-700-300
+			transition-all duration-150"
+					>
+						<i class="fa-solid fa-table-cells-large text-surface-500"></i>
+						<span class="hidden sm:inline">{m.portals()}</span>
+					</a>
+				{/if}
+				{#if !data?.user?.is_third_party}
+					<button
+						onclick={() => commandPalette?.toggle()}
+						aria-label={m.search()}
+						class="flex items-center gap-2 shrink-0 rounded-lg border border-surface-200-800 bg-surface-100-900/80 px-3 py-1.5
+			text-xs text-surface-600-400 hover:bg-surface-200-800 hover:border-surface-300-700 hover:text-surface-700-300
+			transition-all duration-150 cursor-pointer"
+					>
+						<i class="fa-solid fa-magnifying-glass text-surface-500"></i>
+						<span class="hidden sm:inline text-surface-500">{m.searchEllipsis()}</span>
+						<kbd
+							class="hidden sm:inline-flex items-center rounded border border-surface-200-800 bg-surface-50-950 px-1.5 py-0.5
+				font-mono text-[10px] text-surface-500">{modifierKey}K</kbd
+						>
+					</button>
+				{/if}
+				{#if data?.user?.is_admin && data?.settings?.show_get_started !== false}
+					<button
+						onclick={() => getStartedTrigger.set(true)}
+						class="shrink-0 px-3 py-1.5 rounded-full bg-violet-500 dark:bg-violet-600 text-white text-xs font-semibold shadow-lg
+			ring-2 ring-violet-400 ring-offset-2 transition-all duration-300 hover:bg-violet-600
+			hover:ring-violet-300 hover:ring-offset-violet-100 hover:shadow-violet-500/50
+			focus:outline-hidden focus:ring-violet-500 cursor-pointer"
+					>
+						<i class="fa-solid fa-rocket mr-1"></i>
+						{m.getStarted()}
+					</button>
+				{/if}
+			</div>
+		</div>
+		<div class="px-4">
+			<hr class="my-1" />
 			<Breadcrumbs />
-		{/snippet}
+		</div>
 	</AppBar>
 	<!-- Router Slot -->
-	<CommandPalette />
+	{#if !data?.user?.is_third_party}
+		<CommandPalette bind:this={commandPalette} />
+	{/if}
+	{#if $page.data.featureflags?.chat_mode}
+		<ChatWidget />
+	{/if}
 	<main
-		class="min-h-screen p-8 bg-linear-to-br from-violet-100 to-slate-200 transition-all duration-300 {classesSidebarOpen(
+		class="min-h-screen p-8 bg-linear-to-br from-surface-200-800 to-surface-150-850 transition-all duration-300 {classesSidebarOpen(
 			sidebarOpen
 		)}"
 	>

@@ -63,6 +63,7 @@ class EndpointTestsUtils:
             "Folders",
             Folder,
             {"name": assigned_folder_name},
+            auto_groups=True,
             item_search_field="name",
         )
         assigned_folder = test_folder = Folder.objects.get(name=assigned_folder_name)
@@ -73,6 +74,7 @@ class EndpointTestsUtils:
                 "Folders",
                 Folder,
                 {"name": test_folder_name},
+                auto_groups=True,
                 base_count=1,
                 item_search_field="name",
             )
@@ -600,6 +602,7 @@ class EndpointTestsQueries:
             expected_status: int = status.HTTP_201_CREATED,
             user_group: str = None,
             scope: str = None,
+            auto_groups: bool = False,
         ):
             """Test to create object with the API with authentication
 
@@ -629,7 +632,11 @@ class EndpointTestsQueries:
             url = endpoint or EndpointTestsUtils.get_endpoint_url(verbose_name)
 
             # Uses the API endpoint to create an object with authentication
-            response = authenticated_client.post(url, build_params, format=query_format)
+            payload = build_params.copy()
+            if auto_groups and object is Folder and "create_iam_groups" not in payload:
+                payload["create_iam_groups"] = True
+
+            response = authenticated_client.post(url, payload, format=query_format)
 
             if fails:
                 # Asserts that the object was not created

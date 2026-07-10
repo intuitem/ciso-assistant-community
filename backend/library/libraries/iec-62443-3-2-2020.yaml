@@ -1,0 +1,471 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:iec-62443-3-2-2020
+locale: en
+ref_id: iec-62443-3-2-2020
+name: "IEC 62443-3-2:2020 \u2014 Security risk assessment for system design (outline)"
+description: "Outline of IEC 62443-3-2:2020 \u2014 Security for industrial automation\
+  \ and control systems - Part 3-2: Security risk assessment for system design. Targets\
+  \ asset owners and system integrators. Lists the 7 ZCR groups and their 32 Zone,\
+  \ Conduit and Risk Assessment requirements (all in clause 4) with paraphrased descriptions.\
+  \ Purchase the standard for the normative text, Annex A (Security levels) and Annex\
+  \ B (Risk matrices) guidance."
+copyright: IEC - Purchase the standard for the full normative text.
+version: 1
+publication_date: 2026-04-28
+provider: IEC
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:iec-62443-3-2-2020
+    ref_id: iec-62443-3-2-2020
+    name: "IEC 62443-3-2:2020 \u2014 Security risk assessment for system design (outline)"
+    description: Workflow for partitioning the System under Consideration (SUC) into
+      zones and conduits and conducting initial + detailed cyber security risk assessments.
+      ZCR 5.6 outputs the SL-T (target Security Level) per zone/conduit consumed by
+      62443-3-3.
+    min_score: 0
+    max_score: 5
+    scores_definition:
+    - score: 0
+      name: Incomplete
+      description: Ad hoc and unknown
+    - score: 1
+      name: Initial
+      description: Unpredictable and reactive
+    - score: 2
+      name: Managed
+      description: Managed on the project level
+    - score: 3
+      name: Defined
+      description: Proactive, rather than reactive
+    - score: 4
+      name: Quantitatively managed
+      description: Measured and controlled
+    - score: 5
+      name: Optimizing
+      description: Stable and flexible
+    implementation_groups_definition:
+    - ref_id: zcr
+      name: Zone, Conduit and Risk Assessment Requirements
+      description: All 32 ZCR sub-requirements (clause 4).
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Zone, conduit and risk assessment requirements
+      description: Workflow for defining the System under Consideration, partitioning
+        it into zones and conduits, and conducting initial + detailed risk assessments
+        to derive the target Security Level (SL-T) and Cybersecurity Requirements
+        Specification (CRS).
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:4
+      ref_id: ZCR 1
+      name: Identify the SUC
+      description: Define what is and is not in scope of the cyber risk assessment.
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-1
+      ref_id: ZCR 1.1
+      name: Identify the SUC perimeter and access points
+      description: 'Step: Identify the boundary of the System under Consideration
+        (SUC), including all external access points (network connections, USB, vendor
+        remote, wireless, physical). Output: SUC boundary diagram listing every access
+        point with its protocol, direction, and counterparty.'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:4
+      ref_id: ZCR 2
+      name: Initial cyber security risk assessment
+      description: High-level initial risk assessment to decide whether detailed assessment
+        is needed per zone.
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-2
+      ref_id: ZCR 2.1
+      name: Perform initial cyber security risk assessment
+      description: 'Step: For each candidate zone, identify worst-case scenarios and
+        impact and compare against the asset owner''s tolerable-risk threshold. Output:
+        Initial risk-assessment record with worst-case impact, frequency assumptions,
+        and a gating decision (proceed to detailed RA or not).'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:4
+      ref_id: ZCR 3
+      name: Partition the SUC into zones and conduits
+      description: Group SUC assets into zones and document the conduits (communication
+        paths) connecting them.
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3
+      ref_id: ZCR 3.1
+      name: Establish zones and conduits
+      description: 'Step: Document zone-grouping criteria (function, criticality,
+        ownership, access-control needs) and create the zone-and-conduit model. Output:
+        Documented zones, conduits, and the criteria used to define them.'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3
+      ref_id: ZCR 3.2
+      name: Separate business and IACS assets
+      description: 'Step: Place business/IT assets and IACS assets in separate zones
+        with controlled conduits between them. Output: Business and IACS zones are
+        clearly delineated; inter-zone conduits are documented.'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3
+      ref_id: ZCR 3.3
+      name: Separate safety related assets
+      description: 'Step: Place safety-related assets (SIS, ESD) in separate zones
+        from non-safety assets, aligning the cybersecurity zone boundary with the
+        safety integrity boundary (SIL per IEC 61508/61511). Output: Safety zones
+        are documented separately with restricted conduits to control zones; the SIL
+        of the safety zone is recorded and the cyber boundary respects it.'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3
+      ref_id: ZCR 3.4
+      name: Separate temporarily connected devices
+      description: 'Step: Account for transient devices (engineer laptops, vendor
+        laptops, USB drives, mobile diagnostic tools) as their own zone class or with
+        documented connection controls. Output: Temporary-device handling is documented
+        in the zone-and-conduit model.'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3
+      ref_id: ZCR 3.5
+      name: Separate wireless devices
+      description: 'Step: Wireless-only zones are established or wireless devices
+        are clearly placed within a zone with documented isolation. Output: Wireless
+        devices are accounted for in the zone-and-conduit diagram.'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3
+      ref_id: ZCR 3.6
+      name: Separate devices connected via external networks
+      description: 'Step: Devices reachable from external networks (Internet, corporate
+        IT, partner networks, vendor remote) are placed in zones reflecting their
+        elevated exposure. Output: External-connectivity zones are documented with
+        their exposure characteristics.'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:4
+      ref_id: ZCR 4
+      name: Risk comparison
+      description: Compare the initial risk against the asset owner's tolerable-risk
+        threshold to decide whether detailed risk assessment is needed.
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-4
+      ref_id: ZCR 4.1
+      name: Compare initial risk to tolerable risk
+      description: 'Step: For each zone, decide whether further (detailed) risk assessment
+        is needed based on whether initial risk exceeds tolerable risk. Output: Per-zone
+        decision documented (proceed to detailed RA, accept, transfer, or avoid).'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:4
+      ref_id: ZCR 5
+      name: Perform a detailed cyber security risk assessment
+      description: For each zone where ZCR 4 indicates need, conduct detailed risk
+        assessment per the next 13 sub-steps.
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
+      ref_id: ZCR 5.1
+      name: Identify threats
+      description: 'Step: Identify threats applicable to each zone and conduit (threat
+        actors, scenarios, attack patterns) drawing on MITRE ATT&CK for ICS, CISA
+        / SANS top-OT-threat lists, sector ISACs (E-ISAC, WaterISAC, Auto-ISAC), and
+        current threat-intelligence feeds. Output: Threat catalog per zone, traceable
+        to specific TTPs / ATT&CK techniques.'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
+      ref_id: ZCR 5.2
+      name: Identify vulnerabilities
+      description: 'Step: Identify vulnerabilities (known CVEs, design weaknesses,
+        configuration issues) applicable to assets in each zone. Output: Vulnerability
+        inventory per zone, periodically refreshed.'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
+      ref_id: ZCR 5.3
+      name: Determine consequence and impact
+      description: 'Step: For each zone, determine the consequence and impact of a
+        successful compromise (safety, environmental, operational, financial, regulatory,
+        reputational). Output: Impact-rating record per zone.'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
+      ref_id: ZCR 5.4
+      name: Determine unmitigated likelihood
+      description: 'Step: Estimate the likelihood of compromise without considering
+        existing countermeasures, based on threat capability and vulnerability exposure.
+        Output: Unmitigated-likelihood rating per threat-zone pairing.'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
+      ref_id: ZCR 5.5
+      name: Determine unmitigated cyber security risk
+      description: 'Step: Combine unmitigated likelihood and impact to compute unmitigated
+        risk per zone. Output: Unmitigated risk record per zone.'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
+      ref_id: ZCR 5.6
+      name: Determine SL-T
+      description: "Step: Determine the target Security Level (SL-T) per Foundational\
+        \ Requirement (FR1-FR7) per zone, based on the risk-reduction needed. Output:\
+        \ SL-T vector (SL-T(IAC), SL-T(UC), SL-T(SI), SL-T(DC), SL-T(RDF), SL-T(TRE),\
+        \ SL-T(RA)) per zone \u2014 consumed by 62443-3-3."
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
+      ref_id: ZCR 5.7
+      name: Compare unmitigated risk with tolerable risk
+      description: 'Step: Compare unmitigated risk against tolerable risk to identify
+        the gap requiring mitigation. Output: Risk-gap analysis per zone.'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
+      ref_id: ZCR 5.8
+      name: Identify and evaluate existing countermeasures
+      description: 'Step: Identify and evaluate the effectiveness of countermeasures
+        already in place (technical, procedural, compensating). Output: Existing-countermeasure
+        inventory with effectiveness ratings.'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
+      ref_id: ZCR 5.9
+      name: Reevaluate likelihood and impact
+      description: 'Step: Reevaluate likelihood and impact taking existing countermeasures
+        into account. Output: Mitigated likelihood and impact ratings per zone.'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
+      ref_id: ZCR 5.10
+      name: Determine residual risk
+      description: 'Step: Compute residual risk after existing countermeasures. Output:
+        Residual-risk record per zone.'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
+      ref_id: ZCR 5.11
+      name: Compare residual risk with tolerable risk
+      description: 'Step: Compare residual risk against tolerable risk to identify
+        any remaining gap. Output: Residual-vs-tolerable decision per zone.'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
+      ref_id: ZCR 5.12
+      name: Identify additional cyber security countermeasures
+      description: 'Step: Where residual risk exceeds tolerable risk, identify additional
+        countermeasures (technical, procedural, compensating) to close the gap. Output:
+        Recommended additional-countermeasure list per zone.'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5
+      ref_id: ZCR 5.13
+      name: Document and communicate results
+      description: 'Step: Document the detailed risk-assessment results and communicate
+        them to the named stakeholder set: asset owner (decision authority), system
+        integrator (design input), SOC / monitoring team (detection priorities), safety
+        engineering (joint risk picture), and product suppliers (procurement requirements).
+        Output: Detailed risk-assessment report per zone with audience-specific summaries
+        (executive, technical, safety, supplier-procurement).'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:4
+      ref_id: ZCR 6
+      name: Document cyber security requirements, assumptions and constraints
+      description: "Capture the cybersecurity requirements, assumptions, and constraints\
+        \ derived from the risk assessment as the input to system design \u2014 the\
+        \ Cybersecurity Requirements Specification (CRS)."
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
+      ref_id: ZCR 6.1
+      name: Cyber security requirements specification
+      description: 'Step: Produce a Cybersecurity Requirements Specification (CRS)
+        covering the per-zone cybersecurity requirements. Output: CRS document per
+        zone with traceability to risk-assessment outputs.'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
+      ref_id: ZCR 6.2
+      name: SUC description
+      description: 'Step: Document the SUC as part of the CRS context (scope, perimeter,
+        architecture). Output: SUC description in the CRS.'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
+      ref_id: ZCR 6.3
+      name: Zone and conduit drawings
+      description: 'Step: Include zone-and-conduit diagrams in the CRS. Output: Zone-and-conduit
+        drawings as CRS deliverables.'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
+      ref_id: ZCR 6.4
+      name: Zone and conduit characteristics
+      description: 'Step: Document characteristics of each zone and conduit (function,
+        criticality, SL-T, throughput, latency, reliability). Output: Per-zone and
+        per-conduit characteristic table.'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
+      ref_id: ZCR 6.5
+      name: Operating environment assumptions
+      description: 'Step: Document assumptions about the operating environment (physical
+        security, organizational controls, neighboring systems). Output: Operating-environment
+        assumption list in the CRS.'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
+      ref_id: ZCR 6.6
+      name: Threat environment
+      description: 'Step: Document the assumed threat environment (threat actors,
+        capabilities, motivations). Output: Threat-environment description in the
+        CRS.'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
+      ref_id: ZCR 6.7
+      name: Organizational security policies
+      description: 'Step: Reference the applicable organizational security policies
+        in the CRS. Output: Policy-reference list in the CRS.'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
+      ref_id: ZCR 6.8
+      name: Tolerable risk
+      description: 'Step: Document the tolerable-risk thresholds used in the risk
+        assessment. Output: Tolerable-risk criteria captured in the CRS.'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-6
+      ref_id: ZCR 6.9
+      name: Regulatory requirements
+      description: 'Step: Document applicable regulatory and contractual requirements
+        affecting the SUC. Output: Regulatory-requirement list in the CRS.'
+      implementation_groups:
+      - zcr
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:4
+      ref_id: ZCR 7
+      name: Asset owner approval
+      description: Obtain asset owner formal approval of the risk assessment outputs
+        and CRS.
+    - urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-7
+      ref_id: ZCR 7.1
+      name: Attain asset owner approval
+      description: 'Step: Present the risk-assessment results, CRS, and recommended
+        countermeasures to the asset owner for formal approval. Output: Signed asset-owner
+        approval record.'
+      implementation_groups:
+      - zcr

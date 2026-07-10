@@ -23,15 +23,6 @@
 	}: Props = $props();
 </script>
 
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
-	field="folder"
-	pathField="path"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-/>
 <Select
 	{form}
 	options={model.selectOptions['attack_stage']}
@@ -40,13 +31,6 @@
 	disableDoubleDash
 	cacheLock={cacheLocks['attack_stage']}
 	bind:cachedValue={formDataCache['attack_stage']}
-/>
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
 />
 <AutocompleteSelect
 	{form}

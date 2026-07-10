@@ -4,7 +4,7 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import HiddenInput from '$lib/components/Forms/HiddenInput.svelte';
 	import { ClientSettingsSchema } from '$lib/utils/client-settings';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import FileInput from '$lib/components/Forms/FileInput.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import * as m from '$paraglide/messages.js';

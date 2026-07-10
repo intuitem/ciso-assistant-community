@@ -4,7 +4,7 @@ import type { PageServerLoad } from './$types';
 
 const getQualityCheckData = async (fetch: any) => {
 	try {
-		const endpoint = `${BASE_API_URL}/perimeters/quality_check/`;
+		const endpoint = `${BASE_API_URL}/folders/quality_check/`;
 		const res = await fetch(endpoint);
 		const json = await res.json();
 		return json.results;

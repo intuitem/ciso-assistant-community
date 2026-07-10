@@ -5,7 +5,7 @@
 	import type { ModelMapEntry } from '$lib/utils/crud';
 	import type { urlModel } from '$lib/utils/types';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { AnyZodObject } from 'zod';
+	import type { FormDataShape } from '$lib/utils/schemas';
 
 	import { m } from '$paraglide/messages';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
@@ -26,7 +26,7 @@
 		editURL?: string;
 		disableEdit?: boolean;
 		disableView?: boolean;
-		deleteForm?: SuperValidated<AnyZodObject> | null;
+		deleteForm?: SuperValidated<FormDataShape> | null;
 		URLModel?: urlModel | string;
 		identifierField?: string;
 		preventDelete?: boolean;
@@ -50,7 +50,7 @@
 		identifierField = 'id',
 		preventDelete = false,
 		preventEdit = false,
-		baseClass = 'space-x-2 whitespace-nowrap flex flex-row items-center text-xl text-surface-700 justify-end',
+		baseClass = 'space-x-2 whitespace-nowrap flex flex-row items-center text-xl text-surface-700-300 justify-end',
 		hasBody = false,
 		head,
 		body,
@@ -164,7 +164,7 @@
 		canEditObject &&
 			!disableEdit &&
 			URLModel &&
-			!['frameworks', 'risk-matrices', 'ebios-rm'].includes(URLModel) &&
+			!['frameworks', 'risk-matrices'].includes(URLModel) &&
 			editURL
 	);
 	let displayDelete = $derived(canDeleteObject && deleteForm !== null);
@@ -177,19 +177,10 @@
 		{#if displayDetail}
 			<Anchor
 				breadcrumbAction="push"
+				aria-label={m.view()}
 				href={detailURL}
 				class="unstyled cursor-pointer hover:text-primary-500"
 				data-testid="tablerow-detail-button"><i class="fa-solid fa-eye"></i></Anchor
-			>
-		{/if}
-		{#if URLModel === 'operating-modes'}
-			<Anchor
-				breadcrumbAction="push"
-				label={m.graph()}
-				href={`/operating-modes/${row.meta.id}/graph/`}
-				stopPropagation
-				class="unstyled cursor-pointer hover:text-primary-500"
-				data-testid="tablerow-edit-button"><i class="fa-solid fa-project-diagram"></i></Anchor
 			>
 		{/if}
 		{#if displayEdit}

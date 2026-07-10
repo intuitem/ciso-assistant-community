@@ -6,11 +6,14 @@
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import FolderTreeSelect from './FolderTreeSelect.svelte';
 	import LoadingSpinner from '../utils/LoadingSpinner.svelte';
 
 	import RiskAssessmentForm from './ModelForm/RiskAssessmentForm.svelte';
 	import PerimeterForm from './ModelForm/PerimeterForm.svelte';
 	import ThreatForm from './ModelForm/ThreatForm.svelte';
+	import SecurityAdvisoryForm from './ModelForm/SecurityAdvisoryForm.svelte';
+	import CWEForm from './ModelForm/CWEForm.svelte';
 	import RiskScenarioForm from './ModelForm/RiskScenarioForm.svelte';
 	import AppliedControlsPoliciesForm from './ModelForm/AppliedControlPolicyForm.svelte';
 	import VulnerabilitiesForm from './ModelForm/VulnerabilitiesForm.svelte';
@@ -31,8 +34,11 @@
 	import TeamForm from './ModelForm/TeamForm.svelte';
 	import SsoSettingsForm from './ModelForm/SsoSettingForm.svelte';
 	import FolderForm from './ModelForm/FolderForm.svelte';
+	import IdpGroupForm from './ModelForm/IdpGroupForm.svelte';
 	import GeneralSettingsForm from './ModelForm/GeneralSettingForm.svelte';
 	import FeatureFlagsSettingForm from './ModelForm/FeatureFlagsSettingForm.svelte';
+	import VulnerabilitySlaSettingForm from './ModelForm/VulnerabilitySlaSettingForm.svelte';
+	import SecIntelFeedsSettingForm from './ModelForm/SecIntelFeedsSettingForm.svelte';
 	import ProcessingForm from './ModelForm/ProcessingForm.svelte';
 	import PurposeForm from './ModelForm/PurposeForm.svelte';
 	import PersonalDataForm from './ModelForm/PersonalDataForm.svelte';
@@ -67,10 +73,20 @@
 	import QuantitativeRiskScenarioForm from './ModelForm/QuantitativeRiskScenarioForm.svelte';
 	import QuantitativeRiskHypothesisForm from './ModelForm/QuantitativeRiskHypothesisForm.svelte';
 	import TerminologyForm from './ModelForm/TerminologyForm.svelte';
+	import ObjectClassificationForm from './ModelForm/ObjectClassificationForm.svelte';
+	import ClassificationLevelForm from './ModelForm/ClassificationLevelForm.svelte';
+	import CustomFieldDefinitionForm from './ModelForm/CustomFieldDefinitionForm.svelte';
 	import RoleForm from './ModelForm/RoleForm.svelte';
 	import EvidenceRevisionForm from './ModelForm/EvidenceRevisionForm.svelte';
 	import GenericCollectionForm from './ModelForm/GenericCollectionForm.svelte';
+	import DocumentContainerForm from './ModelForm/DocumentContainerForm.svelte';
+	import DocumentTemplateForm from './ModelForm/DocumentTemplateForm.svelte';
 	import AccreditationForm from './ModelForm/AccreditationForm.svelte';
+	import ProjectForm from './ModelForm/ProjectForm.svelte';
+	import ResponsibilityMatrixForm from './ModelForm/ResponsibilityMatrixForm.svelte';
+	import ResponsibilityMatrixActivityForm from './ModelForm/ResponsibilityMatrixActivityForm.svelte';
+	import ResponsibilityAssignmentForm from './ModelForm/ResponsibilityAssignmentForm.svelte';
+	import ResponsibilityRoleForm from './ModelForm/ResponsibilityRoleForm.svelte';
 	import MetricDefinitionForm from './ModelForm/MetricDefinitionForm.svelte';
 	import MetricInstanceForm from './ModelForm/MetricInstanceForm.svelte';
 	import CustomMetricSampleForm from './ModelForm/CustomMetricSampleForm.svelte';
@@ -84,11 +100,11 @@
 	import { modelSchema } from '$lib/utils/schemas';
 	import type { ModelInfo, urlModel, CacheLock } from '$lib/utils/types';
 	import { superForm, superValidate, type SuperValidated } from 'sveltekit-superforms';
-	import type { AnyZodObject } from 'zod';
+	import type { FormDataShape } from '$lib/utils/schemas';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import { m } from '$paraglide/messages';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { createModalCache } from '$lib/utils/stores';
 	import FilteringLabelForm from './ModelForm/FilteringLabelForm.svelte';
@@ -98,7 +114,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface Props {
-		form: SuperValidated<AnyZodObject>;
+		form: SuperValidated<FormDataShape>;
 		invalidateAll?: boolean; // set to false to keep form data using muliple forms on a page
 		taintedMessage?: string | boolean;
 		model: ModelInfo;
@@ -112,6 +128,8 @@
 		duplicate?: boolean;
 		importFolder?: boolean;
 		customNameDescription?: boolean;
+		customFolder?: boolean;
+		onFolderChange?: (folderId: string) => void;
 		additionalInitialData?: any;
 		schema?: any;
 		object?: Record<string, any>;
@@ -133,6 +151,8 @@
 		duplicate = false,
 		importFolder = false,
 		customNameDescription = false,
+		customFolder = false,
+		onFolderChange = undefined,
 		additionalInitialData = {},
 		schema = modelSchema(model.urlModel),
 		object = {},
@@ -140,6 +160,60 @@
 	}: Props = $props();
 
 	const URLModel = model.urlModel as urlModel;
+
+	const HIDDEN_FOLDER_MODELS: Set<string> = new Set([
+		'feared-events',
+		'stakeholders',
+		'attack-paths',
+		'ro-to',
+		'strategic-scenarios',
+		'operational-scenarios',
+		'operating-modes',
+		'kill-chains',
+		'evidence-revisions'
+	]);
+
+	let selectedFolder = $state<string | undefined>(undefined);
+	let folderKey = $state(0);
+	let isAutoFillingFolder = $state(false);
+
+	function handleFolderChange(folderId: string) {
+		selectedFolder = folderId;
+		if (!isAutoFillingFolder && _form.form?.data?.perimeter) {
+			_form.form.update((currentData) => ({
+				...currentData,
+				perimeter: undefined
+			}));
+		}
+		isAutoFillingFolder = false;
+		onFolderChange?.(folderId);
+	}
+
+	async function handlePerimeterChange(perimeterId: string) {
+		if (perimeterId && !selectedFolder) {
+			try {
+				const response = await fetch(`/perimeters/${perimeterId}`);
+				if (response.ok) {
+					const perimeter = await response.json();
+					if (perimeter.folder?.id) {
+						isAutoFillingFolder = true;
+						selectedFolder = perimeter.folder.id;
+						_form.form.update((currentData) => ({
+							...currentData,
+							folder: perimeter.folder.id
+						}));
+						folderKey++;
+					}
+				}
+			} catch (error) {
+				console.error('Error fetching perimeter:', error);
+			}
+		}
+	}
+
+	const defaultFolderWritePermission =
+		context === 'edit' ? `change_${model.name}` : `add_${model.name}`;
+	setContext('folderTreeDefaultWritePermission', defaultFolderWritePermission);
 
 	function cancel(): void {
 		if (browser) {
@@ -149,7 +223,7 @@
 			if (nextValue) goto(nextValue);
 		}
 	}
-	let shape = $derived(schema.shape || schema._def.schema.shape);
+	let shape = $derived(schema.shape || schema._def?.schema?.shape);
 	let updated_fields = new Set();
 
 	function makeCacheLock(): CacheLock {
@@ -228,7 +302,7 @@
 			if (form.message?.redirect) {
 				goto(getSecureRedirect(form.message.redirect));
 			}
-			if (form.valid) {
+			if (form.valid && !form.message?.error) {
 				if (parent && typeof parent.onConfirm === 'function') {
 					parent.onConfirm();
 				}
@@ -317,7 +391,7 @@
 										name: shouldUpdateName ? r.name : currentData.name,
 										category: r.category,
 										csf_function: r.csf_function,
-										ref_id: r.ref_id
+										ref_id: r.ref_id ?? currentData.ref_id ?? ''
 									};
 								});
 							});
@@ -326,17 +400,40 @@
 			/>
 		{/if}
 		{#if shape.name && !customNameDescription}
-			<TextField
-				{form}
-				field="name"
-				label={m.name()}
-				cacheLock={cacheLocks['name']}
-				bind:cachedValue={formDataCache['name']}
-				data-focusindex="0"
-				oninput={() => {
-					updated_fields.add('name');
-				}}
-			/>
+			{#if shape.ref_id}
+				<div class="grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-4">
+					<TextField
+						{form}
+						field="ref_id"
+						label={m.refId()}
+						cacheLock={cacheLocks['ref_id']}
+						bind:cachedValue={formDataCache['ref_id']}
+					/>
+					<TextField
+						{form}
+						field="name"
+						label={m.name()}
+						cacheLock={cacheLocks['name']}
+						bind:cachedValue={formDataCache['name']}
+						data-focusindex="0"
+						oninput={() => {
+							updated_fields.add('name');
+						}}
+					/>
+				</div>
+			{:else}
+				<TextField
+					{form}
+					field="name"
+					label={m.name()}
+					cacheLock={cacheLocks['name']}
+					bind:cachedValue={formDataCache['name']}
+					data-focusindex="0"
+					oninput={() => {
+						updated_fields.add('name');
+					}}
+				/>
+			{/if}
 		{/if}
 		{#if shape.description && !customNameDescription}
 			<MarkdownField
@@ -347,6 +444,46 @@
 				bind:cachedValue={formDataCache['description']}
 				data-focusindex="1"
 			/>
+		{/if}
+		{#if shape.folder && !customFolder && URLModel !== 'validation-flows'}
+			{#key folderKey}
+				<FolderTreeSelect
+					{form}
+					field="folder"
+					cacheLock={cacheLocks['folder']}
+					bind:cachedValue={formDataCache['folder']}
+					label={m.domain()}
+					hidden={HIDDEN_FOLDER_MODELS.has(URLModel)}
+					disabled={(URLModel === 'entities' && object?.builtin) ||
+						(URLModel === 'perimeters' && !!initialData?.folder)}
+					contentTypes={['compliance-assessments', 'evidences'].includes(URLModel)
+						? ['DO', 'GL', 'EN']
+						: undefined}
+					helpText={URLModel === 'campaigns'
+						? m.campaignDomainHelpText()
+						: URLModel === 'custom-fields'
+							? m.customFieldFolderHelpText()
+							: undefined}
+					onChange={handleFolderChange}
+					mount={handleFolderChange}
+				/>
+			{/key}
+			{#if shape.perimeter && !HIDDEN_FOLDER_MODELS.has(URLModel)}
+				{#key selectedFolder}
+					<AutocompleteSelect
+						{form}
+						optionsEndpoint="perimeters"
+						optionsDetailedUrlParameters={selectedFolder ? [['folder', selectedFolder]] : []}
+						optionsExtraFields={[['folder', 'str']]}
+						field="perimeter"
+						nullable
+						cacheLock={cacheLocks['perimeter']}
+						bind:cachedValue={formDataCache['perimeter']}
+						label={m.perimeter()}
+						onChange={handlePerimeterChange}
+					/>
+				{/key}
+			{/if}
 		{/if}
 		{#if URLModel === 'perimeters'}
 			<PerimeterForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
@@ -361,6 +498,8 @@
 				{object}
 				{...rest}
 			/>
+		{:else if URLModel === 'idp-groups'}
+			<IdpGroupForm {form} {model} {cacheLocks} {formDataCache} {shape} {context} />
 		{:else if URLModel === 'risk-assessments'}
 			<RiskAssessmentForm
 				{form}
@@ -374,8 +513,32 @@
 				{updated_fields}
 				{...rest}
 			/>
+		{:else if URLModel === 'document-containers'}
+			<DocumentContainerForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
+		{:else if URLModel === 'document-templates'}
+			<DocumentTemplateForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
 		{:else if URLModel === 'threats'}
 			<ThreatForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+		{:else if URLModel === 'security-advisories'}
+			<SecurityAdvisoryForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+		{:else if URLModel === 'cwes'}
+			<CWEForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'risk-scenarios'}
 			<RiskScenarioForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'applied-controls' || URLModel === 'policies'}
@@ -471,7 +634,8 @@
 				{cacheLocks}
 				{formDataCache}
 				{initialData}
-				{data}
+				{object}
+				{context}
 				{...rest}
 			/>
 		{:else if URLModel === 'solutions'}
@@ -500,6 +664,10 @@
 			<GeneralSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} {...rest} />
 		{:else if URLModel === 'feature-flags'}
 			<FeatureFlagsSettingForm {form} {model} {cacheLocks} {formDataCache} {data} {...rest} />
+		{:else if URLModel === 'vulnerability-sla'}
+			<VulnerabilitySlaSettingForm {form} {model} />
+		{:else if URLModel === 'sec-intel-feeds'}
+			<SecIntelFeedsSettingForm {form} {model} />
 		{:else if URLModel === 'filtering-labels'}
 			<FilteringLabelForm {form} {model} {cacheLocks} {formDataCache} {...rest} />
 		{:else if URLModel === 'business-impact-analysis'}
@@ -721,6 +889,7 @@
 				{cacheLocks}
 				{formDataCache}
 				initialData={model.initialData}
+				{object}
 				{context}
 				{...rest}
 			/>
@@ -763,6 +932,27 @@
 			<OrganisationObjectiveForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 		{:else if URLModel === 'terminologies'}
 			<TerminologyForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
+		{:else if URLModel === 'object-classifications'}
+			<ObjectClassificationForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+			/>
+		{:else if URLModel === 'classification-levels'}
+			<ClassificationLevelForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
+		{:else if URLModel === 'custom-fields'}
+			<CustomFieldDefinitionForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
 		{:else if URLModel === 'roles'}
 			<RoleForm {form} {model} {cacheLocks} {formDataCache} {context} />
 		{:else if URLModel === 'evidence-revisions'}
@@ -787,6 +977,40 @@
 			/>
 		{:else if URLModel === 'accreditations'}
 			<AccreditationForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
+		{:else if URLModel === 'projects'}
+			<ProjectForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
+		{:else if URLModel === 'responsibility-matrices'}
+			<ResponsibilityMatrixForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
+		{:else if URLModel === 'responsibility-matrix-activities'}
+			<ResponsibilityMatrixActivityForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
+		{:else if URLModel === 'responsibility-assignments'}
+			<ResponsibilityAssignmentForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
+		{:else if URLModel === 'responsibility-roles'}
+			<ResponsibilityRoleForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
 		{:else if URLModel === 'metric-definitions'}
 			<MetricDefinitionForm
 				{form}
@@ -821,11 +1045,9 @@
 		{:else if URLModel === 'dashboards'}
 			<DashboardForm
 				{form}
-				{model}
 				{cacheLocks}
 				{formDataCache}
 				initialData={{ ...initialData, ...additionalInitialData }}
-				{data}
 				{...rest}
 			/>
 		{:else if URLModel === 'dashboard-widgets'}
@@ -835,7 +1057,6 @@
 				{cacheLocks}
 				{formDataCache}
 				initialData={{ ...initialData, ...additionalInitialData }}
-				{data}
 				{object}
 				{...rest}
 			/>
@@ -856,15 +1077,16 @@
 				{cacheLocks}
 				{formDataCache}
 				initialData={{ ...initialData, ...additionalInitialData }}
-				{data}
 				{object}
 				{...rest}
 			/>
 		{/if}
-		<div class="flex flex-row justify-between space-x-4">
+		<div
+			class="flex flex-row justify-between space-x-4 sticky bottom-0 backdrop-blur-sm pt-4 pb-2 border-t border-surface-200-800"
+		>
 			{#if closeModal}
 				<button
-					class="btn bg-gray-400 text-white font-semibold w-full"
+					class="btn bg-surface-400-600 text-white font-semibold w-full"
 					data-testid="cancel-button"
 					type="button"
 					onclick={(event) => {
@@ -897,7 +1119,7 @@
 			{:else}
 				{#if cancelButton}
 					<button
-						class="btn bg-gray-400 text-white font-semibold w-full"
+						class="btn bg-surface-400-600 text-white font-semibold w-full"
 						data-testid="cancel-button"
 						type="button"
 						onclick={cancel}>{m.cancel()}</button

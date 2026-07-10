@@ -1,0 +1,820 @@
+---
+urn: urn:intuitem:risk:library:mapping-iso27001-2022-to-itil4
+locale: fr
+ref_id: mapping-iso27001-2022-to-itil4
+name: ISO/IEC 27001:2022 -> ITIL 4 Management Practices
+description: "Correspondance entre les contrôles de l'Annexe A de la norme internationale ISO/IEC 27001:2022 et les 34 pratiques de gestion d'ITIL 4."
+copyright: "https://www.iso.org/standard/27001 - © AXELOS Limited 2019. ITIL® est une marque déposée d'AXELOS Limited."
+version: 1
+publication_date: 2024-05-21
+provider: ISO/IEC - AXELOS Limited
+packager: Nadia QOUDHADH
+dependencies:
+  - urn:intuitem:risk:library:iso27001-2022
+  - urn:intuitem:risk:library:itil4
+objects:
+  requirement_mapping_set:
+    urn: urn:intuitem:risk:req_mapping_set:iso27001-2022-to-itil4
+    ref_id: mapping-iso27001-2022-to-itil4
+    name: ISO/IEC 27001:2022 -> ITIL 4 Management Practices
+    description: "Correspondance entre les contrôles de l'Annexe A de la norme internationale ISO/IEC 27001:2022 et les 34 pratiques de gestion d'ITIL 4."
+    source_framework_urn: urn:intuitem:risk:framework:iso27001-2022
+    target_framework_urn: urn:intuitem:risk:framework:itil4
+    requirement_mappings:
+      # --- Clause 4 Contexte de l'organisation ---
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.1
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:strategy-management
+        relationship: intersect
+        rationale: "Comprendre l'organisation et son contexte est un intrant clé pour formuler la stratégie (ITIL4-GEN-12)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:strategy-management
+        relationship: intersect
+        rationale: "Les besoins des parties prenantes sont essentiels pour définir la stratégie et les objectifs (ITIL4-GEN-12)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:relationship-management
+        relationship: intersect
+        rationale: "L'analyse des besoins des parties prenantes est fondamentale pour établir et maintenir des relations (ITIL4-GEN-09)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.3
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:portfolio-management
+        relationship: intersect
+        rationale: "La détermination du périmètre du SMSI contribue à définir le portefeuille de services et d'actifs à gérer (ITIL4-GEN-07)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.4
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:continual-improvement
+        relationship: intersect
+        rationale: "L'exigence de mettre en place et d'améliorer un SMSI est au cœur de la pratique d'amélioration continue (ITIL4-GEN-02)."
+
+      # --- Clause 5 Leadership ---
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:continual-improvement
+        relationship: intersect
+        rationale: "L'engagement de la direction est crucial pour piloter l'amélioration continue (ITIL4-GEN-02)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:organizational-change
+        relationship: intersect
+        rationale: "Le leadership est nécessaire pour gérer avec succès les changements organisationnels liés au SMSI (ITIL4-GEN-06)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.2
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:strategy-management
+        relationship: intersect
+        rationale: "La politique de sécurité de l'information est une composante de la stratégie et des objectifs de l'organisation (ITIL4-GEN-12)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.3
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:workforce-talent
+        relationship: intersect
+        rationale: "La définition des rôles et responsabilités est essentielle pour la gestion des effectifs et des talents (ITIL4-GEN-14)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.3
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:organizational-change
+        relationship: intersect
+        rationale: "L'assignation des autorités facilite la mise en œuvre des changements (ITIL4-GEN-06)."
+
+      # --- Clause 6 Planification ---
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:risk-management
+        relationship: intersect
+        rationale: "L'identification des risques et opportunités est le cœur de la gestion des risques (ITIL4-GEN-10)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:risk-management
+        relationship: intersect
+        rationale: "L'évaluation des risques est une activité clé de la gestion des risques (ITIL4-GEN-10)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:risk-management
+        relationship: intersect
+        rationale: "Le traitement des risques (par la sélection de contrôles) est une activité de la gestion des risques (ITIL4-GEN-10)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.2
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:strategy-management
+        relationship: intersect
+        rationale: "Fixer des objectifs de sécurité alignés sur les buts stratégiques relève de la gestion de la stratégie (ITIL4-GEN-12)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.3
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:organizational-change
+        relationship: intersect
+        rationale: "Planifier les changements est l'essence même de la gestion du changement organisationnel (ITIL4-GEN-06)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.3
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:project-management
+        relationship: intersect
+        rationale: "La planification des changements peut être menée via des projets (ITIL4-GEN-08)."
+
+      # --- Clause 7 Support ---
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.1
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:workforce-talent
+        relationship: intersect
+        rationale: "La fourniture de ressources humaines compétentes est gérée par la pratique des effectifs et talents (ITIL4-GEN-14)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.1
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:financial-management
+        relationship: intersect
+        rationale: "L'allocation de ressources financières pour le SMSI est couverte par la gestion financière (ITIL4-GEN-11)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.2
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:workforce-talent
+        relationship: intersect
+        rationale: "La compétence du personnel est un objectif central de la gestion des effectifs et des talents (ITIL4-GEN-14)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.3
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:workforce-talent
+        relationship: intersect
+        rationale: "La sensibilisation fait partie intégrante du développement et de la gestion des talents (ITIL4-GEN-14)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:relationship-management
+        relationship: intersect
+        rationale: "Les processus de communication sont essentiels pour gérer les relations avec les parties prenantes (ITIL4-GEN-09)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.1
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:knowledge-management
+        relationship: intersect
+        rationale: "La documentation du SMSI contribue à la base de connaissances de l'organisation (ITIL4-GEN-04)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.2
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:knowledge-management
+        relationship: intersect
+        rationale: "La création et mise à jour de la documentation relève de la gestion des connaissances (ITIL4-GEN-04)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:knowledge-management
+        relationship: intersect
+        rationale: "Le contrôle de l'accès et de la disponibilité des informations documentées est un aspect de la gestion des connaissances (ITIL4-GEN-04)."
+
+      # --- Clause 8 Opérations ---
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:continual-improvement
+        relationship: intersect
+        rationale: "La planification et le contrôle opérationnels incluent l'identification d'opportunités d'amélioration (ITIL4-GEN-02)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.2
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:risk-management
+        relationship: intersect
+        rationale: "La réalisation de l'évaluation des risques est une activité opérationnelle de la gestion des risques (ITIL4-GEN-10)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.3
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:risk-management
+        relationship: intersect
+        rationale: "La mise en œuvre du traitement des risques est une activité opérationnelle de la gestion des risques (ITIL4-GEN-10)."
+
+      # --- Clause 9 Évaluation de la performance ---
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:measurement-reporting
+        relationship: intersect
+        rationale: "La surveillance, la mesure et l'évaluation de la performance sont les activités principales de cette pratique (ITIL4-GEN-05)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:continual-improvement
+        relationship: intersect
+        rationale: "L'évaluation de la performance alimente le cycle d'amélioration continue (ITIL4-GEN-02)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:continual-improvement
+        relationship: intersect
+        rationale: "Les audits internes sont des sources d'information pour l'amélioration continue (ITIL4-GEN-02)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:measurement-reporting
+        relationship: intersect
+        rationale: "Les audits internes sont un moyen de mesurer la conformité et l'efficacité (ITIL4-GEN-05)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.2
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:project-management
+        relationship: intersect
+        rationale: "La planification et la réalisation d'un programme d'audit peut suivre une approche de gestion de projet (ITIL4-GEN-08)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.1
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:strategy-management
+        relationship: intersect
+        rationale: "La revue de direction évalue l'adéquation du SMSI avec les objectifs stratégiques (ITIL4-GEN-12)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.2
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:measurement-reporting
+        relationship: intersect
+        rationale: "Les entrées de la revue de direction sont basées sur des mesures et des rapports (ITIL4-GEN-05)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.3
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:continual-improvement
+        relationship: intersect
+        rationale: "Les résultats de la revue de direction (décisions d'amélioration) sont des intrants clés pour l'amélioration continue (ITIL4-GEN-02)."
+
+      # --- Clause 10 Amélioration ---
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.1
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:continual-improvement
+        relationship: intersect
+        rationale: "L'amélioration continue est directement alignée sur cette pratique ITIL (ITIL4-GEN-02)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:continual-improvement
+        relationship: intersect
+        rationale: "Le traitement des non-conformités et des actions correctives est un élément déclencheur de l'amélioration continue (ITIL4-GEN-02)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:problem-management
+        relationship: intersect
+        rationale: "L'identification des causes profondes et la prévention de la récurrence sont des objectifs de la gestion des problèmes (ITIL4-SVC-08)."
+
+      # --- Annexe A : Contrôles Organisationnels (A.5) ---
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "L'établissement de politiques de sécurité est une activité fondamentale de la gestion de la sécurité de l'information (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "La définition des rôles et responsabilités en matière de sécurité est couverte par la gestion de la sécurité de l'information (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:workforce-talent
+        relationship: intersect
+        rationale: "L'assignation de ces rôles relève de la gestion des effectifs (ITIL4-GEN-14)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.3
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "La ségrégation des tâches est un principe de sécurité à mettre en œuvre (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.3
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:service-configuration
+        relationship: intersect
+        rationale: "La ségrégation se reflète dans la configuration des rôles et des accès (ITIL4-SVC-11)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.4
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "Les responsabilités de la direction en matière de sécurité sont encadrées par cette pratique (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.4
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:workforce-talent
+        relationship: intersect
+        rationale: "Définir ce que la direction doit faire en fait partie (ITIL4-GEN-14)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.5
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:incident-management
+        relationship: intersect
+        rationale: "Le contact avec les autorités en cas d'incident fait partie du processus de gestion des incidents (ITIL4-SVC-05)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.5
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:supplier-management
+        relationship: intersect
+        rationale: "Les autorités peuvent être considérées comme des parties prenantes externes, gérées par cette pratique (ITIL4-GEN-13)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.6
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:knowledge-management
+        relationship: intersect
+        rationale: "Le contact avec des groupes d'intérêt est une source de connaissances sur les tendances (ITIL4-GEN-04)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.6
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:relationship-management
+        relationship: intersect
+        rationale: "Ces contacts sont un aspect de la gestion des relations avec les parties prenantes (ITIL4-GEN-09)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.7
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "La veille sur les menaces est une activité essentielle de la gestion de la sécurité (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.7
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:monitoring-event
+        relationship: intersect
+        rationale: "La surveillance des flux de menaces peut être réalisée par la pratique de surveillance et gestion des événements (ITIL4-SVC-07)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.8
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:project-management
+        relationship: intersect
+        rationale: "Intégrer la sécurité dans la gestion de projet est un objectif de cette pratique (ITIL4-GEN-08)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:it-asset-management
+        relationship: intersect
+        rationale: "La tenue d'un inventaire des actifs est la fonction première de la gestion des actifs (ITIL4-SVC-06)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:service-configuration
+        relationship: intersect
+        rationale: "Les actifs sont des éléments de configuration, gérés par cette pratique (ITIL4-SVC-11)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "Définir l'utilisation acceptable des actifs est une règle de sécurité (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:service-level
+        relationship: intersect
+        rationale: "Ces règles peuvent être intégrées dans les accords de niveau de service (ITIL4-SVC-15)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.11
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:it-asset-management
+        relationship: intersect
+        rationale: "La restitution des actifs est une étape de leur cycle de vie, gérée par l'ITAM (ITIL4-SVC-06)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.11
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:service-configuration
+        relationship: intersect
+        rationale: "La restitution d'actifs implique une mise à jour de la configuration (ITIL4-SVC-11)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.12
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "La classification de l'information est une mesure de sécurité fondamentale (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.12
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:it-asset-management
+        relationship: intersect
+        rationale: "La classification peut être un attribut des actifs (ITIL4-SVC-06)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.13
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "L'étiquetage découle de la classification, c'est une mesure de sécurité (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "Le transfert sécurisé est une mesure de protection de l'information (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:monitoring-event
+        relationship: intersect
+        rationale: "Les transferts peuvent être surveillés comme des événements (ITIL4-SVC-07)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "Le contrôle d'accès est un pilier de la sécurité de l'information (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:service-configuration
+        relationship: intersect
+        rationale: "Les droits d'accès sont liés à la configuration des services et des utilisateurs (ITIL4-SVC-11)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "La gestion des identités est un aspect clé de la sécurité (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "La protection des informations d'authentification est une mesure de sécurité (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "La revue des droits d'accès est une mesure de contrôle de la sécurité (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:supplier-management
+        relationship: intersect
+        rationale: "La sécurité dans les relations fournisseurs est un objectif de la gestion des fournisseurs (ITIL4-GEN-13)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "C'est une extension de la gestion de la sécurité aux fournisseurs (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:supplier-management
+        relationship: intersect
+        rationale: "Inclure des clauses de sécurité dans les accords fournisseurs relève de cette pratique (ITIL4-GEN-13)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:supplier-management
+        relationship: intersect
+        rationale: "La gestion des risques dans la chaîne d'approvisionnement TIC est couverte par la gestion des fournisseurs (ITIL4-GEN-13)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:risk-management
+        relationship: intersect
+        rationale: "C'est une application de la gestion des risques aux fournisseurs (ITIL4-GEN-10)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:supplier-management
+        relationship: intersect
+        rationale: "Le suivi et la revue des services fournisseurs sont des activités de cette pratique (ITIL4-GEN-13)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:service-level
+        relationship: intersect
+        rationale: "Le suivi des services s'appuie sur les accords de niveau de service (ITIL4-SVC-15)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:supplier-management
+        relationship: intersect
+        rationale: "La sécurité des services cloud est gérée dans le cadre des relations avec les fournisseurs de cloud (ITIL4-GEN-13)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "C'est une application spécifique des mesures de sécurité (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:incident-management
+        relationship: intersect
+        rationale: "La planification de la gestion des incidents est une partie essentielle de la préparation (ITIL4-SVC-05)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:service-continuity
+        relationship: intersect
+        rationale: "Les plans de réponse aux incidents s'articulent avec les plans de continuité (ITIL4-SVC-12)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:incident-management
+        relationship: intersect
+        rationale: "L'évaluation et la décision sur les événements de sécurité est une étape de la gestion des incidents (ITIL4-SVC-05)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:monitoring-event
+        relationship: intersect
+        rationale: "Les événements de sécurité sont détectés et qualifiés par cette pratique (ITIL4-SVC-07)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:incident-management
+        relationship: intersect
+        rationale: "La réponse aux incidents est l'activité principale de cette pratique (ITIL4-SVC-05)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.27
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:problem-management
+        relationship: intersect
+        rationale: "Tirer des leçons des incidents est un objectif de la gestion des problèmes (identification des causes profondes) (ITIL4-SVC-08)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.27
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:continual-improvement
+        relationship: intersect
+        rationale: "Les leçons apprises alimentent l'amélioration continue (ITIL4-GEN-02)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.28
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:incident-management
+        relationship: intersect
+        rationale: "La collecte de preuves peut faire partie du processus de résolution d'incident (ITIL4-SVC-05)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.29
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:service-continuity
+        relationship: intersect
+        rationale: "Maintenir la sécurité pendant les perturbations est un objectif de la gestion de la continuité (ITIL4-SVC-12)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.29
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:incident-management
+        relationship: intersect
+        rationale: "La gestion des incidents majeurs peut activer les plans de continuité (ITIL4-SVC-05)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.30
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:service-continuity
+        relationship: intersect
+        rationale: "La préparation TIC pour la continuité est un aspect technique de cette pratique (ITIL4-SVC-12)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.30
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:availability-management
+        relationship: intersect
+        rationale: "La redondance et les plans de reprise contribuent à la disponibilité (ITIL4-SVC-01)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:service-level
+        relationship: intersect
+        rationale: "Les exigences légales et contractuelles sont des sources pour définir les niveaux de service (ITIL4-SVC-15)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "S'assurer de la conformité est un objectif de la gestion de la sécurité (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.32
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "La protection des droits de propriété intellectuelle est une mesure de sécurité (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.33
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:service-configuration
+        relationship: intersect
+        rationale: "Les enregistrements peuvent être considérés comme des éléments de configuration à protéger (ITIL4-SVC-11)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.33
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "Leur protection relève de la sécurité de l'information (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "La protection des PII est un aspect clé de la sécurité et de la vie privée (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:continual-improvement
+        relationship: intersect
+        rationale: "Les revues indépendantes sont des sources d'amélioration (ITIL4-GEN-02)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:measurement-reporting
+        relationship: intersect
+        rationale: "Les revues indépendantes sont un moyen d'évaluer la performance (ITIL4-GEN-05)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.36
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "La conformité aux politiques de sécurité est l'objectif de cette pratique (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.36
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:measurement-reporting
+        relationship: intersect
+        rationale: "La mesure de la conformité est couverte par cette pratique (ITIL4-GEN-05)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.37
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:knowledge-management
+        relationship: intersect
+        rationale: "Les procédures documentées sont un élément clé de la base de connaissances (ITIL4-GEN-04)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.37
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:service-desk
+        relationship: intersect
+        rationale: "Les procédures sont utilisées par le centre de services pour traiter les demandes (ITIL4-SVC-14)."
+
+      # --- Annexe A : Contrôles Humains (A.6) ---
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.1
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:workforce-talent
+        relationship: intersect
+        rationale: "La sélection des candidats (screening) est une activité de la gestion des effectifs et des talents (ITIL4-GEN-14)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.1
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "Le screening vise à réduire les risques de sécurité liés au personnel (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:workforce-talent
+        relationship: intersect
+        rationale: "Inclure des responsabilités de sécurité dans les contrats de travail relève de cette pratique (ITIL4-GEN-14)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:workforce-talent
+        relationship: intersect
+        rationale: "La formation et la sensibilisation sont des activités de développement des talents (ITIL4-GEN-14)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "C'est une mesure de sécurité visant à renforcer la culture de sécurité (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.4
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:workforce-talent
+        relationship: intersect
+        rationale: "Le processus disciplinaire est un outil de gestion des effectifs (ITIL4-GEN-14)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.5
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:workforce-talent
+        relationship: intersect
+        rationale: "La gestion des responsabilités en cas de départ ou changement de rôle est une activité clé de la gestion des effectifs (ITIL4-GEN-14)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.5
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:it-asset-management
+        relationship: intersect
+        rationale: "La récupération des actifs fait partie de la gestion de leur cycle de vie (ITIL4-SVC-06)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.5
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "La révocation des droits d'accès est une mesure de sécurité essentielle (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.6
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "Les accords de confidentialité sont une mesure de protection de l'information (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.6
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:workforce-talent
+        relationship: intersect
+        rationale: "Leur signature est une étape du processus d'intégration (ITIL4-GEN-14)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "La gestion sécurisée du télétravail est une mesure de sécurité (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:service-desk
+        relationship: intersect
+        rationale: "Le centre de services supporte les utilisateurs en télétravail (ITIL4-SVC-14)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.8
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:incident-management
+        relationship: intersect
+        rationale: "Le signalement des événements de sécurité est le point de départ de la gestion des incidents (ITIL4-SVC-05)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.8
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:service-desk
+        relationship: intersect
+        rationale: "Le centre de services est souvent le point de contact pour ces signalements (ITIL4-SVC-14)."
+
+      # --- Annexe A : Contrôles Physiques (A.7) ---
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.1
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "Les périmètres de sécurité physique sont une mesure de sécurité (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.1
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:infrastructure-platform
+        relationship: intersect
+        rationale: "La protection physique des infrastructures est une préoccupation de cette pratique (ITIL4-TECH-02)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "Le contrôle des entrées physiques est une mesure de sécurité (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.3
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "La sécurisation des locaux est une mesure de sécurité (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:monitoring-event
+        relationship: intersect
+        rationale: "La surveillance physique peut être intégrée à la surveillance et gestion des événements (ITIL4-SVC-07)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "C'est une mesure de sécurité (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.5
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:infrastructure-platform
+        relationship: intersect
+        rationale: "La protection contre les menaces environnementales est essentielle pour l'infrastructure (ITIL4-TECH-02)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.5
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:service-continuity
+        relationship: intersect
+        rationale: "Ces protections contribuent à la continuité des services (ITIL4-SVC-12)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.6
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "La gestion des zones sécurisées est une mesure de sécurité (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.7
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "La politique de bureau et écran propre est une mesure de sécurité simple mais importante (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.8
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:infrastructure-platform
+        relationship: intersect
+        rationale: "La protection des équipements est une activité de cette pratique (ITIL4-TECH-02)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.9
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "La sécurité des actifs hors site est une extension des mesures de sécurité (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.9
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:it-asset-management
+        relationship: intersect
+        rationale: "Le suivi et la protection des actifs mobiles relève de l'ITAM (ITIL4-SVC-06)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "La protection des supports de stockage est une mesure de sécurité (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.11
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:infrastructure-platform
+        relationship: intersect
+        rationale: "La fiabilité des utilitaires (alimentation, climatisation) est gérée par cette pratique (ITIL4-TECH-02)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.11
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:service-continuity
+        relationship: intersect
+        rationale: "Leur protection est cruciale pour la continuité (ITIL4-SVC-12)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.12
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:infrastructure-platform
+        relationship: intersect
+        rationale: "La sécurité du câblage est un aspect de la gestion de l'infrastructure (ITIL4-TECH-02)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.13
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:infrastructure-platform
+        relationship: intersect
+        rationale: "La maintenance des équipements est une activité de cette pratique (ITIL4-TECH-02)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.14
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:it-asset-management
+        relationship: intersect
+        rationale: "L'élimination ou la réutilisation sécurisée est la dernière étape du cycle de vie des actifs (ITIL4-SVC-06)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.14
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "La destruction sécurisée des données est une mesure de sécurité (ITIL4-GEN-03)."
+
+      # --- Annexe A : Contrôles Technologiques (A.8) ---
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:infrastructure-platform
+        relationship: intersect
+        rationale: "La protection des terminaux utilisateurs est une activité de gestion de l'infrastructure (ITIL4-TECH-02)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "C'est une mesure de sécurité technique (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "La gestion des accès privilégiés est un contrôle de sécurité critique (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:service-configuration
+        relationship: intersect
+        rationale: "Ces droits sont des attributs de la configuration des rôles et des comptes (ITIL4-SVC-11)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "La restriction d'accès est un pilier de la sécurité (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.4
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:software-development
+        relationship: intersect
+        rationale: "La sécurisation de l'accès au code source est une pratique de développement sécurisé (ITIL4-TECH-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.4
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "C'est une mesure de sécurité (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "L'authentification sécurisée (ex: MFA) est une mesure de sécurité technique (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.6
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:capacity-performance
+        relationship: intersect
+        rationale: "La gestion de la capacité vise à garantir la performance et à prévenir les ruptures (ITIL4-SVC-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.6
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:availability-management
+        relationship: intersect
+        rationale: "La capacité est un facteur clé de la disponibilité (ITIL4-SVC-01)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "La protection contre les logiciels malveillants est une mesure de sécurité technique (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "La gestion des vulnérabilités techniques est un aspect clé de la sécurité (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:change-enablement
+        relationship: intersect
+        rationale: "L'application de correctifs est un type de changement à contrôler (ITIL4-SVC-04)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:service-configuration
+        relationship: intersect
+        rationale: "La gestion de la configuration a pour objet de gérer les configurations de manière cohérente (ITIL4-SVC-11)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.10
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "La suppression sécurisée des informations est une mesure de sécurité (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.10
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:it-asset-management
+        relationship: intersect
+        rationale: "Cela peut faire partie de la fin de vie d'un actif de stockage (ITIL4-SVC-06)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.11
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "Le masquage des données est une mesure de protection de la confidentialité (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "La prévention des fuites de données est une mesure de sécurité (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:service-continuity
+        relationship: intersect
+        rationale: "Les sauvegardes sont un élément fondamental de la continuité et de la reprise d'activité (ITIL4-SVC-12)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:it-asset-management
+        relationship: intersect
+        rationale: "Les sauvegardes sont une forme de gestion des actifs de données (ITIL4-SVC-06)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.14
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:availability-management
+        relationship: intersect
+        rationale: "La redondance est une technique clé pour garantir la disponibilité (ITIL4-SVC-01)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.14
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:service-continuity
+        relationship: intersect
+        rationale: "La redondance des installations contribue à la continuité (ITIL4-SVC-12)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:monitoring-event
+        relationship: intersect
+        rationale: "La journalisation est une source d'événements à surveiller (ITIL4-SVC-07)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "Les journaux sont essentiels pour la détection et l'investigation des incidents de sécurité (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:monitoring-event
+        relationship: intersect
+        rationale: "La surveillance continue des activités est le rôle de cette pratique (ITIL4-SVC-07)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.17
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:infrastructure-platform
+        relationship: intersect
+        rationale: "La synchronisation des horloges est une activité de gestion technique de l'infrastructure (ITIL4-TECH-02)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.18
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "La restriction et la surveillance des programmes privilégiés est une mesure de sécurité (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:change-enablement
+        relationship: intersect
+        rationale: "L'installation de logiciels est un changement à gérer (ITIL4-SVC-04)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:deployment-management
+        relationship: intersect
+        rationale: "L'installation est une activité de déploiement (ITIL4-TECH-01)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "La sécurité des réseaux est une mesure de sécurité technique (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:infrastructure-platform
+        relationship: intersect
+        rationale: "La gestion des réseaux fait partie de la gestion de l'infrastructure (ITIL4-TECH-02)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:service-level
+        relationship: intersect
+        rationale: "La sécurité des services réseau contribue à atteindre les niveaux de service convenus (ITIL4-SVC-15)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "C'est une application de la sécurité aux services réseau (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:infrastructure-platform
+        relationship: intersect
+        rationale: "La ségrégation des réseaux est une conception de l'infrastructure (ITIL4-TECH-02)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "C'est une mesure de sécurité pour limiter la propagation des menaces (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "Le filtrage web est une mesure de sécurité technique (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:monitoring-event
+        relationship: intersect
+        rationale: "Les tentatives d'accès à des sites bloqués peuvent générer des événements (ITIL4-SVC-07)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "L'utilisation de la cryptographie est une mesure de sécurité fondamentale (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:software-development
+        relationship: intersect
+        rationale: "L'intégration de la sécurité dans le cycle de vie du développement est une pratique de développement sécurisé (ITIL4-TECH-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "C'est une application de la sécurité au développement (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:business-analysis
+        relationship: intersect
+        rationale: "La définition des exigences de sécurité pour les applications fait partie de l'analyse des besoins métier (ITIL4-SVC-02)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "Ces exigences sont définies par la gestion de la sécurité (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.27
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:service-design
+        relationship: intersect
+        rationale: "Les principes d'architecture et d'ingénierie sécurisées sont appliqués lors de la conception des services (ITIL4-SVC-13)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.27
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "C'est une exigence de sécurité pour la conception (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.28
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:software-development
+        relationship: intersect
+        rationale: "Le codage sécurisé est une pratique de développement (ITIL4-TECH-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.28
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "C'est une mesure de sécurité pour prévenir les vulnérabilités (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:service-validation
+        relationship: intersect
+        rationale: "Les tests de sécurité font partie de la validation et des tests des services (ITIL4-SVC-17)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:software-development
+        relationship: intersect
+        rationale: "C'est une étape du développement (ITIL4-TECH-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.30
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:supplier-management
+        relationship: intersect
+        rationale: "La gestion des risques liés au développement externalisé relève de la gestion des fournisseurs (ITIL4-GEN-13)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.30
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:software-development
+        relationship: intersect
+        rationale: "Cela impacte la gestion du développement (ITIL4-TECH-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.31
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:release-management
+        relationship: intersect
+        rationale: "La séparation des environnements est une bonne pratique pour la gestion des mises en production (ITIL4-SVC-09)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.31
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:software-development
+        relationship: intersect
+        rationale: "C'est une pratique de gestion du développement (ITIL4-TECH-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:change-enablement
+        relationship: intersect
+        rationale: "La gestion des changements a pour objet de gérer les changements de manière à minimiser les risques (ITIL4-SVC-04)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:release-management
+        relationship: intersect
+        rationale: "Les changements aboutissent souvent à des mises en production (ITIL4-SVC-09)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.33
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:service-validation
+        relationship: intersect
+        rationale: "La protection des données de test est un aspect de la validation et des tests (ITIL4-SVC-17)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.33
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "C'est une mesure de sécurité pour éviter l'exposition de données sensibles (ITIL4-GEN-03)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.34
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:service-validation
+        relationship: intersect
+        rationale: "La protection des systèmes lors des tests d'audit est une considération importante pour la validation (ITIL4-SVC-17)."
+      - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.34
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:information-security
+        relationship: intersect
+        rationale: "C'est une mesure de sécurité à appliquer pendant les audits (ITIL4-GEN-03)."

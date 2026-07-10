@@ -8,6 +8,7 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { onMount } from 'svelte';
 	import { m } from '$paraglide/messages';
+	import { page } from '$app/state';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -71,15 +72,6 @@
 		allowedExtensions={'*'}
 	/>
 {/if}
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="folders"
-	field="folder"
-	pathField="path"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-/>
 {#if context !== 'edit'}
 	<TextField
 		{form}
@@ -118,15 +110,19 @@
 	label={m.owner()}
 />
 
-<Select
-	{form}
-	options={model.selectOptions?.status}
-	field="status"
-	label={m.status()}
-	disableDoubleDash={true}
-	cacheLock={cacheLocks['status']}
-	bind:cachedValue={formDataCache['status']}
-/>
+<!-- Evidence status is an auditor-side review decision: respondents deposit
+	 evidence but must not set/change its status (e.g. self-approve). -->
+{#if !page.data?.user?.is_third_party}
+	<Select
+		{form}
+		options={model.selectOptions?.status}
+		field="status"
+		label={m.status()}
+		disableDoubleDash={true}
+		cacheLock={cacheLocks['status']}
+		bind:cachedValue={formDataCache['status']}
+	/>
+{/if}
 
 <TextField
 	type="date"

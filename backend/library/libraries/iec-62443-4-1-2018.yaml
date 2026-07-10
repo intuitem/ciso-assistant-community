@@ -1,0 +1,673 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:iec-62443-4-1-2018
+locale: en
+ref_id: iec-62443-4-1-2018
+name: "IEC 62443-4-1:2018 \u2014 Secure product development lifecycle requirements\
+  \ (outline)"
+description: "Outline of IEC 62443-4-1:2018 \u2014 Security for industrial automation\
+  \ and control systems - Part 4-1: Secure product development lifecycle requirements.\
+  \ Targets product suppliers; basis of the ISASecure SDLA certification. Lists the\
+  \ 8 practices (SM, SR, SD, SI, SVV, DM, SUM, SG) and their 47 base requirements\
+  \ with paraphrased descriptions; purchase the standard for the normative text and\
+  \ Maturity Level (ML 1-4) evaluation guidance."
+copyright: IEC - Purchase the standard for the full normative text.
+version: 1
+publication_date: 2026-04-28
+provider: IEC
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:iec-62443-4-1-2018
+    ref_id: iec-62443-4-1-2018
+    name: "IEC 62443-4-1:2018 \u2014 Secure product development lifecycle requirements\
+      \ (outline)"
+    description: Targets product suppliers. The standard rates each Practice on a
+      CMMI-DEV-derived Maturity Level scale ML1 (Initial) to ML4 (Improving), per
+      Annex A. ML scoring is not reproduced in this outline.
+    min_score: 0
+    max_score: 5
+    scores_definition:
+    - score: 0
+      name: Incomplete
+      description: Ad hoc and unknown
+    - score: 1
+      name: Initial
+      description: Unpredictable and reactive
+    - score: 2
+      name: Managed
+      description: Managed on the project level
+    - score: 3
+      name: Defined
+      description: Proactive, rather than reactive
+    - score: 4
+      name: Quantitatively managed
+      description: Measured and controlled
+    - score: 5
+      name: Optimizing
+      description: Stable and flexible
+    implementation_groups_definition:
+    - ref_id: sdl_practices
+      name: SDL Practices
+      description: 8 secure-development-lifecycle practices (SM, SR, SD, SI, SVV,
+        DM, SUM, SG).
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: Practice 1 - Security management
+      description: The product supplier maintains a documented secure development
+        process applied across all relevant products.
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
+      ref_id: SM-1
+      name: Development process
+      description: 'Practice: A documented secure development process is in place
+        and is applied to every product within the SDLC scope. Evidence: The documented
+        process exists, is current, and is referenced in product development records.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
+      ref_id: SM-2
+      name: Identification of responsibilities
+      description: 'Practice: Roles and responsibilities for executing the secure
+        development process are documented and assigned. Evidence: A RACI or role
+        map names individuals or roles for each process step; gaps are tracked and
+        closed.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
+      ref_id: SM-3
+      name: Identification of applicability
+      description: 'Practice: For each product, applicability of the SDLC requirements
+        is documented (which apply, which don''t, which are tailored, with justification).
+        Evidence: A per-product applicability statement exists with rationale for
+        any tailoring.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
+      ref_id: SM-4
+      name: Security expertise
+      description: 'Practice: Personnel performing security-relevant SDLC activities
+        have demonstrable competence in product cybersecurity. Evidence: Training
+        records, certifications, and experience matrices map to the SDLC roles defined
+        in SM-2.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
+      ref_id: SM-5
+      name: Process scoping
+      description: 'Practice: The boundary between the secure development process
+        and other organizational processes (sales, support, manufacturing) is documented
+        and managed. Evidence: Process scope documents show interfaces and handoffs
+        between the SDLC and adjacent processes.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
+      ref_id: SM-6
+      name: File integrity
+      description: 'Practice: Source code, design documents, build artifacts, CI/CD
+        pipeline definitions, and security-relevant files are protected against unauthorized
+        modification. Evidence: Version control with access control; signed commits
+        or signed build artifacts; pipeline-definition changes go through review;
+        provenance is auditable end-to-end (SLSA-style attestations where applicable).'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
+      ref_id: SM-7
+      name: Development environment security
+      description: "Practice: Development, build, and test environments \u2014 including\
+        \ build clusters, package proxies / artifact caches, container registries,\
+        \ and signing infrastructure \u2014 are secured (access control, malware protection,\
+        \ segregation from production). Evidence: Hardened development infrastructure\
+        \ with documented controls and monitoring; environment-access reviews; build-server\
+        \ and dependency-cache integrity is verifiable (recent supply-chain attack\
+        \ patterns covered)."
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
+      ref_id: SM-8
+      name: Controls for private keys
+      description: 'Practice: Code-signing and other product-related private keys
+        are stored, accessed, rotated, and revoked under documented controls (HSM,
+        sealed access); a documented key-compromise procedure covers detection, immediate
+        rotation, certificate revocation, and customer notification. Evidence: Private-key
+        management policy with auditable access logs; HSM/secure-storage attestation;
+        key-compromise runbook with notification-timeline commitments. NIST 800-53:
+        SC-12.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
+      ref_id: SM-9
+      name: Security requirements for externally provided components
+      description: 'Practice: Security requirements are placed on external components
+        (commercial, open-source) entering the product, with documented selection,
+        vetting, and SBOM tracking. Evidence: Component intake process; SBOM (e.g.
+        SPDX, CycloneDX) with provenance; vulnerability-monitoring feed for tracked
+        components.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
+      ref_id: SM-10
+      name: Custom developed components from third-party suppliers
+      description: 'Practice: When custom components are developed by third parties,
+        security obligations flow down contractually to sub-contractors as well, and
+        the primary supplier verifies sub-contractor compliance. Evidence: Supplier
+        contracts with cybersecurity clauses requiring flow-down to sub-contractors;
+        supplier-audit or attestation records; risk register for third-party components;
+        source-code escrow or equivalent continuity arrangement for critical custom
+        work.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
+      ref_id: SM-11
+      name: Assessing and addressing security-related issues
+      description: 'Practice: Security issues identified throughout the lifecycle
+        (defects, vulnerabilities, deviations) are tracked, prioritized, and addressed
+        under a documented process. Evidence: Defect/vulnerability tracker with severity,
+        status, owner, and remediation timeline.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
+      ref_id: SM-12
+      name: Process verification
+      description: 'Practice: Independent personnel periodically verify that the secure
+        development process is being followed (audits, gate reviews). Evidence: Process-verification
+        audit reports with findings and corrective actions tracked to closure.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:5
+      ref_id: SM-13
+      name: Continuous improvement
+      description: 'Practice: The secure development process is periodically reviewed
+        and improved based on lessons learned, incidents, and external developments.
+        Evidence: Review records (cadence, participants, outcomes); changes to the
+        process are version-controlled.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: Practice 2 - Specification of security requirements
+      description: Security requirements for each product are explicitly specified,
+        threat-modeled, reviewed, and traceable through development.
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sr-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:6
+      ref_id: SR-1
+      name: Product security context
+      description: 'Practice: For each product, the intended operational environment,
+        intended use cases, and assumed external security context are documented.
+        Evidence: A product security context document covering intended deployment
+        zones, user roles, and threat assumptions per product.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sr-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:6
+      ref_id: SR-2
+      name: Threat model
+      description: 'Practice: A threat model for each product is created, maintained,
+        and updated as the product evolves. Evidence: Threat-model artifacts (data-flow
+        diagrams, attack trees, STRIDE/PASTA tables) with traceability to mitigations.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sr-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:6
+      ref_id: SR-3
+      name: Product security requirements
+      description: 'Practice: Security requirements derived from the threat model
+        are documented for each product, traceable to features and tests. Evidence:
+        A product security requirement specification; each requirement traces to a
+        design element and a verification test.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sr-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:6
+      ref_id: SR-4
+      name: Product security requirements content
+      description: 'Practice: Security requirements are written with sufficient detail
+        to be testable (no vague ''be secure'' language). Evidence: Each security
+        requirement has a measurable acceptance criterion and references applicable
+        62443-3-3 SRs or 62443-4-2 CRs.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sr-5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:6
+      ref_id: SR-5
+      name: Security requirements review
+      description: 'Practice: Security requirements are reviewed by qualified personnel
+        (including independent reviewers) before development proceeds. Evidence: Review
+        records with reviewer identities, dates, findings, and dispositions.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: Practice 3 - Secure by design
+      description: 'Product designs incorporate security from the start: defense in
+        depth, secure-design principles, and design review.'
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sd-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:7
+      ref_id: SD-1
+      name: Secure design principles
+      description: 'Practice: Designs apply documented secure-design principles (least
+        privilege, defense in depth, fail secure, complete mediation, economy of mechanism).
+        Evidence: Design documents reference and apply named principles; deviations
+        are justified.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sd-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:7
+      ref_id: SD-2
+      name: Defense in depth design
+      description: 'Practice: Product designs implement multiple layers of defense
+        so that compromise of one component does not compromise the system. Evidence:
+        Architecture diagrams identify defense layers; threat models map attacks against
+        each layer.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sd-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:7
+      ref_id: SD-3
+      name: Security design review
+      description: 'Practice: Designs are subject to security review (peer or independent)
+        at defined milestones. Evidence: Design-review records covering security topics,
+        with findings and dispositions tracked to closure.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sd-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:7
+      ref_id: SD-4
+      name: Secure design best practices
+      description: 'Practice: Designs follow industry secure-design best practices
+        applicable to the product class (cryptography choices, secure boot, sandboxing,
+        isolation). Evidence: Design documents reference applicable best-practice
+        sources (NIST, OWASP, CERT, ENISA) and explicitly justify any deviations.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:8
+      assessable: false
+      depth: 1
+      ref_id: '8'
+      name: Practice 4 - Secure implementation
+      description: Code is implemented to documented secure-coding standards with
+        implementation review.
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:si-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:8
+      ref_id: SI-1
+      name: Security implementation review
+      description: 'Practice: Code is reviewed for security defects before being released,
+        using qualified reviewers and/or automated tooling. Evidence: Code-review
+        records (manual review checklists + SAST tool reports) covering all release-bound
+        code; review findings tracked to closure.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:si-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:8
+      ref_id: SI-2
+      name: Secure coding standards
+      description: 'Practice: Documented secure coding standards exist and are followed
+        for the product''s languages and frameworks (e.g. CERT C/C++, MISRA, OWASP
+        for web). Evidence: Documented coding standards; CI enforces a baseline (linters,
+        SAST); deviations are tracked and justified.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:9
+      assessable: false
+      depth: 1
+      ref_id: '9'
+      name: Practice 5 - Security verification and validation testing
+      description: Testing covers security requirements, threat mitigations, vulnerability
+        discovery, and penetration testing, with appropriate independence.
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:svv-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:9
+      ref_id: SVV-1
+      name: Security requirements testing
+      description: 'Practice: Each security requirement (SR-3) has corresponding verification
+        tests covering positive and negative cases. Evidence: Test plans and results
+        trace 1:1 to security requirements.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:svv-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:9
+      ref_id: SVV-2
+      name: Threat mitigation testing
+      description: 'Practice: Threat mitigations identified in the threat model (SR-2)
+        are explicitly tested. Evidence: A test matrix maps each mitigation to test
+        cases with executed results.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:svv-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:9
+      ref_id: SVV-3
+      name: Vulnerability testing
+      description: 'Practice: Vulnerability identification activities (SAST, DAST,
+        fuzzing, dependency scanning) are performed before release. Evidence: Vulnerability
+        scan reports run against release candidates; findings tracked to closure or
+        accepted with rationale.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:svv-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:9
+      ref_id: SVV-4
+      name: Penetration testing
+      description: 'Practice: Penetration testing exercises the product against realistic
+        attacker techniques before release. Evidence: Pentest reports (internal or
+        third-party) with scope, findings, severity, and remediation status.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:svv-5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:9
+      ref_id: SVV-5
+      name: Independence of testers
+      description: 'Practice: Persons performing security testing are sufficiently
+        independent from the developers (organizational separation or third-party).
+        Evidence: Tester role assignments demonstrate independence; reporting line
+        is documented.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:10
+      assessable: false
+      depth: 1
+      ref_id: '10'
+      name: Practice 6 - Management of security-related issues
+      description: Externally reported and internally discovered security issues are
+        received, reviewed, assessed, addressed, disclosed, and the process is itself
+        reviewed.
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:dm-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:10
+      ref_id: DM-1
+      name: Receiving notifications of security-related issues
+      description: 'Practice: A documented intake channel (security@..., PSIRT contact,
+        security.txt) receives external reports and routes them to the right team.
+        Evidence: A published vulnerability-reporting channel; incoming reports are
+        logged; SLA for acknowledgement is defined and met.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:dm-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:10
+      ref_id: DM-2
+      name: Reviewing security-related issues
+      description: 'Practice: Reported issues are reviewed for validity, scope, and
+        applicability under a documented process. Evidence: Issue tracker entries
+        show review timestamps, reviewer, and validity disposition.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:dm-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:10
+      ref_id: DM-3
+      name: Assessing security-related issues
+      description: 'Practice: Valid issues are assessed for severity (e.g. CVSS),
+        exploitability, and impact across affected products. Evidence: Each valid
+        issue has a severity rationale and an impact-analysis record covering all
+        affected product versions.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:dm-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:10
+      ref_id: DM-4
+      name: Addressing security-related issues
+      description: 'Practice: Issues are addressed (fix, mitigation, workaround) with
+        timelines proportional to severity. Evidence: Remediation plans with target
+        dates per severity; actual closure metrics reported.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:dm-5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:10
+      ref_id: DM-5
+      name: Disclosing security-related issues
+      description: 'Practice: Security issues are disclosed to affected customers
+        and the public per a documented coordinated-disclosure policy. Evidence: Published
+        advisories (CVE/CSAF), customer communications, and a disclosure-timeline
+        policy.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:dm-6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:10
+      ref_id: DM-6
+      name: Periodic review of security defect management practice
+      description: 'Practice: The defect-management practice is reviewed periodically
+        and improved based on metrics and incidents. Evidence: Review records covering
+        SLA attainment, false-positive rate, time-to-fix, and improvement actions.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:11
+      assessable: false
+      depth: 1
+      ref_id: '11'
+      name: Practice 7 - Security update management
+      description: Security updates are qualified, documented, distributed, and delivered
+        in a timely manner.
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sum-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:11
+      ref_id: SUM-1
+      name: Security update qualification
+      description: 'Practice: Each security update is qualified (regression tested,
+        integration tested) before release to ensure it does not destabilize deployed
+        systems. Evidence: Qualification test plans and results per update; rollback
+        plan included.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sum-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:11
+      ref_id: SUM-2
+      name: Security update documentation
+      description: 'Practice: Each security update is accompanied by documentation
+        (what''s fixed, severity, prerequisites, side effects, install instructions).
+        Evidence: Release notes / advisory templates with all required content fields.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sum-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:11
+      ref_id: SUM-3
+      name: Dependent component or operating system security update documentation
+      description: 'Practice: For updates that depend on components outside the supplier''s
+        control (OS, third-party libraries), the dependency relationship and tested
+        versions are documented. Evidence: Compatibility matrices listing tested OS
+        / dependency versions per product release.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sum-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:11
+      ref_id: SUM-4
+      name: Security update delivery
+      description: 'Practice: Updates are delivered via authenticated, integrity-protected
+        mechanisms to authorized customers. Evidence: Signed update packages, authenticated
+        distribution channels, and download/verification documentation.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sum-5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:11
+      ref_id: SUM-5
+      name: Timely delivery of security patches
+      description: 'Practice: Security patches are delivered within timeframes proportional
+        to severity, per a documented policy; an out-of-cycle / emergency-patch path
+        exists for high-impact zero-days (Log4Shell-class events) with a target measured
+        in hours, not days. Evidence: Patch SLA policy (e.g. critical = N days, high
+        = M days) plus emergency-patch SLA; metrics show SLA attainment for both routine
+        and emergency releases.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:12
+      assessable: false
+      depth: 1
+      ref_id: '12'
+      name: Practice 8 - Security guidelines
+      description: Documentation guides the customer on deploying, operating, and
+        decommissioning the product securely.
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sg-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:12
+      ref_id: SG-1
+      name: Product defense in depth
+      description: 'Practice: Documentation describes the product''s defense-in-depth
+        design, including the security responsibilities the customer must implement
+        to complete the picture. Evidence: A ''security overview'' document per product
+        covering layered defenses and customer-side obligations.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sg-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:12
+      ref_id: SG-2
+      name: Defense in depth measures expected in the environment
+      description: 'Practice: Documentation specifies environmental security measures
+        the product depends on (network segmentation, authentication infrastructure,
+        time sources). Evidence: Environmental prerequisites are documented; deployment
+        guides require confirmation.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sg-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:12
+      ref_id: SG-3
+      name: Security hardening guidelines
+      description: 'Practice: Hardening guidelines tell the customer how to configure
+        the product securely (services to disable, ports to close, accounts to remove,
+        secure baselines). Evidence: A hardening guide aligned with documented secure
+        baselines (CIS benchmarks where applicable).'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sg-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:12
+      ref_id: SG-4
+      name: Secure disposal guidelines
+      description: 'Practice: End-of-life and disposal guidelines tell the customer
+        how to securely retire the product (sanitize storage, revoke certificates,
+        decommission accounts). Evidence: A disposal procedure document; field decommissioning
+        kits or scripts where applicable.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sg-5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:12
+      ref_id: SG-5
+      name: Secure operation guidelines
+      description: 'Practice: Operation guidelines cover security-relevant operational
+        tasks (account management, log review, patch application). Evidence: An operations
+        guide with security-task playbooks.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sg-6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:12
+      ref_id: SG-6
+      name: Account management guidelines
+      description: 'Practice: Documentation covers customer-side account management
+        (default account list, role assignments, password-policy support). Evidence:
+        A documented account-management section listing default accounts and recommended
+        customer practice.'
+      implementation_groups:
+      - sdl_practices
+    - urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sg-7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:12
+      ref_id: SG-7
+      name: Documentation review
+      description: 'Practice: All security-related customer documentation is reviewed
+        for accuracy, completeness, and consistency before release. Evidence: Document-review
+        records covering security guides; revisions are tracked under change control.'
+      implementation_groups:
+      - sdl_practices

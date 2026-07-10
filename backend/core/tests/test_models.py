@@ -2,7 +2,7 @@ from uuid import UUID
 from django.core.exceptions import ValidationError
 
 import pytest
-from ciso_assistant.settings import BASE_DIR
+from django.conf import settings
 from test_fixtures import RISK_MATRIX_JSON_DEFINITION
 
 from core.models import (
@@ -35,7 +35,7 @@ from .fixtures import *
 
 User = get_user_model()
 
-SAMPLE_640x480_JPG = BASE_DIR / "app_tests" / "sample_640x480.jpg"
+SAMPLE_640x480_JPG = settings.BASE_DIR / "app_tests" / "sample_640x480.jpg"
 
 
 @pytest.mark.django_db
@@ -98,6 +98,57 @@ class TestEvidence:
         assert evidence.filename() is None
         assert evidence.get_size() is None
         assert evidence.attachment_hash is None
+
+
+@pytest.mark.django_db
+class TestAppliedControlDisplayCost:
+    """display_cost is a pure property over self.cost."""
+
+    def test_empty_cost_returns_empty_string(self):
+        assert AppliedControl(cost=None).display_cost == ""
+        assert AppliedControl(cost={}).display_cost == ""
+
+    def test_cost_type_with_neither_fixed_nor_people_is_skipped(self):
+        control = AppliedControl(
+            cost={"currency": "EUR", "build": {"fixed_cost": 0, "people_days": 0}}
+        )
+        assert control.display_cost == ""
+
+    def test_people_days_only_is_displayed(self):
+        # Regression: a cost expressed purely in people-days used to be dropped
+        # because the row was skipped whenever fixed_cost was 0.
+        control = AppliedControl(
+            cost={"currency": "EUR", "build": {"fixed_cost": 0, "people_days": 5}}
+        )
+        assert control.display_cost == "Build: 5 people days"
+
+    def test_fixed_cost_only_is_displayed_without_people_days(self):
+        control = AppliedControl(
+            cost={"currency": "EUR", "build": {"fixed_cost": 500, "people_days": 0}}
+        )
+        result = control.display_cost
+        assert result.startswith("Build: ")
+        assert "500" in result
+        assert "people days" not in result
+
+    def test_fixed_cost_and_people_days_are_both_displayed(self):
+        control = AppliedControl(
+            cost={"currency": "EUR", "build": {"fixed_cost": 500, "people_days": 5}}
+        )
+        result = control.display_cost
+        assert result.startswith("Build: ")
+        assert "500" in result
+        assert "5 people days" in result
+
+    def test_build_and_run_are_joined(self):
+        control = AppliedControl(
+            cost={
+                "currency": "EUR",
+                "build": {"fixed_cost": 0, "people_days": 5},
+                "run": {"fixed_cost": 0, "people_days": 2},
+            }
+        )
+        assert control.display_cost == "Build: 5 people days | Run: 2 people days"
 
 
 @pytest.mark.django_db

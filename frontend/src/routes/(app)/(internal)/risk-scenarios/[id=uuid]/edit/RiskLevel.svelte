@@ -60,11 +60,11 @@
 	});
 
 	let classesCellText = $derived((backgroundHexColor: string) => {
-		return isDark(backgroundHexColor) ? 'text-white' : '';
+		return isDark(backgroundHexColor) ? 'text-white' : 'text-surface-950';
 	});
 </script>
 
-<div class="flex flex-col">
+<div class="flex flex-col relative">
 	{#if label !== undefined}
 		<label class="text-sm font-semibold" for={field}>{label}</label>
 	{/if}
@@ -78,9 +78,13 @@
 			{safeTranslate(riskLevel.name)}
 		</div>
 	{:else}
-		<div class="flex font-medium w-32 justify-center p-2 rounded-base bg-gray-300">--</div>
+		<div class="flex font-medium w-32 justify-center p-2 rounded-base bg-surface-300-700">--</div>
 	{/if}
 	{#if helpText}
-		<p class="text-sm text-gray-500 w-64">{helpText}</p>
+		<p
+			class="absolute top-full mt-1 text-sm text-surface-600-400 w-80 break-words whitespace-pre-line"
+		>
+			{helpText}
+		</p>
 	{/if}
 </div>

@@ -8,8 +8,8 @@ description: National Institute of Standards and Technology - Cybersecurity Fram
   (CSF 2.0)
 copyright: With the exception of material marked as copyrighted, information presented
   on NIST sites are considered public information and may be distributed or copied.
-version: 5
-publication_date: 2025-07-09
+version: 6
+publication_date: 2026-06-03
 provider: NIST
 packager: intuitem
 translations:
@@ -21,6 +21,8 @@ translations:
     name: NIST CSF version 2.0
     description: National Institute of Standards and Technology - Cybersecurity Framework
       (CSF 2.0)
+dependencies:
+- urn:intuitem:risk:library:doc-pol
 objects:
   framework:
     urn: urn:intuitem:risk:framework:nist-csf-2.0
@@ -179,6 +181,10 @@ objects:
         Ex1: Share the organization''s mission (e.g., through vision and mission statements,
         marketing, and service strategies) to provide a basis for identifying risks
         that may impede that mission'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.context
+      - urn:intuitem:risk:function:doc-pol:doc.overview
+      - urn:intuitem:risk:function:doc-pol:pol.main
       translations:
         fr:
           description: "La mission organisationnelle est comprise et informe la gestion\
@@ -216,6 +222,9 @@ objects:
         expectations (e.g., privacy expectations of customers, business expectations
         of partnerships, compliance expectations of regulators, ethics expectations
         of society)'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.context
+      - urn:intuitem:risk:function:doc-pol:doc.com
       translations:
         fr:
           description: "Les parties prenantes internes et externes sont comprises,\
@@ -265,6 +274,9 @@ objects:
 
         Ex3: Align the organization''s cybersecurity strategy with legal, regulatory,
         and contractual requirements'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.legal
+      - urn:intuitem:risk:function:doc-pol:pol.main
       translations:
         fr:
           description: "Les exigences l\xE9gales, r\xE9glementaires et contractuelles\
@@ -316,6 +328,10 @@ objects:
         Ex3: Establish and communicate resilience objectives (e.g., recovery time
         objectives) for delivering critical capabilities and services in various operating
         states (e.g., under attack, during recovery, normal operation)'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.context
+      - urn:intuitem:risk:function:doc-pol:doc.scope
+      - urn:intuitem:risk:function:doc-pol:doc.bia
       translations:
         fr:
           description: "Les objectifs, capacit\xE9s et services critiques dont d\xE9\
@@ -364,6 +380,10 @@ objects:
         share that information with appropriate personnel
 
         3rd: 3rd Party Risk'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.context
+      - urn:intuitem:risk:function:doc-pol:doc.bia
+      - urn:intuitem:risk:function:doc-pol:doc.supplier_register
       translations:
         fr:
           description: "Les r\xE9sultats, les capacit\xE9s et les services dont d\xE9\
@@ -426,6 +446,9 @@ objects:
 
         Ex3: Senior leaders agree about cybersecurity objectives and use them for
         measuring and managing risk and performance'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.risk
+      - urn:intuitem:risk:function:doc-pol:doc.so_register
       translations:
         fr:
           description: "Les objectifs de gestion des risques sont \xE9tablis et accept\xE9\
@@ -471,6 +494,9 @@ objects:
 
         Ex3: Refine organizational objectives and risk appetite periodically based
         on known risk exposure and residual risk'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.risk_appetite
+      - urn:intuitem:risk:function:doc-pol:pol.risk
       translations:
         fr:
           description: "Les d\xE9clarations d\u2019app\xE9tence et de tol\xE9rance\
@@ -511,6 +537,9 @@ objects:
 
         Ex3: Establish criteria for escalating cybersecurity risks within enterprise
         risk management'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.risk
+      - urn:intuitem:risk:function:doc-pol:doc.risk_register
       translations:
         fr:
           description: "Les activit\xE9s et les r\xE9sultats de la gestion des risques\
@@ -553,6 +582,9 @@ objects:
         (e.g., outsourcing certain cybersecurity functions, having a third party perform
         financial transactions on behalf of the organization, using public cloud-based
         services)'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.risk
+      - urn:intuitem:risk:function:doc-pol:doc.risk_appetite
       translations:
         fr:
           description: "Une orientation strat\xE9gique d\xE9crivant les options de\
@@ -594,6 +626,10 @@ objects:
         Ex2: Identify how all departments across the organization - such as management,
         operations, internal auditors, legal, acquisition, physical security, and
         HR - will communicate with each other about cybersecurity risks'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.com
+      - urn:intuitem:risk:function:doc-pol:pol.risk
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
       translations:
         fr:
           description: "Les lignes de communication au sein de l\u2019organisation\
@@ -639,6 +675,9 @@ objects:
 
         Ex4: Use a consistent list of risk categories to support integrating, aggregating,
         and comparing cybersecurity risks'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.risk
+      - urn:intuitem:risk:function:doc-pol:doc.risk_register
       translations:
         fr:
           description: "Une m\xE9thode normalis\xE9e de calcul, de documentation,\
@@ -686,6 +725,9 @@ objects:
 
         Ex3: Calculate, document, and prioritize positive risks alongside negative
         risks'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.risk
+      - urn:intuitem:risk:function:doc-pol:doc.risk_register
       translations:
         fr:
           description: "Les opportunit\xE9s strat\xE9giques (c-\xE0-d., les risques\
@@ -752,6 +794,10 @@ objects:
 
         Ex4: Conduct reviews to ensure adequate authority and coordination among those
         responsible for managing cybersecurity risk'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.main
+      - urn:intuitem:risk:function:doc-pol:doc.raci
+      - urn:intuitem:risk:function:doc-pol:pol.educ
       translations:
         fr:
           description: "La direction organisationnelle est responsable des risques\
@@ -810,6 +856,9 @@ objects:
 
         Ex5: Clearly articulate cybersecurity responsibilities within operations,
         risk functions, and internal audit functions'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.raci
+      - urn:intuitem:risk:function:doc-pol:doc.controls
       translations:
         fr:
           description: "Les r\xF4les, responsabilit\xE9s et autorit\xE9s li\xE9s \xE0\
@@ -863,6 +912,9 @@ objects:
 
         Ex3: Provide adequate and sufficient people, process, and technical resources
         to support the cybersecurity strategy'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.main
+      - urn:intuitem:risk:function:doc-pol:doc.raci
       translations:
         fr:
           description: "Les ressources ad\xE9quates sont allou\xE9es en fonction de\
@@ -907,6 +959,11 @@ objects:
 
         Ex4: Define and enforce obligations for personnel to be aware of, adhere to,
         and uphold security policies as they relate to their roles'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.hr_security
+      - urn:intuitem:risk:function:doc-pol:proc.bg_screening
+      - urn:intuitem:risk:function:doc-pol:proc.disciplinary
+      - urn:intuitem:risk:function:doc-pol:pol.educ
       translations:
         fr:
           description: "La cybers\xE9curit\xE9 est incluse dans les pratiques en mati\xE8\
@@ -978,6 +1035,9 @@ objects:
 
         Ex5: Require personnel to acknowledge receipt of policy when first hired,
         annually, and whenever policy is updated'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.main
+      - urn:intuitem:risk:function:doc-pol:doc.doc_register
       translations:
         fr:
           description: "La politique de gestion des risques de cybers\xE9curit\xE9\
@@ -1036,6 +1096,10 @@ objects:
         Ex4: Update policy to reflect changes in technology (e.g., adoption of artificial
         intelligence) and changes to the business (e.g., acquisition of a new business,
         new contract requirements)'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.main
+      - urn:intuitem:risk:function:doc-pol:doc.doc_register
+      - urn:intuitem:risk:function:doc-pol:pol.audit
       translations:
         fr:
           description: "La politique de gestion des risques de cybers\xE9curit\xE9\
@@ -1110,6 +1174,9 @@ objects:
 
         Ex2: Examine whether cybersecurity risk strategies that impede operations
         or innovation should be adjusted'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.mgmt_review
+      - urn:intuitem:risk:function:doc-pol:pol.risk
       translations:
         fr:
           description: "Les r\xE9sultats de la strat\xE9gie de gestion des risques\
@@ -1147,6 +1214,10 @@ objects:
         to determine whether policy changes are necessary
 
         Ex3: Review strategy in light of cybersecurity incidents'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.mgmt_review
+      - urn:intuitem:risk:function:doc-pol:pol.risk
+      - urn:intuitem:risk:function:doc-pol:pol.audit
       translations:
         fr:
           description: "La strat\xE9gie de gestion des risques de cybers\xE9curit\xE9\
@@ -1187,6 +1258,10 @@ objects:
 
         Ex3: Collect and communicate metrics on cybersecurity risk management with
         senior leadership'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.mgmt_review
+      - urn:intuitem:risk:function:doc-pol:doc.nc_log
+      - urn:intuitem:risk:function:doc-pol:pol.audit
       translations:
         fr:
           description: "La performance de la gestion des risques de cybers\xE9curit\xE9\
@@ -1257,6 +1332,8 @@ objects:
         as cybersecurity, IT, operations, legal, human resources, and engineering
 
         3rd: 3rd Party Risk'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
       translations:
         fr:
           description: "Un programme, une strat\xE9gie, des objectifs, des politiques\
@@ -1338,6 +1415,9 @@ objects:
         between the organization and its suppliers
 
         3rd: 3rd Party Risk'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
+      - urn:intuitem:risk:function:doc-pol:doc.raci
       translations:
         fr:
           description: "Les r\xF4les et responsabilit\xE9s en mati\xE8re de cybers\xE9\
@@ -1418,6 +1498,9 @@ objects:
         and address them at the enterprise risk management level
 
         3rd: 3rd Party Risk'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
+      - urn:intuitem:risk:function:doc-pol:pol.risk
       translations:
         fr:
           description: "La gestion des risques de la cha\xEEne d\u2019approvisionnement\
@@ -1463,6 +1546,9 @@ objects:
         criticality criteria
 
         3rd: 3rd Party Risk'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.supplier_register
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
       translations:
         fr:
           description: "Les fournisseurs sont connus et prioris\xE9s par criticit\xE9"
@@ -1527,6 +1613,9 @@ objects:
         to potential cybersecurity risks
 
         3rd: 3rd Party Risk'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
+      - urn:intuitem:risk:function:doc-pol:proc.tprm_assessment
       translations:
         fr:
           description: "Les exigences visant \xE0 s\u2019adresser aux risques de cybers\xE9\
@@ -1617,6 +1706,9 @@ objects:
         prior to acquisition and use
 
         3rd: 3rd Party Risk'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.tprm_assessment
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
       translations:
         fr:
           description: "La planification et la diligence raisonnable sont effectu\xE9\
@@ -1674,6 +1766,10 @@ objects:
         ensure business continuity
 
         3rd: 3rd Party Risk'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.tprm_assessment
+      - urn:intuitem:risk:function:doc-pol:doc.supplier_register
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
       translations:
         fr:
           description: "Les risques pos\xE9s par un fournisseur, ses produits et services\
@@ -1736,6 +1832,10 @@ objects:
         Ex5: Conduct collaborative lessons learned sessions with critical suppliers
 
         3rd: 3rd Party Risk'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
+      - urn:intuitem:risk:function:doc-pol:pol.incident
+      - urn:intuitem:risk:function:doc-pol:proc.incident
       translations:
         fr:
           description: "Les fournisseurs concern\xE9s et autres tiers sont inclus\
@@ -1791,6 +1891,9 @@ objects:
         for unauthorized changes
 
         3rd: 3rd Party Risk'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
+      - urn:intuitem:risk:function:doc-pol:proc.tprm_assessment
       translations:
         fr:
           description: "Les pratiques de s\xE9curit\xE9 de la cha\xEEne d\u2019approvisionnement\
@@ -1857,6 +1960,9 @@ objects:
         Ex7: Manage data leakage risks associated with supplier termination
 
         3rd: 3rd Party Risk'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
+      - urn:intuitem:risk:function:doc-pol:proc.disposal
       translations:
         fr:
           description: "Les plans de gestion des risques de la cha\xEEne d\u2019approvisionnement\
@@ -1951,6 +2057,10 @@ objects:
 
         Ex2: Constantly monitor networks to detect new hardware and automatically
         update inventories'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.asset_register
+      - urn:intuitem:risk:function:doc-pol:tech.cmdb
+      - urn:intuitem:risk:function:doc-pol:tech.asset_discovery
       translations:
         fr:
           description: "Les inventaires du mat\xE9riel g\xE9r\xE9 par l\u2019organisation\
@@ -1984,6 +2094,10 @@ objects:
         for software and service inventory changes
 
         Ex3: Maintain an inventory of the organization''s systems'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.asset_register
+      - urn:intuitem:risk:function:doc-pol:tech.cmdb
+      - urn:intuitem:risk:function:doc-pol:tech.sw_inventory
       translations:
         fr:
           description: "Les inventaires des logiciels, services et syst\xE8mes g\xE9\
@@ -2028,6 +2142,9 @@ objects:
 
         Ex4: Maintain documentation of expected network ports, protocols, and services
         that are typically used among authorized systems'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.flow_matrix
+      - urn:intuitem:risk:function:doc-pol:doc.is_map
       translations:
         fr:
           description: "Les repr\xE9sentations des communications r\xE9seau autoris\xE9\
@@ -2072,6 +2189,9 @@ objects:
         use of that service
 
         3rd: 3rd Party Risk'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.supplier_register
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
       translations:
         fr:
           description: Les inventaires des services fournis par les fournisseurs sont
@@ -2110,6 +2230,10 @@ objects:
 
         Ex3: Track the asset priorities and update them periodically or when significant
         changes to the organization occur'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.classif
+      - urn:intuitem:risk:function:doc-pol:pol.asset
+      - urn:intuitem:risk:function:doc-pol:doc.asset_register
       translations:
         fr:
           description: "Les actifs sont prioris\xE9s en fonction de la classification,\
@@ -2148,6 +2272,10 @@ objects:
 
         Ex4: Track the provenance, data owner, and geolocation of each instance of
         designated data types'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.asset_register
+      - urn:intuitem:risk:function:doc-pol:pol.classif
+      - urn:intuitem:risk:function:doc-pol:pol.asset
       translations:
         fr:
           description: "Les inventaires de donn\xE9es et les m\xE9tadonn\xE9es correspondantes\
@@ -2213,6 +2341,10 @@ objects:
 
         Ex9: Offer methods for destroying paper, storage media, and other physical
         forms of data storage'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.asset
+      - urn:intuitem:risk:function:doc-pol:proc.software_lifecycle
+      - urn:intuitem:risk:function:doc-pol:proc.disposal
       translations:
         fr:
           description: "Les syst\xE8mes, mat\xE9riels, logiciels, services et donn\xE9\
@@ -2304,6 +2436,10 @@ objects:
 
         Ex6: Review processes and procedures for weaknesses that could be exploited
         to affect cybersecurity'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
+      - urn:intuitem:risk:function:doc-pol:tech.vuln_scanner
+      - urn:intuitem:risk:function:doc-pol:doc.risk_register
       translations:
         fr:
           description: "Les vuln\xE9rabilit\xE9s des actifs sont identifi\xE9es, valid\xE9\
@@ -2356,6 +2492,9 @@ objects:
 
         Ex3: Monitor sources of cyber threat intelligence for information on the types
         of vulnerabilities that emerging technologies may have'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.threat_intel
+      - urn:intuitem:risk:function:doc-pol:proc.threat_intel
       translations:
         fr:
           description: "Les renseignements sur les cybermenaces sont re\xE7us de forums\
@@ -2398,6 +2537,9 @@ objects:
         environment
 
         Ex3: Implement processes for identifying internal threat actors'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.threat_intel
+      - urn:intuitem:risk:function:doc-pol:doc.risk_register
       translations:
         fr:
           description: "Les menaces internes et externes \xE0 l\u2019organisation\
@@ -2438,6 +2580,9 @@ objects:
 
         Ex3: Account for the potential impacts of cascading failures for systems of
         systems'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.risk
+      - urn:intuitem:risk:function:doc-pol:doc.risk_register
       translations:
         fr:
           description: "Les impacts potentiels et les probabilit\xE9s des menaces\
@@ -2477,6 +2622,9 @@ objects:
 
         Ex2: Prioritize cybersecurity resource allocations and investments based on
         estimated likelihoods and impacts'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.risk
+      - urn:intuitem:risk:function:doc-pol:doc.risk_register
       translations:
         fr:
           description: "Les menaces, les vuln\xE9rabilit\xE9s, les probabilit\xE9\
@@ -2517,6 +2665,9 @@ objects:
 
         Ex5: Communicate planned risk responses to affected stakeholders in priority
         order'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.risk
+      - urn:intuitem:risk:function:doc-pol:doc.risk_register
       translations:
         fr:
           description: "Les r\xE9ponses aux risques sont choisies, prioris\xE9es,\
@@ -2564,6 +2715,11 @@ objects:
 
         Ex4: Periodically review risks that were accepted based upon planned future
         actions or milestones'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.change_mgmt
+      - urn:intuitem:risk:function:doc-pol:proc.change_mgmt
+      - urn:intuitem:risk:function:doc-pol:proc.exception_mgmt
+      - urn:intuitem:risk:function:doc-pol:doc.exception_register
       translations:
         fr:
           description: "Les changements et les exceptions sont g\xE9r\xE9s, \xE9valu\xE9\
@@ -2606,6 +2762,9 @@ objects:
         analyzing the impact of, and responding to cybersecurity threat, vulnerability,
         or incident disclosures by suppliers, customers, partners, and government
         cybersecurity organizations'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.vuln_disclosure
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
       translations:
         fr:
           description: "Les processus de r\xE9ception, d\u2019analyse et de r\xE9\
@@ -2641,6 +2800,10 @@ objects:
         products and services prior to acquisition and use
 
         3rd: 3rd Party Risk'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.tprm_assessment
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
+      - urn:intuitem:risk:function:doc-pol:proc.sbom
       translations:
         fr:
           description: "L\u2019authenticit\xE9 et l\u2019int\xE9grit\xE9 du mat\xE9\
@@ -2663,6 +2826,9 @@ objects:
       description: Critical suppliers are assessed prior to acquisition
       annotation: 'Ex1: Conduct supplier risk assessments against business and applicable
         cybersecurity requirements, including the supply chain'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.tprm_assessment
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
       translations:
         fr:
           description: "Les fournisseurs critiques sont \xE9valu\xE9s avant l\u2019\
@@ -2711,6 +2877,10 @@ objects:
 
         Ex3: Constantly evaluate compliance with selected cybersecurity requirements
         through automated means'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.audit
+      - urn:intuitem:risk:function:doc-pol:doc.nc_log
+      - urn:intuitem:risk:function:doc-pol:doc.mgmt_review
       translations:
         fr:
           description: "Les am\xE9liorations sont identifi\xE9es \xE0 partir des \xE9\
@@ -2762,6 +2932,10 @@ objects:
 
         Ex6: Collect and analyze performance metrics using security tools and services
         to inform improvements to the cybersecurity program'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.pentest
+      - urn:intuitem:risk:function:doc-pol:proc.bcp_exercise
+      - urn:intuitem:risk:function:doc-pol:proc.ir_exercise
       translations:
         fr:
           description: "Les am\xE9liorations sont identifi\xE9es \xE0 partir de tests\
@@ -2826,6 +3000,9 @@ objects:
         take lessons learned into account
 
         Ex3: Use metrics to assess operational cybersecurity performance over time'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.nc_log
+      - urn:intuitem:risk:function:doc-pol:pol.audit
       translations:
         fr:
           description: "Les am\xE9liorations sont identifi\xE9es \xE0 partir de l\u2019\
@@ -2871,6 +3048,10 @@ objects:
 
         Ex5: Review and update all cybersecurity plans annually or when a need for
         significant improvements is identified'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.incident
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:pol.bcp
       translations:
         fr:
           description: "Les plans de r\xE9ponse aux incidents et d\u2019autres plans\
@@ -2969,6 +3150,9 @@ objects:
 
         Ex4: Physically label authorized hardware with an identifier for inventory
         and servicing purposes'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:tech.iam
       translations:
         fr:
           description: "Les identit\xE9s et les informations d\u2019identification\
@@ -3014,6 +3198,9 @@ objects:
         identity credentials (e.g., passport, visa, driver''s license)
 
         Ex2: Issue a different credential for each person (i.e., no credential sharing)'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:tech.iam
       translations:
         fr:
           description: "Les identit\xE9s sont v\xE9rifi\xE9es et li\xE9es aux informations\
@@ -3050,6 +3237,10 @@ objects:
 
         Ex4: Ensure that authorized personnel can access accounts essential for protecting
         safety under emergency conditions'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:tech.iam
+      - urn:intuitem:risk:function:doc-pol:tech.mfa
       translations:
         fr:
           description: "Les utilisateurs, les services et le mat\xE9riel sont authentifi\xE9\
@@ -3089,6 +3280,10 @@ objects:
         and follow all guidance for the generation (e.g., data models, metadata),
         protection (e.g., digital signing, encryption), and verification (e.g., signature
         validation) of identity assertions'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:tech.iam
+      - urn:intuitem:risk:function:doc-pol:tech.mfa
       translations:
         fr:
           description: "Les affirmations d\u2019identit\xE9 sont prot\xE9g\xE9es,\
@@ -3140,6 +3335,11 @@ objects:
 
         Ex4: Periodically review the privileges associated with critical business
         functions to confirm proper separation of duties'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:pol.seg_duty
+      - urn:intuitem:risk:function:doc-pol:proc.rbac
+      - urn:intuitem:risk:function:doc-pol:proc.recertification
       translations:
         fr:
           description: "Les autorisations d\u2019acc\xE8s, les droits et les autorisations\
@@ -3192,6 +3392,10 @@ objects:
 
         Ex3: Escort guests, vendors, and other third parties within areas that contain
         business-critical assets'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:phys.secure_area
+      - urn:intuitem:risk:function:doc-pol:phys.visitor_mgmt
+      - urn:intuitem:risk:function:doc-pol:pol.physical
       translations:
         fr:
           description: "L\u2019acc\xE8s physique aux actifs est g\xE9r\xE9, surveill\xE9\
@@ -3261,6 +3465,10 @@ objects:
 
         Ex5: Require annual refreshers to reinforce existing practices and introduce
         new practices'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.educ
+      - urn:intuitem:risk:function:doc-pol:doc.educ_plan
+      - urn:intuitem:risk:function:doc-pol:doc.educ_register
       translations:
         fr:
           description: "Le personnel est sensibilis\xE9 et form\xE9 afin qu\u2019\
@@ -3327,6 +3535,10 @@ objects:
 
         Ex4: Require annual refreshers to reinforce existing practices and introduce
         new practices'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.educ
+      - urn:intuitem:risk:function:doc-pol:doc.educ_plan
+      - urn:intuitem:risk:function:doc-pol:doc.competency
       translations:
         fr:
           description: "Les personnes occupant des postes sp\xE9cialis\xE9s re\xE7\
@@ -3404,6 +3616,10 @@ objects:
 
         Ex5: Physically secure removable media containing unencrypted sensitive information,
         such as within locked offices or file cabinets'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.crypto
+      - urn:intuitem:risk:function:doc-pol:tech.disk_encryption
+      - urn:intuitem:risk:function:doc-pol:tech.file_encryption
       translations:
         fr:
           description: "La confidentialit\xE9, l\u2019int\xE9grit\xE9 et la disponibilit\xE9\
@@ -3455,6 +3671,10 @@ objects:
 
         Ex4: Prevent reuse of sensitive data from production environments (e.g., customer
         records) in development, testing, and other non-production environments'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.crypto
+      - urn:intuitem:risk:function:doc-pol:pol.transfer
+      - urn:intuitem:risk:function:doc-pol:tech.vpn
       translations:
         fr:
           description: "La confidentialit\xE9, l\u2019int\xE9grit\xE9 et la disponibilit\xE9\
@@ -3500,6 +3720,9 @@ objects:
 
         Ex2: Protect data in use from access by other users and processes of the same
         platform'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.crypto
+      - urn:intuitem:risk:function:doc-pol:tech.dlp
       translations:
         fr:
           description: "La confidentialit\xE9, l\u2019int\xE9grit\xE9 et la disponibilit\xE9\
@@ -3534,6 +3757,10 @@ objects:
 
         Ex4: Enforce geographic separation and geolocation restrictions for data backup
         storage'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.backup
+      - urn:intuitem:risk:function:doc-pol:tech.immutable_backup
+      - urn:intuitem:risk:function:doc-pol:proc.bcp_exercise
       translations:
         fr:
           description: "Les sauvegardes des donn\xE9es sont cr\xE9\xE9es, prot\xE9\
@@ -3599,6 +3826,10 @@ objects:
         cybersecurity when installing or upgrading software
 
         Ex3: Monitor implemented software for deviations from approved baselines'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
+      - urn:intuitem:risk:function:doc-pol:proc.change_mgmt
       translations:
         fr:
           description: "Les pratiques de gestion de la configuration sont \xE9tablies\
@@ -3650,6 +3881,10 @@ objects:
 
         Ex6: Define and implement plans for software and service end-of-life maintenance
         support and obsolescence'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.software_lifecycle
+      - urn:intuitem:risk:function:doc-pol:proc.update
+      - urn:intuitem:risk:function:doc-pol:pol.maintenance
       translations:
         fr:
           description: "Le logiciel est maintenu, remplac\xE9 et supprim\xE9 en fonction\
@@ -3700,6 +3935,10 @@ objects:
         and obsolescence
 
         Ex3: Perform hardware disposal in a secure, responsible, and auditable manner'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.maintenance
+      - urn:intuitem:risk:function:doc-pol:proc.disposal
+      - urn:intuitem:risk:function:doc-pol:pol.asset
       translations:
         fr:
           description: "Le mat\xE9riel est entretenu, remplac\xE9 et retir\xE9 en\
@@ -3737,6 +3976,10 @@ objects:
         logging infrastructure systems and services
 
         Ex3: Configure log generators to record the data needed by zero-trust architectures'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.logging
+      - urn:intuitem:risk:function:doc-pol:pol.monitor
+      - urn:intuitem:risk:function:doc-pol:tech.access_log
       translations:
         fr:
           description: "Les enregistrements de journaux sont g\xE9n\xE9r\xE9s et mis\
@@ -3778,6 +4021,9 @@ objects:
 
         Ex4: Configure platforms to allow the installation of organization-approved
         software only'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.app_control
+      - urn:intuitem:risk:function:doc-pol:tech.app_control
       translations:
         fr:
           description: "L\u2019installation et l\u2019ex\xE9cution de logiciels non\
@@ -3819,6 +4065,10 @@ objects:
 
         Ex3: Maintain the software used in production environments, and securely dispose
         of software once it is no longer needed'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.secdev
+      - urn:intuitem:risk:function:doc-pol:proc.sdlc
+      - urn:intuitem:risk:function:doc-pol:tech.sast_dast
       translations:
         fr:
           description: "Les pratiques de d\xE9veloppement de logiciels s\xE9curis\xE9\
@@ -3887,6 +4137,11 @@ objects:
 
         Ex4: Check the cyber health of endpoints before allowing them to access and
         use production resources'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.network
+      - urn:intuitem:risk:function:doc-pol:tech.network_firewall
+      - urn:intuitem:risk:function:doc-pol:tech.vlan
+      - urn:intuitem:risk:function:doc-pol:tech.microsegmentation
       translations:
         fr:
           description: "Les r\xE9seaux et les environnements sont prot\xE9g\xE9s contre\
@@ -3936,6 +4191,10 @@ objects:
         Ex2: Include protection from environmental threats and provisions for adequate
         operating infrastructure in requirements for service providers that operate
         systems on the organization''s behalf'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.physical
+      - urn:intuitem:risk:function:doc-pol:phys.power_env
+      - urn:intuitem:risk:function:doc-pol:phys.secure_area
       translations:
         fr:
           description: "Les actifs technologiques de l\u2019organisation sont prot\xE9\
@@ -3973,6 +4232,9 @@ objects:
 
         Ex3: Use high-availability components like redundant storage and power supplies
         to improve system reliability'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.bcp
+      - urn:intuitem:risk:function:doc-pol:tech.dr_site
       translations:
         fr:
           description: "Les m\xE9canismes sont mis en \u0153uvre pour satisfaire aux\
@@ -4001,6 +4263,8 @@ objects:
         and other resources
 
         Ex2: Forecast future needs, and scale resources accordingly'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.capacity_mgmt
       translations:
         fr:
           description: "Les capacit\xE9 de ressources ad\xE9quate pour assurer la\
@@ -4068,6 +4332,11 @@ objects:
         for zero trust purposes
 
         1st: 1st Party Risk'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+      - urn:intuitem:risk:function:doc-pol:tech.ids
+      - urn:intuitem:risk:function:doc-pol:pol.monitor
+      - urn:intuitem:risk:function:doc-pol:proc.logging
       translations:
         fr:
           description: "Les r\xE9seaux et services r\xE9seau sont surveill\xE9s pour\
@@ -4114,6 +4383,9 @@ objects:
         guards
 
         1st: 1st Party Risk'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:phys.cctv
+      - urn:intuitem:risk:function:doc-pol:phys.secure_area
       translations:
         fr:
           description: "L\u2019environnement physique est surveill\xE9 pour d\xE9\
@@ -4158,6 +4430,10 @@ objects:
         any usage
 
         1st: 1st Party Risk'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.access_log
+      - urn:intuitem:risk:function:doc-pol:tech.dlp
+      - urn:intuitem:risk:function:doc-pol:proc.insider_threat
       translations:
         fr:
           description: "L\u2019activit\xE9 du personnel et l\u2019utilisation de la\
@@ -4194,6 +4470,10 @@ objects:
         and other service providers for deviations from expected behavior
 
         3rd: 3rd Party Risk'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+      - urn:intuitem:risk:function:doc-pol:proc.tprm_assessment
       translations:
         fr:
           description: "Les activit\xE9s et services des prestataires de services\
@@ -4237,6 +4517,10 @@ objects:
         and redirect the endpoints to a remediation environment before access is authorized
 
         1st: 1st Party Risk'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.edr
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+      - urn:intuitem:risk:function:doc-pol:tech.cmdb
       translations:
         fr:
           description: "Le mat\xE9riel informatique et les logiciels, les environnements\
@@ -4315,6 +4599,10 @@ objects:
         Ex4: Use log analysis tools to generate reports on their findings
 
         1st: 1st Party Risk'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+      - urn:intuitem:risk:function:doc-pol:proc.threat_hunt
+      - urn:intuitem:risk:function:doc-pol:pol.monitor
       translations:
         fr:
           description: "Les \xE9v\xE9nements potentiellement ind\xE9sirables sont\
@@ -4361,6 +4649,9 @@ objects:
         sources
 
         1st: 1st Party Risk'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+      - urn:intuitem:risk:function:doc-pol:proc.logging
       translations:
         fr:
           description: "Les informations sont corr\xE9l\xE9es \xE0 partir de sources\
@@ -4393,6 +4684,9 @@ objects:
         Ex2: A person creates their own estimates of impact and scope
 
         1st: 1st Party Risk'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:tech.siem
       translations:
         fr:
           description: "L\u2019impact et la port\xE9e estim\xE9s des \xE9v\xE9nements\
@@ -4429,6 +4723,10 @@ objects:
         when technical staff discover indicators of compromise
 
         1st: 1st Party Risk'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:pol.monitor
       translations:
         fr:
           description: "Les informations sur les \xE9v\xE9nements ind\xE9sirables\
@@ -4474,6 +4772,10 @@ objects:
         technologies from suppliers, vendors, and third-party security advisories
 
         1st: 1st Party Risk'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.threat_intel
+      - urn:intuitem:risk:function:doc-pol:proc.threat_intel
+      - urn:intuitem:risk:function:doc-pol:tech.siem
       translations:
         fr:
           description: "Les renseignements sur les cybermenaces et d\u2019autres informations\
@@ -4510,6 +4812,9 @@ objects:
         Ex2: Take known false positives into account when applying incident criteria
 
         1st: 1st Party Risk'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.incident
+      - urn:intuitem:risk:function:doc-pol:proc.incident
       translations:
         fr:
           description: "Les incidents sont d\xE9clar\xE9s lorsque les \xE9v\xE9nements\
@@ -4575,6 +4880,10 @@ objects:
         incident response (for example, business continuity and disaster recovery)
 
         3rd: 3rd Party Risk'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.incident
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
       translations:
         fr:
           description: "Le plan de r\xE9ponse aux incidents est ex\xE9cut\xE9 en coordination\
@@ -4609,6 +4918,9 @@ objects:
         and necessitate incident response activities
 
         Ex2: Apply criteria to estimate the severity of an incident'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:doc.incident_register
       translations:
         fr:
           description: "Les rapports d\u2019incidents sont tri\xE9s et valid\xE9s"
@@ -4640,6 +4952,9 @@ objects:
         Ex3: Select incident response strategies for active incidents by balancing
         the need to quickly recover from an incident with the need to observe the
         attacker or conduct a more thorough investigation'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:pol.incident
       translations:
         fr:
           description: "Les incidents sont cat\xE9goris\xE9s et prioris\xE9s"
@@ -4673,6 +4988,9 @@ objects:
 
         Ex2: Coordinate incident escalation or elevation with designated internal
         and external stakeholders'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:proc.crisis_mgmt
       translations:
         fr:
           description: "Les incidents sont escalad\xE9s ou augment\xE9s selon les\
@@ -4701,6 +5019,9 @@ objects:
 
         Ex2: Take the possible operational disruption of incident recovery activities
         into account'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:proc.drp
       translations:
         fr:
           description: "Les crit\xE8res d\u2019initiation de la reprise apr\xE8s incident\
@@ -4757,6 +5078,10 @@ objects:
 
         Ex4: Check any cyber deception technology for additional information on attacker
         behavior'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:proc.forensics
+      - urn:intuitem:risk:function:doc-pol:proc.post_incident
       translations:
         fr:
           description: "Une analyse est effectu\xE9e pour \xE9tablir ce qui s\u2019\
@@ -4797,6 +5122,8 @@ objects:
         Ex2: Require the incident lead to document the incident in detail and be responsible
         for preserving the integrity of the documentation and the sources of all information
         being reported'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.forensics
       translations:
         fr:
           description: "Les actions effectu\xE9es au cours d\u2019une enqu\xEAte sont\
@@ -4832,6 +5159,9 @@ objects:
         Ex1: Collect, preserve, and safeguard the integrity of all pertinent incident
         data and metadata (e.g., data source, date/time of collection) based on evidence
         preservation and chain-of-custody procedures'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.forensics
+      - urn:intuitem:risk:function:doc-pol:proc.logging
       translations:
         fr:
           description: "Les donn\xE9es et m\xE9tadonn\xE9es relatives aux incidents\
@@ -4862,6 +5192,9 @@ objects:
 
         Ex2: Automatically run tools on targets to look for indicators of compromise
         and evidence of persistence'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:tech.siem
       translations:
         fr:
           description: "L\u2019ampleur d\u2019un incident est estim\xE9e et valid\xE9\
@@ -4914,6 +5247,10 @@ objects:
 
         Ex3: Notify law enforcement agencies and regulatory bodies of incidents based
         on criteria in the incident response plan and management approval'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:doc.com
+      - urn:intuitem:risk:function:doc-pol:proc.breach_notif
       translations:
         fr:
           description: "Les parties prenantes internes et externes sont inform\xE9\
@@ -4966,6 +5303,9 @@ objects:
 
         Ex6: Coordinate crisis communication methods between the organization and
         its critical suppliers'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:doc.com
       translations:
         fr:
           description: "Les informations sont partag\xE9es avec des parties prenantes\
@@ -5036,6 +5376,10 @@ objects:
 
         Ex4: Automatically transfer compromised endpoints to a remediation virtual
         local area network (VLAN)'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:tech.edr
+      - urn:intuitem:risk:function:doc-pol:tech.network_firewall
       translations:
         fr:
           description: Les incidents sont contenus
@@ -5083,6 +5427,9 @@ objects:
 
         Ex3: Allow a third party (e.g., managed security service provider) to perform
         eradication actions on behalf of the organization'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:tech.edr
       translations:
         fr:
           description: "Les incidents sont \xE9radiqu\xE9s"
@@ -5155,6 +5502,10 @@ objects:
         Ex2: Make all individuals with recovery responsibilities aware of the plans
         for recovery and the authorizations required to implement each aspect of the
         plans'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.drp
+      - urn:intuitem:risk:function:doc-pol:pol.bcp
+      - urn:intuitem:risk:function:doc-pol:proc.incident
       translations:
         fr:
           description: "La partie r\xE9cup\xE9ration du plan de r\xE9ponse aux incidents\
@@ -5187,6 +5538,9 @@ objects:
 
         Ex2: Change planned recovery actions based on a reassessment of organizational
         needs and resources'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.drp
+      - urn:intuitem:risk:function:doc-pol:pol.bcp
       translations:
         fr:
           description: "Les actions de r\xE9cup\xE9ration sont s\xE9lectionn\xE9es,\
@@ -5215,6 +5569,10 @@ objects:
 
         Ex1: Check restoration assets for indicators of compromise, file corruption,
         and other integrity issues before use'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.backup
+      - urn:intuitem:risk:function:doc-pol:tech.immutable_backup
+      - urn:intuitem:risk:function:doc-pol:proc.drp
       translations:
         fr:
           description: "L\u2019int\xE9grit\xE9 des sauvegardes et autres actifs de\
@@ -5247,6 +5605,9 @@ objects:
 
         Ex3: Monitor the performance of restored systems to verify the adequacy of
         the restoration'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.bcp
+      - urn:intuitem:risk:function:doc-pol:doc.bia
       translations:
         fr:
           description: "Les fonctions critiques de la mission et la gestion des risques\
@@ -5286,6 +5647,9 @@ objects:
 
         Ex2: Verify the correctness and adequacy of the restoration actions taken
         before putting a restored system online'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.drp
+      - urn:intuitem:risk:function:doc-pol:pol.backup
       translations:
         fr:
           description: "L\u2019int\xE9grit\xE9 des actifs restaur\xE9s est v\xE9rifi\xE9\
@@ -5317,6 +5681,9 @@ objects:
         response and recovery actions taken, and lessons learned
 
         Ex2: Declare the end of incident recovery once the criteria are met'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.drp
+      - urn:intuitem:risk:function:doc-pol:proc.post_incident
       translations:
         fr:
           description: "La fin de la reprise apr\xE8s incident est d\xE9clar\xE9e\
@@ -5375,6 +5742,10 @@ objects:
 
         Ex4: Coordinate crisis communication between the organization and its critical
         suppliers'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.com
+      - urn:intuitem:risk:function:doc-pol:proc.crisis_mgmt
+      - urn:intuitem:risk:function:doc-pol:proc.incident
       translations:
         fr:
           description: "Les activit\xE9s de r\xE9cup\xE9ration et les progr\xE8s r\xE9\
@@ -5419,6 +5790,9 @@ objects:
 
         Ex2: Explain the steps being taken to recover from the incident and to prevent
         a recurrence'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.com
+      - urn:intuitem:risk:function:doc-pol:proc.crisis_mgmt
       translations:
         fr:
           description: "Les mises \xE0 jour publiques sur la r\xE9cup\xE9ration apr\xE8\

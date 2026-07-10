@@ -4,17 +4,23 @@ ref_id: risk-matrix-5x5-iso27005
 name: 5x5 ISO-27005
 description: 5x5 matrix from ISO 27005 Annex A
 copyright: ISO
-version: 4
+version: 6
 publication_date: 2025-02-21
 provider: intuitem
 packager: intuitem
 translations:
   fr:
     name: Matrice 5x5 ISO-27005
-    description: "Matrice 5x5 d\xE9crite dans la norme ISO-27005 annexe A"
+    description: "Matrice 5x5 décrite dans la norme ISO-27005 annexe A"
   it:
     name: Matrice 5x5 ISO-27005
     description: Matrice 5x5 descritta nella norma ISO-27005 allegato A
+  de:
+    name: 5x5-Risikomatrix nach ISO 27005
+    description: 5x5-Matrix gemäß ISO 27005, Anhang A
+  es:
+    name: Matriz 5x5 ISO-27005
+    description: Matriz 5x5 descrita en la norma ISO-27005 anexo A
 objects:
   risk_matrix:
   - urn: urn:intuitem:risk:matrix:5x5-iso27005
@@ -29,21 +35,33 @@ objects:
       translations:
         fr:
           name: 1 - improbable
-          description: "La vraisemblance du sc\xE9nario de risque est tr\xE8s faible"
+          description: "La vraisemblance du scénario de risque est très faible"
         it:
           name: 1 - improbabile
-          description: "La verosimiglianza dello scenario di rischio \xE8 molto bassa"
+          description: "La verosimiglianza dello scenario di rischio è molto bassa"
+        de:
+          name: 1 - unwahrscheinlich
+          description: Die Eintrittswahrscheinlichkeit des Risikoszenarios ist sehr gering.
+        es:
+          name: 1 - Improbable
+          description: "La probabilidad del escenario de riesgo es muy baja"          
     - id: 1
       abbreviation: '2'
       name: 2 - rather unlikely
       description: The likelihood of the risk scenario is low
       translations:
         fr:
-          name: "2 - plut\xF4t improbable"
-          description: "La vraisemblance du sc\xE9nario de risque est faible"
+          name: "2 - plutôt improbable"
+          description: "La vraisemblance du scénario de risque est faible"
         it:
           name: 2 - piuttosto improbabile
-          description: "La verosimiglianza dello scenario di rischio \xE8 bassa"
+          description: "La verosimiglianza dello scenario di rischio è bassa"
+        de:
+          name: 2 - eher unwahrscheinlich
+          description: Die Eintrittswahrscheinlichkeit des Risikoszenarios ist gering.
+        es:
+          name: 2 - Poco Probable
+          description: "La probabilidad del escenario de riesgo es baja"
     - id: 2
       abbreviation: '3'
       name: 3 - likely
@@ -51,21 +69,33 @@ objects:
       translations:
         fr:
           name: 3 - probable
-          description: "La vraisemblance du sc\xE9nario de risque est significative"
+          description: "La vraisemblance du scénario de risque est significative"
         it:
           name: 3 - probabile
-          description: "La verosimiglianza dello scenario di rischio \xE8 significativa"
+          description: "La verosimiglianza dello scenario di rischio è significativa"
+        de:
+          name: 3 - wahrscheinlich
+          description: Die Eintrittswahrscheinlichkeit des Risikoszenarios ist signifikant.
+        es:
+          name: 3 - Probable
+          description: "La probabilidad del escenario de riesgo es significativa"          
     - id: 3
       abbreviation: '4'
       name: 4 - very likely
       description: The likelihood of the risk scenario is high
       translations:
         fr:
-          name: "4 - tr\xE8s probable"
-          description: "La vraisemblance du sc\xE9nario de risque est \xE9lev\xE9e"
+          name: "4 - très probable"
+          description: "La vraisemblance du scénario de risque est élevée"
         it:
           name: 4 - molto probabile
-          description: "La verosimiglianza dello scenario di rischio \xE8 alta"
+          description: "La verosimiglianza dello scenario di rischio è alta"
+        de:
+          name: 4 - sehr wahrscheinlich
+          description: Die Eintrittswahrscheinlichkeit des Risikoszenarios ist hoch.
+        es:
+          name: 4 - Muy Probable
+          description: "La probabilidad del escenario de riesgo es alta"          
     - id: 4
       abbreviation: '5'
       name: 5 - almost certain
@@ -73,11 +103,16 @@ objects:
       translations:
         fr:
           name: 5 - presque certain
-          description: "La vraisemblance du sc\xE9nario de risque est tr\xE8s \xE9\
-            lev\xE9e"
+          description: "La vraisemblance du scénario de risque est très élevée"
         it:
           name: 5 - quasi certo
-          description: "La verosimiglianza dello scenario di rischio \xE8 molto alta"
+          description: "La verosimiglianza dello scenario di rischio è molto alta"
+        de:
+          name: 5 - nahezu sicher
+          description: Die Eintrittswahrscheinlichkeit des Risikoszenarios ist sehr hoch.
+        es:
+          name: 5 - Casi Seguro
+          description: "La probabilidad del escenario de riesgo es muy alta"          
     impact:
     - id: 0
       abbreviation: '1'
@@ -86,10 +121,16 @@ objects:
       translations:
         fr:
           name: 1 - mineur
-          description: "Cons\xE9quences n\xE9gligeables pour l'oraganisation"
+          description: "Conséquences négligeables pour l'organisation"
         it:
           name: 1 - minore
           description: Conseguenze trascurabili per l'organizzazione
+        de:
+          name: 1 - geringfügig
+          description: Vernachlässigbare Auswirkungen auf die Organisation.
+        es:
+          name: 1 - Leve
+          description: "Consecuencias insignificantes para la organizaci\xf3n"          
     - id: 1
       abbreviation: '2'
       name: 2 - significant
@@ -97,10 +138,16 @@ objects:
       translations:
         fr:
           name: 2 - significatif
-          description: "Cons\xE9quences significatives mais limit\xE9es pour l'organisation"
+          description: "Conséquences significatives mais limitées pour l'organisation"
         it:
           name: 2 - significativo
           description: Conseguenze significative ma limitate per l'organizzazione
+        de:
+          name: 2 - bedeutend
+          description: Signifikante, jedoch begrenzte Auswirkungen auf die Organisation.
+        es:
+          name: 2 - Significativo
+          description: "Consecuencias significativas pero limitadas para la organizaci\xf3n"          
     - id: 2
       abbreviation: '3'
       name: 3 - serious
@@ -108,10 +155,16 @@ objects:
       translations:
         fr:
           name: 3 - serieux
-          description: "Cons\xE9quences substantielles pour l'organisation"
+          description: "Conséquences substantielles pour l'organisation"
         it:
           name: 3 - serio
           description: Conseguenze sostanziali per l'organizzazione
+        de:
+          name: 3 - erheblich
+          description: Erhebliche Auswirkungen auf die Organisation.
+        es:
+          name: 3 - Grave
+          description: "Consecuencias sustanciales para la organizaci\xf3n"          
     - id: 3
       abbreviation: '4'
       name: 4 - critical
@@ -119,10 +172,16 @@ objects:
       translations:
         fr:
           name: 4 - critique
-          description: "Cons\xE9quences d\xE9sastreuses pour l'organisation"
+          description: "Conséquences désastreuses pour l'organisation"
         it:
           name: 4 - critico
           description: Conseguenze disastrose per l'organizzazione
+        de:
+          name: 4 - kritisch
+          description: Desaströse Auswirkungen auf die Organisation.
+        es:
+          name: "4 - Cr\xedtico"
+          description: "Consecuencias desastrosas para la organizaci\xf3n"          
     - id: 4
       abbreviation: '5'
       name: 5 - catastrophic
@@ -130,11 +189,16 @@ objects:
       translations:
         fr:
           name: 5 - catastrophique
-          description: "Cons\xE9quences sectorielles ou r\xE9glementaires au-del\xE0\
-            \ de l\u2019organisation"
+          description: "Conséquences sectorielles ou réglementaires au-delà de l’organisation"
         it:
           name: 5 - catastrofico
           description: Conseguenze settoriali o regolamentari oltre l'organizzazione
+        de:
+          name: 5 - katastrophal
+          description: Sektorale oder regulatorische Auswirkungen über die Organisation hinaus.
+        es:
+          name: "5 - Catastr\xf3fico"
+          description: "Consecuencias sectoriales o regulatorias m\xe1s all\xe1 de la organizaci\xf3n"          
     risk:
     - id: 0
       abbreviation: '1'
@@ -142,11 +206,17 @@ objects:
       description: very low - acceptable risk
       translations:
         fr:
-          name: "1 - tr\xE8s faible"
-          description: "tr\xE8s faible - risque acceptable"
+          name: "1 - très faible"
+          description: "très faible - risque acceptable"
         it:
           name: 1 - molto basso
           description: molto basso - rischio accettabile
+        de:
+          name: 1 - sehr gering
+          description: Sehr geringes, akzeptables Risiko.
+        es:
+          name: 1 - Muy Bajo
+          description: Muy bajo - Riesgo aceptable          
       hexcolor: '#D3FF4E'
     - id: 1
       abbreviation: '2'
@@ -159,6 +229,12 @@ objects:
         it:
           name: 2 - basso
           description: basso - rischio accettabile
+        de:
+          name: 2 - gering
+          description: Geringes, akzeptables Risiko.
+        es:
+          name: 2 - Bajo
+          description: Bajo - Riesgo aceptable          
       hexcolor: '#02A45A'
     - id: 2
       abbreviation: '3'
@@ -171,6 +247,12 @@ objects:
         it:
           name: 3 - medio
           description: medio - rischio tollerabile
+        de:
+          name: 3 - mittel
+          description: Tolerierbares Risiko.
+        es:
+          name: 3 - Medio
+          description: Medio - Riesgo tolerable          
       hexcolor: '#FFA600'
     - id: 3
       abbreviation: '4'
@@ -178,11 +260,17 @@ objects:
       description: high - unacceptable risk
       translations:
         fr:
-          name: "4 - \xE9lev\xE9"
-          description: "\xE9lev\xE9 - risque inacceptable"
+          name: "4 - élevé"
+          description: "élevé - risque inacceptable"
         it:
           name: 4 - alto
           description: alto - rischio inaccettabile
+        de:
+          name: 4 - hoch
+          description: Hohes, inakzeptables Risiko.
+        es:
+          name: 4 - Alto
+          description: Alto - Riesgo inaceptable          
       hexcolor: '#FF1A00'
     - id: 4
       abbreviation: '5'
@@ -190,11 +278,17 @@ objects:
       description: very high - unacceptable risk
       translations:
         fr:
-          name: "5 - tr\xE8s \xE9lev\xE9"
-          description: "tr\xE8s \xE9lev\xE9 - risque inacceptable"
+          name: "5 - très élevé"
+          description: "très élevé - risque inacceptable"
         it:
           name: 5 - molto alto
           description: molto alto - rischio inaccettabile
+        de:
+          name: 5 - sehr hoch
+          description: Sehr hohes, inakzeptables Risiko.
+        es:
+          name: 5 - Muy Alto
+          description: Muy Alto - Riesgo inaceptable          
       hexcolor: '#C00000'
     grid:
     - - 0
@@ -225,7 +319,13 @@ objects:
     translations:
       fr:
         name: Matrice 5x5 ISO-27005
-        description: "Matrice 5x5 d\xE9crite dans la norme ISO-27005 annexe A"
+        description: "Matrice 5x5 décrite dans la norme ISO-27005 annexe A"
       it:
         name: Matrice 5x5 ISO-27005
         description: Matrice 5x5 descritta nella norma ISO-27005 allegato A
+      de:
+        name: 5x5-Risikomatrix nach ISO 27005
+        description: 5x5-Matrix gemäß ISO 27005, Anhang A
+      es:
+        name: Matriz 5x5 ISO-27005
+        description: Matriz 5x5 descrita en la norma ISO-27005 anexo A        

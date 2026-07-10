@@ -107,7 +107,7 @@ DORA_SENSITIVENESS_CHOICES = [
     ("eba_ZZ:x793", "High"),
 ]
 
-DORA_FUNCTION_CRITICALITY_CHOICES = [
+DORA_YES_NO_ASSESSMENT_CHOICES = [
     ("eba_BT:x28", "Yes"),
     ("eba_BT:x29", "No"),
     ("eba_BT:x21", "Assessment not performed"),
@@ -150,6 +150,7 @@ DORA_REINTEGRATION_POSSIBILITY_CHOICES = [
     ("eba_ZZ:x798", "Easy"),
     ("eba_ZZ:x966", "Difficult"),
     ("eba_ZZ:x967", "Highly complex"),
+    ("eba_ZZ:x0", "Not applicable"),
 ]
 
 DORA_LICENSED_ACTIVITY_CHOICES = [
@@ -405,6 +406,9 @@ DORA_LICENSED_ACTIVITY_CHOICES = [
         "investment advice concerning one or more of the instruments listed in Annex I, Section C to Directive 2004/39/EC",
     ),
     ("eba_TA:x275", "Ancillary services"),
+    ("eba_TA:x276", "supporting function"),
+    ("eba_TA:qx277", "Non-life reinsurance activities"),
+    ("eba_TA:qx278", "Life-reinsurance activities"),
     ("eba_TA:x104", "Foreign exchange services"),
     ("eba_TA:x133", "Reception and transmission of orders"),
     ("eba_TA:x134", "Execution of orders on behalf of clients"),
@@ -426,3 +430,306 @@ DORA_LICENSED_ACTIVITY_CHOICES = [
     ("eba_TA:x147", "Services related to underwriting"),
     ("eba_TA:x162", "Taking deposits and other repayable funds"),
 ]
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# DORA Incident Report (IR) constants — based on DORA IR Schema v1.2.1
+# ──────────────────────────────────────────────────────────────────────────────
+
+DORA_IR_SUBMISSION_CHOICES = [
+    ("initial_notification", "Initial notification"),
+    ("intermediate_report", "Intermediate report"),
+    ("final_report", "Final report"),
+    (
+        "major_incident_reclassified_as_non-major",
+        "Major incident reclassified as non-major",
+    ),
+]
+
+DORA_IR_CURRENCY_CHOICES = [
+    ("EUR", "EUR"),
+    ("BGN", "BGN"),
+    ("CZK", "CZK"),
+    ("DKK", "DKK"),
+    ("HUF", "HUF"),
+    ("PLN", "PLN"),
+    ("RON", "RON"),
+    ("ISK", "ISK"),
+    ("CHF", "CHF"),
+    ("NOK", "NOK"),
+    ("SEK", "SEK"),
+]
+
+DORA_IR_INCIDENT_DISCOVERY_CHOICES = [
+    ("it_security", "IT security"),
+    ("staff", "Staff"),
+    ("internal_audit", "Internal audit"),
+    ("external_audit", "External audit"),
+    ("clients", "Clients"),
+    ("financial_counterparts", "Financial counterparts"),
+    ("third-party_provider", "Third-party provider"),
+    ("attacker", "Attacker"),
+    ("monitoring_systems", "Monitoring systems"),
+    ("authority_agency_law_enforcement_body", "Authority/Agency/Law enforcement body"),
+    ("other", "Other"),
+]
+
+DORA_IR_INCIDENT_CLASSIFICATION_CHOICES = [
+    ("cybersecurity-related", "Cybersecurity-related"),
+    ("process_failure", "Process failure"),
+    ("system_failure", "System failure"),
+    ("external_event", "External event"),
+    ("payment-related", "Payment-related"),
+    ("other", "Other"),
+]
+
+DORA_IR_THREAT_TECHNIQUES_CHOICES = [
+    ("social_engineering_including_phishing", "Social engineering including phishing"),
+    ("ddos", "DDoS"),
+    ("identity_theft", "Identity theft"),
+    (
+        "data_encryption_for_impact_including_ransomware",
+        "Data encryption for impact including ransomware",
+    ),
+    ("resource_hijacking", "Resource hijacking"),
+    (
+        "data_exfiltration_and_manipulation_including_identity_theft",
+        "Data exfiltration and manipulation including identity theft",
+    ),
+    ("data_destruction", "Data destruction"),
+    ("defacement", "Defacement"),
+    ("supply-chain_attack", "Supply-chain attack"),
+    ("other", "Other"),
+]
+
+DORA_IR_ROOT_CAUSE_HL_CHOICES = [
+    ("malicious_actions", "Malicious actions"),
+    ("process_failure", "Process failure"),
+    ("system_failure_malfunction", "System failure/malfunction"),
+    ("human_error", "Human error"),
+    ("external_event", "External event"),
+]
+
+DORA_IR_ROOT_CAUSE_DETAILED_CHOICES = [
+    (
+        "malicious_actions_deliberate_internal_actions",
+        "Malicious actions — Deliberate internal actions",
+    ),
+    (
+        "malicious_actions_deliberate_physical_damage_manipulation_theft",
+        "Malicious actions — Deliberate physical damage/manipulation/theft",
+    ),
+    ("malicious_actions_fraudulent_actions", "Malicious actions — Fraudulent actions"),
+    (
+        "process_failure_insufficient_monitoring_or_failure_of_monitoring_and_control",
+        "Process failure — Insufficient or failure of monitoring and control",
+    ),
+    (
+        "process_failure_insufficient_unclear_roles_and_responsibilities",
+        "Process failure — Insufficient/unclear roles and responsibilities",
+    ),
+    (
+        "process_failure_ICT_risk_management_process_failure",
+        "Process failure — ICT risk management process failure",
+    ),
+    (
+        "process_failure_insufficient_or_failure_of_ict_operations_and_ict_security_operations",
+        "Process failure — Insufficient or failure of ICT operations and ICT security operations",
+    ),
+    (
+        "process_failure_insufficient_or_failure_of_ict_project_management",
+        "Process failure — Insufficient or failure of ICT project management",
+    ),
+    (
+        "process_failure_inadequacy_of_internal_policies_procedures_and_documentation",
+        "Process failure — Inadequacy of internal policies/procedures/documentation",
+    ),
+    (
+        "process_failure_inadequate_ict_systems_acquisition_development_and_maintenance",
+        "Process failure — Inadequate ICT systems acquisition/development/maintenance",
+    ),
+    ("process_failure_other", "Process failure — Other"),
+    (
+        "system_failure_hardware_capacity_and_performance",
+        "System failure — Hardware capacity and performance",
+    ),
+    ("system_failure_hardware_maintenance", "System failure — Hardware maintenance"),
+    (
+        "system_failure_hardware_obsolescence_ageing",
+        "System failure — Hardware obsolescence/ageing",
+    ),
+    (
+        "system_failure_software_compatibility_configuration",
+        "System failure — Software compatibility/configuration",
+    ),
+    (
+        "system_failure_software_performance",
+        "System failure — Software performance",
+    ),
+    (
+        "system_failure_network_configuration",
+        "System failure — Network configuration",
+    ),
+    ("system_failure_physical_damage", "System failure — Physical damage"),
+    ("system_failure_other", "System failure — Other"),
+    ("human_error_omission", "Human error — Omission"),
+    ("human_error_mistake", "Human error — Mistake"),
+    ("human_error_skills_knowledge", "Human error — Skills/knowledge"),
+    (
+        "human_error_inadequate_human_resources",
+        "Human error — Inadequate human resources",
+    ),
+    ("human_error_miscommunication", "Human error — Miscommunication"),
+    ("human_error_other", "Human error — Other"),
+    (
+        "external_event_natural_disasters_force_majeure",
+        "External event — Natural disasters/force majeure",
+    ),
+    (
+        "external_event_third-party_failures",
+        "External event — Third-party failures",
+    ),
+    ("external_event_other", "External event — Other"),
+]
+
+DORA_IR_ROOT_CAUSE_ADDITIONAL_CHOICES = [
+    ("monitoring_of_policy_adherence", "Monitoring of policy adherence"),
+    (
+        "monitoring_of_third-party_service_providers",
+        "Monitoring of third-party service providers",
+    ),
+    (
+        "monitoring_and_verification_of_remediation_of_vulnerabilities",
+        "Monitoring and verification of remediation of vulnerabilities",
+    ),
+    ("identity_and_access_management", "Identity and access management"),
+    ("encryption_and_cryptography", "Encryption and cryptography"),
+    ("logging", "Logging"),
+    (
+        "failure_in_specifying_accurate_risk_tolerance_levels",
+        "Failure in specifying accurate risk tolerance levels",
+    ),
+    (
+        "insufficient_vulnerability_and_threat_assessments",
+        "Insufficient vulnerability and threat assessments",
+    ),
+    ("inadequate_risk_treatment_measures", "Inadequate risk treatment measures"),
+    (
+        "poor_management_of_residual_ict_risks",
+        "Poor management of residual ICT risks",
+    ),
+    ("vulnerability_and_patch_management", "Vulnerability and patch management"),
+    ("change_management", "Change management"),
+    (
+        "capacity_and_performance_management",
+        "Capacity and performance management",
+    ),
+    (
+        "ict_asset_management_and_information_classification",
+        "ICT asset management and information classification",
+    ),
+    ("backup_and_restore", "Backup and restore"),
+    ("error_handling", "Error handling"),
+    (
+        "inadequate_ict_systems_acquisition_development_and_maintenance",
+        "Inadequate ICT systems acquisition/development/maintenance",
+    ),
+    (
+        "insufficient_or_failure_of_software_testing",
+        "Insufficient or failure of software testing",
+    ),
+]
+
+DORA_IR_CLASSIFICATION_CRITERION_CHOICES = [
+    (
+        "clients_financial_counterparts_and_transactions_affected",
+        "Clients, financial counterparts and transactions affected",
+    ),
+    ("geographical_spread", "Geographical spread"),
+    ("data_losses", "Data losses"),
+    ("critical_services_affected", "Critical services affected"),
+    ("economic_impact", "Economic impact"),
+    ("reputational_impact", "Reputational impact"),
+    ("duration_and_service_downtime", "Duration and service downtime"),
+]
+
+DORA_IR_REPORTING_AUTHORITY_CHOICES = [
+    ("police_law_enforcement", "Police/Law enforcement"),
+    ("csirt", "CSIRT"),
+    ("data_protection_authority", "Data protection authority"),
+    ("national_cybersecurity_agency", "National cybersecurity agency"),
+    ("none", "None"),
+    ("other", "Other"),
+]
+
+DORA_IR_AFFECTED_ENTITY_TYPE_CHOICES = [
+    ("credit_institution", "Credit institution"),
+    ("payment_institution", "Payment institution"),
+    ("exempted_payment_institution", "Exempted payment institution"),
+    (
+        "account_information_service_provider",
+        "Account information service provider",
+    ),
+    ("electronic_money_institution", "Electronic money institution"),
+    (
+        "exempted_electronic_money_institution",
+        "Exempted electronic money institution",
+    ),
+    ("investment_firm", "Investment firm"),
+    ("crypto-asset_service_provider", "Crypto-asset service provider"),
+    ("issuer_of_asset-referenced_tokens", "Issuer of asset-referenced tokens"),
+    ("central_securities_depository", "Central securities depository"),
+    ("central_counterparty", "Central counterparty"),
+    ("trading_venue", "Trading venue"),
+    ("trade_repository", "Trade repository"),
+    (
+        "manager_of_alternative_investment_fund",
+        "Manager of alternative investment fund",
+    ),
+    ("management_company", "Management company"),
+    ("data_reporting_service_provider", "Data reporting service provider"),
+    (
+        "insurance_and_reinsurance_undertaking",
+        "Insurance and reinsurance undertaking",
+    ),
+    (
+        "insurance_intermediary_reinsurance_intermediary_and_ancillary_insurance_intermediary",
+        "Insurance intermediary, reinsurance intermediary and ancillary insurance intermediary",
+    ),
+    (
+        "institution_for_occupational_retirement_provision",
+        "Institution for occupational retirement provision",
+    ),
+    ("credit_rating_agency", "Credit rating agency"),
+    (
+        "administrator_of_critical_benchmarks",
+        "Administrator of critical benchmarks",
+    ),
+    ("crowdfunding_service_provider", "Crowdfunding service provider"),
+    ("securitisation_repository", "Securitisation repository"),
+]
+
+# Mapping from existing DORA_ENTITY_TYPE_CHOICES (eba_CT codes) to IR entity type values
+ENTITY_TYPE_EBA_TO_IR = {
+    "eba_CT:x12": "credit_institution",
+    "eba_CT:x300": "payment_institution",
+    "eba_CT:x301": "account_information_service_provider",
+    "eba_CT:x302": "electronic_money_institution",
+    "eba_CT:x303": "crypto-asset_service_provider",
+    "eba_CT:x304": "central_securities_depository",
+    "eba_CT:x305": "trading_venue",
+    "eba_CT:x306": "trade_repository",
+    "eba_CT:x307": "manager_of_alternative_investment_fund",
+    "eba_CT:x308": "data_reporting_service_provider",
+    "eba_CT:x309": "insurance_and_reinsurance_undertaking",
+    "eba_CT:x310": "issuer_of_asset-referenced_tokens",
+    "eba_CT:x311": "institution_for_occupational_retirement_provision",
+    "eba_CT:x312": "credit_rating_agency",
+    "eba_CT:x313": "administrator_of_critical_benchmarks",
+    "eba_CT:x314": "crowdfunding_service_provider",
+    "eba_CT:x315": "securitisation_repository",
+    "eba_CT:x599": "investment_firm",
+    "eba_CT:x639": "management_company",
+    "eba_CT:x320": "insurance_intermediary_reinsurance_intermediary_and_ancillary_insurance_intermediary",
+    "eba_CT:x643": "central_counterparty",
+}

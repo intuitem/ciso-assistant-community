@@ -132,6 +132,28 @@ The resulting YAML file adheres to the CISO Assistant schema and can be directly
 
 When the `--compat` flag is omitted or when the compatibility mode is different from `1`, URNs for nodes without a `ref_id` are constructed using the `parent_urn`. This format is simpler to understand and maintain compared to the legacy `nodeXXX` suffix system.
 
+### > `convert_v1_to_v2.py`
+
+Usage:
+```bash
+python convert_v1_to_v2.py your_v1_library_file.xlsx
+```
+
+To launch it, open a shell in a command line, and type:
+
+```bash
+python convert_v1_to_v2.py your_v1_library_file.xlsx
+```
+
+This will modify your original file (in our case, `your_v1_library_file.xlsx`) and save the original v1 version as `your_v1_library_file_v1.xlsx.old`.
+
+## About framework Updates
+
+If you want to update a framework, don't forget to increment the version number in the `version` field of the `library_meta` sheet before converting it to YAML. Otherwise, if the version number of the framework file is lower than or equal to the version number of the old version of your already imported framework in CISO Assistant, your framework will not be updated and CISO Assistant will not suggest to update the framework in your loaded libraries.
+
+
+<details>
+<summary>[Deprecated] convert_library_v1.py</summary>
 
 ### > `convert_library_v1.py`
 
@@ -153,26 +175,7 @@ This will produce a file named `your_library_file.yaml`.
 
 The `--compat` flag is recommended only to maintain libraries that have been generated prior or up to release `1.9.20`. Without the compat flag, URNs generated for nodes without `ref_id` are constructed using the `parent_urn`. These generated URNs are much simpler to understand and maintain if required, compared to the previous system using `nodeXXX` suffix.
 
-
-### > `convert_v1_to_v2.py`
-
-Usage:
-```bash
-python convert_v1_to_v2.py your_v1_library_file.xlsx
-```
-
-To launch it, open a shell in a command line, and type:
-
-```bash
-python convert_v1_to_v2.py your_v1_library_file.xlsx
-```
-
-This will produce a file named `your_v1_library_file_new.yaml`.
-
-## About framework Updates
-
-If you want to update a framework, don't forget to increment the version number in the `version` field of the `library_meta` sheet before converting it to YAML. Otherwise, if the version number of the framework file is lower than or equal to the version number of the old version of your already imported framework in CISO Assistant, your framework will not be updated and CISO Assistant will not suggest to update the framework in your loaded libraries.
-
+</details>
 
 ## Format of Excel files
 
@@ -247,11 +250,14 @@ The `_content` tab for a `framework` object contains the following columns:
 - annotation
 - importance: one among `mandatory`/`recommended`/`nice_to_have` or empty cell (= undefined). Default value is `undefined`.
 - weight: Positive integer `>= 1`. Used for score weighting. The default weight (if undefined) is `1`.
+- min_score: Integer. Override the requirement's minimum score (cascades from the ComplianceAssessment when blank).
+- max_score: Integer. Override the requirement's maximum score (cascades from the ComplianceAssessment when blank).
+- scores_definition: name of a `scores` object. Overrides the level labels for this requirement (cascades when blank). When that name matches an entry in the framework's `scores_definition.alternatives` registry, the requirement stores a string reference instead of inlining the labels — multiple requirements can share the same alternative without duplication.
 - questions: 1 or several (n) questions, separated by line breaks
 - answer: 1 (same for all questions) or n (one answer per question) answers, separated by line breaks
 - depends_on: Format: `question_line:choice_lines`. Set `/` (= undefined) or empty cell if the question depends on nothing. See the cell notes in `example_framework.xlsx`, at lines `41` and `43`, column `depends_on` for better understanding.
 - condition: One among `any`/`all`. Required if `depends_on` is defined for a question. Set to `/` (= undefined) if `depends_on` is undefined for a specific question. `any`: Any answer selected from the `depends_on` list will show the question. `all`: Selecting all answers from the `depends_on` list will show the question. 
-- urn_id (+): this is reserved for specific compatibility issues to force the urn calculation
+- node_id (+): this is reserved for specific compatibility issues to force the urn calculation
 - skip_count (+): trick to fix a referential without changing the URNs (subtract `1` from the counter) [Works with Compatibility mode `1` in `convert_library_v2.py`]
 - fix_count (+): negative or positive integer. Better version of `skip_count`  (adds the integer to the counter) [Works with Compatibility mode `3` in `convert_library_v2.py`]
 
@@ -288,6 +294,7 @@ The `_content` tab for a `threats` object contains the following columns:
 - name (*)
 - description
 - annotation
+- node_id (+): this is reserved for specific compatibility issues to force the urn calculation
 
 ### Reference controls
 
@@ -302,6 +309,7 @@ The `_content` tab for a `reference_controls` object contains the following colu
 - category: one among `policy`/`process`/`technical`/`physical`/`procedure`
 - csf_function: one among `govern`/`identify`/`protect`/`detect`/`respond`/`recover`
 - annotation
+- node_id (+): this is reserved for specific compatibility issues to force the urn calculation
 
 ### Requirement mapping sets
 
@@ -361,7 +369,15 @@ The `_content` tab for a "answers" object contains the following columns:
   - description: Each description is separated by line breaks. To make a description written on several lines, start the next line with a `|`. Set `/` to indicate that there is no comment for a specific choice.
   - select_implementation_groups: A choice provokes the selection of the indicated Implementation Groups (IG). For the same choice, separate IGs with commas. To define IGs for each choice, separate IG groups with line breaks. Set `/` or an empty cell for no IG. When you're creating a questionnaire, we *STRONGLY* recommend not setting the most important `default_selected` IG (in the IG Content Sheet) for any choice, in order to avoid the risk of having an empty questionnaire when selecting an answer and then deselecting it.
   - add_score: Positive or negative integer. The score is calculated based on this choice. All values selected within a requirement assessment are summed, and the sum is clipped by the scale. Each choice is separated by line breaks. NOTE: If you start with a minus sign `-` in Excel, it may not work correctly because Excel considers it to be a function. To avoid this problem, add an apostrophe `'` in front of the minus sign (i.e. `'-`).
-  - compute_result: Boolean/None. True = `true` ; False = `false` ; None = `/` or empty cell. If true, this choice contributes to compliance. If false, this choice contributes to non-compliance. If empty, the choice contributes to nothing. Each boolean is separated by line breaks.
+  - compute_result: Semantic compliance contribution of the choice. Accepted values are the same as in the framework builder UI:
+      - `compliant` — the choice contributes to compliance
+      - `non_compliant` — the choice contributes to non-compliance
+      - `partially_compliant` — the choice contributes a partial compliance result
+      - `not_applicable` — neutral: the choice is dropped from the aggregation. The requirement is marked `not_applicable` only when every contributing choice resolves to `not_applicable`. To mark a whole requirement as out of scope based on one question (e.g. *"Do you process personal data? -> No"*), use `depends_on` so the dependent questions are hidden when the scoping answer is picked.
+      - `/` or empty cell — neutral, the choice does not contribute to the result
+    Legacy boolean literals are still accepted for backward compatibility with older spreadsheets: `true` is treated as `compliant`, `false` as `non_compliant`. Each value is separated by line breaks (one per choice).
+
+    Aggregation across all selected choices of a requirement: (1) neutral entries (empty + `not_applicable`) are dropped, (2) if no contribution remains and at least one was `not_applicable`, the requirement is `not_applicable`, (3) otherwise mixed `compliant`/`non_compliant` or any `partially_compliant` yields `partially_compliant`, else the worst remaining value wins.
   - color: Hexadecimal value. Format = `#xxxxxx` ; None = `/` or empty cell. Each choice color is separated by line breaks.
 
 Note: Unsupported values should be rejected.

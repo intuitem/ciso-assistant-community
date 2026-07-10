@@ -12,7 +12,12 @@ export const GET: RequestHandler = async ({ fetch }) => {
 	const optionsResponse = await res.json();
 
 	const options = optionsResponse.map((eventType: string) => {
-		return { label: eventType, value: eventType };
+		const [modelName, action] = eventType.split('.');
+		return {
+			id: eventType,
+			name: action,
+			model_name: modelName
+		};
 	});
 
 	return new Response(JSON.stringify(options), {

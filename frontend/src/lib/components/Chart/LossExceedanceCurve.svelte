@@ -8,6 +8,7 @@
 		classesContainer?: string;
 		name?: string;
 		data?: Array<[number, number]>;
+		inherentData?: Array<[number, number]>;
 		toleranceData?: Array<[number, number]>;
 		residualData?: Array<[number, number]>;
 		lossThreshold?: number;
@@ -35,6 +36,7 @@
 		classesContainer = '',
 		name = 'loss-exceedance',
 		data = undefined,
+		inherentData = undefined,
 		toleranceData = undefined,
 		residualData = undefined,
 		lossThreshold = undefined,
@@ -77,7 +79,7 @@
 
 	// Calculate dynamic X-axis bounds
 	const calculatedXMax = autoXMax
-		? (getMaxLossFromData(data, toleranceData, residualData) ?? xMax)
+		? (getMaxLossFromData(data, inherentData, toleranceData, residualData) ?? xMax)
 		: xMax;
 
 	// Use provided xMin or calculate from data, fallback to calculatedXMax/100000
@@ -85,7 +87,11 @@
 
 	onMount(async () => {
 		const echarts = await import('echarts');
-		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
+		let chart = echarts.init(
+			document.getElementById(chart_id),
+			document.documentElement.classList.contains('dark') ? 'dark' : null,
+			{ renderer: 'svg' }
+		);
 
 		const option = {
 			title: showTitle
@@ -128,10 +134,23 @@
 				: undefined,
 			legend: {
 				show:
-					(toleranceData && toleranceData.length > 0) || (residualData && residualData.length > 0),
+					(inherentData && inherentData.length > 0) ||
+					(toleranceData && toleranceData.length > 0) ||
+					(residualData && residualData.length > 0),
 				top: '5%',
 				left: '10%',
 				data: [
+					...(inherentData && inherentData.length > 0
+						? [
+								{
+									name: m.inherentRisk(),
+									icon: 'circle',
+									itemStyle: {
+										color: '#ff9800'
+									}
+								}
+							]
+						: []),
 					{
 						name: m.currentRisk(),
 						icon: 'circle',
@@ -274,6 +293,37 @@
 				}
 			},
 			series: [
+				// Inherent Risk curve (only if inherentData is provided)
+				...(inherentData && inherentData.length > 0
+					? [
+							{
+								name: m.inherentRisk(),
+								type: 'line',
+								smooth: true,
+								symbol: 'none',
+								symbolSize: 0,
+								showSymbol: false,
+								lineStyle: {
+									color: '#ff9800',
+									width: 3
+								},
+								areaStyle: {
+									opacity: 0.1,
+									color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+										{
+											offset: 0,
+											color: '#ff9800'
+										},
+										{
+											offset: 1,
+											color: 'rgba(255, 152, 0, 0.05)'
+										}
+									])
+								},
+								data: inherentData
+							}
+						]
+					: []),
 				// Combined Current Risk curve
 				{
 					name: m.currentRisk(),
@@ -385,6 +435,7 @@
 			]
 		};
 
+		option.backgroundColor = 'transparent';
 		chart.setOption(option);
 
 		window.addEventListener('resize', function () {

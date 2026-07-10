@@ -4,11 +4,10 @@
 	import { m } from '$paraglide/messages';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { webhookEndpointSchema } from '$lib/utils/schemas';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import EventTypesSelect from '../EventTypesSelect.svelte';
-	import { onMount } from 'svelte';
+	import ListSelector from '$lib/components/Forms/ListSelector.svelte';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { goto } from '$lib/utils/breadcrumbs';
 	import { page } from '$app/state';
@@ -27,22 +26,16 @@
 
 	let showSecretField = $state(!data.webhookEndpoint?.has_secret);
 
-	let eventTypeOptions = $state([]);
-
 	function cancel(): void {
 		const nextValue = getSecureRedirect(page.url.searchParams.get('next'));
 		if (nextValue) goto(nextValue);
 	}
-
-	onMount(async () => {
-		eventTypeOptions = await fetch('/settings/webhooks/event-types').then((res) => res.json());
-	});
 </script>
 
 <SuperForm
 	class="flex flex-col space-y-3"
 	data={data?.form}
-	dataType="form"
+	dataType="json"
 	validators={zod(webhookEndpointSchema)}
 >
 	{#snippet children({ form })}
@@ -89,10 +82,19 @@
 			/>
 		{/if}
 
-		<EventTypesSelect {form} field="event_types" label={m.events()} options={eventTypeOptions} />
+		<ListSelector
+			{form}
+			field="event_types"
+			label={m.events()}
+			optionsEndpoint="settings/webhooks/event-types"
+			optionsLabelField="name"
+			groupBy="model_name"
+		/>
 		<div class="flex flex-row justify-between space-x-4">
-			<button class="btn bg-gray-400 text-white font-semibold w-full" type="button" onclick={cancel}
-				>{m.cancel()}</button
+			<button
+				class="btn bg-surface-400-600 text-white font-semibold w-full"
+				type="button"
+				onclick={cancel}>{m.cancel()}</button
 			>
 			<button
 				class="btn preset-filled-primary-500 font-semibold w-full"

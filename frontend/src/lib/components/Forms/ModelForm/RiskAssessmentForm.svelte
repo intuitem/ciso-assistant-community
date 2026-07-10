@@ -1,23 +1,22 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import Select from '../Select.svelte';
-	import type { SuperValidated } from 'sveltekit-superforms';
+	import type { SuperForm } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import Checkbox from '../Checkbox.svelte';
 
 	interface Props {
-		form: SuperValidated<any>;
+		form: SuperForm<any>;
 		model: ModelInfo;
 		duplicate?: boolean;
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
-		object?: Record<string, any>; // export let context: string = 'default';
+		object?: Record<string, any>;
 	}
 
 	let {
@@ -70,22 +69,6 @@
 
 <TextField
 	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="perimeters"
-	optionsExtraFields={[['folder', 'str']]}
-	field="perimeter"
-	cacheLock={cacheLocks['perimeter']}
-	bind:cachedValue={formDataCache['perimeter']}
-	label={m.perimeter()}
-/>
-<TextField
-	{form}
 	field="version"
 	label={m.version()}
 	cacheLock={cacheLocks['version']}
@@ -106,7 +89,7 @@
 		{form}
 		translateOptions={false}
 		disableDoubleDash
-		optionsEndpoint="risk-matrices"
+		optionsEndpoint="risk-matrices?is_enabled=true"
 		field="risk_matrix"
 		cacheLock={cacheLocks['risk_matrix']}
 		bind:cachedValue={formDataCache['risk_matrix']}
@@ -189,6 +172,14 @@
 			helpText={m.isLockedHelpText()}
 			cacheLock={cacheLocks['is_locked']}
 			bind:cachedValue={formDataCache['is_locked']}
+		/>
+		<Checkbox
+			{form}
+			field="auto_sync"
+			label={m.autoSync()}
+			helpText={m.autoSyncHelpText()}
+			cacheLock={cacheLocks['auto_sync']}
+			bind:cachedValue={formDataCache['auto_sync']}
 		/>
 	</Dropdown>
 	{#if initialData.ebios_rm_study}

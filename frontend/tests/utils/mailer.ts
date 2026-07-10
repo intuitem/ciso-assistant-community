@@ -16,7 +16,7 @@ class Email {
 
 	async hasWelcomeEmailDetails() {
 		expect.soft(await this.getFrom()).toEqual('ciso-assistant@tests.net');
-		expect.soft(await this.getSubject()).toEqual('Welcome to Ciso Assistant!');
+		expect.soft(await this.getSubject()).toEqual('Welcome to CISO Assistant!');
 	}
 
 	async hasResetPasswordEmailDetails() {
@@ -77,5 +77,10 @@ export class Mailer {
 
 	async getLastEmail() {
 		return new Email(this.emails.first());
+	}
+
+	async getEmailBySubject(subject: string) {
+		const email = this.emails.filter({ hasText: subject }).first();
+		return new Email(email);
 	}
 }

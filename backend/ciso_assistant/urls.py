@@ -14,12 +14,15 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from django.conf import settings
 from django.urls import include, path
 from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularRedocView,
     SpectacularSwaggerView,
 )
+from core.views import metrics_view
+from django.conf import settings
 
 # beware of the order of url patterns, this can change de behavior in case of multiple matches and avoid giving identical paths that could cause conflicts
 urlpatterns = [
@@ -36,7 +39,17 @@ urlpatterns = [
         name="redoc",
     ),
     path("api/integrations/", include("integrations.urls", namespace="integrations")),
+    path("api/scim/v2/", include("iam.scim.urls")),
     path("api/", include("core.urls")),
     path("serdes/", include("serdes.urls")),
     path("i18n/", include("django.conf.urls.i18n")),
 ]
+
+if getattr(settings, "ENABLE_INFRA_CONFIG_MANAGEMENT", False):
+    from global_settings.views import infra_config_view
+
+    urlpatterns.append(path("infra-config/", infra_config_view, name="infra-config"))
+if getattr(settings, "EXPOSE_METRICS", False):
+    from core.views import metrics_view
+
+    urlpatterns.append(path("metrics/", metrics_view, name="metrics"))

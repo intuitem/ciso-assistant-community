@@ -12,7 +12,10 @@ import TaskNodeChangeStatus from '$lib/components/ContextMenu/task-nodes/ChangeS
 import { getModelInfo } from './crud';
 import SelectObject from '$lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
 import ChangePriority from '$lib/components/ContextMenu/applied-controls/ChangePriority.svelte';
+import ReplaceWith from '$lib/components/ContextMenu/applied-controls/ReplaceWith.svelte';
 import ChangeAttackStage from '$lib/components/ContextMenu/elementary-actions/ChangeAttackStage.svelte';
+import VulnerabilityChangeStatus from '$lib/components/ContextMenu/vulnerabilities/ChangeStatus.svelte';
+import VulnerabilityChangeSeverity from '$lib/components/ContextMenu/vulnerabilities/ChangeSeverity.svelte';
 
 export function tableSourceMapper(source: any[], keys: string[]): any[] {
 	return source.map((row) => {
@@ -24,7 +27,14 @@ export function tableSourceMapper(source: any[], keys: string[]): any[] {
 
 export interface ListViewFilterConfig {
 	component: ComponentType;
-	props?: { label: string; optionsEndpoint?: string; multiple?: boolean; options?: Option[] };
+	props?: {
+		label: string;
+		optionsEndpoint?: string;
+		multiple?: boolean;
+		options?: Option[];
+		enableDoubleDash?: boolean;
+		[key: string]: unknown;
+	};
 	hide?: boolean;
 }
 
@@ -32,6 +42,8 @@ interface ListViewFieldsConfig {
 	[key: string]: {
 		head: string[];
 		body: string[];
+		// Extra columns offered via the column selector but hidden by default; `head`/`body` stay the defaults.
+		optionalFields?: { head: string[]; body: string[] };
 		meta?: string[];
 		breadcrumb_link_disabled?: boolean;
 		filters?: {
@@ -76,6 +88,43 @@ const RISK_STAGE_OPTIONS = [
 	{ label: 'Current', value: 'current' },
 	{ label: 'Residual', value: 'residual' }
 ];
+const CUSTOM_FIELD_BOOLEAN_OPTIONS = [
+	{ label: 'yes', value: 'true' },
+	{ label: 'no', value: 'false' }
+];
+
+/**
+ * Build ModelTable filter configs for enumerable custom fields (choice / multi_choice / boolean).
+ * The filter key carries the backend lookup: `cf__<key>__in` (any-of) for choices, `cf__<key>` for
+ * booleans — both handled by the backend CustomFieldFilterBackend. The dotless `cf__` prefix keeps
+ * the key a flat field name (superforms treats "." as a nested path). Text/number/date fields
+ * filter via the API but have no dropdown UI here.
+ */
+export function buildCustomFieldFilters(
+	defs: import('./customFields').CustomFieldDef[]
+): Record<string, ListViewFilterConfig> {
+	const filters: Record<string, ListViewFilterConfig> = {};
+	for (const def of defs ?? []) {
+		if (def.filterable === false) continue;
+		if (def.field_type === 'choice' || def.field_type === 'multi_choice') {
+			filters[`cf__${def.key}__in`] = {
+				component: AutocompleteSelect,
+				props: {
+					label: def.label_localized,
+					multiple: true,
+					options: def.choices.map((c) => ({ label: c.label_localized, value: c.value }))
+				}
+			};
+		} else if (def.field_type === 'boolean') {
+			filters[`cf__${def.key}`] = {
+				component: AutocompleteSelect,
+				props: { label: def.label_localized, options: CUSTOM_FIELD_BOOLEAN_OPTIONS }
+			};
+		}
+	}
+	return filters;
+}
+
 export const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -110,11 +159,81 @@ export const ACCREDITATION_CATEGORY_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const PROJECT_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'terminologies?field_path=project.status',
+		optionsLabelField: 'name',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+export const PROJECT_KIND_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'projects/kind',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'kind',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+export const PROJECT_HEALTH_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'terminologies?field_path=project.health',
+		optionsLabelField: 'name',
+		label: 'health',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 export const DOMAIN_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'folders?content_type=DO&content_type=GL',
 		label: 'domain',
+		multiple: true
+	}
+};
+
+export const DOCUMENT_TYPE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'document-containers/document_type',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'documentType',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+export const DOCUMENT_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'document-containers/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+export const DOCUMENT_SOURCE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'document-containers/source',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'source',
+		browserCache: 'force-cache',
 		multiple: true
 	}
 };
@@ -125,6 +244,16 @@ export const LABELS_FILTER: ListViewFilterConfig = {
 		optionsEndpoint: 'filtering-labels',
 		label: 'filtering_labels',
 		optionsLabelField: 'label',
+		multiple: true
+	}
+};
+
+export const CLASSIFICATION_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'classification-levels',
+		optionsLabelField: 'label',
+		label: 'classification',
 		multiple: true
 	}
 };
@@ -156,6 +285,7 @@ export const PRIORITY_FILTER: ListViewFilterConfig = {
 		optionsValueField: 'value',
 		browserCache: 'force-cache',
 		label: 'priority',
+		enableDoubleDash: true,
 		multiple: true
 	}
 };
@@ -168,6 +298,7 @@ export const EFFORT_FILTER: ListViewFilterConfig = {
 		optionsValueField: 'value',
 		browserCache: 'force-cache',
 		label: 'effort',
+		enableDoubleDash: true,
 		multiple: true
 	}
 };
@@ -281,6 +412,7 @@ export const APPLIED_CONTROL_IMPACT_FILTER: ListViewFilterConfig = {
 		optionsValueField: 'value',
 		label: 'controlImpact',
 		browserCache: 'force-cache',
+		enableDoubleDash: true,
 		multiple: true
 	}
 };
@@ -444,7 +576,8 @@ export const LEGAL_BASIS_FILTER: ListViewFilterConfig = {
 export const PROCESSING_NATURE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		optionsEndpoint: 'processing-natures',
+		optionsEndpoint: 'terminologies?field_path=processing.nature&is_visible=true',
+		optionsLabelField: 'translated_name',
 		label: 'nature',
 		browserCache: 'force-cache',
 		multiple: true
@@ -468,6 +601,39 @@ export const ORGANISATION_OBJECTIVE_HEALTH_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		label: 'health',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+export const ORGANISATION_ISSUE_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'organisation-issues/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+export const ORGANISATION_ISSUE_CATEGORY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'organisation-issues/category',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'category',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+export const ORGANISATION_ISSUE_ORIGIN_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'organisation-issues/origin',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'origin',
 		browserCache: 'force-cache',
 		multiple: true
 	}
@@ -521,6 +687,18 @@ export const LINKED_MODELS_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'linkedModels',
 		optionsEndpoint: 'validation-flows/linked_models',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+export const APPLIED_CONTROL_LINKED_MODELS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'linkedModels',
+		optionsEndpoint: 'applied-controls/linked_models',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		browserCache: 'force-cache',
@@ -614,10 +792,20 @@ export const QUALIFICATION_FILTER: ListViewFilterConfig = {
 export const PERSONAL_DATA_CATEGORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		optionsEndpoint: 'personal-data/category',
+		optionsEndpoint: 'terminologies?field_path=personal_data.category&is_visible=true',
+		optionsLabelField: 'translated_name',
+		label: 'category',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+export const DATA_SUBJECT_CATEGORY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'data-subjects/category',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
-		label: 'category',
+		label: 'dataSubjectCategory',
 		browserCache: 'force-cache',
 		multiple: true
 	}
@@ -697,7 +885,7 @@ export const TASK_TEMPLATE_ASSIGNED_TO_FILTER: ListViewFilterConfig = {
 		label: 'assigned_to',
 		optionsLabelField: 'str',
 		optionsValueField: 'id',
-		optionsEndpoint: 'task-templates/assigned_to',
+		optionsEndpoint: 'actors',
 		multiple: true
 	}
 };
@@ -909,6 +1097,18 @@ export const LANGUAGE_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const DOC_TEMPLATE_LANGUAGE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'language',
+		optionsEndpoint: 'document-templates/locale',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 export const ASSET_TYPE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -994,6 +1194,7 @@ export const APPLIED_CONTROL_CATEGORY_FILTER: ListViewFilterConfig = {
 		multiple: true,
 		optionsLabelField: 'label',
 		browserCache: 'force-cache',
+		enableDoubleDash: true,
 		optionsValueField: 'value'
 	}
 };
@@ -1006,6 +1207,7 @@ export const APPLIED_CONTROL_CSF_FUNCTION_FILTER: ListViewFilterConfig = {
 		optionsValueField: 'value',
 		label: 'csfFunction',
 		browserCache: 'force-cache',
+		enableDoubleDash: true,
 		multiple: true
 	}
 };
@@ -1016,7 +1218,7 @@ export const OWNER_FILTER: ListViewFilterConfig = {
 		label: 'owner',
 		optionsLabelField: 'str',
 		optionsValueField: 'id',
-		optionsEndpoint: 'applied-controls/owner',
+		optionsEndpoint: 'actors',
 		multiple: true
 	}
 };
@@ -1027,7 +1229,7 @@ export const FINDINGS_OWNER_FILTER: ListViewFilterConfig = {
 		label: 'owner',
 		optionsLabelField: 'str',
 		optionsValueField: 'id',
-		optionsEndpoint: 'findings/owner',
+		optionsEndpoint: 'actors',
 		multiple: true
 	}
 };
@@ -1172,7 +1374,7 @@ export const EVIDENCE_OWNER_FILTER: ListViewFilterConfig = {
 		label: 'owner',
 		optionsLabelField: 'str',
 		optionsValueField: 'id',
-		optionsEndpoint: 'evidences/owner',
+		optionsEndpoint: 'actors',
 		multiple: true
 	}
 };
@@ -1201,10 +1403,35 @@ export const VULNERABILITY_SEVERITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const SECURITY_ADVISORY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'security-advisories',
+		label: 'securityAdvisory',
+		multiple: true
+	}
+};
+
+export const CWE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'cwes',
+		label: 'cwe',
+		multiple: true
+	}
+};
+
 export const listViewFields = {
 	folders: {
-		head: ['name', 'description', 'contentType', 'parentDomain', 'labels'],
-		body: ['name', 'description', 'content_type', 'parent_folder', 'filtering_labels'],
+		head: ['name', 'description', 'contentType', 'parentDomain', 'iamGroups', 'labels'],
+		body: [
+			'name',
+			'description',
+			'content_type',
+			'parent_folder',
+			'create_iam_groups',
+			'filtering_labels'
+		],
 		filters: {
 			content_type: CONTENT_TYPE_FILTER,
 			filtering_labels: LABELS_FILTER
@@ -1213,6 +1440,10 @@ export const listViewFields = {
 	perimeters: {
 		head: ['ref_id', 'name', 'description', 'defaultAssignee', 'domain'],
 		body: ['ref_id', 'name', 'description', 'default_assignee', 'folder'],
+		optionalFields: {
+			head: ['lcStatus', 'createdAt', 'updatedAt'],
+			body: ['lc_status', 'created_at', 'updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			lc_status: PERIMETER_STATUS_FILTER
@@ -1223,24 +1454,44 @@ export const listViewFields = {
 		body: ['label']
 	},
 	'risk-matrices': {
-		head: ['name', 'description', 'provider', 'domain'],
-		body: ['name', 'description', 'provider', 'folder'],
+		head: ['name', 'description', 'provider', 'domain', 'isEnabled'],
+		body: ['name', 'description', 'provider', 'folder', 'is_enabled'],
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			provider: {
 				...PROVIDER_FILTER,
 				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'risk-matrices/provider' }
+			},
+			is_enabled: {
+				component: AutocompleteSelect,
+				props: {
+					label: 'isEnabled',
+					options: YES_NO_OPTIONS,
+					multiple: false
+				}
 			}
 		}
 	},
 	vulnerabilities: {
-		head: ['ref_id', 'name', 'status', 'severity', 'applied_controls', 'folder', 'labels'],
+		head: [
+			'ref_id',
+			'name',
+			'status',
+			'severity',
+			'sla',
+			'dueDate',
+			'applied_controls',
+			'folder',
+			'labels'
+		],
 		body: [
 			'ref_id',
 			'name',
 			'status',
 			'severity',
+			'state',
+			'due_date',
 			'applied_controls',
 			'folder',
 			'filtering_labels'
@@ -1249,20 +1500,39 @@ export const listViewFields = {
 			folder: DOMAIN_FILTER,
 			filtering_labels: LABELS_FILTER,
 			status: VULNERABILITY_STATUS_FILTER,
-			severity: VULNERABILITY_SEVERITY_FILTER
+			severity: VULNERABILITY_SEVERITY_FILTER,
+			assets: ASSET_FILTER,
+			security_advisories: SECURITY_ADVISORY_FILTER,
+			cwes: CWE_FILTER
 		}
 	},
 	'risk-assessments': {
-		head: ['ref_id', 'name', 'riskMatrix', 'status', 'riskScenarios', 'perimeter', 'updatedAt'],
+		head: [
+			'ref_id',
+			'name',
+			'description',
+			'riskMatrix',
+			'status',
+			'riskScenarios',
+			'folder',
+			'perimeter',
+			'updatedAt'
+		],
 		body: [
 			'ref_id',
 			'str',
+			'description',
 			'risk_matrix',
 			'status',
 			'risk_scenarios_count',
+			'folder',
 			'perimeter',
 			'updated_at'
 		],
+		optionalFields: {
+			head: ['createdAt'],
+			body: ['created_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -1272,6 +1542,10 @@ export const listViewFields = {
 	threats: {
 		head: ['ref_id', 'name', 'description', 'library', 'domain', 'labels'],
 		body: ['ref_id', 'name', 'description', 'library', 'folder', 'filtering_labels'],
+		optionalFields: {
+			head: ['provider', 'createdAt', 'updatedAt'],
+			body: ['provider', 'created_at', 'updated_at']
+		},
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -1283,11 +1557,63 @@ export const listViewFields = {
 			filtering_labels: LABELS_FILTER
 		}
 	},
+	'security-advisories': {
+		head: [
+			'ref_id',
+			'name',
+			'source',
+			'description',
+			'cvssBaseScore',
+			'epssScore',
+			'isActivelyExploited',
+			'publishedDate',
+			'domain',
+			'labels'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'source',
+			'description',
+			'cvss_base_score',
+			'epss_score',
+			'is_actively_exploited',
+			'published_date',
+			'folder',
+			'filtering_labels'
+		],
+		meta: ['id', 'urn'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			source: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'security-advisories/source',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'source',
+					browserCache: 'force-cache',
+					multiple: true
+				}
+			},
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	cwes: {
+		head: ['ref_id', 'name', 'description', 'library', 'domain', 'labels'],
+		body: ['ref_id', 'name', 'description', 'library', 'folder', 'filtering_labels'],
+		meta: ['id', 'urn'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			filtering_labels: LABELS_FILTER
+		}
+	},
 	'risk-scenarios': {
 		head: [
 			'ref_id',
 			'threats',
 			'name',
+			'owner',
 			'inherentLevel',
 			'existingAppliedControls',
 			'currentLevel',
@@ -1301,6 +1627,7 @@ export const listViewFields = {
 			'ref_id',
 			'threats',
 			'name',
+			'owner',
 			'inherent_level',
 			'existing_applied_controls',
 			'current_level',
@@ -1310,18 +1637,23 @@ export const listViewFields = {
 			'treatment',
 			'risk_assessment'
 		],
+		optionalFields: {
+			head: ['createdAt', 'updatedAt'],
+			body: ['created_at', 'updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
 			treatment: TREATMENT_FILTER,
 			risk_assessment: RISK_ASSESSMENT_FILTER,
+			owner: OWNER_FILTER,
 			threats: THREAT_FILTER,
 			assets: ASSET_FILTER,
 			current_level: CURRENT_RISK_LEVEL_FILTER,
 			residual_level: RESIDUAL_RISK_LEVEL_FILTER,
 			within_tolerance: RISK_TOLERANCE_FILTER,
-			control_impact: APPLIED_CONTROL_IMPACT_FILTER,
-			effort: APPLIED_CONTROL_EFFORT_FILTER
+			qualifications: QUALIFICATION_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'risk-acceptances': {
@@ -1379,34 +1711,43 @@ export const listViewFields = {
 		head: [
 			'ref_id',
 			'name',
+			'assets',
 			'priority',
 			'status',
+			'owner',
 			'category',
 			'csfFunction',
 			'eta',
 			'domain',
-			'owner',
 			'controlImpact',
 			'effort',
+			'linkedModels',
 			'labels'
 		],
 		body: [
 			'ref_id',
 			'name',
+			'assets',
 			'priority',
 			'status',
+			'owner',
 			'category',
 			'csf_function',
 			'eta',
 			'folder',
-			'owner',
 			'control_impact',
 			'effort',
+			'linked_models',
 			'filtering_labels'
 		],
+		optionalFields: {
+			head: ['progress', 'startDate', 'expiryDate', 'createdAt', 'updatedAt'],
+			body: ['progress_field', 'start_date', 'expiry_date', 'created_at', 'updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: APPLIED_CONTROL_STATUS_FILTER,
+			assets: ASSET_FILTER,
 			category: APPLIED_CONTROL_CATEGORY_FILTER,
 			csf_function: APPLIED_CONTROL_CSF_FUNCTION_FILTER,
 			priority: PRIORITY_FILTER,
@@ -1416,7 +1757,8 @@ export const listViewFields = {
 			reference_control: REFERENCE_CONTROL_FILTER,
 			eta__lte: undefined,
 			is_assigned: IS_ASSIGNED_FILTER,
-			owner: OWNER_FILTER
+			owner: OWNER_FILTER,
+			linked_models: APPLIED_CONTROL_LINKED_MODELS_FILTER
 		}
 	},
 	policies: {
@@ -1442,6 +1784,10 @@ export const listViewFields = {
 			'folder',
 			'reference_control'
 		],
+		optionalFields: {
+			head: ['startDate', 'expiryDate', 'createdAt', 'updatedAt'],
+			body: ['start_date', 'expiry_date', 'created_at', 'updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: APPLIED_CONTROL_STATUS_FILTER,
@@ -1471,6 +1817,10 @@ export const listViewFields = {
 			'folder',
 			'filtering_labels'
 		],
+		optionalFields: {
+			head: ['createdAt', 'updatedAt'],
+			body: ['created_at', 'updated_at']
+		},
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -1504,6 +1854,10 @@ export const listViewFields = {
 			'folder',
 			'filtering_labels'
 		],
+		optionalFields: {
+			head: ['referenceLink', 'createdAt', 'updatedAt'],
+			body: ['reference_link', 'created_at', 'updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			type: ASSET_TYPE_FILTER,
@@ -1522,6 +1876,7 @@ export const listViewFields = {
 			'firstName',
 			'lastName',
 			'userGroups',
+			'idpGroups',
 			'isActive',
 			'expiryDate',
 			'keep_local_login',
@@ -1533,6 +1888,7 @@ export const listViewFields = {
 			'first_name',
 			'last_name',
 			'user_groups',
+			'idp_groups',
 			'is_active',
 			'expiry_date',
 			'keep_local_login',
@@ -1550,8 +1906,12 @@ export const listViewFields = {
 	},
 	'user-groups': {
 		head: ['name'],
-		body: ['localization_dict'],
+		body: ['name'],
 		meta: ['id', 'builtin']
+	},
+	'idp-groups': {
+		head: ['name', 'userGroups'],
+		body: ['name', 'user_groups']
 	},
 	roles: {
 		head: ['name', 'description'],
@@ -1579,6 +1939,7 @@ export const listViewFields = {
 			'name',
 			'version',
 			'framework',
+			'folder',
 			'perimeter',
 			'reviewProgress',
 			'createdAt',
@@ -1589,11 +1950,16 @@ export const listViewFields = {
 			'name',
 			'version',
 			'framework',
+			'folder',
 			'perimeter',
 			'progress',
 			'created_at',
 			'updated_at'
 		],
+		optionalFields: {
+			head: ['status'],
+			body: ['status']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -1613,8 +1979,20 @@ export const listViewFields = {
 		}
 	},
 	evidences: {
-		head: ['name', 'folder', 'owner', 'status', 'updatedAt', 'labels'],
-		body: ['name', 'folder', 'owner', 'status', 'updated_at', 'filtering_labels'],
+		head: ['name', 'folder', 'owner', 'status', 'updatedAt', 'labels', 'appliedControls'],
+		body: [
+			'name',
+			'folder',
+			'owner',
+			'status',
+			'updated_at',
+			'filtering_labels',
+			'applied_controls'
+		],
+		optionalFields: {
+			head: ['createdAt'],
+			body: ['created_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			filtering_labels: LABELS_FILTER,
@@ -1628,6 +2006,49 @@ export const listViewFields = {
 		filters: {
 			filtering_labels: LABELS_FILTER
 		}
+	},
+	'document-revisions': {
+		head: ['versionNumber', 'status', 'author', 'changeSummary', 'createdAt'],
+		body: ['version_number', 'status_display', 'author', 'change_summary', 'created_at']
+	},
+	'document-containers': {
+		head: ['refId', 'name', 'documentType', 'status', 'classification', 'domain', 'labels'],
+		body: [
+			'ref_id',
+			'name',
+			'document_type',
+			'status',
+			'classification',
+			'folder',
+			'filtering_labels'
+		],
+		optionalFields: {
+			head: ['source'],
+			body: ['source']
+		},
+		filters: {
+			folder: DOMAIN_FILTER,
+			document_type: DOCUMENT_TYPE_FILTER,
+			source: DOCUMENT_SOURCE_FILTER,
+			status: DOCUMENT_STATUS_FILTER,
+			classification: CLASSIFICATION_FILTER,
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	'document-templates': {
+		head: ['name', 'refId', 'documentType', 'provider', 'language', 'builtin', 'domain'],
+		body: ['name', 'ref_id', 'document_type', 'provider', 'locale', 'builtin', 'folder'],
+		meta: ['id', 'builtin'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			document_type: DOCUMENT_TYPE_FILTER,
+			locale: DOC_TEMPLATE_LANGUAGE_FILTER,
+			builtin: BUILTIN_FILTER
+		}
+	},
+	'managed-documents': {
+		head: ['name', 'documentType', 'locale', 'domain'],
+		body: ['name', 'document_type', 'locale', 'folder']
 	},
 	requirements: {
 		head: ['ref_id', 'name', 'description', 'framework'],
@@ -1702,15 +2123,38 @@ export const listViewFields = {
 			'relationship',
 			'default_criticality'
 		],
+		optionalFields: {
+			head: ['filteringLabels', 'referenceLink', 'createdAt', 'updatedAt'],
+			body: ['filtering_labels', 'reference_link', 'created_at', 'updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			parent_entity: PARENT_ENTITY_FILTER,
-			relationship: ENTITY_RELATIONSHIP_FILTER
+			relationship: ENTITY_RELATIONSHIP_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'entity-assessments': {
-		head: ['name', 'entity', 'perimeter', 'status', 'dueDate', 'criticality', 'conclusion'],
-		body: ['name', 'entity', 'perimeter', 'status', 'due_date', 'criticality', 'conclusion'],
+		head: [
+			'name',
+			'entity',
+			'perimeter',
+			'status',
+			'dueDate',
+			'criticality',
+			'conclusion',
+			'folder'
+		],
+		body: [
+			'name',
+			'entity',
+			'perimeter',
+			'status',
+			'due_date',
+			'criticality',
+			'conclusion',
+			'folder'
+		],
 		filters: {
 			perimeter: PERIMETER_FILTER,
 			entity: ENTITY_FILTER,
@@ -1722,6 +2166,10 @@ export const listViewFields = {
 	solutions: {
 		head: ['refId', 'name', 'description', 'providerEntity', 'criticality', 'labels'],
 		body: ['ref_id', 'name', 'description', 'provider_entity', 'criticality', 'filtering_labels'],
+		optionalFields: {
+			head: ['createdAt', 'updatedAt'],
+			body: ['created_at', 'updated_at']
+		},
 		filters: {
 			provider_entity: ENTITY_FILTER,
 			criticality: SOLUTION_CRITICALITY_FILTER,
@@ -1736,6 +2184,7 @@ export const listViewFields = {
 			'status',
 			'startDate',
 			'endDate',
+			'annualExpense',
 			'providerEntity',
 			'beneficiaryEntity',
 			'solutions'
@@ -1747,6 +2196,7 @@ export const listViewFields = {
 			'status',
 			'start_date',
 			'end_date',
+			'annual_expense',
 			'provider_entity',
 			'beneficiary_entity',
 			'solutions'
@@ -1766,8 +2216,12 @@ export const listViewFields = {
 		}
 	},
 	'business-impact-analysis': {
-		head: ['name', 'perimeter', 'status'],
-		body: ['name', 'perimeter', 'status'],
+		head: ['name', 'perimeter', 'folder', 'status'],
+		body: ['name', 'perimeter', 'folder', 'status'],
+		optionalFields: {
+			head: ['createdAt', 'updatedAt'],
+			body: ['created_at', 'updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -1804,9 +2258,34 @@ export const listViewFields = {
 		head: ['pointInTime', 'assetAssessment', 'qualiImpact', 'impactOn', 'justification'],
 		body: ['get_human_pit', 'asset_assessment', 'quali_impact', 'qualifications', 'justification']
 	},
+	'dora-incident-reports': {
+		head: [
+			'incident',
+			'incidentSubmission',
+			'reportCurrency',
+			'submittingEntity',
+			'folder',
+			'createdAt'
+		],
+		body: [
+			'incident',
+			'incident_submission',
+			'report_currency',
+			'submitting_entity',
+			'folder',
+			'created_at'
+		],
+		filters: {
+			folder: DOMAIN_FILTER
+		}
+	},
 	processings: {
 		head: ['refId', 'name', 'description', 'status', 'processingNature', 'labels', 'folder'],
 		body: ['ref_id', 'name', 'description', 'status', 'nature', 'filtering_labels', 'folder'],
+		optionalFields: {
+			head: ['personalDataCategories', 'dataSubjectCategories', 'updatedAt'],
+			body: ['personal_data_categories', 'data_subject_categories', 'updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			assigned_to: {
@@ -1820,6 +2299,8 @@ export const listViewFields = {
 			},
 			status: PROCESSING_STATUS_FILTER,
 			nature: PROCESSING_NATURE_FILTER,
+			personal_data__category: PERSONAL_DATA_CATEGORY_FILTER,
+			data_subjects__category: DATA_SUBJECT_CATEGORY_FILTER,
 			filtering_labels: LABELS_FILTER
 		}
 	},
@@ -1940,47 +2421,89 @@ export const listViewFields = {
 		}
 	},
 	purposes: {
-		head: ['name', 'description', 'legalBasis', 'processing'],
-		body: ['name', 'description', 'legal_basis', 'processing'],
+		head: ['legalBasis', 'description', 'customName', 'processing'],
+		body: ['legal_basis', 'description', 'name', 'processing'],
 		filters: {
 			processing: PROCESSING_FILTER,
 			legal_basis: LEGAL_BASIS_FILTER
 		}
 	},
 	'personal-data': {
-		head: ['processing', 'name', 'category', 'isSensitive', 'retention', 'deletionPolicy'],
-		body: ['processing', 'name', 'category', 'is_sensitive', 'retention', 'deletion_policy'],
+		head: [
+			'category',
+			'isSensitive',
+			'retention',
+			'deletionPolicy',
+			'customName',
+			'assets',
+			'processing'
+		],
+		body: [
+			'category',
+			'is_sensitive',
+			'retention',
+			'deletion_policy',
+			'name',
+			'assets',
+			'processing'
+		],
 		filters: {
 			processing: PROCESSING_FILTER,
-			category: PERSONAL_DATA_CATEGORY_FILTER
+			category: PERSONAL_DATA_CATEGORY_FILTER,
+			deletion_policy: { hide: true } as ListViewFilterConfig,
+			is_sensitive: { hide: true } as ListViewFilterConfig
 		}
 	},
 	'data-subjects': {
-		head: ['name', 'description', 'category'],
-		body: ['name', 'description', 'category']
+		head: ['category', 'description', 'customName'],
+		body: ['category', 'description', 'name']
 	},
 	'data-recipients': {
-		head: ['name', 'description', 'category'],
-		body: ['name', 'description', 'category']
+		head: ['category', 'description', 'customName'],
+		body: ['category', 'description', 'name']
 	},
 	'data-contractors': {
-		head: ['name', 'description', 'entity', 'relationshipType', 'country', 'documentationLink'],
-		body: ['name', 'description', 'entity', 'relationship_type', 'country', 'documentation_link']
+		head: ['entity', 'relationshipType', 'country', 'customName', 'documentationLink'],
+		body: ['entity', 'relationship_type', 'country', 'name', 'documentation_link']
 	},
 	'data-transfers': {
-		head: ['name', 'description', 'entity', 'country', 'legalBasis', 'documentationLink'],
-		body: ['name', 'description', 'entity', 'country', 'legal_basis', 'documentation_link']
+		head: ['entity', 'country', 'transferMechanism', 'customName', 'documentationLink'],
+		body: ['entity', 'country', 'transfer_mechanism', 'name', 'documentation_link'],
+		filters: {
+			transfer_mechanism: { hide: true } as ListViewFilterConfig
+		}
 	},
 	'ebios-rm': {
-		head: ['name', 'description', 'domain', 'quotationMethod', 'createdAt', 'updatedAt'],
-		body: ['name', 'description', 'folder', 'quotation_method', 'created_at', 'updated_at'],
+		head: [
+			'refId',
+			'name',
+			'description',
+			'domain',
+			'status',
+			'quotationMethod',
+			'createdAt',
+			'updatedAt'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'description',
+			'folder',
+			'status',
+			'quotation_method',
+			'created_at',
+			'updated_at'
+		],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			category: ORGANISATION_ISSUE_CATEGORY_FILTER,
+			origin: ORGANISATION_ISSUE_ORIGIN_FILTER,
+			status: ORGANISATION_ISSUE_STATUS_FILTER
 		}
 	},
 	'feared-events': {
-		head: ['selected', 'name', 'assets', 'description', 'qualifications', 'gravity'],
-		body: ['is_selected', 'name', 'assets', 'description', 'qualifications', 'gravity'],
+		head: ['selected', 'refId', 'name', 'assets', 'description', 'qualifications', 'gravity'],
+		body: ['is_selected', 'ref_id', 'name', 'assets', 'description', 'qualifications', 'gravity'],
 		filters: {
 			assets: ASSET_FILTER,
 			qualifications: QUALIFICATION_FILTER,
@@ -2136,6 +2659,10 @@ export const listViewFields = {
 			'associated_objects_count',
 			'created_at'
 		],
+		optionalFields: {
+			head: ['updatedAt'],
+			body: ['updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			severity: EXCEPTION_SEVERITY_FILTER,
@@ -2143,8 +2670,26 @@ export const listViewFields = {
 		}
 	},
 	'findings-assessments': {
-		head: ['ref_id', 'name', 'category', 'evidences', 'findings', 'perimeter'],
-		body: ['ref_id', 'name', 'category', 'evidences', 'findings_count', 'perimeter'],
+		head: [
+			'ref_id',
+			'name',
+			'category',
+			'evidences',
+			'findings',
+			'treatmentProgress',
+			'folder',
+			'perimeter'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'category',
+			'evidences',
+			'findings_count',
+			'treatment_progress',
+			'folder',
+			'perimeter'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -2155,6 +2700,7 @@ export const listViewFields = {
 		head: [
 			'ref_id',
 			'name',
+			'description',
 			'findings_assessment',
 			'severity',
 			'priority',
@@ -2166,6 +2712,7 @@ export const listViewFields = {
 		body: [
 			'ref_id',
 			'name',
+			'description',
 			'findings_assessment',
 			'severity',
 			'priority',
@@ -2174,6 +2721,10 @@ export const listViewFields = {
 			'applied_controls',
 			'filtering_labels'
 		],
+		optionalFields: {
+			head: ['createdAt', 'updatedAt'],
+			body: ['created_at', 'updated_at']
+		},
 		filters: {
 			filtering_labels: LABELS_FILTER,
 			severity: FINDINGS_SEVERITY_FILTER,
@@ -2207,13 +2758,18 @@ export const listViewFields = {
 			'reported_at',
 			'updated_at'
 		],
+		optionalFields: {
+			head: ['createdAt'],
+			body: ['created_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			qualifications: QUALIFICATION_FILTER,
 			entities: ENTITY_FILTER,
 			status: INCIDENT_STATUS_FILTER,
 			detection: INCIDENT_DETECTION_FILTER,
-			severity: INCIDENT_SEVERITY_FILTER
+			severity: INCIDENT_SEVERITY_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'timeline-entries': {
@@ -2229,24 +2785,70 @@ export const listViewFields = {
 		}
 	},
 	'organisation-objectives': {
-		head: ['refId', 'name', 'domain', 'status', 'health', 'dueDate', 'assignee'],
-		body: ['ref_id', 'name', 'folder', 'status', 'health', 'due_date', 'assigned_to'],
+		head: [
+			'refId',
+			'name',
+			'domain',
+			'status',
+			'health',
+			'isActive',
+			'startDate',
+			'eta',
+			'dueDate',
+			'closingDate',
+			'assignee'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'folder',
+			'status',
+			'health',
+			'is_active',
+			'start_date',
+			'eta',
+			'due_date',
+			'closing_date',
+			'assigned_to'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: ORGANISATION_OBJECTIVE_STATUS_FILTER,
-			health: ORGANISATION_OBJECTIVE_HEALTH_FILTER
+			health: ORGANISATION_OBJECTIVE_HEALTH_FILTER,
+			is_active: USER_IS_ACTIVE_FILTER
 		}
 	},
 	'organisation-issues': {
-		head: ['refId', 'name', 'category', 'origin', 'domain'],
-		body: ['ref_id', 'name', 'category', 'origin', 'folder'],
+		head: [
+			'refId',
+			'name',
+			'category',
+			'origin',
+			'status',
+			'startDate',
+			'expirationDate',
+			'domain'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'category',
+			'origin',
+			'status',
+			'start_date',
+			'expiration_date',
+			'folder'
+		],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			category: ORGANISATION_ISSUE_CATEGORY_FILTER,
+			origin: ORGANISATION_ISSUE_ORIGIN_FILTER,
+			status: ORGANISATION_ISSUE_STATUS_FILTER
 		}
 	},
 	'quantitative-risk-studies': {
-		head: ['name', 'description', 'status', 'updatedAt', 'domain'],
-		body: ['name', 'description', 'status', 'updated_at', 'folder'],
+		head: ['refId', 'name', 'description', 'status', 'updatedAt', 'domain'],
+		body: ['ref_id', 'name', 'description', 'status', 'updated_at', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: RISK_ASSESSMENT_STATUS_FILTER
@@ -2331,7 +2933,8 @@ export const listViewFields = {
 			'lastOccurrenceStatus',
 			'nextOccurrence',
 			'nextOccurrenceStatus',
-			'folder'
+			'folder',
+			'labels'
 		],
 		body: [
 			'ref_id',
@@ -2342,14 +2945,20 @@ export const listViewFields = {
 			'last_occurrence_status',
 			'next_occurrence',
 			'next_occurrence_status',
-			'folder'
+			'folder',
+			'filtering_labels'
 		],
+		optionalFields: {
+			head: ['createdAt', 'updatedAt'],
+			body: ['created_at', 'updated_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			assigned_to: TASK_TEMPLATE_ASSIGNED_TO_FILTER,
 			is_recurrent: IS_RECURRENT_FILTER,
 			last_occurrence_status: LAST_OCCURENCE_STATUS_FILTER,
-			next_occurrence_status: NEXT_OCCURENCE_STATUS_FILTER
+			next_occurrence_status: NEXT_OCCURENCE_STATUS_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'task-nodes': {
@@ -2364,18 +2973,41 @@ export const listViewFields = {
 		head: ['name', 'abbreviation'],
 		body: ['name', 'abbreviation']
 	},
+	'custom-fields': {
+		head: ['model', 'key', 'label', 'fieldType', 'required', 'domain'],
+		body: ['model_label', 'key', 'label', 'field_type', 'required', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER
+		}
+	},
 	terminologies: {
 		head: ['field_path', 'name', 'description', 'translations', 'is_visible'],
-		body: ['field_path', 'name', 'description', 'translations', 'is_visible'],
+		body: ['field_path', 'translated_name', 'description', 'translations', 'is_visible'],
 		filters: {
 			field_path: FIELD_PATH_FILTER,
 			builtin: BUILTIN_FILTER,
 			is_visible: IS_VISIBLE_FILTER
 		}
 	},
+	'object-classifications': {
+		head: ['name', 'description', 'ref_id', 'is_visible'],
+		body: ['name', 'description', 'ref_id', 'is_visible'],
+		filters: {
+			builtin: BUILTIN_FILTER,
+			is_visible: IS_VISIBLE_FILTER
+		}
+	},
+	'classification-levels': {
+		head: ['rank', 'abbreviation', 'name', 'hexcolor', 'is_visible'],
+		body: ['rank', 'abbreviation', 'name', 'hexcolor', 'is_visible'],
+		filters: {
+			builtin: BUILTIN_FILTER,
+			is_visible: IS_VISIBLE_FILTER
+		}
+	},
 	'generic-collections': {
-		head: ['ref_id', 'name', 'description', 'labels', 'folder'],
-		body: ['ref_id', 'name', 'description', 'filtering_labels', 'folder'],
+		head: ['ref_id', 'name', 'description', 'project', 'labels', 'folder'],
+		body: ['ref_id', 'name', 'description', 'projects', 'filtering_labels', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			filtering_labels: LABELS_FILTER
@@ -2391,6 +3023,40 @@ export const listViewFields = {
 			authority: ACCREDITATION_AUTHORITY_FILTER,
 			filtering_labels: LABELS_FILTER
 		}
+	},
+	projects: {
+		head: ['kind', 'ref_id', 'name', 'status', 'health', 'owner', 'progress', 'folder'],
+		body: ['kind', 'ref_id', 'name', 'status', 'health', 'owner', 'progress', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			kind: PROJECT_KIND_FILTER,
+			status: PROJECT_STATUS_FILTER,
+			health: PROJECT_HEALTH_FILTER,
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	'responsibility-matrices': {
+		head: ['ref_id', 'name', 'preset', 'activities_count', 'folder'],
+		body: ['ref_id', 'name', 'preset', 'activities_count', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	'responsibility-roles': {
+		head: ['code', 'name', 'taxonomy', 'color', 'order', 'builtin'],
+		body: ['code', 'name', 'taxonomy', 'color', 'order', 'builtin'],
+		filters: {}
+	},
+	'responsibility-matrix-activities': {
+		head: ['name', 'description', 'order', 'matrix'],
+		body: ['name', 'description', 'order', 'matrix'],
+		filters: {}
+	},
+	'responsibility-assignments': {
+		head: ['activity', 'actor', 'role'],
+		body: ['activity', 'actor', 'role'],
+		filters: {}
 	},
 	'metric-definitions': {
 		head: ['ref_id', 'name', 'description', 'category', 'unit', 'provider', 'labels', 'folder'],
@@ -2592,6 +3258,13 @@ export const listViewFields = {
 			gravity: undefined
 		},
 		body: ['users']
+	},
+	journeys: {
+		head: ['name', 'preset', 'folder', 'appliedVersion', 'appliedAt', 'appliedBy'],
+		body: ['name', 'preset', 'folder', 'applied_version', 'applied_at', 'applied_by'],
+		filters: {
+			folder: DOMAIN_FILTER
+		}
 	}
 } as const satisfies ListViewFieldsConfig;
 
@@ -2607,7 +3280,8 @@ export const contextMenuActions = {
 		{ component: ChangeImpact, props: {} },
 		{ component: ChangeEffort, props: {} },
 		{ component: ChangePriority, props: {} },
-		{ component: ChangeCsfFunction, props: {} }
+		{ component: ChangeCsfFunction, props: {} },
+		{ component: ReplaceWith, props: {} }
 	],
 	evidences: [{ component: EvidenceChangeStatus, props: {} }],
 	'task-nodes': [{ component: TaskNodeChangeStatus, props: {} }],
@@ -2616,15 +3290,576 @@ export const contextMenuActions = {
 	stakeholders: [{ component: SelectObject, props: {} }],
 	'attack-paths': [{ component: SelectObject, props: {} }],
 	'operational-scenarios': [{ component: SelectObject, props: {} }],
-	'elementary-actions': [{ component: ChangeAttackStage, props: {} }]
+	'elementary-actions': [{ component: ChangeAttackStage, props: {} }],
+	vulnerabilities: [
+		{ component: VulnerabilityChangeStatus, props: {} },
+		{ component: VulnerabilityChangeSeverity, props: {} }
+	]
 };
+
+// Batch action configuration
+export interface BatchActionConfig {
+	type:
+		| 'delete'
+		| 'change_field'
+		| 'change_m2m'
+		| 'add_m2m'
+		| 'remove_m2m'
+		| 'change_folder'
+		| 'group'
+		| 'merge';
+	label: string;
+	icon: string;
+	field?: string;
+	optionsEndpoint?: string;
+	enableDoubleDash?: boolean;
+	multiSelect?: boolean;
+	children?: BatchActionConfig[];
+	minSelection?: number;
+	maxSelection?: number;
+}
+
+export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
+	'document-templates': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	'applied-controls': [
+		{
+			type: 'group',
+			label: 'changeAttributes',
+			icon: 'fa-solid fa-sliders',
+			children: [
+				{
+					type: 'change_field',
+					label: 'changeStatus',
+					icon: 'fa-solid fa-arrow-right-arrow-left',
+					field: 'status',
+					optionsEndpoint: 'applied-controls/status'
+				},
+				{
+					type: 'change_field',
+					label: 'batchChangePriority',
+					icon: 'fa-solid fa-arrow-up-wide-short',
+					field: 'priority',
+					optionsEndpoint: 'applied-controls/priority',
+					enableDoubleDash: true
+				},
+				{
+					type: 'change_field',
+					label: 'changeCsfFunction',
+					icon: 'fa-solid fa-shield-halved',
+					field: 'csf_function',
+					optionsEndpoint: 'applied-controls/csf_function',
+					enableDoubleDash: true
+				}
+			]
+		},
+		{
+			type: 'change_m2m',
+			label: 'changeOwner',
+			icon: 'fa-solid fa-user-pen',
+			field: 'owner',
+			optionsEndpoint: 'actors',
+			multiSelect: true
+		},
+		{
+			type: 'group',
+			label: 'manageLabels',
+			icon: 'fa-solid fa-tags',
+			children: [
+				{
+					type: 'add_m2m',
+					label: 'addLabels',
+					icon: 'fa-solid fa-plus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				},
+				{
+					type: 'remove_m2m',
+					label: 'removeLabels',
+					icon: 'fa-solid fa-minus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				}
+			]
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{
+			type: 'merge',
+			label: 'mergeControls',
+			icon: 'fa-solid fa-code-merge',
+			minSelection: 2,
+			maxSelection: 20
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	policies: [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'policies/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{
+			type: 'merge',
+			label: 'mergeControls',
+			icon: 'fa-solid fa-code-merge',
+			minSelection: 2,
+			maxSelection: 20
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	evidences: [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'evidences/status'
+		},
+		{
+			type: 'change_m2m',
+			label: 'changeOwner',
+			icon: 'fa-solid fa-user-pen',
+			field: 'owner',
+			optionsEndpoint: 'actors',
+			multiSelect: true
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	incidents: [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'incidents/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'risk-scenarios': [
+		{
+			type: 'change_field',
+			label: 'changeTreatment',
+			icon: 'fa-solid fa-shield-halved',
+			field: 'treatment',
+			optionsEndpoint: 'risk-scenarios/treatment'
+		},
+		{
+			type: 'change_m2m',
+			label: 'changeOwner',
+			icon: 'fa-solid fa-user-pen',
+			field: 'owner',
+			optionsEndpoint: 'actors',
+			multiSelect: true
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'risk-assessments': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'risk-assessments/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'compliance-assessments': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'compliance-assessments/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'business-impact-analysis': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'business-impact-analysis/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	findings: [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'findings/status'
+		},
+		{
+			type: 'change_m2m',
+			label: 'changeOwner',
+			icon: 'fa-solid fa-user-pen',
+			field: 'owner',
+			optionsEndpoint: 'actors',
+			multiSelect: true
+		},
+		{
+			type: 'group',
+			label: 'manageLabels',
+			icon: 'fa-solid fa-tags',
+			children: [
+				{
+					type: 'add_m2m',
+					label: 'addLabels',
+					icon: 'fa-solid fa-plus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				},
+				{
+					type: 'remove_m2m',
+					label: 'removeLabels',
+					icon: 'fa-solid fa-minus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				}
+			]
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'task-nodes': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'task-nodes/status'
+		}
+	],
+	'requirement-assessments': [
+		{
+			type: 'change_field',
+			label: 'changeResult',
+			icon: 'fa-solid fa-clipboard-check',
+			field: 'result',
+			optionsEndpoint: 'requirement-assessments/result'
+		}
+	],
+	'organisation-objectives': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'organisation-objectives/status'
+		},
+		{
+			type: 'change_field',
+			label: 'changeHealth',
+			icon: 'fa-solid fa-heart-pulse',
+			field: 'health',
+			optionsEndpoint: 'organisation-objectives/health'
+		},
+		{
+			type: 'change_field',
+			label: 'changeIsActive',
+			icon: 'fa-solid fa-toggle-on',
+			field: 'is_active',
+			optionsEndpoint: 'organisation-objectives/is_active'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'task-templates': [
+		{
+			type: 'change_m2m',
+			label: 'changeAssignee',
+			icon: 'fa-solid fa-user-pen',
+			field: 'assigned_to',
+			optionsEndpoint: 'actors',
+			multiSelect: true
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	assets: [
+		{
+			type: 'change_m2m',
+			label: 'changeOwner',
+			icon: 'fa-solid fa-user-pen',
+			field: 'owner',
+			optionsEndpoint: 'actors',
+			multiSelect: true
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'security-exceptions': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'security-exceptions/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	vulnerabilities: [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'vulnerabilities/status'
+		},
+		{
+			type: 'change_field',
+			label: 'changeSeverity',
+			icon: 'fa-solid fa-arrow-up-wide-short',
+			field: 'severity',
+			optionsEndpoint: 'vulnerabilities/severity'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'security-advisories': [
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	cwes: [
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	campaigns: [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'campaigns/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	contracts: [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'contracts/status'
+		},
+		{
+			type: 'change_m2m',
+			label: 'changeOwner',
+			icon: 'fa-solid fa-user-pen',
+			field: 'owner',
+			optionsEndpoint: 'actors',
+			multiSelect: true
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'organisation-issues': [
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'validation-flows': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	'quantitative-risk-studies': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	'ebios-rm': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	entities: [
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	representatives: [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	solutions: [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	'entity-assessments': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	'data-transfers': [
+		{
+			type: 'change_field',
+			label: 'changeTransferMechanism',
+			icon: 'fa-solid fa-right-left',
+			field: 'transfer_mechanism',
+			optionsEndpoint: 'data-transfers/transfer_mechanism'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'personal-data': [
+		{
+			type: 'change_field',
+			label: 'changeDeletionPolicy',
+			icon: 'fa-solid fa-clock-rotate-left',
+			field: 'deletion_policy',
+			optionsEndpoint: 'personal-data/deletion_policy'
+		},
+		{
+			type: 'change_field',
+			label: 'changeIsSensitive',
+			icon: 'fa-solid fa-shield-halved',
+			field: 'is_sensitive',
+			optionsEndpoint: 'personal-data/is_sensitive'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	processings: [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'processings/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'findings-assessments': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'findings-assessments/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'metric-instances': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'metric-instances/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	]
+};
+
+export function getBatchActions(model: urlModel): BatchActionConfig[] {
+	return batchActions[model] ?? [];
+}
 
 export function getListViewFields({
 	key,
-	featureFlags = {}
+	featureFlags = {},
+	includeOptional = false
 }: {
 	key: string;
 	featureFlags: Record<string, boolean>;
+	includeOptional?: boolean;
 }) {
 	if (!Object.keys(listViewFields).includes(key)) {
 		return { head: [], body: [] };
@@ -2649,6 +3884,12 @@ export function getListViewFields({
 		body = body.filter((_, index) => !indicesToPop.includes(index));
 	}
 
+	// Optional fields are appended after the defaults but are hidden by default in the UI.
+	if (includeOptional && baseEntry.optionalFields) {
+		head = [...head, ...baseEntry.optionalFields.head];
+		body = [...body, ...baseEntry.optionalFields.body];
+	}
+
 	return {
 		...baseEntry,
 		head,
@@ -2656,8 +3897,11 @@ export function getListViewFields({
 	};
 }
 
-export const headData = (model: urlModel) =>
-	listViewFields[model].body.reduce((obj, key, index) => {
-		obj[key] = listViewFields[model].head[index];
-		return obj;
-	}, {});
+export const headData = (model: urlModel): Record<string, string> =>
+	listViewFields[model].body.reduce(
+		(obj, key, index) => {
+			obj[key] = listViewFields[model].head[index];
+			return obj;
+		},
+		{} as Record<string, string>
+	);

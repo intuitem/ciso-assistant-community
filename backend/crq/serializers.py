@@ -6,6 +6,8 @@ from core.serializers import (
     ActionPlanSerializer,
 )
 from core.models import AppliedControl
+from core.utils import get_global_currency
+from pmbok.models import GenericCollection
 
 from .models import (
     QuantitativeRiskHypothesis,
@@ -77,9 +79,25 @@ class ImpactField(serializers.Field):
 
 
 class QuantitativeRiskStudyWriteSerializer(BaseModelSerializer):
+    genericcollection = serializers.PrimaryKeyRelatedField(
+        source="genericcollection_set",
+        many=True,
+        required=False,
+        queryset=GenericCollection.objects.all(),
+    )
+
     class Meta:
         model = QuantitativeRiskStudy
         exclude = ["created_at", "updated_at"]
+
+    def validate_risk_tolerance(self, value):
+        """
+        Strip curve_data from incoming risk_tolerance since it should always
+        be computed by the backend based on the points values.
+        """
+        if value and isinstance(value, dict):
+            value.pop("curve_data", None)
+        return value
 
     def update(self, instance, validated_data):
         old_folder_id = instance.folder_id
@@ -343,7 +361,7 @@ class QuantitativeRiskHypothesisReadSerializer(BaseModelSerializer):
     roc = serializers.DecimalField(max_digits=12, decimal_places=4, read_only=True)
     roc_display = serializers.CharField(read_only=True)
     roc_interpretation = serializers.CharField(read_only=True)
-    roc_calculation_explanation = serializers.CharField(read_only=True)
+    roc_calculation_explanation = serializers.JSONField(read_only=True)
     folder = FieldsRelatedField()
 
     def get_lec_data(self, obj):
@@ -392,10 +410,7 @@ class QuantitativeRiskHypothesisReadSerializer(BaseModelSerializer):
 
     def get_currency(self, obj):
         """Return currency symbol from global settings"""
-        from global_settings.models import GlobalSettings
-
-        general_settings = GlobalSettings.objects.filter(name="general").first()
-        return general_settings.value.get("currency", "€") if general_settings else "€"
+        return get_global_currency()
 
     loss_threshold = serializers.SerializerMethodField()
     loss_threshold_display = serializers.SerializerMethodField()

@@ -1,5 +1,6 @@
 <script lang="ts">
 	// Stores
+	import * as m from '$paraglide/messages';
 	import type { ModelInfo } from '$lib/utils/types';
 	import type { ModalStore } from '@skeletonlabs/skeleton-svelte';
 	const modalStore: ModalStore = getModalStore();
@@ -7,18 +8,18 @@
 	let closeModal = true;
 
 	// Base Classes
-	const cBase = 'card bg-surface-50 p-4 w-fit max-w-4xl shadow-xl space-y-4';
+	const cBase = 'card bg-surface-50-950 p-4 w-fit max-w-4xl shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold whitespace-pre-line';
 
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { AnyZodObject } from 'zod';
+	import type { FormDataShape } from '$lib/utils/schemas';
 	import { getModalStore } from './stores';
 	import { onMount, tick } from 'svelte';
 	interface Props {
 		/** Exposes parent props to this component. */
 		parent: any;
-		form: SuperValidated<AnyZodObject>;
+		form: SuperValidated<FormDataShape>;
 		customNameDescription?: boolean;
 		importFolder?: boolean;
 		model: ModelInfo;
@@ -39,7 +40,9 @@
 		form,
 		importFolder = false,
 		model,
-		customNameDescription = model.customNameDescription ?? false,
+		customNameDescription = model?.customNameDescription ??
+			model?.info?.customNameDescription ??
+			false,
 		duplicate = false,
 		invalidateAll = true,
 		formAction = '?/create',
@@ -68,15 +71,14 @@
 			<header class={cHeader} data-testid="modal-title">
 				{$modalStore[0].title ?? '(title missing)'}
 			</header>
-			<div
-				role="button"
-				tabindex="0"
+			<button
+				type="button"
+				aria-label={m.close()}
 				class="flex items-center hover:text-primary-500 cursor-pointer"
 				onclick={parent.onClose}
-				onkeydown={parent.onClose}
 			>
 				<i class="fa-solid fa-xmark"></i>
-			</div>
+			</button>
 		</div>
 		<ModelForm
 			{form}

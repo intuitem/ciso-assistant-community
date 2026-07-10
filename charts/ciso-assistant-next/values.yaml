@@ -18,6 +18,21 @@ global:
   # -- Extra allowed hosts (comma separated, without spaces)
   extraAllowedHosts: ""
 
+  ## Extra CA certificate trusted by every pod (backend, Huey and frontend).
+  ## Provide only your CA in the secret: trust is added on top of the system roots,
+  ## not replaced, so public CAs keep working. For Python (backend/Huey) an init
+  ## container merges the system bundle with your CA; for Node (frontend) it is set
+  ## via the additive NODE_EXTRA_CA_CERTS.
+  extraCerts:
+    # -- Trust an extra CA certificate on all pods (added to the default roots, not replacing them)
+    enabled: false
+    # -- Name of an existing secret holding the CA certificate
+    secretName: ""
+    # -- Key inside the secret (also the file name once mounted)
+    fileName: ca.crt
+    # -- Directory where the certificate / merged bundle is mounted
+    mountPath: /etc/ssl/extra-certs
+
   # Default image used by all components
   image:
     # -- If defined, a registry applied to all CISO Assistant deployments
@@ -44,11 +59,34 @@ global:
   #  supplementalGroups: []
   #  fsGroup: 1001
 
+  # NOTE: per-component affinity, nodeSelector and tolerations
+  # fall back to global.affinity, global.nodeSelector, and global.tolerations
+  # respectively when left empty ({} / []). To skip the global fallback,
+  # set the per-component (backend/frontend) key to a non-empty value,
+  # or leave the global keys unset.
+
   # -- Default node selector for all components
   nodeSelector: {} # @schema additionalProperties: true
 
   # -- Default tolerations for all components
   tolerations: []
+
+  # -- Affinity rules for all components
+  affinity: {} # @schema additionalProperties: true
+
+## Service Account
+serviceAccount:
+  # -- Create a service account for CISO Assistant
+  create: false
+  # -- Service account name
+  # @default -- `""` (defaults to fullname)
+  name: ""
+  # -- Annotations applied to created service account
+  annotations: {} # @schema additionalProperties: true
+  # -- Labels applied to created service account
+  labels: {} # @schema additionalProperties: true
+  # -- Automount API credentials for the Service Account
+  automountServiceAccountToken: true
 
 ## CISO Assistant backend
 backend:
@@ -79,15 +117,18 @@ backend:
       host: smtp.server.local
       # -- SMTP post
       port: 25
-      # -- Enable TLS for SMTP
+      # -- Enable TLS for SMTP (explicit TLS)
       useTls: false
+      # -- Enable SSL for SMTP (implicit TLS)
+      ## Note: useSsl takes precedence over useTls when both are enabled
+      useSsl: false
       # -- SMTP username
       username: ""
       # -- SMTP password
       password: ""
 
     # -- Set the database type (sqlite, pgsql or externalPgsql)
-    ## Note : PostgreSQL database configuration at `postgresql` or `externalPgsql` section
+    ## Note: PostgreSQL database configuration at `postgresql` or `externalPgsql` section
     databaseType: sqlite
 
     # -- Set Django secret key
@@ -97,6 +138,26 @@ backend:
 
     # -- Enable Django debug mode
     djangoDebug: false
+
+    ## AI assistant / chat feature
+    ## Note: requires a reachable Qdrant (enable `qdrant.enabled` or provide QDRANT_URL
+    ## via backend.env / backend.huey.env) and an LLM provider configured from the in-app settings.
+    chat:
+      # -- Enable the AI assistant / chat feature (sets ENABLE_CHAT)
+      enabled: false
+
+  # -- Set extra volumes for backend
+  extraVolumes: []
+    #   - name: ca-certs
+    #     secret:
+    #       secretName: my-ca-cert
+
+  # -- Set extra volume mounts for backend container
+  extraVolumeMounts: []
+    #   - name: ca-certs
+    #     mountPath: /usr/local/share/ca-certificates/custom-ca.crt
+    #     subPath: ca.crt
+    #     readOnly: true
 
   ## Huey config
   huey:
@@ -114,6 +175,13 @@ backend:
       #   limits:
       #     cpu: 256m
       #     memory: 1024Mi
+
+    # -- Set extra volume mounts for Huey container
+    extraVolumeMounts: []
+      #   - name: ca-certs
+      #     mountPath: /usr/local/share/ca-certificates/custom-ca.crt
+      #     subPath: ca.crt
+      #     readOnly: true
 
   ## Backend persistence configuration (used for sqlite DBs and local storage)
   persistence:
@@ -168,6 +236,15 @@ backend:
     #     cpu: 256m
     #     memory: 1024Mi
 
+  # -- Default node selector for backend
+  nodeSelector: {} # @schema additionalProperties: true
+
+  # -- Default tolerations for backend
+  tolerations: []
+
+  # -- Affinity rules for backend
+  affinity: {} # @schema additionalProperties: true
+
   # -- Environment variables to pass to backend
   env: []
 
@@ -216,6 +293,19 @@ frontend:
     # -- Configure body size limit for uploads in bytes (unit suffix like K/M/G can be used)
     bodySizeLimit: "50M"
 
+  # -- Set extra volumes for frontend
+  extraVolumes: []
+    #   - name: ca-certs
+    #     secret:
+    #       secretName: my-ca-cert
+
+  # -- Set extra volume mounts for frontend container
+  extraVolumeMounts: []
+    #   - name: ca-certs
+    #     mountPath: /usr/local/share/ca-certificates/custom-ca.crt
+    #     subPath: ca.crt
+    #     readOnly: true
+
   ## Frontend image
   image:
     # -- Registry to use for the frontend
@@ -242,6 +332,15 @@ frontend:
     #   limits:
     #     cpu: 256m
     #     memory: 1024Mi
+
+  # -- Default node selector for frontend
+  nodeSelector: {} # @schema additionalProperties: true
+
+  # -- Default tolerations for frontend
+  tolerations: []
+
+  # -- Affinity rules for frontend
+  affinity: {} # @schema additionalProperties: true
 
   # -- Environment variables to pass to frontend
   env: []
@@ -306,9 +405,30 @@ ingress:
       #   ...
       #   -----END CERTIFICATE-----
 
-## Bundeled PostgreSQL database configuration (Bitnami chart)
+## NetworkPolicy configuration
+networkPolicy:
+  # -- Create a NetworkPolicy for CISO Assistant pods
+  enabled: false
+  # -- Policy types to enable (Ingress and/or Egress)
+  policyTypes:
+    - Ingress
+  # -- Pod selector the policy applies to
+  # @default -- all pods of this release
+  podSelector: {} # @schema additionalProperties: true
+  ## Example:
+  ##   - from:
+  ##       - namespaceSelector:
+  ##           matchLabels:
+  ##             kubernetes.io/metadata.name: ingress-nginx
+  # -- Ingress rules (raw Kubernetes NetworkPolicy `ingress` entries)
+  ingress: []
+  # -- Egress rules (raw Kubernetes NetworkPolicy `egress` entries)
+  egress: []
+
+## DEPRECATED - Bundled PostgreSQL database configuration (Bitnami chart)
 ## Ref: https://artifacthub.io/packages/helm/bitnami/postgresql
 ## Note: Don't enable if you use SQLite mode or external PgSQL database
+## IMPORTANT: Bitnami PostgreSQL deployment will be removed in a future version, you should use SQLite mode or externalPgsql
 postgresql: # @schema additionalProperties: true
   # -- Enable to deploy PostgreSQL.
   enabled: false
@@ -346,3 +466,39 @@ externalPgsql:
   database: ciso-assistant
   # -- Port of an external PostgreSQL to connect
   port: 5432
+
+## Qdrant vector database (AI assistant / RAG)
+## Deployed via the official Qdrant chart (https://github.com/qdrant/qdrant-helm)
+## as a StatefulSet with persistence and health probes out of the box.
+## When enabled, QDRANT_URL is injected into the backend and Huey containers.
+## Any key below is passed through to the Qdrant subchart, refer to its values for
+## the full set of options (replicaCount, persistence, image, resources, ...).
+qdrant: # @schema additionalProperties: true
+  # -- Deploy the bundled Qdrant (official subchart) and inject QDRANT_URL
+  enabled: false
+
+  # -- Number of Qdrant replicas (requires `qdrant.config.cluster.enabled`)
+  replicaCount: 1
+
+  # -- Qdrant storage persistence
+  persistence: # @schema additionalProperties: true
+    accessModes: ["ReadWriteOnce"]
+    size: 10Gi
+    annotations: {} # @schema additionalProperties: true
+    additionalLabels: {} # @schema additionalProperties: true
+    # storageVolumeName: qdrant-storage
+    # storageSubPath: ""
+    # storageClassName: local-path
+    # volumeAttributesClassName: ""
+
+  # -- Qdrant runtime configuration
+  config: # @schema additionalProperties: true
+    cluster: # @schema additionalProperties: true
+      enabled: true
+      p2p: # @schema additionalProperties: true
+        port: 6335
+        enable_tls: false
+      consensus: # @schema additionalProperties: true
+        tick_period_ms: 100
+    service: # @schema additionalProperties: true
+      enable_tls: false

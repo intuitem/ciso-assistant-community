@@ -45,6 +45,15 @@ export class FormContent {
 	}
 
 	async fill(values: { [k: string]: any }) {
+		const modal = this.page.getByTestId('modal-backdrop');
+		if (await modal.isVisible({ timeout: 100 }).catch(() => false)) {
+			const moreTrigger = modal
+				.locator('[data-scope="accordion"][data-part="item-trigger"][data-state="closed"]')
+				.first();
+			if (await moreTrigger.isVisible({ timeout: 200 }).catch(() => false)) {
+				await moreTrigger.click();
+			}
+		}
 		for (const key in values) {
 			const field = this.fields.get(key);
 			for (const spinner of await this.page.locator('.loading-spinner').all()) {
@@ -105,10 +114,15 @@ export class FormContent {
 								await responsePromise;
 							} else {
 								await field.locator.click();
-								await expect(
-									field.locator.getByRole('option', { name: values[key] }).first()
-								).toBeVisible({ timeout: 10_000 });
-								await field.locator.getByRole('option', { name: values[key] }).first().click();
+								const optionLocator = field.locator
+									.getByRole('option', { name: values[key] })
+									.first();
+								// If the option isn't immediately visible, type to trigger lazy search
+								if (!(await optionLocator.isVisible())) {
+									await field.locator.getByRole('textbox').fill(values[key]);
+								}
+								await expect(optionLocator).toBeVisible({ timeout: 10_000 });
+								await optionLocator.click();
 							}
 						}
 					}).toPass({ timeout: 22_000, intervals: [500, 1000, 10_000] });
@@ -116,8 +130,13 @@ export class FormContent {
 				case FormFieldType.SELECT_MULTIPLE_AUTOCOMPLETE:
 					await field.locator.click();
 					for (const val of values[key]) {
-						await expect(field.locator.getByRole('option', { name: val }).first()).toBeVisible();
-						await field.locator.getByRole('option', { name: val }).first().click();
+						const optionLocator = field.locator.getByRole('option', { name: val }).first();
+						// If the option isn't immediately visible, type to trigger lazy search
+						if (!(await optionLocator.isVisible())) {
+							await field.locator.getByRole('textbox').fill(val);
+						}
+						await expect(optionLocator).toBeVisible({ timeout: 10_000 });
+						await optionLocator.click();
 					}
 					if (
 						(await field.locator.isEnabled()) &&

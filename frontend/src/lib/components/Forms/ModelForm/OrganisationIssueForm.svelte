@@ -25,13 +25,6 @@
 	}: Props = $props();
 </script>
 
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
 <Select
 	{form}
 	options={model.selectOptions['origin']}
@@ -48,9 +41,19 @@
 	cacheLock={cacheLocks['category']}
 	bind:cachedValue={formDataCache['category']}
 />
+<Select
+	{form}
+	options={model.selectOptions['status']}
+	field="status"
+	label={m.status()}
+	disableDoubleDash={true}
+	cacheLock={cacheLocks['status']}
+	bind:cachedValue={formDataCache['status']}
+/>
 <AutocompleteSelect
 	{form}
 	multiple
+	lazy
 	optionsEndpoint="assets"
 	optionsLabelField="auto"
 	optionsExtraFields={[['folder', 'str']]}
@@ -75,11 +78,19 @@
 	cacheLock={cacheLocks['observation']}
 	bind:cachedValue={formDataCache['observation']}
 />
-<AutocompleteSelect
+<TextField
+	type="date"
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
+	field="start_date"
+	label={m.startDate()}
+	cacheLock={cacheLocks['start_date']}
+	bind:cachedValue={formDataCache['start_date']}
+/>
+<TextField
+	type="date"
+	{form}
+	field="expiration_date"
+	label={m.expiryDate()}
+	cacheLock={cacheLocks['expiration_date']}
+	bind:cachedValue={formDataCache['expiration_date']}
 />

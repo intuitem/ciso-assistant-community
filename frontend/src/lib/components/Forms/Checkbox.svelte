@@ -76,7 +76,7 @@
 			{:else if checkboxComponent === 'switch'}
 				<Switch
 					name={field}
-					{classes}
+					class={classes}
 					data-testid="form-input-{field.replaceAll('_', '-')}"
 					checked={Boolean($value)}
 					onCheckedChange={(e) => {
@@ -86,7 +86,12 @@
 					{...$constraints}
 					{...rest}
 					{disabled}
-				/>
+				>
+					<Switch.Control>
+						<Switch.Thumb />
+					</Switch.Control>
+					<Switch.HiddenInput />
+				</Switch>
 			{/if}
 		</div>
 	</div>
@@ -98,6 +103,6 @@
 		</div>
 	{/if}
 	{#if helpText}
-		<p class="text-sm text-gray-500">{helpText}</p>
+		<p class="text-sm text-surface-600-400">{helpText}</p>
 	{/if}
 </div>

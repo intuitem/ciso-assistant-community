@@ -2,13 +2,18 @@
 	import { page } from '$app/state';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import List from '$lib/components/List/List.svelte';
+	import BatchCreatePersonalDataModal from '$lib/components/Modals/BatchCreatePersonalDataModal.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
+	import RiskAcceptanceModal from '$lib/components/Modals/RiskAcceptanceModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import SelectExistingModal from '$lib/components/Modals/SelectExistingModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import CustomFieldsDisplay from '$lib/components/Forms/CustomFieldsDisplay.svelte';
+	import { booleanDisplay } from '$lib/utils/boolean-display';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import { type ModelMapEntry, type ReverseForeignKeyField } from '$lib/utils/crud';
 	import { getModelInfo } from '$lib/utils/crud.js';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import { formatDate, formatDateOrDateTime } from '$lib/utils/datetime';
 	import { isURL } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales.js';
@@ -24,6 +29,7 @@
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { getListViewFields } from '$lib/utils/table';
 	import { canPerformAction } from '$lib/utils/access-control';
+	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
@@ -33,14 +39,31 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const defaultExcludes = [
-		'id',
-		'is_published',
-		'localization_dict',
-		'str',
-		'path',
-		'sync_mappings'
-	];
+	const defaultExcludes = ['id', 'is_published', 'str', 'path', 'sync_mappings'];
+
+	// Format the raw numbers of the ROSI explanation per the active locale.
+	function formatRosiExplanationParams(params: Record<string, number> | undefined) {
+		if (!params) return {};
+		const locale = getLocale();
+		const amount = (value: number) =>
+			new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
+				value
+			);
+		const percent = (value: number) =>
+			new Intl.NumberFormat(locale, {
+				style: 'percent',
+				minimumFractionDigits: 1,
+				maximumFractionDigits: 1
+			}).format(value);
+		return {
+			currentAle: amount(params.currentAle),
+			residualAle: amount(params.residualAle),
+			riskReduction: amount(params.riskReduction),
+			treatmentCost: amount(params.treatmentCost),
+			netBenefit: amount(params.netBenefit),
+			rosi: percent(params.rosi)
+		};
+	}
 
 	interface Props {
 		data: any;
@@ -74,8 +97,12 @@
 			'validation_deadline',
 			'timestamp',
 			'reported_at',
+			'occurred_at',
+			'resolved_at',
 			'due_date',
-			'start_date'
+			'start_date',
+			'closing_date',
+			'commission_date'
 		],
 		widgets,
 		actions,
@@ -186,6 +213,70 @@
 		modalStore.trigger(modal);
 	}
 
+	function modalSelectExisting(field: ReverseForeignKeyField): void {
+		if (!field.addExisting || !data.updateForm) return;
+		const addExisting = field.addExisting;
+		const modalComponent: ModalComponent = {
+			ref: SelectExistingModal,
+			props: {
+				form: data.updateForm,
+				urlModel: data.urlModel,
+				field: addExisting.parentField,
+				optionsEndpoint: addExisting.optionsEndpoint ?? field.endpointUrl ?? field.urlModel,
+				label: addExisting.label,
+				optionsInfoFields: addExisting.optionsInfoFields,
+				lazy: addExisting.lazy
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: safeTranslate(addExisting.label ?? 'selectExisting')
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalBatchCreate(field: ReverseForeignKeyField, parentId: string): void {
+		if (!field.batchCreate) return;
+		const modalComponent: ModalComponent = {
+			ref: BatchCreatePersonalDataModal,
+			props: {
+				processingId: parentId,
+				urlModel: field.urlModel
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: safeTranslate(field.batchCreate.label ?? 'batchCreate')
+		};
+		modalStore.trigger(modal);
+	}
+	function modalRiskAcceptanceApproval(id: string, name: string, action: string): void {
+		const urlModel = getModelInfo('risk-acceptances').urlModel;
+		const modalComponent: ModalComponent = {
+			ref: RiskAcceptanceModal,
+			props: {
+				_form: {
+					id: id,
+					urlmodel: urlModel,
+					justification: action.includes('revoke') ? (data.data.justification ?? '') : ''
+				},
+				id: id,
+				debug: false,
+				URLModel: urlModel,
+				formAction: action
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.confirmModalTitle(),
+			body: `${m.confirmModalMessage()}: ${name}?`
+		};
+		modalStore.trigger(modal);
+	}
+
 	function modalConfirm(id: string, name: string, action: string): void {
 		const urlModel = getModelInfo('risk-acceptances').urlModel;
 		const modalComponent: ModalComponent = {
@@ -208,7 +299,7 @@
 		modalStore.trigger(modal);
 	}
 
-	function modalAppliedControlDuplicateForm(): void {
+	function modalDuplicateForm(titleKey: () => string): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
 			props: {
@@ -223,7 +314,7 @@
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			title: m.duplicateAppliedControl()
+			title: titleKey()
 		};
 		modalStore.trigger(modal);
 	}
@@ -355,7 +446,7 @@
 				{m.riskAcceptanceNotYetSubmittedMessage()}
 			</div>
 		</div>
-	{:else if data.data.state === 'Submitted' && page.data.user.id === data.data.approver.id}
+	{:else if data.data.state === 'Submitted' && page.data.user.id === data.data.approver?.id}
 		<div
 			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container shadow-sm px-6 py-2 justify-between"
 		>
@@ -365,18 +456,16 @@
 			<div class="flex space-x-2">
 				<button
 					onclick={(_) => {
-						modalConfirm(data.data.id, data.data.name, '?/accept');
+						modalRiskAcceptanceApproval(data.data.id, data.data.name, '?/accept');
 					}}
-					onkeydown={(_) => modalConfirm(data.data.id, data.data.name, '?/accept')}
 					class="btn preset-filled-success-500"
 				>
 					<i class="fas fa-check mr-2"></i> {m.validate()}</button
 				>
 				<button
 					onclick={(_) => {
-						modalConfirm(data.data.id, data.data.name, '?/reject');
+						modalRiskAcceptanceApproval(data.data.id, data.data.name, '?/reject');
 					}}
-					onkeydown={(_) => modalConfirm(data.data.id, data.data.name, '?/reject')}
 					class="btn preset-filled-error-500"
 				>
 					<i class="fas fa-xmark mr-2"></i> {m.reject()}</button
@@ -390,13 +479,12 @@
 			<div class="text-green-900">
 				{m.riskAcceptanceValidatedMessage()}
 			</div>
-			{#if page.data.user.id === data.data.approver.id}
+			{#if page.data.user.id === data.data.approver?.id}
 				<div class="ml-auto whitespace-nowrap">
 					<button
 						onclick={(_) => {
-							modalConfirm(data.data.id, data.data.name, '?/revoke');
+							modalRiskAcceptanceApproval(data.data.id, data.data.name, '?/revoke');
 						}}
-						onkeydown={(_) => modalConfirm(data.data.id, data.data.name, '?/revoke')}
 						class="btn preset-filled-error-500"
 					>
 						<i class="fas fa-xmark mr-2"></i> {m.revoke()}</button
@@ -407,7 +495,18 @@
 	{/if}
 
 	<!-- Main content area - modified to use conditional flex layout -->
-	<div class="card shadow-lg bg-white p-4">
+	<div class="card shadow-lg bg-surface-50-950 p-4">
+		{#if data.urlModel === 'stakeholders' && data.data?.ebios_rm_study?.id}
+			<div class="mb-4 p-3">
+				<Anchor
+					href={'/ebios-rm/' + data.data.ebios_rm_study.id + '/workshop-3/ecosystem'}
+					class="anchor text-sm"
+				>
+					<i class="fa-solid fa-arrow-left"></i>
+					{m.backToWorkshop()} : {m.ebiosWs3_1()}
+				</Anchor>
+			</div>
+		{/if}
 		{#each data.data?.sync_mappings as syncMapping}
 			<div class="mb-4 p-4 bg-secondary-50 border-l-4 border-secondary-400">
 				<h3 class="font-semibold text-secondary-800 mb-2">
@@ -419,7 +518,7 @@
 					<dd>{syncMapping.remote_id}</dd>
 
 					<dt class="font-medium">{m.lastSynced()}</dt>
-					<dd>{new Date(syncMapping.last_synced_at).toLocaleString(getLocale())}</dd>
+					<dd>{formatDate(new Date(syncMapping.last_synced_at), true, getLocale())}</dd>
 
 					<dt class="font-medium">{m.status()}</dt>
 					<dd>{safeTranslate(syncMapping.sync_status)}</dd>
@@ -429,48 +528,47 @@
 		<div class={hasWidgets ? 'flex flex-row flex-wrap gap-4' : 'w-full'}>
 			<!-- Left side - Details (conditional width) -->
 			<div
-				class="flow-root rounded-lg border border-gray-100 py-3 shadow-xs {hasWidgets
+				class="flow-root rounded-lg border border-surface-100-900 py-3 shadow-xs {hasWidgets
 					? 'flex-1 min-w-[300px]'
 					: 'w-full'}"
 			>
-				<dl class="-my-3 divide-y divide-gray-100 text-sm">
+				<dl class="-my-3 divide-y divide-surface-100-900 text-sm">
 					{#each orderedEntries().filter(([key, _]) => (fields.length > 0 ? fields.includes(key) : true) && !exclude.includes(key)) as [key, value], index}
 						{@const isRelatedField = relatedFieldNames.has(key)}
 						{@const hiddenCountForValue = isRelatedField ? countMasked(value) : 0}
 						<div
-							class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-surface-50 sm:grid-cols-5 sm:gap-4 {index >=
+							class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-surface-100-900 sm:grid-cols-5 sm:gap-4 {index >=
 								MAX_ROWS && !expandedTable
 								? 'hidden'
 								: ''}"
 						>
+							<!-- Keys column -->
 							<dt
-								class="font-medium text-gray-900 flex items-center gap-2"
+								class="font-medium text-surface-950-50 flex items-center gap-2"
 								data-testid="{key.replace('_', '-')}-field-title"
 							>
 								<span>{safeTranslate(key)}</span>
 								{#if getFieldConfig(key)?.tooltip}
 									{@const tooltipKey = getFieldConfig(key)?.tooltip}
 									{@const tooltipText = m[tooltipKey] ? m[tooltipKey]() : tooltipKey}
-									<Tooltip
-										positioning={{ placement: 'right' }}
-										contentBase="card bg-gray-800 text-white p-3 max-w-xs shadow-xl border border-gray-700"
-										openDelay={200}
-										closeDelay={100}
-										arrow
-										arrowBase="arrow bg-gray-800 border border-gray-700"
-									>
-										{#snippet trigger()}
+									<Tooltip positioning={{ placement: 'right' }} openDelay={200} closeDelay={100}>
+										<Tooltip.Trigger>
 											<i
 												class="fas fa-info-circle text-sm text-blue-500 hover:text-blue-600 cursor-help"
 											></i>
-										{/snippet}
-										{#snippet content()}
-											<p class="text-sm">{tooltipText}</p>
-										{/snippet}
+										</Tooltip.Trigger>
+										<Tooltip.Positioner>
+											<Tooltip.Content
+												class="card bg-surface-950-50 text-white p-3 max-w-xs shadow-xl border border-surface-700-300"
+											>
+												<p class="text-sm">{tooltipText}</p>
+											</Tooltip.Content>
+										</Tooltip.Positioner>
 									</Tooltip>
 								{/if}
 							</dt>
-							<dd class="text-gray-700 sm:col-span-4">
+							<!-- Value column -->
+							<dd class="text-surface-700-300 sm:col-span-4">
 								<ul class="">
 									<li
 										class="list-none whitespace-pre-line"
@@ -539,6 +637,7 @@
 												{:else}
 													--
 												{/if}
+												<!-- Values that are Arrays -->
 											{:else if Array.isArray(value)}
 												{@const visibleValues = isRelatedField
 													? value.filter((item) => !isMaskedPlaceholder(item))
@@ -559,7 +658,7 @@
 																		>{val.name}</Anchor
 																	>
 																	{#if val.legal_basis}
-																		<span class="text-gray-600">
+																		<span class="text-surface-600-400">
 																			- {safeTranslate(val.legal_basis)}
 																		</span>
 																	{/if}
@@ -567,14 +666,28 @@
 																	{@const [securityObjectiveName, securityObjectiveValue] =
 																		Object.entries(val)[0]}
 																	{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
-																{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship'}
+																{:else if key === 'choices_definition'}
+																	<span class="font-mono text-xs bg-surface-200-800 px-1 rounded"
+																		>{val.ref_id}</span
+																	>
+																	- {val.name}
+																{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship' && key !== 'nature'}
 																	{@const itemHref = `/${
 																		data.model?.foreignKeyFields?.find((item) => item.field === key)
 																			?.urlModel
 																	}/${val.id}`}
 																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-																		>{val.str}</Anchor
+																		>{safeTranslate(val.str)}</Anchor
 																	>
+																{:else if val.str && (val.str.startsWith('http://') || val.str.startsWith('https://'))}
+																	<a
+																		href={val.str}
+																		target="_blank"
+																		rel="noopener noreferrer"
+																		class="anchor">{val.str}</a
+																	>
+																{:else if val.str && key === 'permissions'}
+																	{val.str}
 																{:else if val.str}
 																	{safeTranslate(val.str)}
 																{:else}
@@ -607,7 +720,7 @@
 													>
 												{:else}
 													<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-														>{value.str || value.name}</Anchor
+														>{safeTranslate(value.str || value.name)}</Anchor
 													>
 												{/if}
 												<!-- Shortcut before DetailView refactoring -->
@@ -621,7 +734,7 @@
 												<li class="fa-solid fa-flag text-blue-500"></li>
 												{m.p3()}
 											{:else if value === 'P4'}
-												<li class="fa-solid fa-flag text-gray-500"></li>
+												<li class="fa-solid fa-flag text-surface-600-400"></li>
 												{m.p4()}
 											{:else if key === 'icon'}
 												<i class="text-lg fa {data.data.icon_fa_class}"></i>
@@ -632,9 +745,16 @@
 												>
 											{:else if ISO_8601_REGEX.test(value) && dateFieldsToFormat.includes(key)}
 												{formatDateOrDateTime(value, getLocale())}
-											{:else if key === 'description' || key === 'observation' || key === 'annotation'}
+											{:else if key === 'description' || key === 'observation' || key === 'annotation' || key === 'justification'}
 												<MarkdownRenderer content={value} />
-											{:else if m[toCamelCase(value.str || value.name)]}
+											{:else if typeof value === 'boolean'}
+												{@const bd = booleanDisplay(value, key, data.urlModel)}
+												<i class="{bd.icon} {bd.colorClass}"></i>
+											{:else if key === 'roc_display'}
+												{safeTranslate(value)}
+											{:else if key === 'roc_calculation_explanation'}
+												{safeTranslate(value.key, formatRosiExplanationParams(value.params))}
+											{:else if !['name', 'ref_id'].includes(key) && m[toCamelCase(value.str || value.name)]}
 												{safeTranslate((value.str || value.name) ?? value)}
 											{:else}
 												{(value.str || value.name) ?? value}
@@ -662,7 +782,7 @@
 		{#if orderedEntries().filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ).length > MAX_ROWS}
 			<button
 				onclick={() => (expandedTable = !expandedTable)}
-				class="m-5 text-blue-800"
+				class="m-5 text-primary-800-200"
 				aria-expanded={expandedTable}
 			>
 				<i class="{expandedTable ? 'fas fa-chevron-up' : 'fas fa-chevron-down'} mr-3"></i>
@@ -713,29 +833,31 @@
 						open={openStateRA && !data.data.approver}
 						onOpenChange={(e) => (openStateRA = e.open)}
 						positioning={{ placement: 'top' }}
-						contentBase="card preset-tonal-error p-4"
 						openDelay={200}
 						closeDelay={100}
-						arrow
-						arrowBase="arrow preset-tonal-surface border border-error-100"
-						onclick={() => {
-							if (data.data.approver) modalConfirm(data.data.id, data.data.name, '?/submit');
-						}}
-						onkeydown={(_: any) => {
-							if (data.data.approver) return modalConfirm(data.data.id, data.data.name, '?/submit');
-						}}
-						triggerBase={data.data.approver
-							? 'btn preset-filled-primary-500 *:pointer-events-none'
-							: 'btn preset-filled-primary-500 opacity-50 *:pointer-events-none cursor-not-allowed'}
-						disabled={data.data.approver}
 					>
-						{#snippet trigger()}
+						<Tooltip.Trigger
+							onclick={() => {
+								if (data.data.approver) modalConfirm(data.data.id, data.data.name, '?/submit');
+							}}
+							onkeydown={(_: any) => {
+								if (data.data.approver)
+									return modalConfirm(data.data.id, data.data.name, '?/submit');
+							}}
+							class={data.data.approver
+								? 'btn preset-filled-primary-500 *:pointer-events-none'
+								: 'btn preset-filled-primary-500 opacity-50 *:pointer-events-none cursor-not-allowed'}
+						>
 							<i class="fas fa-paper-plane mr-2"></i>
 							{m.submit()}
-						{/snippet}
-						{#snippet content()}
-							<p>{m.riskAcceptanceMissingApproverMessage()}</p>
-						{/snippet}
+						</Tooltip.Trigger>
+						{#if !data.data.approver}
+							<Tooltip.Positioner>
+								<Tooltip.Content class="card preset-tonal-error p-4">
+									<p>{m.riskAcceptanceMissingApproverMessage()}</p>
+								</Tooltip.Content>
+							</Tooltip.Positioner>
+						{/if}
 					</Tooltip>
 				{/if}
 
@@ -750,8 +872,18 @@
 
 				{#if data.urlModel === 'applied-controls'}
 					<button
-						class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
-						onclick={(_) => modalAppliedControlDuplicateForm()}
+						class="btn text-white bg-linear-to-l from-sky-500 to-green-600"
+						onclick={(_) => modalDuplicateForm(m.duplicateAppliedControl)}
+						data-testid="duplicate-button"
+					>
+						<i class="fa-solid fa-copy mr-2"></i>
+						{m.duplicate()}</button
+					>
+				{/if}
+				{#if data.urlModel === 'organisation-objectives'}
+					<button
+						class="btn text-white bg-linear-to-l from-sky-500 to-green-600"
+						onclick={(_) => modalDuplicateForm(m.duplicateOrganisationObjective)}
 						data-testid="duplicate-button"
 					>
 						<i class="fa-solid fa-copy mr-2"></i>
@@ -760,66 +892,132 @@
 				{/if}
 			{/if}
 			{@render actions?.()}
+			<AuditTrailButton model={data.urlModel} objectId={data.data?.id} />
 		</div>
 	</div>
 </div>
 
+<CustomFieldsDisplay
+	urlModel={data.urlModel}
+	folderId={data.data?.folder?.id ?? data.data?.folder}
+	values={data.data?.custom_fields}
+/>
+
 {#if relatedModels.length > 0 && displayModelTable}
-	<div class="card shadow-lg mt-8 bg-white">
+	<div class="card shadow-lg mt-8 bg-surface-50-950 px-2 py-6">
 		<Tabs
 			value={group}
 			onValueChange={(e) => (group = e.value)}
-			listJustify="justify-center"
-			listClasses="flex flex-wrap"
+			orientation="vertical"
+			class="w-full"
 		>
-			{#snippet list()}
+			<Tabs.List class="shrink-0 gap-3">
 				{#each relatedModels as [urlmodel, model]}
-					<Tabs.Control value={urlmodel}>
+					<Tabs.Trigger
+						value={urlmodel}
+						class="justify-between w-full rounded-md px-3 py-2 transition-colors
+			       aria-[selected=true]:!bg-surface-200-800
+			       "
+						data-testid="tabs-control"
+					>
 						{safeTranslate(model.info.localNamePlural)}
-						{#if model.table.body.length > 0}
-							<span class="badge preset-tonal-secondary">{model.table.body.length}</span>
+						{#if model.count !== undefined && model.count > 0}
+							<span
+								class="ml-2 rounded-full px-2 py-0.5 text-xs
+						   preset-tonal-secondary text-surface-700-300"
+							>
+								{model.count}
+							</span>
 						{/if}
-					</Tabs.Control>
+					</Tabs.Trigger>
 				{/each}
-			{/snippet}
-			{#snippet content()}
-				{#each relatedModels as [urlmodel, model]}
-					<Tabs.Panel value={urlmodel}>
-						{#key urlmodel}
-							<div class="flex flex-row justify-between px-4 py-2">
-								<h4 class="font-semibold lowercase capitalize-first my-auto">
-									{safeTranslate('associated-' + model.info.localNamePlural)}
-								</h4>
-							</div>
-							{@const field = data.model.reverseForeignKeyFields.find(
-								(item) => item.urlModel === urlmodel
-							)}
-							{@const fieldsToUse =
-								field?.tableFields ||
-								getListViewFields({
-									key: urlmodel,
-									featureFlags: page.data?.featureflags
-								}).body.filter((v) => v !== field.field)}
-							{#if model.table}
-								<ModelTable
-									baseEndpoint={getReverseForeignKeyEndpoint({
-										parentModel: data.model,
-										targetUrlModel: urlmodel,
-										field: field.field,
-										id: data.data.id,
-										endpointUrl: field.endpointUrl
-									})}
-									source={model.table}
-									disableCreate={disableCreate || model.disableCreate}
-									disableEdit={disableEdit || model.disableEdit}
-									disableDelete={disableDelete || model.disableDelete}
-									deleteForm={model.deleteForm}
-									URLModel={urlmodel}
-									expectedCount={getExpectedCount(urlmodel, field)}
-									fields={fieldsToUse}
-									defaultFilters={field.defaultFilters || {}}
-								>
-									{#snippet addButton()}
+			</Tabs.List>
+			{#each relatedModels as [urlmodel, model]}
+				<Tabs.Content value={urlmodel} class="flex-1 min-w-0">
+					{#key urlmodel}
+						{@const field = data.model.reverseForeignKeyFields.find(
+							(item) => item.urlModel === urlmodel
+						)}
+						{@const fieldsToUse =
+							field?.tableFields ||
+							getListViewFields({
+								key: urlmodel,
+								featureFlags: page.data?.featureflags
+							}).body.filter((v) => v !== field.field)}
+						{#if model.table}
+							<ModelTable
+								baseEndpoint={getReverseForeignKeyEndpoint({
+									parentModel: data.model,
+									targetUrlModel: urlmodel,
+									field: field.field,
+									id: data.data.id,
+									endpointUrl: field.endpointUrl
+								})}
+								source={model.table}
+								disableCreate={disableCreate || model.disableCreate}
+								disableEdit={disableEdit || model.disableEdit}
+								disableDelete={disableDelete || model.disableDelete}
+								deleteForm={model.deleteForm}
+								URLModel={urlmodel}
+								expectedCount={getExpectedCount(urlmodel, field)}
+								fields={fieldsToUse}
+								defaultFilters={field.defaultFilters || {}}
+							>
+								{#snippet addButton()}
+									{#if canEditObject && field?.addExisting}
+										<span
+											class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
+										>
+											<button
+												class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+												data-testid="select-existing-button"
+												title={safeTranslate(field.addExisting.label ?? 'selectExisting')}
+												onclick={() => modalSelectExisting(field)}
+											>
+												<i class="fa-solid fa-hand-pointer"></i>
+											</button>
+										</span>
+										{#if field?.batchCreate}
+											<span
+												class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
+											>
+												<button
+													class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+													data-testid="batch-create-button"
+													title={safeTranslate(field.batchCreate.label ?? 'batchCreate')}
+													onclick={() => modalBatchCreate(field, data.data.id)}
+												>
+													<i class="fa-solid fa-layer-group"></i>
+												</button>
+											</span>
+										{/if}
+										<span
+											class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
+										>
+											<button
+												class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+												data-testid="add-button"
+												title={safeTranslate('add-' + model.info.localName)}
+												onclick={(_) => modalCreateForm(model)}
+											>
+												<i class="fa-solid fa-file-circle-plus"></i>
+											</button>
+										</span>
+									{:else}
+										{#if field?.batchCreate}
+											<span
+												class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
+											>
+												<button
+													class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+													data-testid="batch-create-button"
+													title={safeTranslate(field.batchCreate.label ?? 'batchCreate')}
+													onclick={() => modalBatchCreate(field, data.data.id)}
+												>
+													<i class="fa-solid fa-layer-group"></i>
+												</button>
+											</span>
+										{/if}
 										<button
 											class="btn preset-filled-primary-500 self-end my-auto"
 											data-testid="add-button"
@@ -828,13 +1026,13 @@
 												'add-' + model.info.localName
 											)}</button
 										>
-									{/snippet}
-								</ModelTable>
-							{/if}
-						{/key}
-					</Tabs.Panel>
-				{/each}
-			{/snippet}
+									{/if}
+								{/snippet}
+							</ModelTable>
+						{/if}
+					{/key}
+				</Tabs.Content>
+			{/each}
 		</Tabs>
 	</div>
 {/if}

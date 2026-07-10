@@ -51,13 +51,6 @@
 	);
 </script>
 
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
 <Checkbox
 	{form}
 	field="is_active"
@@ -65,20 +58,14 @@
 	cacheLock={cacheLocks['is_active']}
 	bind:cachedValue={formDataCache['is_active']}
 />
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
-	field="folder"
-	pathField="path"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-	disabled={object.builtin}
-/>
 {#if !object.builtin}
 	<AutocompleteSelect
 		{form}
-		optionsEndpoint="terminologies?field_path=entity.relationship"
+		optionsEndpoint="terminologies"
+		optionsDetailedUrlParameters={[
+			['field_path', 'entity.relationship'],
+			['is_visible', 'true']
+		]}
 		field="relationship"
 		cacheLock={cacheLocks['relationship']}
 		bind:cachedValue={formDataCache['relationship']}

@@ -15,14 +15,12 @@ from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.pagination import LimitOffsetPagination
-from ciso_assistant.settings import SCHEMA_VERSION, VERSION
 from core.models import EvidenceRevision
 from core.utils import compare_schema_versions
+from iam.models import User
 from serdes.serializers import LoadBackupSerializer
 
-from auditlog.models import LogEntry
 from django.db.models.signals import post_save
-from core.custom_middleware import add_user_info_to_log_entry
 from django.apps import apps
 from django.conf import settings
 from auditlog.context import disable_auditlog
@@ -41,12 +39,12 @@ class ExportBackupView(APIView):
         response = HttpResponse(content_type="application/json")
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         response["Content-Disposition"] = (
-            f'attachment; filename="ciso-assistant-db-{VERSION}-{timestamp}.json"'
+            f'attachment; filename="ciso-assistant-db-{settings.VERSION}-{timestamp}.json"'
         )
 
         buffer = io.StringIO()
         buffer.write(
-            f'[{{"meta": [{{"media_version": "{VERSION}", "schema_version": "{SCHEMA_VERSION}"}}]}},\n'
+            f'[{{"meta": [{{"media_version": "{settings.VERSION}", "schema_version": "{settings.SCHEMA_VERSION}"}}]}},\n'
         )
         # Here we dump th data to stdout
         # NOTE: We will not be able to dump selected folders with this method.
@@ -77,9 +75,9 @@ class LoadBackupView(APIView):
     serializer_class = LoadBackupSerializer
 
     def load_backup(self, request, decompressed_data, backup_version, current_version):
-        # Temporarily disconnect the problematic signal
-        post_save.disconnect(add_user_info_to_log_entry, sender=LogEntry)
-
+        # The LogEntry enrichment receiver disconnected here in #1707 is gone:
+        # folder is now captured inline via AbstractBaseModel.get_additional_data,
+        # so loaddata of auditlog.logentry fixtures no longer triggers enrichment.
         backup_buffer = io.StringIO()
         try:
             management.call_command(
@@ -89,6 +87,7 @@ class LoadBackupView(APIView):
                 verbosity=0,
                 exclude=[
                     "contenttypes",
+                    "auth.permission",
                     "sessions.session",
                     "iam.ssosettings",
                     "knox.authtoken",
@@ -138,6 +137,7 @@ class LoadBackupView(APIView):
                         "auditlog.logentry",
                     ],
                 )
+
         except Exception as e:
             logger.error("Error while loading backup", exc_info=e)
             logger.error(
@@ -153,6 +153,13 @@ class LoadBackupView(APIView):
                     "-",
                     format="json",
                     verbosity=0,
+                    exclude=[
+                        "contenttypes",
+                        "auth.permission",
+                        "sessions.session",
+                        "iam.ssosettings",
+                        "knox.authtoken",
+                    ],
                 )
             except Exception as restore_error:
                 logger.error("Error restoring original backup", exc_info=restore_error)
@@ -169,7 +176,46 @@ class LoadBackupView(APIView):
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
         finally:
             post_save.disconnect(fixture_callback)
-            post_save.connect(add_user_info_to_log_entry, sender=LogEntry)
+
+        # Enforce LICENSE_SEATS after successful restore
+        license_seats = getattr(settings, "LICENSE_SEATS", None)
+        if license_seats is not None:
+            editor_count = len(User.get_editors())
+            if editor_count > license_seats:
+                logger.error(
+                    "Backup exceeds license seats, rolling back",
+                    editor_count=editor_count,
+                    license_seats=license_seats,
+                )
+                try:
+                    sys.stdin = io.StringIO(current_backup)
+                    management.call_command("flush", interactive=False)
+                    management.call_command(
+                        "loaddata",
+                        "-",
+                        format="json",
+                        verbosity=0,
+                        exclude=[
+                            "contenttypes",
+                            "auth.permission",
+                            "sessions.session",
+                            "iam.ssosettings",
+                            "knox.authtoken",
+                        ],
+                    )
+                except Exception as restore_error:
+                    logger.error(
+                        "Error restoring original backup", exc_info=restore_error
+                    )
+                    return Response(
+                        {"error": "RestoreFailed"},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    )
+                return Response(
+                    {"error": "errorLicenseSeatsExceeded"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
         return Response({}, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
@@ -193,7 +239,7 @@ class LoadBackupView(APIView):
         metadata, decompressed_data = full_decompressed_data
         metadata = metadata["meta"]
 
-        current_version = VERSION.split("-")[0]
+        current_version = settings.VERSION.split("-")[0]
         backup_version = None
         schema_version = 0
 
@@ -206,7 +252,7 @@ class LoadBackupView(APIView):
         try:
             schema_version_int = int(schema_version)
             compare_schema_versions(schema_version_int, backup_version)
-            if backup_version != VERSION:
+            if backup_version != settings.VERSION:
                 raise ValueError(
                     "The version of the current instance and the one that generated the backup are not the same."
                 )
@@ -288,7 +334,7 @@ class FullRestoreView(APIView):
             metadata, decompressed_data = full_decompressed_data
             metadata = metadata["meta"]
 
-            current_version = VERSION.split("-")[0]
+            current_version = settings.VERSION.split("-")[0]
             backup_version = None
             schema_version = 0
 
@@ -301,7 +347,7 @@ class FullRestoreView(APIView):
             try:
                 schema_version_int = int(schema_version)
                 compare_schema_versions(schema_version_int, backup_version)
-                if backup_version != VERSION:
+                if backup_version != settings.VERSION:
                     raise ValueError(
                         "The version of the current instance and the one that generated the backup are not the same."
                     )
@@ -404,7 +450,7 @@ class FullRestoreView(APIView):
                                 header = json.loads(block_data[:i].decode("utf-8"))
                                 header_end = i
                                 break
-                            except (json.JSONDecodeError, UnicodeDecodeError):
+                            except json.JSONDecodeError, UnicodeDecodeError:
                                 continue
 
                         if not header:
@@ -501,7 +547,10 @@ class FullRestoreView(APIView):
 
                         revision.attachment = saved_path
                         revision.attachment_hash = actual_hash
-                        revision.save(update_fields=["attachment", "attachment_hash"])
+                        with disable_auditlog():
+                            revision.save(
+                                update_fields=["attachment", "attachment_hash"]
+                            )
 
                         stats["restored"] += 1
 
@@ -846,7 +895,7 @@ class BatchUploadAttachmentsView(APIView):
                             header = json.loads(block_data[:i].decode("utf-8"))
                             header_end = i
                             break
-                        except (json.JSONDecodeError, UnicodeDecodeError):
+                        except json.JSONDecodeError, UnicodeDecodeError:
                             continue
 
                     if not header:
@@ -945,7 +994,8 @@ class BatchUploadAttachmentsView(APIView):
 
                     revision.attachment = saved_path
                     revision.attachment_hash = actual_hash
-                    revision.save(update_fields=["attachment", "attachment_hash"])
+                    with disable_auditlog():
+                        revision.save(update_fields=["attachment", "attachment_hash"])
 
                     stats["restored"] += 1
 

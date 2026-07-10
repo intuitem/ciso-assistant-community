@@ -1,11 +1,12 @@
 import { getSecureRedirect } from '$lib/utils/helpers';
 
 import { ALLAUTH_API_URL, BASE_API_URL } from '$lib/utils/constants';
+import { logger } from '$lib/server/logger';
 import { loginSchema } from '$lib/utils/schemas';
 import type { LoginRequestBody } from '$lib/utils/types';
 import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { setError, superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 import { mfaAuthenticateSchema } from './mfa/utils/schemas';
 
@@ -22,13 +23,13 @@ interface AuthenticationFlow {
 		| 'mfa_reauthenticate';
 	provider?: Record<string, string>;
 	is_pending: boolean;
-	types: 'totp' | 'recovery_codes';
+	types: ('totp' | 'recovery_codes' | 'webauthn')[];
 }
 
 export const load: PageServerLoad = async ({ fetch, request, locals }) => {
 	// redirect user if already logged in
 	if (locals.user) {
-		redirect(302, '/analytics');
+		redirect(302, locals.user.is_auditee ? '/auditee-dashboard' : '/analytics');
 	}
 
 	const form = await superValidate(request, zod(loginSchema));
@@ -65,7 +66,7 @@ export const actions: Actions = {
 		const res = await fetch(endpoint, requestInitOptions).then((res) => res.json());
 
 		if (res.status !== 200) {
-			console.error(res);
+			logger.warning('Login failed', { status: res.status });
 			if (res.errors) {
 				res.errors.forEach((error) => {
 					setError(form, error.param, error.code);
@@ -139,7 +140,7 @@ export const actions: Actions = {
 		const response = await event.fetch(endpoint, requestInitOptions).then((res) => res.json());
 
 		if (response.status !== 200) {
-			console.error('Could not authenticate using TOTP', response);
+			logger.warning('Could not authenticate using TOTP', { status: response.status });
 			if (Object.hasOwn(response, 'errors')) {
 				response.errors.forEach((error) => {
 					setError(form, error.param, error.code);
@@ -163,5 +164,58 @@ export const actions: Actions = {
 		});
 
 		return { form };
+	},
+	mfaAuthenticateWebAuthn: async (event) => {
+		const formData = await event.request.formData();
+		if (!formData) return fail(400, { error: 'No form data' });
+
+		const credentialJson = formData.get('credential');
+		if (!credentialJson || typeof credentialJson !== 'string') {
+			return fail(400, { error: 'Missing credential' });
+		}
+
+		let credential;
+		try {
+			credential = JSON.parse(credentialJson);
+		} catch {
+			return fail(400, { error: 'Invalid credential' });
+		}
+
+		const endpoint = `${ALLAUTH_API_URL}/auth/webauthn/authenticate`;
+		const requestInitOptions: RequestInit = {
+			method: 'POST',
+			body: JSON.stringify({ credential })
+		};
+
+		let response;
+		try {
+			const res = await event.fetch(endpoint, requestInitOptions);
+			response = await res.json();
+		} catch {
+			return fail(502, { error: 'WebAuthn authentication failed' });
+		}
+
+		if (response.status !== 200) {
+			logger.warning('Could not authenticate using WebAuthn', { status: response.status });
+			return fail(response.status, { error: 'WebAuthn authentication failed' });
+		}
+
+		event.cookies.set('token', response.meta.access_token, {
+			httpOnly: true,
+			sameSite: 'lax',
+			path: '/',
+			secure: true
+		});
+
+		event.cookies.set('allauth_session_token', response.meta.session_token, {
+			httpOnly: true,
+			sameSite: 'lax',
+			path: '/',
+			secure: true
+		});
+
+		const next = event.url.searchParams.get('next');
+		const secureNext = getSecureRedirect(next) || '/';
+		redirect(302, secureNext);
 	}
 };

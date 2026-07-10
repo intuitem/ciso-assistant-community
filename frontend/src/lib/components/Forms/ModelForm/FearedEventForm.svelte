@@ -7,6 +7,7 @@
 	import { m } from '$paraglide/messages';
 	import TextArea from '../TextArea.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -25,7 +26,7 @@
 	}: Props = $props();
 </script>
 
-<p class="text-sm text-gray-500">{m.fearedEventHelpText()}</p>
+<p class="text-sm text-surface-600-400">{m.fearedEventHelpText()}</p>
 <AutocompleteSelect
 	{form}
 	field="ebios_rm_study"
@@ -33,22 +34,6 @@
 	bind:cachedValue={formDataCache['ebios_rm_study']}
 	label={m.ebiosRmStudy()}
 	hidden={initialData.ebios_rm_study}
-/>
-<AutocompleteSelect
-	{form}
-	field="folder"
-	pathField="path"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.folder()}
-	hidden
-/>
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
 />
 <Select
 	{form}
@@ -59,12 +44,13 @@
 	bind:cachedValue={formDataCache['gravity']}
 	helpText={m.gravityHelpText()}
 />
-<TextArea
+<MarkdownField
 	{form}
 	field="justification"
 	label={m.justification()}
 	cacheLock={cacheLocks['justification']}
 	bind:cachedValue={formDataCache['justification']}
+	data-focusindex="1"
 />
 <AutocompleteSelect
 	multiple

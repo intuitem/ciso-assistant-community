@@ -1,0 +1,296 @@
+from django.db import models, transaction
+from rest_framework import serializers
+
+from core.models import Policy
+from core.serializer_fields import FieldsRelatedField
+from core.serializers import BaseModelSerializer
+from iam.models import Folder, RoleAssignment
+
+from .models import (
+    DocumentContainer,
+    DocumentRevision,
+    DocumentTemplate,
+    ManagedDocument,
+)
+
+
+class DocumentContainerReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    policies = FieldsRelatedField(many=True)
+    applied_controls = FieldsRelatedField(many=True)
+    task_templates = FieldsRelatedField(many=True)
+    processings = FieldsRelatedField(many=True)
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
+    classification = serializers.SerializerMethodField()
+    document_count = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+    source = serializers.SerializerMethodField()
+
+    class Meta:
+        model = DocumentContainer
+        fields = "__all__"
+
+    def _default_doc(self, obj):
+        if not hasattr(obj, "_cached_default_doc"):
+            docs = list(obj.documents.all())
+            obj._cached_default_doc = next(
+                (d for d in docs if d.default_locale), docs[0] if docs else None
+            )
+        return obj._cached_default_doc
+
+    def get_source(self, obj):
+        doc = self._default_doc(obj)
+        if doc and doc.current_revision_id:
+            return doc.current_revision.source
+        return None
+
+    def get_classification(self, obj):
+        lvl = obj.classification
+        if not lvl:
+            return None
+        # No "str" key on purpose: the table renders a related-object link when a
+        # truthy `str` is present, but a colored chip (using `name`) when it isn't.
+        return {
+            "id": str(lvl.id),
+            "name": lvl.label,
+            "abbreviation": lvl.abbreviation,
+            "hexcolor": lvl.hexcolor,
+        }
+
+    def get_document_count(self, obj):
+        return len(obj.documents.all())
+
+    def get_status(self, obj):
+        """Workflow state of the container, taken from the default-locale
+        document's current revision (falls back to any document)."""
+        doc = self._default_doc(obj)
+        if doc and doc.current_revision_id:
+            return doc.current_revision.status
+        return None
+
+
+class DocumentContainerWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = DocumentContainer
+        fields = "__all__"
+
+
+class DocumentTemplateReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = DocumentTemplate
+        fields = "__all__"
+
+
+class DocumentTemplateWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = DocumentTemplate
+        fields = "__all__"
+
+
+class ManagedDocumentWriteSerializer(BaseModelSerializer):
+    # Write-only inputs that resolve/seed the container; not model fields (the
+    # legacy policy/document_type columns were dropped in the Stream A contract).
+    policy = serializers.PrimaryKeyRelatedField(
+        queryset=Policy.objects.all(),
+        required=False,
+        allow_null=True,
+        write_only=True,
+    )
+    document_type = serializers.ChoiceField(
+        choices=DocumentContainer.DocumentType.choices,
+        required=False,
+        write_only=True,
+    )
+
+    class Meta:
+        model = ManagedDocument
+        fields = "__all__"
+        # default_locale is derived in create() (one default per container) and
+        # current_revision is maintained by publish()/upload/link actions — never
+        # client-settable, else a PATCH could create two defaults or repoint the
+        # served revision.
+        read_only_fields = ["default_locale", "current_revision"]
+
+    def create(self, validated_data):
+        # Default locale to user's preferred language
+        request = self.context.get("request")
+        if "locale" not in validated_data or not validated_data.get("locale"):
+            lang = "en"
+            if (
+                request
+                and hasattr(request, "user")
+                and hasattr(request.user, "get_preferences")
+            ):
+                lang = request.user.get_preferences().get("lang", "en")
+            validated_data["locale"] = lang
+
+        # Container inputs (write-only, not model fields).
+        policy = validated_data.pop("policy", None)
+        if policy is not None and validated_data.get("container") is not None:
+            raise serializers.ValidationError(
+                "Provide either policy or container, not both."
+            )
+        document_type = (
+            validated_data.pop("document_type", None)
+            or DocumentContainer.DocumentType.POLICY
+        )
+
+        # Auto-create an initial draft revision atomically with the document
+        author = request.user if request else None
+        content = ""
+        if template_name := validated_data.get("template_used"):
+            locale = validated_data.get("locale", "en")
+            accessible_ids = (
+                RoleAssignment.get_accessible_object_ids(
+                    Folder.get_root_folder(), request.user, DocumentTemplate
+                )[0]
+                if request
+                else []
+            )
+            visible = DocumentTemplate.objects.filter(
+                models.Q(id__in=accessible_ids) | models.Q(builtin=True)
+            )
+            template = (
+                visible.filter(ref_id=template_name, locale=locale).first()
+                or visible.filter(ref_id=template_name, locale="en").first()
+            )
+            if template:
+                content = template.content
+        with transaction.atomic():
+            # Resolve the container that groups this document's locale variants.
+            # Legacy/policy flow: one container per policy. Standalone: a fresh one.
+            container = validated_data.get("container")
+            if container is None:
+                if policy is not None:
+                    # Lock the policy row so concurrent creates for the same
+                    # policy can't each build a duplicate container.
+                    policy = Policy.objects.select_for_update().get(pk=policy.pk)
+                    container = (
+                        DocumentContainer.objects.select_for_update()
+                        .filter(policies=policy)
+                        .first()
+                    )
+                    if container is None:
+                        container = DocumentContainer.objects.create(
+                            document_type=document_type,
+                            name=validated_data.get("name")
+                            or getattr(policy, "name", ""),
+                            folder=policy.folder,
+                            is_published=policy.is_published,
+                        )
+                        container.policies.add(policy)
+                else:
+                    container = DocumentContainer.objects.create(
+                        document_type=document_type,
+                        name=validated_data.get("name", ""),
+                        is_published=False,
+                        **(
+                            {"folder": validated_data["folder"]}
+                            if validated_data.get("folder")
+                            else {}
+                        ),
+                    )
+                validated_data["container"] = container
+            else:
+                container = DocumentContainer.objects.select_for_update().get(
+                    pk=container.pk
+                )
+                validated_data["container"] = container
+
+            # Set default_locale inside the transaction to avoid race conditions
+            # where two concurrent creates both see no siblings and both set True
+            has_siblings = (
+                ManagedDocument.objects.select_for_update()
+                .filter(container=container)
+                .exists()
+            )
+            validated_data.setdefault("default_locale", not has_siblings)
+
+            # Gate the add-permission check on the container's folder rather than
+            # letting BaseModelSerializer fall back to the root folder.
+            validated_data["folder"] = container.folder
+
+            document = super().create(validated_data)
+            revision = DocumentRevision.objects.create(
+                document=document,
+                version_number=1,
+                content=content,
+                author=author,
+            )
+            document.current_revision = revision
+            document.save()
+        return document
+
+
+class ManagedDocumentReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    container = FieldsRelatedField()
+    current_revision = FieldsRelatedField(
+        fields=["id", "version_number", "status", "published_at", "author"],
+    )
+    revision_count = serializers.SerializerMethodField()
+    latest_draft = serializers.SerializerMethodField()
+    display_name = serializers.CharField(read_only=True)
+    document_type = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ManagedDocument
+        fields = "__all__"
+
+    def get_document_type(self, obj):
+        return obj.container.document_type if obj.container_id else None
+
+    def get_revision_count(self, obj):
+        return obj.revisions.count()
+
+    def get_latest_draft(self, obj):
+        draft = obj.revisions.filter(status=DocumentRevision.Status.DRAFT).first()
+        return str(draft.id) if draft else None
+
+
+class DocumentRevisionWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = DocumentRevision
+        fields = "__all__"
+        # Workflow fields are managed exclusively by dedicated actions
+        # (submit-for-review, approve, request-changes, start-editing, etc.)
+        # and model methods — not directly writable via PATCH.
+        read_only_fields = [
+            "status",
+            "reviewer",
+            "reviewer_comments",
+            "published_at",
+            "pdf_snapshot",
+            "editing_user",
+            "editing_since",
+            "version_number",
+            "author",
+        ]
+
+    def create(self, validated_data):
+        document = validated_data["document"]
+        request = self.context.get("request")
+        if request and not validated_data.get("author"):
+            validated_data["author"] = request.user
+        with transaction.atomic():
+            # Lock existing revisions to prevent concurrent version_number collisions
+            max_version = (
+                DocumentRevision.objects.select_for_update()
+                .filter(document=document)
+                .aggregate(models.Max("version_number"))["version_number__max"]
+            )
+            validated_data["version_number"] = (max_version or 0) + 1
+            return super().create(validated_data)
+
+
+class DocumentRevisionReadSerializer(BaseModelSerializer):
+    document = FieldsRelatedField()
+    author = FieldsRelatedField(fields=["id", "email", "first_name", "last_name"])
+    reviewer = FieldsRelatedField(fields=["id", "email", "first_name", "last_name"])
+    status_display = serializers.CharField(source="get_status_display")
+
+    class Meta:
+        model = DocumentRevision
+        fields = "__all__"

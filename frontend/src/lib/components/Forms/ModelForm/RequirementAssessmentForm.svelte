@@ -7,6 +7,8 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import { page } from '$app/state';
+	import { filterResultChoices } from '$lib/utils/helpers';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -58,7 +60,11 @@
 	/>
 	<Select
 		{form}
-		options={model.selectOptions['result']}
+		options={filterResultChoices(
+			model.selectOptions['result'],
+			page.data.settings?.disable_partially_compliant_result,
+			object?.result
+		)}
 		field="result"
 		label={m.result()}
 		cacheLock={cacheLocks['result']}
@@ -80,15 +86,6 @@
 		label={m.observation()}
 		cacheLock={cacheLocks['observation']}
 		bind:cachedValue={formDataCache['observation']}
-	/>
-	<AutocompleteSelect
-		{form}
-		optionsEndpoint="folders?content_type=DO&content_type=GL"
-		field="folder"
-		pathField="path"
-		cacheLock={cacheLocks['folder']}
-		bind:cachedValue={formDataCache['folder']}
-		label={m.domain()}
 	/>
 	<HiddenInput {form} field="compliance_assessment" />
 {/if}

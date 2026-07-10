@@ -32,7 +32,7 @@
 	}: Props = $props();
 
 	// Base Classes
-	const cBase = 'card bg-surface-50 p-4 w-modal shadow-xl space-y-4';
+	const cBase = 'card bg-surface-50-950 p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'p-4 space-y-4 rounded-container';
 
@@ -72,14 +72,19 @@
 							}}
 							>{safeTranslate(choice.name)}
 							{#if choice.description}
-								<Tooltip
-									positioning={{ placement: 'top' }}
-									triggerBase="underline"
-									contentBase="card preset-filled p-4"
-									openDelay={50}
-								>
-									{#snippet trigger()}<i class="fa-solid fa-circle-info"></i>{/snippet}
-									{#snippet content()}{safeTranslate(choice.description)}{/snippet}
+								<Tooltip positioning={{ placement: 'top' }} openDelay={50}>
+									<Tooltip.Trigger>
+										{#snippet child({ props })}
+											<span {...props} class="underline"
+												><i class="fa-solid fa-circle-info"></i></span
+											>
+										{/snippet}
+									</Tooltip.Trigger>
+									<Tooltip.Positioner>
+										<Tooltip.Content class="card preset-filled p-4"
+											>{safeTranslate(choice.description)}</Tooltip.Content
+										>
+									</Tooltip.Positioner>
 								</Tooltip>
 							{/if}
 						</button>

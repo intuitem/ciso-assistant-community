@@ -1,0 +1,250 @@
+urn: urn:intuitem:risk:preset:french-homologation
+locale: fr
+ref_id: preset-french-homologation
+name: "Homologation de sécurité"
+description: "Parcours complet d'homologation de sécurité d'un système d'information conformément au cadre français. Inclut l'étude EBIOS RM, le guide d'hygiène ANSSI comme socle de sécurité, et la checklist du dossier d'homologation pour piloter la démarche de bout en bout."
+version: 1
+provider: intuitem
+packager: intuitem
+translations:
+  en:
+    name: "Security Accreditation (French Homologation)"
+    description: "Complete security accreditation journey for an information system following the French framework. Includes the EBIOS RM risk study, the ANSSI hygiene guide as a security baseline, and the homologation dossier checklist to drive the process end to end."
+
+dependencies:
+  - urn:intuitem:risk:library:checklist-dossier-homologation
+  - urn:intuitem:risk:library:anssi-guide-hygiene
+  - urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm
+  - urn:intuitem:risk:library:intuitem-common-catalog
+
+objects:
+  preset:
+    profile:
+      company_size:
+        - sme
+        - large
+      industry:
+        - government
+        - defense
+        - general
+      region:
+        - fr
+      goal: homologation
+
+    feature_flags:
+      enable:
+        - compliance
+        - ebiosrm
+        - follow_up
+        - project_management
+
+    scaffolded_objects:
+      - type: ebios_rm_study
+        name: "Étude EBIOS RM"
+        description: "Étude de risques EBIOS RM du système d'information à homologuer — couvre les 5 ateliers de la méthode."
+        risk_matrix: urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm
+        ref: ebios_study
+        translations:
+          en:
+            name: "EBIOS RM Study"
+            description: "EBIOS RM risk study for the information system to be accredited — covers all 5 workshops of the method."
+      - type: risk_assessment
+        name: "Analyse de risques"
+        risk_matrix: urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm
+        ref: main_ra
+        translations:
+          en:
+            name: "Risk Assessment"
+      - type: compliance_assessment
+        name: "Checklist dossier d'homologation"
+        framework: urn:intuitem:risk:library:checklist-dossier-homologation
+        ref: homologation_checklist
+        translations:
+          en:
+            name: "Homologation Dossier Checklist"
+      - type: compliance_assessment
+        name: "Évaluation ANSSI Hygiène"
+        framework: urn:intuitem:risk:library:anssi-guide-hygiene
+        create_suggested_controls: true
+        ref: anssi_audit
+        translations:
+          en:
+            name: "ANSSI Hygiene Assessment"
+
+      # --- Assets (typical for a system to be accredited) ---
+      - type: asset
+        name: "Système d'information cible"
+        description: "Le système d'information objet de la démarche d'homologation — inclut l'ensemble des composants matériels, logiciels et réseaux."
+        asset_type: SP
+        ref: asset_target_system
+        translations:
+          en:
+            name: "Target information system"
+            description: "The information system subject to the accreditation process — includes all hardware, software, and network components."
+      - type: asset
+        name: "Infrastructure d'hébergement"
+        description: "Serveurs, baies, salles serveurs, alimentation électrique et climatisation hébergeant le SI cible."
+        asset_type: SP
+        ref: asset_hosting
+        translations:
+          en:
+            name: "Hosting infrastructure"
+            description: "Servers, racks, server rooms, power supply, and cooling hosting the target IS."
+      - type: asset
+        name: "Interconnexions réseau"
+        description: "Liens réseau, pare-feu, passerelles et DMZ connectant le SI cible à d'autres systèmes ou à Internet."
+        asset_type: SP
+        ref: asset_network
+        translations:
+          en:
+            name: "Network interconnections"
+            description: "Network links, firewalls, gateways, and DMZ connecting the target IS to other systems or the Internet."
+      - type: asset
+        name: "Postes de travail et terminaux"
+        description: "Postes de travail, ordinateurs portables et terminaux utilisés pour accéder au SI cible."
+        asset_type: SP
+        ref: asset_endpoints
+        translations:
+          en:
+            name: "Workstations and terminals"
+            description: "Workstations, laptops, and terminals used to access the target IS."
+      - type: asset
+        name: "Données traitées par le SI"
+        description: "Données métier, données personnelles et données sensibles traitées, stockées ou transmises par le système d'information."
+        asset_type: PR
+        ref: asset_data
+        translations:
+          en:
+            name: "Data processed by the IS"
+            description: "Business data, personal data, and sensitive data processed, stored, or transmitted by the information system."
+
+      # --- Risk scenarios ---
+      - type: risk_scenario
+        name: "Compromission du SI via une vulnérabilité non corrigée"
+        description: "Un attaquant exploite une vulnérabilité connue non corrigée dans le SI cible pour obtenir un accès non autorisé."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_target_system, asset_data]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-004]
+        translations:
+          en:
+            name: "IS compromise via unpatched vulnerability"
+            description: "An attacker exploits a known unpatched vulnerability in the target IS to gain unauthorised access."
+      - type: risk_scenario
+        name: "Attaque via les interconnexions réseau"
+        description: "Un attaquant exploite les interconnexions réseau (Internet, partenaires) pour pénétrer le SI cible."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_network, asset_target_system]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-006]
+        translations:
+          en:
+            name: "Attack via network interconnections"
+            description: "An attacker exploits network interconnections (Internet, partners) to penetrate the target IS."
+      - type: risk_scenario
+        name: "Vol ou fuite de données sensibles"
+        description: "Des données sensibles du SI sont exfiltrées suite à une compromission ou une erreur humaine."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_data]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-019]
+        translations:
+          en:
+            name: "Theft or leak of sensitive data"
+            description: "Sensitive data from the IS is exfiltrated following a compromise or human error."
+      - type: risk_scenario
+        name: "Menace interne (administrateur malveillant)"
+        description: "Un administrateur ou un utilisateur privilégié utilise ses droits pour accéder à des données ou modifier le système de manière non autorisée."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_target_system, asset_data]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-005]
+        translations:
+          en:
+            name: "Insider threat (malicious administrator)"
+            description: "An administrator or privileged user misuses their access to view data or modify the system without authorisation."
+      - type: risk_scenario
+        name: "Indisponibilité du SI par attaque ou panne"
+        description: "Le SI cible devient indisponible suite à une attaque DDoS, une panne matérielle ou une erreur de configuration."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_target_system, asset_hosting]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-022]
+        translations:
+          en:
+            name: "IS unavailability due to attack or failure"
+            description: "The target IS becomes unavailable following a DDoS attack, hardware failure, or configuration error."
+
+    journey:
+      steps:
+        - key: scope
+          title: "Définir le périmètre du SI à homologuer"
+          description: "Identifiez précisément le système d'information cible, ses composants, ses interconnexions et les données qu'il traite"
+          target_model: assets
+          translations:
+            en:
+              title: "Define the scope of the IS to be accredited"
+              description: "Precisely identify the target information system, its components, interconnections, and the data it processes"
+        - key: anssi_hygiene
+          title: "Évaluer le socle d'hygiène ANSSI"
+          description: "Parcourez les 42 mesures d'hygiène ANSSI pour établir le socle de sécurité minimal du SI"
+          target_model: compliance-assessments
+          target_ref: anssi_audit
+          translations:
+            en:
+              title: "Assess the ANSSI hygiene baseline"
+              description: "Go through the 42 ANSSI hygiene measures to establish the minimal security baseline for the IS"
+        - key: ebios_rm
+          title: "Mener une étude EBIOS RM"
+          description: "Déroulez les 5 ateliers de la méthode EBIOS RM — cadrage, sources de risque, scénarios stratégiques, scénarios opérationnels, traitement du risque"
+          target_model: ebios-rm
+          target_ref: ebios_study
+          translations:
+            en:
+              title: "Conduct an EBIOS RM study"
+              description: "Run through the 5 EBIOS RM workshops — scoping, risk sources, strategic scenarios, operational scenarios, risk treatment"
+        - key: risk_analysis
+          title: "Examiner les scénarios de risque"
+          description: "Passez en revue les scénarios de risque pré-alimentés, ajustez leur vraisemblance et leur gravité, et ajoutez de nouveaux scénarios si nécessaire"
+          target_model: risk-assessments
+          target_ref: main_ra
+          translations:
+            en:
+              title: "Review risk scenarios"
+              description: "Review the pre-seeded risk scenarios, adjust their likelihood and severity, and add new scenarios as needed"
+        - key: controls
+          title: "Implémenter et suivre les mesures de sécurité"
+          description: "Examinez les mesures suggérées par l'évaluation ANSSI, assignez des responsables et suivez la mise en œuvre"
+          target_model: applied-controls
+          translations:
+            en:
+              title: "Implement and track security controls"
+              description: "Review the suggested controls from the ANSSI assessment, assign owners, and track implementation"
+        - key: audit
+          title: "Planifier l'audit de sécurité"
+          description: "Organisez un audit de sécurité (test d'intrusion, audit de configuration, audit organisationnel) et importez les résultats pour compléter le dossier"
+          target_model: findings-assessments
+          translations:
+            en:
+              title: "Plan the security audit"
+              description: "Organise a security audit (penetration test, configuration audit, organisational audit) and import results to complete the dossier"
+        - key: evidences
+          title: "Rassembler les preuves et documents"
+          description: "Collectez et attachez toutes les preuves nécessaires au dossier — politiques, procédures, rapports d'audit, captures d'écran de configuration, PV de recette sécurité"
+          target_model: evidences
+          translations:
+            en:
+              title: "Gather evidence and documents"
+              description: "Collect and attach all evidence required for the dossier — policies, procedures, audit reports, configuration screenshots, security acceptance records"
+        - key: homologation_checklist
+          title: "Constituer le dossier d'homologation"
+          description: "Parcourez la checklist du dossier d'homologation et vérifiez que tous les livrables requis sont présents — stratégie d'homologation, analyse de risques, rapports d'audit, plan d'action"
+          target_model: compliance-assessments
+          target_ref: homologation_checklist
+          translations:
+            en:
+              title: "Build the accreditation dossier"
+              description: "Go through the homologation dossier checklist and verify all required deliverables are present — accreditation strategy, risk analysis, audit reports, action plan"
+        - key: accreditation
+          title: "Créer et suivre la fiche d'homologation"
+          description: "Créez l'objet d'homologation dans le module projet, liez-le à la checklist et à l'étude EBIOS RM, puis soumettez le dossier à l'autorité d'homologation"
+          target_model: accreditations
+          translations:
+            en:
+              title: "Create and track the accreditation record"
+              description: "Create the accreditation object in the project module, link it to the checklist and EBIOS RM study, and submit the dossier to the accrediting authority"

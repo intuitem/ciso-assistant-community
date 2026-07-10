@@ -1,0 +1,3901 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:zt_ot
+locale: en
+ref_id: DOW_ZT_OT
+name: Zero Trust for Operational Technology Activities and Outcomes (ZT OT)
+description: "The Department of War (DoW) Chief Information Officer (CIO) established\
+  \ the Zero Trust (ZT) Portfolio Management Office (PfMO) to coordinate, synchronize,\
+  \ and accelerate adoption of ZT architecture and cybersecurity framework across\
+  \ the DoW enterprise.\nThe ZT security model transitions away from trusted networks,\
+  \ actors, and devices to an environment with continuous authentication and fine-grained\
+  \ policy enforcement.\nIn July 2025, the Department issued DTM 25-003, \u201CImplementing\
+  \ the DoD Zero Trust Strategy,\u201D which directs DoW Components to achieve, at\
+  \ minimum, Target Level ZT across all unclassified and classified systems (including\
+  \ national security systems) and control systems/Operational Technology (OT).\n\
+  https://dodcio.defense.gov/Portals/0/Documents/Library/ZT-OperationalTechnologyActivitiesOutcomes.pdf"
+copyright: Department of War (DoW), Nov 18, 2025
+version: 1
+publication_date: 2026-05-05
+provider: The Department of War (DoW) Chief Information Officer (CIO)
+packager: celalunalp
+labels:
+- ZT
+- OT
+- DOW
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:zt_ot
+    ref_id: DOW_ZT_OT
+    name: Zero Trust for Operational Technology Activities and Outcomes (ZT OT)
+    description: 'This guidance provides a revised set of Activities and Outcomes
+      to facilitate current and future adoption of ZT principles in OT environments,
+      accounting for the distinct differences between Information Technology (IT)
+      and OT practices.
+
+      The ZT for OT Activities and Outcomes are aligned to the ZT for Enterprise IT
+      Activities and Outcomes to facilitate interoperability and alignment between
+      the two.
+
+
+      This guidance is focused on DoW owned OT environments and control systems up
+      to and including the point of demarcation, encompassing facility related control
+      systems, power grids, water treatment facilities, security and life safety systems,
+      energy management systems, transportation networks, logistics handling, and
+      manufacturing control systems.'
+    min_score: 0
+    max_score: 105
+    implementation_groups_definition:
+    - ref_id: Target
+      name: Target
+      description: Target Level ZT is the minimum set of ZT capability outcomes and
+        activities necessary to secure and protect the Department's Data, Applications,
+        Assets, and Services (DAAS) to manage risks from currently known threats.
+    - ref_id: Advanced
+      name: Advanced
+      description: Advanced Level ZT capabilities include the complete set of identified
+        ZT capability outcomes and activities that enable adaptive responses to cybersecurity
+        risk and threats and offer the highest level of protection.
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:zt_ot:1
+      assessable: false
+      depth: 1
+      ref_id: '1'
+      name: User
+    - urn: urn:intuitem:risk:req_node:zt_ot:1.1.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:1
+      ref_id: 1.1.1.OT
+      name: Inventory Users in OT Environment
+      description: DoW Components establish and update a user inventory within the
+        OT environment, manually if necessary, preparing for an automated approach
+        in later stages.  Privileged OT accounts will be identified. Both standard
+        and privileged accounts for applications and systems with local identity stores
+        will be identified for future migration and/or decommissioning.  Shared group
+        accounts, must-run accounts, or service OT accounts must be identified for
+        future migration to inventory and/or decommissioning.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:1.1.1.ot:question:1:
+          type: unique_choice
+          text: Identified and documented inventory of accounts across both the Operational
+            IT and Process Control environments.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.1.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.1.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.1.1.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:1.1.1.ot:question:2:
+          type: unique_choice
+          text: All applications and systems with local identity stores have been
+            identified.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.1.1.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.1.1.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.1.1.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:1.1.1.ot:question:3:
+          type: unique_choice
+          text: Local user, local privileged, shared, must-run, and service OT accounts
+            have been identified for migration and/or decommissioning.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.1.1.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.1.1.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.1.1.ot:question:3:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:1.2.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:1
+      ref_id: 1.2.1.OT
+      name: Implement Authorization and Access Management for OT Environments
+      description: DoW Components implement OT or Enterprise ICAM governance, or other
+        authorized credentialing services, in accordance with applicable policies
+        and regulations. The authorized credentialing service establishes a set of
+        attributes for authentication and authorization within the OT environment.
+        Attributes are integrated with the 2.1.3.OT activity process for a complete
+        IdP process.  The OT credentialing service is enabled for adding and updating
+        attributes for users. OT privileged access and authorization are approved  and
+        tailored as specified by the roles.  For OT systems on which it is technically
+        capable, any shared group, must-run, and service OT accounts  are migrated
+        to proper identities or are decommissioned. Any OT systems identified that
+        cannot be migrated and/or decommisioned are tracked using a risk-based metholody
+        for future migration and/or decommision.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:1.2.1.ot:question:1:
+          type: unique_choice
+          text: Authorized Credentialing service is implemented for the Operational
+            IT environment.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.2.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.2.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.2.1.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:1.2.1.ot:question:2:
+          type: unique_choice
+          text: Attributes for authentication and authorization of users are defined.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.2.1.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.2.1.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.2.1.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:1.2.1.ot:question:3:
+          type: unique_choice
+          text: OT credentialing service enabled to add and update attributes.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.2.1.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.2.1.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.2.1.ot:question:3:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:1.2.1.ot:question:4:
+          type: unique_choice
+          text: OT privileged accounts are authorized based on roles and attributes.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.2.1.ot:question:4:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.2.1.ot:question:4:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.2.1.ot:question:4:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:1.2.1.ot:question:5:
+          type: unique_choice
+          text: Shared group, must-run, and service OT accounts have been migrated
+            and/or decommissioned.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.2.1.ot:question:5:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.2.1.ot:question:5:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.2.1.ot:question:5:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:1.2.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:1
+      ref_id: 1.2.2.OT
+      name: Role Based Dynamic Access for OT Environments
+      description: DoW Components develop rules, both technical and procedural, for
+        remote and third-party access into the OT environment.   All users must have
+        strict role-based access controls prior to access or connection into the OT
+        environment.  Remote and third-party access should be limited to the account
+        of least privilege required to perform work. OT privileged accounts required
+        for operations are accessed through the Authorized Credentialing Service.   Identify
+        high-privileged accounts and require these use dynamic access control.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:1.2.2.ot:question:1:
+          type: unique_choice
+          text: Rules are defined for third party and remote access into the OT environment.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.2.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.2.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.2.2.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:1.2.2.ot:question:2:
+          type: unique_choice
+          text: Role-based enforcement of user access to the environment;  Authorized
+            Credentialing service required for Privileged accounts.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.2.2.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.2.2.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.2.2.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:1.2.2.ot:question:3:
+          type: unique_choice
+          text: Identified High-privileged accounts and enforced using dynamic access.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.2.2.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.2.2.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.2.2.ot:question:3:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:1.3.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:1
+      ref_id: 1.3.1.OT
+      name: MFA for OT Environments
+      description: DoW Components enable or integrate the Authorized Credentialing
+        Service with Multifactor Authentication (MFA), or an approved alternative
+        authoritative credentialing solution, either technical or procedural, for
+        access within the OT Environment.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:1.3.1.ot:question:1:
+          type: unique_choice
+          text: MFA, or approved authoritative credentialing solution, is implemented
+            with the Authorized Credentialing Service for access.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.3.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.3.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.3.1.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:1.3.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:1
+      ref_id: 1.3.2.OT
+      name: Alternative Flexible Credentialing
+      description: DoW Components shall support alternative methods of authentication
+        that can be managed using a self-service approach.  The solution will be approved
+        and implemented following DoW Enterprise policy recommendations and guidance.
+      implementation_groups:
+      - Advanced
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:1.3.2.ot:question:1:
+          type: unique_choice
+          text: Authoritative Credentialing service provides user self- service alternative
+            authentication solutions.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.3.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.3.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.3.2.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:1.3.2.ot:question:2:
+          type: unique_choice
+          text: DoW Component provides solutions approved per policy.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.3.2.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.3.2.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.3.2.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:1.3.3.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:1
+      ref_id: 1.3.3.OT
+      name: Interoperate Credentialing Services
+      description: DoW Component Authentication solution is extended to interoperate
+        with DoW Approved Credentialing services.
+      implementation_groups:
+      - Advanced
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:1.3.3.ot:question:1:
+          type: unique_choice
+          text: DoW Component authentication solution interoperates with all approved
+            credentialing services.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.3.3.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.3.3.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.3.3.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:1.4.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:1
+      ref_id: 1.4.1.OT
+      name: Implement PAM for OT Environments Pt. 1
+      description: DoW Components procure and implement an OT Privileged Access Management
+        (PAM) solution that supports all critical privileged use cases, as appropriate
+        in the OT environment. Integration points for applications, services, and/or
+        devices are identified to determine the status of support for the PAM solution.
+        Applications, services, and/or devices that are able to integrate with the
+        PAM solution are transitioned to using the solution.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:1.4.1.ot:question:1:
+          type: unique_choice
+          text: OT PAM solution implemented.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.4.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.4.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.4.1.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:1.4.1.ot:question:2:
+          type: unique_choice
+          text: Integration points with appropriate applications, services, and devices
+            are identified to support interoperability across the environment.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.4.1.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.4.1.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.4.1.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:1.4.1.ot:question:3:
+          type: unique_choice
+          text: Applications, services, devices that can be readily integrated with
+            the PAM solution are integrated.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.4.1.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.4.1.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.4.1.ot:question:3:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:1.4.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:1
+      ref_id: 1.4.2.OT
+      name: Implement PAM for OT Environments Pt. 2
+      description: DoW Components extend integrations with the OT PAM Solution to
+        all use cases, inclusive of all critical use cases.   Applications, services,
+        and devices that cannot integrate with the PAM solution shall be managed in
+        a risk- based methodical approach to be migrated and/or decommissioned where
+        operationally possible in the OT Environment.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:1.4.2.ot:question:1:
+          type: unique_choice
+          text: OT PAM solution extended for all use cases.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.4.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.4.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.4.2.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:1.4.2.ot:question:2:
+          type: unique_choice
+          text: Applications, services, and devices that are not integrated with the
+            OT PAM solution are migrated and/or decommissioned.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.4.2.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.4.2.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.4.2.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:1.5.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:1
+      ref_id: 1.5.1.OT
+      name: Life-Cycle Management for OT Environments Pt. 1
+      description: DoW Components develop and document an Identity Life-Cycle Management
+        (ILM) process for the OT Environment.  The process is implemented for all
+        users that access, connect, and operate with the OT Environment.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:1.5.1.ot:question:1:
+          type: unique_choice
+          text: OT Environment Identity Life-Cycle Management process developed, documented,
+            and implemented.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.5.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.5.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.5.1.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:1.5.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:1
+      ref_id: 1.5.2.OT
+      name: Life-Cycle Management for OT Environments Pt. 2
+      description: DoW Components works with the DoW Enterprise to review and align
+        the OT Environment ILM process with existing ILM processes, policies, and
+        standards.  Exceptions are identified and are managed in a risk-based methodical
+        approach.
+      implementation_groups:
+      - Advanced
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:1.5.2.ot:question:1:
+          type: unique_choice
+          text: Standardized ILM processes and policies for OT environments.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.5.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.5.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.5.2.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:1.6.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:1
+      ref_id: 1.6.1.OT
+      name: Implement User & Entity Behavior Activity (UEBA) and User Activity Monitoring
+        (UAM) Tooling for OT Environments
+      description: DoW Components procure and implement UEBA and UAM solutions that
+        are designed specifically for OT environments for all users, PEs and NPEs,
+        as appropriate.  UEBA and UAM solutions are integrated with the Authorized
+        Credentialing Service and configured actions prioritize safety, reliability,
+        and resilience within the OT environment.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:1.6.1.ot:question:1:
+          type: unique_choice
+          text: UEBA and UAM functionality is implemented for all users, PEs and NPEs,
+            as appropriate.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.6.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.6.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.6.1.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:1.7.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:1
+      ref_id: 1.7.1.OT
+      name: Deny by Default Policy in OT Environments
+      description: DoW Components conduct a comprehensive review of all user accounts
+        and their assigned permissions, applying the principle of least privilege
+        to revoke unnecessary access rights while maintaining the safety and reliability
+        of OT processes.  Identify and decommission static privileged accounts where
+        possible, or reduce their permissions to the minimum required.  Automate audit
+        logging and governance processes to continuously monitor access and prepare
+        for the implementation of more granular, attribute-based or dynamic access
+        control mechanisms.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:1.7.1.ot:question:1:
+          type: unique_choice
+          text: Default permission levels have been significantly reduced, thoroug.h
+            audit of identity and group usage with revocation of unnecessary permissions.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.7.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.7.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.7.1.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:1.7.1.ot:question:2:
+          type: unique_choice
+          text: Auditing process has been automated where possible
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.7.1.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.7.1.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.7.1.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:1.7.1.ot:question:3:
+          type: unique_choice
+          text: Static privileged users decommissioned or had permissions reduced.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.7.1.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.7.1.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.7.1.ot:question:3:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:1.8.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:1
+      ref_id: 1.8.1.OT
+      name: Initial Authentication in OT Environments
+      description: DoW Components implement authentication processes to authenticate
+        users at the start of every session in the Operational IT environment, in
+        the Enterprise IT environment when it interoperates with the OT environment,
+        and in the Process Control environment via technical or procedural means,
+        as appropriate.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:1.8.1.ot:question:1:
+          type: unique_choice
+          text: Authentication of users is implemented across applications per session.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.8.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.8.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.8.1.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:1.8.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:1
+      ref_id: 1.8.2.OT
+      name: Programmable Periodic Authentication in OT Environments
+      description: DoW Components enable programmable periodic authentication requirements
+        in the Operational IT environment, in the Enterprise IT environment when it
+        interoperates with the OT environment, and in the Process Control environment,
+        as appropriate on a session basis.  Alternative mitigating controls, technical
+        or procedural, must be deployed and documented when OT devices do not support
+        periodic authentication.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:1.8.2.ot:question:1:
+          type: unique_choice
+          text: Programmable periodic authentication of users is implemented multiple
+            times per session.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.8.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.8.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.8.2.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:1.8.2.ot:question:2:
+          type: unique_choice
+          text: Alternative mitigating controls are deployed for OT devices that do
+            not support periodic authentication.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.8.2.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.8.2.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.8.2.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:1.8.3.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:1
+      ref_id: 1.8.3.OT
+      name: Continuous Authentication
+      description: DoW Components monitor transaction-based authentications for Policy
+        Violations.  Any violations are escalated for response to the incident response
+        process.
+      implementation_groups:
+      - Advanced
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:1.8.3.ot:question:1:
+          type: unique_choice
+          text: Transaction authentication monitoring detects Policy Violations and
+            escalated for action.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.8.3.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.8.3.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.8.3.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:1.9.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:1
+      ref_id: 1.9.1.OT
+      name: Enterprise Credentialing Services Pt. 1
+      description: The DoW Enterprise works with DoW Components to implement DoW approved
+        Credentialing Services in a centralized and/or federated fashion in the Operational
+        IT environment, in the Enterprise IT environment when it interoperates with
+        the OT environment, and in the Process Control environment, as appropriate.  DoW
+        Components credentialing services interoperate with the DoW Enterprise, while
+        also ensuring all risks involving communications between Process Control and
+        Operational IT environments are mitigated beforehand.  DoW Component local
+        credentialing solutions are identified for future migration and decommissioning.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:1.9.1.ot:question:1:
+          type: unique_choice
+          text: DoW Component implements approved Credentialing Services in the OT
+            environment.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.9.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.9.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.9.1.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:1.9.1.ot:question:2:
+          type: unique_choice
+          text: Component Credentialing Service interoperates with DoW Enterprise
+            approved Credentialing Authority when possible.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.9.1.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.9.1.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.9.1.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:1.9.1.ot:question:3:
+          type: unique_choice
+          text: Local Credentialing solutions are identified for future migration
+            and decommissioning.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.9.1.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.9.1.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.9.1.ot:question:3:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:1.9.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:1
+      ref_id: 1.9.2.OT
+      name: Enterprise Credentialing Services Pt. 2
+      description: DoW Component local credentialing solution is decommissioned and
+        users are migrated to the DoW Approved Credentialing Authority as appropriate.
+        All systems are assessed for compliance with this directive. Systems unable
+        to comply due to technical or operational constraints, including Stand-Alone
+        systems, where migration may be delayed due to inherent limitations, are subject
+        to a documented risk assessment process to be migrated and decommissioned
+        in the future, and compensating controls are implemented to maintain equivalent
+        security posture. Any users that are in violation are escalated for review
+        and remediated.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:1.9.2.ot:question:1:
+          type: unique_choice
+          text: Local Credentialing is decommissioned and migrated to DoW Approved
+            solution.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.9.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.9.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.9.2.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:1.9.2.ot:question:2:
+          type: unique_choice
+          text: Users unable to migrate are escalated and remediated.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.9.2.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.9.2.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.9.2.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:1.9.3.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:1
+      ref_id: 1.9.3.OT
+      name: Enterprise Credentialing Services Pt. 3
+      description: DoW Components shall apply authentication from DoW Approved Credentialing
+        Authority to all OT Assets.
+      implementation_groups:
+      - Advanced
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:1.9.3.ot:question:1:
+          type: unique_choice
+          text: Authentication from a DoW approved Credentialing Authority has been
+            applied to all OT Assets, enabling interoperable access across all OT
+            componentry.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.9.3.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.9.3.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:1.9.3.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: Device
+    - urn: urn:intuitem:risk:req_node:zt_ot:2.1.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:2
+      ref_id: 2.1.1.OT
+      name: Inventory NPEs in OT Environment
+      description: DoW Components develop a centralized inventory for NPEs in the
+        Operational IT and Process Control environments.  Existing inventories are
+        identified and manual and/or passive discovery-based automated solutions shall
+        be used to update the centralized inventory.  Automated inventories must be
+        manually verified and audited periodically for accuracy as new equipment is
+        deployed in the environment.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:2.1.1.ot:question:1:
+          type: unique_choice
+          text: DoW Components have developed a centralized inventory of NPE, incorporating
+            existing inventories through manual and/or passive discovery-based automated
+            solutions.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.1.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:2.1.1.ot:question:2:
+          type: unique_choice
+          text: Inventories are manually validated and audited periodically.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.1.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.1.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.1.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:2.1.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:2
+      ref_id: 2.1.2.OT
+      name: NPE Certificate Management for OT Environment
+      description: DoW Components utilize the Public Key Infrastructure (PKI) solution,
+        or DoW approved Credentialing Authority, to deploy X.509 certificates to all
+        supported and managed NPEs in the Operational IT environment.  NPEs within
+        the Process Control environment supporting X.509 certificates are assigned.  NPEs
+        incapable are marked for retirement or excepted using a risk based methodical
+        approach.  In addition, break-glass mechanisms are implemented to revert system
+        to non-secure OT protocols in the event of mission critical requirement. Break-glass
+        mechanisms must have mitigation controls in place to prevent misuse or exploitation.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:2.1.2.ot:question:1:
+          type: unique_choice
+          text: NPEs are managed via available PKI/IdP solutions, where possible.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.2.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:2.1.2.ot:question:2:
+          type: unique_choice
+          text: DoW Components have established break-glass mechanisms to revert Process
+            Control environment NPEs to utilize non-secure OT protocols in the event
+            of mission critical requirements.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.2.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.2.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.2.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:2.1.3.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:2
+      ref_id: 2.1.3.OT
+      name: NPE Credentialing Authority
+      description: The DoW approved Credentialing Authority, using either a centralized
+        or federated technologies, integrates NPEs from both the Operational IT and
+        Process Control environments. The Operational IT and Process Control IdP solution
+        should be separate from the Enterprise IT solution. An Operational IT Device
+        Management solution is used to track NPE integration. As appropriate, process
+        Control NPEs shall be integrated into the PKI and/or IdP system to enable
+        secure OT protocols (e.g., BACnet Secure Connect (BACnet/SC), DNP3 Secure).
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:2.1.3.ot:question:1:
+          type: unique_choice
+          text: NPEs from both Operational IT and Process Control environments are
+            integrated using either centralized or federated technologies.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.3.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.3.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.3.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:2.1.3.ot:question:2:
+          type: unique_choice
+          text: NPEs are tracked in the Operational IT environment Device Management
+            solution, indicating whether they are integrated into the IdP and/or PKI
+            system.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.3.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.3.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.3.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:2.1.3.ot:question:3:
+          type: unique_choice
+          text: Process Control NPEs are integrated into the PKI and/or IdP system
+            as appropriate to enable secure OT protocols.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.3.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.3.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.3.ot:question:3:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:2.1.3.ot:question:4:
+          type: unique_choice
+          text: NPEs not integrated are marked for retirement or an exception is documented
+            with a risk-based, methodical approach.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.3.ot:question:4:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.3.ot:question:4:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.3.ot:question:4:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:2.1.4.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:2
+      ref_id: 2.1.4.OT
+      name: Automated NPE Discovery
+      description: DoW Components automate OT network NPE discovery through the OT
+        environment, limiting access to NPEs based on risk-based methods.  OT network
+        asset discovery shall utilize active discovery methods that are optimized
+        to mitigate operational disturbances through configurations that avoid aggressive
+        network scans, especially for equipment in the Process Control environment.  In
+        addition, SIEM, SOAR, and IDS solutions shall be configured to permit traffic
+        from authorized active discovery tools to reduce false alarms.
+      implementation_groups:
+      - Advanced
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:2.1.4.ot:question:1:
+          type: unique_choice
+          text: NPE discovery is automated through the entire OT environment.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.4.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.4.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.4.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:2.1.4.ot:question:2:
+          type: unique_choice
+          text: Automated discovery utilizes active discovery methods, as opposed
+            to passive discovery methods.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.4.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.4.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.4.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:2.1.4.ot:question:3:
+          type: unique_choice
+          text: The incidence of false alarms is reduced compared to Target Activities
+            by configuring the SIEM, SOAR, and IDS solution to permit traffic from
+            discovery tools.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.4.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.4.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.1.4.ot:question:3:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:2.2.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:2
+      ref_id: 2.2.1.OT
+      name: Implement Connection Policy for OT Environments
+      description: The DoW Enterprise refines policy, standards and requirements for
+        connection policies.  Policy, standards, and requirements should specifically
+        state how often compliance audits are conducted to ensure all NPEs meet minimum
+        security standards.  DoW Components implement and enforce compliance-based
+        network authorization for the Operational IT environment, but only for the
+        Process Control environment, as appropriate.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:2.2.1.ot:question:1:
+          type: unique_choice
+          text: DoW Enterprise policy, standards, and requirements for connection
+            policies are refined and documented.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.2.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.2.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.2.1.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:2.2.1.ot:question:2:
+          type: unique_choice
+          text: Refined policies clearly dictate the frequency and scope of compliance
+            audits to meet minimum security standards.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.2.1.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.2.1.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.2.1.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:2.2.1.ot:question:3:
+          type: unique_choice
+          text: DoW Components implement and enforce compliance-based network authorization,
+            specifically for the Process Control environment as appropriate.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.2.1.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.2.1.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.2.1.ot:question:3:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:2.2.1.ot:question:4:
+          type: unique_choice
+          text: Compliance enforcement is risk-based, prioritizing the Operational
+            IT and Process Control environments as appropriate.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.2.1.ot:question:4:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.2.1.ot:question:4:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.2.1.ot:question:4:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:2.3.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:2
+      ref_id: 2.3.1.OT
+      name: Configuration Monitoring and Control Tools for OT Environments
+      description: DoW Components procure and implement configuration monitoring and
+        control solutions for the Operational IT environment. Configuration control
+        should ensure configuration files (e.g., ladder logic) for the Process Control
+        environment are not altered, downloaded, or uploaded except by authorized
+        individuals.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:2.3.1.ot:question:1:
+          type: unique_choice
+          text: Configuration monitoring and control solutions are implemented for
+            the Operational IT environment.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.3.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.3.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.3.1.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:2.3.1.ot:question:2:
+          type: unique_choice
+          text: Process Control environment configuration control solution prevents
+            altering, downloading, or uploading unauthorized configuration files.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.3.1.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.3.1.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.3.1.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:2.3.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:2
+      ref_id: 2.3.2.OT
+      name: Integrate AV Tools for OT Environments
+      description: DoW Components procure and implement approved anti-virus and anti-
+        malware solutions for supported Operational IT NPEs.  NPEs without anti- virus
+        or anti-malware solutions must be protected with mitigating controls.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:2.3.2.ot:question:1:
+          type: unique_choice
+          text: Anti-virus and anti-malware is implemented on Operational IT NPEs.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.3.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.3.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.3.2.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:2.3.2.ot:question:2:
+          type: unique_choice
+          text: NPEs without anti-virus or anti-malware must be protected with other
+            mitigating controls.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.3.2.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.3.2.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.3.2.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:2.3.3.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:2
+      ref_id: 2.3.3.OT
+      name: OT Device Security Stack with C2C
+      description: DoW Components working with DoW Enterprise review current C2C policies
+        applicability to the OT Environment.  DoW Components shall prioritize applying
+        security solutions and configurations for OT devices enabling C2C policies
+        where possible in the OT Environment.
+      implementation_groups:
+      - Advanced
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:2.3.3.ot:question:1:
+          type: unique_choice
+          text: DoW Components, in collaboration with the DoW Enterprise, have reviewed
+            current C2C policies to determine their applicability to the OT environment.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.3.3.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.3.3.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.3.3.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:2.3.3.ot:question:2:
+          type: unique_choice
+          text: Based on the review, DoW Components prioritize the implementation
+            of security solutions and configurations for OT devices that enable C2C
+            policies, where feasible.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.3.3.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.3.3.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.3.3.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:2.3.3.ot:question:3:
+          type: unique_choice
+          text: OT devices prioritized for C2C implementation have an acceptable security
+            stack adaptation to support those policies.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.3.3.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.3.3.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.3.3.ot:question:3:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:2.4.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:2
+      ref_id: 2.4.1.OT
+      name: NPE Deny by Default Policy
+      description: DoW Components block all unauthorized remote and local NPE access
+        to resources, including serial communications and console access, via technical
+        or procedural controls.  Identified and authorized NPEs are provided risk-
+        based, methodical access.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:2.4.1.ot:question:1:
+          type: unique_choice
+          text: Unauthorized remote and local NPE access and connections are blocked.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.4.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.4.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.4.1.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:2.4.1.ot:question:2:
+          type: unique_choice
+          text: Physical controls are implemented to secure local NPE access.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.4.1.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.4.1.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.4.1.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:2.4.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:2
+      ref_id: 2.4.2.OT
+      name: Managed and Limited BYOD support for OT Environments
+      description: Only Government Furnished Equipment (GFE) is permitted to connect
+        to an OT Environment.  GFE is provided by the system owner and any required
+        software is scanned and approved before deployment for use in the OT environment.  If
+        non-GFE is required, and properly authorized by command authority, to connect
+        to the OT Environment, it must follow the approved deviation process, which
+        explicitly identifies risk tolerance levels based on situational circumstance.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:2.4.2.ot:question:1:
+          type: unique_choice
+          text: Only GFE is permitted to connect, manage, configure, or maintain NPE
+            in the OT environment.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.4.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.4.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.4.2.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:2.4.2.ot:question:2:
+          type: unique_choice
+          text: Software deployed on GFE is scanned and approved before use in the
+            OT environment.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.4.2.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.4.2.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.4.2.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:2.4.2.ot:question:3:
+          type: unique_choice
+          text: Any non-GFE requiring connection to the OT environment must follow
+            an approved deviation process, explicitly identifying risk tolerance levels
+            based on situational circumstance and requiring command authorization
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.4.2.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.4.2.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.4.2.ot:question:3:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:2.4.3.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:2
+      ref_id: 2.4.3.OT
+      name: Managed Non-OT Assets
+      description: DoW Components shall require non-OT assets are managed and meet
+        standard baseline checks before authorization or connection to the OT Environment.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:2.4.3.ot:question:1:
+          type: unique_choice
+          text: Only non-OT assets that meet mandated configuration standards allowed
+            to access resources or connect in the OT Environment.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.4.3.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.4.3.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.4.3.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:2.5.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:2
+      ref_id: 2.5.1.OT
+      name: Implement Vulnerability and Patch Management Tools for OT Environments
+      description: OT Environments must maintain minimum government approved compliance
+        standards and patching as well as be maintained to current approved configuration
+        profiles. Any systems outside of these standards require authorization from
+        the DoW Component through a risk based assessment approach.  Periodic reassessments
+        for compliance are performed for all devices in use.  At the Process Control
+        level, special care must be given to mitigate vulnerabilities without a patch
+        source, while protecting safety, operational functionality, and process reliability.
+        Similarly, risk-based testing must be performed and accepted prior to  patching.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:2.5.1.ot:question:1:
+          type: unique_choice
+          text: OT Environments are maintained to current approved compliance standards,
+            patching levels, and configuration profiles.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.5.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.5.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.5.1.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:2.5.1.ot:question:2:
+          type: unique_choice
+          text: Periodic reassessments are performed for all devices to verify ongoing
+            compliance.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.5.1.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.5.1.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.5.1.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:2.5.1.ot:question:3:
+          type: unique_choice
+          text: For Process Control environments, a risk-based approach is used to
+            mitigate vulnerabilities, particularly where patch sources are unavailable,
+            prioritizing process reliability.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.5.1.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.5.1.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.5.1.ot:question:3:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:2.6.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:2
+      ref_id: 2.6.1.OT
+      name: Implement UEDM for OT Environments
+      description: DoW Components will procure and implement a UEDM solution, wherever
+        applicable, for all identified devices.  This shall include explicit configuration
+        profiles per device.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:2.6.1.ot:question:1:
+          type: unique_choice
+          text: UEDM solution is implemented, incorporating the requirements for configuration,
+            vulnerability, and patch management.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.6.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.6.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.6.1.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:2.6.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:2
+      ref_id: 2.6.2.OT
+      name: OT Device Configuration Management
+      description: DoW Components sets standards and policies for the device inventory
+        and secure configuration, in conjunction with the UEDM solution and asset
+        management tools, to enable automated configuration management control.  Automated
+        solutions for configuring devices are used only after analyzing the risk to
+        operations.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:2.6.2.ot:question:1:
+          type: unique_choice
+          text: Standards and policies are defined for OT device management for the
+            Operational IT and Process Control environments.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.6.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.6.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.6.2.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:2.6.2.ot:question:2:
+          type: unique_choice
+          text: Automated configuration management is enabled.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.6.2.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.6.2.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.6.2.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:2.7.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:2
+      ref_id: 2.7.1.OT
+      name: Implement Endpoint Detection & Response (EDR) Tools for OT Environments
+      description: DoW Components procure and implement EDR solution(s) within the
+        Operational IT, and Process Control environments as appropriate.  DoW Components
+        conduct system analysis to determine the potential automated responses within
+        both the Operational IT and Process Control environments prioritizing safety,
+        process reliability, and mission.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:2.7.1.ot:question:1:
+          type: unique_choice
+          text: EDR solutions are implemented for both Operational IT and Process
+            Control environments, following system analysis to determine and prioritize
+            automated responses.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.7.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.7.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.7.1.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:2.7.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:2
+      ref_id: 2.7.2.OT
+      name: Implement Extended Detection & Response (XDR) Tools for OT Environments
+      description: DoW Components procure and implement XDR solution(s) to all possible
+        devices, and integration with other solutions where possible.  EDR continues
+        coverage to include the maximum number of services and applications as part
+        of the XDR implementation.  Basic analytics are sent from the XDR solution
+        stack to the OT and/or Enterprise SIEM solution.
+      implementation_groups:
+      - Advanced
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:2.7.2.ot:question:1:
+          type: unique_choice
+          text: XDR solution is implemented for both Operational IT and Process Control
+            environments.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.7.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.7.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.7.2.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:2.7.2.ot:question:2:
+          type: unique_choice
+          text: The maximum number of services and applications are covered by the
+            XDR solution.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.7.2.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.7.2.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.7.2.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:2.7.2.ot:question:3:
+          type: unique_choice
+          text: Basic analytics from the XDR are sent to the OT and/or Enterprise
+            SIEM.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.7.2.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.7.2.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:2.7.2.ot:question:3:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: Applications and Workload
+    - urn: urn:intuitem:risk:req_node:zt_ot:3.1.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:3
+      ref_id: 3.1.1.OT
+      name: OT Application and Code Inventory
+      description: DoW Components create an inventory of all applications.  Software
+        applications include those in use within the Operational IT environment, as
+        well as those in use within the Enterprise IT applications when they interoperate
+        with the Operational IT environment, including open source, commercial, and/or
+        in-house solutions.  Each Component tracks and documents the application supportability,
+        hosted location (e.g., cloud, on- premise, hybrid), and other important data
+        (e.g., name, version, team responsible, licensing and support, mapped dependencies).
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:3.1.1.ot:question:1:
+          type: unique_choice
+          text: All applications within the Operational IT environment, and the Enterprise
+            IT and which interoperate with the Operational IT environment, are identified,
+            categorized, tracked, and documented.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.1.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.1.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.1.1.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:3.1.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:3
+      ref_id: 3.1.2.OT
+      name: OT Application Control
+      description: Application control solutions are applied to inventoried applications
+        (e.g., SCADA software, control software, controller IDEs, etc.), to prevent
+        unauthorized modifications.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:3.1.2.ot:question:1:
+          type: unique_choice
+          text: Application control solutions are implemented on inventoried applications.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.1.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.1.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.1.2.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:3.2.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:3
+      ref_id: 3.2.1.OT
+      name: Build OT DevOps Capability Factory Pt. 1
+      description: The DoW Enterprise provide guidance for DevOps or DevSecOps processes,
+        CI/CD, and Infrastructure as Code (IaC) pipelines in the Operational IT environments,
+        and where appropriate for the Process Control applications. For DoW Components
+        that have application development processes the guidance is applied.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:3.2.1.ot:question:1:
+          type: unique_choice
+          text: The DoW Enterprise provides guidance for DevOps or DevSecOps processes,
+            CI/CD, and IaC pipelines for Operational IT environments, and where appropriate  for
+            Process Control applications, to be applied by DoW Components with existing
+            application development processes.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.2.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.2.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.2.1.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:3.2.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:3
+      ref_id: 3.2.2.OT
+      name: Build OT DevOps Capability Factory Pt. 2
+      description: 'DoW Components that have capability development processes extend
+        to use approved DevOps or DevSecOps processes, CI/CD, and IaC  pipelines to
+        develop new capabilities in the OT environment, as appropriate.  DevOps or
+        DevSecOps processes are also used to update existing capabilities.
+
+        Continual validation functions are integrated into the CI/CD pipelines and
+        DevSecOps processes are integrated with existing capabilities.'
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:3.2.2.ot:question:1:
+          type: unique_choice
+          text: Engineering teams within the OT environment follow DevOps or DevSecOps,
+            CI/CD, and IaC  pipeline process patterns for development and deployment.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.2.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.2.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.2.2.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:3.2.3.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:3
+      ref_id: 3.2.3.OT
+      name: Standardized OT Application Security and XBOM Inventory
+      description: All delivered applications and capabilities must apply approved
+        security practices during development and ensure all security features are
+        operable during execution.  Additionally, an approved XBOM solution inventories
+        utilized capability and application delivery.
+      implementation_groups:
+      - Advanced
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:3.2.3.ot:question:1:
+          type: unique_choice
+          text: All delivered applications and capabilities apply approved security
+            practices during development.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.2.3.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.2.3.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.2.3.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:3.2.3.ot:question:2:
+          type: unique_choice
+          text: All security features are operable during execution.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.2.3.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.2.3.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.2.3.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:3.2.3.ot:question:3:
+          type: unique_choice
+          text: An approved XBOM solution inventories utilized software solutions.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.2.3.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.2.3.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.2.3.ot:question:3:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:3.3.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:3
+      ref_id: 3.3.1.OT
+      name: OT Vulnerability Management Program Pt. 1
+      description: DoW Components work with the DoW Enterprise to establish and manage  an
+        OT Vulnerability Management program. OT Vulnerability Management teams shall
+        collaborate with a related Enterprise IT Vulnerability Management team. Vulnerability
+        management for the OT environment shall incorporate vulnerability scope and
+        risk to mission in prioritization decisions. Vulnerability sources can be
+        delivered from any trusted agent, and must be consumed as an interoperable
+        product.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:3.3.1.ot:question:1:
+          type: unique_choice
+          text: OT Vulnerability Management program is established and managed by
+            the DoW Component, in collaboration with the DoW Enterprise.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.3.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.3.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.3.1.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:3.3.1.ot:question:2:
+          type: unique_choice
+          text: The OT Vulnerability Management program prioritizes vulnerabilities
+            based on risk to mission and consumes vulnerability data from interoperable
+            sources.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.3.1.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.3.1.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.3.1.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:3.3.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:3
+      ref_id: 3.3.2.OT
+      name: OT Vulnerability Management Program Pt. 2
+      description: Standard processes are established at the DoW Enterprise level
+        for reporting and managing the disclosure of vulnerabilities in DoW maintained
+        or operated OT environments, for disclosure both publicly and privately.  DoW
+        Components expand the OT Vulnerability Management program to track  and manage
+        open public, controlled public, PAI and CAI, and DoW internally derived vulnerability
+        sources.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:3.3.2.ot:question:1:
+          type: unique_choice
+          text: Enterprise-wide processes for managing disclosure of vulnerabilities
+            for OT environments.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.3.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.3.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.3.2.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:3.3.2.ot:question:2:
+          type: unique_choice
+          text: DoW Components have expanded the vulnerability management program
+            to track and manage open public, controlled public, PAI and CAI, and DoW
+            internally derived vulnerability sources.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.3.2.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.3.2.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.3.2.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:3.3.3.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:3
+      ref_id: 3.3.3.OT
+      name: Binaries, Code, and Hardware Configurations for OT Environments
+      description: The DoW Components manage and document approved binaries, code,
+        and hardware configurations for the Operational IT and Process Control environments,
+        and code reviews are conducted. Secure and reliable configuration management
+        processes and procedures are established and adopted (e.g., to enable reverting
+        to known-good backups). These approaches include supplier sourcing risk management,
+        supply chain risk management, and industry standard vulnerability management.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:3.3.3.ot:question:1:
+          type: unique_choice
+          text: Approved binaries, code, and hardware configuration developed across
+            the OT environment are managed and documented.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.3.3.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.3.3.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.3.3.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:3.4.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:3
+      ref_id: 3.4.1.OT
+      name: Access Control for OT Environments Pt. 1
+      description: All applications and capabilities must support a full ABAC solution.
+        Applications, services, and devices unable to utilize ABAC are identified
+        for future decommissioning.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:3.4.1.ot:question:1:
+          type: unique_choice
+          text: All applications and capabilities support a full ABAC solution.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.4.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.4.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.4.1.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:3.4.1.ot:question:2:
+          type: unique_choice
+          text: Applications, services, and devices unable to utilize ABAC are identified
+            for future decommissioning.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.4.1.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.4.1.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.4.1.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:3.4.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:3
+      ref_id: 3.4.2.OT
+      name: Access Control for OT Environments Pt. 2
+      description: Access control must be enforced using digital policy with full
+        attribution utilizing ABAC following established policies. Applications, services,
+        and devices unable to utilize ABAC are either decommissioned or accepted using
+        a risk-based methodical approach.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:3.4.2.ot:question:1:
+          type: unique_choice
+          text: Policy enforcements is implemented for all possible applications,
+            services, and devices in the Operational IT environment.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.4.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.4.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.4.2.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:3.4.2.ot:question:2:
+          type: unique_choice
+          text: Applications, services, and devices unable to utilize ABAC are either
+            decommissioned or accepted using a risk-based approach.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.4.2.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.4.2.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.4.2.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:3.4.3.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:3
+      ref_id: 3.4.3.OT
+      name: Access Control for OT Environments Pt. 3
+      description: Confidence scoring is introduced across the attributes to create
+        a more advanced method of authorization decision making in an automated fashion.
+        High-Privileged OT attributes are identified for the Confidence scoring.
+      implementation_groups:
+      - Advanced
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:3.4.3.ot:question:1:
+          type: unique_choice
+          text: Confidence scoring is introduced and implemented to High-Privileged
+            OT attributes.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.4.3.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.4.3.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.4.3.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:3.4.4.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:3
+      ref_id: 3.4.4.OT
+      name: Access Control for OT Environments Pt. 4
+      description: Apply confidence scoring to all DAAS, PEs, and NPEs in the OT environment.
+      implementation_groups:
+      - Advanced
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:3.4.4.ot:question:1:
+          type: unique_choice
+          text: Confidence scoring is applied to all DAAS, PEs, and NPEs in the OT
+            environment.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.4.4.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.4.4.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:3.4.4.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Data
+    - urn: urn:intuitem:risk:req_node:zt_ot:4.1.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:4
+      ref_id: 4.1.1.OT
+      name: OT Data Tagging Governance
+      description: The DoW Enterprise establishes governing body(s) for establishing
+        controlled terminology (data and metadata), file formats, and communication
+        protocols, which are used to ensure interoperability across communities.  Data
+        at the DoW Component level should be categorized and analyzed to align with
+        the controlled terminology, ensuring input from appropriate Information Owners
+        for correct alignment.  DoW Components will also determine data tagging structure
+        and maps based on workflow process, with a focus on risk of operational impact.  OT
+        environment must include a characterization method for all data.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:4.1.1.ot:question:1:
+          type: unique_choice
+          text: A governing body is established to define and maintain controlled
+            terminology, file formats, and communication protocols for interoperable
+            data transmission, querying, and storage across communities.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.1.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.1.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.1.1.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:4.1.1.ot:question:2:
+          type: unique_choice
+          text: DoW Component categorizes and analyzes their data to align with the
+            established controlled terminology.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.1.1.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.1.1.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.1.1.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:4.1.1.ot:question:3:
+          type: unique_choice
+          text: DoW Component determines and implements data tagging structures and
+            maps based on workflow processes and operational risk, including a characterization
+            method for all data in the OT environment.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.1.1.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.1.1.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.1.1.ot:question:3:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:4.1.1.ot:question:4:
+          type: unique_choice
+          text: Exemptions for data tagging have been submitted by the DoW Component
+            with justification.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.1.1.ot:question:4:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.1.1.ot:question:4:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.1.1.ot:question:4:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:4.2.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:4
+      ref_id: 4.2.1.OT
+      name: Define OT Data Tagging Patterns
+      description: Data tagging mandates for data within the OT environment is defined
+        based on workflow process data types in 4.1.1.OT.  The DoW Enterprise works
+        with DoW Components to establish data tagging, labeling, and classification
+        patterns based on industry best practices.  Patterns are agreed upon, for
+        both Operational IT data tagging and Process Control data tagging (which may
+        be system specific), documented, and implemented in portions of the OT environment
+        for which tagging does not interfere with critical processes.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:4.2.1.ot:question:1:
+          type: unique_choice
+          text: Data tagging mandates for OT data are defined based on workflow process
+            data types.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.2.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.2.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.2.1.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:4.2.1.ot:question:2:
+          type: unique_choice
+          text: Data tagging, labeling, and classification patterns are established
+            across DoW Components, instituting industry best practices and does not
+            interfere with critical processes.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.2.1.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.2.1.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.2.1.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:4.2.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:4
+      ref_id: 4.2.2.OT
+      name: OT Data Sharing Interoperability Patterns
+      description: The DoW Enterprise, collaborating with the DoW Components, develops
+        interoperability patterns that are compliant with the established policy used
+        for each operating mode of the OT environment.  DoW Components develop methods
+        for data sharing outside of the OT environment, considerations for secure
+        data exchange between different Impact Levels, and including protection mechanisms
+        for managing all OT data.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:4.2.2.ot:question:1:
+          type: unique_choice
+          text: Interoperability patterns, compliant with established policy, are
+            in place for data protection technologies across all operating modes of
+            the OT environment.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.2.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.2.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.2.2.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:4.2.2.ot:question:2:
+          type: unique_choice
+          text: Methods and protection mechanisms for data sharing outside of the
+            OT environment are developed.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.2.2.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.2.2.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.2.2.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:4.2.3.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:4
+      ref_id: 4.2.3.OT
+      name: Document OT Storage Architecture
+      description: The DoW Enterprise works with DoW Components to establish storage
+        architecture patterns and guidance, taking into consideration the data that
+        is produced within the Operational IT and Process Control environments. DoW
+        Components develop logical and physical architectural diagram for all storage
+        methods.  DoW Components assess their existing data storage strategies and
+        technologies to determine the suitability for implementing storage architectures.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:4.2.3.ot:question:1:
+          type: unique_choice
+          text: Storage architecture patterns and guidance are established by the
+            DoW Enterprise in collaboration with the DoW Component.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.2.3.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.2.3.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.2.3.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:4.2.3.ot:question:2:
+          type: unique_choice
+          text: Storage architecture considers OT-specific data requirements, both
+            for the Operational IT environment (e.g., server configurations, network
+            device configurations, etc.), and Process Control environment (e.g., controller
+            logic, device configurations, PLC project files, etc.).
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.2.3.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.2.3.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.2.3.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:4.2.3.ot:question:3:
+          type: unique_choice
+          text: Logical and physical architectural diagrams are developed for all
+            storage methods used by the DoW Component.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.2.3.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.2.3.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.2.3.ot:question:3:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:4.2.3.ot:question:4:
+          type: unique_choice
+          text: DoW Component assesses their existing data storage strategies and
+            technologies to determine suitability for implementing established storage
+            architecture patterns, including consideration of Software Defined Storage
+            where appropriate.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.2.3.ot:question:4:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.2.3.ot:question:4:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.2.3.ot:question:4:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:4.3.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:4
+      ref_id: 4.3.1.OT
+      name: Implement OT Data Tagging Tools
+      description: DoW Components procure and implement a data tagging solution based
+        on the standard from activity 4.2.1.OT.  A framework is established for periodic
+        re-assessment of system risk and vulnerability. Tagging solution may leverage
+        native capabilities of the Process Control protocols.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:4.3.1.ot:question:1:
+          type: unique_choice
+          text: Data tagging solution is procured and implemented.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.3.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.3.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.3.1.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:4.3.1.ot:question:2:
+          type: unique_choice
+          text: Periodic evaluation of the system risk and vulnerabilities is performed
+            to adjust data tagging to evolving threat landscape.E53:E55
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.3.1.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.3.1.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.3.1.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:4.3.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:4
+      ref_id: 4.3.2.OT
+      name: Data Tagging
+      description: DoW Components use the tagging standards developed in 4.2.1.OT
+        to apply tags (manual or automated) using local labeling to meet minimum essential
+        metadata criteria to enable ZT functionalities.  Data tagging solution migrates
+        over time to attribute-based pattern marking.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:4.3.2.ot:question:1:
+          type: unique_choice
+          text: Manual and/or automated data tagging begins according to the standards
+            established.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.3.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.3.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.3.2.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:4.4.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:4
+      ref_id: 4.4.1.OT
+      name: DLP Analytics
+      description: DoW Components establish DLP types (e.g., Network, Endpoint, On-
+        Premises, etc.) and recognition patterns based on data tagging solution in
+        Activity 4.3.1.OT.  A DLP analytics process is established to investigate
+        loss type from logs, and determine severity, impact, policy enforcement, and
+        mitigation response.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:4.4.1.ot:question:1:
+          type: unique_choice
+          text: DLP types, recognition patterns, and analytics process are established.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.1.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:4.4.1.ot:question:2:
+          type: unique_choice
+          text: DLP analytics process enables policy enforcement for how sensitive
+            data is handled and shared, and enables monitoring and detection of data
+            loss events.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.1.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.1.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.1.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:4.4.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:4
+      ref_id: 4.4.2.OT
+      name: Establish DRM Processes
+      description: DoW Components establish a DRM processes, which leverage PBAC to
+        control information use, to include information use beyond the OT environment
+        Formal Boundary.  The framework includes the development of DRM-specific use
+        cases to better outline solution coverage.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:4.4.2.ot:question:1:
+          type: unique_choice
+          text: DRM processes that leverage PBAC are established.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.2.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:4.4.2.ot:question:2:
+          type: unique_choice
+          text: DRM-specific use cases are developed in framework.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.2.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.2.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.2.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:4.4.3.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:4
+      ref_id: 4.4.3.OT
+      name: OT File Prioritization and Monitoring
+      description: DoW Components identify files within the Operational IT and Process
+        Control environments that require file monitoring and protection (e.g., controller
+        configuration files, plant schematics, network diagrams), and establish a
+        prioritization process for ranking severity of impact for each file type and
+        use case.  Data owners utilize File Monitoring tools to monitor, in priority
+        order, the identified files.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:4.4.3.ot:question:1:
+          type: unique_choice
+          text: Data and files of critical classification are  actively being monitored.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.3.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.3.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.3.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:4.4.3.ot:question:2:
+          type: unique_choice
+          text: Data owners utilize File Monitoring tools to monitor files in order
+            of established priority.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.3.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.3.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.3.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:4.4.3.ot:question:3:
+          type: unique_choice
+          text: Basic Integration is in place with monitoring system such as the SIEM.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.3.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.3.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.3.ot:question:3:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:4.4.4.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:4
+      ref_id: 4.4.4.OT
+      name: OT File Monitoring Interoperability
+      description: File monitoring artifacts and logs must have a standard, machine-readable
+        formats to enable interoperability with other tools (e.g., DLP, DRM, and UEBA
+        tools), in alignment with activity 6.6.1.OT.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:4.4.4.ot:question:1:
+          type: unique_choice
+          text: Data and files of all regulated classifications are actively being
+            monitored
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.4.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.4.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.4.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:4.4.4.ot:question:2:
+          type: unique_choice
+          text: A standard, machine-readable format is utilized for file monitoring
+            artifacts and logs.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.4.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.4.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.4.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:4.4.5.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:4
+      ref_id: 4.4.5.OT
+      name: Inventory Databases
+      description: DoW Components identify, enumerate, and document databases within
+        the OT Operational Environment.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:4.4.5.ot:question:1:
+          type: unique_choice
+          text: Databases are identified and documented within the OT Operational
+            Environment.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.5.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.5.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.5.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:4.4.6.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:4
+      ref_id: 4.4.6.OT
+      name: Database Activity Monitoring and Response
+      description: DoW Components procure, implement, and utilize Database Monitoring
+        solutions, as appropriate, with either in-band or out-of-band solutions.   Initial
+        data monitored shall include regulated data types (e.g., CUI, PII, PHI)   as
+        appropriate for the mission environment.  Logs and analytics from the database
+        monitoring solution are fed to the SIEM.  Additional data attributes are identified
+        and used to extend the monitoring of databases as applicable.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:4.4.6.ot:question:1:
+          type: unique_choice
+          text: Databases within the OT environment (e.g.  data at rest, data exchange,
+            transaction monitoring) is monitored.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.6.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.6.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.6.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:4.4.6.ot:question:2:
+          type: unique_choice
+          text: Monitoring analytics is sent to SIEM.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.6.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.6.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.6.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:4.4.6.ot:question:3:
+          type: unique_choice
+          text: Additional data attributes are identified and incorporated into database
+            monitoring to enhance detection capabilities.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.6.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.6.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.6.ot:question:3:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:4.4.6.ot:question:4:
+          type: unique_choice
+          text: Along with in-band monitoring, out-of-band monitoring solutions are
+            considered and possibly utilized.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.6.ot:question:4:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.6.ot:question:4:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.4.6.ot:question:4:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:4.5.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:4
+      ref_id: 4.5.1.OT
+      name: Implement DRM and DLP Pt. 1
+      description: OT environment will manage DRM and DLP to the outer edge of the
+        OT environment formal boundary as determined by the DoW Component.  The consumer
+        of the artifact(s) is expected to maintain the DRM agreement.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:4.5.1.ot:question:1:
+          type: unique_choice
+          text: DRM and DLP are managed by OT environment to  the outer edge of the
+            OT environment formal boundary.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.5.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.5.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.5.1.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:4.5.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:4
+      ref_id: 4.5.2.OT
+      name: Implement DRM and DLP Pt. 2
+      description: Atypical DRM behavior or occurrences are documented and reported
+        to DoW Components or Enterprise, to perform outlier analysis and refinement
+        of DRM rule sets.  Refined rule sets utilized by DLP.
+      implementation_groups:
+      - Advanced
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:4.5.2.ot:question:1:
+          type: unique_choice
+          text: Outlier analysis and refinement of DRM rule sets is performed and
+            documented against atypical DRM behavior and/or occurrences
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.5.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.5.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.5.2.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:4.5.2.ot:question:2:
+          type: unique_choice
+          text: DLP used with refined rule sets.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.5.2.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.5.2.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.5.2.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:4.5.3.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:4
+      ref_id: 4.5.3.OT
+      name: DRM Response Pt. 1
+      description: Create data tags for response characterization, and create response
+        process driven by newly established tags.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:4.5.3.ot:question:1:
+          type: unique_choice
+          text: Data tags are created for DRM response characterization.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.5.3.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.5.3.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.5.3.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:4.5.3.ot:question:2:
+          type: unique_choice
+          text: DRM response process is driven by newly established tags.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.5.3.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.5.3.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.5.3.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:4.5.4.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:4
+      ref_id: 4.5.4.OT
+      name: DRM Response Pt. 2
+      description: DoW Components implement data tags for data within databases applicable
+        to the mission environment.  Data is encrypted according to policy based on
+        data tags.
+      implementation_groups:
+      - Advanced
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:4.5.4.ot:question:1:
+          type: unique_choice
+          text: Data repositories are protected using DRM.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.5.4.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.5.4.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.5.4.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:4.5.4.ot:question:2:
+          type: unique_choice
+          text: Data is encrypted using data tags.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.5.4.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.5.4.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.5.4.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:4.6.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:4
+      ref_id: 4.6.1.OT
+      name: DLP Deployment
+      description: "Newly identified attributes can be established to improve DLP\
+        \ outcomes. The DLP enforcement points can be controlled to the OT environment\
+        \ formal boundary with a combination of PBAC, DRM, and DLP, and then beyond\
+        \ the boundary via agreement.  DLP is initially implemented with \u201Cmonitor-only\u201D\
+        \ and/or \u201Clearning\u201D mode, to test outcomes with limiting impact\
+        \ on operations.  Collaboration with cyber functions should occur with respect\
+        \ to any observed data loss activity."
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:4.6.1.ot:question:1:
+          type: unique_choice
+          text: DLP enforcement points are established and controlled to the OT environment
+            formal boundary, deployed with DLP tools, and initially configured in
+            monitor mode with standardized logging.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.6.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.6.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.6.1.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:4.6.1.ot:question:2:
+          type: unique_choice
+          text: A process is established for identifying and incorporating new data
+            attributes to improve DLP effectiveness.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.6.1.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.6.1.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.6.1.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:4.6.1.ot:question:3:
+          type: unique_choice
+          text: Observed data loss activity triggers collaboration with cyber functions
+            for investigation and response.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.6.1.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.6.1.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.6.1.ot:question:3:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:4.6.1.ot:question:4:
+          type: unique_choice
+          text: Mechanisms for extending DLP enforcement beyond the OT boundary via
+            agreements are defined.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.6.1.ot:question:4:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.6.1.ot:question:4:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.6.1.ot:question:4:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:4.6.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:4
+      ref_id: 4.6.2.OT
+      name: DLP Operations
+      description: DLP solution is transitioned from testing to operations.  DLP and
+        zero trust tagging should be complimentary to achieve full access control
+        and data loss prevention to the formal boundary.  The operational model must
+        also prescribe formalized agreements for zero trust and DLP behaviors beyond
+        the formal boundary as determined by the DoW Component.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:4.6.2.ot:question:1:
+          type: unique_choice
+          text: DLP solution is transitioned from testing to operations mode.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.6.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.6.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.6.2.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:4.6.2.ot:question:2:
+          type: unique_choice
+          text: Tagging is integrated to achieve full access control and data loss
+            prevention to the formal boundary.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.6.2.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.6.2.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.6.2.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:4.6.2.ot:question:3:
+          type: unique_choice
+          text: Formalized agreements are established to govern zero trust and DLP
+            behaviors beyond the formal boundary.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.6.2.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.6.2.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.6.2.ot:question:3:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:4.7.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:4
+      ref_id: 4.7.1.OT
+      name: Manage DAAS Access with Storage Policy
+      description: Governance mechanisms ensure that DoW Component DAAS access policy
+        is sufficient for Zero Trust outcomes aligned with activity 4.2.3.OT.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:4.7.1.ot:question:1:
+          type: unique_choice
+          text: Attribute-based DAAS policy is developed with DoW Enterprise and organizational
+            level support.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.7.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.7.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:4.7.1.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: Network
+    - urn: urn:intuitem:risk:req_node:zt_ot:5.1.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:5
+      ref_id: 5.1.1.OT
+      name: OT Granular Access Rules and Policies Pt. 1
+      description: The DoW Enterprise works with DoW Components to create granular
+        access rules and policies, technical and procedural, in the Operational IT
+        environment, and within the Enterprise IT environment when services are provided
+        to the OT environment.  Associated ConOps shall be developed to align with
+        the access rules and policies.  DoW Components will implement these access
+        rules and policies into existing solutions to improve initial risk levels
+        and ensure future interoperability.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:5.1.1.ot:question:1:
+          type: unique_choice
+          text: Granular access rules and policies are established for the Operational
+            IT environment, and for the Enterprise IT environment when applicable.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.1.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.1.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.1.1.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:5.1.1.ot:question:2:
+          type: unique_choice
+          text: ConOps are developed.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.1.1.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.1.1.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.1.1.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:5.1.1.ot:question:3:
+          type: unique_choice
+          text: Access rules and policies are implemented.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.1.1.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.1.1.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.1.1.ot:question:3:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:5.1.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:5
+      ref_id: 5.1.2.OT
+      name: OT Granular Access Rules and Policies Pt. 2
+      description: Data flow patterns are defined. DoW Components apply data tagging
+        patterns to enable granular access to the OT environment, as appropriate.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:5.1.2.ot:question:1:
+          type: unique_choice
+          text: Data flow patterns are defined, which cover both persistent and ephemeral
+            data.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.1.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.1.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.1.2.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:5.1.2.ot:question:2:
+          type: unique_choice
+          text: Data tagging patterns are applied.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.1.2.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.1.2.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.1.2.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:5.2.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:5
+      ref_id: 5.2.1.OT
+      name: Define OT Communication Pathway APIs
+      description: When SDN or alternate communication pathways are specified, the
+        DoW Enterprise works with the DoW Components to identify the necessary APIs
+        and other programmatic interfaces.  Automated policy management through APIs
+        should be tested before deployment, to minimize risk to OT operations.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:5.2.1.ot:question:1:
+          type: unique_choice
+          text: Necessary APIs and other programmatic interfaces for specified communication
+            pathways (including SDN) are identified and tested prior to deployment
+            to minimize risk to OT operations.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.2.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.2.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.2.1.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:5.2.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:5
+      ref_id: 5.2.2.OT
+      name: Implement OT Programmable Infrastructure
+      description: DoW Components implement the programmable communication pathways
+        to enable automation tasks in the Operational IT environment, as appropriate.  Segmentation
+        Gateways and Authentication Decision Points are integrated into the SDN or
+        alternative networking infrastructure.  All components of each programmable
+        pathway shall output their logs into a standardized repository (e.g., SIEM,
+        Log Analytics, syslog) for monitoring and alerting.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:5.2.2.ot:question:1:
+          type: unique_choice
+          text: Programmable communication pathways are implemented in the Operational
+            IT environment.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.2.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.2.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.2.2.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:5.2.2.ot:question:2:
+          type: unique_choice
+          text: Segmentation Gateways and Authentication Decision Points are integrated
+            into SDN.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.2.2.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.2.2.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.2.2.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:5.2.2.ot:question:3:
+          type: unique_choice
+          text: Logs are output into standardized repository.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.2.2.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.2.2.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.2.2.ot:question:3:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:5.2.3.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:5
+      ref_id: 5.2.3.OT
+      name: Information Flow Mapping Across OT Planes
+      description: Develop detailed information flow map inclusive of all planes and
+        actions (e.g., data, control, management planes).  Analytics and NetFlow from
+        the updated infrastructure is automatically fed into operations centers and
+        analytics tools.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:5.2.3.ot:question:1:
+          type: unique_choice
+          text: Detailed information flow map is developed.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.2.3.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.2.3.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.2.3.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:5.2.3.ot:question:2:
+          type: unique_choice
+          text: Analytics are automatically fed to operations centers and analytic
+            tools.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.2.3.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.2.3.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.2.3.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:5.3.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:5
+      ref_id: 5.3.1.OT
+      name: OT Plane Segmentation
+      description: DoW Components implement plane segmentation (e.g., control, data,
+        management planes) using traditional tiered and/or service-based architectures,
+        as it applies to connected devices and systems within the Enterprise IT, Operational
+        IT, and Process Control environments.  Proxy and/or enforcement checks are
+        integrated with communication pathways based the access policies defined in
+        5.1.1.OT and 5.1.2.OT.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:5.3.1.ot:question:1:
+          type: unique_choice
+          text: Traditional tiered and/or service-based plane segmentation is implemented.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.3.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.3.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.3.1.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:5.3.1.ot:question:2:
+          type: unique_choice
+          text: Enforcement checks of attributes, behavior, or other data using behavioral
+            analytics engines are established.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.3.1.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.3.1.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.3.1.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:5.3.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:5
+      ref_id: 5.3.2.OT
+      name: B/C/P/S  Segmentation
+      description: DoW Components implement B/C/P/S segmentation using logical zones,
+        limiting lateral movement across missions and geographically separated DoW
+        Components.  Proxy and/or enforcement checks are integrated with the communication
+        pathways based on the defined access policies.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:5.3.2.ot:question:1:
+          type: unique_choice
+          text: Segmentation is implemented across base, camp, post and stations using
+            logical zones to limit lateral movement.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.3.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.3.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.3.2.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:5.3.2.ot:question:2:
+          type: unique_choice
+          text: Attribute and behavior based enforcement checks are implemented  to
+            enforce defined access policies across the base, camp, post, and stations.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.3.2.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.3.2.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.3.2.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:5.4.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:5
+      ref_id: 5.4.1.OT
+      name: Implement Micro Segmentation
+      description: DoW Components implement Micro segmentation communication   pathways
+        into the Operational IT and Process Control environments,  enabling basic
+        segmentation of network addresses, VLANs, devices, endpoints, services, ports,
+        and protocols.  Basic automation is accepted for  IT systems for policy changes,
+        including API decision-making.  OT systems will queue and notify proposed
+        changes for human approval.  Virtual hosting environments also implement Micro
+        segmentation at the host/container level.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:5.4.1.ot:question:1:
+          type: unique_choice
+          text: Micro segmentation is implemented in the OT environment.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.4.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.4.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.4.1.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:5.4.1.ot:question:2:
+          type: unique_choice
+          text: Automated policy changes are enabled following human approval.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.4.1.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.4.1.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.4.1.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:5.4.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:5
+      ref_id: 5.4.2.OT
+      name: Application and Device Micro Segmentation
+      description: DoW Components apply Micro segmentation communication pathways
+        for all information flow, including logical network zones (e.g., VLANs, IP
+        subnets), roles, attributes and conditional-based access control for all PEs,
+        NPEs, and endpoints, privileged access management services for network resources,
+        and policy-based control on API access, as appropriate.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:5.4.2.ot:question:1:
+          type: unique_choice
+          text: Micro segmentation is implemented across all information flow, utilizing
+            role, attribute, and condition- based access controls for PEs, NPEs, and
+            endpoints, privileged access management services for network resources,
+            policy-based control on API access, and logical network zones.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.4.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.4.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.4.2.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:5.4.3.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:5
+      ref_id: 5.4.3.OT
+      name: Protect OT Data In Transit
+      description: DoW Components shall use protection of data in transit per policy,
+        and include common use cases.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:5.4.3.ot:question:1:
+          type: unique_choice
+          text: Data is protected in transit per policy through the OT environment.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.4.3.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.4.3.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:5.4.3.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: Automation and Orchestration
+    - urn: urn:intuitem:risk:req_node:zt_ot:6.1.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:6
+      ref_id: 6.1.1.OT
+      name: Policy Inventory and Development
+      description: DoW Enterprise works with DoW Components to catalog and inventory
+        existing access control policies and standards across OT system environments,
+        including role-based access controls and policies dictating operational availability
+        and Disaster Recovery Plans/Business Continuity Plans.  Policies and standards
+        are updated as needed.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:6.1.1.ot:question:1:
+          type: unique_choice
+          text: Policies have been collected in reference to applicable compliance
+            and risk.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.1.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.1.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.1.1.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:6.1.1.ot:question:2:
+          type: unique_choice
+          text: Policies have been reviewed and updated as needed.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.1.1.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.1.1.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.1.1.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:6.1.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:6
+      ref_id: 6.1.2.OT
+      name: Attribute-Driven Access Profiles
+      description: DoW Components support DoW Enterprise in establishing rules, which
+        are prioritized over local rules, as appropriate. DoW Components develop attribute-driven
+        access profile rules for mission/task and DAAS, using appropriate cross-pillar
+        data.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:6.1.2.ot:question:1:
+          type: unique_choice
+          text: Enterprise rules are established.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.1.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.1.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.1.2.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:6.1.2.ot:question:2:
+          type: unique_choice
+          text: Component scoped, attribute-driven profile(s) are created for mission/task
+            and DAAS
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.1.2.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.1.2.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.1.2.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:6.1.3.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:6
+      ref_id: 6.1.3.OT
+      name: Enterprise Security Profile for OT Environments Pt. 1
+      description: DoW Components establish minimum attributes to drive security and
+        privacy policies.  DoW Components create rules to ensure security, privacy,
+        and integrity is aligned and in compliance with Enterprise policy.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:6.1.3.ot:question:1:
+          type: unique_choice
+          text: Minimum attributes are established to drive security and privacy policies.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.1.3.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.1.3.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.1.3.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:6.1.3.ot:question:2:
+          type: unique_choice
+          text: Rules are created to ensure alignment with Enterprise policy.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.1.3.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.1.3.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.1.3.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:6.1.4.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:6
+      ref_id: 6.1.4.OT
+      name: Enterprise Security Profile for OT Environments Pt. 2
+      description: DoW Components implement all security and privacy rules to ensure
+        sufficient policy coverage.
+      implementation_groups:
+      - Advanced
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:6.1.4.ot:question:1:
+          type: unique_choice
+          text: All security and privacy rules are implemented to ensure sufficient
+            policy coverage.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.1.4.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.1.4.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.1.4.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:6.2.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:6
+      ref_id: 6.2.1.OT
+      name: Process Automation Analysis
+      description: DoW Components identify, enumerate, and document all operational
+        processes and procedures that can be executed both manually and in an automated
+        fashion, and identify candidates for automation.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:6.2.1.ot:question:1:
+          type: unique_choice
+          text: Automatable operational processes and procedures are identified.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.2.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.2.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.2.1.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:6.2.1.ot:question:2:
+          type: unique_choice
+          text: All operational processes and procedures are enumerated.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.2.1.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.2.1.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.2.1.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:6.2.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:6
+      ref_id: 6.2.2.OT
+      name: Tool Interoperability for OT Environments
+      description: DoW Enterprise works with DoW Components to establish and prioritize
+        baseline integration and interoperability between applicable SOAR, SIEM, and
+        other security solutions within OT environments.  Where possible, environment
+        integration shall be done with DoW Enterprise solutions and policy services,
+        while maintaining a human in the loop capability.
+      implementation_groups:
+      - Advanced
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:6.2.2.ot:question:1:
+          type: unique_choice
+          text: Baseline integration and interoperability between applicable SOAR,
+            SIEM, and other security solutions within OT environments is established.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.2.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.2.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.2.2.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:6.2.2.ot:question:2:
+          type: unique_choice
+          text: Prioritization of integration efforts is completed, based on risk
+            and operational impact.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.2.2.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.2.2.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.2.2.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:6.2.2.ot:question:3:
+          type: unique_choice
+          text: Integration with DoW Enterprise solutions and policy services is prioritized
+            and implemented where feasible.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.2.2.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.2.2.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.2.2.ot:question:3:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:6.3.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:6
+      ref_id: 6.3.1.OT
+      name: Implement OT Data Tagging and Classification Tools
+      description: 'DoW Components evaluate data-driven analytic approaches, such
+        as Machine Learning solutions or equivalent capabilities, as needed to increase
+        capability for orchestrated workflows and risk management processes.
+
+        Solutions are tested with existing tagged and classified data repositories
+        to establish baselines with a supervised approach to continually improve analysis.'
+      implementation_groups:
+      - Advanced
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:6.3.1.ot:question:1:
+          type: unique_choice
+          text: Implemented data tagging and classification tools are integrated with
+            analytic tools, utilizing existing tagged and classified data repositories.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.3.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.3.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.3.1.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:6.3.1.ot:question:2:
+          type: unique_choice
+          text: A supervised learning approach is established to establish baselines
+            and continually improve the accuracy and effectiveness of data-driven
+            analysis.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.3.1.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.3.1.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.3.1.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:6.5.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:6
+      ref_id: 6.5.1.OT
+      name: OT Response Automation Analysis
+      description: Identify and enumerate all workflow processes that are potential
+        optimization candidates, to improve response automation using advanced analysis
+        techniques.  Manual tasks are assessed for possible automation, or partial
+        automation that maintains a human-in-the-loop.  Remaining manual processes
+        are documented for exception and are periodically revaluated for possible
+        automation.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:6.5.1.ot:question:1:
+          type: unique_choice
+          text: All workflow processes are identified and enumerated.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.5.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.5.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.5.1.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:6.5.1.ot:question:2:
+          type: unique_choice
+          text: Manual processes are assessed for automation.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.5.1.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.5.1.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.5.1.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:6.5.1.ot:question:3:
+          type: unique_choice
+          text: Remaining manual processes are documented for exception and are periodically
+            revaluated for possible automation.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.5.1.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.5.1.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.5.1.ot:question:3:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:6.5.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:6
+      ref_id: 6.5.2.OT
+      name: Implement SOAR Tools in OT Environment
+      description: DoW Components work with DoW Enterprise to develop a standard set
+        of requirements for OT SOAR solutions to operate in OT environments.  DoW
+        Components use approved requirements to procure and implement SOAR solutions
+        in the OT environment, while maintaining a human in the loop capability to
+        prevent mission impact or risk of life.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:6.5.2.ot:question:1:
+          type: unique_choice
+          text: Develop requirements for SOAR tool.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.5.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.5.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.5.2.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:6.5.2.ot:question:2:
+          type: unique_choice
+          text: Procure SOAR tools.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.5.2.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.5.2.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.5.2.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:6.5.3.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:6
+      ref_id: 6.5.3.OT
+      name: IAC within OT Environments
+      description: DoW Components review existing manual and automated processes to
+        prioritize Infrastructure as Code (IAC) development for automation within
+        the OT Environment.
+      implementation_groups:
+      - Advanced
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:6.5.3.ot:question:1:
+          type: unique_choice
+          text: When possible IAC principles are applied to automate workflow capabilities.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.5.3.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.5.3.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.5.3.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:6.5.3.ot:question:2:
+          type: unique_choice
+          text: Manual processes are automated when possible.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.5.3.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.5.3.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.5.3.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:6.6.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:6
+      ref_id: 6.6.1.OT
+      name: API Patterns for OT Environments Pt. 1
+      description: The DoW Enterprise works with DoW Components to establish an API
+        standard (or equivalent automated interchange mechanism) which outlines the
+        approved patterns and protocols for tooling inclusive of the OT environment.
+        The standard should prioritize ensuring the safety, reliability, and resilience
+        of the OT Environment with the diverse OT componentry implemented.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:6.6.1.ot:question:1:
+          type: unique_choice
+          text: API standard is established for tooling.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.6.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.6.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.6.1.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:6.6.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:6
+      ref_id: 6.6.2.OT
+      name: Tool Compliance Analysis for OT Environments
+      description: Automation and orchestration tooling and solutions are reviewed
+        to identify existing APIs that they provide.  These APIs are analyzed for
+        compliance with existing API machine-readable patterns and protocols established
+        by DoW Enterprise, or the necessary modifications are documented to achieve
+        alignment.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:6.6.2.ot:question:1:
+          type: unique_choice
+          text: Existing APIs within automation and orchestration tooling are assessed
+            for compliance with established DoW Enterprise API standards.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.6.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.6.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.6.2.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:6.6.2.ot:question:2:
+          type: unique_choice
+          text: Non-compliant APIs are documented with necessary modifications to
+            achieve alignment with DoW Enterprise standards.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.6.2.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.6.2.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.6.2.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:6.6.3.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:6
+      ref_id: 6.6.3.OT
+      name: API Patterns for OT Environments Pt. 2
+      description: DoW Components ensure that all applications and services implement
+        API protocols as appropriate.  Enterprise and/or Operational IT environments
+        shall prioritize interoperation with APIs.  Applications and services that
+        are unable to interoperate are scheduled for eventual retirement, and alternative
+        equivalent capability solutions for operational gaps must be identified.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:6.6.3.ot:question:1:
+          type: unique_choice
+          text: API calls and schemas are implemented at prioritized areas within
+            the OT environment.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.6.3.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.6.3.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.6.3.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:6.6.3.ot:question:2:
+          type: unique_choice
+          text: Applications and services that cannot meet standardization are marked
+            for eventual retirement.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.6.3.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.6.3.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.6.3.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:6.6.3.ot:question:3:
+          type: unique_choice
+          text: Alternative equivalent capability solutions are identified.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.6.3.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.6.3.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.6.3.ot:question:3:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:6.6.4.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:6
+      ref_id: 6.6.4.OT
+      name: API Patterns for OT Environments Pt. 3
+      description: DoW Components ensure that all applications and services implement
+        API protocols.  Applications and services that were marked for retirement
+        are decommissioned.  If decommissioning presents an operational gap, an alternative
+        must be implemented.
+      implementation_groups:
+      - Advanced
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:6.6.4.ot:question:1:
+          type: unique_choice
+          text: All applications and services implement the standard API calls and
+            schemas.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.6.4.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.6.4.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.6.4.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:6.6.4.ot:question:2:
+          type: unique_choice
+          text: Applications and services that cannot meet API standardization requirements
+            are either retired or replaced with alternative solutions.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.6.4.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.6.4.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.6.4.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:6.7.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:6
+      ref_id: 6.7.1.OT
+      name: Incident Response Guidance for OT Environments Pt. 1
+      description: DoW Enterprise works with DoW Components to establish cybersecurity
+        incident response guidance utilizing threat feeds from 7.5.1.OT.  DoW Components
+        establish appropriate incident response processes for OT environments based
+        on each environment's standard operating procedures.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:6.7.1.ot:question:1:
+          type: unique_choice
+          text: Threat events are identified.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.7.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.7.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.7.1.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:6.7.1.ot:question:2:
+          type: unique_choice
+          text: Incident response workflows for threat events are developed.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.7.1.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.7.1.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.7.1.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:6.7.1.ot:question:3:
+          type: unique_choice
+          text: DoW Component establishes and documents OT- specific incident response
+            processes, aligned with the Enterprise guidance and their existing standard
+            operating procedures.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.7.1.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.7.1.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.7.1.ot:question:3:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:6.7.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:6
+      ref_id: 6.7.2.OT
+      name: Incident Response Guidance for OT Environments Pt. 2
+      description: DoW Components identify and establish extended incident response
+        guidance for advanced response types in alignment with 7.2.3.OT. This includes
+        developing and incorporating incident response playbooks for any event to
+        support OT engineers and security managers. Enrichment data sources are used
+        for existing workflows to identify emerging, evolving, and advanced threat
+        events.
+      implementation_groups:
+      - Advanced
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:6.7.2.ot:question:1:
+          type: unique_choice
+          text: Guidance for advanced threat events are developed; Advanced Threat
+            events are identified.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.7.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.7.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.7.2.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:6.7.2.ot:question:2:
+          type: unique_choice
+          text: Enrichment data is utilized for advanced incident response.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.7.2.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.7.2.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:6.7.2.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: Visibility and Analytics
+    - urn: urn:intuitem:risk:req_node:zt_ot:7.1.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:7
+      ref_id: 7.1.1.OT
+      name: Scale Considerations for OT Environments
+      description: DoW Components are required to analyze current OT infrastructure
+        and resource capabilities and capacities for adopting zero trust functionality,
+        and project a growth curve aligned with planned mission needs.  The team works
+        with existing Continuity of Operations teams to ensure continuous mission
+        support.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:7.1.1.ot:question:1:
+          type: unique_choice
+          text: Future scaling needs are determined for current conditions, as well
+            as for mission growth and emergencies.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.1.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.1.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.1.1.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:7.1.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:7
+      ref_id: 7.1.2.OT
+      name: Log Parsing in OT Environments
+      description: DoW Components identify and prioritize collection of all log, event,
+        alert,  and flow sources in the Operational IT and Process Control environments
+        within the OT environment, and for data flow to the Enterprise IT and external
+        environments.  DoW Components and DoW Enterprise, with vendor support, map
+        existing vendor log content and create a DoW Enterprise machine consumable
+        pattern.  The established DoW Enterprise pattern is provided as a contract
+        element for vendor capability alignment.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:7.1.2.ot:question:1:
+          type: unique_choice
+          text: Rules developed for each log format.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.1.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.1.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.1.2.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:7.1.2.ot:question:2:
+          type: unique_choice
+          text: All log, event, alert, and flow sources are identified in the OT environment
+            and are collected and mapped.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.1.2.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.1.2.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.1.2.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:7.1.3.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:7
+      ref_id: 7.1.3.OT
+      name: Log Analysis in OT Environments
+      description: DoW Components work with DoW Enterprise to develop common behaviors,
+        and identifies and prioritizes behaviors based on all relevant documented
+        processes, including distinct operating modes.  Ensure log data has sufficient
+        attributes to analyze the behavior model.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:7.1.3.ot:question:1:
+          type: unique_choice
+          text: Common behaviors are developed or identified, and are prioritized
+            based on all relevant documented processes.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.1.3.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.1.3.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.1.3.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:7.1.3.ot:question:2:
+          type: unique_choice
+          text: Log data has sufficient attributes to analyze behavior model.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.1.3.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.1.3.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.1.3.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:7.2.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:7
+      ref_id: 7.2.1.OT
+      name: OT Infrastructure Incident Response Isolation
+      description: DoW Components will ensure that the interconnections between Enterprise
+        IT, Operational IT, and Process Control infrastructure are designed to be
+        disconnected physically or logically during a detected incident to prevent
+        any further intrusion or damage.  The infrastructure must prevent reconnection
+        until the incident is cleared. A controlled recovery procedure for testing
+        and validation is used during reconnection to maintain system integrity and
+        reduce the risk of recurring issues.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:7.2.1.ot:question:1:
+          type: unique_choice
+          text: Enterprise IT, Operational IT, and Process Control infrastructure
+            can be physically or logically disconnected in a safe and reliable manner,
+            and this capability is regularly tested and validated to ensure effectiveness
+            during incident response.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.1.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:7.2.1.ot:question:2:
+          type: unique_choice
+          text: Controlled recovery procedure testing and validation process to maintain
+            system integrity is used.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.1.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.1.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.1.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:7.2.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:7
+      ref_id: 7.2.2.OT
+      name: Threat Alerting for OT Environments Pt. 1
+      description: DoW Components procure and implement a SIEM solution, or integrate,
+        with an Enterprise SIEM.  Data feeds are ingested, identified from the CTI
+        program established in 7.5.1.OT, to develop rules and alerts for the OT environment.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:7.2.2.ot:question:1:
+          type: unique_choice
+          text: SIEM solution is procured and implemented for OT environment.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.2.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:7.2.2.ot:question:2:
+          type: unique_choice
+          text: Data feeds are ingested.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.2.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.2.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.2.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:7.2.2.ot:question:3:
+          type: unique_choice
+          text: Rules and alerts are developed for the OT environment.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.2.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.2.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.2.ot:question:3:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:7.2.3.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:7
+      ref_id: 7.2.3.OT
+      name: Threat Alerting for OT Environments Pt. 2
+      description: 'DoW Components expand threat alerting and develop deviation anomaly
+        rules to detect advanced threats utilizing the data feeds established in
+
+        7.2.2.OT.'
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:7.2.3.ot:question:1:
+          type: unique_choice
+          text: Threat alerting is expanded by incorporating data feeds resulting
+            in a measurable increase in the number of detected threat indicators.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.3.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.3.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.3.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:7.2.3.ot:question:2:
+          type: unique_choice
+          text: Deviation anomaly rules are developed and implemented to detect advanced
+            threats and reduce false positive rates.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.3.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.3.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.3.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:7.2.4.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:7
+      ref_id: 7.2.4.OT
+      name: Threat Alerting for OT Environments Pt. 3
+      description: Threat Alerting is expanded to include advanced data sources, such
+        as UEBA and UAM.  These advanced data sources are used to develop and improve
+        anomalous and pattern activity detections and event triggers.
+      implementation_groups:
+      - Advanced
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:7.2.4.ot:question:1:
+          type: unique_choice
+          text: Identify Triggering Anomalous Events.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.4.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.4.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.4.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:7.2.4.ot:question:2:
+          type: unique_choice
+          text: Implement Triggering Policy.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.4.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.4.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.4.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:7.2.4.ot:question:3:
+          type: unique_choice
+          text: Anomalous and pattern activity detections are developed and continuously
+            improved using data from UEBA and UAM, resulting in a reduction in undetected
+            threats.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.4.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.4.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.4.ot:question:3:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:7.2.5.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:7
+      ref_id: 7.2.5.OT
+      name: OT Asset ID and Alert Correlation
+      description: 'All PEs and NPEs in SIEM are identified and correlated to alerts
+        in order
+
+        to provide security teams with accurately detailed information and asset IDs.
+        Event visualization indicates which asset ID is affected by detected event.'
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:7.2.5.ot:question:1:
+          type: unique_choice
+          text: All PEs and NPEs within the SIEM are identified and correlated to
+            alerts, providing security teams with accurately detailed information
+            and asset IDs.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.5.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.5.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.5.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:7.2.5.ot:question:2:
+          type: unique_choice
+          text: Event visualization clearly indicates the affected asset ID for each
+            detected event.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.5.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.5.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.5.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:7.2.5.ot:question:3:
+          type: unique_choice
+          text: Automated responses are developed based on asset ID, enabling faster
+            and more targeted incident response.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.5.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.5.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.5.ot:question:3:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:7.2.6.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:7
+      ref_id: 7.2.6.OT
+      name: OT Baselines
+      description: DoW Components develop a subject/attribute baseline approach based
+        off of typical patterns and behaviors from activity 7.3.2.OT.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:7.2.6.ot:question:1:
+          type: unique_choice
+          text: Subject/attribute baseline are established.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.6.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.6.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.2.6.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:7.3.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:7
+      ref_id: 7.3.1.OT
+      name: Implement Analytics Tools for OT Environments
+      description: DoW Enterprise works with DoW Components to develop and provide
+        minimum requirements for Analytics Tools capabilities to analyze all data.
+        Any analytic tools under consideration by DoW Components for implementation
+        shall be subject to these requirements.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:7.3.1.ot:question:1:
+          type: unique_choice
+          text: Minimum requirements for analytic tools are developed.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.3.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.3.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.3.1.ot:question:1:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:7.3.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:7
+      ref_id: 7.3.2.OT
+      name: Establish OT Baseline Behavior
+      description: DoW Components utilize analytics tools developed for OT environments
+        to analyze baseline operational behavior patterns across the entire OT environment,
+        and to identify patterns and deviations from the normal baseline.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:7.3.2.ot:question:1:
+          type: unique_choice
+          text: Analytics tools are utilized to establish baseline behavioral patterns
+            for OT environment, and deviations from these baselines are identified
+            and investigated to proactively detect anomalous activity and potential
+            threats.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.3.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.3.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.3.2.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:7.3.2.ot:question:2:
+          type: unique_choice
+          text: UEBA capabilities improve the accuracy of threat detection by reducing
+            false positives and identifying previously undetected malicious activity.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.3.2.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.3.2.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.3.2.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:7.4.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:7
+      ref_id: 7.4.1.OT
+      name: OT Environment Baseline and Profiling
+      description: DoW Components, utilizing the developed OT baselines, create threat
+        profiles to assess the level of risk of deviations from normal baseline.  Threat
+        profiles should be used for prioritization of events and integrated into   access
+        profile rules developed for system triage.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:7.4.1.ot:question:1:
+          type: unique_choice
+          text: Threat profiles are developed to assess level of risk.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.4.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.4.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.4.1.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:7.4.1.ot:question:2:
+          type: unique_choice
+          text: Events are prioritized based on developed threat profiles.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.4.1.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.4.1.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.4.1.ot:question:2:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:7.5.1.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:7
+      ref_id: 7.5.1.OT
+      name: OT Cyber Threat Intelligence Program Pt. 1
+      description: The DoW Enterprise works with DoW Components to develop an OT CTI
+        program.  The CTI program identifies and integrates common data feeds  with
+        an OT SIEM solution for improved alerting and response.  Integrations with
+        enforcement points are created to monitor CTI-driven data alerting and response
+        for the Enterprise IT, Operational IT, and the Process Control environments.
+      implementation_groups:
+      - Target
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:7.5.1.ot:question:1:
+          type: unique_choice
+          text: An OT-focused CTI program is established, defining processes for identifying,
+            analyzing, and disseminating threat intelligence.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.5.1.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.5.1.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.5.1.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:7.5.1.ot:question:2:
+          type: unique_choice
+          text: The CTI program integrates relevant data feeds into the SIEM solution
+            that is deployed in the OT environment.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.5.1.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.5.1.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.5.1.ot:question:2:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:7.5.1.ot:question:3:
+          type: unique_choice
+          text: CTI-driven data alerting and response are integrated with enforcement
+            points across Enterprise IT, Operational IT, and Process Control environments.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.5.1.ot:question:3:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.5.1.ot:question:3:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.5.1.ot:question:3:choice:3
+            value: N/A
+    - urn: urn:intuitem:risk:req_node:zt_ot:7.5.2.ot
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:zt_ot:7
+      ref_id: 7.5.2.OT
+      name: OT Cyber Threat Intelligence Program Pt. 2
+      description: DoW Components expand their CTI program to develop a community
+        of interest that includes identified stakeholders.  Authenticated, private,
+        and controlled CTI data feeds are integrated into the OT SIEM solution and
+        utilized by the appropriate PEPs.
+      implementation_groups:
+      - Advanced
+      questions:
+        urn:intuitem:risk:req_node:zt_ot:7.5.2.ot:question:1:
+          type: unique_choice
+          text: The OT CTI program is expanded to include authenticated, private,
+            and controlled CTI data feeds.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.5.2.ot:question:1:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.5.2.ot:question:1:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.5.2.ot:question:1:choice:3
+            value: N/A
+        urn:intuitem:risk:req_node:zt_ot:7.5.2.ot:question:2:
+          type: unique_choice
+          text: A CTI community of interest is established, identifying and engaging
+            key stakeholders.
+          choices:
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.5.2.ot:question:2:choice:1
+            value: 'Yes'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.5.2.ot:question:2:choice:2
+            value: 'No'
+          - urn: urn:intuitem:risk:req_node:zt_ot:7.5.2.ot:question:2:choice:3
+            value: N/A

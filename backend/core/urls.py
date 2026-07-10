@@ -1,4 +1,5 @@
 from .views import *
+from sec_intel.views import SecurityAdvisoryViewSet, CWEViewSet
 from tprm.views import (
     EntityViewSet,
     RepresentativeViewSet,
@@ -11,17 +12,22 @@ from library.views import (
     StoredLibraryViewSet,
     LoadedLibraryViewSet,
 )
+from custom_fields.views import CustomFieldDefinitionViewSet
 import importlib
 
 
 from django.urls import include, path
 from rest_framework import routers
 
-from ciso_assistant.settings import DEBUG
 from django.conf import settings
 
 router = routers.DefaultRouter()
 router.register(r"folders", FolderViewSet, basename="folders")
+router.register(
+    r"custom-fields",
+    CustomFieldDefinitionViewSet,
+    basename="custom-fields",
+)
 router.register(r"entities", EntityViewSet, basename="entities")
 router.register(
     r"entity-assessments", EntityAssessmentViewSet, basename="entity-assessments"
@@ -34,6 +40,10 @@ router.register(r"risk-matrices", RiskMatrixViewSet, basename="risk-matrices")
 router.register(r"vulnerabilities", VulnerabilityViewSet, basename="vulnerabilities")
 router.register(r"risk-assessments", RiskAssessmentViewSet, basename="risk-assessments")
 router.register(r"threats", ThreatViewSet, basename="threats")
+router.register(
+    r"security-advisories", SecurityAdvisoryViewSet, basename="security-advisories"
+)
+router.register(r"cwes", CWEViewSet, basename="cwes")
 router.register(r"risk-scenarios", RiskScenarioViewSet, basename="risk-scenarios")
 router.register(r"applied-controls", AppliedControlViewSet, basename="applied-controls")
 router.register(r"policies", PolicyViewSet, basename="policies")
@@ -54,6 +64,7 @@ router.register(r"teams", TeamViewSet, basename="teams")
 
 router.register(r"users", UserViewSet, basename="users")
 router.register(r"user-groups", UserGroupViewSet, basename="user-groups")
+router.register(r"idp-groups", IdPGroupViewSet, basename="idp-groups")
 router.register(r"role-assignments", RoleAssignmentViewSet, basename="role-assignments")
 router.register(r"frameworks", FrameworkViewSet, basename="frameworks")
 router.register(r"evidences", EvidenceViewSet, basename="evidences")
@@ -86,6 +97,11 @@ router.register(
     RequirementAssessmentViewSet,
     basename="requirement-assessments",
 )
+router.register(
+    r"requirement-assignments",
+    RequirementAssignmentViewSet,
+    basename="requirement-assignments",
+)
 router.register(r"stored-libraries", StoredLibraryViewSet, basename="stored-libraries")
 router.register(r"loaded-libraries", LoadedLibraryViewSet, basename="loaded-libraries")
 router.register(
@@ -114,9 +130,26 @@ router.register(
 router.register(r"findings", FindingViewSet, basename="findings")
 router.register(r"incidents", IncidentViewSet, basename="incidents")
 router.register(r"timeline-entries", TimelineEntryViewSet, basename="timeline-entries")
+router.register(r"comments", CommentViewSet, basename="comments")
 router.register(r"task-templates", TaskTemplateViewSet, basename="task-templates")
 router.register(r"task-nodes", TaskNodeViewSet, basename="task-nodes")
 router.register(r"terminologies", TerminologyViewSet, basename="terminologies")
+router.register(
+    r"object-classifications",
+    ObjectClassificationViewSet,
+    basename="object-classifications",
+)
+router.register(
+    r"classification-levels",
+    ClassificationLevelViewSet,
+    basename="classification-levels",
+)
+router.register(r"questions", QuestionViewSet, basename="questions")
+router.register(r"question-choices", QuestionChoiceViewSet, basename="question-choices")
+router.register(r"answers", AnswerViewSet, basename="answers")
+router.register(r"presets", PresetViewSet, basename="presets")
+router.register(r"journeys", JourneyViewSet, basename="journeys")
+router.register(r"journey-steps", JourneyStepViewSet, basename="journey-steps")
 
 ROUTES = settings.ROUTES
 MODULES = settings.MODULES.values()
@@ -137,12 +170,15 @@ urlpatterns = [
     path("data-wizard/", include("data_wizard.urls")),
     path("settings/", include("global_settings.urls")),
     path("user-preferences/", UserPreferencesView.as_view(), name="user-preferences"),
+    path("chat/", include("chat.urls")),
     path("ebios-rm/", include("ebios_rm.urls")),
+    path("", include("doc_management.urls")),
     path("privacy/", include("privacy.urls")),
     path("resilience/", include("resilience.urls")),
     path("crq/", include("crq.urls")),
     path("pmbok/", include("pmbok.urls")),
     path("metrology/", include("metrology.urls")),
+    path("", include("portals.urls")),
     path("csrf/", get_csrf_token, name="get_csrf_token"),
     path("health/", healthcheck, name="healthcheck"),
     path("build/", get_build, name="get_build"),
@@ -158,6 +194,14 @@ urlpatterns = [
     ),
     path("get_counters/", get_counters_view, name="get_counters_view"),
     path("get_metrics/", get_metrics_view, name="get_metrics_view"),
+    path(
+        "analytics/export/xlsx/",
+        get_analytics_export_xlsx,
+        name="get_analytics_export_xlsx",
+    ),
+    path(
+        "get_audits_metrics/", get_audits_metrics_view, name="get_audits_metrics_view"
+    ),
     path(
         "get_combined_assessments_status/",
         get_combined_assessments_status_view,
@@ -192,12 +236,20 @@ urlpatterns = [
         ComplianceAssessmentActionPlanList.as_view(),
     ),
     path(
+        "compliance-assessments/<uuid:pk>/action-plan/budget-overview/",
+        ComplianceAssessmentActionPlanBudgetOverview.as_view(),
+    ),
+    path(
         "compliance-assessments/<uuid:pk>/evidences-list/",
         ComplianceAssessmentEvidenceList.as_view(),
     ),
     path(
         "risk-assessments/<uuid:pk>/action-plan/",
         RiskAssessmentActionPlanList.as_view(),
+    ),
+    path(
+        "risk-assessments/<uuid:pk>/action-plan/budget-overview/",
+        RiskAssessmentActionPlanBudgetOverview.as_view(),
     ),
     path(
         "mapping-libraries/",
@@ -208,6 +260,7 @@ urlpatterns = [
         UserRolesOnFolderList.as_view(),
         name="user-perms-on-folder-list",
     ),
+    path("search/", global_search, name="global-search"),
     path("quick-start/", QuickStartView.as_view(), name="quick-start"),
     path("content-types/", ContentTypeListView.as_view(), name="content-types-list"),
     path(
@@ -220,7 +273,7 @@ urlpatterns = [
 for index, module in enumerate(MODULES):
     urlpatterns.insert(index, (path(module["path"], include(module["module"]))))
 
-if DEBUG:
+if settings.DEBUG:
     # Browsable API is only available in DEBUG mode
     urlpatterns += [
         path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),

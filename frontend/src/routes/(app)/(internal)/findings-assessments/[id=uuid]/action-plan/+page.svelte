@@ -39,14 +39,23 @@
 	};
 </script>
 
-<div class="bg-white p-2 shadow-sm rounded-lg space-x-2 flex flex-row justify-center mb-2">
+<div class="bg-surface-50-950 p-2 shadow-sm rounded-lg space-x-2 flex flex-row justify-center mb-2">
 	<p class="font-semibold text-lg">
-		{m.perimeter()}:
-		<a
-			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
-			href="/perimeters/{data.findings_assessment.perimeter.id}/"
-			>{data.findings_assessment.perimeter.str}</a
-		>
+		{#if data.findings_assessment.perimeter}
+			{m.perimeter()}:
+			<a
+				class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
+				href="/perimeters/{data.findings_assessment.perimeter.id}/"
+				>{data.findings_assessment.perimeter.str}</a
+			>
+		{:else}
+			{m.folder()}:
+			<a
+				class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
+				href="/folders/{data.findings_assessment.folder.id}/"
+				>{data.findings_assessment.folder.str}</a
+			>
+		{/if}
 	</p>
 	<p>/</p>
 	<p class="font-semibold text-lg">
@@ -59,20 +68,30 @@
 	</p>
 	<p>/</p>
 </div>
-<div class="flex flex-col space-y-4 bg-white p-4 shadow-sm rounded-lg space-x-2">
+<div class="flex flex-col space-y-4 bg-surface-50-950 p-4 shadow-sm rounded-lg space-x-2">
 	<div class="flex justify-between items-center w-full">
 		<div class="flex-1">
 			<p class="text-xl font-extrabold">{m.associatedAppliedControls()}</p>
-			<p class="text-sm text-gray-500">
+			<p class="text-sm text-surface-600-400">
 				{m.actionPlanHelpText()}
 			</p>
 		</div>
-		<div class="flex gap-2 ml-auto">
+		<div class="flex gap-2 ml-auto items-center">
+			<Anchor
+				breadcrumbAction="push"
+				href={`/applied-controls/analytics?findings_assessments=${page.params.id}&backUrl=${encodeURIComponent(page.url.pathname)}&backLabel=${encodeURIComponent(m.actionPlan())}`}
+				label={m.analytics()}
+				class="btn text-gray-100 bg-linear-to-r from-sky-500 to-cyan-500 h-fit"
+				title={m.appliedControlsAnalytics()}
+				aria-label={m.appliedControlsAnalytics()}
+				data-testid="analytics-button"
+				><i class="fa-solid fa-chart-pie mr-2" aria-hidden="true"></i>{m.analytics()}</Anchor
+			>
 			<Anchor
 				breadcrumbAction="push"
 				href={`/applied-controls/flash-mode?findings_assessments=${page.params.id}&backUrl=${encodeURIComponent(page.url.pathname)}&backLabel=${encodeURIComponent(m.actionPlan())}`}
 				class="btn text-gray-100 bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
-				><i class="fa-solid fa-bolt mr-2"></i> {m.flashMode()}</Anchor
+				><i class="fa-solid fa-bolt mr-2" aria-hidden="true"></i> {m.flashMode()}</Anchor
 			>
 		</div>
 	</div>

@@ -108,23 +108,6 @@
 
 <AutocompleteSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-/>
-
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
-
-<AutocompleteSelect
-	{form}
 	multiple
 	optionsEndpoint="actors"
 	optionsLabelField="str"
@@ -178,7 +161,7 @@
 		/>
 
 		<div class="space-y-2">
-			<h5 class="font-medium text-gray-600 my-2 py-2">Risk Tolerance Points</h5>
+			<h5 class="font-medium text-surface-600-400 my-2 py-2">Risk Tolerance Points</h5>
 			<div class="grid grid-cols-2 gap-4">
 				<!-- Point 1 Probability as Percentage -->
 				<div class="form-control">

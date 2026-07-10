@@ -8,12 +8,12 @@
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import List from '../List/List.svelte';
 	import Checkbox from '../Forms/Checkbox.svelte';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 
 	const modalStore: ModalStore = getModalStore();
 
 	// Base Classes
-	const cBase = 'card bg-surface-50 p-4 w-modal shadow-xl space-y-4';
+	const cBase = 'card bg-surface-50-950 p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'p-4 space-y-4 rounded-container';
 

@@ -1,0 +1,23 @@
+subject: "Bienvenue sur CISO Assistant !"
+body: |
+  <img src="https://intuitem.com/ciso-assistant.png" alt="CISO Assistant" width="200">
+
+  ## Bienvenue sur CISO Assistant !
+
+  **Votre plateforme de gestion GRC tout-en-un**
+
+  Un accès à CISO Assistant vous a été accordé. Pour commencer, utilisez le lien ci-dessous pour définir votre mot de passe :
+
+  [Définir mon mot de passe](${set_password_url})
+
+  En cas de problème avec le lien, copiez et collez l'URL suivante dans votre navigateur :
+  ${set_password_url}
+
+  Ce lien ne peut être utilisé qu'une seule fois. S'il a expiré, rendez-vous sur [votre instance](${ciso_assistant_url}) et demandez une réinitialisation de mot de passe.
+
+  Si vous, ou votre organisation, n'avez pas fait cette demande, vous pouvez simplement ignorer cet email.
+
+  En savoir plus sur CISO Assistant [ici](https://intuitem.com/).
+
+  Cordialement,
+  L'équipe CISO Assistant

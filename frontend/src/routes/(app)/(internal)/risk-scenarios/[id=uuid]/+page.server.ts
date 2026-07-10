@@ -5,16 +5,34 @@ import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 import { headData } from '$lib/utils/table';
 import { fail, superValidate } from 'sveltekit-superforms';
 import { z } from 'zod';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { m } from '$paraglide/messages';
+import { error, redirect } from '@sveltejs/kit';
 
-export const load = (async ({ fetch, params }) => {
+export const load = (async ({ fetch, params, cookies, locals }) => {
 	const URLModel = 'risk-scenarios';
 	const baseEndpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
 	const objectEndpoint = `${BASE_API_URL}/${URLModel}/${params.id}/object/`;
+
+	const res = await fetch(baseEndpoint);
+	if (!res.ok) {
+		if (res.status === 404) {
+			// Check if focus mode is active
+			const focusFolderId = cookies.get('focus_folder_id');
+			const focusModeEnabled = locals.featureflags?.focus_mode ?? false;
+			const isFocusModeActive = focusFolderId && focusModeEnabled;
+
+			const message = isFocusModeActive
+				? m.objectNotReachableFromCurrentFocus()
+				: m.objectNotFound();
+			setFlash({ type: 'warning', message }, cookies);
+			throw redirect(302, '/risk-scenarios');
+		}
+		throw error(res.status, res.statusText || 'Failed to load risk scenario');
+	}
+	const scenario = await res.json();
 	const object = await fetch(objectEndpoint).then((res) => res.json());
-	const scenario = await fetch(baseEndpoint).then((res) => res.json());
 
 	const tables: Record<string, any> = {};
 
@@ -38,7 +56,7 @@ export const load = (async ({ fetch, params }) => {
 	await Promise.all(
 		['risk_scenarios', 'risk_scenarios_e'].map(async (key) => {
 			const table: TableSource = {
-				head: ['name', 'owner', 'status', 'eta'],
+				head: headData('applied-controls'),
 				body: [],
 				meta: []
 			};
@@ -50,7 +68,7 @@ export const load = (async ({ fetch, params }) => {
 		.then((res) => res.json())
 		.then((res) => JSON.parse(res.json_definition));
 
-	return { scenario, tables, riskMatrix, title: scenario.name };
+	return { scenario, tables, riskMatrix, title: scenario.str };
 }) satisfies PageServerLoad;
 
 export const actions: Actions = {

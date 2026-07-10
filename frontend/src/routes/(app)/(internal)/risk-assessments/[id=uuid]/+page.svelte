@@ -4,12 +4,16 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
 	import { URL_MODEL_MAP, getModelInfo } from '$lib/utils/crud';
+	import { listViewFields } from '$lib/utils/table';
+	import type { ListViewFilterConfig } from '$lib/utils/table';
 	import type { RiskMatrixJsonDefinition, RiskScenario } from '$lib/utils/types';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import { canPerformAction } from '$lib/utils/access-control';
+	import { formatDate } from '$lib/utils/datetime';
 	import { getLocale } from '$paraglide/runtime';
 	import {
 		getModalStore,
@@ -17,14 +21,14 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
-	import { Popover, ProgressRing } from '@skeletonlabs/skeleton-svelte';
+	import { Popover, Progress } from '@skeletonlabs/skeleton-svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import SyncToActionsRiskModal from '$lib/components/Modals/SyncToActionsRiskModal.svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
-	import { zod } from 'sveltekit-superforms/adapters';
-	import z from 'zod';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
 	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
 	import { invalidateAll } from '$app/navigation';
 
@@ -35,6 +39,20 @@
 	const showRisks = true;
 	const useBubbles = data.useBubbles;
 	const risk_assessment = $derived(data.risk_assessment);
+
+	const scenarioTableFilters = $derived.by(() => {
+		const base = listViewFields['risk-scenarios'].filters;
+		const scope: [string, string][] = [['risk_assessment', risk_assessment.id]];
+		const withScope = (filter: ListViewFilterConfig): ListViewFilterConfig => ({
+			...filter,
+			props: { ...filter.props, optionsDetailedUrlParameters: scope }
+		});
+		return {
+			...base,
+			current_level: withScope(base.current_level),
+			residual_level: withScope(base.residual_level)
+		};
+	});
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -220,10 +238,14 @@
 				</div>
 			</div>
 		{/if}
-		<div class="card bg-white p-4 m-4 shadow-sm flex space-x-2 relative">
+		<div class="card bg-surface-50-950 p-4 m-4 shadow-sm flex space-x-2 relative">
 			<div class="container w-1/3">
 				<div id="name" class="text-lg font-semibold" data-testid="name-field-value">
-					{risk_assessment.perimeter.str}/{risk_assessment.name} - {risk_assessment.version}
+					{#if risk_assessment.perimeter}
+						{risk_assessment.perimeter.str}/{risk_assessment.name} - {risk_assessment.version}
+					{:else}
+						{risk_assessment.folder.str}/{risk_assessment.name} - {risk_assessment.version}
+					{/if}
 				</div>
 				<br />
 				<div class="text-sm">
@@ -254,11 +276,11 @@
 						</li>
 						<li>
 							<span class="font-semibold">{m.createdAt()}:</span>
-							{new Date(risk_assessment.created_at).toLocaleString(getLocale())}
+							{formatDate(new Date(risk_assessment.created_at), true, getLocale())}
 						</li>
 						<li>
 							<span class="font-semibold">{m.updatedAt()}:</span>
-							{new Date(risk_assessment.updated_at).toLocaleString(getLocale())}
+							{formatDate(new Date(risk_assessment.updated_at), true, getLocale())}
 						</li>
 					</ul>
 				</div>
@@ -301,44 +323,47 @@
 			</div>
 			<div class="flex flex-col space-y-2 ml-4">
 				<div class="flex flex-row space-x-2">
-					<Popover
-						open={exportPopupOpen}
-						onOpenChange={(e) => (exportPopupOpen = e.open)}
-						triggerClasses="btn preset-filled-primary-500 w-full"
-					>
-						{#snippet trigger()}
+					<Popover open={exportPopupOpen} onOpenChange={(e) => (exportPopupOpen = e.open)}>
+						<Popover.Trigger class="btn preset-filled-primary-500 w-full">
 							<span data-testid="export-button">
 								<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
 							</span>
-						{/snippet}
-						{#snippet content()}
-							<div class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1">
-								<p class="block px-4 py-2 text-sm text-gray-800">{m.riskAssessment()}</p>
-								<a
-									href="/risk-assessments/{risk_assessment.id}/export/pdf"
-									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
+						</Popover.Trigger>
+						<Popover.Positioner>
+							<Popover.Content>
+								<div
+									class="card whitespace-nowrap bg-surface-50-950 py-2 w-fit shadow-lg space-y-1"
 								>
-								<a
-									href="/risk-assessments/{risk_assessment.id}/export/csv"
-									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asCSV()}</a
-								>
-								<a
-									href="/risk-assessments/{risk_assessment.id}/export/xlsx"
-									class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
-									>... {m.asXLSX()}</a
-								>
-								<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
-								<a
-									href="/risk-assessments/{risk_assessment.id}/action-plan/export/pdf"
-									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
-								>
-								<a
-									href="/risk-assessments/{risk_assessment.id}/action-plan/export/excel"
-									class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
-									>... {m.asXLSX()}</a
-								>
-							</div>
-						{/snippet}
+									<p class="block px-4 py-2 text-sm text-surface-950-50">{m.riskAssessment()}</p>
+									<a
+										href="/risk-assessments/{risk_assessment.id}/export/pdf"
+										class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
+										>... {m.asPDF()}</a
+									>
+									<a
+										href="/risk-assessments/{risk_assessment.id}/export/csv"
+										class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
+										>... {m.asCSV()}</a
+									>
+									<a
+										href="/risk-assessments/{risk_assessment.id}/export/xlsx"
+										class="block px-4 py-2 text-sm text-surface-950-50 border-b hover:bg-surface-200-800"
+										>... {m.asXLSX()}</a
+									>
+									<p class="block px-4 py-2 text-sm text-surface-950-50">{m.actionPlan()}</p>
+									<a
+										href="/risk-assessments/{risk_assessment.id}/action-plan/export/pdf"
+										class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
+										>... {m.asPDF()}</a
+									>
+									<a
+										href="/risk-assessments/{risk_assessment.id}/action-plan/export/excel"
+										class="block px-4 py-2 text-sm text-surface-950-50 border-b hover:bg-surface-200-800"
+										>... {m.asXLSX()}</a
+									>
+								</div>
+							</Popover.Content>
+						</Popover.Positioner>
 					</Popover>
 					{#if canEditObject}
 						<Anchor
@@ -352,15 +377,22 @@
 						>
 					{/if}
 				</div>
+				<AuditTrailButton model="risk-assessments" objectId={risk_assessment.id} />
 				<Anchor
 					label={m.actionPlan()}
 					href="/risk-assessments/{risk_assessment.id}/action-plan"
 					class="btn preset-filled-primary-500"
 					><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}</Anchor
 				>
+				<Anchor
+					label={m.analytics()}
+					href="/risk-assessments/{risk_assessment.id}/analytics"
+					class="btn preset-filled-primary-500"
+					><i class="fa-solid fa-chart-line mr-2"></i>{m.analytics()}</Anchor
+				>
 				<span class="pt-4 font-light text-sm">{m.powerUps()}</span>
 				<button
-					class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
+					class="btn text-white bg-linear-to-l from-sky-500 to-green-600"
 					onclick={(_) => modalDuplicateForm()}
 					data-testid="duplicate-button"
 				>
@@ -369,19 +401,19 @@
 				>
 				{#if !risk_assessment?.is_locked}
 					<button
-						class="btn text-gray-100 bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
+						class="btn text-white bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
 						onclick={async () => {
 							await modalConfirmSyncToActions(risk_assessment.id, '?/syncToActions');
 						}}
 					>
 						<span class="mr-2">
 							{#if syncingToActionsIsLoading}
-								<ProgressRing
-									strokeWidth="16px"
-									meterStroke="stroke-white"
-									size="size-6"
-									classes="-ml-2"
-								/>
+								<Progress value={null}>
+									<Progress.Circle class="[--size:--spacing(6)] -ml-2">
+										<Progress.CircleTrack />
+										<Progress.CircleRange class="stroke-white" />
+									</Progress.Circle>
+								</Progress>
 							{:else}
 								<i class="fa-solid fa-arrows-rotate mr-2"></i>
 							{/if}
@@ -392,14 +424,14 @@
 				<Anchor
 					href="/risk-assessments/{risk_assessment.id}/convert-to-quantitative"
 					label={m.convertToQuantitative()}
-					class="btn text-gray-100 bg-linear-to-r from-purple-500 to-pink-500"
+					class="btn text-white bg-linear-to-r from-purple-500 to-pink-500"
 				>
 					<i class="fa-solid fa-calculator mr-2"></i>
 					{m.convertToQuantitative()}
 				</Anchor>
 				{#if !risk_assessment?.is_locked && page.data?.featureflags?.validation_flows}
 					<button
-						class="btn text-gray-100 bg-linear-to-r from-orange-500 to-amber-500"
+						class="btn text-white bg-linear-to-r from-orange-500 to-amber-500"
 						onclick={() => modalRequestValidation()}
 						data-testid="request-validation-button"
 					>
@@ -411,8 +443,8 @@
 		</div>
 	</div>
 	<!--Risk risk_assessment-->
-	<div class="card m-4 p-4 shadow-sm bg-white">
-		<div class="bg-white">
+	<div class="card m-4 p-4 shadow-sm bg-surface-50-950">
+		<div class="bg-surface-50-950">
 			<div class="flex flex-row justify-between">
 				<h4 class="text-lg font-semibold lowercase capitalize-first my-auto">
 					{m.associatedRiskScenarios()}
@@ -424,6 +456,7 @@
 				model={getModelInfo('risk-scenarios')}
 				URLModel="risk-scenarios"
 				search={false}
+				tableFilters={scenarioTableFilters}
 				baseEndpoint="/risk-scenarios?risk_assessment={risk_assessment.id}"
 				folderId={data.risk_assessment.folder.id}
 				{fields}
@@ -446,7 +479,7 @@
 		</div>
 	</div>
 	<!--Matrix view-->
-	<div class="card m-4 p-4 shadow-sm bg-white page-break">
+	<div class="card m-4 p-4 shadow-sm bg-surface-50-950 page-break">
 		<div class="text-lg font-semibold">{m.riskMatrixView()}</div>
 		<div class="flex flex-wrap justify-between gap-8 [&>div]:basis-xl [&>div]:grow">
 			{#if page.data?.featureflags?.inherent_risk}
@@ -474,6 +507,7 @@
 					matrixName={'current'}
 					data={currentCluster}
 					dataItemComponent={RiskScenarioItem}
+					showLegend={showRisks}
 					{useBubbles}
 				/>
 			</div>
@@ -485,7 +519,6 @@
 					matrixName={'residual'}
 					data={residualCluster}
 					dataItemComponent={RiskScenarioItem}
-					showLegend={showRisks}
 					{useBubbles}
 				/>
 			</div>

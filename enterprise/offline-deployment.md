@@ -1,6 +1,7 @@
 # Offline Deployment Guide
 
 This guide explains how to prepare CISO Assistant for production deployment on an air-gapped server (without internet access).
+You need to have a Pro on-premises plan to use this.
 
 ## Overview
 
@@ -15,7 +16,7 @@ You'll use an **online workstation** to download dependencies and build the appl
 **On the online workstation:**
 - Internet connection
 - Git
-- Python 3.12+ with poetry 2.0+
+- Python 3.12+ with uv 0.9+
 - Node 22+ with pnpm 9.0+
 - yaml-cpp library
 
@@ -31,7 +32,7 @@ You'll use an **online workstation** to download dependencies and build the appl
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/intuitem/ciso-assistant-community.git
+git clone --single-branch -b main https://github.com/intuitem/ciso-assistant-community.git
 cd ciso-assistant-community
 ```
 
@@ -41,17 +42,17 @@ cd ciso-assistant-community
 cd backend
 
 # Create virtual environment
-python3 -m venv venv
-source venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
 
-# Install poetry in the venv (required by startup.sh)
-pip install poetry
+# Install uv in the venv (required by startup.sh)
+pip install uv
 
 # Install dependencies
-poetry install --only main
+uv sync --locked --no-dev
 ```
 
-**For Enterprise Edition:**
+**For Enterprise Edition only:**
 
 After installing backend dependencies, copy the enterprise core module:
 
@@ -79,7 +80,7 @@ pnpm prune
 
 **For Enterprise Edition:**
 
-Before building, overlay the enterprise frontend files:
+**Before** building, overlay the enterprise frontend files:
 
 ```bash
 # From the repository root
@@ -90,7 +91,7 @@ cp -r enterprise/frontend/* frontend/
 ## Step 2: Transfer to Offline Server
 
 Transfer the following to the offline server:
-- `backend/` directory (including `venv/` with complete virtual environment)
+- `backend/` directory (including `.venv/` with complete virtual environment)
 - `frontend/` directory (including `build/`, `server/`, `node_modules/`, and `package.json`)
 
 ## Step 3: Deploy on Offline Server
@@ -139,10 +140,18 @@ LICENSE_EXPIRATION=2025-12-31
 
 # S3 Storage (optional)
 # USE_S3=True
+# AWS_STORAGE_BUCKET_NAME=ciso-assistant-bucket
+# AWS_S3_REGION_NAME=us-east-1
+#
+# Authentication Option 1: Access Key (for standalone deployments)
 # AWS_ACCESS_KEY_ID=your-access-key
 # AWS_SECRET_ACCESS_KEY=your-secret-key
-# AWS_STORAGE_BUCKET_NAME=ciso-assistant-bucket
-# AWS_S3_ENDPOINT_URL=https://s3.your-domain.com
+# AWS_S3_ENDPOINT_URL=https://s3.your-domain.com  # Required for S3-compatible services (e.g., MinIO)
+#
+# Authentication Option 2: IRSA (for Kubernetes/EKS deployments)
+# When running on EKS with IRSA enabled, these are automatically set by the pod's service account:
+# AWS_WEB_IDENTITY_TOKEN_FILE=/var/run/secrets/eks.amazonaws.com/serviceaccount/token
+# AWS_ROLE_ARN=arn:aws:iam::123456789012:role/ciso-assistant-s3-role
 
 # Email rescue (backup email server)
 # EMAIL_HOST_RESCUE=your-backup-smtp-host
@@ -155,8 +164,10 @@ LICENSE_EXPIRATION=2025-12-31
 AUDITLOG_RETENTION_DAYS=90
 AUDITLOG_MAX_RECORDS=50000
 
-# Webhook configuration
-# WEBHOOK_ALLOW_PRIVATE_IPS=False
+# Allow outbound server-side requests (webhooks, integrations, chat LLM endpoints)
+# to target private/loopback addresses. Required for local LLMs (e.g. Ollama). Default False.
+# Renamed from WEBHOOK_ALLOW_PRIVATE_IPS; the old name is no longer recognized.
+# ALLOW_PRIVATE_NETWORK_REQUESTS=False
 
 # Logging
 # LOG_LEVEL=INFO
@@ -170,7 +181,7 @@ Before starting the services, run migrations and create a superuser account:
 
 ```bash
 cd /path/to/ciso-assistant-community/backend
-source venv/bin/activate
+source .venv/bin/activate
 
 # Run database migrations
 python manage.py migrate
@@ -199,7 +210,7 @@ Type=exec
 User=ciso-assistant
 Group=ciso-assistant
 WorkingDirectory=/path/to/ciso-assistant-community/backend
-Environment="PATH=/path/to/ciso-assistant-community/backend/venv/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="PATH=/path/to/ciso-assistant-community/backend/.venv/bin:/usr/local/bin:/usr/bin:/bin"
 EnvironmentFile=/path/to/ciso-assistant-community/backend/.env
 ExecStart=/usr/bin/bash startup.sh
 
@@ -223,9 +234,9 @@ Type=simple
 User=ciso-assistant
 Group=ciso-assistant
 WorkingDirectory=/path/to/ciso-assistant-community/backend
-Environment="PATH=/path/to/ciso-assistant-community/backend/venv/bin"
+Environment="PATH=/path/to/ciso-assistant-community/backend/.venv/bin"
 EnvironmentFile=/path/to/ciso-assistant-community/backend/.env
-ExecStart=/path/to/ciso-assistant-community/backend/venv/bin/python \
+ExecStart=/path/to/ciso-assistant-community/backend/.venv/bin/python \
     manage.py run_huey -w 2 -k process
 
 [Install]
@@ -420,7 +431,7 @@ sudo systemctl status ciso-assistant-frontend
 
 To update an offline deployment:
 
-1. On online workstation: Pull latest code, rebuild venv and frontend (including `pnpm prune`)
+1. On online workstation: Pull latest code, rebuild `.venv` (`uv sync --locked --no-dev`) and frontend (including `pnpm prune`)
 2. **Enterprise only:** Re-copy enterprise modules (`enterprise_core` and enterprise frontend files)
 3. Transfer updated files to offline server
 4. Restart services: `sudo systemctl restart ciso-assistant-backend ciso-assistant-huey ciso-assistant-frontend`

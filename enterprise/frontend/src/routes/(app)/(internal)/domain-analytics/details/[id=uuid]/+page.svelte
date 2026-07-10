@@ -20,7 +20,7 @@
 	let hasRisks = $derived(totalRisksCount > 0);
 </script>
 
-<main class="bg-white p-2">
+<main class="bg-surface-50-950 p-2">
 	{#await data.stream.metrics}
 		<div class="col-span-3 lg:col-span-1">
 			<div>Refreshing data ..</div>
@@ -30,7 +30,7 @@
 		<div class="grid grid-cols-4 p-2 gap-2">
 			<!---->
 			<fieldset
-				class="fieldset col-span-full border-slate-300 border rounded-lg grid grid-cols-6 gap-2 p-2 bg-linear-to-b from-slate-50 to-white"
+				class="fieldset col-span-full border-surface-300-700 border rounded-lg grid grid-cols-6 gap-2 p-2 bg-linear-to-b from-slate-50 to-white dark:from-surface-800 dark:to-surface-950"
 			>
 				<legend class="m-2 text-lg font-bold capitalize font-serif"
 					><i class="fa-solid fa-shield-halved m-2"></i><span class="font-sans"
@@ -40,7 +40,7 @@
 				<Card count={metrics.controls.total} label={m.sumpageTotal()} />
 				<Card count={metrics.controls.active} label={m.sumpageActive()} />
 				<Card count={metrics.controls.deprecated} label={m.sumpageDeprecated()} emphasis={true} />
-				<div class="col-span-3 row-span-3 bg-white shadow">
+				<div class="col-span-3 row-span-3 bg-surface-50-950 shadow">
 					<NightingaleChart name="nightingale" values={metrics.csf_functions} />
 				</div>
 				<Card count={metrics.controls.to_do} label={m.sumpageToDo()} />
@@ -51,20 +51,32 @@
 			</fieldset>
 			<!---->
 			<fieldset
-				class="fieldset col-span-full border-slate-300 border rounded-lg grid grid-cols-6 gap-2 p-2 bg-linear-to-b from-slate-50 to-white"
+				class="fieldset col-span-full border-surface-300-700 border rounded-lg grid grid-cols-6 gap-2 p-2 bg-linear-to-b from-slate-50 to-white dark:from-surface-800 dark:to-surface-950"
 			>
 				<legend class="m-2 text-lg font-bold capitalize font-serif"
 					><i class="fa-solid fa-list-check m-2"></i><span class="font-sans">{m.compliance()}</span
 					></legend
 				>
 				<div class="col-span-5 row-span-3">
-					<StackedBarsNormalized
-						names={metrics.audits_stats.names}
-						data={metrics.audits_stats.data}
-						uuids={metrics.audits_stats.uuids}
-					/>
+					{#await data.stream.auditsMetrics}
+						<LoadingSpinner />
+					{:then auditsMetrics}
+						{#if auditsMetrics?.audits_stats}
+							<StackedBarsNormalized
+								names={auditsMetrics.audits_stats.names}
+								data={auditsMetrics.audits_stats.data}
+								uuids={auditsMetrics.audits_stats.uuids}
+							/>
+						{/if}
+					{:catch}
+						<p class="text-error-500">{m.errorLoadingData()}</p>
+					{/await}
 				</div>
-				<Card count="{metrics.compliance.progress_avg}%" label={m.sumpageAvgProgress()} />
+				{#await data.stream.auditsMetrics then auditsMetrics}
+					<Card count="{auditsMetrics?.progress_avg ?? 0}%" label={m.sumpageAvgProgress()} />
+				{:catch}
+					<Card count="0%" label={m.sumpageAvgProgress()} />
+				{/await}
 				<Card
 					count={metrics.compliance.non_compliant_items}
 					label={m.sumpageNonCompliantItems()}
@@ -74,13 +86,13 @@
 			</fieldset>
 			<!---->
 			<fieldset
-				class="fieldset col-span-full bg-slate-50 border-slate-300 border rounded-lg grid grid-cols-6 gap-2 p-2 bg-slate-50"
+				class="fieldset col-span-full bg-surface-50-950 border-surface-300-700 border rounded-lg grid grid-cols-6 gap-2 p-2 bg-surface-50-950"
 			>
 				<legend class="m-2 text-lg font-bold capitalize font-serif"
 					><i class="fa-solid fa-biohazard m-2"></i><span class="font-sans">{m.risk()}</span
 					></legend
 				>
-				<div class="col-span-2 row-span-2 bg-white shadow">
+				<div class="col-span-2 row-span-2 bg-surface-50-950 shadow">
 					{#if data.threats_count.results.labels.length > 0}
 						<RadarChart
 							name="threatRadar"
@@ -92,7 +104,7 @@
 						<p class="font-semibold p-4">{m.noThreatsMapped()}</p>
 					{/if}
 				</div>
-				<div class="col-span-2 row-span-2 h-80 bg-white shadow">
+				<div class="col-span-2 row-span-2 h-80 bg-surface-50-950 shadow">
 					{#if hasRisks}
 						<HalfDonutChart
 							name="current_h"
@@ -104,7 +116,7 @@
 						<p class="font-semibold p-4">{m.noDataAvailable()}</p>
 					{/if}
 				</div>
-				<div class="col-span-2 row-span-2 h-80 bg-white shadow">
+				<div class="col-span-2 row-span-2 h-80 bg-surface-50-950 shadow">
 					{#if hasRisks}
 						<HalfDonutChart
 							name="residual_h"
@@ -126,7 +138,7 @@
 		</div>
 	{:catch error}
 		<div class="col-span-3 lg:col-span-1">
-			<p class="text-red-500">Error loading metrics</p>
+			<p class="text-error-500">Error loading metrics</p>
 		</div>
 	{/await}
 </main>

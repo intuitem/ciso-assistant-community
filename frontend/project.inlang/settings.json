@@ -23,7 +23,11 @@
 		"el",
 		"tr",
 		"hr",
-		"zh"
+		"zh",
+		"lt",
+		"ko",
+		"et",
+		"sk"
 	],
 	"modules": [
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@4/dist/index.js",

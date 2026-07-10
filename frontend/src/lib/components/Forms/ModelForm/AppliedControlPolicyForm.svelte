@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import CustomFieldsSection from '../CustomFieldsSection.svelte';
 	import Select from '../Select.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
@@ -14,6 +15,7 @@
 	import { run } from 'svelte/legacy';
 	import { page } from '$app/state';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { formatDate } from '$lib/utils/datetime';
 	import { getLocale } from '$paraglide/runtime';
 
 	let displayCurrency = $state(page.data?.settings?.currency ?? '€'); // Default to Euro
@@ -72,13 +74,28 @@
 	run(() => {
 		if (model?.selectOptions?.priority) {
 			model.selectOptions.priority.forEach((element) => {
-				element.value = parseInt(element.value);
+				element.value = element.value === '--' ? null : parseInt(element.value);
+			});
+		}
+		if (model?.selectOptions?.control_impact) {
+			model.selectOptions.control_impact.forEach((element) => {
+				element.value = element.value === '--' ? null : parseInt(element.value);
 			});
 		}
 	});
 </script>
 
 {#if !duplicate}
+	{#if schema.shape.category}
+		<Select
+			{form}
+			options={model.selectOptions?.category}
+			field="category"
+			label={m.category()}
+			cacheLock={cacheLocks['category']}
+			bind:cachedValue={formDataCache['category']}
+		/>
+	{/if}
 	<AutocompleteSelect
 		{form}
 		multiple
@@ -136,13 +153,6 @@
 		icon="fa-solid fa-tasks"
 		header={m.projectManagement()}
 	>
-		<TextField
-			{form}
-			field="ref_id"
-			label={m.refId()}
-			cacheLock={cacheLocks['ref_id']}
-			bind:cachedValue={formDataCache['ref_id']}
-		/>
 		<Select
 			{form}
 			options={model.selectOptions?.priority}
@@ -205,7 +215,7 @@
 	>
 		<!-- Build Costs -->
 		<div class="space-y-2">
-			<h5 class="font-medium text-gray-600 my-2 py-2">{m.buildCosts()}</h5>
+			<h5 class="font-medium text-surface-600-400 my-2 py-2">{m.buildCosts()}</h5>
 			<div class="grid grid-cols-2 gap-4">
 				<NumberField
 					{form}
@@ -238,7 +248,7 @@
 
 		<!-- Run Costs -->
 		<div class="space-y-2">
-			<h5 class="font-medium text-gray-600 my-2 py-2">{m.runCosts()}</h5>
+			<h5 class="font-medium text-surface-600-400 my-2 py-2">{m.runCosts()}</h5>
 			<div class="grid grid-cols-2 gap-4">
 				<NumberField
 					{form}
@@ -266,16 +276,6 @@
 		icon="fa-solid fa-project-diagram"
 		header={m.relationships()}
 	>
-		{#if schema.shape.category}
-			<Select
-				{form}
-				options={model.selectOptions?.category}
-				field="category"
-				label={m.category()}
-				cacheLock={cacheLocks['category']}
-				bind:cachedValue={formDataCache['category']}
-			/>
-		{/if}
 		<Select
 			{form}
 			options={model.selectOptions?.csf_function}
@@ -287,6 +287,7 @@
 		<AutocompleteSelect
 			{form}
 			multiple
+			lazy
 			optionsEndpoint="assets"
 			optionsLabelField="auto"
 			optionsExtraFields={[['folder', 'str']]}
@@ -422,7 +423,7 @@
 						<dd>{syncMapping.remote_id}</dd>
 
 						<dt class="font-medium">{m.lastSynced()}</dt>
-						<dd>{new Date(syncMapping.last_synced_at).toLocaleString(getLocale())}</dd>
+						<dd>{formatDate(new Date(syncMapping.last_synced_at), true, getLocale())}</dd>
 
 						<dt class="font-medium">{m.status()}</dt>
 						<dd>{safeTranslate(syncMapping.sync_status)}</dd>
@@ -442,15 +443,6 @@
 	/>
 {/if}
 
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
-	optionsDetailedUrlParameters={origin === 'requirement-assessments'
-		? [['scope_folder_id', initialData.folder]]
-		: []}
-	field="folder"
-	pathField="path"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-/>
+{#if model?.name === 'appliedcontrol'}
+	<CustomFieldsSection {form} model="core.appliedcontrol" folderId={$formStore.folder} />
+{/if}

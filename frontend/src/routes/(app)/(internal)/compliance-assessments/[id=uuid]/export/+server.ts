@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { contentDispositionHeader } from '$lib/utils/contentDisposition';
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
@@ -6,7 +7,7 @@ import type { RequestHandler } from './$types';
 function sanitizeFileName(name: string): string {
 	return name
 		.normalize('NFKC') // Normalize Unicode
-		.replace(/[\x00-\x1F<>:"/\\|?*\u007F'`’‘“”()\[\]{}]/g, '-') // Remove dangerous characters
+		.replace(/[\x00-\x1F<>:"/\\|?*\u007F;'`’‘“”()\[\]{}]/g, '-') // Remove dangerous characters
 		.replace(/\s+/g, '-') // Replace whitespace with dash
 		.replace(/\.+$/g, '') // Remove trailing dots
 		.replace(/^-+|-+$/g, '') // Trim leading/trailing dashes
@@ -34,7 +35,6 @@ export const GET: RequestHandler = async ({ fetch, params }) => {
 	const datePart = formatDateForFilename(); // e.g. 2025-06-26_16-45-12
 	const sanitizedName = sanitizeFileName(namePart);
 	const finalFileName = `${sanitizedName}-${datePart}.zip`;
-	const urlEncodedFileName = encodeURIComponent(finalFileName);
 
 	// Fetch the ZIP blob
 	const blobData = await fetch(endpoint).then((res) => {
@@ -48,7 +48,7 @@ export const GET: RequestHandler = async ({ fetch, params }) => {
 	return new Response(blobData, {
 		headers: {
 			'Content-Type': 'application/zip',
-			'Content-Disposition': `attachment; filename*=utf-8''${urlEncodedFileName}; filename="${finalFileName}"`
+			'Content-Disposition': contentDispositionHeader(finalFileName)
 		}
 	});
 };

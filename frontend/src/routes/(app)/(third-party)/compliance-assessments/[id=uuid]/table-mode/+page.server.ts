@@ -1,11 +1,13 @@
-import { nestedWriteFormAction } from '$lib/utils/actions';
+import { handleErrorResponse, nestedWriteFormAction } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
 import { m } from '$paraglide/messages';
-import type { Actions } from '@sveltejs/kit';
+import { safeTranslate } from '$lib/utils/i18n';
+import { fail, type Actions } from '@sveltejs/kit';
+import { setFlash } from 'sveltekit-flash-message/server';
 import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { ModelInfo } from '$lib/utils/types';
 import type { PageServerLoad } from './$types';
@@ -20,9 +22,12 @@ export const load = (async ({ fetch, params }) => {
 		)
 	);
 
-	const frameworkEndpoint = `${BASE_API_URL}/frameworks/${compliance_assessment.framework.id}/`;
-	const framework = await fetch(frameworkEndpoint).then((res) => res.json());
-	compliance_assessment.framework = framework;
+	const frameworkId = compliance_assessment.framework?.id;
+	if (frameworkId) {
+		const frameworkEndpoint = `${BASE_API_URL}/frameworks/${frameworkId}/`;
+		const framework = await fetch(frameworkEndpoint).then((res) => res.json());
+		compliance_assessment.framework = framework;
+	}
 
 	const measureModel = getModelInfo('applied-controls');
 	const measureCreateSchema = modelSchema('applied-controls');
@@ -71,8 +76,12 @@ export const load = (async ({ fetch, params }) => {
 				folder: requirementAssessment.folder.id,
 				requirement: requirementAssessment.requirement.id,
 				compliance_assessment: requirementAssessment.compliance_assessment.id,
-				evidences: requirementAssessment.evidences.map((evidence) => evidence.id),
-				applied_controls: requirementAssessment.applied_controls.map((ac) => ac.id)
+				...(requirementAssessment.evidences !== undefined && {
+					evidences: requirementAssessment.evidences.map((evidence) => evidence.id)
+				}),
+				...(requirementAssessment.applied_controls !== undefined && {
+					applied_controls: requirementAssessment.applied_controls.map((ac) => ac.id)
+				})
 			};
 			const updateForm = await superValidate(object, zod(updateSchema), { errors: false });
 			return {
@@ -111,6 +120,7 @@ export const load = (async ({ fetch, params }) => {
 		requirements,
 		measureModel,
 		evidenceModel,
+		viewerRole: tableMode.viewer_role ?? 'auditor',
 		title: m.tableMode()
 	};
 }) satisfies PageServerLoad;
@@ -128,7 +138,8 @@ export const actions: Actions = {
 		};
 
 		const res = await event.fetch(endpoint, requestInitOptions);
-		return { status: res.status, body: await res.json() };
+		const body = await res.json();
+		return { status: res.status, body };
 	},
 	createEvidence: async (event) => {
 		const result = await nestedWriteFormAction({ event, action: 'create' });
@@ -138,6 +149,53 @@ export const actions: Actions = {
 		return nestedWriteFormAction({ event, action: 'create' });
 	},
 	update: async (event) => {
-		return nestedWriteFormAction({ event, action: 'edit' });
+		// Custom update for requirement-assessments. When a select field is hidden
+		// by field_visibility the viewer never sets it, so zod defaults it to "",
+		// which DRF rejects (e.g. `status: ""` is not a valid enum choice). The
+		// requirements_list endpoint that feeds this form already strips fields the
+		// viewer can't see (with the correct viewer_role), and the backend re-strips
+		// non-editable fields for respondents, so all that's left here is to drop
+		// the empty enum defaults before PATCHing.
+		const URLModel = 'requirement-assessments';
+		const schema = modelSchema(URLModel);
+		const id = event.url.searchParams.get('id');
+		if (!id) {
+			console.error('Missing id parameter in update action');
+			return fail(400, { form: await superValidate(event.request, zod(schema)) });
+		}
+		const endpoint = `${BASE_API_URL}/${URLModel}/${id}/`;
+		const form = await superValidate(event.request, zod(schema));
+
+		if (!form.valid) {
+			console.error(form.errors);
+			return fail(400, { form });
+		}
+
+		const formData: Record<string, any> = { ...form.data };
+
+		for (const key of ['status', 'result', 'extended_result', 'respondent_alignment']) {
+			if (formData[key] === '' || formData[key] === null) {
+				delete formData[key];
+			}
+		}
+
+		const response = await event.fetch(endpoint, {
+			method: 'PATCH',
+			body: JSON.stringify(formData)
+		});
+
+		if (!response.ok) return handleErrorResponse({ event, response, form });
+
+		const object = await response.json();
+		setFlash(
+			{
+				type: 'success',
+				message: m.successfullySavedObject({
+					object: safeTranslate('requirementAssessment').toLowerCase()
+				})
+			},
+			event
+		);
+		return { form, object };
 	}
 };

@@ -4,12 +4,13 @@ import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
 import { safeTranslate } from '$lib/utils/i18n';
 import { m } from '$paraglide/messages';
 
-import { fail, type Actions } from '@sveltejs/kit';
+import { fail, type Actions, type RequestEvent } from '@sveltejs/kit';
 import { message, setError, superValidate } from 'sveltekit-superforms';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import {
+	defaultWriteFormAction,
 	nestedDeleteFormAction,
 	nestedWriteFormAction,
 	handleErrorResponse
@@ -18,6 +19,59 @@ import { modelSchema } from '$lib/utils/schemas';
 
 import { loadDetail } from '$lib/utils/load';
 import type { PageServerLoad } from './$types';
+
+async function handleRiskAcceptanceTransition(
+	event: Pick<RequestEvent, 'request' | 'fetch' | 'params'>,
+	transition: 'accept' | 'reject' | 'revoke',
+	successMessage: (args: { object: string; id: string }) => string
+) {
+	const { request, fetch, params } = event;
+	const formData = await request.formData();
+	const schema =
+		params.model === 'risk-acceptances'
+			? z.object({
+					urlmodel: z.string(),
+					id: z.string().uuid(),
+					justification: z.string().optional().default('')
+				})
+			: z.object({ urlmodel: z.string(), id: z.string().uuid() });
+	const form = await superValidate(formData, zod(schema));
+
+	const { urlmodel, id, justification } = form.data;
+	const endpoint = `${BASE_API_URL}/${urlmodel}/${id}/${transition}/`;
+
+	if (!form.valid) {
+		return fail(400, { form });
+	}
+
+	const requestInitOptions: RequestInit =
+		params.model === 'risk-acceptances'
+			? {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ justification })
+				}
+			: { method: 'POST' };
+
+	const res = await fetch(endpoint, requestInitOptions);
+	if (!res.ok) {
+		const response = await res.json();
+		if (response.non_field_errors) {
+			setError(form, 'non_field_errors', response.non_field_errors);
+		}
+		return fail(400, { form });
+	}
+
+	const model: string = urlParamModelVerboseName(params.model!);
+	// TODO: reference object by name instead of id
+	return message(
+		form,
+		successMessage({
+			object: safeTranslate(model).toLowerCase(),
+			id
+		})
+	);
+}
 
 export const load: PageServerLoad = async (event) => {
 	const modelInfo = getModelInfo(event.params.model);
@@ -29,11 +83,12 @@ export const load: PageServerLoad = async (event) => {
 	});
 
 	if (event.params.model === 'applied-controls') {
-		const appliedControlSchema = modelSchema(event.params.model);
+		const appliedControlSchema = modelSchema(event.params.model + '_duplicate');
 		const appliedControl = data.data;
 		const initialDataDuplicate = {
 			name: appliedControl.name,
-			description: appliedControl.description
+			description: appliedControl.description,
+			folder: appliedControl.folder.id
 		};
 
 		const appliedControlDuplicateForm = await superValidate(
@@ -47,6 +102,19 @@ export const load: PageServerLoad = async (event) => {
 		data.duplicateForm = appliedControlDuplicateForm;
 	}
 
+	if (event.params.model === 'organisation-objectives') {
+		const objectiveSchema = modelSchema(event.params.model);
+		const objectEndpoint = `${BASE_API_URL}/organisation-objectives/${event.params.id}/object/`;
+		const objectRes = await event.fetch(objectEndpoint);
+		if (objectRes.ok) {
+			const objectData = await objectRes.json();
+			const objectiveDuplicateForm = await superValidate(objectData, zod(objectiveSchema), {
+				errors: false
+			});
+			data.duplicateForm = objectiveDuplicateForm;
+		}
+	}
+
 	return data;
 };
 
@@ -57,6 +125,13 @@ export const actions: Actions = {
 	},
 	delete: async (event) => {
 		return nestedDeleteFormAction({ event });
+	},
+	update: async (event) => {
+		return defaultWriteFormAction({
+			event,
+			urlModel: event.params.model,
+			action: 'edit'
+		});
 	},
 	duplicate: async (event) => {
 		const formData = await event.request.formData();
@@ -82,6 +157,9 @@ export const actions: Actions = {
 
 		if (!response.ok) return handleErrorResponse({ event, response, form });
 
+		const res = await response.json();
+		const newId = res.results?.id;
+
 		const modelVerboseName: string = urlParamModelVerboseName(event.params.model as string);
 		setFlash(
 			{
@@ -93,40 +171,15 @@ export const actions: Actions = {
 			event
 		);
 
+		if (newId) {
+			return message(form, { redirect: `/${event.params.model}/${newId}` });
+		}
+
 		return { form };
 	},
 	reject: async ({ request, fetch, params }) => {
-		const formData = await request.formData();
-		const schema = z.object({ urlmodel: z.string(), id: z.string().uuid() });
-		const rejectForm = await superValidate(formData, zod(schema));
-
-		const urlmodel = rejectForm.data.urlmodel;
-		const id = rejectForm.data.id;
-		const endpoint = `${BASE_API_URL}/${urlmodel}/${id}/reject/`;
-
-		if (!rejectForm.valid) {
-			return fail(400, { form: rejectForm });
-		}
-
-		const requestInitOptions: RequestInit = {
-			method: 'POST'
-		};
-		const res = await fetch(endpoint, requestInitOptions);
-		if (!res.ok) {
-			const response = await res.json();
-			if (response.non_field_errors) {
-				setError(rejectForm, 'non_field_errors', response.non_field_errors);
-			}
-			return fail(400, { form: rejectForm });
-		}
-		const model: string = urlParamModelVerboseName(params.model!);
-		// TODO: reference object by name instead of id
-		return message(
-			rejectForm,
-			m.successfullyRejectedObject({
-				object: safeTranslate(model).toLowerCase(),
-				id: id
-			})
+		return handleRiskAcceptanceTransition({ request, fetch, params }, 'reject', (args) =>
+			m.successfullyRejectedObject(args)
 		);
 	},
 	submit: async ({ request, fetch, params }) => {
@@ -199,71 +252,13 @@ export const actions: Actions = {
 		);
 	},
 	accept: async ({ request, fetch, params }) => {
-		const formData = await request.formData();
-		const schema = z.object({ urlmodel: z.string(), id: z.string().uuid() });
-		const acceptForm = await superValidate(formData, zod(schema));
-
-		const urlmodel = acceptForm.data.urlmodel;
-		const id = acceptForm.data.id;
-		const endpoint = `${BASE_API_URL}/${urlmodel}/${id}/accept/`;
-
-		if (!acceptForm.valid) {
-			return fail(400, { form: acceptForm });
-		}
-
-		const requestInitOptions: RequestInit = {
-			method: 'POST'
-		};
-		const res = await fetch(endpoint, requestInitOptions);
-		if (!res.ok) {
-			const response = await res.json();
-			if (response.non_field_errors) {
-				setError(acceptForm, 'non_field_errors', response.non_field_errors);
-			}
-			return fail(400, { form: acceptForm });
-		}
-		const model: string = urlParamModelVerboseName(params.model!);
-		// TODO: reference object by name instead of id
-		return message(
-			acceptForm,
-			m.successfullyValidatedObject({
-				object: safeTranslate(model).toLowerCase(),
-				id: id
-			})
+		return handleRiskAcceptanceTransition({ request, fetch, params }, 'accept', (args) =>
+			m.successfullyValidatedObject(args)
 		);
 	},
 	revoke: async ({ request, fetch, params }) => {
-		const formData = await request.formData();
-		const schema = z.object({ urlmodel: z.string(), id: z.string().uuid() });
-		const revokeForm = await superValidate(formData, zod(schema));
-
-		const urlmodel = revokeForm.data.urlmodel;
-		const id = revokeForm.data.id;
-		const endpoint = `${BASE_API_URL}/${urlmodel}/${id}/revoke/`;
-
-		if (!revokeForm.valid) {
-			return fail(400, { form: revokeForm });
-		}
-
-		const requestInitOptions: RequestInit = {
-			method: 'POST'
-		};
-		const res = await fetch(endpoint, requestInitOptions);
-		if (!res.ok) {
-			const response = await res.json();
-			if (response.non_field_errors) {
-				setError(revokeForm, 'non_field_errors', response.non_field_errors);
-			}
-			return fail(400, { form: revokeForm });
-		}
-		const model: string = urlParamModelVerboseName(params.model!);
-		// TODO: reference object by name instead of id
-		return message(
-			revokeForm,
-			m.successfullyRevokedObject({
-				object: safeTranslate(model).toLowerCase(),
-				id: id
-			})
+		return handleRiskAcceptanceTransition({ request, fetch, params }, 'revoke', (args) =>
+			m.successfullyRevokedObject(args)
 		);
 	}
 };

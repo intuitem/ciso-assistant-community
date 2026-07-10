@@ -24,7 +24,7 @@
 	}: Props = $props();
 </script>
 
-<p class="text-sm text-gray-500">{m.strategicScenarioHelpText()}</p>
+<p class="text-sm text-surface-600-400">{m.strategicScenarioHelpText()}</p>
 
 <AutocompleteSelect
 	{form}
@@ -52,18 +52,3 @@
 		nullable
 	/>
 {/key}
-<AutocompleteSelect
-	{form}
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.folder()}
-	hidden
-/>
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>

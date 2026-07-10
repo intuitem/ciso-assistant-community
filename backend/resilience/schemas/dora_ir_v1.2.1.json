@@ -1,0 +1,1159 @@
+{
+  "$id": "IR-1.2.1",
+  "$schema": "http://json-schema.org/draft/2020-12/schema#",
+  "title": "DORA Major Incident Report",
+  "type": "object",
+  "properties": {
+    "incidentSubmission": {
+      "type": "string",
+      "enum": [
+        "initial_notification",
+        "intermediate_report",
+        "final_report",
+        "major_incident_reclassified_as_non-major"
+      ],
+      "description": "field 1.1"
+    },
+    "reportCurrency": {
+      "type": "string",
+      "enum": [
+        "EUR",
+        "BGN",
+        "CZK",
+        "DKK",
+        "HUF",
+        "PLN",
+        "RON",
+        "ISK",
+        "CHF",
+        "NOK",
+        "SEK"
+      ],
+      "description": "field 1.15"
+    },
+    "submittingEntity": {
+      "$ref": "#/$defs/Entity",
+      "description": "field 1.2,1.3,"
+    },
+    "affectedEntity": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Entity",
+        "description": "field 1.4,1.5,1.6"
+      },
+      "minItems": 1
+    },
+    "ultimateParentUndertaking": {
+      "$ref": "#/$defs/Entity",
+      "description": "field 1.13,1.14"
+    },
+    "primaryContact": {
+      "$ref": "#/$defs/Contact",
+      "description": "field 1.7,1.8,1.9"
+    },
+    "secondaryContact": {
+      "$ref": "#/$defs/Contact",
+      "description": "field 1.10,1.11,1.12"
+    },
+    "incident": {
+      "$ref": "#/$defs/Incident"
+    },
+    "impactAssessment": {
+      "$ref": "#/$defs/ImpactAssessment"
+    },
+    "reportingToOtherAuthorities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "description": "field 3.31",
+        "enum": [
+          "police_law_enforcement",
+          "csirt",
+          "data_protection_authority",
+          "national_cybersecurity_agency",
+          "none",
+          "other"
+        ]
+      },
+      "minItems": 1
+    },
+    "reportingToOtherAuthoritiesOther": {
+      "type": "string",
+      "maxLength": 32767,
+      "description": "field 3.32  Required if reportingToOtherAuthorities includes 'OTHER'"
+    },
+    "informationDurationServiceDowntimeActualOrEstimate": {
+      "type": "string",
+      "enum": [
+        "actual_figures",
+        "estimates",
+        "actual_figures_and_estimates",
+        "no_information_available"
+      ],
+      "description": "field 3.17"
+    }
+  },
+  "required": [
+    "incidentSubmission",
+    "submittingEntity",
+    "affectedEntity",
+    "primaryContact",
+    "incident"
+  ],
+  "additionalProperties": false,
+  "dependencies": {
+    "incidentSubmission": {
+      "oneOf": [
+        {
+          "properties": {
+            "incidentSubmission": {
+              "const": "final_report"
+            },
+            "incident": {
+              "properties": {
+                "incidentType": {
+                  "required": [
+                    "incidentClassification"
+                  ]
+                },
+                "classificationTypes": {
+                  "items": {
+                    "allOf": [
+                      {
+                        "if": {
+                          "properties": {
+                            "classificationCriterion": {
+                              "const": "clients_financial_counterparts_and_transactions_affected"
+                            }
+                          }
+                        },
+                        "then": {
+                          "required": []
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "classificationCriterion": {
+                              "const": "geographical_spread"
+                            }
+                          }
+                        },
+                        "then": {
+                          "required": [
+                            "countryCodeMaterialityThresholds"
+                          ]
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "classificationCriterion": {
+                              "const": "economic_impact"
+                            }
+                          }
+                        },
+                        "then": {
+                          "required": [
+                            "economicImpactMaterialityThreshold"
+                          ]
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "classificationCriterion": {
+                              "const": "data_losses"
+                            }
+                          }
+                        },
+                        "then": {
+                          "required": [
+                            "dataLosseMaterialityThresholds"
+                          ]
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "classificationCriterion": {
+                              "const": "reputational_impact"
+                            }
+                          }
+                        },
+                        "then": {
+                          "required": []
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "incidentType",
+                "financialEntityCode",
+                "incidentDescription",
+                "rootCauseHLClassification",
+                "incidentResolutionSummary",
+                "incidentResolutionDateTime",
+                "incidentResolutionVsPlannedImplementation",
+                "financialRecoveriesAmount"
+              ]
+            },
+            "impactAssessment": {
+              "serviceImpact": {
+                "required": []
+              },
+              "required": [
+                "criticalServicesAffected",
+                "affectedAssets",
+                "isAffectedInfrastructureComponents",
+                "serviceImpact"
+              ]
+            }
+          },
+          "required": []
+        },
+        {
+          "properties": {
+            "incidentSubmission": {
+              "const": "intermediate_report"
+            },
+            "incident": {
+              "properties": {
+                "incidentType": {
+                  "required": [
+                    "incidentClassification"
+                  ]
+                },
+                "classificationTypes": {
+                  "items": {
+                    "allOf": [
+                      {
+                        "if": {
+                          "properties": {
+                            "classificationCriterion": {
+                              "const": "clients_financial_counterparts_and_transactions_affected"
+                            }
+                          }
+                        },
+                        "then": {
+                          "required": []
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "classificationCriterion": {
+                              "const": "geographical_spread"
+                            }
+                          }
+                        },
+                        "then": {
+                          "required": [
+                            "countryCodeMaterialityThresholds"
+                          ]
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "classificationCriterion": {
+                              "const": "data_losses"
+                            }
+                          }
+                        },
+                        "then": {
+                          "required": [
+                            "dataLosseMaterialityThresholds"
+                          ]
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "classificationCriterion": {
+                              "const": "reputational_impact"
+                            }
+                          }
+                        },
+                        "then": {
+                          "required": []
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "incidentType",
+                "financialEntityCode",
+                "incidentDescription"
+              ]
+            },
+            "impactAssessment": {
+              "serviceImpact": {
+                "required": []
+              },
+              "required": [
+                "criticalServicesAffected",
+                "affectedAssets",
+                "isAffectedInfrastructureComponents",
+                "serviceImpact"
+              ]
+            }
+          },
+          "required": [
+            "incident",
+            "impactAssessment"
+          ]
+        },
+        {
+          "properties": {
+            "incidentSubmission": {
+              "const": "initial_notification"
+            }
+          }
+        },
+        {
+          "properties": {
+            "incidentSubmission": {
+              "const": "major_incident_reclassified_as_non-major"
+            },
+            "incident": {
+              "required": []
+            }
+          }
+        }
+      ]
+    },
+    "reportingToOtherAuthorities": {
+      "oneOf": [
+        {
+          "properties": {
+            "reportingToOtherAuthorities": {
+              "contains": {
+                "const": "other"
+              }
+            }
+          },
+          "required": []
+        },
+        {
+          "not": {
+            "properties": {
+              "reportingToOtherAuthorities": {
+                "contains": {
+                  "const": "other"
+                }
+              }
+            }
+          },
+          "required": []
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "Entity": {
+      "type": "object",
+      "properties": {
+        "entityType": {
+          "type": "string",
+          "enum": [
+            "SUBMITTING_ENTITY",
+            "AFFECTED_ENTITY",
+            "ULTIMATE_PARENT_UNDERTAKING_ENTITY"
+          ],
+          "description": ""
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 32767,
+          "description": "field 1.2, 1.5, 1.13"
+        },
+        "code": {
+          "type": "string",
+          "maxLength": 32767,
+          "description": "field 1.3b"
+        },
+        "affectedEntityType": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "field 1.4",
+            "enum": [
+              "credit_institution",
+              "payment_institution",
+              "exempted_payment_institution",
+              "account_information_service_provider",
+              "electronic_money_institution",
+              "exempted_electronic_money_institution",
+              "investment_firm",
+              "crypto-asset_service_provider",
+              "issuer_of_asset-referenced_tokens",
+              "central_securities_depository",
+              "central_counterparty",
+              "trading_venue",
+              "trade_repository",
+              "manager_of_alternative_investment_fund",
+              "management_company",
+              "data_reporting_service_provider",
+              "insurance_and_reinsurance_undertaking",
+              "insurance_intermediary_reinsurance_intermediary_and_ancillary_insurance_intermediary",
+              "institution_for_occupational_retirement_provision",
+              "credit_rating_agency",
+              "administrator_of_critical_benchmarks",
+              "crowdfunding_service_provider",
+              "securitisation_repository"
+            ]
+          },
+          "minItems": 1
+        },
+        "LEI": {
+          "type": "string",
+          "pattern": "^[A-Z0-9]{18}[0-9]{2}$",
+          "description": "field 1.3a, 1.6, 1.14. The validation rules on the required field is not implemented"
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "dependencies": {
+        "entityType": {
+          "oneOf": [
+            {
+              "properties": {
+                "entityType": {
+                  "enum": [
+                    "SUBMITTING_ENTITY"
+                  ]
+                },
+                "LEI": {
+                  "minLength": 1
+                },
+                "code": {
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "name",
+                "LEI",
+                "code"
+              ]
+            },
+            {
+              "properties": {
+                "entityType": {
+                  "enum": [
+                    "SUBMITTING_ENTITY"
+                  ]
+                },
+                "LEI": {
+                  "type": "null"
+                }
+              },
+              "required": [
+                "name",
+                "code"
+              ]
+            },
+            {
+              "properties": {
+                "entityType": {
+                  "enum": [
+                    "SUBMITTING_ENTITY"
+                  ]
+                },
+                "code": {
+                  "type": "null"
+                }
+              },
+              "required": [
+                "name",
+                "LEI"
+              ]
+            },
+            {
+              "properties": {
+                "entityType": {
+                  "enum": [
+                    "AFFECTED_ENTITY"
+                  ]
+                }
+              },
+              "required": [
+                "affectedEntityType"
+              ]
+            },
+            {
+              "properties": {
+                "entityType": {
+                  "enum": [
+                    "ULTIMATE_PARENT_UNDERTAKING_ENTITY"
+                  ]
+                }
+              },
+              "required": []
+            }
+          ]
+        }
+      }
+    },
+    "Contact": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 32767,
+          "description": "field 1.7, 1.10 - depending on the type of the contact primary or second"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "field 1.8, 1.11 - depending on the type of the contact primary or second"
+        },
+        "phone": {
+          "type": "string",
+          "pattern": "^\\+?[1-9]\\d{1,14}(\\s?\\(\\d+\\))?([-\\s.]?\\d+)*$",
+          "description": "field 1.9, 1.12 - depending on the type of the contact primary or second"
+        }
+      },
+      "required": [
+        "email"
+      ],
+      "additionalProperties": false
+    },
+    "Incident": {
+      "type": "object",
+      "properties": {
+        "financialEntityCode": {
+          "type": "string",
+          "maxLength": 32767,
+          "description": "field 2.1"
+        },
+        "detectionDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "field 2.2"
+        },
+        "classificationDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "field 2.3"
+        },
+        "incidentDescription": {
+          "type": "string",
+          "maxLength": 32767,
+          "description": "field 2.4"
+        },
+        "otherInformation": {
+          "type": "string",
+          "maxLength": 32767,
+          "description": "field 2.10"
+        },
+        "classificationTypes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/ClassificationType"
+          }
+        },
+        "isBusinessContinuityActivated": {
+          "type": "boolean",
+          "description": "field 2.9"
+        },
+        "incidentOccurrenceDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "field 3.2"
+        },
+        "incidentDuration": {
+          "type": "string",
+          "pattern": "^\\d{1,3}:(?:[01]\\d|2[0-3]):[0-5]\\d$",
+          "description": "field 3.15"
+        },
+        "originatesFromThirdPartyProvider": {
+          "type": "string",
+          "maxLength": 32767,
+          "description": "field 2.8"
+        },
+        "incidentDiscovery": {
+          "type": "string",
+          "enum": [
+            "it_security",
+            "staff",
+            "internal_audit",
+            "external_audit",
+            "clients",
+            "financial_counterparts",
+            "third-party_provider",
+            "attacker",
+            "monitoring_systems",
+            "authority_agency_law_enforcement_body",
+            "other"
+          ],
+          "description": "field 2.7"
+        },
+        "competentAuthorityCode": {
+          "type": "string",
+          "maxLength": 32767,
+          "description": "field 3.1"
+        },
+        "incidentType": {
+          "$ref": "#/$defs/IncidentType"
+        },
+        "rootCauseHLClassification": {
+          "type": "array",
+          "description": "field 4.1",
+          "items": {
+            "type": "string",
+            "enum": [
+              "malicious_actions",
+              "process_failure",
+              "system_failure_malfunction",
+              "human_error",
+              "external_event"
+            ]
+          },
+          "minItems": 1
+        },
+        "rootCausesDetailedClassification": {
+          "type": "array",
+          "description": "field 4.2",
+          "items": {
+            "type": "string",
+            "enum": [
+              "malicious_actions_deliberate_internal_actions",
+              "malicious_actions_deliberate_physical_damage_manipulation_theft",
+              "malicious_actions_fraudulent_actions",
+              "process_failure_insufficient_monitoring_or_failure_of_monitoring_and_control",
+              "process_failure_insufficient_unclear_roles_and_responsibilities",
+              "process_failure_ICT_risk_management_process_failure",
+              "process_failure_insufficient_or_failure_of_ict_operations_and_ict_security_operations",
+              "process_failure_insufficient_or_failure_of_ict_project_management",
+              "process_failure_inadequacy_of_internal_policies_procedures_and_documentation",
+              "process_failure_inadequate_ict_systems_acquisition_development_and_maintenance",
+              "process_failure_other",
+              "system_failure_hardware_capacity_and_performance",
+              "system_failure_hardware_maintenance",
+              "system_failure_hardware_obsolescence_ageing",
+              "system_failure_software_compatibility_configuration",
+              "system_failure_software_performance",
+              "system_failure_network_configuration",
+              "system_failure_physical_damage",
+              "system_failure_other",
+              "human_error_omission",
+              "human_error_mistake",
+              "human_error_skills_knowledge",
+              "human_error_inadequate_human_resources",
+              "human_error_miscommunication",
+              "human_error_other",
+              "external_event_natural_disasters_force_majeure",
+              "external_event_third-party_failures",
+              "external_event_other"
+            ]
+          },
+          "minItems": 1
+        },
+        "rootCausesAdditionalClassification": {
+          "type": "array",
+          "description": "field 4.3",
+          "items": {
+            "type": "string",
+            "enum": [
+              "monitoring_of_policy_adherence",
+              "monitoring_of_third-party_service_providers",
+              "monitoring_and_verification_of_remediation_of_vulnerabilities",
+              "identity_and_access_management",
+              "encryption_and_cryptography",
+              "logging",
+              "failure_in_specifying_accurate_risk_tolerance_levels",
+              "insufficient_vulnerability_and_threat_assessments",
+              "inadequate_risk_treatment_measures",
+              "poor_management_of_residual_ict_risks",
+              "vulnerability_and_patch_management",
+              "change_management",
+              "capacity_and_performance_management",
+              "ict_asset_management_and_information_classification",
+              "backup_and_restore",
+              "error_handling",
+              "inadequate_ict_systems_acquisition_development_and_maintenance",
+              "insufficient_or_failure_of_software_testing"
+            ]
+          },
+          "minItems": 1
+        },
+        "rootCausesOther": {
+          "type": "string",
+          "maxLength": 32767,
+          "description": "field 4.4"
+        },
+        "rootCausesInformation": {
+          "type": "string",
+          "maxLength": 32767,
+          "description": "field 4.5"
+        },
+        "rootCauseAddressingDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "field 4.7 - format YYYY-MM-DDThh:mm:ssZ"
+        },
+        "incidentResolutionSummary": {
+          "type": "string",
+          "maxLength": 32767,
+          "description": "field 4.6"
+        },
+        "incidentResolutionDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "field 4.8 - format YYYY-MM-DDThh:mm:ssZ"
+        },
+        "incidentResolutionVsPlannedImplementation": {
+          "type": "string",
+          "maxLength": 32767,
+          "description": "field 4.9"
+        },
+        "assessmentOfRiskToCriticalFunctions": {
+          "type": "string",
+          "description": "field 4.10"
+        },
+        "informationRelevantToResolutionAuthorities": {
+          "type": "string",
+          "maxLength": 32767,
+          "description": "field 4.11"
+        },
+        "financialRecoveriesAmount": {
+          "type": "number",
+          "description": "field 4.14"
+        },
+        "grossAmountIndirectDirectCosts": {
+          "type": "number",
+          "description": "field 4.13"
+        },
+        "recurringNonMajorIncidentsDescription": {
+          "type": "string",
+          "maxLength": 32767,
+          "description": "field 4.15"
+        },
+        "recurringIncidentDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "field 4.16; format YYYY-MM-DDThh:mm:ssZ"
+        }
+      },
+      "required": [
+        "incidentDescription",
+        "classificationTypes"
+      ],
+      "dependencies": {
+        "rootCausesDetailedClassification": {
+          "oneOf": [
+            {
+              "properties": {
+                "rootCausesDetailedClassification": {
+                  "contains": {
+                    "enum": [
+                      "process_failure_other",
+                      "system_failure_other",
+                      "human_error_other",
+                      "external_event_other"
+                    ]
+                  }
+                }
+              },
+              "required": []
+            },
+            {
+              "not": {
+                "properties": {
+                  "rootCausesDetailedClassification": {
+                    "contains": {
+                      "enum": [
+                        "process_failure_other",
+                        "system_failure_other",
+                        "human_error_other",
+                        "external_event_other"
+                      ]
+                    }
+                  }
+                }
+              },
+              "required": []
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "IncidentType": {
+      "type": "object",
+      "properties": {
+        "incidentClassification": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "cybersecurity-related",
+              "process_failure",
+              "system_failure",
+              "external_event",
+              "payment-related",
+              "other"
+            ]
+          },
+          "minItems": 1,
+          "description": "field 3.23"
+        },
+        "otherIncidentClassification": {
+          "type": "string",
+          "maxLength": 32767,
+          "description": "field 3.24 This field is required if 'incidentClassification' is other"
+        },
+        "threatTechniques": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "social_engineering_including_phishing",
+              "ddos",
+              "identity_theft",
+              "data_encryption_for_impact_including_ransomware",
+              "resource_hijacking",
+              "data_exfiltration_and_manipulation_including_identity_theft",
+              "data_destruction",
+              "defacement",
+              "supply-chain_attack",
+              "other"
+            ]
+          },
+          "minItems": 1,
+          "description": "field 3.25 Required if 'incidentClassification' is 'CYBERSECURITY_RELATED'."
+        },
+        "otherThreatTechniques": {
+          "type": "string",
+          "maxLength": 32767,
+          "description": "field 3.26 This field is required if 'threatTechniques' includes 'OTHER'"
+        },
+        "indicatorsOfCompromise": {
+          "type": "string",
+          "maxLength": 32767,
+          "description": "field 3.35 Required if the 'incidentClassification' is 'CYBERSECURITY_RELATED'"
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "incidentClassification": {
+                "contains": {
+                  "const": "other"
+                }
+              }
+            }
+          },
+          "then": {
+            "required": []
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "incidentClassification": {
+                "const": "cybersecurity-related"
+              }
+            }
+          },
+          "then": {
+            "required": []
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "threatTechniques": {
+                "contains": {
+                  "const": "other"
+                }
+              }
+            }
+          },
+          "then": {
+            "required": []
+          }
+        }
+      ]
+    },
+    "ImpactAssessment": {
+      "type": "object",
+      "properties": {
+        "hasImpactOnRelevantClients": {
+          "type": "boolean",
+          "description": "field 3.8"
+        },
+        "serviceImpact": {
+          "$ref": "#/$defs/ServiceImpact"
+        },
+        "criticalServicesAffected": {
+          "type": "string",
+          "maxLength": 32767,
+          "description": "field 3.22"
+        },
+        "affectedAssets": {
+          "$ref": "#/$defs/AffectedAssets",
+          "description": "field 3.4, 3.5, 3.6, 3.7, 3.9, 3.10, 3.11, 3.12"
+        },
+        "affectedFunctionalAreas": {
+          "type": "string",
+          "maxLength": 32767,
+          "description": "field 3.27"
+        },
+        "isAffectedInfrastructureComponents": {
+          "type": "string",
+          "enum": [
+            "yes",
+            "no",
+            "information_not_available"
+          ],
+          "description": "field 3.28"
+        },
+        "affectedInfrastructureComponents": {
+          "type": "string",
+          "maxLength": 32767,
+          "description": "field 3.29"
+        },
+        "isImpactOnFinancialInterest": {
+          "type": "string",
+          "enum": [
+            "yes",
+            "no",
+            "information_not_available"
+          ],
+          "description": "field 3.30"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "ServiceImpact": {
+      "type": "object",
+      "properties": {
+        "serviceRestorationDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "field 3.3"
+        },
+        "serviceDowntime": {
+          "type": "string",
+          "pattern": "^\\d{1,3}:(?:[01]\\d|2[0-3]):[0-5]\\d$",
+          "description": "field 3.16"
+        },
+        "isTemporaryActionsMeasuresForRecovery": {
+          "type": "boolean",
+          "description": "field 3.33"
+        },
+        "descriptionOfTemporaryActionsMeasuresForRecovery": {
+          "type": "string",
+          "maxLength": 32767,
+          "description": "field 3.34"
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "if": {
+        "properties": {
+          "isTemporaryActionsMeasuresForRecovery": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "required": []
+      }
+    },
+    "AffectedAssets": {
+      "type": "object",
+      "properties": {
+        "affectedClients": {
+          "$ref": "#/$defs/NumberPercentageType",
+          "description": "field 3.4, 3.5"
+        },
+        "affectedFinancialCounterparts": {
+          "$ref": "#/$defs/NumberPercentageType",
+          "description": "field 3.6, 3.7"
+        },
+        "affectedTransactions": {
+          "$ref": "#/$defs/NumberPercentageType",
+          "description": "field 3.9, 3.10"
+        },
+        "valueOfAffectedTransactions": {
+          "type": "number",
+          "description": "field 3.11"
+        },
+        "numbersActualEstimate": {
+          "type": "array",
+          "description": "field 3.12",
+          "items": {
+            "type": "string",
+            "enum": [
+              "actual_figures_for_clients_affected",
+              "actual_figures_for_financial_counterparts_affected",
+              "actual_figures_for_transactions_affected",
+              "estimates_for_clients_affected",
+              "estimates_for_financial_counterparts_affected",
+              "estimates_for_transactions_affected",
+              "no_impact_on_clients",
+              "no_impact_on_financial_counterparts",
+              "no_impact_on_transactions"
+            ]
+          },
+          "minItems": 1
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "NumberPercentageType": {
+      "type": "object",
+      "properties": {
+        "number": {
+          "type": "integer",
+          "description": "generic"
+        },
+        "percentage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "generic"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "ClassificationType": {
+      "type": "object",
+      "properties": {
+        "classificationCriterion": {
+          "type": "string",
+          "description": "field 2.5",
+          "enum": [
+            "clients_financial_counterparts_and_transactions_affected",
+            "geographical_spread",
+            "data_losses",
+            "critical_services_affected",
+            "economic_impact",
+            "reputational_impact",
+            "duration_and_service_downtime"
+          ]
+        },
+        "countryCodeMaterialityThresholds": {
+          "type": "array",
+          "description": "field 2.6",
+          "items": {
+            "type": "string",
+            "enum": [
+              "AT",
+              "BE",
+              "BG",
+              "HR",
+              "CY",
+              "CZ",
+              "DK",
+              "EE",
+              "ES",
+              "FI",
+              "FR",
+              "DE",
+              "GR",
+              "HU",
+              "IS",
+              "IE",
+              "IT",
+              "LI",
+              "LT",
+              "LU",
+              "LV",
+              "MT",
+              "NL",
+              "NO",
+              "PL",
+              "PT",
+              "RO",
+              "SE",
+              "SI",
+              "SK"
+            ]
+          },
+          "minItems": 1
+        },
+        "memberStatesImpactType": {
+          "type": "array",
+          "description": "field 3.18",
+          "items": {
+            "type": "string",
+            "enum": [
+              "clients",
+              "financial_counterparts",
+              "branch_of_the_financial_entity",
+              "financial_entities_within_the_group_carrying_out_activities_in_the_respective_member_state",
+              "financial_market_infrastructure",
+              "third-party_providers_that_may_be_common_to_other_financial_entities"
+            ]
+          },
+          "minItems": 1
+        },
+        "memberStatesImpactTypeDescription": {
+          "type": "string",
+          "maxLength": 32767,
+          "description": "field 3.19"
+        },
+        "dataLosseMaterialityThresholds": {
+          "type": "array",
+          "description": "field 3.20",
+          "items": {
+            "type": "string",
+            "enum": [
+              "availability",
+              "authenticity",
+              "integrity",
+              "confidentiality"
+            ]
+          },
+          "minItems": 1
+        },
+        "dataLossesDescription": {
+          "type": "string",
+          "description": "field 3.21"
+        },
+        "reputationalImpactType": {
+          "type": "array",
+          "description": "field 3.13 , if field 2.5 mention reputation impact",
+          "items": {
+            "type": "string",
+            "enum": [
+              "the_major_ict-related_incident_has_been_reflected_in_the_media",
+              "the_major_ict-related_incident_has_resulted_in_repetitive_complaints_from_different_clients_or_financial_counterparts_on_client-facing_services_or_critical_business_relationships",
+              "the_financial_entity_will_not_be_able_to_or_is_likely_not_to_be_able_to_meet_regulatory_requirements_as_a_result_of_the_major_ict-related_incident",
+              "the_financial_entity_will_or_is_likely_to_lose_clients_or_financial_counterparts_with_a_material_impact_on_its_business_as_a_result_of_the_major_ict-related_incident"
+            ]
+          },
+          "minItems": 1
+        },
+        "reputationalImpactDescription": {
+          "type": "string",
+          "maxLength": 32767,
+          "description": "field 3.14"
+        },
+        "economicImpactMaterialityThreshold": {
+          "type": "string",
+          "description": "field 4.12"
+        }
+      },
+      "required": [
+        "classificationCriterion"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

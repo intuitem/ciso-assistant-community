@@ -1,0 +1,833 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:bassou:risk:library:checklist_09-08
+locale: fr
+ref_id: "Checklist des exigences relatives \xE0 la loi 09-08"
+name: "Checklist des exigences de la Loi n\xB0 09-08 relative \xE0 la protection des\
+  \ donn\xE9es \xE0 caract\xE8re personnel"
+description: "Checklist des exigences de la Loi n\xB0 09-08 relative \xE0 la protection\
+  \ des donn\xE9es \xE0 caract\xE8re personnel"
+copyright: Oulkhabou Bassou
+version: 1
+publication_date: 2026-05-01
+provider: BASSOU
+packager: Oulkhabou Bassou
+objects:
+  framework:
+    urn: urn:bassou:risk:framework:checklist_09-08
+    ref_id: "Checklist des exigences relatives \xE0 la loi 09-08"
+    name: "Checklist des exigences de la Loi n\xB0 09-08 relative \xE0 la protection\
+      \ des donn\xE9es \xE0 caract\xE8re personnel"
+    description: "Checklist des exigences de la Loi n\xB0 09-08 relative \xE0 la protection\
+      \ des donn\xE9es \xE0 caract\xE8re personnel"
+    min_score: 0
+    max_score: 5
+    requirement_nodes:
+    - urn: urn:bassou:risk:req_node:checklist_09-08:qualite-des-donnees-et-liceite-du-traitement
+      assessable: false
+      depth: 1
+      name: "Qualit\xE9 des donn\xE9es et lic\xE9it\xE9 du traitement"
+    - urn: urn:bassou:risk:req_node:checklist_09-08:qualite-des-donnees-et-liceite-du-traitement:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:qualite-des-donnees-et-liceite-du-traitement
+      name: "\u25B6  A. Principes de qualit\xE9 des donn\xE9es (Art. 3)"
+    - urn: urn:bassou:risk:req_node:checklist_09-08:1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:qualite-des-donnees-et-liceite-du-traitement:1
+      ref_id: '1.1'
+      name: Art. 3-a
+      description: "Les donn\xE9es \xE0 caract\xE8re personnel sont trait\xE9es loyalement\
+        \ et licitement."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:qualite-des-donnees-et-liceite-du-traitement:1
+      ref_id: '1.2'
+      name: Art. 3-b
+      description: "Les donn\xE9es sont collect\xE9es pour des finalit\xE9s d\xE9\
+        termin\xE9es, explicites et l\xE9gitimes, et ne sont pas trait\xE9es ult\xE9\
+        rieurement de mani\xE8re incompatible avec ces finalit\xE9s."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:qualite-des-donnees-et-liceite-du-traitement:1
+      ref_id: '1.3'
+      name: Art. 3-c
+      description: "Les donn\xE9es collect\xE9es sont ad\xE9quates, pertinentes et\
+        \ non excessives au regard des finalit\xE9s du traitement."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:qualite-des-donnees-et-liceite-du-traitement:1
+      ref_id: '1.4'
+      name: Art. 3-d
+      description: "Les donn\xE9es sont exactes et mises \xE0 jour. Des mesures raisonnables\
+        \ sont prises pour effacer ou rectifier les donn\xE9es inexactes ou incompl\xE8\
+        tes."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:qualite-des-donnees-et-liceite-du-traitement:1
+      ref_id: '1.5'
+      name: Art. 3-e
+      description: "Les donn\xE9es sont conserv\xE9es sous une forme permettant l'identification\
+        \ des personnes concern\xE9es pendant une dur\xE9e n'exc\xE9dant pas celle\
+        \ n\xE9cessaire \xE0 la r\xE9alisation des finalit\xE9s."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:qualite-des-donnees-et-liceite-du-traitement:1
+      ref_id: '1.6'
+      name: "Art. 3 \xA73"
+      description: "Le responsable du traitement assure le respect des principes de\
+        \ qualit\xE9 des donn\xE9es sous le contr\xF4le de la Commission nationale."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:qualite-des-donnees-et-liceite-du-traitement:2
+      assessable: false
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:qualite-des-donnees-et-liceite-du-traitement
+      name: "\u25B6  B. Consentement et l\xE9gitimit\xE9 du traitement (Art. 4)"
+    - urn: urn:bassou:risk:req_node:checklist_09-08:1.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:qualite-des-donnees-et-liceite-du-traitement:2
+      ref_id: '1.7'
+      name: "Art. 4 \xA71"
+      description: "Le traitement n'est effectu\xE9 que si la personne concern\xE9\
+        e a donn\xE9 son consentement de mani\xE8re indubitables \xE0 l'op\xE9ration\
+        \ ou \xE0 l'ensemble des op\xE9rations envisag\xE9es."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:1.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:qualite-des-donnees-et-liceite-du-traitement:2
+      ref_id: '1.8'
+      name: "Art. 4 \xA72"
+      description: "La communication de donn\xE9es \xE0 un tiers n'est r\xE9alis\xE9\
+        e qu'\xE0 des fins directement li\xE9es aux fonctions du c\xE9dant et du cessionnaire\
+        \ et sous r\xE9serve du consentement pr\xE9alable de la personne concern\xE9\
+        e."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:1.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:qualite-des-donnees-et-liceite-du-traitement:2
+      ref_id: '1.9'
+      name: Art. 4-a
+      description: "En l'absence de consentement : le traitement est n\xE9cessaire\
+        \ au respect d'une obligation l\xE9gale applicable au responsable ou \xE0\
+        \ la personne concern\xE9e."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:1.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:qualite-des-donnees-et-liceite-du-traitement:2
+      ref_id: '1.10'
+      name: Art. 4-b
+      description: "En l'absence de consentement : le traitement est n\xE9cessaire\
+        \ \xE0 l'ex\xE9cution d'un contrat auquel la personne est partie ou \xE0 des\
+        \ mesures pr\xE9contractuelles."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:1.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:qualite-des-donnees-et-liceite-du-traitement:2
+      ref_id: '1.11'
+      name: Art. 4-c
+      description: "En l'absence de consentement : le traitement est n\xE9cessaire\
+        \ \xE0 la sauvegarde d'int\xE9r\xEAts vitaux de la personne, si elle est dans\
+        \ l'incapacit\xE9 de consentir."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:1.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:qualite-des-donnees-et-liceite-du-traitement:2
+      ref_id: '1.12'
+      name: Art. 4-d
+      description: "En l'absence de consentement : le traitement est n\xE9cessaire\
+        \ \xE0 l'ex\xE9cution d'une mission d'int\xE9r\xEAt public ou relevant de\
+        \ l'exercice de l'autorit\xE9 publique."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:1.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:qualite-des-donnees-et-liceite-du-traitement:2
+      ref_id: '1.13'
+      name: Art. 4-e
+      description: "En l'absence de consentement : le traitement est n\xE9cessaire\
+        \ \xE0 la r\xE9alisation de l'int\xE9r\xEAt l\xE9gitime du responsable, sans\
+        \ m\xE9conna\xEEtre les droits et libert\xE9s fondamentaux de la personne."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: "Droits des personnes concern\xE9es"
+    - urn: urn:bassou:risk:req_node:checklist_09-08:2:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:2
+      name: "\u25B6  A. Droit \xE0 l'information lors de la collecte (Art. 5)"
+    - urn: urn:bassou:risk:req_node:checklist_09-08:2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:2:1
+      ref_id: '2.1'
+      name: "Art. 5 \xA71-a"
+      description: "La personne concern\xE9e est inform\xE9e pr\xE9alablement et de\
+        \ mani\xE8re expresse, pr\xE9cise et non \xE9quivoque de l'identit\xE9 du\
+        \ responsable du traitement et, le cas \xE9ch\xE9ant, de son repr\xE9sentant."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:2:1
+      ref_id: '2.2'
+      name: "Art. 5 \xA71-b"
+      description: "La personne concern\xE9e est inform\xE9e des finalit\xE9s du traitement\
+        \ auquel les donn\xE9es sont destin\xE9es."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:2:1
+      ref_id: '2.3'
+      name: "Art. 5 \xA71-c"
+      description: "La personne concern\xE9e est inform\xE9e des destinataires ou\
+        \ cat\xE9gories de destinataires, du caract\xE8re obligatoire ou facultatif\
+        \ de la r\xE9ponse, et de l'existence d'un droit d'acc\xE8s et de rectification."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:2:1
+      ref_id: '2.4'
+      name: "Art. 5 \xA71-d"
+      description: "La personne concern\xE9e est inform\xE9e des caract\xE9ristiques\
+        \ du r\xE9c\xE9piss\xE9 de d\xE9claration ou de l'autorisation de la Commission\
+        \ nationale."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:2:1
+      ref_id: '2.5'
+      name: "Art. 5 \xA72"
+      description: "Les documents servant de base \xE0 la collecte contiennent toutes\
+        \ les informations d'information pr\xE9vues au paragraphe 1 de l'article 5."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:2:1
+      ref_id: '2.6'
+      name: "Art. 5 \xA73"
+      description: "Lorsque les donn\xE9es ne sont pas collect\xE9es directement aupr\xE8\
+        s de la personne concern\xE9e, le responsable lui fournit les informations\
+        \ requises avant enregistrement ou au plus tard lors de la premi\xE8re communication."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:2.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:2:1
+      ref_id: '2.7'
+      name: "Art. 5 \xA74"
+      description: "En cas de collecte via des r\xE9seaux ouverts, la personne concern\xE9\
+        e est inform\xE9e des risques de circulation de ses donn\xE9es sans garanties\
+        \ de s\xE9curit\xE9."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:2:2
+      assessable: false
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:2
+      name: "\u25B6  B. Droit d'acc\xE8s (Art. 7)"
+    - urn: urn:bassou:risk:req_node:checklist_09-08:2.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:2:2
+      ref_id: '2.8'
+      name: Art. 7-a
+      description: "La personne concern\xE9e peut obtenir, \xE0 intervalles raisonnables,\
+        \ gratuitement et sans d\xE9lai, la confirmation que ses donn\xE9es sont ou\
+        \ ne sont pas trait\xE9es, ainsi que les informations relatives aux finalit\xE9\
+        s, cat\xE9gories de donn\xE9es et destinataires."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:2.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:2:2
+      ref_id: '2.9'
+      name: Art. 7-b
+      description: "La personne concern\xE9e peut obtenir communication, sous forme\
+        \ intelligible, des donn\xE9es faisant l'objet du traitement et de toute information\
+        \ disponible sur leur origine."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:2.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:2:2
+      ref_id: '2.10'
+      name: Art. 7-c
+      description: "La personne concern\xE9e peut conna\xEEtre la logique qui sous-tend\
+        \ tout traitement automatis\xE9 de donn\xE9es la concernant."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:2:3
+      assessable: false
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:2
+      name: "\u25B6  C. Droit de rectification (Art. 8)"
+    - urn: urn:bassou:risk:req_node:checklist_09-08:2.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:2:3
+      ref_id: '2.11'
+      name: Art. 8-a
+      description: "Le responsable proc\xE8de, sans frais et dans un d\xE9lai de 10\
+        \ jours, \xE0 l'actualisation, la rectification, l'effacement ou le verrouillage\
+        \ des donn\xE9es non conformes \xE0 la loi."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:2.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:2:3
+      ref_id: '2.12'
+      name: Art. 8-b
+      description: "Le responsable notifie aux tiers auxquels les donn\xE9es ont \xE9\
+        t\xE9 communiqu\xE9es toute actualisation, rectification, effacement ou verrouillage\
+        \ effectu\xE9."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:2:4
+      assessable: false
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:2
+      name: "\u25B6  D. Droit d'opposition et interdiction de prospection directe\
+        \ (Art. 9 & 10)"
+    - urn: urn:bassou:risk:req_node:checklist_09-08:2.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:2:4
+      ref_id: '2.13'
+      name: "Art. 9 \xA71"
+      description: "La personne concern\xE9e peut s'opposer, pour des motifs l\xE9\
+        gitimes, au traitement des donn\xE9es la concernant."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:2.14
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:2:4
+      ref_id: '2.14'
+      name: "Art. 9 \xA72"
+      description: "La personne peut s'opposer, sans frais, \xE0 l'utilisation de\
+        \ ses donn\xE9es \xE0 des fins de prospection commerciale."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:2.15
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:2:4
+      ref_id: '2.15'
+      name: "Art. 10 \xA71"
+      description: "La prospection directe par automate d'appel, t\xE9l\xE9copieur\
+        \ ou courrier \xE9lectronique n'est effectu\xE9e qu'avec le consentement pr\xE9\
+        alable et explicite du destinataire."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:2.16
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:2:4
+      ref_id: '2.16'
+      name: "Art. 10 \xA74"
+      description: "Tout message de prospection directe mentionne des coordonn\xE9\
+        es valables permettant au destinataire de s'opposer gratuitement \xE0 la r\xE9\
+        ception de tels messages."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:2.17
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:2:4
+      ref_id: '2.17'
+      name: "Art. 10 \xA75"
+      description: "L'identit\xE9 de l'\xE9metteur n'est pas dissimul\xE9e et l'objet\
+        \ du message est en rapport avec la prestation ou le service propos\xE9."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:2:5
+      assessable: false
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:2
+      name: "\u25B6  E. Neutralit\xE9 des d\xE9cisions automatis\xE9es (Art. 11)"
+    - urn: urn:bassou:risk:req_node:checklist_09-08:2.18
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:2:5
+      ref_id: '2.18'
+      name: "Art. 11 \xA71"
+      description: "Aucune d\xE9cision de justice impliquant une appr\xE9ciation sur\
+        \ le comportement d'une personne n'a pour fondement un traitement automatis\xE9\
+        \ \xE9valuant certains aspects de sa personnalit\xE9."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:2.19
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:2:5
+      ref_id: '2.19'
+      name: "Art. 11 \xA72"
+      description: "Aucune d\xE9cision produisant des effets juridiques n'est prise\
+        \ sur le seul fondement d'un traitement automatis\xE9 d\xE9finissant le profil\
+        \ ou \xE9valuant la personnalit\xE9 de l'int\xE9ress\xE9."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: "Obligations de d\xE9claration et d'autorisation pr\xE9alable"
+    - urn: urn:bassou:risk:req_node:checklist_09-08:3:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:3
+      name: "\u25B6  A. D\xE9termination du r\xE9gime applicable (Art. 12)"
+    - urn: urn:bassou:risk:req_node:checklist_09-08:3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:3:1
+      ref_id: '3.1'
+      name: "Art. 12 \xA71-a"
+      description: "Une autorisation pr\xE9alable est obtenue pour tout traitement\
+        \ portant sur des donn\xE9es sensibles (origines raciales/ethniques, opinions\
+        \ politiques, convictions religieuses, donn\xE9es g\xE9n\xE9tiques, de sant\xE9\
+        , syndicales)."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:3:1
+      ref_id: '3.2'
+      name: "Art. 12 \xA71-b"
+      description: "Une autorisation pr\xE9alable est obtenue pour l'utilisation de\
+        \ donn\xE9es \xE0 des fins diff\xE9rentes de celles pour lesquelles elles\
+        \ ont \xE9t\xE9 collect\xE9es."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:3:1
+      ref_id: '3.3'
+      name: "Art. 12 \xA71-c"
+      description: "Une autorisation pr\xE9alable est obtenue pour le traitement de\
+        \ donn\xE9es g\xE9n\xE9tiques (hors personnels de sant\xE9 \xE0 fins m\xE9\
+        dicales)."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:3:1
+      ref_id: '3.4'
+      name: "Art. 12 \xA71-d"
+      description: "Une autorisation pr\xE9alable est obtenue pour le traitement de\
+        \ donn\xE9es portant sur des infractions, condamnations ou mesures de s\xFB\
+        ret\xE9 (hors auxiliaires de justice)."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:3:1
+      ref_id: '3.5'
+      name: "Art. 12 \xA71-e"
+      description: "Une autorisation pr\xE9alable est obtenue pour le traitement de\
+        \ donn\xE9es comportant le num\xE9ro de la carte d'identit\xE9 nationale."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:3.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:3:1
+      ref_id: '3.6'
+      name: "Art. 12 \xA71-f"
+      description: "Une autorisation pr\xE9alable est obtenue pour l'interconnexion\
+        \ de fichiers de personnes morales g\xE9rant un service public avec des finalit\xE9\
+        s diff\xE9rentes."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:3.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:3:1
+      ref_id: '3.7'
+      name: "Art. 12 \xA72"
+      description: "Une d\xE9claration pr\xE9alable est effectu\xE9e pour tous les\
+        \ autres traitements non soumis \xE0 autorisation."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:3:2
+      assessable: false
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:3
+      name: "\u25B6  B. Contenu obligatoire de la d\xE9claration (Art. 15)"
+    - urn: urn:bassou:risk:req_node:checklist_09-08:3.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:3:2
+      ref_id: '3.8'
+      name: Art. 15-a
+      description: "La d\xE9claration mentionne le nom et l'adresse du responsable\
+        \ du traitement et, le cas \xE9ch\xE9ant, de son repr\xE9sentant."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:3.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:3:2
+      ref_id: '3.9'
+      name: Art. 15-b
+      description: "La d\xE9claration pr\xE9cise la d\xE9nomination, les caract\xE9\
+        ristiques et la ou les finalit\xE9s du traitement envisag\xE9."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:3.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:3:2
+      ref_id: '3.10'
+      name: Art. 15-c
+      description: "La d\xE9claration comporte une description de la ou des cat\xE9\
+        gories de personnes concern\xE9es et des cat\xE9gories de donn\xE9es s'y rapportant."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:3.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:3:2
+      ref_id: '3.11'
+      name: Art. 15-d
+      description: "La d\xE9claration identifie les destinataires ou cat\xE9gories\
+        \ de destinataires auxquels les donn\xE9es sont susceptibles d'\xEAtre communiqu\xE9\
+        es."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:3.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:3:2
+      ref_id: '3.12'
+      name: Art. 15-e
+      description: "La d\xE9claration mentionne les transferts de donn\xE9es envisag\xE9\
+        s \xE0 destination d'\xC9tats \xE9trangers."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:3.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:3:2
+      ref_id: '3.13'
+      name: Art. 15-f
+      description: "La d\xE9claration pr\xE9cise la dur\xE9e de conservation des donn\xE9\
+        es."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:3.14
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:3:2
+      ref_id: '3.14'
+      name: Art. 15-g
+      description: "La d\xE9claration indique le service aupr\xE8s duquel la personne\
+        \ pourra exercer ses droits et les mesures facilitant cet exercice."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:3.15
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:3:2
+      ref_id: '3.15'
+      name: Art. 15-h
+      description: "La d\xE9claration comporte une description g\xE9n\xE9rale des\
+        \ mesures prises pour assurer la confidentialit\xE9 et la s\xE9curit\xE9 du\
+        \ traitement."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:3.16
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:3:2
+      ref_id: '3.16'
+      name: Art. 15-i
+      description: "La d\xE9claration mentionne les recoupements, interconnexions,\
+        \ cessions et sous-traitances \xE9ventuelles de donn\xE9es \xE0 des tiers."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:3.17
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:3:2
+      ref_id: '3.17'
+      name: "Art. 15 \xA72"
+      description: "Toute modification des informations d\xE9clar\xE9es et toute suppression\
+        \ de traitement sont notifi\xE9es sans d\xE9lai \xE0 la Commission nationale."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:3:3
+      assessable: false
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:3
+      name: "\u25B6  C. Autorisation pr\xE9alable \u2013 Donn\xE9es sensibles (Art.\
+        \ 21 & 22)"
+    - urn: urn:bassou:risk:req_node:checklist_09-08:3.18
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:3:3
+      ref_id: '3.18'
+      name: "Art. 21 \xA71"
+      description: "Le traitement de donn\xE9es sensibles est subordonn\xE9 \xE0 une\
+        \ autorisation l\xE9gale ou, \xE0 d\xE9faut, \xE0 une autorisation de la Commission\
+        \ nationale."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:3.19
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:3:3
+      ref_id: '3.19'
+      name: "Art. 21 \xA72"
+      description: "L'autorisation est accord\xE9e au vu du consentement expr\xE8\
+        s de la personne concern\xE9e ou lorsque le traitement est indispensable \xE0\
+        \ l'exercice des fonctions l\xE9gales ou statutaires du responsable."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:3.20
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:3:3
+      ref_id: '3.20'
+      name: Art. 22
+      description: "Le traitement de donn\xE9es relatives \xE0 la sant\xE9 \xE0 des\
+        \ fins exclusivement m\xE9dicales (m\xE9decine pr\xE9ventive, diagnostic,\
+        \ soins) effectu\xE9 par un professionnel soumis au secret est soumis \xE0\
+        \ simple d\xE9claration."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: "Obligations de s\xE9curit\xE9, confidentialit\xE9 et secret professionnel"
+    - urn: urn:bassou:risk:req_node:checklist_09-08:4:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:4
+      name: "\u25B6  A. Mesures techniques et organisationnelles g\xE9n\xE9rales (Art.\
+        \ 23)"
+    - urn: urn:bassou:risk:req_node:checklist_09-08:4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:4:1
+      ref_id: '4.1'
+      name: "Art. 23 \xA71"
+      description: "Des mesures techniques et organisationnelles appropri\xE9es sont\
+        \ mises en \u0153uvre pour prot\xE9ger les donn\xE9es contre la destruction\
+        \ accidentelle ou illicite, la perte, l'alt\xE9ration, la diffusion ou l'acc\xE8\
+        s non autoris\xE9s."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:4:1
+      ref_id: '4.2'
+      name: "Art. 23 \xA71"
+      description: "Le niveau de s\xE9curit\xE9 mis en \u0153uvre est appropri\xE9\
+        \ aux risques pr\xE9sent\xE9s par le traitement et \xE0 la nature des donn\xE9\
+        es, compte tenu de l'\xE9tat de l'art et des co\xFBts."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:4:1
+      ref_id: '4.3'
+      name: "Art. 23 \xA72"
+      description: "Le responsable, en cas de sous-traitance, choisit un sous-traitant\
+        \ pr\xE9sentant des garanties suffisantes en mati\xE8re de s\xE9curit\xE9\
+        \ technique et organisationnelle."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:4:1
+      ref_id: '4.4'
+      name: "Art. 23 \xA73"
+      description: "La sous-traitance est r\xE9gie par un contrat ou acte juridique\
+        \ pr\xE9cisant que le sous-traitant n'agit que sur instruction du responsable\
+        \ et que les obligations de s\xE9curit\xE9 lui incombent \xE9galement."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:4.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:4:1
+      ref_id: '4.5'
+      name: "Art. 23 \xA74"
+      description: "Les \xE9l\xE9ments du contrat relatifs \xE0 la protection des\
+        \ donn\xE9es et les exigences de s\xE9curit\xE9 sont consign\xE9s par \xE9\
+        crit ou sous une forme \xE9quivalente, \xE0 des fins de conservation des preuves."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:4:2
+      assessable: false
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:4
+      name: "\u25B6  B. Mesures sp\xE9cifiques aux donn\xE9es sensibles et de sant\xE9\
+        \ (Art. 24)"
+    - urn: urn:bassou:risk:req_node:checklist_09-08:4.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:4:2
+      ref_id: '4.6'
+      name: "Art. 24 \xA71-a"
+      description: "Des mesures de contr\xF4le physique d'acc\xE8s aux installations\
+        \ sont mises en \u0153uvre pour emp\xEAcher l'acc\xE8s de toute personne non\
+        \ autoris\xE9e."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:4.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:4:2
+      ref_id: '4.7'
+      name: "Art. 24 \xA71-b"
+      description: "Des mesures de contr\xF4le des supports de donn\xE9es sont en\
+        \ place pour emp\xEAcher la lecture, copie, modification ou retrait non autoris\xE9\
+        s."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:4.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:4:2
+      ref_id: '4.8'
+      name: "Art. 24 \xA71-c"
+      description: "Des mesures de contr\xF4le de l'insertion garantissent l'impossibilit\xE9\
+        \ d'introduire, consulter, modifier ou \xE9liminer des donn\xE9es de mani\xE8\
+        re non autoris\xE9e."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:4.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:4:2
+      ref_id: '4.9'
+      name: "Art. 24 \xA71-d"
+      description: "Des mesures de contr\xF4le de l'utilisation emp\xEAchent l'usage\
+        \ des syst\xE8mes de traitement automatis\xE9 par des personnes non autoris\xE9\
+        es via des installations de transmission."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:4.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:4:2
+      ref_id: '4.10'
+      name: "Art. 24 \xA71-e"
+      description: "Des mesures de contr\xF4le de l'acc\xE8s garantissent que seules\
+        \ les personnes autoris\xE9es acc\xE8dent aux donn\xE9es couvertes par l'autorisation."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:4.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:4:2
+      ref_id: '4.11'
+      name: "Art. 24 \xA71-f"
+      description: "Des mesures de contr\xF4le de la transmission permettent de v\xE9\
+        rifier les entit\xE9s auxquelles les donn\xE9es peuvent \xEAtre transmises\
+        \ via des installations de transmission."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:4.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:4:2
+      ref_id: '4.12'
+      name: "Art. 24 \xA71-g"
+      description: "Des mesures de contr\xF4le de l'introduction garantissent la tra\xE7\
+        abilit\xE9 a posteriori des donn\xE9es introduites, de la date d'introduction\
+        \ et des personnes concern\xE9es."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:4.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:4:2
+      ref_id: '4.13'
+      name: "Art. 24 \xA71-h"
+      description: "Des mesures de contr\xF4le du transport emp\xEAchent la lecture,\
+        \ reproduction, modification ou \xE9limination non autoris\xE9es lors de la\
+        \ transmission ou du transport des supports."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:4:3
+      assessable: false
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:4
+      name: "\u25B6  C. Secret professionnel et restriction d'acc\xE8s (Art. 25 &\
+        \ 26)"
+    - urn: urn:bassou:risk:req_node:checklist_09-08:4.14
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:4:3
+      ref_id: '4.14'
+      name: Art. 25
+      description: "Toute personne agissant sous l'autorit\xE9 du responsable ou du\
+        \ sous-traitant n'acc\xE8de aux donn\xE9es qu'aux fins d'ex\xE9cuter les instructions\
+        \ du responsable du traitement, sauf obligations l\xE9gales."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:4.15
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:4:3
+      ref_id: '4.15'
+      name: "Art. 26 \xA71"
+      description: "Le responsable du traitement et toutes les personnes ayant eu\
+        \ connaissance des donn\xE9es dans l'exercice de leurs fonctions sont tenus\
+        \ au secret professionnel, y compris apr\xE8s cessation de leurs fonctions."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:4.16
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:4:3
+      ref_id: '4.16'
+      name: "Art. 26 \xA72"
+      description: "L'obligation de secret professionnel n'exempte pas de l'obligation\
+        \ de fournir des informations conform\xE9ment aux dispositions l\xE9gales\
+        \ applicables."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: "Transferts de donn\xE9es vers des pays \xE9trangers"
+    - urn: urn:bassou:risk:req_node:checklist_09-08:5:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:5
+      name: "\u25B6  A. Exigences g\xE9n\xE9rales de protection ad\xE9quate (Art.\
+        \ 43)"
+    - urn: urn:bassou:risk:req_node:checklist_09-08:5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:5:1
+      ref_id: '5.1'
+      name: "Art. 43 \xA71"
+      description: "Tout transfert de donn\xE9es vers un \xC9tat \xE9tranger est conditionn\xE9\
+        \ au fait que cet \xC9tat assure un niveau de protection suffisant de la vie\
+        \ priv\xE9e et des libert\xE9s fondamentales."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:5:1
+      ref_id: '5.2'
+      name: "Art. 43 \xA72"
+      description: "Le caract\xE8re suffisant de la protection est appr\xE9ci\xE9\
+        \ en fonction des dispositions l\xE9gales en vigueur dans l'\xC9tat destinataire,\
+        \ des mesures de s\xE9curit\xE9 appliqu\xE9es, des caract\xE9ristiques du\
+        \ traitement, de la nature et de la destination des donn\xE9es."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:5:1
+      ref_id: '5.3'
+      name: "Art. 43 \xA73"
+      description: "Le transfert est effectu\xE9 uniquement vers des \xC9tats figurant\
+        \ sur la liste \xE9tablie par la Commission nationale comme r\xE9pondant aux\
+        \ crit\xE8res de protection ad\xE9quate."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:5:2
+      assessable: false
+      depth: 2
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:5
+      name: "\u25B6  B. D\xE9rogations applicables aux transferts vers des \xC9tats\
+        \ non ad\xE9quats (Art. 44)"
+    - urn: urn:bassou:risk:req_node:checklist_09-08:5.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:5:2
+      ref_id: '5.4'
+      name: "Art. 44 \xA7intro"
+      description: "En l'absence de protection ad\xE9quate de l'\xC9tat destinataire,\
+        \ le transfert ne peut \xEAtre effectu\xE9 que si la personne concern\xE9\
+        e a consenti express\xE9ment audit transfert ou si l'une des d\xE9rogations\
+        \ l\xE9gales pr\xE9vues est applicable."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:5.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:5:2
+      ref_id: '5.5'
+      name: "Art. 44 \xA71-a"
+      description: "D\xE9rogation applicable : le transfert est n\xE9cessaire \xE0\
+        \ la sauvegarde de la vie de la personne concern\xE9e."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:5.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:5:2
+      ref_id: '5.6'
+      name: "Art. 44 \xA71-b"
+      description: "D\xE9rogation applicable : le transfert est n\xE9cessaire \xE0\
+        \ la pr\xE9servation de l'int\xE9r\xEAt public."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:5.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:5:2
+      ref_id: '5.7'
+      name: "Art. 44 \xA71-c"
+      description: "D\xE9rogation applicable : le transfert est n\xE9cessaire \xE0\
+        \ la constatation, l'exercice ou la d\xE9fense d'un droit en justice."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:5.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:5:2
+      ref_id: '5.8'
+      name: "Art. 44 \xA71-d/e"
+      description: "D\xE9rogation applicable : le transfert est n\xE9cessaire \xE0\
+        \ l'ex\xE9cution ou \xE0 la conclusion d'un contrat liant le responsable \xE0\
+        \ la personne concern\xE9e ou conclu dans son int\xE9r\xEAt avec un tiers."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:5.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:5:2
+      ref_id: '5.9'
+      name: "Art. 44 \xA71-f"
+      description: "D\xE9rogation applicable : le transfert est n\xE9cessaire \xE0\
+        \ l'ex\xE9cution d'une mesure d'entraide judiciaire internationale."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:5.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:5:2
+      ref_id: '5.10'
+      name: "Art. 44 \xA71-g"
+      description: "D\xE9rogation applicable : le transfert est n\xE9cessaire \xE0\
+        \ la pr\xE9vention, au diagnostic ou au traitement d'affections m\xE9dicales."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:5.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:5:2
+      ref_id: '5.11'
+      name: "Art. 44 \xA72"
+      description: "D\xE9rogation applicable : le transfert s'effectue en application\
+        \ d'un accord bilat\xE9ral ou multilat\xE9ral auquel le Royaume du Maroc est\
+        \ partie."
+    - urn: urn:bassou:risk:req_node:checklist_09-08:5.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:bassou:risk:req_node:checklist_09-08:5:2
+      ref_id: '5.12'
+      name: "Art. 44 \xA73"
+      description: "D\xE9rogation applicable : le transfert est express\xE9ment autoris\xE9\
+        \ par la Commission nationale apr\xE8s v\xE9rification que le traitement garantit\
+        \ un niveau de protection suffisant (clauses contractuelles ou r\xE8gles internes)."

@@ -11,10 +11,31 @@ class StoredLibrarySerializer(ReferentialSerializer):
     locales = serializers.ListField(source="get_locales", read_only=True)
     loaded_library = serializers.SerializerMethodField()
     filtering_labels = FieldsRelatedField(many=True, fields=["id", "label"])
+    is_preset = serializers.BooleanField(read_only=True)
+    profile = serializers.SerializerMethodField()
+    scaffolded_objects = serializers.SerializerMethodField()
 
     def get_loaded_library(self, obj) -> Optional[str]:
         loaded_library = obj.get_loaded_library()
         return str(loaded_library.id) if loaded_library else None
+
+    def get_profile(self, obj) -> Optional[dict]:
+        if obj.is_preset:
+            return obj.content.get("preset", {}).get("profile")
+        return None
+
+    def get_scaffolded_objects(self, obj) -> Optional[list]:
+        if not obj.is_preset:
+            return None
+        items = obj.content.get("preset", {}).get("scaffolded_objects", [])
+        if not items:
+            return None
+        from collections import Counter
+
+        counts = Counter(item["type"] for item in items)
+        return [
+            {"type": obj_type, "count": count} for obj_type, count in counts.items()
+        ]
 
     class Meta:
         model = StoredLibrary
@@ -38,6 +59,9 @@ class StoredLibrarySerializer(ReferentialSerializer):
             "locales",
             "loaded_library",
             "copyright",
+            "is_preset",
+            "profile",
+            "scaffolded_objects",
         ]
 
 

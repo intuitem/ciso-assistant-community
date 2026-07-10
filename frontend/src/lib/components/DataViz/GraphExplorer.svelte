@@ -71,7 +71,8 @@
 	const getCustomEdgeFormatter = () => {
 		return (params) => {
 			// Truncate function - truncates text to maxLength and adds ellipsis
-			const truncate = (text, maxLength = 25) => {
+			const truncate = (text) => {
+				const maxLength = 25;
 				if (text.length <= maxLength) return text;
 				return text.substring(0, maxLength) + '...';
 			};
@@ -371,8 +372,12 @@
 			return;
 		}
 
-		chart = echarts.init(element);
+		chart = echarts.init(
+			element,
+			document.documentElement.classList.contains('dark') ? 'dark' : null
+		);
 		const options = getChartOptions();
+		options.backgroundColor = 'transparent';
 		chart.setOption(options);
 
 		chart.on('click', (params) => {
@@ -408,13 +413,13 @@
 	};
 </script>
 
-<div class="flex flex-col h-screen bg-white shadow-sm">
+<div class="flex flex-col h-screen bg-surface-50-950 shadow-sm">
 	<div class="relative p-2">
 		<label for="graph-search" class="sr-only">Search</label>
 		<input
 			id="graph-search"
 			type="text"
-			class="w-full rounded-md border-gray-200 py-2.5 pe-10 shadow-xs"
+			class="w-full rounded-md border-surface-200-800 bg-surface-50-950 text-surface-900-100 py-2.5 pe-10 shadow-xs"
 			bind:value={searchQuery}
 			onkeydown={handleKeyDown}
 			placeholder={m.findANode()}
@@ -422,7 +427,7 @@
 		<span class="absolute inset-y-0 end-0 grid w-10 place-content-center">
 			<button
 				type="button"
-				class="text-gray-600 hover:text-gray-700"
+				class="text-surface-600-400 hover:text-surface-700-300"
 				onclick={() => searchNodes(searchQuery)}
 				aria-label="Search"
 			>

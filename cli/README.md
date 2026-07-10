@@ -12,7 +12,6 @@ CLICA is a command-line interface tool for interacting with the CISO Assistant R
   - [Import Commands](#import-commands)
   - [File Upload Commands](#file-upload-commands)
   - [Instance Management Commands](#instance-management-commands)
-- [Data Formats](#data-formats)
 - [MCP Integration](#mcp-integration)
 - [Examples](#examples)
 - [Troubleshooting](#troubleshooting)
@@ -22,23 +21,21 @@ CLICA is a command-line interface tool for interacting with the CISO Assistant R
 ### Prerequisites
 
 - Python 3.12 or higher
-- Required Python packages (install via pip):
+- [uv](https://docs.astral.sh/uv/) (the project is managed with `uv`; install via `curl -LsSf https://astral.sh/uv/install.sh | sh` or your package manager)
+
+### Setup
+
+From the `cli/` directory:
 
 ```bash
-pip install -r requirements.txt
+uv sync
 ```
+
+This creates a `.venv/` and installs the locked dependencies from `uv.lock`. Run CLI commands with `uv run` (see examples below), or activate the venv manually with `source .venv/bin/activate`.
 
 ### Dependencies
 
-The CLI requires the following Python packages:
-
-- pandas
-- rich
-- requests
-- click
-- pyyaml
-- icecream
-- python-dotenv
+Runtime dependencies are declared in [`pyproject.toml`](./pyproject.toml) and pinned in [`uv.lock`](./uv.lock). Use `uv add <pkg>` / `uv remove <pkg>` to manage them — do not edit `uv.lock` by hand.
 
 ## Authentication Setup
 
@@ -86,7 +83,7 @@ These commands retrieve information from your CISO Assistant instance:
 Retrieves all available folders/domains from your CISO Assistant instance.
 
 ```bash
-python clica.py get-folders
+uv run clica.py get-folders
 ```
 
 **Output:** JSON list of all folders with their IDs and names.
@@ -96,7 +93,7 @@ python clica.py get-folders
 Lists all available perimeters in your CISO Assistant instance.
 
 ```bash
-python clica.py get-perimeters
+uv run clica.py get-perimeters
 ```
 
 **Output:** JSON list of perimeters organized by folder.
@@ -106,113 +103,61 @@ python clica.py get-perimeters
 Retrieves all loaded risk matrices from the Global folder.
 
 ```bash
-python clica.py get-matrices
+uv run clica.py get-matrices
 ```
 
 **Output:** JSON list of available risk matrices with their IDs and names.
 
 ### Import Commands
 
-These commands import data from CSV files into CISO Assistant:
+Most import commands now leverage the same “Data Wizard” backend that powers the enterprise UI. These commands accept the Excel/CSV templates described in the [documentation](https://intuitem.gitbook.io/ciso-assistant/guide/data-import-wizard) and share a common set of options:
 
-#### `import_risk_assessment`
+- `--file` (required): Path to the template to upload.
+- `--folder`: Folder/domain name or UUID. Required for models that need a domain. Individual rows in the template can still override the folder via their `domain` column.
+- `--perimeter`: Perimeter name or UUID (only for models that require it).
+- `--framework`: Framework name or UUID (Compliance Assessments only).
+- `--matrix`: Risk matrix name or UUID (Risk Assessments and EBIOS RM studies).
 
-Imports a complete risk assessment from a CSV file, including risk scenarios, assets, threats, and controls.
+You can pass either UUIDs or human-readable names; the CLI resolves names through the `/ids/` endpoints.
 
-```bash
-python clica.py import-risk-assessment \
-  --file RA_sample.csv \
-  --folder "Business Unit 1" \
-  --perimeter "Network Infrastructure" \
-  --matrix "4x4 Risk Matrix" \
-  --name "Q1 2024 Risk Assessment" \
-  --create_all
-```
+Supported Data Wizard commands:
 
-**Parameters:**
-
-- `--file`: Path to the CSV file containing risk assessment data
-- `--folder`: Target folder name in CISO Assistant
-- `--perimeter`: Perimeter name to associate with the assessment
-- `--matrix`: Risk matrix name to use for impact/probability mapping
-- `--name`: Name for the new risk assessment
-- `--create_all`: (Optional) Automatically create associated objects (threats, assets, controls)
-
-**Features:**
-
-- Automatically creates missing assets, threats, and controls when `--create_all` is used
-- Maps risk matrix values to proper impact and probability levels
-- Supports multiple risk treatment options
-- Handles complex relationships between risk scenarios and their components
-
-#### `import_assets`
-
-Imports assets from a CSV file into the Global folder.
+| Command | Model type | Required CLI options |
+| --- | --- | --- |
+| `import-assets` | Asset | `--folder` |
+| `import-applied-controls` | AppliedControl | `--folder` |
+| `import-evidences` | Evidence | `--folder` |
+| `import-users` | User | — |
+| `import-folders` | Folder | — |
+| `import-perimeters` | Perimeter | `--folder` |
+| `import-compliance-assessments` | ComplianceAssessment | `--perimeter`, `--framework` |
+| `import-findings-assessments` | FindingsAssessment | `--perimeter` |
+| `import-risk-assessment` | RiskAssessment | `--perimeter`, `--matrix` |
+| `import-elementary-actions` | ElementaryAction | `--folder` |
+| `import-reference-controls` | ReferenceControl | `--folder` |
+| `import-threats` | Threat | `--folder` |
+| `import-processings` | Processing | `--folder` |
+| `import-tprm` | TPRM | `--folder` |
+| `import-ebios-rm-study-arm` | EbiosRMStudyARM | `--folder`, `--matrix` |
+| `import-ebios-rm-study` | EbiosRMStudyExcel | `--folder`, `--matrix` |
+| `import-ebios-rm-study-egerie-xml` | EbiosRMStudyEgerieXML | `--folder`, `--matrix` |
+| `import-bia` | BusinessImpactAnalysis | — |
+Example:
 
 ```bash
-python clica.py import-assets --file sample_assets.csv
-```
-
-**Parameters:**
-
-- `--file`: Path to the CSV file containing asset data
-
-**CSV Format:**
-
-```csv
-name,description,domain,type
-Server01,Production web server,Global,Primary
-Backup Storage,Backup storage system,Global,Support
-```
-
-#### `import_controls`
-
-Imports applied controls (security measures) from a CSV file.
-
-```bash
-python clica.py import-controls --file sample_controls.csv
-```
-
-**Parameters:**
-
-- `--file`: Path to the CSV file containing control data
-
-**CSV Format:**
-
-```csv
-name,description,category,csf_function
-Firewall,Network traffic control,Technical,Protect
-Security Training,Employee awareness program,Process,Protect
-```
-
-#### `import_evidences`
-
-Imports evidence records from a CSV file.
-
-```bash
-python clica.py import-evidences --file evidences.csv
-```
-
-**Parameters:**
-
-- `--file`: Path to the CSV file containing evidence data
-
-**CSV Format:**
-
-```csv
-name,description
-Asset Management Policy,Documented asset management procedures
-Security Audit Report,Annual security assessment results
+uv run clica.py import-assets \
+  --file data-wizard-assets.xlsx \
+  --folder "Global"
 ```
 
 ### File Upload Commands
 
-#### `upload_attachment`
+#### `upload-attachment`
 
 Uploads a file as an attachment to an existing evidence record.
 
 ```bash
-python clica.py upload-attachment \
+uv run clica.py upload-attachment \
   --file /path/to/document.pdf \
   --name "Asset Management Policy"
 ```
@@ -229,7 +174,7 @@ python clica.py upload-attachment \
 Creates a complete backup of your CISO Assistant instance using a memory-efficient streaming approach. Supports resume capability for interrupted backups.
 
 ```bash
-python clica.py backup-full --dest-dir ./db --batch-size 200 --resume
+uv run clica.py backup-full --dest-dir ./db --batch-size 200 --resume
 ```
 
 **Parameters:**
@@ -272,7 +217,7 @@ python clica.py backup-full --dest-dir ./db --batch-size 200 --resume
 Restores a complete backup of your CISO Assistant instance using a memory-efficient streaming approach. Supports resume capability for interrupted restores.
 
 ```bash
-python clica.py restore-full --src-dir ./db --verify-hashes
+uv run clica.py restore-full --src-dir ./db --verify-hashes
 ```
 
 **Parameters:**
@@ -337,57 +282,15 @@ The backup/restore system uses a custom binary streaming protocol to avoid memor
 ### Instance Management Commands
 
 
-## Data Formats
-
-### Risk Assessment CSV Format
-
-The risk assessment CSV file should use semicolon (`;`) as delimiter and include the following columns:
-
-```csv
-ref_id;assets;threats;name;description;existing_controls;current_impact;current_proba;current_risk;additional_controls;residual_impact;residual_proba;residual_risk;treatment
-```
-
-**Column Descriptions:**
-
-- `ref_id`: Unique reference identifier for the risk scenario
-- `assets`: Comma-separated list of asset names
-- `threats`: Comma-separated list of threat names
-- `name`: Risk scenario name
-- `description`: Detailed description of the risk
-- `existing_controls`: Comma-separated list of current control names
-- `current_impact`: Current impact level (must match risk matrix values)
-- `current_proba`: Current probability level (must match risk matrix values)
-- `current_risk`: Current risk level (calculated)
-- `additional_controls`: Comma-separated list of additional control names
-- `residual_impact`: Residual impact level after controls
-- `residual_proba`: Residual probability level after controls
-- `residual_risk`: Residual risk level (calculated)
-- `treatment`: Risk treatment option
-
-### Risk Treatment Options
-
-The CLI supports the following risk treatment options:
-
-- `open`: Risk is identified but not yet treated
-- `mitigate`: Implement controls to reduce risk
-- `accept`: Accept the risk as is
-- `avoid`: Eliminate the risk by avoiding the activity
-- `transfer`: Transfer risk to a third party (e.g., insurance)
-
 ## MCP Integration
 
 CLICA includes Model Context Protocol (MCP) integration for use with Claude Desktop and other MCP-compatible clients.
 
 ### Setup for Claude Desktop
 
-1. Install prerequisites:
-   - Python 3.12
-   - uv package manager
-   - Node.js
-   - Claude Desktop
-
-2. Configure your `.mcp.env` file with the same parameters as `.clica.env`
-3. Update Claude Desktop configuration (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
+1. Make sure the CLI is installed (see [Installation](#installation) — `uv sync` from the `cli/` directory), and that you also have Node.js and Claude Desktop.
+2. Configure your `.mcp.env` file with the same parameters as `.clica.env`.
+3. Update Claude Desktop configuration (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS). `uv` will resolve and run the locked environment for you:
 
 ```json
 {
@@ -414,34 +317,31 @@ CLICA includes Model Context Protocol (MCP) integration for use with Claude Desk
 
 ```bash
 # First, check available folders, perimeters, and matrices
-python clica.py get-folders
-python clica.py get-perimeters
-python clica.py get-matrices
+uv run clica.py get-folders
+uv run clica.py get-perimeters
+uv run clica.py get-matrices
 
-# Import a complete risk assessment
-python clica.py import-risk-assessment \
-  --file RA_sample.csv \
-  --folder "Business Unit 1" \
+# Import a complete risk assessment via the Data Wizard backend
+uv run clica.py import-risk-assessment \
+  --file data-wizard-risk-assessments.xlsx \
   --perimeter "IT Infrastructure" \
-  --matrix "4x4 risk matrix from EBIOS-RM" \
-  --name "2024 Q1 Risk Assessment" \
-  --create_all
+  --matrix "4x4 risk matrix from EBIOS-RM"
 ```
 
 ### Import Supporting Data
 
 ```bash
-# Import assets
-python clica.py import-assets --file sample_assets.csv
+# Import assets using the Data Wizard backend
+uv run clica.py import-assets --file data-wizard-assets.xlsx --folder "Global"
 
-# Import security controls
-python clica.py import-controls --file sample_controls.csv
+# Import applied controls
+uv run clica.py import-applied-controls --file data-wizard-controls.xlsx --folder "Global"
 
 # Import evidence records
-python clica.py import-evidences --file evidences.csv
+uv run clica.py import-evidences --file data-wizard-evidences.xlsx --folder "Global"
 
 # Upload supporting documents
-python clica.py upload-attachment \
+uv run clica.py upload-attachment \
   --file "security_policy.pdf" \
   --name "Information Security Policy"
 ```
@@ -451,16 +351,16 @@ python clica.py upload-attachment \
 ```bash
 # Create a full backup with timestamp
 BACKUP_DATE=$(date +%Y-%m-%d_%H-%M-%S)
-python clica.py backup-full --dest-dir "./backups/backup-$BACKUP_DATE"
+uv run clica.py backup-full --dest-dir "./backups/backup-$BACKUP_DATE"
 
 # List backups
 ls -lh ./backups/
 
 # Restore from a specific backup
-python clica.py restore-full --src-dir "./backups/backup-2024-01-15_10-30-00"
+uv run clica.py restore-full --src-dir "./backups/backup-2024-01-15_10-30-00"
 
 # Automated daily backup (can be added to cron)
-python clica.py backup-full --dest-dir "/var/backups/ciso-assistant/$(date +%Y-%m-%d)"
+uv run clica.py backup-full --dest-dir "/var/backups/ciso-assistant/$(date +%Y-%m-%d)"
 ```
 
 ## Troubleshooting
@@ -469,15 +369,13 @@ python clica.py backup-full --dest-dir "/var/backups/ciso-assistant/$(date +%Y-%
 
 - `"No authentication token available"`: Configure your PAT token in `.clica.env`
 - `"something went wrong. check authentication"`: Verify your token and API URL
-- `"Matrix doesn't match the labels used on your input file"`: Ensure impact/probability values match your risk matrix
-
 ### Getting Help
 
 For additional support:
 
 1. Check the CISO Assistant documentation
 2. Verify your API endpoint is accessible
-3. Review the sample CSV files for proper formatting
+3. Review the Data Wizard templates for proper formatting
 4. Ensure all required dependencies are installed
 5. Contact us on our Discord !
 

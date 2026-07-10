@@ -9,8 +9,10 @@
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
+	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
 
 	let { data } = $props();
+	let expandedNodes: string[] = $state([]);
 
 	const showRisks = true;
 
@@ -77,26 +79,26 @@
 	}
 </script>
 
-<div class="card bg-white p-4 shadow-sm space-y-4">
+<div class="card bg-surface-50-950 p-4 shadow-sm space-y-4">
 	<div class="flex flex-col space-y-2">
 		<span class="w-full flex flex-row justify-between">
 			<h1 class="font-medium text-xl">{data.library.name}</h1>
 		</span>
 		<div class="space-y-1">
-			<p class="text-md leading-5 text-gray-700">
+			<p class="text-md leading-5 text-surface-700-300">
 				<strong>{m.description()}</strong>: {data.library.description}
 			</p>
-			<p class="text-md leading-5 text-gray-700">
+			<p class="text-md leading-5 text-surface-700-300">
 				<strong>{m.provider()}</strong>: {data.library.provider}
 			</p>
-			<p class="text-md leading-5 text-gray-700">
+			<p class="text-md leading-5 text-surface-700-300">
 				<strong>{m.packager()}</strong>: {data.library.packager}
 			</p>
-			<p class="text-md leading-5 text-gray-700">
+			<p class="text-md leading-5 text-surface-700-300">
 				<strong>{m.version()}</strong>: {data.library.version}
 			</p>
 			{#if data.library.publication_date}
-				<p class="text-md leading-5 text-gray-700">
+				<p class="text-md leading-5 text-surface-700-300">
 					<strong>{m.publicationDate()}</strong>: {formatDateOrDateTime(
 						data.library.publication_date,
 						getLocale()
@@ -104,7 +106,7 @@
 				</p>
 			{/if}
 			{#if data.library.dependencies}
-				<p class="text-md leading-5 text-gray-700">
+				<p class="text-md leading-5 text-surface-700-300">
 					<strong>{m.dependencies()}</strong>:
 				</p>
 				<ul class="list-disc list-inside">
@@ -114,7 +116,7 @@
 				</ul>
 			{/if}
 			{#if data.library.copyright}
-				<p class="text-md leading-5 text-gray-700">
+				<p class="text-md leading-5 text-surface-700-300">
 					<strong>{m.copyright()}</strong>: {data.library.copyright}
 				</p>
 			{/if}
@@ -180,16 +182,17 @@
 	{/if}
 
 	{#if framework}
-		<h4 class="h4 font-medium">{m.framework()}</h4>
 		{#await data.tree}
 			<span data-testid="loading-field">
 				{m.loading()}...
 			</span>
 		{:then tree}
-			<RecursiveTreeView
-				nodes={transformToTreeView(Object.entries(tree))}
-				hover="hover:bg-initial"
-			/>
+			{@const treeViewNodes = transformToTreeView(Object.entries(tree))}
+			<div class="flex items-center justify-between">
+				<h4 class="h4 font-medium">{m.framework()}</h4>
+				<TreeExpandCollapseToggle nodes={treeViewNodes} bind:expandedNodes />
+			</div>
+			<RecursiveTreeView nodes={treeViewNodes} bind:expandedNodes hover="hover:bg-initial" />
 		{/await}
 	{/if}
 </div>

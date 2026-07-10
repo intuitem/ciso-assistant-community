@@ -34,23 +34,44 @@ def validate_file_size(value):
         return value
 
 
-def validate_file_name(value):
-    """
-    Check file extension and sanitize its name
-    """
-    allowed_extensions = [
-        "jpg",
-        "jpeg",
-        "png",
-        "docx",
-        "txt",
-        "xls",
-        "xlsx",
-        "csv",
-        "pdf",
-    ]
+ALLOWED_UPLOAD_EXTENSIONS = [
+    "jpg",
+    "jpeg",
+    "png",
+    "doc",
+    "docx",
+    "odt",
+    "ppt",
+    "pptx",
+    "txt",
+    "xls",
+    "xlsx",
+    "ods",
+    "csv",
+    "pdf",
+    "json",
+    "yaml",
+    "yml",
+    "toml",
+    "xml",
+    "msg",
+    "eml",
+    "zip",
+    "7z",
+    "tar",
+    "gz",
+    "log",
+    "svg",
+    "mp4",
+    "mov",
+    "gif",
+    "webp",
+]
+
+
+def _validate_file_extension_and_sanitize(value, allowed_extensions):
     parts = value.name.split(".")
-    extension = parts[-1]
+    extension = parts[-1].lower()
 
     if extension in allowed_extensions:
         if len(value.name) > 256:
@@ -62,4 +83,22 @@ def validate_file_name(value):
         )
         return value
     else:
-        raise ValidationError("An error occured with file extension")
+        raise ValidationError(
+            f"Unsupported file extension '.{extension}'. Allowed extensions: {', '.join(allowed_extensions)}"
+        )
+
+
+def validate_file_name(value):
+    """
+    Check file extension against the general upload allowlist and sanitize its name.
+    """
+    return _validate_file_extension_and_sanitize(value, ALLOWED_UPLOAD_EXTENSIONS)
+
+
+def validate_html_template_file_name(value):
+    """
+    Filename check for HTML layout templates (server-side WeasyPrint templates,
+    rendered by the platform and never served as attachments). `.html` is allowed
+    here even though it is excluded from the general upload allowlist.
+    """
+    return _validate_file_extension_and_sanitize(value, ["html"])

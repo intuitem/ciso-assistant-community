@@ -70,7 +70,7 @@ def _cache_tables_ready() -> bool:
     try:
         with connection.cursor() as cursor:
             tables = set(connection.introspection.table_names(cursor))
-    except (OperationalError, ProgrammingError):
+    except OperationalError, ProgrammingError:
         return False
     return CacheVersion._meta.db_table in tables
 
@@ -229,6 +229,7 @@ def get_folder_path(
 class RolesCacheState:
     role_permissions: Mapping[uuid.UUID, FrozenSet[str]]
     permission_ids_by_codename: Mapping[str, int]
+    role_id_by_name: Mapping[str, uuid.UUID]
 
 
 def build_roles_cache_state() -> RolesCacheState:
@@ -236,7 +237,7 @@ def build_roles_cache_state() -> RolesCacheState:
 
     roles = (
         Role.objects.all()
-        .only("id")
+        .only("id", "name")
         .prefetch_related(
             Prefetch(
                 "permissions",
@@ -246,10 +247,13 @@ def build_roles_cache_state() -> RolesCacheState:
     )
 
     role_permissions: Dict[uuid.UUID, FrozenSet[str]] = {}
+    role_id_by_name: Dict[str, uuid.UUID] = {}
     for role in roles:
         role_permissions[role.id] = frozenset(
             p.codename for p in role.permissions.all() if p.codename
         )
+        if role.name:
+            role_id_by_name[role.name] = role.id
 
     permissions = Permission.objects.all().only("codename", "id")
     permission_ids_by_codename: Dict[str, int] = {
@@ -259,6 +263,7 @@ def build_roles_cache_state() -> RolesCacheState:
     return RolesCacheState(
         role_permissions=MappingProxyType(role_permissions),
         permission_ids_by_codename=MappingProxyType(permission_ids_by_codename),
+        role_id_by_name=MappingProxyType(role_id_by_name),
     )
 
 
@@ -277,6 +282,7 @@ class GroupsCacheState:
 
 def build_groups_cache_state() -> GroupsCacheState:
     User = apps.get_model("iam", "User")
+    IdPGroup = apps.get_model("iam", "IdPGroup")
 
     through = User.user_groups.through  # type: ignore[attr-defined]
     rows = through.objects.all().values_list("user_id", "usergroup_id")
@@ -284,6 +290,27 @@ def build_groups_cache_state() -> GroupsCacheState:
     mapping: Dict[uuid.UUID, set[uuid.UUID]] = {}
     for user_id, group_id in rows:
         mapping.setdefault(user_id, set()).add(group_id)
+
+    # Groups of groups: a user inherits the user_groups granted by each IdP
+    # group they belong to (SCIM-managed membership in User.idp_groups). Gated
+    # by the idp_groups feature flag so disabling it immediately revokes
+    # inherited roles once the cache is rebuilt (the flag write path invalidates
+    # this cache, see global_settings.serializers.FeatureFlagsSerializer).
+    from global_settings.utils import ff_is_enabled
+
+    if ff_is_enabled("idp_groups"):
+        idp_user_groups: Dict[uuid.UUID, set[uuid.UUID]] = {}
+        for idp_id, group_id in IdPGroup.user_groups.through.objects.values_list(
+            "idpgroup_id", "usergroup_id"
+        ):
+            idp_user_groups.setdefault(idp_id, set()).add(group_id)
+
+        for user_id, idp_id in User.idp_groups.through.objects.values_list(
+            "user_id", "idpgroup_id"
+        ):
+            granted = idp_user_groups.get(idp_id)
+            if granted:
+                mapping.setdefault(user_id, set()).update(granted)
 
     frozen: Dict[uuid.UUID, FrozenSet[uuid.UUID]] = {
         u: frozenset(gids) for u, gids in mapping.items()

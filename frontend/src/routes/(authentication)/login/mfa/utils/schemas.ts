@@ -1,6 +1,7 @@
-import { z, type AnyZodObject } from 'zod';
+import { z } from 'zod';
+import type { ZodSchema } from '$lib/utils/schemas';
 
-export const mfaAuthenticateSchema: AnyZodObject = z.object({
+export const mfaAuthenticateSchema: ZodSchema = z.object({
 	code: z
 		.string()
 		.regex(/^\d{6,8}$/)

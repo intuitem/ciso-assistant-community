@@ -25,14 +25,6 @@
 	}: Props = $props();
 </script>
 
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
-
 <AutocompleteSelect
 	{form}
 	field="status"
@@ -58,18 +50,10 @@
 <AutocompleteSelect
 	multiple
 	{form}
-	optionsEndpoint="processing-natures"
+	optionsEndpoint="terminologies?field_path=processing.nature&is_visible=true"
+	optionsLabelField="translated_name"
 	field="nature"
 	label={m.processingNature()}
-/>
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
-	field="folder"
-	pathField="path"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
 />
 <AutocompleteSelect
 	multiple
@@ -118,6 +102,16 @@
 	cacheLock={cacheLocks['evidences']}
 	bind:cachedValue={formDataCache['evidences']}
 	label={m.evidences()}
+/>
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="perimeters"
+	optionsExtraFields={[['folder', 'str']]}
+	field="perimeters"
+	cacheLock={cacheLocks['perimeters']}
+	bind:cachedValue={formDataCache['perimeters']}
+	label={m.perimeters()}
 />
 <!-- author = models.ForeignKey( -->
 <!--     User, on_delete=models.SET_NULL, null=True, related_name="authored_processings" -->

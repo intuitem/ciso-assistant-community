@@ -1,9 +1,9 @@
 from rest_framework import permissions
 from rest_framework.request import Request
 from django.contrib.auth import get_user_model
-from .utils import RoleCodename
 
-from iam.models import RoleAssignment, Folder, Permission, Role
+from global_settings.utils import ff_is_enabled
+from iam.models import RoleAssignment, Folder, Permission
 
 User = get_user_model()
 
@@ -61,8 +61,21 @@ class RBACPermissions(permissions.DjangoObjectPermissions):
         )
 
 
-class IsAdministrator(permissions.BasePermission):
+class IsGlobalAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
-        return RoleAssignment.has_role(
-            user=request.user, role=Role.objects.get(name=RoleCodename.ADMINISTRATOR)
-        )
+        user = request.user
+        return bool(user and user.is_authenticated and user.is_admin())
+
+
+class FeatureFlagRequired(permissions.BasePermission):
+    """Deny access unless the feature flag named by the view's ``feature_flag``
+    attribute is enabled. Server-side counterpart to the UI flag gating, so a
+    flag-off / community build cannot reach the endpoint via the API."""
+
+    message = "This feature is not enabled."
+
+    def has_permission(self, request, view):
+        flag = getattr(view, "feature_flag", None)
+        if not flag:
+            return True
+        return ff_is_enabled(flag)

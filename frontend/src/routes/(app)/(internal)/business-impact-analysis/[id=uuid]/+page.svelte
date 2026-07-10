@@ -4,6 +4,7 @@
 	import { m } from '$paraglide/messages';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { page } from '$app/state';
+	import { Popover } from '@skeletonlabs/skeleton-svelte';
 	import { invalidateAll } from '$app/navigation';
 	import ActivityTracker from '$lib/components/DataViz/ActivityTracker.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
@@ -20,6 +21,7 @@
 	}
 
 	let { data }: Props = $props();
+	let exportPopupOpen = $state(false);
 
 	const modalStore: ModalStore = getModalStore();
 	const business_impact_analysis = $derived(data.data);
@@ -68,6 +70,29 @@
 >
 	{#snippet actions()}
 		<div class="flex flex-col space-y-2">
+			<Popover
+				open={exportPopupOpen}
+				onOpenChange={(e) => (exportPopupOpen = e.open)}
+				positioning={{ placement: 'bottom' }}
+				triggerBase="btn preset-filled-primary-500 w-full"
+				contentBase="card whitespace-nowrap bg-surface-50-950 py-2 w-fit shadow-lg space-y-1"
+				zIndex="1000"
+			>
+				{#snippet trigger()}
+					<span data-testid="export-button">
+						<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+					</span>
+				{/snippet}
+				{#snippet content()}
+					<div>
+						<a
+							href="/business-impact-analysis/{data.data.id}/export/xlsx"
+							class="block px-4 py-2 text-sm text-surface-800-200 hover:bg-surface-200-800"
+							>... {m.asXLSX()}</a
+						>
+					</div>
+				{/snippet}
+			</Popover>
 			<Anchor
 				href={`${page.url.pathname}/visual`}
 				class="btn preset-filled-primary-500 h-fit"
@@ -81,7 +106,7 @@
 			>
 			{#if !business_impact_analysis?.is_locked && page.data?.featureflags?.validation_flows}
 				<button
-					class="btn text-gray-100 bg-linear-to-r from-orange-500 to-amber-500 h-fit"
+					class="btn text-white bg-linear-to-r from-orange-500 to-amber-500 h-fit"
 					onclick={() => modalRequestValidation()}
 					data-testid="request-validation-button"
 				>
@@ -94,7 +119,7 @@
 	{#snippet widgets()}
 		{#key business_impact_analysis.validation_flows}
 			<div class="h-full flex flex-col space-y-4">
-				<div class="card p-4 bg-gray-50 shadow-xs grow">
+				<div class="card p-4 bg-surface-50-950 shadow-xs grow">
 					<div class="font-bold text-xl mb-4">{m.recoveryInsights()}</div>
 					<div class="flex items-center justify-center">
 						<ActivityTracker metrics={data.metrics} />

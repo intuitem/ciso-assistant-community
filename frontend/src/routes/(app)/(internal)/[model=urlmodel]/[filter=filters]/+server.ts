@@ -3,9 +3,9 @@ import type { RequestHandler } from './$types';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
 
-export const GET: RequestHandler = async ({ fetch, params }) => {
+export const GET: RequestHandler = async ({ fetch, params, url }) => {
 	const model = getModelInfo(params.model);
-	const endpoint = `${BASE_API_URL}/${model.endpointUrl ?? params.model}/${params.filter}/`;
+	const endpoint = `${BASE_API_URL}/${model.endpointUrl ?? params.model}/${params.filter}/${url.search}`;
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {
