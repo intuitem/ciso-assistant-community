@@ -1130,7 +1130,9 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 selected_urns=request.data.get("urns"),
                 default_policy=request.data.get("default_policy", builder.POLICY_STRIP),
                 per_urn_policies=request.data.get("policies"),
-                resolve_owner=builder.find_owning_library_urn,
+                resolve_owner=lambda ref: builder.find_owning_library_urn(
+                    ref, user=request.user
+                ),
             )
             # The builder allows at most one framework and one risk matrix per
             # library. An import may replace the existing one (same minted
@@ -1296,7 +1298,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
         stored_index_cache: dict = {}  # one content parse per candidate library
         for ref in refs - covered:
             owner = builder.find_owning_library_urn(
-                ref
+                ref, user=user
             ) or builder.find_stored_owner_urn(
                 ref, index_cache=stored_index_cache, accessible_ids=accessible
             )

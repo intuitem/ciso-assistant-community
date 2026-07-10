@@ -1695,3 +1695,18 @@ def test_validation_and_dependency_sync_read_with_the_users_eyes(builder_only_cl
     put = builder_only_client.put(editor_url, {"editing_draft": doc}, format="json")
     assert put.status_code == status.HTTP_200_OK, put.content
     assert builder_only_client.get(detail_url).data["dependencies"] in ([], None)
+
+    # 4. Same rule for LOADED libraries: loading doc-pol changes nothing
+    # for a user who may not read its objects.
+    assert (
+        StoredLibrary.objects.get(urn="urn:intuitem:risk:library:doc-pol").load()
+        is None
+    )
+    validation = builder_only_client.get(validate_url).data
+    assert any("unresolved reference" in e for e in validation["errors"]), validation
+    assert not any("requires a dependency" in e for e in validation["errors"]), (
+        validation
+    )
+    put = builder_only_client.put(editor_url, {"editing_draft": doc}, format="json")
+    assert put.status_code == status.HTTP_200_OK, put.content
+    assert builder_only_client.get(detail_url).data["dependencies"] in ([], None)

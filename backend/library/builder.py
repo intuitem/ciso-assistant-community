@@ -584,8 +584,12 @@ def merge_objects(content: dict, new_objects: dict, overwrite: bool = False) -> 
     return merged
 
 
-def find_owning_library_urn(urn: str):
-    """Best-effort resolution of the loaded library owning an object URN."""
+def find_owning_library_urn(urn: str, user=None):
+    """Best-effort resolution of the loaded library owning an object URN.
+
+    When `user` is given, only objects the user may read resolve — we see
+    what we are allowed to see, full stop. None means system context.
+    """
     from core.models import (
         Framework,
         ReferenceControl,
@@ -594,7 +598,11 @@ def find_owning_library_urn(urn: str):
         RiskMatrix,
         Threat,
     )
+    from iam.models import RoleAssignment
     from metrology.models import MetricDefinition
+
+    def readable(model, obj) -> bool:
+        return user is None or RoleAssignment.is_object_readable(user, model, obj.id)
 
     lowered = str(urn).lower()
     for model in (Threat, ReferenceControl, Framework, RiskMatrix, MetricDefinition):
@@ -604,21 +612,25 @@ def find_owning_library_urn(urn: str):
             .first()
         )
         if obj:
-            return obj.library.urn
+            return obj.library.urn if readable(model, obj) else None
     node = (
         RequirementNode.objects.filter(urn=lowered)
         .select_related("framework__library")
         .first()
     )
     if node and node.framework and node.framework.library:
-        return node.framework.library.urn
+        return node.framework.library.urn if readable(RequirementNode, node) else None
     mapping_set = (
         RequirementMappingSet.objects.filter(urn=lowered)
         .select_related("library")
         .first()
     )
     if mapping_set and mapping_set.library:
-        return mapping_set.library.urn
+        return (
+            mapping_set.library.urn
+            if readable(RequirementMappingSet, mapping_set)
+            else None
+        )
     return None
 
 
@@ -875,7 +887,7 @@ def _check_reference_integrity(draft, user=None) -> list:
         lowered = str(ref).lower()
         if lowered in internal:
             return
-        owner = find_owning_library_urn(lowered)
+        owner = find_owning_library_urn(lowered, user=user)
         if owner is None and lowered not in dependency_urns():
             # Not loaded, not covered by a declared dependency: a stored
             # library may still own it (better message than "unresolved").
