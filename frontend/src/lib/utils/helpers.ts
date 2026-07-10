@@ -136,6 +136,22 @@ export function stringify(value: string | number | boolean | null = null) {
 		.replace(/[\u0300-\u036f]/g, '');
 }
 
+/**
+ * Best-effort display name for an actor/approver: "First Last", else email, else
+ * its string representation. Returns '' when none is available so callers can
+ * fall back to their own placeholder.
+ */
+export function formatActorName(
+	actor:
+		| { first_name?: string; last_name?: string; email?: string; str?: string }
+		| null
+		| undefined
+): string {
+	if (!actor) return '';
+	const full = `${actor.first_name || ''} ${actor.last_name || ''}`.trim();
+	return full || actor.email || actor.str || '';
+}
+
 export function isDark(hexcolor: string | undefined): boolean {
 	if (!hexcolor) return false;
 	const r = parseInt(hexcolor.slice(1, 3), 16);

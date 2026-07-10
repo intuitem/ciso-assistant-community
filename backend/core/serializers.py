@@ -418,9 +418,32 @@ class VulnerabilityImportExportSerializer(BaseModelSerializer):
 
 
 class RiskAcceptanceWriteSerializer(BaseModelSerializer):
+    # Write-only flag so a new acceptance can be submitted for approval directly
+    # from the creation form, instead of creating a draft then submitting it.
+    submit = serializers.BooleanField(write_only=True, required=False, default=False)
+
     class Meta:
         model = RiskAcceptance
         exclude = ["accepted_at", "rejected_at", "revoked_at", "state"]
+
+    def validate(self, data):
+        # `submit` is only honoured on create; don't reject updates that carry it.
+        if not self.instance and data.get("submit") and not data.get("approver"):
+            raise serializers.ValidationError(
+                {"approver": "An approver is required to submit for approval."}
+            )
+        return super().validate(data)
+
+    def create(self, validated_data):
+        submit = validated_data.pop("submit", False)
+        instance = super().create(validated_data)
+        if submit:
+            instance.set_state("submitted")
+        return instance
+
+    def update(self, instance, validated_data):
+        validated_data.pop("submit", False)
+        return super().update(instance, validated_data)
 
 
 class RiskAcceptanceReadSerializer(BaseModelSerializer):
@@ -1751,6 +1774,8 @@ class ComplianceAssessmentActionPlanSerializer(ActionPlanSerializer):
             "evidences",
             "evidence_attachments",
             "owner",
+            "created_at",
+            "updated_at",
         ]
 
 
@@ -1797,6 +1822,8 @@ class RiskAssessmentActionPlanSerializer(ActionPlanSerializer):
             "reference_control",
             "evidences",
             "owner",
+            "created_at",
+            "updated_at",
         ]
 
 
@@ -4427,15 +4454,13 @@ class SecurityExceptionWriteSerializer(BaseModelSerializer):
             )
 
     def _send_status_notification(self, security_exception):
-        """Notify owners and approver when the status changes"""
+        """Notify owners when the status changes"""
         try:
             from .tasks import send_security_exception_status_notification
 
             recipient_emails = []
             for owner in security_exception.owners.all():
                 recipient_emails.extend(owner.get_emails())
-            if security_exception.approver and security_exception.approver.email:
-                recipient_emails.append(security_exception.approver.email)
 
             if not recipient_emails:
                 return
@@ -4465,6 +4490,9 @@ class SecurityExceptionWriteSerializer(BaseModelSerializer):
     class Meta:
         model = SecurityException
         fields = "__all__"
+        # Deprecated: approval is handled through validation flows. The field is
+        # kept read-only so existing values remain visible without new writes.
+        read_only_fields = ["approver"]
 
 
 class SecurityExceptionReadSerializer(BaseModelSerializer):
