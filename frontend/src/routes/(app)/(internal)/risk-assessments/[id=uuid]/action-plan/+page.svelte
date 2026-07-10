@@ -112,6 +112,7 @@
 			orderBy={{ identifier: 'eta', direction: 'desc' }}
 			baseEndpoint="/risk-assessments/{page.params.id}/action-plan"
 			columnSelector={true}
+			columnStateKey="applied-controls:risk-action-plan"
 			fields={[
 				'ref_id',
 				'name',

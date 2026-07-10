@@ -88,6 +88,7 @@
 			tags={false}
 			baseEndpoint="/applied-controls?findings_assessments={page.params.id}"
 			columnSelector={true}
+			columnStateKey="applied-controls:asset-action-plan"
 			fields={[
 				'name',
 				'status',

@@ -81,6 +81,7 @@
 			orderBy={{ identifier: 'eta', direction: 'desc' }}
 			baseEndpoint="/quantitative-risk-studies/{page.params.id}/action-plan"
 			columnSelector={true}
+			columnStateKey="applied-controls:quantitative-risk-action-plan"
 			fields={[
 				'name',
 				'status',

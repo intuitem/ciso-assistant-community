@@ -91,6 +91,7 @@
 		detailQueryParameter?: string;
 		fields?: string[];
 		columnSelector?: boolean;
+		columnStateKey?: string;
 		canSelectObject?: boolean;
 		overrideFilters?: { [key: string]: any[] };
 		defaultFilters?: { [key: string]: any[] };
@@ -145,6 +146,7 @@
 		detailQueryParameter = $bindable(),
 		fields = [],
 		columnSelector = undefined,
+		columnStateKey = undefined,
 		canSelectObject = false,
 		overrideFilters = {},
 		defaultFilters = {},
@@ -215,8 +217,10 @@
 			(columnSelector === true || fields.length === 0) &&
 			allColumns.length > 1
 	);
+	// Persistence key: distinct per embedded table when set, else the shared per-model key.
+	const stateKey = $derived(columnStateKey ?? URLModel);
 	// Stored choice, with stale keys dropped and a fallback to defaults so a table is never empty.
-	const storedColumns = $derived(URLModel ? $tableColumnStates[URLModel] : undefined);
+	const storedColumns = $derived(stateKey ? $tableColumnStates[stateKey] : undefined);
 	const sanitizedStored = $derived(storedColumns?.filter((key) => allColumnKeys.includes(key)));
 	const visibleColumns = $derived(sanitizedStored?.length ? sanitizedStored : defaultColumns);
 	// Keys to render, in order. Without the selector, keep natural head order (behaviour unchanged).
@@ -238,18 +242,18 @@
 		cols.length === defaultColumns.length && cols.every((key, i) => defaultColumns[i] === key);
 
 	function setVisibleColumns(visible: string[]) {
-		if (!URLModel) return;
+		if (!stateKey) return;
 		if (sameAsDefault(visible)) {
 			resetColumns();
 			return;
 		}
-		$tableColumnStates = { ...$tableColumnStates, [URLModel]: visible };
+		$tableColumnStates = { ...$tableColumnStates, [stateKey]: visible };
 	}
 
 	function resetColumns() {
-		if (!URLModel) return;
+		if (!stateKey) return;
 		const next = { ...$tableColumnStates };
-		delete next[URLModel];
+		delete next[stateKey];
 		$tableColumnStates = next;
 	}
 

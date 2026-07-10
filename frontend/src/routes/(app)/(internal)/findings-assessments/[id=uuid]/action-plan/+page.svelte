@@ -107,6 +107,7 @@
 			tags={false}
 			baseEndpoint="/applied-controls?findings_assessments={page.params.id}"
 			columnSelector={true}
+			columnStateKey="applied-controls:findings-action-plan"
 			fields={[
 				'name',
 				'status',
