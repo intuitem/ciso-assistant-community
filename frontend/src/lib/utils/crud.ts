@@ -1950,7 +1950,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		detailViewFields: [
 			{ field: 'id' },
 			{ field: 'ref_id' },
-			{ field: 'form_display_name' },
+			{ field: 'name' },
 			{ field: 'description' },
 			{ field: 'strategic_scenario' },
 			{ field: 'ro_to_couple' },

@@ -208,7 +208,7 @@
 	const showColumnSelector = $derived(
 		(columnSelector ?? Boolean(deleteForm)) &&
 			Boolean(URLModel) &&
-			isStandaloneTable &&
+			(columnSelector === true || isStandaloneTable) &&
 			fields.length === 0 &&
 			allColumns.length > 1
 	);
