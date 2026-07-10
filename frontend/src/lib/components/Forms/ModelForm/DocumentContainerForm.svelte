@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import Select from '../Select.svelte';
+	import TextField from '../TextField.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import type { SuperValidated } from 'sveltekit-superforms';
@@ -32,6 +33,14 @@
 		value: t.key
 	}));
 </script>
+
+<TextField
+	{form}
+	field="ref_id"
+	label={m.refId()}
+	cacheLock={cacheLocks['ref_id']}
+	bind:cachedValue={formDataCache['ref_id']}
+/>
 
 <Select
 	{form}

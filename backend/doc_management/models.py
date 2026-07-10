@@ -34,6 +34,9 @@ class DocumentContainer(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
         default=DocumentType.POLICY,
         verbose_name=_("Document type"),
     )
+    ref_id = models.CharField(
+        max_length=100, blank=True, default="", verbose_name=_("Reference ID")
+    )
     name = models.CharField(max_length=200, blank=True, verbose_name=_("Name"))
     description = models.TextField(blank=True, verbose_name=_("Description"))
     classification = models.ForeignKey(

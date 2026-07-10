@@ -141,6 +141,9 @@ class DocumentContainerFilter(GenericFilterSet):
     status = df.MultipleChoiceFilter(
         choices=DocumentRevision.Status.choices, method="filter_status"
     )
+    source = df.MultipleChoiceFilter(
+        choices=DocumentRevision.Source.choices, method="filter_source"
+    )
 
     class Meta:
         model = DocumentContainer
@@ -163,6 +166,14 @@ class DocumentContainerFilter(GenericFilterSet):
             documents__current_revision__status__in=value,
         ).distinct()
 
+    def filter_source(self, queryset, name, value):
+        if not value:
+            return queryset
+        return queryset.filter(
+            documents__default_locale=True,
+            documents__current_revision__source__in=value,
+        ).distinct()
+
 
 class DocumentContainerViewSet(BaseModelViewSet):
     """
@@ -172,7 +183,7 @@ class DocumentContainerViewSet(BaseModelViewSet):
 
     model = DocumentContainer
     filterset_class = DocumentContainerFilter
-    search_fields = ["name"]
+    search_fields = ["name", "ref_id"]
     serializers_module = "doc_management.serializers"
 
     @action(detail=False, name="Get document type choices")
@@ -190,6 +201,15 @@ class DocumentContainerViewSet(BaseModelViewSet):
             [
                 {"value": v, "label": str(label)}
                 for v, label in DocumentRevision.Status.choices
+            ]
+        )
+
+    @action(detail=False, name="Get source choices")
+    def source(self, request):
+        return Response(
+            [
+                {"value": v, "label": str(label)}
+                for v, label in DocumentRevision.Source.choices
             ]
         )
 
@@ -257,6 +277,7 @@ class DocumentContainerViewSet(BaseModelViewSet):
             result.append(
                 {
                     "id": str(c.id),
+                    "ref_id": c.ref_id,
                     "name": c.name,
                     "document_type": c.document_type,
                     "folder": {"id": str(c.folder_id), "str": c.folder.name}

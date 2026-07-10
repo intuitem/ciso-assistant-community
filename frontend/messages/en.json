@@ -5339,5 +5339,7 @@
 	"classification": "Classification",
 	"importTemplatesSubtitle": "Bulk-import document templates from a .zip bundle.",
 	"importTemplatesSingleNote": "Importing just one template? It's quicker to create it directly from the Templates list.",
-	"unpublishedDocumentsNotice": "{count} document(s) drafted but not yet published — visible in the manage view."
+	"unpublishedDocumentsNotice": "{count} document(s) drafted but not yet published — visible in the manage view.",
+	"authored": "Authored",
+	"uploaded": "Uploaded"
 }

@@ -196,6 +196,9 @@
 							class="absolute inset-y-0 left-0 w-1 bg-primary-500/30 transition-all duration-200 group-hover:w-1.5 group-hover:bg-primary-500"
 						></span>
 
+						{#if doc.ref_id}
+							<span class="font-mono text-xs text-surface-400">{doc.ref_id}</span>
+						{/if}
 						<a
 							href={readHref(doc, doc.languages[0])}
 							class="line-clamp-3 text-base font-semibold leading-snug tracking-tight transition-colors duration-150 group-hover:text-primary-600 focus:outline-none focus-visible:underline"

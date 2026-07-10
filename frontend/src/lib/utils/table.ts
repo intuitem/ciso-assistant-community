@@ -226,6 +226,18 @@ export const DOCUMENT_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const DOCUMENT_SOURCE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'document-containers/source',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'source',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 export const LABELS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -2000,11 +2012,24 @@ export const listViewFields = {
 		body: ['version_number', 'status_display', 'author', 'change_summary', 'created_at']
 	},
 	'document-containers': {
-		head: ['name', 'documentType', 'status', 'classification', 'domain', 'labels'],
-		body: ['name', 'document_type', 'status', 'classification', 'folder', 'filtering_labels'],
+		head: ['refId', 'name', 'documentType', 'status', 'classification', 'domain', 'labels'],
+		body: [
+			'ref_id',
+			'name',
+			'document_type',
+			'status',
+			'classification',
+			'folder',
+			'filtering_labels'
+		],
+		optionalFields: {
+			head: ['source'],
+			body: ['source']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			document_type: DOCUMENT_TYPE_FILTER,
+			source: DOCUMENT_SOURCE_FILTER,
 			status: DOCUMENT_STATUS_FILTER,
 			classification: CLASSIFICATION_FILTER,
 			filtering_labels: LABELS_FILTER

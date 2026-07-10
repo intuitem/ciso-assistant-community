@@ -50,6 +50,9 @@
 					<i class="fa-solid {documentTypeIcon(docType)}"></i>
 				</div>
 				<div class="min-w-0 flex-1 space-y-2">
+					{#if data.container?.ref_id}
+						<span class="font-mono text-xs text-surface-400">{data.container.ref_id}</span>
+					{/if}
 					<div class="flex items-start justify-between gap-3">
 						<h1 class="text-2xl font-bold leading-tight tracking-tight">
 							{data.container?.name || m.untitled()}
@@ -112,18 +115,33 @@
 	</header>
 
 	{#if isLinked && linkUrl}
-		<div class="space-y-2">
+		<div
+			class="flex flex-wrap items-center gap-4 rounded-xl border border-surface-200-800 bg-surface-50-950 p-6 shadow-sm"
+		>
+			<div
+				class="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-primary-500/10 text-primary-500 ring-1 ring-primary-500/20"
+			>
+				<i class="fa-solid fa-link"></i>
+			</div>
+			<div class="min-w-0 flex-1">
+				<p class="text-xs font-semibold uppercase tracking-wide text-surface-400">{m.link()}</p>
+				<a
+					href={linkUrl}
+					target="_blank"
+					rel="noopener noreferrer"
+					class="break-all text-sm text-primary-500 hover:underline"
+				>
+					{linkUrl}
+				</a>
+			</div>
 			<a
 				href={linkUrl}
 				target="_blank"
 				rel="noopener noreferrer"
-				class="btn btn-sm variant-filled-primary"
+				class="btn btn-sm variant-filled-primary shrink-0"
 			>
-				<i class="fa-solid fa-arrow-up-right-from-square mr-2"></i>{m.openLink()}
+				<i class="fa-solid fa-arrow-up-right-from-square mr-2"></i>{m.open()}
 			</a>
-			<p class="break-all text-sm text-surface-500">
-				<i class="fa-solid fa-link mr-1"></i>{linkUrl}
-			</p>
 		</div>
 	{:else if isUploaded && fileUrl}
 		<div class="space-y-4">

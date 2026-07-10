@@ -1008,6 +1008,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [{ field: 'container', urlModel: 'managed-documents' }],
 		selectFields: [{ field: 'document_type' }],
 		detailViewFields: [
+			{ field: 'ref_id' },
 			{ field: 'name' },
 			{ field: 'description' },
 			{ field: 'document_type' },

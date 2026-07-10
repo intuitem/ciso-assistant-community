@@ -20,6 +20,7 @@ export const POST: RequestHandler = async ({ request, fetch, locals }) => {
 	const folder = String(fd.get('folder') ?? '');
 	const locale = String(fd.get('locale') ?? 'en');
 	const classification = String(fd.get('classification') ?? '');
+	const ref_id = String(fd.get('ref_id') ?? '');
 	const links: Record<string, string[]> = {};
 	for (const f of LINK_FIELDS) links[f] = fd.getAll(f).map(String);
 
@@ -55,7 +56,8 @@ export const POST: RequestHandler = async ({ request, fetch, locals }) => {
 				document_type,
 				folder,
 				...links,
-				...(classification ? { classification } : {})
+				...(classification ? { classification } : {}),
+				...(ref_id ? { ref_id } : {})
 			})
 		});
 	}
@@ -65,11 +67,18 @@ export const POST: RequestHandler = async ({ request, fetch, locals }) => {
 
 	// upload/link go through custom actions that don't accept object-links or
 	// classification — set them in a follow-up PATCH when present.
-	if (source !== 'author' && (classification || LINK_FIELDS.some((f) => links[f].length))) {
+	if (
+		source !== 'author' &&
+		(classification || ref_id || LINK_FIELDS.some((f) => links[f].length))
+	) {
 		const patchRes = await fetch(`${BASE_API_URL}/document-containers/${data.id}/`, {
 			method: 'PATCH',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ ...links, ...(classification ? { classification } : {}) })
+			body: JSON.stringify({
+				...links,
+				...(classification ? { classification } : {}),
+				...(ref_id ? { ref_id } : {})
+			})
 		});
 		if (!patchRes.ok) {
 			return json(await patchRes.json().catch(() => ({ error: 'Failed to set links' })), {

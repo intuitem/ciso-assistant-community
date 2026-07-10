@@ -24,10 +24,17 @@ class DocumentContainerReadSerializer(BaseModelSerializer):
     classification = serializers.SerializerMethodField()
     document_count = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
+    source = serializers.SerializerMethodField()
 
     class Meta:
         model = DocumentContainer
         fields = "__all__"
+
+    def get_source(self, obj):
+        doc = obj.documents.filter(default_locale=True).first() or obj.documents.first()
+        if doc and doc.current_revision_id:
+            return doc.current_revision.source
+        return None
 
     def get_classification(self, obj):
         lvl = obj.classification

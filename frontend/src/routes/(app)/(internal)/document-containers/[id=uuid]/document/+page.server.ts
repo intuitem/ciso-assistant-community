@@ -3,7 +3,7 @@ import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
-	const { fetch, params, cookies, locals } = event;
+	const { fetch, params, cookies, locals, url } = event;
 
 	if (!locals.featureflags?.document_management) {
 		redirect(302, `/documents`);
@@ -16,8 +16,8 @@ export const load: PageServerLoad = async (event) => {
 	}
 	const container = await containerRes.json();
 
-	// Determine user's preferred locale
-	const userLocale = cookies.get('LOCALE') || 'en';
+	// Determine target locale: explicit ?locale= wins over the user's cookie
+	const userLocale = url.searchParams.get('locale') || cookies.get('LOCALE') || 'en';
 
 	// Fetch all documents for this container (for locale switcher)
 	// Gracefully degrade if doc_management is unavailable

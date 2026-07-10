@@ -1851,6 +1851,7 @@ export const teamSchema = z.object({
 });
 
 export const DocumentContainerSchema = z.object({
+	ref_id: z.string().max(100).optional().default(''),
 	name: z.string().max(200).optional().default(''),
 	description: z.string().optional().default(''),
 	document_type: z.string().optional().default('policy'),

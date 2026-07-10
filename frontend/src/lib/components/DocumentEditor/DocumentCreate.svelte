@@ -37,6 +37,7 @@
 	const boundIds = (field: string) => (parent && parentField === field ? [parent.id] : []);
 
 	const schema = z.object({
+		ref_id: z.string().optional().default(''),
 		name: z.string().optional().default(''),
 		document_type: z.string().default(functionType ?? 'policy'),
 		folder: z.string().default(defaultFolder),
@@ -84,6 +85,7 @@
 		try {
 			const fd = new FormData();
 			fd.append('source', source);
+			fd.append('ref_id', $form.ref_id);
 			fd.append('name', $form.name);
 			fd.append('document_type', $form.document_type);
 			fd.append('folder', $form.folder);
@@ -122,6 +124,8 @@
 	{#if error}
 		<aside class="variant-soft-error rounded p-3 text-sm">{error}</aside>
 	{/if}
+
+	<TextField form={_form} field="ref_id" label={m.refId()} />
 
 	<TextField form={_form} field="name" label={m.name()} />
 
