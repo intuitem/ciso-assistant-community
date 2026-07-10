@@ -831,6 +831,7 @@
 	"effortHelpText": "The effort required to implement the applied control",
 	"costHelpText": "The cost required to implement the applied control",
 	"approverHelpText": "Risk owner and approver identity",
+	"approverDeprecatedHelpText": "This field is deprecated. Use validation flows to request approval of a security exception.",
 	"riskAcceptanceRiskScenariosHelpText": "The risk scenarios that are accepted",
 	"attachmentHelpText": "File for evidence (eg. screenshot, log file, etc.). When selected, you can paste screenshots directly from your clipboard.",
 	"attachmentWarningText": "WARNING: Uploading a new file will overwrite the existing one",

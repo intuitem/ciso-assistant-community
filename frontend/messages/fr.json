@@ -819,6 +819,7 @@
 	"riskAcceptanceJustificationHelpText": "Justification de l'acceptation du risque. Seul l'approbateur peut modifier ce champ.",
 	"riskAcceptanceJustificationLabel": "Justification de l'acceptation du risque",
 	"approverHelpText": "Identité du propriétaire du risque et de l’approbateur",
+	"approverDeprecatedHelpText": "Ce champ est déprécié. Utilisez les flux de validation pour demander l'approbation d'une exception de sécurité.",
 	"riskAcceptanceRiskScenariosHelpText": "Les scénarios de risques acceptés",
 	"attachmentHelpText": "Fichier de preuve (ex. capture d'écran, fichier journal, etc.). Quand le champ est sélectionné, vous pouvez y coller une copie d'écran de votre presse-papiers.",
 	"attachmentWarningText": "ATTENTION : le téléchargement d'un nouveau fichier écrasera celui existant",
