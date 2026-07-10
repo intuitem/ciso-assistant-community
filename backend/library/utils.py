@@ -25,7 +25,7 @@ from metrology.models import MetricDefinition
 from django.db import transaction
 from iam.models import Folder
 
-from django.db.utils import OperationalError
+from django.db.utils import IntegrityError, OperationalError
 import structlog
 
 logger = structlog.get_logger(__name__)
@@ -152,18 +152,22 @@ class RequirementNodeImporter:
             questions_data if isinstance(questions_data, dict) else {},
         )
 
-        for threat in self.requirement_data.get("threats", []):
-            logger.info(
-                f"Parsing the threats for {self.requirement_data.get('ref_id')}"
-            )
-            requirement_node.threats.add(Threat.objects.get(urn=threat.lower()))
+        # Use .set() rather than .add(): on the adopt-in-place / re-import
+        # path the node already exists, and a link removed in the document
+        # must be removed from the live row too (add-only would strand it).
+        threats = [
+            Threat.objects.get(urn=threat.lower())
+            for threat in self.requirement_data.get("threats", [])
+        ]
+        if threats or requirement_node.threats.exists():
+            requirement_node.threats.set(threats)
 
+        reference_controls = []
         for reference_control in self.requirement_data.get("reference_controls", []):
-            logger.info(
-                f"Parsing the reference controls for {self.requirement_data.get('ref_id')}"
-            )
             try:
-                ref = ReferenceControl.objects.get(urn=reference_control.lower())
+                reference_controls.append(
+                    ReferenceControl.objects.get(urn=reference_control.lower())
+                )
             except ReferenceControl.DoesNotExist as exc:
                 reference_control_name = reference_control or "unknown"
                 requirement_identifier = self.requirement_data.get(
@@ -175,7 +179,8 @@ class RequirementNodeImporter:
                 )
                 logger.error(error_message)
                 raise ValueError(error_message) from exc
-            requirement_node.reference_controls.add(ref)
+        if reference_controls or requirement_node.reference_controls.exists():
+            requirement_node.reference_controls.set(reference_controls)
 
 
 class RequirementMappingImporter:
@@ -371,9 +376,23 @@ class FrameworkImporter:
         # update_or_create: identical to create() for normal loads (no row
         # exists yet) and adopts a pre-existing library-less framework in
         # place — same URN family, same rows, audits untouched (the adopted
-        # live-framework path).
+        # live-framework path). Adoption is restricted to genuinely
+        # library-less rows of the same locale: a framework URN that already
+        # belongs to a library (or a different locale of one) is a real
+        # collision, so we preserve the loader's historical hard failure
+        # rather than silently re-homing another library's framework and
+        # cascade-pruning its requirement nodes / assessments.
+        framework_urn = self.framework_data["urn"].lower()
+        existing = Framework.objects.filter(urn=framework_urn).first()
+        if existing is not None and (
+            existing.library_id is not None or existing.locale != library_object.locale
+        ):
+            raise IntegrityError(
+                f"Framework {framework_urn} already exists and belongs to a "
+                f"library; cannot be adopted by {library_object.urn}"
+            )
         framework_object, framework_created = Framework.objects.update_or_create(
-            urn=self.framework_data["urn"].lower(),
+            urn=framework_urn,
             defaults=dict(
                 folder=Folder.get_root_folder(),
                 library=library_object,

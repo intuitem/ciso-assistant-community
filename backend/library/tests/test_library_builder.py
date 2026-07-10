@@ -1831,3 +1831,541 @@ def test_adopt_live_framework_refuses_library_backed_ones(admin_client):
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.data["error"] == "frameworkBelongsToALibrary"
+
+
+# ---------------------------------------------------------------------------
+# Review remediation regressions (2026-07-10)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_presets_list_endpoint_does_not_500(admin_client):
+    """PresetReadSerializer must not reference the dropped editing_version."""
+    response = admin_client.get(reverse("presets-list"))
+    assert response.status_code == status.HTTP_200_OK, response.content
+
+
+@pytest.mark.django_db
+def test_publish_cannot_hijack_a_library_backed_framework(admin_client):
+    """A draft whose framework URN collides with an already-loaded,
+    library-backed framework must fail to publish — not silently re-home it
+    and prune its nodes."""
+    victim = _create_draft(
+        admin_client,
+        packager="me",
+        ref_id="victimlib",
+        content={
+            "frameworks": [
+                {
+                    "urn": "urn:me:risk:framework:victimlib",
+                    "ref_id": "V",
+                    "name": "Victim",
+                    "requirement_nodes": [
+                        {
+                            "urn": "urn:me:risk:req_node:victimlib:a",
+                            "ref_id": "A",
+                            "assessable": True,
+                            "depth": 1,
+                            "name": "Keep me",
+                        }
+                    ],
+                }
+            ]
+        },
+    )
+    assert (
+        admin_client.post(
+            reverse("library-drafts-publish", args=[victim["id"]]), {}, format="json"
+        ).status_code
+        == status.HTTP_200_OK
+    )
+    victim_fw = Framework.objects.get(urn="urn:me:risk:framework:victimlib")
+    assert victim_fw.library is not None
+
+    # An attacker library (different identity) declaring the same framework URN.
+    attacker = _create_draft(
+        admin_client,
+        packager="me",
+        ref_id="attackerlib",
+        content={
+            "frameworks": [
+                {
+                    "urn": "urn:me:risk:framework:victimlib",  # collision
+                    "ref_id": "V",
+                    "name": "Hijacked",
+                    "requirement_nodes": [],
+                }
+            ]
+        },
+    )
+    response = admin_client.post(
+        reverse("library-drafts-publish", args=[attacker["id"]]), {}, format="json"
+    )
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, (
+        response.content
+    )
+    # The victim framework is untouched: same library, node still there.
+    victim_fw.refresh_from_db()
+    assert victim_fw.library.urn == "urn:me:risk:library:victimlib"
+    assert victim_fw.name == "Victim"
+    assert RequirementNode.objects.filter(
+        urn="urn:me:risk:req_node:victimlib:a"
+    ).exists()
+
+
+@pytest.mark.django_db
+def test_duplicate_urns_are_rejected_at_the_shape_door(admin_client):
+    draft = _create_draft(admin_client, content={})
+    content = {
+        "frameworks": [
+            {
+                "urn": "urn:me:risk:framework:dup",
+                "ref_id": "D",
+                "name": "Dup",
+                "requirement_nodes": [
+                    {
+                        "urn": "urn:me:risk:req_node:dup:a",
+                        "assessable": True,
+                        "depth": 1,
+                    },
+                    {
+                        "urn": "urn:me:risk:req_node:dup:a",
+                        "assessable": True,
+                        "depth": 1,
+                    },
+                ],
+            }
+        ]
+    }
+    response = admin_client.patch(
+        reverse("library-drafts-detail", args=[draft["id"]]),
+        {"content": content},
+        format="json",
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "duplicate URN" in str(response.content)
+
+
+@pytest.mark.django_db
+def test_validate_flags_oversized_fields_and_dangling_depends_on(admin_client):
+    content = {
+        "frameworks": [
+            {
+                "urn": "urn:me:risk:framework:big",
+                "ref_id": "B",
+                "name": "B",
+                "requirement_nodes": [
+                    {
+                        "urn": "urn:me:risk:req_node:big:a",
+                        "ref_id": "A",
+                        "assessable": True,
+                        "depth": 1,
+                        "name": "N" * 250,  # > 200
+                        "questions": {
+                            "urn:me:risk:req_node:big:a:question:1": {
+                                "type": "unique_choice",
+                                "text": "Q",
+                                "depends_on": {"question": "urn:me:risk:missing:q"},
+                            }
+                        },
+                    }
+                ],
+            }
+        ]
+    }
+    draft = _create_draft(admin_client, packager="me", ref_id="big", content=content)
+    errors = admin_client.get(
+        reverse("library-drafts-validate", args=[draft["id"]])
+    ).data["errors"]
+    assert any("characters (max 200)" in e for e in errors), errors
+    assert any("depends_on references question" in e for e in errors), errors
+
+
+@pytest.mark.django_db
+def test_validate_flags_a_structurally_broken_matrix(admin_client):
+    content = {
+        "risk_matrices": [
+            {
+                "urn": "urn:me:risk:matrix:mtx",
+                "ref_id": "MTX",
+                "name": "Broken",
+                "probability": [{"name": "L"}, {"name": "H"}],
+                "impact": [{"name": "L"}, {"name": "H"}],
+                "risk": [{"name": "L"}, {"name": "H"}],
+                "grid": [[0, 5], [0, 1]],  # cell 5 indexes past the risk array
+            }
+        ]
+    }
+    draft = _create_draft(admin_client, packager="me", ref_id="mtx", content=content)
+    errors = admin_client.get(
+        reverse("library-drafts-validate", args=[draft["id"]])
+    ).data["errors"]
+    assert any("risk_matrices[0]" in e for e in errors), errors
+
+
+@pytest.mark.django_db
+def test_check_identity_rejects_a_malformed_exclude_draft(admin_client):
+    response = admin_client.get(
+        reverse("library-drafts-check-identity"),
+        {"packager": "me", "ref_id": "lib", "exclude_draft": "not-a-uuid"},
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+def test_adopt_publish_preserves_mixed_case_and_dangling_nodes(admin_client):
+    root = Folder.get_root_folder()
+    framework = Framework.objects.create(name="Legacy", folder=root, urn=None)
+    kept = RequirementNode.objects.create(
+        framework=framework,
+        folder=root,
+        name="Mixed case",
+        ref_id="A",
+        assessable=True,
+        order_id=0,
+        urn="urn:custom:risk:req_node:LEGACY:A1",  # mixed case, API-writable
+    )
+    orphan = RequirementNode.objects.create(
+        framework=framework,
+        folder=root,
+        name="Orphan",
+        ref_id="B",
+        assessable=True,
+        order_id=1,
+        urn="urn:custom:risk:req_node:legacy:b",
+        parent_urn="urn:custom:risk:req_node:legacy:gone",  # dangling parent
+    )
+    framework.urn = "urn:custom:risk:framework:legacy"
+    framework.save(update_fields=["urn"])
+
+    adopt = admin_client.post(
+        reverse("library-drafts-adopt"), {"framework": str(framework.id)}, format="json"
+    )
+    assert adopt.status_code == status.HTTP_201_CREATED, adopt.content
+    draft_id = adopt.data["id"]
+
+    # Mixed-case URN normalized in place; dangling node promoted (kept).
+    kept.refresh_from_db()
+    assert kept.urn == "urn:custom:risk:req_node:legacy:a1"
+    doc_nodes = adopt.data["content"]["frameworks"][0]["requirement_nodes"]
+    doc_urns = {n["urn"] for n in doc_nodes}
+    assert "urn:custom:risk:req_node:legacy:a1" in doc_urns
+    assert "urn:custom:risk:req_node:legacy:b" in doc_urns  # not dropped
+
+    publish = admin_client.post(
+        reverse("library-drafts-publish", args=[draft_id]), {}, format="json"
+    )
+    assert publish.status_code == status.HTTP_200_OK, publish.content
+    # Both original live rows survive (same ids), nothing pruned.
+    assert RequirementNode.objects.filter(id=kept.id).exists()
+    assert RequirementNode.objects.filter(id=orphan.id).exists()
+
+
+@pytest.mark.django_db
+def test_publish_detaches_removed_reference_control_links(admin_client):
+    # The control ships in the library and is materialized by publish — not
+    # pre-created (which would collide on the loader's unique URN).
+    content = {
+        "reference_controls": [
+            {
+                "urn": "urn:me:risk:reference_control:linklib:c1",
+                "ref_id": "C1",
+                "name": "Ctrl",
+            }
+        ],
+        "frameworks": [
+            {
+                "urn": "urn:me:risk:framework:linklib",
+                "ref_id": "L",
+                "name": "L",
+                "requirement_nodes": [
+                    {
+                        "urn": "urn:me:risk:req_node:linklib:a",
+                        "ref_id": "A",
+                        "assessable": True,
+                        "depth": 1,
+                        "reference_controls": [
+                            "urn:me:risk:reference_control:linklib:c1"
+                        ],
+                    }
+                ],
+            }
+        ],
+    }
+    draft = _create_draft(
+        admin_client, packager="me", ref_id="linklib", content=content
+    )
+    detail_url = reverse("library-drafts-detail", args=[draft["id"]])
+    publish_url = reverse("library-drafts-publish", args=[draft["id"]])
+    assert (
+        admin_client.post(publish_url, {}, format="json").status_code
+        == status.HTTP_200_OK
+    )
+    node = RequirementNode.objects.get(urn="urn:me:risk:req_node:linklib:a")
+    control = ReferenceControl.objects.get(
+        urn="urn:me:risk:reference_control:linklib:c1"
+    )
+    assert node.reference_controls.filter(id=control.id).exists()
+
+    # Remove the link in the document and republish → live row must drop it.
+    current = admin_client.get(detail_url).data["content"]
+    current["frameworks"][0]["requirement_nodes"][0].pop("reference_controls", None)
+    admin_client.patch(detail_url, {"content": current}, format="json")
+    admin_client.patch(detail_url, {"version": 2}, format="json")
+    republish = admin_client.post(publish_url, {}, format="json")
+    assert republish.status_code == status.HTTP_200_OK, republish.content
+    node.refresh_from_db()
+    assert not node.reference_controls.filter(id=control.id).exists()
+
+
+# ---------------------------------------------------------------------------
+# Import a YAML file directly into an editable draft
+# ---------------------------------------------------------------------------
+
+
+def _yaml_upload(name, raw: bytes):
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    return SimpleUploadedFile(name, raw, content_type="application/yaml")
+
+
+@pytest.mark.django_db
+def test_import_yaml_seeds_an_editable_draft(admin_client):
+    raw = (LIBRARIES_DIR / "critical_risk_matrix_5x5.yaml").read_bytes()
+    response = admin_client.post(
+        reverse("library-drafts-import-yaml"),
+        {"file": _yaml_upload("matrix.yaml", raw)},
+        format="multipart",
+    )
+    assert response.status_code == status.HTTP_201_CREATED, response.content
+    draft = response.data
+    # Editable: not published anywhere, so identity is not frozen.
+    assert draft["identity_locked"] is False
+    assert draft["packager"] == "intuitem"
+    assert draft["ref_id"] == "critical_risk_matrix_5x5"
+    # Minted effective_urn matches the imported library's own URN family.
+    assert draft["urn"] == "urn:intuitem:risk:library:critical_risk_matrix_5x5"
+    assert draft["content"]["risk_matrices"][0]["urn"] == (
+        "urn:intuitem:risk:matrix:critical_risk_matrix_5x5"
+    )
+
+
+@pytest.mark.django_db
+def test_imported_draft_identity_is_renameable_and_rebases(admin_client):
+    raw = (LIBRARIES_DIR / "critical_risk_matrix_5x5.yaml").read_bytes()
+    draft_id = admin_client.post(
+        reverse("library-drafts-import-yaml"),
+        {"file": _yaml_upload("matrix.yaml", raw)},
+        format="multipart",
+    ).data["id"]
+
+    detail_url = reverse("library-drafts-detail", args=[draft_id])
+    renamed = admin_client.patch(
+        detail_url, {"packager": "me", "ref_id": "mymatrix"}, format="json"
+    )
+    assert renamed.status_code == status.HTTP_200_OK, renamed.content
+
+    updated = admin_client.get(detail_url).data
+    assert updated["urn"] == "urn:me:risk:library:mymatrix"
+    # The whole URN family rebased across the document.
+    assert updated["content"]["risk_matrices"][0]["urn"] == (
+        "urn:me:risk:matrix:mymatrix"
+    )
+
+
+@pytest.mark.django_db
+def test_import_yaml_rejects_malformed_and_empty_files(admin_client):
+    bad = admin_client.post(
+        reverse("library-drafts-import-yaml"),
+        {"file": _yaml_upload("bad.yaml", b"just: a: scalar: mess: [")},
+        format="multipart",
+    )
+    assert bad.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    scalar = admin_client.post(
+        reverse("library-drafts-import-yaml"),
+        {"file": _yaml_upload("scalar.yaml", b"not a library")},
+        format="multipart",
+    )
+    assert scalar.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    no_objects = admin_client.post(
+        reverse("library-drafts-import-yaml"),
+        {"file": _yaml_upload("empty.yaml", b"urn: urn:x:risk:library:x\nname: X\n")},
+        format="multipart",
+    )
+    assert no_objects.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+
+@pytest.mark.django_db
+def test_import_yaml_requires_a_file(admin_client):
+    response = admin_client.post(
+        reverse("library-drafts-import-yaml"), {}, format="multipart"
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+# ---------------------------------------------------------------------------
+# Clone objects from another draft (not just stored libraries)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_import_objects_clones_from_a_draft_source(admin_client):
+    # A source draft holding a couple of threats.
+    source = _create_draft(
+        admin_client,
+        packager="src",
+        ref_id="sourcedraft",
+        content={
+            "threats": [
+                {
+                    "urn": "urn:src:risk:threat:sourcedraft:t1",
+                    "ref_id": "T1",
+                    "name": "T1",
+                },
+                {
+                    "urn": "urn:src:risk:threat:sourcedraft:t2",
+                    "ref_id": "T2",
+                    "name": "T2",
+                },
+            ]
+        },
+    )
+    target = _create_draft(admin_client, packager="me", ref_id="target", content={})
+    response = admin_client.post(
+        reverse("library-drafts-import-objects", args=[target["id"]]),
+        {"source": f"draft:{source['id']}", "object_types": ["threats"]},
+        format="json",
+    )
+    assert response.status_code == status.HTTP_200_OK, response.content
+    # Copy-by-value, rebased onto the target's identity.
+    threats = {t["urn"] for t in response.data["draft"]["content"]["threats"]}
+    assert threats == {
+        "urn:me:risk:threat:target:t1",
+        "urn:me:risk:threat:target:t2",
+    }
+
+
+@pytest.mark.django_db
+def test_import_objects_rejects_importing_from_self(admin_client):
+    draft = _create_draft(
+        admin_client,
+        content={
+            "threats": [
+                {"urn": "urn:me:risk:threat:mylib:t1", "ref_id": "T1", "name": "T"}
+            ]
+        },
+    )
+    response = admin_client.post(
+        reverse("library-drafts-import-objects", args=[draft["id"]]),
+        {"source": f"draft:{draft['id']}"},
+        format="json",
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.data["error"] == "cannotImportFromSelf"
+
+
+@pytest.mark.django_db
+def test_import_objects_from_unknown_draft_is_not_found(admin_client):
+    # The readable-draft gate reuses is_object_readable (RBAC covered by the
+    # stored-library tests); here assert an unknown id resolves to a clean 404.
+    target = _create_draft(admin_client, packager="me", ref_id="t", content={})
+    response = admin_client.post(
+        reverse("library-drafts-import-objects", args=[target["id"]]),
+        {"source": "draft:00000000-0000-0000-0000-000000000000"},
+        format="json",
+    )
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+# ---------------------------------------------------------------------------
+# Deleting a framework and a journey preset from a draft
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_delete_object_removes_a_framework(admin_client):
+    draft = _create_draft(
+        admin_client,
+        packager="me",
+        ref_id="fwlib",
+        content={
+            "frameworks": [
+                {
+                    "urn": "urn:me:risk:framework:fwlib",
+                    "ref_id": "F",
+                    "name": "F",
+                    "requirement_nodes": [],
+                }
+            ]
+        },
+    )
+    response = admin_client.post(
+        reverse("library-drafts-delete-object", args=[draft["id"]]),
+        {"urn": "urn:me:risk:framework:fwlib"},
+        format="json",
+    )
+    assert response.status_code == status.HTTP_200_OK, response.content
+    assert "frameworks" not in response.data["draft"]["content"]
+
+
+@pytest.mark.django_db
+def test_delete_framework_blocked_by_a_mapping_set(admin_client):
+    draft = _create_draft(
+        admin_client,
+        packager="me",
+        ref_id="mfw",
+        content={
+            "frameworks": [
+                {
+                    "urn": "urn:me:risk:framework:mfw",
+                    "ref_id": "F",
+                    "name": "F",
+                    "requirement_nodes": [],
+                }
+            ],
+            "requirement_mapping_sets": [
+                {
+                    "urn": "urn:me:risk:req_mapping_set:mfw:m1",
+                    "ref_id": "M1",
+                    "name": "M1",
+                    "source_framework_urn": "urn:me:risk:framework:mfw",
+                    "target_framework_urn": "urn:other:risk:framework:x",
+                    "requirement_mappings": [],
+                }
+            ],
+        },
+    )
+    response = admin_client.post(
+        reverse("library-drafts-delete-object", args=[draft["id"]]),
+        {"urn": "urn:me:risk:framework:mfw"},
+        format="json",
+    )
+    assert response.status_code == status.HTTP_409_CONFLICT
+    assert response.data["error"] == "objectIsReferencedByMappingSet"
+
+
+@pytest.mark.django_db
+def test_delete_object_removes_the_journey_preset(admin_client):
+    draft = _create_draft(
+        admin_client,
+        packager="me",
+        ref_id="presetlib",
+        content={"preset": {"name": "Onboarding", "journey": {"steps": []}}},
+    )
+    response = admin_client.post(
+        reverse("library-drafts-delete-object", args=[draft["id"]]),
+        {"field": "preset"},
+        format="json",
+    )
+    assert response.status_code == status.HTTP_200_OK, response.content
+    assert "preset" not in response.data["draft"]["content"]
+
+    # Removing it again is a clean 404.
+    again = admin_client.post(
+        reverse("library-drafts-delete-object", args=[draft["id"]]),
+        {"field": "preset"},
+        format="json",
+    )
+    assert again.status_code == status.HTTP_404_NOT_FOUND

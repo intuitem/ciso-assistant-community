@@ -1312,7 +1312,10 @@ class LibraryUpdater:
                                 ra_pks_to_update.add(ra.pk)
                                 requirement_assessment_objects_to_update.append(ra)
 
-                    # update threats linked to the requirement_node
+                    # Sync threats linked to the requirement_node. Use .set()
+                    # (not add-only): a link removed in the new version must be
+                    # removed from the live node too.
+                    new_threats = []
                     for threat_urn in requirement_node.get("threats", []):
                         normalized_threat_urn = threat_urn.lower()
                         threat_object = (
@@ -1320,9 +1323,12 @@ class LibraryUpdater:
                             or Threat.objects.filter(urn=normalized_threat_urn).first()
                         )
                         if threat_object:
-                            requirement_node_object.threats.add(threat_object)
+                            new_threats.append(threat_object)
+                    if new_threats or requirement_node_object.threats.exists():
+                        requirement_node_object.threats.set(new_threats)
 
-                    # update reference_controls linked to the requirement_node
+                    # Sync reference_controls linked to the requirement_node.
+                    new_reference_controls = []
                     for rc_urn in requirement_node.get("reference_controls", []):
                         normalized_rc_urn = rc_urn.lower()
                         rc_object = (
@@ -1332,7 +1338,14 @@ class LibraryUpdater:
                             ).first()
                         )
                         if rc_object:
-                            requirement_node_object.reference_controls.add(rc_object)
+                            new_reference_controls.append(rc_object)
+                    if (
+                        new_reference_controls
+                        or requirement_node_object.reference_controls.exists()
+                    ):
+                        requirement_node_object.reference_controls.set(
+                            new_reference_controls
+                        )
 
                 # Fix for the dual bulk_update issue - consolidate into one update
                 if requirement_node_objects_to_update:

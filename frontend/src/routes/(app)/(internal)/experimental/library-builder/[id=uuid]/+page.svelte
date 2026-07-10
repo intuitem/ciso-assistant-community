@@ -6,6 +6,7 @@
 	let { data } = $props();
 	let draft: any = $state(data.draft);
 	let storedLibraries: any[] = $state(data.storedLibraries ?? []);
+	let otherDrafts: any[] = $state(data.otherDrafts ?? []);
 
 	$pageTitle = 'Library Builder';
 
@@ -441,6 +442,24 @@
 		setStatus('Deleted', 'success');
 	}
 
+	// The journey preset is a singular top-level key, removed by name.
+	async function deletePreset() {
+		if (!confirm('Remove the journey preset from this library?')) return;
+		const res = await fetch(base(), {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ action: 'delete-object', field: 'preset' })
+		});
+		const result = await res.json();
+		if (!res.ok) {
+			setStatus(result.error || JSON.stringify(result), 'error');
+			return;
+		}
+		draft = result.draft;
+		resetForms();
+		setStatus('Deleted', 'success');
+	}
+
 	// --- Risk matrices ------------------------------------------------------------
 	let addingMatrix = $state(false);
 
@@ -761,11 +780,22 @@
 				</p>
 				<select class="select text-sm" bind:value={importSource}>
 					<option value="">Source library…</option>
-					{#each storedLibraries as library}
-						<option value={library.id}>
-							{library.name} (v{library.version}){library.builtin ? ' — builtin' : ''}
-						</option>
-					{/each}
+					{#if storedLibraries.length > 0}
+						<optgroup label="Stored libraries">
+							{#each storedLibraries as library}
+								<option value={library.id}>
+									{library.name} (v{library.version}){library.builtin ? ' — builtin' : ''}
+								</option>
+							{/each}
+						</optgroup>
+					{/if}
+					{#if otherDrafts.length > 0}
+						<optgroup label="Your drafts">
+							{#each otherDrafts as other}
+								<option value={'draft:' + other.id}>{other.name}</option>
+							{/each}
+						</optgroup>
+					{/if}
 				</select>
 				<div class="flex flex-wrap gap-3 text-sm">
 					{#each OBJECT_TYPES as type}
@@ -873,10 +903,20 @@
 									{(framework.requirement_nodes ?? []).length} requirement node(s)
 								</p>
 							</div>
-							<a href={frameworkEditorHref(framework)} class="btn btn-sm variant-filled-primary">
-								<i class="fa-solid fa-pen-to-square mr-1"></i>
-								Edit visually
-							</a>
+							<div class="flex items-center gap-1">
+								<a href={frameworkEditorHref(framework)} class="btn btn-sm variant-filled-primary">
+									<i class="fa-solid fa-pen-to-square mr-1"></i>
+									Edit visually
+								</a>
+								<button
+									type="button"
+									class="btn btn-sm variant-ghost-error"
+									onclick={() => deleteObject(framework)}
+									aria-label="Delete framework"
+								>
+									<i class="fa-solid fa-trash"></i>
+								</button>
+							</div>
 						</li>
 					{/each}
 				</ul>
@@ -952,15 +992,27 @@
 				<h3 class="text-lg font-semibold">
 					<i class="fa-solid fa-route mr-1"></i>Journey preset
 				</h3>
-				<a
-					href="/experimental/library-builder/{draft.id}/preset"
-					class="btn btn-sm {draft.content?.preset
-						? 'variant-filled-primary'
-						: 'variant-ghost-primary'}"
-				>
-					<i class="fa-solid fa-pen-to-square mr-1"></i>
-					{draft.content?.preset ? 'Edit journey' : 'Create journey'}
-				</a>
+				<div class="flex items-center gap-1">
+					<a
+						href="/experimental/library-builder/{draft.id}/preset"
+						class="btn btn-sm {draft.content?.preset
+							? 'variant-filled-primary'
+							: 'variant-ghost-primary'}"
+					>
+						<i class="fa-solid fa-pen-to-square mr-1"></i>
+						{draft.content?.preset ? 'Edit journey' : 'Create journey'}
+					</a>
+					{#if draft.content?.preset}
+						<button
+							type="button"
+							class="btn btn-sm variant-ghost-error"
+							onclick={deletePreset}
+							aria-label="Remove journey preset"
+						>
+							<i class="fa-solid fa-trash"></i>
+						</button>
+					{/if}
+				</div>
 			</div>
 			{#if draft.content?.preset}
 				<p class="text-sm text-surface-600-400">

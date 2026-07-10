@@ -72,6 +72,16 @@ def mint_missing_urns(framework) -> bool:
     packager, ref = framework_identity(framework)
     wrote = False
 
+    def _normalize(row) -> bool:
+        """Lowercase an existing URN in place so a later publish (which
+        looks rows up by the lowercased document URN) matches this very
+        row instead of creating a duplicate. Returns True when written."""
+        if row.urn and row.urn != str(row.urn).lower():
+            row.urn = str(row.urn).lower()
+            row.save(update_fields=["urn"])
+            return True
+        return False
+
     if not framework.urn:
         candidate = f"urn:{packager}:risk:framework:{ref}"
         suffix = 2
@@ -86,12 +96,15 @@ def mint_missing_urns(framework) -> bool:
         framework.urn = candidate
         framework.save(update_fields=["urn"])
         wrote = True
+    elif _normalize(framework):
+        wrote = True
 
     node_base = framework.urn.lower().replace(":framework:", ":req_node:", 1)
     nodes = list(RequirementNode.objects.filter(framework=framework))
     taken = {str(n.urn).lower() for n in nodes if n.urn}
     for index, node in enumerate(nodes):
         if node.urn:
+            wrote = _normalize(node) or wrote
             continue
         leaf = (
             urn_safe_leaf(node.ref_id or "")
@@ -116,7 +129,9 @@ def mint_missing_urns(framework) -> bool:
         )
         q_taken = {str(q.urn).lower() for q in questions if q.urn}
         for q_index, question in enumerate(questions):
-            if not question.urn:
+            if question.urn:
+                wrote = _normalize(question) or wrote
+            else:
                 candidate = f"{str(node.urn).lower()}:question:{q_index + 1}"
                 suffix = 2
                 while candidate in q_taken:
@@ -134,6 +149,7 @@ def mint_missing_urns(framework) -> bool:
             c_taken = {str(c.urn).lower() for c in choices if c.urn}
             for c_index, choice in enumerate(choices):
                 if choice.urn:
+                    wrote = _normalize(choice) or wrote
                     continue
                 candidate = f"{str(question.urn).lower()}:choice:{c_index + 1}"
                 suffix = 2
@@ -250,13 +266,49 @@ def live_framework_to_object(framework) -> dict:
         return node_dict
 
     requirement_nodes = []
+    serialized_urns: set = set()
 
     def walk(parent_urn, depth):
         for node in children.get(parent_urn, []):
-            requirement_nodes.append(serialize_node(node, depth))
-            walk(str(node.urn).lower(), depth + 1)
+            node_urn = str(node.urn).lower()
+            if node_urn in serialized_urns:
+                continue  # defends against a parent cycle
+            serialized_urns.add(node_urn)
+            node_dict = serialize_node(node, depth)
+            requirement_nodes.append(node_dict)
+            walk(node_urn, depth + 1)
 
     walk(None, 1)
+
+    # Nodes whose parent_urn dangles (parent deleted via the API, legacy
+    # data, or a cycle) are unreachable from the roots. Promote them to
+    # roots rather than dropping them — dropping would make publish's node
+    # prune delete live rows (and their assessments) the user never touched.
+    node_urns = {str(node.urn).lower() for node in nodes}
+    for parent_urn in sorted(
+        key for key in children if key is not None and key not in node_urns
+    ):
+        for node in children[parent_urn]:
+            node_urn = str(node.urn).lower()
+            if node_urn in serialized_urns:
+                continue
+            serialized_urns.add(node_urn)
+            node_dict = serialize_node(node, 1)
+            node_dict.pop("parent_urn", None)  # the referenced parent is gone
+            requirement_nodes.append(node_dict)
+            walk(node_urn, 2)
+
+    # Final sweep for any node still unserialized (a pure parent cycle whose
+    # members all reference each other): break it by rooting them.
+    for node in nodes:
+        node_urn = str(node.urn).lower()
+        if node_urn in serialized_urns:
+            continue
+        serialized_urns.add(node_urn)
+        node_dict = serialize_node(node, 1)
+        node_dict.pop("parent_urn", None)
+        requirement_nodes.append(node_dict)
+        walk(node_urn, 2)
 
     return _clean(
         {

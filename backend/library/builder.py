@@ -131,9 +131,25 @@ def check_document_shape(objects: dict) -> list:
     are ignored (round-trip tolerance).
     """
     errors = []
+    seen_urns: dict = {}
 
     def type_error(path, expected):
         errors.append(f"{path}: must be {expected}")
+
+    def note_urn(value, path):
+        """Every identity URN in the document must be unique — two objects
+        sharing a URN silently merge at load (update_or_create last-wins) or
+        crash on the unique constraint. URNs embed a type token, so cross-
+        kind collisions never happen naturally; a repeat is a real defect."""
+        if not isinstance(value, str) or not value:
+            return
+        key = value.lower()
+        if key in seen_urns:
+            errors.append(
+                f"{path}: duplicate URN {value} (already at {seen_urns[key]})"
+            )
+        else:
+            seen_urns[key] = path
 
     def check_str_list(value, path):
         if not isinstance(value, list):
@@ -165,6 +181,8 @@ def check_document_shape(objects: dict) -> list:
             urn = obj.get("urn")
             if urn is not None and not isinstance(urn, str):
                 type_error(f"content.{field}[{index}].urn", "a string")
+            else:
+                note_urn(urn, f"content.{field}[{index}]")
 
     preset = objects.get("preset")
     if preset is not None:
@@ -186,6 +204,7 @@ def check_document_shape(objects: dict) -> list:
                 value = node.get(str_field)
                 if value is not None and not isinstance(value, str):
                     type_error(f"{node_path}.{str_field}", "a string")
+            note_urn(node.get("urn"), node_path)
             for ref_field in ("threats", "reference_controls"):
                 refs = node.get(ref_field)
                 if refs is not None:
@@ -198,12 +217,16 @@ def check_document_shape(objects: dict) -> list:
                 continue
             for q_urn, question in questions.items():
                 q_path = f"{node_path}.questions[{q_urn}]"
+                note_urn(q_urn, q_path)
                 if not isinstance(question, dict):
                     type_error(q_path, "an object")
                     continue
                 choices = question.get("choices")
                 if choices is not None:
-                    check_dict_list(choices, f"{q_path}.choices")
+                    for choice_index, choice in check_dict_list(
+                        choices, f"{q_path}.choices"
+                    ):
+                        note_urn(choice.get("urn"), f"{q_path}.choices[{choice_index}]")
 
     for index, mapping_set in top_level.get("requirement_mapping_sets", []):
         path = f"content.requirement_mapping_sets[{index}]"
@@ -808,6 +831,52 @@ def check_identity_conflicts(
     return conflicts
 
 
+# DB varchar limits (core.models). SQLite ignores them silently, so an
+# oversized value only crashes at publish on Postgres — validate must reject
+# it up front so the failure is the same everywhere.
+_MAX_LENGTHS = {"name": 200, "ref_id": 100, "urn": 255}
+
+
+def _check_field_lengths(objects: dict) -> list:
+    errors = []
+
+    def check(obj, path):
+        if not isinstance(obj, dict):
+            return
+        for field, limit in _MAX_LENGTHS.items():
+            value = obj.get(field)
+            if isinstance(value, str) and len(value) > limit:
+                errors.append(
+                    f"{path}.{field} is {len(value)} characters (max {limit})"
+                )
+
+    for field in LIST_OBJECT_FIELDS:
+        for index, obj in enumerate(objects.get(field) or []):
+            check(obj, f"content.{field}[{index}]")
+
+    for fw_index, framework in enumerate(objects.get("frameworks") or []):
+        if not isinstance(framework, dict):
+            continue
+        base = f"content.frameworks[{fw_index}]"
+        for node_index, node in enumerate(framework.get("requirement_nodes") or []):
+            if not isinstance(node, dict):
+                continue
+            node_path = f"{base}.requirement_nodes[{node_index}]"
+            check(node, node_path)
+            questions = node.get("questions")
+            if isinstance(questions, dict):
+                for q_urn, question in questions.items():
+                    if len(str(q_urn)) > _MAX_LENGTHS["urn"]:
+                        errors.append(
+                            f"{node_path}.questions[{q_urn}]: URN is "
+                            f"{len(str(q_urn))} characters (max {_MAX_LENGTHS['urn']})"
+                        )
+                    if isinstance(question, dict):
+                        for choice in question.get("choices") or []:
+                            check(choice, f"{node_path}.questions[{q_urn}].choice")
+    return errors
+
+
 def validate_draft_document(draft, *, user=None) -> dict:
     """Dry-run validation of a draft: loader field validation + reference
     integrity + advisory identity conflicts. Never writes anything.
@@ -835,6 +904,22 @@ def validate_draft_document(draft, *, user=None) -> dict:
         # instead of crashing on it.
         if shape_errors := check_document_shape(normalized):
             return {"errors": errors + shape_errors, "warnings": warnings}
+        errors.extend(_check_field_lengths(normalized))
+        # Structural matrix validation (grid dims vs levels, cell indices).
+        # RiskMatrixImporter.is_valid is a no-op and this validation runs
+        # only for drafts, so a matrix reaching content via a raw PATCH
+        # (bypassing the upsert-object door) is still checked before publish.
+        from core.views import RiskMatrixViewSet
+
+        for index, matrix in enumerate(normalized.get("risk_matrices") or []):
+            if not isinstance(matrix, dict):
+                continue
+            definition = {
+                key: matrix.get(key)
+                for key in ("probability", "impact", "risk", "grid")
+            }
+            for matrix_error in RiskMatrixViewSet._validate_json_definition(definition):
+                errors.append(f"content.risk_matrices[{index}]: {matrix_error}")
         shim = StoredLibrary(
             name=draft.name or "",
             urn=library["urn"],
@@ -927,6 +1012,16 @@ def _check_reference_integrity(draft, user=None) -> list:
 
     for framework in objects.get("frameworks") or []:
         fw_urn = str(framework.get("urn", "")).lower()
+        # A question's depends_on.question must reference a question that
+        # exists in this framework, else the dependent question is invisible
+        # forever in every audit (isQuestionVisible finds no answer for it).
+        framework_question_urns = set()
+        for node in framework.get("requirement_nodes") or []:
+            questions = node.get("questions")
+            if isinstance(questions, dict):
+                framework_question_urns.update(
+                    str(q_urn).lower() for q_urn in questions
+                )
         for node in framework.get("requirement_nodes") or []:
             node_urn = str(node.get("urn", "")).lower()
             parent = node.get("parent_urn")
@@ -938,6 +1033,20 @@ def _check_reference_integrity(draft, user=None) -> list:
                 check_ref(ref, node_urn)
             for ref in node.get("reference_controls") or []:
                 check_ref(ref, node_urn)
+            questions = node.get("questions")
+            if isinstance(questions, dict):
+                for q_urn, question in questions.items():
+                    depends_on = (question or {}).get("depends_on")
+                    target = (
+                        depends_on.get("question")
+                        if isinstance(depends_on, dict)
+                        else None
+                    )
+                    if target and str(target).lower() not in framework_question_urns:
+                        errors.append(
+                            f"{q_urn}: depends_on references question {target} "
+                            f"which is not in {fw_urn}"
+                        )
     for mapping_set in objects.get("requirement_mapping_sets") or []:
         ms_urn = str(mapping_set.get("urn", "")).lower()
         for ref_field in ("source_framework_urn", "target_framework_urn"):

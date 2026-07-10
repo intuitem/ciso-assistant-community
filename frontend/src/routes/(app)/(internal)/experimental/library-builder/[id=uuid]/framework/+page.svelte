@@ -45,8 +45,9 @@
 
 	const links = {
 		back: `/experimental/library-builder/${draft.id}`,
-		preview: null,
-		exportYaml: `/experimental/library-builder/${draft.id}/export`
+		preview: null
+		// No exportYaml: export is a whole-library action, offered on the
+		// library page, not inside the framework editor.
 	};
 </script>
 

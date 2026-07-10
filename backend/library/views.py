@@ -1,6 +1,7 @@
 from itertools import chain
 import json
 import re
+import uuid
 
 import yaml
 from django.core.exceptions import ValidationError
@@ -23,7 +24,12 @@ from rest_framework.status import (
     HTTP_500_INTERNAL_SERVER_ERROR,
     HTTP_504_GATEWAY_TIMEOUT,
 )
-from rest_framework.parsers import FileUploadParser, JSONParser
+from rest_framework.parsers import (
+    FileUploadParser,
+    FormParser,
+    JSONParser,
+    MultiPartParser,
+)
 
 from django.http import HttpResponse
 
@@ -907,6 +913,21 @@ def _get_readable_stored_library(user, pk_or_urn) -> StoredLibrary | None:
     return None
 
 
+def _get_readable_draft(user, pk) -> "LibraryDraft | None":
+    """Fetch a LibraryDraft by id, RBAC-checked; unreadable == missing."""
+    if not pk:
+        return None
+    try:
+        draft = LibraryDraft.objects.filter(id=pk).first()
+    except ValidationError, ValueError:
+        return None
+    if draft is not None and RoleAssignment.is_object_readable(
+        user, LibraryDraft, draft.id
+    ):
+        return draft
+    return None
+
+
 class LibraryDraftViewSet(BaseModelViewSet):
     """
     Interactive library packager. A draft is a document that serializes to
@@ -973,13 +994,21 @@ class LibraryDraftViewSet(BaseModelViewSet):
             return Response(
                 {"error": "invalidLibraryIdentity"}, status=HTTP_400_BAD_REQUEST
             )
+        exclude_draft = request.query_params.get("exclude_draft")
+        if exclude_draft:
+            try:
+                uuid.UUID(str(exclude_draft))
+            except ValueError, TypeError:
+                return Response(
+                    {"error": "invalidExcludeDraft"}, status=HTTP_400_BAD_REQUEST
+                )
         return Response(
             {
                 "urn": builder.library_urn(packager, ref_id),
                 "conflicts": builder.check_identity_conflicts(
                     packager,
                     ref_id,
-                    exclude_draft_id=request.query_params.get("exclude_draft"),
+                    exclude_draft_id=exclude_draft,
                     user=request.user,
                 ),
             }
@@ -1126,26 +1155,18 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 {"error": "frameworkBelongsToALibrary"}, status=HTTP_400_BAD_REQUEST
             )
 
-        needs_minting = (
-            not framework.urn
-            or RequirementNode.objects.filter(framework=framework, urn=None).exists()
-            or Question.objects.filter(
-                requirement_node__framework=framework, urn=None
-            ).exists()
-            or QuestionChoice.objects.filter(
-                question__requirement_node__framework=framework, urn=None
-            ).exists()
-        )
-        if needs_minting:
-            # Minting writes URNs onto the live rows.
-            if not RoleAssignment.is_access_allowed(
-                user=request.user,
-                perm=Permission.objects.get(codename="change_framework"),
-                folder=framework.folder,
-            ):
-                return Response(status=HTTP_403_FORBIDDEN)
-            live.mint_missing_urns(framework)
-            framework.refresh_from_db()
+        # Adopting a live framework backfills missing URNs and normalizes
+        # mixed-case ones onto the live rows so a later publish updates those
+        # very rows in place — that is a live-row write, so it requires
+        # change_framework (mint_missing_urns is a no-op when already clean).
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_framework"),
+            folder=framework.folder,
+        ):
+            return Response(status=HTTP_403_FORBIDDEN)
+        live.mint_missing_urns(framework)
+        framework.refresh_from_db()
 
         draft_urn = framework.urn.lower().replace(":framework:", ":library:", 1)
         existing_draft = LibraryDraft.objects.filter(urn=draft_urn).first()
@@ -1174,19 +1195,132 @@ class LibraryDraftViewSet(BaseModelViewSet):
         )
         return Response(LibraryDraftReadSerializer(draft).data, status=HTTP_201_CREATED)
 
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="import-yaml",
+        parser_classes=[MultiPartParser, FormParser],
+    )
+    def import_yaml(self, request):
+        """Seed a NEW editable draft from an uploaded library YAML file.
+
+        A library YAML is just a serialized draft document, so this is the
+        inverse of Export — without routing through a StoredLibrary first.
+        Unlike adopt (which keeps a stored/loaded library in sync and freezes
+        its identity), the imported file is not loaded anywhere: the draft's
+        identity stays editable (renaming rebases the whole URN family) until
+        it is published. Dependencies are resolved only at publish, as usual.
+        """
+        folder_id = request.data.get("folder")
+        try:
+            folder = (
+                Folder.objects.get(id=folder_id)
+                if folder_id
+                else Folder.get_root_folder()
+            )
+        except Folder.DoesNotExist, ValidationError, ValueError:
+            return Response({"error": "folderNotFound"}, status=HTTP_404_NOT_FOUND)
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_librarydraft"),
+            folder=folder,
+        ):
+            return Response(status=HTTP_403_FORBIDDEN)
+
+        attachment = request.FILES.get("file")
+        if attachment is None:
+            return Response({"error": "noFileDetected"}, status=HTTP_400_BAD_REQUEST)
+        if attachment.size > MAX_UPLOAD_SIZE:
+            return Response({"error": "fileTooLarge"}, status=HTTP_400_BAD_REQUEST)
+        try:
+            validate_file_extension(attachment)
+            document = yaml.safe_load(attachment.read())
+        except (yaml.YAMLError, ValidationError, DRFValidationError) as e:
+            return Response(
+                {"error": "invalidYamlFile", "detail": str(e)},
+                status=HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+        if not isinstance(document, dict):
+            return Response(
+                {"error": "invalidLibraryFile"}, status=HTTP_422_UNPROCESSABLE_ENTITY
+            )
+
+        # Same shape gate adopt uses: a raw file is untrusted client data.
+        content = builder.normalize_objects(document.get("objects") or {})
+        if shape_errors := builder.check_document_shape(content):
+            return Response(
+                {"error": "importInvalidContent", "details": shape_errors},
+                status=HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+        if not content:
+            return Response(
+                {"error": "libraryFileHasNoObjects"},
+                status=HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+
+        # Derive the identity from the library URN so the minted effective_urn
+        # matches the objects' URN family (a later rename rebases both). Fall
+        # back to the metadata fields for non-standard files.
+        groups = match_urn(str(document.get("urn") or ""))
+        if groups:
+            packager, ref_id = groups[0], str(groups[-1]).lower()
+        else:
+            packager = document.get("packager") or "custom"
+            ref_id = str(document.get("ref_id") or "imported-library").lower()
+
+        draft = LibraryDraft.objects.create(
+            name=document.get("name") or ref_id,
+            description=document.get("description"),
+            folder=folder,
+            packager=str(packager),
+            ref_id=ref_id,
+            locale=document.get("locale") or "en",
+            version=document.get("version") or 1,
+            provider=document.get("provider"),
+            copyright=document.get("copyright"),
+            publication_date=document.get("publication_date"),
+            annotation=document.get("annotation"),
+            translations=document.get("translations") or {},
+            dependencies=list(document.get("dependencies") or []),
+            labels=list(document.get("labels") or []),
+            content=content,
+            # No urn / first_published_at: the file is not loaded anywhere,
+            # so the identity is editable until this draft is published.
+        )
+        return Response(LibraryDraftReadSerializer(draft).data, status=HTTP_201_CREATED)
+
     @action(detail=True, methods=["post"], url_path="import-objects")
     def import_objects(self, request, pk):
-        """Selective extraction (clone): copy objects from a stored library
-        into this draft, rebased onto the draft's URN family."""
+        """Selective extraction (clone): copy objects from a source library
+        into this draft, rebased onto the draft's URN family. The source is
+        a stored library (id/urn) or another draft (``draft:<id>``) — a
+        draft is just a library document, so its work-in-progress objects
+        can be borrowed without publishing it first."""
         draft = self.get_object()
-        source = _get_readable_stored_library(request.user, request.data.get("source"))
-        if source is None:
-            return Response({"error": "libraryNotFound"}, status=HTTP_404_NOT_FOUND)
-        if builder.check_document_shape(
-            builder.normalize_objects(source.content or {})
-        ):
+        raw_source = str(request.data.get("source") or "")
+        if raw_source.startswith("draft:"):
+            source_draft = _get_readable_draft(
+                request.user, raw_source[len("draft:") :]
+            )
+            if source_draft is None:
+                return Response({"error": "libraryNotFound"}, status=HTTP_404_NOT_FOUND)
+            if source_draft.id == draft.id:
+                return Response(
+                    {"error": "cannotImportFromSelf"}, status=HTTP_400_BAD_REQUEST
+                )
+            source_content = source_draft.content or {}
+            source_urn = source_draft.effective_urn
+            source_dependencies = source_draft.dependencies or []
+        else:
+            source = _get_readable_stored_library(request.user, raw_source)
+            if source is None:
+                return Response({"error": "libraryNotFound"}, status=HTTP_404_NOT_FOUND)
+            source_content = source.content or {}
+            source_urn = source.urn
+            source_dependencies = source.dependencies or []
+        if builder.check_document_shape(builder.normalize_objects(source_content)):
             # Extraction assumes well-formed structure; a structurally
-            # malformed stored library cannot be used as a clone source.
+            # malformed source cannot be used as a clone source.
             return Response(
                 {"error": "sourceLibraryMalformed"},
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
@@ -1202,9 +1336,9 @@ class LibraryDraftViewSet(BaseModelViewSet):
             )
         try:
             extraction = builder.extract_objects(
-                source_content=source.content or {},
-                source_library_urn=source.urn,
-                source_dependencies=source.dependencies or [],
+                source_content=source_content,
+                source_library_urn=source_urn,
+                source_dependencies=source_dependencies,
                 target_packager=draft.packager,
                 target_ref_id=draft.ref_id,
                 selected_types=request.data.get("object_types"),
@@ -1891,11 +2025,26 @@ class LibraryDraftViewSet(BaseModelViewSet):
         mandatory): delete the mapping set first.
         """
         draft = self.get_object()
+        content = builder.normalize_objects(draft.content or {})
+
+        # The journey preset is a singular top-level key (not a URN-keyed list
+        # object), so it is removed by name rather than by URN.
+        if request.data.get("field") == "preset" or request.data.get("urn") == "preset":
+            if "preset" not in content:
+                return Response(
+                    {"error": "objectNotFoundInDraft"}, status=HTTP_404_NOT_FOUND
+                )
+            del content["preset"]
+            draft.content = content
+            draft.save(update_fields=["content", "updated_at"])
+            return Response(
+                {"status": "ok", "draft": LibraryDraftReadSerializer(draft).data}
+            )
+
         target_urn = str(request.data.get("urn") or "").lower()
         if not target_urn:
             return Response({"error": "urnRequired"}, status=HTTP_400_BAD_REQUEST)
 
-        content = builder.normalize_objects(draft.content or {})
         located = next(
             (
                 (field, index)

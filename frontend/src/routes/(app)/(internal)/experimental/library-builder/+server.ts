@@ -31,8 +31,20 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 	);
 };
 
-/** Create ({action: 'create', ...fields}) or adopt ({action: 'adopt', stored_library}) */
+/** Create ({action: 'create', ...fields}) or adopt ({action: 'adopt', stored_library}).
+ *  A multipart request (a YAML file upload) is streamed to import-yaml. */
 export const POST: RequestHandler = async ({ request, fetch }) => {
+	if (request.headers.get('content-type')?.includes('multipart/form-data')) {
+		const r = await fetch(`${BASE_API_URL}/library-drafts/import-yaml/`, {
+			method: 'POST',
+			body: await request.formData()
+		});
+		const text = await r.text();
+		if (!text || r.status === 204) {
+			return new Response(null, { status: r.status });
+		}
+		return json(JSON.parse(text), { status: r.status });
+	}
 	const body = await request.json().catch(() => ({}));
 	const action = body.action;
 	delete body.action;

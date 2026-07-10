@@ -44,7 +44,8 @@
 		checkTimeout = setTimeout(async () => {
 			const params = new URLSearchParams({ packager: newPackager, ref_id: newRefId });
 			const res = await fetch(`/experimental/library-builder?${params}`);
-			identityCheck = await res.json();
+			// A permission-denied / empty-body response has no JSON to parse.
+			identityCheck = res.ok ? await res.json() : null;
 		}, 350);
 	}
 
@@ -68,6 +69,31 @@
 		} catch (e: any) {
 			setStatus(e.message, 'error');
 			creating = false;
+		}
+	}
+
+	// --- Import a YAML file directly (no corpus round-trip) ----------------
+	let importingYaml = $state(false);
+
+	async function importYaml(event: Event) {
+		const input = event.currentTarget as HTMLInputElement;
+		const file = input.files?.[0];
+		input.value = ''; // allow re-selecting the same file after an error
+		if (!file) return;
+		importingYaml = true;
+		try {
+			const form = new FormData();
+			form.append('file', file);
+			const res = await fetch('/experimental/library-builder', {
+				method: 'POST',
+				body: form
+			});
+			const result = await res.json();
+			if (!res.ok) throw new Error(result.detail || result.error || JSON.stringify(result));
+			window.location.href = `/experimental/library-builder/${result.id}`;
+		} catch (e: any) {
+			setStatus(e.message, 'error');
+			importingYaml = false;
 		}
 	}
 
@@ -264,6 +290,24 @@
 					<i class="fa-solid fa-plus mr-1"></i>
 					New Library Draft
 				</button>
+				<label
+					class="btn btn-sm variant-ghost-primary cursor-pointer"
+					title="Import a library YAML file into a new editable draft"
+				>
+					{#if importingYaml}
+						<i class="fa-solid fa-spinner fa-spin mr-1"></i>
+					{:else}
+						<i class="fa-solid fa-file-arrow-up mr-1"></i>
+					{/if}
+					Import YAML
+					<input
+						type="file"
+						accept=".yaml,.yml"
+						class="hidden"
+						disabled={importingYaml}
+						onchange={importYaml}
+					/>
+				</label>
 				{#if customLibraries.length > 0 || orphanFrameworks.length > 0}
 					<select class="select w-64 text-sm" bind:value={adoptSource}>
 						<option value="">Adopt a custom library…</option>
