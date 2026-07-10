@@ -980,6 +980,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
                     packager,
                     ref_id,
                     exclude_draft_id=request.query_params.get("exclude_draft"),
+                    user=request.user,
                 ),
             }
         )
@@ -995,7 +996,10 @@ class LibraryDraftViewSet(BaseModelViewSet):
             {
                 "identity_locked": False,
                 "conflicts": builder.check_identity_conflicts(
-                    draft.packager, draft.ref_id, exclude_draft_id=draft.id
+                    draft.packager,
+                    draft.ref_id,
+                    exclude_draft_id=draft.id,
+                    user=request.user,
                 ),
             }
         )

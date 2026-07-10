@@ -713,13 +713,20 @@ def accessible_stored_library_ids(user):
     )
 
 
-def check_identity_conflicts(packager: str, ref_id: str, exclude_draft_id=None) -> list:
+def check_identity_conflicts(
+    packager: str, ref_id: str, exclude_draft_id=None, user=None
+) -> list:
     """Advisory check of a draft identity against the existing corpus.
 
     Library-level conflicts are checked against StoredLibrary (broader than
     loaded), LoadedLibrary and other drafts. Object-level conflicts are
     checked against the loaded referential tables. The hard gate remains the
     loader's own uniqueness checks at publish time.
+
+    Scoped to `user` when given — conflicts with objects the user cannot
+    read are omitted (we see what we are allowed to see, full stop); the
+    publish-time gate still refuses colliding identities. None means system
+    context.
     """
     from core.models import (
         Framework,
@@ -732,7 +739,16 @@ def check_identity_conflicts(packager: str, ref_id: str, exclude_draft_id=None) 
         Threat,
     )
     from django.db.models import Q
+    from iam.models import Folder, RoleAssignment
     from metrology.models import MetricDefinition
+
+    def scope(queryset, model):
+        if user is None:
+            return queryset
+        ids = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), user, model
+        )[0]
+        return queryset.filter(id__in=ids)
 
     conflicts = []
     lib_urn = library_urn(packager, ref_id)
@@ -740,7 +756,7 @@ def check_identity_conflicts(packager: str, ref_id: str, exclude_draft_id=None) 
         (StoredLibrary, "stored_library"),
         (LoadedLibrary, "loaded_library"),
     ):
-        for hit in model.objects.filter(urn=lib_urn):
+        for hit in scope(model.objects.filter(urn=lib_urn), model):
             conflicts.append(
                 {
                     "kind": kind,
@@ -749,8 +765,11 @@ def check_identity_conflicts(packager: str, ref_id: str, exclude_draft_id=None) 
                     "version": hit.version,
                 }
             )
-    drafts = LibraryDraft.objects.filter(
-        Q(urn=lib_urn) | Q(urn__isnull=True, packager=packager, ref_id=ref_id)
+    drafts = scope(
+        LibraryDraft.objects.filter(
+            Q(urn=lib_urn) | Q(urn__isnull=True, packager=packager, ref_id=ref_id)
+        ),
+        LibraryDraft,
     )
     if exclude_draft_id:
         drafts = drafts.exclude(id=exclude_draft_id)
@@ -774,8 +793,8 @@ def check_identity_conflicts(packager: str, ref_id: str, exclude_draft_id=None) 
     }
     for field, model in object_models.items():
         base = object_urn_base(packager, ref_id, field)
-        hits = model.objects.filter(
-            Q(urn=base) | Q(urn__startswith=base + ":")
+        hits = scope(
+            model.objects.filter(Q(urn=base) | Q(urn__startswith=base + ":")), model
         ).select_related("library")[:10]
         for hit in hits:
             conflicts.append(
@@ -836,7 +855,7 @@ def validate_draft_document(draft, *, user=None) -> dict:
 
     if not draft.identity_locked:
         for conflict in check_identity_conflicts(
-            draft.packager, draft.ref_id, exclude_draft_id=draft.id
+            draft.packager, draft.ref_id, exclude_draft_id=draft.id, user=user
         ):
             warnings.append(
                 "Identity conflict with {kind} {urn}".format(

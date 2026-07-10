@@ -1710,3 +1710,33 @@ def test_validation_and_dependency_sync_read_with_the_users_eyes(builder_only_cl
     put = builder_only_client.put(editor_url, {"editing_draft": doc}, format="json")
     assert put.status_code == status.HTTP_200_OK, put.content
     assert builder_only_client.get(detail_url).data["dependencies"] in ([], None)
+
+
+@pytest.mark.django_db
+def test_identity_conflict_oracle_is_scoped(builder_only_client):
+    """Identity conflicts only surface objects the user may read: a hidden
+    library never shows up through check-identity, conflicts or validate."""
+    check = builder_only_client.get(
+        reverse("library-drafts-check-identity"),
+        {"packager": "intuitem", "ref_id": "doc-pol"},
+    )
+    assert check.status_code == status.HTTP_200_OK, check.content
+    assert check.data["conflicts"] == []
+
+    created = builder_only_client.post(
+        reverse("library-drafts-list"),
+        {"name": "Probe", "packager": "intuitem", "ref_id": "doc-pol", "content": {}},
+        format="json",
+    )
+    assert created.status_code == status.HTTP_201_CREATED, created.content
+    draft_id = created.data["id"]
+
+    conflicts = builder_only_client.get(
+        reverse("library-drafts-conflicts", args=[draft_id])
+    )
+    assert conflicts.data["conflicts"] == []
+
+    validation = builder_only_client.get(
+        reverse("library-drafts-validate", args=[draft_id])
+    ).data
+    assert not any("Identity conflict" in w for w in validation["warnings"]), validation
