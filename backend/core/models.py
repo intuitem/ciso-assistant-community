@@ -10141,3 +10141,31 @@ class CustomWordTemplate(AbstractBaseModel, FolderMixin):
 
 
 # actions - 0: create, 1: update, 2: delete
+
+auditlog.register(
+    Team,
+    m2m_fields={"members", "deputies"},
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    ValidationFlow,
+    m2m_fields={
+        "compliance_assessments",
+        "risk_assessments",
+        "business_impact_analysis",
+        "crq_studies",
+        "ebios_studies",
+        "entity_assessments",
+        "findings_assessments",
+        "evidences",
+        "security_exceptions",
+        "policies",
+        "processings",
+    },
+    exclude_fields=common_exclude,
+)
+auditlog.register(StoredLibrary, exclude_fields=common_exclude)
+auditlog.register(LoadedLibrary, exclude_fields=common_exclude)
+auditlog.register(RiskMatrix, exclude_fields=common_exclude)
+auditlog.register(CustomEmailTemplate, exclude_fields=common_exclude)
+auditlog.register(CustomWordTemplate, exclude_fields=common_exclude)

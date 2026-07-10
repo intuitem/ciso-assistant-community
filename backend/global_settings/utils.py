@@ -49,7 +49,7 @@ def mask_sensitive_settings(value: str) -> str:
     settings visible so the audit log still shows a readable diff."""
     try:
         data = json.loads(value)
-    except (ValueError, TypeError):
+    except ValueError, TypeError:
         return value
     if not isinstance(data, (dict, list)):
         return value
@@ -67,7 +67,7 @@ def redact_secret_value(value: str) -> str:
         return value
     try:
         data = json.loads(value)
-    except (ValueError, TypeError):
+    except ValueError, TypeError:
         return SETTINGS_MASK_PLACEHOLDER
     if isinstance(data, (dict, list)):
         return json.dumps(_redact_all_values(data), sort_keys=True)
