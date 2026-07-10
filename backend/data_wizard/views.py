@@ -1,5 +1,4 @@
 import csv
-import csv
 import io
 import logging
 import structlog
@@ -16,6 +15,7 @@ from core.base_models import AbstractBaseModel
 from core.utils import build_questions_dict
 from core.models import (
     Actor,
+    Assessment,
     Asset,
     ComplianceAssessment,
     Evidence,
@@ -26,9 +26,7 @@ from core.models import (
     RiskAssessment,
     RiskMatrix,
     AppliedControl,
-    ComplianceAssessment,
     FindingsAssessment,
-    RiskAssessment,
     RiskScenario,
     Policy,
     SecurityException,
@@ -167,6 +165,10 @@ def get_accessible_folders_map(user: User) -> dict[str, UUID]:
 
 ZIP_MAGIC_NUMBER: Final[bytes] = bytes([0x50, 0x4B, 0x03, 0x04])
 
+# Characters Excel forbids in sheet names, stripped by the task export
+# (mirror of INVALID_CHARS in TaskTemplateViewSet.export_xlsx).
+SHEET_NAME_INVALID_CHARS: Final[str] = r"[\\\/\?\*\[\]:]"
+
 
 def is_excel_file(file: io.BytesIO) -> bool:
     file_data = file.read(len(ZIP_MAGIC_NUMBER))
@@ -180,6 +182,8 @@ def read_csv_file(file: io.BytesIO) -> pd.DataFrame:
 
     Avoids pandas' ``sep=None`` sniffing, which treats any character as a
     candidate and misreads single-column files (e.g. picking ``n`` in ``name``).
+    utf-8-sig transparently strips the BOM our CSV exports prepend for Excel,
+    so the first column header is not corrupted.
     """
     sample = file.read(8192).decode("utf-8-sig", errors="replace")
     file.seek(0)
@@ -187,7 +191,7 @@ def read_csv_file(file: io.BytesIO) -> pd.DataFrame:
         sep = csv.Sniffer().sniff(sample, delimiters=",;\t|").delimiter
     except csv.Error:
         sep = ","
-    return pd.read_csv(file, sep=sep).fillna("")
+    return pd.read_csv(file, sep=sep, encoding="utf-8-sig").fillna("")
 
 
 def normalize_datetime_columns(df: pd.DataFrame) -> pd.DataFrame:
@@ -1730,6 +1734,23 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
         }
     )
 
+    # The prepared "schedule" dict is assembled from these columns; without this
+    # mapping, UPDATE mode would look for a "schedule" column and never update it.
+    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType(
+        {
+            "schedule": [
+                "schedule_frequency",
+                "schedule_interval",
+                "schedule_days_of_week",
+                "schedule_weeks_of_month",
+                "schedule_months_of_year",
+                "schedule_end_date",
+                "schedule_occurrences",
+                "schedule_overdue_behavior",
+            ],
+        }
+    )
+
     _M2M_CLEARABLE: ClassVar[frozenset[str]] = frozenset(
         {
             "assigned_to",
@@ -1766,13 +1787,14 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
         ).first()
 
     @staticmethod
-    def _resolve_actors(raw: str) -> list[UUID]:
-        """Resolve comma-separated user emails or team names to Actor IDs.
+    def _resolve_actors(raw: str, unresolved: list[str]) -> list[UUID]:
+        """Resolve comma/semicolon-separated user emails or team names to Actor IDs.
 
-        Entries that cannot be matched are silently skipped with a log warning.
+        Entries that cannot be matched are collected into ``unresolved`` and
+        reported back as a row warning.
         """
         actor_ids = set()
-        for entry in raw.split(","):
+        for entry in re.split(r"[|,;]", raw):
             entry = entry.strip()
             if not entry:
                 continue
@@ -1782,36 +1804,70 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
             if actor is not None:
                 actor_ids.add(actor.id)
             else:
+                unresolved.append(f"assigned_to '{entry}'")
                 # Mask the value to avoid leaking PII (emails) into application logs.
                 logger.warning(
                     "Task import: could not resolve assigned_to entry (masked: %s***); skipping.",
-                    entry[:4] if entry else "",
+                    entry[:4],
                 )
         return list(actor_ids)
 
     @staticmethod
-    def _resolve_m2m_by_name(model: type[models.Model], raw: str) -> list[UUID]:
-        """Resolve comma-separated names to model IDs.
+    def _resolve_m2m_by_name(
+        model: type[models.Model],
+        raw: str,
+        accessible_folder_ids: set,
+        preferred_folder_id,
+        unresolved: list[str],
+    ) -> list[UUID]:
+        """Resolve comma/pipe-separated names or ref_ids to model IDs.
 
-        For RiskAssessment, falls back to matching ``str(obj)`` because its
-        ``__str__`` returns ``"{name} - {version}"`` rather than just the name.
-        Unresolvable entries are skipped with a log warning.
+        Lookups are scoped to the user's accessible folders; when several
+        folders hold an object with the same name, an exact ref_id match wins,
+        then the record's own folder. Assessments also match their
+        ``"{name} - {version}"`` string, which is what the task export writes.
+        Entries that cannot be matched are collected into ``unresolved`` and
+        reported back as a row warning.
         """
+        has_ref_id = any(f.name == "ref_id" for f in model._meta.fields)
         ids = set()
-        for entry in raw.split(","):
+        for entry in re.split(r"[|,]", raw):
             entry = entry.strip()
             if not entry:
                 continue
-            obj = model.objects.filter(name__iexact=entry).first()
-            if obj is None and model is RiskAssessment:
+            name_query = Q(name__iexact=entry)
+            if has_ref_id:
+                name_query |= Q(ref_id=entry)
+            candidates = list(
+                model.objects.filter(name_query, folder_id__in=accessible_folder_ids)
+            )
+            obj = (
+                next((c for c in candidates if c.ref_id == entry), None)
+                if has_ref_id
+                else None
+            )
+            if obj is None:
+                obj = next(
+                    (
+                        c
+                        for c in candidates
+                        if str(c.folder_id) == str(preferred_folder_id)
+                    ),
+                    None,
+                ) or (candidates[0] if candidates else None)
+            if obj is None and issubclass(model, Assessment):
+                # Assessments export as "{name} - {version}".
                 name_part = entry.rsplit(" - ", 1)[0].strip()
-                for candidate in model.objects.filter(name__iexact=name_part):
+                for candidate in model.objects.filter(
+                    name__iexact=name_part, folder_id__in=accessible_folder_ids
+                ):
                     if str(candidate) == entry:
                         obj = candidate
                         break
             if obj is not None:
                 ids.add(obj.id)
             else:
+                unresolved.append(f"{model._meta.model_name} '{entry}'")
                 logger.warning(
                     "Task import: could not resolve %s '%s'; skipping.",
                     model._meta.model_name,
@@ -1846,7 +1902,13 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
         schedule = None
         freq = str(record.get("schedule_frequency") or "").strip().upper()
         interval_raw = record.get("schedule_interval")
-        if freq and interval_raw:
+        has_interval = str(interval_raw or "").strip() != ""
+        if bool(freq) != has_interval:
+            return {}, Error(
+                record=record,
+                error="schedule_frequency and schedule_interval must be provided together",
+            )
+        if freq and has_interval:
             try:
                 interval = int(interval_raw)
             except ValueError, TypeError:
@@ -1910,8 +1972,15 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
         if observation:
             data["observation"] = str(observation)
 
+        accessible_folder_ids = set(self.folders_map.values())
+        if self.folder_id:
+            accessible_folder_ids.add(self.folder_id)
+        unresolved: list[str] = []
+
         assigned_raw = record.get("assigned_to") or ""
-        data["assigned_to"] = self._resolve_actors(assigned_raw) if assigned_raw else []
+        data["assigned_to"] = (
+            self._resolve_actors(assigned_raw, unresolved) if assigned_raw else []
+        )
 
         for col_name, model in [
             ("assets", Asset),
@@ -1922,8 +1991,21 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
             ("findings_assessment", FindingsAssessment),
         ]:
             raw = record.get(col_name) or ""
-            data[col_name] = self._resolve_m2m_by_name(model, raw) if raw else []
+            data[col_name] = (
+                self._resolve_m2m_by_name(
+                    model, raw, accessible_folder_ids, folder_id, unresolved
+                )
+                if raw
+                else []
+            )
 
+        if unresolved:
+            return data, Error(
+                record=record,
+                error="Unresolved linked records were skipped: "
+                + "; ".join(unresolved),
+                is_warning=True,
+            )
         return data, None
 
 
@@ -2963,6 +3045,17 @@ class LoadFileView(APIView):
                         # CSV: flat single-sheet import of task templates only
                         file_type = RecordFileType.CSV
                         df = read_csv_file(record_file)
+                        try:
+                            df = normalize_df_columns(df)
+                        except ValueError:
+                            logger.warning(
+                                "Invalid import file structure during column normalization",
+                                exc_info=True,
+                            )
+                            return Response(
+                                {"error": "Invalid file format or columns."},
+                                status=status.HTTP_400_BAD_REQUEST,
+                            )
                         base_context = BaseContext(
                             request,
                             folders_map=folders_map,
@@ -3265,6 +3358,32 @@ class LoadFileView(APIView):
 
         return results
 
+    @staticmethod
+    def _resolve_summary_row_template(
+        rec: dict, folders_map, folder_id
+    ) -> Optional[TaskTemplate]:
+        """Resolve the TaskTemplate targeted by a summary row (ref_id first, then name)."""
+        rec_name = str(rec.get("name", "")).strip()
+        if not rec_name:
+            return None
+        row_folder_name = str(rec.get("folder", "")).lower()
+        row_folder_id = (
+            folders_map.get(row_folder_name, folder_id)
+            if row_folder_name
+            else folder_id
+        )
+        ref_id = str(rec.get("ref_id", "")).strip()
+        tmpl = None
+        if ref_id:
+            tmpl = TaskTemplate.objects.filter(
+                ref_id=ref_id, folder_id=row_folder_id
+            ).first()
+        if tmpl is None:
+            tmpl = TaskTemplate.objects.filter(
+                name=rec_name, folder_id=row_folder_id
+            ).first()
+        return tmpl
+
     def _process_task_template_excel(
         self,
         request,
@@ -3281,73 +3400,103 @@ class LoadFileView(APIView):
 
         A single-sheet file is treated as a Summary-only import (no task nodes).
         """
-        excel_data = pd.ExcelFile(excel_file)
-        sheet_names = excel_data.sheet_names
-
-        base_context = BaseContext(
-            request,
-            folders_map=folders_map,
-            folder_id=folder_id,
-            perimeter_id=None,
-            matrix_id=None,
-            framework_id=None,
-            on_conflict=on_conflict,
-        )
-
         task_nodes_result = Result()
         overall_results: dict = {"templates": {}}
+        try:
+            excel_data = pd.ExcelFile(excel_file)
+            sheet_names = excel_data.sheet_names
 
-        summary_sheet = "Summary" if "Summary" in sheet_names else sheet_names[0]
+            base_context = BaseContext(
+                request,
+                folders_map=folders_map,
+                folder_id=folder_id,
+                perimeter_id=None,
+                matrix_id=None,
+                framework_id=None,
+                on_conflict=on_conflict,
+            )
 
-        summary_df = normalize_datetime_columns(
-            pd.read_excel(excel_data, sheet_name=summary_sheet)
-        ).fillna("")
-        summary_records = summary_df.to_dict(orient="records")
+            summary_sheet = "Summary" if "Summary" in sheet_names else sheet_names[0]
 
-        template_results = (
-            TaskTemplateRecordConsumer(base_context)
-            .process_records(summary_records)
-            .to_dict()
-        )
-        overall_results["templates"] = template_results
+            summary_df = normalize_df_columns(
+                normalize_datetime_columns(
+                    pd.read_excel(excel_data, sheet_name=summary_sheet)
+                )
+            ).fillna("")
+            summary_records = summary_df.to_dict(orient="records")
 
-        if len(sheet_names) == 1 or template_results.get("stopped"):
-            overall_results["task_nodes"] = task_nodes_result.to_dict()
-            return overall_results
+            # Rows whose template exists before this import: node-sheet conflicts on
+            # them are real. Templates created by this run auto-sync a node from
+            # task_date (non-recurrent), which the node sheets legitimately update.
+            preexisting_rows = {
+                idx
+                for idx, rec in enumerate(summary_records, start=1)
+                if self._resolve_summary_row_template(rec, folders_map, folder_id)
+                is not None
+            }
 
+            template_results = (
+                TaskTemplateRecordConsumer(base_context)
+                .process_records(summary_records)
+                .to_dict()
+            )
+            overall_results["templates"] = template_results
+
+            if len(sheet_names) > 1 and not template_results.get("stopped"):
+                self._import_task_node_sheets(
+                    excel_data,
+                    sheet_names,
+                    summary_sheet,
+                    summary_records,
+                    preexisting_rows,
+                    folders_map,
+                    folder_id,
+                    on_conflict,
+                    task_nodes_result,
+                )
+        except Exception as exc:
+            logger.error("Task template import failed", exc_info=True)
+            task_nodes_result.add_error(
+                Error(record={}, error=f"Import aborted: {exc}")
+            )
+
+        overall_results["task_nodes"] = task_nodes_result.to_dict()
+        return overall_results
+
+    def _import_task_node_sheets(
+        self,
+        excel_data: pd.ExcelFile,
+        sheet_names: list[str],
+        summary_sheet: str,
+        summary_records: list[dict],
+        preexisting_rows: set[int],
+        folders_map,
+        folder_id,
+        on_conflict: ConflictMode,
+        result: Result,
+    ) -> None:
+        """Import past TaskNode occurrences from the per-template sheets."""
         # Build counter → TaskTemplate map resolving each row's actual folder,
         # so multi-folder imports match nodes to the correct template.
         template_map: dict[int, TaskTemplate] = {}
         for idx, rec in enumerate(summary_records, start=1):
-            rec_name = str(rec.get("name", "")).strip()
-            if not rec_name:
-                continue
-            row_folder_name = str(rec.get("folder", "")).lower()
-            row_folder_id = (
-                folders_map.get(row_folder_name, folder_id)
-                if row_folder_name
-                else folder_id
-            )
-            ref_id = str(rec.get("ref_id", "")).strip()
-            tmpl = None
-            if ref_id:
-                tmpl = TaskTemplate.objects.filter(
-                    ref_id=ref_id, folder_id=row_folder_id
-                ).first()
-            if tmpl is None:
-                tmpl = TaskTemplate.objects.filter(
-                    name=rec_name, folder_id=row_folder_id
-                ).first()
+            tmpl = self._resolve_summary_row_template(rec, folders_map, folder_id)
             if tmpl is not None:
                 template_map[idx] = tmpl
 
         today = timezone.localdate()
+        collision_suffix = re.compile(r" \(\d+\)$")
+
+        def _matches_hint(tmpl: TaskTemplate, hint: str) -> bool:
+            sanitized = re.sub(SHEET_NAME_INVALID_CHARS, "", tmpl.name or "")
+            return sanitized.lower().startswith(hint.lower())
 
         for sheet_name in sheet_names:
             if sheet_name == summary_sheet:
                 continue
 
-            # Sheet names are exported as "{counter}-{name}" truncated to 31 chars.
+            # Sheet names are exported as "{counter}-{name}" truncated to 31 chars,
+            # with an optional " (n)" suffix on name collisions.
             dash_pos = sheet_name.find("-")
             if dash_pos < 1:
                 continue
@@ -3356,16 +3505,54 @@ class LoadFileView(APIView):
             except ValueError:
                 continue
 
-            template = template_map.get(counter)
-            if template is None:
-                name_hint = sheet_name[dash_pos + 1 :].strip()
-                template = TaskTemplate.objects.filter(
-                    name__istartswith=name_hint,
-                    folder_id=folder_id,
-                ).first()
+            name_hint = collision_suffix.sub("", sheet_name[dash_pos + 1 :]).strip()
+
+            mapped = template_map.get(counter)
+            template = mapped
+            if (
+                template is not None
+                and name_hint
+                and not _matches_hint(template, name_hint)
+            ):
+                # Counter and sheet name disagree: files exported before sheet
+                # numbering was aligned with summary rows skipped templates
+                # without nodes. Prefer the name match, keep the counter as a
+                # last resort (the template may have been renamed in Summary).
+                by_name = next(
+                    (t for t in template_map.values() if _matches_hint(t, name_hint)),
+                    None,
+                )
+                if by_name is not None and by_name.pk != template.pk:
+                    result.warnings.append(
+                        Error(
+                            record={"sheet": sheet_name},
+                            error=(
+                                f"Sheet '{sheet_name}' does not match summary row"
+                                f" #{counter} ('{template.name}'); its task nodes were"
+                                f" imported into '{by_name.name}' based on the sheet name."
+                            ),
+                            is_warning=True,
+                        )
+                    )
+                    template = by_name
+            elif template is None:
+                if name_hint:
+                    template = next(
+                        (
+                            t
+                            for t in template_map.values()
+                            if _matches_hint(t, name_hint)
+                        ),
+                        None,
+                    )
+                if template is None:
+                    template = TaskTemplate.objects.filter(
+                        name__istartswith=sheet_name[dash_pos + 1 :].strip(),
+                        folder_id=folder_id,
+                    ).first()
 
             if template is None:
-                task_nodes_result.add_error(
+                result.add_error(
                     Error(
                         record={"sheet": sheet_name},
                         error=f"TaskTemplate not found for sheet '{sheet_name}'; skipped.",
@@ -3373,39 +3560,69 @@ class LoadFileView(APIView):
                 )
                 continue
 
-            sheet_df = normalize_datetime_columns(
-                pd.read_excel(excel_data, sheet_name=sheet_name)
+            row_idx = next(
+                (i for i, t in template_map.items() if t.pk == template.pk), None
+            )
+            template_created = row_idx is not None and row_idx not in preexisting_rows
+
+            sheet_df = normalize_df_columns(
+                normalize_datetime_columns(
+                    pd.read_excel(excel_data, sheet_name=sheet_name)
+                )
             ).fillna("")
 
             for row in sheet_df.to_dict(orient="records"):
-                due_date = _parse_date(row.get("due_date"))
-                if not due_date:
+                due_date_raw = _parse_date(row.get("due_date"))
+                if not due_date_raw:
                     continue
-
                 try:
-                    if date.fromisoformat(str(due_date)) > today:
-                        continue
+                    due_date = date.fromisoformat(str(due_date_raw))
                 except ValueError, TypeError:
-                    pass
+                    result.add_error(
+                        Error(
+                            record={"sheet": sheet_name, "due_date": str(due_date_raw)},
+                            error=f"Invalid due_date '{due_date_raw}' (expected YYYY-MM-DD)",
+                        )
+                    )
+                    continue
+                if due_date > today:
+                    # Future nodes are regenerated from the schedule.
+                    continue
 
                 raw_status = str(row.get("status", "")).lower().strip()
                 status_val = TaskTemplateRecordConsumer.TASK_STATUS_MAP.get(
                     raw_status, "pending"
                 )
                 observation = str(row.get("observation", ""))
-                scheduled_date = _parse_date(row.get("scheduled_date")) or due_date
+                scheduled_raw = _parse_date(row.get("scheduled_date"))
+                try:
+                    scheduled_date = (
+                        date.fromisoformat(str(scheduled_raw))
+                        if scheduled_raw
+                        else due_date
+                    )
+                except ValueError, TypeError:
+                    logger.debug(
+                        "Falling back to due_date for unparsable scheduled_date",
+                        scheduled_date=str(scheduled_raw),
+                        sheet_name=sheet_name,
+                    )
+                    scheduled_date = due_date
 
                 existing_node = TaskNode.objects.filter(
                     task_template=template, folder=template.folder, due_date=due_date
                 ).first()
 
-                if existing_node is not None:
+                # A node on a template created by this very import is the one
+                # auto-synced from task_date, not a pre-existing record: apply
+                # the row to it instead of treating it as a conflict.
+                if existing_node is not None and not template_created:
                     match on_conflict:
                         case ConflictMode.SKIP:
-                            task_nodes_result.add_skipped()
+                            result.add_skipped()
                             continue
                         case ConflictMode.STOP:
-                            task_nodes_result.add_error(
+                            result.add_error(
                                 Error(
                                     record={"due_date": str(due_date)},
                                     error=(
@@ -3414,50 +3631,69 @@ class LoadFileView(APIView):
                                     ),
                                 )
                             )
-                            task_nodes_result.stopped = True
+                            result.stopped = True
                             break
                         case ConflictMode.UPDATE:
-                            existing_node.status = status_val
-                            existing_node.observation = observation
-                            existing_node.scheduled_date = scheduled_date
-                            existing_node.to_delete = False
-                            try:
-                                existing_node.save()
-                            except (IntegrityError, ValidationError) as exc:
-                                task_nodes_result.add_error(
-                                    Error(
-                                        record={"due_date": str(due_date)},
-                                        error=str(exc),
-                                    )
-                                )
-                                continue
-                            task_nodes_result.add_updated()
-                else:
-                    try:
-                        TaskNode.objects.create(
-                            task_template=template,
-                            due_date=due_date,
-                            status=status_val,
-                            observation=observation,
-                            folder=template.folder,
-                            scheduled_date=scheduled_date,
-                            to_delete=False,
-                        )
-                    except (IntegrityError, ValidationError) as exc:
-                        task_nodes_result.add_error(
-                            Error(
-                                record={"due_date": str(due_date)},
-                                error=str(exc),
+                            self._save_task_node_row(
+                                existing_node,
+                                status_val,
+                                observation,
+                                scheduled_date,
+                                result,
+                                created=False,
                             )
-                        )
-                        continue
-                    task_nodes_result.add_created()
+                elif existing_node is not None:
+                    self._save_task_node_row(
+                        existing_node,
+                        status_val,
+                        observation,
+                        scheduled_date,
+                        result,
+                        created=False,
+                    )
+                else:
+                    node = TaskNode(
+                        task_template=template,
+                        due_date=due_date,
+                        folder=template.folder,
+                        to_delete=False,
+                    )
+                    self._save_task_node_row(
+                        node,
+                        status_val,
+                        observation,
+                        scheduled_date,
+                        result,
+                        created=True,
+                    )
 
-            if task_nodes_result.stopped:
+            if result.stopped:
                 break
 
-        overall_results["task_nodes"] = task_nodes_result.to_dict()
-        return overall_results
+    @staticmethod
+    def _save_task_node_row(
+        node: TaskNode,
+        status_val: str,
+        observation: str,
+        scheduled_date: date,
+        result: Result,
+        created: bool,
+    ) -> None:
+        node.status = status_val
+        node.observation = observation
+        node.scheduled_date = scheduled_date
+        node.to_delete = False
+        try:
+            node.save()
+        except (IntegrityError, ValidationError) as exc:
+            result.add_error(
+                Error(record={"due_date": str(node.due_date)}, error=str(exc))
+            )
+            return
+        if created:
+            result.add_created()
+        else:
+            result.add_updated()
 
     def _reconcile_compliance_requirements(
         self, request, records, compliance_assessment, framework_id, results
