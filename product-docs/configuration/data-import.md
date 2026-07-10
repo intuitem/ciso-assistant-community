@@ -768,9 +768,9 @@ The wizard imports both in a single multi-sheet Excel file: a **Summary** sheet 
 * `assets` - comma-separated asset names or ref\_ids
 * `applied_controls` - comma-separated control names or ref\_ids
 * `evidences` - comma-separated evidence names
-* `compliance_assessments` - comma-separated assessment names or ref\_ids; the `name - version` format produced by the export is accepted
+* `compliance_assessments` - comma-separated assessment names or ref\_ids
 * `risk_assessments` - comma-separated assessment names or ref\_ids; the `name - version` format produced by the export is accepted
-* `findings_assessment` - comma-separated findings assessment names or ref\_ids; the `name - version` format produced by the export is accepted
+* `findings_assessment` - comma-separated findings assessment names or ref\_ids
 * `status` - non-recurrent only; sets the status of the single task node
   * `pending`
   * `in_progress`

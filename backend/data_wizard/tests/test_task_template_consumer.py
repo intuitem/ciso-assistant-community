@@ -19,6 +19,8 @@ from core.models import (
     AppliedControl,
     Asset,
     FindingsAssessment,
+    RiskAssessment,
+    RiskMatrix,
     TaskNode,
     TaskTemplate,
 )
@@ -220,21 +222,46 @@ class TestTaskTemplateM2MResolution:
         assert error is None
         assert record_data["assets"] == [winner.id]
 
-    def test_assessment_version_suffix_resolution(self, base_context, domain_folder):
+    def test_findings_assessment_resolved_by_plain_name(
+        self, base_context, domain_folder
+    ):
+        # FindingsAssessment.__str__ is the plain name; that is what the export writes.
         fa = FindingsAssessment.objects.create(
             name="Pentest Findings", version="1.0", folder=domain_folder
         )
         consumer = TaskTemplateRecordConsumer(base_context)
         record_data, error = consumer.prepare_create(
-            {"name": "T", "findings_assessment": "Pentest Findings - 1.0"}, None
+            {"name": "T", "findings_assessment": "Pentest Findings"}, None
         )
         assert error is None
         assert record_data["findings_assessment"] == [fa.id]
 
+    def test_risk_assessment_version_suffix_resolution(
+        self, base_context, domain_folder
+    ):
+        # RiskAssessment.__str__ is "{name} - {version}"; the export writes that
+        # string and the importer must resolve it back.
+        matrix = RiskMatrix.objects.create(
+            name="test matrix", folder=domain_folder, json_definition={}
+        )
+        ra = RiskAssessment.objects.create(
+            name="Ecommerce Risk overview",
+            version="0.1",
+            folder=domain_folder,
+            risk_matrix=matrix,
+        )
+        consumer = TaskTemplateRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create(
+            {"name": "T", "risk_assessments": "Ecommerce Risk overview - 0.1"}, None
+        )
+        assert error is None
+        assert record_data["risk_assessments"] == [ra.id]
+
     def test_assigned_to_resolved_by_email(
         self, base_context, domain_folder, admin_user
     ):
-        actor = Actor.objects.create(user=admin_user)
+        # User creation auto-syncs an Actor (ActorSyncMixin), so fetch it.
+        actor, _ = Actor.objects.get_or_create(user=admin_user)
         consumer = TaskTemplateRecordConsumer(base_context)
         record_data, error = consumer.prepare_create(
             {"name": "T", "assigned_to": admin_user.email.upper()}, None

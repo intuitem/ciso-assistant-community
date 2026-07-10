@@ -1824,10 +1824,11 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
 
         Lookups are scoped to the user's accessible folders; when several
         folders hold an object with the same name, an exact ref_id match wins,
-        then the record's own folder. Assessments also match their
-        ``"{name} - {version}"`` string, which is what the task export writes.
-        Entries that cannot be matched are collected into ``unresolved`` and
-        reported back as a row warning.
+        then the record's own folder. Assessments are also matched against
+        their ``str()`` form, so versioned exports resolve back (currently
+        only RiskAssessment renders ``"{name} - {version}"``; the other
+        assessments export their plain name). Entries that cannot be matched
+        are collected into ``unresolved`` and reported back as a row warning.
         """
         has_ref_id = any(f.name == "ref_id" for f in model._meta.fields)
         ids = set()

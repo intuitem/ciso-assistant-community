@@ -697,9 +697,9 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `assets` | No | Comma-separated asset names or ref_ids |
 | `applied_controls` | No | Comma-separated control names or ref_ids |
 | `evidences` | No | Comma-separated evidence names |
-| `compliance_assessments` | No | Comma-separated assessment names or ref_ids (supports `"name - version"` format) |
-| `risk_assessments` | No | Comma-separated assessment names or ref_ids (supports `"name - version"` format) |
-| `findings_assessment` | No | Comma-separated findings assessment names or ref_ids (supports `"name - version"` format) |
+| `compliance_assessments` | No | Comma-separated assessment names or ref_ids |
+| `risk_assessments` | No | Comma-separated assessment names or ref_ids (supports the `"name - version"` format written by the export) |
+| `findings_assessment` | No | Comma-separated findings assessment names or ref_ids |
 | `schedule_frequency` | No | `DAILY`, `WEEKLY`, `MONTHLY`, or `YEARLY` — required together with `schedule_interval` |
 | `schedule_interval` | No | Integer — repeat every N periods — required together with `schedule_frequency` |
 | `schedule_days_of_week` | No | Comma-separated integers 1–7, Mon=1, Sun=7 (WEEKLY) |
@@ -726,7 +726,7 @@ Each sheet imports past occurrences for one template. The sheet name is `"{count
 **Special considerations:**
 
 - **Linked-record resolution is folder-scoped:** `assets`, `applied_controls`, `evidences` and the assessment columns are matched by ref_id or name within the folders the importing user can access. An exact ref_id match wins, then an object in the row's own folder. Entries that cannot be resolved are skipped and reported as import warnings.
-- **M2M resolution for versioned models:** assessments (`risk_assessments`, `compliance_assessments`, `findings_assessment`) export as `"name - version"`. The importer strips the version suffix and matches by name, then verifies `str(candidate) == entry` to handle duplicates.
+- **M2M resolution for versioned models:** `risk_assessments` export as `"name - version"` (their `__str__`); the importer strips the version suffix, matches by name, then verifies `str(candidate) == entry`. Compliance and findings assessments export their plain name and are matched by name or ref_id.
 - **Empty M2M cells clear links in UPDATE mode:** when a linked-record column is present in the file but empty, an UPDATE-mode import removes the existing links for that field.
 - **PII protection:** Actor lookup warnings mask email addresses beyond the first 4 characters in server logs.
 - **on_conflict applies to nodes:** SKIP/STOP/UPDATE conflict mode applies to both templates and their task nodes. Node sheets belonging to a template created by the same import update the node auto-created from `task_date` instead of raising a conflict.
