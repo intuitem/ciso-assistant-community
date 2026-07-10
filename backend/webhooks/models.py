@@ -1,4 +1,5 @@
 import uuid
+from auditlog.registry import auditlog
 from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -150,3 +151,13 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
         """Run full model validation (clean + field checks) before persisting."""
         self.full_clean()
         super().save(*args, **kwargs)
+
+
+# secret, headers (SIEM token) and kafka_config (SASL password) are redacted.
+auditlog.register(
+    WebhookEndpoint,
+    exclude_fields=["created_at", "updated_at", "is_published"],
+    mask_fields=["headers", "kafka_config", "secret"],
+    mask_callable="global_settings.utils.redact_secret_value",
+    m2m_fields={"event_types", "target_folders"},
+)
