@@ -34,6 +34,56 @@ def start_instance(
     parent_instance=None,
     parent_token=None,
 ):
+    """Create an instance and run it synchronously (tests, subprocesses)."""
+    instance = create_instance(
+        version,
+        trigger=trigger,
+        payload=payload,
+        initiated_by=initiated_by,
+        parent_instance=parent_instance,
+        parent_token=parent_token,
+    )
+    run_instance(instance)
+    instance.refresh_from_db()
+    return instance
+
+
+def trigger_instance(version, *, trigger="manual", payload=None, initiated_by=None):
+    """Entry point for webhook/manual triggers: honors the async setting."""
+    from django.conf import settings
+
+    instance = create_instance(
+        version, trigger=trigger, payload=payload, initiated_by=initiated_by
+    )
+    if getattr(settings, "WORKFLOWS_ASYNC_EXECUTION", False):
+        from .tasks import run_instance_task
+
+        run_instance_task(str(instance.id))
+    else:
+        run_instance(instance)
+    instance.refresh_from_db()
+    return instance
+
+
+def run_instance(instance):
+    with transaction.atomic():
+        locked = (
+            WorkflowInstance.objects.select_for_update()
+            .select_related("version")
+            .get(id=instance.id)
+        )
+        _run(locked)
+
+
+def create_instance(
+    version,
+    *,
+    trigger="manual",
+    payload=None,
+    initiated_by=None,
+    parent_instance=None,
+    parent_token=None,
+):
     start_node = version.nodes.filter(type=WorkflowNode.Type.START).first()
     if start_node is None:
         raise EngineError("This version has no start node")
@@ -69,7 +119,6 @@ def start_instance(
             data={"variables": variables},
         )
         WorkflowToken.objects.create(instance=instance, current_node=start_node)
-        _run(instance)
     return instance
 
 
@@ -162,7 +211,7 @@ def _process(token):
                 WorkflowInstanceLog.EventType.ACTION_EXECUTED,
                 node=node,
                 message=(node.action_config or {}).get("type", ""),
-                data=output,
+                data=_truncate_log_data(output),
             )
 
         if node.type == WorkflowNode.Type.SUBPROCESS:
@@ -172,9 +221,42 @@ def _process(token):
 
         _advance(token)
     except (ActionError, EngineError) as e:
-        _fail_token(token, str(e))
+        _handle_failure(token, str(e))
     except Exception as e:  # noqa: BLE001 — a buggy action must not 500 the request
-        _fail_token(token, f"{type(e).__name__}: {e}")
+        _handle_failure(token, f"{type(e).__name__}: {e}")
+
+
+def _handle_failure(token, message):
+    """Retry policy (spec D10/D17): schedule a delayed Huey re-execution while
+    attempts remain on action/subprocess nodes, else park the token in error."""
+    node = token.current_node
+    retryable = node.type in (
+        WorkflowNode.Type.ACTION,
+        WorkflowNode.Type.SUBPROCESS,
+    )
+    if not retryable or token.retry_count >= node.retry_max_attempts:
+        _fail_token(token, message)
+        return
+
+    token.retry_count += 1
+    token.status = WorkflowToken.Status.RETRYING
+    token.error_message = message
+    token.save(update_fields=["retry_count", "status", "error_message", "updated_at"])
+    delay = node.retry_delay_seconds
+    if node.retry_backoff == WorkflowNode.RetryBackoff.EXPONENTIAL:
+        delay *= 2 ** (token.retry_count - 1)
+    _log(
+        token.instance,
+        WorkflowInstanceLog.EventType.ERROR,
+        node=node,
+        message=(
+            f"{message} — retry {token.retry_count}/{node.retry_max_attempts} "
+            f"in {delay}s"
+        ),
+    )
+    from .tasks import retry_token_task
+
+    retry_token_task.schedule(args=(str(token.id),), delay=delay)
 
 
 def _start_subprocess(token):
@@ -382,10 +464,11 @@ def _fail_instance(instance, message):
 
 def _refresh_status(instance):
     statuses = set(instance.tokens.values_list("status", flat=True))
-    if (
-        WorkflowToken.Status.ACTIVE in statuses
-        or WorkflowToken.Status.WAITING in statuses
-    ):
+    if statuses & {
+        WorkflowToken.Status.ACTIVE,
+        WorkflowToken.Status.WAITING,
+        WorkflowToken.Status.RETRYING,
+    }:
         return
     if WorkflowToken.Status.ERROR in statuses:
         instance.status = WorkflowInstance.Status.FAILED
@@ -405,6 +488,24 @@ def _refresh_status(instance):
                 parent_token.current_node, instance.variables, parent_token.instance
             )
             resume_token(parent_token)
+
+
+def _truncate_log_data(output, limit=2000):
+    """Keep the instance log lean: large action outputs (HTTP bodies) are
+    previewed, not stored verbatim. output_mapping already ran on the full
+    value, so nothing functional is lost."""
+    import json
+
+    truncated = {}
+    for key, value in output.items():
+        serialized = value if isinstance(value, str) else json.dumps(value, default=str)
+        if len(serialized) > limit:
+            truncated[key] = (
+                f"{serialized[:limit]}… <{len(serialized)} chars truncated>"
+            )
+        else:
+            truncated[key] = value
+    return truncated
 
 
 def _log(instance, event_type, node=None, edge=None, message="", data=None):

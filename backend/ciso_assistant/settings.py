@@ -843,6 +843,12 @@ HUEY = {
 AUDITLOG_RETENTION_DAYS = int(os.environ.get("AUDITLOG_RETENTION_DAYS", 90))
 AUDITLOG_MAX_RECORDS = int(os.environ.get("AUDITLOG_MAX_RECORDS", 50000))
 
+# Run workflow instances in a Huey worker instead of the triggering request.
+# Requires a running Huey consumer; keep False for dev setups without one.
+WORKFLOWS_ASYNC_EXECUTION = (
+    os.environ.get("WORKFLOWS_ASYNC_EXECUTION", "").lower() == "true"
+)
+
 # Allow outbound server-side requests (webhooks, integrations, LLM URLs) to private/loopback addresses
 ALLOW_PRIVATE_NETWORK_REQUESTS = os.environ.get(
     "ALLOW_PRIVATE_NETWORK_REQUESTS", "False"

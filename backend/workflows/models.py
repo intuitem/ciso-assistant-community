@@ -23,6 +23,9 @@ class Workflow(NameDescriptionFolderMixin, FilteringLabelMixin):
     webhook_secret = models.CharField(
         max_length=64, default=generate_webhook_secret, unique=True
     )
+    # When set, inbound hooks must carry a valid HMAC-SHA256 signature of the
+    # raw body (X-Hub-Signature-256 / X-Signature-256, optional sha256= prefix).
+    webhook_hmac_secret = models.CharField(max_length=128, blank=True)
 
     fields_to_check = ["name"]
 
@@ -518,6 +521,7 @@ class WorkflowToken(AbstractBaseModel, FolderMixin):
         WAITING = "waiting", "Waiting"
         CONSUMED = "consumed", "Consumed"
         COMPLETED = "completed", "Completed"
+        RETRYING = "retrying", "Retrying"
         ERROR = "error", "Error"
 
     instance = models.ForeignKey(
@@ -543,6 +547,7 @@ class WorkflowToken(AbstractBaseModel, FolderMixin):
         related_name="tokens",
     )
     error_message = models.TextField(blank=True)
+    retry_count = models.PositiveIntegerField(default=0)
 
     def save(self, *args, **kwargs):
         self.folder = self.instance.folder
@@ -592,6 +597,39 @@ class WorkflowInstanceLog(AbstractBaseModel, FolderMixin):
     def save(self, *args, **kwargs):
         self.folder = self.instance.folder
         super().save(*args, **kwargs)
+
+
+class WorkflowSecret(AbstractBaseModel, FolderMixin):
+    """Encrypted named credential for http_request, referenced as
+    {{secrets.NAME}}. Values are write-only: the API never returns them and
+    the engine resolves them only at execution time (spec D17)."""
+
+    name = models.CharField(max_length=100)
+    encrypted_value = models.BinaryField()
+
+    fields_to_check = ["name"]
+
+    class Meta:
+        ordering = ["name"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["folder", "name"],
+                name="unique_workflow_secret_name",
+            )
+        ]
+
+    def set_value(self, value: str):
+        from .crypto import encrypt_secret
+
+        self.encrypted_value = encrypt_secret(value)
+
+    def get_value(self) -> str:
+        from .crypto import decrypt_secret
+
+        return decrypt_secret(bytes(self.encrypted_value))
+
+    def __str__(self):
+        return self.name
 
 
 def _clone_row(instance, **overrides):

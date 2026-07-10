@@ -7,6 +7,7 @@ from workflows.models import (
     Workflow,
     WorkflowInstance,
     WorkflowInstanceLog,
+    WorkflowSecret,
     WorkflowToken,
     WorkflowVersion,
 )
@@ -72,6 +73,7 @@ class WorkflowInstanceReadSerializer(BaseModelSerializer):
                 status__in=[
                     WorkflowToken.Status.ACTIVE,
                     WorkflowToken.Status.WAITING,
+                    WorkflowToken.Status.RETRYING,
                     WorkflowToken.Status.ERROR,
                 ]
             ).select_related("current_node")
@@ -82,6 +84,38 @@ class WorkflowInstanceWriteSerializer(BaseModelSerializer):
     class Meta:
         model = WorkflowInstance
         fields = ["version"]
+
+
+class WorkflowSecretReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = WorkflowSecret
+        # Write-only store: the value never leaves the server (spec D17).
+        fields = ["id", "name", "folder", "created_at", "updated_at"]
+
+
+class WorkflowSecretWriteSerializer(BaseModelSerializer):
+    value = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = WorkflowSecret
+        fields = ["name", "folder", "value"]
+
+    def create(self, validated_data):
+        value = validated_data.pop("value")
+        secret = WorkflowSecret(**validated_data)
+        secret.set_value(value)
+        secret.save()
+        return secret
+
+    def update(self, instance, validated_data):
+        value = validated_data.pop("value", None)
+        instance = super().update(instance, validated_data)
+        if value:
+            instance.set_value(value)
+            instance.save()
+        return instance
 
 
 class WorkflowInstanceLogReadSerializer(BaseModelSerializer):

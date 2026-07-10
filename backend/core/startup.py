@@ -109,6 +109,7 @@ READER_PERMISSIONS_LIST = [
     "view_workflowinstance",
     "view_workflowtoken",
     "view_workflowinstancelog",
+    "view_workflowsecret",
     # pmbok
     "view_genericcollection",
     "view_accreditation",
@@ -246,6 +247,7 @@ APPROVER_PERMISSIONS_LIST = [
     "view_workflowinstance",
     "view_workflowtoken",
     "view_workflowinstancelog",
+    "view_workflowsecret",
     # pmbok
     "view_genericcollection",
     "view_accreditation",
@@ -595,6 +597,10 @@ ANALYST_PERMISSIONS_LIST = [
     "delete_workflowinstance",
     "view_workflowtoken",
     "view_workflowinstancelog",
+    "view_workflowsecret",
+    "add_workflowsecret",
+    "change_workflowsecret",
+    "delete_workflowsecret",
     # pmbok
     "view_genericcollection",
     "add_genericcollection",
@@ -1063,6 +1069,10 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "delete_workflowinstance",
     "view_workflowtoken",
     "view_workflowinstancelog",
+    "view_workflowsecret",
+    "add_workflowsecret",
+    "change_workflowsecret",
+    "delete_workflowsecret",
     # pmbok
     "view_genericcollection",
     "add_genericcollection",
@@ -1583,6 +1593,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "delete_workflowinstance",
     "view_workflowtoken",
     "view_workflowinstancelog",
+    "view_workflowsecret",
+    "add_workflowsecret",
+    "change_workflowsecret",
+    "delete_workflowsecret",
     # pmbok
     "view_genericcollection",
     "add_genericcollection",

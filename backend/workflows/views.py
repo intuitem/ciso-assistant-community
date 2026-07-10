@@ -1,3 +1,7 @@
+import hashlib
+import hmac
+
+from django.contrib.auth.models import Permission
 from django.shortcuts import get_object_or_404
 from django.utils.crypto import constant_time_compare
 from django.utils.decorators import method_decorator
@@ -9,10 +13,19 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.views import BaseModelViewSet
+from iam.models import RoleAssignment
 
-from .engine import EngineError, start_instance
+from .actions import required_permissions
+from .engine import EngineError, trigger_instance
 from .graph import GraphValidationError, save_graph, serialize_graph
-from .models import Workflow, WorkflowInstance, WorkflowNode, WorkflowVersion
+from .models import (
+    Workflow,
+    WorkflowInstance,
+    WorkflowNode,
+    WorkflowSecret,
+    WorkflowVersion,
+    generate_webhook_secret,
+)
 from .serializers import (
     WorkflowInstanceLogReadSerializer,
     WorkflowInstanceReadSerializer,
@@ -45,10 +58,18 @@ class WorkflowViewSet(BaseModelViewSet):
                         fk_name: endpoint
                         for fk_name, (_model, endpoint) in entry["fk_fields"].items()
                     },
+                    "match_on": entry.get("match_on", "name"),
                 }
                 for key, entry in CREATABLE_MODELS.items()
             ]
         )
+
+    @action(detail=True, methods=["post"], url_path="rotate-secret")
+    def rotate_secret(self, request, pk=None):
+        workflow = self.get_object()
+        workflow.webhook_secret = generate_webhook_secret()
+        workflow.save(update_fields=["webhook_secret", "updated_at"])
+        return Response({"webhook_secret": workflow.webhook_secret})
 
 
 class WorkflowVersionViewSet(BaseModelViewSet):
@@ -93,6 +114,7 @@ class WorkflowVersionViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         errors = validate_graph(version)
+        errors += _deputization_errors(request.user, version)
         if errors:
             return Response({"errors": errors}, status=status.HTTP_400_BAD_REQUEST)
         version.publish()
@@ -117,6 +139,39 @@ class WorkflowVersionViewSet(BaseModelViewSet):
         )
 
 
+class WorkflowSecretViewSet(BaseModelViewSet):
+    model = WorkflowSecret
+    serializers_module = "workflows.serializers"
+    filterset_fields = ["folder"]
+    search_fields = ["name"]
+    ordering = ["name"]
+
+
+def _deputization_errors(user, version):
+    """Spec D18: the publisher must hold the permissions the workflow's
+    actions exercise. The workflow then acts as its publisher's deputy."""
+    errors = []
+    if getattr(user, "is_superuser", False):
+        return errors
+    for node in version.nodes.filter(type=WorkflowNode.Type.ACTION):
+        for codename in required_permissions(node.action_config):
+            permission = Permission.objects.filter(codename=codename).first()
+            if permission is None:
+                continue
+            if not RoleAssignment.is_access_allowed(
+                user=user, perm=permission, folder=version.folder
+            ):
+                errors.append(
+                    {
+                        "code": "publisher_permission_missing",
+                        "message": f"Publishing this action requires the '{codename}' permission",
+                        "node_id": str(node.id),
+                        "edge_id": None,
+                    }
+                )
+    return errors
+
+
 class WorkflowInstanceViewSet(BaseModelViewSet):
     model = WorkflowInstance
     serializers_module = "workflows.serializers"
@@ -128,7 +183,7 @@ class WorkflowInstanceViewSet(BaseModelViewSet):
         """Launching a run: POST {version: uuid}."""
         version = get_object_or_404(WorkflowVersion, id=request.data.get("version"))
         try:
-            instance = start_instance(
+            instance = trigger_instance(
                 version, trigger="manual", initiated_by=request.user
             )
         except EngineError as e:
@@ -164,6 +219,12 @@ class WorkflowWebhookView(APIView):
         workflow = get_object_or_404(Workflow, id=workflow_id)
         if not constant_time_compare(secret, workflow.webhook_secret):
             return Response(status=status.HTTP_404_NOT_FOUND)
+        if workflow.webhook_hmac_secret and not self._signature_valid(
+            request, workflow.webhook_hmac_secret
+        ):
+            return Response(
+                {"error": "invalidSignature"}, status=status.HTTP_403_FORBIDDEN
+            )
         version = workflow.published_version
         if version is None:
             return Response(
@@ -172,10 +233,21 @@ class WorkflowWebhookView(APIView):
             )
         payload = request.data if isinstance(request.data, dict) else {}
         try:
-            instance = start_instance(version, trigger="webhook", payload=payload)
+            instance = trigger_instance(version, trigger="webhook", payload=payload)
         except EngineError as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(
             {"instance": str(instance.id), "status": instance.status},
             status=status.HTTP_201_CREATED,
         )
+
+    @staticmethod
+    def _signature_valid(request, hmac_secret):
+        provided = request.headers.get("X-Hub-Signature-256") or request.headers.get(
+            "X-Signature-256", ""
+        )
+        provided = provided.removeprefix("sha256=")
+        expected = hmac.new(
+            hmac_secret.encode(), request.body, hashlib.sha256
+        ).hexdigest()
+        return hmac.compare_digest(provided, expected)
