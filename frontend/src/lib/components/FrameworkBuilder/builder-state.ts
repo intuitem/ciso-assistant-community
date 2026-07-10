@@ -1,12 +1,6 @@
 import { getContext, setContext } from 'svelte';
 import { writable, type Writable } from 'svelte/store';
-import {
-	apiSaveDraft,
-	apiPublishDraft,
-	apiDiscardDraft,
-	apiStartEditing,
-	type DraftJSON
-} from './builder-api';
+import { apiSaveDraft, type DraftJSON } from './builder-api';
 import { m } from '$paraglide/messages';
 import { resolveComputeResult } from '$lib/utils/helpers';
 
@@ -905,7 +899,6 @@ export interface BuilderStore {
 	unsaved: Writable<boolean>;
 	unpublished: Writable<boolean>;
 	isScrolling: Writable<boolean>;
-	publishWarnings: Writable<string[]>;
 	clearError: (key: string) => void;
 
 	addNode: (opts: { parent: string | null; preset?: NodePreset; afterIndex?: number }) => void;
@@ -933,8 +926,6 @@ export interface BuilderStore {
 	removeLanguage: (lang: string) => void;
 	setBaseLocale: (locale: string) => void;
 	flushDraft: () => Promise<boolean>;
-	publish: () => Promise<boolean>;
-	discard: () => Promise<void>;
 	destroy: () => void;
 }
 
@@ -1008,9 +999,6 @@ export function createBuilderState(
 	const unpublished = writable(!!draftMarkedDirty || didRepairNodeIds);
 	const isScrolling = writable(false);
 	const activeLanguage = writable<string | null>(null);
-	// Non-fatal warnings returned by the last successful publish
-	// (e.g. URN disambiguation). Cleared by the UI when dismissed.
-	const publishWarnings = writable<string[]>([]);
 
 	function markDirty() {
 		unsaved.set(true);
@@ -1074,86 +1062,6 @@ export function createBuilderState(
 			return await currentSave;
 		} finally {
 			currentSave = null;
-		}
-	}
-
-	/** Validate all nodes and framework before publish. Returns true if valid. */
-	function validateBeforePublish(): boolean {
-		const validationErrors = validateDraft(get(framework), get(rootNodes));
-		for (const err of validationErrors) {
-			setError(err.key, err.message);
-		}
-		return validationErrors.length === 0;
-	}
-
-	// Returns true only when the draft was actually published. Every failure
-	// path (save failed, client-side validation failed, backend rejected,
-	// unexpected throw) records a 'publish' error and returns false so the
-	// caller can keep the confirmation dialog open and show why, instead of
-	// flashing success or dying as an unhandled rejection.
-	async function publish(): Promise<boolean> {
-		try {
-			const saved = await flushDraft();
-			if (!saved) {
-				setError('publish', m.builderFailedToSaveDraftBeforePublish());
-				return false;
-			}
-
-			// Clear previous node- and question-level validation errors so stale
-			// entries (e.g. slider min/max/step errors from the previous attempt)
-			// don't survive a re-validation.
-			errors.update((prev) => {
-				const next = new Map(prev);
-				for (const key of next.keys()) {
-					if (key.startsWith('node-') || key.startsWith('question-')) next.delete(key);
-				}
-				return next;
-			});
-			clearError('publish');
-
-			if (!validateBeforePublish()) {
-				// Keep a specific message (e.g. framework name required) if
-				// validateDraft already set one; only fall back to the generic.
-				if (!get(errors).has('publish')) {
-					setError('publish', m.builderFixValidationErrorsBeforePublish());
-				}
-				return false;
-			}
-
-			const warnings = await apiPublishDraft(apiTarget);
-			// Reflect the server-side bump locally so reactive status (e.g.,
-			// "Live" vs "Draft — nothing live yet") updates without a refresh.
-			framework.update((f) => ({ ...f, editing_version: (f.editing_version ?? 1) + 1 }));
-			clearError('publish');
-			publishWarnings.set(warnings);
-			return true;
-		} catch (e) {
-			console.error('[FrameworkBuilder] Publish failed:', e);
-			setError('publish', (e as Error).message);
-			return false;
-		}
-	}
-
-	async function discard() {
-		try {
-			// Clear the draft on the server
-			await apiDiscardDraft(apiTarget);
-			// Re-create a fresh draft from live relational data
-			const { draft: freshDraft } = await apiStartEditing(apiTarget);
-			// Re-hydrate stores from the fresh draft
-			const hydrated = hydrateDraft(freshDraft, frameworkId);
-			const freshFramework = { ...frameworkData, ...hydrated.frameworkPatch } as Framework;
-			const freshRootNodes = buildTree(hydrated.nodes, hydrated.questions);
-			framework.set(freshFramework);
-			rootNodes.set(freshRootNodes);
-			activeSection.set(freshRootNodes[0]?.node.id ?? '');
-			unsaved.set(false);
-			unpublished.set(false);
-			clearError('discard');
-		} catch (e) {
-			console.error('[FrameworkBuilder] Draft discard failed:', e);
-			setError('discard', (e as Error).message);
-			throw e;
 		}
 	}
 
@@ -2016,7 +1924,6 @@ export function createBuilderState(
 		unsaved,
 		unpublished,
 		isScrolling,
-		publishWarnings,
 		clearError,
 
 		addNode,
@@ -2044,8 +1951,6 @@ export function createBuilderState(
 		removeLanguage,
 		setBaseLocale,
 		flushDraft,
-		publish,
-		discard,
 		destroy
 	};
 }

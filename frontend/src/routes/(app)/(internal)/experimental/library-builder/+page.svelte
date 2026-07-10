@@ -8,6 +8,7 @@
 	let { data } = $props();
 	let drafts: any[] = $state(data.drafts ?? []);
 	let customLibraries: any[] = $state(data.customLibraries ?? []);
+	let orphanFrameworks: any[] = $state(data.orphanFrameworks ?? []);
 
 	let statusMessage = $state('');
 	let statusType: 'success' | 'error' | '' = $state('');
@@ -78,10 +79,17 @@
 		if (!adoptSource) return;
 		adopting = true;
 		try {
+			// Values are "library:<id>" or "framework:<id>" (library-less live
+			// framework from the retired standalone editor, adopted in place).
+			const [kind, id] = adoptSource.split(':', 2);
+			const body =
+				kind === 'framework'
+					? { action: 'adopt', framework: id }
+					: { action: 'adopt', stored_library: id };
 			const res = await fetch('/experimental/library-builder', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ action: 'adopt', stored_library: adoptSource })
+				body: JSON.stringify(body)
 			});
 			const result = await res.json();
 			if (res.status === 409 && result.draft) {
@@ -256,12 +264,25 @@
 					<i class="fa-solid fa-plus mr-1"></i>
 					New Library Draft
 				</button>
-				{#if customLibraries.length > 0}
+				{#if customLibraries.length > 0 || orphanFrameworks.length > 0}
 					<select class="select w-64 text-sm" bind:value={adoptSource}>
 						<option value="">Adopt a custom library…</option>
-						{#each customLibraries as library}
-							<option value={library.id}>{library.name} (v{library.version})</option>
-						{/each}
+						{#if customLibraries.length > 0}
+							<optgroup label="Custom libraries">
+								{#each customLibraries as library}
+									<option value={'library:' + library.id}>
+										{library.name} (v{library.version})
+									</option>
+								{/each}
+							</optgroup>
+						{/if}
+						{#if orphanFrameworks.length > 0}
+							<optgroup label="Custom frameworks (no library yet)">
+								{#each orphanFrameworks as framework}
+									<option value={'framework:' + framework.id}>{framework.name}</option>
+								{/each}
+							</optgroup>
+						{/if}
 					</select>
 					<button
 						type="button"

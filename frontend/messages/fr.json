@@ -4766,19 +4766,12 @@
 	"builderRequirementHint": "Évaluable, peut avoir des enfants",
 	"builderSplashScreen": "Écran de présentation",
 	"builderSplashScreenHint": "Présentationnel, non évaluable",
-	"builderStatusLive": "En production",
-	"builderStatusLiveTitle": "Le brouillon correspond à ce que voient les répondants des audits.",
-	"builderStatusUnpublishedChanges": "Modifications non publiées",
-	"builderStatusUnpublishedChangesTitle": "Le brouillon contient des modifications qui ne sont pas encore visibles par les répondants. Publiez pour les appliquer.",
-	"builderStatusDraftNothingLive": "Brouillon — rien en production",
-	"builderStatusDraftNothingLiveTitle": "Le brouillon a du contenu mais rien n'a été publié. Les nouveaux audits ne verront rien tant que vous n'aurez pas publié.",
 	"builderStatusEmpty": "Vide",
 	"builderStatusEmptyTitle": "Aucune exigence pour l'instant. Les nouveaux audits basés sur ce référentiel n'auront rien à évaluer.",
 	"builderPreview": "Aperçu",
 	"builderPreviewSaveFirst": "Enregistrez d'abord votre brouillon pour pouvoir prévisualiser",
 	"builderPreviewAsRespondent": "Aperçu en tant que répondant (ouvre dans un nouvel onglet)",
 	"builderExportYamlTitle": "Exporter le référentiel au format YAML",
-	"builderExportYamlUnpublishedWarning": "Les modifications non publiées ne seront pas incluses. Publiez d'abord pour exporter les dernières modifications.",
 	"builderCopyBase": "Copier la base",
 	"builderCopyBaseTitle": "Copier le texte de la langue de base vers {lang} (n'écrase pas les traductions existantes)",
 	"builderCopyBaseQuestion": "Copier le texte de base ?",
@@ -4788,96 +4781,7 @@
 	"builderExpandAllCards": "Déplier toutes les cartes",
 	"builderCollapseAllCards": "Replier toutes les cartes",
 	"builderSaveFailed": "Échec de l'enregistrement",
-	"builderPublishedFlash": "Publié !",
 	"builderSaveDraftTitle": "Enregistrer le brouillon (Ctrl+S)",
-	"builderDiscardDraftTitle": "Abandonner le brouillon",
-	"builderDiscard": "Abandonner",
-	"builderDiscardAllChangesQuestion": "Abandonner toutes les modifications ?",
-	"builderYesDiscard": "Oui, abandonner",
-	"builderPublishDraftToLiveTitle": "Publier le brouillon vers le référentiel en production",
-	"builderPublishing": "Publication...",
-	"builderPublishModalTitle": "Publier le brouillon en production",
-	"builderPublishModalDescription": "Cette action mettra à jour le référentiel en production. Vérifiez les modifications ci-dessous.",
-	"builderRequirementAdded": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} exigence ajoutée",
-				"countPlural=other": "{count} exigences ajoutées"
-			}
-		}
-	],
-	"builderQuestionsAddedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} question",
-				"countPlural=other": "{count} questions"
-			}
-		}
-	],
-	"builderRequirementRemoved": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} exigence supprimée",
-				"countPlural=other": "{count} exigences supprimées"
-			}
-		}
-	],
-	"builderQuestionsRemovedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} question",
-				"countPlural=other": "{count} questions"
-			}
-		}
-	],
-	"builderNoStructuralChanges": "Aucune modification structurelle détectée (métadonnées uniquement).",
-	"builderBreakingChangesDetected": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} changement incompatible détecté",
-				"countPlural=other": "{count} changements incompatibles détectés"
-			}
-		}
-	],
-	"builderBreakingChangesHint": "Ces modifications peuvent affecter le scoring, la visibilité ou les résultats de conformité dans les audits existants.",
-	"builderFixValidationErrorsBeforePublish": "Certains éléments comportent des erreurs de validation. Corrigez les champs signalés avant de publier.",
-	"builderPublishedWithWarnings": "Publié avec des avertissements :",
-	"builderChangeTypeRequirement": "exigence",
-	"builderChangeTypeQuestion": "question",
-	"builderChangeTypeChoice": "choix de réponse",
-	"builderFieldLabelAssessable": "Évaluable",
-	"builderFieldLabelWeight": "Poids",
-	"builderFieldLabelImplementationGroups": "Groupes d'implémentation",
-	"builderFieldLabelVisibilityExpression": "Condition de visibilité",
-	"builderFieldLabelType": "Type de question",
-	"builderFieldLabelDependsOn": "Affichage conditionnel",
-	"builderFieldLabelAddScore": "Contribution au score",
-	"builderFieldLabelComputeResult": "Compte dans le résultat",
-	"builderFieldLabelSelectImplementationGroups": "Sélectionne les groupes d'implémentation",
-	"builderAffectedAudits": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} audit existant sera affecté",
-				"countPlural=other": "{count} audits existants sera affecté"
-			}
-		}
-	],
-	"builderAffectedAuditsAddedHint": "De nouvelles exigences seront ajoutées à ces audits.",
-	"builderAffectedAuditsRemovedHint": "Les exigences supprimées et leurs données d'évaluation seront effacées de ces audits.",
-	"builderCouldNotLoadPreview": "Impossible de charger l'aperçu d'impact. Procédez avec prudence.",
-	"builderConfirmPublish": "Confirmer la publication",
 	"builderSearchNodes": "Rechercher des nœuds...",
 	"builderExpandSidebar": "Déplier la barre latérale",
 	"builderCollapseSidebar": "Replier la barre latérale",
@@ -5035,18 +4939,18 @@
 	"builderVisibilityExpressionTooltip": "Expression CEL qui doit être évaluée à vrai pour que cette exigence soit visible. Exemple : requirements[\"urn:...\"].score > 50",
 	"builderVisibilityExpressionPlaceholder": "ex. requirements[\"urn:...\"].score > 50",
 	"builderImplementationGroupsLabel": "Groupes d'implémentation :",
-	"refIdRequired": "Un identifiant de r\u00e9f\u00e9rence valide est requis",
-	"objectUrnAlreadyExists": "Un objet avec cet identifiant existe d\u00e9j\u00e0 dans le brouillon",
-	"defaultPackager": "Packager par d\u00e9faut",
-	"defaultPackagerHelpText": "Pr\u00e9remplit l'identit\u00e9 de packager lors de la cr\u00e9ation de biblioth\u00e8ques dans le g\u00e9n\u00e9rateur (les URN sont urn:{packager}:risk:\u2026). Minuscules, chiffres, - et _ uniquement.",
+	"refIdRequired": "Un identifiant de référence valide est requis",
+	"objectUrnAlreadyExists": "Un objet avec cet identifiant existe déjà dans le brouillon",
+	"defaultPackager": "Packager par défaut",
+	"defaultPackagerHelpText": "Préremplit l'identité de packager lors de la création de bibliothèques dans le générateur (les URN sont urn:{packager}:risk:…). Minuscules, chiffres, - et _ uniquement.",
 	"builderThreatsLabel": "Menaces :",
-	"builderReferenceControlsLabel": "Contr\u00f4les de r\u00e9f\u00e9rence :",
+	"builderReferenceControlsLabel": "Contrôles de référence :",
 	"builderLinkExisting": "Lier un objet existant",
-	"builderCreateNew": "Cr\u00e9er",
-	"builderNoCatalogMatches": "Aucun r\u00e9sultat",
-	"builderBrowseLibrary": "Parcourir une autre biblioth\u00e8que\u2026",
-	"builderCatalogUnavailable": "Catalogue de r\u00e9f\u00e9rences indisponible",
-	"builderLinkDependencyHint": "Lier un objet d'une autre biblioth\u00e8que ajoute cette biblioth\u00e8que comme d\u00e9pendance.",
+	"builderCreateNew": "Créer",
+	"builderNoCatalogMatches": "Aucun résultat",
+	"builderBrowseLibrary": "Parcourir une autre bibliothèque…",
+	"builderCatalogUnavailable": "Catalogue de références indisponible",
+	"builderLinkDependencyHint": "Lier un objet d'une autre bibliothèque ajoute cette bibliothèque comme dépendance.",
 	"builderAddQuestion": "Ajouter une question",
 	"builderChildrenHidden": [
 		{
@@ -5069,7 +4973,6 @@
 	"builderSplashNumberedList": "Liste numérotée",
 	"builderSplashLink": "Lien",
 	"builderSplashTable": "Tableau",
-	"builderSplashInsertImage": "Insérer une image",
 	"builderUntitledQuestion": "Question sans titre",
 	"builderNotTranslated": "Non traduit",
 	"builderQuestionTextPlaceholder": "Saisissez votre question...",
@@ -5114,27 +5017,12 @@
 	"builderKbSaveDraft": "Enregistrer le brouillon",
 	"builderKbShowCheatsheet": "Afficher cet aide-mémoire",
 	"builderKbCloseDialog": "Fermer la boîte de dialogue",
-	"builderImportedFramework": "Référentiel importé",
-	"builderImportedFrameworkDescription": "Ce référentiel a été importé depuis une bibliothèque et ne peut pas être modifié directement. Pour effectuer des modifications, créez une copie modifiable.",
-	"builderCreateCopyAndEdit": "Créer une copie et modifier",
-	"builderCreatingCopy": "Création de la copie...",
-	"builderLoadingEditor": "Chargement de l'éditeur...",
-	"builderFailedToStartEditor": "Échec du démarrage de l'éditeur",
-	"builderBackToFramework": "Retour au référentiel",
-	"builderBackToBuilder": "Retour au constructeur",
-	"builderFailedToLoadDraft": "Échec du chargement du brouillon",
-	"builderImplementationGroupsHeader": "Groupes d'implémentation",
-	"builderNoItemsToPreview": "Aucun élément à prévisualiser.",
-	"builderNoItemsToPreviewHint": "Ajoutez des exigences évaluables ou des écrans de présentation dans le constructeur.",
-	"builderBaseLanguageOption": "Langue de base",
 	"builderFrameworkNameRequired": "Le nom du référentiel est requis.",
 	"builderFrameworkNameTooLong": "Le nom du référentiel fait {length} caractères (max 200).",
 	"builderNodeNameTooLong": "Le nom dépasse 200 caractères ({length}/200). Déplacez le texte long dans le champ description.",
 	"builderRefIdTooLong": "« {label} » : ref_id fait {length} caractères (max 100).",
 	"builderUrnTooLong": "« {label} » : URN fait {length} caractères (max 255).",
-	"builderFailedToSaveDraftBeforePublish": "Échec de l'enregistrement du brouillon avant publication.",
 	"builderUnsavedChangesNavigation": "Vous avez des modifications non enregistrées qui seront perdues. Quitter quand même ?",
-	"builderUnpublishedChangesNavigation": "Vous avez des modifications non publiées. Votre brouillon est enregistré et vous pourrez le reprendre plus tard. Quitter quand même ?",
 	"bulkEvidenceUpload": "Téléversement groupé de preuves",
 	"bulkEvidenceUploadDescription": "Téléversez plusieurs fichiers (ou un dossier entier) comme preuves en une seule fois. Les doublons (même SHA-256 dans le domaine cible) sont détectés automatiquement. Les conflits de nom sont résolus selon la stratégie choisie ci-dessous.",
 	"targetDomain": "Domaine cible",
@@ -5205,7 +5093,6 @@
 	"builderQuestionTypeUniqueChoice": "Choix unique",
 	"builderQuestionTypeMultipleChoice": "Choix multiple",
 	"builderQuestionTypeDate": "Date",
-	"builderChangedOn": "modifié le",
 	"requirementWeight": "Poids",
 	"frameworkReport": "Rapport du référentiel",
 	"scoringScale": "Échelle de notation",

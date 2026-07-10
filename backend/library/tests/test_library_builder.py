@@ -1740,3 +1740,94 @@ def test_identity_conflict_oracle_is_scoped(builder_only_client):
         reverse("library-drafts-validate", args=[draft_id])
     ).data
     assert not any("Identity conflict" in w for w in validation["warnings"]), validation
+
+
+# ---------------------------------------------------------------------------
+# Adopt a library-less live framework (retired standalone editor output)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_adopt_live_framework_updates_rows_in_place(admin_client):
+    from core.models import Question, QuestionChoice
+
+    root = Folder.get_root_folder()
+    framework = Framework.objects.create(name="Homegrown", folder=root, urn=None)
+    chapter = RequirementNode.objects.create(
+        framework=framework,
+        folder=root,
+        name="Chapter A",
+        ref_id="A",
+        assessable=False,
+        order_id=0,
+    )
+    requirement = RequirementNode.objects.create(
+        framework=framework,
+        folder=root,
+        name="Req A.1",
+        ref_id="A.1",
+        assessable=True,
+        order_id=1,
+    )
+    question = Question.objects.create(
+        requirement_node=requirement,
+        folder=root,
+        type="unique_choice",
+        text="Done?",
+        order=0,
+    )
+    QuestionChoice.objects.create(question=question, folder=root, value="Yes", order=0)
+
+    response = admin_client.post(
+        reverse("library-drafts-adopt"),
+        {"framework": str(framework.id)},
+        format="json",
+    )
+    assert response.status_code == status.HTTP_201_CREATED, response.content
+    draft_id = response.data["id"]
+    assert response.data["identity_locked"] is True
+
+    # Missing URNs were minted onto the live rows (adopt-in-place enabler).
+    framework.refresh_from_db()
+    chapter.refresh_from_db()
+    requirement.refresh_from_db()
+    question.refresh_from_db()
+    assert framework.urn == "urn:custom:risk:framework:homegrown"
+    assert chapter.urn and requirement.urn and question.urn
+
+    # The document mirrors the live tree.
+    content = response.data["content"]
+    doc_nodes = content["frameworks"][0]["requirement_nodes"]
+    assert [n["ref_id"] for n in doc_nodes] == ["A", "A.1"]
+    assert question.urn in doc_nodes[1]["questions"]
+
+    # Publishing goes through the loader and updates the SAME rows.
+    publish = admin_client.post(
+        reverse("library-drafts-publish", args=[draft_id]), {}, format="json"
+    )
+    assert publish.status_code == status.HTTP_200_OK, publish.content
+    framework.refresh_from_db()
+    requirement.refresh_from_db()
+    assert framework.library is not None  # attached, not duplicated
+    assert framework.library.urn == "urn:custom:risk:library:homegrown"
+    assert Framework.objects.filter(name="Homegrown").count() == 1
+    assert requirement.framework_id == framework.id
+
+
+@pytest.mark.django_db
+def test_adopt_live_framework_refuses_library_backed_ones(admin_client):
+    stored = StoredLibrary.objects.get(urn="urn:intuitem:risk:library:doc-pol")
+    assert stored.load() is None
+    framework = Framework.objects.create(
+        name="Lib-backed",
+        folder=Folder.get_root_folder(),
+        urn="urn:x:risk:framework:libbacked",
+        library=LoadedLibrary.objects.get(urn="urn:intuitem:risk:library:doc-pol"),
+    )
+    response = admin_client.post(
+        reverse("library-drafts-adopt"),
+        {"framework": str(framework.id)},
+        format="json",
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.data["error"] == "frameworkBelongsToALibrary"

@@ -25,12 +25,10 @@
 
 	let backHref = $derived(links?.back ?? `/frameworks/${frameworkId}`);
 	// Tri-state: undefined → default live-framework preview, null → hidden.
-	let previewHref = $derived(
-		links && 'preview' in links ? links.preview : `/frameworks/${frameworkId}/builder/preview`
-	);
-	let exportHref = $derived(
-		links?.exportYaml ?? `/frameworks/${frameworkId}/builder?_action=export-yaml`
-	);
+	// The standalone /frameworks/{id}/builder routes are retired: hosts must
+	// provide these links explicitly (the library builder does).
+	let previewHref = $derived(links?.preview ?? null);
+	let exportHref = $derived(links?.exportYaml ?? null);
 	const {
 		saving: savingStore,
 		errors: errorsStore,
@@ -128,20 +126,22 @@
 		{/if}
 
 		<!-- Export YAML button (exports the saved document) -->
-		<a
-			href={exportHref}
-			class="shrink-0 text-xs text-surface-600-400 hover:text-surface-700-300 transition-colors px-2 py-1 flex items-center gap-1"
-			download
-			title={$unsavedStore
-				? 'The export reflects the last saved state — save your changes first.'
-				: m.builderExportYamlTitle()}
-		>
-			<i class="fa-solid fa-file-export text-[10px]"></i>
-			{m.exportYaml()}
-			{#if $unsavedStore}
-				<i class="fa-solid fa-triangle-exclamation text-amber-500 text-[10px]"></i>
-			{/if}
-		</a>
+		{#if exportHref}
+			<a
+				href={exportHref}
+				class="shrink-0 text-xs text-surface-600-400 hover:text-surface-700-300 transition-colors px-2 py-1 flex items-center gap-1"
+				download
+				title={$unsavedStore
+					? 'The export reflects the last saved state — save your changes first.'
+					: m.builderExportYamlTitle()}
+			>
+				<i class="fa-solid fa-file-export text-[10px]"></i>
+				{m.exportYaml()}
+				{#if $unsavedStore}
+					<i class="fa-solid fa-triangle-exclamation text-amber-500 text-[10px]"></i>
+				{/if}
+			</a>
+		{/if}
 
 		<!-- Language selector -->
 		{#if ($frameworkStore.available_languages ?? []).length > 0}

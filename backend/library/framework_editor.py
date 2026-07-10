@@ -84,7 +84,7 @@ def node_base_urn(framework_urn: str) -> str:
 
 
 def _normalize_question_type(raw_type) -> str:
-    # Same normalization as the loader (_create_questions_from_data).
+    # Same normalization as the loader (_sync_questions_from_data).
     return "unique_choice" if raw_type == "single_choice" else (raw_type or "text")
 
 

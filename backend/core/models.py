@@ -52,7 +52,6 @@ from .base_models import (
     AbstractBaseModel,
     ActorSyncManager,
     ActorSyncMixin,
-    EditableMixin,
     ETADueDateMixin,
     NameDescriptionMixin,
 )
@@ -116,81 +115,6 @@ def match_urn(urn_string):
         return match.groups()  # Returns all captured groups from the regex match
     else:
         return None
-
-
-def _create_questions_from_data(requirement_node, questions_data):
-    """Create Question and QuestionChoice objects from the old JSON questions format.
-
-    Args:
-        requirement_node: RequirementNode instance
-        questions_data: dict keyed by question URN with type, text, choices, etc.
-    """
-    from core.models import Question, QuestionChoice
-
-    questions_to_create = []
-    choices_data_per_question = []  # parallel list: choices data for each question
-
-    for order, (q_urn, q_data) in enumerate(questions_data.items()):
-        raw_type = q_data.get("type", "text")
-        q_type = "unique_choice" if raw_type == "single_choice" else raw_type
-        parts = q_urn.split(":")
-        q_ref_id = parts[-1] if parts else q_urn
-        question_text = q_data.get("text", "")
-
-        questions_to_create.append(
-            Question(
-                requirement_node=requirement_node,
-                urn=q_urn,
-                ref_id=q_ref_id,
-                text=question_text,
-                annotation=q_data.get("annotation", question_text),
-                type=q_type,
-                config=q_data.get("config"),
-                depends_on=q_data.get("depends_on"),
-                order=order,
-                weight=q_data.get("weight", 1),
-                folder=requirement_node.folder,
-                is_published=True,
-                translations=q_data.get("translations"),
-            )
-        )
-        choices_data_per_question.append(q_data.get("choices", []))
-
-    created_questions = Question.objects.bulk_create(questions_to_create)
-
-    choices_to_create = []
-    for question, choices_data in zip(created_questions, choices_data_per_question):
-        for c_order, choice in enumerate(choices_data):
-            c_urn = choice.get("urn") or None
-            c_parts = c_urn.split(":") if c_urn else []
-            c_ref_id = c_parts[-1] if c_parts else None
-            compute_result = choice.get("compute_result")
-            if compute_result is not None:
-                compute_result = str(compute_result).lower()
-            choice_value = choice.get("value", "")
-            choices_to_create.append(
-                QuestionChoice(
-                    question=question,
-                    urn=c_urn,
-                    ref_id=c_ref_id,
-                    value=choice_value,
-                    annotation=choice.get("annotation", choice_value),
-                    add_score=choice.get("add_score"),
-                    compute_result=compute_result,
-                    order=c_order,
-                    description=choice.get("description"),
-                    color=choice.get("color"),
-                    select_implementation_groups=choice.get(
-                        "select_implementation_groups"
-                    ),
-                    folder=requirement_node.folder,
-                    is_published=True,
-                    translations=choice.get("translations"),
-                )
-            )
-
-    if choices_to_create:
-        QuestionChoice.objects.bulk_create(choices_to_create)
 
 
 def _sync_questions_from_data(requirement_node, questions_data):
@@ -2400,7 +2324,7 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
         return unsynced_applied_controls_query
 
 
-class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
+class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
     library = models.ForeignKey(
         LoadedLibrary,
         on_delete=models.CASCADE,
@@ -2492,7 +2416,7 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
         return self.get_name_translated
 
 
-class Framework(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
+class Framework(ReferentialObjectMixin, I18nObjectMixin):
     min_score = models.IntegerField(default=0, verbose_name=_("Minimum score"))
     max_score = models.IntegerField(default=100, verbose_name=_("Maximum score"))
     scores_definition = models.JSONField(
@@ -9957,7 +9881,7 @@ class Actor(AbstractBaseModel):
         return str(self.specific)
 
 
-class Preset(NameDescriptionMixin, FolderMixin, EditableMixin):
+class Preset(NameDescriptionMixin, FolderMixin):
     """Template definition. Library-backed (urn set) or user-authored (urn null)."""
 
     urn = models.CharField(max_length=255, null=True, blank=True, unique=True)

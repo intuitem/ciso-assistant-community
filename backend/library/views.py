@@ -1047,6 +1047,9 @@ class LibraryDraftViewSet(BaseModelViewSet):
         ):
             return Response(status=HTTP_403_FORBIDDEN)
 
+        if request.data.get("framework"):
+            return self._adopt_live_framework(request, folder)
+
         source = _get_readable_stored_library(
             request.user, request.data.get("stored_library")
         )
@@ -1094,6 +1097,80 @@ class LibraryDraftViewSet(BaseModelViewSet):
             # The identity already exists in the wild: frozen from the start.
             first_published_at=now(),
             last_published_at=now(),
+        )
+        return Response(LibraryDraftReadSerializer(draft).data, status=HTTP_201_CREATED)
+
+    def _adopt_live_framework(self, request, folder):
+        """Adopt a library-less live framework (retired standalone editor).
+
+        Serializes the live rows into a draft document; missing URNs are
+        minted onto the live rows first so a later publish updates these
+        very rows in place (audits keep pointing at them). The identity is
+        frozen from the start — the family is pinned to the live rows.
+        """
+        from library import live
+
+        try:
+            framework = Framework.objects.filter(
+                id=request.data.get("framework")
+            ).first()
+        except ValidationError, ValueError:
+            framework = None
+        if framework is None or not RoleAssignment.is_object_readable(
+            request.user, Framework, framework.id
+        ):
+            return Response({"error": "frameworkNotFound"}, status=HTTP_404_NOT_FOUND)
+        if framework.library_id:
+            # Library-backed frameworks are adopted through their library.
+            return Response(
+                {"error": "frameworkBelongsToALibrary"}, status=HTTP_400_BAD_REQUEST
+            )
+
+        needs_minting = (
+            not framework.urn
+            or RequirementNode.objects.filter(framework=framework, urn=None).exists()
+            or Question.objects.filter(
+                requirement_node__framework=framework, urn=None
+            ).exists()
+            or QuestionChoice.objects.filter(
+                question__requirement_node__framework=framework, urn=None
+            ).exists()
+        )
+        if needs_minting:
+            # Minting writes URNs onto the live rows.
+            if not RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename="change_framework"),
+                folder=framework.folder,
+            ):
+                return Response(status=HTTP_403_FORBIDDEN)
+            live.mint_missing_urns(framework)
+            framework.refresh_from_db()
+
+        draft_urn = framework.urn.lower().replace(":framework:", ":library:", 1)
+        existing_draft = LibraryDraft.objects.filter(urn=draft_urn).first()
+        if existing_draft is not None:
+            return Response(
+                {"error": "draftAlreadyExists", "draft": str(existing_draft.id)},
+                status=HTTP_409_CONFLICT,
+            )
+
+        packager, ref = live.framework_identity(framework)
+        draft = LibraryDraft.objects.create(
+            name=framework.name,
+            description=framework.description,
+            folder=folder,
+            packager=packager,
+            ref_id=ref,
+            locale=getattr(framework, "locale", None) or "en",
+            version=1,
+            provider=framework.provider or packager,
+            content={"frameworks": [live.live_framework_to_object(framework)]},
+            dependencies=[],
+            urn=draft_urn,
+            # The live rows already carry this family: frozen from the start.
+            first_published_at=now(),
+            last_published_at=None,
         )
         return Response(LibraryDraftReadSerializer(draft).data, status=HTTP_201_CREATED)
 

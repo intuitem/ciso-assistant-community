@@ -19,7 +19,7 @@ from core.models import (
     ReferenceControl,
     Terminology,
     Threat,
-    _create_questions_from_data,
+    _sync_questions_from_data,
 )
 from metrology.models import MetricDefinition
 from django.db import transaction
@@ -106,38 +106,51 @@ class RequirementNodeImporter:
         if parent_urn:
             parent_urn = parent_urn.lower()
 
-        requirement_node = RequirementNode.objects.create(
-            folder=Folder.get_root_folder(),
+        # update_or_create scoped to the framework: identical to create()
+        # for fresh imports, updates in place when the framework row was
+        # adopted (see FrameworkImporter.import_framework).
+        requirement_node, _ = RequirementNode.objects.update_or_create(
             framework=framework_object,
             urn=self.requirement_data["urn"].lower(),
-            parent_urn=parent_urn,
-            assessable=self.requirement_data.get("assessable"),
-            ref_id=self.requirement_data.get("ref_id"),
-            annotation=self.requirement_data.get("annotation"),
-            typical_evidence=self.requirement_data.get("typical_evidence"),
-            provider=framework_object.provider,
-            order_id=self.index,
-            name=self.requirement_data.get("name"),
-            description=self.requirement_data.get("description"),
-            implementation_groups=self.requirement_data.get("implementation_groups"),
-            display_mode=self.requirement_data.get(
-                "display_mode", RequirementNode.DisplayMode.DEFAULT
+            defaults=dict(
+                folder=Folder.get_root_folder(),
+                parent_urn=parent_urn,
+                assessable=self.requirement_data.get("assessable"),
+                ref_id=self.requirement_data.get("ref_id"),
+                annotation=self.requirement_data.get("annotation"),
+                typical_evidence=self.requirement_data.get("typical_evidence"),
+                provider=framework_object.provider,
+                order_id=self.index,
+                name=self.requirement_data.get("name"),
+                description=self.requirement_data.get("description"),
+                implementation_groups=self.requirement_data.get(
+                    "implementation_groups"
+                ),
+                display_mode=self.requirement_data.get(
+                    "display_mode", RequirementNode.DisplayMode.DEFAULT
+                ),
+                weight=self.requirement_data.get("weight", 1),
+                min_score=self.requirement_data.get("min_score"),
+                max_score=self.requirement_data.get("max_score"),
+                scores_definition_ref=self.requirement_data.get(
+                    "scores_definition_ref"
+                ),
+                locale=framework_object.locale,
+                default_locale=framework_object.default_locale,
+                translations=self.requirement_data.get("translations", {}),
+                is_published=True,
             ),
-            weight=self.requirement_data.get("weight", 1),
-            min_score=self.requirement_data.get("min_score"),
-            max_score=self.requirement_data.get("max_score"),
-            scores_definition_ref=self.requirement_data.get("scores_definition_ref"),
-            locale=framework_object.locale,
-            default_locale=framework_object.default_locale,
-            translations=self.requirement_data.get("translations", {}),
-            is_published=True,
         )
         requirement_node.clean()
 
-        # Create Question + QuestionChoice objects from questions data
+        # Sync Question + QuestionChoice objects: pure create for fresh
+        # imports, upsert-and-prune for adopted nodes that already carry
+        # question rows.
         questions_data = self.requirement_data.get("questions")
-        if questions_data and isinstance(questions_data, dict):
-            _create_questions_from_data(requirement_node, questions_data)
+        _sync_questions_from_data(
+            requirement_node,
+            questions_data if isinstance(questions_data, dict) else {},
+        )
 
         for threat in self.requirement_data.get("threats", []):
             logger.info(
@@ -355,28 +368,42 @@ class FrameworkImporter:
         if isinstance(scores_definition, list):
             scores_definition = {"scale": scores_definition}
 
-        framework_object = Framework.objects.create(
-            folder=Folder.get_root_folder(),
-            library=library_object,
+        # update_or_create: identical to create() for normal loads (no row
+        # exists yet) and adopts a pre-existing library-less framework in
+        # place — same URN family, same rows, audits untouched (the adopted
+        # live-framework path).
+        framework_object, framework_created = Framework.objects.update_or_create(
             urn=self.framework_data["urn"].lower(),
-            ref_id=self.framework_data["ref_id"],
-            name=self.framework_data.get("name"),
-            description=self.framework_data.get("description"),
-            min_score=min_score,
-            max_score=max_score,
-            scores_definition=scores_definition,
-            implementation_groups_definition=self.framework_data.get(
-                "implementation_groups_definition"
+            defaults=dict(
+                folder=Folder.get_root_folder(),
+                library=library_object,
+                ref_id=self.framework_data["ref_id"],
+                name=self.framework_data.get("name"),
+                description=self.framework_data.get("description"),
+                min_score=min_score,
+                max_score=max_score,
+                scores_definition=scores_definition,
+                implementation_groups_definition=self.framework_data.get(
+                    "implementation_groups_definition"
+                ),
+                outcomes_definition=self.framework_data.get("outcomes_definition", []),
+                provider=library_object.provider,
+                locale=library_object.locale,
+                default_locale=library_object.default_locale,
+                translations=self.framework_data.get("translations", {}),
+                is_published=True,
             ),
-            outcomes_definition=self.framework_data.get("outcomes_definition", []),
-            provider=library_object.provider,
-            locale=library_object.locale,
-            default_locale=library_object.default_locale,
-            translations=self.framework_data.get("translations", {}),
-            is_published=True,
         )
         for requirement_node in self._requirement_nodes:
             requirement_node.import_requirement_node(framework_object)
+        if not framework_created:
+            # Adopted framework: live nodes absent from the document were
+            # deleted in the draft. No-op for fresh imports.
+            RequirementNode.objects.filter(framework=framework_object).exclude(
+                urn__in=[
+                    rn.requirement_data["urn"].lower() for rn in self._requirement_nodes
+                ]
+            ).delete()
 
 
 class ThreatImporter:
