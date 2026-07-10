@@ -892,6 +892,14 @@ class LibraryUpdater:
                 - 'reset': Reset all scores to None
                 - 'rule_of_three': Apply proportional scaling from old to new range
         """
+
+        def get_implementation_group_ref_ids(definition):
+            return {
+                group.get("ref_id")
+                for group in definition or []
+                if isinstance(group, dict) and group.get("ref_id")
+            }
+
         for new_framework in self.new_frameworks:
             with transaction.atomic():
                 requirement_nodes = new_framework["requirement_nodes"]
@@ -900,10 +908,14 @@ class LibraryUpdater:
                 framework_dict["urn"] = framework_dict["urn"].lower()
                 if "outcomes_definition" not in framework_dict:
                     framework_dict["outcomes_definition"] = []
+                framework_dict.setdefault("implementation_groups_definition", None)
                 prev_fw = Framework.objects.filter(urn=framework_dict["urn"]).first()
                 prev_min = getattr(prev_fw, "min_score", None)
                 prev_max = getattr(prev_fw, "max_score", None)
                 prev_def = getattr(prev_fw, "scores_definition", None)
+                previous_implementation_groups = get_implementation_group_ref_ids(
+                    getattr(prev_fw, "implementation_groups_definition", None)
+                )
 
                 new_framework, _ = Framework.objects.update_or_create(
                     urn=framework_dict["urn"],
@@ -954,6 +966,38 @@ class LibraryUpdater:
                         framework=new_framework
                     ).select_related("folder", "perimeter")
                 ]
+
+                valid_implementation_groups = get_implementation_group_ref_ids(
+                    new_framework.implementation_groups_definition
+                )
+                removed_implementation_groups = (
+                    previous_implementation_groups - valid_implementation_groups
+                )
+                if removed_implementation_groups:
+                    assessments_with_stale_implementation_groups = []
+                    for compliance_assessment in compliance_assessments:
+                        selected_groups = (
+                            compliance_assessment.selected_implementation_groups or []
+                        )
+                        cleaned_groups = [
+                            group
+                            for group in selected_groups
+                            if group in valid_implementation_groups
+                        ]
+                        if cleaned_groups != selected_groups:
+                            compliance_assessment.selected_implementation_groups = (
+                                cleaned_groups
+                            )
+                            assessments_with_stale_implementation_groups.append(
+                                compliance_assessment
+                            )
+
+                    if assessments_with_stale_implementation_groups:
+                        ComplianceAssessment.objects.bulk_update(
+                            assessments_with_stale_implementation_groups,
+                            ["selected_implementation_groups"],
+                            batch_size=100,
+                        )
 
                 existing_requirement_node_objects = {
                     rn.urn.lower(): rn
