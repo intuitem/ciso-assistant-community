@@ -1,7 +1,11 @@
-# Wrap in-flight editing drafts of the retired standalone editors into
-# LibraryDrafts before the EditableMixin columns are dropped.
+# Library builder: add the LibraryDraft model, wrap any in-flight editing
+# drafts of the retired standalone editors into LibraryDrafts, then drop the
+# EditableMixin columns. The three steps live in one migration so they run in
+# order and atomically: the model must exist before the data step reads/writes
+# it, and the editing_draft columns must survive until the data step has
+# consumed them.
 #
-# Scope (deliberate, see the library-builder design note):
+# Data-step scope (deliberate, see the library-builder design note):
 # - Framework WIP (library-less; the old editor only edited those): the
 #   editor-doc blob is converted into a draft document. Missing URNs are
 #   backfilled onto the live rows by row id first, so a later publish
@@ -21,7 +25,11 @@
 
 import re
 
-from django.db import migrations
+import django.core.validators
+import django.db.models.deletion
+import iam.models
+import uuid
+from django.db import migrations, models
 from django.utils.timezone import now
 
 
@@ -56,7 +64,7 @@ def _wrap_framework_drafts(apps, root):
     for framework in Framework.objects.exclude(editing_draft=None):
         label = f"framework {framework.id} ({framework.name!r})"
         if framework.library_id:
-            print(f"[0175] skipping WIP on library-backed {label}")
+            print(f"[0176] skipping WIP on library-backed {label}")
             continue
         doc = framework.editing_draft or {}
         meta = doc.get("framework_meta") or {}
@@ -144,12 +152,12 @@ def _wrap_framework_drafts(apps, root):
                 },
             )
         except Exception as exc:  # malformed WIP: keep live state, log loudly
-            print(f"[0175] could NOT wrap WIP of {label}: {exc}")
+            print(f"[0176] could NOT wrap WIP of {label}: {exc}")
             continue
 
         library_urn = framework.urn.lower().replace(":framework:", ":library:", 1)
         if LibraryDraft.objects.filter(urn=library_urn).exists():
-            print(f"[0175] draft already exists for {label} ({library_urn}), skipping")
+            print(f"[0176] draft already exists for {label} ({library_urn}), skipping")
             continue
         LibraryDraft.objects.create(
             name=meta.get("name") or framework.name,
@@ -168,7 +176,7 @@ def _wrap_framework_drafts(apps, root):
         )
         framework.editing_draft = None
         framework.save(update_fields=["editing_draft"])
-        print(f"[0175] wrapped WIP of {label} into draft {library_urn}")
+        print(f"[0176] wrapped WIP of {label} into draft {library_urn}")
 
 
 def _wrap_matrix_drafts(apps, root):
@@ -178,7 +186,7 @@ def _wrap_matrix_drafts(apps, root):
     for matrix in RiskMatrix.objects.exclude(editing_draft=None):
         label = f"risk matrix {matrix.id} ({matrix.name!r})"
         if matrix.library_id:
-            print(f"[0175] skipping WIP on library-backed {label}")
+            print(f"[0176] skipping WIP on library-backed {label}")
             continue
         definition = matrix.editing_draft or {}
         ref = _token(matrix.ref_id or matrix.name, f"matrix-{str(matrix.id)[:8]}")
@@ -189,7 +197,7 @@ def _wrap_matrix_drafts(apps, root):
             matrix.save(update_fields=["urn"])
         library_urn = f"urn:custom:risk:library:{ref}"
         if LibraryDraft.objects.filter(urn=library_urn).exists():
-            print(f"[0175] draft already exists for {label} ({library_urn}), skipping")
+            print(f"[0176] draft already exists for {label} ({library_urn}), skipping")
             continue
         matrix_object = {
             "urn": matrix.urn.lower(),
@@ -216,7 +224,7 @@ def _wrap_matrix_drafts(apps, root):
         )
         matrix.editing_draft = None
         matrix.save(update_fields=["editing_draft"])
-        print(f"[0175] wrapped WIP of {label} into draft {library_urn}")
+        print(f"[0176] wrapped WIP of {label} into draft {library_urn}")
 
 
 def wrap_editing_drafts(apps, schema_editor):
@@ -231,7 +239,7 @@ def wrap_editing_drafts(apps, schema_editor):
     Preset = apps.get_model("core", "Preset")
     for preset in Preset.objects.exclude(editing_draft=None):
         print(
-            f"[0175] preset {preset.id} ({preset.name!r}) has an in-flight "
+            f"[0176] preset {preset.id} ({preset.name!r}) has an in-flight "
             "editing draft; it is NOT wrapped (re-do the edits in the "
             "library builder) — the published state is untouched."
         )
@@ -239,10 +247,157 @@ def wrap_editing_drafts(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0174_librarydraft"),
-        ("iam", "0001_initial"),
+        ("core", "0175_customdochtmltemplate_objectclassification_and_more"),
+        ("iam", "0023_alter_folder_content_type"),
     ]
 
     operations = [
+        migrations.CreateModel(
+            name="LibraryDraft",
+            fields=[
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(auto_now_add=True, verbose_name="Created at"),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(auto_now=True, verbose_name="Updated at"),
+                ),
+                (
+                    "is_published",
+                    models.BooleanField(default=False, verbose_name="published"),
+                ),
+                ("name", models.CharField(max_length=200, verbose_name="Name")),
+                (
+                    "description",
+                    models.TextField(blank=True, null=True, verbose_name="Description"),
+                ),
+                (
+                    "packager",
+                    models.CharField(
+                        max_length=100,
+                        validators=[
+                            django.core.validators.RegexValidator(
+                                message="invalidLibraryIdentity", regex="^[a-z0-9_-]+$"
+                            )
+                        ],
+                        verbose_name="Packager",
+                    ),
+                ),
+                (
+                    "ref_id",
+                    models.CharField(
+                        max_length=100,
+                        validators=[
+                            django.core.validators.RegexValidator(
+                                message="invalidLibraryIdentity", regex="^[a-z0-9_-]+$"
+                            )
+                        ],
+                        verbose_name="Reference ID",
+                    ),
+                ),
+                (
+                    "urn",
+                    models.CharField(
+                        blank=True, max_length=255, null=True, verbose_name="URN"
+                    ),
+                ),
+                (
+                    "locale",
+                    models.CharField(
+                        default="en", max_length=100, verbose_name="Locale"
+                    ),
+                ),
+                (
+                    "version",
+                    models.IntegerField(
+                        default=1,
+                        validators=[django.core.validators.MinValueValidator(1)],
+                        verbose_name="Version",
+                    ),
+                ),
+                (
+                    "provider",
+                    models.CharField(
+                        blank=True, max_length=200, null=True, verbose_name="Provider"
+                    ),
+                ),
+                (
+                    "copyright",
+                    models.CharField(
+                        blank=True, max_length=4096, null=True, verbose_name="Copyright"
+                    ),
+                ),
+                ("publication_date", models.DateField(blank=True, null=True)),
+                (
+                    "annotation",
+                    models.TextField(blank=True, null=True, verbose_name="Annotation"),
+                ),
+                ("translations", models.JSONField(blank=True, default=dict)),
+                ("dependencies", models.JSONField(blank=True, default=list)),
+                ("labels", models.JSONField(blank=True, default=list)),
+                ("content", models.JSONField(blank=True, default=dict)),
+                ("first_published_at", models.DateTimeField(blank=True, null=True)),
+                ("last_published_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "folder",
+                    models.ForeignKey(
+                        default=iam.models.Folder.get_root_folder_id,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(class)s_folder",
+                        to="iam.folder",
+                    ),
+                ),
+            ],
+            options={
+                "verbose_name": "Library draft",
+                "verbose_name_plural": "Library drafts",
+            },
+        ),
         migrations.RunPython(wrap_editing_drafts, migrations.RunPython.noop),
+        migrations.RemoveField(
+            model_name="framework",
+            name="editing_draft",
+        ),
+        migrations.RemoveField(
+            model_name="framework",
+            name="editing_history",
+        ),
+        migrations.RemoveField(
+            model_name="framework",
+            name="editing_version",
+        ),
+        migrations.RemoveField(
+            model_name="preset",
+            name="editing_draft",
+        ),
+        migrations.RemoveField(
+            model_name="preset",
+            name="editing_history",
+        ),
+        migrations.RemoveField(
+            model_name="preset",
+            name="editing_version",
+        ),
+        migrations.RemoveField(
+            model_name="riskmatrix",
+            name="editing_draft",
+        ),
+        migrations.RemoveField(
+            model_name="riskmatrix",
+            name="editing_history",
+        ),
+        migrations.RemoveField(
+            model_name="riskmatrix",
+            name="editing_version",
+        ),
     ]
