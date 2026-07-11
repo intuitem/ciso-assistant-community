@@ -187,6 +187,8 @@ class StoredLibraryViewSet(BaseModelViewSet):
             lib = StoredLibrary.objects.get(**{key: pk})
         except:
             return Response("Library not found.", status=HTTP_404_NOT_FOUND)
+        if not RoleAssignment.is_object_readable(request.user, StoredLibrary, lib.id):
+            return Response("Library not found.", status=HTTP_404_NOT_FOUND)
         return Response(update_translations(lib.content))
 
     def destroy(self, request, *args, pk, **kwargs):
@@ -281,6 +283,8 @@ class StoredLibraryViewSet(BaseModelViewSet):
             key = "urn" if pk.startswith("urn:") else "id"
             lib = StoredLibrary.objects.get(**{key: pk})
         except:
+            return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
+        if not RoleAssignment.is_object_readable(request.user, StoredLibrary, lib.id):
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
 
         library_objects = lib.content  # We may need caching for this
@@ -754,6 +758,8 @@ class LoadedLibraryViewSet(BaseModelViewSet):
             lib = LoadedLibrary.objects.get(**{key: pk})
         except Exception:
             return Response("Library not found.", status=HTTP_404_NOT_FOUND)
+        if not RoleAssignment.is_object_readable(request.user, LoadedLibrary, lib.id):
+            return Response("Library not found.", status=HTTP_404_NOT_FOUND)
         return Response(lib._objects)
 
     @action(detail=True, methods=["get"])
@@ -764,6 +770,8 @@ class LoadedLibraryViewSet(BaseModelViewSet):
             key = "urn" if pk.startswith("urn:") else "id"
             lib = LoadedLibrary.objects.get(**{key: pk})
         except Exception:
+            return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
+        if not RoleAssignment.is_object_readable(request.user, LoadedLibrary, lib.id):
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
 
         if not lib.frameworks.exists():

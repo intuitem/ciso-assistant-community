@@ -940,6 +940,7 @@
 					<AuditTrailButton
 						model="compliance-assessments"
 						objectId={data.compliance_assessment.id}
+						folderId={data.compliance_assessment.folder.id}
 					/>
 				{/if}
 				<!-- Power-ups Command Palette Grid -->

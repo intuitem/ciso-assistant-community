@@ -45,18 +45,22 @@
 
 	const user = page.data.user;
 	const model = URL_MODEL_MAP['risk-scenarios'];
-	const canEditObject: boolean = canPerformAction({
-		user,
-		action: 'change',
-		model: model.name,
-		domain: data.scenario.folder.id
-	});
-	const canCreateAcceptance = canPerformAction({
-		user,
-		action: 'add',
-		model: 'riskacceptance',
-		domain: data.scenario.folder.id
-	});
+	const canEditObject: boolean = $derived(
+		canPerformAction({
+			user,
+			action: 'change',
+			model: model.name,
+			domain: data.scenario.folder.id
+		})
+	);
+	const canCreateAcceptance = $derived(
+		canPerformAction({
+			user,
+			action: 'add',
+			model: 'riskacceptance',
+			domain: data.scenario.folder.id
+		})
+	);
 	let color_map = $state({});
 	color_map['--'] = '#A9A9A9';
 

@@ -28,7 +28,7 @@
 	import { goto } from '$app/navigation';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { getListViewFields } from '$lib/utils/table';
-	import { canPerformAction } from '$lib/utils/access-control';
+	import { canPerformAction, resolveObjectDomain } from '$lib/utils/access-control';
 	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
 	import {
 		getModalStore,
@@ -365,14 +365,13 @@
 	}
 
 	const user = page.data.user;
+	const objectDomain: string =
+		resolveObjectDomain(data.model.name, data.data) ?? user.root_folder_id;
 	const canEditObject: boolean = canPerformAction({
 		user,
 		action: 'change',
 		model: data.model.name,
-		domain:
-			data.model.name === 'folder'
-				? data.data.id
-				: (data.data.folder?.id ?? data.data.folder ?? user.root_folder_id)
+		domain: objectDomain
 	});
 
 	let displayEditButton = $derived(function () {
@@ -894,13 +893,7 @@
 				{/if}
 			{/if}
 			{@render actions?.()}
-			<AuditTrailButton
-				model={data.urlModel}
-				objectId={data.data?.id}
-				folderId={data.model.name === 'folder'
-					? data.data?.id
-					: (data.data?.folder?.id ?? data.data?.folder ?? user.root_folder_id)}
-			/>
+			<AuditTrailButton model={data.urlModel} objectId={data.data?.id} folderId={objectDomain} />
 		</div>
 	</div>
 </div>

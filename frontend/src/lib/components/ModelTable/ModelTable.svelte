@@ -44,7 +44,11 @@
 	import Search from './Search.svelte';
 	import Th from './Th.svelte';
 	import ThFilter from './ThFilter.svelte';
-	import { canPerformAction, hasPermissionAnywhere } from '$lib/utils/access-control';
+	import {
+		canPerformAction,
+		canPerformActionOnObject,
+		hasPermissionAnywhere
+	} from '$lib/utils/access-control';
 	import { ContextMenu } from 'bits-ui';
 	import { tableHandlers, tableStates, tableColumnStates } from '$lib/utils/stores';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
@@ -515,16 +519,11 @@
 	);
 	let contextMenuCanEditObject = $derived(
 		(model
-			? canPerformAction({
+			? canPerformActionOnObject({
 					user,
 					action: 'change',
 					model: model.name,
-					domain:
-						model.name === 'folder'
-							? contextMenuOpenRow?.meta.id
-							: (contextMenuOpenRow?.meta.folder?.id ??
-								contextMenuOpenRow?.meta.folder ??
-								user.root_folder_id)
+					object: contextMenuOpenRow?.meta
 				})
 			: false) &&
 			(!(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn) ||
@@ -541,16 +540,11 @@
 	let contextMenuCanDeleteObject = $derived(
 		!preventDelete(contextMenuOpenRow ?? { head: {}, body: [], meta: [] }) &&
 			(model
-				? canPerformAction({
+				? canPerformActionOnObject({
 						user,
 						action: 'delete',
 						model: model.name,
-						domain:
-							model.name === 'folder'
-								? contextMenuOpenRow?.meta.id
-								: (contextMenuOpenRow?.meta.folder?.id ??
-									contextMenuOpenRow?.meta.folder ??
-									user.root_folder_id)
+						object: contextMenuOpenRow?.meta
 					})
 				: false)
 	);
