@@ -78,18 +78,18 @@
 		{#if $unsavedStore}
 			<span
 				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 inline-flex items-center gap-1"
-				title="Local edits not yet saved to the library draft."
+				title={m.builderStatusUnsavedTitle()}
 			>
 				<i class="fa-solid fa-pen-nib text-[10px]"></i>
-				Unsaved changes
+				{m.builderStatusUnsaved()}
 			</span>
 		{:else if hasDraftContent}
 			<span
 				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 inline-flex items-center gap-1"
-				title="All edits are saved to the library draft. Publish from the library page."
+				title={m.builderStatusSavedTitle()}
 			>
 				<i class="fa-solid fa-circle-check text-[10px]"></i>
-				Saved to draft
+				{m.builderStatusSaved()}
 			</span>
 		{:else}
 			<span
@@ -131,9 +131,7 @@
 				href={exportHref}
 				class="shrink-0 text-xs text-surface-600-400 hover:text-surface-700-300 transition-colors px-2 py-1 flex items-center gap-1"
 				download
-				title={$unsavedStore
-					? 'The export reflects the last saved state — save your changes first.'
-					: m.builderExportYamlTitle()}
+				title={$unsavedStore ? m.builderExportUnsavedTitle() : m.builderExportYamlTitle()}
 			>
 				<i class="fa-solid fa-file-export text-[10px]"></i>
 				{m.exportYaml()}

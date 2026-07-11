@@ -226,7 +226,13 @@ def check_document_shape(objects: dict) -> list:
                     for choice_index, choice in check_dict_list(
                         choices, f"{q_path}.choices"
                     ):
-                        note_urn(choice.get("urn"), f"{q_path}.choices[{choice_index}]")
+                        choice_urn = choice.get("urn")
+                        if choice_urn is not None and not isinstance(choice_urn, str):
+                            type_error(
+                                f"{q_path}.choices[{choice_index}].urn", "a string"
+                            )
+                        else:
+                            note_urn(choice_urn, f"{q_path}.choices[{choice_index}]")
 
     for index, mapping_set in top_level.get("requirement_mapping_sets", []):
         path = f"content.requirement_mapping_sets[{index}]"
@@ -411,6 +417,10 @@ def extract_objects(
     """
     if default_policy not in REFERENCE_POLICIES:
         raise BuilderError(f"Unknown reference policy: {default_policy}")
+    # Request payload: a list or scalar would crash on .items() (500);
+    # BuilderError is what the views translate into a 400.
+    if per_urn_policies is not None and not isinstance(per_urn_policies, dict):
+        raise BuilderError("Reference policies must be an object keyed by URN")
     per_urn_policies = {
         str(urn).lower(): policy for urn, policy in (per_urn_policies or {}).items()
     }
@@ -1012,6 +1022,13 @@ def _check_reference_integrity(draft, user=None) -> list:
 
     for framework in objects.get("frameworks") or []:
         fw_urn = str(framework.get("urn", "")).lower()
+        # parent_urn must point inside THIS framework's tree: checking the
+        # document-wide node set would let a multi-framework document (import
+        # or adopt path) attach a node across frameworks and break the tree.
+        framework_node_urns = {
+            str(node.get("urn", "")).lower()
+            for node in framework.get("requirement_nodes") or []
+        }
         # A question's depends_on.question must reference a question that
         # exists in this framework, else the dependent question is invisible
         # forever in every audit (isQuestionVisible finds no answer for it).
@@ -1025,7 +1042,7 @@ def _check_reference_integrity(draft, user=None) -> list:
         for node in framework.get("requirement_nodes") or []:
             node_urn = str(node.get("urn", "")).lower()
             parent = node.get("parent_urn")
-            if parent and str(parent).lower() not in node_urns:
+            if parent and str(parent).lower() not in framework_node_urns:
                 errors.append(
                     f"{node_urn}: parent_urn {parent} is not a node of {fw_urn}"
                 )

@@ -22,6 +22,24 @@
 		'preset'
 	];
 
+	// Count-aware, localized label per object kind (singular/plural handled
+	// by the message). Unknown keys fall back to the raw key.
+	const OBJECT_LABELS: Record<string, (args: { count: number }) => string> = {
+		frameworks: m.lbCountFrameworks,
+		threats: m.lbCountThreats,
+		reference_controls: m.lbCountReferenceControls,
+		risk_matrices: m.lbCountRiskMatrices,
+		requirement_mapping_sets: m.lbCountRequirementMappingSets,
+		metric_definitions: m.lbCountMetricDefinitions,
+		preset: m.lbCountPreset
+	};
+
+	function objectCountLabel(type: string): string {
+		const count = objectCount(type);
+		const label = OBJECT_LABELS[type];
+		return label ? label({ count }) : `${count} ${type.replaceAll('_', ' ')}`;
+	}
+
 	let statusMessage = $state('');
 	let statusType: 'success' | 'error' | '' = $state('');
 	let statusTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -558,6 +576,9 @@
 					</p>
 				{/if}
 			</div>
+			<!-- Toolbar. Decorative icons are aria-hidden: their ::before glyph
+			     would otherwise pollute the controls' accessible names (breaking
+			     exact-name queries like the functional tests' /^publish$/). -->
 			<div class="flex items-center gap-2">
 				{#if statusMessage}
 					<span
@@ -575,7 +596,10 @@
 						onclick={() => setView(view === 'simple' ? 'full' : 'simple')}
 						title={view === 'simple' ? m.lbDraftFullViewTitle() : m.lbDraftSimpleViewTitle()}
 					>
-						<i class="fa-solid {view === 'simple' ? 'fa-layer-group' : 'fa-minimize'} mr-1"></i>
+						<i
+							class="fa-solid {view === 'simple' ? 'fa-layer-group' : 'fa-minimize'} mr-1"
+							aria-hidden="true"
+						></i>
 						{view === 'simple' ? m.lbDraftFullView() : m.lbDraftSimpleView()}
 					</button>
 				{/if}
@@ -585,10 +609,10 @@
 					onclick={validateDraft}
 					disabled={validating}
 				>
-					<i class="fa-solid fa-list-check mr-1"></i>{m.validate()}
+					<i class="fa-solid fa-list-check mr-1" aria-hidden="true"></i>{m.validate()}
 				</button>
 				<a href="{base()}/export" class="btn btn-sm variant-ghost-surface">
-					<i class="fa-solid fa-file-arrow-down mr-1"></i>{m.exportYaml()}
+					<i class="fa-solid fa-file-arrow-down mr-1" aria-hidden="true"></i>{m.exportYaml()}
 				</a>
 				<button
 					type="button"
@@ -597,9 +621,9 @@
 					disabled={publishing}
 				>
 					{#if publishing}
-						<i class="fa-solid fa-spinner fa-spin mr-1"></i>
+						<i class="fa-solid fa-spinner fa-spin mr-1" aria-hidden="true"></i>
 					{:else}
-						<i class="fa-solid fa-cloud-arrow-up mr-1"></i>
+						<i class="fa-solid fa-cloud-arrow-up mr-1" aria-hidden="true"></i>
 					{/if}
 					{m.publish()}
 				</button>
@@ -616,8 +640,7 @@
 					{#each OBJECT_TYPES as type}
 						{#if objectCount(type) > 0}
 							<span class="badge variant-ghost-surface text-xs">
-								{objectCount(type)}
-								{type.replaceAll('_', ' ')}
+								{objectCountLabel(type)}
 							</span>
 						{/if}
 					{/each}

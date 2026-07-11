@@ -10,20 +10,18 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 	const draft = await draftRes.json();
 
 	// Scaffold references target loaded-library URNs (see the retired
-	// standalone preset editor): same picker data as before.
+	// standalone preset editor): same picker data as before. A non-OK DRF
+	// response still parses as JSON ({"detail": …}), so gate on r.ok or the
+	// pickers would receive the error object instead of a list.
+	const fetchList = (url: string): Promise<any[]> =>
+		fetch(url)
+			.then((r) => (r.ok ? r.json() : Promise.reject(new Error(`${r.status}`))))
+			.then((d) => d.results ?? d)
+			.catch(() => []);
 	const [frameworks, riskMatrices, frameworkDetails] = await Promise.all([
-		fetch(`${BASE_API_URL}/loaded-libraries/?object_type=framework&ordering=name`)
-			.then((r) => r.json())
-			.then((d) => d.results ?? d)
-			.catch(() => []),
-		fetch(`${BASE_API_URL}/loaded-libraries/?object_type=risk_matrix&ordering=name`)
-			.then((r) => r.json())
-			.then((d) => d.results ?? d)
-			.catch(() => []),
-		fetch(`${BASE_API_URL}/frameworks/?ordering=name`)
-			.then((r) => r.json())
-			.then((d) => d.results ?? d)
-			.catch(() => [])
+		fetchList(`${BASE_API_URL}/loaded-libraries/?object_type=framework&ordering=name`),
+		fetchList(`${BASE_API_URL}/loaded-libraries/?object_type=risk_matrix&ordering=name`),
+		fetchList(`${BASE_API_URL}/frameworks/?ordering=name`)
 	]);
 
 	// Shape the moved preset-editor page expects. The preset has its own

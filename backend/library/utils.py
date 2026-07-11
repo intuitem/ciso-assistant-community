@@ -155,10 +155,21 @@ class RequirementNodeImporter:
         # Use .set() rather than .add(): on the adopt-in-place / re-import
         # path the node already exists, and a link removed in the document
         # must be removed from the live row too (add-only would strand it).
-        threats = [
-            Threat.objects.get(urn=threat.lower())
-            for threat in self.requirement_data.get("threats", [])
-        ]
+        threats = []
+        for threat in self.requirement_data.get("threats", []):
+            try:
+                threats.append(Threat.objects.get(urn=threat.lower()))
+            except Threat.DoesNotExist as exc:
+                threat_name = threat or "unknown"
+                requirement_identifier = self.requirement_data.get(
+                    "ref_id", self.requirement_data.get("urn")
+                )
+                error_message = (
+                    f"Unknown threat '{threat_name}' "
+                    f"referenced in requirement '{requirement_identifier}'."
+                )
+                logger.error(error_message)
+                raise ValueError(error_message) from exc
         if threats or requirement_node.threats.exists():
             requirement_node.threats.set(threats)
 

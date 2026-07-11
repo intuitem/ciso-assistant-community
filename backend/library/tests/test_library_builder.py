@@ -209,6 +209,69 @@ def test_extract_reference_policy_keeps_urn_and_adds_source_dependency():
     assert "urn:acme:risk:library:source-lib" in result["dependencies"]
 
 
+def test_extract_rejects_non_dict_reference_policies():
+    """`policies` comes straight from the request body: a list or scalar must
+    raise BuilderError (→ 400), not AttributeError on .items() (→ 500)."""
+    with pytest.raises(builder.BuilderError):
+        builder.extract_objects(
+            source_content=SOURCE_LIBRARY["objects"],
+            source_library_urn=SOURCE_LIBRARY["urn"],
+            source_dependencies=[],
+            target_packager="me",
+            target_ref_id="fork",
+            selected_types=["frameworks"],
+            per_urn_policies=["strip"],
+            resolve_owner=lambda urn: None,
+        )
+
+
+@pytest.mark.django_db
+def test_validation_rejects_cross_framework_parent_urn():
+    """parent_urn must stay inside its own framework's tree. A multi-framework
+    document (reachable through import-yaml or adopt) used to pass because the
+    check ran against the document-wide node set."""
+    draft = LibraryDraft(
+        name="multi",
+        packager="me",
+        ref_id="multi",
+        version=1,
+        urn="urn:me:risk:library:multi",
+        content={
+            "frameworks": [
+                {
+                    "urn": "urn:me:risk:framework:multi-a",
+                    "ref_id": "A",
+                    "name": "A",
+                    "requirement_nodes": [
+                        {
+                            "urn": "urn:me:risk:req_node:multi-a:root",
+                            "assessable": False,
+                        }
+                    ],
+                },
+                {
+                    "urn": "urn:me:risk:framework:multi-b",
+                    "ref_id": "B",
+                    "name": "B",
+                    "requirement_nodes": [
+                        {
+                            "urn": "urn:me:risk:req_node:multi-b:child",
+                            "assessable": True,
+                            # Crosses into framework A's tree: must be rejected.
+                            "parent_urn": "urn:me:risk:req_node:multi-a:root",
+                        }
+                    ],
+                },
+            ]
+        },
+    )
+    validation = builder.validate_draft_document(draft)
+    assert any(
+        "parent_urn" in error and "multi-a:root" in error
+        for error in validation["errors"]
+    ), validation["errors"]
+
+
 def test_extract_individual_selection_of_leaf_objects_is_clean():
     result = builder.extract_objects(
         source_content=SOURCE_LIBRARY["objects"],
@@ -2110,8 +2173,10 @@ def test_publish_detaches_removed_reference_control_links(admin_client):
     # Remove the link in the document and republish → live row must drop it.
     current = admin_client.get(detail_url).data["content"]
     current["frameworks"][0]["requirement_nodes"][0].pop("reference_controls", None)
-    admin_client.patch(detail_url, {"content": current}, format="json")
-    admin_client.patch(detail_url, {"version": 2}, format="json")
+    content_patch = admin_client.patch(detail_url, {"content": current}, format="json")
+    assert content_patch.status_code == status.HTTP_200_OK, content_patch.content
+    version_patch = admin_client.patch(detail_url, {"version": 2}, format="json")
+    assert version_patch.status_code == status.HTTP_200_OK, version_patch.content
     republish = admin_client.post(publish_url, {}, format="json")
     assert republish.status_code == status.HTTP_200_OK, republish.content
     node.refresh_from_db()

@@ -206,8 +206,11 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                     )
             if key == "default_packager":
                 # Identity alphabet of library packagers / ref_ids
-                # (core.LibraryDraft.IDENTITY_REGEX).
-                if not isinstance(value, str) or not re.match(r"^[a-z0-9_-]+$", value):
+                # (core.LibraryDraft.IDENTITY_REGEX). fullmatch, not match:
+                # `$` would still accept a trailing newline.
+                if not isinstance(value, str) or not re.fullmatch(
+                    r"[a-z0-9_-]+", value
+                ):
                     raise serializers.ValidationError(
                         {"default_packager": "Must match [a-z0-9_-]+."}
                     )

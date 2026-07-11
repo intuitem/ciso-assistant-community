@@ -10,6 +10,14 @@ import type { RequestHandler } from './$types';
  */
 export const GET: RequestHandler = async ({ params, fetch }) => {
 	const r = await fetch(`${BASE_API_URL}/library-drafts/${params.id}/export/`);
+	if (!r.ok) {
+		// Without this gate the attachment headers below would make the
+		// browser download the error body as a .yaml file.
+		return new Response(await r.text(), {
+			status: r.status,
+			headers: { 'Content-Type': r.headers.get('Content-Type') ?? 'application/json' }
+		});
+	}
 	return new Response(await r.blob(), {
 		status: r.status,
 		headers: {

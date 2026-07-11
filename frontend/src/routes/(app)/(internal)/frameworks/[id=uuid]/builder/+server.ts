@@ -19,6 +19,13 @@ export const GET: RequestHandler = async ({ fetch, url, params }) => {
 			status: 400
 		});
 	}
+	// attachmentId is interpolated into the proxied URL path: constrain it to
+	// a UUID so crafted values (e.g. ../ segments) can't retarget the proxy.
+	if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(attachmentId)) {
+		return new Response(JSON.stringify({ error: 'invalid attachment_id' }), {
+			status: 400
+		});
+	}
 	const apiUrl = `${BASE_API_URL}/frameworks/${params.id}/serve-image/${attachmentId}/`;
 	const res = await fetch(apiUrl);
 	if (!res.ok) {

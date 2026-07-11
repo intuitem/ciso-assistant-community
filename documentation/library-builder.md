@@ -3,7 +3,7 @@
 ## Summary
 
 The library builder is an **interactive packager**: a tool for authoring a
-library (the same artifact the `tools/` Excel convertor produces), edited in the
+library (the same artifact the `tools/` Excel converter produces), edited in the
 UI instead of a spreadsheet. It produces a **library YAML**. "Publishing" means
 **loading that YAML like any other library** — in this instance or any other,
 identically.

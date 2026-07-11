@@ -2,19 +2,25 @@
 	import FrameworkBuilder from '$lib/components/FrameworkBuilder/FrameworkBuilder.svelte';
 	import type { Framework } from '$lib/components/FrameworkBuilder/builder-state';
 	import { pageTitle } from '$lib/utils/stores';
+	import { m } from '$paraglide/messages';
 
 	let { data } = $props();
 
-	const draft = data.draft;
-	const editorData = data.editorData;
-	const meta = editorData.editing_draft.framework_meta;
+	// $derived, not const: same-route navigation (draft A's editor → draft
+	// B's editor) reuses this component with new `data`. Snapshots would keep
+	// the editor saving against the previous draft.
+	const draft = $derived(data.draft);
+	const editorData = $derived(data.editorData);
+	const meta = $derived(editorData.editing_draft.framework_meta);
 
-	$pageTitle = `Library Builder — ${meta.name || draft.name}`;
+	$effect(() => {
+		$pageTitle = m.lbFrameworkPageTitle({ name: meta.name || draft.name });
+	});
 
 	// Synthetic Framework prop: the editor works on the library document, so
 	// there is no live Framework row backing it. The framework URN doubles as
 	// the stable id (localStorage keys, slug fallback).
-	const framework: Framework = {
+	const framework: Framework = $derived({
 		id: editorData.framework_urn,
 		name: meta.name ?? '',
 		description: meta.description ?? null,
@@ -37,27 +43,33 @@
 		// published, the loaded framework is the live content.
 		editing_version: draft.identity_locked ? 2 : 1,
 		has_compliance_assessments: editorData.has_compliance_assessments ?? false
-	};
+	});
 
-	const apiTarget = `/experimental/library-builder/${draft.id}/framework?framework_urn=${encodeURIComponent(
-		editorData.framework_urn
-	)}`;
+	const apiTarget = $derived(
+		`/experimental/library-builder/${draft.id}/framework?framework_urn=${encodeURIComponent(
+			editorData.framework_urn
+		)}`
+	);
 
-	const links = {
+	const links = $derived({
 		back: `/experimental/library-builder/${draft.id}`,
 		preview: null
 		// No exportYaml: export is a whole-library action, offered on the
 		// library page, not inside the framework editor.
-	};
+	});
 </script>
 
 <div class="min-h-screen">
-	<FrameworkBuilder
-		{framework}
-		requirementNodes={[]}
-		questions={[]}
-		editingDraft={editorData.editing_draft}
-		{apiTarget}
-		{links}
-	/>
+	<!-- FrameworkBuilder seeds its store from initial props only: remount it
+	     whenever the underlying draft changes. -->
+	{#key draft.id}
+		<FrameworkBuilder
+			{framework}
+			requirementNodes={[]}
+			questions={[]}
+			editingDraft={editorData.editing_draft}
+			{apiTarget}
+			{links}
+		/>
+	{/key}
 </div>

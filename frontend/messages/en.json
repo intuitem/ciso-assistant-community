@@ -4838,6 +4838,11 @@
 	"builderSplashScreenHint": "Presentational, non-assessable",
 	"builderStatusEmpty": "Empty",
 	"builderStatusEmptyTitle": "No requirements yet. New audits built on this framework will have nothing to answer.",
+	"builderStatusUnsaved": "Unsaved changes",
+	"builderStatusUnsavedTitle": "Local edits not yet saved to the library draft.",
+	"builderStatusSaved": "Saved to draft",
+	"builderStatusSavedTitle": "All edits are saved to the library draft. Publish from the library page.",
+	"builderExportUnsavedTitle": "The export reflects the last saved state — save your changes first.",
 	"builderPreview": "Preview",
 	"builderPreviewSaveFirst": "Save your draft first to preview",
 	"builderPreviewAsRespondent": "Preview as respondent (opens in new tab)",
@@ -5327,6 +5332,16 @@
 			}
 		}
 	],
+	"lbCountMetricDefinitions": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} metric definition",
+				"countPlural=other": "{count} metric definitions"
+			}
+		}
+	],
 	"lbListNoDrafts": "No library drafts yet. Create one from scratch or adopt one of your custom libraries.",
 	"folderNotFound": "Folder not found",
 	"builtinLibrariesCannotBeAdopted": "Built-in libraries cannot be adopted",
@@ -5344,6 +5359,7 @@
 	"objectMustBeADict": "The object must be a dictionary",
 	"objectNotFoundInDraft": "Object not found in the draft",
 	"lbMatrixPageTitle": "Library Builder — {name}",
+	"lbFrameworkPageTitle": "Library Builder — {name}",
 	"lbMatrixSavedToDraft": "Matrix saved to the draft",
 	"lbMatrixUnsavedChanges": "Unsaved changes",
 	"lbMatrixSaveToDraft": "Save to draft",

@@ -4834,6 +4834,11 @@
 	"builderSplashScreenHint": "Présentationnel, non évaluable",
 	"builderStatusEmpty": "Vide",
 	"builderStatusEmptyTitle": "Aucune exigence pour l'instant. Les nouveaux audits basés sur ce référentiel n'auront rien à évaluer.",
+	"builderStatusUnsaved": "Modifications non enregistrées",
+	"builderStatusUnsavedTitle": "Modifications locales pas encore enregistrées dans le brouillon de bibliothèque.",
+	"builderStatusSaved": "Enregistré dans le brouillon",
+	"builderStatusSavedTitle": "Toutes les modifications sont enregistrées dans le brouillon de bibliothèque. Publiez depuis la page de la bibliothèque.",
+	"builderExportUnsavedTitle": "L'export reflète le dernier état enregistré — enregistrez d'abord vos modifications.",
 	"builderPreview": "Aperçu",
 	"builderPreviewSaveFirst": "Enregistrez d'abord votre brouillon pour pouvoir prévisualiser",
 	"builderPreviewAsRespondent": "Aperçu en tant que répondant (ouvre dans un nouvel onglet)",
@@ -5323,6 +5328,16 @@
 			}
 		}
 	],
+	"lbCountMetricDefinitions": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} définition de métrique",
+				"countPlural=other": "{count} définitions de métriques"
+			}
+		}
+	],
 	"lbListNoDrafts": "Aucun brouillon de bibliothèque pour l'instant. Créez-en un de zéro ou adoptez l'une de vos bibliothèques personnalisées.",
 	"folderNotFound": "Dossier introuvable",
 	"builtinLibrariesCannotBeAdopted": "Les bibliothèques intégrées ne peuvent pas être adoptées",
@@ -5340,6 +5355,7 @@
 	"objectMustBeADict": "L'objet doit être un dictionnaire",
 	"objectNotFoundInDraft": "Objet introuvable dans le brouillon",
 	"lbMatrixPageTitle": "Éditeur de bibliothèque — {name}",
+	"lbFrameworkPageTitle": "Éditeur de bibliothèque — {name}",
 	"lbMatrixSavedToDraft": "Matrice enregistrée dans le brouillon",
 	"lbMatrixUnsavedChanges": "Modifications non enregistrées",
 	"lbMatrixSaveToDraft": "Enregistrer dans le brouillon",
