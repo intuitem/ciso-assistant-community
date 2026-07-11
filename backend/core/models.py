@@ -893,14 +893,6 @@ class LibraryUpdater:
                 - 'reset': Reset all scores to None
                 - 'rule_of_three': Apply proportional scaling from old to new range
         """
-
-        def get_implementation_group_ref_ids(definition):
-            return {
-                group.get("ref_id")
-                for group in definition or []
-                if isinstance(group, dict) and group.get("ref_id")
-            }
-
         for new_framework in self.new_frameworks:
             with transaction.atomic():
                 requirement_nodes = new_framework["requirement_nodes"]
@@ -967,9 +959,11 @@ class LibraryUpdater:
                 ]
 
                 # Drop selected IGs that the updated framework no longer defines.
-                valid_implementation_groups = get_implementation_group_ref_ids(
-                    new_framework.implementation_groups_definition
-                )
+                valid_implementation_groups = {
+                    group.get("ref_id")
+                    for group in new_framework.implementation_groups_definition or []
+                    if isinstance(group, dict) and group.get("ref_id")
+                }
                 assessments_with_stale_implementation_groups = []
                 for compliance_assessment in compliance_assessments:
                     selected_groups = (
