@@ -915,9 +915,6 @@ class LibraryUpdater:
                 prev_min = getattr(prev_fw, "min_score", None)
                 prev_max = getattr(prev_fw, "max_score", None)
                 prev_def = getattr(prev_fw, "scores_definition", None)
-                previous_implementation_groups = get_implementation_group_ref_ids(
-                    getattr(prev_fw, "implementation_groups_definition", None)
-                )
 
                 new_framework, _ = Framework.objects.update_or_create(
                     urn=framework_dict["urn"],
@@ -969,38 +966,34 @@ class LibraryUpdater:
                     ).select_related("folder", "perimeter")
                 ]
 
+                # Drop selected IGs that the updated framework no longer defines.
                 valid_implementation_groups = get_implementation_group_ref_ids(
                     new_framework.implementation_groups_definition
                 )
-                removed_implementation_groups = (
-                    previous_implementation_groups - valid_implementation_groups
-                )
-                # Fix audit's selected IGs only when at least one previously defined IG disappeared.
-                if removed_implementation_groups:
-                    assessments_with_stale_implementation_groups = []
-                    for compliance_assessment in compliance_assessments:
-                        selected_groups = (
-                            compliance_assessment.selected_implementation_groups or []
+                assessments_with_stale_implementation_groups = []
+                for compliance_assessment in compliance_assessments:
+                    selected_groups = (
+                        compliance_assessment.selected_implementation_groups or []
+                    )
+                    cleaned_groups = [
+                        group
+                        for group in selected_groups
+                        if group in valid_implementation_groups
+                    ]
+                    if cleaned_groups != selected_groups:
+                        compliance_assessment.selected_implementation_groups = (
+                            cleaned_groups
                         )
-                        cleaned_groups = [
-                            group
-                            for group in selected_groups
-                            if group in valid_implementation_groups
-                        ]
-                        if cleaned_groups != selected_groups:
-                            compliance_assessment.selected_implementation_groups = (
-                                cleaned_groups
-                            )
-                            assessments_with_stale_implementation_groups.append(
-                                compliance_assessment
-                            )
+                        assessments_with_stale_implementation_groups.append(
+                            compliance_assessment
+                        )
 
-                    if assessments_with_stale_implementation_groups:
-                        ComplianceAssessment.objects.bulk_update(
-                            assessments_with_stale_implementation_groups,
-                            ["selected_implementation_groups"],
-                            batch_size=100,
-                        )
+                if assessments_with_stale_implementation_groups:
+                    ComplianceAssessment.objects.bulk_update(
+                        assessments_with_stale_implementation_groups,
+                        ["selected_implementation_groups"],
+                        batch_size=100,
+                    )
 
                 existing_requirement_node_objects = {
                     rn.urn.lower(): rn
@@ -1023,15 +1016,15 @@ class LibraryUpdater:
                 order_id = 0
                 all_fields_to_update = set()
                 # Omitting one of these nullable fields in a new version must clear its previous value.
-                clearable_requirement_node_fields = {
-                    "ref_id": None,
-                    "name": None,
-                    "description": None,
-                    "annotation": None,
-                    "typical_evidence": None,
-                    "visibility_expression": None,
-                    "implementation_groups": None,
-                }
+                clearable_requirement_node_fields = (
+                    "ref_id",
+                    "name",
+                    "description",
+                    "annotation",
+                    "typical_evidence",
+                    "visibility_expression",
+                    "implementation_groups",
+                )
 
                 # Check if score boundaries changed (triggers warning + strategy prompt)
                 score_boundaries_changed = (
@@ -1148,21 +1141,16 @@ class LibraryUpdater:
 
                     if urn in existing_requirement_node_objects:
                         requirement_node_object = existing_requirement_node_objects[urn]
-                        # Consider omissions before comparing imported and stored values.
-                        for field, default in clearable_requirement_node_fields.items():
-                            requirement_node_dict.setdefault(field, default)
-                        changed_fields = set()
+                        # Consider omissions before applying imported values.
+                        for field in clearable_requirement_node_fields:
+                            requirement_node_dict.setdefault(field, None)
                         for key, value in requirement_node_dict.items():
-                            if getattr(requirement_node_object, key) != value:
-                                setattr(requirement_node_object, key, value)
-                                changed_fields.add(key)
-                        # Avoid validating and writing nodes whose values did not change.
-                        if changed_fields:
-                            requirement_node_object.clean()
-                            all_fields_to_update.update(changed_fields)
-                            requirement_node_objects_to_update.append(
-                                requirement_node_object
-                            )
+                            setattr(requirement_node_object, key, value)
+                        requirement_node_object.clean()
+                        all_fields_to_update.update(requirement_node_dict.keys())
+                        requirement_node_objects_to_update.append(
+                            requirement_node_object
+                        )
                     else:
                         requirement_node_object = RequirementNode.objects.create(
                             urn=urn,
