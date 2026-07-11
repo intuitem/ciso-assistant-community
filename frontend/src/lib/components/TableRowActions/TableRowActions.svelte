@@ -129,33 +129,29 @@
 	let canDeleteObject = $derived(
 		!preventDelete &&
 			(model
-				? page.params.id
-					? canPerformAction({
-							user,
-							action: 'delete',
-							model: model.name,
-							domain:
-								model.name === 'folder'
-									? row.meta.id
-									: (row.meta.folder?.id ?? row.meta.folder ?? user.root_folder_id)
-						})
-					: Object.hasOwn(user.permissions, `delete_${model.name}`)
+				? canPerformAction({
+						user,
+						action: 'delete',
+						model: model.name,
+						domain:
+							model.name === 'folder'
+								? row.meta.id
+								: (row.meta.folder?.id ?? row.meta.folder ?? user.root_folder_id)
+					})
 				: false)
 	);
 	let canEditObject = $derived(
 		!preventEdit &&
 			(model
-				? page.params.id
-					? canPerformAction({
-							user,
-							action: 'change',
-							model: model.name,
-							domain:
-								model.name === 'folder'
-									? row.meta.id
-									: (row.meta.folder?.id ?? row.meta.folder ?? user.root_folder_id)
-						})
-					: Object.hasOwn(user.permissions, `change_${model.name}`)
+				? canPerformAction({
+						user,
+						action: 'change',
+						model: model.name,
+						domain:
+							model.name === 'folder'
+								? row.meta.id
+								: (row.meta.folder?.id ?? row.meta.folder ?? user.root_folder_id)
+					})
 				: false)
 	);
 

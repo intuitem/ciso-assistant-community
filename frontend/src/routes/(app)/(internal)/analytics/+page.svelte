@@ -26,6 +26,7 @@
 	import { m } from '$paraglide/messages';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
+	import { canPerformAction } from '$lib/utils/access-control';
 	import type { PageData } from './$types';
 	import CounterCard from './CounterCard.svelte';
 
@@ -101,7 +102,12 @@
 	let group = $derived(page.url.searchParams.get('tab') || 'summary');
 	let selectedDashboardId = $derived(page.url.searchParams.get('dashboard') || '');
 	let canChangeSettings = $derived(
-		Object.hasOwn(data.user?.permissions ?? {}, 'change_globalsettings')
+		canPerformAction({
+			user: data.user,
+			action: 'change',
+			model: 'globalsettings',
+			domain: data.user?.root_folder_id
+		})
 	);
 
 	let dashboardPickerOpen = $state(false);

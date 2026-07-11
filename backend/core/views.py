@@ -7515,7 +7515,9 @@ class UserFilter(GenericFilterSet):
         """we don't know yet which folders will be used, so filter on any folder"""
         approvers_id = []
         for candidate in User.objects.all():
-            if "approve_riskacceptance" in candidate.permissions:
+            if RoleAssignment.has_permission_anywhere(
+                candidate, "approve_riskacceptance"
+            ):
                 approvers_id.append(candidate.id)
         if value:
             return queryset.filter(id__in=approvers_id)

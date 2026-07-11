@@ -51,7 +51,12 @@
 		model: model.name,
 		domain: data.scenario.folder.id
 	});
-	const canCreateAcceptance = Object.hasOwn(user?.permissions ?? {}, 'add_riskacceptance');
+	const canCreateAcceptance = canPerformAction({
+		user,
+		action: 'add',
+		model: 'riskacceptance',
+		domain: data.scenario.folder.id
+	});
 	let color_map = $state({});
 	color_map['--'] = '#A9A9A9';
 
@@ -229,7 +234,11 @@
 					{m.requestRiskAcceptance()}
 				</button>
 			{/if}
-			<AuditTrailButton model="risk-scenarios" objectId={data.scenario.id} />
+			<AuditTrailButton
+				model="risk-scenarios"
+				objectId={data.scenario.id}
+				folderId={data.scenario.folder.id}
+			/>
 		</div>
 	</div>
 

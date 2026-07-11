@@ -1055,7 +1055,7 @@
 										{/if}
 										<span class="text-sm font-medium">{m.syncToAppliedControls()}</span>
 									</button>
-									{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0}
+									{#if canPerformAction( { user: page.data.user, action: 'add', model: 'appliedcontrol', domain: data.compliance_assessment.folder.id } ) && data.compliance_assessment.framework.reference_controls.length > 0}
 										<button
 											class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
 											onclick={() => {

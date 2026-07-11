@@ -189,7 +189,11 @@
 			{/if}
 		{/if}
 		<div class="ml-auto shrink-0 self-center">
-			<AuditTrailButton model="requirement-assessments" objectId={data.requirementAssessment.id} />
+			<AuditTrailButton
+				model="requirement-assessments"
+				objectId={data.requirementAssessment.id}
+				folderId={data.requirementAssessment.folder.id}
+			/>
 		</div>
 	</div>
 	{#if data.requirement.description}

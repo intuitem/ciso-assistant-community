@@ -894,7 +894,13 @@
 				{/if}
 			{/if}
 			{@render actions?.()}
-			<AuditTrailButton model={data.urlModel} objectId={data.data?.id} />
+			<AuditTrailButton
+				model={data.urlModel}
+				objectId={data.data?.id}
+				folderId={data.model.name === 'folder'
+					? data.data?.id
+					: (data.data?.folder?.id ?? data.data?.folder ?? user.root_folder_id)}
+			/>
 		</div>
 	</div>
 </div>

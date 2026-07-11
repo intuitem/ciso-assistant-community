@@ -377,7 +377,11 @@
 						>
 					{/if}
 				</div>
-				<AuditTrailButton model="risk-assessments" objectId={risk_assessment.id} />
+				<AuditTrailButton
+					model="risk-assessments"
+					objectId={risk_assessment.id}
+					folderId={risk_assessment.folder.id}
+				/>
 				<Anchor
 					label={m.actionPlan()}
 					href="/risk-assessments/{risk_assessment.id}/action-plan"
