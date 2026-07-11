@@ -187,7 +187,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
     def get_queryset(self) -> models.query.QuerySet:
         return super().get_queryset().prefetch_related("filtering_labels")
 
-    def get_serializer_class(self):
+    def get_serializer_class(self, **kwargs):
         if self.action == "list":
             return StoredLibrarySerializer
         return StoredLibraryDetailedSerializer
@@ -707,7 +707,7 @@ class LoadedLibraryViewSet(BaseModelViewSet):
 
     search_fields = ["name", "description", "urn", "ref_id"]
 
-    def get_serializer_class(self):
+    def get_serializer_class(self, **kwargs):
         if self.action == "list":
             return LoadedLibrarySerializer
         return LoadedLibraryDetailedSerializer
@@ -966,7 +966,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
         "metric_definitions",
     )
 
-    def get_serializer_class(self):
+    def get_serializer_class(self, **kwargs):
         if self.action in ("create", "update", "partial_update"):
             return LibraryDraftWriteSerializer
         return LibraryDraftReadSerializer
@@ -2192,11 +2192,13 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 },
                 status=HTTP_409_CONFLICT,
             )
-        except Exception as e:
+        except Exception:
+            # Full detail goes to the log, not to the client: a bare Exception
+            # here can carry internal state (DB, filesystem, paths).
             logger.exception("Failed to load published draft", urn=urn)
             stored.delete()
             return Response(
-                {"error": "libraryLoadFailed", "detail": str(e)},
+                {"error": "libraryLoadFailed"},
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
             )
         if error_msg is not None:
