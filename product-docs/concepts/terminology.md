@@ -20,6 +20,8 @@ A terminology entry binds a **label** to a **field path** — the specific UI su
 - `entity.relationship` — third-party relationship types.
 - `metric_definition.unit` — units shown alongside metric values.
 - `project.status` and `project.health` — workflow labels on projects.
+- `processing.nature` — the nature of a processing activity (collection, storage, disclosure, erasure, …) in the privacy register.
+- `personal_data.category` — categories of personal data (name, email, health data, …) in the privacy register.
 
 For each field path, the platform ships a **built-in** set of entries (state, organised crime, terrorist, activist, … for risk origins, for example). You can:
 

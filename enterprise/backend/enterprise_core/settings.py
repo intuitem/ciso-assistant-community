@@ -42,6 +42,11 @@ ROUTES["custom-word-templates"] = {  # noqa: F405
     "basename": "custom-word-templates",
 }
 
+ROUTES["custom-doc-html-templates"] = {  # noqa: F405
+    "viewset": "enterprise_core.views.CustomDocHtmlTemplateViewSet",
+    "basename": "custom-doc-html-templates",
+}
+
 MODULES["enterprise_core"] = {  # noqa: F405
     "path": "",
     "module": "enterprise_core.urls",

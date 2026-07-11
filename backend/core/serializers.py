@@ -437,9 +437,32 @@ class VulnerabilityImportExportSerializer(BaseModelSerializer):
 
 
 class RiskAcceptanceWriteSerializer(BaseModelSerializer):
+    # Write-only flag so a new acceptance can be submitted for approval directly
+    # from the creation form, instead of creating a draft then submitting it.
+    submit = serializers.BooleanField(write_only=True, required=False, default=False)
+
     class Meta:
         model = RiskAcceptance
         exclude = ["accepted_at", "rejected_at", "revoked_at", "state"]
+
+    def validate(self, data):
+        # `submit` is only honoured on create; don't reject updates that carry it.
+        if not self.instance and data.get("submit") and not data.get("approver"):
+            raise serializers.ValidationError(
+                {"approver": "An approver is required to submit for approval."}
+            )
+        return super().validate(data)
+
+    def create(self, validated_data):
+        submit = validated_data.pop("submit", False)
+        instance = super().create(validated_data)
+        if submit:
+            instance.set_state("submitted")
+        return instance
+
+    def update(self, instance, validated_data):
+        validated_data.pop("submit", False)
+        return super().update(instance, validated_data)
 
 
 class RiskAcceptanceReadSerializer(BaseModelSerializer):
@@ -627,7 +650,89 @@ class AssetCapabilityWriteSerializer(AssetCapabilityReadSerializer):
     pass
 
 
-class AssetWriteSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
+class IntegrationLinkSerializerMixin(serializers.Serializer):
+    """Adds remote-object linking to a model serializer.
+
+    Declares the write-only ``integration_config`` / ``remote_object_id`` /
+    ``create_remote_object`` fields (stripped before the model is written) and
+    exposes existing ``sync_mappings`` on read, scoped by content type. The
+    actual SyncMapping creation / sync scheduling is done by
+    ``IntegrationLinkViewSetMixin`` on the viewset.
+    """
+
+    integration_config = serializers.PrimaryKeyRelatedField(
+        required=False,
+        allow_null=True,
+        queryset=IntegrationConfiguration.objects.all(),
+        write_only=True,
+    )
+    remote_object_id = serializers.CharField(
+        required=False, allow_blank=True, allow_null=True, write_only=True
+    )
+    create_remote_object = serializers.BooleanField(
+        required=False, default=False, write_only=True
+    )
+
+    _INTEGRATION_LINK_FIELDS = (
+        "integration_config",
+        "remote_object_id",
+        "create_remote_object",
+    )
+
+    def _strip_integration_link_fields(self, validated_data):
+        for field in self._INTEGRATION_LINK_FIELDS:
+            validated_data.pop(field, None)
+
+    def create(self, validated_data):
+        self._strip_integration_link_fields(validated_data)
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        self._strip_integration_link_fields(validated_data)
+        return super().update(instance, validated_data)
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        # Only run the sync-mapping lookup on detail reads. Skipping it for
+        # list/create/update avoids a per-object SELECT that almost always
+        # returns nothing (mirrors AppliedControlReadSerializer).
+        if self.context.get("action") != "retrieve":
+            return ret
+        from django.contrib.contenttypes.models import ContentType
+
+        content_type = ContentType.objects.get_for_model(instance.__class__)
+        sync_mappings = [
+            {
+                "id": mapping.id,
+                "remote_id": mapping.remote_id,
+                "sync_status": mapping.sync_status,
+                "last_synced_at": mapping.last_synced_at,
+                "last_sync_direction": mapping.last_sync_direction,
+                "error_message": mapping.error_message,
+                "provider": mapping.configuration.provider.name,
+            }
+            for mapping in SyncMapping.objects.filter(
+                content_type=content_type, local_object_id=instance.id
+            )
+            .select_related("configuration__provider")
+            .only(
+                "id",
+                "remote_id",
+                "sync_status",
+                "last_synced_at",
+                "last_sync_direction",
+                "error_message",
+                "configuration__provider__name",
+            )
+        ]
+        if sync_mappings:
+            ret["sync_mappings"] = sync_mappings
+        return ret
+
+
+class AssetWriteSerializer(
+    IntegrationLinkSerializerMixin, CustomFieldsSerializerMixin, BaseModelSerializer
+):
     ebios_rm_studies = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=EbiosRMStudy.objects.all(),
@@ -1688,6 +1793,8 @@ class ComplianceAssessmentActionPlanSerializer(ActionPlanSerializer):
             "evidences",
             "evidence_attachments",
             "owner",
+            "created_at",
+            "updated_at",
         ]
 
 
@@ -1734,6 +1841,8 @@ class RiskAssessmentActionPlanSerializer(ActionPlanSerializer):
             "reference_control",
             "evidences",
             "owner",
+            "created_at",
+            "updated_at",
         ]
 
 
@@ -1775,7 +1884,6 @@ class AppliedControlMergeRequestSerializer(serializers.Serializer):
     )
     target = AppliedControlMergeTargetSerializer()
     dry_run = serializers.BooleanField(default=False)
-    managed_document_resolution = serializers.DictField(required=False)
 
     def validate_source_ids(self, value):
         seen: set[str] = set()
@@ -2437,11 +2545,8 @@ class EvidenceWriteSerializer(BaseModelSerializer):
         old_folder_id = instance.folder_id
 
         # Handle properly owner field cleaning
-        owners = validated_data.get("owner", None)
         with transaction.atomic():
             instance = super().update(instance, validated_data)
-            if not owners:
-                instance.owner.set([])
 
             # Update all EvidenceRevisions' folder if the Evidence's folder changed
             if old_folder_id != instance.folder_id:
@@ -3844,13 +3949,38 @@ class RequirementMappingSetReadSerializer(BaseModelSerializer):
         ]
 
     @staticmethod
-    def _framework_info(urn):
-        from core.mappings.engine import engine
+    def _resolve_framework_name(urn):
+        """Look up a framework's display name from its library content.
 
-        fw = engine.frameworks.get(urn)
-        if fw is None:
+        Fallback used on the retrieve path, where no pre-built map is in
+        context. Resolves regardless of whether the framework is imported.
+        """
+        lib = StoredLibrary.objects.filter(
+            content__framework__urn=urn,
+            content__framework__isnull=False,
+            content__requirement_mapping_set__isnull=True,
+            content__requirement_mapping_sets__isnull=True,
+        ).first()
+        if lib is None:
+            return None
+        framework = lib.content.get("framework") or {}
+        return framework.get("name", urn)
+
+    def _framework_info(self, urn):
+        if not urn:
             return {"str": urn, "urn": urn}
-        return {"str": fw.get("name", urn), "urn": urn}
+        # On list requests the viewset pre-populates `framework_map` (O(1) lookup).
+        framework_map = (self.context.get("optimized_data") or {}).get("framework_map")
+        if framework_map is not None:
+            name = framework_map.get(urn)
+        else:
+            # Retrieve path: cache per-instance so the duplicate calls from
+            # get_frameworks_available don't re-issue the DB lookup.
+            cache = self.__dict__.setdefault("_framework_name_cache", {})
+            if urn not in cache:
+                cache[urn] = self._resolve_framework_name(urn)
+            name = cache[urn]
+        return {"str": name or urn, "urn": urn}
 
     def get_source_framework(self, obj):
         mapping_set = obj.content.get(
@@ -4347,15 +4477,13 @@ class SecurityExceptionWriteSerializer(BaseModelSerializer):
             )
 
     def _send_status_notification(self, security_exception):
-        """Notify owners and approver when the status changes"""
+        """Notify owners when the status changes"""
         try:
             from .tasks import send_security_exception_status_notification
 
             recipient_emails = []
             for owner in security_exception.owners.all():
                 recipient_emails.extend(owner.get_emails())
-            if security_exception.approver and security_exception.approver.email:
-                recipient_emails.append(security_exception.approver.email)
 
             if not recipient_emails:
                 return
@@ -4385,6 +4513,9 @@ class SecurityExceptionWriteSerializer(BaseModelSerializer):
     class Meta:
         model = SecurityException
         fields = "__all__"
+        # Deprecated: approval is handled through validation flows. The field is
+        # kept read-only so existing values remain visible without new writes.
+        read_only_fields = ["approver"]
 
 
 class SecurityExceptionReadSerializer(BaseModelSerializer):
@@ -5223,6 +5354,40 @@ class TerminologyWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = Terminology
+        exclude = ["folder", "is_published"]
+
+
+class ClassificationLevelReadSerializer(BaseModelSerializer):
+    object_classification = FieldsRelatedField()
+    label = serializers.ReadOnlyField()
+
+    class Meta:
+        model = ClassificationLevel
+        exclude = ["folder"]
+
+
+class ClassificationLevelWriteSerializer(BaseModelSerializer):
+    builtin = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        model = ClassificationLevel
+        exclude = ["folder", "is_published"]
+
+
+class ObjectClassificationReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    levels = ClassificationLevelReadSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = ObjectClassification
+        fields = "__all__"
+
+
+class ObjectClassificationWriteSerializer(BaseModelSerializer):
+    builtin = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        model = ObjectClassification
         exclude = ["folder", "is_published"]
 
 

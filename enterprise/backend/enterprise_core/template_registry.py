@@ -249,6 +249,52 @@ EMAIL_TEMPLATE_REGISTRY = {
             "ciso_assistant_url",
         ],
     },
+    "security_exception_expiring_soon": {
+        "description": "Sent when security exceptions are about to expire",
+        "category": "notification",
+        "variables": [
+            "exception_count",
+            "exception_list",
+            "days_remaining",
+            "ciso_assistant_url",
+        ],
+    },
+    "expired_security_exceptions": {
+        "description": "Sent when security exceptions have expired",
+        "category": "notification",
+        "variables": [
+            "exception_count",
+            "exception_list",
+            "expired_since",
+            "ciso_assistant_url",
+        ],
+    },
+    "security_exception_assignment": {
+        "description": "Sent when a security exception is assigned",
+        "category": "notification",
+        "variables": [
+            "exception_name",
+            "exception_description",
+            "exception_ref_id",
+            "exception_severity",
+            "exception_status",
+            "expiration_date",
+            "folder_name",
+            "ciso_assistant_url",
+        ],
+    },
+    "security_exception_status_changed": {
+        "description": "Sent when a security exception status changes",
+        "category": "notification",
+        "variables": [
+            "exception_name",
+            "exception_ref_id",
+            "new_status",
+            "actor_name",
+            "folder_name",
+            "ciso_assistant_url",
+        ],
+    },
     "task_node_due_soon": {
         "description": "Sent when tasks are due soon",
         "category": "notification",
@@ -320,6 +366,52 @@ EMAIL_TEMPLATE_REGISTRY = {
             "event_notes",
             "validation_url",
             "ciso_assistant_url",
+        ],
+    },
+}
+
+
+# Registry of overridable HTML render templates (WeasyPrint PDF layouts, ...).
+DOC_HTML_TEMPLATE_REGISTRY = {
+    "document_pdf": {
+        "description": "Managed document PDF layout",
+        "default_languages": ["en", "fr"],
+        "variables": [
+            {
+                "name": "title",
+                "type": "string",
+                "description": "Document title",
+            },
+            {
+                "name": "content",
+                "type": "string",
+                "description": "Rendered HTML body of the document (safe)",
+            },
+            {
+                "name": "version",
+                "type": "string",
+                "description": "Version number of the published revision",
+            },
+            {
+                "name": "document_type",
+                "type": "string",
+                "description": "Human-readable document type label",
+            },
+            {
+                "name": "date",
+                "type": "string",
+                "description": "Publication date formatted as DD/MM/YYYY",
+            },
+            {
+                "name": "logo_base64",
+                "type": "string",
+                "description": "Organisation logo as base64 (empty if unset)",
+            },
+            {
+                "name": "logo_mime_type",
+                "type": "string",
+                "description": "MIME type of the organisation logo",
+            },
         ],
     },
 }

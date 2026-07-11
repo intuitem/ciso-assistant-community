@@ -3,6 +3,7 @@ import os
 from enum import Enum
 
 import magic
+from auditlog.registry import auditlog
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -106,3 +107,6 @@ class LogEntryAction(IntEnum):
         }
         UNKNOWN_ACTION_TRANSLATION = "unknown"
         return LOG_ENTRY_ACTION_TRANSLATIONS.get(self, UNKNOWN_ACTION_TRANSLATION)
+
+
+auditlog.register(ClientSettings, exclude_fields=["created_at", "updated_at"])

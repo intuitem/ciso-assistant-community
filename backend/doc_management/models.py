@@ -1,20 +1,31 @@
+import re
+
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from core.base_models import AbstractBaseModel
-from core.models import I18nObjectMixin, Policy
+from core.models import FilteringLabelMixin, I18nObjectMixin
 from core.validators import validate_file_name, validate_file_size
 from iam.models import FolderMixin, User
 
 
-class ManagedDocument(AbstractBaseModel, FolderMixin, I18nObjectMixin):
+class DocumentContainer(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
+    """Language-independent identity of a managed document.
+
+    Groups its per-locale ``ManagedDocument`` realizations and owns the
+    language-independent facts (type, folder, name) plus the typed object
+    links (Stream E.1). Links are purely associative — they never drive the
+    document's folder or publication state.
+    """
+
     class DocumentType(models.TextChoices):
         POLICY = "policy", _("Policy")
         PROCEDURE = "procedure", _("Procedure")
         CHARTER = "charter", _("Charter")
         RECORD = "record", _("Record")
+        MEETING_MINUTES = "meeting_minutes", _("Meeting minutes")
         OTHER = "other", _("Other")
 
     document_type = models.CharField(
@@ -23,16 +34,84 @@ class ManagedDocument(AbstractBaseModel, FolderMixin, I18nObjectMixin):
         default=DocumentType.POLICY,
         verbose_name=_("Document type"),
     )
+    ref_id = models.CharField(
+        max_length=100, blank=True, default="", verbose_name=_("Reference ID")
+    )
     name = models.CharField(max_length=200, blank=True, verbose_name=_("Name"))
     description = models.TextField(blank=True, verbose_name=_("Description"))
-    # Optional link to a parent policy — future document types may link to other objects
-    policy = models.ForeignKey(
-        Policy,
+    classification = models.ForeignKey(
+        "core.ClassificationLevel",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("Classification"),
+    )
+
+    # Typed object links (Stream E.1). Policy is a proxy of AppliedControl, so the
+    # two M2Ms must use distinct reverse names or Django's E304 check fails (the
+    # proxy inherits the base's reverse accessor). The frontend labels both "Documents".
+    policies = models.ManyToManyField(
+        "core.Policy", blank=True, related_name="documents"
+    )
+    applied_controls = models.ManyToManyField(
+        "core.AppliedControl", blank=True, related_name="control_documents"
+    )
+    task_templates = models.ManyToManyField(
+        "core.TaskTemplate", blank=True, related_name="documents"
+    )
+    processings = models.ManyToManyField(
+        "privacy.Processing", blank=True, related_name="documents"
+    )
+
+    fields_to_check = ["name"]
+
+    class Meta:
+        verbose_name = _("Document container")
+        verbose_name_plural = _("Document containers")
+
+    def save(self, *args, **kwargs):
+        propagate = False
+        if self.pk:
+            old = (
+                DocumentContainer.objects.filter(pk=self.pk)
+                .values("folder_id", "is_published")
+                .first()
+            )
+            if old and (
+                old["folder_id"] != self.folder_id
+                or old["is_published"] != self.is_published
+            ):
+                propagate = True
+        super().save(*args, **kwargs)
+        # Children denormalize folder/is_published from the container, so a
+        # container move/publish must reach the already-saved rows too.
+        if propagate:
+            fields = {"folder_id": self.folder_id, "is_published": self.is_published}
+            self.documents.update(**fields)
+            DocumentRevision.objects.filter(document__container=self).update(**fields)
+            DocumentAttachment.objects.filter(document__container=self).update(**fields)
+            DocumentEdit.objects.filter(revision__document__container=self).update(
+                **fields
+            )
+
+    def __str__(self):
+        return self.name or str(self.id)
+
+
+class ManagedDocument(AbstractBaseModel, FolderMixin, I18nObjectMixin):
+    """A single-locale realization of a DocumentContainer, owning the versioned
+    content (its DocumentRevision chain) and per-locale lifecycle."""
+
+    container = models.ForeignKey(
+        DocumentContainer,
         on_delete=models.CASCADE,
         null=True,
         blank=True,
         related_name="documents",
     )
+    name = models.CharField(max_length=200, blank=True, verbose_name=_("Name"))
+    description = models.TextField(blank=True, verbose_name=_("Description"))
     current_revision = models.ForeignKey(
         "DocumentRevision",
         on_delete=models.SET_NULL,
@@ -41,24 +120,24 @@ class ManagedDocument(AbstractBaseModel, FolderMixin, I18nObjectMixin):
         related_name="+",
     )
     template_used = models.CharField(max_length=200, null=True, blank=True)
-    fields_to_check = ["policy", "locale"]
+    fields_to_check = ["container", "locale"]
 
     class Meta:
         verbose_name = _("Managed document")
         verbose_name_plural = _("Managed documents")
 
     def save(self, *args, **kwargs):
-        if self.policy:
-            self.folder = self.policy.folder
-            self.is_published = self.policy.is_published
+        if self.container_id:
+            self.folder = self.container.folder
+            self.is_published = self.container.is_published
         super().save(*args, **kwargs)
 
     @property
     def display_name(self):
         if self.name:
             return self.name
-        if self.policy:
-            return self.policy.name
+        if self.container_id and self.container.name:
+            return self.container.name
         return str(self.id)
 
     def __str__(self):
@@ -103,6 +182,24 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
         blank=True,
         validators=[validate_file_size, validate_file_name],
     )
+
+    class Source(models.TextChoices):
+        AUTHORED = "authored", _("Authored")
+        UPLOADED = "uploaded", _("Uploaded")
+        LINK = "link", _("Linked")
+
+    source = models.CharField(
+        max_length=20, choices=Source.choices, default=Source.AUTHORED
+    )
+    # Source-of-truth file for uploaded revisions (authored revisions render
+    # markdown from `content` instead).
+    file = models.FileField(
+        null=True,
+        blank=True,
+        validators=[validate_file_size, validate_file_name],
+    )
+    # Source-of-truth URL for linked revisions (the document lives externally).
+    url = models.URLField(blank=True)
     published_at = models.DateTimeField(null=True, blank=True)
     editing_user = models.ForeignKey(
         User,
@@ -119,16 +216,30 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
         verbose_name = _("Document revision")
         verbose_name_plural = _("Document revisions")
 
+    @classmethod
+    def from_db(cls, db, field_names, values):
+        instance = super().from_db(db, field_names, values)
+        instance._loaded_content = instance.content
+        return instance
+
     def save(self, *args, **kwargs):
         self.folder = self.document.folder
         self.is_published = self.document.is_published
+        if self.source == self.Source.UPLOADED and not self.file:
+            raise ValidationError("Uploaded revisions require a file.")
         if self.status == self.Status.DRAFT:
             existing = self.document.revisions.filter(status=self.Status.DRAFT).exclude(
                 pk=self.pk
             )
             if existing.exists():
                 raise ValidationError("Only one draft revision allowed per document.")
+        content_changed = getattr(self, "_loaded_content", None) != self.content
         super().save(*args, **kwargs)
+        self._loaded_content = self.content
+        # References are derived from content only — skip the recompute (and its
+        # per-document scan) on status-only transitions and other no-content saves.
+        if content_changed and self.document.container_id:
+            recompute_references(self.document.container)
 
     def validate(self, reviewer=None):
         """Validate this revision: mark as approved, pending publication."""
@@ -162,9 +273,19 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
         self.save()
 
     def delete(self, *args, **kwargs):
+        container = (
+            self.document.container
+            if self.document_id and self.document.container_id
+            else None
+        )
+        super().delete(*args, **kwargs)
+        # Only drop the blobs once the row deletion is durable.
         if self.pdf_snapshot:
             self.pdf_snapshot.delete(save=False)
-        super().delete(*args, **kwargs)
+        if self.file:
+            self.file.delete(save=False)
+        if container:
+            recompute_references(container)
 
     def __str__(self):
         return f"{self.document.display_name} v{self.version_number}"
@@ -240,3 +361,118 @@ class DocumentEdit(AbstractBaseModel, FolderMixin):
     def __str__(self):
         editor_str = self.editor.email if self.editor else "unknown"
         return f"Edit by {editor_str} on {self.created_at}"
+
+
+class DocumentTemplate(AbstractBaseModel, FolderMixin, I18nObjectMixin):
+    """A reusable content skeleton for seeding a document's markdown.
+
+    Built-ins are synced from ``backend/library/policy_templates/`` by the
+    ``sync_document_templates`` management command; customers can add their own.
+    Locale variants of one logical template share a ``ref_id``.
+    """
+
+    document_type = models.CharField(
+        max_length=20,
+        choices=DocumentContainer.DocumentType.choices,
+        default=DocumentContainer.DocumentType.POLICY,
+        verbose_name=_("Document type"),
+    )
+    ref_id = models.CharField(max_length=100, verbose_name=_("Reference"))
+    name = models.CharField(max_length=200, verbose_name=_("Name"))
+    description = models.TextField(blank=True, verbose_name=_("Description"))
+    provider = models.CharField(
+        max_length=200, blank=True, default="", verbose_name=_("Provider")
+    )
+    content = models.TextField(blank=True)
+    builtin = models.BooleanField(default=False)
+    fields_to_check = ["ref_id", "locale"]
+
+    class Meta:
+        verbose_name = _("Document template")
+        verbose_name_plural = _("Document templates")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["ref_id", "locale"], name="unique_template_ref_locale"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.name} ({self.locale})"
+
+
+# --- Document-to-document references (computed from content hyperlinks) --------
+
+# Canonical internal link scheme authored in markdown: [Label](document:<uuid>)
+DOCUMENT_LINK_RE = re.compile(
+    r"document:([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-"
+    r"[0-9a-fA-F]{4}-[0-9a-fA-F]{12})"
+)
+
+
+def parse_document_links(content: str) -> set[str]:
+    """Extract referenced container ids from markdown content."""
+    return set(DOCUMENT_LINK_RE.findall(content or ""))
+
+
+class DocumentReference(AbstractBaseModel):
+    """A directed edge between two DocumentContainers, derived from the content's
+    `document:<id>` hyperlinks. System-maintained (never user-edited)."""
+
+    source_container = models.ForeignKey(
+        "DocumentContainer",
+        on_delete=models.CASCADE,
+        related_name="outgoing_references",
+    )
+    target_container = models.ForeignKey(
+        "DocumentContainer",
+        on_delete=models.CASCADE,
+        related_name="incoming_references",
+    )
+    fields_to_check = []
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["source_container", "target_container"],
+                name="unique_document_reference",
+            )
+        ]
+        verbose_name = _("Document reference")
+        verbose_name_plural = _("Document references")
+
+    def __str__(self):
+        return f"{self.source_container_id} -> {self.target_container_id}"
+
+
+def recompute_references(container) -> None:
+    """Rebuild `container`'s outgoing references from the current content of its
+    per-locale documents. Drops self-links and dangling ids. Idempotent."""
+    target_ids: set[str] = set()
+    for doc in container.documents.all():
+        rev = doc.revisions.first()  # latest by version_number (Meta ordering)
+        if rev and rev.content:
+            target_ids |= parse_document_links(rev.content)
+    target_ids.discard(str(container.id))
+    valid = set(
+        str(i)
+        for i in DocumentContainer.objects.filter(id__in=target_ids).values_list(
+            "id", flat=True
+        )
+    )
+    with transaction.atomic():
+        DocumentReference.objects.filter(source_container=container).exclude(
+            target_container_id__in=valid
+        ).delete()
+        existing = set(
+            str(t)
+            for t in DocumentReference.objects.filter(
+                source_container=container
+            ).values_list("target_container_id", flat=True)
+        )
+        DocumentReference.objects.bulk_create(
+            [
+                DocumentReference(source_container=container, target_container_id=t)
+                for t in (valid - existing)
+            ],
+            ignore_conflicts=True,
+        )
