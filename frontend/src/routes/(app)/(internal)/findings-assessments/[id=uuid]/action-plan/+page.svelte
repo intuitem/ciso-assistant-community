@@ -17,7 +17,9 @@
 		expiry_date: 'expiryDate',
 		effort: 'effort',
 		annual_cost: 'cost',
-		findings_count: 'associated_findings'
+		findings_count: 'associated_findings',
+		created_at: 'createdAt',
+		updated_at: 'updatedAt'
 	};
 	const appliedControlsColumns = [
 		'name',
@@ -104,6 +106,8 @@
 			orderBy={{ identifier: 'eta', direction: 'desc' }}
 			tags={false}
 			baseEndpoint="/applied-controls?findings_assessments={page.params.id}"
+			columnSelector={true}
+			columnStateKey="applied-controls:findings-action-plan"
 			fields={[
 				'name',
 				'status',
