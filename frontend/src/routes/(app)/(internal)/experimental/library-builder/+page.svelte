@@ -543,7 +543,11 @@
 								<td class="text-sm">v{draft.version}</td>
 								<td class="text-sm text-surface-600-400">{objectsSummary(draft)}</td>
 								<td>
-									{#if draft.identity_locked}
+									<!-- "Published" means actually loaded through publish
+									     (last_published_at), NOT merely identity-frozen: an
+									     adopted/migrated draft is frozen but still a draft
+									     until the user publishes it. -->
+									{#if draft.last_published_at}
 										<span class="badge variant-filled-success text-xs">
 											<i class="fa-solid fa-cloud-arrow-up mr-0.5"></i>{m.lbListPublished()}
 										</span>

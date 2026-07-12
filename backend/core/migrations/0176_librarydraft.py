@@ -12,10 +12,11 @@
 #   updates those very rows in place (audits untouched).
 # - Custom risk-matrix WIP: the WIP definition is wrapped into a draft,
 #   the matrix URN minted onto the live row (bare family URN).
-# - User-authored preset WIP (urn-less rows): the editor doc already IS the
-#   builder's preset document shape, so it wraps directly. The `:preset:` URN
-#   is minted onto the live row and the draft frozen, so a later publish
-#   adopts that same row in place (no duplicate), like frameworks and matrices.
+# - User-authored preset WIP (urn-less rows): if a journey has been applied
+#   the preset is in use, so it is adopted in place like a framework/matrix
+#   (mint the :preset: URN, freeze the draft, publish updates that row). If it
+#   is unused it was just a draft the retired editor made prematurely usable,
+#   so it wraps into an EDITABLE draft and the premature row is deleted.
 # - Library-backed matrix WIP and library-loaded preset WIP are logged and
 #   skipped: their live/published state is untouched.
 #
@@ -232,6 +233,7 @@ def _wrap_matrix_drafts(apps, root):
 
 def _wrap_preset_drafts(apps, root):
     Preset = apps.get_model("core", "Preset")
+    PresetJourney = apps.get_model("core", "PresetJourney")
     LibraryDraft = apps.get_model("core", "LibraryDraft")
 
     for preset in Preset.objects.exclude(editing_draft=None):
@@ -243,12 +245,16 @@ def _wrap_preset_drafts(apps, root):
         meta = doc.get("journey_meta") or {}
         name = meta.get("name") or preset.name
 
-        # Mint the preset family URN onto the live row and freeze the draft's
-        # identity, mirroring the matrix wrap: a later publish then adopts THAT
-        # very row in place (upsert_preset_from_stored_library keys on the
-        # `:preset:` URN derived from the library URN) instead of creating a
-        # duplicate Preset. The live row becomes read-only in the catalog
-        # (urn != None), now managed through the draft.
+        # Two shapes, mirroring frameworks/matrices:
+        # - in_use (a journey has been applied): the preset is live
+        #   infrastructure. Mint its :preset: URN onto the row and freeze the
+        #   draft, so publishing adopts THAT row in place (no duplicate).
+        # - not in use: a WIP preset was a *draft* the user never published;
+        #   the retired editor made it prematurely usable. Keep the draft
+        #   editable and delete the premature row, so it is a pure draft again,
+        #   not usable until published (publishing then mints a fresh row).
+        in_use = PresetJourney.objects.filter(preset=preset).exists()
+
         ref = _token(name, f"preset-{str(preset.id)[:8]}")
         library_urn = f"urn:custom:risk:library:{ref}"
         suffix = 2
@@ -256,7 +262,6 @@ def _wrap_preset_drafts(apps, root):
             library_urn = f"urn:custom:risk:library:{ref}-{suffix}"
             suffix += 1
         ref = library_urn.rsplit(":", 1)[-1]
-        preset_urn = library_urn.replace(":library:", ":preset:", 1)
 
         # The editor doc {journey_meta, scaffolded_objects, steps} is the
         # builder's preset document shape (see LibraryDraftViewSet's
@@ -284,14 +289,22 @@ def _wrap_preset_drafts(apps, root):
             content={"preset": preset_object},
             dependencies=[],
             urn=library_urn,
-            # The live row carries the family URN: identity frozen from the
-            # start so publish adopts that row rather than minting a new one.
-            first_published_at=now(),
+            # Frozen only for in-use presets, so publish adopts the live row;
+            # a not-in-use draft keeps an editable identity.
+            first_published_at=now() if in_use else None,
         )
-        preset.urn = preset_urn
-        preset.editing_draft = None
-        preset.save(update_fields=["urn", "editing_draft"])
-        print(f"[0176] wrapped WIP of {label} into draft {library_urn}")
+
+        if in_use:
+            # `:preset:` URN (derived from the library URN, matching
+            # upsert_preset_from_stored_library) minted onto the live row so
+            # publish updates it in place instead of duplicating it.
+            preset.urn = library_urn.replace(":library:", ":preset:", 1)
+            preset.editing_draft = None
+            preset.save(update_fields=["urn", "editing_draft"])
+            print(f"[0176] adopted in-use {label} into draft {library_urn} (frozen)")
+        else:
+            preset.delete()
+            print(f"[0176] wrapped draft {label} into {library_urn} (editable)")
 
 
 def wrap_editing_drafts(apps, schema_editor):
