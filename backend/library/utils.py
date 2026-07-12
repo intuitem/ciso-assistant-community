@@ -593,22 +593,45 @@ class RiskMatrixImporter:
             for key, value in self.risk_matrix_data.items()
             if key in self.MATRIX_FIELDS
         }
-        matrix = RiskMatrix.objects.create(
-            library=library_object,
-            folder=Folder.get_root_folder(),
-            name=self.risk_matrix_data.get("name"),
-            description=self.risk_matrix_data.get("description"),
-            urn=self.risk_matrix_data["urn"].lower(),
-            provider=library_object.provider,
-            ref_id=self.risk_matrix_data.get("ref_id"),
-            json_definition=matrix_data,
-            is_enabled=self.risk_matrix_data.get("is_enabled", True),
-            locale=library_object.locale,
-            default_locale=library_object.default_locale,  # Change this in the future ?
-            translations=self.risk_matrix_data.get("translations", {}),
-            is_published=True,
+        # update_or_create: identical to create() for normal loads (no row
+        # exists yet) and adopts a pre-existing library-less matrix in place —
+        # same row id, so risk assessments built on it stay attached (the
+        # migration-wrapped / adopted-matrix path, mirroring the framework
+        # importer). Adoption is restricted to genuinely library-less rows of
+        # the same locale: a matrix URN that already belongs to a library (or
+        # a different locale of one) is a real collision, so we preserve the
+        # loader's historical hard failure rather than silently re-homing
+        # another library's matrix.
+        matrix_urn = self.risk_matrix_data["urn"].lower()
+        existing = RiskMatrix.objects.filter(urn=matrix_urn).first()
+        if existing is not None and (
+            existing.library_id is not None or existing.locale != library_object.locale
+        ):
+            raise IntegrityError(
+                f"Risk matrix {matrix_urn} already exists and belongs to a "
+                f"library; cannot be adopted by {library_object.urn}"
+            )
+        matrix, created = RiskMatrix.objects.update_or_create(
+            urn=matrix_urn,
+            defaults=dict(
+                library=library_object,
+                folder=Folder.get_root_folder(),
+                name=self.risk_matrix_data.get("name"),
+                description=self.risk_matrix_data.get("description"),
+                provider=library_object.provider,
+                ref_id=self.risk_matrix_data.get("ref_id"),
+                json_definition=matrix_data,
+                is_enabled=self.risk_matrix_data.get("is_enabled", True),
+                locale=library_object.locale,
+                default_locale=library_object.default_locale,  # Change this in the future ?
+                translations=self.risk_matrix_data.get("translations", {}),
+                is_published=True,
+            ),
         )
-        logger.info("Risk matrix created", matrix=matrix)
+        logger.info(
+            "Risk matrix created" if created else "Risk matrix adopted in place",
+            matrix=matrix,
+        )
         return matrix
 
 

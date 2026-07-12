@@ -28,6 +28,7 @@ from core.models import (
     LoadedLibrary,
     ReferenceControl,
     RequirementNode,
+    RiskMatrix,
     StoredLibrary,
     Threat,
 )
@@ -2063,6 +2064,110 @@ def test_publish_cannot_hijack_a_library_backed_framework(admin_client):
     assert RequirementNode.objects.filter(
         urn="urn:me:risk:req_node:victimlib:a"
     ).exists()
+
+
+_MATRIX_LEVELS = [
+    {"abbreviation": "L", "name": "Low", "hexcolor": "#0F0"},
+    {"abbreviation": "H", "name": "High", "hexcolor": "#F00"},
+]
+_MATRIX_OBJECT_FIELDS = {
+    "probability": _MATRIX_LEVELS,
+    "impact": _MATRIX_LEVELS,
+    "risk": _MATRIX_LEVELS,
+    "grid": [[0, 1], [0, 1]],
+}
+
+
+@pytest.mark.django_db
+def test_publish_adopts_a_library_less_matrix_in_place(admin_client):
+    """First publish of a draft whose matrix URN lives on a library-less row
+    (migration-wrapped standalone-editor matrices) must adopt that very row —
+    same id, so risk assessments built on it stay attached — instead of
+    crashing on the URN unique constraint."""
+    live = RiskMatrix.objects.create(
+        folder=Folder.get_root_folder(),
+        name="Wrapped matrix",
+        urn="urn:me:risk:matrix:wrappedlib",
+        ref_id="wrappedlib",
+        json_definition=dict(_MATRIX_OBJECT_FIELDS),
+    )
+    draft = _create_draft(
+        admin_client,
+        packager="me",
+        ref_id="wrappedlib",
+        content={
+            "risk_matrices": [
+                {
+                    "urn": "urn:me:risk:matrix:wrappedlib",
+                    "ref_id": "wrappedlib",
+                    "name": "Wrapped matrix v2",
+                    **_MATRIX_OBJECT_FIELDS,
+                }
+            ]
+        },
+    )
+    response = admin_client.post(
+        reverse("library-drafts-publish", args=[draft["id"]]), {}, format="json"
+    )
+    assert response.status_code == status.HTTP_200_OK, response.content
+    live.refresh_from_db()  # the SAME row was adopted, not replaced
+    assert live.library is not None
+    assert live.library.urn == "urn:me:risk:library:wrappedlib"
+    assert live.name == "Wrapped matrix v2"
+
+
+@pytest.mark.django_db
+def test_publish_cannot_hijack_a_library_backed_matrix(admin_client):
+    """A draft whose matrix URN collides with an already-loaded,
+    library-backed matrix must fail to publish, leaving the victim intact."""
+    victim = _create_draft(
+        admin_client,
+        packager="me",
+        ref_id="victimmatrix",
+        content={
+            "risk_matrices": [
+                {
+                    "urn": "urn:me:risk:matrix:victimmatrix",
+                    "ref_id": "V",
+                    "name": "Victim matrix",
+                    **_MATRIX_OBJECT_FIELDS,
+                }
+            ]
+        },
+    )
+    assert (
+        admin_client.post(
+            reverse("library-drafts-publish", args=[victim["id"]]), {}, format="json"
+        ).status_code
+        == status.HTTP_200_OK
+    )
+    victim_matrix = RiskMatrix.objects.get(urn="urn:me:risk:matrix:victimmatrix")
+    assert victim_matrix.library is not None
+
+    attacker = _create_draft(
+        admin_client,
+        packager="me",
+        ref_id="attackermatrix",
+        content={
+            "risk_matrices": [
+                {
+                    "urn": "urn:me:risk:matrix:victimmatrix",  # collision
+                    "ref_id": "V",
+                    "name": "Hijacked matrix",
+                    **_MATRIX_OBJECT_FIELDS,
+                }
+            ]
+        },
+    )
+    response = admin_client.post(
+        reverse("library-drafts-publish", args=[attacker["id"]]), {}, format="json"
+    )
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, (
+        response.content
+    )
+    victim_matrix.refresh_from_db()
+    assert victim_matrix.library.urn == "urn:me:risk:library:victimmatrix"
+    assert victim_matrix.name == "Victim matrix"
 
 
 @pytest.mark.django_db
