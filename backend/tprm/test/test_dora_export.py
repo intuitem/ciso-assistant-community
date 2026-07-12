@@ -2446,13 +2446,13 @@ class TestParameters(DoraExportTestMixin, TestCase):
         params = self._params_dict(buf)
         self.assertEqual(params["decimalsInteger"], "0")
         self.assertEqual(params["decimalsMonetary"], "-3")
-        self.assertEqual(params["decimalsPercentage"], "4")
-        self.assertEqual(params["decimalsDecimal"], "2")
+        self.assertNotIn("decimalsPercentage", params)
+        self.assertNotIn("decimalsDecimal", params)
 
-    def test_seven_parameter_rows(self):
+    def test_five_parameter_rows(self):
         buf = self._generate(dora_export.generate_parameters, self.entity)
         rows = self._read_csv(buf, "reports/parameters.csv")
-        self.assertEqual(len(self._data_rows(rows)), 7)
+        self.assertEqual(len(self._data_rows(rows)), 5)
 
 
 class TestReportPackageJson(DoraExportTestMixin, TestCase):
