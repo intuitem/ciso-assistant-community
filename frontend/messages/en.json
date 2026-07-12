@@ -5383,6 +5383,7 @@
 	"nothingToPublish": "Nothing new to publish.",
 	"libraryNeedsName": "The library needs a name",
 	"libraryHoldsNoObjects": "The library holds no object yet",
+	"libraryValidationInternalError": "Internal validation error — see the server logs.",
 	"lbDraftValidationFailedSeePanel": "Validation failed — see the validation panel",
 	"lbDraftDeleteObjectConfirm": "Delete \"{name}\" from the draft?",
 	"lbDraftObjectReferencedConfirm": "\"{name}\" is linked from {count} requirement node(s). Remove the links and delete it?",

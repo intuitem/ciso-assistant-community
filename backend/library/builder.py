@@ -945,8 +945,12 @@ def validate_draft_document(draft, *, user=None) -> dict:
             error_msg = LibraryImporter(shim).init()
             if error_msg:
                 errors.append(error_msg)
-        except Exception as exc:
-            errors.append(str(exc))
+        except Exception:
+            # The content already passed the shape gate, so this is an
+            # internal validation bug: full detail to the log, a stable
+            # code (localized by the panel's safeTranslate) to the client.
+            logger.exception("Loader-level validation crashed", urn=library["urn"])
+            errors.append("libraryValidationInternalError")
 
     errors.extend(_check_reference_integrity(draft, user=user))
 

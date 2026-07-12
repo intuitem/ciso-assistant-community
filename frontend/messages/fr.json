@@ -5379,6 +5379,7 @@
 	"nothingToPublish": "Rien de nouveau à publier.",
 	"libraryNeedsName": "La bibliothèque doit avoir un nom",
 	"libraryHoldsNoObjects": "La bibliothèque ne contient encore aucun objet",
+	"libraryValidationInternalError": "Erreur interne de validation — consultez les journaux du serveur.",
 	"lbDraftValidationFailedSeePanel": "Validation échouée — voir le panneau de validation",
 	"lbDraftDeleteObjectConfirm": "Supprimer « {name} » du brouillon ?",
 	"lbDraftObjectReferencedConfirm": "« {name} » est lié depuis {count} nœud(s) d'exigence. Supprimer les liens et le supprimer ?",
