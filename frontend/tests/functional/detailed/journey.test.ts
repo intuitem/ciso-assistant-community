@@ -61,8 +61,10 @@ test.describe('Journeys', () => {
 			await page.goto(libraryEditorUrl);
 			await page.waitForLoadState('networkidle');
 			await page.getByRole('button', { name: /^publish$/i }).click();
-			// Publishing loads the library; the draft's identity freezes.
-			await expect(page.getByText('Identity frozen')).toBeVisible({ timeout: 30_000 });
+			// Publishing loads the library; the header badge flips to Published.
+			await expect(page.getByText('Published', { exact: true })).toBeVisible({
+				timeout: 30_000
+			});
 		});
 
 		await test.step('navigate to /presets and verify preset is listed', async () => {

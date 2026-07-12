@@ -651,6 +651,40 @@ class StoredLibrary(LibraryMixin):
             library_label.garbage_collect()
 
 
+def librarydraft_fingerprint(draft) -> str:
+    """Stable hash of everything a LibraryDraft publishes (metadata + objects).
+
+    Deterministic — unlike to_library_dict(), it reads the *stored*
+    publication_date instead of defaulting to today's date, so the hash does
+    not drift over time. Module-level and attribute-based so the data
+    migration can apply it to historical model instances too.
+    """
+    import hashlib
+    import json
+
+    payload = {
+        "urn": draft.urn or f"urn:{draft.packager}:risk:library:{draft.ref_id}",
+        "locale": draft.locale,
+        "ref_id": draft.ref_id,
+        "name": draft.name,
+        "description": draft.description,
+        "copyright": draft.copyright,
+        "version": draft.version,
+        "publication_date": draft.publication_date.isoformat()
+        if draft.publication_date
+        else None,
+        "provider": draft.provider,
+        "packager": draft.packager,
+        "annotation": draft.annotation,
+        "translations": draft.translations,
+        "dependencies": draft.dependencies,
+        "labels": draft.labels,
+        "content": draft.content,
+    }
+    encoded = json.dumps(payload, sort_keys=True, default=str).encode()
+    return hashlib.sha256(encoded).hexdigest()
+
+
 class LibraryDraft(NameDescriptionMixin, FolderMixin):
     """
     Work-in-progress library authored in the builder.
@@ -710,6 +744,11 @@ class LibraryDraft(NameDescriptionMixin, FolderMixin):
     # Builder lifecycle markers — never overload is_published (IAM visibility).
     first_published_at = models.DateTimeField(null=True, blank=True)
     last_published_at = models.DateTimeField(null=True, blank=True)
+    # Snapshot of what was last loaded, so the builder can tell a published
+    # draft that is unchanged from one that has pending edits (see
+    # has_unpublished_changes). Set together with last_published_at.
+    last_published_version = models.IntegerField(null=True, blank=True)
+    last_published_hash = models.CharField(max_length=64, null=True, blank=True)
 
     class Meta:
         verbose_name = _("Library draft")
@@ -722,6 +761,24 @@ class LibraryDraft(NameDescriptionMixin, FolderMixin):
     @property
     def identity_locked(self) -> bool:
         return self.first_published_at is not None
+
+    def publish_fingerprint(self) -> str:
+        return librarydraft_fingerprint(self)
+
+    def mark_published(self):
+        """Record the just-published snapshot. Caller saves the row."""
+        self.last_published_version = self.version
+        self.last_published_hash = self.publish_fingerprint()
+
+    @property
+    def has_unpublished_changes(self) -> bool:
+        """True for a published (identity-committed) draft edited since its
+        last publication snapshot."""
+        return (
+            self.identity_locked
+            and self.last_published_hash is not None
+            and self.publish_fingerprint() != self.last_published_hash
+        )
 
     def to_library_dict(self) -> dict:
         """Assemble the full library document (the YAML shape) from the draft."""

@@ -146,6 +146,7 @@ class LibraryDraftReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     urn = serializers.CharField(source="effective_urn", read_only=True)
     identity_locked = serializers.BooleanField(read_only=True)
+    has_unpublished_changes = serializers.BooleanField(read_only=True)
     objects_meta = serializers.SerializerMethodField()
 
     def get_objects_meta(self, obj) -> dict:
@@ -181,8 +182,10 @@ class LibraryDraftReadSerializer(BaseModelSerializer):
             "content",
             "objects_meta",
             "identity_locked",
+            "has_unpublished_changes",
             "first_published_at",
             "last_published_at",
+            "last_published_version",
             "created_at",
             "updated_at",
         ]
@@ -191,8 +194,9 @@ class LibraryDraftReadSerializer(BaseModelSerializer):
 class LibraryDraftWriteSerializer(BaseModelSerializer):
     class Meta:
         model = LibraryDraft
-        # urn and the published timestamps are lifecycle fields, only ever set
-        # by the adopt/publish actions.
+        # urn and the published-* snapshot are lifecycle fields, only ever set
+        # by the adopt/publish actions; is_published is the IAM visibility flag
+        # (unrelated to library publication) and is never client-writable.
         exclude = [
             "created_at",
             "updated_at",
@@ -200,6 +204,8 @@ class LibraryDraftWriteSerializer(BaseModelSerializer):
             "urn",
             "first_published_at",
             "last_published_at",
+            "last_published_version",
+            "last_published_hash",
         ]
 
     def validate_content(self, content):

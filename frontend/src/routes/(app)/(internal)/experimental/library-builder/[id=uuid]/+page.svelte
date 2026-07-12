@@ -317,6 +317,12 @@
 				}
 				return;
 			}
+			if (result.error === 'versionBumpRequired') {
+				if (confirm(m.lbDraftVersionBumpConfirm({ version: draft.version }))) {
+					await publish({ ...extra, bump_version: true, _presetChecked: true });
+				}
+				return;
+			}
 			if (result.error === 'score_change_detected') {
 				scoreConflict = result;
 				return;
@@ -332,6 +338,51 @@
 		} finally {
 			publishing = false;
 		}
+	}
+
+	// --- Export --------------------------------------------------------------
+	// Publish (the commit) is required before exporting the canonical
+	// artifact; the escape hatch downloads a -draft-suffixed working copy.
+	async function commitOnly(bump = false): Promise<boolean> {
+		const res = await fetch(base(), {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				action: 'publish',
+				load: false,
+				...(bump ? { bump_version: true } : {})
+			})
+		});
+		const result = await res.json();
+		if (res.ok) {
+			await reload();
+			return true;
+		}
+		if (result.error === 'versionBumpRequired' && !bump) {
+			if (confirm(m.lbDraftVersionBumpConfirm({ version: draft.version }))) {
+				return commitOnly(true);
+			}
+			return false;
+		}
+		if (result.error === 'draftValidationFailed') {
+			validation = { errors: result.details ?? [], warnings: [] };
+			setStatus(m.lbDraftValidationFailedSeePanel(), 'error');
+			return false;
+		}
+		setStatus(result.detail || safeTranslate(result.error) || JSON.stringify(result), 'error');
+		return false;
+	}
+
+	async function exportYaml() {
+		const clean = draft.identity_locked && !draft.has_unpublished_changes;
+		if (!clean) {
+			if (confirm(m.lbDraftExportPublishFirstConfirm())) {
+				if (!(await commitOnly())) return;
+			} else if (!confirm(m.lbDraftExportWorkingCopyConfirm())) {
+				return;
+			}
+		}
+		window.location.href = `${base()}/export`;
 	}
 
 	function objectCount(type: string): number {
@@ -573,12 +624,21 @@
 						<i class="fa-solid fa-arrow-left"></i>
 					</a>
 					<h2 class="text-xl font-semibold">{draft.name}</h2>
-					{#if draft.identity_locked}
-						<span class="badge variant-filled-success text-xs">
-							<i class="fa-solid fa-lock mr-0.5"></i>{m.lbDraftIdentityFrozen()}
+					<!-- Publication status, mirroring the drafts list. Published =
+					     identity committed (frozen), by decision or by proof; the
+					     packager/ref_id fields show the (frozen) hint. -->
+					{#if !draft.identity_locked}
+						<span class="badge variant-ghost-surface text-xs">{m.lbListDraft()}</span>
+					{:else if draft.has_unpublished_changes}
+						<span class="badge variant-filled-warning text-xs">
+							<i class="fa-solid fa-cloud-arrow-up mr-0.5" aria-hidden="true"
+							></i>{m.lbListPublishedModified()}
 						</span>
 					{:else}
-						<span class="badge variant-ghost-surface text-xs">{m.draft()}</span>
+						<span class="badge variant-filled-success text-xs">
+							<i class="fa-solid fa-cloud-arrow-up mr-0.5" aria-hidden="true"
+							></i>{m.lbListPublished()}
+						</span>
 					{/if}
 					<span class="badge variant-ghost-surface text-xs">v{draft.version}</span>
 				</div>
@@ -624,9 +684,9 @@
 				>
 					<i class="fa-solid fa-list-check mr-1" aria-hidden="true"></i>{m.validate()}
 				</button>
-				<a href="{base()}/export" class="btn btn-sm variant-ghost-surface">
+				<button type="button" class="btn btn-sm variant-ghost-surface" onclick={exportYaml}>
 					<i class="fa-solid fa-file-arrow-down mr-1" aria-hidden="true"></i>{m.exportYaml()}
-				</a>
+				</button>
 				<button
 					type="button"
 					class="btn btn-sm variant-filled-primary"
@@ -716,11 +776,13 @@
 				</p>
 			{/if}
 			{#each validation.errors as error}
-				<p class="text-sm text-red-700"><i class="fa-solid fa-circle-xmark mr-1"></i>{error}</p>
+				<p class="text-sm text-red-700">
+					<i class="fa-solid fa-circle-xmark mr-1"></i>{safeTranslate(error)}
+				</p>
 			{/each}
 			{#each validation.warnings as warning}
 				<p class="text-sm text-amber-700">
-					<i class="fa-solid fa-triangle-exclamation mr-1"></i>{warning}
+					<i class="fa-solid fa-triangle-exclamation mr-1"></i>{safeTranslate(warning)}
 				</p>
 			{/each}
 		</div>
@@ -1302,7 +1364,9 @@
 
 	{#if view === 'simple'}
 		<p class="text-xs text-surface-500 text-center">
-			{m.lbDraftSimpleViewPackaged({ kind: primaryKind, urn: draft.urn })}
+			{primaryKind === 'framework'
+				? m.lbDraftSimpleViewPackagedFramework({ urn: draft.urn })
+				: m.lbDraftSimpleViewPackagedMatrix({ urn: draft.urn })}
 		</p>
 	{/if}
 </div>

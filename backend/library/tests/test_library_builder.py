@@ -606,14 +606,15 @@ def test_publish_loads_through_the_existing_import_path(admin_client):
     )
     assert frozen.status_code == status.HTTP_400_BAD_REQUEST
 
-    # re-publish without a version bump is refused…
+    # re-publishing unchanged content is refused outright — no version bump
+    # is suggested for identical bytes
     again = admin_client.post(
         reverse("library-drafts-publish", args=[draft["id"]]), {}, format="json"
     )
     assert again.status_code == status.HTTP_409_CONFLICT
-    assert again.data["error"] == "libraryVersionOutdated"
+    assert again.data["error"] == "nothingToPublish"
 
-    # …and with bump_version it updates the same URN in place
+    # …changed content with bump_version updates the same URN in place
     detail_url = reverse("library-drafts-detail", args=[draft["id"]])
     current = admin_client.get(detail_url).data
     content = current["content"]
@@ -1420,12 +1421,25 @@ def test_delete_object_blocks_on_references_unless_forced(admin_client):
 @pytest.mark.django_db
 def test_export_returns_a_loadable_yaml(admin_client):
     draft = _create_draft(admin_client)
-    response = admin_client.get(reverse("library-drafts-export", args=[draft["id"]]))
+    export_url = reverse("library-drafts-export", args=[draft["id"]])
+
+    # Not published yet: the download is a working copy, suffixed -draft.
+    response = admin_client.get(export_url)
     assert response.status_code == status.HTTP_200_OK
-    assert 'filename="mylib-v1.yaml"' in response["Content-Disposition"]
+    assert 'filename="mylib-v1-draft.yaml"' in response["Content-Disposition"]
     document = yaml.safe_load(response.content)
     assert document["urn"] == "urn:me:risk:library:mylib"
     assert document["objects"]["threats"][0]["ref_id"] == "T1"
+
+    # Published and unchanged: the canonical artifact, no suffix.
+    published = admin_client.post(
+        reverse("library-drafts-publish", args=[draft["id"]]),
+        {"load": False},
+        format="json",
+    )
+    assert published.status_code == status.HTTP_200_OK, published.content
+    response = admin_client.get(export_url)
+    assert 'filename="mylib-v1.yaml"' in response["Content-Disposition"]
 
 
 # ---------------------------------------------------------------------------
@@ -2168,6 +2182,91 @@ def test_publish_cannot_hijack_a_library_backed_matrix(admin_client):
     victim_matrix.refresh_from_db()
     assert victim_matrix.library.urn == "urn:me:risk:library:victimmatrix"
     assert victim_matrix.name == "Victim matrix"
+
+
+@pytest.mark.django_db
+def test_has_unpublished_changes_tracks_edits_after_publish(admin_client):
+    """A published draft reads unchanged right after publish, flips to
+    modified once edited, and back to unchanged after re-publishing."""
+    draft = _create_draft(admin_client)
+    detail_url = reverse("library-drafts-detail", args=[draft["id"]])
+    publish_url = reverse("library-drafts-publish", args=[draft["id"]])
+
+    # Never published yet.
+    assert draft["has_unpublished_changes"] is False
+    assert draft["last_published_version"] is None
+
+    assert (
+        admin_client.post(publish_url, {}, format="json").status_code
+        == status.HTTP_200_OK
+    )
+    fresh = admin_client.get(detail_url).data
+    assert fresh["has_unpublished_changes"] is False  # just published, unchanged
+    assert fresh["last_published_version"] == fresh["version"]
+
+    # Any edit to the publishable content changes the fingerprint.
+    admin_client.patch(detail_url, {"description": "edited"}, format="json")
+    assert admin_client.get(detail_url).data["has_unpublished_changes"] is True
+
+    # Re-publishing (with a version bump) clears it again.
+    admin_client.patch(detail_url, {"version": 2}, format="json")
+    assert (
+        admin_client.post(publish_url, {}, format="json").status_code
+        == status.HTTP_200_OK
+    )
+    assert admin_client.get(detail_url).data["has_unpublished_changes"] is False
+
+
+@pytest.mark.django_db
+def test_publish_without_load_commits_only(admin_client):
+    """publish {load: false} is the user's commit: identity frozen and
+    snapshot recorded, nothing stored or loaded in the corpus. Re-committing
+    unchanged content is refused; changed content demands a version bump."""
+    draft = _create_draft(admin_client)
+    detail_url = reverse("library-drafts-detail", args=[draft["id"]])
+    publish_url = reverse("library-drafts-publish", args=[draft["id"]])
+
+    committed = admin_client.post(publish_url, {"load": False}, format="json")
+    assert committed.status_code == status.HTTP_200_OK, committed.content
+    assert committed.data["loaded"] is False
+
+    fresh = admin_client.get(detail_url).data
+    assert fresh["identity_locked"] is True
+    assert fresh["has_unpublished_changes"] is False
+    urn = fresh["urn"]
+    assert not StoredLibrary.objects.filter(urn=urn).exists()
+    assert not LoadedLibrary.objects.filter(urn=urn).exists()
+
+    # Unchanged content: nothing new to commit.
+    again = admin_client.post(publish_url, {"load": False}, format="json")
+    assert again.status_code == status.HTTP_409_CONFLICT
+    assert again.data["error"] == "nothingToPublish"
+
+    # Changed content under the same version: two different v1 artifacts
+    # would exist in the wild — refused without a bump.
+    admin_client.patch(detail_url, {"description": "edited"}, format="json")
+    refused = admin_client.post(publish_url, {"load": False}, format="json")
+    assert refused.status_code == status.HTTP_409_CONFLICT
+    assert refused.data["error"] == "versionBumpRequired"
+
+    bumped = admin_client.post(
+        publish_url, {"load": False, "bump_version": True}, format="json"
+    )
+    assert bumped.status_code == status.HTTP_200_OK, bumped.content
+    assert bumped.data["version"] == 2
+    assert admin_client.get(detail_url).data["has_unpublished_changes"] is False
+
+    # Committed but not loaded: loading is the pending work, so a full
+    # publish (load=true) must go through even though nothing changed.
+    loaded = admin_client.post(publish_url, {}, format="json")
+    assert loaded.status_code == status.HTTP_200_OK, loaded.content
+    assert LoadedLibrary.objects.filter(urn=urn, version=2).exists()
+
+    # Unchanged AND already loaded: nothing to commit, nothing to load —
+    # refused instead of prompting a pointless version bump.
+    noop = admin_client.post(publish_url, {}, format="json")
+    assert noop.status_code == status.HTTP_409_CONFLICT
+    assert noop.data["error"] == "nothingToPublish"
 
 
 @pytest.mark.django_db

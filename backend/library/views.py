@@ -1041,14 +1041,19 @@ class LibraryDraftViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"])
     def export(self, request, pk):
+        """Pure GET, no state change. A published-and-clean draft exports as
+        the canonical artifact; anything else is a working copy whose URNs may
+        still change, so the filename says so."""
         draft = self.get_object()
         library_yaml = yaml.safe_dump(
             draft.to_library_dict(), sort_keys=False, allow_unicode=True
         )
         response = HttpResponse(library_yaml, content_type="application/yaml")
         safe_ref = re.sub(r"[^A-Za-z0-9._-]+", "-", draft.ref_id or "library")
+        clean = draft.identity_locked and not draft.has_unpublished_changes
+        suffix = "" if clean else "-draft"
         response["Content-Disposition"] = (
-            f'attachment; filename="{safe_ref}-v{draft.version}.yaml"'
+            f'attachment; filename="{safe_ref}-v{draft.version}{suffix}.yaml"'
         )
         return response
 
@@ -1127,6 +1132,10 @@ class LibraryDraftViewSet(BaseModelViewSet):
             first_published_at=now(),
             last_published_at=now(),
         )
+        # Snapshot the adopted (already-loaded) state so the draft reads as
+        # published-and-unchanged until the user edits it.
+        draft.mark_published()
+        draft.save(update_fields=["last_published_version", "last_published_hash"])
         return Response(LibraryDraftReadSerializer(draft).data, status=HTTP_201_CREATED)
 
     def _adopt_live_framework(self, request, folder):
@@ -1189,10 +1198,14 @@ class LibraryDraftViewSet(BaseModelViewSet):
             content={"frameworks": [live.live_framework_to_object(framework)]},
             dependencies=[],
             urn=draft_urn,
-            # The live rows already carry this family: frozen from the start.
+            # Proof-published: the live rows already carry this URN family and
+            # are in use, so the identity is committed from the start.
             first_published_at=now(),
             last_published_at=None,
         )
+        # Snapshot the adopted state so later edits read as unpublished changes.
+        draft.mark_published()
+        draft.save(update_fields=["last_published_version", "last_published_hash"])
         return Response(LibraryDraftReadSerializer(draft).data, status=HTTP_201_CREATED)
 
     @action(
@@ -2112,9 +2125,13 @@ class LibraryDraftViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["post"])
     def publish(self, request, pk):
-        """Publish = load: serialize the draft to library YAML and feed it to
-        the existing stored-library loader. Re-publishing an already-loaded
-        URN goes through the loader's update path (update-by-URN)."""
+        """Publish = the user's commit: freeze the identity and snapshot the
+        content (version + fingerprint). With load=true (the default) the
+        draft is also serialized to library YAML and fed to the existing
+        stored-library loader — loading is proof of publication, so it always
+        implies the commit. Re-publishing an already-loaded URN goes through
+        the loader's update path (update-by-URN). load=false commits without
+        touching the corpus (publish-for-export)."""
         draft = self.get_object()
         for codename in ("add_storedlibrary", "add_loadedlibrary"):
             if not RoleAssignment.is_access_allowed(
@@ -2131,7 +2148,72 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
             )
 
+        # A published artifact is identified by URN + version: re-publishing
+        # different content under the version already snapshotted would put
+        # two different v{n} YAMLs in the wild.
+        if (
+            draft.last_published_hash is not None
+            and draft.version == draft.last_published_version
+            and draft.publish_fingerprint() != draft.last_published_hash
+        ):
+            if request.data.get("bump_version"):
+                draft.version += 1
+                draft.save(update_fields=["version", "updated_at"])
+            else:
+                return Response(
+                    {
+                        "error": "versionBumpRequired",
+                        "published_version": draft.last_published_version,
+                    },
+                    status=HTTP_409_CONFLICT,
+                )
+
+        if not request.data.get("load", True):
+            # Commit only: freeze identity + snapshot, no corpus effect.
+            if (
+                draft.last_published_hash is not None
+                and draft.publish_fingerprint() == draft.last_published_hash
+            ):
+                return Response({"error": "nothingToPublish"}, status=HTTP_409_CONFLICT)
+            if draft.first_published_at is None:
+                draft.first_published_at = now()
+            draft.last_published_at = now()
+            draft.mark_published()
+            draft.save(
+                update_fields=[
+                    "first_published_at",
+                    "last_published_at",
+                    "last_published_version",
+                    "last_published_hash",
+                    "updated_at",
+                ]
+            )
+            return Response(
+                {
+                    "status": "published",
+                    "urn": draft.effective_urn,
+                    "version": draft.version,
+                    "loaded": False,
+                }
+            )
+
         urn = draft.effective_urn
+        # Unchanged since the last publication AND that exact version is
+        # already loaded: there is nothing to commit and nothing to load.
+        # Refusing here (instead of falling into the version guard below)
+        # avoids nudging the user into bumping the version of identical
+        # content. A committed-but-not-loaded draft still passes: loading it
+        # IS the pending work.
+        if (
+            draft.last_published_hash is not None
+            and draft.version == draft.last_published_version
+            and draft.publish_fingerprint() == draft.last_published_hash
+            and LoadedLibrary.objects.filter(
+                urn=urn, locale=draft.locale, version__gte=draft.version
+            ).exists()
+        ):
+            return Response({"error": "nothingToPublish"}, status=HTTP_409_CONFLICT)
+
         max_existing = max(
             [
                 *StoredLibrary.objects.filter(urn=urn, locale=draft.locale).values_list(
@@ -2217,11 +2299,14 @@ class LibraryDraftViewSet(BaseModelViewSet):
         if draft.first_published_at is None:
             draft.first_published_at = now()
         draft.last_published_at = now()
+        draft.mark_published()  # snapshot for has_unpublished_changes
         draft.save(
             update_fields=[
                 "urn",
                 "first_published_at",
                 "last_published_at",
+                "last_published_version",
+                "last_published_hash",
                 "updated_at",
             ]
         )

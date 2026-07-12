@@ -5,18 +5,17 @@
 # it, and the editing_draft columns must survive until the data step has
 # consumed them.
 #
-# Data-step scope (deliberate, see the library-builder design note):
-# - Framework WIP (library-less; the old editor only edited those): the
-#   editor-doc blob is converted into a draft document. Missing URNs are
-#   backfilled onto the live rows by row id first, so a later publish
-#   updates those very rows in place (audits untouched).
-# - Custom risk-matrix WIP: the WIP definition is wrapped into a draft,
-#   the matrix URN minted onto the live row (bare family URN).
-# - User-authored preset WIP (urn-less rows): if a journey has been applied
-#   the preset is in use, so it is adopted in place like a framework/matrix
-#   (mint the :preset: URN, freeze the draft, publish updates that row). If it
-#   is unused it was just a draft the retired editor made prematurely usable,
-#   so it wraps into an EDITABLE draft and the premature row is deleted.
+# Data-step scope (deliberate, see the library-builder design note). One rule
+# for every kind of library-less WIP (framework, matrix, preset):
+# - IN USE (audits/mappings/campaigns for a framework, risk assessments or
+#   EBIOS studies for a matrix, applied journeys for a preset): the URNs have
+#   escaped the editor, so the content is proof-published — URNs are minted
+#   onto the live rows, the draft is created frozen with a publication
+#   snapshot, and a later publish adopts those very rows in place.
+# - NOT in use: it was only ever a draft that the retired editors made
+#   prematurely usable. It wraps into an EDITABLE draft and the premature
+#   live rows are deleted (safe: the in-use test is exactly the set of
+#   CASCADE/PROTECT referencers).
 # - Library-backed matrix WIP and library-loaded preset WIP are logged and
 #   skipped: their live/published state is untouched.
 #
@@ -56,6 +55,30 @@ def _dedup_urn(model, candidate, exclude_id=None):
     return candidate
 
 
+def _snapshot_publication(apps, draft):
+    """Record the just-adopted state on a proof-published draft so later
+    edits surface as unpublished changes."""
+    from core.models import librarydraft_fingerprint
+
+    draft.last_published_version = draft.version
+    draft.last_published_hash = librarydraft_fingerprint(draft)
+    draft.save(update_fields=["last_published_version", "last_published_hash"])
+
+
+def _framework_in_use(apps, framework) -> bool:
+    """URNs escaped the editor: audits, mappings or campaigns reference the
+    framework (all FKs CASCADE, so this also gates deletion safety)."""
+    ComplianceAssessment = apps.get_model("core", "ComplianceAssessment")
+    RequirementMappingSet = apps.get_model("core", "RequirementMappingSet")
+    Campaign = apps.get_model("core", "Campaign")
+    return (
+        ComplianceAssessment.objects.filter(framework=framework).exists()
+        or RequirementMappingSet.objects.filter(source_framework=framework).exists()
+        or RequirementMappingSet.objects.filter(target_framework=framework).exists()
+        or Campaign.objects.filter(frameworks=framework).exists()
+    )
+
+
 def _wrap_framework_drafts(apps, root):
     from library.framework_editor import editor_doc_to_framework_object
 
@@ -72,6 +95,7 @@ def _wrap_framework_drafts(apps, root):
             continue
         doc = framework.editing_draft or {}
         meta = doc.get("framework_meta") or {}
+        in_use = _framework_in_use(apps, framework)
 
         packager = _token(meta.get("urn_namespace") or "custom", "custom")
         ref = _token(
@@ -93,28 +117,30 @@ def _wrap_framework_drafts(apps, root):
             )
             framework.save(update_fields=["urn"])
 
-        # Backfill URNs onto live rows by row id: the editor doc records
-        # carry both, so a later publish updates these very rows.
-        for model, records in (
-            (RequirementNode, doc.get("nodes") or []),
-            (Question, doc.get("questions") or []),
-            (QuestionChoice, doc.get("choices") or []),
-        ):
-            for record in records:
-                if not (record.get("id") and record.get("urn")):
-                    continue
-                try:
-                    row = model.objects.filter(id=record["id"], urn=None).first()
-                except Exception:  # editor-local ids ("tmp-…") are not UUIDs
-                    continue
-                if (
-                    row is not None
-                    and not model.objects.filter(
-                        urn=str(record["urn"]).lower()
-                    ).exists()
-                ):
-                    row.urn = str(record["urn"]).lower()
-                    row.save(update_fields=["urn"])
+        # Backfill URNs onto live rows by row id (in-use adoption only): the
+        # editor doc records carry both, so a later publish updates these very
+        # rows. An unused framework's rows are deleted below — no backfill.
+        if in_use:
+            for model, records in (
+                (RequirementNode, doc.get("nodes") or []),
+                (Question, doc.get("questions") or []),
+                (QuestionChoice, doc.get("choices") or []),
+            ):
+                for record in records:
+                    if not (record.get("id") and record.get("urn")):
+                        continue
+                    try:
+                        row = model.objects.filter(id=record["id"], urn=None).first()
+                    except Exception:  # editor-local ids ("tmp-…") are not UUIDs
+                        continue
+                    if (
+                        row is not None
+                        and not model.objects.filter(
+                            urn=str(record["urn"]).lower()
+                        ).exists()
+                    ):
+                        row.urn = str(record["urn"]).lower()
+                        row.save(update_fields=["urn"])
 
         # Every URN already present in the doc must survive conversion
         # verbatim (that is what matches the backfilled live rows), so the
@@ -163,7 +189,7 @@ def _wrap_framework_drafts(apps, root):
         if LibraryDraft.objects.filter(urn=library_urn).exists():
             print(f"[0176] draft already exists for {label} ({library_urn}), skipping")
             continue
-        LibraryDraft.objects.create(
+        draft = LibraryDraft.objects.create(
             name=meta.get("name") or framework.name,
             description=meta.get("description") or framework.description,
             folder=root,
@@ -175,12 +201,19 @@ def _wrap_framework_drafts(apps, root):
             content={"frameworks": [framework_object]},
             dependencies=[],
             urn=library_urn,
-            # The live rows carry this family: identity frozen from the start.
-            first_published_at=now(),
+            # In use = proof-published (audits/mappings reference the live
+            # rows): frozen so publish adopts them in place. Unused = it was
+            # only ever a draft: editable, premature live rows removed below.
+            first_published_at=now() if in_use else None,
         )
-        framework.editing_draft = None
-        framework.save(update_fields=["editing_draft"])
-        print(f"[0176] wrapped WIP of {label} into draft {library_urn}")
+        if in_use:
+            _snapshot_publication(apps, draft)
+            framework.editing_draft = None
+            framework.save(update_fields=["editing_draft"])
+            print(f"[0176] adopted in-use {label} into draft {library_urn} (frozen)")
+        else:
+            framework.delete()  # cascades nodes/questions/choices only
+            print(f"[0176] wrapped draft {label} into {library_urn} (editable)")
 
 
 def _wrap_matrix_drafts(apps, root):
@@ -193,8 +226,17 @@ def _wrap_matrix_drafts(apps, root):
             print(f"[0176] skipping WIP on library-backed {label}")
             continue
         definition = matrix.editing_draft or {}
+        # In use = proof-published (risk assessments / EBIOS studies reference
+        # the live row, both PROTECT): adopt in place, frozen. Unused = it was
+        # only ever a draft: editable, premature live row removed.
+        RiskAssessment = apps.get_model("core", "RiskAssessment")
+        EbiosRMStudy = apps.get_model("ebios_rm", "EbiosRMStudy")
+        in_use = (
+            RiskAssessment.objects.filter(risk_matrix=matrix).exists()
+            or EbiosRMStudy.objects.filter(risk_matrix=matrix).exists()
+        )
         ref = _token(matrix.ref_id or matrix.name, f"matrix-{str(matrix.id)[:8]}")
-        if not matrix.urn:
+        if in_use and not matrix.urn:
             matrix.urn = _dedup_urn(
                 RiskMatrix, f"urn:custom:risk:matrix:{ref}", exclude_id=matrix.id
             )
@@ -204,7 +246,7 @@ def _wrap_matrix_drafts(apps, root):
             print(f"[0176] draft already exists for {label} ({library_urn}), skipping")
             continue
         matrix_object = {
-            "urn": matrix.urn.lower(),
+            "urn": (matrix.urn or f"urn:custom:risk:matrix:{ref}").lower(),
             "ref_id": matrix.ref_id or ref,
             "name": matrix.name,
             "description": matrix.description,
@@ -212,7 +254,7 @@ def _wrap_matrix_drafts(apps, root):
         for key in ("probability", "impact", "risk", "grid", "strength_of_knowledge"):
             if key in definition:
                 matrix_object[key] = definition[key]
-        LibraryDraft.objects.create(
+        draft = LibraryDraft.objects.create(
             name=matrix.name,
             description=matrix.description,
             folder=root,
@@ -224,11 +266,16 @@ def _wrap_matrix_drafts(apps, root):
             content={"risk_matrices": [matrix_object]},
             dependencies=[],
             urn=library_urn,
-            first_published_at=now(),
+            first_published_at=now() if in_use else None,
         )
-        matrix.editing_draft = None
-        matrix.save(update_fields=["editing_draft"])
-        print(f"[0176] wrapped WIP of {label} into draft {library_urn}")
+        if in_use:
+            _snapshot_publication(apps, draft)
+            matrix.editing_draft = None
+            matrix.save(update_fields=["editing_draft"])
+            print(f"[0176] adopted in-use {label} into draft {library_urn} (frozen)")
+        else:
+            matrix.delete()
+            print(f"[0176] wrapped draft {label} into {library_urn} (editable)")
 
 
 def _wrap_preset_drafts(apps, root):
@@ -277,7 +324,7 @@ def _wrap_preset_drafts(apps, root):
         if preset.feature_flags:
             preset_object["feature_flags"] = preset.feature_flags
 
-        LibraryDraft.objects.create(
+        draft = LibraryDraft.objects.create(
             name=name,
             description=preset_object["description"],
             folder=root,
@@ -295,6 +342,7 @@ def _wrap_preset_drafts(apps, root):
         )
 
         if in_use:
+            _snapshot_publication(apps, draft)
             # `:preset:` URN (derived from the library URN, matching
             # upsert_preset_from_stored_library) minted onto the live row so
             # publish updates it in place instead of duplicating it.
@@ -322,6 +370,8 @@ class Migration(migrations.Migration):
     dependencies = [
         ("core", "0175_customdochtmltemplate_objectclassification_and_more"),
         ("iam", "0023_alter_folder_content_type"),
+        # The wrap step's in-use test reads ebios_rm.EbiosRMStudy.
+        ("ebios_rm", "0001_initial"),
     ]
 
     operations = [
@@ -421,6 +471,11 @@ class Migration(migrations.Migration):
                 ("content", models.JSONField(blank=True, default=dict)),
                 ("first_published_at", models.DateTimeField(blank=True, null=True)),
                 ("last_published_at", models.DateTimeField(blank=True, null=True)),
+                ("last_published_version", models.IntegerField(blank=True, null=True)),
+                (
+                    "last_published_hash",
+                    models.CharField(blank=True, max_length=64, null=True),
+                ),
                 (
                     "folder",
                     models.ForeignKey(

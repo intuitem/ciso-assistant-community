@@ -430,9 +430,7 @@
 						</p>
 					{/if}
 					<p class="text-surface-500">
-						{m.lbListQuickHelp({
-							kind: quickKind === 'framework' ? m.framework() : m.riskMatrix()
-						})}
+						{quickKind === 'framework' ? m.lbListQuickHelpFramework() : m.lbListQuickHelpMatrix()}
 					</p>
 				</div>
 			</div>
@@ -543,16 +541,22 @@
 								<td class="text-sm">v{draft.version}</td>
 								<td class="text-sm text-surface-600-400">{objectsSummary(draft)}</td>
 								<td>
-									<!-- "Published" means actually loaded through publish
-									     (last_published_at), NOT merely identity-frozen: an
-									     adopted/migrated draft is frozen but still a draft
-									     until the user publishes it. -->
-									{#if draft.last_published_at}
-										<span class="badge variant-filled-success text-xs">
-											<i class="fa-solid fa-cloud-arrow-up mr-0.5"></i>{m.lbListPublished()}
+									<!-- Published = identity committed (frozen), whether by the
+									     user's publish decision or by proof (loaded / adopted /
+									     in-use content). Three states: Draft; Published; Published
+									     with edits not yet re-published. -->
+									{#if !draft.identity_locked}
+										<span class="badge variant-ghost-surface text-xs">{m.lbListDraft()}</span>
+									{:else if draft.has_unpublished_changes}
+										<span class="badge variant-filled-warning text-xs">
+											<i class="fa-solid fa-cloud-arrow-up mr-0.5" aria-hidden="true"
+											></i>{m.lbListPublishedModified()}
 										</span>
 									{:else}
-										<span class="badge variant-ghost-surface text-xs">{m.lbListDraft()}</span>
+										<span class="badge variant-filled-success text-xs">
+											<i class="fa-solid fa-cloud-arrow-up mr-0.5" aria-hidden="true"
+											></i>{m.lbListPublished()}
+										</span>
 									{/if}
 								</td>
 								<td class="space-x-1">

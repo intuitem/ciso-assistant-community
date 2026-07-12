@@ -902,10 +902,12 @@ def validate_draft_document(draft, *, user=None) -> dict:
     warnings = []
 
     library = draft.to_library_dict()
+    # Fixed messages are i18n codes (safeTranslate on the frontend); dynamic
+    # ones (paths, URNs) stay literal and display as-is.
     if not draft.name:
-        errors.append("The library needs a name")
+        errors.append("libraryNeedsName")
     if not draft.content:
-        errors.append("The library holds no object yet")
+        errors.append("libraryHoldsNoObjects")
 
     if draft.content:
         normalized = normalize_objects(draft.content)
