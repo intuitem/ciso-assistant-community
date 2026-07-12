@@ -20,6 +20,25 @@ from .models import (
 from rest_framework import serializers
 
 
+# Models whose folder mirrors the study's folder, mapped to the queryset path
+# leading back to the study. Folder-scoped ebios_rm models must appear here or
+# in STUDY_FOLDER_EXEMPT_MODELS so they are not left behind on a domain move.
+STUDY_FOLDER_CASCADE_MODELS = {
+    FearedEvent: "ebios_rm_study",
+    RoTo: "ebios_rm_study",
+    Stakeholder: "ebios_rm_study",
+    StrategicScenario: "ebios_rm_study",
+    AttackPath: "ebios_rm_study",
+    OperationalScenario: "ebios_rm_study",
+    OperatingMode: "operational_scenario__ebios_rm_study",
+    KillChain: "operating_mode__operational_scenario__ebios_rm_study",
+}
+
+# Folder-scoped models that deliberately do not follow the study: they are
+# shared catalog objects (or the study itself) with a user-managed folder.
+STUDY_FOLDER_EXEMPT_MODELS = {EbiosRMStudy, ElementaryAction}
+
+
 class EbiosRMStudyWriteSerializer(BaseModelSerializer):
     genericcollection = serializers.PrimaryKeyRelatedField(
         source="genericcollection_set",
@@ -40,16 +59,8 @@ class EbiosRMStudyWriteSerializer(BaseModelSerializer):
         with transaction.atomic():
             updated_instance = super().update(instance, validated_data)
             if old_folder_id != updated_instance.folder_id:
-                child_models = [
-                    FearedEvent,
-                    RoTo,
-                    Stakeholder,
-                    StrategicScenario,
-                    AttackPath,
-                    OperationalScenario,
-                ]
-                for model in child_models:
-                    model.objects.filter(ebios_rm_study=updated_instance).update(
+                for model, study_path in STUDY_FOLDER_CASCADE_MODELS.items():
+                    model.objects.filter(**{study_path: updated_instance}).update(
                         folder=updated_instance.folder
                     )
         return updated_instance

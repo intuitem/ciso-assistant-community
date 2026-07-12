@@ -3,6 +3,7 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
 	import { m } from '$paraglide/messages';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
@@ -104,6 +105,14 @@
 		>
 			{m.activityOne()}
 		</p>
+		<FolderTreeSelect
+			{form}
+			field="folder"
+			label={m.domain()}
+			cacheLock={cacheLocks['folder']}
+			bind:cachedValue={formDataCache['folder']}
+			helpText={m.ebiosRmStudyDomainHelpText()}
+		/>
 		<Select
 			{form}
 			options={model.selectOptions['status']}
