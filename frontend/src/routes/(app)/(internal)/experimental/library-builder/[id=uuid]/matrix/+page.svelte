@@ -251,7 +251,9 @@
 					>
 						<i class="fa-solid fa-arrow-left"></i>
 					</a>
-					<h2 class="text-xl font-semibold">{name || matrix.ref_id}</h2>
+					<h2 class="text-xl font-semibold">
+						{(isTranslatingMeta && metaTranslations[activeLang]?.name) || name || matrix.ref_id}
+					</h2>
 					{#if unsaved}
 						<span class="badge variant-filled-warning text-xs">{m.lbMatrixUnsavedChanges()}</span>
 					{/if}
@@ -422,6 +424,14 @@
 		<h3 class="text-lg font-semibold mb-3">
 			<i class="fa-solid fa-table-cells mr-1"></i>{m.grid()}
 		</h3>
-		<GridEditor bind:grid {probabilityLevels} {impactLevels} {riskLevels} onchange={onGridChange} />
+		<GridEditor
+			bind:grid
+			{probabilityLevels}
+			{impactLevels}
+			{riskLevels}
+			onchange={onGridChange}
+			{activeLang}
+			{baseLang}
+		/>
 	</div>
 </div>
