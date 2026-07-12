@@ -659,9 +659,6 @@ def librarydraft_fingerprint(draft) -> str:
     not drift over time. Module-level and attribute-based so the data
     migration can apply it to historical model instances too.
     """
-    import hashlib
-    import json
-
     payload = {
         "urn": draft.urn or f"urn:{draft.packager}:risk:library:{draft.ref_id}",
         "locale": draft.locale,
