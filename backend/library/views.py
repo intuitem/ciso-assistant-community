@@ -1799,6 +1799,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
             "journey_meta": {
                 "name": preset.get("name") or draft.name or "",
                 "description": preset.get("description") or draft.description or "",
+                "translations": preset.get("translations") or {},
             },
             "scaffolded_objects": list(preset.get("scaffolded_objects") or []),
             "steps": list(journey.get("steps") or []),
@@ -1843,7 +1844,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
         preset["journey"] = journey
         # The preset's own title, independent from the library name. Empty
         # values are dropped: the loader falls back to the library metadata.
-        for field in ("name", "description"):
+        for field in ("name", "description", "translations"):
             if normalized["journey_meta"][field]:
                 preset[field] = normalized["journey_meta"][field]
             else:

@@ -4,6 +4,7 @@
 	import { pageTitle } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { LOCALE_MAP, language } from '$lib/utils/locales';
 
 	interface Level {
 		id: number;
@@ -50,6 +51,71 @@
 	let grid = $state<number[][]>((matrix.grid ?? []).map((row: number[]) => [...row]));
 	let unsaved = $state(false);
 	let saving = $state(false);
+
+	// --- Translations (ported from the retired standalone matrix editor) ----
+	// activeLang !== baseLang flips the meta inputs and the LevelEditors into
+	// translation mode: edits land in translations[activeLang] instead of the
+	// base fields.
+	let activeLang = $state(baseLang);
+	let addedLanguages: string[] = $state([]);
+	let metaTranslations: Record<string, { name?: string; description?: string }> = $state({
+		...(matrix.translations ?? {})
+	});
+	let isTranslatingMeta = $derived(activeLang !== baseLang);
+
+	// Languages that already carry translations anywhere in the matrix.
+	let usedLanguages = $derived.by(() => {
+		const langs = new Set<string>();
+		for (const levels of [probabilityLevels, impactLevels, riskLevels]) {
+			for (const level of levels) {
+				for (const lang of Object.keys(level.translations ?? {})) langs.add(lang);
+			}
+		}
+		for (const lang of Object.keys(metaTranslations)) langs.add(lang);
+		for (const lang of addedLanguages) langs.add(lang);
+		langs.delete(baseLang);
+		return langs;
+	});
+
+	let availableToAdd = $derived(
+		Object.entries(LOCALE_MAP)
+			.filter(([code]) => code !== baseLang && !usedLanguages.has(code))
+			.map(([code, info]) => ({ code, name: language[info.name] ?? info.name }))
+	);
+
+	function localeLabel(code: string): string {
+		return language[LOCALE_MAP[code as keyof typeof LOCALE_MAP]?.name] ?? code;
+	}
+
+	function addLanguage(code: string) {
+		addedLanguages = [...addedLanguages, code];
+		activeLang = code;
+	}
+
+	function removeLanguage(code: string) {
+		if (code === baseLang) return;
+		for (const levels of [probabilityLevels, impactLevels, riskLevels]) {
+			for (const level of levels) {
+				if (level.translations?.[code]) delete level.translations[code];
+			}
+		}
+		probabilityLevels = [...probabilityLevels];
+		impactLevels = [...impactLevels];
+		riskLevels = [...riskLevels];
+		if (metaTranslations[code]) {
+			const { [code]: _removed, ...rest } = metaTranslations;
+			metaTranslations = rest;
+		}
+		addedLanguages = addedLanguages.filter((lang) => lang !== code);
+		if (activeLang === code) activeLang = baseLang;
+		unsaved = true;
+	}
+
+	function setMetaTranslation(field: 'name' | 'description', value: string) {
+		const current = metaTranslations[activeLang] ?? {};
+		metaTranslations = { ...metaTranslations, [activeLang]: { ...current, [field]: value } };
+		unsaved = true;
+	}
 
 	let statusMessage = $state('');
 	let statusType: 'success' | 'error' | '' = $state('');
@@ -153,6 +219,8 @@
 					object: {
 						name: name || null,
 						description: description || null,
+						// null clears the key on the stored object (upsert semantics)
+						translations: Object.keys(metaTranslations).length > 0 ? metaTranslations : null,
 						probability: withoutIds(probabilityLevels),
 						impact: withoutIds(impactLevels),
 						risk: withoutIds(riskLevels),
@@ -213,19 +281,109 @@
 				</button>
 			</div>
 		</div>
+		<!-- Language bar: base locale chip, translation chips, add-language -->
+		<div class="flex flex-wrap items-center gap-2 mt-4">
+			<button
+				type="button"
+				class="px-3 py-1 rounded-full text-sm transition-colors {activeLang === baseLang
+					? 'bg-primary-500 text-white'
+					: 'bg-surface-100-900 text-surface-600-400 hover:bg-surface-200-800'}"
+				onclick={() => (activeLang = baseLang)}
+			>
+				{localeLabel(baseLang)}
+				<span class="text-xs opacity-70">({baseLang})</span>
+			</button>
+			{#each [...usedLanguages] as lang}
+				<span
+					class="inline-flex items-center rounded-full text-sm transition-colors {activeLang ===
+					lang
+						? 'bg-primary-500 text-white'
+						: 'bg-surface-100-900 text-surface-600-400 hover:bg-surface-200-800'}"
+				>
+					<button type="button" class="px-3 py-1" onclick={() => (activeLang = lang)}>
+						{localeLabel(lang)}
+						<span class="text-xs opacity-70">({lang})</span>
+					</button>
+					<button
+						type="button"
+						class="pr-2 pl-0 py-1 opacity-50 hover:opacity-100 transition-opacity"
+						onclick={(e) => {
+							e.stopPropagation();
+							if (confirm(m.removeLanguageConfirm({ lang: localeLabel(lang) }))) {
+								removeLanguage(lang);
+							}
+						}}
+						aria-label="{m.removeLanguageConfirm({ lang: localeLabel(lang) })} ({lang})"
+					>
+						<i class="fa-solid fa-xmark text-xs" aria-hidden="true"></i>
+					</button>
+				</span>
+			{/each}
+			{#if availableToAdd.length > 0}
+				<select
+					class="select select-sm w-36 text-xs"
+					onchange={(e) => {
+						const value = e.currentTarget.value;
+						if (value) addLanguage(value);
+						e.currentTarget.value = '';
+					}}
+				>
+					<option value="">+ {m.addLanguage()}</option>
+					{#each availableToAdd as lang}
+						<option value={lang.code}>{lang.name}</option>
+					{/each}
+				</select>
+			{/if}
+		</div>
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
 			<label class="label text-sm">
-				<span>{m.name()}</span>
-				<input class="input" type="text" bind:value={name} oninput={() => (unsaved = true)} />
+				<span
+					>{m.name()}{#if isTranslatingMeta}
+						<span class="text-xs font-normal text-surface-500">({activeLang})</span>{/if}</span
+				>
+				{#if isTranslatingMeta}
+					<input
+						class="input"
+						type="text"
+						value={metaTranslations[activeLang]?.name ?? ''}
+						oninput={(e) => setMetaTranslation('name', e.currentTarget.value)}
+						placeholder={name || m.matrixNamePlaceholder()}
+					/>
+					{#if name}
+						<span class="text-xs text-surface-500 block mt-0.5 truncate" title={name}>
+							↳ {baseLang}: {name}
+						</span>
+					{/if}
+				{:else}
+					<input class="input" type="text" bind:value={name} oninput={() => (unsaved = true)} />
+				{/if}
 			</label>
 			<label class="label text-sm">
-				<span>{m.description()}</span>
-				<input
-					class="input"
-					type="text"
-					bind:value={description}
-					oninput={() => (unsaved = true)}
-				/>
+				<span
+					>{m.description()}{#if isTranslatingMeta}
+						<span class="text-xs font-normal text-surface-500">({activeLang})</span>{/if}</span
+				>
+				{#if isTranslatingMeta}
+					<input
+						class="input"
+						type="text"
+						value={metaTranslations[activeLang]?.description ?? ''}
+						oninput={(e) => setMetaTranslation('description', e.currentTarget.value)}
+						placeholder={description || m.descriptionPlaceholder()}
+					/>
+					{#if description}
+						<span class="text-xs text-surface-500 block mt-0.5 truncate" title={description}>
+							↳ {baseLang}: {description}
+						</span>
+					{/if}
+				{:else}
+					<input
+						class="input"
+						type="text"
+						bind:value={description}
+						oninput={() => (unsaved = true)}
+					/>
+				{/if}
 			</label>
 		</div>
 	</div>
@@ -236,7 +394,7 @@
 				bind:levels={probabilityLevels}
 				title={m.lbMatrixProbability()}
 				onchange={onProbabilityChange}
-				activeLang={baseLang}
+				{activeLang}
 				{baseLang}
 			/>
 		</div>
@@ -245,7 +403,7 @@
 				bind:levels={impactLevels}
 				title={m.lbMatrixImpact()}
 				onchange={onImpactChange}
-				activeLang={baseLang}
+				{activeLang}
 				{baseLang}
 			/>
 		</div>
@@ -254,7 +412,7 @@
 				bind:levels={riskLevels}
 				title={m.lbMatrixRisk()}
 				onchange={onRiskChange}
-				activeLang={baseLang}
+				{activeLang}
 				{baseLang}
 			/>
 		</div>

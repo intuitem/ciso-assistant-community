@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { pageTitle } from '$lib/utils/stores';
 	import { defaultMatrixObject } from '../builder-helpers';
+	import TranslationsEditor from '../TranslationsEditor.svelte';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
 
@@ -70,11 +71,12 @@
 	let meta = $state({} as Record<string, any>);
 	let dependenciesText = $state('');
 	let labelsText = $state('');
+	let metaTranslations: Record<string, Record<string, string>> = $state({});
 	let savingMeta = $state(false);
 	let metaBaseline = $state('');
 
 	function metaSnapshot(): string {
-		return JSON.stringify({ meta, dependenciesText, labelsText });
+		return JSON.stringify({ meta, dependenciesText, labelsText, translations: metaTranslations });
 	}
 
 	function serverFormState() {
@@ -92,7 +94,8 @@
 				annotation: draft.annotation ?? ''
 			} as Record<string, any>,
 			dependenciesText: (draft.dependencies ?? []).join('\n'),
-			labelsText: (draft.labels ?? []).join(', ')
+			labelsText: (draft.labels ?? []).join(', '),
+			translations: (draft.translations ?? {}) as Record<string, Record<string, string>>
 		};
 	}
 
@@ -115,11 +118,15 @@
 			if (labelsText !== baseline.labelsText) {
 				server.labelsText = labelsText;
 			}
+			if (JSON.stringify(metaTranslations) !== JSON.stringify(baseline.translations ?? {})) {
+				server.translations = metaTranslations;
+			}
 		}
 		metaBaseline = JSON.stringify(serverFormState());
 		meta = server.meta;
 		dependenciesText = server.dependenciesText;
 		labelsText = server.labelsText;
+		metaTranslations = server.translations;
 	}
 	resetForms();
 
@@ -151,6 +158,7 @@
 				copyright: meta.copyright || null,
 				annotation: meta.annotation || null,
 				description: meta.description || null,
+				translations: metaTranslations,
 				dependencies: dependenciesText
 					.split('\n')
 					.map((s) => s.trim())
@@ -384,6 +392,7 @@
 		field: 'threats' | 'reference_controls';
 		urn: string | null;
 		values: Record<string, string>;
+		translations: Record<string, Record<string, string>>;
 	} = $state(null);
 	let savingLeaf = $state(false);
 
@@ -402,7 +411,8 @@
 							typical_evidence: item?.typical_evidence ?? ''
 						}
 					: {})
-			}
+			},
+			translations: { ...(item?.translations ?? {}) }
 		};
 	}
 
@@ -414,6 +424,9 @@
 			for (const [key, value] of Object.entries(leafForm.values)) {
 				object[key] = value.trim() === '' ? null : value;
 			}
+			// null clears the key on the stored object (upsert semantics)
+			object.translations =
+				Object.keys(leafForm.translations).length > 0 ? leafForm.translations : null;
 			const res = await fetch(base(), {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -782,6 +795,15 @@
 						{m.lbDraftIdentityHelp()}
 					</p>
 				{/if}
+				<!-- Library-level translations (name / description per language) -->
+				<TranslationsEditor
+					bind:translations={metaTranslations}
+					fields={[
+						{ key: 'name', label: m.name() },
+						{ key: 'description', label: m.description(), textarea: true }
+					]}
+					baseLang={meta.locale || 'en'}
+				/>
 				<div class="flex items-center justify-end gap-2 pt-1">
 					{#if metaDirty}
 						<span class="text-xs text-amber-600">
@@ -1128,6 +1150,16 @@
 								<input class="input" type="text" bind:value={leafForm.values.typical_evidence} />
 							</label>
 						{/if}
+						<div class="md:col-span-3">
+							<TranslationsEditor
+								bind:translations={leafForm.translations}
+								fields={[
+									{ key: 'name', label: m.name() },
+									{ key: 'description', label: m.description(), textarea: true }
+								]}
+								baseLang={draft.locale ?? 'en'}
+							/>
+						</div>
 						<div class="md:col-span-3 flex justify-end gap-2">
 							<button
 								type="button"

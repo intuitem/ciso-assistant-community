@@ -1171,9 +1171,98 @@ def test_preset_editor_round_trips_through_the_document(admin_client):
     assert preview.data["deleted_steps"] == []
 
 
+@pytest.mark.django_db
+def test_preset_editor_round_trips_translations(admin_client):
+    """journey_meta and step translations survive PUT → document → GET, and
+    non-object translations are rejected."""
+    draft = _create_draft(admin_client, content={})
+    url = reverse("library-drafts-preset-editor", args=[draft["id"]])
+
+    meta_tr = {"fr": {"name": "Mon parcours", "description": "Étapes"}}
+    step_tr = {"fr": {"title": "Charger le référentiel"}}
+    saved = admin_client.put(
+        url,
+        {
+            "editing_draft": {
+                "journey_meta": {
+                    "name": "My journey",
+                    "description": "Steps",
+                    "translations": meta_tr,
+                },
+                "scaffolded_objects": [],
+                "steps": [
+                    {
+                        "key": "step-1",
+                        "title": "Load the framework",
+                        "target_model": "compliance-assessments",
+                        "translations": step_tr,
+                    }
+                ],
+            }
+        },
+        format="json",
+    )
+    assert saved.status_code == status.HTTP_200_OK, saved.content
+    assert saved.data["editing_draft"]["journey_meta"]["translations"] == meta_tr
+    assert saved.data["editing_draft"]["steps"][0]["translations"] == step_tr
+
+    detail = admin_client.get(reverse("library-drafts-detail", args=[draft["id"]])).data
+    assert detail["content"]["preset"]["translations"] == meta_tr
+    assert detail["content"]["preset"]["journey"]["steps"][0]["translations"] == step_tr
+
+    invalid = admin_client.put(
+        url,
+        {
+            "editing_draft": {
+                "journey_meta": {"name": "X", "translations": "nope"},
+                "scaffolded_objects": [],
+                "steps": [],
+            }
+        },
+        format="json",
+    )
+    assert invalid.status_code == status.HTTP_400_BAD_REQUEST
+
+
 # ---------------------------------------------------------------------------
 # Leaf object editing (threats, reference controls, matrices)
 # ---------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_upsert_object_round_trips_translations(admin_client):
+    """Leaf objects and matrices keep their translations dict through upsert,
+    and a null translations payload clears it."""
+    draft = _create_draft(admin_client, content={})
+    url = reverse("library-drafts-upsert-object", args=[draft["id"]])
+
+    threat_tr = {"fr": {"name": "Hameçonnage", "description": "Leurre"}}
+    created = admin_client.post(
+        url,
+        {
+            "field": "threats",
+            "object": {
+                "ref_id": "T1",
+                "name": "Phishing",
+                "translations": threat_tr,
+            },
+        },
+        format="json",
+    )
+    assert created.status_code == status.HTTP_200_OK, created.content
+    assert created.data["object"]["translations"] == threat_tr
+
+    cleared = admin_client.post(
+        url,
+        {
+            "field": "threats",
+            "urn": created.data["object"]["urn"],
+            "object": {"translations": None},
+        },
+        format="json",
+    )
+    assert cleared.status_code == status.HTTP_200_OK, cleared.content
+    assert "translations" not in cleared.data["object"]
 
 
 @pytest.mark.django_db

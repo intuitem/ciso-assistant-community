@@ -46,7 +46,11 @@ def upsert_preset_from_stored_library(stored_library: StoredLibrary) -> Preset:
         "ref_id": stored_library.ref_id,
         "version": stored_library.version,
         "provider": stored_library.provider,
-        "translations": stored_library.translations or {},
+        # Same precedence as name/description: the preset object's own
+        # translations (authored in the builder) win over the library's.
+        "translations": preset_content.get("translations")
+        or stored_library.translations
+        or {},
         "profile": preset_content.get("profile", {}) or {},
         "feature_flags": preset_content.get("feature_flags", {}) or {},
         "scaffolded_objects": preset_content.get("scaffolded_objects", []) or [],

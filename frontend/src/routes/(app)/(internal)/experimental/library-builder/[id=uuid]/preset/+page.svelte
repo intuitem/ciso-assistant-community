@@ -6,6 +6,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import { TYPE_TO_MODEL, MODEL_TO_TYPE, SCAFFOLD_TYPES } from '$lib/utils/modelTargets';
+	import TranslationsEditor from '../../TranslationsEditor.svelte';
 
 	let { data }: { data: PageData } = $props();
 	$pageTitle = m.lbPresetPageTitle({ name: data.preset.name });
@@ -41,10 +42,14 @@
 		target_ref?: string | null;
 		target_url?: string | null;
 		target_params?: Record<string, any> | null;
-		translations?: Record<string, any>;
+		translations?: Record<string, Record<string, string>>;
 	};
 	type Draft = {
-		journey_meta: { name: string; description: string };
+		journey_meta: {
+			name: string;
+			description: string;
+			translations: Record<string, Record<string, string>>;
+		};
 		scaffolded_objects: Scaffold[];
 		steps: Step[];
 	};
@@ -153,7 +158,8 @@
 		const result: Draft = {
 			journey_meta: {
 				name: d?.journey_meta?.name ?? '',
-				description: d?.journey_meta?.description ?? ''
+				description: d?.journey_meta?.description ?? '',
+				translations: d?.journey_meta?.translations ?? {}
 			},
 			scaffolded_objects: (d?.scaffolded_objects ?? []).map((s: Scaffold) => ({ ...s })),
 			steps: (d?.steps ?? []).map((s: Step) => ({ ...s }))
@@ -795,6 +801,21 @@
 					rows="2"
 					class="w-full text-sm text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1"
 				></textarea>
+				<details class="pt-1" open={Object.keys(draft.journey_meta.translations).length > 0}>
+					<summary class="text-xs text-surface-500 cursor-pointer select-none">
+						<i class="fa-solid fa-language mr-1" aria-hidden="true"></i>{m.translations()}
+					</summary>
+					<div class="mt-2">
+						<TranslationsEditor
+							bind:translations={draft.journey_meta.translations}
+							fields={[
+								{ key: 'name', label: m.name() },
+								{ key: 'description', label: m.description(), textarea: true }
+							]}
+							baseLang={data.draft.locale ?? 'en'}
+						/>
+					</div>
+				</details>
 			</div>
 
 			<!-- Steps -->
@@ -923,6 +944,24 @@
 												setStepField(i, { key: (e.target as HTMLInputElement).value })}
 										/>
 									</div>
+									<details open={Object.keys(step.translations ?? {}).length > 0}>
+										<summary class="text-xs text-surface-500 cursor-pointer select-none">
+											<i class="fa-solid fa-language mr-1" aria-hidden="true"></i>{m.translations()}
+										</summary>
+										<div class="mt-2">
+											<TranslationsEditor
+												bind:translations={
+													() => draft!.steps[i].translations ?? {},
+													(value) => setStepField(i, { translations: value })
+												}
+												fields={[
+													{ key: 'title', label: m.title() },
+													{ key: 'description', label: m.description(), textarea: true }
+												]}
+												baseLang={data.draft.locale ?? 'en'}
+											/>
+										</div>
+									</details>
 								</div>
 								<button
 									type="button"
