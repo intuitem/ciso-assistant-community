@@ -8,6 +8,7 @@
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import { page } from '$app/state';
+	import { onMount } from 'svelte';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -32,12 +33,14 @@
 	let activeActivity: string | null = $state(null);
 	let hasEntities = $state(false);
 
-	fetch('/entities?limit=1')
-		.then((r) => r.json())
-		.then((data) => {
-			hasEntities = (data.count ?? 0) > 0;
-		})
-		.catch(() => {});
+	onMount(() => {
+		fetch('/entities?limit=1')
+			.then((r) => r.json())
+			.then((data) => {
+				hasEntities = (data.count ?? 0) > 0;
+			})
+			.catch(() => {});
+	});
 
 	page.url.searchParams.forEach((value, key) => {
 		if (key === 'activity' && value === 'one') {
