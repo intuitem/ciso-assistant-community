@@ -13,10 +13,9 @@
 # - Custom risk-matrix WIP: the WIP definition is wrapped into a draft,
 #   the matrix URN minted onto the live row (bare family URN).
 # - User-authored preset WIP (urn-less rows): the editor doc already IS the
-#   builder's preset document shape, so it wraps directly. Unlike frameworks
-#   and matrices the live row carries no URN family to adopt, so the draft's
-#   identity stays editable and publishing mints a fresh Preset row; the old
-#   urn-less shell row remains in the catalog until deleted.
+#   builder's preset document shape, so it wraps directly. The `:preset:` URN
+#   is minted onto the live row and the draft frozen, so a later publish
+#   adopts that same row in place (no duplicate), like frameworks and matrices.
 # - Library-backed matrix WIP and library-loaded preset WIP are logged and
 #   skipped: their live/published state is untouched.
 #
@@ -244,9 +243,12 @@ def _wrap_preset_drafts(apps, root):
         meta = doc.get("journey_meta") or {}
         name = meta.get("name") or preset.name
 
-        # No URN family exists on the live row (user-authored presets are
-        # urn-less), so the draft gets a fresh, still-editable identity and
-        # publishing mints a new Preset row.
+        # Mint the preset family URN onto the live row and freeze the draft's
+        # identity, mirroring the matrix wrap: a later publish then adopts THAT
+        # very row in place (upsert_preset_from_stored_library keys on the
+        # `:preset:` URN derived from the library URN) instead of creating a
+        # duplicate Preset. The live row becomes read-only in the catalog
+        # (urn != None), now managed through the draft.
         ref = _token(name, f"preset-{str(preset.id)[:8]}")
         library_urn = f"urn:custom:risk:library:{ref}"
         suffix = 2
@@ -254,6 +256,7 @@ def _wrap_preset_drafts(apps, root):
             library_urn = f"urn:custom:risk:library:{ref}-{suffix}"
             suffix += 1
         ref = library_urn.rsplit(":", 1)[-1]
+        preset_urn = library_urn.replace(":library:", ":preset:", 1)
 
         # The editor doc {journey_meta, scaffolded_objects, steps} is the
         # builder's preset document shape (see LibraryDraftViewSet's
@@ -281,9 +284,13 @@ def _wrap_preset_drafts(apps, root):
             content={"preset": preset_object},
             dependencies=[],
             urn=library_urn,
+            # The live row carries the family URN: identity frozen from the
+            # start so publish adopts that row rather than minting a new one.
+            first_published_at=now(),
         )
+        preset.urn = preset_urn
         preset.editing_draft = None
-        preset.save(update_fields=["editing_draft"])
+        preset.save(update_fields=["urn", "editing_draft"])
         print(f"[0176] wrapped WIP of {label} into draft {library_urn}")
 
 

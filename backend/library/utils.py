@@ -58,9 +58,14 @@ def upsert_preset_from_stored_library(stored_library: StoredLibrary) -> Preset:
         "dependencies": list(stored_library.dependencies or []),
         "folder": Folder.get_root_folder(),
     }
-    preset, _ = Preset.objects.update_or_create(
-        urn=stored_library.urn, defaults=defaults
-    )
+    # The Preset row is keyed on a `:preset:` URN. Hand-authored preset
+    # libraries already carry one as their library URN (see the shipped
+    # preset-*.yaml files); builder-authored libraries use a generic
+    # `:library:` URN, so swap the type token to get the same shape. This
+    # keeps builder presets consistent with shipped ones and lets a
+    # migration mint the matching URN onto a live row for adopt-in-place.
+    preset_urn = stored_library.urn.replace(":library:", ":preset:", 1)
+    preset, _ = Preset.objects.update_or_create(urn=preset_urn, defaults=defaults)
     return preset
 
 
