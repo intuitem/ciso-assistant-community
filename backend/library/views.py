@@ -2240,9 +2240,14 @@ class LibraryDraftViewSet(BaseModelViewSet):
         ).encode()
         try:
             stored, error = StoredLibrary.store_library_content(library_yaml)
-        except (ValueError, ValidationError, yaml.YAMLError) as e:
+        except ValueError, ValidationError, yaml.YAMLError:
+            # Full detail goes to the log, not to the client: validation
+            # exceptions can carry internal state.
+            logger.exception(
+                "Failed to store published draft", urn=urn, locale=draft.locale
+            )
             return Response(
-                {"error": "libraryPublishFailed", "detail": str(e)},
+                {"error": "libraryPublishFailed"},
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
             )
         if error is not None:
