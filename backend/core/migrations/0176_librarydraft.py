@@ -12,9 +12,13 @@
 #   updates those very rows in place (audits untouched).
 # - Custom risk-matrix WIP: the WIP definition is wrapped into a draft,
 #   the matrix URN minted onto the live row (bare family URN).
-# - Library-backed matrix WIP and preset WIP are logged and skipped: their
-#   live/published state is untouched and the populations are expected to
-#   be empty (both editors were experimental).
+# - User-authored preset WIP (urn-less rows): the editor doc already IS the
+#   builder's preset document shape, so it wraps directly. Unlike frameworks
+#   and matrices the live row carries no URN family to adopt, so the draft's
+#   identity stays editable and publishing mints a fresh Preset row; the old
+#   urn-less shell row remains in the catalog until deleted.
+# - Library-backed matrix WIP and library-loaded preset WIP are logged and
+#   skipped: their live/published state is untouched.
 #
 # Finished library-less frameworks WITHOUT WIP are not auto-wrapped — the
 # on-demand "adopt a live framework" action covers them.
@@ -227,6 +231,62 @@ def _wrap_matrix_drafts(apps, root):
         print(f"[0176] wrapped WIP of {label} into draft {library_urn}")
 
 
+def _wrap_preset_drafts(apps, root):
+    Preset = apps.get_model("core", "Preset")
+    LibraryDraft = apps.get_model("core", "LibraryDraft")
+
+    for preset in Preset.objects.exclude(editing_draft=None):
+        label = f"preset {preset.id} ({preset.name!r})"
+        if preset.urn:
+            print(f"[0176] skipping WIP on library-loaded {label}")
+            continue
+        doc = preset.editing_draft or {}
+        meta = doc.get("journey_meta") or {}
+        name = meta.get("name") or preset.name
+
+        # No URN family exists on the live row (user-authored presets are
+        # urn-less), so the draft gets a fresh, still-editable identity and
+        # publishing mints a new Preset row.
+        ref = _token(name, f"preset-{str(preset.id)[:8]}")
+        library_urn = f"urn:custom:risk:library:{ref}"
+        suffix = 2
+        while LibraryDraft.objects.filter(urn=library_urn).exists():
+            library_urn = f"urn:custom:risk:library:{ref}-{suffix}"
+            suffix += 1
+        ref = library_urn.rsplit(":", 1)[-1]
+
+        # The editor doc {journey_meta, scaffolded_objects, steps} is the
+        # builder's preset document shape (see LibraryDraftViewSet's
+        # preset-editor bridge); profile/feature_flags come from the live row.
+        preset_object = {
+            "name": name,
+            "description": meta.get("description") or preset.description or "",
+            "scaffolded_objects": list(doc.get("scaffolded_objects") or []),
+            "journey": {"steps": list(doc.get("steps") or [])},
+        }
+        if preset.profile:
+            preset_object["profile"] = preset.profile
+        if preset.feature_flags:
+            preset_object["feature_flags"] = preset.feature_flags
+
+        LibraryDraft.objects.create(
+            name=name,
+            description=preset_object["description"],
+            folder=root,
+            packager="custom",
+            ref_id=ref,
+            locale="en",
+            version=1,
+            provider=preset.provider or "custom",
+            content={"preset": preset_object},
+            dependencies=[],
+            urn=library_urn,
+        )
+        preset.editing_draft = None
+        preset.save(update_fields=["editing_draft"])
+        print(f"[0176] wrapped WIP of {label} into draft {library_urn}")
+
+
 def wrap_editing_drafts(apps, schema_editor):
     Folder = apps.get_model("iam", "Folder")
     root = Folder.objects.filter(content_type="GL", parent_folder=None).first()
@@ -235,14 +295,7 @@ def wrap_editing_drafts(apps, schema_editor):
 
     _wrap_framework_drafts(apps, root)
     _wrap_matrix_drafts(apps, root)
-
-    Preset = apps.get_model("core", "Preset")
-    for preset in Preset.objects.exclude(editing_draft=None):
-        print(
-            f"[0176] preset {preset.id} ({preset.name!r}) has an in-flight "
-            "editing draft; it is NOT wrapped (re-do the edits in the "
-            "library builder) — the published state is untouched."
-        )
+    _wrap_preset_drafts(apps, root)
 
 
 class Migration(migrations.Migration):
