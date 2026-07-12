@@ -365,14 +365,17 @@
 	}
 
 	const user = page.data.user;
-	const objectDomain: string =
-		resolveObjectDomain(data.model.name, data.data) ?? user.root_folder_id;
-	const canEditObject: boolean = canPerformAction({
-		user,
-		action: 'change',
-		model: data.model.name,
-		domain: objectDomain
-	});
+	const objectDomain: string = $derived(
+		resolveObjectDomain(data.model.name, data.data) ?? user.root_folder_id
+	);
+	const canEditObject: boolean = $derived(
+		canPerformAction({
+			user,
+			action: 'change',
+			model: data.model.name,
+			domain: objectDomain
+		})
+	);
 
 	let displayEditButton = $derived(function () {
 		return (

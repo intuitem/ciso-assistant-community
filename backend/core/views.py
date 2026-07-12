@@ -7809,12 +7809,16 @@ class UserViewSet(BaseModelViewSet):
         viewable_user_group_ids = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), self.request.user, UserGroup
         )[0]
-        return queryset.distinct().prefetch_related(
-            Prefetch(
-                "user_groups",
-                queryset=UserGroup.objects.filter(id__in=viewable_user_group_ids)
-                .select_related("folder")
-                .only("id", "builtin", "name", "folder", "folder__name"),
+        return (
+            queryset.distinct()
+            .select_related("folder")  # serialized by UserReadSerializer.folder
+            .prefetch_related(
+                Prefetch(
+                    "user_groups",
+                    queryset=UserGroup.objects.filter(id__in=viewable_user_group_ids)
+                    .select_related("folder")
+                    .only("id", "builtin", "name", "folder", "folder__name"),
+                )
             )
         )
 
