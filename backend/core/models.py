@@ -2587,6 +2587,11 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
         ),
     )
 
+    class Meta(ReferentialObjectMixin.Meta, I18nObjectMixin.Meta):
+        # Explicit MRO for the parents' (abstract-only) Meta classes; no
+        # options of its own.
+        pass
+
     @property
     def is_used(self) -> bool:
         return RiskAssessment.objects.filter(risk_matrix=self).exists()
