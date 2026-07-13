@@ -165,9 +165,6 @@ jobs:
     services:
       postgres:
         image: ghcr.io/intuitem/ciso-assistant-community/mirror/postgres:16
-        credentials:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres # test credential
@@ -229,9 +226,6 @@ jobs:
     services:
       postgres:
         image: ghcr.io/intuitem/ciso-assistant-community/mirror/postgres:16
-        credentials:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres # test credential
@@ -306,9 +300,6 @@ jobs:
     services:
       postgres:
         image: ghcr.io/intuitem/ciso-assistant-community/mirror/postgres:16
-        credentials:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres # test credential
@@ -317,9 +308,6 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
       mailhog:
         image: ghcr.io/intuitem/ciso-assistant-community/mirror/mailhog:v1.0.1
-        credentials:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
         ports: ["1025:1025", "8025:8025"]
 
     strategy:
@@ -499,9 +487,6 @@ jobs:
     services:
       postgres:
         image: ghcr.io/intuitem/ciso-assistant-community/mirror/postgres:16
-        credentials:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -510,9 +495,6 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
       mailhog:
         image: ghcr.io/intuitem/ciso-assistant-community/mirror/mailhog:v1.0.1
-        credentials:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
         ports: ["1025:1025", "8025:8025"]
 
     strategy:

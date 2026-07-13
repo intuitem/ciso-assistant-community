@@ -51,9 +51,6 @@ jobs:
     services:
       postgres:
         image: ghcr.io/intuitem/ciso-assistant-community/mirror/postgres:16
-        credentials:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -258,9 +255,6 @@ jobs:
     services:
       postgres:
         image: ghcr.io/intuitem/ciso-assistant-community/mirror/postgres:16
-        credentials:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
