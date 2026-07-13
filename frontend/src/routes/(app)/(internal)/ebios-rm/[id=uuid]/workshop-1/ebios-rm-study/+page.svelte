@@ -71,7 +71,8 @@
 				form: data.updateForm,
 				model: data.updatedModel,
 				object: data.object,
-				context: 'selectAsset'
+				context: 'selectAsset',
+				customFolder: true
 			}
 		};
 		let modal: ModalSettings = {
@@ -103,7 +104,7 @@
 			<Anchor
 				breadcrumbAction="push"
 				href={`/ebios-rm/${data.data.id}`}
-				class="flex items-center space-x-2 text-primary-800-300 hover:text-primary-600-400"
+				class="flex items-center space-x-2 text-primary-800-200 hover:text-primary-600-400"
 			>
 				<i class="fa-solid fa-arrow-left"></i>
 				<p>{m.goBackToEbiosRmStudy()}</p>
@@ -289,7 +290,7 @@
 													<button
 														class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
 														data-testid="add-button"
-														title={safeTranslate('add-' + data.model.localName)}
+														title={safeTranslate('add-' + model.info.localName)}
 														onclick={(_) => modalCreateForm(model)}
 														><i class="fa-solid fa-file-circle-plus"></i>
 													</button>

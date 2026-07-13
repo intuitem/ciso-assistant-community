@@ -45,7 +45,7 @@
 	<Anchor
 		breadcrumbAction="push"
 		href={`/ebios-rm/${data.data.id}`}
-		class="flex items-center space-x-2 text-primary-800-300 hover:text-primary-600-400"
+		class="flex items-center space-x-2 text-primary-800-200 hover:text-primary-600-400"
 	>
 		<i class="fa-solid fa-arrow-left"></i>
 		<p>{m.goBackToEbiosRmStudy()}</p>
@@ -82,6 +82,7 @@
 	deleteForm={data.deleteForm}
 	{URLModel}
 	baseEndpoint="/strategic-scenarios?ebios_rm_study={page.params.id}"
+	columnSelector={true}
 >
 	{#snippet addButton()}
 		<div>

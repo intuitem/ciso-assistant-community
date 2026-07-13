@@ -122,7 +122,7 @@
 <Anchor
 	breadcrumbAction="push"
 	href={`/ebios-rm/${data.data.ebios_rm_study.id}`}
-	class="flex items-center space-x-2 text-primary-800-300 hover:text-primary-600-400"
+	class="flex items-center space-x-2 text-primary-800-200 hover:text-primary-600-400"
 >
 	<i class="fa-solid fa-arrow-left"></i>
 	<p>{m.goBackToEbiosRmStudy()}</p>
@@ -185,16 +185,13 @@
 	</div>
 {/if}
 
-<div class="card shadow-lg mt-8 bg-surface-50 w-full p-4">
+<div class="card shadow-lg mt-8 bg-surface-50-950 w-full p-4">
 	<div class="flex justify-between items-center mb-4">
-		<h3 class="text-lg font-semibold text-surface-800">
+		<h3 class="text-lg font-semibold text-surface-800-200">
 			<i class="fa-solid fa-diagram-project mr-2"></i>{m.moGraph()}
 		</h3>
 		{#if canEditObject}
-			<button
-				class="btn text-sm {editMode ? 'preset-tonal-primary' : 'preset-filled-primary-500'}"
-				onclick={() => (editMode = !editMode)}
-			>
+			<button class="btn text-sm preset-filled-primary-500" onclick={() => (editMode = !editMode)}>
 				{#if editMode}
 					<i class="fa-solid fa-eye"></i>
 					{m.viewGraph()}

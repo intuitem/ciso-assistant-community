@@ -20,7 +20,9 @@
 		annual_cost: 'cost',
 		control_impact: 'controlImpact',
 		eta: 'eta',
-		quantitative_risk_scenarios: 'scenarios'
+		quantitative_risk_scenarios: 'scenarios',
+		created_at: 'createdAt',
+		updated_at: 'updatedAt'
 	};
 
 	const appliedControls: TableSource = {
@@ -78,6 +80,8 @@
 			rowsPerPage={true}
 			orderBy={{ identifier: 'eta', direction: 'desc' }}
 			baseEndpoint="/quantitative-risk-studies/{page.params.id}/action-plan"
+			columnSelector={true}
+			columnStateKey="applied-controls:quantitative-risk-action-plan"
 			fields={[
 				'name',
 				'status',

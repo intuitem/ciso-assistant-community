@@ -9,6 +9,7 @@ from core.utils import RoleCodename, UserGroupCodename
 logger = get_logger(__name__)
 
 READER_PERMISSIONS_LIST = [
+    "view_customfielddefinition",
     "view_compliance_assessment_full",
     "view_object_audittrail",
     "view_appliedcontrol",
@@ -18,6 +19,8 @@ READER_PERMISSIONS_LIST = [
     "view_entityassessment",
     "view_evidence",
     "view_evidencerevision",
+    "view_documentcontainer",
+    "view_documenttemplate",
     "view_manageddocument",
     "view_documentrevision",
     "view_documentattachment",
@@ -60,6 +63,8 @@ READER_PERMISSIONS_LIST = [
     "view_attackpath",
     "view_operationalscenario",
     "view_terminology",
+    "view_objectclassification",
+    "view_classificationlevel",
     "view_globalsettings",
     "view_securityexception",
     "view_finding",
@@ -77,7 +82,6 @@ READER_PERMISSIONS_LIST = [
     "view_assetcapability",
     # privacy,
     "view_processing",
-    "view_processingnature",
     "view_purpose",
     "view_personaldata",
     "view_datasubject",
@@ -118,6 +122,11 @@ READER_PERMISSIONS_LIST = [
     "view_preset",
     "view_presetjourney",
     "view_presetjourneystep",
+    # portals
+    "view_portal",
+    "view_portalpreset",
+    "view_publicdocument",
+    "view_frameworksnapshot",
     # chat
     "add_chatsession",
     "view_chatsession",
@@ -135,6 +144,7 @@ READER_PERMISSIONS_LIST = [
 ]
 
 APPROVER_PERMISSIONS_LIST = [
+    "view_customfielddefinition",
     "view_compliance_assessment_full",
     "view_perimeter",
     "view_riskassessment",
@@ -162,6 +172,8 @@ APPROVER_PERMISSIONS_LIST = [
     "view_answer",
     "view_evidence",
     "view_evidencerevision",
+    "view_documentcontainer",
+    "view_documenttemplate",
     "view_manageddocument",
     "view_documentrevision",
     "view_documentattachment",
@@ -181,6 +193,8 @@ APPROVER_PERMISSIONS_LIST = [
     "view_attackpath",
     "view_operationalscenario",
     "view_terminology",
+    "view_objectclassification",
+    "view_classificationlevel",
     "view_globalsettings",
     "view_securityexception",
     "view_finding",
@@ -199,7 +213,6 @@ APPROVER_PERMISSIONS_LIST = [
     "view_campaign",
     # privacy,
     "view_processing",
-    "view_processingnature",
     "view_purpose",
     "view_personaldata",
     "view_datasubject",
@@ -230,6 +243,11 @@ APPROVER_PERMISSIONS_LIST = [
     "view_preset",
     "view_presetjourney",
     "view_presetjourneystep",
+    # portals
+    "view_portal",
+    "view_portalpreset",
+    "view_publicdocument",
+    "view_frameworksnapshot",
     # chat
     "add_chatsession",
     "view_chatsession",
@@ -247,6 +265,7 @@ APPROVER_PERMISSIONS_LIST = [
 ]
 
 ANALYST_PERMISSIONS_LIST = [
+    "view_customfielddefinition",
     "view_compliance_assessment_full",
     "view_object_audittrail",
     "add_filteringlabel",
@@ -380,6 +399,8 @@ ANALYST_PERMISSIONS_LIST = [
     "change_operationalscenario",
     "delete_operationalscenario",
     "view_terminology",
+    "view_objectclassification",
+    "view_classificationlevel",
     "view_globalsettings",
     "view_securityexception",
     "add_securityexception",
@@ -439,7 +460,6 @@ ANALYST_PERMISSIONS_LIST = [
     "change_processing",
     "view_processing",
     "delete_processing",
-    "view_processingnature",
     "add_purpose",
     "change_purpose",
     "view_purpose",
@@ -495,6 +515,14 @@ ANALYST_PERMISSIONS_LIST = [
     "change_evidencerevision",
     "delete_evidencerevision",
     # document management
+    "add_documentcontainer",
+    "view_documentcontainer",
+    "change_documentcontainer",
+    "delete_documentcontainer",
+    "add_documenttemplate",
+    "view_documenttemplate",
+    "change_documenttemplate",
+    "delete_documenttemplate",
     "add_manageddocument",
     "view_manageddocument",
     "change_manageddocument",
@@ -584,6 +612,23 @@ ANALYST_PERMISSIONS_LIST = [
     "delete_presetjourney",
     "view_presetjourneystep",
     "change_presetjourneystep",
+    # portals
+    "view_portal",
+    "add_portal",
+    "change_portal",
+    "delete_portal",
+    "view_portalpreset",
+    "add_portalpreset",
+    "change_portalpreset",
+    "delete_portalpreset",
+    "view_publicdocument",
+    "add_publicdocument",
+    "change_publicdocument",
+    "delete_publicdocument",
+    "view_frameworksnapshot",
+    "add_frameworksnapshot",
+    "change_frameworksnapshot",
+    "delete_frameworksnapshot",
     # chat
     "add_chatsession",
     "view_chatsession",
@@ -612,6 +657,10 @@ ANALYST_PERMISSIONS_LIST = [
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
+    "add_customfielddefinition",
+    "view_customfielddefinition",
+    "change_customfielddefinition",
+    "delete_customfielddefinition",
     "view_compliance_assessment_full",
     "view_object_audittrail",
     "add_filteringlabel",
@@ -771,6 +820,8 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_operationalscenario",
     "delete_operationalscenario",
     "view_terminology",
+    "view_objectclassification",
+    "view_classificationlevel",
     "view_globalsettings",
     "view_securityexception",
     "add_securityexception",
@@ -844,7 +895,6 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_processing",
     "view_processing",
     "delete_processing",
-    "view_processingnature",
     "add_purpose",
     "change_purpose",
     "view_purpose",
@@ -900,6 +950,14 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_evidencerevision",
     "delete_evidencerevision",
     # document management
+    "add_documentcontainer",
+    "view_documentcontainer",
+    "change_documentcontainer",
+    "delete_documentcontainer",
+    "add_documenttemplate",
+    "view_documenttemplate",
+    "change_documenttemplate",
+    "delete_documenttemplate",
     "add_manageddocument",
     "view_manageddocument",
     "change_manageddocument",
@@ -994,6 +1052,23 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "delete_presetjourney",
     "view_presetjourneystep",
     "change_presetjourneystep",
+    # portals
+    "view_portal",
+    "add_portal",
+    "change_portal",
+    "delete_portal",
+    "view_portalpreset",
+    "add_portalpreset",
+    "change_portalpreset",
+    "delete_portalpreset",
+    "view_publicdocument",
+    "add_publicdocument",
+    "change_publicdocument",
+    "delete_publicdocument",
+    "view_frameworksnapshot",
+    "add_frameworksnapshot",
+    "change_frameworksnapshot",
+    "delete_frameworksnapshot",
     # chat
     "add_chatsession",
     "view_chatsession",
@@ -1022,6 +1097,10 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
+    "add_customfielddefinition",
+    "view_customfielddefinition",
+    "change_customfielddefinition",
+    "delete_customfielddefinition",
     "view_central_auditlog",
     "view_compliance_assessment_full",
     "view_object_audittrail",
@@ -1037,6 +1116,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_usergroup",
     "change_usergroup",
     "delete_usergroup",
+    "add_idpgroup",
+    "view_idpgroup",
+    "change_idpgroup",
+    "delete_idpgroup",
     "add_event",
     "view_event",
     "change_event",
@@ -1130,6 +1213,14 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_evidencerevision",
     "delete_evidencerevision",
     # document management
+    "add_documentcontainer",
+    "view_documentcontainer",
+    "change_documentcontainer",
+    "delete_documentcontainer",
+    "add_documenttemplate",
+    "view_documenttemplate",
+    "change_documenttemplate",
+    "delete_documenttemplate",
     "add_manageddocument",
     "view_manageddocument",
     "change_manageddocument",
@@ -1178,6 +1269,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "add_customwordtemplate",
     "change_customwordtemplate",
     "delete_customwordtemplate",
+    "view_customdochtmltemplate",
+    "add_customdochtmltemplate",
+    "change_customdochtmltemplate",
+    "delete_customdochtmltemplate",
     "view_ssosettings",
     "change_ssosettings",
     "view_requirementmappingset",
@@ -1269,7 +1364,6 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_processing",
     "view_processing",
     "delete_processing",
-    "view_processingnature",
     "add_purpose",
     "change_purpose",
     "view_purpose",
@@ -1372,8 +1466,17 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     # terminologies
     "add_terminology",
     "view_terminology",
+    "view_objectclassification",
+    "view_classificationlevel",
     "change_terminology",
     "delete_terminology",
+    # classifications
+    "add_objectclassification",
+    "change_objectclassification",
+    "delete_objectclassification",
+    "add_classificationlevel",
+    "change_classificationlevel",
+    "delete_classificationlevel",
     # pmbok
     "view_genericcollection",
     "add_genericcollection",
@@ -1460,6 +1563,23 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "delete_presetjourney",
     "view_presetjourneystep",
     "change_presetjourneystep",
+    # portals
+    "view_portal",
+    "add_portal",
+    "change_portal",
+    "delete_portal",
+    "view_portalpreset",
+    "add_portalpreset",
+    "change_portalpreset",
+    "delete_portalpreset",
+    "view_publicdocument",
+    "add_publicdocument",
+    "change_publicdocument",
+    "delete_publicdocument",
+    "view_frameworksnapshot",
+    "add_frameworksnapshot",
+    "change_frameworksnapshot",
+    "delete_frameworksnapshot",
     # chat
     "add_chatsession",
     "view_chatsession",
@@ -1547,6 +1667,42 @@ AUDITEE_PERMISSIONS_LIST = [
 ]
 
 
+def ensure_admin_user():
+    """Ensure the designated superuser exists and is in the admin group.
+
+    - FORCE_CREATE_ADMIN + email + user doesn't exist: create superuser
+    - FORCE_CREATE_ADMIN + email + user exists: promote to superuser
+    - Admin group empty + email + user doesn't exist: create superuser
+    - Always: sync all is_superuser users into the admin group
+    """
+    from iam.models import Folder, User, UserGroup
+
+    administrators = UserGroup.objects.get(
+        name="BI-UG-ADM", folder=Folder.get_root_folder()
+    )
+    admin_group_empty = (
+        User.objects.filter(user_groups=administrators).distinct().count() == 0
+    )
+
+    superuser_email = settings.CISO_ASSISTANT_SUPERUSER_EMAIL
+    if superuser_email:
+        superuser_exists = User.objects.filter(email=superuser_email).exists()
+
+        if not superuser_exists and (settings.FORCE_CREATE_ADMIN or admin_group_empty):
+            try:
+                User.objects.create_superuser(email=superuser_email, is_superuser=True)
+            except Exception as e:
+                logger.error("Error creating superuser", exc_info=True)
+        elif superuser_exists and settings.FORCE_CREATE_ADMIN:
+            user = User.objects.get(email=superuser_email)
+            if not user.is_superuser:
+                user.is_superuser = True
+                user.save(update_fields=["is_superuser", "is_active"])
+
+    for u in User.objects.filter(is_superuser=True):
+        u.user_groups.add(administrators)
+
+
 def startup(sender=None, **kwargs):
     """
     Implement CISO Assistant 1.0 default Roles and User Groups during migrate.
@@ -1568,10 +1724,15 @@ def startup(sender=None, **kwargs):
 
     from django.contrib.auth.models import Permission
 
-    from core.models import AssetCapability, AssetClass, Terminology
+    from core.models import (
+        AssetCapability,
+        AssetClass,
+        ObjectClassification,
+        Terminology,
+    )
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
     from tprm.models import Entity
-    from privacy.models import ProcessingNature
+    from privacy.models import create_default_privacy_terminologies
     from global_settings.models import GlobalSettings
     from integrations.models import IntegrationProvider
 
@@ -1708,11 +1869,11 @@ def startup(sender=None, **kwargs):
     except Exception as e:
         logger.error("Error creating default accreditation category", exc_info=True)
 
-    # Create default Processing natures
+    # Create default privacy terminologies (processing natures, personal data categories)
     try:
-        ProcessingNature.create_default_values()
+        create_default_privacy_terminologies()
     except Exception as e:
-        logger.error("Error creating default ProcessingNature", exc_info=True)
+        logger.error("Error creating default privacy terminologies", exc_info=True)
 
     # Create default AssetClass
     try:
@@ -1754,6 +1915,11 @@ def startup(sender=None, **kwargs):
         logger.error("Error creating default Project Health", exc_info=True)
 
     try:
+        ObjectClassification.create_default_classifications()
+    except Exception as e:
+        logger.error("Error creating default classifications", exc_info=True)
+
+    try:
         from pmbok.models import ResponsibilityRole
 
         ResponsibilityRole.create_default_roles()
@@ -1781,35 +1947,19 @@ def startup(sender=None, **kwargs):
     call_command("autoloadlibraries")
     call_command("sync_event_types")
 
+    # Runs here (not in doc_management post_migrate) so the root folder the
+    # template folder FK needs already exists.
+    try:
+        call_command("sync_document_templates")
+    except Exception as e:
+        logger.error("Error syncing built-in document templates", exc_info=True)
+
     try:
         call_command("backfill_builtin_metrics")
     except Exception as e:
         logger.error("Error backfilling builtin metrics", exc_info=True)
 
-    # add administrators group to superusers (for resiliency)
-    administrators = UserGroup.objects.get(
-        name="BI-UG-ADM", folder=Folder.get_root_folder()
-    )
-    if (
-        User.objects.filter(user_groups=administrators).distinct().count() == 0
-        or settings.FORCE_CREATE_ADMIN
-    ):
-        # if superuser defined and does not exist, then create it
-        if (
-            settings.CISO_ASSISTANT_SUPERUSER_EMAIL
-            and not User.objects.filter(
-                email=settings.CISO_ASSISTANT_SUPERUSER_EMAIL
-            ).exists()
-        ):
-            try:
-                User.objects.create_superuser(
-                    email=settings.CISO_ASSISTANT_SUPERUSER_EMAIL, is_superuser=True
-                )
-            except Exception as e:
-                logger.error("Error creating superuser", exc_info=True)
-
-        for u in User.objects.filter(is_superuser=True):
-            u.user_groups.add(administrators)
+    ensure_admin_user()
 
     # reset global setings in case of an issue
     default_settings = {
@@ -1824,6 +1974,8 @@ def startup(sender=None, **kwargs):
         "daily_rate": 500,
         "mapping_max_depth": 3,
         "show_warning_external_links": True,
+        "show_get_started": True,
+        "personal_folders": False,
         "allow_assignments_to_entities": False,
         "enforce_mfa": False,
     }

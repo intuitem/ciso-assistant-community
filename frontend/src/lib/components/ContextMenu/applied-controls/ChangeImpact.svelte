@@ -16,26 +16,25 @@
 
 	const flash = getFlash(page);
 
-	let options: { label: string; value: string }[] = $state([]);
+	let options: { label: string; value: string | null }[] = $state([]);
 
 	onMount(async () => {
 		const rawOptions = await fetch('/applied-controls/control_impact').then((r) => r.json());
-		// Move '--' to the end while preserving order of other options
+		// Append the '--' (unset) option at the end, deduplicating if already present
 		options = [
 			...rawOptions.filter((o: { label: string }) => o.label !== '--'),
-			...rawOptions.filter((o: { label: string }) => o.label === '--')
+			{ label: '--', value: null }
 		];
 	});
 
-	async function changeImpact(newImpact: string) {
+	async function changeImpact(newImpact: string | null) {
 		const endpoint = `/applied-controls/${row?.meta?.id}/control_impact`;
-		const impactValue = newImpact === '--' ? null : newImpact;
 		const requestInit = {
 			method: 'PATCH',
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ control_impact: impactValue })
+			body: JSON.stringify({ control_impact: newImpact })
 		};
 		try {
 			const response = await fetch(endpoint, requestInit);

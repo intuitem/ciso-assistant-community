@@ -1,6 +1,5 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import Select from '../Select.svelte';
@@ -51,16 +50,10 @@
 <AutocompleteSelect
 	multiple
 	{form}
-	optionsEndpoint="processing-natures"
+	optionsEndpoint="terminologies?field_path=processing.nature&is_visible=true"
+	optionsLabelField="translated_name"
 	field="nature"
 	label={m.processingNature()}
-/>
-<FolderTreeSelect
-	{form}
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
 />
 <AutocompleteSelect
 	multiple

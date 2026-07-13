@@ -75,15 +75,35 @@ LOGGING = {
             "processor": structlog.dev.ConsoleRenderer(),
         },
     },
+    # Warning and above go to stderr, the rest to stdout, so systemd/journald
+    # assigns error vs info priority correctly.
+    "filters": {
+        "below_warning": {
+            "()": "django.utils.log.CallbackFilter",
+            "callback": lambda record: record.levelno < logging.WARNING,
+        },
+    },
     "handlers": {
-        "console": {
+        "stdout": {
             "class": "logging.StreamHandler",
+            "stream": "ext://sys.stdout",
+            "formatter": LOG_FORMAT,
+            "filters": ["below_warning"],
+        },
+        "stderr": {
+            "class": "logging.StreamHandler",
+            "stream": "ext://sys.stderr",
+            "level": "WARNING",
             "formatter": LOG_FORMAT,
         },
     },
     "loggers": {
-        "": {"handlers": ["console"], "level": LOG_LEVEL},
-        "httpx": {"handlers": ["console"], "level": "WARNING", "propagate": False},
+        "": {"handlers": ["stdout", "stderr"], "level": LOG_LEVEL},
+        "httpx": {
+            "handlers": ["stdout", "stderr"],
+            "level": "WARNING",
+            "propagate": False,
+        },
         # Disable Django's default request logger — it logs full URLs including
         # sensitive OAuth2 query params (code, token). Request logging is already
         # handled by django_structlog with query-param redaction.
@@ -428,9 +448,11 @@ INSTALLED_APPS = [
     "privacy",
     "resilience",
     "crq",
+    "custom_fields",
     "metrology",
     "chat",
     "doc_management",
+    "portals",
     "core",
     "cal",
     "django_filters",
@@ -600,7 +622,7 @@ if DEBUG:
 
     if DB_LOG:
         LOGGING["loggers"]["django.db.backends"] = {
-            "handlers": ["console"],
+            "handlers": ["stdout", "stderr"],
             "level": "DEBUG",
             "propagate": False,
         }
@@ -682,6 +704,7 @@ LANGUAGES = [
     ("lt", "Lithuanian"),
     ("ko", "Korean"),
     ("et", "Estonian"),
+    ("sk", "Slovak"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -819,6 +842,7 @@ HUEY = {
 AUDITLOG_RETENTION_DAYS = int(os.environ.get("AUDITLOG_RETENTION_DAYS", 90))
 AUDITLOG_MAX_RECORDS = int(os.environ.get("AUDITLOG_MAX_RECORDS", 50000))
 
-WEBHOOK_ALLOW_PRIVATE_IPS = os.environ.get(
-    "WEBHOOK_ALLOW_PRIVATE_IPS", "False"
+# Allow outbound server-side requests (webhooks, integrations, LLM URLs) to private/loopback addresses
+ALLOW_PRIVATE_NETWORK_REQUESTS = os.environ.get(
+    "ALLOW_PRIVATE_NETWORK_REQUESTS", "False"
 ).lower() in ("true", "1", "yes")

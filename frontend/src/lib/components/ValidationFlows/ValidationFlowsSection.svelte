@@ -2,6 +2,7 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { formatActorName } from '$lib/utils/helpers';
 	import { m } from '$paraglide/messages';
 
 	interface Approver {
@@ -23,6 +24,8 @@
 			| 'dropped'
 			| 'change_requested';
 		approver: Approver | null;
+		request_notes?: string | null;
+		last_event_notes?: string | null;
 	}
 
 	interface Props {
@@ -30,6 +33,35 @@
 	}
 
 	let { validationFlows }: Props = $props();
+
+	// Scroll container: track the adjacent detail card so the validations panel grows
+	// and shrinks with the "view more / view less" toggle instead of a fixed height.
+	let scrollEl: HTMLDivElement | undefined = $state();
+	let maxHeight = $state('70vh');
+
+	$effect(() => {
+		if (!scrollEl) return;
+		const row = scrollEl.closest<HTMLElement>('.flex.flex-row.flex-wrap.gap-4');
+		const detailCard = row?.firstElementChild as HTMLElement | undefined;
+		if (!detailCard) return;
+
+		// Keep the detail card sized to its own content so it doesn't stretch to our
+		// height, which would otherwise create a measure/grow feedback loop.
+		const previousAlignSelf = detailCard.style.alignSelf;
+		detailCard.style.alignSelf = 'flex-start';
+
+		// Leave room for the dropdown header (~3rem) so the panel matches the card.
+		const update = () => {
+			maxHeight = `${Math.max(detailCard.clientHeight - 48, 160)}px`;
+		};
+		update();
+		const observer = new ResizeObserver(update);
+		observer.observe(detailCard);
+		return () => {
+			observer.disconnect();
+			detailCard.style.alignSelf = previousAlignSelf;
+		};
+	});
 
 	// Get status icon
 	function getStatusIcon(status: string): string {
@@ -54,11 +86,7 @@
 
 	// Get approver display name
 	function getApproverName(approver: ValidationFlow['approver']): string {
-		if (approver === null) return m.undefined();
-		if (approver.first_name || approver.last_name) {
-			return `${approver.first_name || ''} ${approver.last_name || ''}`.trim();
-		}
-		return approver.email;
+		return formatActorName(approver) || m.undefined();
 	}
 </script>
 
@@ -69,7 +97,11 @@
 		style="hover:text-primary-700"
 		open={false}
 	>
-		<div class="space-y-3">
+		<div
+			bind:this={scrollEl}
+			class="space-y-3 overflow-y-auto pr-1"
+			style="max-height: {maxHeight}"
+		>
 			{#each validationFlows as validation_flow}
 				<div class="p-3 bg-surface-50-950 rounded-lg border border-surface-200-800">
 					<div class="flex items-start justify-between">
@@ -101,6 +133,20 @@
 								<span class="font-medium">{m.approver()}:</span>
 								{getApproverName(validation_flow.approver)}
 							</div>
+							{#if validation_flow.request_notes}
+								<div class="text-sm text-surface-600-400 mt-1">
+									<i class="fa-solid fa-note-sticky mr-1"></i>
+									<span class="font-medium">{m.requestNotes()}:</span>
+									<span class="whitespace-pre-line">{validation_flow.request_notes}</span>
+								</div>
+							{/if}
+							{#if validation_flow.last_event_notes && validation_flow.status !== 'submitted'}
+								<div class="text-sm text-surface-600-400 mt-1">
+									<i class="fa-solid fa-comment-dots mr-1"></i>
+									<span class="font-medium">{m.decisionNotes()}:</span>
+									<span class="whitespace-pre-line">{validation_flow.last_event_notes}</span>
+								</div>
+							{/if}
 						</div>
 					</div>
 				</div>

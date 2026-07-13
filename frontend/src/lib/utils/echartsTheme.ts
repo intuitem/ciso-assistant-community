@@ -26,11 +26,18 @@ export function mountThemeAwareChart(
 ): () => void {
 	let dark = isDarkTheme();
 	let chart: any;
+	let firstPaint = true;
 
 	const init = () => {
 		chart = echarts.init(container, dark ? 'dark' : null, rendererOpts);
-		chart.setOption({ ...buildOption(), backgroundColor: 'transparent' }, true);
+		const option = { ...buildOption(), backgroundColor: 'transparent' };
+		// A theme-flip re-init must snap straight to the final frame: animating it looks
+		// janky live, and window.print() can capture the chart mid-animation (blank/partial
+		// in PDF exports). Only the very first mount keeps its entry animation.
+		if (!firstPaint) option.animation = false;
+		chart.setOption(option, true);
 		onChart?.(chart);
+		firstPaint = false;
 	};
 	init();
 	container.setAttribute('data-theme-managed', 'true');

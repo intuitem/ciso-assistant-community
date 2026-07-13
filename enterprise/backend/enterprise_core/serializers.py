@@ -16,7 +16,7 @@ from global_settings.serializers import (
     FeatureFlagsSerializer as CommunityFeatureFlagSerializer,
 )
 
-from core.models import CustomEmailTemplate, CustomWordTemplate
+from core.models import CustomEmailTemplate, CustomWordTemplate, CustomDocHtmlTemplate
 from .models import ClientSettings, LogEntryAction
 from auditlog.models import LogEntry
 from global_settings.serializers import (
@@ -254,6 +254,35 @@ class CustomWordTemplateWriteSerializer(BaseModelSerializer):
         read_only_fields = ["id"]
 
 
+class CustomDocHtmlTemplateReadSerializer(BaseModelSerializer):
+    file = serializers.SerializerMethodField()
+
+    def get_file(self, obj):
+        if obj.file:
+            return obj.file.name.split("/")[-1]
+        return None
+
+    class Meta:
+        model = CustomDocHtmlTemplate
+        fields = [
+            "id",
+            "folder",
+            "template_key",
+            "language",
+            "file",
+            "is_active",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class CustomDocHtmlTemplateWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = CustomDocHtmlTemplate
+        fields = ["id", "template_key", "language", "is_active"]
+        read_only_fields = ["id"]
+
+
 class FeatureFlagsSerializer(CommunityFeatureFlagSerializer):
     """
     Serializer for managing Feature Flags stored within the 'value' JSON field
@@ -273,6 +302,13 @@ class FeatureFlagsSerializer(CommunityFeatureFlagSerializer):
         source="value.audit_log_forwarding", required=False, default=False
     )
 
+    custom_fields = serializers.BooleanField(
+        source="value.custom_fields", required=False, default=False
+    )
+
     object_audit_trail = serializers.BooleanField(
         source="value.object_audit_trail", required=False, default=True
+    )
+    idp_groups = serializers.BooleanField(
+        source="value.idp_groups", required=False, default=False
     )

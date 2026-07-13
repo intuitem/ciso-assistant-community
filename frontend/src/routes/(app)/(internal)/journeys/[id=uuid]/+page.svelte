@@ -3,6 +3,7 @@
 	import { m } from '$paraglide/messages';
 	import { invalidateAll } from '$app/navigation';
 	import { goto } from '$lib/utils/breadcrumbs';
+	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { page } from '$app/stores';
 	import { getModalStore } from '$lib/components/Modals/stores';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
@@ -82,15 +83,10 @@
 		return parts.length ? `?${parts.join('&')}` : '';
 	}
 
-	function isSafeInternalUrl(url: string): boolean {
-		// Must be a rooted, same-origin path. Reject protocol-relative "//..." and any scheme.
-		return url.startsWith('/') && !url.startsWith('//') && !/^\w+:/.test(url);
-	}
-
 	function getStepLink(step: any): string | null {
 		// target_url takes precedence: supports generic routes like /reporting or /settings.
 		if (step.target_url && typeof step.target_url === 'string') {
-			if (!isSafeInternalUrl(step.target_url)) return null;
+			if (!getSecureRedirect(step.target_url)) return null;
 			return `${step.target_url}${buildQueryString(step.target_params)}`;
 		}
 		if (!step.target_model) return null;

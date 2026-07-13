@@ -16,17 +16,42 @@
 		data: PageData;
 	}
 
+	// The report must always export in light mode. Dropping `.dark` while printing forces
+	// both surface pairings (via color-scheme) and dark: utilities to render light.
+	let printWasDark = false;
+	let printForced = false;
+	let printTimeout: ReturnType<typeof setTimeout> | undefined;
+	function forceLightForPrint() {
+		if (printForced) return;
+		printForced = true;
+		printWasDark = document.documentElement.classList.contains('dark');
+		if (printWasDark) document.documentElement.classList.remove('dark');
+	}
+	function restoreThemeAfterPrint() {
+		if (!printForced) return;
+		printForced = false;
+		if (printWasDark) document.documentElement.classList.add('dark');
+	}
+
 	$effect(() => {
 		const handlePrint = () => {
 			document.documentElement.classList.add('is-printing');
+			forceLightForPrint();
 		};
 		const handleAfterPrint = () => {
 			document.documentElement.classList.remove('is-printing');
+			restoreThemeAfterPrint();
 		};
 		window.addEventListener('beforeprint', handlePrint);
 		window.addEventListener('afterprint', handleAfterPrint);
 
 		return () => {
+			if (printTimeout) {
+				clearTimeout(printTimeout);
+				printTimeout = undefined;
+			}
+			document.documentElement.classList.remove('is-printing');
+			restoreThemeAfterPrint();
 			window.removeEventListener('beforeprint', handlePrint);
 			window.removeEventListener('afterprint', handleAfterPrint);
 		};
@@ -41,7 +66,14 @@
 	const scaleMap = SECURITY_OBJECTIVE_SCALE_MAP[scale];
 
 	function exportPDF() {
-		window.print();
+		// Flip to light first so theme-managed ECharts re-render (animation-free) in light
+		// before the print snapshot, then print. beforeprint also flips; both are idempotent.
+		forceLightForPrint();
+		if (printTimeout) clearTimeout(printTimeout);
+		printTimeout = setTimeout(() => {
+			printTimeout = undefined;
+			window.print();
+		}, 200);
 	}
 
 	// Helper function to apply scale transformation
@@ -104,7 +136,7 @@
 		<Anchor
 			breadcrumbAction="push"
 			href={`/business-impact-analysis/${bia.id}`}
-			class="flex items-center space-x-2 text-primary-800-300 hover:text-primary-600-400"
+			class="flex items-center space-x-2 text-primary-800-200 hover:text-primary-600-400"
 		>
 			<i class="fa-solid fa-arrow-left"></i>
 			<p>{m.back()}</p>

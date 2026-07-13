@@ -1,6 +1,5 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import HiddenInput from '../HiddenInput.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Select from '../Select.svelte';
@@ -97,13 +96,6 @@
 </script>
 
 <HiddenInput {form} field="requirement_assessments" />
-<FolderTreeSelect
-	{form}
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-/>
 <AutocompleteSelect
 	{form}
 	multiple
@@ -120,14 +112,15 @@
 />
 <AutocompleteSelect
 	{form}
+	disabled={true}
 	optionsEndpoint="users?is_approver=true"
 	optionsLabelField="email"
 	field="approver"
 	cacheLock={cacheLocks['approver']}
 	bind:cachedValue={formDataCache['approver']}
 	nullable={true}
-	label={m.approver()}
-	helpText={m.approverHelpText()}
+	label={`${m.approver()} (${m.deprecated()})`}
+	helpText={m.approverDeprecatedHelpText()}
 />
 <Select
 	{form}

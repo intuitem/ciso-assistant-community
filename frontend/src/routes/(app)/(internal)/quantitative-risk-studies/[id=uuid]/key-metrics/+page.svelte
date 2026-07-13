@@ -3,8 +3,21 @@
 	import { page } from '$app/stores';
 	import { m } from '$paraglide/messages';
 	import { goto } from '$app/navigation';
-	import { Grid, Willow } from 'wx-svelte-grid';
+	import { onMount } from 'svelte';
+	import { Grid, Willow, WillowDark } from 'wx-svelte-grid';
 	import ALETimelineRaceChart from '$lib/components/Chart/ALETimelineRaceChart.svelte';
+
+	// Track the dark-mode class on <html> so the grid theme matches the app theme
+	let isDark = $state(false);
+	onMount(() => {
+		const root = document.documentElement;
+		isDark = root.classList.contains('dark');
+		const observer = new MutationObserver(() => {
+			isDark = root.classList.contains('dark');
+		});
+		observer.observe(root, { attributes: true, attributeFilter: ['class'] });
+		return () => observer.disconnect();
+	});
 
 	interface Props {
 		data: PageData;
@@ -325,20 +338,20 @@
 				</div>
 
 				<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-					<div class="bg-blue-50 rounded-lg p-4 text-center">
-						<div class="text-2xl font-bold text-blue-600">
+					<div class="bg-blue-50 dark:bg-blue-950 rounded-lg p-4 text-center">
+						<div class="text-2xl font-bold text-blue-600 dark:text-blue-400">
 							{keyMetricsData.scenarios_with_current_data}
 						</div>
 						<div class="text-sm text-surface-600-400">{m.scenariosWithCurrentData()}</div>
 					</div>
-					<div class="bg-green-50 rounded-lg p-4 text-center">
-						<div class="text-2xl font-bold text-green-600">
+					<div class="bg-green-50 dark:bg-green-950 rounded-lg p-4 text-center">
+						<div class="text-2xl font-bold text-green-600 dark:text-green-400">
 							{keyMetricsData.scenarios_with_residual_data}
 						</div>
 						<div class="text-sm text-surface-600-400">{m.scenariosWithResidualData()}</div>
 					</div>
-					<div class="bg-purple-50 rounded-lg p-4 text-center">
-						<div class="text-2xl font-bold text-purple-600">
+					<div class="bg-purple-50 dark:bg-purple-950 rounded-lg p-4 text-center">
+						<div class="text-2xl font-bold text-purple-600 dark:text-purple-400">
 							{keyMetricsData.loss_threshold_display}
 						</div>
 						<div class="text-sm text-surface-600-400">{m.lossThresholdLabel()}</div>
@@ -361,12 +374,14 @@
 				</div>
 			{:else}
 				<!-- Debug information when chart doesn't show -->
-				<div class="mb-8 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-					<h3 class="text-lg font-semibold text-yellow-800 mb-2">
+				<div
+					class="mb-8 bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4"
+				>
+					<h3 class="text-lg font-semibold text-yellow-800 dark:text-yellow-300 mb-2">
 						<i class="fa-solid fa-info-circle mr-2"></i>
 						ALE Timeline Chart Debug Info
 					</h3>
-					<div class="text-sm text-yellow-700 space-y-1">
+					<div class="text-sm text-yellow-700 dark:text-yellow-400 space-y-1">
 						<p><strong>Total {m.scenarios()}:</strong> {keyMetricsData?.scenarios?.length || 0}</p>
 						<p>
 							<strong>{m.scenariosWithCurrentLevel()}</strong>
@@ -389,7 +404,8 @@
 						</p>
 						<details class="mt-2">
 							<summary class="cursor-pointer font-medium">View raw scenario data</summary>
-							<pre class="mt-2 p-2 bg-yellow-100 rounded text-xs overflow-auto">{JSON.stringify(
+							<pre
+								class="mt-2 p-2 bg-yellow-100 dark:bg-yellow-900 rounded text-xs overflow-auto">{JSON.stringify(
 									keyMetricsData?.scenarios,
 									null,
 									2
@@ -489,14 +505,19 @@
 
 				<div class="p-4">
 					<div style="height: 500px; width: 100%;">
-						<Willow>
+						{#snippet gridContent()}
 							<Grid
 								data={prepareGridData(keyMetricsData)}
 								columns={visibleColumns}
 								headerHeight={40}
 								rowHeight={45}
 							/>
-						</Willow>
+						{/snippet}
+						{#if isDark}
+							<WillowDark>{@render gridContent()}</WillowDark>
+						{:else}
+							<Willow>{@render gridContent()}</Willow>
+						{/if}
 					</div>
 				</div>
 			</div>

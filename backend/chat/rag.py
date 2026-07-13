@@ -11,6 +11,7 @@ import time
 from django.db.models import Q
 
 from iam.models import Folder, RoleAssignment
+from chat.embedding_models import RERANKER_MODEL as _RERANKER_MODEL
 
 logger = structlog.get_logger(__name__)
 
@@ -19,7 +20,6 @@ QDRANT_URL = os.environ.get("QDRANT_URL", "http://localhost:6333")
 
 # Cross-encoder re-ranker (cached singleton)
 _reranker = None
-_RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 
 
 def _get_reranker():

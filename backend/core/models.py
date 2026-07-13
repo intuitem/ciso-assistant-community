@@ -36,6 +36,7 @@ from structlog import get_logger
 from django.utils.timezone import now
 
 from iam.models import Folder, FolderMixin, PublishInRootFolderMixin, User
+from custom_fields.host import CustomFieldsMixin
 
 from library.helpers import (
     get_referential_translation,
@@ -46,6 +47,7 @@ from library.helpers import (
 
 from core.utils import format_currency as _fmt_currency
 from global_settings.models import GlobalSettings
+from integrations.sync_mixin import IntegrationSyncableMixin
 
 from .base_models import (
     AbstractBaseModel,
@@ -66,6 +68,7 @@ from .utils import (
 )
 from .validators import (
     validate_file_name,
+    validate_html_template_file_name,
     validate_file_size,
     JSONSchemaInstanceValidator,
 )
@@ -898,6 +901,8 @@ class LibraryUpdater:
                 framework_dict["urn"] = framework_dict["urn"].lower()
                 if "outcomes_definition" not in framework_dict:
                     framework_dict["outcomes_definition"] = []
+                # An omitted IG definition means that the framework no longer defines implementation groups.
+                framework_dict.setdefault("implementation_groups_definition", None)
                 prev_fw = Framework.objects.filter(urn=framework_dict["urn"]).first()
                 prev_min = getattr(prev_fw, "min_score", None)
                 prev_max = getattr(prev_fw, "max_score", None)
@@ -953,6 +958,37 @@ class LibraryUpdater:
                     ).select_related("folder", "perimeter")
                 ]
 
+                # Drop selected IGs that the updated framework no longer defines.
+                valid_implementation_groups = {
+                    group.get("ref_id")
+                    for group in new_framework.implementation_groups_definition or []
+                    if isinstance(group, dict) and group.get("ref_id")
+                }
+                assessments_with_stale_implementation_groups = []
+                for compliance_assessment in compliance_assessments:
+                    selected_groups = (
+                        compliance_assessment.selected_implementation_groups or []
+                    )
+                    cleaned_groups = [
+                        group
+                        for group in selected_groups
+                        if group in valid_implementation_groups
+                    ]
+                    if cleaned_groups != selected_groups:
+                        compliance_assessment.selected_implementation_groups = (
+                            cleaned_groups
+                        )
+                        assessments_with_stale_implementation_groups.append(
+                            compliance_assessment
+                        )
+
+                if assessments_with_stale_implementation_groups:
+                    ComplianceAssessment.objects.bulk_update(
+                        assessments_with_stale_implementation_groups,
+                        ["selected_implementation_groups"],
+                        batch_size=100,
+                    )
+
                 existing_requirement_node_objects = {
                     rn.urn.lower(): rn
                     for rn in RequirementNode.objects.filter(framework=new_framework)
@@ -973,6 +1009,16 @@ class LibraryUpdater:
                 requirement_node_objects_to_update = []
                 order_id = 0
                 all_fields_to_update = set()
+                # Omitting one of these nullable fields in a new version must clear its previous value.
+                clearable_requirement_node_fields = (
+                    "ref_id",
+                    "name",
+                    "description",
+                    "annotation",
+                    "typical_evidence",
+                    "visibility_expression",
+                    "implementation_groups",
+                )
 
                 # Check if score boundaries changed (triggers warning + strategy prompt)
                 score_boundaries_changed = (
@@ -1089,6 +1135,9 @@ class LibraryUpdater:
 
                     if urn in existing_requirement_node_objects:
                         requirement_node_object = existing_requirement_node_objects[urn]
+                        # Consider omissions before applying imported values.
+                        for field in clearable_requirement_node_fields:
+                            requirement_node_dict.setdefault(field, None)
                         for key, value in requirement_node_dict.items():
                             setattr(requirement_node_object, key, value)
                         requirement_node_object.clean()
@@ -1313,18 +1362,7 @@ class LibraryUpdater:
 
                 # Fix for the dual bulk_update issue - consolidate into one update
                 if requirement_node_objects_to_update:
-                    # Ensure all needed fields are included
-                    fields_to_update = sorted(
-                        all_fields_to_update.union(
-                            {
-                                "name",
-                                "description",
-                                "order_id",
-                                "implementation_groups",
-                                "visibility_expression",
-                            }
-                        )
-                    )
+                    fields_to_update = sorted(all_fields_to_update)
                     RequirementNode.objects.bulk_update(
                         requirement_node_objects_to_update,
                         fields_to_update,
@@ -1665,6 +1703,138 @@ class LoadedLibrary(LibraryMixin):
         )
 
 
+class ObjectClassification(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+    DEFAULT_TLP_LEVELS = [
+        {
+            "abbreviation": "CLEAR",
+            "name": "clear",
+            "rank": 0,
+            "hexcolor": "#FFFFFF",
+            "translations": {"fr": {"name": "clair"}},
+        },
+        {
+            "abbreviation": "GREEN",
+            "name": "green",
+            "rank": 1,
+            "hexcolor": "#33FF00",
+            "translations": {"fr": {"name": "vert"}},
+        },
+        {
+            "abbreviation": "AMBER",
+            "name": "amber",
+            "rank": 2,
+            "hexcolor": "#FFC000",
+            "translations": {"fr": {"name": "orange"}},
+        },
+        {
+            "abbreviation": "AMBER+STRICT",
+            "name": "amber_strict",
+            "rank": 3,
+            "hexcolor": "#FFC000",
+            "translations": {"fr": {"name": "orange+strict"}},
+        },
+        {
+            "abbreviation": "RED",
+            "name": "red",
+            "rank": 4,
+            "hexcolor": "#FF2B2B",
+            "translations": {"fr": {"name": "rouge"}},
+        },
+    ]
+
+    ref_id = models.CharField(
+        max_length=100, blank=True, verbose_name=_("Reference ID")
+    )
+    builtin = models.BooleanField(default=False, verbose_name=_("Built-in"))
+    is_visible = models.BooleanField(default=True, verbose_name=_("Is Visible"))
+    translations = models.JSONField(
+        default=dict, blank=True, null=True, verbose_name=_("Translations")
+    )
+
+    fields_to_check = ["name"]
+
+    class Meta:
+        verbose_name = _("Object classification")
+        verbose_name_plural = _("Object classifications")
+
+    @classmethod
+    def create_default_classifications(cls):
+        # is_visible is user-controlled: set on insert only, never on re-seed.
+        tlp, _ = cls.objects.update_or_create(
+            ref_id="TLP",
+            defaults={
+                "name": "TLP",
+                "description": "Traffic Light Protocol",
+                "builtin": True,
+                "translations": {
+                    "fr": {
+                        "name": "TLP",
+                        "description": "Protocole des feux de circulation",
+                    }
+                },
+            },
+            create_defaults={
+                "name": "TLP",
+                "description": "Traffic Light Protocol",
+                "builtin": True,
+                "is_visible": True,
+                "translations": {
+                    "fr": {
+                        "name": "TLP",
+                        "description": "Protocole des feux de circulation",
+                    }
+                },
+            },
+        )
+        for level in cls.DEFAULT_TLP_LEVELS:
+            ClassificationLevel.objects.update_or_create(
+                object_classification=tlp,
+                abbreviation=level["abbreviation"],
+                defaults={**level, "builtin": True},
+            )
+
+
+class ClassificationLevel(NameDescriptionMixin, FolderMixin):
+    object_classification = models.ForeignKey(
+        ObjectClassification,
+        on_delete=models.CASCADE,
+        related_name="levels",
+        verbose_name=_("Object classification"),
+    )
+    rank = models.PositiveIntegerField(default=0, verbose_name=_("Rank"))
+    hexcolor = models.CharField(
+        max_length=9, blank=True, default="", verbose_name=_("Color")
+    )
+    abbreviation = models.CharField(
+        max_length=50, blank=True, default="", verbose_name=_("Abbreviation")
+    )
+    builtin = models.BooleanField(default=False, verbose_name=_("Built-in"))
+    is_visible = models.BooleanField(default=True, verbose_name=_("Is Visible"))
+    translations = models.JSONField(
+        default=dict, blank=True, null=True, verbose_name=_("Translations")
+    )
+
+    fields_to_check = ["abbreviation", "object_classification"]
+
+    class Meta:
+        ordering = ["object_classification", "rank"]
+        verbose_name = _("Classification level")
+        verbose_name_plural = _("Classification levels")
+
+    def save(self, *args, **kwargs):
+        if self.object_classification_id:
+            self.folder = self.object_classification.folder
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.abbreviation or self.name
+
+    @property
+    def label(self):
+        t = (self.translations or {}).get(get_language(), {})
+        return t.get("name") or self.abbreviation or self.name
+
+
 class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     """
     Model to store custom terminology for the application
@@ -1679,6 +1849,8 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         METRIC_UNIT = "metric_definition.unit", "metricUnit"
         PROJECT_STATUS = "project.status", "projectStatus"
         PROJECT_HEALTH = "project.health", "projectHealth"
+        PROCESSING_NATURE = "processing.nature", "processingNature"
+        PERSONAL_DATA_CATEGORY = "personal_data.category", "personalDataCategory"
 
     DEFAULT_ROTO_RISK_ORIGINS = [
         {
@@ -2432,6 +2604,13 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
         verbose_name = _("Framework")
         verbose_name_plural = _("Frameworks")
 
+    def get_implementation_groups_definition_translated(self):
+        import copy
+
+        return update_translations_in_object(
+            copy.deepcopy(self.implementation_groups_definition or [])
+        )
+
     def is_deletable(self) -> bool:
         """
         Returns True if the framework can be deleted
@@ -2504,7 +2683,7 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
         return self._is_dynamic_cache
 
     def __str__(self) -> str:
-        return f"{self.provider} - {self.name}"
+        return f"{self.provider} - {self.get_name_translated}"
 
 
 class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
@@ -3083,6 +3262,7 @@ class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMi
         DRAFT = "draft", "draft"
         IN_REVIEW = "in_review", "in review"
         APPROVED = "approved", "approved"
+        REJECTED = "rejected", "rejected"
         RESOLVED = "resolved", "resolved"
         EXPIRED = "expired", "expired"
         DEPRECATED = "deprecated", "deprecated"
@@ -3165,8 +3345,23 @@ class AssetCapability(ReferentialObjectMixin, I18nObjectMixin):
 
 
 class Asset(
-    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
+    IntegrationSyncableMixin,
+    NameDescriptionMixin,
+    FolderMixin,
+    PublishInRootFolderMixin,
+    FilteringLabelMixin,
+    CustomFieldsMixin,
 ):
+    INTEGRATION_MODEL_KEY = "asset"
+    INTEGRATION_SYNCABLE_FIELDS: Final[set[str]] = {
+        "name",
+        "description",
+        "ref_id",
+        "type",
+        "reference_link",
+        "observation",
+    }
+
     class Type(models.TextChoices):
         """
         The type of the asset.
@@ -3951,8 +4146,18 @@ class Asset(
         ]
 
     def save(self, *args, **kwargs) -> None:
+        # Capture changed syncable fields before writing, for outbound sync.
+        changed_fields = self._capture_sync_changed_fields()
+        # _state.adding, not `pk is None`: the UUID pk is defaulted at
+        # instantiation, so pk is never None even for unsaved rows.
+        is_new = self._state.adding
+        # ``skip_sync`` lets the inbound pull path write without re-triggering a
+        # push (set by the orchestrator's _update_local_object).
+        skip_sync = kwargs.pop("skip_sync", False)
         self.full_clean()
-        return super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
+        if not skip_sync:
+            self._trigger_sync(is_new=is_new, changed_fields=changed_fields)
 
     def get_security_objectives_comparison(
         self, security_objectives=None, security_capabilities=None
@@ -4543,16 +4748,10 @@ class Evidence(
         super().save(*args, **kwargs)
         self.revisions.update(is_published=self.is_published)
 
-    def delete(self, using=None, keep_parents=False):
-        for rev in self.revisions.all():
-            if rev.attachment:
-                rev.attachment.delete(save=False)
-
-        return super().delete(using=using, keep_parents=keep_parents)
-
     @property
     def last_revision(self):
-        return self.revisions.order_by("-version").first() or None
+        revs = self.revisions.all()
+        return max(revs, key=lambda r: r.version) if revs else None
 
     def get_folder(self):
         if self.applied_controls:
@@ -4562,24 +4761,18 @@ class Evidence(
         else:
             return None
 
-    def filename(self):
-        return (
-            os.path.basename(self.last_revision.attachment.name)
-            if self.last_revision and self.last_revision.attachment
-            else None
-        )
+    def filename(self) -> str | None:
+        return self.last_revision.filename() if self.last_revision else None
 
     def get_size(self):
+        rev = self.last_revision
         if (
-            not self.last_revision
-            or not self.last_revision.attachment
-            or not self.last_revision.attachment.storage.exists(
-                self.last_revision.attachment.name
-            )
+            not rev
+            or not rev.attachment
+            or not rev.attachment.storage.exists(rev.attachment.name)
         ):
             return None
-        # get the attachment size with the correct unit
-        size = self.last_revision.attachment.size
+        size = rev.attachment.size
         if size < 1024:
             return f"{size} B"
         elif size < 1024 * 1024:
@@ -4589,9 +4782,10 @@ class Evidence(
 
     @property
     def attachment_hash(self):
-        if not self.last_revision or not self.last_revision.attachment:
+        rev = self.last_revision
+        if not rev or not rev.attachment:
             return None
-        return hashlib.sha256(self.last_revision.attachment.read()).hexdigest()
+        return hashlib.sha256(rev.attachment.read()).hexdigest()
 
 
 class EvidenceRevision(AbstractBaseModel, FolderMixin):
@@ -4634,6 +4828,10 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
     observation = models.TextField(verbose_name="Observation", blank=True, null=True)
 
     fields_to_check = ["evidence", "version"]
+
+    class Meta:
+        verbose_name = _("Evidence Revision")
+        verbose_name_plural = _("Evidence Revisions")
 
     def __str__(self):
         return f"{self.evidence.name} v{self.version}"
@@ -4682,7 +4880,6 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
                             if hasattr(self.attachment, "seek"):
                                 self.attachment.seek(0)
                 except Exception as e:
-                    logger = get_logger(__name__)
                     logger.warning(
                         "Failed to compute attachment hash",
                         revision_id=self.pk,
@@ -4696,13 +4893,9 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
 
         super().save(*args, **kwargs)
 
-    def delete(self, using=None, keep_parents=False):
-        if self.attachment:
-            self.attachment.delete(save=False)
-
-        return super().delete(using=using, keep_parents=keep_parents)
-
-    def filename(self):
+    def filename(self) -> str | None:
+        if not self.attachment:
+            return None
         return os.path.basename(self.attachment.name)
 
     def get_size(self):
@@ -4718,10 +4911,6 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
             return f"{size / 1024:.1f} KB"
         else:
             return f"{size / 1024 / 1024:.1f} MB"
-
-    class Meta:
-        verbose_name = _("Evidence Revision")
-        verbose_name_plural = _("Evidence Revisions")
 
 
 class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
@@ -4923,6 +5112,13 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
 
 
 class Comment(AbstractBaseModel, FolderMixin):
+    PARENT_FIELDS = (
+        "requirement_assessment",
+        "risk_scenario",
+        "applied_control",
+        "finding",
+    )
+
     body = models.TextField(verbose_name=_("Body"))
     is_tainted = models.BooleanField(default=False, verbose_name=_("Edited"))
     is_active = models.BooleanField(default=True, verbose_name=_("Active"))
@@ -5018,6 +5214,11 @@ class Comment(AbstractBaseModel, FolderMixin):
         if not self._state.adding and self.pk:
             try:
                 old = Comment.objects.get(pk=self.pk)
+                for field_name in self.PARENT_FIELDS:
+                    if getattr(old, f"{field_name}_id") != getattr(
+                        self, f"{field_name}_id"
+                    ):
+                        raise ValidationError(_("Comment parent cannot be changed."))
                 if old.body != self.body:
                     self.is_tainted = True
             except Comment.DoesNotExist:
@@ -5039,8 +5240,15 @@ def _get_default_applied_control_cost():
 
 
 class AppliedControl(
-    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
+    IntegrationSyncableMixin,
+    NameDescriptionMixin,
+    FolderMixin,
+    PublishInRootFolderMixin,
+    FilteringLabelMixin,
+    CustomFieldsMixin,
 ):
+    INTEGRATION_MODEL_KEY = "applied_control"
+
     class Status(models.TextChoices):
         TO_DO = "to_do", _("To do")
         IN_PROGRESS = "in_progress", _("In progress")
@@ -5249,11 +5457,8 @@ class AppliedControl(
         verbose_name_plural = _("Applied controls")
 
     def save(self, *args, **kwargs):
-        # Track what changed
-        changed_fields = []
-        old_instance = AppliedControl.objects.filter(pk=self.pk).first()
-        if old_instance:
-            changed_fields = self._get_changed_fields(old_instance)
+        # Track what changed (vs the persisted row) for outbound sync.
+        changed_fields = self._capture_sync_changed_fields()
 
         if self.reference_control and self.category is None:
             self.category = self.reference_control.category
@@ -5262,8 +5467,9 @@ class AppliedControl(
         if self.status == "active":
             self.progress_field = 100
 
-        # Save first
-        is_new = self.pk is None
+        # Save first. _state.adding, not `pk is None`: the UUID pk is defaulted
+        # at instantiation, so pk is never None even for unsaved rows.
+        is_new = self._state.adding
         skip_sync = kwargs.pop("skip_sync", False)
         super(AppliedControl, self).save(*args, **kwargs)
 
@@ -5278,47 +5484,6 @@ class AppliedControl(
         from metrology.models import BuiltinMetricSample
 
         BuiltinMetricSample.update_or_create_snapshot(self.folder)
-
-    def _get_changed_fields(self, old_instance) -> list[str]:
-        """Detect which fields changed"""
-        changed = []
-
-        for field in self.INTEGRATION_SYNCABLE_FIELDS:
-            old_val = getattr(old_instance, field)
-            new_val = getattr(self, field)
-            if old_val != new_val:
-                changed.append(field)
-
-        return changed
-
-    def _trigger_sync(self, is_new: bool, changed_fields: List[str]):
-        """Queue sync tasks for all active integrations"""
-        from integrations.tasks import sync_object_to_integrations
-        from integrations.models import IntegrationConfiguration
-
-        # Find all active ITSM integrations for this folder
-        configurations = IntegrationConfiguration.objects.filter(
-            folder=Folder.get_root_folder(),
-            provider__provider_type="itsm",
-            is_active=True,
-        )
-
-        if configurations.exists() and (is_new or changed_fields):
-            # Dispatch async task
-            logger.debug(
-                "Dispatching remote object sync task", applied_control_id=self.pk
-            )
-            transaction.on_commit(
-                lambda: sync_object_to_integrations.schedule(
-                    args=(
-                        ContentType.objects.get_for_model(self),
-                        self.pk,
-                        list(configurations.values_list("id", flat=True)),
-                        changed_fields,
-                    ),
-                    delay=1,
-                )
-            )
 
     @property
     def risk_scenarios(self):
@@ -5403,15 +5568,15 @@ class AppliedControl(
             if (cost_data := self.cost.get(cost_type)) is None:
                 continue
 
-            if (cost := cost_data.get("fixed_cost", 0)) == 0:
+            fixed_cost = cost_data.get("fixed_cost", 0)
+            people_days = cost_data.get("people_days", 0)
+            if not fixed_cost and not people_days:
                 continue
 
-            people_days = cost_data.get("people_days", 0)
             cost_parts: list[str] = []
-
-            stringified_cost = self._stringify_cost(cost, currency)
-            cost_parts.append(stringified_cost)
-            if people_days > 0:
+            if fixed_cost:
+                cost_parts.append(self._stringify_cost(fixed_cost, currency))
+            if people_days:
                 cost_parts.append(f"{people_days} people days")
 
             cost_string = ", ".join(cost_parts)
@@ -7602,7 +7767,7 @@ class ComplianceAssessment(Assessment):
 
         return [
             group.get("name")
-            for group in framework.implementation_groups_definition
+            for group in framework.get_implementation_groups_definition_translated()
             if group.get("ref_id") in self.selected_implementation_groups
         ]
 
@@ -8107,107 +8272,6 @@ class ComplianceAssessment(Assessment):
             "count": sum([len(errors_lst), len(warnings_lst), len(info_lst)]),
         }
         return findings
-
-    def compute_requirement_assessments_results(
-        self, mapping_set: RequirementMappingSet, source_assessment: Self
-    ) -> tuple[list["RequirementAssessment"], dict["RequirementAssessment", list[str]]]:
-        requirement_assessments: list[RequirementAssessment] = []
-        assessment_source_dict: dict[RequirementAssessment, list[str]] = {}
-        result_order = (
-            RequirementAssessment.Result.NOT_ASSESSED,
-            RequirementAssessment.Result.NOT_APPLICABLE,
-            RequirementAssessment.Result.NON_COMPLIANT,
-            RequirementAssessment.Result.PARTIALLY_COMPLIANT,
-            RequirementAssessment.Result.COMPLIANT,
-        )
-
-        def assign_attributes(target, attributes):
-            """
-            Helper function to assign attributes to a target object.
-            Only assigns if the attribute is not None.
-            """
-            keys = ["result", "status", "score", "is_scored", "observation"]
-            for key, value in zip(keys, attributes):
-                if value is not None:
-                    setattr(target, key, value)
-
-        for requirement_assessment in self.requirement_assessments.all():
-            mappings = mapping_set.mappings.filter(
-                target_requirement=requirement_assessment.requirement
-            )
-            inferences = []
-            refs = []
-
-            # Filter for full coverage relationships if applicable
-            if mappings.filter(
-                relationship__in=RequirementMapping.FULL_COVERAGE_RELATIONSHIPS
-            ).exists():
-                mappings = mappings.filter(
-                    relationship__in=RequirementMapping.FULL_COVERAGE_RELATIONSHIPS
-                )
-
-            for mapping in mappings:
-                source_requirement_assessment = RequirementAssessment.objects.get(
-                    compliance_assessment=source_assessment,
-                    requirement=mapping.source_requirement,
-                )
-                inferred_result = requirement_assessment.infer_result(
-                    mapping=mapping,
-                    source_requirement_assessment=source_requirement_assessment,
-                )
-                if inferred_result.get("result") in result_order:
-                    inferences.append(
-                        (
-                            inferred_result.get("result"),
-                            inferred_result.get("status"),
-                            inferred_result.get("score"),
-                            inferred_result.get("is_scored"),
-                            inferred_result.get("observation"),
-                        )
-                    )
-                    refs.append(source_requirement_assessment)
-
-            if inferences:
-                if len(inferences) == 1:
-                    selected_inference = inferences[0]
-                    ref = refs[0]
-                else:
-                    selected_inference = min(
-                        inferences, key=lambda x: result_order.index(x[0])
-                    )
-                    ref = refs[inferences.index(selected_inference)]
-
-                assessment_source_dict[requirement_assessment] = [
-                    str(ref.id) for ref in refs
-                ]
-
-                assign_attributes(requirement_assessment, selected_inference)
-                requirement_assessment.mapping_inference = {
-                    "result": requirement_assessment.result,
-                    "source_requirement_assessment": {
-                        "str": str(ref),
-                        "id": str(ref.id),
-                        "is_scored": ref.is_scored,
-                        "score": ref.score,
-                        "coverage": mapping.coverage,
-                    },
-                    # "mappings": [mapping.id for mapping in mappings],
-                }
-                requirement_assessments.append(requirement_assessment)
-
-        RequirementAssessment.objects.bulk_update(
-            requirement_assessments,
-            [
-                "mapping_inference",
-                "result",
-                "status",
-                "score",
-                "is_scored",
-                "observation",
-            ],
-            batch_size=1000,
-        )
-        return requirement_assessments, assessment_source_dict
 
     def _get_progress_counts(self) -> tuple[int, int]:
         """
@@ -9024,6 +9088,8 @@ class FindingsAssessment(Assessment):
     class Category(models.TextChoices):
         UNDEFINED = "--", "Undefined"
         PENTEST = "pentest", "Pentest"
+        THREAT_HUNTING = "threat_hunting", "Threat hunting"
+        RED_TEAMING = "red_teaming", "Red teaming"
         AUDIT = "audit", "Audit"
         SELF_IDENTIFIED = "self_identified", "Self-identified"
 
@@ -9293,18 +9359,35 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         )
 
     def set_state(self, state):
-        self.state = state
-        if state == "accepted":
-            self.accepted_at = datetime.now()
-            # iterate over the risk scenarios to set their treatment to accepted
-            for scenario in self.risk_scenarios.all():
-                scenario.treatment = "accept"
-                scenario.save()
-        if state == "rejected":
-            self.rejected_at = datetime.now()
-        elif state == "revoked":
-            self.revoked_at = datetime.now()
-        self.save()
+        # Scenario treatments and the acceptance state must move together, so all
+        # writes are wrapped in a single transaction.
+        with transaction.atomic():
+            self.state = state
+            if state == "accepted":
+                self.accepted_at = datetime.now()
+                # iterate over the risk scenarios to set their treatment to accepted
+                for scenario in self.risk_scenarios.all():
+                    scenario.treatment = "accept"
+                    scenario.save()
+            if state == "rejected":
+                self.rejected_at = datetime.now()
+            elif state == "revoked":
+                self.revoked_at = datetime.now()
+                # revert the treatment set on acceptance, leaving scenarios that have
+                # since moved to another treatment, or are still covered by another
+                # accepted acceptance, untouched
+                for scenario in self.risk_scenarios.all():
+                    if scenario.treatment != "accept":
+                        continue
+                    still_accepted = (
+                        scenario.riskacceptance_set.filter(state="accepted")
+                        .exclude(pk=self.pk)
+                        .exists()
+                    )
+                    if not still_accepted:
+                        scenario.treatment = "open"
+                        scenario.save()
+            self.save()
 
 
 # tasks management
@@ -9760,6 +9843,18 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
             if getattr(self, field).exists():
                 linked.append(field)
         return linked
+
+    @property
+    def last_event(self):
+        """Most recent flow event. Reuses the prefetch cache when available."""
+        # FlowEvent is ordered by -created_at, so the first item is the latest.
+        events = list(self.events.all())
+        return events[0] if events else None
+
+    @property
+    def last_event_notes(self) -> str | None:
+        event = self.last_event
+        return event.event_notes if event else None
 
     def __str__(self) -> str:
         return self.ref_id
@@ -10227,8 +10322,78 @@ class CustomWordTemplate(AbstractBaseModel, FolderMixin):
 
     fields_to_check = ["template_key", "language"]
 
+    def delete(self, *args, **kwargs):
+        if self.file:
+            self.file.delete(save=False)
+        super().delete(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.template_key} ({self.language})"
+
+
+class CustomDocHtmlTemplate(AbstractBaseModel, FolderMixin):
+    """
+    Allows admins to override built-in HTML render templates (WeasyPrint PDF
+    layouts, etc.). Each record overrides one template for one language.
+    Access is gated by the enterprise viewset and UI.
+    """
+
+    template_key = models.CharField(
+        max_length=100,
+        help_text=_("Template identifier, e.g. 'document_pdf'"),
+    )
+    language = models.CharField(
+        max_length=10,
+        help_text=_("Language code, e.g. 'en', 'fr'"),
+    )
+    file = models.FileField(
+        upload_to="custom_html_templates/",
+        validators=[
+            FileExtensionValidator(["html"]),
+            validate_file_size,
+            validate_html_template_file_name,
+        ],
+        help_text=_("Custom .html template file (Django template syntax)"),
+    )
+    is_active = models.BooleanField(default=True)
+
+    fields_to_check = ["template_key", "language"]
+
+    def delete(self, *args, **kwargs):
+        if self.file:
+            self.file.delete(save=False)
+        super().delete(*args, **kwargs)
+
     def __str__(self):
         return f"{self.template_key} ({self.language})"
 
 
 # actions - 0: create, 1: update, 2: delete
+
+auditlog.register(
+    Team,
+    m2m_fields={"members", "deputies"},
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    ValidationFlow,
+    m2m_fields={
+        "compliance_assessments",
+        "risk_assessments",
+        "business_impact_analysis",
+        "crq_studies",
+        "ebios_studies",
+        "entity_assessments",
+        "findings_assessments",
+        "evidences",
+        "security_exceptions",
+        "policies",
+        "processings",
+    },
+    exclude_fields=common_exclude,
+)
+auditlog.register(StoredLibrary, exclude_fields=common_exclude)
+auditlog.register(LoadedLibrary, exclude_fields=common_exclude)
+auditlog.register(RiskMatrix, exclude_fields=common_exclude)
+auditlog.register(CustomEmailTemplate, exclude_fields=common_exclude)
+auditlog.register(CustomWordTemplate, exclude_fields=common_exclude)

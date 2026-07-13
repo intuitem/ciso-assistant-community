@@ -32,7 +32,9 @@
 }
 
 @utility btn-mini-primary {
-	@apply text-gray-50 bg-violet-600 hover:bg-violet-500 dark:bg-violet-700 dark:hover:bg-violet-600;
+	/* Follows the theme primary like preset-filled-primary-500 (bg + contrast text), with the
+	   same Skeleton btn hover (brightness 125% light / 75% dark) rather than a bg shift. */
+	@apply text-primary-contrast-500 bg-primary-500 hover:brightness-125 dark:hover:brightness-75;
 }
 @utility btn-mini-secondary {
 	@apply text-gray-50 bg-pink-500 hover:bg-pink-400 dark:bg-pink-600 dark:hover:bg-pink-500;
@@ -79,16 +81,24 @@
 	}
 }
 
-/* svelte-multiselect dropdown dark mode */
-.dark div.multiselect > ul.options {
-	background-color: var(--color-surface-900);
+/* svelte-multiselect dropdown: align the options panel with the app surface in both
+   themes (off-white surface-100 instead of pure white in light, surface-900 in dark). */
+div.multiselect > ul.options {
+	background-color: var(--color-surface-100-900);
+	color: var(--color-surface-950-50);
+}
+div.multiselect > ul.options > li.active {
+	background-color: var(--color-surface-200-800);
+}
+div.multiselect > ul.options > li:not(.active):hover {
+	background-color: var(--color-surface-200-800);
+}
+/* Selected values/chips: keep text readable in dark mode. Single-select uses a
+   transparent li (text sits on the dark input bg); multi-select uses a filled
+   chip. The chip's own contrast color is preserved; only bare/transparent
+   selected text inherits this adaptive color. */
+.dark div.multiselect > ul.selected > li:not(.chip) {
 	color: var(--color-surface-50);
-}
-.dark div.multiselect > ul.options > li.active {
-	background-color: var(--color-surface-800);
-}
-.dark div.multiselect > ul.options > li:not(.active):hover {
-	background-color: var(--color-surface-800);
 }
 
 /* Tailwind prose dark mode */

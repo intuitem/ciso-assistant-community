@@ -187,7 +187,7 @@
 					</p>
 					<input
 						type="date"
-						class="px-2 py-1 border border-surface-300-700 rounded text-md font-semibold text-surface-500"
+						class="px-2 py-1 border border-surface-300-700 bg-surface-50-950 text-surface-500 rounded text-md font-semibold"
 						value={taskNode.scheduled_date}
 						disabled
 					/>
@@ -199,7 +199,7 @@
 				</p>
 				<input
 					type="date"
-					class="px-2 py-1 border border-surface-300-700 rounded text-md font-semibold"
+					class="px-2 py-1 border border-surface-300-700 bg-surface-50-950 text-surface-900-100 rounded text-md font-semibold"
 					bind:value={taskNode.due_date}
 					onchange={(e) => submitDueDateChange(e.target.value)}
 				/>

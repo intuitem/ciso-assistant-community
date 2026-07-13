@@ -24,13 +24,12 @@
 	const reportTiles: ReportTileData[] = [
 		{
 			id: 'dora-roi',
-			title: 'DORA Register of Information',
-			description:
-				'Generate DORA-compliant Register of Information (ROI) containing entity data required by the Digital Operational Resilience Act',
+			title: m.doraRegisterOfInformation(),
+			description: m.doraRoiDescription(),
 			icon: 'fa-solid fa-building-shield',
 			category: 'compliance',
 			href: '/reports/dora-roi',
-			tags: ['DORA', 'Regulation', 'Entities', 'Beta']
+			tags: ['DORA', 'Regulation', 'Entities']
 		},
 		{
 			id: 'soa',
@@ -84,12 +83,10 @@
 			</div>
 			<div>
 				<h3 class="text-lg font-semibold text-surface-950-50 mb-2">
-					{m.aboutReports ? m.aboutReports() : 'About Reports'}
+					{m.aboutReports()}
 				</h3>
-				<p class="text-surface-700-300">
-					{m.aboutReportsDescription
-						? m.aboutReportsDescription()
-						: 'Reports provide a simple tools to generate specialized reports useful for key insights or required by authorities for specific standards.\nMore specialized capabilities will be added as we identify specific cases.'}
+				<p class="text-surface-700-300 whitespace-pre-line">
+					{m.aboutReportsDescription()}
 				</p>
 			</div>
 		</div>

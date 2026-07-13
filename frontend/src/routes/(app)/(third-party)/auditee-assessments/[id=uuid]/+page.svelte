@@ -32,6 +32,7 @@
 		alignmentValueFromChoiceUrn,
 		choiceUrnFromAlignmentValue,
 		alignmentColorMap,
+		requirementResultOptions,
 		AUTO_ALIGNMENT_QUESTION_URN
 	} from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -51,13 +52,8 @@
 
 	let { data, form }: Props = $props();
 
-	const result_options = [
-		{ id: 'not_assessed', label: m.notAssessed() },
-		{ id: 'non_compliant', label: m.nonCompliant() },
-		{ id: 'partially_compliant', label: m.partiallyCompliant() },
-		{ id: 'compliant', label: m.compliant() },
-		{ id: 'not_applicable', label: m.notApplicable() }
-	];
+	// Full list, used for the ToC result counts; the input radio filters per-row.
+	const result_options = requirementResultOptions();
 
 	const status_options = [
 		{ id: 'to_do', label: m.toDo() },
@@ -655,7 +651,7 @@
 						<button
 							class="w-full text-left px-2 py-1.5 text-xs rounded-md transition-colors truncate flex items-center gap-1.5
 								{section.index === currentIndex
-								? 'bg-primary-100 text-primary-800-300 font-semibold'
+								? 'bg-primary-100 text-primary-800-200 font-semibold'
 								: 'text-surface-600-400 hover:bg-surface-200-800'}"
 							onclick={() => goTo(section.index)}
 							title={section.title}
@@ -684,7 +680,7 @@
 				<div class="flex items-center space-x-3">
 					<a
 						href="/auditee-dashboard"
-						class="text-primary-600 hover:text-primary-800-300"
+						class="text-primary-600 hover:text-primary-800-200"
 						title={m.auditDashboard()}
 					>
 						<i class="fa-solid fa-arrow-left"></i>
@@ -1019,7 +1015,10 @@
 										</span>
 									{:else}
 										<RadioGroup
-											possibleOptions={result_options}
+											possibleOptions={requirementResultOptions(
+												page.data.settings?.disable_partially_compliant_result,
+												requirementAssessment.result
+											)}
 											key="id"
 											labelKey="label"
 											field="result"

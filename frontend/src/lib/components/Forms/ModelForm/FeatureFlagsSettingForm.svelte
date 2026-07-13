@@ -33,6 +33,11 @@
 					field: 'journeys',
 					label: m.journeys(),
 					description: m.journeysDescription()
+				},
+				{
+					field: 'custom_portals',
+					label: m.customPortals(),
+					description: m.customPortalsDescription()
 				}
 			].filter(({ field }) => availableKeys.includes(field))
 		},
@@ -121,6 +126,11 @@
 					field: 'policy_documents',
 					label: m.policyDocumentsFlag(),
 					description: m.policyDocumentsFlagDescription()
+				},
+				{
+					field: 'document_management',
+					label: m.documentManagementFlag(),
+					description: m.documentManagementFlagDescription()
 				},
 				{
 					field: 'exceptions',
@@ -242,9 +252,19 @@
 					description: m.focusModeTooltip()
 				},
 				{
+					field: 'idp_groups',
+					label: m.idpGroups(),
+					description: m.idpGroupsDescription()
+				},
+				{
 					field: 'terminologies',
 					label: m.terminologies(),
 					description: m.riskOriginHelpText()
+				},
+				{
+					field: 'custom_fields',
+					label: m.customFields(),
+					description: m.customFieldsDescription()
 				},
 				{
 					field: 'outgoing_webhooks',
@@ -302,6 +322,7 @@
 				'follow_up',
 				'reports',
 				'policy_documents',
+				'document_management',
 				'advanced_analytics',
 				'auditee_mode',
 				'campaigns',

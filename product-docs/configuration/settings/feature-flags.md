@@ -20,6 +20,7 @@ Flags affect what's visible in the sidebar, what appears in CRUD pages, and whic
 - **organisation_issues** — context register: issues affecting the organisation.
 - **organisation_objectives** — context register: organisational objectives.
 - **policy_documents** — the dedicated Policies surface (a filtered view of applied controls).
+- **document_management** — the standalone [Documents](../../concepts/documents.md) module: the reading catalogue, document list, and templates. Author or upload documents through a draft → published lifecycle, independent of policies.
 
 ## Risk
 
@@ -65,8 +66,10 @@ Flags affect what's visible in the sidebar, what appears in CRUD pages, and whic
 
 - **outgoing_webhooks** — outgoing webhooks. _Default off._
 - **audit_log_forwarding** — [forward the audit log](../../integrations/audit-log-forwarding.md) to an external SIEM over HTTP or Kafka. _PRO. Default off._
+- **idp_groups** — [SCIM 2.0 provisioning and IdP group mapping](../sso/scim.md): the IdP groups menu, the SCIM settings tab, and the IdP groups column on the users table. _PRO._
 - **chat_mode** — the in-product chat assistant. _Default off; only visible when `ENABLE_CHAT` is set on the instance._
 - **terminologies** — organisation-specific label overrides.
+- **custom_fields** — org-defined typed fields on objects (Projects, Assets, Applied controls); see [Custom fields](../../features/custom-fields.md). _PRO. Default off._
 
 ## Project management
 

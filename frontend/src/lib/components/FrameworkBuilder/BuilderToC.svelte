@@ -276,7 +276,7 @@
 					onkeydown={handleSearchKeydown}
 					type="text"
 					placeholder={m.builderSearchNodes()}
-					class="w-full px-3 py-1.5 pr-7 text-xs border border-surface-200-800 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+					class="input w-full px-3 py-1.5 pr-7 text-xs border border-surface-200-800 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
 				/>
 				<div class="absolute inset-y-0 right-0 flex items-center pr-2">
 					{#if searchQuery}
@@ -415,7 +415,7 @@
 					<p class="text-xs text-surface-500">{m.builderNoMatchingNodes()}</p>
 					<button
 						onclick={clearSearch}
-						class="mt-1 text-xs text-primary-600 hover:text-primary-800-300 underline"
+						class="mt-1 text-xs text-primary-600 hover:text-primary-800-200 underline"
 					>
 						{m.clearSearch()}
 					</button>

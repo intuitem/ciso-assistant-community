@@ -75,28 +75,28 @@
 		{
 			key: 'ebiosReconnaissance',
 			icon: 'fa-magnifying-glass',
-			twBg: 'bg-pink-50',
+			twBg: 'bg-pink-50 dark:bg-pink-950/40',
 			twBorder: 'border-pink-400',
 			twText: 'text-pink-500'
 		},
 		{
 			key: 'ebiosInitialAccess',
 			icon: 'fa-right-to-bracket',
-			twBg: 'bg-violet-50',
+			twBg: 'bg-violet-50 dark:bg-violet-950/40',
 			twBorder: 'border-violet-400',
 			twText: 'text-violet-500'
 		},
 		{
 			key: 'ebiosDiscovery',
 			icon: 'fa-lightbulb',
-			twBg: 'bg-orange-50',
+			twBg: 'bg-orange-50 dark:bg-orange-950/40',
 			twBorder: 'border-orange-400',
 			twText: 'text-orange-500'
 		},
 		{
 			key: 'ebiosExploitation',
 			icon: 'fa-bolt',
-			twBg: 'bg-red-50',
+			twBg: 'bg-red-50 dark:bg-red-950/40',
 			twBorder: 'border-red-400',
 			twText: 'text-red-500'
 		}
@@ -123,6 +123,18 @@
 	let dragOverStage = $state<number | null>(null);
 	let showHelp = $state(false);
 	let selectedEdgeId = $state<string | null>(null);
+
+	// Track the app dark mode (`.dark` on <html>) so SvelteFlow uses its native dark
+	// theme via colorMode. SvelteFlow defaults to light otherwise (white canvas).
+	let isDark = $state(false);
+	$effect(() => {
+		const root = document.documentElement;
+		const update = () => (isDark = root.classList.contains('dark'));
+		update();
+		const observer = new MutationObserver(update);
+		observer.observe(root, { attributes: true, attributeFilter: ['class'] });
+		return () => observer.disconnect();
+	});
 
 	setContext('killChainEditor', {
 		get dragOverStage() {
@@ -573,6 +585,7 @@
 			<SvelteFlow
 				bind:nodes
 				bind:edges
+				colorMode={isDark ? 'dark' : 'light'}
 				{nodeTypes}
 				{edgeTypes}
 				isValidConnection={readonly ? () => false : isValidConnection}
@@ -677,7 +690,23 @@
 	:global(.svelte-flow) {
 		--xy-node-border-radius: var(--radius-base);
 		--xy-edge-stroke: var(--color-surface-500);
-		background-color: var(--color-surface-50);
+		/* Drive the canvas fill through xyflow's own var so it wins over the bundled
+		   stylesheet (a plain background-color ties on specificity and loses). */
+		--xy-background-color: var(--color-surface-50);
+		--xy-background-pattern-color: var(--color-surface-300);
+	}
+	:global(.dark .svelte-flow) {
+		--xy-background-color: var(--color-surface-950);
+		--xy-background-pattern-color: var(--color-surface-800);
+		/* SvelteFlow Controls + MiniMap default to white; map them to the dark palette */
+		--xy-controls-button-background-color: var(--color-surface-800);
+		--xy-controls-button-background-color-hover: var(--color-surface-700);
+		--xy-controls-button-color: var(--color-surface-100);
+		--xy-controls-button-color-hover: var(--color-surface-50);
+		--xy-controls-button-border-color: var(--color-surface-700);
+		--xy-minimap-background-color: var(--color-surface-900);
+		--xy-minimap-mask-background-color: var(--color-surface-950);
+		--xy-minimap-node-background-color: var(--color-surface-600);
 	}
 	:global(.svelte-flow .svelte-flow__edge-path) {
 		stroke-width: 2;

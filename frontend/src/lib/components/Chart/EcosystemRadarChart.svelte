@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { mountThemeAwareChart, isDarkTheme } from '$lib/utils/echartsTheme';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
@@ -40,281 +41,289 @@
 	//
 
 	const chart_id = `${name}_div`;
-	onMount(async () => {
-		const echarts = await import('echarts');
-		let chart = echarts.init(
-			document.getElementById(chart_id),
-			document.documentElement.classList.contains('dark') ? 'dark' : null,
-			{ renderer: 'svg' }
-		);
-		const getGraphicElements = (chart) => {
-			const chartWidth = chart.getWidth();
-			const chartHeight = chart.getHeight();
-			const centerX = chartWidth / 2;
-			const centerY = chartHeight / 2;
+	let chart: any = null;
+	onMount(() => {
+		let dispose: (() => void) | undefined;
+		let cleanupResize: (() => void) | undefined;
+		let active = true;
+		(async () => {
+			const echarts = await import('echarts');
+			if (!active) return;
+			const el = document.getElementById(chart_id);
+			if (!el) return;
+			const getGraphicElements = (labelColor: string) => {
+				const chartWidth = el.clientWidth;
+				const chartHeight = el.clientHeight;
+				const centerX = chartWidth / 2;
+				const centerY = chartHeight / 2;
 
-			return [
-				// Existing text elements
-				{
-					type: 'text',
-					left: 'center',
-					top: 40,
-					style: {
-						text: m.cyberReliability(),
-						font: 'bold 16px Arial',
-						fill: '#333',
-						textAlign: 'center'
+				return [
+					// Existing text elements
+					{
+						type: 'text',
+						left: 'center',
+						top: 40,
+						style: {
+							text: m.cyberReliability(),
+							font: 'bold 16px Arial',
+							fill: labelColor,
+							textAlign: 'center'
+						}
+					},
+					{
+						type: 'text',
+						position: [chartWidth / 4, (3 * chartHeight) / 4],
+						silent: true,
+						style: {
+							text: m.suppliers(),
+							font: '18px Arial',
+							fill: labelColor,
+							textAlign: 'center',
+							textVerticalAlign: 'middle'
+						}
+					},
+					{
+						type: 'text',
+						position: [(3 * chartWidth) / 4, chartHeight / 4],
+						silent: true,
+						style: {
+							text: m.partners(),
+							font: '18px Arial',
+							fill: labelColor,
+							textAlign: 'center',
+							textVerticalAlign: 'middle'
+						}
+					},
+					{
+						type: 'text',
+						position: [chartWidth / 4, chartHeight / 4],
+						silent: true,
+						style: {
+							text: m.clients(),
+							font: '18px Arial',
+							fill: labelColor,
+							textAlign: 'center',
+							textVerticalAlign: 'middle'
+						}
 					}
+				];
+			};
+			const mainAngles = [45, 135, 225, 315];
+			dispose = mountThemeAwareChart(
+				echarts,
+				el,
+				() => {
+					// Recomputed on every theme flip so labels/separators stay readable on both surfaces.
+					const isDark = isDarkTheme();
+					const labelColor = isDark ? '#cbd5e1' : '#475569';
+					const splitLineColor = isDark ? '#64748b' : '#9ca3af';
+					return {
+						title: {
+							text: title
+						},
+						graphic: getGraphicElements(labelColor),
+						legend: {
+							data: ['<4', '4-5', '6-7', '>7'],
+							top: 60
+						},
+						polar: {},
+						tooltip: {
+							formatter: function (params) {
+								return (
+									params.value[3].split('-')[0] +
+									' - ' +
+									safeTranslate(params.value[3].split('-')[1]) +
+									`<br/>${m.criticalitySemiColon()} ` +
+									params.value[0]
+								);
+							}
+						},
+						angleAxis: {
+							type: 'value',
+							startAngle: 315,
+							boundaryGap: true,
+							interval: 45,
+							axisLabel: { show: false },
+							splitLine: {
+								show: false
+							},
+							axisLine: {
+								show: false
+							},
+							axisTick: {
+								show: false
+							},
+							alignTick: true
+						},
+						radiusAxis: {
+							type: 'value',
+							max: max,
+							inverse: true,
+							axisLabel: { show: true },
+							axisLine: {
+								show: true,
+								symbol: ['arrow', 'none'],
+								lineStyle: { width: 2 }
+							},
+							axisTick: {
+								show: false
+							}
+						},
+						series: [
+							{
+								name: '<4',
+								color: '#E73E51',
+								type: 'scatter',
+								coordinateSystem: 'polar',
+								symbolSize: function (val) {
+									return val[2] * 2;
+								},
+								data: data.clst1,
+								animationDelay: function (idx) {
+									return idx * 5;
+								}
+							},
+							{
+								name: '4-5',
+								color: '#DE8898',
+								type: 'scatter',
+								coordinateSystem: 'polar',
+								symbolSize: function (val) {
+									return val[2] * 2;
+								},
+								data: data.clst2,
+								animationDelay: function (idx) {
+									return idx * 5;
+								}
+							},
+							{
+								name: '6-7',
+								color: '#BAD9EA',
+								type: 'scatter',
+								coordinateSystem: 'polar',
+								symbolSize: function (val) {
+									return val[2] * 2;
+								},
+								data: data.clst3,
+								animationDelay: function (idx) {
+									return idx * 5;
+								}
+							},
+							{
+								name: '>7',
+								color: '#8A8B8A',
+								type: 'scatter',
+								coordinateSystem: 'polar',
+								symbolSize: function (val) {
+									return val[2] * 2;
+								},
+								data: data.clst4,
+								animationDelay: function (idx) {
+									return idx * 5;
+								}
+							},
+							{
+								name: 'CircleR',
+								type: 'line',
+								coordinateSystem: 'polar',
+								itemStyle: { borderJoin: 'round' },
+								symbol: 'none',
+								data: new Array(360).fill(0).map((_, index) => {
+									return [redZoneRadius, index];
+								}),
+								lineStyle: {
+									color: '#E73E51',
+									width: 5
+								},
+								showInLegend: false,
+								silent: true,
+								zlevel: -1
+							},
+							{
+								name: 'CircleY',
+								type: 'line',
+								coordinateSystem: 'polar',
+								symbol: 'none',
+								data: new Array(360).fill(0).map((_, index) => {
+									return [yellowZoneRadius, index];
+								}),
+								lineStyle: {
+									color: '#F8EA47',
+									width: 5
+								},
+								showInLegend: false,
+								silent: true,
+								zlevel: -1
+							},
+							{
+								name: 'CircleG',
+								type: 'line',
+								coordinateSystem: 'polar',
+								symbol: 'none',
+								data: new Array(360).fill(0).map((_, index) => {
+									return [greenZoneRadius, index];
+								}),
+								lineStyle: {
+									color: '#00ADA8',
+									width: 5
+								},
+								// If you don't want this to show up in the legend:
+								showInLegend: false,
+								silent: true,
+								zlevel: -1
+							},
+							// Center blue dot
+							{
+								name: 'CenterDot',
+								type: 'scatter',
+								coordinateSystem: 'polar',
+								symbol: 'circle',
+								symbolSize: 30,
+								itemStyle: {
+									color: '#007FB9',
+									borderWidth: 1
+								},
+								data: [[max - 0.001, 0]],
+								silent: true,
+								zlevel: -1,
+								showInLegend: false
+							},
+							{
+								name: 'MinorSplitLines',
+								type: 'line',
+								coordinateSystem: 'polar',
+								symbol: 'none',
+								silent: true,
+								lineStyle: {
+									color: splitLineColor,
+									width: 1
+								},
+								data: mainAngles.flatMap((angle) => [
+									[0, angle],
+									[max, angle],
+									[NaN, NaN]
+								])
+							}
+						]
+					};
 				},
-				{
-					type: 'text',
-					position: [chartWidth / 4, (3 * chartHeight) / 4],
-					silent: true,
-					style: {
-						text: m.suppliers(),
-						font: '18px Arial',
-						fill: '#666',
-						textAlign: 'center',
-						textVerticalAlign: 'middle'
-					}
-				},
-				{
-					type: 'text',
-					position: [(3 * chartWidth) / 4, chartHeight / 4],
-					silent: true,
-					style: {
-						text: m.partners(),
-						font: '18px Arial',
-						fill: '#666',
-						textAlign: 'center',
-						textVerticalAlign: 'middle'
-					}
-				},
-				{
-					type: 'text',
-					position: [chartWidth / 4, chartHeight / 4],
-					silent: true,
-					style: {
-						text: m.clients(),
-						font: '18px Arial',
-						fill: '#666',
-						textAlign: 'center',
-						textVerticalAlign: 'middle'
-					}
-				}
-			];
-		};
-		const mainAngles = [45, 135, 225, 315];
-		const option = {
-			title: {
-				text: title
-			},
-			graphic: getGraphicElements(chart),
-			legend: {
-				data: ['<4', '4-5', '6-7', '>7'],
-				top: 60
-			},
-			polar: {},
-			tooltip: {
-				formatter: function (params) {
-					return (
-						params.value[3].split('-')[0] +
-						' - ' +
-						safeTranslate(params.value[3].split('-')[1]) +
-						`<br/>${m.criticalitySemiColon()} ` +
-						params.value[0]
-					);
-				}
-			},
-			angleAxis: {
-				type: 'value',
-				startAngle: 315,
-				boundaryGap: true,
-				interval: 45,
-				axisLabel: { show: false },
-				splitLine: {
-					show: false
-				},
-				axisLine: {
-					show: false
-				},
-				axisTick: {
-					show: false
-				},
-				alignTick: true
-			},
-			radiusAxis: {
-				type: 'value',
-				max: max,
-				inverse: true,
-				axisLabel: { show: true },
-				axisLine: {
-					show: true,
-					symbol: ['arrow', 'none'],
-					lineStyle: { width: 2 }
-				},
-				axisTick: {
-					show: false
-				}
-			},
-			series: [
-				{
-					name: '<4',
-					color: '#E73E51',
-					type: 'scatter',
-					coordinateSystem: 'polar',
-					symbolSize: function (val) {
-						return val[2] * 2;
-					},
-					data: data.clst1,
-					animationDelay: function (idx) {
-						return idx * 5;
-					}
-				},
-				{
-					name: '4-5',
-					color: '#DE8898',
-					type: 'scatter',
-					coordinateSystem: 'polar',
-					symbolSize: function (val) {
-						return val[2] * 2;
-					},
-					data: data.clst2,
-					animationDelay: function (idx) {
-						return idx * 5;
-					}
-				},
-				{
-					name: '6-7',
-					color: '#BAD9EA',
-					type: 'scatter',
-					coordinateSystem: 'polar',
-					symbolSize: function (val) {
-						return val[2] * 2;
-					},
-					data: data.clst3,
-					animationDelay: function (idx) {
-						return idx * 5;
-					}
-				},
-				{
-					name: '>7',
-					color: '#8A8B8A',
-					type: 'scatter',
-					coordinateSystem: 'polar',
-					symbolSize: function (val) {
-						return val[2] * 2;
-					},
-					data: data.clst4,
-					animationDelay: function (idx) {
-						return idx * 5;
-					}
-				},
-				{
-					name: 'CircleR',
-					type: 'line',
-					coordinateSystem: 'polar',
-					itemStyle: { borderJoin: 'round' },
-					symbol: 'none',
-					data: new Array(360).fill(0).map((_, index) => {
-						return [redZoneRadius, index];
-					}),
-					lineStyle: {
-						color: '#E73E51',
-						width: 5
-					},
-					showInLegend: false,
-					silent: true,
-					zlevel: -1
-				},
-				{
-					name: 'CircleY',
-					type: 'line',
-					coordinateSystem: 'polar',
-					symbol: 'none',
-					data: new Array(360).fill(0).map((_, index) => {
-						return [yellowZoneRadius, index];
-					}),
-					lineStyle: {
-						color: '#F8EA47',
-						width: 5
-					},
-					showInLegend: false,
-					silent: true,
-					zlevel: -1
-				},
-				{
-					name: 'CircleG',
-					type: 'line',
-					coordinateSystem: 'polar',
-					symbol: 'none',
-					data: new Array(360).fill(0).map((_, index) => {
-						return [greenZoneRadius, index];
-					}),
-					lineStyle: {
-						color: '#00ADA8',
-						width: 5
-					},
-					// If you don't want this to show up in the legend:
-					showInLegend: false,
-					silent: true,
-					zlevel: -1
-				},
-				// Center blue dot
-				{
-					name: 'CenterDot',
-					type: 'scatter',
-					coordinateSystem: 'polar',
-					symbol: 'circle',
-					symbolSize: 30,
-					itemStyle: {
-						color: '#007FB9',
-						borderWidth: 1
-					},
-					data: [[max - 0.001, 0]],
-					silent: true,
-					zlevel: -1,
-					showInLegend: false
-				},
-				{
-					name: 'MinorSplitLines',
-					type: 'line',
-					coordinateSystem: 'polar',
-					symbol: 'none',
-					silent: true,
-					lineStyle: {
-						color: '#1C263B',
-						width: 1
-					},
-					data: mainAngles.flatMap((angle) => [
-						[0, angle],
-						[max, angle],
-						[NaN, NaN]
-					])
-				}
-			]
-		};
+				{ onChart: (c: any) => (chart = c) }
+			);
 
-		option.backgroundColor = 'transparent';
-		chart.setOption(option);
+			// Reposition graphic labels on resize (their coords depend on chart size)
+			const handleResize = () => {
+				chart?.resize();
+				chart?.setOption({ graphic: getGraphicElements(isDarkTheme() ? '#cbd5e1' : '#475569') });
+			};
+			window.addEventListener('resize', handleResize);
+			cleanupResize = () => window.removeEventListener('resize', handleResize);
+		})();
 
-		// Handle resize
-		window.addEventListener('resize', function () {
-			chart.resize();
-			// Update the graphic elements positions after resize
-			chart.setOption({
-				graphic: getGraphicElements(chart)
-			});
-		});
-
-		// Clean up event listener on component unmount
+		// Clean up on component unmount
 		return () => {
-			window.removeEventListener('resize', function () {
-				chart.resize();
-				chart.setOption({
-					graphic: getGraphicElements(chart)
-				});
-			});
+			active = false;
+			cleanupResize?.();
+			dispose?.();
 		};
 	});
 </script>

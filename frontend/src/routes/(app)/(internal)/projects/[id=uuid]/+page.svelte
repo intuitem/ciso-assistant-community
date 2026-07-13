@@ -10,6 +10,7 @@
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import SliderInput from '$lib/components/Forms/SliderInput.svelte';
+	import ProjectCustomFieldsPanel from '$lib/components/Forms/ProjectCustomFieldsPanel.svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -589,7 +590,7 @@
 							href={project.ref_link}
 							target="_blank"
 							rel="noopener noreferrer"
-							class="text-primary-600 hover:text-primary-800-300 hover:underline text-sm inline-flex items-center gap-1 mt-2"
+							class="text-primary-600 hover:text-primary-800-200 hover:underline text-sm inline-flex items-center gap-1 mt-2"
 						>
 							<i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
 							{project.ref_link}
@@ -779,7 +780,7 @@
 				{#if project.parent_project}
 					<Anchor
 						href="/projects/{project.parent_project.id}"
-						class="text-primary-600 hover:text-primary-800-300 hover:underline truncate block"
+						class="text-primary-600 hover:text-primary-800-200 hover:underline truncate block"
 					>
 						{project.parent_project.str}
 					</Anchor>
@@ -957,6 +958,14 @@
 					{/if}
 				</div>
 			</div>
+
+			<ProjectCustomFieldsPanel
+				endpoint={page.url.pathname}
+				model="pmbok.project"
+				folderId={project.folder?.id}
+				values={project.custom_fields}
+				onSaved={invalidateAll}
+			/>
 		</Tabs.Content>
 		<Tabs.Content value="charter" class="p-6">
 			<div class="flex justify-end mb-4">
@@ -1452,7 +1461,7 @@
 						{#if project.linked_collection}
 							<Anchor
 								href="/generic-collections/{project.linked_collection.id}"
-								class="text-primary-600 hover:text-primary-800-300 hover:underline text-sm"
+								class="text-primary-600 hover:text-primary-800-200 hover:underline text-sm"
 							>
 								{project.linked_collection.str}
 							</Anchor>
@@ -1483,7 +1492,7 @@
 									<li class="text-sm">
 										<Anchor
 											href="/responsibility-matrices/{matrix.id}"
-											class="text-primary-600 hover:text-primary-800-300 hover:underline"
+											class="text-primary-600 hover:text-primary-800-200 hover:underline"
 										>
 											{matrix.str}
 										</Anchor>

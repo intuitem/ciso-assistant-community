@@ -73,10 +73,10 @@
 						// For links/flows, get node names by index
 						const sourceNode = nodes[params.data.source];
 						const targetNode = nodes[params.data.target];
-						return `${sourceNode.name} → ${targetNode.name}<br/>Count: ${params.value}`;
+						return `${sourceNode.name} → ${targetNode.name}<br/>${safeTranslate('count')}: ${params.value}`;
 					} else {
 						// For nodes, show the node name and its total count
-						return `${params.name}<br/>Count: ${params.value}`;
+						return `${params.name}<br/>${safeTranslate('count')}: ${params.value}`;
 					}
 				}
 			},

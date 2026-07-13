@@ -123,7 +123,7 @@
 							<input
 								type="text"
 								value={rule.ref_id}
-								class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+								class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 								onblur={(e) => {
 									rules[index].ref_id = e.currentTarget.value;
 									persist();
@@ -136,7 +136,7 @@
 								type="text"
 								value={rule.annotation}
 								placeholder={m.builderLabelHint()}
-								class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+								class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 								onblur={(e) => {
 									rules[index].annotation = e.currentTarget.value;
 									persist();
@@ -151,7 +151,7 @@
 							value={rule.expression}
 							placeholder={m.builderCelExpressionPlaceholder()}
 							rows="2"
-							class="w-full text-sm font-mono border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-y"
+							class="input w-full text-sm font-mono border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-y"
 							onblur={(e) => {
 								rules[index].expression = e.currentTarget.value;
 								persist();
@@ -196,7 +196,7 @@
 								type="text"
 								value={getTranslation(rule.translations, lang, 'annotation')}
 								placeholder={m.builderTranslateLabel()}
-								class="w-full text-sm border border-blue-100 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+								class="input w-full text-sm border border-blue-100 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 								onblur={(e) => {
 									rules[index].translations = withTranslation(
 										rules[index].translations,

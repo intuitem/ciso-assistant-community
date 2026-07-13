@@ -141,7 +141,23 @@ class AbstractBaseModel(models.Model):
         if field_errors:
             raise ValidationError(field_errors)
 
+    def _validate_char_max_lengths(self):
+        errors = {}
+        for field in self._meta.fields:
+            if not isinstance(field, models.CharField):
+                continue
+            value = field.to_python(getattr(self, field.attname))
+            if value is not None and len(value) > field.max_length:
+                errors[field.name] = ValidationError(
+                    f"Ensure this value has at most {field.max_length} characters (it has {len(value)}).",
+                    code="max_length",
+                    params={"max_length": field.max_length, "length": len(value)},
+                )
+        if errors:
+            raise ValidationError(errors)
+
     def save(self, *args, **kwargs) -> None:
+        self._validate_char_max_lengths()
         self.clean()
         super().save(*args, **kwargs)
 

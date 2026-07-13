@@ -33,6 +33,7 @@
   * [Incidents](concepts/incidents.md)
 * Governance
   * [Policies](concepts/policies.md)
+  * [Documents](concepts/documents.md)
   * [Findings assessments](concepts/findings-assessments.md)
   * [Validation flows](concepts/validation-flows.md)
 * Risk
@@ -49,6 +50,7 @@
   * [Privacy register](concepts/privacy-register.md)
   * [Project management](concepts/project-management.md)
   * [Terminology](concepts/terminology.md)
+  * [Object classifications](concepts/object-classification.md)
 
 ## Installation
 
@@ -95,6 +97,7 @@
 * [SSO](configuration/sso/README.md)
   * [SAML](configuration/sso/saml.md)
   * [OpenID Connect (OIDC)](configuration/sso/oidc.md)
+  * [SCIM provisioning and IdP groups](configuration/sso/scim.md)
   * [Identity providers](configuration/sso/identity-providers/README.md)
     * [Microsoft Entra ID](configuration/sso/identity-providers/entra-id.md)
     * [Okta](configuration/sso/identity-providers/okta.md)
@@ -141,8 +144,12 @@
   * [Managing a collection](guides/collections.md)
   * [Managing an accreditation](guides/accreditations.md)
   * [Managing a responsibility matrix](guides/responsibility-matrix.md)
+* Documents
+  * [Authoring documents](guides/documents/authoring-documents.md)
+  * [Document templates](guides/documents/document-templates.md)
 * Third-party
   * [Third-Party Risk Management](guides/tprm.md)
+  * [Common TPRM pitfalls](guides/tprm-challenges.md)
 
 ## Features
 
@@ -171,10 +178,12 @@
 * [Control Plan](features/control-plan.md)
 * [Action plans](features/action-plans.md)
 * [Working with tables](features/working-with-tables.md)
+* [Custom fields](features/custom-fields.md)
 * [Command palette](features/command-palette.md)
 * [Universal search](features/search.md)
 * [My assignments](features/my-assignments.md)
 * [Notifications](features/notifications.md)
+* [Portals and trust center](features/portals.md)
 * [Framework-specific features](features/framework-specific/README.md)
   * [ISO 27001](features/framework-specific/iso.md)
   * [CCB CyFun](features/framework-specific/cyfun.md)

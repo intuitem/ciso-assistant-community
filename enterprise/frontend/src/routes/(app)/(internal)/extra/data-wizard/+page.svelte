@@ -11,6 +11,11 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
+	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
 
 	interface Props {
 		data: PageData;
@@ -29,6 +34,40 @@
 	let showModelDropdown = $state(false);
 	let searchInputRef: HTMLInputElement | null = $state(null);
 	let onConflict = $state('stop');
+
+	// SPA form backing the scope pickers; each renders its own name={field} hidden
+	// input, so the values post with the upload form.
+	const scopeSchema = z.object({
+		folder: z.string().nullish(),
+		perimeter: z.string().nullish(),
+		framework: z.string().nullish(),
+		matrix: z.string().nullish(),
+		target: z.string().nullish()
+	});
+	const scopeForm = superForm(
+		defaults(
+			{ folder: null, perimeter: null, framework: null, matrix: null, target: null },
+			zod(scopeSchema)
+		),
+		{ dataType: 'json', taintedMessage: false, validators: zod(scopeSchema), SPA: true }
+	);
+	const scope = scopeForm.form;
+
+	// Composite models: perimeter optional, domain derived from it when set.
+	const ASSESSMENT_MODELS = [
+		'ComplianceAssessment',
+		'RiskAssessment',
+		'FindingsAssessment',
+		'BusinessImpactAnalysis'
+	];
+
+	// Models offering an explicit "update existing" target, mapped to their list
+	// endpoint. BIA is excluded: it already reconciles by name on import.
+	const TARGET_ENDPOINTS: Record<string, string> = {
+		ComplianceAssessment: 'compliance-assessments',
+		RiskAssessment: 'risk-assessments',
+		FindingsAssessment: 'findings-assessments'
+	};
 
 	// Model configuration
 	const modelOptions = [
@@ -81,6 +120,11 @@
 			description: m.ebiosRMStudyExcelDescription()
 		},
 		{
+			id: 'TaskTemplate',
+			label: m.taskTemplates(),
+			description: m.taskTemplatesDescription()
+		},
+		{
 			id: 'EbiosRMStudyEgerieXML',
 			label: m.ebiosRMStudyEgerieXML(),
 			description: m.ebiosRMStudyEgerieXMLDescription()
@@ -90,8 +134,10 @@
 	// Per-model accepted file extensions. Most importers consume Excel;
 	// Egerie ships an XML export, hence the explicit branch.
 	const XML_MODELS = new Set(['EbiosRMStudyEgerieXML']);
+	const CSV_CAPABLE_MODELS = new Set(['TaskTemplate']);
 	function extensionsFor(modelId: string): string[] {
 		if (XML_MODELS.has(modelId)) return ['.xml'];
+		if (CSV_CAPABLE_MODELS.has(modelId)) return ['.xls', '.xlsx', '.csv'];
 		return ['.xls', '.xlsx'];
 	}
 
@@ -116,14 +162,12 @@
 		}
 	}
 
-	// Determine if domain selection should be disabled
+	// Assessment domain is derived from the perimeter; with none picked the user
+	// selects a fallback domain directly.
 	let isDomainDisabled = $derived(
-		selectedModel === 'ComplianceAssessment' ||
-			selectedModel === 'BusinessImpactAnalysis' ||
-			selectedModel === 'FindingsAssessment' ||
-			selectedModel === 'RiskAssessment' ||
-			selectedModel === 'User' ||
-			selectedModel === 'Folder'
+		selectedModel === 'User' ||
+			selectedModel === 'Folder' ||
+			(ASSESSMENT_MODELS.includes(selectedModel) && !!$scope.perimeter)
 	);
 
 	let isFrameworkDisabled = $derived(selectedModel !== 'ComplianceAssessment');
@@ -153,12 +197,24 @@
 		'TPRM',
 		'EbiosRMStudyARM',
 		'EbiosRMStudyExcel',
+		'TaskTemplate',
 		'EbiosRMStudyEgerieXML',
 		'Vulnerability'
 	];
 
 	// Determine if perimeter selection should be disabled
 	let isPerimeterDisabled = $derived(modelsWithoutPerimeter.includes(selectedModel));
+
+	let targetEndpoint = $derived(TARGET_ENDPOINTS[selectedModel]);
+	let isTargetEnabled = $derived(!!targetEndpoint);
+
+	// Scope required to create a NEW assessment. A chosen target reuses the
+	// existing container's framework/matrix, so neither is needed then.
+	let isScopeIncomplete = $derived(
+		!$scope.target &&
+			((selectedModel === 'RiskAssessment' && !$scope.matrix) ||
+				(selectedModel === 'ComplianceAssessment' && !$scope.framework))
+	);
 
 	// Fixed: Check files correctly
 	let uploadButtonStyles = $derived(files && files.length > 0 ? '' : 'chip-disabled');
@@ -171,6 +227,8 @@
 	$effect(() => {
 		selectedModel;
 		files = null;
+		// Model-specific scope is no longer valid; keep the chosen domain.
+		scope.update((v) => ({ ...v, perimeter: null, framework: null, matrix: null, target: null }));
 		if (fileInputRef) fileInputRef.value = '';
 	});
 
@@ -336,7 +394,7 @@
 									bind:this={searchInputRef}
 									bind:value={searchQuery}
 									autofocus
-									class="w-full px-3 py-2 border border-surface-300-700 rounded-md text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200"
+									class="w-full px-3 py-2 border border-surface-300-700 bg-surface-50-950 text-surface-900-100 rounded-md text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200"
 								/>
 							</div>
 
@@ -351,14 +409,16 @@
 												showModelDropdown = false;
 												searchQuery = '';
 											}}
-											class="w-full px-4 py-3 text-left hover:bg-indigo-50 dark:hover:bg-indigo-500/15 border-b border-surface-100-900 last:border-b-0 transition-colors group"
+											class="w-full px-4 py-3 text-left hover:bg-indigo-50 dark:hover:bg-indigo-950 border-b border-surface-100-900 last:border-b-0 transition-colors group"
 											class:bg-indigo-100={model.id === selectedModel}
+											class:dark:bg-indigo-900={model.id === selectedModel}
 										>
 											<div class="flex items-start gap-3">
 												<div class="flex-1 min-w-0 pt-0.5">
 													<p
-														class="font-medium text-surface-900-100 group-hover:text-indigo-700 transition-colors"
+														class="font-medium text-surface-900-100 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors"
 														class:text-indigo-700={model.id === selectedModel}
+														class:dark:text-indigo-300={model.id === selectedModel}
 													>
 														{model.label}
 													</p>
@@ -489,100 +549,78 @@
 				</div>
 
 				<!-- Domain Selection -->
-				<div>
-					<label for="folder" class="block text-sm font-medium text-surface-900-100 mb-2"
-						>{m.dataWizardSelectFallbackDomain()}</label
-					>
-					{#if !isDomainDisabled}
-						<select
-							id="folder"
-							name="folder"
-							class="w-full px-4 py-2.5 border-2 border-surface-300-700 bg-surface-50-950 rounded-lg text-surface-900-100 text-sm hover:border-rose-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-colors"
+				{#if !isDomainDisabled}
+					<FolderTreeSelect
+						form={scopeForm}
+						field="folder"
+						nullable
+						label={m.dataWizardSelectFallbackDomain()}
+					/>
+				{:else}
+					<div>
+						<span class="block text-sm font-medium text-surface-900-100 mb-2"
+							>{m.dataWizardSelectFallbackDomain()}</span
 						>
-							{#each data.data.folders as folder}
-								<option value={folder.id}>{folder.name}</option>
-							{/each}
-						</select>
-					{:else}
 						<div
 							class="px-4 py-2.5 bg-surface-100-900 border-2 border-surface-200-800 rounded-lg text-surface-600-400 text-sm"
 						>
 							{m.automatic?.() ?? 'Automatic'}
 						</div>
-					{/if}
-				</div>
+					</div>
+				{/if}
 
 				<!-- Perimeter Selection -->
-				<div>
-					<label for="perimeter" class="block text-sm font-medium text-surface-900-100 mb-2"
-						>{m.dataWizardSelectPerimeter()}</label
-					>
-					{#if !isPerimeterDisabled}
-						<select
-							id="perimeter"
-							name="perimeter"
-							class="w-full px-4 py-2.5 border-2 border-surface-300-700 bg-surface-50-950 rounded-lg text-surface-900-100 text-sm hover:border-rose-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-colors"
-						>
-							{#each data.data.perimeters as perimeter}
-								<option value={perimeter.id}>{perimeter.name}</option>
-							{/each}
-						</select>
-					{:else}
-						<div
-							class="px-4 py-2.5 bg-surface-100-900 border-2 border-surface-200-800 rounded-lg text-surface-600-400 text-sm"
-						>
-							{m.notRequired?.() ?? 'Not required'}
-						</div>
-					{/if}
-				</div>
+				{#if !isPerimeterDisabled}
+					<AutocompleteSelect
+						form={scopeForm}
+						field="perimeter"
+						optionsEndpoint="perimeters"
+						optionsExtraFields={[['folder', 'str']]}
+						nullable
+						label={m.dataWizardSelectPerimeter()}
+					/>
+				{/if}
 
 				<!-- Framework Selection -->
-				<div>
-					<label for="framework" class="block text-sm font-medium text-surface-900-100 mb-2"
-						>{m.dataWizardSelectFramework()}</label
-					>
-					{#if !isFrameworkDisabled}
-						<select
-							id="framework"
-							name="framework"
-							class="w-full px-4 py-2.5 border-2 border-surface-300-700 bg-surface-50-950 rounded-lg text-surface-900-100 text-sm hover:border-rose-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-colors"
-						>
-							{#each data.data.frameworks as framework}
-								<option value={framework.id}>{framework.name}</option>
-							{/each}
-						</select>
-					{:else}
-						<div
-							class="px-4 py-2.5 bg-surface-100-900 border-2 border-surface-200-800 rounded-lg text-surface-600-400 text-sm"
-						>
-							{m.notRequired?.() ?? 'Not required'}
-						</div>
-					{/if}
-				</div>
+				{#if !isFrameworkDisabled}
+					<AutocompleteSelect
+						form={scopeForm}
+						field="framework"
+						optionsEndpoint="frameworks"
+						mandatory={!$scope.target}
+						label={m.dataWizardSelectFramework()}
+					/>
+				{/if}
 
 				<!-- Risk Matrix Selection -->
-				<div>
-					<label for="matrix" class="block text-sm font-medium text-surface-900-100 mb-2"
-						>{m.dataWizardSelectRiskMatrix()}</label
-					>
-					{#if !isMatrixDisabled}
-						<select
-							id="matrix"
-							name="matrix"
-							class="w-full px-4 py-2.5 border-2 border-surface-300-700 bg-surface-50-950 rounded-lg text-surface-900-100 text-sm hover:border-rose-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-colors"
-						>
-							{#each data.data.risk_matrices || [] as matrix}
-								<option value={matrix.id}>{matrix.name}</option>
-							{/each}
-						</select>
-					{:else}
-						<div
-							class="px-4 py-2.5 bg-surface-100-900 border-2 border-surface-200-800 rounded-lg text-surface-600-400 text-sm"
-						>
-							{m.notRequired?.() ?? 'Not required'}
+				{#if !isMatrixDisabled}
+					<AutocompleteSelect
+						form={scopeForm}
+						field="matrix"
+						optionsEndpoint="risk-matrices"
+						mandatory={selectedModel === 'RiskAssessment' && !$scope.target}
+						label={m.dataWizardSelectRiskMatrix()}
+					/>
+				{/if}
+
+				{#if isTargetEnabled}
+					{#key selectedModel}
+						<div>
+							<AutocompleteSelect
+								form={scopeForm}
+								field="target"
+								optionsEndpoint={targetEndpoint}
+								optionsExtraFields={[['folder', 'str']]}
+								nullable
+								label={m.dataWizardUpdateExisting?.() ?? 'Update existing assessment'}
+							/>
+							<p class="text-xs text-surface-600-400 mt-1">
+								{m.dataWizardUpdateExistingHint?.() ??
+									'Leave empty to create a fresh assessment. Pick an existing one to reconcile the imported rows into it; the conflict strategy then applies to its children.'}
+							</p>
 						</div>
-					{/if}
-				</div>
+					{/key}
+				{/if}
 			</div>
 
 			<!-- Upload Button -->
@@ -590,7 +628,7 @@
 				<button
 					class="flex-1 px-6 py-3 bg-gradient-to-r {uploadButtonStyles} from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
 					type="button"
-					disabled={!files || files.length === 0}
+					disabled={!files || files.length === 0 || isScopeIncomplete}
 					onclick={modalConfirm}
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
