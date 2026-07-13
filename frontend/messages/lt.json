@@ -2556,6 +2556,7 @@
 	"campaigns": "Kampanijos",
 	"addCampaign": "Pradėti kampaniją",
 	"campaignDomainHelpText": "Sritis, prie kurios bus prijungta kampanija.",
+	"ebiosRmStudyDomainHelpText": "Pakeitus sritį, studija ir visi jos seminarų objektai perkeliami į pasirinktą sritį.",
 	"averageProgress": "Vidutinė pažanga",
 	"daysRemaining": "Likusios dienos",
 	"associatedFindingsAssessments": "Susiję stebėjimai",
