@@ -31,9 +31,26 @@ import re
 import django.core.validators
 import django.db.models.deletion
 import iam.models
+import structlog
 import uuid
 from django.db import migrations, models
 from django.utils.timezone import now
+
+logger = structlog.get_logger(__name__)
+
+
+def _log_wip_loss(kind, obj, reason):
+    """WIP this migration cannot wrap is about to be destroyed with the
+    editing_draft column. Emit the full editor blob at error level so it is
+    recoverable from the upgrade logs — never dropped silently."""
+    logger.error(
+        "[0176] dropping un-wrappable editing draft",
+        kind=kind,
+        id=str(obj.id),
+        name=obj.name,
+        reason=reason,
+        editing_draft=obj.editing_draft,
+    )
 
 
 def _token(value, fallback):
@@ -91,7 +108,7 @@ def _wrap_framework_drafts(apps, root):
     for framework in Framework.objects.exclude(editing_draft=None):
         label = f"framework {framework.id} ({framework.name!r})"
         if framework.library_id:
-            print(f"[0176] skipping WIP on library-backed {label}")
+            _log_wip_loss("framework", framework, "library-backed (WIP dropped)")
             continue
         doc = framework.editing_draft or {}
         meta = doc.get("framework_meta") or {}
@@ -121,6 +138,31 @@ def _wrap_framework_drafts(apps, root):
         # editor doc records carry both, so a later publish updates these very
         # rows. An unused framework's rows are deleted below — no backfill.
         if in_use:
+            # Normalize any existing mixed-case URN to lowercase first. The
+            # editor doc (and thus a later publish) uses lowercased URNs; a
+            # live row left mixed-case would be missed by the publish prune
+            # and cascade-deleted with its RequirementAssessments. Mirrors
+            # live.mint_missing_urns, inlined on historical models.
+            for row in RequirementNode.objects.filter(framework=framework):
+                if row.urn and row.urn != row.urn.lower():
+                    row.urn = row.urn.lower()
+                    row.save(update_fields=["urn"])
+            node_ids = list(
+                RequirementNode.objects.filter(framework=framework).values_list(
+                    "id", flat=True
+                )
+            )
+            for row in Question.objects.filter(requirement_node_id__in=node_ids):
+                if row.urn and row.urn != row.urn.lower():
+                    row.urn = row.urn.lower()
+                    row.save(update_fields=["urn"])
+            for row in QuestionChoice.objects.filter(
+                question__requirement_node_id__in=node_ids
+            ):
+                if row.urn and row.urn != row.urn.lower():
+                    row.urn = row.urn.lower()
+                    row.save(update_fields=["urn"])
+
             for model, records in (
                 (RequirementNode, doc.get("nodes") or []),
                 (Question, doc.get("questions") or []),
@@ -182,12 +224,14 @@ def _wrap_framework_drafts(apps, root):
                 },
             )
         except Exception as exc:  # malformed WIP: keep live state, log loudly
-            print(f"[0176] could NOT wrap WIP of {label}: {exc}")
+            _log_wip_loss("framework", framework, f"conversion failed: {exc}")
             continue
 
         library_urn = framework.urn.lower().replace(":framework:", ":library:", 1)
         if LibraryDraft.objects.filter(urn=library_urn).exists():
-            print(f"[0176] draft already exists for {label} ({library_urn}), skipping")
+            _log_wip_loss(
+                "framework", framework, f"draft URN already exists ({library_urn})"
+            )
             continue
         draft = LibraryDraft.objects.create(
             name=meta.get("name") or framework.name,
@@ -223,7 +267,7 @@ def _wrap_matrix_drafts(apps, root):
     for matrix in RiskMatrix.objects.exclude(editing_draft=None):
         label = f"risk matrix {matrix.id} ({matrix.name!r})"
         if matrix.library_id:
-            print(f"[0176] skipping WIP on library-backed {label}")
+            _log_wip_loss("risk_matrix", matrix, "library-backed (WIP dropped)")
             continue
         definition = matrix.editing_draft or {}
         # In use = proof-published (risk assessments / EBIOS studies reference
@@ -243,7 +287,9 @@ def _wrap_matrix_drafts(apps, root):
             matrix.save(update_fields=["urn"])
         library_urn = f"urn:custom:risk:library:{ref}"
         if LibraryDraft.objects.filter(urn=library_urn).exists():
-            print(f"[0176] draft already exists for {label} ({library_urn}), skipping")
+            _log_wip_loss(
+                "risk_matrix", matrix, f"draft URN already exists ({library_urn})"
+            )
             continue
         matrix_object = {
             "urn": (matrix.urn or f"urn:custom:risk:matrix:{ref}").lower(),
@@ -286,7 +332,7 @@ def _wrap_preset_drafts(apps, root):
     for preset in Preset.objects.exclude(editing_draft=None):
         label = f"preset {preset.id} ({preset.name!r})"
         if preset.urn:
-            print(f"[0176] skipping WIP on library-loaded {label}")
+            _log_wip_loss("preset", preset, "library-loaded (WIP dropped)")
             continue
         doc = preset.editing_draft or {}
         meta = doc.get("journey_meta") or {}
