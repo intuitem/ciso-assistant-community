@@ -21,7 +21,7 @@
 	import { openRiskAcceptanceModal } from '$lib/utils/riskAcceptance';
 
 	import { onMount } from 'svelte';
-	import { canPerformAction } from '$lib/utils/access-control';
+	import { canPerformActionOnObject } from '$lib/utils/access-control';
 	import {
 		getModalStore,
 		type ModalComponent,
@@ -46,19 +46,19 @@
 	const user = page.data.user;
 	const model = URL_MODEL_MAP['risk-scenarios'];
 	const canEditObject: boolean = $derived(
-		canPerformAction({
+		canPerformActionOnObject({
 			user,
 			action: 'change',
 			model: model.name,
-			domain: data.scenario.folder.id
+			object: data.scenario
 		})
 	);
 	const canCreateAcceptance = $derived(
-		canPerformAction({
+		canPerformActionOnObject({
 			user,
 			action: 'add',
 			model: 'riskacceptance',
-			domain: data.scenario.folder.id
+			object: data.scenario
 		})
 	);
 	let color_map = $state({});

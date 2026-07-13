@@ -12,7 +12,7 @@
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
-	import { canPerformAction } from '$lib/utils/access-control';
+	import { canPerformActionOnObject } from '$lib/utils/access-control';
 	import { formatDate } from '$lib/utils/datetime';
 	import { getLocale } from '$paraglide/runtime';
 	import {
@@ -58,11 +58,11 @@
 
 	const user = page.data.user;
 	const model = URL_MODEL_MAP['risk-assessments'];
-	const canEditObject: boolean = canPerformAction({
+	const canEditObject: boolean = canPerformActionOnObject({
 		user,
 		action: 'change',
 		model: model.name,
-		domain: risk_assessment.folder.id
+		object: risk_assessment
 	});
 	function modalCreateForm(): void {
 		const modalComponent: ModalComponent = {
