@@ -719,7 +719,11 @@ class LibraryDraft(NameDescriptionMixin, FolderMixin):
     )
     # Set when the draft adopts an existing library whose URN predates the
     # minted urn:{packager}:risk:library:{ref_id} convention; null otherwise.
-    urn = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("URN"))
+    # unique: at most one draft may own a published identity (NULLs — fresh
+    # drafts — are exempt, as SQL uniqueness ignores them).
+    urn = models.CharField(
+        max_length=255, null=True, blank=True, unique=True, verbose_name=_("URN")
+    )
     locale = models.CharField(max_length=100, default="en", verbose_name=_("Locale"))
     version = models.IntegerField(
         default=1, validators=[MinValueValidator(1)], verbose_name=_("Version")

@@ -5,7 +5,7 @@ import uuid
 
 import yaml
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.db.models import F, Q, IntegerField, OuterRef, Subquery, Exists
 from django.db import models
 from django.utils.timezone import now
@@ -1111,27 +1111,41 @@ class LibraryDraftViewSet(BaseModelViewSet):
             )
 
         urn_groups = match_urn(source.urn)
-        draft = LibraryDraft.objects.create(
-            name=source.name,
-            description=source.description,
-            folder=folder,
-            packager=source.packager or (urn_groups[0] if urn_groups else "unknown"),
-            ref_id=source.ref_id or source.urn.rsplit(":", 1)[-1],
-            locale=source.locale,
-            version=source.version,
-            provider=source.provider,
-            copyright=source.copyright,
-            publication_date=source.publication_date,
-            annotation=source.annotation,
-            translations=source.translations or {},
-            dependencies=list(source.dependencies or []),
-            labels=[label.label for label in source.filtering_labels.all()],
-            content=content,
-            urn=source.urn,
-            # The identity already exists in the wild: frozen from the start.
-            first_published_at=now(),
-            last_published_at=now(),
-        )
+        try:
+            # atomic + unique urn: a concurrent adopt of the same library that
+            # slipped past the existence check above loses here cleanly.
+            with transaction.atomic():
+                draft = LibraryDraft.objects.create(
+                    name=source.name,
+                    description=source.description,
+                    folder=folder,
+                    packager=source.packager
+                    or (urn_groups[0] if urn_groups else "unknown"),
+                    ref_id=source.ref_id or source.urn.rsplit(":", 1)[-1],
+                    locale=source.locale,
+                    version=source.version,
+                    provider=source.provider,
+                    copyright=source.copyright,
+                    publication_date=source.publication_date,
+                    annotation=source.annotation,
+                    translations=source.translations or {},
+                    dependencies=list(source.dependencies or []),
+                    labels=[label.label for label in source.filtering_labels.all()],
+                    content=content,
+                    urn=source.urn,
+                    # The identity already exists in the wild: frozen from the start.
+                    first_published_at=now(),
+                    last_published_at=now(),
+                )
+        except IntegrityError:
+            existing_draft = LibraryDraft.objects.filter(urn=source.urn).first()
+            return Response(
+                {
+                    "error": "draftAlreadyExists",
+                    "draft": str(existing_draft.id) if existing_draft else None,
+                },
+                status=HTTP_409_CONFLICT,
+            )
         # Snapshot the adopted (already-loaded) state so the draft reads as
         # published-and-unchanged until the user edits it.
         draft.mark_published()
@@ -1186,23 +1200,37 @@ class LibraryDraftViewSet(BaseModelViewSet):
             )
 
         packager, ref = live.framework_identity(framework)
-        draft = LibraryDraft.objects.create(
-            name=framework.name,
-            description=framework.description,
-            folder=folder,
-            packager=packager,
-            ref_id=ref,
-            locale=getattr(framework, "locale", None) or "en",
-            version=1,
-            provider=framework.provider or packager,
-            content={"frameworks": [live.live_framework_to_object(framework)]},
-            dependencies=[],
-            urn=draft_urn,
-            # Proof-published: the live rows already carry this URN family and
-            # are in use, so the identity is committed from the start.
-            first_published_at=now(),
-            last_published_at=None,
-        )
+        try:
+            # atomic + unique urn: a concurrent adopt of the same framework
+            # that slipped past the existence check above loses here cleanly.
+            with transaction.atomic():
+                draft = LibraryDraft.objects.create(
+                    name=framework.name,
+                    description=framework.description,
+                    folder=folder,
+                    packager=packager,
+                    ref_id=ref,
+                    locale=getattr(framework, "locale", None) or "en",
+                    version=1,
+                    provider=framework.provider or packager,
+                    content={"frameworks": [live.live_framework_to_object(framework)]},
+                    dependencies=[],
+                    urn=draft_urn,
+                    # Proof-published: the live rows already carry this URN
+                    # family and are in use, so the identity is committed
+                    # from the start.
+                    first_published_at=now(),
+                    last_published_at=None,
+                )
+        except IntegrityError:
+            existing_draft = LibraryDraft.objects.filter(urn=draft_urn).first()
+            return Response(
+                {
+                    "error": "draftAlreadyExists",
+                    "draft": str(existing_draft.id) if existing_draft else None,
+                },
+                status=HTTP_409_CONFLICT,
+            )
         # Snapshot the adopted state so later edits read as unpublished changes.
         draft.mark_published()
         draft.save(update_fields=["last_published_version", "last_published_hash"])
@@ -1928,8 +1956,13 @@ class LibraryDraftViewSet(BaseModelViewSet):
         }
 
         draft = self.get_object()
-        field = builder.CANONICAL_OBJECT_FIELDS.get(
-            request.data.get("field"), request.data.get("field")
+        raw_field = request.data.get("field")
+        # Non-string payloads (e.g. a list) are unhashable and would crash the
+        # dict lookup (500); normalize them to fail the allowlist check below.
+        field = (
+            builder.CANONICAL_OBJECT_FIELDS.get(raw_field, raw_field)
+            if isinstance(raw_field, str)
+            else None
         )
         if field not in self.UPSERTABLE_FIELDS:
             return Response(
@@ -2198,6 +2231,17 @@ class LibraryDraftViewSet(BaseModelViewSet):
             )
 
         urn = draft.effective_urn
+        # Another draft already owns this URN (published under the same
+        # identity first): refuse before touching the corpus — the unique
+        # constraint would reject our urn stamp at the end anyway, after the
+        # load already went through.
+        conflicting = LibraryDraft.objects.filter(urn=urn).exclude(id=draft.id).first()
+        if conflicting is not None:
+            return Response(
+                {"error": "draftAlreadyExists", "draft": str(conflicting.id)},
+                status=HTTP_409_CONFLICT,
+            )
+
         # Unchanged since the last publication AND that exact version is
         # already loaded: there is nothing to commit and nothing to load.
         # Refusing here (instead of falling into the version guard below)

@@ -1272,6 +1272,13 @@ def test_upsert_object_mints_urn_and_validates(admin_client):
     draft = _create_draft(admin_client, content={})
     url = reverse("library-drafts-upsert-object", args=[draft["id"]])
 
+    # A non-string field (unhashable) must be a clean 400, not a TypeError.
+    bad_field = admin_client.post(
+        url, {"field": [], "object": {"ref_id": "X"}}, format="json"
+    )
+    assert bad_field.status_code == status.HTTP_400_BAD_REQUEST
+    assert bad_field.data["error"] == "unsupportedObjectField"
+
     created = admin_client.post(
         url,
         {
@@ -2267,6 +2274,28 @@ def test_publish_without_load_commits_only(admin_client):
     noop = admin_client.post(publish_url, {}, format="json")
     assert noop.status_code == status.HTTP_409_CONFLICT
     assert noop.data["error"] == "nothingToPublish"
+
+
+@pytest.mark.django_db
+def test_publish_refuses_when_another_draft_owns_the_urn(admin_client):
+    """Two urn-less drafts can share an identity while editing (advisory
+    conflict warnings only), but only ONE may publish it: the second publish
+    must refuse cleanly, pointing at the owner, before touching the corpus."""
+    first = _create_draft(admin_client)
+    assert (
+        admin_client.post(
+            reverse("library-drafts-publish", args=[first["id"]]), {}, format="json"
+        ).status_code
+        == status.HTTP_200_OK
+    )
+
+    second = _create_draft(admin_client, name="Same identity")  # same packager/ref_id
+    response = admin_client.post(
+        reverse("library-drafts-publish", args=[second["id"]]), {}, format="json"
+    )
+    assert response.status_code == status.HTTP_409_CONFLICT, response.content
+    assert response.data["error"] == "draftAlreadyExists"
+    assert response.data["draft"] == first["id"]
 
 
 @pytest.mark.django_db

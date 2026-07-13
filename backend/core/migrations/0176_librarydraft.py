@@ -431,7 +431,11 @@ class Migration(migrations.Migration):
                 (
                     "urn",
                     models.CharField(
-                        blank=True, max_length=255, null=True, verbose_name="URN"
+                        blank=True,
+                        max_length=255,
+                        null=True,
+                        unique=True,
+                        verbose_name="URN",
                     ),
                 ),
                 (
