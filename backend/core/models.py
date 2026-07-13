@@ -901,6 +901,8 @@ class LibraryUpdater:
                 framework_dict["urn"] = framework_dict["urn"].lower()
                 if "outcomes_definition" not in framework_dict:
                     framework_dict["outcomes_definition"] = []
+                # An omitted IG definition means that the framework no longer defines implementation groups.
+                framework_dict.setdefault("implementation_groups_definition", None)
                 prev_fw = Framework.objects.filter(urn=framework_dict["urn"]).first()
                 prev_min = getattr(prev_fw, "min_score", None)
                 prev_max = getattr(prev_fw, "max_score", None)
@@ -956,6 +958,37 @@ class LibraryUpdater:
                     ).select_related("folder", "perimeter")
                 ]
 
+                # Drop selected IGs that the updated framework no longer defines.
+                valid_implementation_groups = {
+                    group.get("ref_id")
+                    for group in new_framework.implementation_groups_definition or []
+                    if isinstance(group, dict) and group.get("ref_id")
+                }
+                assessments_with_stale_implementation_groups = []
+                for compliance_assessment in compliance_assessments:
+                    selected_groups = (
+                        compliance_assessment.selected_implementation_groups or []
+                    )
+                    cleaned_groups = [
+                        group
+                        for group in selected_groups
+                        if group in valid_implementation_groups
+                    ]
+                    if cleaned_groups != selected_groups:
+                        compliance_assessment.selected_implementation_groups = (
+                            cleaned_groups
+                        )
+                        assessments_with_stale_implementation_groups.append(
+                            compliance_assessment
+                        )
+
+                if assessments_with_stale_implementation_groups:
+                    ComplianceAssessment.objects.bulk_update(
+                        assessments_with_stale_implementation_groups,
+                        ["selected_implementation_groups"],
+                        batch_size=100,
+                    )
+
                 existing_requirement_node_objects = {
                     rn.urn.lower(): rn
                     for rn in RequirementNode.objects.filter(framework=new_framework)
@@ -976,6 +1009,16 @@ class LibraryUpdater:
                 requirement_node_objects_to_update = []
                 order_id = 0
                 all_fields_to_update = set()
+                # Omitting one of these nullable fields in a new version must clear its previous value.
+                clearable_requirement_node_fields = (
+                    "ref_id",
+                    "name",
+                    "description",
+                    "annotation",
+                    "typical_evidence",
+                    "visibility_expression",
+                    "implementation_groups",
+                )
 
                 # Check if score boundaries changed (triggers warning + strategy prompt)
                 score_boundaries_changed = (
@@ -1092,6 +1135,9 @@ class LibraryUpdater:
 
                     if urn in existing_requirement_node_objects:
                         requirement_node_object = existing_requirement_node_objects[urn]
+                        # Consider omissions before applying imported values.
+                        for field in clearable_requirement_node_fields:
+                            requirement_node_dict.setdefault(field, None)
                         for key, value in requirement_node_dict.items():
                             setattr(requirement_node_object, key, value)
                         requirement_node_object.clean()
@@ -1316,18 +1362,7 @@ class LibraryUpdater:
 
                 # Fix for the dual bulk_update issue - consolidate into one update
                 if requirement_node_objects_to_update:
-                    # Ensure all needed fields are included
-                    fields_to_update = sorted(
-                        all_fields_to_update.union(
-                            {
-                                "name",
-                                "description",
-                                "order_id",
-                                "implementation_groups",
-                                "visibility_expression",
-                            }
-                        )
-                    )
+                    fields_to_update = sorted(all_fields_to_update)
                     RequirementNode.objects.bulk_update(
                         requirement_node_objects_to_update,
                         fields_to_update,
