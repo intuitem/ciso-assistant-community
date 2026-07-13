@@ -1667,5 +1667,6 @@
 	"scimTokenGenerationFailed": "Det gick inte att generera SCIM-token",
 	"idpGroup": "IdP-grupp",
 	"idpGroups": "IdP-grupper",
-	"idpGroupsDescription": "Aktivera IdP-gruppfederation (SCIM-provisionering, IdP-gruppmappningar och IdP-gruppmedlemskap för användare)."
+	"idpGroupsDescription": "Aktivera IdP-gruppfederation (SCIM-provisionering, IdP-gruppmappningar och IdP-gruppmedlemskap för användare).",
+	"ebiosRmStudyDomainHelpText": "Om du ändrar domänen flyttas studien och alla dess workshopobjekt till den valda domänen."
 }

@@ -1644,5 +1644,6 @@
 	"scimTokenGenerationFailed": "SCIM ٹوکن بنانے میں ناکام",
 	"idpGroup": "IdP گروپ",
 	"idpGroups": "IdP گروپس",
-	"idpGroupsDescription": "IdP گروپ فیڈریشن فعال کریں (SCIM پرووژننگ، IdP گروپ میپنگز، اور صارفین پر IdP گروپ ممبرشپس)۔"
+	"idpGroupsDescription": "IdP گروپ فیڈریشن فعال کریں (SCIM پرووژننگ، IdP گروپ میپنگز، اور صارفین پر IdP گروپ ممبرشپس)۔",
+	"ebiosRmStudyDomainHelpText": "ڈومین تبدیل کرنے سے مطالعہ اور اس کی تمام ورکشاپ اشیاء منتخب ڈومین میں منتقل ہو جاتی ہیں۔"
 }

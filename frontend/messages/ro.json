@@ -1669,5 +1669,6 @@
 	"scimTokenGenerationFailed": "Generarea tokenului SCIM a eșuat",
 	"idpGroup": "Grup IdP",
 	"idpGroups": "Grupuri IdP",
-	"idpGroupsDescription": "Activați federarea grupurilor IdP (provizionare SCIM, mapări de grupuri IdP și apartenențe la grupuri IdP ale utilizatorilor)."
+	"idpGroupsDescription": "Activați federarea grupurilor IdP (provizionare SCIM, mapări de grupuri IdP și apartenențe la grupuri IdP ale utilizatorilor).",
+	"ebiosRmStudyDomainHelpText": "Schimbarea domeniului mută studiul și toate obiectele atelierelor sale în domeniul selectat."
 }
