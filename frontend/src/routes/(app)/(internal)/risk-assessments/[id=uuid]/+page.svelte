@@ -380,7 +380,7 @@
 				<AuditTrailButton
 					model="risk-assessments"
 					objectId={risk_assessment.id}
-					folderId={risk_assessment.folder.id}
+					folderId={risk_assessment.folder?.id ?? user.root_folder_id}
 				/>
 				<Anchor
 					label={m.actionPlan()}

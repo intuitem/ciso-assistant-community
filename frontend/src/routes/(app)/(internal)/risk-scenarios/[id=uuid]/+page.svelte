@@ -241,7 +241,7 @@
 			<AuditTrailButton
 				model="risk-scenarios"
 				objectId={data.scenario.id}
-				folderId={data.scenario.folder.id}
+				folderId={data.scenario.folder?.id ?? user.root_folder_id}
 			/>
 		</div>
 	</div>

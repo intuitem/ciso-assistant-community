@@ -28,7 +28,7 @@
 	import { goto } from '$app/navigation';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { getListViewFields } from '$lib/utils/table';
-	import { canPerformAction, resolveObjectDomain } from '$lib/utils/access-control';
+	import { canPerformActionOnObject, resolveObjectDomain } from '$lib/utils/access-control';
 	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
 	import {
 		getModalStore,
@@ -368,12 +368,14 @@
 	const objectDomain: string = $derived(
 		resolveObjectDomain(data.model.name, data.data) ?? user.root_folder_id
 	);
+	// Same helper as ModelTable/TableRowActions so edit affordances agree everywhere,
+	// including the no-folder fallback (existential check deferring to the backend).
 	const canEditObject: boolean = $derived(
-		canPerformAction({
+		canPerformActionOnObject({
 			user,
 			action: 'change',
 			model: data.model.name,
-			domain: objectDomain
+			object: data.data
 		})
 	);
 
