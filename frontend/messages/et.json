@@ -2713,6 +2713,7 @@
 	"campaigns": "Kampaaniad",
 	"addCampaign": "Alusta kampaaniat",
 	"campaignDomainHelpText": "Valdkond, millega kampaania seotakse.",
+	"ebiosRmStudyDomainHelpText": "Valdkonna muutmine viib uuringu ja kõik selle töötubade objektid valitud valdkonda.",
 	"averageProgress": "Keskmine edenemine",
 	"daysRemaining": "Päevi jäänud",
 	"associatedFindingsAssessments": "Seotud järeltegevused",

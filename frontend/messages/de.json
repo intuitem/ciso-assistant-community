@@ -1407,6 +1407,7 @@
 	"cal": "Kalender",
 	"campaign": "Kampagne",
 	"campaignDomainHelpText": "Der Bereich, dem die Kampagne zugeordnet wird.",
+	"ebiosRmStudyDomainHelpText": "Durch das Ändern des Bereichs werden die Studie und alle zugehörigen Workshop-Objekte in den ausgewählten Bereich verschoben.",
 	"campaigns": "Kampagnen",
 	"cancelled": "Abgebrochen",
 	"cannotCalculate": "Kann nicht berechnet werden",

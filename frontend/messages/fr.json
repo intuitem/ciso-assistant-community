@@ -2690,6 +2690,7 @@
 	"campaigns": "Campagnes",
 	"addCampaign": "Démarrer une campagne",
 	"campaignDomainHelpText": "Le domaine auquel la campagne sera attachée.",
+	"ebiosRmStudyDomainHelpText": "Changer le domaine déplace l'étude et tous les objets de ses ateliers vers le domaine sélectionné.",
 	"averageProgress": "Progression moyenne",
 	"daysRemaining": "Jours restants",
 	"associatedFindingsAssessments": "Suivis associés",

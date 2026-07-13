@@ -2798,6 +2798,7 @@
 	"campaigns": "Campaigns",
 	"addCampaign": "Start a campaign",
 	"campaignDomainHelpText": "The domain that the campaign will be attached to.",
+	"ebiosRmStudyDomainHelpText": "Changing the domain moves the study and all its workshop objects to the selected domain.",
 	"averageProgress": "Average progress",
 	"daysRemaining": "Days remaining",
 	"associatedFindingsAssessments": "Associated follow-ups",
