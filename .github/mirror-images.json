@@ -1,7 +1,7 @@
 [
   { "source": "docker.io/library/postgres:16", "target": "postgres:16" },
   { "source": "docker.io/library/postgres:17", "target": "postgres:17" },
-  { "source": "docker.io/mailhog/mailhog:latest", "target": "mailhog:latest" },
+  { "source": "docker.io/mailhog/mailhog:v1.0.1", "target": "mailhog:v1.0.1" },
   { "source": "docker.io/qdrant/qdrant:v1.14.0", "target": "qdrant:v1.14.0" },
   { "source": "docker.io/library/caddy:2.11.2", "target": "caddy:2.11.2" },
   { "source": "docker.io/library/node:24-slim", "target": "node:24-slim" },

@@ -51,6 +51,9 @@ jobs:
         run: |
           set -euo pipefail
           fail=0
+          # Fail fast on a malformed manifest: process substitution below does not
+          # propagate jq's exit status through set -e, so validate up front.
+          jq -e . .github/mirror-images.json > /dev/null
           while read -r row; do
             src="$(jq -r '.source' <<<"$row")"
             tgt="$(jq -r '.target' <<<"$row")"
