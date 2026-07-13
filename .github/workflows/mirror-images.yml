@@ -38,7 +38,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Log in to GHCR
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -54,12 +54,35 @@ jobs:
           # Fail fast on a malformed manifest: process substitution below does not
           # propagate jq's exit status through set -e, so validate up front.
           jq -e . .github/mirror-images.json > /dev/null
+
+          # Copy one image, retrying to absorb transient GHCR 403/429 under manifest bursts.
+          # A single-platform "platforms" (e.g. "linux/amd64") mirrors just that arch via
+          # pull/tag/push, trimming fat multi-arch indexes (caddy ships s390x/ppc64le/riscv/
+          # windows + attestation manifests CI never uses, one of which 403s the whole copy);
+          # without it we copy the whole index registry-to-registry.
+          copy_one() {
+            local src="$1" dst="$2" plat="$3" attempt
+            for attempt in 1 2 3; do
+              if [ -n "$plat" ]; then
+                if docker pull --platform "$plat" "$src" \
+                  && docker tag "$src" "$dst" \
+                  && docker push "$dst"; then return 0; fi
+              else
+                if docker buildx imagetools create --tag "$dst" "$src"; then return 0; fi
+              fi
+              echo "::warning::copy attempt ${attempt} failed for ${src}; retrying in $((attempt * 10))s"
+              sleep "$((attempt * 10))"
+            done
+            return 1
+          }
+
           while read -r row; do
             src="$(jq -r '.source' <<<"$row")"
             tgt="$(jq -r '.target' <<<"$row")"
+            plat="$(jq -r '.platforms // empty' <<<"$row")"
             dst="${DEST_BASE}/${tgt}"
-            echo "::group::${src} -> ${dst}"
-            if docker buildx imagetools create --tag "$dst" "$src"; then
+            echo "::group::${src} -> ${dst}${plat:+ (${plat})}"
+            if copy_one "$src" "$dst" "$plat"; then
               echo "OK: ${dst}"
             else
               echo "::error::failed to mirror ${src}"
