@@ -164,7 +164,10 @@ jobs:
       DB_HOST: localhost
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:16
+        image: ghcr.io/intuitem/ciso-assistant-community/mirror/postgres:16
+        credentials:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres # test credential
@@ -225,7 +228,10 @@ jobs:
       LICENSE_SEATS: 999
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:16
+        image: ghcr.io/intuitem/ciso-assistant-community/mirror/postgres:16
+        credentials:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres # test credential
@@ -299,7 +305,10 @@ jobs:
       PUBLIC_BACKEND_API_URL: http://localhost:8173/api
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:16
+        image: ghcr.io/intuitem/ciso-assistant-community/mirror/postgres:16
+        credentials:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres # test credential
@@ -307,7 +316,10 @@ jobs:
         ports: ["5432:5432"]
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
       mailhog:
-        image: mailhog/mailhog
+        image: ghcr.io/intuitem/ciso-assistant-community/mirror/mailhog:v1.0.1
+        credentials:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
         ports: ["1025:1025", "8025:8025"]
 
     strategy:
@@ -486,7 +498,10 @@ jobs:
       PUBLIC_BACKEND_API_URL: http://localhost:8173/api
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:16
+        image: ghcr.io/intuitem/ciso-assistant-community/mirror/postgres:16
+        credentials:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -494,7 +509,10 @@ jobs:
         ports: ["5432:5432"]
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
       mailhog:
-        image: mailhog/mailhog
+        image: ghcr.io/intuitem/ciso-assistant-community/mirror/mailhog:v1.0.1
+        credentials:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
         ports: ["1025:1025", "8025:8025"]
 
     strategy:
