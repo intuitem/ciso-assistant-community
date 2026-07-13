@@ -15,6 +15,14 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 	const baseEndpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
 	const objectEndpoint = `${BASE_API_URL}/${URLModel}/${params.id}/object/`;
 
+	// Depends only on params.id, so start it now and let it overlap the fetches below.
+	const riskAcceptancesPromise = fetch(
+		`${BASE_API_URL}/risk-acceptances/?risk_scenarios=${params.id}`
+	)
+		.then((res) => (res.ok ? res.json() : { results: [] }))
+		.then((res) => res.results ?? [])
+		.catch(() => []);
+
 	const res = await fetch(baseEndpoint);
 	if (!res.ok) {
 		if (res.status === 404) {
@@ -68,7 +76,13 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 		.then((res) => res.json())
 		.then((res) => JSON.parse(res.json_definition));
 
-	return { scenario, tables, riskMatrix, title: scenario.str };
+	return {
+		scenario,
+		tables,
+		riskMatrix,
+		title: scenario.str,
+		riskAcceptances: await riskAcceptancesPromise
+	};
 }) satisfies PageServerLoad;
 
 export const actions: Actions = {
