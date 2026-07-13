@@ -2155,6 +2155,42 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'is_locked' }
 		]
 	},
+	'posture-assessments': {
+		name: 'postureassessment',
+		localName: 'postureAssessment',
+		localNamePlural: 'postureAssessments',
+		verboseName: 'Posture assessment',
+		verboseNamePlural: 'Posture assessments',
+		endpointUrl: 'automation/posture-assessments',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'perimeter', urlModel: 'perimeters' },
+			{ field: 'framework', urlModel: 'frameworks' },
+			{ field: 'assets', urlModel: 'assets' },
+			{ field: 'authors', urlModel: 'actors' },
+			{ field: 'reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' },
+			{ field: 'follow_up_assessment', urlModel: 'findings-assessments' }
+		],
+		selectFields: [{ field: 'status' }],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'folder' },
+			{ field: 'perimeter' },
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'framework' },
+			{ field: 'assets' },
+			{ field: 'history_depth' },
+			{ field: 'authors' },
+			{ field: 'reviewers' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' },
+			{ field: 'version' },
+			{ field: 'status' },
+			{ field: 'observation' }
+		]
+	},
 	findings: {
 		name: 'finding',
 		localName: 'finding',

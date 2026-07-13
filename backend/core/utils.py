@@ -252,6 +252,7 @@ class RoleCodename(Enum):
     READER = "BI-RL-AUD"
     THIRD_PARTY_RESPONDENT = "BI-RL-TPR"
     AUDITEE = "BI-RL-ADE"
+    TECHNICAL_TESTER = "BI-RL-TST"
 
     def __str__(self) -> str:
         return self.value
@@ -268,6 +269,7 @@ class UserGroupCodename(Enum):
     READER = "BI-UG-AUD"
     THIRD_PARTY_RESPONDENT = "BI-UG-TPR"
     AUDITEE = "BI-UG-ADE"
+    TECHNICAL_TESTER = "BI-UG-TST"
 
     def __str__(self) -> str:
         return self.value
@@ -466,6 +468,15 @@ BUILTIN_ROLE_TRANSLATIONS = {
         "ur": {"name": "جواب دہندہ"},
         "zh": {"name": "受访者"},
     },
+    "BI-RL-TST": {
+        "en": {"name": "Technical tester"},
+        "de": {"name": "Technischer Tester"},
+        "es": {"name": "Probador técnico"},
+        "fr": {"name": "Testeur technique"},
+        "it": {"name": "Tester tecnico"},
+        "nl": {"name": "Technisch tester"},
+        "pt": {"name": "Testador técnico"},
+    },
 }
 
 
@@ -500,6 +511,7 @@ BUILTIN_USERGROUP_CODENAMES = {
         RoleCodename.THIRD_PARTY_RESPONDENT
     ),
     str(UserGroupCodename.AUDITEE): str(RoleCodename.AUDITEE),
+    str(UserGroupCodename.TECHNICAL_TESTER): str(RoleCodename.TECHNICAL_TESTER),
 }
 
 # NOTE: This is set to "Main" now, but will be changed to a unique identifier

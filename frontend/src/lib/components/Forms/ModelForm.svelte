@@ -56,6 +56,7 @@
 	import SecurityExceptionForm from './ModelForm/SecurityExceptionForm.svelte';
 	import FindingForm from './ModelForm/FindingForm.svelte';
 	import FindingsAssessmentForm from './ModelForm/FindingsAssessmentForm.svelte';
+	import PostureAssessmentForm from './ModelForm/PostureAssessmentForm.svelte';
 	import IncidentForm from './ModelForm/IncidentForm.svelte';
 	import TimelineEntryForm from './ModelForm/TimelineEntryForm.svelte';
 	import TaskTemplateForm from './ModelForm/TaskTemplateForm.svelte';
@@ -838,6 +839,8 @@
 				{context}
 				{...rest}
 			/>
+		{:else if URLModel === 'posture-assessments'}
+			<PostureAssessmentForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'incidents'}
 			<IncidentForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} {...rest} />
 		{:else if URLModel === 'timeline-entries'}

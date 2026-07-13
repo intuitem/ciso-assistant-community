@@ -688,7 +688,8 @@ export const FeatureFlagsSchema = z.object({
 	security_advisories: z.boolean().optional(),
 	cwes: z.boolean().optional(),
 	object_audit_trail: z.boolean().optional(),
-	custom_portals: z.boolean().optional()
+	custom_portals: z.boolean().optional(),
+	posture_assessments: z.boolean().optional()
 });
 
 export const PortalSettingsSchema = z.object({
@@ -1349,6 +1350,25 @@ export const FindingsAssessmentSchema = z.object({
 	is_locked: z.boolean().optional().default(false)
 });
 
+export const PostureAssessmentSchema = z.object({
+	...NameDescriptionMixin,
+	version: z.string().optional().default('1.0'),
+	ref_id: z.string().optional(),
+	folder: z.string(),
+	perimeter: z.string().optional().nullable(),
+	status: z.string().optional().nullable(),
+	framework: z.string(),
+	selected_implementation_groups: z.array(z.string().optional()).optional(),
+	assets: z.array(z.string().optional()).optional(),
+	history_depth: z.number().int().min(1).optional().default(10),
+	authors: z.array(z.string().optional()).optional(),
+	reviewers: z.array(z.string().optional()).optional(),
+	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	observation: z.string().optional().nullable(),
+	follow_up_assessment: z.string().optional().nullable()
+});
+
 export const IncidentSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
@@ -1961,6 +1981,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'security-exceptions': SecurityExceptionSchema,
 	findings: FindingSchema,
 	'findings-assessments': FindingsAssessmentSchema,
+	'posture-assessments': PostureAssessmentSchema,
 	incidents: IncidentSchema,
 	'timeline-entries': TimelineEntrySchema,
 	'dora-incident-reports': DoraIncidentReportSchema,

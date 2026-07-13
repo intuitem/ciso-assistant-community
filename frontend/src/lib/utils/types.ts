@@ -98,6 +98,7 @@ export const URL_MODEL = [
 	'security-exceptions',
 	'findings',
 	'findings-assessments',
+	'posture-assessments',
 	// privacy,
 	'processings',
 	'right-requests',
