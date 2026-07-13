@@ -1456,6 +1456,16 @@ class LibraryDraftViewSet(BaseModelViewSet):
             )
         return frameworks[0], None
 
+    @staticmethod
+    def _readable_audits_on(framework, user):
+        """Audits on a live framework the user is allowed to see. We only ever
+        surface what the caller may read (RBAC), never the raw cross-scope set.
+        """
+        viewable, _, _ = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), user, ComplianceAssessment
+        )
+        return ComplianceAssessment.objects.filter(framework=framework, id__in=viewable)
+
     @action(detail=True, methods=["get", "put"], url_path="framework-editor")
     def framework_editor(self, request, pk):
         """Bridge to the visual framework editor.
@@ -1484,8 +1494,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
                         for f in content.get("frameworks") or []
                     ],
                     "has_compliance_assessments": bool(
-                        live
-                        and ComplianceAssessment.objects.filter(framework=live).exists()
+                        live and self._readable_audits_on(live, request.user).exists()
                     ),
                     "editing_draft": fw_editor.framework_to_editor_doc(
                         framework, locale=draft.locale
@@ -1511,6 +1520,14 @@ class LibraryDraftViewSet(BaseModelViewSet):
             return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
         frameworks = content["frameworks"]
         frameworks[frameworks.index(framework)] = new_framework
+        # Shape gate before persisting, like every other content door: the
+        # editor doc can carry duplicate node/question/choice URNs that would
+        # poison the loader's urn_map (dropped questions, merged choices).
+        if shape_errors := builder.check_document_shape(content):
+            return Response(
+                {"error": "draftShapeInvalid", "details": shape_errors},
+                status=HTTP_400_BAD_REQUEST,
+            )
         draft.content = content
         update_fields = ["content", "updated_at"]
         if self._sync_link_dependencies(draft, content, new_framework, request.user):
@@ -1660,7 +1677,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 "breaking_changes": [],
                 "affected_audits": [
                     {"id": str(audit.id), "name": audit.name}
-                    for audit in ComplianceAssessment.objects.filter(framework=live)
+                    for audit in self._readable_audits_on(live, request.user)
                 ]
                 if live
                 else [],

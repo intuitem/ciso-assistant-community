@@ -45,25 +45,6 @@ async function handleResponse(res: Response): Promise<unknown> {
 	return res.json();
 }
 
-/** Start editing: POST to create/return the editing_draft */
-export interface StartEditingResult {
-	draft: DraftJSON;
-	resumed: boolean; // true if resuming an existing draft, false if freshly created from live data
-}
-
-export async function apiStartEditing(frameworkId: string): Promise<StartEditingResult> {
-	const res = await fetch(apiUrl(frameworkId), {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ _action: 'start-editing' })
-	});
-	const data = (await handleResponse(res)) as { editing_draft: DraftJSON; status: string };
-	return {
-		draft: data.editing_draft,
-		resumed: data.status === 'already_editing'
-	};
-}
-
 /** Save draft: PATCH to persist the current draft state */
 export async function apiSaveDraft(frameworkId: string, draft: DraftJSON): Promise<void> {
 	const res = await fetch(apiUrl(frameworkId), {

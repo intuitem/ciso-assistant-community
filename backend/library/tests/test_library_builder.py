@@ -1743,6 +1743,43 @@ def builder_only_client(app_config):
 
 
 @pytest.mark.django_db
+def test_framework_editor_audits_are_rbac_scoped(app_config):
+    """The framework editor only ever surfaces audits the caller may read:
+    _readable_audits_on returns them for a privileged user and nothing for a
+    builder user without view_complianceassessment (no cross-scope leak)."""
+    from core.models import ComplianceAssessment, Perimeter
+    from library.views import LibraryDraftViewSet
+
+    root = Folder.get_root_folder()
+    framework = Framework.objects.create(name="Live FW", folder=root)
+    perimeter = Perimeter.objects.create(name="P", folder=root)
+    audit = ComplianceAssessment.objects.create(
+        name="Secret audit", perimeter=perimeter, framework=framework, folder=root
+    )
+
+    admin = User.objects.create_superuser("audit-admin@builder-tests.com")
+    builder = User.objects.create_user("nobody@builder-tests.com")
+    builder.is_published = True
+    builder.save()
+    role = Role.objects.create(name="NoAudit", folder=root)
+    role.permissions.set(Permission.objects.filter(codename="view_folder"))
+    group = UserGroup.objects.create(name="no-audit-group", folder=root)
+    group.user_set.add(builder)
+    RoleAssignment.objects.create(
+        user_group=group, role=role, folder=root, is_recursive=True
+    ).perimeter_folders.add(root)
+
+    admin_ids = [
+        a.id for a in LibraryDraftViewSet._readable_audits_on(framework, admin)
+    ]
+    builder_ids = [
+        a.id for a in LibraryDraftViewSet._readable_audits_on(framework, builder)
+    ]
+    assert audit.id in admin_ids
+    assert builder_ids == []
+
+
+@pytest.mark.django_db
 def test_stored_library_reads_respect_rbac(builder_only_client):
     """Every stored-library read path follows the folder-scoped RBAC model:
     a user without view_storedlibrary sees no library, through any door."""

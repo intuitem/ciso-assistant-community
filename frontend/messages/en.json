@@ -5384,6 +5384,7 @@
 	"libraryNeedsName": "The library needs a name",
 	"libraryHoldsNoObjects": "The library holds no object yet",
 	"libraryValidationInternalError": "Internal validation error — see the server logs.",
+	"draftShapeInvalid": "The document has structural errors (e.g. duplicate URNs) and was not saved.",
 	"lbDraftValidationFailedSeePanel": "Validation failed — see the validation panel",
 	"lbDraftDeleteObjectConfirm": "Delete \"{name}\" from the draft?",
 	"lbDraftObjectReferencedConfirm": "\"{name}\" is linked from {count} requirement node(s). Remove the links and delete it?",

@@ -495,6 +495,20 @@
 		}
 		return Object.keys(out).length ? out : null;
 	}
+
+	// Param rows are edited in local state (keyed by step key) so an empty,
+	// not-yet-filled row can exist while typing — rowsToParams drops empty
+	// keys, so deriving straight from target_params made "Add param" a no-op.
+	let paramRows = $state<Record<string, Array<{ k: string; v: string }>>>({});
+
+	function displayParamRows(step: Step): Array<{ k: string; v: string }> {
+		return paramRows[step.key] ?? paramsToRows(step.target_params);
+	}
+
+	function setParamRows(i: number, step: Step, rows: Array<{ k: string; v: string }>) {
+		paramRows = { ...paramRows, [step.key]: rows };
+		setStepField(i, { target_params: rowsToParams(rows) });
+	}
 </script>
 
 {#snippet scaffoldFields(scaffold: Scaffold, idx: number)}
@@ -1230,25 +1244,28 @@
 														type="button"
 														class="text-xs text-surface-600-400 hover:text-blue-600 transition-colors inline-flex items-center gap-1"
 														onclick={() => {
-															const rows = paramsToRows(step.target_params);
-															rows.push({ k: '', v: '' });
-															setStepField(i, { target_params: rowsToParams(rows) });
+															// Add an empty row to LOCAL state only; it persists
+															// (unlike a rowsToParams round-trip) until keys are typed.
+															paramRows = {
+																...paramRows,
+																[step.key]: [...displayParamRows(step), { k: '', v: '' }]
+															};
 														}}
 													>
 														<i class="fa-solid fa-plus text-[9px]"></i>
 														{m.lbPresetAddParam()}
 													</button>
 												</div>
-												{#each paramsToRows(step.target_params) as row, ri (ri)}
+												{#each displayParamRows(step) as row, ri (ri)}
 													<div class="flex gap-2 mb-1.5">
 														<input
 															class="flex-1 text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors font-mono"
 															placeholder={m.lbPresetParamKeyPlaceholder()}
 															value={row.k}
 															oninput={(e) => {
-																const rows = paramsToRows(step.target_params);
+																const rows = displayParamRows(step).map((r) => ({ ...r }));
 																rows[ri].k = (e.target as HTMLInputElement).value;
-																setStepField(i, { target_params: rowsToParams(rows) });
+																setParamRows(i, step, rows);
 															}}
 														/>
 														<input
@@ -1256,19 +1273,17 @@
 															placeholder={m.lbPresetParamValuePlaceholder()}
 															value={row.v}
 															oninput={(e) => {
-																const rows = paramsToRows(step.target_params);
+																const rows = displayParamRows(step).map((r) => ({ ...r }));
 																rows[ri].v = (e.target as HTMLInputElement).value;
-																setStepField(i, { target_params: rowsToParams(rows) });
+																setParamRows(i, step, rows);
 															}}
 														/>
 														<button
 															type="button"
 															class="w-8 h-8 inline-flex items-center justify-center rounded-lg text-surface-500 hover:text-red-600 hover:bg-red-50 transition-colors"
 															onclick={() => {
-																const rows = paramsToRows(step.target_params).filter(
-																	(_, x) => x !== ri
-																);
-																setStepField(i, { target_params: rowsToParams(rows) });
+																const rows = displayParamRows(step).filter((_, x) => x !== ri);
+																setParamRows(i, step, rows);
 															}}
 															title={m.lbPresetRemoveParam()}
 															aria-label={m.lbPresetRemoveParam()}

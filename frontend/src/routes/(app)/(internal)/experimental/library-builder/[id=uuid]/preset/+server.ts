@@ -21,7 +21,14 @@ async function backend(url: string, method: string, body: unknown, fetchFn: type
 	if (!text || r.status === 204) {
 		return new Response(null, { status: r.status });
 	}
-	return json(JSON.parse(text), { status: r.status });
+	try {
+		return json(JSON.parse(text), { status: r.status });
+	} catch {
+		return new Response(text, {
+			status: r.status,
+			headers: { 'Content-Type': r.headers.get('Content-Type') ?? 'text/plain' }
+		});
+	}
 }
 
 export const POST: RequestHandler = async ({ params, request, fetch }) => {
