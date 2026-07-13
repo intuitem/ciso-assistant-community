@@ -1,0 +1,70 @@
+name: Mirror third-party images to GHCR
+
+# Copies the third-party images that CI depends on (postgres, mailhog, qdrant,
+# caddy, node, python) from Docker Hub into this repo's GHCR namespace so that CI
+# never pulls them anonymously from Docker Hub or ECR Public (both of which
+# rate-limit anonymous pulls on GitHub's shared runner IPs).
+#
+# Single source of truth: .github/mirror-images.json
+# Destination: ghcr.io/<owner>/<repo>/mirror/<target>
+#
+# After the FIRST successful run, make each new GHCR package PUBLIC once
+# (Org / repo -> Packages -> mirror/* -> Package settings -> Change visibility).
+# Public packages let fork PRs pull them too, with no secrets.
+
+on:
+  schedule:
+    - cron: "17 4 * * 1" # weekly, Monday 04:17 UTC
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/mirror-images.json"
+      - ".github/workflows/mirror-images.yml"
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: mirror-images
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Log in to GHCR
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Copy images to GHCR
+        env:
+          DEST_BASE: ghcr.io/${{ github.repository }}/mirror
+        shell: bash
+        run: |
+          set -euo pipefail
+          fail=0
+          # Fail fast on a malformed manifest: process substitution below does not
+          # propagate jq's exit status through set -e, so validate up front.
+          jq -e . .github/mirror-images.json > /dev/null
+          while read -r row; do
+            src="$(jq -r '.source' <<<"$row")"
+            tgt="$(jq -r '.target' <<<"$row")"
+            dst="${DEST_BASE}/${tgt}"
+            echo "::group::${src} -> ${dst}"
+            if docker buildx imagetools create --tag "$dst" "$src"; then
+              echo "OK: ${dst}"
+            else
+              echo "::error::failed to mirror ${src}"
+              fail=1
+            fi
+            echo "::endgroup::"
+          done < <(jq -c '.[]' .github/mirror-images.json)
+          exit "$fail"
