@@ -1403,6 +1403,7 @@
 	"cal": "Kalender",
 	"campaign": "Campagne",
 	"campaignDomainHelpText": "Het domein waaraan de campagne wordt gekoppeld.",
+	"ebiosRmStudyDomainHelpText": "Het wijzigen van het domein verplaatst de studie en al haar workshopobjecten naar het geselecteerde domein.",
 	"campaigns": "Campagnes",
 	"cancelled": "Geannuleerd",
 	"cannotCalculate": "Kan niet berekenen",

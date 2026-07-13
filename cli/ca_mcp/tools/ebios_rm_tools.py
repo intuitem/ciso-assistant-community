@@ -1649,6 +1649,7 @@ async def update_ebios_rm_study(
     observation: str = None,
     assets: list = None,
     compliance_assessments: list = None,
+    folder: str = None,
 ) -> str:
     """Update an EBIOS RM study (Workshop 1)
 
@@ -1667,6 +1668,7 @@ async def update_ebios_rm_study(
         observation: Observation notes
         assets: List of asset IDs/names (replaces existing)
         compliance_assessments: List of compliance assessment (audit) IDs/names for security baseline (replaces existing)
+        folder: Folder (domain) ID/name to move the study to; all study-scoped objects (feared events, RO/TO couples, stakeholders, strategic scenarios, attack paths, operational scenarios, operating modes, kill chains) follow the study
     """
     try:
         from ..resolvers import resolve_compliance_assessment_id
@@ -1687,6 +1689,8 @@ async def update_ebios_rm_study(
             payload["status"] = status
         if observation is not None:
             payload["observation"] = observation
+        if folder is not None:
+            payload["folder"] = resolve_folder_id(folder)
 
         if assets is not None:
             resolved_assets = []

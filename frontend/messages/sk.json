@@ -2611,6 +2611,7 @@
 	"campaigns": "Kampane",
 	"addCampaign": "Spustite kampaň",
 	"campaignDomainHelpText": "Organizačná oblasť, ku ktorej bude kampaň pripojená.",
+	"ebiosRmStudyDomainHelpText": "Zmena organizačnej oblasti presunie štúdiu a všetky objekty jej workshopov do vybranej organizačnej oblasti.",
 	"averageProgress": "Priemerný pokrok",
 	"daysRemaining": "Zostávajúce dni",
 	"associatedFindingsAssessments": "Súvisiace následné kroky",
@@ -3365,7 +3366,6 @@
 	"deleteFinding": "Odstrániť nález",
 	"deleteFindingsAssessment": "Vymazať hodnotenie zistení",
 	"deleteFramework": "Odstrániť rámec",
-	"deleteHistoricalMetric": "Odstrániť historický ukazovateľ",
 	"deleteValidationFlow": "Odstrániť overovací postup",
 	"deleteIncident": "Odstrániť incident",
 	"deleteKillChain": "Odstrániť krok reťaze zabíjania",
@@ -4993,7 +4993,6 @@
 	"auditTreeInheritanceDescription": "Kombinovať výsledky auditu s auditmi nadradených domén pre rovnaký rámec.",
 	"atLeastOneColumnRequired": "Musí zostať zobrazený aspoň jeden stĺpec",
 	"hidden": "Skryté",
-
 	"complianceDescription": "Vykonávajte audity, kampane a analýzy súvisiace s auditmi.",
 	"riskManagement": "Riadenie rizík",
 	"riskManagementDescription": "Posudzujte a ošetrujte riziká naprieč scenármi, zraniteľnosťami a dopadmi.",

@@ -1410,6 +1410,7 @@
 	"cal": "Calendario",
 	"campaign": "Campaña",
 	"campaignDomainHelpText": "El dominio al que se adjuntará la campaña.",
+	"ebiosRmStudyDomainHelpText": "Cambiar el dominio mueve el estudio y todos los objetos de sus talleres al dominio seleccionado.",
 	"campaigns": "Campañas",
 	"cancelled": "Cancelado",
 	"cannotCalculate": "No se puede calcular",
