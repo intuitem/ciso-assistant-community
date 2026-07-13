@@ -630,6 +630,102 @@ class TestCustomLibraryImportYAML:
             f"LoadedLibrary should still be v1 (update not triggered), got v{loaded.version}"
         )
 
+    def test_update_clears_missing_requirement_node_fields(
+        self, admin_client, upload_url
+    ):
+        """Updating a library clears selected requirement fields omitted in v2."""
+        v1_yaml = SAMPLE_FRAMEWORK_YAML.replace(
+            "description: A sample assessable requirement",
+            "description: A sample assessable requirement\n"
+            "      annotation: Test annotation\n"
+            "      typical_evidence: Test evidence\n"
+            "      implementation_groups:\n"
+            "      - base",
+        )
+
+        response1 = _upload_yaml(
+            admin_client,
+            upload_url,
+            "clearable_req_fields_v1.yaml",
+            v1_yaml.encode("utf-8"),
+        )
+        assert response1.status_code == status.HTTP_201_CREATED
+
+        node_urn = "urn:intuitem:test:req_node:sample-fw-reg:cat-1.1"
+        node = RequirementNode.objects.get(urn=node_urn)
+        # Seed this experimental field directly without exposing it in library imports.
+        node.visibility_expression = "true"
+        node.save(update_fields=["visibility_expression"])
+
+        assert node.ref_id == "CAT-1.1"
+        assert node.name == "Requirement 1.1"
+        assert node.description == "A sample assessable requirement"
+        assert node.annotation == "Test annotation"
+        assert node.typical_evidence == "Test evidence"
+        assert node.visibility_expression == "true"
+        assert node.implementation_groups == ["base"]
+        assert node.order_id == 1
+
+        v2_yaml = """
+urn: urn:intuitem:test:library:sample-framework-regression
+locale: en
+ref_id: SAMPLE-FW-REG
+name: Sample Framework for Regression Test
+description: A minimal framework library used for regression testing
+copyright: Test
+version: 2
+publication_date: 2025-01-01
+provider: test-provider
+packager: test-packager
+objects:
+  framework:
+    urn: urn:intuitem:test:framework:sample-framework-regression
+    ref_id: SAMPLE-FW-REG
+    name: Sample Framework for Regression Test
+    description: A sample framework
+    requirement_nodes:
+    - urn: urn:intuitem:test:req_node:sample-fw-reg:cat-1
+      assessable: false
+      depth: 1
+      ref_id: CAT-1
+      name: Category 1
+      description: A sample category
+    - urn: urn:intuitem:test:req_node:sample-fw-reg:cat-1.2
+      assessable: true
+      depth: 2
+      ref_id: CAT-1.2
+      parent_urn: urn:intuitem:test:req_node:sample-fw-reg:cat-1
+      name: Requirement 1.2
+      description: Another sample assessable requirement
+    - urn: urn:intuitem:test:req_node:sample-fw-reg:cat-1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:test:req_node:sample-fw-reg:cat-1
+""".lstrip()
+
+        response2 = _upload_yaml(
+            admin_client,
+            upload_url,
+            "clearable_req_fields_v2.yaml",
+            v2_yaml.encode("utf-8"),
+        )
+        assert response2.status_code == status.HTTP_201_CREATED
+
+        loaded = LoadedLibrary.objects.get(
+            urn="urn:intuitem:test:library:sample-framework-regression"
+        )
+        assert loaded.update() is None
+
+        node.refresh_from_db()
+        assert node.ref_id is None
+        assert node.name is None
+        assert node.description is None
+        assert node.annotation is None
+        assert node.typical_evidence is None
+        assert node.visibility_expression is None
+        assert node.implementation_groups is None
+        assert node.order_id == 2
+
 
 # Excel Import Tests
 
