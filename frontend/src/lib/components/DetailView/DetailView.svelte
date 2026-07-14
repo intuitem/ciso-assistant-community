@@ -25,7 +25,7 @@
 
 	import { onMount } from 'svelte';
 
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { getListViewFields } from '$lib/utils/table';
 	import { canPerformAction } from '$lib/utils/access-control';
@@ -211,6 +211,30 @@
 			title: safeTranslate('add-' + model.info.localName)
 		};
 		modalStore.trigger(modal);
+	}
+
+	async function removeFromParent(
+		field: any,
+		ids: string[],
+		clear: () => void,
+		reload: () => void
+	): Promise<void> {
+		if (!field?.removeFromParent || !ids.length) return;
+		const res = await fetch(
+			`/${data.model.urlModel}/${data.data.id}/${field.removeFromParent.action}`,
+			{
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ [field.removeFromParent.payloadField]: ids })
+			}
+		);
+		if (res.ok) {
+			clear();
+			reload();
+			await invalidateAll();
+		} else {
+			console.error('Failed to remove from parent', await res.json());
+		}
 	}
 
 	function modalSelectExisting(field: ReverseForeignKeyField): void {
@@ -964,7 +988,21 @@
 								expectedCount={getExpectedCount(urlmodel, field)}
 								fields={fieldsToUse}
 								defaultFilters={field.defaultFilters || {}}
+								selectable={Boolean(canEditObject && field?.removeFromParent)}
 							>
+								{#snippet selectActions({ ids, clear, reload })}
+									{#if field?.removeFromParent}
+										<button
+											type="button"
+											class="btn btn-sm preset-filled-error-500"
+											onclick={() => removeFromParent(field, ids, clear, reload)}
+										>
+											<i class="fa-solid fa-user-minus mr-2"></i>{safeTranslate(
+												field.removeFromParent.label ?? 'remove'
+											)}
+										</button>
+									{/if}
+								{/snippet}
 								{#snippet addButton()}
 									{#if canEditObject && field?.addExisting}
 										<span

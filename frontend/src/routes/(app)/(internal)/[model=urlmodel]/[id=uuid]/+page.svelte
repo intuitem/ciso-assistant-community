@@ -2,7 +2,7 @@
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
-	import SelectExistingModal from '$lib/components/Modals/SelectExistingModal.svelte';
+	import EntityPickerModal from '$lib/components/Modals/EntityPickerModal.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
@@ -10,7 +10,7 @@
 		type ModalStore
 	} from '$lib/components/Modals/stores';
 	import { canPerformAction } from '$lib/utils/access-control';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { invalidateAll } from '$app/navigation';
 	import type { PageData, ActionData } from './$types';
 	import { page } from '$app/state';
 	import { m } from '$paraglide/messages';
@@ -31,7 +31,6 @@
 	const canManageMembers = $derived(
 		Boolean(
 			data.model.name === 'usergroup' &&
-				data.updateForm &&
 				canPerformAction({
 					user: page.data.user,
 					action: 'change',
@@ -41,29 +40,42 @@
 		)
 	);
 
-	function manageMembers(): void {
-		if (!data.updateForm) return;
+	function addMembers(): void {
+		const groupId = data.data.id;
 		const modalComponent: ModalComponent = {
-			ref: SelectExistingModal,
+			ref: EntityPickerModal,
 			props: {
-				form: data.updateForm,
-				urlModel: 'user-groups',
-				field: 'users',
-				optionsEndpoint: 'users',
-				label: 'members',
-				optionsExtraFields: [],
-				// Users have no `name`; label them by their display string
-				// (first/last name, or email as fallback).
-				optionsLabelField: 'str',
-				// Server-side search so the picker scales to very large user counts
-				// instead of loading every user into the browser.
-				lazy: true
+				endpoint: 'users',
+				title: m.addMembers(),
+				subtitle: data.data.name ?? data.data.str,
+				labelField: 'email',
+				secondaryField: 'str',
+				activeField: 'is_active',
+				columns: [
+					{ key: 'email', label: 'email', filter: 'icontains' },
+					{ key: 'first_name', label: 'firstName', filter: 'icontains' },
+					{ key: 'last_name', label: 'lastName', filter: 'icontains' }
+				],
+				// Add-only: exclude users already in the group so the picker only ever
+				// lists candidates to add. Removal is a batch action on the Users tab.
+				scopeFilters: { exclude_user_groups: groupId },
+				confirmLabel: m.addMembers(),
+				async onConfirm(ids: string[]) {
+					if (!ids.length) return;
+					const res = await fetch(`/user-groups/${groupId}/add-members`, {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ users: ids })
+					});
+					if (res.ok) await invalidateAll();
+					else console.error('Failed to add members', await res.json());
+				}
 			}
 		};
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			title: m.manageMembers()
+			title: m.addMembers()
 		};
 		modalStore.trigger(modal);
 	}
@@ -73,10 +85,10 @@
 	<div class="flex items-center justify-end mb-4">
 		<button
 			class="btn preset-filled-primary-500"
-			data-testid="manage-members-button"
-			onclick={manageMembers}
+			data-testid="add-members-button"
+			onclick={addMembers}
 		>
-			<i class="fa-solid fa-users mr-2"></i>{m.manageMembers()}
+			<i class="fa-solid fa-user-plus mr-2"></i>{m.addMembers()}
 		</button>
 	</div>
 {/if}

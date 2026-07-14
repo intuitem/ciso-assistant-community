@@ -478,13 +478,6 @@ export const UserCreateSchema = z.object({
 		)
 });
 
-export const UserGroupSchema = z.object({
-	name: z.string().optional(),
-	folder: z.string().optional(),
-	// Reverse side of User.user_groups; edited from the group's detail page.
-	users: z.array(z.string().uuid()).optional()
-});
-
 export const ChangePasswordSchema = z.object({
 	old_password: z.string(),
 	new_password: z.string(),
@@ -2005,8 +1998,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'document-containers': DocumentContainerSchema,
 	'document-templates': DocumentTemplateSchema,
 	'managed-documents': ManagedDocumentSchema,
-	'document-revisions': DocumentRevisionSchema,
-	'user-groups': UserGroupSchema
+	'document-revisions': DocumentRevisionSchema
 };
 
 export const modelSchema = (model: string) => {

@@ -127,6 +127,14 @@ export interface ReverseForeignKeyField extends ForeignKeyField {
 	batchCreate?: {
 		label?: string; // i18n key for button title (defaults to 'batchCreate')
 	};
+	// Enables multi-row selection on the reverse-FK table with an action that POSTs
+	// the selected ids to a parent endpoint (e.g. remove members from a group).
+	// Gated by change permission on the parent's folder.
+	removeFromParent?: {
+		action: string; // parent action url segment, e.g. 'remove-members'
+		payloadField: string; // request body key holding the selected ids, e.g. 'users'
+		label?: string; // i18n key for the button (defaults to 'remove')
+	};
 }
 
 interface Field {
@@ -879,17 +887,13 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableCreate: true,
 				disableDelete: true,
 				folderPermsNeeded: [{ model: 'folder', action: 'change' }],
-				// Manage membership from the group side: PATCHes the group's `users`
-				// field, gated by change_usergroup on the group's folder — so a domain
-				// manager can add/remove members without write access on the (Global)
-				// User object. The picker preselects current members; deselect = remove.
-				addExisting: {
-					parentField: 'users',
-					optionsEndpoint: 'users',
-					label: 'members',
-					optionsInfoFields: {
-						fields: [{ field: 'email' }]
-					}
+				// Select members in the table and remove them from the group. Routes to
+				// the group's change_usergroup-gated endpoint, so a domain manager can
+				// remove members without write access on the (Global) User object.
+				removeFromParent: {
+					action: 'remove-members',
+					payloadField: 'users',
+					label: 'removeFromGroup'
 				}
 			}
 		],

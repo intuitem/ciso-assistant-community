@@ -2042,13 +2042,6 @@ class UserReadSerializer(BaseModelSerializer):
             "is_superuser",
         ]
 
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        # Display string (first/last name, or email) used as the label in user
-        # pickers; the eager options path reads this serializer.
-        data["str"] = str(instance)
-        return data
-
 
 class UserRolesOnFolderSerializer(BaseModelSerializer):
     roles = serializers.SerializerMethodField()
@@ -2151,7 +2144,7 @@ class UserAutocompleteSerializer(BaseModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "first_name", "last_name", "email"]
+        fields = ["id", "first_name", "last_name", "email", "is_active"]
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -2170,34 +2163,9 @@ class UserGroupReadSerializer(BaseModelSerializer):
 
 
 class UserGroupWriteSerializer(BaseModelSerializer):
-    # Membership is the reverse side of User.user_groups. Exposing it as a write
-    # field on the *group* lets it be managed by whoever can change the group
-    # (change_usergroup on the group's folder) rather than requiring change_user
-    # (Global-only). Only the M2M through-rows are touched — no User attribute.
-    users = serializers.PrimaryKeyRelatedField(
-        many=True,
-        source="user_set",
-        queryset=User.objects.all(),
-        required=False,
-    )
-
     class Meta:
         model = UserGroup
         fields = "__all__"
-
-    def create(self, validated_data):
-        members = validated_data.pop("user_set", None)
-        instance = super().create(validated_data)
-        if members is not None:
-            instance.user_set.set(members)
-        return instance
-
-    def update(self, instance, validated_data):
-        members = validated_data.pop("user_set", None)
-        instance = super().update(instance, validated_data)
-        if members is not None:
-            instance.user_set.set(members)
-        return instance
 
 
 class IdPGroupReadSerializer(BaseModelSerializer):

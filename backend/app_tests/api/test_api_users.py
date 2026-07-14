@@ -2,7 +2,7 @@ import pytest
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
-from iam.models import User
+from iam.models import Folder, User, UserGroup
 
 
 from test_vars import USERS_ENDPOINT as API_ENDPOINT
@@ -292,3 +292,59 @@ class TestUsersAutocomplete:
         assert response.status_code == status.HTTP_200_OK
         rows = response.data["results"] if isinstance(response.data, dict) else response.data
         assert [r["email"] for r in rows] == ["target@tests.com"]
+
+    def test_autocomplete_returns_active_flag(self, authenticated_client):
+        User.objects.create_user("inactive@tests.com", is_active=False, is_published=True)
+
+        url = reverse("users-autocomplete")
+        response = authenticated_client.get(url, {"search": "inactive"})
+
+        rows = response.data["results"] if isinstance(response.data, dict) else response.data
+        assert rows[0]["is_active"] is False
+
+    def test_autocomplete_column_icontains(self, authenticated_client):
+        User.objects.create_user(
+            "picker@tests.com", first_name="Wolfgang", is_published=True
+        )
+        User.objects.create_user(
+            "other@tests.com", first_name="Bela", is_published=True
+        )
+
+        url = reverse("users-autocomplete")
+        response = authenticated_client.get(url, {"first_name__icontains": "olfg"})
+
+        rows = response.data["results"] if isinstance(response.data, dict) else response.data
+        emails = [r["email"] for r in rows]
+        assert "picker@tests.com" in emails
+        assert "other@tests.com" not in emails
+
+    def test_autocomplete_exclude_user_groups(self, authenticated_client):
+        """Add-only pickers drop users already in the group."""
+        folder = Folder.get_root_folder()
+        group = UserGroup.objects.create(name="picker-grp", folder=folder)
+        member = User.objects.create_user("member@tests.com", is_published=True)
+        outsider = User.objects.create_user("outsider@tests.com", is_published=True)
+        group.user_set.add(member)
+
+        url = reverse("users-autocomplete")
+        response = authenticated_client.get(url, {"exclude_user_groups": str(group.id)})
+
+        rows = response.data["results"] if isinstance(response.data, dict) else response.data
+        emails = [r["email"] for r in rows]
+        assert "member@tests.com" not in emails
+        assert "outsider@tests.com" in emails
+
+    def test_autocomplete_ordering(self, authenticated_client):
+        User.objects.create_user("zzz@tests.com", first_name="Zed", is_published=True)
+        User.objects.create_user("aaa@tests.com", first_name="Ann", is_published=True)
+
+        url = reverse("users-autocomplete")
+        asc = authenticated_client.get(url, {"ordering": "email"})
+        desc = authenticated_client.get(url, {"ordering": "-email"})
+
+        def emails(resp):
+            rows = resp.data["results"] if isinstance(resp.data, dict) else resp.data
+            return [r["email"] for r in rows]
+
+        assert emails(asc) == sorted(emails(asc))
+        assert emails(desc) == sorted(emails(desc), reverse=True)

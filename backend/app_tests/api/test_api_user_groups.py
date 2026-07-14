@@ -85,8 +85,8 @@ def _client_for(user: User) -> APIClient:
 
 @pytest.mark.django_db
 class TestUserGroupMembership:
-    """A domain manager can manage the membership of groups in their domain by
-    PATCHing the group's ``users`` field, without holding change_user (Global-only).
+    """A domain manager can add/remove members of groups in their domain via the
+    add-members / remove-members actions, without holding change_user (Global-only).
     Authorization is enforced on the group's folder via change_usergroup."""
 
     def _setup_domain(self, name="D1"):
@@ -108,56 +108,46 @@ class TestUserGroupMembership:
         ra.save()
         return domain, group, manager
 
-    def test_domain_manager_can_add_member(self, app_config):
+    def test_domain_manager_can_add_members(self, app_config):
         _, group, manager = self._setup_domain()
-        target = User.objects.create_user("member@tests.com", is_published=True)
+        a = User.objects.create_user("a@tests.com", is_published=True)
+        b = User.objects.create_user("b@tests.com", is_published=True)
         client = _client_for(manager)
 
-        url = reverse("user-groups-detail", args=[group.id])
-        response = client.patch(url, {"users": [str(target.id)]}, format="json")
+        url = reverse("user-groups-add-members", args=[group.id])
+        response = client.post(url, {"users": [str(a.id), str(b.id)]}, format="json")
 
         assert response.status_code == status.HTTP_200_OK
-        assert group.user_set.filter(pk=target.pk).exists()
+        assert group.user_set.filter(pk=a.pk).exists()
+        assert group.user_set.filter(pk=b.pk).exists()
 
-    def test_domain_manager_can_remove_member(self, app_config):
-        """Set-semantics: PATCHing an empty (or reduced) list removes members."""
+    def test_domain_manager_can_batch_remove_members(self, app_config):
         _, group, manager = self._setup_domain()
         keep = User.objects.create_user("keep@tests.com", is_published=True)
-        drop = User.objects.create_user("drop@tests.com", is_published=True)
-        group.user_set.add(keep, drop)
+        drop1 = User.objects.create_user("drop1@tests.com", is_published=True)
+        drop2 = User.objects.create_user("drop2@tests.com", is_published=True)
+        group.user_set.add(keep, drop1, drop2)
         client = _client_for(manager)
 
-        url = reverse("user-groups-detail", args=[group.id])
-        response = client.patch(url, {"users": [str(keep.id)]}, format="json")
+        url = reverse("user-groups-remove-members", args=[group.id])
+        response = client.post(
+            url, {"users": [str(drop1.id), str(drop2.id)]}, format="json"
+        )
 
         assert response.status_code == status.HTTP_200_OK
         assert group.user_set.filter(pk=keep.pk).exists()
-        assert not group.user_set.filter(pk=drop.pk).exists()
+        assert not group.user_set.filter(pk__in=[drop1.pk, drop2.pk]).exists()
 
-    def test_object_endpoint_exposes_current_members(self, app_config):
-        """The write-data (/object/) endpoint returns current members so the edit
-        form can preselect them."""
-        _, group, manager = self._setup_domain()
-        target = User.objects.create_user("member@tests.com", is_published=True)
-        group.user_set.add(target)
-        client = _client_for(manager)
-
-        url = reverse("user-groups-object", args=[group.id])
-        response = client.get(url)
-
-        assert response.status_code == status.HTTP_200_OK
-        assert str(target.id) in [str(u) for u in response.data["users"]]
-
-    def test_domain_manager_cannot_manage_group_outside_domain(self, app_config):
-        """Membership authorization follows the group's folder: a manager of D1 can't
-        touch a group belonging to a sibling domain D2."""
+    def test_domain_manager_cannot_add_outside_domain(self, app_config):
+        """Authorization follows the group's folder: a manager of D1 can't touch a
+        group belonging to a sibling domain D2."""
         _, _, manager = self._setup_domain("D1")
         _, other_group, _ = self._setup_domain("D2")
         target = User.objects.create_user("member@tests.com", is_published=True)
         client = _client_for(manager)
 
-        url = reverse("user-groups-detail", args=[other_group.id])
-        response = client.patch(url, {"users": [str(target.id)]}, format="json")
+        url = reverse("user-groups-add-members", args=[other_group.id])
+        response = client.post(url, {"users": [str(target.id)]}, format="json")
 
         assert response.status_code in (
             status.HTTP_403_FORBIDDEN,
@@ -182,14 +172,16 @@ class TestUserGroupMembership:
         )
         assert not group.user_set.filter(pk=target.pk).exists()
 
-    def test_cannot_empty_last_admin_group(self, authenticated_client):
-        """The direct BI-UG-ADM membership can't be emptied on the group path either,
+    def test_cannot_remove_last_admin(self, authenticated_client):
+        """The last direct BI-UG-ADM administrator is protected on the group path too,
         mirroring UserViewSet."""
         admin_group = UserGroup.objects.get(name="BI-UG-ADM")
         sole_admin = admin_group.user_set.get()
 
-        url = reverse("user-groups-detail", args=[admin_group.id])
-        response = authenticated_client.patch(url, {"users": []}, format="json")
+        url = reverse("user-groups-remove-members", args=[admin_group.id])
+        response = authenticated_client.post(
+            url, {"users": [str(sole_admin.id)]}, format="json"
+        )
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert response.data.get("error") == "attemptToRemoveOnlyAdminUserGroup"

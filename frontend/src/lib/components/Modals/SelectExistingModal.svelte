@@ -27,13 +27,6 @@
 			fields: { field: string; translate?: boolean }[];
 			classes?: string;
 		};
-		// Extra fields prefixed to each option label (e.g. the owning folder).
-		// Defaults to the folder; pass [] for options that have no meaningful folder
-		// (e.g. users, which all live in the root folder) to avoid a dangling "/".
-		optionsExtraFields?: [string, string][];
-		// Object field used as the option label. Defaults to 'name'; use 'str' for
-		// models without a name (e.g. users, labelled by their display string).
-		optionsLabelField?: string;
 		lazy?: boolean;
 	}
 
@@ -48,8 +41,6 @@
 			fields: [],
 			classes: 'text-surface-500'
 		},
-		optionsExtraFields = [['folder', 'str']],
-		optionsLabelField = 'name',
 		lazy = false
 	}: Props = $props();
 
@@ -128,8 +119,7 @@
 				multiple
 				{lazy}
 				{optionsEndpoint}
-				{optionsExtraFields}
-				{optionsLabelField}
+				optionsExtraFields={[['folder', 'str']]}
 				{optionsInfoFields}
 				field={fieldName}
 				label={safeTranslate(label ?? fieldName)}

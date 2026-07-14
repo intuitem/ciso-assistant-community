@@ -7510,6 +7510,22 @@ class UserFilter(GenericFilterSet):
     exclude_current = df.BooleanFilter(
         method="filter_exclude_current", label="Exclude current user"
     )
+    # Per-column partial-match search for pickers (the exact-match email/
+    # first_name/last_name filters from Meta.fields are kept alongside these).
+    email__icontains = df.CharFilter(field_name="email", lookup_expr="icontains")
+    first_name__icontains = df.CharFilter(
+        field_name="first_name", lookup_expr="icontains"
+    )
+    last_name__icontains = df.CharFilter(
+        field_name="last_name", lookup_expr="icontains"
+    )
+    # Add-only member pickers: drop users already in the given group.
+    exclude_user_groups = df.UUIDFilter(method="filter_exclude_user_groups")
+
+    def filter_exclude_user_groups(self, queryset, name, value):
+        if value:
+            return queryset.exclude(user_groups__id=value)
+        return queryset
 
     def filter_approver(self, queryset, name, value):
         """we don't know yet which folders will be used, so filter on any folder"""
@@ -8013,31 +8029,18 @@ class UserGroupViewSet(BaseModelViewSet):
         DjangoFilterBackend,
         UserGroupFilter,
     ]
+    # Membership is a property of the *group* (folder = its domain), not of the
+    # globally-scoped User. Authorizing add/remove members on change_usergroup —
+    # checked against the group's folder by has_object_permission — lets a domain
+    # manager manage the membership of groups in their domain (and subdomains, via
+    # folder recursion) without holding change_user, which is Global-only.
+    permission_overrides = {
+        "add_members": "change_usergroup",
+        "remove_members": "change_usergroup",
+    }
 
     def get_queryset(self):
         return super().get_queryset().select_related("folder")
-
-    def update(self, request, *args, **kwargs):
-        # Membership is editable via the write serializer's ``users`` field. A PATCH
-        # here is gated by change_usergroup on the group's folder (RBACPermissions),
-        # so a domain manager can manage the membership of groups in their domain
-        # (and subdomains, via folder recursion) without holding change_user, which
-        # is Global-only. Only the M2M is touched — no User attribute is writable.
-        #
-        # Protect the last *direct* BI-UG-ADM administrator, mirroring UserViewSet,
-        # so membership management can never empty the lockout-proof admin anchor.
-        # BI-UG-ADM lives in the root folder, so only a global admin reaches this.
-        group = self.get_object()
-        if group.name == "BI-UG-ADM" and "users" in request.data:
-            members = request.data.get("users") or []
-            if isinstance(members, str):
-                members = [m for m in members.split(",") if m]
-            if not members:
-                return Response(
-                    {"error": "attemptToRemoveOnlyAdminUserGroup"},
-                    status=status.HTTP_403_FORBIDDEN,
-                )
-        return super().update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
         user_group = self.get_object()
@@ -8047,6 +8050,60 @@ class UserGroupViewSet(BaseModelViewSet):
                 status=status.HTTP_403_FORBIDDEN,
             )
         return super().destroy(request, *args, **kwargs)
+
+    def _member_ids(self, request) -> list[str]:
+        ids = request.data.get("users")
+        if isinstance(ids, str):
+            ids = [i for i in ids.split(",") if i]
+        ids = [i for i in (ids or []) if i]
+        if not ids:
+            raise DRFValidationError({"users": ["This field is required."]})
+        return ids
+
+    @action(detail=True, methods=["post"], url_path="add-members")
+    def add_members(self, request, pk=None):
+        """Add users to this group. Only the M2M through-rows are written — no User
+        attribute is touched — so membership management is granted without leaking
+        change_user. Authorized on the group's folder (see permission_overrides)."""
+        group = self.get_object()
+        users = User.objects.filter(pk__in=self._member_ids(request))
+        group.user_set.add(*users)
+        logger.info(
+            "users added to user group",
+            user_group=group,
+            users=list(users),
+            actor=request.user,
+        )
+        return Response({"count": group.user_set.count()})
+
+    @action(detail=True, methods=["post"], url_path="remove-members")
+    def remove_members(self, request, pk=None):
+        """Remove users from this group (batch). Same authorization as add_members.
+        Protects the last direct BI-UG-ADM administrator, mirroring UserViewSet, so
+        membership management can never strip the lockout-proof admin anchor."""
+        group = self.get_object()
+        ids = self._member_ids(request)
+
+        if group.name == "BI-UG-ADM":
+            direct_admin_count = User.objects.filter(
+                user_groups__name="BI-UG-ADM"
+            ).count()
+            removing = group.user_set.filter(pk__in=ids).count()
+            if direct_admin_count - removing < 1:
+                return Response(
+                    {"error": "attemptToRemoveOnlyAdminUserGroup"},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+
+        users = User.objects.filter(pk__in=ids)
+        group.user_set.remove(*users)
+        logger.info(
+            "users removed from user group",
+            user_group=group,
+            users=list(users),
+            actor=request.user,
+        )
+        return Response({"count": group.user_set.count()})
 
 
 class IdPGroupViewSet(BaseModelViewSet):
