@@ -7,7 +7,7 @@ from core.serializers import (
     UserWriteSerializer as CommunityUserWriteSerializer,
 )
 from core.serializer_fields import FieldsRelatedField
-from iam.models import Folder, RoleAssignment, User, Role
+from iam.models import RoleAssignment, User, Role
 from iam.cache_builders import get_folder_path, CacheNotReadyError
 import uuid
 
