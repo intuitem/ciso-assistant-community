@@ -1,4 +1,5 @@
 import uuid
+from collections import Counter
 from uuid import UUID
 
 from django.contrib.auth.models import Permission
@@ -67,6 +68,97 @@ class PostureAssessmentViewSet(BaseModelViewSet):
             }
         )
 
+    @action(detail=True, methods=["get"])
+    def tree(self, request, pk=None):
+        assessment = self.get_object()
+        asset_id = request.query_params.get("asset")
+
+        rows = assessment.current_posture()
+        if asset_id:
+            rows = [r for r in rows if str(r.asset_id) == asset_id]
+        counts_by_requirement = {}
+        row_by_requirement = {}
+        for r in rows:
+            counts_by_requirement.setdefault(r.requirement_id, Counter())[r.result] += 1
+            if asset_id:
+                row_by_requirement[r.requirement_id] = r
+
+        nodes = list(RequirementNode.objects.filter(framework=assessment.framework))
+        for node in nodes:
+            if node.order_id is None:
+                node.order_id = node.created_at
+        children = {}
+        for node in nodes:
+            children.setdefault(node.parent_urn, []).append(node)
+        for siblings in children.values():
+            siblings.sort(key=lambda n: n.order_id)
+
+        def serialize(node):
+            entry = {
+                "id": str(node.id),
+                "urn": node.urn,
+                "ref_id": node.ref_id,
+                "name": node.name,
+                "description": node.description,
+                "assessable": node.assessable,
+                "counts": dict(counts_by_requirement.get(node.id, {})),
+                "children": [serialize(c) for c in children.get(node.urn, [])],
+            }
+            for child in entry["children"]:
+                for result, count in child["counts"].items():
+                    entry["counts"][result] = entry["counts"].get(result, 0) + count
+            row = row_by_requirement.get(node.id)
+            if row:
+                entry["current"] = {
+                    "result": row.result,
+                    "timestamp": row.timestamp,
+                    "actual": row.actual,
+                    "expected": row.expected,
+                    "message": row.message,
+                }
+            return entry
+
+        return Response(
+            {
+                "tree": [serialize(n) for n in children.get(None, [])],
+                "assets": [
+                    {"id": str(a.id), "str": str(a)} for a in assessment.assets.all()
+                ],
+            }
+        )
+
+    @action(detail=True, methods=["get"])
+    def trend(self, request, pk=None):
+        assessment = self.get_object()
+        rows = assessment.results.order_by("timestamp", "created_at").values(
+            "asset_id", "requirement_id", "result", "run_id", "timestamp"
+        )
+        latest = {}
+        points = []
+        current_run = None
+        current_ts = None
+
+        def snapshot():
+            counts = Counter(latest.values())
+            applicable = counts["pass"] + counts["fail"]
+            score = round(100 * counts["pass"] / applicable, 1) if applicable else None
+            return {
+                "run_id": str(current_run),
+                "timestamp": current_ts,
+                "score": score,
+                "counts": dict(counts),
+            }
+
+        for row in rows:
+            if current_run is not None and row["run_id"] != current_run:
+                points.append(snapshot())
+            current_run = row["run_id"]
+            current_ts = row["timestamp"]
+            latest[(row["asset_id"], row["requirement_id"])] = row["result"]
+        if current_run is not None:
+            points.append(snapshot())
+        return Response({"points": points})
+
     @action(detail=True, methods=["post"], url_path="upload-results")
     def upload_results(self, request, pk=None):
         assessment = self.get_object()
@@ -114,6 +206,12 @@ class PostureAssessmentViewSet(BaseModelViewSet):
         else:
             run_id = uuid.uuid4()
 
+        source = request.data.get("source", PostureResult.Source.API)
+        if source not in PostureResult.Source.values:
+            return Response(
+                {"error": "invalid source"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
         timestamp = timezone.now()
         tool = request.data.get("tool", "")
 
@@ -146,7 +244,7 @@ class PostureAssessmentViewSet(BaseModelViewSet):
                     "expected": entry.get("expected", ""),
                     "message": entry.get("message", ""),
                     "tool": tool,
-                    "source": PostureResult.Source.API,
+                    "source": source,
                     "imported_by": request.user,
                 },
             )

@@ -7,17 +7,18 @@ import { nestedDeleteFormAction } from '$lib/utils/actions';
 
 export const load: PageServerLoad = async (event) => {
 	const endpoint = `${BASE_API_URL}/automation/posture-assessments/${event.params.id}`;
-	const [detailData, posture, actionPlan] = await Promise.all([
+	const [detailData, posture, actionPlan, trend] = await Promise.all([
 		loadDetail({
 			event,
 			model: getModelInfo('posture-assessments'),
 			id: event.params.id
 		}),
 		event.fetch(`${endpoint}/posture/`).then((res) => res.json()),
-		event.fetch(`${endpoint}/action-plan/`).then((res) => res.json())
+		event.fetch(`${endpoint}/action-plan/`).then((res) => res.json()),
+		event.fetch(`${endpoint}/trend/`).then((res) => res.json())
 	]);
 
-	return { ...detailData, posture, actionPlan };
+	return { ...detailData, posture, actionPlan, trend };
 };
 
 export const actions: Actions = {

@@ -2,6 +2,8 @@
 	import type { PageData, ActionData } from './$types';
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import PostureTrendChart from '$lib/components/Chart/PostureTrendChart.svelte';
+	import PostureHeatmapChart from '$lib/components/Chart/PostureHeatmapChart.svelte';
 	import { enhance } from '$app/forms';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -44,41 +46,26 @@
 		);
 	});
 
-	const cells = $derived.by(() => {
-		const map = new Map();
-		for (const row of results) map.set(`${row.requirement.id}:${row.asset.id}`, row);
-		return map;
-	});
-
-	const latestTimestamp = $derived(
-		results.reduce((acc: string, r: any) => (r.timestamp > acc ? r.timestamp : acc), '')
-	);
-
 	const counts = $derived.by(() => {
 		const acc: Record<string, number> = {};
 		for (const row of results) acc[row.result] = (acc[row.result] ?? 0) + 1;
 		return acc;
 	});
 
-	function cellTitle(row: any): string {
-		if (!row) return m.notMeasured();
-		const parts = [
-			resultLabels[row.result] ?? row.result,
-			new Date(row.timestamp).toLocaleString()
-		];
-		if (row.actual) parts.push(`actual: ${row.actual}`);
-		if (row.expected) parts.push(`expected: ${row.expected}`);
-		if (row.message) parts.push(row.message);
-		return parts.join(' — ');
-	}
-
-	function isStale(row: any): boolean {
-		return latestTimestamp !== '' && row.timestamp < latestTimestamp;
-	}
+	const trendPoints = $derived(data.trend?.points ?? []);
 </script>
 
 <div class="flex flex-col space-y-4">
 	<DetailView {data}>
+		{#snippet actions()}
+			<Anchor
+				href="/posture-assessments/{data.data.id}/tree"
+				class="btn preset-filled-primary-500 h-fit w-full"
+				label={m.treeView()}
+			>
+				<i class="fa-solid fa-folder-tree mr-2"></i>{m.treeView()}
+			</Anchor>
+		{/snippet}
 		{#snippet widgets()}
 			<div class="h-full flex flex-col space-y-4">
 				<div class="card p-4 bg-surface-50-950 shadow-xs">
@@ -117,73 +104,17 @@
 		{/snippet}
 	</DetailView>
 
+	{#if trendPoints.length > 1}
+		<div class="card p-4 bg-surface-50-950 shadow-xs">
+			<h3 class="text-lg font-semibold mb-2">{m.passRate()}</h3>
+			<PostureTrendChart points={trendPoints} name="posture_trend" />
+		</div>
+	{/if}
+
 	{#if results.length}
 		<div class="card p-4 bg-surface-50-950 shadow-xs">
-			<h3 class="text-lg font-semibold mb-4">{m.currentPosture()}</h3>
-			<div class="overflow-x-auto">
-				<table class="table-auto w-full text-sm">
-					<thead>
-						<tr>
-							<th class="text-left px-2 py-1 sticky left-0 bg-surface-50-950"></th>
-							{#each assets as asset (asset.id)}
-								<th
-									class="px-2 py-1 text-left whitespace-nowrap max-w-40 truncate"
-									title={asset.name}
-								>
-									{asset.name}
-								</th>
-							{/each}
-						</tr>
-					</thead>
-					<tbody>
-						{#each checks as check (check.id)}
-							<tr class="border-t border-surface-200-800">
-								<td
-									class="px-2 py-1 whitespace-nowrap sticky left-0 bg-surface-50-950 font-medium"
-									title={check.name}
-								>
-									{check.ref_id}
-									<span class="font-normal text-surface-600-400 hidden lg:inline">
-										{check.name?.length > 60 ? `${check.name.slice(0, 60)}…` : (check.name ?? '')}
-									</span>
-								</td>
-								{#each assets as asset (asset.id)}
-									{@const row = cells.get(`${check.id}:${asset.id}`)}
-									<td class="px-2 py-1">
-										{#if row}
-											<span
-												class="inline-block w-6 h-6 rounded-sm {postureResultTailwindColorMap[
-													row.result
-												]} {isStale(row) ? 'opacity-50' : ''}"
-												title={cellTitle(row)}
-											></span>
-										{:else}
-											<span
-												class="inline-block w-6 h-6 rounded-sm border border-dashed border-surface-300-700"
-												title={m.notMeasured()}
-											></span>
-										{/if}
-									</td>
-								{/each}
-							</tr>
-						{/each}
-					</tbody>
-				</table>
-			</div>
-			<div class="flex flex-wrap gap-4 mt-4 text-xs text-surface-600-400">
-				{#each Object.entries(resultLabels) as [value, label]}
-					<span class="flex items-center gap-1">
-						<span class="inline-block w-3 h-3 rounded-sm {postureResultTailwindColorMap[value]}"
-						></span>
-						{label}
-					</span>
-				{/each}
-				<span class="flex items-center gap-1">
-					<span class="inline-block w-3 h-3 rounded-sm border border-dashed border-surface-300-700"
-					></span>
-					{m.notMeasured()}
-				</span>
-			</div>
+			<h3 class="text-lg font-semibold mb-2">{m.currentPosture()}</h3>
+			<PostureHeatmapChart {results} {assets} name="posture_heatmap" />
 		</div>
 	{/if}
 
