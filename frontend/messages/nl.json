@@ -995,8 +995,14 @@
 	"mappingSuggestionTeasing": "Suggesties voor in kaart brengen zijn nu beschikbaar! U kunt de filters gebruiken om suggesties te verkennen op basis van geladen kaders.",
 	"hourCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Uur",
 				"countPlural=other": "{count} Uren"
@@ -1005,8 +1011,13 @@
 	],
 	"minuteCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Minuut",
 				"countPlural=other": "{count} Minuten"
@@ -1015,8 +1026,13 @@
 	],
 	"dayCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Dag",
 				"countPlural=other": "{count} Dagen"
@@ -1025,8 +1041,13 @@
 	],
 	"objectsNotVisible": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} object niet zichtbaar.",
 				"countPlural=other": "{count} objecten niet zichtbaar."
@@ -3046,8 +3067,14 @@
 	"errorFetching": "Kan de kaskade-informatie niet laden. Probeer het opnieuw.",
 	"cascadeAffectedNotice": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"count=0": "Geen andere objecten worden beïnvloed.",
 				"countPlural=one": "{count} gerelateerd object wordt niet verwijderd maar verliest een of meer relaties.",
@@ -3191,8 +3218,13 @@
 	"builderPublishModalDescription": "Hiermee wordt het live kader bijgewerkt. Bekijk de wijzigingen hieronder.",
 	"builderRequirementAdded": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} vereisten toegevoegd",
 				"countPlural=other": "{count} vereisten toegevoegd"
@@ -3201,8 +3233,13 @@
 	],
 	"builderQuestionsAddedSuffix": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} vragen",
 				"countPlural=other": "{count} vragen"
@@ -3211,8 +3248,13 @@
 	],
 	"builderRequirementRemoved": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} vereisten verwijderd",
 				"countPlural=other": "{count} vereisten verwijderd"
@@ -3221,8 +3263,13 @@
 	],
 	"builderQuestionsRemovedSuffix": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} vragen",
 				"countPlural=other": "{count} vragen"
@@ -3232,8 +3279,13 @@
 	"builderNoStructuralChanges": "Geen structurele wijzigingen gedetecteerd (alleen metadata).",
 	"builderBreakingChangesDetected": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} ingrijpende wijzigingen gedetecteerd",
 				"countPlural=other": "{count} ingrijpende wijzigingen gedetecteerd"
@@ -3243,8 +3295,13 @@
 	"builderBreakingChangesHint": "Deze wijzigingen kunnen invloed hebben op de scoring, zichtbaarheid of nalevingsresultaten in bestaande audits.",
 	"builderAffectedAudits": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} bestaande audits worden beïnvloed",
 				"countPlural=other": "{count} bestaande audits worden beïnvloed"
@@ -3282,8 +3339,13 @@
 	"builderNoRulesOrGroupsConfigured": "Geen regels of groepen geconfigureerd",
 	"builderOutcomeRuleSummary": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} uitkomstregels",
 				"countPlural=other": "{count} uitkomstregels"
@@ -3292,8 +3354,13 @@
 	],
 	"builderImplementationGroupsSummaryShort": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} groepen",
 				"countPlural=other": "{count} groepen"
@@ -3306,8 +3373,13 @@
 	"builderScoreScale": "Scoreschaal",
 	"builderScaleLevel": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} niveaus",
 				"countPlural=other": "{count} niveaus"
@@ -3377,8 +3449,13 @@
 	"builderAssessableLeaf": "Beoordeelbaar blad",
 	"builderAssessableWithChildren": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "Beoordeelbaar · {count} kind",
 				"countPlural=other": "Beoordeelbaar · {count} kinderen"
@@ -3387,8 +3464,13 @@
 	],
 	"builderGroupWithChildren": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "Groep · {count} kind",
 				"countPlural=other": "Groep · {count} kinderen"
@@ -3415,8 +3497,13 @@
 	"builderAddQuestion": "Vraag toevoegen",
 	"builderChildrenHidden": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} kind verborgen",
 				"countPlural=other": "{count} kinderen verborgen"
@@ -3444,8 +3531,14 @@
 	"builderChangeTypeWarning": "Het type wijzigen verwijdert bestaande keuzes. Doorgaan?",
 	"builderShownWhenAnswers": [
 		{
-			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"input ref",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "Getoond wanneer {ref} = {count} antwoorden",
 				"countPlural=other": "Getoond wanneer {ref} = {count} antwoorden"
@@ -3550,9 +3643,9 @@
 	"idpGroup": "IdP-groep",
 	"idpGroups": "IdP-groepen",
 	"idpGroupsDescription": "IdP-groepsfederatie inschakelen (SCIM-provisioning, IdP-groepskoppelingen en IdP-groepslidmaatschappen van gebruikers).",
-	"actual":"Werkelijk",
-	"actualCost":"Werkelijke kosten",
-	"diffFrom":"Van",
-	"diffTo":"Tot",
-	"color":"Kleur"
+	"actual": "Werkelijk",
+	"actualCost": "Werkelijke kosten",
+	"diffFrom": "Van",
+	"diffTo": "Tot",
+	"color": "Kleur"
 }
