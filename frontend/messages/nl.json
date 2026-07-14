@@ -3550,8 +3550,8 @@
 	"idpGroup": "IdP-groep",
 	"idpGroups": "IdP-groepen",
 	"idpGroupsDescription": "IdP-groepsfederatie inschakelen (SCIM-provisioning, IdP-groepskoppelingen en IdP-groepslidmaatschappen van gebruikers).",
-	"actual":"Actueel",
-	"actualCost":"Actuele kost",
+	"actual":"Werkelijk",
+	"actualCost":"Werkelijke kosten",
 	"diffFrom":"Van",
 	"diffTo":"Tot",
 	"color":"Kleur"
