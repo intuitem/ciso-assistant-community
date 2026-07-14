@@ -931,7 +931,7 @@ def _get_readable_draft(user, pk) -> "LibraryDraft | None":
 class LibraryDraftViewSet(BaseModelViewSet):
     """
     Interactive library packager. A draft is a document that serializes to
-    the same library YAML the tools/ Excel convertor produces; publishing
+    the same library YAML the tools/ Excel converter produces; publishing
     feeds that YAML to the existing stored-library loader — the single
     writer of live referential objects. The builder never touches live
     Framework/ReferenceControl/Threat/... rows itself.

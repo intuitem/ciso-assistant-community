@@ -687,7 +687,7 @@ class LibraryDraft(NameDescriptionMixin, FolderMixin):
     Work-in-progress library authored in the builder.
 
     A draft is a document: it serializes to the same library YAML the tools/
-    Excel convertor produces, and publishing means feeding that YAML to the
+    Excel converter produces, and publishing means feeding that YAML to the
     existing StoredLibrary/loader path. The builder never writes live
     referential objects (Framework/ReferenceControl/Threat/...) itself.
 
@@ -1422,7 +1422,7 @@ class LibraryUpdater:
                     # (not add-only): a link removed in the new version must be
                     # removed from the live node too.
                     new_threats = []
-                    for threat_urn in requirement_node.get("threats", []):
+                    for threat_urn in requirement_node.get("threats") or []:
                         normalized_threat_urn = threat_urn.lower()
                         threat_object = (
                             objects_tracked.get(normalized_threat_urn)
@@ -1435,7 +1435,7 @@ class LibraryUpdater:
 
                     # Sync reference_controls linked to the requirement_node.
                     new_reference_controls = []
-                    for rc_urn in requirement_node.get("reference_controls", []):
+                    for rc_urn in requirement_node.get("reference_controls") or []:
                         normalized_rc_urn = rc_urn.lower()
                         rc_object = (
                             objects_tracked.get(normalized_rc_urn)

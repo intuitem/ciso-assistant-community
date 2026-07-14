@@ -28,7 +28,6 @@
 	let open = $state(false);
 	let tab: 'existing' | 'create' = $state('existing');
 	let search = $state('');
-	let browsed: ReferentialCatalogSource[] = $state([]);
 	let browseError = $state(false);
 	let createRefId = $state('');
 	let createName = $state('');
@@ -43,7 +42,7 @@
 	const current = $derived([...new Set(node.node[kind] ?? [])]);
 	const catalogReady = $derived($catalogStore?.status === 'ready');
 
-	const sources = $derived([...($catalogStore?.catalog?.sources ?? []), ...browsed]);
+	const sources = $derived($catalogStore?.catalog?.sources ?? []);
 
 	const labelByUrn = $derived.by(() => {
 		const map = new Map<string, string>();
@@ -102,7 +101,18 @@
 		busy = true;
 		browseError = false;
 		try {
-			browsed = [...browsed, await apiBrowseReferenceLibrary(builder.apiTarget, libraryUrn)];
+			const source = await apiBrowseReferenceLibrary(builder.apiTarget, libraryUrn);
+			// Broadcast to the shared catalog so a library browsed in one picker
+			// is visible to every instance without re-fetching (mirrors
+			// createNew()). The guard avoids a duplicate source if two pickers
+			// browse the same library concurrently.
+			catalogStore?.update((state) => {
+				const catalogSources = state.catalog?.sources;
+				if (catalogSources && !catalogSources.some((s) => s.library_urn === source.library_urn)) {
+					catalogSources.push(source);
+				}
+				return { ...state };
+			});
 		} catch {
 			browseError = true;
 		} finally {

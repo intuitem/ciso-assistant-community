@@ -2,7 +2,7 @@
 Library builder helpers.
 
 The builder treats a work-in-progress library as a document (core.LibraryDraft)
-that serializes to the same library YAML the tools/ Excel convertor produces.
+that serializes to the same library YAML the tools/ Excel converter produces.
 Publishing routes that YAML through the existing StoredLibrary/loader path —
 the builder never writes live referential objects itself.
 
