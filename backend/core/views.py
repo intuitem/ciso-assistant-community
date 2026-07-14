@@ -837,6 +837,35 @@ def get_or_create_personal_folder(user):
     return folder
 
 
+class AutocompleteMixin:
+    """Adds a lightweight, server-paginated ``autocomplete`` action for entity
+    pickers (search/ordering/filtering come from the viewset's existing filter
+    backends). A model becomes pickable by mixing this in and either setting
+    ``autocomplete_fields`` (extra fields beyond id/str) or overriding
+    ``autocomplete_serializer_class``. The frontend proxies ``/{model}/autocomplete``
+    generically (see [model]/autocomplete/+server.ts)."""
+
+    autocomplete_serializer_class = None
+    autocomplete_fields: list[str] = []
+
+    def get_autocomplete_serializer_class(self):
+        if self.autocomplete_serializer_class:
+            return self.autocomplete_serializer_class
+        from core.serializers import build_autocomplete_serializer
+
+        return build_autocomplete_serializer(self.model, self.autocomplete_fields)
+
+    @action(detail=False, name="Lightweight autocomplete search")
+    def autocomplete(self, request):
+        qs = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(qs)
+        objects = page if page is not None else qs
+        serializer = self.get_autocomplete_serializer_class()(objects, many=True)
+        if page is not None:
+            return self.get_paginated_response(serializer.data)
+        return Response(serializer.data)
+
+
 class BaseModelViewSet(viewsets.ModelViewSet):
     filter_backends = [
         DjangoFilterBackend,
@@ -7804,7 +7833,7 @@ class TeamViewSet(BaseModelViewSet):
         )
 
 
-class UserViewSet(BaseModelViewSet):
+class UserViewSet(AutocompleteMixin, BaseModelViewSet):
     """
     API endpoint that allows users to be viewed or edited
     """
@@ -7813,6 +7842,7 @@ class UserViewSet(BaseModelViewSet):
     ordering = ["-is_active", "-is_superuser", "email", "id"]
     filterset_class = UserFilter
     search_fields = ["email", "first_name", "last_name"]
+    autocomplete_fields = ["first_name", "last_name", "email", "is_active"]
 
     def get_queryset(self):
         # Use base IAM filtering
@@ -7836,21 +7866,6 @@ class UserViewSet(BaseModelViewSet):
                 .only("id", "builtin", "name", "folder", "folder__name"),
             )
         )
-
-    @action(detail=False, name="Lightweight autocomplete search")
-    def autocomplete(self, request):
-        """Server-side search/pagination for user pickers (honours search_fields
-        and the ``id`` filter). Lets selects scale to large user counts without
-        loading every user into the browser."""
-        from core.serializers import UserAutocompleteSerializer
-
-        qs = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(qs)
-        objects = page if page is not None else qs
-        serializer = UserAutocompleteSerializer(objects, many=True)
-        if page is not None:
-            return self.get_paginated_response(serializer.data)
-        return Response(serializer.data)
 
     def update(self, request: Request, *args, **kwargs) -> Response:
         user = self.get_object()

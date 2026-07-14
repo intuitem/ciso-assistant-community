@@ -71,10 +71,13 @@
 	let includeInactive = $state(false);
 	let mode = $state<'list' | 'table'>('list');
 	let loading = $state(false);
+	let loadError = $state(false);
 	let saving = $state(false);
 	// Server-side sort: the column key, prefixed with '-' for descending. Empty = default.
 	let ordering = $state('');
 	let debounce: ReturnType<typeof setTimeout> | null = null;
+	// Monotonic request id: a slow earlier response must not overwrite a newer one.
+	let loadSeq = 0;
 
 	function buildParams(extra: Record<string, string> = {}) {
 		const p = new URLSearchParams();
@@ -104,17 +107,25 @@
 	}
 
 	async function load() {
+		const seq = ++loadSeq;
 		loading = true;
+		loadError = false;
 		try {
 			const p = buildParams({ limit: String(pageSize), offset: String(offset) });
 			const res = await fetch(`/${endpoint}/autocomplete?${p.toString()}`);
+			if (seq !== loadSeq) return; // superseded by a newer request
 			if (res.ok) {
 				const data = await res.json();
+				if (seq !== loadSeq) return;
 				rows = data?.results ?? data ?? [];
 				count = data?.count ?? rows.length;
+			} else {
+				loadError = true;
 			}
+		} catch {
+			if (seq === loadSeq) loadError = true;
 		} finally {
-			loading = false;
+			if (seq === loadSeq) loading = false;
 		}
 	}
 
@@ -283,6 +294,10 @@
 					<div class="flex items-center justify-center h-full text-surface-500">
 						<i class="fa-solid fa-circle-notch fa-spin"></i>
 					</div>
+				{:else if loadError}
+					<div class="flex items-center justify-center h-full text-error-500 text-sm">
+						<i class="fa-solid fa-triangle-exclamation mr-2"></i>{safeTranslate('error')}
+					</div>
 				{:else if rows.length === 0}
 					<div class="flex items-center justify-center h-full text-surface-500 text-sm">
 						{safeTranslate('noResults')}
@@ -371,6 +386,12 @@
 							<tr>
 								<td colspan={columns.length + 1} class="text-center py-16 text-surface-500">
 									<i class="fa-solid fa-circle-notch fa-spin"></i>
+								</td>
+							</tr>
+						{:else if loadError}
+							<tr>
+								<td colspan={columns.length + 1} class="text-center py-16 text-error-500 text-sm">
+									<i class="fa-solid fa-triangle-exclamation mr-2"></i>{safeTranslate('error')}
 								</td>
 							</tr>
 						{:else if rows.length === 0}

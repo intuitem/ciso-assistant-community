@@ -2137,19 +2137,23 @@ class UserWriteSerializer(BaseModelSerializer):
         return super().update(instance, validated_data)
 
 
-class UserAutocompleteSerializer(BaseModelSerializer):
-    """Minimal user representation for autocomplete selects. Enables server-side
-    search (via the viewset's search_fields) so pickers scale to large user counts
-    without loading every user client-side."""
+def build_autocomplete_serializer(model_cls, extra_fields=()):
+    """Build a lightweight serializer for autocomplete/entity pickers: ``id`` plus
+    the given fields, and always a display ``str``. Enables server-side search so
+    pickers scale to large datasets without loading every row client-side. Used by
+    core.views.AutocompleteMixin."""
 
-    class Meta:
-        model = User
-        fields = ["id", "first_name", "last_name", "email", "is_active"]
+    class _AutocompleteSerializer(BaseModelSerializer):
+        class Meta:
+            model = model_cls
+            fields = ["id", *extra_fields]
 
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        data["str"] = str(instance)
-        return data
+        def to_representation(self, instance):
+            data = super().to_representation(instance)
+            data["str"] = str(instance)
+            return data
+
+    return _AutocompleteSerializer
 
 
 class UserGroupReadSerializer(BaseModelSerializer):

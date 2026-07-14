@@ -2,13 +2,8 @@
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
-	import EntityPickerModal from '$lib/components/Modals/EntityPickerModal.svelte';
-	import {
-		getModalStore,
-		type ModalComponent,
-		type ModalSettings,
-		type ModalStore
-	} from '$lib/components/Modals/stores';
+	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import { openEntityPicker } from '$lib/utils/entityPicker';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import { invalidateAll } from '$app/navigation';
 	import type { PageData, ActionData } from './$types';
@@ -42,42 +37,33 @@
 
 	function addMembers(): void {
 		const groupId = data.data.id;
-		const modalComponent: ModalComponent = {
-			ref: EntityPickerModal,
-			props: {
-				endpoint: 'users',
-				title: m.addMembers(),
-				subtitle: data.data.name ?? data.data.str,
-				labelField: 'email',
-				secondaryField: 'str',
-				activeField: 'is_active',
-				columns: [
-					{ key: 'email', label: 'email', filter: 'icontains' },
-					{ key: 'first_name', label: 'firstName', filter: 'icontains' },
-					{ key: 'last_name', label: 'lastName', filter: 'icontains' }
-				],
-				// Add-only: exclude users already in the group so the picker only ever
-				// lists candidates to add. Removal is a batch action on the Users tab.
-				scopeFilters: { exclude_user_groups: groupId },
-				confirmLabel: m.addMembers(),
-				async onConfirm(ids: string[]) {
-					if (!ids.length) return;
-					const res = await fetch(`/user-groups/${groupId}/add-members`, {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({ users: ids })
-					});
-					if (res.ok) await invalidateAll();
-					else console.error('Failed to add members', await res.json());
-				}
+		openEntityPicker(modalStore, {
+			endpoint: 'users',
+			title: m.addMembers(),
+			subtitle: data.data.name ?? data.data.str,
+			labelField: 'email',
+			secondaryField: 'str',
+			activeField: 'is_active',
+			columns: [
+				{ key: 'email', label: 'email', filter: 'icontains' },
+				{ key: 'first_name', label: 'firstName', filter: 'icontains' },
+				{ key: 'last_name', label: 'lastName', filter: 'icontains' }
+			],
+			// Add-only: exclude users already in the group so the picker only ever
+			// lists candidates to add. Removal is a batch action on the Users tab.
+			scopeFilters: { exclude_user_groups: groupId },
+			confirmLabel: m.addMembers(),
+			async onConfirm(ids: string[]) {
+				if (!ids.length) return;
+				const res = await fetch(`/user-groups/${groupId}/add-members`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ users: ids })
+				});
+				if (res.ok) await invalidateAll();
+				else console.error('Failed to add members', await res.json());
 			}
-		};
-		const modal: ModalSettings = {
-			type: 'component',
-			component: modalComponent,
-			title: m.addMembers()
-		};
-		modalStore.trigger(modal);
+		});
 	}
 </script>
 
