@@ -3553,5 +3553,6 @@
 	"actual":"Actueel",
 	"actualCost":"Actuele kost",
 	"diffFrom":"Van",
-	"diffTo":"Tot"
+	"diffTo":"Tot",
+	"color":"Kleur"
 }
