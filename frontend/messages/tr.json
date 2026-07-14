@@ -1742,6 +1742,7 @@
 	"campaigns": "Kampanyalar",
 	"addCampaign": "Bir kampanya başlat",
 	"campaignDomainHelpText": "Kampanyanın ekleneceği etki alanı.",
+	"ebiosRmStudyDomainHelpText": "Etki alanının değiştirilmesi, çalışmayı ve tüm atölye nesnelerini seçilen etki alanına taşır.",
 	"averageProgress": "Ortalama ilerleme",
 	"daysRemaining": "Kalan gün",
 	"associatedFindingsAssessments": "İlişkili takipler",
