@@ -7803,6 +7803,11 @@ class UserViewSet(BaseModelViewSet):
         # but ensure current user is always included
         queryset = super().get_queryset() | User.objects.filter(pk=self.request.user.pk)
 
+        # The autocomplete path serializes only id/name/email — skip the
+        # user_groups prefetch so it stays lightweight at scale.
+        if self.action == "autocomplete":
+            return queryset.distinct()
+
         # Add prefetch for user_groups visibility
         viewable_user_group_ids = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), self.request.user, UserGroup
@@ -7815,6 +7820,21 @@ class UserViewSet(BaseModelViewSet):
                 .only("id", "builtin", "name", "folder", "folder__name"),
             )
         )
+
+    @action(detail=False, name="Lightweight autocomplete search")
+    def autocomplete(self, request):
+        """Server-side search/pagination for user pickers (honours search_fields
+        and the ``id`` filter). Lets selects scale to large user counts without
+        loading every user into the browser."""
+        from core.serializers import UserAutocompleteSerializer
+
+        qs = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(qs)
+        objects = page if page is not None else qs
+        serializer = UserAutocompleteSerializer(objects, many=True)
+        if page is not None:
+            return self.get_paginated_response(serializer.data)
+        return Response(serializer.data)
 
     def update(self, request: Request, *args, **kwargs) -> Response:
         user = self.get_object()
@@ -7996,6 +8016,28 @@ class UserGroupViewSet(BaseModelViewSet):
 
     def get_queryset(self):
         return super().get_queryset().select_related("folder")
+
+    def update(self, request, *args, **kwargs):
+        # Membership is editable via the write serializer's ``users`` field. A PATCH
+        # here is gated by change_usergroup on the group's folder (RBACPermissions),
+        # so a domain manager can manage the membership of groups in their domain
+        # (and subdomains, via folder recursion) without holding change_user, which
+        # is Global-only. Only the M2M is touched — no User attribute is writable.
+        #
+        # Protect the last *direct* BI-UG-ADM administrator, mirroring UserViewSet,
+        # so membership management can never empty the lockout-proof admin anchor.
+        # BI-UG-ADM lives in the root folder, so only a global admin reaches this.
+        group = self.get_object()
+        if group.name == "BI-UG-ADM" and "users" in request.data:
+            members = request.data.get("users") or []
+            if isinstance(members, str):
+                members = [m for m in members.split(",") if m]
+            if not members:
+                return Response(
+                    {"error": "attemptToRemoveOnlyAdminUserGroup"},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+        return super().update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
         user_group = self.get_object()

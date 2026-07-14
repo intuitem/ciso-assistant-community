@@ -4557,6 +4557,7 @@
 	"leader": "Leader",
 	"deputies": "Deputies",
 	"members": "Members",
+	"manageMembers": "Manage members",
 	"addTeam": "Add team",
 	"viewTeam": "View team",
 	"changeTeam": "Change team",

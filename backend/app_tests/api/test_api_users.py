@@ -249,3 +249,46 @@ class TestUsersAuthenticated:
         superuser.refresh_from_db()
 
         assert superuser.is_active is True
+
+
+@pytest.mark.django_db
+class TestUsersAutocomplete:
+    """The lightweight autocomplete endpoint powers user pickers at scale."""
+
+    def test_autocomplete_returns_display_string(self, authenticated_client):
+        User.objects.create_user(
+            "alice@tests.com", first_name="Alice", last_name="Smith", is_published=True
+        )
+
+        url = reverse("users-autocomplete")
+        response = authenticated_client.get(url)
+
+        assert response.status_code == status.HTTP_200_OK
+        rows = response.data["results"] if isinstance(response.data, dict) else response.data
+        alice = next(r for r in rows if r["email"] == "alice@tests.com")
+        assert alice["str"] == "Alice Smith"
+        assert "id" in alice
+
+    def test_autocomplete_search_filters(self, authenticated_client):
+        User.objects.create_user("needle@tests.com", is_published=True)
+        User.objects.create_user("haystack@tests.com", is_published=True)
+
+        url = reverse("users-autocomplete")
+        response = authenticated_client.get(url, {"search": "needle"})
+
+        assert response.status_code == status.HTTP_200_OK
+        rows = response.data["results"] if isinstance(response.data, dict) else response.data
+        emails = [r["email"] for r in rows]
+        assert "needle@tests.com" in emails
+        assert "haystack@tests.com" not in emails
+
+    def test_autocomplete_id_filter_hydrates_selection(self, authenticated_client):
+        target = User.objects.create_user("target@tests.com", is_published=True)
+        User.objects.create_user("other@tests.com", is_published=True)
+
+        url = reverse("users-autocomplete")
+        response = authenticated_client.get(url, {"id": str(target.id)})
+
+        assert response.status_code == status.HTTP_200_OK
+        rows = response.data["results"] if isinstance(response.data, dict) else response.data
+        assert [r["email"] for r in rows] == ["target@tests.com"]

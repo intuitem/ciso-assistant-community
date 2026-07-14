@@ -1,10 +1,12 @@
 import pytest
+from django.contrib.auth.models import Permission
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
+from knox.models import AuthToken
 from core.models import User
 
-from iam.models import RoleAssignment, UserGroup
+from iam.models import Folder, Role, RoleAssignment, UserGroup
 from test_vars import GROUPS_PERMISSIONS, TEST_USER_EMAIL
 
 
@@ -51,3 +53,144 @@ class TestUserGroups:
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert not UserGroup.objects.filter(id=non_builtin_group.id).exists()
+
+
+def _domain_manager_role() -> Role:
+    """A role holding change_usergroup + view_user but NOT change_user — the exact
+    shape of a domain manager, who can manage groups in their domain but has no
+    write access to the (Global-scoped) User object."""
+    role, _ = Role.objects.get_or_create(name="test domain manager")
+    role.permissions.set(
+        Permission.objects.filter(
+            codename__in=[
+                # view_folder is required for any object under the domain to be
+                # visible at all (see get_accessible_object_ids).
+                "view_folder",
+                "view_usergroup",
+                "change_usergroup",
+                "view_user",
+            ]
+        )
+    )
+    role.save()
+    return role
+
+
+def _client_for(user: User) -> APIClient:
+    client = APIClient()
+    token = AuthToken.objects.create(user=user)[1]
+    client.credentials(HTTP_AUTHORIZATION=f"Token {token}")
+    return client
+
+
+@pytest.mark.django_db
+class TestUserGroupMembership:
+    """A domain manager can manage the membership of groups in their domain by
+    PATCHing the group's ``users`` field, without holding change_user (Global-only).
+    Authorization is enforced on the group's folder via change_usergroup."""
+
+    def _setup_domain(self, name="D1"):
+        root = Folder.get_root_folder()
+        domain = Folder.objects.create(
+            name=name,
+            parent_folder=root,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        group = UserGroup.objects.create(name=f"{name} team", folder=domain)
+        manager = User.objects.create_user(f"dm-{name}@tests.com", is_published=True)
+        ra = RoleAssignment.objects.create(
+            user=manager,
+            role=_domain_manager_role(),
+            folder=domain,
+            is_recursive=True,
+        )
+        ra.perimeter_folders.add(domain)
+        ra.save()
+        return domain, group, manager
+
+    def test_domain_manager_can_add_member(self, app_config):
+        _, group, manager = self._setup_domain()
+        target = User.objects.create_user("member@tests.com", is_published=True)
+        client = _client_for(manager)
+
+        url = reverse("user-groups-detail", args=[group.id])
+        response = client.patch(url, {"users": [str(target.id)]}, format="json")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert group.user_set.filter(pk=target.pk).exists()
+
+    def test_domain_manager_can_remove_member(self, app_config):
+        """Set-semantics: PATCHing an empty (or reduced) list removes members."""
+        _, group, manager = self._setup_domain()
+        keep = User.objects.create_user("keep@tests.com", is_published=True)
+        drop = User.objects.create_user("drop@tests.com", is_published=True)
+        group.user_set.add(keep, drop)
+        client = _client_for(manager)
+
+        url = reverse("user-groups-detail", args=[group.id])
+        response = client.patch(url, {"users": [str(keep.id)]}, format="json")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert group.user_set.filter(pk=keep.pk).exists()
+        assert not group.user_set.filter(pk=drop.pk).exists()
+
+    def test_object_endpoint_exposes_current_members(self, app_config):
+        """The write-data (/object/) endpoint returns current members so the edit
+        form can preselect them."""
+        _, group, manager = self._setup_domain()
+        target = User.objects.create_user("member@tests.com", is_published=True)
+        group.user_set.add(target)
+        client = _client_for(manager)
+
+        url = reverse("user-groups-object", args=[group.id])
+        response = client.get(url)
+
+        assert response.status_code == status.HTTP_200_OK
+        assert str(target.id) in [str(u) for u in response.data["users"]]
+
+    def test_domain_manager_cannot_manage_group_outside_domain(self, app_config):
+        """Membership authorization follows the group's folder: a manager of D1 can't
+        touch a group belonging to a sibling domain D2."""
+        _, _, manager = self._setup_domain("D1")
+        _, other_group, _ = self._setup_domain("D2")
+        target = User.objects.create_user("member@tests.com", is_published=True)
+        client = _client_for(manager)
+
+        url = reverse("user-groups-detail", args=[other_group.id])
+        response = client.patch(url, {"users": [str(target.id)]}, format="json")
+
+        assert response.status_code in (
+            status.HTTP_403_FORBIDDEN,
+            status.HTTP_404_NOT_FOUND,
+        )
+        assert not other_group.user_set.filter(pk=target.pk).exists()
+
+    def test_domain_manager_cannot_edit_user_directly(self, app_config):
+        """Control: the manager still has no write access to the User object, so the
+        legacy user-form path stays Global-admin-only. Only the group-scoped path
+        is newly permitted."""
+        _, group, manager = self._setup_domain()
+        target = User.objects.create_user("member@tests.com", is_published=True)
+        client = _client_for(manager)
+
+        url = reverse("users-detail", args=[target.id])
+        response = client.patch(url, {"user_groups": [str(group.id)]}, format="json")
+
+        assert response.status_code in (
+            status.HTTP_403_FORBIDDEN,
+            status.HTTP_404_NOT_FOUND,
+        )
+        assert not group.user_set.filter(pk=target.pk).exists()
+
+    def test_cannot_empty_last_admin_group(self, authenticated_client):
+        """The direct BI-UG-ADM membership can't be emptied on the group path either,
+        mirroring UserViewSet."""
+        admin_group = UserGroup.objects.get(name="BI-UG-ADM")
+        sole_admin = admin_group.user_set.get()
+
+        url = reverse("user-groups-detail", args=[admin_group.id])
+        response = authenticated_client.patch(url, {"users": []}, format="json")
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.data.get("error") == "attemptToRemoveOnlyAdminUserGroup"
+        assert admin_group.user_set.filter(pk=sole_admin.pk).exists()

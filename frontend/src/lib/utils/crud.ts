@@ -878,7 +878,19 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'users',
 				disableCreate: true,
 				disableDelete: true,
-				folderPermsNeeded: [{ model: 'folder', action: 'change' }]
+				folderPermsNeeded: [{ model: 'folder', action: 'change' }],
+				// Manage membership from the group side: PATCHes the group's `users`
+				// field, gated by change_usergroup on the group's folder — so a domain
+				// manager can add/remove members without write access on the (Global)
+				// User object. The picker preselects current members; deselect = remove.
+				addExisting: {
+					parentField: 'users',
+					optionsEndpoint: 'users',
+					label: 'members',
+					optionsInfoFields: {
+						fields: [{ field: 'email' }]
+					}
+				}
 			}
 		],
 		filters: []
