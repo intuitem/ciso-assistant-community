@@ -7149,7 +7149,13 @@ class UserFilter(GenericFilterSet):
     exclude_user_groups = df.UUIDFilter(method="filter_exclude_user_groups")
 
     def filter_exclude_user_groups(self, queryset, name, value):
-        if value:
+        # Only honour the exclusion for a group the caller can actually read, so
+        # this endpoint can't be used to infer membership of groups they can't see.
+        if (
+            value
+            and self.request
+            and RoleAssignment.is_object_readable(self.request.user, UserGroup, value)
+        ):
             return queryset.exclude(user_groups__id=value)
         return queryset
 
@@ -7663,6 +7669,8 @@ class UserGroupViewSet(BaseModelViewSet):
             )
         return super().destroy(request, *args, **kwargs)
 
+    MEMBER_BATCH_LIMIT = 100
+
     def _member_ids(self, request) -> list[str]:
         ids = request.data.get("users")
         if isinstance(ids, str):
@@ -7670,6 +7678,10 @@ class UserGroupViewSet(BaseModelViewSet):
         ids = [i for i in (ids or []) if i]
         if not ids:
             raise DRFValidationError({"users": ["This field is required."]})
+        if len(ids) > self.MEMBER_BATCH_LIMIT:
+            raise DRFValidationError(
+                {"users": [f"Too many ids (max {self.MEMBER_BATCH_LIMIT})"]}
+            )
         return ids
 
     @action(detail=True, methods=["post"], url_path="add-members")

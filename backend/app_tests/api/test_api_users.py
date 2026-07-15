@@ -345,7 +345,7 @@ class TestUsersAutocomplete:
         folder = Folder.get_root_folder()
         group = UserGroup.objects.create(name="picker-grp", folder=folder)
         member = User.objects.create_user("member@tests.com", is_published=True)
-        outsider = User.objects.create_user("outsider@tests.com", is_published=True)
+        User.objects.create_user("outsider@tests.com", is_published=True)
         group.user_set.add(member)
 
         url = reverse("users-autocomplete")

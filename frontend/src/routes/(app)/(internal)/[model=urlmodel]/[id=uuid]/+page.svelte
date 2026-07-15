@@ -60,8 +60,13 @@
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({ users: ids })
 				});
-				if (res.ok) await invalidateAll();
-				else console.error('Failed to add members', await res.json());
+				if (!res.ok) {
+					// Throw so the picker keeps the selection and surfaces the failure
+					// instead of closing as if it succeeded.
+					console.error('Failed to add members', await res.json().catch(() => res.statusText));
+					throw new Error('Failed to add members');
+				}
+				await invalidateAll();
 			}
 		});
 	}
@@ -70,6 +75,7 @@
 {#if canManageMembers}
 	<div class="flex items-center justify-end mb-4">
 		<button
+			type="button"
 			class="btn preset-filled-primary-500"
 			data-testid="add-members-button"
 			onclick={addMembers}

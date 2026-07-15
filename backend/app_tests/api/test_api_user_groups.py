@@ -1,4 +1,5 @@
 import pytest
+from uuid import uuid4
 from django.contrib.auth.models import Permission
 from django.urls import reverse
 from rest_framework import status
@@ -186,3 +187,36 @@ class TestUserGroupMembership:
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert response.data.get("error") == "attemptToRemoveOnlyAdminUserGroup"
         assert admin_group.user_set.filter(pk=sole_admin.pk).exists()
+
+    def test_add_members_rejects_oversized_batch(self, app_config):
+        """The users list is capped, mirroring batch_action's limit."""
+        _, group, manager = self._setup_domain()
+        client = _client_for(manager)
+
+        url = reverse("user-groups-add-members", args=[group.id])
+        response = client.post(
+            url, {"users": [str(uuid4()) for _ in range(101)]}, format="json"
+        )
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_exclude_user_groups_ignored_when_group_not_readable(self, app_config):
+        """exclude_user_groups must not leak membership of groups the caller can't
+        read: a D1 manager excluding a D2 group has the filter ignored, so D2's
+        member still shows up in the autocomplete results."""
+        _, _, manager = self._setup_domain("D1")
+        _, d2_group, _ = self._setup_domain("D2")
+        d2_member = User.objects.create_user("d2member@tests.com", is_published=True)
+        d2_group.user_set.add(d2_member)
+        client = _client_for(manager)
+
+        url = reverse("users-autocomplete")
+        response = client.get(url, {"exclude_user_groups": str(d2_group.id)})
+
+        assert response.status_code == status.HTTP_200_OK
+        rows = (
+            response.data["results"]
+            if isinstance(response.data, dict)
+            else response.data
+        )
+        assert "d2member@tests.com" in [r["email"] for r in rows]

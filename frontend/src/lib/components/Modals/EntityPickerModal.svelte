@@ -3,44 +3,11 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import { getModalStore, type ModalStore } from './stores';
+	import type { EntityPickerOptions } from '$lib/utils/entityPicker';
 
-	interface Column {
-		key: string;
-		label: string;
-		// How a per-column filter maps to a query param: 'icontains' -> `${key}__icontains`,
-		// 'exact' -> `${key}`. Omit for a display-only column (no filter input).
-		filter?: 'icontains' | 'exact';
-		// Set false to make the column non-sortable (default: sortable via ?ordering).
-		sortable?: boolean;
-	}
-
-	interface Props {
-		parent: any;
-		// API resource whose `/{endpoint}/autocomplete` action backs the picker
-		// (server-side search, pagination, filters).
-		endpoint: string;
-		title?: string;
-		subtitle?: string;
-		// Object field used as the primary row label (default 'str').
-		labelField?: string;
-		// Optional secondary line under the label (e.g. 'email').
-		secondaryField?: string;
-		// Columns for the browse (table) mode.
-		columns?: Column[];
-		// Fixed query params applied to every request (e.g. scoping filters).
-		scopeFilters?: Record<string, string>;
-		// If set, renders an active/inactive badge from this boolean field and a
-		// "include inactive" toggle (default filters them out).
-		activeField?: string;
-		// Ids whose objects seed the selection tray (the current membership).
-		initialSelectedIds?: string[];
-		// Alternatively, seed the tray from a server-side filter (e.g. the current
-		// members of a group) so the caller needn't know the ids up front.
-		initialSelectedParams?: Record<string, string>;
-		confirmLabel?: string;
-		// Receives the final selected ids on confirm.
-		onConfirm: (ids: string[]) => Promise<void> | void;
-	}
+	// Canonical picker types live in entityPicker.ts; the modal just adds the
+	// Skeleton-injected `parent`.
+	type Props = EntityPickerOptions & { parent: any };
 
 	let {
 		parent,
@@ -73,6 +40,7 @@
 	let loading = $state(false);
 	let loadError = $state(false);
 	let saving = $state(false);
+	let saveError = $state(false);
 	// Server-side sort: the column key, prefixed with '-' for descending. Empty = default.
 	let ordering = $state('');
 	let debounce: ReturnType<typeof setTimeout> | null = null;
@@ -138,10 +106,16 @@
 		} else {
 			return;
 		}
-		const res = await fetch(`/${endpoint}/autocomplete?${p.toString()}`);
-		if (res.ok) {
-			const data = await res.json();
-			for (const o of data?.results ?? data ?? []) selected.set(o.id, o);
+		try {
+			const res = await fetch(`/${endpoint}/autocomplete?${p.toString()}`);
+			if (res.ok) {
+				const data = await res.json();
+				for (const o of data?.results ?? data ?? []) selected.set(o.id, o);
+			} else {
+				console.error(`Failed to hydrate ${endpoint} selection:`, res.status);
+			}
+		} catch (e) {
+			console.error(`Failed to hydrate ${endpoint} selection:`, e);
 		}
 	}
 
@@ -218,9 +192,15 @@
 
 	async function confirm() {
 		saving = true;
+		saveError = false;
 		try {
 			await onConfirm([...selected.keys()]);
+			// Only close once onConfirm has resolved without throwing.
 			parent?.onClose?.();
+		} catch (e) {
+			// Keep the modal open so the selection isn't lost and the failure is visible.
+			saveError = true;
+			console.error('Entity picker confirm failed:', e);
 		} finally {
 			saving = false;
 		}
@@ -410,10 +390,19 @@
 						{:else}
 							{#each rows as row}
 								<tr
+									tabindex="0"
+									role="button"
+									aria-pressed={selected.has(row.id)}
 									class="cursor-pointer hover:bg-surface-100-900 {selected.has(row.id)
 										? 'bg-primary-50-950'
 										: ''}"
 									onclick={() => toggle(row)}
+									onkeydown={(e) => {
+										if (e.key === 'Enter' || e.key === ' ') {
+											e.preventDefault();
+											toggle(row);
+										}
+									}}
 								>
 									<td class="w-6 py-2 pl-2">
 										<i
@@ -509,7 +498,12 @@
 			</div>
 		</div>
 
-		<footer class="flex justify-end gap-2 px-5 py-3 border-t border-surface-200-800">
+		<footer class="flex items-center justify-end gap-3 px-5 py-3 border-t border-surface-200-800">
+			{#if saveError}
+				<span class="mr-auto text-sm text-error-500">
+					<i class="fa-solid fa-triangle-exclamation mr-1"></i>{safeTranslate('error')}
+				</span>
+			{/if}
 			<button type="button" class="btn preset-tonal" onclick={parent.onClose}>{m.cancel()}</button>
 			<button
 				type="button"
