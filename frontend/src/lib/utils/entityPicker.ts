@@ -1,9 +1,5 @@
 import EntityPickerModal from '$lib/components/Modals/EntityPickerModal.svelte';
-import type {
-	ModalComponent,
-	ModalSettings,
-	ModalStore
-} from '$lib/components/Modals/stores';
+import type { ModalComponent, ModalSettings, ModalStore } from '$lib/components/Modals/stores';
 
 export interface EntityPickerColumn {
 	key: string;

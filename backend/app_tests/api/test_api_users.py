@@ -264,7 +264,11 @@ class TestUsersAutocomplete:
         response = authenticated_client.get(url)
 
         assert response.status_code == status.HTTP_200_OK
-        rows = response.data["results"] if isinstance(response.data, dict) else response.data
+        rows = (
+            response.data["results"]
+            if isinstance(response.data, dict)
+            else response.data
+        )
         alice = next(r for r in rows if r["email"] == "alice@tests.com")
         assert alice["str"] == "Alice Smith"
         assert "id" in alice
@@ -277,7 +281,11 @@ class TestUsersAutocomplete:
         response = authenticated_client.get(url, {"search": "needle"})
 
         assert response.status_code == status.HTTP_200_OK
-        rows = response.data["results"] if isinstance(response.data, dict) else response.data
+        rows = (
+            response.data["results"]
+            if isinstance(response.data, dict)
+            else response.data
+        )
         emails = [r["email"] for r in rows]
         assert "needle@tests.com" in emails
         assert "haystack@tests.com" not in emails
@@ -290,16 +298,26 @@ class TestUsersAutocomplete:
         response = authenticated_client.get(url, {"id": str(target.id)})
 
         assert response.status_code == status.HTTP_200_OK
-        rows = response.data["results"] if isinstance(response.data, dict) else response.data
+        rows = (
+            response.data["results"]
+            if isinstance(response.data, dict)
+            else response.data
+        )
         assert [r["email"] for r in rows] == ["target@tests.com"]
 
     def test_autocomplete_returns_active_flag(self, authenticated_client):
-        User.objects.create_user("inactive@tests.com", is_active=False, is_published=True)
+        User.objects.create_user(
+            "inactive@tests.com", is_active=False, is_published=True
+        )
 
         url = reverse("users-autocomplete")
         response = authenticated_client.get(url, {"search": "inactive"})
 
-        rows = response.data["results"] if isinstance(response.data, dict) else response.data
+        rows = (
+            response.data["results"]
+            if isinstance(response.data, dict)
+            else response.data
+        )
         assert rows[0]["is_active"] is False
 
     def test_autocomplete_column_icontains(self, authenticated_client):
@@ -313,7 +331,11 @@ class TestUsersAutocomplete:
         url = reverse("users-autocomplete")
         response = authenticated_client.get(url, {"first_name__icontains": "olfg"})
 
-        rows = response.data["results"] if isinstance(response.data, dict) else response.data
+        rows = (
+            response.data["results"]
+            if isinstance(response.data, dict)
+            else response.data
+        )
         emails = [r["email"] for r in rows]
         assert "picker@tests.com" in emails
         assert "other@tests.com" not in emails
@@ -329,7 +351,11 @@ class TestUsersAutocomplete:
         url = reverse("users-autocomplete")
         response = authenticated_client.get(url, {"exclude_user_groups": str(group.id)})
 
-        rows = response.data["results"] if isinstance(response.data, dict) else response.data
+        rows = (
+            response.data["results"]
+            if isinstance(response.data, dict)
+            else response.data
+        )
         emails = [r["email"] for r in rows]
         assert "member@tests.com" not in emails
         assert "outsider@tests.com" in emails

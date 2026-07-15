@@ -794,7 +794,9 @@
 			/>
 		{:else if selectable && selectedIds.size > 0}
 			<div class="flex items-center gap-3 px-2">
-				<span class="text-sm text-surface-700-300">{selectedIds.size} {safeTranslate('selected')}</span>
+				<span class="text-sm text-surface-700-300"
+					>{selectedIds.size} {safeTranslate('selected')}</span
+				>
 				{@render selectActions?.({
 					ids: [...selectedIds],
 					clear: clearSelection,

@@ -268,7 +268,12 @@
 			</button>
 			{#if activeField}
 				<label class="flex items-center gap-2 text-sm text-surface-600-400 whitespace-nowrap">
-					<input type="checkbox" class="checkbox" checked={includeInactive} onchange={toggleInactive} />
+					<input
+						type="checkbox"
+						class="checkbox"
+						checked={includeInactive}
+						onchange={toggleInactive}
+					/>
 					{safeTranslate('includeInactive')}
 				</label>
 			{/if}
@@ -314,7 +319,9 @@
 							onclick={() => toggle(row)}
 						>
 							<i
-								class="fa-{selected.has(row.id) ? 'solid' : 'regular'} fa-square{selected.has(row.id)
+								class="fa-{selected.has(row.id) ? 'solid' : 'regular'} fa-square{selected.has(
+									row.id
+								)
 									? '-check'
 									: ''} text-lg {selected.has(row.id) ? 'text-primary-500' : 'text-surface-400'}"
 							></i>
@@ -396,10 +403,7 @@
 							</tr>
 						{:else if rows.length === 0}
 							<tr>
-								<td
-									colspan={columns.length + 1}
-									class="text-center py-16 text-surface-500 text-sm"
-								>
+								<td colspan={columns.length + 1} class="text-center py-16 text-surface-500 text-sm">
 									{safeTranslate('noResults')}
 								</td>
 							</tr>
