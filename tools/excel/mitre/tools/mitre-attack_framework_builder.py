@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-r"""Build the CISO Assistant MITRE ATT&CK Excel library.
+"""Build the CISO Assistant MITRE ATT&CK Excel library.
 
 The complete pipeline is handled by this script:
 
@@ -7,12 +7,25 @@ The complete pipeline is handled by this script:
 2. Read the ATT&CK version from the JSON file's latest release commit.
 3. Export the legacy intermediate techniques/measures workbooks.
 4. Build the final, versioned CISO Assistant workbook.
-5. Delete downloaded and intermediate files unless ``-k/--keep`` is used.
+5. Delete downloaded and intermediate files unless `-k/--keep` is used.
 
-Run from PowerShell:
+Run from shell:
 
-    python .\mitre-attack_framework_builder.py
-    python .\mitre-attack_framework_builder.py --keep
+    python ./mitre-attack_framework_builder.py
+    python ./mitre-attack_framework_builder.py --keep
+
+Manual steps for French translations in the final workbook:
+
+- To activate the French translation formulas, manually remove the `@` in
+  front of the `=`. Excel's Find and Replace tool can help, but process about
+  100 cells at a time instead of replacing every cell at once to avoid hitting
+  the translation API limit too quickly.
+- After the formulas finish translating, copy the translated cells and paste
+  them back into the same location using Paste Values. This ensures that the
+  exported YAML contains the actual translations; otherwise, it may contain
+  unexpected formula-related text instead.
+- Some source text may be too long for the translation function. Translate
+  those cells manually (e.g. with DeepL).
 """
 
 from __future__ import annotations
@@ -502,9 +515,8 @@ def build_final_workbook(
     mitigations_content = workbook.create_sheet(MITIGATIONS_CONTENT_SHEET)
 
     library_name = f"Mitre ATT&CK v{version} - Threats and Mitigations"
-    # Keep the French formulas as text so Excel does not calculate them when
-    # the workbook opens. Remove the leading apostrophe manually to activate
-    # each TRADUIRE formula.
+    # See the module docstring for the manual steps required to activate the
+    # French translation formulas and replace them with their resulting values.
     append_meta_rows(
         library_meta,
         (
