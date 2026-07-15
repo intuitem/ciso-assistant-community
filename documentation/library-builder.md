@@ -4,9 +4,11 @@
 
 The library builder is an **interactive packager**: a tool for authoring a
 library (the same artifact the `tools/` Excel converter produces), edited in the
-UI instead of a spreadsheet. It produces a **library YAML**. "Publishing" means
-**loading that YAML like any other library** — in this instance or any other,
-identically.
+UI instead of a spreadsheet. It produces a **library YAML** that **loads like
+any other library** — in this instance or any other, identically (no bespoke
+path). "Publishing" is the user-decided transition that **commits the library's
+identity** (freezes its URNs); loading *or* exporting the library provokes it,
+since either is proof the identity is committed.
 
 It is a *library* builder, not a framework builder: one library can hold any mix
 of object types (framework, reference controls, threats, risk matrix, mappings,
@@ -72,17 +74,35 @@ Free choice does not preclude conflict-checking. Two complementary layers:
 ## Lifecycle
 
 ```
-choose packager+ref_id  →  design objects (draft, identity editable)  →  publish = load (identity frozen)  →  re-edit/re-publish = update-by-URN
+choose packager+ref_id  →  design objects (draft, identity editable)  →  publish = commit identity (URNs frozen)  →  re-edit  →  re-publish (version bump) = update-by-URN
 ```
 
 - **Draft (unpublished):** `packager`/`ref_id` freely editable. Changing either
   regenerates the URN family across the document — cheap and safe because it's a
   document (no live objects, no dependents, no migration).
-- **Published (loaded/distributed):** identity is **frozen** and immutable —
-  dependencies, mappings, and audits reference it by URN. Re-publishing updates
-  the existing library in place via `update_or_create(urn=…)`.
-- **Editability** = "still a draft, not yet loaded" — not "`framework.urn IS
-  NULL`". The old null-URN editability hack is retired.
+- **Publish = commit identity.** Publishing is the user-decided transition that
+  **freezes the identity** (the URN family) and snapshots the published version +
+  content hash. It is distinct from *loading*:
+  - `publish` loads by default (materializes live objects through the loader),
+    but `load:false` **commits identity only** — freeze the URNs without loading.
+  - **Loading and exporting also provoke publication:** a loaded or exported
+    library is proof its identity is committed, so both freeze it if it wasn't
+    already. (You don't always have a load as proof — hence the commit-only path.)
+- **Published (identity frozen):** identity is immutable — dependencies,
+  mappings, and audits reference it by URN. Re-publishing updates the existing
+  library in place via `update_or_create(urn=…)`.
+- **Re-publishing changed content requires a version bump.** The draft carries a
+  deterministic content fingerprint (`librarydraft_fingerprint`);
+  `has_unpublished_changes` = identity frozen **and** the fingerprint differs
+  from the last published one. Re-publishing then demands a higher `version`
+  (`versionBumpRequired`); re-publishing unchanged content is refused
+  (`nothingToPublish`).
+- **Three states** drive the editor's status badge:
+  - **Draft** — not yet published; identity still editable.
+  - **Live** — published with no changes since (`identity_locked`, fingerprint matches).
+  - **Unpublished changes** — published but edited since (`has_unpublished_changes`).
+- **Identity editability** = "still unpublished" — not "`framework.urn IS NULL`".
+  The old null-URN editability hack is retired.
 
 ## Cloning / extraction
 
@@ -135,8 +155,8 @@ its identity is **yours**:
 - **Adopt (identity preserved).** Import a library *you own* (e.g. one you've
   been maintaining via the `tools/` Excel pipeline) into a `LibraryDraft`
   **keeping its `packager`/`ref_id`** and all URNs as-is (no rebase). You then
-  maintain it in the builder instead of Excel; publish = load =
-  `update_or_create(urn=…)` updates it in place. This is the inverse of publish
+  maintain it in the builder instead of Excel; publishing loads it and
+  `update_or_create(urn=…)` updates it in place. Adopt is the inverse of export
   (YAML → draft).
 - **Clone (identity rebased).** Import a library you *don't* own into a draft
   under a *new* `packager`/`ref_id` (the selective-extraction flow above).
