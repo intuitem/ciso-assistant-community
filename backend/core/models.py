@@ -25,7 +25,7 @@ from django.core.validators import (
 )
 from django.core.files.storage import default_storage
 from django.db import models, transaction
-from django.db.models import F, Q, OuterRef, Subquery, Prefetch, Count
+from django.db.models import F, Q, Exists, OuterRef, Subquery, Prefetch, Count
 from django.db.models.query import QuerySet
 from django.forms.models import model_to_dict
 from django.urls import reverse
@@ -8373,21 +8373,30 @@ class ComplianceAssessment(Assessment):
 
     def _get_progress_counts(self) -> tuple[int, int]:
         """
-        Return (total, assessed) counts for assessable requirements
+        Return (total, assessed) counts for assessable requirements.
+
+        "Assessed" follows the progress cascade documented on
+        RequirementAssessment.progress_assessed_q.
         """
 
         requirements = RequirementAssessment.objects.filter(
             compliance_assessment=self, requirement__assessable=True
         )
+        result_visible = self._auditor_visible("result")
+        framework_has_questions = self.has_questions
+        if framework_has_questions:
+            requirements = requirements.annotate(
+                _has_questions=RequirementAssessment.has_questions_subquery()
+            )
+        assessed_filter = RequirementAssessment.progress_assessed_q(
+            result_visible=result_visible,
+            has_questions_annotation=framework_has_questions,
+        )
 
         if not self.selected_implementation_groups:
             counts = requirements.aggregate(
                 total=Count("id"),
-                assessed=Count(
-                    "id",
-                    filter=~Q(result=RequirementAssessment.Result.NOT_ASSESSED)
-                    | Q(score__isnull=False),
-                ),
+                assessed=Count("id", filter=assessed_filter),
             )
             return counts["total"], counts["assessed"]
 
@@ -8397,6 +8406,7 @@ class ComplianceAssessment(Assessment):
         lightweight_requirements = (
             requirements.select_related("requirement")
             .only(
+                "status",
                 "result",
                 "score",
                 "requirement_id",
@@ -8413,10 +8423,14 @@ class ComplianceAssessment(Assessment):
                 continue
 
             total += 1
-            if (
-                requirement_assessment.result
-                != RequirementAssessment.Result.NOT_ASSESSED
-            ) or requirement_assessment.score is not None:
+            if requirement_assessment.is_assessed_for_progress(
+                has_questions=(
+                    requirement_assessment._has_questions
+                    if framework_has_questions
+                    else False
+                ),
+                result_visible=result_visible,
+            ):
                 assessed += 1
 
         return total, assessed
@@ -8829,6 +8843,55 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         ca = self.compliance_assessment
         _defer_once("_pending_metrics_updates", ca.pk, ca.upsert_daily_metrics)
 
+    # Audit progress cascade (documentation/architecture/audit-progress-spec.md):
+    #   1. status used (!= to_do): only `done` counts, in_progress/in_review block
+    #   2. requirement has questions: questionnaire carriers (result set by the
+    #      result-driven path, or score committed by the complete-questionnaire
+    #      discipline in recompute_assessment)
+    #   3. result visible on the audit: result set
+    #   4. score-only audit: score set
+    # `progress_assessed_q` and `is_assessed_for_progress` are the SQL and
+    # Python forms of the same cascade and MUST stay in sync. Both operate on
+    # scalar fields only: answer/visibility resolution happens at write time.
+
+    @classmethod
+    def has_questions_subquery(cls) -> Exists:
+        """Per-RA `Exists` for annotating `_has_questions` on RA querysets."""
+        return Exists(
+            Question.objects.filter(requirement_node_id=OuterRef("requirement_id"))
+        )
+
+    @classmethod
+    def progress_assessed_q(
+        cls, *, result_visible: bool, has_questions_annotation: bool
+    ) -> Q:
+        """Filter for RAs counting as assessed in audit progress.
+
+        When `has_questions_annotation` is True the queryset must be annotated
+        with `_has_questions` (see `has_questions_subquery`); pass False when
+        the audit's framework has no questions to skip that branch entirely.
+        """
+        result_assessed = ~Q(result=cls.Result.NOT_ASSESSED)
+        score_assessed = Q(score__isnull=False)
+        content = result_assessed if result_visible else score_assessed
+        if has_questions_annotation:
+            content = (Q(_has_questions=True) & (result_assessed | score_assessed)) | (
+                Q(_has_questions=False) & content
+            )
+        return Q(status=cls.Status.DONE) | (Q(status=cls.Status.TODO) & content)
+
+    def is_assessed_for_progress(
+        self, *, has_questions: bool, result_visible: bool
+    ) -> bool:
+        """In-memory form of `progress_assessed_q` for prefetched/iterated RAs."""
+        if self.status != self.Status.TODO:
+            return self.status == self.Status.DONE
+        result_assessed = self.result != self.Result.NOT_ASSESSED
+        score_assessed = self.score is not None
+        if has_questions:
+            return result_assessed or score_assessed
+        return result_assessed if result_visible else score_assessed
+
     def get_visible_questions_counts(self) -> tuple[int, int]:
         """Return (visible_questions_count, answered_visible_questions_count) for this assessment."""
         # Use prefetched objects if available
@@ -8939,7 +9002,13 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                         if resolved_cr is not None:
                             results.append(resolved_cr)
 
-        if is_score_computed:
+        # A score is only committed once every visible question has an answer:
+        # a committed score marks the RA as assessed in the progress cascade,
+        # so a partially answered questionnaire must not produce one.
+        questionnaire_complete = (
+            visible_questions > 0 and answered_visible_questions == visible_questions
+        )
+        if is_score_computed and questionnaire_complete:
             if aggregation == "mean" and total_weight > 0:
                 computed_score = total_score / total_weight
             else:
@@ -8947,7 +9016,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             new_score = max(min(int(computed_score), max_score), min_score)
         else:
             new_score = None
-        new_is_scored = is_score_computed
+        new_is_scored = is_score_computed and questionnaire_complete
 
         # `is_result_driven` was set inline during the question pass: True iff
         # at least one choice carries a resolvable `compute_result`. For

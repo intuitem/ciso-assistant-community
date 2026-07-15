@@ -9975,8 +9975,7 @@ class JourneyViewSet(BaseModelViewSet):
         for ref_name, obj_id in (journey.object_refs or {}).items():
             try:
                 ca = readable_ca_qs.get(id=obj_id, folder=folder)
-                total_ra = ca.requirement_assessments.count()
-                assessed_ra = ca.requirement_assessments.exclude(status="to_do").count()
+                total_ra, assessed_ra = ca._get_progress_counts()
                 compliance_stats[ref_name] = {
                     "name": ca.name,
                     "total": total_ra,
@@ -10336,35 +10335,59 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         cost is independent of the total RA table size.
 
         Only the no-implementation-groups case is computed here; audits
-        with `selected_implementation_groups` still rely on the prefetched
-        `requirement_assessments` for in-Python IG filtering inside
-        `ComplianceAssessmentListSerializer.get_progress`.
+        with `selected_implementation_groups` fall back to the model's
+        cascade counts inside `ComplianceAssessmentListSerializer.get_progress`.
         """
+        from core.utils import resolve_visibility_from_overrides
+
         optimized_data = super()._get_optimized_object_data(queryset)
         audit_ids = [a.id for a in queryset]
         if not audit_ids:
             return optimized_data
 
-        not_assessed = RequirementAssessment.Result.NOT_ASSESSED
+        # `result` visibility is per-audit configuration, so the single
+        # GROUP BY computes both cascade variants and Python picks per audit.
         rows = (
             RequirementAssessment.objects.filter(
                 compliance_assessment_id__in=audit_ids,
                 requirement__assessable=True,
             )
+            .annotate(_has_questions=RequirementAssessment.has_questions_subquery())
             .values("compliance_assessment_id")
             .annotate(
                 total=Count("id"),
-                assessed=Count(
+                assessed_result_visible=Count(
                     "id",
-                    filter=~Q(result=not_assessed) | Q(score__isnull=False),
+                    filter=RequirementAssessment.progress_assessed_q(
+                        result_visible=True, has_questions_annotation=True
+                    ),
                 ),
+                assessed_result_hidden=Count(
+                    "id",
+                    filter=RequirementAssessment.progress_assessed_q(
+                        result_visible=False, has_questions_annotation=True
+                    ),
+                ),
+            )
+        )
+        visibility_by_id = dict(
+            ComplianceAssessment.objects.filter(id__in=audit_ids).values_list(
+                "id", "field_visibility"
             )
         )
         total_map: dict = {}
         assessed_map: dict = {}
         for r in rows:
-            total_map[r["compliance_assessment_id"]] = r["total"]
-            assessed_map[r["compliance_assessment_id"]] = r["assessed"]
+            ca_id = r["compliance_assessment_id"]
+            result_pair = resolve_visibility_from_overrides(
+                visibility_by_id.get(ca_id), "result"
+            )
+            total_map[ca_id] = r["total"]
+            assessed_map[ca_id] = (
+                r["assessed_result_visible"]
+                if result_pair.get("auditor", "edit") != "hidden"
+                else r["assessed_result_hidden"]
+            )
         optimized_data["total_requirements"] = total_map
         optimized_data["assessed_requirements"] = assessed_map
         return optimized_data
@@ -10425,36 +10448,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         # Custom detail actions (tree, global_score, donut_data, etc.)
         # use lightweight querysets — they don't need full prefetches.
 
-        # The `total_requirements` / `assessed_requirements` Count(distinct=True)
-        # annotations are catastrophic on the list path: each one forces
-        # SQLite to materialise a temp B-tree over the full LEFT JOIN of
-        # the requirement_assessments table per row, and the two together
-        # account for the ~2.7s single-query cost on /compliance-assessments/.
-        # On the list path we compute the same numbers in `_get_optimized_object_data`
-        # via a single GROUP BY bounded by the page (≤ page_size audits).
-        # Retrieve still uses the annotations because the cost is trivial
-        # at one row.
-        if self.action != "list":
-            qs = qs.annotate(
-                total_requirements=Count(
-                    "requirement_assessments",
-                    filter=Q(requirement_assessments__requirement__assessable=True),
-                    distinct=True,
-                ),
-                assessed_requirements=Count(
-                    "requirement_assessments",
-                    filter=Q(
-                        Q(
-                            ~Q(
-                                requirement_assessments__result=RequirementAssessment.Result.NOT_ASSESSED
-                            )
-                        )
-                        | Q(requirement_assessments__score__isnull=False),
-                        requirement_assessments__requirement__assessable=True,
-                    ),
-                    distinct=True,
-                ),
-            )
+        # Progress is computed through the model's cascade counts
+        # (`ComplianceAssessment._get_progress_counts`): one GROUP BY bounded
+        # by the page on the list path (`_get_optimized_object_data`), one
+        # scalar aggregate per object on detail paths. The former
+        # total/assessed `Count(distinct=True)` annotations were catastrophic
+        # on SQLite (temp B-tree over the full RA LEFT JOIN per row, ~2.7s on
+        # /compliance-assessments/) and must not come back.
 
         return qs
 
@@ -12198,39 +12198,25 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
             ca = assignment.compliance_assessment
             ra_ids = assignment.requirement_assessments.values_list("id", flat=True)
-            ras = RequirementAssessment.objects.filter(
-                id__in=ra_ids, requirement__assessable=True
-            )
-            total = ras.count()
-            done = ras.exclude(result="not_assessed").count()
-
-            # Use question-based progress when framework has questions
-            has_questions = (
-                Question.objects.filter(
-                    requirement_node__framework=ca.framework
-                ).exists()
-                if ca.framework
-                else False
-            )
-
-            if has_questions:
-                total_q = 0
-                answered_q = 0
-                for ra in ras.prefetch_related(
-                    "answers",
-                    "answers__question",
-                    "answers__selected_choices",
-                    "requirement__questions",
-                    "requirement__questions__choices",
-                ):
-                    v, a = ra.get_visible_questions_counts()
-                    total_q += v
-                    answered_q += a
-                progress_percent = (
-                    round(answered_q / total_q * 100) if total_q > 0 else 0
+            counts = (
+                RequirementAssessment.objects.filter(
+                    id__in=ra_ids, requirement__assessable=True
                 )
-            else:
-                progress_percent = round(done / total * 100) if total > 0 else 0
+                .annotate(_has_questions=RequirementAssessment.has_questions_subquery())
+                .aggregate(
+                    total=Count("id"),
+                    done=Count(
+                        "id",
+                        filter=RequirementAssessment.progress_assessed_q(
+                            result_visible=ca._auditor_visible("result"),
+                            has_questions_annotation=True,
+                        ),
+                    ),
+                )
+            )
+            total = counts["total"]
+            done = counts["done"]
+            progress_percent = round(done / total * 100) if total > 0 else 0
 
             actor_names = ", ".join(str(a) for a in assignment.actor.all())
 

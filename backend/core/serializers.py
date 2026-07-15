@@ -2797,26 +2797,10 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     )
 
     def get_progress(self, obj):
-        if not obj.selected_implementation_groups:
-            total = getattr(obj, "total_requirements", 0)
-            assessed = getattr(obj, "assessed_requirements", 0)
-        else:
-            selected_groups = set(obj.selected_implementation_groups)
-            ras = [
-                ra
-                for ra in obj.requirement_assessments.all()
-                if selected_groups & set(ra.requirement.implementation_groups or [])
-            ]
-            total = len(ras)
-            assessed = len(
-                [
-                    ra
-                    for ra in ras
-                    if ra.result != RequirementAssessment.Result.NOT_ASSESSED
-                    or ra.score is not None
-                ]
-            )
-        return int((assessed / total) * 100) if total else 0
+        # Detail-oriented serializer: delegate to the model's cascade-based
+        # counts (scalar aggregate, IG-aware). See
+        # RequirementAssessment.progress_assessed_q for the cascade.
+        return obj.progress
 
     def get_answers_progress(self, obj):
         if not obj.has_questions:
@@ -2879,24 +2863,10 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
             optimized_data = self.context.get("optimized_data") or {}
             total = optimized_data.get("total_requirements", {}).get(obj.id, 0)
             assessed = optimized_data.get("assessed_requirements", {}).get(obj.id, 0)
-        else:
-            # Use prefetched requirement_assessments filtered by implementation groups
-            selected_groups = set(obj.selected_implementation_groups)
-            ras = [
-                ra
-                for ra in obj.requirement_assessments.all()
-                if selected_groups & set(ra.requirement.implementation_groups or [])
-            ]
-            total = len(ras)
-            assessed = len(
-                [
-                    ra
-                    for ra in ras
-                    if ra.result != RequirementAssessment.Result.NOT_ASSESSED
-                    or ra.score is not None
-                ]
-            )
-        return int((assessed / total) * 100) if total else 0
+            return int((assessed / total) * 100) if total else 0
+        # Audits with implementation groups: the model walks scalar-only RAs
+        # with the same cascade (bounded to the page's IG audits).
+        return obj.progress
 
     class Meta:
         model = ComplianceAssessment
@@ -3072,13 +3042,21 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                     compliance_assessment=updated_instance
                 ).update(folder=updated_instance.folder)
 
-            # Toggle is_scored on all requirement assessments when scoring visibility flips
+            # Toggle is_scored on all requirement assessments when scoring visibility flips.
+            # RAs whose requirement has questions are excluded: their score and
+            # is_scored belong to recompute_assessment (a committed score means
+            # "questionnaire complete" for the progress cascade), so they must
+            # never be pre-filled.
             if updated_instance.scoring_enabled != old_scoring_enabled:
-                assessable_ras = RequirementAssessment.objects.filter(
-                    compliance_assessment=updated_instance,
-                    requirement__assessable=True,
-                ).exclude(
-                    result=RequirementAssessment.Result.NOT_APPLICABLE,
+                assessable_ras = (
+                    RequirementAssessment.objects.filter(
+                        compliance_assessment=updated_instance,
+                        requirement__assessable=True,
+                    )
+                    .exclude(
+                        result=RequirementAssessment.Result.NOT_APPLICABLE,
+                    )
+                    .exclude(requirement__questions__isnull=False)
                 )
                 if updated_instance.scoring_enabled:
                     # Turn on: set is_scored=True, initialize score to the RA's
