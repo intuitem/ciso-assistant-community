@@ -99,9 +99,16 @@ def _build_saml_logout_url(request, provider, slo_state) -> str | None:
 
 def _pop_slo_state(request: HttpRequest) -> dict | None:
     slo_state = request.session.pop(SLO_SESSION_KEY, None)
-    if slo_state:
-        return slo_state
+    # The allauth headless session must die server-side no matter which
+    # session yielded the SLO state — deleting only its cookie would leave
+    # the session token replayable until expiry.
+    token_state = _pop_allauth_token_session(request)
+    return slo_state or token_state
 
+
+def _pop_allauth_token_session(request: HttpRequest) -> dict | None:
+    """Delete the allauth headless session referenced by the session-token
+    cookie, returning any SLO state it held."""
     session_token = request.COOKIES.get(ALLAUTH_SESSION_TOKEN_COOKIE_NAME)
     if not session_token or session_token == request.session.session_key:
         return None
@@ -115,14 +122,22 @@ def _pop_slo_state(request: HttpRequest) -> dict | None:
 
 
 def _redirect_with_logout_cookies(url: str) -> HttpResponseRedirect:
+    # token and allauth_session_token are set host-only with path=/ (frontend
+    # and OIDC/SAML callback views); deletion must match those attributes.
     response = HttpResponseRedirect(url)
-    response.delete_cookie("token", path="/")
-    response.delete_cookie(ALLAUTH_SESSION_TOKEN_COOKIE_NAME, path="/")
+    response.delete_cookie("token", path="/", samesite="Lax")
+    response.delete_cookie(ALLAUTH_SESSION_TOKEN_COOKIE_NAME, path="/", samesite="Lax")
     return response
 
 
 class IdPLogoutView(View):
-    """Redirect the browser through the IdP logout endpoint."""
+    """Redirect the browser through the IdP logout endpoint.
+
+    Deliberately a plain GET without CSRF protection: it is the target of a
+    cross-request redirect chain and, for SAML, of the IdP round-trip. The
+    worst a forged request can do is log the user out (no state is disclosed
+    and the IdP redirect only ever targets the configured provider).
+    """
 
     def get(self, request):
         fallback = get_post_logout_redirect_url()
