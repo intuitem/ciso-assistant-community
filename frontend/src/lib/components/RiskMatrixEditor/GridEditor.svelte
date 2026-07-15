@@ -8,6 +8,7 @@
 		name: string;
 		description: string;
 		hexcolor: string;
+		translations?: Record<string, { name?: string; description?: string }>;
 	}
 
 	interface Props {
@@ -16,6 +17,9 @@
 		impactLevels: Level[];
 		riskLevels: Level[];
 		onchange: (grid: number[][]) => void;
+		/** When editing a translation, display level names in that language. */
+		activeLang?: string;
+		baseLang?: string;
 	}
 
 	let {
@@ -23,8 +27,19 @@
 		probabilityLevels,
 		impactLevels,
 		riskLevels,
-		onchange
+		onchange,
+		activeLang,
+		baseLang
 	}: Props = $props();
+
+	// Translated display name with base-language fallback (abbreviations are
+	// not translated — the levels' translations carry name/description only).
+	function levelName(level: Level): string {
+		if (activeLang && activeLang !== baseLang) {
+			return level.translations?.[activeLang]?.name || level.name;
+		}
+		return level.name;
+	}
 
 	function cycleRiskLevel(rowIdx: number, colIdx: number) {
 		const current = grid[rowIdx][colIdx];
@@ -74,7 +89,7 @@
 							>
 								<span class="text-xs font-bold">{impact.abbreviation}</span>
 								<br />
-								<span class="text-xs">{impact.name}</span>
+								<span class="text-xs">{levelName(impact)}</span>
 							</th>
 						{/each}
 					</tr>
@@ -92,7 +107,7 @@
 							>
 								<span class="text-xs font-bold">{prob.abbreviation}</span>
 								<br />
-								<span class="text-xs">{prob.name}</span>
+								<span class="text-xs">{levelName(prob)}</span>
 							</td>
 							{#each impactLevels as _, colIdx}
 								{@const riskLevel = getRiskLevel(grid[rowIdx]?.[colIdx] ?? 0)}
@@ -136,7 +151,7 @@
 														setRiskLevel(rowIdx, colIdx, rIdx);
 													}}
 												>
-													{rl.abbreviation} - {rl.name}
+													{rl.abbreviation} - {levelName(rl)}
 												</button>
 											{/each}
 										</div>

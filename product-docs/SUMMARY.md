@@ -112,6 +112,7 @@
   * [Upgrading a library](configuration/libraries/upgrading-a-library.md)
   * [Library clean-up](configuration/libraries/library-cleanup.md)
 * [Authoring](configuration/authoring/README.md)
+  * [Library builder](configuration/authoring/library-builder.md)
   * [Framework](configuration/authoring/framework.md)
     * [Framework builder — reference](configuration/authoring/framework-builder.md)
   * [Risk matrix](configuration/authoring/matrix.md)
