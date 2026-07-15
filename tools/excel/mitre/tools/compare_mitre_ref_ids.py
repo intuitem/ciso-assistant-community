@@ -18,7 +18,7 @@ COMMUNITY_ROOT = SCRIPT_DIR.parents[3]
 DEFAULT_ORIGINAL = (
     COMMUNITY_ROOT / "backend" / "library" / "libraries" / "mitre-attack.yaml"
 )
-DEFAULT_NEW = SCRIPT_DIR / "mitre-attack-v19.1.yaml"
+DEFAULT_NEW = SCRIPT_DIR / "mitre-attack.yaml"
 SECTIONS = ("reference_controls", "threats")
 
 
@@ -62,7 +62,9 @@ def load_yaml(path: Path) -> dict[str, Any]:
     return data
 
 
-def extract_ref_ids(data: dict[str, Any], section: str, path: Path) -> list[str]:
+def extract_ref_ids_and_names(
+    data: dict[str, Any], section: str, path: Path
+) -> tuple[list[str], dict[str, str]]:
     entries = data["objects"].get(section)
     if not isinstance(entries, list):
         raise ValueError(
@@ -70,6 +72,7 @@ def extract_ref_ids(data: dict[str, Any], section: str, path: Path) -> list[str]
         )
 
     ref_ids: list[str] = []
+    names_by_ref_id: dict[str, str] = {}
     for position, entry in enumerate(entries, start=1):
         if not isinstance(entry, dict):
             raise ValueError(
@@ -82,9 +85,19 @@ def extract_ref_ids(data: dict[str, Any], section: str, path: Path) -> list[str]
                 f"The ref_id for item {position} in 'objects.{section}' "
                 f"is missing or invalid in {path}."
             )
-        ref_ids.append(ref_id.strip())
 
-    return ref_ids
+        name = entry.get("name")
+        if not isinstance(name, str) or not name.strip():
+            raise ValueError(
+                f"The name for item {position} in 'objects.{section}' "
+                f"is missing or invalid in {path}."
+            )
+
+        clean_ref_id = ref_id.strip()
+        ref_ids.append(clean_ref_id)
+        names_by_ref_id.setdefault(clean_ref_id, name.strip())
+
+    return ref_ids, names_by_ref_id
 
 
 def natural_sort_key(value: str) -> tuple[tuple[int, int | str], ...]:
@@ -96,14 +109,18 @@ def natural_sort_key(value: str) -> tuple[tuple[int, int | str], ...]:
     )
 
 
-def format_changes(label: str, values: set[str], marker: str) -> None:
+def format_changes(
+    label: str, values: set[str], names_by_ref_id: dict[str, str], marker: str
+) -> None:
     print(f"  {label} ({len(values)}):")
     if not values:
         print("    None")
         return
 
+    max_ref_id_length = max(len(ref_id) for ref_id in values)
     for ref_id in sorted(values, key=natural_sort_key):
-        print(f"    {marker} {ref_id}")
+        spacing = " " * (max_ref_id_length - len(ref_id) + 1)
+        print(f"    {marker} [{ref_id}]{spacing}{names_by_ref_id[ref_id]}")
 
 
 def duplicate_ref_ids(values: list[str]) -> set[str]:
@@ -127,8 +144,12 @@ def main() -> int:
 
     for section in SECTIONS:
         try:
-            original_values = extract_ref_ids(original_data, section, original_path)
-            new_values = extract_ref_ids(new_data, section, new_path)
+            original_values, original_names = extract_ref_ids_and_names(
+                original_data, section, original_path
+            )
+            new_values, new_names = extract_ref_ids_and_names(
+                new_data, section, new_path
+            )
         except ValueError as exc:
             print(f"Error: {exc}", file=sys.stderr)
             return 2
@@ -143,8 +164,8 @@ def main() -> int:
             f"  Totals: {len(original_ids)} in the original, "
             f"{len(new_ids)} in the new file"
         )
-        format_changes("Added", added, "+")
-        format_changes("Removed", removed, "-")
+        format_changes("Added", added, new_names, "+")
+        format_changes("Removed", removed, original_names, "-")
 
         original_duplicates = duplicate_ref_ids(original_values)
         new_duplicates = duplicate_ref_ids(new_values)
