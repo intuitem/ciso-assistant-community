@@ -3,6 +3,7 @@ from collections import Counter
 from uuid import UUID
 
 from django.contrib.auth.models import Permission
+from django.db.models import Count, Max, Min, Q
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -88,18 +89,25 @@ class PostureAssessmentViewSet(BaseModelViewSet):
             }
         )
 
+    @staticmethod
+    def _asset_param(request):
+        asset_id = request.query_params.get("asset")
+        if not asset_id:
+            return None, None
+        try:
+            return UUID(str(asset_id)), None
+        except ValueError:
+            return None, Response(
+                {"error": "asset must be a valid UUID"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
     @action(detail=True, methods=["get"])
     def tree(self, request, pk=None):
         assessment = self.get_object()
-        asset_id = request.query_params.get("asset")
-        if asset_id:
-            try:
-                asset_id = UUID(str(asset_id))
-            except ValueError:
-                return Response(
-                    {"error": "asset must be a valid UUID"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+        asset_id, error = self._asset_param(request)
+        if error:
+            return error
 
         rows = assessment.current_posture(asset_id=asset_id)
         counts_by_requirement = {}
@@ -156,15 +164,49 @@ class PostureAssessmentViewSet(BaseModelViewSet):
         )
 
     @action(detail=True, methods=["get"])
+    def runs(self, request, pk=None):
+        assessment = self.get_object()
+        asset_id, error = self._asset_param(request)
+        if error:
+            return error
+        qs = assessment.results
+        if asset_id:
+            qs = qs.filter(asset_id=asset_id)
+        runs = (
+            qs.values("run_id")
+            .annotate(
+                timestamp=Min("timestamp"),
+                tool=Max("tool"),
+                source=Max("source"),
+                checks=Count("id"),
+                passed=Count("id", filter=Q(result="pass")),
+                failed=Count("id", filter=Q(result="fail")),
+                errors=Count("id", filter=Q(result="error")),
+                assets=Count("asset_id", distinct=True),
+            )
+            .order_by("timestamp")
+        )
+        return Response(
+            {"runs": [{**run, "run_id": str(run["run_id"])} for run in runs]}
+        )
+
+    @action(detail=True, methods=["get"])
     def trend(self, request, pk=None):
         assessment = self.get_object()
-        rows = assessment.results.order_by("timestamp", "created_at").values(
-            "asset_id", "requirement_id", "result", "run_id", "timestamp"
+        asset_id, error = self._asset_param(request)
+        if error:
+            return error
+        qs = assessment.results
+        if asset_id:
+            qs = qs.filter(asset_id=asset_id)
+        rows = qs.order_by("timestamp", "created_at").values(
+            "asset_id", "requirement_id", "result", "run_id", "timestamp", "tool"
         )
         latest = {}
         points = []
         current_run = None
         current_ts = None
+        current_tool = ""
 
         def snapshot():
             counts = Counter(latest.values())
@@ -173,6 +215,7 @@ class PostureAssessmentViewSet(BaseModelViewSet):
             return {
                 "run_id": str(current_run),
                 "timestamp": current_ts,
+                "tool": current_tool,
                 "score": score,
                 "counts": dict(counts),
             }
@@ -182,6 +225,7 @@ class PostureAssessmentViewSet(BaseModelViewSet):
                 points.append(snapshot())
             current_run = row["run_id"]
             current_ts = row["timestamp"]
+            current_tool = row["tool"]
             latest[(row["asset_id"], row["requirement_id"])] = row["result"]
         if current_run is not None:
             points.append(snapshot())

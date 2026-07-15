@@ -254,6 +254,53 @@ class TestPostureIngestion:
         assert points[0]["counts"] == {"fail": 2}
         assert points[2]["counts"] == {"pass": 2}
 
+    def test_trend_per_asset(self, setup):
+        s = setup
+        upload(s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "fail"}])
+        upload(s["client"], s["pa"], s["asset2"], [{"ref_id": "1.1", "result": "pass"}])
+
+        base = f"/api/automation/posture-assessments/{s['pa'].id}/trend/"
+        combined = s["client"].get(base).json()["points"]
+        asset1_only = s["client"].get(f"{base}?asset={s['asset1'].id}").json()["points"]
+        assert combined[-1]["score"] == 50.0
+        assert [p["score"] for p in asset1_only] == [0.0]
+        assert s["client"].get(f"{base}?asset=not-a-uuid").status_code == 400
+
+    def test_runs_timeline(self, setup):
+        s = setup
+        r1 = upload(
+            s["client"],
+            s["pa"],
+            s["asset1"],
+            [
+                {"ref_id": "1.1", "result": "pass"},
+                {"ref_id": "1.2", "result": "fail"},
+            ],
+            tool="kube-bench 0.7",
+        ).json()
+        upload(
+            s["client"],
+            s["pa"],
+            s["asset1"],
+            [{"ref_id": "1.1", "result": "fail"}],
+            tool="kube-bench 0.8",
+        )
+        upload(s["client"], s["pa"], s["asset2"], [{"ref_id": "1.1", "result": "pass"}])
+
+        base = f"/api/automation/posture-assessments/{s['pa'].id}/runs/"
+        all_runs = s["client"].get(base).json()["runs"]
+        assert len(all_runs) == 3
+        first = next(r for r in all_runs if r["run_id"] == r1["run_id"])
+        assert first["tool"] == "kube-bench 0.7"
+        assert first["checks"] == 2
+        assert first["passed"] == 1
+        assert first["failed"] == 1
+        assert first["assets"] == 1
+
+        asset1_runs = s["client"].get(f"{base}?asset={s['asset1'].id}").json()["runs"]
+        assert len(asset1_runs) == 2
+        assert [r["tool"] for r in asset1_runs] == ["kube-bench 0.7", "kube-bench 0.8"]
+
     def test_score_none_when_nothing_applicable(self, setup):
         s = setup
         upload(
