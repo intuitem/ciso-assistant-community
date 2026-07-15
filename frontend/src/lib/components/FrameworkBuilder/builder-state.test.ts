@@ -153,6 +153,8 @@ function makeNode(overrides: Partial<RequirementNode> = {}): RequirementNode {
 		weight: 1,
 		importance: '',
 		display_mode: 'default',
+		threats: [],
+		reference_controls: [],
 		framework: 'fw-1',
 		folder: 'folder-1',
 		...overrides
@@ -398,7 +400,9 @@ describe('buildTree', () => {
 			importance: '',
 			display_mode: 'default',
 			framework: 'fw-1',
-			folder: 'folder-1'
+			folder: 'folder-1',
+			threats: [],
+			reference_controls: []
 		};
 		const tree = buildTree([n], []);
 		expect(tree).toHaveLength(1);
@@ -425,7 +429,9 @@ describe('buildTree', () => {
 			importance: '',
 			display_mode: 'default',
 			framework: 'fw-1',
-			folder: 'folder-1'
+			folder: 'folder-1',
+			threats: [],
+			reference_controls: []
 		};
 		const child: RequirementNode = {
 			...parent,
@@ -516,7 +522,9 @@ describe('serializeDraft round-trip', () => {
 			importance: '',
 			display_mode: 'default',
 			framework: 'fw-1',
-			folder: 'folder-1'
+			folder: 'folder-1',
+			threats: [],
+			reference_controls: []
 		};
 		const tree = buildTree([n], []);
 		const draft = serializeDraft(fw, tree);

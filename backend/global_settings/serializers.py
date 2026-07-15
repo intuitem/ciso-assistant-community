@@ -1,4 +1,5 @@
 import ipaddress
+import re
 import uuid
 
 from django.conf import settings as django_settings
@@ -96,6 +97,7 @@ GENERAL_SETTINGS_KEYS = [
     "default_custom_analytics_dashboard",
     "audit_tree_aggregation_strategy",
     "default_landing",
+    "default_packager",
     "personal_folders",
     "personal_folders_parent",
     "disable_partially_compliant_result",
@@ -201,6 +203,16 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                         {
                             "default_language": f"Invalid language. Must be one of: {valid_codes}"
                         }
+                    )
+            if key == "default_packager":
+                # Identity alphabet of library packagers / ref_ids
+                # (core.LibraryDraft.IDENTITY_REGEX). fullmatch, not match:
+                # `$` would still accept a trailing newline.
+                if not isinstance(value, str) or not re.fullmatch(
+                    r"[a-z0-9_-]+", value
+                ):
+                    raise serializers.ValidationError(
+                        {"default_packager": "Must match [a-z0-9_-]+."}
                     )
             if key == "chat_temperature_enabled":
                 if not isinstance(value, bool):

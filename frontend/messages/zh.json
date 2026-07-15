@@ -1916,6 +1916,7 @@
 	"errorCreatingPersonalAccessToken": "创建个人访问令牌时发生错误。",
 	"errorMaxPatAmountExceeded": "该用户已超过允许的最大令牌数量。",
 	"campaignDomainHelpText": "活动将附加到的域。",
+	"ebiosRmStudyDomainHelpText": "更改域会将研究及其所有工作坊对象移至所选域。",
 	"associatedFindingsAssessments": "关联的跟踪",
 	"serverURL": "服务器URL",
 	"oidcConfiguration": "openid-configuration",

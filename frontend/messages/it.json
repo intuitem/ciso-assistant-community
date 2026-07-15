@@ -3008,6 +3008,7 @@
 	"bia": "BIA",
 	"businessImpactAnalysis": "Analisi di impatto aziendale",
 	"campaignDomainHelpText": "Il dominio a cui la campagna verrà associata.",
+	"ebiosRmStudyDomainHelpText": "La modifica del dominio sposta lo studio e tutti gli oggetti dei suoi workshop nel dominio selezionato.",
 	"changeAttackStage": "Modifica fase di attacco",
 	"changeCsfFunction": "... funzione CSF",
 	"changeDataContractor": "Modifica titolare del trattamento",

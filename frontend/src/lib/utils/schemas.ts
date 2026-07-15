@@ -612,6 +612,11 @@ export const GeneralSettingsSchema = z.object({
 	allow_assignments_to_entities: z.boolean().default(false).optional(),
 	enforce_mfa: z.boolean().default(false).optional(),
 	default_language: z.string().default('en').optional(),
+	default_packager: z
+		.string()
+		.regex(/^[a-z0-9_-]+$/)
+		.default('custom')
+		.optional(),
 	llm_provider: z.string().default('ollama').optional(),
 	ollama_base_url: z.string().default('http://localhost:11434').optional(),
 	ollama_model: z.string().default('mistral').optional(),
