@@ -19,13 +19,13 @@ from core.models import (
     ReferenceControl,
     Terminology,
     Threat,
-    _create_questions_from_data,
+    _sync_questions_from_data,
 )
 from metrology.models import MetricDefinition
 from django.db import transaction
 from iam.models import Folder
 
-from django.db.utils import OperationalError
+from django.db.utils import IntegrityError, OperationalError
 import structlog
 
 logger = structlog.get_logger(__name__)
@@ -36,12 +36,21 @@ def upsert_preset_from_stored_library(stored_library: StoredLibrary) -> Preset:
     preset_content = stored_library.content.get("preset", {}) or {}
     journey = preset_content.get("journey", {}) or {}
     defaults = {
-        "name": stored_library.name,
-        "description": stored_library.description or "",
+        # The preset object may carry its own name/description (authored in
+        # the library builder); legacy preset libraries fall back to the
+        # library metadata, with which they are one-to-one.
+        "name": preset_content.get("name") or stored_library.name,
+        "description": preset_content.get("description")
+        or stored_library.description
+        or "",
         "ref_id": stored_library.ref_id,
         "version": stored_library.version,
         "provider": stored_library.provider,
-        "translations": stored_library.translations or {},
+        # Same precedence as name/description: the preset object's own
+        # translations (authored in the builder) win over the library's.
+        "translations": preset_content.get("translations")
+        or stored_library.translations
+        or {},
         "profile": preset_content.get("profile", {}) or {},
         "feature_flags": preset_content.get("feature_flags", {}) or {},
         "scaffolded_objects": preset_content.get("scaffolded_objects", []) or [],
@@ -49,9 +58,14 @@ def upsert_preset_from_stored_library(stored_library: StoredLibrary) -> Preset:
         "dependencies": list(stored_library.dependencies or []),
         "folder": Folder.get_root_folder(),
     }
-    preset, _ = Preset.objects.update_or_create(
-        urn=stored_library.urn, defaults=defaults
-    )
+    # The Preset row is keyed on a `:preset:` URN. Hand-authored preset
+    # libraries already carry one as their library URN (see the shipped
+    # preset-*.yaml files); builder-authored libraries use a generic
+    # `:library:` URN, so swap the type token to get the same shape. This
+    # keeps builder presets consistent with shipped ones and lets a
+    # migration mint the matching URN onto a live row for adopt-in-place.
+    preset_urn = stored_library.urn.replace(":library:", ":preset:", 1)
+    preset, _ = Preset.objects.update_or_create(urn=preset_urn, defaults=defaults)
     return preset
 
 
@@ -101,51 +115,79 @@ class RequirementNodeImporter:
         if parent_urn:
             parent_urn = parent_urn.lower()
 
-        requirement_node = RequirementNode.objects.create(
-            folder=Folder.get_root_folder(),
+        # update_or_create scoped to the framework: identical to create()
+        # for fresh imports, updates in place when the framework row was
+        # adopted (see FrameworkImporter.import_framework).
+        requirement_node, _ = RequirementNode.objects.update_or_create(
             framework=framework_object,
             urn=self.requirement_data["urn"].lower(),
-            parent_urn=parent_urn,
-            assessable=self.requirement_data.get("assessable"),
-            ref_id=self.requirement_data.get("ref_id"),
-            annotation=self.requirement_data.get("annotation"),
-            typical_evidence=self.requirement_data.get("typical_evidence"),
-            provider=framework_object.provider,
-            order_id=self.index,
-            name=self.requirement_data.get("name"),
-            description=self.requirement_data.get("description"),
-            implementation_groups=self.requirement_data.get("implementation_groups"),
-            display_mode=self.requirement_data.get(
-                "display_mode", RequirementNode.DisplayMode.DEFAULT
+            defaults=dict(
+                folder=Folder.get_root_folder(),
+                parent_urn=parent_urn,
+                assessable=self.requirement_data.get("assessable"),
+                ref_id=self.requirement_data.get("ref_id"),
+                annotation=self.requirement_data.get("annotation"),
+                typical_evidence=self.requirement_data.get("typical_evidence"),
+                provider=framework_object.provider,
+                order_id=self.index,
+                name=self.requirement_data.get("name"),
+                description=self.requirement_data.get("description"),
+                implementation_groups=self.requirement_data.get(
+                    "implementation_groups"
+                ),
+                display_mode=self.requirement_data.get(
+                    "display_mode", RequirementNode.DisplayMode.DEFAULT
+                ),
+                weight=self.requirement_data.get("weight", 1),
+                min_score=self.requirement_data.get("min_score"),
+                max_score=self.requirement_data.get("max_score"),
+                scores_definition_ref=self.requirement_data.get(
+                    "scores_definition_ref"
+                ),
+                locale=framework_object.locale,
+                default_locale=framework_object.default_locale,
+                translations=self.requirement_data.get("translations", {}),
+                is_published=True,
             ),
-            weight=self.requirement_data.get("weight", 1),
-            min_score=self.requirement_data.get("min_score"),
-            max_score=self.requirement_data.get("max_score"),
-            scores_definition_ref=self.requirement_data.get("scores_definition_ref"),
-            locale=framework_object.locale,
-            default_locale=framework_object.default_locale,
-            translations=self.requirement_data.get("translations", {}),
-            is_published=True,
         )
         requirement_node.clean()
 
-        # Create Question + QuestionChoice objects from questions data
+        # Sync Question + QuestionChoice objects: pure create for fresh
+        # imports, upsert-and-prune for adopted nodes that already carry
+        # question rows.
         questions_data = self.requirement_data.get("questions")
-        if questions_data and isinstance(questions_data, dict):
-            _create_questions_from_data(requirement_node, questions_data)
+        _sync_questions_from_data(
+            requirement_node,
+            questions_data if isinstance(questions_data, dict) else {},
+        )
 
+        # Use .set() rather than .add(): on the adopt-in-place / re-import
+        # path the node already exists, and a link removed in the document
+        # must be removed from the live row too (add-only would strand it).
+        threats = []
         for threat in self.requirement_data.get("threats", []):
-            logger.info(
-                f"Parsing the threats for {self.requirement_data.get('ref_id')}"
-            )
-            requirement_node.threats.add(Threat.objects.get(urn=threat.lower()))
-
-        for reference_control in self.requirement_data.get("reference_controls", []):
-            logger.info(
-                f"Parsing the reference controls for {self.requirement_data.get('ref_id')}"
-            )
             try:
-                ref = ReferenceControl.objects.get(urn=reference_control.lower())
+                threats.append(Threat.objects.get(urn=threat.lower()))
+            except Threat.DoesNotExist as exc:
+                threat_name = threat or "unknown"
+                requirement_identifier = self.requirement_data.get(
+                    "ref_id", self.requirement_data.get("urn")
+                )
+                error_message = (
+                    f"Unknown threat '{threat_name}' "
+                    f"referenced in requirement '{requirement_identifier}'."
+                )
+                logger.error(error_message)
+                raise ValueError(error_message) from exc
+        if threats or requirement_node.threats.exists():
+            requirement_node.threats.set(threats)
+
+        reference_controls = []
+        for reference_control in self.requirement_data.get("reference_controls", []):
+            try:
+                reference_controls.append(
+                    ReferenceControl.objects.get(urn=reference_control.lower())
+                )
             except ReferenceControl.DoesNotExist as exc:
                 reference_control_name = reference_control or "unknown"
                 requirement_identifier = self.requirement_data.get(
@@ -157,7 +199,8 @@ class RequirementNodeImporter:
                 )
                 logger.error(error_message)
                 raise ValueError(error_message) from exc
-            requirement_node.reference_controls.add(ref)
+        if reference_controls or requirement_node.reference_controls.exists():
+            requirement_node.reference_controls.set(reference_controls)
 
 
 class RequirementMappingImporter:
@@ -350,28 +393,56 @@ class FrameworkImporter:
         if isinstance(scores_definition, list):
             scores_definition = {"scale": scores_definition}
 
-        framework_object = Framework.objects.create(
-            folder=Folder.get_root_folder(),
-            library=library_object,
-            urn=self.framework_data["urn"].lower(),
-            ref_id=self.framework_data["ref_id"],
-            name=self.framework_data.get("name"),
-            description=self.framework_data.get("description"),
-            min_score=min_score,
-            max_score=max_score,
-            scores_definition=scores_definition,
-            implementation_groups_definition=self.framework_data.get(
-                "implementation_groups_definition"
+        # update_or_create: identical to create() for normal loads (no row
+        # exists yet) and adopts a pre-existing library-less framework in
+        # place — same URN family, same rows, audits untouched (the adopted
+        # live-framework path). Adoption is restricted to genuinely
+        # library-less rows of the same locale: a framework URN that already
+        # belongs to a library (or a different locale of one) is a real
+        # collision, so we preserve the loader's historical hard failure
+        # rather than silently re-homing another library's framework and
+        # cascade-pruning its requirement nodes / assessments.
+        framework_urn = self.framework_data["urn"].lower()
+        existing = Framework.objects.filter(urn=framework_urn).first()
+        if existing is not None and (
+            existing.library_id is not None or existing.locale != library_object.locale
+        ):
+            raise IntegrityError(
+                f"Framework {framework_urn} already exists and belongs to a "
+                f"library; cannot be adopted by {library_object.urn}"
+            )
+        framework_object, framework_created = Framework.objects.update_or_create(
+            urn=framework_urn,
+            defaults=dict(
+                folder=Folder.get_root_folder(),
+                library=library_object,
+                ref_id=self.framework_data["ref_id"],
+                name=self.framework_data.get("name"),
+                description=self.framework_data.get("description"),
+                min_score=min_score,
+                max_score=max_score,
+                scores_definition=scores_definition,
+                implementation_groups_definition=self.framework_data.get(
+                    "implementation_groups_definition"
+                ),
+                outcomes_definition=self.framework_data.get("outcomes_definition", []),
+                provider=library_object.provider,
+                locale=library_object.locale,
+                default_locale=library_object.default_locale,
+                translations=self.framework_data.get("translations", {}),
+                is_published=True,
             ),
-            outcomes_definition=self.framework_data.get("outcomes_definition", []),
-            provider=library_object.provider,
-            locale=library_object.locale,
-            default_locale=library_object.default_locale,
-            translations=self.framework_data.get("translations", {}),
-            is_published=True,
         )
         for requirement_node in self._requirement_nodes:
             requirement_node.import_requirement_node(framework_object)
+        if not framework_created:
+            # Adopted framework: live nodes absent from the document were
+            # deleted in the draft. No-op for fresh imports.
+            RequirementNode.objects.filter(framework=framework_object).exclude(
+                urn__in=[
+                    rn.requirement_data["urn"].lower() for rn in self._requirement_nodes
+                ]
+            ).delete()
 
 
 class ThreatImporter:
@@ -527,22 +598,45 @@ class RiskMatrixImporter:
             for key, value in self.risk_matrix_data.items()
             if key in self.MATRIX_FIELDS
         }
-        matrix = RiskMatrix.objects.create(
-            library=library_object,
-            folder=Folder.get_root_folder(),
-            name=self.risk_matrix_data.get("name"),
-            description=self.risk_matrix_data.get("description"),
-            urn=self.risk_matrix_data["urn"].lower(),
-            provider=library_object.provider,
-            ref_id=self.risk_matrix_data.get("ref_id"),
-            json_definition=matrix_data,
-            is_enabled=self.risk_matrix_data.get("is_enabled", True),
-            locale=library_object.locale,
-            default_locale=library_object.default_locale,  # Change this in the future ?
-            translations=self.risk_matrix_data.get("translations", {}),
-            is_published=True,
+        # update_or_create: identical to create() for normal loads (no row
+        # exists yet) and adopts a pre-existing library-less matrix in place —
+        # same row id, so risk assessments built on it stay attached (the
+        # migration-wrapped / adopted-matrix path, mirroring the framework
+        # importer). Adoption is restricted to genuinely library-less rows of
+        # the same locale: a matrix URN that already belongs to a library (or
+        # a different locale of one) is a real collision, so we preserve the
+        # loader's historical hard failure rather than silently re-homing
+        # another library's matrix.
+        matrix_urn = self.risk_matrix_data["urn"].lower()
+        existing = RiskMatrix.objects.filter(urn=matrix_urn).first()
+        if existing is not None and (
+            existing.library_id is not None or existing.locale != library_object.locale
+        ):
+            raise IntegrityError(
+                f"Risk matrix {matrix_urn} already exists and belongs to a "
+                f"library; cannot be adopted by {library_object.urn}"
+            )
+        matrix, created = RiskMatrix.objects.update_or_create(
+            urn=matrix_urn,
+            defaults=dict(
+                library=library_object,
+                folder=Folder.get_root_folder(),
+                name=self.risk_matrix_data.get("name"),
+                description=self.risk_matrix_data.get("description"),
+                provider=library_object.provider,
+                ref_id=self.risk_matrix_data.get("ref_id"),
+                json_definition=matrix_data,
+                is_enabled=self.risk_matrix_data.get("is_enabled", True),
+                locale=library_object.locale,
+                default_locale=library_object.default_locale,  # Change this in the future ?
+                translations=self.risk_matrix_data.get("translations", {}),
+                is_published=True,
+            ),
         )
-        logger.info("Risk matrix created", matrix=matrix)
+        logger.info(
+            "Risk matrix created" if created else "Risk matrix adopted in place",
+            matrix=matrix,
+        )
         return matrix
 
 

@@ -1952,5 +1952,6 @@
 	"scimTokenGenerationFailed": "Kunne ikke generere SCIM-token",
 	"idpGroup": "IdP-gruppe",
 	"idpGroups": "IdP-grupper",
-	"idpGroupsDescription": "Aktivér IdP-gruppeføderation (SCIM-provisionering, IdP-gruppemapninger og IdP-gruppemedlemskaber for brugere)."
+	"idpGroupsDescription": "Aktivér IdP-gruppeføderation (SCIM-provisionering, IdP-gruppemapninger og IdP-gruppemedlemskaber for brugere).",
+	"ebiosRmStudyDomainHelpText": "Ændring af domænet flytter analysen og alle dens workshopobjekter til det valgte domæne."
 }
