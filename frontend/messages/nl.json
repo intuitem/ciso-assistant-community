@@ -3549,5 +3549,10 @@
 	"scimTokenGenerationFailed": "Kan SCIM-token niet genereren",
 	"idpGroup": "IdP-groep",
 	"idpGroups": "IdP-groepen",
-	"idpGroupsDescription": "IdP-groepsfederatie inschakelen (SCIM-provisioning, IdP-groepskoppelingen en IdP-groepslidmaatschappen van gebruikers)."
+	"idpGroupsDescription": "IdP-groepsfederatie inschakelen (SCIM-provisioning, IdP-groepskoppelingen en IdP-groepslidmaatschappen van gebruikers).",
+	"actual": "Werkelijk",
+	"actualCost": "Werkelijke kosten",
+	"diffFrom": "Van",
+	"diffTo": "Tot",
+	"color": "Kleur"
 }
