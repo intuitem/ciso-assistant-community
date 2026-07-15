@@ -38,7 +38,9 @@
 		);
 	});
 
-	const chartHeight = $derived(Math.max(280, checks.length * 24 + 120));
+	const Y_WINDOW = 40;
+	const X_WINDOW = 20;
+	const chartHeight = $derived(Math.max(280, Math.min(checks.length, Y_WINDOW) * 24 + 160));
 
 	onMount(async () => {
 		const echarts = await import('echarts');
@@ -64,9 +66,43 @@
 				itemStyle: r.timestamp < latestTimestamp ? { opacity: 0.55 } : undefined
 			}));
 
+		const dataZoom = [
+			...(assets.length > X_WINDOW
+				? [
+						{
+							type: 'slider',
+							xAxisIndex: 0,
+							bottom: 34,
+							height: 16,
+							startValue: 0,
+							endValue: X_WINDOW - 1,
+							zoomLock: false
+						}
+					]
+				: []),
+			...(checks.length > Y_WINDOW
+				? [
+						{
+							type: 'slider',
+							yAxisIndex: 0,
+							right: 4,
+							width: 16,
+							startValue: checks.length - 1,
+							endValue: checks.length - Y_WINDOW
+						}
+					]
+				: [])
+		];
+
 		const option = {
 			backgroundColor: 'transparent',
-			grid: { top: 30, right: 10, bottom: 60, left: 90 },
+			grid: {
+				top: 60,
+				right: checks.length > Y_WINDOW ? 40 : 10,
+				bottom: assets.length > X_WINDOW ? 90 : 60,
+				left: 90
+			},
+			dataZoom,
 			tooltip: {
 				position: 'top',
 				formatter: (params: any) => {
@@ -86,7 +122,7 @@
 				type: 'category',
 				data: assets.map((a) => a.name),
 				position: 'top',
-				axisLabel: { interval: 0, rotate: assets.length > 6 ? 30 : 0 },
+				axisLabel: { rotate: assets.length > 6 ? 30 : 0 },
 				splitArea: { show: true }
 			},
 			yAxis: {

@@ -60,7 +60,7 @@
 
 {#snippet nodeView(node: any, depth: number)}
 	{#if node.children?.length}
-		<details open={depth === 0} class="group">
+		<details open={depth <= 1} class="group">
 			<summary
 				class="flex items-center gap-2 cursor-pointer rounded px-2 py-1.5 hover:bg-surface-100-900"
 			>

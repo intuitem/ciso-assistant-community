@@ -16,7 +16,6 @@ from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 from iam.models import RoleAssignment
 
 from .models import PostureAssessment, PostureResult
-from .serializers import PostureResultReadSerializer
 
 LONG_CACHE_TTL = 60  # mn
 
@@ -57,14 +56,35 @@ class PostureAssessmentViewSet(BaseModelViewSet):
     def result(self, request):
         return Response(dict(PostureResult.Result.choices))
 
+    @staticmethod
+    def _row_payload(row):
+        return {
+            "id": str(row["id"]),
+            "requirement": {
+                "id": str(row["requirement_id"]),
+                "ref_id": row["requirement__ref_id"],
+                "name": row["requirement__name"],
+            },
+            "asset": {"id": str(row["asset_id"]), "str": row["asset__name"]},
+            "result": row["result"],
+            "timestamp": row["timestamp"],
+            "run_id": str(row["run_id"]),
+            "actual": row["actual"],
+            "expected": row["expected"],
+            "message": row["message"],
+        }
+
     @action(detail=True, methods=["get"])
     def posture(self, request, pk=None):
         assessment = self.get_object()
         rows = assessment.current_posture()
+        counts = Counter(row["result"] for row in rows)
+        applicable = counts["pass"] + counts["fail"]
+        score = round(100 * counts["pass"] / applicable, 1) if applicable else None
         return Response(
             {
-                "score": assessment.get_score(),
-                "results": PostureResultReadSerializer(rows, many=True).data,
+                "score": score,
+                "results": [self._row_payload(row) for row in rows],
             }
         )
 
@@ -72,16 +92,24 @@ class PostureAssessmentViewSet(BaseModelViewSet):
     def tree(self, request, pk=None):
         assessment = self.get_object()
         asset_id = request.query_params.get("asset")
-
-        rows = assessment.current_posture()
         if asset_id:
-            rows = [r for r in rows if str(r.asset_id) == asset_id]
+            try:
+                asset_id = UUID(str(asset_id))
+            except ValueError:
+                return Response(
+                    {"error": "asset must be a valid UUID"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        rows = assessment.current_posture(asset_id=asset_id)
         counts_by_requirement = {}
         row_by_requirement = {}
         for r in rows:
-            counts_by_requirement.setdefault(r.requirement_id, Counter())[r.result] += 1
+            counts_by_requirement.setdefault(r["requirement_id"], Counter())[
+                r["result"]
+            ] += 1
             if asset_id:
-                row_by_requirement[r.requirement_id] = r
+                row_by_requirement[r["requirement_id"]] = r
 
         nodes = list(RequirementNode.objects.filter(framework=assessment.framework))
         for node in nodes:
@@ -110,11 +138,11 @@ class PostureAssessmentViewSet(BaseModelViewSet):
             row = row_by_requirement.get(node.id)
             if row:
                 entry["current"] = {
-                    "result": row.result,
-                    "timestamp": row.timestamp,
-                    "actual": row.actual,
-                    "expected": row.expected,
-                    "message": row.message,
+                    "result": row["result"],
+                    "timestamp": row["timestamp"],
+                    "actual": row["actual"],
+                    "expected": row["expected"],
+                    "message": row["message"],
                 }
             return entry
 
@@ -275,23 +303,23 @@ class PostureAssessmentViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"], url_path="action-plan")
     def action_plan(self, request, pk=None):
         assessment = self.get_object()
-        fails = [r for r in assessment.current_posture() if r.result == "fail"]
+        fails = [r for r in assessment.current_posture() if r["result"] == "fail"]
         findings = self._follow_up_findings(assessment)
         rows = []
         for r in fails:
-            finding = findings.get((r.requirement_id, r.asset_id))
+            finding = findings.get((r["requirement_id"], r["asset_id"]))
             rows.append(
                 {
                     "requirement": {
-                        "id": str(r.requirement_id),
-                        "ref_id": r.requirement.ref_id,
-                        "name": r.requirement.name,
+                        "id": str(r["requirement_id"]),
+                        "ref_id": r["requirement__ref_id"],
+                        "name": r["requirement__name"],
                     },
-                    "asset": {"id": str(r.asset_id), "str": str(r.asset)},
-                    "actual": r.actual,
-                    "expected": r.expected,
-                    "message": r.message,
-                    "timestamp": r.timestamp,
+                    "asset": {"id": str(r["asset_id"]), "str": r["asset__name"]},
+                    "actual": r["actual"],
+                    "expected": r["expected"],
+                    "message": r["message"],
+                    "timestamp": r["timestamp"],
                     "finding": {
                         "id": str(finding.id),
                         "name": finding.name,

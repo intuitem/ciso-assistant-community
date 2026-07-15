@@ -2,6 +2,8 @@ from collections import Counter
 
 from auditlog.registry import auditlog
 from django.db import models
+from django.db.models import F, Window
+from django.db.models.functions import RowNumber
 from django.utils.translation import gettext_lazy as _
 
 from core.base_models import AbstractBaseModel
@@ -47,17 +49,37 @@ class PostureAssessment(Assessment):
         verbose_name = _("Posture assessment")
         verbose_name_plural = _("Posture assessments")
 
-    def current_posture(self) -> list["PostureResult"]:
-        latest = {}
-        rows = self.results.select_related("requirement", "asset").order_by(
-            "timestamp", "created_at"
+    def current_posture(self, asset_id=None) -> list[dict]:
+        qs = self.results
+        if asset_id:
+            qs = qs.filter(asset_id=asset_id)
+        return list(
+            qs.annotate(
+                rn=Window(
+                    expression=RowNumber(),
+                    partition_by=[F("asset_id"), F("requirement_id")],
+                    order_by=[F("timestamp").desc(), F("created_at").desc()],
+                )
+            )
+            .filter(rn=1)
+            .values(
+                "id",
+                "requirement_id",
+                "asset_id",
+                "result",
+                "timestamp",
+                "run_id",
+                "actual",
+                "expected",
+                "message",
+                "requirement__ref_id",
+                "requirement__name",
+                "asset__name",
+            )
         )
-        for row in rows:
-            latest[(row.asset_id, row.requirement_id)] = row
-        return list(latest.values())
 
     def get_score(self) -> float | None:
-        counts = Counter(row.result for row in self.current_posture())
+        counts = Counter(row["result"] for row in self.current_posture())
         applicable = counts["pass"] + counts["fail"]
         if not applicable:
             return None

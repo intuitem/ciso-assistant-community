@@ -4,13 +4,13 @@ import { fail, type Actions } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async (event) => {
 	const endpoint = `${BASE_API_URL}/automation/posture-assessments/${event.params.id}`;
-	const asset = event.url.searchParams.get('asset');
-	const [assessment, tree] = await Promise.all([
-		event.fetch(`${endpoint}/`).then((res) => res.json()),
-		event
-			.fetch(`${endpoint}/tree/${asset ? `?asset=${encodeURIComponent(asset)}` : ''}`)
-			.then((res) => res.json())
-	]);
+	const assessment = await event.fetch(`${endpoint}/`).then((res) => res.json());
+	const asset =
+		event.url.searchParams.get('asset') ??
+		(assessment.assets?.length === 1 ? assessment.assets[0].id : null);
+	const tree = await event
+		.fetch(`${endpoint}/tree/${asset ? `?asset=${encodeURIComponent(asset)}` : ''}`)
+		.then((res) => res.json());
 	return {
 		assessment,
 		tree: tree.tree,

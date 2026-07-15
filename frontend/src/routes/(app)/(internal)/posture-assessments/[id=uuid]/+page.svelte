@@ -116,6 +116,19 @@
 			<h3 class="text-lg font-semibold mb-2">{m.currentPosture()}</h3>
 			<PostureHeatmapChart {results} {assets} name="posture_heatmap" />
 		</div>
+	{:else}
+		<div class="card p-8 bg-surface-50-950 shadow-xs flex flex-col items-center gap-3 text-center">
+			<i class="fa-solid fa-list-check text-3xl text-surface-400"></i>
+			<p class="font-semibold">{m.noPostureResultsYet()}</p>
+			<p class="text-sm text-surface-600-400">{m.noPostureResultsHelp()}</p>
+			<Anchor
+				href="/posture-assessments/{data.data.id}/tree"
+				class="btn preset-filled-primary-500"
+				label={m.treeView()}
+			>
+				<i class="fa-solid fa-folder-tree mr-2"></i>{m.treeView()}
+			</Anchor>
+		</div>
 	{/if}
 
 	{#if data.actionPlan?.total_fails}

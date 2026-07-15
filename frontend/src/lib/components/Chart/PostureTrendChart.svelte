@@ -64,6 +64,7 @@
 				{
 					name: m.passRate(),
 					type: 'line',
+					sampling: 'lttb',
 					smooth: true,
 					symbol: 'circle',
 					symbolSize: 7,
