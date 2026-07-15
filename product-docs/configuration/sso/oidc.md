@@ -38,10 +38,13 @@ CISO Assistant automatically sends a standards-compliant `state` and `nonce` on 
 
 ### Single Logout
 
-To close the OIDC session at the identity provider when users log out of CISO Assistant, register this post-logout redirect URI on the OIDC client:
+Turn on **Enable service provider-initiated single logout** in the SSO settings to close the OIDC session at the identity provider when users log out of CISO Assistant (see [Single Logout](README.md#single-logout) for the general behavior). It additionally requires:
 
-```
-<frontend_url>/login
-```
+* an `end_session_endpoint` in the provider's OpenID configuration, and
+* `<frontend_url>/login` registered as an allowed post-logout redirect URI on the OIDC client.
 
-The provider's OpenID configuration must expose an `end_session_endpoint`. CISO Assistant uses this endpoint with `client_id`, `id_token_hint`, and the post-logout redirect URI above.
+CISO Assistant calls the end-session endpoint with `client_id`, `id_token_hint`, and that post-logout redirect URI.
+
+{% hint style="info" %}
+With Microsoft Entra ID, OIDC logout still prompts the user to select an account, because Entra ignores the standard `id_token_hint`. The logout itself works, but the prompt cannot be suppressed without Entra-specific configuration. For a prompt-free single logout with Entra ID, use SAML instead.
+{% endhint %}

@@ -2342,6 +2342,8 @@
 	"forceSSOLogin": "Vynútiť prihlásenie SSO",
 	"forceSSOLoginHelpText": "Vyžadovať jednotné prihlásenie pre všetkých používateľov a obnoviť všetky uložené heslá. Používatelia so zapnutou možnosťou „Vylúčiť z vynúteného jednotného prihlásenia“ si zachovajú záložný prístup na základe hesla.",
 	"forceSSOLoginHelpText2": "Pred povolením tejto možnosti sa uistite, že vaše jednotné prihlásenie je funkčné alebo že máte záložný účet.",
+	"enableSpInitiatedSlo": "Povoliť jednotné odhlásenie iniciované poskytovateľom služby",
+	"enableSpInitiatedSloHelpText": "Pri odhlásení ukončiť aj reláciu u poskytovateľa identity.",
 	"lastOccurrenceStatus": "Stav posledného výskytu",
 	"showAllEvents": "Zobraziť všetky udalosti",
 	"featureFlags": "Príznaky funkcií",

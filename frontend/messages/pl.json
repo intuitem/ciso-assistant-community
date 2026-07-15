@@ -1615,6 +1615,8 @@
 	"forceSSOLogin": "Wymuś logowanie SSO",
 	"forceSSOLoginHelpText": "Wymagaj SSO dla wszystkich użytkowników i zresetuj zapisane hasła. Użytkownicy z włączoną opcją 'Wyklucz z wymuszonego SSO' zachowają dostęp awaryjny oparty na haśle.",
 	"forceSSOLoginHelpText2": "Upewnij się, że Twoje SSO działa lub że masz konto awaryjne przed włączeniem tej opcji.",
+	"enableSpInitiatedSlo": "Włącz pojedyncze wylogowanie inicjowane przez dostawcę usług",
+	"enableSpInitiatedSloHelpText": "Podczas wylogowania zamknij także sesję u dostawcy tożsamości.",
 	"lastOccurrenceStatus": "Ostatni status wystąpienia",
 	"showAllEvents": "Pokaż wszystkie wydarzenia",
 	"featureFlags": "Flagi funkcji",

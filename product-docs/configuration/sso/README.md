@@ -13,18 +13,19 @@ description: Configure Single Sign-On with different SAML or OpenID Connect prov
 
 ### Single Logout
 
-When a user logs out of CISO Assistant after authenticating with SSO, CISO Assistant redirects the browser through the identity provider logout endpoint so the identity provider session is closed too.
+By default, logging out of CISO Assistant only ends the local CISO Assistant session. The identity provider session stays open, so clicking **Log in with SSO** again signs the user straight back in without re-authenticating.
 
-For OIDC, the provider must expose an `end_session_endpoint` in its OpenID configuration, and the client must allow this post-logout redirect URI:
+To also close the identity provider session on logout, enable **Enable service provider-initiated single logout** in the SSO settings. When it is on, logging out of CISO Assistant redirects the browser through the identity provider's logout endpoint.
 
-```
-<frontend_url>/login
-```
+This is _service provider-initiated_ single logout: CISO Assistant asks the identity provider to end **its own** session for the user. Whether that in turn signs the user out of other applications federated to the same identity provider depends on the identity provider's single-logout configuration and is not something CISO Assistant controls or can guarantee.
 
-For SAML, configure the identity provider **SLO URL** in the CISO Assistant SAML settings. If your identity provider requires signed logout requests, enable **Logout request signed** and configure the SP key and certificate in the advanced SAML settings.
+The option is off by default, and each protocol needs a logout endpoint on the identity provider side:
+
+* **OIDC** — the provider must expose an `end_session_endpoint`, and `<frontend_url>/login` must be registered as an allowed post-logout redirect URI. See [OpenID Connect](oidc.md).
+* **SAML** — the identity provider Single Logout Service URL must be available (read from the metadata, or set in the **SLO URL** field). See [SAML](saml.md).
 
 {% hint style="info" %}
-Keep `CISO_ASSISTANT_URL` set to the public frontend URL.
+Keep `CISO_ASSISTANT_URL` set to the public frontend URL, otherwise the post-logout redirect will not resolve.
 {% endhint %}
 
 ### Forcing SSO and local-login exceptions

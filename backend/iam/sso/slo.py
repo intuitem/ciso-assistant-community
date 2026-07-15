@@ -151,6 +151,13 @@ class IdPLogoutView(View):
             return _redirect_with_logout_cookies(fallback)
         try:
             sso_settings = SSOSettings.objects.get()
+            if not sso_settings.slo_enabled:
+                logger.info(
+                    "Service provider-initiated single logout disabled, "
+                    "skipping IdP logout",
+                    provider=slo_state.get("provider"),
+                )
+                return _redirect_with_logout_cookies(fallback)
             if sso_settings.provider != slo_state.get("provider"):
                 logger.warning(
                     "SSO provider changed since login, skipping IdP logout",

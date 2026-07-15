@@ -50,7 +50,7 @@ Go into your **Keycloak admin console**
 
     <figure><img src="../../../.gitbook/assets/Screenshot 2024-08-20 11.15.46.png" alt=""><figcaption></figcaption></figure>
 
-    The same metadata contains Keycloak's Single Logout Service URL. Use it as the **SLO URL** in the CISO Assistant SAML settings when you want logout from CISO Assistant to also close the Keycloak session.
+    The same metadata also contains Keycloak's Single Logout Service URL, so it is picked up automatically. To also close the Keycloak session when users log out of CISO Assistant, just turn on **Enable service provider-initiated single logout** in the SSO settings.
 
 
 {% endtab %}
