@@ -254,6 +254,12 @@
 					label={m.showGetStartedButton()}
 					helpText={m.showGetStartedButtonHelpText()}
 				/>
+				<TextField
+					{form}
+					field="default_packager"
+					label={m.defaultPackager()}
+					helpText={m.defaultPackagerHelpText()}
+				/>
 			</div>
 		</Accordion.ItemContent>
 	</Accordion.Item>

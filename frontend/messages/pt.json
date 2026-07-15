@@ -1671,5 +1671,6 @@
 	"scimTokenGenerationFailed": "Falha ao gerar o token SCIM",
 	"idpGroup": "Grupo IdP",
 	"idpGroups": "Grupos IdP",
-	"idpGroupsDescription": "Ativar a federação de grupos IdP (provisionamento SCIM, mapeamentos de grupos IdP e associações a grupos IdP nos usuários)."
+	"idpGroupsDescription": "Ativar a federação de grupos IdP (provisionamento SCIM, mapeamentos de grupos IdP e associações a grupos IdP nos usuários).",
+	"ebiosRmStudyDomainHelpText": "Alterar o domínio move o estudo e todos os objetos dos seus workshops para o domínio selecionado."
 }

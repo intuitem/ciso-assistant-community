@@ -1781,6 +1781,7 @@
 	"campaigns": "Kampanje",
 	"addCampaign": "Započni kampanju",
 	"campaignDomainHelpText": "Domena na koju će kampanja biti vezana.",
+	"ebiosRmStudyDomainHelpText": "Promjena domene premješta istraživanje i sve objekte njegovih radionica u odabranu domenu.",
 	"averageProgress": "Prosječni napredak",
 	"daysRemaining": "Preostalo dana",
 	"associatedFindingsAssessments": "Povezana praćenja",
