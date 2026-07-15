@@ -3,7 +3,7 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import { m } from '$paraglide/messages';
-	import TextArea from '../TextArea.svelte';
+	import MarkdownField from '../MarkdownField.svelte';
 	import Checkbox from '../Checkbox.svelte';
 	import RadioGroup from '../RadioGroup.svelte';
 	import { type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton-svelte';
@@ -256,7 +256,7 @@
 				label={m.selected()}
 				helpText={m.stakeholderIsSelectedHelpText()}
 			/>
-			<TextArea
+			<MarkdownField
 				{form}
 				field="justification"
 				label={m.justification()}
