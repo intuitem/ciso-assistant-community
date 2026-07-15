@@ -12,8 +12,8 @@ param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
-$MigrationCheckAttempts = 60
-$MigrationCheckDelaySeconds = 10
+$BackendCheckAttempts = 60
+$BackendCheckDelaySeconds = 10
 
 if ($UnsupportedArguments.Count -gt 0) {
     Write-Host "Unknown argument(s): $($UnsupportedArguments -join ', '). Supported arguments: -f <compose-file>." -ForegroundColor Red
@@ -61,22 +61,22 @@ function Prepare-MetaFile {
     Copy-Item -Path ".meta" -Destination ".\backend\.meta" -Force
 }
 
-function Wait-ForMigrations {
-    for ($i = 1; $i -le $MigrationCheckAttempts; $i++) {
-        & docker compose -f $DockerComposeFile exec -T backend python manage.py migrate --check *> $null
+function Wait-ForBackend {
+    for ($i = 1; $i -le $BackendCheckAttempts; $i++) {
+        & docker compose -f $DockerComposeFile exec -T backend curl --fail --silent http://localhost:8000/api/health/ *> $null
         if ($LASTEXITCODE -eq 0) {
-            Write-Host "Migrations complete!" -ForegroundColor Green
+            Write-Host "Backend is ready!" -ForegroundColor Green
             return
         }
 
-        if ($i -eq $MigrationCheckAttempts) {
-            $timeoutSeconds = $MigrationCheckAttempts * $MigrationCheckDelaySeconds
-            Write-Host "Migrations did not complete within ${timeoutSeconds}s. Recent backend logs:" -ForegroundColor Red
+        if ($i -eq $BackendCheckAttempts) {
+            $timeoutSeconds = $BackendCheckAttempts * $BackendCheckDelaySeconds
+            Write-Host "Backend did not become ready within ${timeoutSeconds}s. Recent backend logs:" -ForegroundColor Red
             Invoke-DockerCompose logs --tail=50 backend
             exit 1
         }
 
-        Start-Sleep -Seconds $MigrationCheckDelaySeconds
+        Start-Sleep -Seconds $BackendCheckDelaySeconds
     }
 }
 
@@ -118,8 +118,8 @@ try {
     Invoke-DockerCompose up --detach
 
     Write-Host ""
-    Write-Host "Giving some time for the database to be ready, please wait..." -ForegroundColor Cyan
-    Wait-ForMigrations
+    Write-Host "Waiting for CISO Assistant backend to be ready, please wait..." -ForegroundColor Cyan
+    Wait-ForBackend
 
     Write-Host ""
     Write-Host "Initialize your superuser account..." -ForegroundColor Cyan

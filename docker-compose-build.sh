@@ -3,8 +3,8 @@ set -euo pipefail
 
 DOCKER_COMPOSE_FILE="docker-compose-build.yml"
 EXPECTED_OWNER="1001:1001"
-MIGRATION_CHECK_ATTEMPTS=60
-MIGRATION_CHECK_DELAY_SECONDS=10
+BACKEND_CHECK_ATTEMPTS=60
+BACKEND_CHECK_DELAY_SECONDS=10
 UNKNOWN_ARGUMENTS=()
 
 while (($#)); do
@@ -48,21 +48,21 @@ get_owner_linux() {
   stat -c '%u:%g' "$1"
 }
 
-wait_for_migrations() {
-  for i in $(seq 1 "$MIGRATION_CHECK_ATTEMPTS"); do
-    if docker compose -f "${DOCKER_COMPOSE_FILE}" exec -T backend python manage.py migrate --check >/dev/null 2>&1; then
-      echo "Migrations complete."
+wait_for_backend() {
+  for i in $(seq 1 "$BACKEND_CHECK_ATTEMPTS"); do
+    if docker compose -f "${DOCKER_COMPOSE_FILE}" exec -T backend curl --fail --silent http://localhost:8000/api/health/ >/dev/null 2>&1; then
+      echo "Backend is ready."
       return
     fi
 
-    if [ "$i" -eq "$MIGRATION_CHECK_ATTEMPTS" ]; then
-      timeout_seconds=$((MIGRATION_CHECK_ATTEMPTS * MIGRATION_CHECK_DELAY_SECONDS))
-      echo "Migrations did not complete within ${timeout_seconds}s. Recent backend logs:"
+    if [ "$i" -eq "$BACKEND_CHECK_ATTEMPTS" ]; then
+      timeout_seconds=$((BACKEND_CHECK_ATTEMPTS * BACKEND_CHECK_DELAY_SECONDS))
+      echo "Backend did not become ready within ${timeout_seconds}s. Recent backend logs:"
       docker compose -f "${DOCKER_COMPOSE_FILE}" logs --tail=50 backend
       exit 1
     fi
 
-    sleep "$MIGRATION_CHECK_DELAY_SECONDS"
+    sleep "$BACKEND_CHECK_DELAY_SECONDS"
   done
 }
 
@@ -100,8 +100,8 @@ else
   echo "Starting services..."
   docker compose -f "${DOCKER_COMPOSE_FILE}" up -d
 
-  echo "Giving some time for the database to be ready, please wait ..."
-  wait_for_migrations
+  echo "Waiting for CISO Assistant backend to be ready, please wait ..."
+  wait_for_backend
 
   echo "Initialize your superuser account..."
   docker compose -f "${DOCKER_COMPOSE_FILE}" exec backend python manage.py createsuperuser

@@ -1,25 +1,25 @@
 #Requires -Version 5.0
 
 $DockerComposeFile = "docker-compose.yml"
-$MigrationCheckAttempts = 60
-$MigrationCheckDelaySeconds = 10
+$BackendCheckAttempts = 60
+$BackendCheckDelaySeconds = 10
 
-function Wait-ForMigrations {
-    for ($i = 1; $i -le $MigrationCheckAttempts; $i++) {
-        & docker compose -f $DockerComposeFile exec -T backend python manage.py migrate --check *> $null
+function Wait-ForBackend {
+    for ($i = 1; $i -le $BackendCheckAttempts; $i++) {
+        & docker compose -f $DockerComposeFile exec -T backend curl --fail --silent http://localhost:8000/api/health/ *> $null
         if ($LASTEXITCODE -eq 0) {
-            Write-Host "Migrations complete!" -ForegroundColor Green
+            Write-Host "Backend is ready!" -ForegroundColor Green
             return
         }
 
-        if ($i -eq $MigrationCheckAttempts) {
-            $timeoutSeconds = $MigrationCheckAttempts * $MigrationCheckDelaySeconds
-            Write-Host "Migrations did not complete within ${timeoutSeconds}s. Recent backend logs:" -ForegroundColor Red
+        if ($i -eq $BackendCheckAttempts) {
+            $timeoutSeconds = $BackendCheckAttempts * $BackendCheckDelaySeconds
+            Write-Host "Backend did not become ready within ${timeoutSeconds}s. Recent backend logs:" -ForegroundColor Red
             docker compose -f $DockerComposeFile logs --tail=50 backend
             exit 1
         }
 
-        Start-Sleep -Seconds $MigrationCheckDelaySeconds
+        Start-Sleep -Seconds $BackendCheckDelaySeconds
     }
 }
 
@@ -39,9 +39,9 @@ Write-Host "Starting CISO Assistant services..." -ForegroundColor Cyan
 docker compose -f $DockerComposeFile pull
 
 Write-Host ""
-Write-Host "Giving some time for the database to be ready, please wait..." -ForegroundColor Cyan
+Write-Host "Waiting for CISO Assistant backend to be ready, please wait..." -ForegroundColor Cyan
 docker compose -f $DockerComposeFile up -d
-Wait-ForMigrations
+Wait-ForBackend
 
 Write-Host ""
 Write-Host "Creating superuser..." -ForegroundColor Cyan
