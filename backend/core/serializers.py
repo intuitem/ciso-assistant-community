@@ -282,39 +282,20 @@ class RiskMatrixReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
     json_definition = serializers.JSONField(source="get_json_translated")
     library = FieldsRelatedField(["name", "id"])
-    has_editing_draft = serializers.SerializerMethodField()
     editing_languages = serializers.SerializerMethodField()
 
-    def get_has_editing_draft(self, obj):
-        return obj.editing_draft is not None
-
     def get_editing_languages(self, obj):
-        """Return list of language codes available in the draft or published translations."""
+        """Return list of language codes available in the published translations."""
         langs = set()
-        # Base locale
         if obj.locale:
             langs.add(obj.locale)
-        # From model translations (published)
         if obj.translations and isinstance(obj.translations, dict):
             langs.update(obj.translations.keys())
-        # From editing_draft level translations + _meta
-        if obj.editing_draft and isinstance(obj.editing_draft, dict):
-            meta = obj.editing_draft.get("_meta", {})
-            if isinstance(meta.get("translations"), dict):
-                langs.update(meta["translations"].keys())
-            for category in ("probability", "impact", "risk"):
-                levels = obj.editing_draft.get(category, [])
-                if isinstance(levels, list):
-                    for level in levels:
-                        if isinstance(level, dict) and isinstance(
-                            level.get("translations"), dict
-                        ):
-                            langs.update(level["translations"].keys())
         return sorted(langs) if langs else [obj.locale or "en"]
 
     class Meta:
         model = RiskMatrix
-        exclude = ["translations", "editing_draft", "editing_history"]
+        exclude = ["translations"]
 
 
 class RiskMatrixWriteSerializer(RiskMatrixReadSerializer):
@@ -2326,7 +2307,6 @@ class FrameworkReadSerializer(ReferentialSerializer):
     reference_controls = FieldsRelatedField(many=True)
     is_dynamic = serializers.BooleanField(read_only=True)
     has_update = serializers.BooleanField(read_only=True)
-    has_editing_draft = serializers.SerializerMethodField()
     has_compliance_assessments = serializers.SerializerMethodField()
     scores_definition = serializers.SerializerMethodField()
     # The complete per-role visibility map a new CA created from this framework
@@ -2339,9 +2319,6 @@ class FrameworkReadSerializer(ReferentialSerializer):
 
     def get_implementation_groups_definition(self, obj):
         return obj.get_implementation_groups_definition_translated()
-
-    def get_has_editing_draft(self, obj):
-        return obj.editing_draft is not None
 
     def get_has_compliance_assessments(self, obj):
         return obj.complianceassessment_set.exists()
@@ -2359,7 +2336,7 @@ class FrameworkReadSerializer(ReferentialSerializer):
 
     class Meta:
         model = Framework
-        exclude = ["translations", "editing_draft", "editing_history"]
+        exclude = ["translations"]
 
 
 class FrameworkWriteSerializer(FrameworkReadSerializer):
@@ -4708,7 +4685,6 @@ class PresetReadSerializer(BaseModelSerializer):
             "urn",
             "ref_id",
             "version",
-            "editing_version",
             "provider",
             "translations",
             "profile",

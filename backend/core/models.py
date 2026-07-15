@@ -53,7 +53,6 @@ from .base_models import (
     AbstractBaseModel,
     ActorSyncManager,
     ActorSyncMixin,
-    EditableMixin,
     ETADueDateMixin,
     NameDescriptionMixin,
 )
@@ -118,81 +117,6 @@ def match_urn(urn_string):
         return match.groups()  # Returns all captured groups from the regex match
     else:
         return None
-
-
-def _create_questions_from_data(requirement_node, questions_data):
-    """Create Question and QuestionChoice objects from the old JSON questions format.
-
-    Args:
-        requirement_node: RequirementNode instance
-        questions_data: dict keyed by question URN with type, text, choices, etc.
-    """
-    from core.models import Question, QuestionChoice
-
-    questions_to_create = []
-    choices_data_per_question = []  # parallel list: choices data for each question
-
-    for order, (q_urn, q_data) in enumerate(questions_data.items()):
-        raw_type = q_data.get("type", "text")
-        q_type = "unique_choice" if raw_type == "single_choice" else raw_type
-        parts = q_urn.split(":")
-        q_ref_id = parts[-1] if parts else q_urn
-        question_text = q_data.get("text", "")
-
-        questions_to_create.append(
-            Question(
-                requirement_node=requirement_node,
-                urn=q_urn,
-                ref_id=q_ref_id,
-                text=question_text,
-                annotation=q_data.get("annotation", question_text),
-                type=q_type,
-                config=q_data.get("config"),
-                depends_on=q_data.get("depends_on"),
-                order=order,
-                weight=q_data.get("weight", 1),
-                folder=requirement_node.folder,
-                is_published=True,
-                translations=q_data.get("translations"),
-            )
-        )
-        choices_data_per_question.append(q_data.get("choices", []))
-
-    created_questions = Question.objects.bulk_create(questions_to_create)
-
-    choices_to_create = []
-    for question, choices_data in zip(created_questions, choices_data_per_question):
-        for c_order, choice in enumerate(choices_data):
-            c_urn = choice.get("urn") or None
-            c_parts = c_urn.split(":") if c_urn else []
-            c_ref_id = c_parts[-1] if c_parts else None
-            compute_result = choice.get("compute_result")
-            if compute_result is not None:
-                compute_result = str(compute_result).lower()
-            choice_value = choice.get("value", "")
-            choices_to_create.append(
-                QuestionChoice(
-                    question=question,
-                    urn=c_urn,
-                    ref_id=c_ref_id,
-                    value=choice_value,
-                    annotation=choice.get("annotation", choice_value),
-                    add_score=choice.get("add_score"),
-                    compute_result=compute_result,
-                    order=c_order,
-                    description=choice.get("description"),
-                    color=choice.get("color"),
-                    select_implementation_groups=choice.get(
-                        "select_implementation_groups"
-                    ),
-                    folder=requirement_node.folder,
-                    is_published=True,
-                    translations=choice.get("translations"),
-                )
-            )
-
-    if choices_to_create:
-        QuestionChoice.objects.bulk_create(choices_to_create)
 
 
 def _sync_questions_from_data(requirement_node, questions_data):
@@ -725,6 +649,162 @@ class StoredLibrary(LibraryMixin):
 
         for library_label in library_filtering_labels:
             library_label.garbage_collect()
+
+
+def librarydraft_fingerprint(draft) -> str:
+    """Stable hash of everything a LibraryDraft publishes (metadata + objects).
+
+    Deterministic — unlike to_library_dict(), it reads the *stored*
+    publication_date instead of defaulting to today's date, so the hash does
+    not drift over time. Module-level and attribute-based so the data
+    migration can apply it to historical model instances too.
+    """
+    payload = {
+        "urn": draft.urn or f"urn:{draft.packager}:risk:library:{draft.ref_id}",
+        "locale": draft.locale,
+        "ref_id": draft.ref_id,
+        "name": draft.name,
+        "description": draft.description,
+        "copyright": draft.copyright,
+        "version": draft.version,
+        "publication_date": draft.publication_date.isoformat()
+        if draft.publication_date
+        else None,
+        "provider": draft.provider,
+        "packager": draft.packager,
+        "annotation": draft.annotation,
+        "translations": draft.translations,
+        "dependencies": draft.dependencies,
+        "labels": draft.labels,
+        "content": draft.content,
+    }
+    encoded = json.dumps(payload, sort_keys=True, default=str).encode()
+    return hashlib.sha256(encoded).hexdigest()
+
+
+class LibraryDraft(NameDescriptionMixin, FolderMixin):
+    """
+    Work-in-progress library authored in the builder.
+
+    A draft is a document: it serializes to the same library YAML the tools/
+    Excel converter produces, and publishing means feeding that YAML to the
+    existing StoredLibrary/loader path. The builder never writes live
+    referential objects (Framework/ReferenceControl/Threat/...) itself.
+
+    Identity is (packager, ref_id): both are URN-safe slugs from which the
+    draft's whole URN family is derived. They are freely editable while the
+    draft has never been published; once published (or adopted from an
+    existing library), the identity is frozen because external artifacts may
+    reference it by URN.
+    """
+
+    # Segments used to mint URNs, hence stricter than the display-oriented
+    # packager/ref_id columns of LibraryMixin (legacy libraries hold values
+    # like "Paul Flatt" there).
+    IDENTITY_REGEX = r"^[a-z0-9_-]+$"
+
+    packager = models.CharField(
+        max_length=100,
+        validators=[
+            RegexValidator(regex=IDENTITY_REGEX, message="invalidLibraryIdentity")
+        ],
+        verbose_name=_("Packager"),
+    )
+    ref_id = models.CharField(
+        max_length=100,
+        validators=[
+            RegexValidator(regex=IDENTITY_REGEX, message="invalidLibraryIdentity")
+        ],
+        verbose_name=_("Reference ID"),
+    )
+    # Set when the draft adopts an existing library whose URN predates the
+    # minted urn:{packager}:risk:library:{ref_id} convention; null otherwise.
+    # unique: at most one draft may own a published identity (NULLs — fresh
+    # drafts — are exempt, as SQL uniqueness ignores them).
+    urn = models.CharField(
+        max_length=255, null=True, blank=True, unique=True, verbose_name=_("URN")
+    )
+    locale = models.CharField(max_length=100, default="en", verbose_name=_("Locale"))
+    version = models.IntegerField(
+        default=1, validators=[MinValueValidator(1)], verbose_name=_("Version")
+    )
+    provider = models.CharField(
+        max_length=200, blank=True, null=True, verbose_name=_("Provider")
+    )
+    copyright = models.CharField(
+        max_length=4096, blank=True, null=True, verbose_name=_("Copyright")
+    )
+    publication_date = models.DateField(null=True, blank=True)
+    annotation = models.TextField(null=True, blank=True, verbose_name=_("Annotation"))
+    translations = models.JSONField(default=dict, blank=True)
+    dependencies = models.JSONField(default=list, blank=True)
+    labels = models.JSONField(default=list, blank=True)
+    # The library "objects" document (framework, threats, reference_controls,
+    # risk_matrices, requirement_mapping_sets, metric_definitions, preset).
+    content = models.JSONField(default=dict, blank=True)
+    # Builder lifecycle markers — never overload is_published (IAM visibility).
+    first_published_at = models.DateTimeField(null=True, blank=True)
+    last_published_at = models.DateTimeField(null=True, blank=True)
+    # Snapshot of what was last loaded, so the builder can tell a published
+    # draft that is unchanged from one that has pending edits (see
+    # has_unpublished_changes). Set together with last_published_at.
+    last_published_version = models.IntegerField(null=True, blank=True)
+    last_published_hash = models.CharField(max_length=64, null=True, blank=True)
+
+    class Meta:
+        verbose_name = _("Library draft")
+        verbose_name_plural = _("Library drafts")
+
+    @property
+    def effective_urn(self) -> str:
+        return self.urn or f"urn:{self.packager}:risk:library:{self.ref_id}"
+
+    @property
+    def identity_locked(self) -> bool:
+        return self.first_published_at is not None
+
+    def publish_fingerprint(self) -> str:
+        return librarydraft_fingerprint(self)
+
+    def mark_published(self):
+        """Record the just-published snapshot. Caller saves the row."""
+        self.last_published_version = self.version
+        self.last_published_hash = self.publish_fingerprint()
+
+    @property
+    def has_unpublished_changes(self) -> bool:
+        """True for a published (identity-committed) draft edited since its
+        last publication snapshot."""
+        return (
+            self.identity_locked
+            and self.last_published_hash is not None
+            and self.publish_fingerprint() != self.last_published_hash
+        )
+
+    def to_library_dict(self) -> dict:
+        """Assemble the full library document (the YAML shape) from the draft."""
+        library = {
+            "urn": self.effective_urn,
+            "locale": self.locale,
+            "ref_id": self.ref_id,
+            "name": self.name,
+            "description": self.description,
+            "copyright": self.copyright,
+            "version": self.version,
+            "publication_date": self.publication_date or now().date(),
+            "provider": self.provider,
+            "packager": self.packager,
+            "annotation": self.annotation,
+        }
+        library = {key: value for key, value in library.items() if value is not None}
+        if self.translations:
+            library["translations"] = self.translations
+        if self.dependencies:
+            library["dependencies"] = self.dependencies
+        if self.labels:
+            library["labels"] = self.labels
+        library["objects"] = self.content or {}
+        return library
 
 
 class LibraryUpdater:
@@ -1338,18 +1418,24 @@ class LibraryUpdater:
                                 ra_pks_to_update.add(ra.pk)
                                 requirement_assessment_objects_to_update.append(ra)
 
-                    # update threats linked to the requirement_node
-                    for threat_urn in requirement_node.get("threats", []):
+                    # Sync threats linked to the requirement_node. Use .set()
+                    # (not add-only): a link removed in the new version must be
+                    # removed from the live node too.
+                    new_threats = []
+                    for threat_urn in requirement_node.get("threats") or []:
                         normalized_threat_urn = threat_urn.lower()
                         threat_object = (
                             objects_tracked.get(normalized_threat_urn)
                             or Threat.objects.filter(urn=normalized_threat_urn).first()
                         )
                         if threat_object:
-                            requirement_node_object.threats.add(threat_object)
+                            new_threats.append(threat_object)
+                    if new_threats or requirement_node_object.threats.exists():
+                        requirement_node_object.threats.set(new_threats)
 
-                    # update reference_controls linked to the requirement_node
-                    for rc_urn in requirement_node.get("reference_controls", []):
+                    # Sync reference_controls linked to the requirement_node.
+                    new_reference_controls = []
+                    for rc_urn in requirement_node.get("reference_controls") or []:
                         normalized_rc_urn = rc_urn.lower()
                         rc_object = (
                             objects_tracked.get(normalized_rc_urn)
@@ -1358,7 +1444,14 @@ class LibraryUpdater:
                             ).first()
                         )
                         if rc_object:
-                            requirement_node_object.reference_controls.add(rc_object)
+                            new_reference_controls.append(rc_object)
+                    if (
+                        new_reference_controls
+                        or requirement_node_object.reference_controls.exists()
+                    ):
+                        requirement_node_object.reference_controls.set(
+                            new_reference_controls
+                        )
 
                 # Fix for the dual bulk_update issue - consolidate into one update
                 if requirement_node_objects_to_update:
@@ -2473,7 +2566,7 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
         return unsynced_applied_controls_query
 
 
-class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
+class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
     library = models.ForeignKey(
         LoadedLibrary,
         on_delete=models.CASCADE,
@@ -2497,6 +2590,11 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
             "If the risk matrix is set as disabled, it will not be available for selection for new risk assessments."
         ),
     )
+
+    class Meta(ReferentialObjectMixin.Meta, I18nObjectMixin.Meta):
+        # Explicit MRO for the parents' (abstract-only) Meta classes; no
+        # options of its own.
+        pass
 
     @property
     def is_used(self) -> bool:
@@ -2565,7 +2663,7 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
         return self.get_name_translated
 
 
-class Framework(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
+class Framework(ReferentialObjectMixin, I18nObjectMixin):
     min_score = models.IntegerField(default=0, verbose_name=_("Minimum score"))
     max_score = models.IntegerField(default=100, verbose_name=_("Maximum score"))
     scores_definition = models.JSONField(
@@ -10028,7 +10126,7 @@ class Actor(AbstractBaseModel):
         return str(self.specific)
 
 
-class Preset(NameDescriptionMixin, FolderMixin, EditableMixin):
+class Preset(NameDescriptionMixin, FolderMixin):
     """Template definition. Library-backed (urn set) or user-authored (urn null)."""
 
     urn = models.CharField(max_length=255, null=True, blank=True, unique=True)
@@ -10259,6 +10357,12 @@ auditlog.register(
 auditlog.register(
     PresetJourneyStep,
     exclude_fields=common_exclude,
+)
+auditlog.register(
+    LibraryDraft,
+    # The document blob changes on every autosave; the auditable event is the
+    # publication, captured on the stored/loaded library side.
+    exclude_fields=common_exclude + ["content"],
 )
 
 
