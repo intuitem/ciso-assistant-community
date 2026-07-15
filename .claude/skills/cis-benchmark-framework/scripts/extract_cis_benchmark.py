@@ -288,6 +288,14 @@ def main():
         action="store_true",
         help="keep sections that contain no assessable recommendation (e.g. 'Introduction')",
     )
+    parser.add_argument(
+        "--rename",
+        action="append",
+        default=[],
+        metavar="REF=TITLE",
+        help="errata override: replace the extracted title of REF (repeatable); "
+        "use when the PDF's summary table contradicts the recommendation body",
+    )
     args = parser.parse_args()
 
     doc = fitz.open(args.pdf)
@@ -298,6 +306,11 @@ def main():
 
     rows, warnings = parse_rows(summary_table_lines(doc))
     doc.close()
+    renames = dict(r.split("=", 1) for r in args.rename)
+    if renames:
+        rows = [(ref, d, renames.pop(ref, t), tag) for ref, d, t, tag in rows]
+        for ref in renames:
+            warnings.append(f"--rename ref {ref} not found in extracted rows")
     if not args.keep_empty_sections:
         before = len(rows)
         rows = prune_empty_sections(rows)

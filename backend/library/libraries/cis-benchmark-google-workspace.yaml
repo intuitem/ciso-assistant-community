@@ -784,7 +784,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cis-benchmark-google-workspace:4.1.2
       ref_id: 4.1.2.1
-      name: (L2) Ensure Super Admin account recovery is enabled
+      name: (L2) Ensure Super Admin account recovery is disabled
       implementation_groups:
       - M
     - urn: urn:intuitem:risk:req_node:cis-benchmark-google-workspace:4.1.2.2

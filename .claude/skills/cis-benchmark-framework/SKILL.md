@@ -42,13 +42,33 @@ Metadata (title, `vX.Y.Z`, publication date) is auto-read from the cover-page li
 
 The script exits 2 with `WARNING:` lines when it sees numeric lines it couldn't place (possible numbering gaps) — treat any warning as a parse review, not noise.
 
-## Validation (do all three)
+## Validation (always run the deep check)
 
-1. **Script counters**: the run prints `N nodes: X sections, Y automated, Z manual` — sanity-check against the benchmark's expected scale.
-2. **Structural YAML check**: unique URNs, every depth>1 node's `parent_urn` resolves, every assessable node has an `A`/`M` group, names ≤200 chars.
-3. **Completeness cross-check**: count `Profile Applicability:` occurrences in the PDF body — it should equal the assessable count. Known benign diffs when diffing ref-by-ref with a heading-walk-back checker:
-   - wrapped body headings make the checker misread refs (`1.11 Ensure ... Within a Period of | 90 Days` → checker reports ref `90`); verify the real ref was extracted before suspecting the extractor;
-   - CIS PDFs occasionally list a recommendation in the summary table that has no body section (e.g. Ubuntu 24.04 v2.0.0 `1.5.10`) — keep it, the summary table is the source of truth.
+```bash
+.venv/bin/python .claude/skills/cis-benchmark-framework/scripts/deep_check.py \
+    path/to/benchmark.pdf backend/library/libraries/cis-benchmark-<tech>.yaml
+```
+
+`deep_check.py` rebuilds ground truth from two sources *independent of the extractor* — the PDF's Table of Contents (refs + full titles + tags, including sections) and the recommendation body headings (anchored at `Profile Applicability:`) — and verifies against the YAML: ref coverage both ways, exact titles (whitespace/hyphen/quote-normalized), Automated/Manual tags, assessability, legitimacy of pruned sections, node ordering, and cover metadata. Expect `CLEAN`; `toc > yaml` by the pruned-section count is normal.
+
+Interpreting findings:
+
+- **TITLE-DIFF confirmed by both ToC and body** → the summary table itself is wrong (CIS errata); fix with `--rename` (below), body is authoritative.
+- **YAML-ONLY + NO-BODY on the same ref** → summary-table-only phantom row (CIS editorial leftover). Keep it (the summary table is the extraction source of truth) but note it.
+- Anything else → suspect the extractor; debug before shipping.
+
+## Errata overrides
+
+When the summary table contradicts the recommendation body, override at extraction time so the fix is reproducible:
+
+```bash
+--rename "4.1.2.1=(L2) Ensure Super Admin account recovery is disabled"
+```
+
+Known CIS PDF errata (re-apply on re-extraction):
+
+- **Google Workspace v1.3.0 `4.1.2.1`**: summary table says "recovery is enabled"; ToC + body say "**disabled**" (the real control). Use the `--rename` above.
+- **Ubuntu 24.04 v2.0.0 `1.5.10`** ("Ensure core file size is configured"): exists only in the summary table — ToC jumps 1.5.9 → 1.5.11 and there is no body section. Kept intentionally; deep_check reports it as the only expected non-CLEAN finding.
 
 ## Outputs & conventions
 
