@@ -1304,8 +1304,6 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         perm: NativePermissionPrefix,
         actor: Actor,
     ) -> bool:
-        from core.models import Team, Entity
-
         specific = actor.specific
         specific_model = type(specific)
         iam_scope_folder = specific.folder
@@ -1502,10 +1500,10 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             "perimeter_folders__id", flat=True
         ).distinct()
         """
-        The "direct folders" are the one stored in the `RoleAssignment.perimeter_folders` field.
-        These folders have roles being directly assigned to them.
+        The "direct folders" are the ones stored in the `RoleAssignment.perimeter_folders` field.
+        These folders have roles (`RoleAssignment.role`) being directly assigned to them.
 
-        In opposition to the indirect (recursive) folders which permission was granted due to permission on an ancestor folder.
+        In opposition to the indirect (recursive) folders which permission was granted due to a `Role` assigned on one of its ancestor folders.
         """
 
         direct_flat_folder_ids = flat_role_assignments.values_list(
