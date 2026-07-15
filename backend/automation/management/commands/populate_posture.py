@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils import timezone
 
-from automation.models import PostureAssessment, PostureResult
+from automation.models import PostureAssessment, PostureResult, PostureRun
 from core.models import (
     Asset,
     Finding,
@@ -142,11 +142,18 @@ class Command(BaseCommand):
 
         now = timezone.now()
         rows = []
+        runs = []
         for day in range(days):
             timestamp = now - timedelta(days=days - 1 - day, hours=random.randint(0, 5))
             pass_probability = 0.6 + 0.32 * (day / max(days - 1, 1))
             for asset in assets:
-                run_id = uuid.uuid4()
+                run = PostureRun(
+                    id=uuid.uuid4(),
+                    posture_assessment=pa,
+                    started_at=timestamp,
+                    tool="populate-posture 1.0",
+                )
+                runs.append(run)
                 for check in checks:
                     if check in not_applicable:
                         result = "not_applicable"
@@ -169,14 +176,14 @@ class Command(BaseCommand):
                             asset=asset,
                             result=result,
                             timestamp=timestamp,
-                            run_id=run_id,
+                            run=run,
                             actual="PermissionsMode=0666" if result == "fail" else "",
                             expected="PermissionsMode=0644" if result == "fail" else "",
                             message="scan timeout" if result == "error" else "",
-                            tool="populate-posture 1.0",
                             source=PostureResult.Source.IMPORT,
                         )
                     )
+        PostureRun.objects.bulk_create(runs, batch_size=2000)
         PostureResult.objects.bulk_create(rows, batch_size=2000)
 
         follow_up = FindingsAssessment.objects.create(

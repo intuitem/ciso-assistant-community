@@ -1,7 +1,7 @@
 import pytest
 from rest_framework.test import APIClient
 
-from automation.models import PostureAssessment, PostureResult
+from automation.models import PostureAssessment, PostureResult, PostureRun
 from core.models import Asset, Finding, FindingsAssessment, Framework, RequirementNode
 from iam.models import Folder, Role, RoleAssignment, User
 
@@ -112,9 +112,46 @@ class TestPostureIngestion:
         row = PostureResult.objects.get(requirement=s["nodes"]["1.2"])
         assert row.actual == "0666"
         assert row.expected == "0644"
-        assert row.tool == "kube-bench 0.7"
+        assert row.run.tool == "kube-bench 0.7"
+        assert row.run.posture_assessment == s["pa"]
         assert row.source == PostureResult.Source.API
         assert row.imported_by is not None
+
+    def test_run_object_reuse_and_scoping(self, setup):
+        s = setup
+        first = upload(
+            s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "pass"}]
+        ).json()
+        upload(
+            s["client"],
+            s["pa"],
+            s["asset2"],
+            [{"ref_id": "1.1", "result": "pass"}],
+            run_id=first["run_id"],
+        )
+        assert PostureRun.objects.filter(posture_assessment=s["pa"]).count() == 1
+
+        other = PostureAssessment.objects.create(
+            name="Other", folder=s["domain"], framework=s["framework"]
+        )
+        other.assets.set([s["asset1"]])
+        res = upload(
+            s["client"],
+            other,
+            s["asset1"],
+            [{"ref_id": "1.1", "result": "pass"}],
+            run_id=first["run_id"],
+        )
+        assert res.status_code == 400
+        assert "another assessment" in res.json()["error"]
+
+    def test_pruning_garbage_collects_empty_runs(self, setup):
+        s = setup
+        for result in ("fail", "fail", "pass"):
+            upload(
+                s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": result}]
+            )
+        assert PostureRun.objects.filter(posture_assessment=s["pa"]).count() == 2
 
     def test_run_id_patch_upsert(self, setup):
         s = setup
@@ -146,10 +183,81 @@ class TestPostureIngestion:
         )
         assert res.status_code == 400
 
-    def test_scope_enforcement(self, setup):
+    def test_auto_enroll_existing_asset(self, setup):
         s = setup
-        rogue = Asset.objects.create(name="rogue", folder=s["domain"])
-        res = upload(s["client"], s["pa"], rogue, [{"ref_id": "1.1", "result": "pass"}])
+        newcomer = Asset.objects.create(name="vm-new", folder=s["domain"])
+        res = upload(
+            s["client"], s["pa"], newcomer, [{"ref_id": "1.1", "result": "pass"}]
+        )
+        assert res.status_code == 200
+        assert res.json()["enrolled_asset"] is True
+        assert s["pa"].assets.filter(id=newcomer.id).exists()
+
+        res2 = upload(
+            s["client"], s["pa"], newcomer, [{"ref_id": "1.2", "result": "pass"}]
+        )
+        assert res2.json()["enrolled_asset"] is False
+
+    def test_scope_removal_blocked_for_measured_assets(self, setup):
+        s = setup
+        upload(s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "pass"}])
+
+        res = s["client"].patch(
+            f"/api/automation/posture-assessments/{s['pa'].id}/",
+            {"assets": [str(s["asset2"].id)]},
+            format="json",
+        )
+        assert res.status_code == 400
+        assert "vm-1" in str(res.json())
+
+        res2 = s["client"].patch(
+            f"/api/automation/posture-assessments/{s['pa'].id}/",
+            {"assets": [str(s["asset1"].id)]},
+            format="json",
+        )
+        assert res2.status_code == 200
+        assert not s["pa"].assets.filter(id=s["asset2"].id).exists()
+
+    def test_orphaned_results_do_not_block_scope_additions(self, setup):
+        s = setup
+        upload(s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "pass"}])
+        s["pa"].assets.remove(s["asset1"])  # simulate pre-guard drift
+
+        newcomer = Asset.objects.create(name="vm-3", folder=s["domain"])
+        res = s["client"].patch(
+            f"/api/automation/posture-assessments/{s['pa'].id}/",
+            {"assets": [str(s["asset2"].id), str(newcomer.id)]},
+            format="json",
+        )
+        assert res.status_code == 200
+
+    def test_purge_asset(self, setup):
+        s = setup
+        upload(s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "fail"}])
+        upload(s["client"], s["pa"], s["asset2"], [{"ref_id": "1.1", "result": "pass"}])
+
+        res = s["client"].post(
+            f"/api/automation/posture-assessments/{s['pa'].id}/purge-asset/",
+            {"asset": str(s["asset1"].id)},
+            format="json",
+        )
+        assert res.status_code == 200
+        assert res.json()["deleted_results"] == 1
+        assert not s["pa"].assets.filter(id=s["asset1"].id).exists()
+        assert not s["pa"].results.filter(asset=s["asset1"]).exists()
+        assert PostureRun.objects.filter(posture_assessment=s["pa"]).count() == 1
+        assert s["pa"].results.filter(asset=s["asset2"]).exists()
+
+    def test_nonexistent_asset_rejected(self, setup):
+        s = setup
+        res = s["client"].post(
+            f"/api/automation/posture-assessments/{s['pa'].id}/upload-results/",
+            {
+                "asset": "00000000-0000-0000-0000-000000000000",
+                "results": [{"ref_id": "1.1", "result": "pass"}],
+            },
+            format="json",
+        )
         assert res.status_code == 400
         assert PostureResult.objects.filter(posture_assessment=s["pa"]).count() == 0
 
@@ -301,6 +409,12 @@ class TestPostureIngestion:
         assert len(asset1_runs) == 2
         assert [r["tool"] for r in asset1_runs] == ["kube-bench 0.7", "kube-bench 0.8"]
 
+    def test_posture_total_checks(self, setup):
+        s = setup
+        assert get_posture(s["client"], s["pa"])["total_checks"] == 4
+        upload(s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "pass"}])
+        assert get_posture(s["client"], s["pa"])["total_checks"] == 4
+
     def test_score_none_when_nothing_applicable(self, setup):
         s = setup
         upload(
@@ -310,6 +424,90 @@ class TestPostureIngestion:
             [{"ref_id": "1.1", "result": "not_applicable"}],
         )
         assert get_posture(s["client"], s["pa"])["score"] is None
+
+
+@pytest.mark.django_db
+class TestRunDetail:
+    def test_run_detail_multi_asset(self, setup):
+        s = setup
+        first = upload(
+            s["client"],
+            s["pa"],
+            s["asset1"],
+            [
+                {"ref_id": "1.1", "result": "pass"},
+                {"ref_id": "1.2", "result": "fail"},
+            ],
+            tool="kube-bench 0.7",
+        ).json()
+        upload(
+            s["client"],
+            s["pa"],
+            s["asset2"],
+            [
+                {"ref_id": "1.1", "result": "pass"},
+                {"ref_id": "1.3", "result": "error"},
+            ],
+            run_id=first["run_id"],
+        )
+
+        res = s["client"].get(
+            f"/api/automation/posture-assessments/{s['pa'].id}/runs/{first['run_id']}/"
+        )
+        assert res.status_code == 200
+        body = res.json()
+        assert body["run"]["assets"] == 2
+        assert body["run"]["checks"] == 4
+        assert body["run"]["passed"] == 2
+        assert body["run"]["failed"] == 1
+        assert body["run"]["tool"] == "kube-bench 0.7"
+        asset_ids = {row["asset"]["id"] for row in body["results"]}
+        assert asset_ids == {str(s["asset1"].id), str(s["asset2"].id)}
+
+    def test_run_detail_not_found(self, setup):
+        s = setup
+        res = s["client"].get(
+            f"/api/automation/posture-assessments/{s['pa'].id}/runs/00000000-0000-0000-0000-000000000000/"
+        )
+        assert res.status_code == 404
+
+        other = PostureAssessment.objects.create(
+            name="Other", folder=s["domain"], framework=s["framework"]
+        )
+        other.assets.set([s["asset1"]])
+        run = upload(
+            s["client"], other, s["asset1"], [{"ref_id": "1.1", "result": "pass"}]
+        ).json()["run_id"]
+        res2 = s["client"].get(
+            f"/api/automation/posture-assessments/{s['pa'].id}/runs/{run}/"
+        )
+        assert res2.status_code == 404
+
+    def test_run_detail_reflects_patch(self, setup):
+        s = setup
+        run = upload(
+            s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "fail"}]
+        ).json()["run_id"]
+        upload(
+            s["client"],
+            s["pa"],
+            s["asset1"],
+            [{"ref_id": "1.1", "result": "pass"}],
+            run_id=run,
+        )
+        body = (
+            s["client"]
+            .get(f"/api/automation/posture-assessments/{s['pa'].id}/runs/{run}/")
+            .json()
+        )
+        assert body["results"][0]["result"] == "pass"
+        assert body["run"]["checks"] == 1
+
+    def test_runs_list_still_routes(self, setup):
+        s = setup
+        res = s["client"].get(f"/api/automation/posture-assessments/{s['pa'].id}/runs/")
+        assert res.status_code == 200
+        assert res.json() == {"runs": []}
 
 
 @pytest.mark.django_db
@@ -376,6 +574,328 @@ class TestTree:
             format="json",
         )
         assert bad.status_code == 400
+
+
+@pytest.fixture
+def ig_setup(db):
+    root = Folder.get_root_folder()
+    domain = Folder.objects.create(
+        parent_folder=root, name="IG Domain", content_type=Folder.ContentType.DOMAIN
+    )
+    fw = Framework.objects.create(
+        name="IG Benchmark",
+        folder=root,
+        is_published=True,
+        implementation_groups_definition=[
+            {"ref_id": "A", "name": "Automatic"},
+            {"ref_id": "B", "name": "Manual"},
+        ],
+    )
+    section = RequirementNode.objects.create(
+        framework=fw,
+        urn="urn:test:ig:section:1",
+        ref_id="1",
+        assessable=False,
+        folder=root,
+        is_published=True,
+    )
+    groups = {"1.1": ["A"], "1.2": ["B"], "1.3": None, "2.1": ["A", "B"]}
+    nodes = {}
+    for ref_id, igs in groups.items():
+        nodes[ref_id] = RequirementNode.objects.create(
+            framework=fw,
+            urn=f"urn:test:ig:req:{ref_id}",
+            parent_urn=section.urn if ref_id.startswith("1.") else None,
+            ref_id=ref_id,
+            assessable=True,
+            implementation_groups=igs,
+            folder=root,
+            is_published=True,
+        )
+    asset = Asset.objects.create(name="ig-vm", folder=domain)
+    pa = PostureAssessment.objects.create(
+        name="IG posture", folder=domain, framework=fw
+    )
+    pa.assets.set([asset])
+    admin = User.objects.create_superuser("ig-admin@tests.com")
+    client = APIClient()
+    client.force_authenticate(admin)
+    upload(
+        client,
+        pa,
+        asset,
+        [
+            {"ref_id": "1.1", "result": "pass"},
+            {"ref_id": "1.2", "result": "fail"},
+            {"ref_id": "1.3", "result": "fail"},
+            {"ref_id": "2.1", "result": "fail"},
+        ],
+    )
+    return {"pa": pa, "asset": asset, "client": client, "nodes": nodes}
+
+
+@pytest.mark.django_db
+class TestImplementationGroups:
+    def select(self, s, groups):
+        s["pa"].selected_implementation_groups = groups
+        s["pa"].save(update_fields=["selected_implementation_groups"])
+
+    def test_posture_filtered_by_selection(self, ig_setup):
+        s = ig_setup
+        self.select(s, ["A"])
+        body = get_posture(s["client"], s["pa"])
+        refs = sorted(r["requirement"]["ref_id"] for r in body["results"])
+        assert refs == ["1.1", "2.1"]
+        assert body["total_checks"] == 2
+        assert body["score"] == 50.0  # 1 pass / (1 pass + 1 fail)
+
+    def test_no_ig_node_excluded_when_selection_active(self, ig_setup):
+        s = ig_setup
+        self.select(s, ["A"])
+        refs = {
+            r["requirement"]["ref_id"]
+            for r in get_posture(s["client"], s["pa"])["results"]
+        }
+        assert "1.3" not in refs
+
+    def test_empty_or_null_selection_means_no_filtering(self, ig_setup):
+        s = ig_setup
+        for value in (None, []):
+            self.select(s, value)
+            body = get_posture(s["client"], s["pa"])
+            assert len(body["results"]) == 4
+            assert body["total_checks"] == 4
+
+    def test_tree_pruned(self, ig_setup):
+        s = ig_setup
+        self.select(s, ["B"])
+        tree = (
+            s["client"]
+            .get(f"/api/automation/posture-assessments/{s['pa'].id}/tree/")
+            .json()["tree"]
+        )
+        top_refs = [n["ref_id"] for n in tree]
+        assert top_refs == ["1", "2.1"]
+        section = tree[0]
+        assert [c["ref_id"] for c in section["children"]] == ["1.2"]
+        assert section["counts"] == {"fail": 1}
+
+    def test_trend_filtered(self, ig_setup):
+        s = ig_setup
+        self.select(s, ["A"])
+        points = (
+            s["client"]
+            .get(f"/api/automation/posture-assessments/{s['pa'].id}/trend/")
+            .json()["points"]
+        )
+        assert points[-1]["counts"] == {"pass": 1, "fail": 1}
+
+    def test_runs_stay_unfiltered(self, ig_setup):
+        s = ig_setup
+        self.select(s, ["A"])
+        runs = (
+            s["client"]
+            .get(f"/api/automation/posture-assessments/{s['pa'].id}/runs/")
+            .json()["runs"]
+        )
+        assert runs[0]["checks"] == 4
+
+    def test_upload_outside_selection_stored_but_hidden(self, ig_setup):
+        s = ig_setup
+        self.select(s, ["A"])
+        res = upload(
+            s["client"], s["pa"], s["asset"], [{"ref_id": "1.2", "result": "pass"}]
+        )
+        assert res.status_code == 200
+        assert (
+            PostureResult.objects.filter(
+                posture_assessment=s["pa"], requirement=s["nodes"]["1.2"]
+            ).count()
+            == 2
+        )
+        refs = {
+            r["requirement"]["ref_id"]
+            for r in get_posture(s["client"], s["pa"])["results"]
+        }
+        assert "1.2" not in refs
+
+
+@pytest.mark.django_db
+class TestImportResults:
+    def import_file(self, s, name, content, content_type="text/plain"):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        return s["client"].post(
+            f"/api/automation/posture-assessments/{s['pa'].id}/import-results/",
+            {
+                "asset": str(s["asset1"].id),
+                "file": SimpleUploadedFile(name, content, content_type=content_type),
+            },
+            format="multipart",
+        )
+
+    def test_csv_import(self, setup):
+        s = setup
+        csv_content = (
+            b"ref_id,result,actual,message\n"
+            b"1.1,pass,mode 0644,\n"
+            b"1.2,fail,mode 0666,bad perms\n"
+            b"bogus,,\n"
+        )
+        res = self.import_file(s, "scan.csv", csv_content)
+        assert res.status_code == 200
+        body = res.json()
+        assert body["created"] == 2
+        assert len(body["parse_errors"]) == 1
+        row = PostureResult.objects.get(requirement=s["nodes"]["1.2"])
+        assert row.source == "import"
+        assert row.run.tool == "scan.csv"
+        assert row.message == "bad perms"
+
+    def test_xlsx_import(self, setup):
+        s = setup
+        import io
+
+        from openpyxl import Workbook
+
+        wb = Workbook()
+        ws = wb.active
+        ws.append(["ref_id", "result"])
+        ws.append(["1.1", "pass"])
+        ws.append(["2.1", "not_applicable"])
+        buffer = io.BytesIO()
+        wb.save(buffer)
+        res = self.import_file(s, "scan.xlsx", buffer.getvalue())
+        assert res.status_code == 200
+        assert res.json()["created"] == 2
+
+    def test_ocsf_import(self, setup):
+        s = setup
+        import json
+
+        events = [
+            {
+                "class_uid": 2003,
+                "metadata": {"product": {"name": "prowler", "version": "4.2"}},
+                "compliance": {
+                    "status": "Pass",
+                    "requirements": ["1.1"],
+                },
+            },
+            {
+                "class_uid": 2003,
+                "compliance": {
+                    "status": "Fail",
+                    "status_detail": "port open",
+                    "requirements": ["CIS-1.2"],
+                },
+            },
+            {
+                "class_uid": 2003,
+                "compliance": {"status": "Warning", "requirements": ["1.3"]},
+            },
+            {
+                "class_uid": 2003,
+                "status": "Suppressed",
+                "compliance": {"status": "Fail", "requirements": ["2.1"]},
+            },
+            {"class_uid": 2002, "compliance": {"status": "Fail"}},
+        ]
+        res = self.import_file(
+            s, "findings.json", json.dumps(events).encode(), "application/json"
+        )
+        assert res.status_code == 200
+        body = res.json()
+        assert body["created"] == 3
+        assert body["skipped_suppressed"] == 1
+        assert body["skipped_other_class"] == 1
+        assert body["unknown_ref_ids"] == []
+
+        assert PostureResult.objects.get(requirement=s["nodes"]["1.1"]).result == "pass"
+        prefixed = PostureResult.objects.get(requirement=s["nodes"]["1.2"])
+        assert prefixed.result == "fail"
+        assert prefixed.message == "port open"
+        assert prefixed.run.tool == "prowler 4.2"
+        assert (
+            PostureResult.objects.get(requirement=s["nodes"]["1.3"]).result
+            == "not_checked"
+        )
+
+    def test_unsupported_extension(self, setup):
+        s = setup
+        res = self.import_file(s, "scan.pdf", b"whatever")
+        assert res.status_code == 400
+
+    def test_malformed_json(self, setup):
+        s = setup
+        res = self.import_file(s, "scan.json", b"{not json", "application/json")
+        assert res.status_code == 400
+
+    def test_import_auto_enrolls(self, setup):
+        s = setup
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        newcomer = Asset.objects.create(name="vm-import", folder=s["domain"])
+        res = s["client"].post(
+            f"/api/automation/posture-assessments/{s['pa'].id}/import-results/",
+            {
+                "asset": str(newcomer.id),
+                "file": SimpleUploadedFile("scan.csv", b"ref_id,result\n1.1,pass\n"),
+            },
+            format="multipart",
+        )
+        assert res.status_code == 200
+        assert res.json()["enrolled_asset"] is True
+        assert s["pa"].assets.filter(id=newcomer.id).exists()
+
+
+@pytest.mark.django_db
+class TestExportResults:
+    def test_csv_export_all_and_per_asset(self, setup):
+        s = setup
+        upload(
+            s["client"],
+            s["pa"],
+            s["asset1"],
+            [
+                {"ref_id": "1.1", "result": "pass", "actual": "0644"},
+                {"ref_id": "1.2", "result": "fail"},
+            ],
+        )
+        upload(s["client"], s["pa"], s["asset2"], [{"ref_id": "1.1", "result": "pass"}])
+
+        base = f"/api/automation/posture-assessments/{s['pa'].id}/export-results/"
+        res = s["client"].get(base)
+        assert res.status_code == 200
+        assert res["Content-Type"].startswith("text/csv")
+        lines = res.content.decode().strip().splitlines()
+        assert lines[0].startswith("asset,ref_id,requirement,result")
+        assert len(lines) == 4  # header + 3 current rows
+
+        per_asset = s["client"].get(f"{base}?asset={s['asset1'].id}")
+        asset_lines = per_asset.content.decode().strip().splitlines()
+        assert len(asset_lines) == 3
+        assert all("vm-1" in line for line in asset_lines[1:])
+
+    def test_xlsx_export(self, setup):
+        s = setup
+        upload(s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "pass"}])
+        res = s["client"].get(
+            f"/api/automation/posture-assessments/{s['pa'].id}/export-results/?file_format=xlsx"
+        )
+        assert res.status_code == 200
+        assert "spreadsheetml" in res["Content-Type"]
+        assert res.content[:2] == b"PK"
+
+    def test_export_respects_implementation_groups(self, ig_setup):
+        s = ig_setup
+        s["pa"].selected_implementation_groups = ["A"]
+        s["pa"].save(update_fields=["selected_implementation_groups"])
+        res = s["client"].get(
+            f"/api/automation/posture-assessments/{s['pa'].id}/export-results/"
+        )
+        lines = res.content.decode().strip().splitlines()
+        assert len(lines) == 3  # header + 1.1 + 2.1
 
 
 @pytest.mark.django_db

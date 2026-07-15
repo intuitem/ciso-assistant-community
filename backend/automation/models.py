@@ -49,10 +49,32 @@ class PostureAssessment(Assessment):
         verbose_name = _("Posture assessment")
         verbose_name_plural = _("Posture assessments")
 
+    def requirement_matches_selected_groups(self, implementation_groups) -> bool:
+        selected = self.selected_implementation_groups
+        if not selected:
+            return True
+        if not implementation_groups:
+            return False
+        return bool(set(selected) & set(implementation_groups))
+
+    def selected_requirement_ids(self) -> set | None:
+        if not self.selected_implementation_groups:
+            return None
+        return {
+            node["id"]
+            for node in RequirementNode.objects.filter(
+                framework=self.framework, assessable=True
+            ).values("id", "implementation_groups")
+            if self.requirement_matches_selected_groups(node["implementation_groups"])
+        }
+
     def current_posture(self, asset_id=None) -> list[dict]:
         qs = self.results
         if asset_id:
             qs = qs.filter(asset_id=asset_id)
+        selected_ids = self.selected_requirement_ids()
+        if selected_ids is not None:
+            qs = qs.filter(requirement_id__in=selected_ids)
         return list(
             qs.annotate(
                 rn=Window(
@@ -69,6 +91,8 @@ class PostureAssessment(Assessment):
                 "result",
                 "timestamp",
                 "run_id",
+                "run__tool",
+                "source",
                 "actual",
                 "expected",
                 "message",
@@ -96,6 +120,23 @@ class PostureAssessment(Assessment):
             stale.extend(pks[self.history_depth :])
         if stale:
             self.results.filter(pk__in=stale).delete()
+            self.runs.filter(results__isnull=True).delete()
+
+
+class PostureRun(AbstractBaseModel):
+    posture_assessment = models.ForeignKey(
+        PostureAssessment, on_delete=models.CASCADE, related_name="runs"
+    )
+    started_at = models.DateTimeField()
+    tool = models.CharField(max_length=100, blank=True)
+
+    class Meta:
+        verbose_name = _("Posture run")
+        verbose_name_plural = _("Posture runs")
+        indexes = [models.Index(fields=["posture_assessment", "started_at"])]
+
+    def __str__(self):
+        return f"{self.tool or 'run'} @ {self.started_at:%Y-%m-%d %H:%M}"
 
 
 class PostureResult(AbstractBaseModel):
@@ -114,6 +155,9 @@ class PostureResult(AbstractBaseModel):
     posture_assessment = models.ForeignKey(
         PostureAssessment, on_delete=models.CASCADE, related_name="results"
     )
+    run = models.ForeignKey(
+        PostureRun, on_delete=models.CASCADE, related_name="results"
+    )
     requirement = models.ForeignKey(
         RequirementNode, on_delete=models.CASCADE, related_name="posture_results"
     )
@@ -124,11 +168,9 @@ class PostureResult(AbstractBaseModel):
         max_length=20, choices=Result.choices, default=Result.NOT_CHECKED
     )
     timestamp = models.DateTimeField()
-    run_id = models.UUIDField()
     actual = models.CharField(max_length=255, blank=True)
     expected = models.CharField(max_length=255, blank=True)
     message = models.TextField(blank=True)
-    tool = models.CharField(max_length=100, blank=True)
     source = models.CharField(max_length=10, choices=Source.choices, default=Source.API)
     imported_by = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
@@ -138,14 +180,14 @@ class PostureResult(AbstractBaseModel):
         verbose_name = _("Posture result")
         verbose_name_plural = _("Posture results")
         indexes = [
-            models.Index(fields=["posture_assessment", "run_id"]),
+            models.Index(fields=["posture_assessment", "run"]),
             models.Index(
                 fields=["posture_assessment", "asset", "requirement", "timestamp"]
             ),
         ]
         constraints = [
             models.UniqueConstraint(
-                fields=["run_id", "asset", "requirement"],
+                fields=["run", "asset", "requirement"],
                 name="unique_posture_result_per_run",
             ),
         ]

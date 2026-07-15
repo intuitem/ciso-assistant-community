@@ -1,3 +1,6 @@
+from rest_framework import serializers
+
+from core.models import Asset
 from core.serializers import (
     AssessmentReadSerializer,
     BaseModelSerializer,
@@ -9,6 +12,23 @@ from .models import PostureAssessment, PostureResult
 
 
 class PostureAssessmentWriteSerializer(BaseModelSerializer):
+    def update(self, instance, validated_data):
+        if "assets" in validated_data:
+            kept = {asset.id for asset in validated_data["assets"]}
+            current = set(instance.assets.values_list("id", flat=True))
+            measured = set(
+                instance.results.values_list("asset_id", flat=True).distinct()
+            )
+            dropped = (current & measured) - kept
+            if dropped:
+                names = ", ".join(
+                    Asset.objects.filter(id__in=dropped).values_list("name", flat=True)
+                )
+                raise serializers.ValidationError(
+                    {"assets": f"cannot remove assets with recorded results: {names}"}
+                )
+        return super().update(instance, validated_data)
+
     class Meta:
         model = PostureAssessment
         exclude = ["created_at", "updated_at"]

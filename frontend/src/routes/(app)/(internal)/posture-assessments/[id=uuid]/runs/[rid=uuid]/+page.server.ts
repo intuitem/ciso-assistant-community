@@ -1,23 +1,17 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import type { PageServerLoad } from './$types';
-import { fail, type Actions } from '@sveltejs/kit';
+import { error, fail, type Actions } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async (event) => {
-	const endpoint = `${BASE_API_URL}/automation/posture-assessments/${event.params.id}`;
-	const assessment = await event.fetch(`${endpoint}/`).then((res) => res.json());
-	const asset =
-		event.url.searchParams.get('asset') ??
-		(assessment.assets?.length === 1 ? assessment.assets[0].id : null);
-	const tree = await event
-		.fetch(`${endpoint}/tree/${asset ? `?asset=${encodeURIComponent(asset)}` : ''}`)
-		.then((res) => res.json());
-	return {
-		assessment,
-		tree: tree.tree,
-		assets: tree.assets,
-		selectedAsset: asset,
-		title: assessment.name
-	};
+	const res = await event.fetch(
+		`${BASE_API_URL}/automation/posture-assessments/${event.params.id}/runs/${event.params.rid}/`
+	);
+	if (!res.ok) error(404);
+	const body = await res.json();
+	const assessment = await event
+		.fetch(`${BASE_API_URL}/automation/posture-assessments/${event.params.id}/`)
+		.then((r) => r.json());
+	return { run: body.run, results: body.results, assessment, title: assessment.name };
 };
 
 export const actions: Actions = {
@@ -30,13 +24,13 @@ export const actions: Actions = {
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					asset: formData.get('asset'),
+					run_id: event.params.rid,
 					source: 'manual',
-					...(formData.get('run_id') ? { run_id: formData.get('run_id') } : {}),
 					results: [{ ref_id: formData.get('ref_id'), result: formData.get('result') }]
 				})
 			}
 		);
 		if (!res.ok) return fail(res.status, await res.json());
-		return { ok: true };
+		return await res.json();
 	}
 };

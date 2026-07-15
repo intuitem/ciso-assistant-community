@@ -39,6 +39,14 @@
 		const select = event.currentTarget as HTMLSelectElement;
 		if (select.value) select.form?.requestSubmit();
 	}
+
+	let treeContainer: HTMLDivElement | undefined = $state();
+
+	function setAll(open: boolean) {
+		treeContainer
+			?.querySelectorAll('details')
+			.forEach((node) => ((node as HTMLDetailsElement).open = open));
+	}
 </script>
 
 {#snippet countChips(counts: Record<string, number>)}
@@ -102,6 +110,7 @@
 					<form method="POST" action="?/setResult" use:enhance>
 						<input type="hidden" name="ref_id" value={node.ref_id} />
 						<input type="hidden" name="asset" value={data.selectedAsset} />
+						<input type="hidden" name="run_id" value={node.current?.run_id ?? ''} />
 						<select
 							name="result"
 							class="select w-40 py-1 text-sm"
@@ -132,6 +141,14 @@
 			<i class="fa-solid fa-arrow-left mr-2"></i>{data.assessment.name}
 		</Anchor>
 		<h3 class="text-lg font-semibold grow">{m.treeView()}</h3>
+		<div class="flex items-center gap-1">
+			<button type="button" class="btn btn-sm preset-tonal" onclick={() => setAll(true)}>
+				<i class="fa-solid fa-angles-down mr-1"></i>{m.expandAll()}
+			</button>
+			<button type="button" class="btn btn-sm preset-tonal" onclick={() => setAll(false)}>
+				<i class="fa-solid fa-angles-up mr-1"></i>{m.collapseAll()}
+			</button>
+		</div>
 		<label class="flex items-center gap-2 text-sm">
 			{m.selectAsset()}
 			<select class="select w-64 py-1" value={data.selectedAsset ?? ''} onchange={onAssetChange}>
@@ -147,7 +164,7 @@
 		<p class="text-sm text-surface-600-400 px-2">{m.selectAssetToEditHelp()}</p>
 	{/if}
 
-	<div class="card p-4 bg-surface-50-950 shadow-xs space-y-0.5">
+	<div class="card p-4 bg-surface-50-950 shadow-xs space-y-0.5" bind:this={treeContainer}>
 		{#each data.tree as node (node.id)}
 			{@render nodeView(node, 0)}
 		{/each}

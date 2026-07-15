@@ -26,6 +26,27 @@
 		initialData = {},
 		object = {}
 	}: Props = $props();
+
+	let implementationGroupsChoices = $state<{ label: string; value: string }[]>([]);
+
+	async function handleFrameworkChange(id: string) {
+		if (!id) return;
+		const r = await fetch(`/frameworks/${id}`).then((res) => res.json());
+		const implementation_groups = r['implementation_groups_definition'] || [];
+		implementationGroupsChoices = implementation_groups.map((group: any) => ({
+			label: group.name,
+			value: group.ref_id
+		}));
+		const defaults = implementation_groups
+			.filter((group: any) => group.default_selected)
+			.map((group: any) => group.ref_id);
+		if (!object.id) {
+			form.form.update((currentData: any) => ({
+				...currentData,
+				selected_implementation_groups: defaults
+			}));
+		}
+	}
 </script>
 
 <AutocompleteSelect
@@ -36,18 +57,21 @@
 	cacheLock={cacheLocks['framework']}
 	bind:cachedValue={formDataCache['framework']}
 	disabled={object.id}
+	onChange={async (e) => handleFrameworkChange(e)}
+	mount={async (e) => handleFrameworkChange(e)}
 />
-<AutocompleteSelect
-	{form}
-	multiple
-	optionsEndpoint="assets"
-	optionsExtraFields={[['folder', 'str']]}
-	optionsLabelField="auto"
-	field="assets"
-	label={m.assets()}
-	cacheLock={cacheLocks['assets']}
-	bind:cachedValue={formDataCache['assets']}
-/>
+{#if implementationGroupsChoices.length > 0}
+	<AutocompleteSelect
+		multiple
+		translateOptions={false}
+		{form}
+		options={implementationGroupsChoices}
+		field="selected_implementation_groups"
+		cacheLock={cacheLocks['selected_implementation_groups']}
+		bind:cachedValue={formDataCache['selected_implementation_groups']}
+		label={m.selectedImplementationGroups()}
+	/>
+{/if}
 <Select
 	{form}
 	options={model.selectOptions['status']}

@@ -1364,7 +1364,6 @@ export const PostureAssessmentSchema = z.object({
 	status: z.string().optional().nullable(),
 	framework: z.string(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
-	assets: z.array(z.string().optional()).optional(),
 	history_depth: z.number().int().min(1).optional().default(10),
 	authors: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),

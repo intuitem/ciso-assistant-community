@@ -38,6 +38,12 @@
 		);
 	});
 
+	const columns = $derived(
+		[...assets].sort((a, b) =>
+			(a.name ?? '').localeCompare(b.name ?? '', undefined, { numeric: true })
+		)
+	);
+
 	const Y_WINDOW = 40;
 	const X_WINDOW = 20;
 	const chartHeight = $derived(Math.max(280, Math.min(checks.length, Y_WINDOW) * 24 + 160));
@@ -51,7 +57,7 @@
 		);
 
 		const latestTimestamp = results.reduce((acc, r) => (r.timestamp > acc ? r.timestamp : acc), '');
-		const assetIndex = new Map(assets.map((a, i) => [a.id, i]));
+		const assetIndex = new Map(columns.map((a, i) => [a.id, i]));
 		const checkIndex = new Map(checks.map((c, i) => [c.id, i]));
 
 		const data = results
@@ -67,7 +73,7 @@
 			}));
 
 		const dataZoom = [
-			...(assets.length > X_WINDOW
+			...(columns.length > X_WINDOW
 				? [
 						{
 							type: 'slider',
@@ -99,7 +105,7 @@
 			grid: {
 				top: 60,
 				right: checks.length > Y_WINDOW ? 40 : 10,
-				bottom: assets.length > X_WINDOW ? 90 : 60,
+				bottom: columns.length > X_WINDOW ? 90 : 60,
 				left: 90
 			},
 			dataZoom,
@@ -120,9 +126,9 @@
 			},
 			xAxis: {
 				type: 'category',
-				data: assets.map((a) => a.name),
+				data: columns.map((a) => a.name),
 				position: 'top',
-				axisLabel: { rotate: assets.length > 6 ? 30 : 0 },
+				axisLabel: { rotate: columns.length > 6 ? 30 : 0 },
 				splitArea: { show: true }
 			},
 			yAxis: {
