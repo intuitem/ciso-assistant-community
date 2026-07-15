@@ -1623,5 +1623,6 @@
 	"scimTokenGenerationFailed": "SCIM टोकन उत्पन्न करने में विफल",
 	"idpGroup": "IdP समूह",
 	"idpGroups": "IdP समूह",
-	"idpGroupsDescription": "IdP समूह फ़ेडरेशन सक्षम करें (SCIM प्रावधान, IdP समूह मैपिंग, और उपयोगकर्ताओं पर IdP समूह सदस्यताएँ)।"
+	"idpGroupsDescription": "IdP समूह फ़ेडरेशन सक्षम करें (SCIM प्रावधान, IdP समूह मैपिंग, और उपयोगकर्ताओं पर IdP समूह सदस्यताएँ)।",
+	"ebiosRmStudyDomainHelpText": "डोमेन बदलने से अध्ययन और उसकी सभी कार्यशाला वस्तुएँ चयनित डोमेन में स्थानांतरित हो जाती हैं।"
 }

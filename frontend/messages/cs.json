@@ -3518,6 +3518,7 @@
 	"campaigns": "Kampaně",
 	"addCampaign": "Zahájit kampaň",
 	"campaignDomainHelpText": "Doména, ke které bude kampaň připojena.",
+	"ebiosRmStudyDomainHelpText": "Změna domény přesune studii a všechny objekty jejích workshopů do vybrané domény.",
 	"averageProgress": "Průměrný postup",
 	"daysRemaining": "Zbývající dny",
 	"serverURL": "Adresa URL serveru",

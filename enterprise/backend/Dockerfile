@@ -1,4 +1,5 @@
-FROM python:3.14-slim
+ARG PYTHON_IMAGE=python:3.14-slim
+FROM ${PYTHON_IMAGE}
 
 # UV_NO_SYNC=1: prevent `uv run` from auto-syncing at runtime; the venv is built once at image build (uv sync --locked --no-dev)
 ENV PYTHONUNBUFFERED=1 \

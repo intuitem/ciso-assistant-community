@@ -50,7 +50,7 @@ jobs:
       PUBLIC_BACKEND_API_URL: http://localhost:8000/api
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:16
+        image: ghcr.io/intuitem/ciso-assistant-community/mirror/postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -150,6 +150,12 @@ jobs:
     timeout-minutes: 22
     env:
       COMPOSE_TEST: True
+      # Pull build-time and runtime base images from our GHCR mirror instead of
+      # Docker Hub to avoid anonymous pull rate limits. See .github/mirror-images.json.
+      PYTHON_IMAGE: ghcr.io/intuitem/ciso-assistant-community/mirror/python:3.14-slim
+      NODE_IMAGE: ghcr.io/intuitem/ciso-assistant-community/mirror/node:24-slim
+      QDRANT_IMAGE: ghcr.io/intuitem/ciso-assistant-community/mirror/qdrant:v1.14.0
+      CADDY_IMAGE: ghcr.io/intuitem/ciso-assistant-community/mirror/caddy:2.11.2
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
@@ -248,7 +254,7 @@ jobs:
       PUBLIC_BACKEND_API_URL: http://localhost:8000/api
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:16
+        image: ghcr.io/intuitem/ciso-assistant-community/mirror/postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -342,6 +348,10 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       COMPOSE_TEST: True
+      # Pull base/runtime images from our GHCR mirror instead of Docker Hub. See .github/mirror-images.json.
+      PYTHON_IMAGE: ghcr.io/intuitem/ciso-assistant-community/mirror/python:3.14-slim
+      NODE_IMAGE: ghcr.io/intuitem/ciso-assistant-community/mirror/node:24-slim
+      CADDY_IMAGE: ghcr.io/intuitem/ciso-assistant-community/mirror/caddy:2.11.2
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0

@@ -3,10 +3,12 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
 	import { m } from '$paraglide/messages';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import { page } from '$app/state';
+	import { onMount } from 'svelte';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -31,12 +33,14 @@
 	let activeActivity: string | null = $state(null);
 	let hasEntities = $state(false);
 
-	fetch('/entities?limit=1')
-		.then((r) => r.json())
-		.then((data) => {
-			hasEntities = (data.count ?? 0) > 0;
-		})
-		.catch(() => {});
+	onMount(() => {
+		fetch('/entities?limit=1')
+			.then((r) => r.json())
+			.then((data) => {
+				hasEntities = (data.count ?? 0) > 0;
+			})
+			.catch(() => {});
+	});
 
 	page.url.searchParams.forEach((value, key) => {
 		if (key === 'activity' && value === 'one') {
@@ -104,6 +108,14 @@
 		>
 			{m.activityOne()}
 		</p>
+		<FolderTreeSelect
+			{form}
+			field="folder"
+			label={m.domain()}
+			cacheLock={cacheLocks['folder']}
+			bind:cachedValue={formDataCache['folder']}
+			helpText={m.ebiosRmStudyDomainHelpText()}
+		/>
 		<Select
 			{form}
 			options={model.selectOptions['status']}

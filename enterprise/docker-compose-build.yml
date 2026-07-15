@@ -6,6 +6,8 @@ services:
       dockerfile: ../enterprise/backend/Dockerfile
       additional_contexts:
         enterprise_backend: ./backend
+      args:
+        PYTHON_IMAGE: ${PYTHON_IMAGE:-python:3.14-slim}
     restart: always
     environment:
       - ALLOWED_HOSTS=backend,localhost
@@ -24,6 +26,8 @@ services:
       dockerfile: ../enterprise/backend/Dockerfile
       additional_contexts:
         enterprise_backend: ./backend
+      args:
+        PYTHON_IMAGE: ${PYTHON_IMAGE:-python:3.14-slim}
     restart: always
     environment:
       - ALLOWED_HOSTS=backend,localhost
@@ -51,13 +55,15 @@ services:
       dockerfile: ../enterprise/frontend/Dockerfile
       additional_contexts:
         enterprise_frontend: ./frontend
+      args:
+        NODE_IMAGE: ${NODE_IMAGE:-node:24-slim}
     depends_on:
       - backend
     restart: always
 
   caddy:
     container_name: caddy
-    image: caddy:2.11.2
+    image: ${CADDY_IMAGE:-caddy:2.11.2}
     environment:
       - CISO_ASSISTANT_URL=https://localhost:8443
     restart: unless-stopped
