@@ -2,73 +2,53 @@
 	import { onMount } from 'svelte';
 	import { getBuilderContext } from './builder-state';
 	import { localeLabel } from './builder-utils.svelte';
-	import { apiPublishDraftPreview, type PublishPreview } from './builder-api';
 	import { m } from '$paraglide/messages';
 
 	interface Props {
 		frameworkId: string;
+		/** Toolbar link overrides for non-live hosts (null preview hides the link) */
+		links?: { back?: string; preview?: string | null; exportYaml?: string } | null;
 		onOpenHelp?: () => void;
 		onExpandAllCards?: () => void;
 		onCollapseAllCards?: () => void;
 	}
 
-	let { frameworkId, onOpenHelp, onExpandAllCards, onCollapseAllCards }: Props = $props();
+	let {
+		frameworkId,
+		links = null,
+		onOpenHelp,
+		onExpandAllCards,
+		onCollapseAllCards
+	}: Props = $props();
 
 	const builder = getBuilderContext();
+
+	let backHref = $derived(links?.back ?? `/frameworks/${frameworkId}`);
+	// Tri-state: undefined → default live-framework preview, null → hidden.
+	// The standalone /frameworks/{id}/builder routes are retired: hosts must
+	// provide these links explicitly (the library builder does).
+	let previewHref = $derived(links?.preview ?? null);
+	let exportHref = $derived(links?.exportYaml ?? null);
 	const {
 		saving: savingStore,
 		errors: errorsStore,
 		unsaved: unsavedStore,
-		unpublished: unpublishedStore,
 		rootNodes: rootNodesStore,
 		framework: frameworkStore,
-		activeLanguage: activeLanguageStore,
-		publishWarnings: publishWarningsStore
+		activeLanguage: activeLanguageStore
 	} = builder;
 
 	let topOffset = $state(0);
-	let confirmPublish = $state(false);
-	let confirmDiscard = $state(false);
-	let publishing = $state(false);
-	let discarding = $state(false);
-	let publishSuccess = $state(false);
 	let confirmCopyBase = $state(false);
-	let publishPreview = $state<PublishPreview | null>(null);
-	let loadingPreview = $state(false);
-	// Real reason the preview failed (backend message), shown in the dialog
-	// instead of a generic "could not load preview".
-	let previewError = $state<string | null>(null);
-
-	// Surfaced inside the publish dialog so a backend rejection (e.g. a locked
-	// URN namespace or a server error) is visible instead of the dialog
-	// silently staying open with no feedback.
-	let publishError = $derived($errorsStore.get('publish'));
-
-	// Reset the dialog's local state. Used directly when the 'publish' error
-	// must stay visible in the page banner (validation failure, success flash);
-	// closePublishModal additionally clears it (user-initiated dismiss).
-	function resetPublishModal() {
-		confirmPublish = false;
-		publishPreview = null;
-		previewError = null;
-	}
-
-	function closePublishModal() {
-		resetPublishModal();
-		builder.clearError('publish');
-	}
 
 	let translationProgress = $derived.by(() => {
 		if (!$activeLanguageStore) return null;
 		return builder.getTranslationProgress($activeLanguageStore);
 	});
 
-	// Live-vs-draft status. The framework is always pickable by audit authors;
-	// what varies is whether any live content exists and whether the draft
-	// differs from live.
-	// - hasLiveContent: true iff the framework has ever been published (editing_version > 1).
-	// - hasDraftContent: the in-editor tree has at least one node.
-	let hasLiveContent = $derived(($frameworkStore.editing_version ?? 1) > 1);
+	// The library-draft document is the single draft layer: the only lifecycle
+	// state the editor owns is saved-vs-unsaved. Publishing (loading the
+	// library) happens on the library page.
 	let hasDraftContent = $derived($rootNodesStore.length > 0);
 
 	onMount(() => {
@@ -77,89 +57,6 @@
 			topOffset = appBar.getBoundingClientRect().height;
 		}
 	});
-
-	// Map the backend's internal field/type identifiers (e.g. "add_score",
-	// "visibility_expression", "choice") to human-readable labels so the
-	// breaking-changes list doesn't expose raw column names. Unknown keys fall
-	// back to the raw value rather than hiding the information.
-	function breakingFieldLabel(field: string): string {
-		switch (field) {
-			case 'assessable':
-				return m.builderFieldLabelAssessable();
-			case 'weight':
-				return m.builderFieldLabelWeight();
-			case 'implementation_groups':
-				return m.builderFieldLabelImplementationGroups();
-			case 'visibility_expression':
-				return m.builderFieldLabelVisibilityExpression();
-			case 'type':
-				return m.builderFieldLabelType();
-			case 'depends_on':
-				return m.builderFieldLabelDependsOn();
-			case 'add_score':
-				return m.builderFieldLabelAddScore();
-			case 'compute_result':
-				return m.builderFieldLabelComputeResult();
-			case 'select_implementation_groups':
-				return m.builderFieldLabelSelectImplementationGroups();
-			default:
-				return field;
-		}
-	}
-
-	function breakingTypeLabel(type: string): string {
-		switch (type) {
-			case 'requirement':
-				return m.builderChangeTypeRequirement();
-			case 'question':
-				return m.builderChangeTypeQuestion();
-			case 'choice':
-				return m.builderChangeTypeChoice();
-			default:
-				return type;
-		}
-	}
-
-	async function handlePublish() {
-		publishing = true;
-		try {
-			const published = await builder.publish();
-			if (!published) {
-				// publish() recorded a 'publish' error. If the failure is
-				// field-level validation, close the dialog so the highlighted
-				// fields (and the page-level error banner) are visible;
-				// otherwise keep it open and show the error inside (below).
-				const hasFieldErrors = [...$errorsStore.keys()].some(
-					(k) => k.startsWith('node-') || k.startsWith('question-')
-				);
-				if (hasFieldErrors) {
-					resetPublishModal();
-				}
-				return;
-			}
-			publishSuccess = true;
-			resetPublishModal();
-			builder.unsaved.set(false);
-			builder.unpublished.set(false);
-			setTimeout(() => (publishSuccess = false), 3000);
-		} finally {
-			publishing = false;
-		}
-	}
-
-	async function handleDiscard() {
-		discarding = true;
-		try {
-			await builder.discard();
-			confirmDiscard = false;
-		} catch (e) {
-			// The message is already in the errors store; keep the raw error
-			// (with stack) in the console for support diagnostics.
-			console.error('[FrameworkBuilder] Discard failed:', e);
-		} finally {
-			discarding = false;
-		}
-	}
 </script>
 
 <div
@@ -168,7 +65,7 @@
 >
 	<div class="flex items-center gap-3 py-2 px-4">
 		<a
-			href="/frameworks/{frameworkId}"
+			href={backHref}
 			class="text-sm text-surface-500 hover:text-surface-600-400 transition-colors shrink-0"
 		>
 			<i class="fa-solid fa-arrow-left"></i>
@@ -176,33 +73,23 @@
 
 		<div class="h-4 w-px bg-surface-200-800 shrink-0"></div>
 
-		<!--
-			Live-vs-draft status badge. The framework is always pickable by audit
-			authors; what varies is whether new audits will see the editor's work.
-		-->
-		{#if hasLiveContent && !$unpublishedStore}
-			<span
-				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 inline-flex items-center gap-1"
-				title={m.builderStatusLiveTitle()}
-			>
-				<i class="fa-solid fa-circle-check text-[10px]"></i>
-				{m.builderStatusLive()}
-			</span>
-		{:else if hasLiveContent && $unpublishedStore}
+		<!-- Saved-vs-unsaved status: the library-draft document is the single
+		     draft layer, publishing happens on the library page. -->
+		{#if $unsavedStore}
 			<span
 				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 inline-flex items-center gap-1"
-				title={m.builderStatusUnpublishedChangesTitle()}
+				title={m.builderStatusUnsavedTitle()}
 			>
 				<i class="fa-solid fa-pen-nib text-[10px]"></i>
-				{m.builderStatusUnpublishedChanges()}
+				{m.builderStatusUnsaved()}
 			</span>
 		{:else if hasDraftContent}
 			<span
-				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 inline-flex items-center gap-1"
-				title={m.builderStatusDraftNothingLiveTitle()}
+				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 inline-flex items-center gap-1"
+				title={m.builderStatusSavedTitle()}
 			>
-				<i class="fa-solid fa-triangle-exclamation text-[10px]"></i>
-				{m.builderStatusDraftNothingLive()}
+				<i class="fa-solid fa-circle-check text-[10px]"></i>
+				{m.builderStatusSaved()}
 			</span>
 		{:else}
 			<span
@@ -215,7 +102,9 @@
 		{/if}
 
 		<!-- Preview button -->
-		{#if $unsavedStore}
+		{#if previewHref === null}
+			<!-- host has no respondent preview route -->
+		{:else if $unsavedStore}
 			<span
 				class="shrink-0 text-xs text-gray-300 px-2 py-1 flex items-center gap-1 cursor-not-allowed"
 				title={m.builderPreviewSaveFirst()}
@@ -225,7 +114,7 @@
 			</span>
 		{:else}
 			<a
-				href="/frameworks/{frameworkId}/builder/preview"
+				href={previewHref}
 				target="_blank"
 				rel="noopener noreferrer"
 				class="shrink-0 text-xs text-purple-600 hover:text-purple-800 transition-colors px-2 py-1 flex items-center gap-1"
@@ -236,21 +125,21 @@
 			</a>
 		{/if}
 
-		<!-- Export YAML button -->
-		<a
-			href="/frameworks/{frameworkId}/builder?_action=export-yaml"
-			class="shrink-0 text-xs text-surface-600-400 hover:text-surface-700-300 transition-colors px-2 py-1 flex items-center gap-1"
-			download
-			title={$unpublishedStore
-				? m.builderExportYamlUnpublishedWarning()
-				: m.builderExportYamlTitle()}
-		>
-			<i class="fa-solid fa-file-export text-[10px]"></i>
-			{m.exportYaml()}
-			{#if $unpublishedStore}
-				<i class="fa-solid fa-triangle-exclamation text-amber-500 text-[10px]"></i>
-			{/if}
-		</a>
+		<!-- Export YAML button (exports the saved document) -->
+		{#if exportHref}
+			<a
+				href={exportHref}
+				class="shrink-0 text-xs text-surface-600-400 hover:text-surface-700-300 transition-colors px-2 py-1 flex items-center gap-1"
+				download
+				title={$unsavedStore ? m.builderExportUnsavedTitle() : m.builderExportYamlTitle()}
+			>
+				<i class="fa-solid fa-file-export text-[10px]"></i>
+				{m.exportYaml()}
+				{#if $unsavedStore}
+					<i class="fa-solid fa-triangle-exclamation text-amber-500 text-[10px]"></i>
+				{/if}
+			</a>
+		{/if}
 
 		<!-- Language selector -->
 		{#if ($frameworkStore.available_languages ?? []).length > 0}
@@ -381,288 +270,5 @@
 				{m.builderSaveFailed()}
 			</span>
 		{/if}
-
-		<!-- Publish success -->
-		{#if publishSuccess}
-			<span class="shrink-0 text-xs text-green-600 flex items-center gap-1">
-				<i class="fa-solid fa-check text-xs"></i>
-				{m.builderPublishedFlash()}
-			</span>
-		{/if}
-
-		<!-- Discard/Publish buttons (visible when draft differs from published state) -->
-		{#if !$unpublishedStore}
-			<!-- No changes — nothing to discard or publish -->
-		{:else if confirmDiscard}
-			<span class="shrink-0 text-xs text-red-600 font-medium"
-				>{m.builderDiscardAllChangesQuestion()}</span
-			>
-			<button
-				type="button"
-				class="shrink-0 text-xs text-red-600 font-medium px-2 py-1 rounded bg-red-50 hover:bg-red-100 transition-colors"
-				disabled={discarding}
-				onclick={handleDiscard}
-			>
-				{#if discarding}
-					<i class="fa-solid fa-circle-notch fa-spin mr-1"></i>
-				{/if}
-				{m.builderYesDiscard()}
-			</button>
-			<button
-				type="button"
-				class="shrink-0 text-xs text-surface-600-400 px-2 py-1"
-				onclick={() => (confirmDiscard = false)}
-			>
-				{m.cancel()}
-			</button>
-		{:else}
-			<button
-				type="button"
-				class="shrink-0 text-xs text-surface-500 hover:text-red-500 transition-colors px-2 py-1"
-				title={m.builderDiscardDraftTitle()}
-				onclick={() => (confirmDiscard = true)}
-			>
-				<i class="fa-solid fa-trash-can mr-1"></i>{m.builderDiscard()}
-			</button>
-		{/if}
-
-		{#if $unpublishedStore && !$unsavedStore}
-			<div class="h-4 w-px bg-surface-200-800 shrink-0"></div>
-
-			<!-- Publish button (hidden until draft is saved) -->
-			<button
-				type="button"
-				class="shrink-0 text-xs text-white font-medium px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 transition-colors flex items-center gap-1.5"
-				title={m.builderPublishDraftToLiveTitle()}
-				disabled={loadingPreview}
-				onclick={async () => {
-					builder.clearError('publish');
-					previewError = null;
-					loadingPreview = true;
-					try {
-						publishPreview = await apiPublishDraftPreview(frameworkId);
-						confirmPublish = true;
-					} catch (e) {
-						// Fall back to confirmation without preview, but show the
-						// real reason so the user isn't confirming blind.
-						console.error('[FrameworkBuilder] Publish preview failed:', e);
-						publishPreview = null;
-						previewError = (e as Error).message;
-						confirmPublish = true;
-					} finally {
-						loadingPreview = false;
-					}
-				}}
-			>
-				{#if loadingPreview}
-					<i class="fa-solid fa-circle-notch fa-spin text-[10px]"></i>
-				{:else}
-					<i class="fa-solid fa-rocket text-[10px]"></i>
-				{/if}
-				{m.publish()}
-			</button>
-		{/if}
 	</div>
-
-	{#if $publishWarningsStore.length > 0}
-		<!-- Non-fatal warnings from the last publish (e.g. URN disambiguation) -->
-		<div
-			class="flex items-start gap-2 px-4 py-2 bg-amber-50 border-t border-amber-200 text-xs text-amber-800"
-			role="status"
-		>
-			<i class="fa-solid fa-triangle-exclamation mt-0.5"></i>
-			<div class="grow space-y-0.5">
-				<span class="font-medium">{m.builderPublishedWithWarnings()}</span>
-				<ul class="list-disc list-inside">
-					{#each $publishWarningsStore as warning}
-						<li>{warning}</li>
-					{/each}
-				</ul>
-			</div>
-			<button
-				type="button"
-				class="shrink-0 text-amber-500 hover:text-amber-700"
-				title={m.cancel()}
-				onclick={() => publishWarningsStore.set([])}
-			>
-				<i class="fa-solid fa-xmark"></i>
-			</button>
-		</div>
-	{/if}
 </div>
-
-{#if confirmPublish}
-	<!-- Publish impact preview modal -->
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div
-		class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-		onkeydown={(e) => e.key === 'Escape' && !publishing && closePublishModal()}
-	>
-		<!-- svelte-ignore a11y_click_events_have_key_events -->
-		<div
-			class="bg-surface-50-950 rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden"
-			onclick={(e) => e.stopPropagation()}
-		>
-			<div class="px-5 py-4 border-b border-surface-200-800">
-				<h3 class="text-lg font-semibold text-surface-900-100">{m.builderPublishModalTitle()}</h3>
-				<p class="text-sm text-surface-600-400 mt-1">
-					{m.builderPublishModalDescription()}
-				</p>
-			</div>
-
-			<div class="px-5 py-4 space-y-3 max-h-[60vh] overflow-y-auto">
-				{#if publishPreview}
-					{#if publishPreview.added.requirements > 0}
-						<div class="p-3 bg-green-50 border-l-2 border-green-400 rounded-r">
-							<div class="text-sm font-medium text-green-800">
-								<i class="fa-solid fa-plus mr-1"></i>
-								{m.builderRequirementAdded({
-									count: publishPreview.added.requirements
-								})}
-								{#if publishPreview.added.questions > 0}
-									, {m.builderQuestionsAddedSuffix({
-										count: publishPreview.added.questions
-									})}
-								{/if}
-							</div>
-							{#if publishPreview.added.details.length > 0}
-								<ul class="mt-1.5 text-xs text-green-700 space-y-0.5">
-									{#each publishPreview.added.details as node}
-										<li class="truncate" title={node.name}>{node.name}</li>
-									{/each}
-								</ul>
-							{/if}
-						</div>
-					{/if}
-
-					{#if publishPreview.removed.requirements > 0}
-						<div class="p-3 bg-red-50 border-l-2 border-red-400 rounded-r">
-							<div class="text-sm font-medium text-red-800">
-								<i class="fa-solid fa-trash mr-1"></i>
-								{m.builderRequirementRemoved({
-									count: publishPreview.removed.requirements
-								})}
-								{#if publishPreview.removed.questions > 0}
-									, {m.builderQuestionsRemovedSuffix({
-										count: publishPreview.removed.questions
-									})}
-								{/if}
-							</div>
-							{#if publishPreview.removed.details.length > 0}
-								<ul class="mt-1.5 text-xs text-red-700 space-y-0.5">
-									{#each publishPreview.removed.details as node}
-										<li class="truncate" title={node.name}>{node.name}</li>
-									{/each}
-								</ul>
-							{/if}
-						</div>
-					{/if}
-
-					{#if publishPreview.added.requirements === 0 && publishPreview.removed.requirements === 0}
-						<div class="p-3 bg-surface-50-950 border-l-2 border-surface-300-700 rounded-r">
-							<div class="text-sm text-surface-600-400">
-								<i class="fa-solid fa-equals mr-1"></i>
-								{m.builderNoStructuralChanges()}
-							</div>
-						</div>
-					{/if}
-
-					{#if publishPreview.breaking_changes?.length > 0}
-						<div class="p-3 bg-orange-50 border-l-2 border-orange-500 rounded-r">
-							<div class="text-sm font-medium text-orange-800">
-								<i class="fa-solid fa-bolt mr-1"></i>
-								{m.builderBreakingChangesDetected({
-									count: publishPreview.breaking_changes.length
-								})}
-							</div>
-							<ul class="mt-1.5 text-xs text-orange-700 space-y-0.5">
-								{#each publishPreview.breaking_changes as change}
-									<li
-										class="truncate"
-										title="{breakingTypeLabel(change.type)}: {change.name} ({breakingFieldLabel(
-											change.field
-										)})"
-									>
-										<span class="font-medium">{breakingFieldLabel(change.field)}</span>
-										{m.builderChangedOn()}
-										{breakingTypeLabel(change.type)}
-										<span class="font-medium">{change.name}</span>
-									</li>
-								{/each}
-							</ul>
-							<p class="mt-1.5 text-xs text-orange-600">
-								{m.builderBreakingChangesHint()}
-							</p>
-						</div>
-					{/if}
-
-					{#if publishPreview.affected_audits.length > 0}
-						<div class="p-3 bg-amber-50 border-l-2 border-amber-400 rounded-r">
-							<div class="text-sm font-medium text-amber-800">
-								<i class="fa-solid fa-triangle-exclamation mr-1"></i>
-								{m.builderAffectedAudits({
-									count: publishPreview.affected_audits.length
-								})}
-							</div>
-							<ul class="mt-1.5 text-xs text-amber-700 space-y-0.5">
-								{#each publishPreview.affected_audits as audit}
-									<li class="truncate" title={audit.name}>{audit.name}</li>
-								{/each}
-							</ul>
-							{#if publishPreview.added.requirements > 0}
-								<p class="mt-1.5 text-xs text-amber-600">
-									{m.builderAffectedAuditsAddedHint()}
-								</p>
-							{/if}
-							{#if publishPreview.removed.requirements > 0}
-								<p class="mt-1.5 text-xs text-amber-600">
-									{m.builderAffectedAuditsRemovedHint()}
-								</p>
-							{/if}
-						</div>
-					{/if}
-				{:else}
-					<div class="p-3 bg-surface-50-950 rounded text-sm text-surface-600-400">
-						{m.builderCouldNotLoadPreview()}
-						{#if previewError}
-							<p class="mt-1 text-xs text-red-600">{previewError}</p>
-						{/if}
-					</div>
-				{/if}
-			</div>
-
-			{#if publishError}
-				<div class="px-5 pb-1">
-					<div
-						class="p-3 bg-red-50 border-l-2 border-red-500 rounded-r text-sm text-red-700"
-						role="alert"
-					>
-						<i class="fa-solid fa-circle-exclamation mr-1"></i>{publishError}
-					</div>
-				</div>
-			{/if}
-
-			<div class="px-5 py-3 border-t border-surface-200-800 flex justify-end gap-2">
-				<button
-					type="button"
-					class="px-4 py-2 text-sm font-medium text-surface-700-300 bg-surface-50-950 border border-surface-300-700 rounded-lg hover:bg-surface-50-950"
-					onclick={closePublishModal}
-				>
-					{m.cancel()}
-				</button>
-				<button
-					type="button"
-					class="px-4 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-700 rounded-lg hover:bg-blue-700"
-					disabled={publishing}
-					onclick={handlePublish}
-				>
-					{#if publishing}
-						<i class="fa-solid fa-circle-notch fa-spin mr-1"></i>{m.builderPublishing()}
-					{:else}
-						{m.builderConfirmPublish()}
-					{/if}
-				</button>
-			</div>
-		</div>
-	</div>
-{/if}
