@@ -1742,6 +1742,7 @@
 	"campaigns": "Kampanie",
 	"addCampaign": "Rozpocznij kampanię",
 	"campaignDomainHelpText": "Domena, do której będzie dołączona kampania.",
+	"ebiosRmStudyDomainHelpText": "Zmiana domeny przenosi badanie i wszystkie obiekty jego warsztatów do wybranej domeny.",
 	"averageProgress": "Średni postęp",
 	"daysRemaining": "Pozostały dni",
 	"associatedFindingsAssessments": "Powiązane dalsze działania",

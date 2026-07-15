@@ -2364,6 +2364,7 @@
 	"campaigns": "캠페인",
 	"addCampaign": "캠페인 시작",
 	"campaignDomainHelpText": "캠페인이 연결될 도메인입니다.",
+	"ebiosRmStudyDomainHelpText": "도메인을 변경하면 연구와 모든 워크숍 개체가 선택한 도메인으로 이동합니다.",
 	"averageProgress": "평균 진행률",
 	"daysRemaining": "남은 일수",
 	"associatedFindingsAssessments": "연결된 후속 조치",

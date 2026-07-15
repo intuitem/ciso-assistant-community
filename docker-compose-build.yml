@@ -4,6 +4,8 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      args:
+        PYTHON_IMAGE: ${PYTHON_IMAGE:-python:3.14-slim}
     restart: always
     environment:
       - ALLOWED_HOSTS=backend,localhost
@@ -31,6 +33,8 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      args:
+        PYTHON_IMAGE: ${PYTHON_IMAGE:-python:3.14-slim}
     depends_on:
       - backend
     restart: always
@@ -81,6 +85,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        NODE_IMAGE: ${NODE_IMAGE:-node:24-slim}
     depends_on:
       - backend
     restart: always
@@ -88,7 +94,7 @@ services:
 
   qdrant:
     container_name: qdrant
-    image: qdrant/qdrant:v1.14.0
+    image: ${QDRANT_IMAGE:-qdrant/qdrant:v1.14.0}
     restart: unless-stopped
     volumes:
       - qdrant_data:/qdrant/storage
@@ -97,7 +103,7 @@ services:
 
   caddy:
     container_name: caddy
-    image: caddy:2.11.2
+    image: ${CADDY_IMAGE:-caddy:2.11.2}
     environment:
       - CISO_ASSISTANT_URL=https://localhost:8443
     restart: unless-stopped
