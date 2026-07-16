@@ -464,10 +464,6 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
         invalidate_assignments_cache()
         return result
 
-    @property
-    def permissions(self):
-        return RoleAssignment.get_permissions(self)
-
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -952,10 +948,6 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
     @property
     def username(self):
         return self.email
-
-    @property
-    def permissions(self):
-        return RoleAssignment.get_permissions(self)
 
     @staticmethod
     def get_admin_users() -> QuerySet["User"]:
@@ -1508,6 +1500,31 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         if self.user_group is None:
             return False
         return self.user_group in user.user_groups.all()
+
+    @staticmethod
+    def has_permission_anywhere(
+        principal: AbstractBaseUser | AnonymousUser | UserGroup, codename: str
+    ) -> bool:
+        """Existential check: does the principal hold this permission codename on at
+        least one folder? Uses caches only — no database access. Only valid for
+        genuinely folder-agnostic questions; scoped decisions must use
+        is_access_allowed with the object's folder.
+        """
+        if isinstance(principal, AnonymousUser) or not getattr(
+            principal, "is_authenticated", True
+        ):
+            return False
+
+        roles_state = get_roles_state()
+        if isinstance(principal, UserGroup):
+            assignments = get_assignments_state().by_group.get(principal.id, ())
+        else:
+            assignments = _iter_assignment_lites_for_user(principal)
+
+        return any(
+            codename in roles_state.role_permissions.get(a.role_id, frozenset())
+            for a in assignments
+        )
 
     @staticmethod
     def get_permissions(principal: AbstractBaseUser | AnonymousUser | UserGroup):
