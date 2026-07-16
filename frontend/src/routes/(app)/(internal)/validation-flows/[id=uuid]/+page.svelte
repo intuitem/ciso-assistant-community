@@ -9,7 +9,7 @@
 	import { getLocale } from '$paraglide/runtime.js';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { invalidateAll } from '$app/navigation';
-	import { canPerformAction } from '$lib/utils/access-control';
+	import { canPerformActionOnObject } from '$lib/utils/access-control';
 	import ValidationFlowActionModal from '$lib/components/Modals/ValidationFlowActionModal.svelte';
 	import {
 		getModalStore,
@@ -28,11 +28,11 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const canEdit: boolean = canPerformAction({
+	const canEdit: boolean = canPerformActionOnObject({
 		user,
 		action: 'change',
 		model: 'validationflow',
-		domain: validation_flow.folder.id
+		object: validation_flow
 	});
 
 	const isApprover = String(user.id) === String(validation_flow.approver?.id);

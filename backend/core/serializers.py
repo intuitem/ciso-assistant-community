@@ -2003,6 +2003,7 @@ class UserReadSerializer(BaseModelSerializer):
     user_groups = FieldsRelatedField(fields=["builtin", "id"], many=True)
     idp_groups = FieldsRelatedField(many=True)
     has_mfa_enabled = serializers.BooleanField(read_only=True)
+    folder = FieldsRelatedField()
 
     class Meta:
         model = User
@@ -2021,6 +2022,7 @@ class UserReadSerializer(BaseModelSerializer):
             "has_mfa_enabled",
             "expiry_date",
             "is_superuser",
+            "folder",
         ]
 
 
