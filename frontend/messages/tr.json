@@ -1615,6 +1615,8 @@
 	"forceSSOLogin": "SSO girişini zorla",
 	"forceSSOLoginHelpText": "Tüm kullanıcılar için SSO gerektirir ve kaydedilmiş tüm parolaları sıfırlar. 'SSO Zorlamadan Hariç Tut' etkinleştirilmiş kullanıcılar, parola tabanlı geri dönüş erişimini koruyacaktır.",
 	"forceSSOLoginHelpText2": "Bu seçeneği etkinleştirmeden önce SSO'nuzun çalıştığından veya bir geri dönüş hesabınız olduğundan emin olun.",
+	"enableSpInitiatedSlo": "Hizmet sağlayıcı tarafından başlatılan tekli oturum kapatmayı etkinleştir",
+	"enableSpInitiatedSloHelpText": "Oturum kapatıldığında kimlik sağlayıcısındaki oturumu da sonlandır.",
 	"lastOccurrenceStatus": "Son gerçekleşme durumu",
 	"showAllEvents": "Tüm olayları göster",
 	"featureFlags": "Özellik bayrakları",
