@@ -1277,7 +1277,7 @@ AUDITOR_VIEW_PERM = "view_compliance_assessment_full"
 AUDIT_ACCESS_PERM = "view_complianceassessment"
 
 
-def get_respondent_scoped_folder_ids(user) -> set:
+def get_respondent_scoped_folder_ids(user) -> set[UUID]:
     """Return folder IDs where *user* sees audits as a **respondent** — i.e. the
     scoped, field-stripped view applies.
 

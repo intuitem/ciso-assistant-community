@@ -1021,7 +1021,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         """True when the user holds the auditee role on at least one domain."""
         from core.utils import get_respondent_scoped_folder_ids
 
-        return bool(get_respondent_scoped_folder_ids(self))
+        return len(get_respondent_scoped_folder_ids(self)) > 0
 
     @property
     def has_backup_permission(self) -> bool:
@@ -1233,8 +1233,10 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             return RoleAssignment.objects.none()
 
         user_role_assignments = RoleAssignment.objects.filter(
-            Q(user=user) | Q(user_group__in=user.user_groups.all())
-        )
+            Q(user=user) |
+            Q(user_group__in=user.user_groups.all()) |
+            Q(user_group__in=UserGroup.objects.filter(idp_groups__in=user.idp_groups.all()))
+        ).distinct()
 
         return user_role_assignments
 
