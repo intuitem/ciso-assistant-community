@@ -10338,6 +10338,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         with `selected_implementation_groups` fall back to the model's
         cascade counts inside `ComplianceAssessmentListSerializer.get_progress`.
         """
+        from core.models import Question
         from core.utils import resolve_visibility_from_overrides
 
         optimized_data = super()._get_optimized_object_data(queryset)
@@ -10345,49 +10346,63 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         if not audit_ids:
             return optimized_data
 
-        # `result` visibility is per-audit configuration, so the single
-        # GROUP BY computes both cascade variants and Python picks per audit.
-        rows = (
-            RequirementAssessment.objects.filter(
-                compliance_assessment_id__in=audit_ids,
-                requirement__assessable=True,
-            )
-            .annotate(_has_questions=RequirementAssessment.has_questions_subquery())
-            .values("compliance_assessment_id")
-            .annotate(
-                total=Count("id"),
-                assessed_result_visible=Count(
-                    "id",
-                    filter=RequirementAssessment.progress_assessed_q(
-                        result_visible=True, has_questions_annotation=True
-                    ),
-                ),
-                assessed_result_hidden=Count(
-                    "id",
-                    filter=RequirementAssessment.progress_assessed_q(
-                        result_visible=False, has_questions_annotation=True
-                    ),
-                ),
-            )
+        # The progress mode (status visible = status-driven) and the content
+        # branches are audit-level facts known before querying, so audits are
+        # bucketed by (status_driven, result_visible, framework_has_questions)
+        # and each bucket runs the cheapest GROUP BY variant — status-driven
+        # and result-visible buckets are purely scalar (no Exists, no extra
+        # joins), i.e. the same cost profile as before the cascade.
+        audit_meta = ComplianceAssessment.objects.filter(id__in=audit_ids).values_list(
+            "id", "field_visibility", "framework_id"
         )
-        visibility_by_id = dict(
-            ComplianceAssessment.objects.filter(id__in=audit_ids).values_list(
-                "id", "field_visibility"
+        frameworks_with_questions = set(
+            Question.objects.filter(
+                requirement_node__framework_id__in={fw for _, _, fw in audit_meta}
             )
+            .values_list("requirement_node__framework_id", flat=True)
+            .distinct()
         )
+        buckets: dict = {}
+        for ca_id, field_visibility, framework_id in audit_meta:
+            status_pair = resolve_visibility_from_overrides(field_visibility, "status")
+            if status_pair.get("auditor", "edit") != "hidden":
+                key = (True, False, False)
+            else:
+                result_pair = resolve_visibility_from_overrides(
+                    field_visibility, "result"
+                )
+                key = (
+                    False,
+                    result_pair.get("auditor", "edit") != "hidden",
+                    framework_id in frameworks_with_questions,
+                )
+            buckets.setdefault(key, []).append(ca_id)
+
         total_map: dict = {}
         assessed_map: dict = {}
-        for r in rows:
-            ca_id = r["compliance_assessment_id"]
-            result_pair = resolve_visibility_from_overrides(
-                visibility_by_id.get(ca_id), "result"
+        for (status_driven, result_visible, has_questions), bucket_ids in buckets.items():
+            ras = RequirementAssessment.objects.filter(
+                compliance_assessment_id__in=bucket_ids,
+                requirement__assessable=True,
             )
-            total_map[ca_id] = r["total"]
-            assessed_map[ca_id] = (
-                r["assessed_result_visible"]
-                if result_pair.get("auditor", "edit") != "hidden"
-                else r["assessed_result_hidden"]
+            if has_questions:
+                ras = ras.annotate(
+                    _has_questions=RequirementAssessment.has_questions_subquery()
+                )
+            rows = ras.values("compliance_assessment_id").annotate(
+                total=Count("id"),
+                assessed=Count(
+                    "id",
+                    filter=RequirementAssessment.progress_assessed_q(
+                        status_driven=status_driven,
+                        result_visible=result_visible,
+                        has_questions_annotation=has_questions,
+                    ),
+                ),
             )
+            for r in rows:
+                total_map[r["compliance_assessment_id"]] = r["total"]
+                assessed_map[r["compliance_assessment_id"]] = r["assessed"]
         optimized_data["total_requirements"] = total_map
         optimized_data["assessed_requirements"] = assessed_map
         return optimized_data
@@ -12198,6 +12213,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
             ca = assignment.compliance_assessment
             ra_ids = assignment.requirement_assessments.values_list("id", flat=True)
+            status_driven = ca._auditor_visible("status")
             counts = (
                 RequirementAssessment.objects.filter(
                     id__in=ra_ids, requirement__assessable=True
@@ -12208,8 +12224,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     done=Count(
                         "id",
                         filter=RequirementAssessment.progress_assessed_q(
-                            result_visible=ca._auditor_visible("result"),
-                            has_questions_annotation=True,
+                            status_driven=status_driven,
+                            result_visible=not status_driven
+                            and ca._auditor_visible("result"),
+                            has_questions_annotation=not status_driven,
                         ),
                     ),
                 )

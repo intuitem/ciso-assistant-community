@@ -25,7 +25,8 @@ from django.core.validators import (
 )
 from django.core.files.storage import default_storage
 from django.db import models, transaction
-from django.db.models import F, Q, Exists, OuterRef, Subquery, Prefetch, Count
+from django.db.models import F, Q, Exists, OuterRef, Subquery, Prefetch, Count, Value
+from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet
 from django.forms.models import model_to_dict
 from django.urls import reverse
@@ -8382,13 +8383,21 @@ class ComplianceAssessment(Assessment):
         requirements = RequirementAssessment.objects.filter(
             compliance_assessment=self, requirement__assessable=True
         )
-        result_visible = self._auditor_visible("result")
-        framework_has_questions = self.has_questions
+        status_driven = self._auditor_visible("status")
+        result_visible = not status_driven and self._auditor_visible("result")
+        min_score_fallback = 0
+        if not status_driven and not result_visible:
+            if self.min_score is not None:
+                min_score_fallback = self.min_score
+            elif self.framework_id is not None:
+                min_score_fallback = self.framework.min_score
+        framework_has_questions = not status_driven and self.has_questions
         if framework_has_questions:
             requirements = requirements.annotate(
                 _has_questions=RequirementAssessment.has_questions_subquery()
             )
         assessed_filter = RequirementAssessment.progress_assessed_q(
+            status_driven=status_driven,
             result_visible=result_visible,
             has_questions_annotation=framework_has_questions,
         )
@@ -8411,6 +8420,7 @@ class ComplianceAssessment(Assessment):
                 "score",
                 "requirement_id",
                 "requirement__implementation_groups",
+                "requirement__min_score",
             )
             .iterator()
         )
@@ -8424,12 +8434,14 @@ class ComplianceAssessment(Assessment):
 
             total += 1
             if requirement_assessment.is_assessed_for_progress(
+                status_driven=status_driven,
                 has_questions=(
                     requirement_assessment._has_questions
                     if framework_has_questions
                     else False
                 ),
                 result_visible=result_visible,
+                min_score_fallback=min_score_fallback,
             ):
                 assessed += 1
 
@@ -8843,15 +8855,23 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         ca = self.compliance_assessment
         _defer_once("_pending_metrics_updates", ca.pk, ca.upsert_daily_metrics)
 
-    # Audit progress cascade (documentation/architecture/audit-progress-spec.md):
-    #   1. status used (!= to_do): only `done` counts, in_progress/in_review block
-    #   2. requirement has questions: questionnaire carriers (result set by the
+    # Audit progress — whether an assessable RA counts as assessed:
+    #
+    # STATUS MODE — the status field is visible on the audit (its visibility
+    # IS the mode switch): only `status == done` counts, content is ignored.
+    # Every assessable RA stays in the denominator.
+    #
+    # CONTENT MODE — status hidden; first matching branch decides:
+    #   1. requirement has questions: questionnaire carriers (result set by the
     #      result-driven path, or score committed by the complete-questionnaire
     #      discipline in recompute_assessment)
-    #   3. result visible on the audit: result set
-    #   4. score-only audit: score set
+    #   2. result visible on the audit: result set
+    #   3. score-only audit: score strictly above the resolved minimum
+    #      (requirement override, then audit, then framework). The scoring
+    #      toggle pre-fills scores at that minimum, so a score left at min is
+    #      indistinguishable from an untouched one and must not count.
     # `progress_assessed_q` and `is_assessed_for_progress` are the SQL and
-    # Python forms of the same cascade and MUST stay in sync. Both operate on
+    # Python forms of the same rules and MUST stay in sync. Both operate on
     # scalar fields only: answer/visibility resolution happens at write time.
 
     @classmethod
@@ -8863,34 +8883,66 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
     @classmethod
     def progress_assessed_q(
-        cls, *, result_visible: bool, has_questions_annotation: bool
+        cls,
+        *,
+        status_driven: bool,
+        result_visible: bool,
+        has_questions_annotation: bool,
     ) -> Q:
         """Filter for RAs counting as assessed in audit progress.
 
-        When `has_questions_annotation` is True the queryset must be annotated
-        with `_has_questions` (see `has_questions_subquery`); pass False when
-        the audit's framework has no questions to skip that branch entirely.
+        `status_driven` is the audit-level mode switch (status field visible
+        to the auditor); when True the other parameters are irrelevant.
+        In content mode, when `has_questions_annotation` is True the queryset
+        must be annotated with `_has_questions` (see `has_questions_subquery`);
+        pass False when the audit's framework has no questions to skip that
+        branch entirely. The score branch resolves the minimum per row, so the
+        filter works across audits in a single GROUP BY.
         """
+        if status_driven:
+            return Q(status=cls.Status.DONE)
         result_assessed = ~Q(result=cls.Result.NOT_ASSESSED)
         score_assessed = Q(score__isnull=False)
-        content = result_assessed if result_visible else score_assessed
+        score_progressed = Q(
+            score__gt=Coalesce(
+                F("requirement__min_score"),
+                F("compliance_assessment__min_score"),
+                F("compliance_assessment__framework__min_score"),
+                Value(0),
+            )
+        )
+        content = result_assessed if result_visible else score_progressed
         if has_questions_annotation:
             content = (Q(_has_questions=True) & (result_assessed | score_assessed)) | (
                 Q(_has_questions=False) & content
             )
-        return Q(status=cls.Status.DONE) | (Q(status=cls.Status.TODO) & content)
+        return content
 
     def is_assessed_for_progress(
-        self, *, has_questions: bool, result_visible: bool
+        self,
+        *,
+        status_driven: bool,
+        has_questions: bool,
+        result_visible: bool,
+        min_score_fallback: int = 0,
     ) -> bool:
-        """In-memory form of `progress_assessed_q` for prefetched/iterated RAs."""
-        if self.status != self.Status.TODO:
+        """In-memory form of `progress_assessed_q` for prefetched/iterated RAs.
+
+        `min_score_fallback` is the audit-level resolved minimum (audit
+        min_score, else framework's); the requirement override takes
+        precedence when set. Callers must have `requirement` loaded.
+        """
+        if status_driven:
             return self.status == self.Status.DONE
         result_assessed = self.result != self.Result.NOT_ASSESSED
         score_assessed = self.score is not None
         if has_questions:
             return result_assessed or score_assessed
-        return result_assessed if result_visible else score_assessed
+        if result_visible:
+            return result_assessed
+        req_min = self.requirement.min_score
+        resolved_min = req_min if req_min is not None else min_score_fallback
+        return self.score is not None and self.score > resolved_min
 
     def get_visible_questions_counts(self) -> tuple[int, int]:
         """Return (visible_questions_count, answered_visible_questions_count) for this assessment."""
