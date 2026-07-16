@@ -7483,17 +7483,25 @@ class UserViewSet(AutocompleteMixin, BaseModelViewSet):
             "user_groups" in request.data
             and user.user_groups.filter(name="BI-UG-ADM").exists()
         ):
-            direct_admin_count = User.objects.filter(
-                user_groups__name="BI-UG-ADM"
-            ).count()
-            if direct_admin_count == 1:
-                admin_group = UserGroup.objects.get(name="BI-UG-ADM")
-                new_user_groups = set(request.data["user_groups"])
-                if str(admin_group.pk) not in new_user_groups:
-                    return Response(
-                        {"error": "attemptToRemoveOnlyAdminUserGroup"},
-                        status=status.HTTP_403_FORBIDDEN,
-                    )
+            with transaction.atomic():
+                # Lock the admin group row so this check-then-act can't race a
+                # concurrent admin-membership change into a zero-admin lockout.
+                admin_group = (
+                    UserGroup.objects.select_for_update()
+                    .filter(name="BI-UG-ADM")
+                    .first()
+                )
+                direct_admin_count = User.objects.filter(
+                    user_groups__name="BI-UG-ADM"
+                ).count()
+                if direct_admin_count == 1 and admin_group is not None:
+                    new_user_groups = set(request.data["user_groups"])
+                    if str(admin_group.pk) not in new_user_groups:
+                        return Response(
+                            {"error": "attemptToRemoveOnlyAdminUserGroup"},
+                            status=status.HTTP_403_FORBIDDEN,
+                        )
+                return super().update(request, *args, **kwargs)
 
         return super().update(request, *args, **kwargs)
 
@@ -7501,14 +7509,19 @@ class UserViewSet(AutocompleteMixin, BaseModelViewSet):
         user = self.get_object()
         # Protect the last direct (locally-managed) administrator — see update().
         if user.user_groups.filter(name="BI-UG-ADM").exists():
-            direct_admin_count = User.objects.filter(
-                user_groups__name="BI-UG-ADM"
-            ).count()
-            if direct_admin_count == 1:
-                return Response(
-                    {"error": "attemptToDeleteOnlyAdminAccountError"},
-                    status=status.HTTP_403_FORBIDDEN,
-                )
+            with transaction.atomic():
+                # Lock the admin group row so this check-then-act can't race a
+                # concurrent admin removal into a zero-admin lockout.
+                UserGroup.objects.select_for_update().filter(name="BI-UG-ADM").first()
+                direct_admin_count = User.objects.filter(
+                    user_groups__name="BI-UG-ADM"
+                ).count()
+                if direct_admin_count == 1:
+                    return Response(
+                        {"error": "attemptToDeleteOnlyAdminAccountError"},
+                        status=status.HTTP_403_FORBIDDEN,
+                    )
+                return super().destroy(request, *args, **kwargs)
 
         return super().destroy(request, *args, **kwargs)
 
@@ -7700,6 +7713,31 @@ class UserGroupViewSet(BaseModelViewSet):
         )
         return Response({"count": group.user_set.count()})
 
+    def _blocks_domain_admin_self_removal(self, actor, group, ids) -> bool:
+        """A user may not strip their own domain-admin entitlement by removing
+        themselves from a group that grants Domain Manager (BI-RL-DMA) — that would
+        be a self-lockout. Exempt when the actor still administers the domain from a
+        higher level (a global admin, or a parent-domain manager); removal by anyone
+        else is unaffected."""
+        if str(actor.pk) not in {str(i) for i in ids}:
+            return False  # not removing self
+        grants_domain_admin = RoleAssignment.objects.filter(
+            user_group=group, role__name="BI-RL-DMA"
+        ).exists()
+        if not grants_domain_admin:
+            return False
+        # is_access_allowed walks up from the PARENT folder, so a match means the
+        # actor holds group-management rights at a strictly higher level (global or
+        # parent domain) — never via this group's own scope.
+        parent = group.folder.parent_folder
+        if parent is not None and RoleAssignment.is_access_allowed(
+            actor,
+            Permission.objects.get(codename="change_usergroup"),
+            parent,
+        ):
+            return False
+        return True
+
     @action(detail=True, methods=["post"], url_path="remove-members")
     def remove_members(self, request, pk=None):
         """Remove users from this group (batch). Same authorization as add_members.
@@ -7707,20 +7745,31 @@ class UserGroupViewSet(BaseModelViewSet):
         membership management can never strip the lockout-proof admin anchor."""
         group = self.get_object()
         ids = self._member_ids(request)
+        users = User.objects.filter(pk__in=ids)
 
         if group.name == "BI-UG-ADM":
-            direct_admin_count = User.objects.filter(
-                user_groups__name="BI-UG-ADM"
-            ).count()
-            removing = group.user_set.filter(pk__in=ids).count()
-            if direct_admin_count - removing < 1:
-                return Response(
-                    {"error": "attemptToRemoveOnlyAdminUserGroup"},
-                    status=status.HTTP_403_FORBIDDEN,
-                )
+            with transaction.atomic():
+                # Lock the admin group row so concurrent removals serialize; without
+                # it the last-admin check is a TOCTOU that can strip every admin.
+                UserGroup.objects.select_for_update().get(pk=group.pk)
+                direct_admin_count = User.objects.filter(
+                    user_groups__name="BI-UG-ADM"
+                ).count()
+                removing = group.user_set.filter(pk__in=ids).count()
+                if direct_admin_count - removing < 1:
+                    return Response(
+                        {"error": "attemptToRemoveOnlyAdminUserGroup"},
+                        status=status.HTTP_403_FORBIDDEN,
+                    )
+                group.user_set.remove(*users)
+        elif self._blocks_domain_admin_self_removal(request.user, group, ids):
+            return Response(
+                {"error": "attemptToRemoveSelfFromDomainAdminGroup"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        else:
+            group.user_set.remove(*users)
 
-        users = User.objects.filter(pk__in=ids)
-        group.user_set.remove(*users)
         logger.info(
             "users removed from user group",
             user_group=group,

@@ -188,6 +188,94 @@ class TestUserGroupMembership:
         assert response.data.get("error") == "attemptToRemoveOnlyAdminUserGroup"
         assert admin_group.user_set.filter(pk=sole_admin.pk).exists()
 
+    def _dma_group(self, name="D1", parent=None):
+        """A domain plus a group that GRANTS Domain Manager (BI-RL-DMA) scoped to it,
+        so membership in the group is what confers domain-admin entitlement."""
+        root = Folder.get_root_folder()
+        domain = Folder.objects.create(
+            name=name,
+            parent_folder=parent or root,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        group = UserGroup.objects.create(name=f"{name} managers", folder=domain)
+        ra = RoleAssignment.objects.create(
+            user_group=group,
+            role=Role.objects.get(name="BI-RL-DMA"),
+            folder=root,
+            is_recursive=True,
+        )
+        ra.perimeter_folders.add(domain)
+        return domain, group
+
+    def test_domain_manager_cannot_remove_self_from_dma_group(self, app_config):
+        """A sole domain admin can't strip their own entitlement (self-lockout)."""
+        _, group = self._dma_group()
+        manager = User.objects.create_user("dm@tests.com", is_published=True)
+        group.user_set.add(manager)
+        client = _client_for(manager)
+
+        url = reverse("user-groups-remove-members", args=[group.id])
+        response = client.post(url, {"users": [str(manager.id)]}, format="json")
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.data.get("error") == "attemptToRemoveSelfFromDomainAdminGroup"
+        assert group.user_set.filter(pk=manager.pk).exists()
+
+    def test_domain_manager_can_remove_another_from_dma_group(self, app_config):
+        """The self-lockout guard only blocks removing oneself; removing a peer
+        (even the last other member) stays allowed."""
+        _, group = self._dma_group()
+        manager = User.objects.create_user("dm@tests.com", is_published=True)
+        other = User.objects.create_user("other@tests.com", is_published=True)
+        group.user_set.add(manager, other)
+        client = _client_for(manager)
+
+        url = reverse("user-groups-remove-members", args=[group.id])
+        response = client.post(url, {"users": [str(other.id)]}, format="json")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert not group.user_set.filter(pk=other.pk).exists()
+        assert group.user_set.filter(pk=manager.pk).exists()
+
+    def test_global_admin_can_remove_self_from_dma_group(self, app_config):
+        """A global admin retains admin from a higher level (root), so self-removal
+        from a domain admin group is allowed."""
+        _, group = self._dma_group()
+        admin = User.objects.create_user("ga@tests.com", is_published=True)
+        admin.user_groups.add(UserGroup.objects.get(name="BI-UG-ADM"))
+        group.user_set.add(admin)
+        client = _client_for(admin)
+
+        url = reverse("user-groups-remove-members", args=[group.id])
+        response = client.post(url, {"users": [str(admin.id)]}, format="json")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert not group.user_set.filter(pk=admin.pk).exists()
+
+    def test_parent_domain_manager_can_remove_self_from_child_dma_group(
+        self, app_config
+    ):
+        """Admin of a parent domain administers the child too, so self-removal from
+        the child's domain admin group is allowed (higher-level exemption)."""
+        parent, _ = self._dma_group("P")
+        _, child_group = self._dma_group("C", parent=parent)
+        manager = User.objects.create_user("pm@tests.com", is_published=True)
+        parent_ra = RoleAssignment.objects.create(
+            user=manager,
+            role=Role.objects.get(name="BI-RL-DMA"),
+            folder=Folder.get_root_folder(),
+            is_recursive=True,
+        )
+        parent_ra.perimeter_folders.add(parent)
+        child_group.user_set.add(manager)
+        client = _client_for(manager)
+
+        url = reverse("user-groups-remove-members", args=[child_group.id])
+        response = client.post(url, {"users": [str(manager.id)]}, format="json")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert not child_group.user_set.filter(pk=manager.pk).exists()
+
     def test_add_members_rejects_oversized_batch(self, app_config):
         """The users list is capped, mirroring batch_action's limit."""
         _, group, manager = self._setup_domain()

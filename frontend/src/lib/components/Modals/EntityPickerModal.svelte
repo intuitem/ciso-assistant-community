@@ -113,9 +113,11 @@
 				for (const o of data?.results ?? data ?? []) selected.set(o.id, o);
 			} else {
 				console.error(`Failed to hydrate ${endpoint} selection:`, res.status);
+				loadError = true;
 			}
 		} catch (e) {
 			console.error(`Failed to hydrate ${endpoint} selection:`, e);
+			loadError = true;
 		}
 	}
 
