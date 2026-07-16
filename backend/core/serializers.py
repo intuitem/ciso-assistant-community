@@ -282,39 +282,20 @@ class RiskMatrixReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
     json_definition = serializers.JSONField(source="get_json_translated")
     library = FieldsRelatedField(["name", "id"])
-    has_editing_draft = serializers.SerializerMethodField()
     editing_languages = serializers.SerializerMethodField()
 
-    def get_has_editing_draft(self, obj):
-        return obj.editing_draft is not None
-
     def get_editing_languages(self, obj):
-        """Return list of language codes available in the draft or published translations."""
+        """Return list of language codes available in the published translations."""
         langs = set()
-        # Base locale
         if obj.locale:
             langs.add(obj.locale)
-        # From model translations (published)
         if obj.translations and isinstance(obj.translations, dict):
             langs.update(obj.translations.keys())
-        # From editing_draft level translations + _meta
-        if obj.editing_draft and isinstance(obj.editing_draft, dict):
-            meta = obj.editing_draft.get("_meta", {})
-            if isinstance(meta.get("translations"), dict):
-                langs.update(meta["translations"].keys())
-            for category in ("probability", "impact", "risk"):
-                levels = obj.editing_draft.get(category, [])
-                if isinstance(levels, list):
-                    for level in levels:
-                        if isinstance(level, dict) and isinstance(
-                            level.get("translations"), dict
-                        ):
-                            langs.update(level["translations"].keys())
         return sorted(langs) if langs else [obj.locale or "en"]
 
     class Meta:
         model = RiskMatrix
-        exclude = ["translations", "editing_draft", "editing_history"]
+        exclude = ["translations"]
 
 
 class RiskMatrixWriteSerializer(RiskMatrixReadSerializer):
@@ -437,9 +418,32 @@ class VulnerabilityImportExportSerializer(BaseModelSerializer):
 
 
 class RiskAcceptanceWriteSerializer(BaseModelSerializer):
+    # Write-only flag so a new acceptance can be submitted for approval directly
+    # from the creation form, instead of creating a draft then submitting it.
+    submit = serializers.BooleanField(write_only=True, required=False, default=False)
+
     class Meta:
         model = RiskAcceptance
         exclude = ["accepted_at", "rejected_at", "revoked_at", "state"]
+
+    def validate(self, data):
+        # `submit` is only honoured on create; don't reject updates that carry it.
+        if not self.instance and data.get("submit") and not data.get("approver"):
+            raise serializers.ValidationError(
+                {"approver": "An approver is required to submit for approval."}
+            )
+        return super().validate(data)
+
+    def create(self, validated_data):
+        submit = validated_data.pop("submit", False)
+        instance = super().create(validated_data)
+        if submit:
+            instance.set_state("submitted")
+        return instance
+
+    def update(self, instance, validated_data):
+        validated_data.pop("submit", False)
+        return super().update(instance, validated_data)
 
 
 class RiskAcceptanceReadSerializer(BaseModelSerializer):
@@ -1770,6 +1774,8 @@ class ComplianceAssessmentActionPlanSerializer(ActionPlanSerializer):
             "evidences",
             "evidence_attachments",
             "owner",
+            "created_at",
+            "updated_at",
         ]
 
 
@@ -1816,6 +1822,8 @@ class RiskAssessmentActionPlanSerializer(ActionPlanSerializer):
             "reference_control",
             "evidences",
             "owner",
+            "created_at",
+            "updated_at",
         ]
 
 
@@ -1995,6 +2003,7 @@ class UserReadSerializer(BaseModelSerializer):
     user_groups = FieldsRelatedField(fields=["builtin", "id"], many=True)
     idp_groups = FieldsRelatedField(many=True)
     has_mfa_enabled = serializers.BooleanField(read_only=True)
+    folder = FieldsRelatedField()
 
     class Meta:
         model = User
@@ -2013,6 +2022,7 @@ class UserReadSerializer(BaseModelSerializer):
             "has_mfa_enabled",
             "expiry_date",
             "is_superuser",
+            "folder",
         ]
 
 
@@ -2299,7 +2309,6 @@ class FrameworkReadSerializer(ReferentialSerializer):
     reference_controls = FieldsRelatedField(many=True)
     is_dynamic = serializers.BooleanField(read_only=True)
     has_update = serializers.BooleanField(read_only=True)
-    has_editing_draft = serializers.SerializerMethodField()
     has_compliance_assessments = serializers.SerializerMethodField()
     scores_definition = serializers.SerializerMethodField()
     # The complete per-role visibility map a new CA created from this framework
@@ -2312,9 +2321,6 @@ class FrameworkReadSerializer(ReferentialSerializer):
 
     def get_implementation_groups_definition(self, obj):
         return obj.get_implementation_groups_definition_translated()
-
-    def get_has_editing_draft(self, obj):
-        return obj.editing_draft is not None
 
     def get_has_compliance_assessments(self, obj):
         return obj.complianceassessment_set.exists()
@@ -2332,7 +2338,7 @@ class FrameworkReadSerializer(ReferentialSerializer):
 
     class Meta:
         model = Framework
-        exclude = ["translations", "editing_draft", "editing_history"]
+        exclude = ["translations"]
 
 
 class FrameworkWriteSerializer(FrameworkReadSerializer):
@@ -4450,15 +4456,13 @@ class SecurityExceptionWriteSerializer(BaseModelSerializer):
             )
 
     def _send_status_notification(self, security_exception):
-        """Notify owners and approver when the status changes"""
+        """Notify owners when the status changes"""
         try:
             from .tasks import send_security_exception_status_notification
 
             recipient_emails = []
             for owner in security_exception.owners.all():
                 recipient_emails.extend(owner.get_emails())
-            if security_exception.approver and security_exception.approver.email:
-                recipient_emails.append(security_exception.approver.email)
 
             if not recipient_emails:
                 return
@@ -4488,6 +4492,9 @@ class SecurityExceptionWriteSerializer(BaseModelSerializer):
     class Meta:
         model = SecurityException
         fields = "__all__"
+        # Deprecated: approval is handled through validation flows. The field is
+        # kept read-only so existing values remain visible without new writes.
+        read_only_fields = ["approver"]
 
 
 class SecurityExceptionReadSerializer(BaseModelSerializer):
@@ -4680,7 +4687,6 @@ class PresetReadSerializer(BaseModelSerializer):
             "urn",
             "ref_id",
             "version",
-            "editing_version",
             "provider",
             "translations",
             "profile",

@@ -1,7 +1,9 @@
+from typing import Final
+
 from auditlog.registry import auditlog
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Case, When, IntegerField, Q
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
@@ -191,11 +193,16 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         ordering = ["created_at"]
 
     def save(self, *args, **kwargs):
+        folder_changed = False
         if self.pk:
-            old_matrix_id = (
+            old_study = (
                 EbiosRMStudy.objects.filter(pk=self.pk)
-                .values_list("risk_matrix_id", flat=True)
+                .values("risk_matrix_id", "folder_id")
                 .first()
+            )
+            old_matrix_id = old_study["risk_matrix_id"] if old_study else None
+            folder_changed = (
+                old_study is not None and old_study["folder_id"] != self.folder_id
             )
 
             if old_matrix_id != self.risk_matrix_id:
@@ -216,7 +223,13 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
                         )
                         operational_scenario.save(update_fields=["likelihood"])
 
-        super().save(*args, **kwargs)
+        with transaction.atomic():
+            super().save(*args, **kwargs)
+            if folder_changed:
+                for model, study_path in STUDY_FOLDER_CASCADE_MODELS.items():
+                    model.objects.filter(**{study_path: self}).update(
+                        folder=self.folder
+                    )
 
         if self.quotation_method == "express":
             for scenario in self.operational_scenarios.all():
@@ -1230,6 +1243,23 @@ class KillChain(AbstractBaseModel, FolderMixin):
 
     def __str__(self):
         return f"{self.operating_mode} - {self.elementary_action.name}"
+
+
+# Models whose folder mirrors the study's folder, mapped to the queryset path
+# leading back to the study. EbiosRMStudy.save() cascades folder changes over
+# this mapping, so a folder-scoped ebios_rm model must be added here to follow
+# the study on a domain move (ElementaryAction is intentionally excluded: it is
+# a shared catalog object with a user-managed folder).
+STUDY_FOLDER_CASCADE_MODELS: Final[dict[type[models.Model], str]] = {
+    FearedEvent: "ebios_rm_study",
+    RoTo: "ebios_rm_study",
+    Stakeholder: "ebios_rm_study",
+    StrategicScenario: "ebios_rm_study",
+    AttackPath: "ebios_rm_study",
+    OperationalScenario: "ebios_rm_study",
+    OperatingMode: "operational_scenario__ebios_rm_study",
+    KillChain: "operating_mode__operational_scenario__ebios_rm_study",
+}
 
 
 common_exclude = ["created_at", "updated_at"]

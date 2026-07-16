@@ -20,7 +20,9 @@
 		control_impact: 'controlImpact',
 		effort: 'effort',
 		annual_cost: 'cost',
-		requirement_assessments: 'matchingRequirements'
+		requirement_assessments: 'matchingRequirements',
+		created_at: 'createdAt',
+		updated_at: 'updatedAt'
 	};
 
 	const appliedControls: TableSource = {
@@ -105,6 +107,8 @@
 			rowsPerPage={true}
 			orderBy={{ identifier: 'eta', direction: 'desc' }}
 			baseEndpoint="/compliance-assessments/{page.params.id}/action-plan"
+			columnSelector={true}
+			columnStateKey="applied-controls:compliance-action-plan"
 			fields={[
 				'ref_id',
 				'name',

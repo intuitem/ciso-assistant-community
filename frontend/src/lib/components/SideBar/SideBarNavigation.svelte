@@ -6,6 +6,7 @@
 	import { Accordion } from '@skeletonlabs/skeleton-svelte';
 	import { page } from '$app/state';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	import { hasPermissionAnywhere } from '$lib/utils/access-control';
 	import { driverInstance } from '$lib/utils/stores';
 
 	const user = page.data.user;
@@ -17,14 +18,10 @@
 				if (subItem.exclude) {
 					return user?.roles?.some((role: string) => !subItem.exclude.includes(role)) ?? false;
 				} else if (subItem.permissions) {
-					return subItem.permissions?.some(
-						(permission) => user?.permissions && Object.hasOwn(user.permissions, permission)
-					);
+					return subItem.permissions?.some((permission) => hasPermissionAnywhere(user, permission));
 				} else if (Object.hasOwn(URL_MODEL_MAP, subItem.href.split('/')[1])) {
 					const model = URL_MODEL_MAP[subItem.href.split('/')[1]];
-					const canViewObject =
-						user?.permissions && Object.hasOwn(user.permissions, `view_${model.name}`);
-					return canViewObject;
+					return hasPermissionAnywhere(user, `view_${model.name}`);
 				}
 				return false;
 			});

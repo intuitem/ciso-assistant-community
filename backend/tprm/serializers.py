@@ -366,6 +366,9 @@ class RepresentativeReadSerializer(BaseModelSerializer):
     entity = FieldsRelatedField()
     user = FieldsRelatedField()
     filtering_labels = FieldsRelatedField(many=True)
+    # Governing folder, derived the same way as backend enforcement
+    # (Folder.get_folder path: entity.folder) so the frontend can scope checks.
+    folder = FieldsRelatedField(source="entity.folder")
 
     class Meta:
         model = Representative
@@ -476,6 +479,9 @@ class SolutionSubcontractorWriteSerializer(serializers.Serializer):
 class SolutionReadSerializer(BaseModelSerializer):
     provider_entity = FieldsRelatedField()
     recipient_entity = FieldsRelatedField()
+    # Governing folder, derived the same way as backend enforcement
+    # (Folder.get_folder path: provider_entity.folder) so the frontend can scope checks.
+    folder = FieldsRelatedField(source="provider_entity.folder")
     assets = FieldsRelatedField(many=True)
     contracts = FieldsRelatedField(many=True)
     owner = FieldsRelatedField(many=True)

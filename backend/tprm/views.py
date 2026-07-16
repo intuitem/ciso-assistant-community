@@ -1229,6 +1229,10 @@ class RepresentativeViewSet(ExportMixin, BaseModelViewSet):
     filterset_fields = ["entity", "ref_id", "filtering_labels"]
     search_fields = ["email"]
 
+    def get_queryset(self):
+        # folder is serialized via source="entity.folder"; pull it in one join
+        return super().get_queryset().select_related("entity__folder")
+
 
 class SolutionViewSet(ExportMixin, BaseModelViewSet):
     """
@@ -1284,6 +1288,10 @@ class SolutionViewSet(ExportMixin, BaseModelViewSet):
         "dora_alternative_providers_identified",
         "filtering_labels",
     ]
+
+    def get_queryset(self):
+        # folder is serialized via source="provider_entity.folder"; pull it in one join
+        return super().get_queryset().select_related("provider_entity__folder")
 
     @action(detail=False, name="Get data location storage choices")
     def data_location_storage(self, request):

@@ -14,7 +14,9 @@
 <article
 	class="hover:animate-background rounded-xl bg-linear-to-r from-green-300 via-blue-500 to-purple-600 p-0.5 shadow-xl transition hover:bg-size-[400%_400%] hover:shadow-xs hover:[animation-duration:4s]"
 >
-	<Anchor href={link}>
+	<!-- Without an explicit label the breadcrumb captures the card's whole
+	     inner text (description + title + tags). -->
+	<Anchor href={link} label={title}>
 		<div class="rounded-[10px] bg-surface-50-950 p-4 pt-20! sm:p-6 h-full">
 			<div class="block text-xs text-surface-600-400 min-h-10 flex items-end">{desc}</div>
 

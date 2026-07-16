@@ -15,13 +15,13 @@
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
 	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
+	import RiskAcceptancesSection from '$lib/components/RiskAcceptances/RiskAcceptancesSection.svelte';
 
 	import { goto } from '$app/navigation';
+	import { openRiskAcceptanceModal } from '$lib/utils/riskAcceptance';
 
 	import { onMount } from 'svelte';
-	import { canPerformAction } from '$lib/utils/access-control';
-	import List from '$lib/components/List/List.svelte';
-	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
+	import { canPerformActionOnObject } from '$lib/utils/access-control';
 	import {
 		getModalStore,
 		type ModalComponent,
@@ -45,12 +45,22 @@
 
 	const user = page.data.user;
 	const model = URL_MODEL_MAP['risk-scenarios'];
-	const canEditObject: boolean = canPerformAction({
-		user,
-		action: 'change',
-		model: model.name,
-		domain: data.scenario.folder.id
-	});
+	const canEditObject: boolean = $derived(
+		canPerformActionOnObject({
+			user,
+			action: 'change',
+			model: model.name,
+			object: data.scenario
+		})
+	);
+	const canCreateAcceptance = $derived(
+		canPerformActionOnObject({
+			user,
+			action: 'add',
+			model: 'riskacceptance',
+			object: data.scenario
+		})
+	);
 	let color_map = $state({});
 	color_map['--'] = '#A9A9A9';
 
@@ -131,6 +141,13 @@
 			syncingToActionsIsLoading = false;
 	});
 
+	function modalRequestRiskAcceptance(): void {
+		openRiskAcceptanceModal(modalStore, {
+			folderId: data.scenario.folder.id,
+			riskScenarioIds: [page.params.id]
+		});
+	}
+
 	onMount(() => {
 		// Add event listener when component mounts
 		window.addEventListener('keydown', handleKeydown);
@@ -178,8 +195,9 @@
 					<p class="text-surface-400-600 italic text-sm">{m.noDescription()}</p>
 				{/if}
 			</div>
+			<RiskAcceptancesSection riskAcceptances={data.riskAcceptances} />
 		</div>
-		<div class="flex flex-col space-y-2 sm:my-auto shrink-0">
+		<div class="flex flex-col space-y-2 sm:self-start shrink-0">
 			{#if canEditObject}
 				<Anchor
 					href={`${page.url.pathname}/edit?next=${page.url.pathname}`}
@@ -210,7 +228,21 @@
 					</button>
 				{/if}
 			{/if}
-			<AuditTrailButton model="risk-scenarios" objectId={data.scenario.id} />
+			{#if canCreateAcceptance && !data.scenario.risk_assessment?.is_locked}
+				<button
+					class="btn text-white bg-linear-to-r from-orange-500 to-amber-500 h-fit"
+					onclick={() => modalRequestRiskAcceptance()}
+					data-testid="request-risk-acceptance-button"
+				>
+					<i class="fa-solid fa-signature mr-2"></i>
+					{m.requestRiskAcceptance()}
+				</button>
+			{/if}
+			<AuditTrailButton
+				model="risk-scenarios"
+				objectId={data.scenario.id}
+				folderId={data.scenario.folder?.id ?? user.root_folder_id}
+			/>
 		</div>
 	</div>
 

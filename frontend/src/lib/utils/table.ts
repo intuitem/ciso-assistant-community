@@ -1657,8 +1657,13 @@ export const listViewFields = {
 		}
 	},
 	'risk-acceptances': {
-		head: ['name', 'description', 'riskScenarios', 'state'],
-		body: ['name', 'description', 'risk_scenarios', 'state'],
+		head: ['name', 'description', 'riskScenarios'],
+		body: ['name', 'description', 'risk_scenarios'],
+		// State is shown as a badge on the name column, so the column is opt-in.
+		optionalFields: {
+			head: ['state'],
+			body: ['state']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			state: STATE_FILTER,
@@ -3758,7 +3763,15 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 	],
 	'validation-flows': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
 	'quantitative-risk-studies': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
-	'ebios-rm': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	'ebios-rm': [
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
 	entities: [
 		{
 			type: 'change_folder',

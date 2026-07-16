@@ -249,6 +249,52 @@ EMAIL_TEMPLATE_REGISTRY = {
             "ciso_assistant_url",
         ],
     },
+    "security_exception_expiring_soon": {
+        "description": "Sent when security exceptions are about to expire",
+        "category": "notification",
+        "variables": [
+            "exception_count",
+            "exception_list",
+            "days_remaining",
+            "ciso_assistant_url",
+        ],
+    },
+    "expired_security_exceptions": {
+        "description": "Sent when security exceptions have expired",
+        "category": "notification",
+        "variables": [
+            "exception_count",
+            "exception_list",
+            "expired_since",
+            "ciso_assistant_url",
+        ],
+    },
+    "security_exception_assignment": {
+        "description": "Sent when a security exception is assigned",
+        "category": "notification",
+        "variables": [
+            "exception_name",
+            "exception_description",
+            "exception_ref_id",
+            "exception_severity",
+            "exception_status",
+            "expiration_date",
+            "folder_name",
+            "ciso_assistant_url",
+        ],
+    },
+    "security_exception_status_changed": {
+        "description": "Sent when a security exception status changes",
+        "category": "notification",
+        "variables": [
+            "exception_name",
+            "exception_ref_id",
+            "new_status",
+            "actor_name",
+            "folder_name",
+            "ciso_assistant_url",
+        ],
+    },
     "task_node_due_soon": {
         "description": "Sent when tasks are due soon",
         "category": "notification",

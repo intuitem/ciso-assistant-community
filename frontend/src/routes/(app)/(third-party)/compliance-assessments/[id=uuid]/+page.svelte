@@ -50,7 +50,7 @@
 	import { auditFiltersStore, expandedNodesState } from '$lib/utils/stores';
 	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
 	import { derived } from 'svelte/store';
-	import { canPerformAction } from '$lib/utils/access-control';
+	import { canPerformActionOnObject } from '$lib/utils/access-control';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
 	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
@@ -69,20 +69,20 @@
 
 	const user = page.data.user;
 	const model = URL_MODEL_MAP['compliance-assessments'];
-	const canEditObject: boolean = canPerformAction({
+	const canEditObject: boolean = canPerformActionOnObject({
 		user,
 		action: 'change',
 		model: model.name,
-		domain: compliance_assessment.folder.id
+		object: compliance_assessment
 	});
 	const requirementAssessmentModel = URL_MODEL_MAP['requirement-assessments'];
 	const canEditRequirementAssessment: boolean =
 		!data.compliance_assessment.is_locked &&
-		canPerformAction({
+		canPerformActionOnObject({
 			user,
 			action: 'change',
 			model: requirementAssessmentModel.name,
-			domain: data.compliance_assessment.folder.id
+			object: data.compliance_assessment
 		});
 
 	const viewerRole: 'auditor' | 'respondent' = page.data.user.is_third_party
@@ -940,6 +940,7 @@
 					<AuditTrailButton
 						model="compliance-assessments"
 						objectId={data.compliance_assessment.id}
+						folderId={data.compliance_assessment.folder?.id ?? user.root_folder_id}
 					/>
 				{/if}
 				<!-- Power-ups Command Palette Grid -->
@@ -1055,7 +1056,7 @@
 										{/if}
 										<span class="text-sm font-medium">{m.syncToAppliedControls()}</span>
 									</button>
-									{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0}
+									{#if canPerformActionOnObject( { user: page.data.user, action: 'add', model: 'appliedcontrol', object: data.compliance_assessment } ) && data.compliance_assessment.framework.reference_controls.length > 0}
 										<button
 											class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
 											onclick={() => {

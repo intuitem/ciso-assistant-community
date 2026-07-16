@@ -299,7 +299,8 @@ export const RiskAcceptanceSchema = z.object({
 	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	justification: z.string().optional().nullable(),
 	approver: z.string().optional().nullable(),
-	risk_scenarios: z.array(z.string())
+	risk_scenarios: z.array(z.string()),
+	submit: z.boolean().optional()
 });
 
 export const ValidationFlowSchema = z.object({
@@ -611,6 +612,11 @@ export const GeneralSettingsSchema = z.object({
 	allow_assignments_to_entities: z.boolean().default(false).optional(),
 	enforce_mfa: z.boolean().default(false).optional(),
 	default_language: z.string().default('en').optional(),
+	default_packager: z
+		.string()
+		.regex(/^[a-z0-9_-]+$/)
+		.default('custom')
+		.optional(),
 	llm_provider: z.string().default('ollama').optional(),
 	ollama_base_url: z.string().default('http://localhost:11434').optional(),
 	ollama_model: z.string().default('mistral').optional(),
