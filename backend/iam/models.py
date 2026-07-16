@@ -1233,9 +1233,13 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             return RoleAssignment.objects.none()
 
         user_role_assignments = RoleAssignment.objects.filter(
-            Q(user=user) |
-            Q(user_group__in=user.user_groups.all()) |
-            Q(user_group__in=UserGroup.objects.filter(idp_groups__in=user.idp_groups.all()))
+            Q(user=user)
+            | Q(user_group__in=user.user_groups.all())
+            | Q(
+                user_group__in=UserGroup.objects.filter(
+                    idp_groups__in=user.idp_groups.all()
+                )
+            )
         ).distinct()
 
         return user_role_assignments
