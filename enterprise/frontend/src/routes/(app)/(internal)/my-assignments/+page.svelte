@@ -441,6 +441,31 @@
 				/>
 			</div>
 		{/if}
+		{#if showEmptySections || counts.riskAcceptances > 0}
+			<div
+				class="col-span-6 bg-linear-to-br from-yellow-200 to-yellow-50 dark:from-yellow-950/40 dark:to-yellow-950/10 p-2 rounded"
+			>
+				<div class="font-bold mb-2">
+					<i class="fa-solid fa-signature mr-2"></i>{m.riskAcceptances()}
+					{#if counts.riskAcceptances > 0}
+						<span class="badge variant-filled-surface ml-2">{counts.riskAcceptances}</span>
+					{/if}
+				</div>
+				<ModelTable
+					source={{
+						head: {
+							name: 'name',
+							expiry_date: 'expiry_date',
+							folder: 'folder'
+						},
+						body: []
+					}}
+					hideFilters={true}
+					URLModel="risk-acceptances"
+					baseEndpoint="/risk-acceptances?{approverParams}&state=submitted"
+				/>
+			</div>
+		{/if}
 		{#if showEmptySections || counts.findings > 0}
 			<div
 				class="col-span-6 bg-linear-to-br from-violet-200 to-violet-50 dark:from-violet-950/40 dark:to-violet-950/10 p-2 rounded"

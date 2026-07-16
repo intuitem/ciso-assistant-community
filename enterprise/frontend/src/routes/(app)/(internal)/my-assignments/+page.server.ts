@@ -102,6 +102,7 @@ export const load: PageServerLoad = async ({ fetch, parent, url }) => {
 		organisationObjectives: buildEndpoint('/organisation-objectives', assignedToParams, 'limit=0'),
 		rightRequests: buildEndpoint('/privacy/right-requests', ownerParams, 'limit=0'),
 		validationFlows: buildEndpoint('/validation-flows', approverParams, 'limit=0'),
+		riskAcceptances: buildEndpoint('/risk-acceptances', approverParams, 'state=submitted&limit=0'),
 		metricInstances: buildEndpoint('/metrology/metric-instances', ownerParams, 'limit=0')
 	};
 
