@@ -62,11 +62,6 @@ class PostureAssessmentViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(PostureAssessment.Status.choices))
 
-    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
-    @action(detail=False, name="Get result choices")
-    def result(self, request):
-        return Response(dict(PostureResult.Result.choices))
-
     @staticmethod
     def _row_payload(row):
         return {
@@ -462,7 +457,6 @@ class PostureAssessmentViewSet(BaseModelViewSet):
                 asset=asset,
                 requirement=node,
                 defaults={
-                    "posture_assessment": assessment,
                     "result": entry["result"],
                     "timestamp": timestamp,
                     "actual": entry.get("actual", ""),

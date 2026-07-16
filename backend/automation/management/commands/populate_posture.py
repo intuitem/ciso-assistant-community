@@ -60,7 +60,7 @@ class Command(BaseCommand):
         domain = Folder.objects.filter(name=DOMAIN_NAME).first()
         if domain:
             results = PostureResult.objects.filter(
-                posture_assessment__folder=domain
+                run__posture_assessment__folder=domain
             ).count()
             domain.delete()
             self.stdout.write(
@@ -171,7 +171,6 @@ class Command(BaseCommand):
                             result = "fail"
                     rows.append(
                         PostureResult(
-                            posture_assessment=pa,
                             requirement=check,
                             asset=asset,
                             result=result,

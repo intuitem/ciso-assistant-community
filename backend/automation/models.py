@@ -68,6 +68,10 @@ class PostureAssessment(Assessment):
             if self.requirement_matches_selected_groups(node["implementation_groups"])
         }
 
+    @property
+    def results(self):
+        return PostureResult.objects.filter(run__posture_assessment=self)
+
     def current_posture(self, asset_id=None) -> list[dict]:
         qs = self.results
         if asset_id:
@@ -152,9 +156,6 @@ class PostureResult(AbstractBaseModel):
         API = "api", _("API")
         IMPORT = "import", _("Import")
 
-    posture_assessment = models.ForeignKey(
-        PostureAssessment, on_delete=models.CASCADE, related_name="results"
-    )
     run = models.ForeignKey(
         PostureRun, on_delete=models.CASCADE, related_name="results"
     )
@@ -180,10 +181,7 @@ class PostureResult(AbstractBaseModel):
         verbose_name = _("Posture result")
         verbose_name_plural = _("Posture results")
         indexes = [
-            models.Index(fields=["posture_assessment", "run"]),
-            models.Index(
-                fields=["posture_assessment", "asset", "requirement", "timestamp"]
-            ),
+            models.Index(fields=["asset", "requirement", "timestamp"]),
         ]
         constraints = [
             models.UniqueConstraint(

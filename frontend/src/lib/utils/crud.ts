@@ -2168,7 +2168,6 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'framework', urlModel: 'frameworks' },
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'authors', urlModel: 'actors' },
-			{ field: 'reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'follow_up_assessment', urlModel: 'findings-assessments' }
 		],
 		selectFields: [{ field: 'status' }],
@@ -2183,10 +2182,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'assets' },
 			{ field: 'history_depth' },
 			{ field: 'authors' },
-			{ field: 'reviewers' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' },
-			{ field: 'version' },
 			{ field: 'status' },
 			{ field: 'observation' }
 		]

@@ -169,8 +169,12 @@ class TestPostureIngestion:
         assert body["run_id"] == first["run_id"]
         assert body["created"] == 0
         assert body["updated"] == 1
-        assert PostureResult.objects.filter(posture_assessment=s["pa"]).count() == 1
-        assert PostureResult.objects.get(posture_assessment=s["pa"]).result == "pass"
+        assert (
+            PostureResult.objects.filter(run__posture_assessment=s["pa"]).count() == 1
+        )
+        assert (
+            PostureResult.objects.get(run__posture_assessment=s["pa"]).result == "pass"
+        )
 
     def test_invalid_run_id(self, setup):
         s = setup
@@ -259,7 +263,9 @@ class TestPostureIngestion:
             format="json",
         )
         assert res.status_code == 400
-        assert PostureResult.objects.filter(posture_assessment=s["pa"]).count() == 0
+        assert (
+            PostureResult.objects.filter(run__posture_assessment=s["pa"]).count() == 0
+        )
 
     def test_invalid_result_vocabulary(self, setup):
         s = setup
@@ -270,7 +276,9 @@ class TestPostureIngestion:
             [{"ref_id": "1.1", "result": "compliant"}],
         )
         assert res.status_code == 400
-        assert PostureResult.objects.filter(posture_assessment=s["pa"]).count() == 0
+        assert (
+            PostureResult.objects.filter(run__posture_assessment=s["pa"]).count() == 0
+        )
 
     def test_pruning_per_asset_and_check(self, setup):
         s = setup
@@ -281,12 +289,12 @@ class TestPostureIngestion:
         upload(s["client"], s["pa"], s["asset1"], [{"ref_id": "1.2", "result": "fail"}])
 
         kept = PostureResult.objects.filter(
-            posture_assessment=s["pa"], requirement=s["nodes"]["1.1"]
+            run__posture_assessment=s["pa"], requirement=s["nodes"]["1.1"]
         )
         assert kept.count() == 2
         assert (
             PostureResult.objects.filter(
-                posture_assessment=s["pa"], requirement=s["nodes"]["1.2"]
+                run__posture_assessment=s["pa"], requirement=s["nodes"]["1.2"]
             ).count()
             == 1
         )
@@ -294,7 +302,7 @@ class TestPostureIngestion:
         upload(s["client"], s["pa"], s["asset2"], [{"ref_id": "1.1", "result": "pass"}])
         assert (
             PostureResult.objects.filter(
-                posture_assessment=s["pa"],
+                run__posture_assessment=s["pa"],
                 requirement=s["nodes"]["1.1"],
                 asset=s["asset2"],
             ).count()
@@ -561,7 +569,7 @@ class TestTree:
             format="json",
         )
         assert res.status_code == 200
-        row = PostureResult.objects.get(posture_assessment=s["pa"])
+        row = PostureResult.objects.get(run__posture_assessment=s["pa"])
         assert row.source == "manual"
 
         bad = s["client"].post(
@@ -709,7 +717,7 @@ class TestImplementationGroups:
         assert res.status_code == 200
         assert (
             PostureResult.objects.filter(
-                posture_assessment=s["pa"], requirement=s["nodes"]["1.2"]
+                run__posture_assessment=s["pa"], requirement=s["nodes"]["1.2"]
             ).count()
             == 2
         )
@@ -1014,4 +1022,6 @@ class TestPosturePermissions:
             reader, s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "pass"}]
         )
         assert res.status_code == 403
-        assert PostureResult.objects.filter(posture_assessment=s["pa"]).count() == 0
+        assert (
+            PostureResult.objects.filter(run__posture_assessment=s["pa"]).count() == 0
+        )

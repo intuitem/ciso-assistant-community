@@ -1357,7 +1357,6 @@ export const FindingsAssessmentSchema = z.object({
 
 export const PostureAssessmentSchema = z.object({
 	...NameDescriptionMixin,
-	version: z.string().optional().default('1.0'),
 	ref_id: z.string().optional(),
 	folder: z.string(),
 	perimeter: z.string().optional().nullable(),
@@ -1366,9 +1365,6 @@ export const PostureAssessmentSchema = z.object({
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
 	history_depth: z.number().int().min(1).optional().default(10),
 	authors: z.array(z.string().optional()).optional(),
-	reviewers: z.array(z.string().optional()).optional(),
-	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
-	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	observation: z.string().optional().nullable(),
 	follow_up_assessment: z.string().optional().nullable()
 });

@@ -96,13 +96,6 @@
 	label={m.authors()}
 />
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
-	<TextField
-		{form}
-		field="version"
-		label={m.version()}
-		cacheLock={cacheLocks['version']}
-		bind:cachedValue={formDataCache['version']}
-	/>
 	<NumberField
 		{form}
 		field="history_depth"
@@ -113,20 +106,6 @@
 	/>
 	<AutocompleteSelect
 		{form}
-		multiple
-		optionsEndpoint="actors"
-		optionsLabelField="str"
-		optionsInfoFields={{
-			fields: [{ field: 'type', translate: true }],
-			position: 'prefix'
-		}}
-		field="reviewers"
-		cacheLock={cacheLocks['reviewers']}
-		bind:cachedValue={formDataCache['reviewers']}
-		label={m.reviewers()}
-	/>
-	<AutocompleteSelect
-		{form}
 		optionsEndpoint="findings-assessments"
 		optionsExtraFields={[['folder', 'str']]}
 		field="follow_up_assessment"
@@ -134,24 +113,6 @@
 		label={m.followUpAssessment()}
 		cacheLock={cacheLocks['follow_up_assessment']}
 		bind:cachedValue={formDataCache['follow_up_assessment']}
-	/>
-	<TextField
-		type="date"
-		{form}
-		field="eta"
-		label={m.eta()}
-		helpText={m.etaHelpText()}
-		cacheLock={cacheLocks['eta']}
-		bind:cachedValue={formDataCache['eta']}
-	/>
-	<TextField
-		type="date"
-		{form}
-		field="due_date"
-		label={m.dueDate()}
-		helpText={m.dueDateHelpText()}
-		cacheLock={cacheLocks['due_date']}
-		bind:cachedValue={formDataCache['due_date']}
 	/>
 	<MarkdownField
 		{form}
