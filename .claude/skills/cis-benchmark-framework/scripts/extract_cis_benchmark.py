@@ -38,7 +38,7 @@ CLASSIFICATION_RE = re.compile(r"^(Internal Only|TLP:).*", re.IGNORECASE)
 def cover_metadata(doc):
     """Return (title, version, publication_date) from the cover page."""
     for page in doc[:3]:
-        lines = [l.strip() for l in page.get_text().splitlines() if l.strip()]
+        lines = [line.strip() for line in page.get_text().splitlines() if line.strip()]
         title_parts = []
         for line in lines:
             m = VERSION_LINE_RE.match(line)
@@ -65,7 +65,7 @@ def summary_table_lines(doc):
     """Yield content lines of the summary table, page headers stripped."""
     start = None
     for i, page in enumerate(doc):
-        lines = [l.strip() for l in page.get_text().splitlines()]
+        lines = [line.strip() for line in page.get_text().splitlines()]
         if SUMMARY_HEADING in lines and "CIS Benchmark Recommendation" in lines:
             start = i
             break

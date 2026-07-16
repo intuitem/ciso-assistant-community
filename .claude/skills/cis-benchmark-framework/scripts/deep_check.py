@@ -90,9 +90,9 @@ def parse_body(doc, known_refs=None):
         if "Profile Applicability:" not in text:
             continue
         lines = [
-            l.strip()
-            for l in text.splitlines()
-            if l.strip() and not NOISE_RE.match(l.strip())
+            line.strip()
+            for line in text.splitlines()
+            if line.strip() and not NOISE_RE.match(line.strip())
         ]
         for i, l in enumerate(lines):
             if not l.startswith("Profile Applicability:"):
