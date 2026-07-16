@@ -10,17 +10,9 @@ Authoring is a separate discipline from running the platform. Once content has b
 
 For frameworks, matrices, and presets, the **recommended path is the in-app visual editor**. These are now unified in a single [Library builder](library-builder.md) under the `/experimental/` namespace: you author a whole library as a **draft document** — never touching live objects — then publish it through the standard loader, or export/import it as YAML. Draft/publish lifecycle, live preview, real-time validation, and multi-language support all apply. Excel-driven authoring remains the right channel for library publishing across instances.
 
-Each authoring topic is organised as **a task-oriented main page + a deep reference subpage**. Start with the task page when you know what you're trying to do; jump to the reference when you need to know what a specific surface does or how a particular flow works in detail.
-
 ## What's in this section
 
-- [Library builder](library-builder.md) — the unified entry point: author a full library (or a single framework/matrix in simple mode), adopt or clone existing content, import/export YAML, and publish through the standard loader.
-- [Framework authoring](framework.md) — recipes for forking a framework, building a requirement tree, scoring, translating, and publishing.
-  - [Framework builder — reference](framework-builder.md) — every surface in the framework builder, end to end.
-- [Risk matrix authoring](matrix.md) — recipes for creating a matrix, forking from a library, editing the grid, applying palettes, translating, and publishing.
-  - [Matrix editor — reference](matrix-editor.md) — every surface in the matrix editor, end to end.
-- [Journey preset authoring](preset.md) — recipes for building step sequences, scaffolding objects, cross-step focus, and publishing.
-  - [Preset editor — reference](preset-editor.md) — every surface in the preset editor, end to end.
+- [Library builder](library-builder.md) — the unified entry point for authoring library content in the app: author a full library (or a single framework/matrix in simple mode), build requirement trees, matrices, threats, reference controls, and journey presets, adopt or clone existing content, import/export YAML, and publish through the standard loader.
 - [Excel-driven authoring](excel.md) — the recommended workflow for authoring frameworks, matrices, and other library content from Excel before conversion to YAML.
 
 ## When to read this section

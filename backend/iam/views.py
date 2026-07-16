@@ -233,7 +233,6 @@ class CurrentUserView(views.APIView):
             "date_joined": request.user.date_joined,
             "user_groups": user_groups,
             "roles": request.user.get_roles(),
-            "permissions": request.user.permissions,
             "is_third_party": request.user.is_third_party,
             "is_auditee": request.user.is_auditee,
             "is_admin": request.user.is_admin(),
