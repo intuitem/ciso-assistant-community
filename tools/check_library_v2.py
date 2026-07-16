@@ -133,6 +133,9 @@ class MetaTypes(Enum):
 class SheetTypes(Enum):
     META = "_meta"
     CONTENT = "_content"
+ 
+class MandatorySheets(Enum):
+    LIBRARY_META = "library_meta"
 
 class YAMLSectionTypes(Enum):
     THREATS = "threats"
@@ -243,7 +246,7 @@ def get_meta_sheets_with_type(wb: Workbook) -> Dict[str, str]:
     meta_sheets_with_type = {}
 
     for sheet_name in wb.sheetnames:
-        if not sheet_name.endswith("_meta"):
+        if not sheet_name.endswith(SheetTypes.META.value):
             continue
 
         ws = wb[sheet_name]
@@ -361,8 +364,8 @@ def validate_ref_id_with_spaces(ref_id: str, context: str = None, row = None):
         raise ValueError(f"({context if context else 'validate_ref_id'}){' Row #'+str(row)+':' if row else ""} Invalid Ref. ID \"{ref_id}\" : Only alphanumeric characters, '-', '_', ' ', and '.' are allowed")
 
 def validate_sheet_name(sheet_name: str, context: str = None):
-    if not (sheet_name.endswith("_meta") or sheet_name.endswith("_content")):
-        raise ValueError(f"({context if context else 'validate_sheet_name'}) Invalid sheet name \"{sheet_name}\". Sheet names must end with '_meta' or '_content'")
+    if not (sheet_name.endswith(SheetTypes.META.value) or sheet_name.endswith(SheetTypes.CONTENT.value)):
+        raise ValueError(f"({context if context else 'validate_sheet_name'}) Invalid sheet name \"{sheet_name}\". Sheet names must end with '{SheetTypes.META.value}' or '{SheetTypes.CONTENT.value}'")
 
 def is_valid_locale(locale_str):
     return bool(re.fullmatch(r"[a-z0-9]{2}", locale_str))
@@ -474,7 +477,7 @@ def validate_integer_value(
     Rules:
     - Always checks "is integer" (default behavior)
     - If positive_only=True -> checks > 0
-    - If min/max provided -> checks min <= value <= max
+    - If min/max provided -> checks (min <= value <= max)
 
     Collects all invalid values and raises ONE ValueError at the end.
     """
@@ -663,7 +666,7 @@ def validate_related_content_sheet_from_name_key(wb: Workbook, df, sheet_name: s
     if not value:
         return  # value is empty, skip check
 
-    expected_sheet = f"{value}_content"
+    expected_sheet = f"{value}{SheetTypes.CONTENT.value}"
     if expected_sheet not in wb.sheetnames:
         raise ValueError(
             f"({context}) [{sheet_name}] Row #{row}: Key \"name\" points to missing sheet starting with \"{value}\" (Missing \"{expected_sheet}\")"
@@ -672,7 +675,7 @@ def validate_related_content_sheet_from_name_key(wb: Workbook, df, sheet_name: s
 
 
 
-# [META] Library {OK}
+# [META] Library {OK}²
 def validate_library_meta(df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
@@ -718,7 +721,7 @@ def validate_library_meta(df, sheet_name: str, verbose: bool = False, ctx: Conso
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
-# [META] Framework {OK}
+# [META] Framework {OK}²
 def validate_framework_meta(wb: Workbook, df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
@@ -759,7 +762,7 @@ def validate_framework_meta(wb: Workbook, df, sheet_name: str, verbose: bool = F
         if not value:
             continue
 
-        expected_sheet = f"{value}_meta"
+        expected_sheet = f"{value}{SheetTypes.META.value}"
         if expected_sheet in wb.sheetnames:
             continue
 
@@ -805,7 +808,7 @@ def validate_framework_meta(wb: Workbook, df, sheet_name: str, verbose: bool = F
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
-# [META] Threats {OK}
+# [META] Threats {OK}²
 def validate_threats_meta(df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
@@ -849,7 +852,7 @@ def validate_reference_controls_meta(df, sheet_name: str, verbose: bool = False,
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
-# [META] Risk Matrix {OK}
+# [META] Risk Matrix {OK}²
 def validate_risk_matrix_meta(df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
@@ -875,7 +878,7 @@ def validate_risk_matrix_meta(df, sheet_name: str, verbose: bool = False, ctx: C
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
-# [META] Implementation Groups {OK}
+# [META] Implementation Groups {OK}²
 def validate_implementation_groups_meta(wb: Workbook, df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
@@ -895,7 +898,7 @@ def validate_implementation_groups_meta(wb: Workbook, df, sheet_name: str, verbo
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
-# [META] Mappings {OK}
+# [META] Mappings {OK}²
 def validate_requirement_mapping_set_meta(df, sheet_name: str, verbose, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
@@ -958,7 +961,7 @@ def validate_requirement_mapping_set_meta(df, sheet_name: str, verbose, ctx: Con
 
 
 
-# [META] Scores {OK}
+# [META] Scores {OK}²
 def validate_scores_meta(wb: Workbook, df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
@@ -978,7 +981,7 @@ def validate_scores_meta(wb: Workbook, df, sheet_name: str, verbose: bool = Fals
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
-# [META] Answers {OK}
+# [META] Answers {OK}²
 def validate_answers_meta(wb: Workbook, df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
@@ -998,7 +1001,7 @@ def validate_answers_meta(wb: Workbook, df, sheet_name: str, verbose: bool = Fal
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
-# [META] URN Prefix {OK}
+# [META] URN Prefix {OK}²
 def validate_urn_prefix_meta(df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
@@ -1164,7 +1167,7 @@ def validate_extra_locales_in_content(df, sheet_name: str, context: str, ctx: Co
 
 # Return the name of a "_content" sheet by removing the trailing "_content" in the given sheet name.
 def get_content_sheet_base_name(content_sheet_name: str) -> str:
-    if not content_sheet_name.endswith("_content"):
+    if not content_sheet_name.endswith(SheetTypes.CONTENT.value):
         raise ValueError(f"Invalid sheet name: \"{content_sheet_name}\" does not end with \"_content\"")
 
     base_name = re.sub(r'_content$', '', content_sheet_name)
@@ -1963,7 +1966,7 @@ def _framework_validate_column_against_reference_sheet(wb: Workbook, df: pd.Data
             f"> 💡 Tip: Either remove column \"{column_name}\" or define a proper value for \"{meta_key}\" in the meta sheet."
         )
 
-    ref_content_sheet = f"{ref_base_name}_content"
+    ref_content_sheet = f"{ref_base_name}{SheetTypes.CONTENT.value}"
     if ref_content_sheet not in wb.sheetnames:
         raise ValueError(f"({context}) [{current_sheet_name}] Referenced sheet \"{ref_content_sheet}\" (from key \"{meta_key}\") not found")
 
@@ -2515,7 +2518,7 @@ def get_yaml_section_from_files(yaml_files: List[str], section_type: YAMLSection
 
 
 
-# [CONTENT] Framework {OK}
+# [CONTENT] Framework {OK} [Check new optional columns : "min_score", "max_score" & "scores_definition"]
 def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, external_refs: List[str] = None, verbose: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
@@ -2600,7 +2603,7 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, exter
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
-# [CONTENT] Threats {OK}
+# [CONTENT] Threats {OK}²
 def validate_threats_content(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
@@ -2619,7 +2622,7 @@ def validate_threats_content(df, sheet_name, verbose: bool = False, ctx: Console
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
-# [CONTENT] Reference Controls {OK}
+# [CONTENT] Reference Controls {OK}²
 def validate_reference_controls_content(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
@@ -2646,7 +2649,7 @@ def validate_reference_controls_content(df, sheet_name, verbose: bool = False, c
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
-# [CONTENT] Risk Matrix
+# [CONTENT] Risk Matrix²
 def validate_risk_matrix_content(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
@@ -2676,7 +2679,7 @@ def validate_risk_matrix_content(df, sheet_name, verbose: bool = False, ctx: Con
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
-# [CONTENT] Implementation Groups {OK}
+# [CONTENT] Implementation Groups {OK} [Check optional column: "default_selected"]
 def validate_implementation_groups_content(wb: Workbook, df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
@@ -2703,7 +2706,7 @@ def validate_implementation_groups_content(wb: Workbook, df, sheet_name, verbose
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
-# [CONTENT] Requirement Mapping Set {OK}
+# [CONTENT] Requirement Mapping Set {OK}²
 def validate_requirement_mapping_set_content(wb: Workbook, df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
@@ -2733,7 +2736,7 @@ def validate_requirement_mapping_set_content(wb: Workbook, df, sheet_name, verbo
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
-# [CONTENT] Scores {OK}
+# [CONTENT] Scores {OK}²
 def validate_scores_content(wb: Workbook, df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
@@ -2765,7 +2768,7 @@ def validate_scores_content(wb: Workbook, df, sheet_name, verbose: bool = False,
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
-# [CONTENT] Answers {OK}
+# [CONTENT] Answers {OK} [Chekc new optional column: "description", "select_implementation_groups", "add_score", "compute_result", "color"]
 def validate_answers_content(wb: Workbook, df: pd.DataFrame, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
@@ -2810,7 +2813,7 @@ def validate_answers_content(wb: Workbook, df: pd.DataFrame, sheet_name, verbose
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
-# [CONTENT] URN Prefix {OK}
+# [CONTENT] URN Prefix {OK}²
 def validate_urn_prefix_content(wb: Workbook, df: pd.DataFrame, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
@@ -2885,18 +2888,18 @@ def validate_urn_prefix_content(wb: Workbook, df: pd.DataFrame, sheet_name, verb
 
         # 3. Load "library_meta" sheet as a key-value dictionary
         try:
-            rows = list(wb["library_meta"].values)
+            rows = list(wb[MandatorySheets.LIBRARY_META.value].values)
             meta_dict = {
                 str(row[0]).strip(): str(row[1]).strip()
                 for row in rows if row and len(row) >= 2 and row[0] and row[1]
             }
         except Exception as e:
-            raise ValueError(f"({fct_name}) [{sheet_name}] Could not read \"library_meta\" sheet: {e}")
+            raise ValueError(f"({fct_name}) [{sheet_name}] Could not read \"{MandatorySheets.LIBRARY_META.value}\" sheet: {e}")
 
         # 4. Ensure "dependencies" field exists and is non-empty
         if "dependencies" not in meta_dict or not meta_dict["dependencies"].strip():
             raise ValueError(
-                f"({fct_name}) [{sheet_name}] \"library_meta\" is missing a non-empty \"dependencies\" field, "
+                f"({fct_name}) [{sheet_name}] \"{MandatorySheets.LIBRARY_META.value}\" is missing a non-empty \"dependencies\" field, "
                 f"required to declare external libraries: {', '.join(f'\"{d}\"' for d in required_dependencies)}"
             )
 
@@ -2914,7 +2917,7 @@ def validate_urn_prefix_content(wb: Workbook, df: pd.DataFrame, sheet_name, verb
             ref_ctrl_list = ", ".join(f'"{r}"' for r in external_ref_ctrl)
 
             raise ValueError(
-                f"({fct_name}) [{sheet_name}] Missing required dependencies in \"library_meta\": {missing_list}\n"
+                f"({fct_name}) [{sheet_name}] Missing required dependencies in \"{MandatorySheets.LIBRARY_META.value}\": {missing_list}\n"
                 f"> 💡 Tip: These are required due to the following external prefixes:\n"
                 f"   - External \"threats\": {threat_list or 'None'}\n"
                 f"   - External \"reference_controls\": {ref_ctrl_list or 'None'}"
@@ -3021,18 +3024,18 @@ def validate_excel_structure(filepath, external_refs: List[str] = None, verbose:
 
     # Sort sheets
     for sheet_name in wb.sheetnames:
-        if sheet_name.endswith("_meta"):
+        if sheet_name.endswith(SheetTypes.META.value):
             df = pd.read_excel(filepath, sheet_name=sheet_name, header=None, dtype=str, keep_default_na=False)
             meta_sheets[sheet_name] = df
-        elif sheet_name.endswith("_content"):
+        elif sheet_name.endswith(SheetTypes.CONTENT.value):
             df = pd.read_excel(filepath, sheet_name=sheet_name, header=0, dtype=str, keep_default_na=False)
             content_sheets[sheet_name] = df
         else:
             ignored_sheets.append(sheet_name)
 
-    if not "library_meta" in meta_sheets:
+    if not MandatorySheets.LIBRARY_META.value in meta_sheets:
         raise ValueError(
-            f"({fct_name}) [{sheet_name}] No \"library_meta\" sheet found."
+            f"({fct_name}) [{sheet_name}] No \"{MandatorySheets.LIBRARY_META.value}\" sheet found."
             f"\n> 💡 Tip: Ensure your Excel file \"{file_name}\" is in v2 format."
         )
 
@@ -3041,8 +3044,8 @@ def validate_excel_structure(filepath, external_refs: List[str] = None, verbose:
 
         base_name = re.sub(r'_meta$', '', sheet_name)
         
-        expected_content_sheet = base_name + "_content"
-        if sheet_name != "library_meta" and expected_content_sheet not in content_sheets:
+        expected_content_sheet = base_name + SheetTypes.CONTENT.value
+        if sheet_name != MandatorySheets.LIBRARY_META.value and expected_content_sheet not in content_sheets:
             raise ValueError(f"({fct_name}) [{sheet_name}] No corresponding content sheet found for this meta"
                             f"\n> 💡 Tip: Make sure the corresponding content sheet for \"{sheet_name}\" is named \"{expected_content_sheet}\"")
 
