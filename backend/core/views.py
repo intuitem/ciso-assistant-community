@@ -10386,7 +10386,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
         total_map: dict = {}
         assessed_map: dict = {}
-        for (status_driven, result_visible, has_questions), bucket_ids in buckets.items():
+        for (
+            status_driven,
+            result_visible,
+            has_questions,
+        ), bucket_ids in buckets.items():
             ras = RequirementAssessment.objects.filter(
                 compliance_assessment_id__in=bucket_ids,
                 requirement__assessable=True,
