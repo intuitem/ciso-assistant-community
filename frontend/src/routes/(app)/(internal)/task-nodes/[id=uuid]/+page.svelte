@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
 	import { m } from '$paraglide/messages';
+	import { canPerformActionOnObject } from '$lib/utils/access-control';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import TableMarkdownField from '$lib/components/Forms/TableMarkdownField.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
@@ -278,7 +279,7 @@
 						</td>
 						<td class="py-1 pl-2 w-8 text-center">
 							{#if !taskNode.evidence_reviewed.includes(evidence.id)}
-								{#if page.data.user.permissions['add_evidencerevision']}
+								{#if canPerformActionOnObject( { user: page.data.user, action: 'add', model: 'evidencerevision', object: evidence } )}
 									<button
 										onclick={() => modalRevisionCreate(evidence)}
 										class="text-primary-500 hover:text-primary-700"

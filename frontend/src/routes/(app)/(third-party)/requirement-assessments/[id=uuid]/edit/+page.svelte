@@ -18,6 +18,7 @@
 
 	import { hideSuggestions } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
+	import { canPerformActionOnObject } from '$lib/utils/access-control';
 	import { countMasked } from '$lib/utils/related-visibility';
 	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
 
@@ -182,7 +183,12 @@
 		// triggers invalidateAll, or after the modal creates/links new controls).
 		const _ = data.requirementAssessment.applied_controls;
 		if (
-			Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') &&
+			canPerformActionOnObject({
+				user: page.data.user,
+				action: 'add',
+				model: 'appliedcontrol',
+				object: data.requirementAssessment
+			}) &&
 			reference_controls.length > 0
 		) {
 			fetchSuggestionsPreview(data.requirementAssessment.id).then((items) => {
@@ -562,7 +568,7 @@
 									</div>
 									<div class="h-full flex flex-col space-y-2 rounded-container p-4">
 										<span class="flex flex-row justify-end items-center space-x-2">
-											{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && reference_controls.length > 0}
+											{#if canPerformActionOnObject( { user: page.data.user, action: 'add', model: 'appliedcontrol', object: data.requirementAssessment } ) && reference_controls.length > 0}
 												{@const nothingToSuggest = actionableSuggestionsCount === 0}
 												<button
 													class="btn self-end shadow-sm

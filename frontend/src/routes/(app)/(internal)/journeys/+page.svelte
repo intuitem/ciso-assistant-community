@@ -5,6 +5,7 @@
 	import ApplyPresetModal from '$lib/components/Modals/ApplyPresetModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { goto } from '$lib/utils/breadcrumbs';
+	import { canPerformAction } from '$lib/utils/access-control';
 	import { page } from '$app/stores';
 
 	let { data }: { data: PageData } = $props();
@@ -12,7 +13,12 @@
 	const modalStore = getModalStore();
 
 	const canApplyPreset = $derived(
-		Object.hasOwn($page.data.user?.permissions ?? {}, 'add_loadedlibrary')
+		canPerformAction({
+			user: $page.data.user,
+			action: 'add',
+			model: 'loadedlibrary',
+			domain: $page.data.user?.root_folder_id
+		})
 	);
 
 	function startJourney() {

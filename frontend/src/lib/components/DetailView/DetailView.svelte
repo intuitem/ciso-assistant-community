@@ -28,7 +28,7 @@
 	import { goto } from '$app/navigation';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { getListViewFields } from '$lib/utils/table';
-	import { canPerformAction } from '$lib/utils/access-control';
+	import { canPerformActionOnObject, resolveObjectDomain } from '$lib/utils/access-control';
 	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
 	import {
 		getModalStore,
@@ -365,15 +365,19 @@
 	}
 
 	const user = page.data.user;
-	const canEditObject: boolean = canPerformAction({
-		user,
-		action: 'change',
-		model: data.model.name,
-		domain:
-			data.model.name === 'folder'
-				? data.data.id
-				: (data.data.folder?.id ?? data.data.folder ?? user.root_folder_id)
-	});
+	const objectDomain: string = $derived(
+		resolveObjectDomain(data.model.name, data.data) ?? user.root_folder_id
+	);
+	// Same helper as ModelTable/TableRowActions so edit affordances agree everywhere,
+	// including the no-folder fallback (existential check deferring to the backend).
+	const canEditObject: boolean = $derived(
+		canPerformActionOnObject({
+			user,
+			action: 'change',
+			model: data.model.name,
+			object: data.data
+		})
+	);
 
 	let displayEditButton = $derived(function () {
 		return (
@@ -894,7 +898,7 @@
 				{/if}
 			{/if}
 			{@render actions?.()}
-			<AuditTrailButton model={data.urlModel} objectId={data.data?.id} />
+			<AuditTrailButton model={data.urlModel} objectId={data.data?.id} folderId={objectDomain} />
 		</div>
 	</div>
 </div>

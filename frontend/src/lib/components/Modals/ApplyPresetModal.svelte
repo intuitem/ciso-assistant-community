@@ -4,6 +4,7 @@
 	import { page } from '$app/stores';
 	import { onDestroy } from 'svelte';
 	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
+	import { canPerformAction } from '$lib/utils/access-control';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -27,7 +28,12 @@
 	const modalStore = getModalStore();
 
 	const canChangeSettings = $derived(
-		Object.hasOwn($page.data.user?.permissions ?? {}, 'change_globalsettings')
+		canPerformAction({
+			user: $page.data.user,
+			action: 'change',
+			model: 'globalsettings',
+			domain: $page.data.user?.root_folder_id
+		})
 	);
 
 	// When no preset is pre-selected (e.g. opened from the journeys list "Start a journey"
