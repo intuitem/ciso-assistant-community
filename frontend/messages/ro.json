@@ -1018,6 +1018,8 @@
 	"forceSSOLogin": "Forțați autentificarea SSO",
 	"forceSSOLoginHelpText": "Solicitați SSO pentru toți utilizatorii și resetați parolele salvate. Utilizatorii cu 'Excludeți din SSO forțat' activat vor păstra accesul de rezervă bazat pe parolă.",
 	"forceSSOLoginHelpText2": "Asigurați-vă că SSO-ul dvs. funcționează sau că aveți un cont de rezervă înainte de a activa această opțiune.",
+	"enableSpInitiatedSlo": "Activează deconectarea unică inițiată de furnizorul de servicii",
+	"enableSpInitiatedSloHelpText": "La deconectare, închide și sesiunea de la furnizorul de identitate.",
 	"youCanSetPasswordHere": "Puteți seta parola dvs. aici.",
 	"mappingSuggested": "Sugestie de mapare",
 	"mappingSuggestedHelpText": "Sugestii de mapare bazate pe cadre încărcate",

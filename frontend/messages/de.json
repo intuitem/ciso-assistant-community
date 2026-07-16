@@ -993,6 +993,8 @@
 	"forceSSOLogin": "SSO-Anmeldung erzwingen",
 	"forceSSOLoginHelpText": "SSO für alle Benutzer verpflichtend machen und lokale Passwörter zurücksetzen. Benutzer mit ‚Von erzwungenem SSO ausgenommen‘ behalten Zugriff per Passwort.",
 	"forceSSOLoginHelpText2": "Stellen Sie sicher, dass Ihr SSO funktioniert oder ein Fallback-Konto existiert, bevor Sie dies aktivieren.",
+	"enableSpInitiatedSlo": "Vom Service Provider initiiertes Single Logout aktivieren",
+	"enableSpInitiatedSloHelpText": "Beim Abmelden auch die Sitzung beim Identitätsanbieter beenden.",
 	"mappingSuggested": "Vorgeschlagene Zuordnung",
 	"mappingSuggestedHelpText": "Zuordnungsvorschläge basierend auf geladenen Frameworks",
 	"mappingSuggestionTeasing": "Zuordnungen werden jetzt vorgeschlagen! Verwenden Sie die Filter, um Vorschläge basierend auf geladenen Frameworks zu erkunden.",

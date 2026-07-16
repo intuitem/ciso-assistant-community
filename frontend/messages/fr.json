@@ -2381,6 +2381,8 @@
 	"forceSSOLogin": "Forcer la connexion SSO",
 	"forceSSOLoginHelpText": "Exiger le SSO pour tous les utilisateurs et réinitialiser tous les mots de passe enregistrés. Les utilisateurs avec 'Exclure du SSO forcé' activé conserveront un accès de secours basé sur un mot de passe.",
 	"forceSSOLoginHelpText2": "Assurez-vous que votre SSO fonctionne ou que vous disposez d'un compte de secours avant d'activer cette option.",
+	"enableSpInitiatedSlo": "Activer la déconnexion unique initiée par le fournisseur de service",
+	"enableSpInitiatedSloHelpText": "À la déconnexion, clôturer aussi la session du fournisseur d'identité.",
 	"lastOccurrenceStatus": "Statut de la dernière occurrence",
 	"nextOccurrence": "Prochaine occurrence",
 	"taskTemplate": "Tâche",

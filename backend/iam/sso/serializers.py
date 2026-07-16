@@ -13,7 +13,7 @@ class SSOSettingsReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = SSOSettings
-        fields = ["id", "name", "provider", "is_enabled", "force_sso"]
+        fields = ["id", "name", "provider", "is_enabled", "force_sso", "slo_enabled"]
 
 
 class SSOSettingsWriteSerializer(BaseModelSerializer):
@@ -22,6 +22,10 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
     )
     force_sso = serializers.BooleanField(
         required=False,
+    )
+    slo_enabled = serializers.BooleanField(
+        required=False,
+        default=False,
     )
     provider = serializers.CharField(
         required=False,
