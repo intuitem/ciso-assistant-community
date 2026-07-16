@@ -1057,7 +1057,9 @@ class AuditedModelsView(APIView):
 
         if (
             not _object_audit_trail_enabled()
-            or AUDIT_TRAIL_PERMISSION not in request.user.permissions
+            or not RoleAssignment.has_permission_anywhere(
+                request.user, AUDIT_TRAIL_PERMISSION
+            )
         ):
             return Response([])
         names = sorted(model._meta.model_name for model in auditlog.get_models())
