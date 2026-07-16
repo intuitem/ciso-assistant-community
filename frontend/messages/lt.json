@@ -2321,6 +2321,8 @@
 	"forceSSOLogin": "Priverstinis SSO prisijungimas",
 	"forceSSOLoginHelpText": "Reikalauti SSO visiems naudotojams ir iš naujo nustatyti išsaugotus slaptažodžius. Naudotojai, kuriems įjungta parinktis 'Neįtraukti į priverstinį SSO', išlaikys prieigą naudojant slaptažodį.",
 	"forceSSOLoginHelpText2": "Prieš įjungdami šią parinktį, įsitikinkite, kad jūsų SSO veikia arba turite atsarginę paskyrą.",
+	"enableSpInitiatedSlo": "Įjungti paslaugų teikėjo inicijuotą vienkartinį atsijungimą",
+	"enableSpInitiatedSloHelpText": "Atsijungiant taip pat užbaigti tapatybės tiekėjo seansą.",
 	"lastOccurrenceStatus": "Paskutinio įvykio statusas",
 	"showAllEvents": "Rodyti visus įvykius",
 	"featureFlags": "Funkcijų vėliavėlės",

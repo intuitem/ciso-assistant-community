@@ -1008,6 +1008,8 @@
 	"forceSSOLogin": "Vynutit přihlášení SSO",
 	"forceSSOLoginHelpText": "Vyžadovat SSO pro všechny uživatele a resetovat všechna uložená hesla. Uživatelé s povolenou možností 'Vyloučit z vynuceného SSO' si zachovají přístup pomocí hesla jako záložní možnost.",
 	"forceSSOLoginHelpText2": "Ujistěte se, že vaše SSO funguje nebo že máte záložní účet před povolením této možnosti.",
+	"enableSpInitiatedSlo": "Povolit jednotné odhlášení iniciované poskytovatelem služby",
+	"enableSpInitiatedSloHelpText": "Při odhlášení ukončit také relaci u poskytovatele identity.",
 	"mappingSuggested": "Navrhované mapování",
 	"mappingSuggestedHelpText": "Návrhy mapování založené na načtených rámcích",
 	"mappingSuggestionTeasing": "Nyní jsou navrhována mapování! Můžete použít filtry k prozkoumání návrhů založených na načtených rámcích.",

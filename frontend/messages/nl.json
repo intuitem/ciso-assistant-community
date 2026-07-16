@@ -988,6 +988,8 @@
 	"forceSSOLogin": "SSO-login afdwingen",
 	"forceSSOLoginHelpText": "SSO vereisen voor alle gebruikers en opgeslagen wachtwoorden resetten. Gebruikers met 'Uitsluiten van geforceerde SSO' ingeschakeld behouden toegang via wachtwoord als back-up.",
 	"forceSSOLoginHelpText2": "Zorg ervoor dat uw SSO functioneel is of dat u een back-upaccount heeft voordat u deze optie inschakelt.",
+	"enableSpInitiatedSlo": "Door de service provider geïnitieerde single logout inschakelen",
+	"enableSpInitiatedSloHelpText": "Bij het afmelden ook de sessie bij de identity provider sluiten.",
 	"youCanSetPasswordHere": "Je kunt hier je wachtwoord instellen.",
 	"mappingSuggested": "Suggestie voor in kaart brengen",
 	"mappingSuggestedHelpText": "Suggesties voor in kaart brengen gebaseerd op geladen kaders",
