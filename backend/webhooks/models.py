@@ -92,7 +92,7 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
     )
 
     url = models.URLField(
-        max_length=512,
+        max_length=4096,
         blank=True,
         default="",
         help_text="Consumer URL (HTTP transport).",

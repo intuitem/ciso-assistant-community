@@ -3399,7 +3399,9 @@ class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMi
     )
     is_published = models.BooleanField(_("published"), default=True)
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
-    link = models.URLField(null=True, blank=True, verbose_name=_("Link"))
+    link = models.URLField(
+        null=True, blank=True, max_length=4096, verbose_name=_("Link")
+    )
 
     fields_to_check = ["ref_id", "name"]
 
@@ -3561,7 +3563,7 @@ class Asset(
     reference_link = models.URLField(
         null=True,
         blank=True,
-        max_length=2048,
+        max_length=4096,
         help_text=_("External url for action follow-up (eg. Jira ticket)"),
         verbose_name=_("Link"),
     )
@@ -4920,7 +4922,7 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
     link = models.URLField(
         blank=True,
         null=True,
-        max_length=2048,
+        max_length=4096,
         verbose_name=_("Link"),
     )
     observation = models.TextField(verbose_name="Observation", blank=True, null=True)
@@ -5087,7 +5089,7 @@ class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     link = models.CharField(
         null=True,
         blank=True,
-        max_length=2048,
+        max_length=4096,
         verbose_name=_("Link"),
     )
     # note: made this syntax to avoid circular dependencies
@@ -5467,7 +5469,7 @@ class AppliedControl(
     link = models.CharField(
         null=True,
         blank=True,
-        max_length=2048,
+        max_length=4096,
         help_text=_("External url for action follow-up (eg. Jira ticket)"),
         verbose_name=_("Link"),
     )
@@ -9623,7 +9625,7 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     link = models.URLField(
         blank=True,
         null=True,
-        max_length=2048,
+        max_length=4096,
         help_text=_("Link to the evidence (eg. Jira ticket, etc.)"),
         verbose_name=_("Link"),
     )

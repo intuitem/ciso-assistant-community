@@ -84,7 +84,7 @@ class Entity(
         help_text=_("Default trust level for stakeholder assessment (1-4)"),
     )
     mission = models.TextField(blank=True)
-    reference_link = models.URLField(blank=True, null=True, max_length=2048)
+    reference_link = models.URLField(blank=True, null=True, max_length=4096)
     owned_folders = models.ManyToManyField(
         "iam.Folder",
         related_name="owner",
@@ -230,7 +230,7 @@ class EntityAssessment(Assessment):
     reference_link = models.URLField(
         blank=True,
         null=True,
-        max_length=2048,
+        max_length=4096,
         verbose_name=_("Reference link"),
     )
 
@@ -284,7 +284,7 @@ class Solution(NameDescriptionMixin, FilteringLabelMixin):
     )
     ref_id = models.CharField(max_length=255, blank=True)
     is_active = models.BooleanField(default=True, verbose_name=_("Is active"))
-    reference_link = models.URLField(blank=True, null=True, max_length=2048)
+    reference_link = models.URLField(blank=True, null=True, max_length=4096)
     criticality = models.IntegerField(default=0, verbose_name=_("Criticality"))
     owner = models.ManyToManyField(
         Actor,
