@@ -44,7 +44,11 @@
 	import Search from './Search.svelte';
 	import Th from './Th.svelte';
 	import ThFilter from './ThFilter.svelte';
-	import { canPerformAction } from '$lib/utils/access-control';
+	import {
+		canPerformAction,
+		canPerformActionOnObject,
+		hasPermissionAnywhere
+	} from '$lib/utils/access-control';
 	import { ContextMenu } from 'bits-ui';
 	import { tableHandlers, tableStates, tableColumnStates } from '$lib/utils/stores';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
@@ -510,24 +514,17 @@
 							page.params.id ||
 							user.root_folder_id
 					})
-				: Object.hasOwn(user.permissions, `add_${model.name}`)
+				: hasPermissionAnywhere(user, `add_${model.name}`)
 			: false
 	);
 	let contextMenuCanEditObject = $derived(
 		(model
-			? page.params.id
-				? canPerformAction({
-						user,
-						action: 'change',
-						model: model.name,
-						domain:
-							model.name === 'folder'
-								? contextMenuOpenRow?.meta.id
-								: (contextMenuOpenRow?.meta.folder?.id ??
-									contextMenuOpenRow?.meta.folder ??
-									user.root_folder_id)
-					})
-				: Object.hasOwn(user.permissions, `change_${model.name}`)
+			? canPerformActionOnObject({
+					user,
+					action: 'change',
+					model: model.name,
+					object: contextMenuOpenRow?.meta
+				})
 			: false) &&
 			(!(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn) ||
 				URLModel === 'terminologies' ||
@@ -543,19 +540,12 @@
 	let contextMenuCanDeleteObject = $derived(
 		!preventDelete(contextMenuOpenRow ?? { head: {}, body: [], meta: [] }) &&
 			(model
-				? page.params.id
-					? canPerformAction({
-							user,
-							action: 'delete',
-							model: model.name,
-							domain:
-								model.name === 'folder'
-									? contextMenuOpenRow?.meta.id
-									: (contextMenuOpenRow?.meta.folder?.id ??
-										contextMenuOpenRow?.meta.folder ??
-										user.root_folder_id)
-						})
-					: Object.hasOwn(user.permissions, `delete_${model.name}`)
+				? canPerformActionOnObject({
+						user,
+						action: 'delete',
+						model: model.name,
+						object: contextMenuOpenRow?.meta
+					})
 				: false)
 	);
 
@@ -723,8 +713,8 @@
 		URLModel && model
 			? getBatchActions(URLModel).filter((a) =>
 					a.type === 'delete'
-						? Object.hasOwn(user.permissions, `delete_${model.name}`)
-						: Object.hasOwn(user.permissions, `change_${model.name}`)
+						? hasPermissionAnywhere(user, `delete_${model.name}`)
+						: hasPermissionAnywhere(user, `change_${model.name}`)
 				)
 			: []
 	);

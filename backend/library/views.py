@@ -713,8 +713,6 @@ class LoadedLibraryViewSet(BaseModelViewSet):
         return LoadedLibraryDetailedSerializer
 
     def retrieve(self, request, *args, pk, **kwargs):
-        if "view_loadedlibrary" not in request.user.permissions:
-            return Response(status=HTTP_403_FORBIDDEN)
         try:
             key = "urn" if pk.startswith("urn:") else "id"
             lib = LoadedLibrary.objects.get(
@@ -727,6 +725,8 @@ class LoadedLibraryViewSet(BaseModelViewSet):
             return Response(
                 data="Error retrieving library.", status=HTTP_400_BAD_REQUEST
             )
+        if not RoleAssignment.is_object_readable(request.user, LoadedLibrary, lib.id):
+            return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
         data = LoadedLibraryDetailedSerializer(lib).data
         data["objects"] = lib._objects
         return Response(data)
@@ -766,6 +766,8 @@ class LoadedLibraryViewSet(BaseModelViewSet):
             lib = LoadedLibrary.objects.get(**{key: pk})
         except Exception:
             return Response("Library not found.", status=HTTP_404_NOT_FOUND)
+        if not RoleAssignment.is_object_readable(request.user, LoadedLibrary, lib.id):
+            return Response("Library not found.", status=HTTP_404_NOT_FOUND)
         return Response(lib._objects)
 
     @action(detail=True, methods=["get"])
@@ -776,6 +778,8 @@ class LoadedLibraryViewSet(BaseModelViewSet):
             key = "urn" if pk.startswith("urn:") else "id"
             lib = LoadedLibrary.objects.get(**{key: pk})
         except Exception:
+            return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
+        if not RoleAssignment.is_object_readable(request.user, LoadedLibrary, lib.id):
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
 
         if not lib.frameworks.exists():

@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
 	import { m } from '$paraglide/messages';
+	import { isAccessAllowed } from '$lib/utils/access-control';
 	import type { PageData } from './$types';
 
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
@@ -96,7 +97,7 @@
 
 	const authorizedExtensions = ['.bak'];
 	const user = page.data.user;
-	const canBackup: boolean = Object.hasOwn(user.permissions, 'backup');
+	const canBackup: boolean = isAccessAllowed(user, 'backup', user.root_folder_id);
 </script>
 
 {#if canBackup}
