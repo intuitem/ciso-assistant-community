@@ -71,7 +71,10 @@ class PostureAssessmentViewSet(BaseModelViewSet):
                 "ref_id": row["requirement__ref_id"],
                 "name": row["requirement__name"],
             },
-            "asset": {"id": str(row["asset_id"]), "str": row["asset__name"]},
+            "asset": {
+                "id": str(row["asset_id"]),
+                "str": f"{row['asset__folder__name']}/{row['asset__name']}",
+            },
             "result": row["result"],
             "timestamp": row["timestamp"],
             "run_id": str(row["run_id"]),
@@ -200,8 +203,10 @@ class PostureAssessmentViewSet(BaseModelViewSet):
                     if entry is not None
                 ],
                 "assets": [
-                    {"id": str(a.id), "str": str(a)}
-                    for a in assessment.assets.order_by("name")
+                    {"id": str(a.id), "str": f"{a.folder.name}/{a.name}"}
+                    for a in assessment.assets.select_related("folder").order_by(
+                        "folder__name", "name"
+                    )
                 ],
             }
         )
@@ -276,7 +281,8 @@ class PostureAssessmentViewSet(BaseModelViewSet):
                 "requirement__ref_id",
                 "requirement__name",
                 "asset__name",
-            ).order_by("asset__name", "requirement__ref_id")
+                "asset__folder__name",
+            ).order_by("asset__folder__name", "asset__name", "requirement__ref_id")
         )
         counts = Counter(row["result"] for row in rows)
         return Response(
@@ -497,7 +503,7 @@ class PostureAssessmentViewSet(BaseModelViewSet):
     @staticmethod
     def _export_row(row):
         return [
-            row["asset__name"],
+            f"{row['asset__folder__name']}/{row['asset__name']}",
             row["requirement__ref_id"],
             row["requirement__name"],
             row["result"],
@@ -638,7 +644,10 @@ class PostureAssessmentViewSet(BaseModelViewSet):
                         "ref_id": r["requirement__ref_id"],
                         "name": r["requirement__name"],
                     },
-                    "asset": {"id": str(r["asset_id"]), "str": r["asset__name"]},
+                    "asset": {
+                        "id": str(r["asset_id"]),
+                        "str": f"{r['asset__folder__name']}/{r['asset__name']}",
+                    },
                     "actual": r["actual"],
                     "expected": r["expected"],
                     "message": r["message"],

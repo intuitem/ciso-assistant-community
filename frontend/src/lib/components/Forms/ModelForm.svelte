@@ -840,7 +840,15 @@
 				{...rest}
 			/>
 		{:else if URLModel === 'posture-assessments'}
-			<PostureAssessmentForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+			<PostureAssessmentForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{...rest}
+			/>
 		{:else if URLModel === 'incidents'}
 			<IncidentForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} {...rest} />
 		{:else if URLModel === 'timeline-entries'}

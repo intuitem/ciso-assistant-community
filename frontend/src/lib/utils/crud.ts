@@ -2179,7 +2179,6 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'name' },
 			{ field: 'description' },
 			{ field: 'framework' },
-			{ field: 'assets' },
 			{ field: 'history_depth' },
 			{ field: 'authors' },
 			{ field: 'created_at', type: 'datetime' },

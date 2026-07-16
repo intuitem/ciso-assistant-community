@@ -22,7 +22,10 @@ export const load: PageServerLoad = async (event) => {
 	let selectedAssetName = tree.assets.find((a: any) => a.id === asset)?.str ?? null;
 	if (asset && !selectedAssetName) {
 		const remote = await event.fetch(`${BASE_API_URL}/assets/${asset}/`);
-		if (remote.ok) selectedAssetName = (await remote.json()).name;
+		if (remote.ok) {
+			const body = await remote.json();
+			selectedAssetName = body.folder?.str ? `${body.folder.str}/${body.name}` : body.name;
+		}
 	}
 
 	const checks = flattenChecks(tree.tree);

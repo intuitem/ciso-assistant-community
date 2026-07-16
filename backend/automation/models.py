@@ -103,6 +103,7 @@ class PostureAssessment(Assessment):
                 "requirement__ref_id",
                 "requirement__name",
                 "asset__name",
+                "asset__folder__name",
             )
         )
 

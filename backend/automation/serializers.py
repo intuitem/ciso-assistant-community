@@ -8,7 +8,7 @@ from core.serializers import (
     PathField,
 )
 
-from .models import PostureAssessment, PostureResult
+from .models import PostureAssessment
 
 
 class PostureAssessmentWriteSerializer(BaseModelSerializer):
@@ -38,7 +38,7 @@ class PostureAssessmentReadSerializer(AssessmentReadSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
     framework = FieldsRelatedField()
-    assets = FieldsRelatedField(many=True)
+    assets = FieldsRelatedField(["id", {"folder": ["id"]}], many=True)
     follow_up_assessment = FieldsRelatedField()
 
     class Meta:

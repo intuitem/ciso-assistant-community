@@ -104,7 +104,8 @@
 								class="w-full text-left px-2 py-1 text-sm rounded hover:bg-surface-100-900"
 								onclick={() => pickAsset(candidate.id)}
 							>
-								{candidate.name ?? candidate.str}
+								{candidate.folder?.str ? `${candidate.folder.str}/` : ''}{candidate.name ??
+									candidate.str}
 							</button>
 						{:else}
 							<p class="text-xs text-surface-600-400">{m.noEntriesFound()}</p>

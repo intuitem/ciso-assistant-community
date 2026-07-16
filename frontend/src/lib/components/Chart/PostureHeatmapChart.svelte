@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { m } from '$paraglide/messages';
 
 	interface Props {
@@ -19,6 +19,7 @@
 	}: Props = $props();
 
 	const chart_id = `${name}_div`;
+	let cleanup: (() => void) | undefined;
 
 	const RESULT_ORDER = ['fail', 'error', 'not_checked', 'not_applicable', 'pass'];
 	const RESULT_COLORS = ['#f87171', '#fbbf24', '#d1d5db', '#6b7280', '#86efac'];
@@ -161,8 +162,19 @@
 		};
 
 		chart.setOption(option);
-		window.addEventListener('resize', () => chart.resize());
+		const container = document.getElementById(chart_id);
+		const observer = new ResizeObserver(() => chart.resize());
+		if (container) observer.observe(container);
+		const onWindowResize = () => chart.resize();
+		window.addEventListener('resize', onWindowResize);
+		cleanup = () => {
+			observer.disconnect();
+			window.removeEventListener('resize', onWindowResize);
+			chart.dispose();
+		};
 	});
+
+	onDestroy(() => cleanup?.());
 </script>
 
 <div id={chart_id} class="{width} {classesContainer}" style="height: {chartHeight}px"></div>

@@ -5,7 +5,7 @@
 	import PostureTrendChart from '$lib/components/Chart/PostureTrendChart.svelte';
 	import PostureHeatmapChart from '$lib/components/Chart/PostureHeatmapChart.svelte';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
-	import { enhance } from '$app/forms';
+	import { deserialize, enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -29,6 +29,8 @@
 		error: m.error(),
 		not_checked: m.notChecked()
 	};
+
+	const assetLabel = (a: any) => (a?.folder?.str ? `${a.folder.str}/${a.str}` : (a?.str ?? ''));
 
 	let activeTab = $state('overview');
 
@@ -62,7 +64,7 @@
 	});
 
 	const assets = $derived.by(() => {
-		const columns = (data.data?.assets ?? []).map((a: any) => ({ id: a.id, name: a.str }));
+		const columns = (data.data?.assets ?? []).map((a: any) => ({ id: a.id, name: assetLabel(a) }));
 		const known = new Set(columns.map((a: any) => a.id));
 		for (const row of results) {
 			if (!known.has(row.asset.id)) {
@@ -127,7 +129,7 @@
 				const applicable = (acc?.pass ?? 0) + (acc?.fail ?? 0);
 				return {
 					id: a.id,
-					name: a.str,
+					name: assetLabel(a),
 					measured: acc?.measured ?? 0,
 					passRate: applicable ? Math.round((100 * (acc?.pass ?? 0)) / applicable) : null,
 					lastRun: acc?.last || null
@@ -160,7 +162,11 @@
 				if (!confirmed) return;
 				const fd = new FormData();
 				fd.set('asset', asset.id);
-				await fetch('?/purgeAsset', { method: 'POST', body: fd });
+				await fetch('?/purgeAsset', {
+					method: 'POST',
+					body: fd,
+					headers: { 'x-sveltekit-action': 'true' }
+				});
 				await invalidateAll();
 			}
 		});
@@ -184,14 +190,14 @@
 		const fd = new FormData();
 		fd.set('asset', importAssetId);
 		fd.set('file', file);
-		const res = await fetch('?/importFile', { method: 'POST', body: fd });
-		const body = await res.json().catch(() => null);
-		try {
-			const parsed = JSON.parse(body?.data ?? '[]');
-			importSummary = parsed?.[parsed?.[0]?.importSummary] ?? { done: true };
-		} catch {
-			importSummary = { done: true };
-		}
+		const res = await fetch('?/importFile', {
+			method: 'POST',
+			body: fd,
+			headers: { 'x-sveltekit-action': 'true' }
+		});
+		const result = deserialize(await res.text());
+		importSummary =
+			result.type === 'success' ? (result.data?.importSummary ?? { done: true }) : null;
 		input.value = '';
 		await invalidateAll();
 	}
@@ -350,7 +356,7 @@
 						>
 							<option value="">{m.allAssets()}</option>
 							{#each scopedAssets as asset (asset.id)}
-								<option value={asset.id}>{asset.str}</option>
+								<option value={asset.id}>{assetLabel(asset)}</option>
 							{/each}
 						</select>
 					</label>
@@ -388,14 +394,16 @@
 				</div>
 
 				{#if trendPoints.length > 1}
-					<div>
-						<h3 class="text-lg font-semibold mb-2">{m.passRate()}</h3>
-						<PostureTrendChart points={trendPoints} name="posture_trend" />
-					</div>
+					{#key trendPoints}
+						<div>
+							<h3 class="text-lg font-semibold mb-2">{m.passRate()}</h3>
+							<PostureTrendChart points={trendPoints} name="posture_trend" />
+						</div>
+					{/key}
 				{/if}
 
 				{#if filteredResults.length}
-					{#key `${filterAsset}:${filterStatuses.join(',')}`}
+					{#key filteredResults}
 						<div>
 							<h3 class="text-lg font-semibold mb-2">{m.currentPosture()}</h3>
 							<PostureHeatmapChart
@@ -500,7 +508,8 @@
 												type="submit"
 												class="w-full text-left px-2 py-1 text-sm rounded hover:bg-surface-100-900"
 											>
-												{candidate.str ?? candidate.name}
+												{candidate.folder?.str ? `${candidate.folder.str}/` : ''}{candidate.name ??
+													candidate.str}
 											</button>
 										</form>
 									{:else}

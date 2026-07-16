@@ -666,13 +666,13 @@ class TestImplementationGroups:
         }
         assert "1.3" not in refs
 
-    def test_empty_or_null_selection_means_no_filtering(self, ig_setup):
+    @pytest.mark.parametrize("selection", [[], None])
+    def test_empty_selection_means_no_filtering(self, ig_setup, selection):
         s = ig_setup
-        for value in (None, []):
-            self.select(s, value)
-            body = get_posture(s["client"], s["pa"])
-            assert len(body["results"]) == 4
-            assert body["total_checks"] == 4
+        self.select(s, selection)
+        body = get_posture(s["client"], s["pa"])
+        assert len(body["results"]) == 4
+        assert body["total_checks"] == 4
 
     def test_tree_pruned(self, ig_setup):
         s = ig_setup
