@@ -414,7 +414,7 @@
 				/>
 			</div>
 		{/if}
-		{#if (showEmptySections || counts.validationFlows > 0) && data.featureflags?.validation_flows}
+		{#if approverParams && (showEmptySections || counts.validationFlows > 0) && data.featureflags?.validation_flows}
 			<div
 				class="col-span-6 bg-linear-to-br from-orange-200 to-orange-50 dark:from-orange-950/40 dark:to-orange-950/10 p-2 rounded"
 			>
@@ -441,7 +441,7 @@
 				/>
 			</div>
 		{/if}
-		{#if showEmptySections || counts.riskAcceptances > 0}
+		{#if approverParams && (showEmptySections || counts.riskAcceptances > 0)}
 			<div
 				class="col-span-6 bg-linear-to-br from-yellow-200 to-yellow-50 dark:from-yellow-950/40 dark:to-yellow-950/10 p-2 rounded"
 			>
