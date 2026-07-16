@@ -370,9 +370,7 @@ class TestComplianceAssessmentListProgress:
 
         assert _list_progress(authenticated_client, audit.id) == 25
 
-    def test_score_alone_does_not_count_when_result_visible(
-        self, authenticated_client
-    ):
+    def test_score_alone_does_not_count_when_result_visible(self, authenticated_client):
         """Content mode with the result field visible: the result decides,
         a score alone (e.g. left by the scoring pre-fill) never counts."""
         framework = _make_framework()
