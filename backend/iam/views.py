@@ -31,6 +31,7 @@ from global_settings.models import GlobalSettings
 from core.models import Actor
 from .models import Folder, PersonalAccessToken, RoleAssignment, SCIMToken
 from core.permissions import IsGlobalAdmin, FeatureFlagRequired
+from iam.sso.slo import copy_slo_state_from_session_key
 from .serializers import (
     ChangePasswordSerializer,
     PersonalAccessTokenReadSerializer,
@@ -270,6 +271,9 @@ class SessionTokenView(views.APIView):
         # Log the user in and get the session token
         # This token is used for allauth's authentication flows
         login(request, user)
+        copy_slo_state_from_session_key(
+            request, request.META.get("HTTP_X_SSO_SESSION_KEY")
+        )
         session_token = request.session.session_key
         return Response({"token": session_token})
 

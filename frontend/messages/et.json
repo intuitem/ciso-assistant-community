@@ -2444,6 +2444,8 @@
 	"forceSSOLogin": "Nõua SSO sisselogimist",
 	"forceSSOLoginHelpText": "Nõua kõigilt kasutajatelt SSO-d ja lähtesta kõik salvestatud paroolid. Kasutajad, kellel on „Välista kohustuslikust SSO-st”, säilitavad paroolipõhise varujuurdepääsu.",
 	"forceSSOLoginHelpText2": "Enne selle valiku lubamist veendu, et SSO töötab või et sul on varukonto.",
+	"enableSpInitiatedSlo": "Luba teenusepakkuja algatatud ühekordne väljalogimine",
+	"enableSpInitiatedSloHelpText": "Väljalogimisel sulge ka identiteedipakkuja seanss.",
 	"lastOccurrenceStatus": "Viimase esinemise olek",
 	"showAllEvents": "Kuva kõik sündmused",
 	"featureFlags": "Funktsioonilülitid",

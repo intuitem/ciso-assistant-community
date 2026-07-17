@@ -995,6 +995,8 @@
 	"forceSSOLogin": "Forzar inicio de sesión SSO",
 	"forceSSOLoginHelpText": "Requerir SSO para todos los usuarios y restablecer cualquier contraseña guardada. Los usuarios con 'Excluir del SSO forzado' habilitado conservarán el acceso de respaldo basado en contraseña.",
 	"forceSSOLoginHelpText2": "Asegúrese de que su SSO funcione o que tenga una cuenta de respaldo antes de habilitar esta opción.",
+	"enableSpInitiatedSlo": "Habilitar cierre de sesión único iniciado por el proveedor de servicios",
+	"enableSpInitiatedSloHelpText": "Al cerrar sesión, cerrar también la sesión en el proveedor de identidad.",
 	"youCanSetPasswordHere": "Puede establecer su contraseña aquí.",
 	"mappingSuggested": "Sugerencia de mapeo",
 	"mappingSuggestedHelpText": "Sugerencias de mapeo basadas en marcos cargados",

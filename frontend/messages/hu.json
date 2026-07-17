@@ -1027,6 +1027,8 @@
 	"forceSSOLogin": "SSO bejelentkezés kényszerítése",
 	"forceSSOLoginHelpText": "Kötelezővé teszi az SSO-t minden felhasználó számára, és visszaállítja az összes mentett jelszót. Azok a felhasználók, akiknél a 'Kizárás a kényszerített SSO-ból' engedélyezve van, megőrzik a jelszó alapú tartalék hozzáférést.",
 	"forceSSOLoginHelpText2": "Győződjön meg róla, hogy az SSO működik, vagy hogy van tartalék fiókja, mielőtt engedélyezi ezt az opciót.",
+	"enableSpInitiatedSlo": "Szolgáltató által kezdeményezett egyszeri kijelentkezés engedélyezése",
+	"enableSpInitiatedSloHelpText": "Kijelentkezéskor az identitásszolgáltatói munkamenet is lezárul.",
 	"mappingSuggested": "Leképezés javasolt",
 	"mappingSuggestedHelpText": "Leképezési javaslatok a betöltött keretek alapján",
 	"mappingSuggestionTeasing": "A leképezések most javasoltak! A szűrők segítségével felfedezheti a betöltött keretek alapján történő javaslatokat.",
