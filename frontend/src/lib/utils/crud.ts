@@ -2159,8 +2159,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		name: 'postureassessment',
 		localName: 'postureAssessment',
 		localNamePlural: 'postureAssessments',
-		verboseName: 'Posture assessment',
-		verboseNamePlural: 'Posture assessments',
+		verboseName: 'Technical posture',
+		verboseNamePlural: 'Technical postures',
 		endpointUrl: 'automation/posture-assessments',
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
@@ -2179,6 +2179,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'name' },
 			{ field: 'description' },
 			{ field: 'framework' },
+			{ field: 'follow_up_assessment' },
 			{ field: 'history_depth' },
 			{ field: 'authors' },
 			{ field: 'created_at', type: 'datetime' },

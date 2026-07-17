@@ -33,6 +33,23 @@
 			.filter((p) => p.score != null)
 			.map((p) => ({ value: [p.timestamp, p.score], counts: p.counts }));
 
+		const times = data.map((d) => new Date(d.value[0]).getTime());
+		const spanMs = times.length > 1 ? Math.max(...times) - Math.min(...times) : 0;
+		const dayMs = 24 * 3600 * 1000;
+		const axisLabelFormatter = (value: number) => {
+			const date = new Date(value);
+			if (spanMs <= dayMs)
+				return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+			if (spanMs <= 7 * dayMs)
+				return date.toLocaleString([], {
+					month: 'short',
+					day: 'numeric',
+					hour: '2-digit',
+					minute: '2-digit'
+				});
+			return date.toLocaleDateString();
+		};
+
 		const option = {
 			backgroundColor: 'transparent',
 			grid: { top: 20, right: 30, bottom: 40, left: 50 },
@@ -50,9 +67,7 @@
 			},
 			xAxis: {
 				type: 'time',
-				axisLabel: {
-					formatter: (value: number) => new Date(value).toLocaleDateString()
-				}
+				axisLabel: { formatter: axisLabelFormatter, hideOverlap: true }
 			},
 			yAxis: {
 				type: 'value',

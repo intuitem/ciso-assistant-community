@@ -61,9 +61,14 @@ export const actions: Actions = {
 		const formData = await event.request.formData();
 		const file = formData.get('file');
 		const asset = formData.get('asset');
-		if (!file || !asset) return fail(400, { error: 'asset and file are required' });
+		const assets = formData.get('assets');
+		const mapping = formData.get('mapping');
+		if (!file || (!asset && !assets && !mapping))
+			return fail(400, { error: 'asset and file are required' });
 		const fd = new FormData();
-		fd.set('asset', asset);
+		if (asset) fd.set('asset', asset);
+		if (assets) fd.set('assets', assets);
+		if (mapping) fd.set('mapping', mapping);
 		fd.set('file', file);
 		const res = await event.fetch(
 			`${BASE_API_URL}/automation/posture-assessments/${event.params.id}/import-results/`,
@@ -71,6 +76,19 @@ export const actions: Actions = {
 		);
 		if (!res.ok) return fail(res.status, await res.json());
 		return { importSummary: await res.json() };
+	},
+	analyzeImport: async (event) => {
+		const formData = await event.request.formData();
+		const file = formData.get('file');
+		if (!file) return fail(400, { error: 'file is required' });
+		const fd = new FormData();
+		fd.set('file', file);
+		const res = await event.fetch(
+			`${BASE_API_URL}/automation/posture-assessments/${event.params.id}/analyze-import/`,
+			{ method: 'POST', body: fd }
+		);
+		if (!res.ok) return fail(res.status, await res.json());
+		return { analysis: await res.json() };
 	},
 	purgeAsset: async (event) => {
 		const formData = await event.request.formData();

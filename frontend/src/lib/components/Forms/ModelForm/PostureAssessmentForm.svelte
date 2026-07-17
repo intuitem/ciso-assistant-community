@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import Checkbox from '../Checkbox.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import NumberField from '$lib/components/Forms/NumberField.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
@@ -95,6 +96,14 @@
 	bind:cachedValue={formDataCache['authors']}
 	label={m.authors()}
 />
+{#if !object.id}
+	<Checkbox
+		{form}
+		field="create_follow_up_assessment"
+		label={m.createFollowUpAssessment()}
+		helpText={m.createFollowUpAssessmentHelpText()}
+	/>
+{/if}
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 	<NumberField
 		{form}

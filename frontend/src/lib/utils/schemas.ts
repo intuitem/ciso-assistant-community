@@ -1366,7 +1366,8 @@ export const PostureAssessmentSchema = z.object({
 	history_depth: z.number().int().min(1).optional().default(10),
 	authors: z.array(z.string().optional()).optional(),
 	observation: z.string().optional().nullable(),
-	follow_up_assessment: z.string().optional().nullable()
+	follow_up_assessment: z.string().optional().nullable(),
+	create_follow_up_assessment: z.boolean().optional().default(true)
 });
 
 export const IncidentSchema = z.object({

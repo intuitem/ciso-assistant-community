@@ -13,6 +13,7 @@
 	import { page } from '$app/state';
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
+	import ImportMappingModal from '$lib/components/Modals/ImportMappingModal.svelte';
 	import { postureResultTailwindColorMap } from '$lib/utils/constants';
 
 	interface Props {
@@ -172,34 +173,74 @@
 		});
 	}
 
-	// file import (per asset row)
+	// file import (runs tab)
 	let importInput: HTMLInputElement | undefined = $state();
-	let importAssetId = $state('');
 	let importSummary: any = $state(null);
 
-	function startImport(assetId: string) {
-		importAssetId = assetId;
+	function startImport() {
 		importSummary = null;
 		importInput?.click();
+	}
+
+	async function postAction(action: string, fd: FormData) {
+		const res = await fetch(`?/${action}`, {
+			method: 'POST',
+			body: fd,
+			headers: { 'x-sveltekit-action': 'true' }
+		});
+		return deserialize(await res.text());
+	}
+
+	async function commitImport(file: File, mapping: object | null, assetIds: string[]) {
+		const fd = new FormData();
+		if (mapping) fd.set('mapping', JSON.stringify(mapping));
+		if (assetIds.length) fd.set('assets', JSON.stringify(assetIds));
+		fd.set('file', file);
+		const result = await postAction('importFile', fd);
+		importSummary =
+			result.type === 'success'
+				? (result.data?.importSummary ?? { done: true })
+				: { error: (result as any).data?.error ?? true };
+		await invalidateAll();
+	}
+
+	function openImportModal(file: File, analysis: object | null) {
+		modalStore.trigger({
+			type: 'component',
+			component: {
+				ref: ImportMappingModal,
+				props: {
+					analysis,
+					fileName: file.name,
+					assets: assetRows.map(({ id, name }) => ({ id, name }))
+				}
+			},
+			response: async (payload: { mapping: object | null; assetIds: string[] } | false) => {
+				if (!payload) return;
+				await commitImport(file, payload.mapping, payload.assetIds);
+			}
+		});
 	}
 
 	async function onImportFile(event: Event) {
 		const input = event.currentTarget as HTMLInputElement;
 		const file = input.files?.[0];
-		if (!file || !importAssetId) return;
-		const fd = new FormData();
-		fd.set('asset', importAssetId);
-		fd.set('file', file);
-		const res = await fetch('?/importFile', {
-			method: 'POST',
-			body: fd,
-			headers: { 'x-sveltekit-action': 'true' }
-		});
-		const result = deserialize(await res.text());
-		importSummary =
-			result.type === 'success' ? (result.data?.importSummary ?? { done: true }) : null;
 		input.value = '';
-		await invalidateAll();
+		if (!file) return;
+
+		if (!file.name.toLowerCase().endsWith('.csv')) {
+			openImportModal(file, null);
+			return;
+		}
+
+		const fd = new FormData();
+		fd.set('file', file);
+		const analyzed = await postAction('analyzeImport', fd);
+		if (analyzed.type !== 'success' || !analyzed.data?.analysis) {
+			importSummary = { error: (analyzed as any).data?.error ?? true };
+			return;
+		}
+		openImportModal(file, analyzed.data.analysis);
 	}
 
 	// API snippet
@@ -252,13 +293,6 @@
 					label={m.matrixEdit()}
 				>
 					<i class="fa-solid fa-table-cells mr-2"></i>{m.matrixEdit()}
-				</Anchor>
-				<Anchor
-					href="/posture-assessments/{data.data.id}/runs/new"
-					class="btn preset-filled-primary-500 h-fit w-full"
-					label={m.newManualRun()}
-				>
-					<i class="fa-solid fa-plus mr-2"></i>{m.newManualRun()}
 				</Anchor>
 			</div>
 		{/snippet}
@@ -433,24 +467,6 @@
 
 			<Tabs.Content value="assets" class="p-4">
 				<div data-testid="posture-assets-card" class="space-y-3">
-					<input
-						bind:this={importInput}
-						type="file"
-						accept=".csv,.xlsx,.json"
-						class="hidden"
-						onchange={onImportFile}
-					/>
-					{#if importSummary}
-						<p class="text-sm text-primary-700 dark:text-primary-300">
-							<i class="fa-solid fa-file-import mr-1"></i>
-							{m.importSummary({
-								created: importSummary.created ?? '?',
-								updated: importSummary.updated ?? 0,
-								skipped:
-									(importSummary.skipped_suppressed ?? 0) + (importSummary.skipped_other_class ?? 0)
-							})}
-						</p>
-					{/if}
 					<div class="flex items-center justify-between relative">
 						<h3 class="text-lg font-semibold">{m.assets()}</h3>
 						<div class="flex items-center gap-2">
@@ -558,14 +574,6 @@
 											>
 												<i class="fa-solid fa-plus"></i>
 											</Anchor>
-											<button
-												type="button"
-												class="text-surface-500 hover:text-primary-500"
-												title={m.importResultsHelp()}
-												onclick={() => startImport(row.id)}
-											>
-												<i class="fa-solid fa-file-import"></i>
-											</button>
 											<a
 												href="/posture-assessments/{data.data
 													.id}/export?asset={row.id}&file_format=csv"
@@ -608,6 +616,53 @@
 			</Tabs.Content>
 
 			<Tabs.Content value="runs" class="p-4">
+				<input
+					bind:this={importInput}
+					type="file"
+					accept=".csv,.xlsx,.json"
+					class="hidden"
+					onchange={onImportFile}
+				/>
+				<div class="flex items-center justify-between mb-3">
+					<div>
+						{#if importSummary?.error}
+							<p class="text-sm text-error-600-400">
+								<i class="fa-solid fa-triangle-exclamation mr-1"></i>
+								{typeof importSummary.error === 'string' ? importSummary.error : m.error()}
+							</p>
+						{:else if importSummary}
+							<p class="text-sm text-primary-700 dark:text-primary-300">
+								<i class="fa-solid fa-file-import mr-1"></i>
+								{m.importSummary({
+									created: importSummary.created ?? '?',
+									updated: importSummary.updated ?? 0,
+									skipped:
+										(importSummary.skipped_suppressed ?? 0) +
+										(importSummary.skipped_other_class ?? 0) +
+										(importSummary.skipped_ignored ?? 0) +
+										(importSummary.skipped_unmapped ?? 0)
+								})}
+							</p>
+						{/if}
+					</div>
+					<div class="flex items-center gap-2">
+						<Anchor
+							href="/posture-assessments/{data.data.id}/runs/new"
+							class="btn btn-sm preset-filled-primary-500"
+							label={m.newManualRun()}
+						>
+							<i class="fa-solid fa-plus mr-1"></i>{m.newManualRun()}
+						</Anchor>
+						<button
+							type="button"
+							class="btn btn-sm preset-filled-primary-500"
+							onclick={startImport}
+							data-testid="posture-import-run"
+						>
+							<i class="fa-solid fa-file-import mr-1"></i>{m.importResults()}
+						</button>
+					</div>
+				</div>
 				{#if data.runs?.runs?.length}
 					<div class="overflow-x-auto">
 						<table class="table-auto w-full text-sm">
@@ -653,7 +708,11 @@
 			</Tabs.Content>
 
 			<Tabs.Content value="action-plan" class="p-4">
-				{#if actionPlanRows.length}
+				{#if !data.data.follow_up_assessment}
+					<p class="text-sm text-warning-600-400">
+						<i class="fa-solid fa-circle-info mr-1"></i>{m.actionPlanNoFollowUpHint()}
+					</p>
+				{:else if actionPlanRows.length}
 					<div class="flex items-center justify-between mb-4">
 						<p class="text-sm text-surface-600-400">
 							{data.actionPlan.total_fails}
@@ -662,6 +721,11 @@
 							{m.unplanned()}
 						</p>
 					</div>
+					{#if form?.error}
+						<p class="text-sm text-error-600-400 mb-3">
+							<i class="fa-solid fa-triangle-exclamation mr-1"></i>{form.error}
+						</p>
+					{/if}
 					<div class="overflow-x-auto">
 						<table class="table-auto w-full text-sm">
 							<thead>

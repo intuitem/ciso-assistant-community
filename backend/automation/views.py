@@ -1,5 +1,6 @@
 import csv
 import io
+import json
 import re
 import uuid
 from collections import Counter
@@ -18,14 +19,14 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 
-from core.models import Asset, Finding, FindingsAssessment, RequirementNode
+from core.models import Asset, Finding, RequirementNode
 from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     escape_excel_formula,
 )
 from iam.models import RoleAssignment
 
-from .importers import ImportError_, parse_file
+from .importers import ImportError_, analyze_csv, parse_file, parse_mapped_csv
 from .models import PostureAssessment, PostureResult, PostureRun
 
 LONG_CACHE_TTL = 60  # mn
@@ -561,6 +562,141 @@ class PostureAssessmentViewSet(BaseModelViewSet):
     @action(
         detail=True,
         methods=["post"],
+        url_path="analyze-import",
+        parser_classes=[MultiPartParser, FormParser],
+    )
+    def analyze_import(self, request, pk=None):
+        assessment = self.get_object()
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_postureassessment"),
+            folder=assessment.folder,
+        ):
+            raise PermissionDenied()
+        file = request.FILES.get("file")
+        if file is None:
+            return Response(
+                {"error": "file is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        if not (file.name or "").lower().endswith(".csv"):
+            return Response(
+                {"error": "analysis supports .csv files only"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            return Response(
+                analyze_csv(file, delimiter=request.data.get("delimiter") or None)
+            )
+        except ImportError_ as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @staticmethod
+    def _target_asset_ids(request):
+        """Explicit targets: `assets` (JSON list of uuids) or legacy single `asset`."""
+        raw = request.data.get("assets")
+        if raw:
+            try:
+                ids = json.loads(raw)
+                assert isinstance(ids, list) and ids
+                return [UUID(str(i)) for i in ids], None
+            except json.JSONDecodeError, ValueError, AssertionError:
+                return None, Response(
+                    {"error": "assets must be a JSON list of asset UUIDs"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        single = request.data.get("asset")
+        if single:
+            try:
+                return [UUID(str(single))], None
+            except ValueError:
+                return None, Response(
+                    {"error": "asset must be a valid UUID"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        return None, Response(
+            {"error": "asset or assets is required"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    def _run_import_plan(self, request, assessment, plan, tool):
+        """One shared run over [(label, asset_id|None, entries)]; None = unresolved."""
+        run_id = uuid.uuid4()
+        combined = {
+            "run_id": str(run_id),
+            "created": 0,
+            "updated": 0,
+            "unknown_ref_ids": [],
+            "assets_imported": 0,
+            "enrolled_assets": [],
+            "skipped_assets": [],
+        }
+        for label, asset_id, entries in plan:
+            if asset_id is None:
+                combined["skipped_assets"].append(label or "(empty)")
+                continue
+            response = self._ingest(
+                request,
+                assessment,
+                asset_id=asset_id,
+                entries=entries,
+                run_id=run_id,
+                source=PostureResult.Source.IMPORT,
+                tool=tool,
+            )
+            if response.status_code != 200:
+                combined["skipped_assets"].append(label)
+                continue
+            combined["assets_imported"] += 1
+            combined["created"] += response.data["created"]
+            combined["updated"] += response.data["updated"]
+            for ref in response.data["unknown_ref_ids"]:
+                if ref not in combined["unknown_ref_ids"]:
+                    combined["unknown_ref_ids"].append(ref)
+            if response.data["enrolled_asset"]:
+                combined["enrolled_assets"].append(label)
+        if not combined["assets_imported"]:
+            return Response(
+                {
+                    "error": "no rows could be applied to an asset",
+                    "skipped_assets": combined["skipped_assets"][:20],
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(combined)
+
+    def _import_mapped(self, request, assessment, file, mapping):
+        try:
+            groups, extras = parse_mapped_csv(file, mapping)
+        except ImportError_ as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        tool = (file.name or "")[:100]
+
+        if (mapping.get("columns") or {}).get("asset"):
+            plan = []
+            for asset_value, entries in groups.items():
+                matches = Asset.objects.filter(name=asset_value)
+                plan.append(
+                    (
+                        asset_value,
+                        matches[0].id if len(matches) == 1 else None,
+                        entries,
+                    )
+                )
+        else:
+            targets, error = self._target_asset_ids(request)
+            if error:
+                return error
+            entries = groups.get("", [])
+            plan = [(str(asset_id), asset_id, entries) for asset_id in targets]
+
+        response = self._run_import_plan(request, assessment, plan, tool)
+        if response.status_code == 200:
+            response.data.update(extras)
+        return response
+
+    @action(
+        detail=True,
+        methods=["post"],
         url_path="import-results",
         parser_classes=[MultiPartParser, FormParser],
     )
@@ -578,21 +714,49 @@ class PostureAssessmentViewSet(BaseModelViewSet):
             return Response(
                 {"error": "file is required"}, status=status.HTTP_400_BAD_REQUEST
             )
+
+        mapping_raw = request.data.get("mapping")
+        if mapping_raw:
+            try:
+                mapping = json.loads(mapping_raw)
+            except TypeError, json.JSONDecodeError:
+                return Response(
+                    {"error": "mapping must be valid JSON"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            if not (file.name or "").lower().endswith(".csv"):
+                return Response(
+                    {"error": "mapped import supports .csv files only"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            return self._import_mapped(request, assessment, file, mapping)
+
         try:
             entries, extras = parse_file(file)
         except ImportError_ as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         tool = extras.pop("tool", "") or (file.name or "")[:100]
-        response = self._ingest(
-            request,
-            assessment,
-            asset_id=request.data.get("asset"),
-            entries=entries,
-            run_id=None,
-            source=PostureResult.Source.IMPORT,
-            tool=tool,
-        )
+        if request.data.get("assets"):
+            targets, error = self._target_asset_ids(request)
+            if error:
+                return error
+            response = self._run_import_plan(
+                request,
+                assessment,
+                [(str(asset_id), asset_id, entries) for asset_id in targets],
+                tool,
+            )
+        else:
+            response = self._ingest(
+                request,
+                assessment,
+                asset_id=request.data.get("asset"),
+                entries=entries,
+                run_id=None,
+                source=PostureResult.Source.IMPORT,
+                tool=tool,
+            )
         if response.status_code == 200:
             extras["parse_errors"] = extras.get("parse_errors", [])[:20]
             response.data.update(extras)
@@ -689,20 +853,10 @@ class PostureAssessmentViewSet(BaseModelViewSet):
 
         follow_up = assessment.follow_up_assessment
         if follow_up is None:
-            if not RoleAssignment.is_access_allowed(
-                user=request.user,
-                perm=Permission.objects.get(codename="add_findingsassessment"),
-                folder=assessment.folder,
-            ):
-                raise PermissionDenied()
-            follow_up = FindingsAssessment.objects.create(
-                name=f"{assessment.name} — follow-up"[:200],
-                folder=assessment.folder,
-                perimeter=assessment.perimeter,
-                category=FindingsAssessment.Category.POSTURE,
+            return Response(
+                {"error": "no follow-up assessment attached"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
-            assessment.follow_up_assessment = follow_up
-            assessment.save(update_fields=["follow_up_assessment"])
 
         existing = Finding.objects.filter(
             findings_assessment=follow_up, requirement_node=requirement, asset=asset

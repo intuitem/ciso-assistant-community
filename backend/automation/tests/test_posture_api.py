@@ -857,6 +857,321 @@ class TestImportResults:
         assert s["pa"].assets.filter(id=newcomer.id).exists()
 
 
+SCANNER_CSV = (
+    b"PROVIDER;REQUIREMENTS_ID;STATUS;STATUSEXTENDED;RESOURCENAME\n"
+    b"kubernetes;1.1;PASS;pod a ok;pod-a\n"
+    b"kubernetes;1.1;FAIL;pod b has caps;pod-b\n"
+    b"kubernetes;1.2;PASS;ok;pod-a\n"
+    b"kubernetes;1.3;MANUAL;check by hand;cluster\n"
+    b"kubernetes;2.1;MUTED;waived;pod-a\n"
+)
+
+SCANNER_MAPPING = {
+    "delimiter": ";",
+    "columns": {
+        "ref_id": "REQUIREMENTS_ID",
+        "result": "STATUS",
+        "message": "STATUSEXTENDED",
+    },
+    "values": {
+        "PASS": "pass",
+        "FAIL": "fail",
+        "MANUAL": "not_checked",
+        "MUTED": "ignore",
+    },
+    "aggregation": "worst_case",
+}
+
+
+@pytest.mark.django_db
+class TestCreateFollowUpAssessment:
+    def create(self, s, **extra):
+        payload = {
+            "name": "posture with follow-up",
+            "folder": str(s["domain"].id),
+            "framework": str(s["framework"].id),
+            **extra,
+        }
+        return s["client"].post(
+            "/api/automation/posture-assessments/", payload, format="json"
+        )
+
+    def test_flag_creates_linked_findings_assessment(self, setup):
+        s = setup
+        res = self.create(s, create_follow_up_assessment=True)
+        assert res.status_code == 201
+        pa = PostureAssessment.objects.get(id=res.json()["id"])
+        follow_up = pa.follow_up_assessment
+        assert follow_up is not None
+        assert follow_up.name == "posture with follow-up — follow-up"
+        assert follow_up.folder == s["domain"]
+        assert follow_up.category == FindingsAssessment.Category.POSTURE
+
+    def test_flag_off_creates_nothing(self, setup):
+        s = setup
+        res = self.create(s, create_follow_up_assessment=False)
+        assert res.status_code == 201
+        pa = PostureAssessment.objects.get(id=res.json()["id"])
+        assert pa.follow_up_assessment is None
+        assert FindingsAssessment.objects.count() == 0
+
+    def test_explicit_follow_up_wins_over_flag(self, setup):
+        s = setup
+        existing = FindingsAssessment.objects.create(
+            name="existing", folder=s["domain"]
+        )
+        res = self.create(
+            s,
+            create_follow_up_assessment=True,
+            follow_up_assessment=str(existing.id),
+        )
+        assert res.status_code == 201
+        pa = PostureAssessment.objects.get(id=res.json()["id"])
+        assert pa.follow_up_assessment == existing
+        assert FindingsAssessment.objects.count() == 1
+
+    def test_flag_ignored_on_update(self, setup):
+        s = setup
+        res = s["client"].patch(
+            f"/api/automation/posture-assessments/{s['pa'].id}/",
+            {"create_follow_up_assessment": True},
+            format="json",
+        )
+        assert res.status_code == 200
+        s["pa"].refresh_from_db()
+        assert s["pa"].follow_up_assessment is None
+        assert FindingsAssessment.objects.count() == 0
+
+
+@pytest.mark.django_db
+class TestAnalyzeImport:
+    def analyze(self, s, content, name="scan.csv"):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        return s["client"].post(
+            f"/api/automation/posture-assessments/{s['pa'].id}/analyze-import/",
+            {"file": SimpleUploadedFile(name, content)},
+            format="multipart",
+        )
+
+    def test_analyze_sniffs_delimiter_and_profiles_columns(self, setup):
+        res = self.analyze(setup, SCANNER_CSV)
+        assert res.status_code == 200
+        body = res.json()
+        assert body["delimiter"] == ";"
+        assert body["headers"][1] == "REQUIREMENTS_ID"
+        assert body["row_count"] == 5
+        assert body["columns"]["STATUS"]["values"] == [
+            "FAIL",
+            "MANUAL",
+            "MUTED",
+            "PASS",
+        ]
+        assert len(body["sample_rows"]) == 5
+
+    def test_analyze_caps_distinct_values(self, setup):
+        content = b"ref;status\n" + b"".join(b"check-%d;PASS\n" % i for i in range(30))
+        body = self.analyze(setup, content).json()
+        assert body["columns"]["ref"]["values"] is None
+        assert body["columns"]["ref"]["distinct"] == "20+"
+        assert body["columns"]["status"]["values"] == ["PASS"]
+
+    def test_analyze_rejects_non_csv(self, setup):
+        res = self.analyze(setup, b"{}", name="scan.json")
+        assert res.status_code == 400
+
+
+@pytest.mark.django_db
+class TestMappedImport:
+    def import_mapped(self, s, mapping, content=SCANNER_CSV, asset=None):
+        import json as json_
+
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        payload = {
+            "file": SimpleUploadedFile("prowler.csv", content),
+            "mapping": json_.dumps(mapping),
+        }
+        if asset is not False:
+            payload["asset"] = str((asset or s["asset1"]).id)
+        return s["client"].post(
+            f"/api/automation/posture-assessments/{s['pa'].id}/import-results/",
+            payload,
+            format="multipart",
+        )
+
+    def test_worst_case_aggregation(self, setup):
+        s = setup
+        res = self.import_mapped(s, SCANNER_MAPPING)
+        assert res.status_code == 200
+        body = res.json()
+        assert body["created"] == 3
+        assert body["skipped_ignored"] == 1
+        row = PostureResult.objects.get(requirement=s["nodes"]["1.1"])
+        assert row.result == "fail"
+        assert row.actual == "1/2 rows fail"
+        assert row.message == "pod b has caps"
+        assert PostureResult.objects.get(requirement=s["nodes"]["1.3"]).result == (
+            "not_checked"
+        )
+
+    def test_best_case_aggregation(self, setup):
+        s = setup
+        res = self.import_mapped(s, {**SCANNER_MAPPING, "aggregation": "best_case"})
+        assert res.status_code == 200
+        assert PostureResult.objects.get(requirement=s["nodes"]["1.1"]).result == (
+            "pass"
+        )
+
+    def test_last_row_aggregation(self, setup):
+        s = setup
+        res = self.import_mapped(s, {**SCANNER_MAPPING, "aggregation": "last_row"})
+        assert res.status_code == 200
+        assert PostureResult.objects.get(requirement=s["nodes"]["1.1"]).result == (
+            "fail"
+        )
+
+    def test_strict_aggregation_rejects_collision(self, setup):
+        res = self.import_mapped(setup, {**SCANNER_MAPPING, "aggregation": "strict"})
+        assert res.status_code == 400
+        assert "1.1" in res.json()["error"]
+
+    def test_unmapped_value_counted_not_fatal(self, setup):
+        s = setup
+        mapping = {**SCANNER_MAPPING, "values": {"PASS": "pass", "FAIL": "fail"}}
+        res = self.import_mapped(s, mapping)
+        assert res.status_code == 200
+        body = res.json()
+        assert body["skipped_unmapped"] == 2
+        assert body["created"] == 2
+
+    def test_mapping_validation_errors(self, setup):
+        res = self.import_mapped(setup, {**SCANNER_MAPPING, "columns": {}})
+        assert res.status_code == 400
+        res = self.import_mapped(
+            setup,
+            {
+                **SCANNER_MAPPING,
+                "columns": {"ref_id": "NOPE", "result": "STATUS"},
+            },
+        )
+        assert res.status_code == 400
+        res = self.import_mapped(setup, {**SCANNER_MAPPING, "aggregation": "median"})
+        assert res.status_code == 400
+
+    def test_asset_column_multi_asset_shared_run(self, setup):
+        s = setup
+        content = (
+            b"REQUIREMENTS_ID;STATUS;NAMESPACE\n"
+            b"1.1;PASS;vm-1\n"
+            b"1.2;FAIL;vm-1\n"
+            b"1.1;PASS;vm-2\n"
+            b"1.1;PASS;ghost\n"
+        )
+        mapping = {
+            **SCANNER_MAPPING,
+            "columns": {
+                "ref_id": "REQUIREMENTS_ID",
+                "result": "STATUS",
+                "asset": "NAMESPACE",
+            },
+        }
+        res = self.import_mapped(s, mapping, content=content, asset=False)
+        assert res.status_code == 200
+        body = res.json()
+        assert body["assets_imported"] == 2
+        assert body["created"] == 3
+        assert body["skipped_assets"] == ["ghost"]
+        run_ids = set(
+            PostureResult.objects.filter(source="import").values_list(
+                "run_id", flat=True
+            )
+        )
+        assert len(run_ids) == 1
+        assert body["enrolled_assets"] == []  # vm-1/vm-2 already scoped in fixture
+
+    def test_explicit_multi_asset_targets_shared_run(self, setup):
+        s = setup
+        import json as json_
+
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        res = s["client"].post(
+            f"/api/automation/posture-assessments/{s['pa'].id}/import-results/",
+            {
+                "file": SimpleUploadedFile("prowler.csv", SCANNER_CSV),
+                "mapping": json_.dumps(SCANNER_MAPPING),
+                "assets": json_.dumps([str(s["asset1"].id), str(s["asset2"].id)]),
+            },
+            format="multipart",
+        )
+        assert res.status_code == 200
+        body = res.json()
+        assert body["assets_imported"] == 2
+        assert body["created"] == 6  # 3 aggregated cells x 2 assets
+        run_ids = set(
+            PostureResult.objects.filter(source="import").values_list(
+                "run_id", flat=True
+            )
+        )
+        assert len(run_ids) == 1
+        for asset in (s["asset1"], s["asset2"]):
+            assert (
+                PostureResult.objects.get(
+                    asset=asset, requirement=s["nodes"]["1.1"]
+                ).result
+                == "fail"
+            )
+
+    def test_canonical_csv_multi_asset_targets(self, setup):
+        s = setup
+        import json as json_
+
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        res = s["client"].post(
+            f"/api/automation/posture-assessments/{s['pa'].id}/import-results/",
+            {
+                "file": SimpleUploadedFile("scan.csv", b"ref_id,result\n1.1,pass\n"),
+                "assets": json_.dumps([str(s["asset1"].id), str(s["asset2"].id)]),
+            },
+            format="multipart",
+        )
+        assert res.status_code == 200
+        body = res.json()
+        assert body["assets_imported"] == 2
+        assert body["created"] == 2
+        assert PostureRun.objects.filter(posture_assessment=s["pa"]).count() == 1
+
+    def test_invalid_assets_param_400(self, setup):
+        s = setup
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        res = s["client"].post(
+            f"/api/automation/posture-assessments/{s['pa'].id}/import-results/",
+            {
+                "file": SimpleUploadedFile("scan.csv", b"ref_id,result\n1.1,pass\n"),
+                "assets": "not-json",
+            },
+            format="multipart",
+        )
+        assert res.status_code == 400
+
+    def test_asset_column_no_match_400(self, setup):
+        content = b"REQUIREMENTS_ID;STATUS;NAMESPACE\n1.1;PASS;ghost\n"
+        mapping = {
+            **SCANNER_MAPPING,
+            "columns": {
+                "ref_id": "REQUIREMENTS_ID",
+                "result": "STATUS",
+                "asset": "NAMESPACE",
+            },
+        }
+        res = self.import_mapped(setup, mapping, content=content, asset=False)
+        assert res.status_code == 400
+        assert res.json()["skipped_assets"] == ["ghost"]
+
+
 @pytest.mark.django_db
 class TestExportResults:
     def test_csv_export_all_and_per_asset(self, setup):
@@ -939,7 +1254,16 @@ class TestActionPlan:
         assert plan["results"][0]["requirement"]["ref_id"] == "1.1"
         assert plan["results"][0]["finding"] is None
 
-    def test_create_finding_lazy_register_and_rejoin(self, setup):
+    def test_create_finding_requires_attached_follow_up(self, setup):
+        s = setup
+        upload(s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "fail"}])
+        assert s["pa"].follow_up_assessment is None
+        res = self.create_finding(s, s["nodes"]["1.1"], s["asset1"])
+        assert res.status_code == 400
+        assert "follow-up" in res.json()["error"]
+        assert FindingsAssessment.objects.count() == 0
+
+    def test_create_finding_and_rejoin(self, setup):
         s = setup
         upload(
             s["client"],
@@ -947,17 +1271,17 @@ class TestActionPlan:
             s["asset1"],
             [{"ref_id": "1.1", "result": "fail", "actual": "0666", "expected": "0644"}],
         )
-        assert s["pa"].follow_up_assessment is None
+        register = FindingsAssessment.objects.create(
+            name="follow-up",
+            folder=s["pa"].folder,
+            category=FindingsAssessment.Category.POSTURE,
+        )
+        s["pa"].follow_up_assessment = register
+        s["pa"].save(update_fields=["follow_up_assessment"])
 
         res = self.create_finding(s, s["nodes"]["1.1"], s["asset1"])
         assert res.status_code == 201
         assert res.json()["created"] is True
-
-        s["pa"].refresh_from_db()
-        register = s["pa"].follow_up_assessment
-        assert register is not None
-        assert register.category == FindingsAssessment.Category.POSTURE
-        assert register.folder == s["pa"].folder
 
         finding = Finding.objects.get(id=res.json()["finding"])
         assert finding.requirement_node == s["nodes"]["1.1"]
