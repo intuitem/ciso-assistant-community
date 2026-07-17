@@ -2887,7 +2887,7 @@ def validate_scores_content(wb: Workbook, df, sheet_name, verbose: bool = False,
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
-# [CONTENT] Answers {OK} [Chekc new optional column: "description", "select_implementation_groups", "add_score", "compute_result", "color"]
+# [CONTENT] Answers {OK} [Check new optional column: "description", "select_implementation_groups", "add_score", "compute_result", "color"]
 def validate_answers_content(wb: Workbook, df: pd.DataFrame, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
