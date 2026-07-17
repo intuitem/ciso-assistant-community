@@ -153,12 +153,20 @@ async def update_asset(
                 resolved_vulns.append(resolve_vulnerability_id(vuln))
             payload["vulnerabilities"] = resolved_vulns
 
-        needs_objectives = any(p is not None for p in [
-            sec_confidentiality, sec_confidentiality_enabled,
-            sec_integrity, sec_integrity_enabled,
-            sec_availability, sec_availability_enabled,
-            dro_rto, dro_rpo, dro_mtd,
-        ])
+        needs_objectives = any(
+            p is not None
+            for p in [
+                sec_confidentiality,
+                sec_confidentiality_enabled,
+                sec_integrity,
+                sec_integrity_enabled,
+                sec_availability,
+                sec_availability_enabled,
+                dro_rto,
+                dro_rpo,
+                dro_mtd,
+            ]
+        )
         if needs_objectives:
             fetch_res = make_get_request(f"/assets/{resolved_asset_id}/")
             current_asset = fetch_res.json() if fetch_res.status_code == 200 else {}
@@ -169,31 +177,63 @@ async def update_asset(
             raw_dro = current_asset.get("disaster_recovery_objectives") or {}
             cur_dro = raw_dro.get("objectives", {}) if isinstance(raw_dro, dict) else {}
 
-            if any(p is not None for p in [
-                sec_confidentiality, sec_confidentiality_enabled,
-                sec_integrity, sec_integrity_enabled,
-                sec_availability, sec_availability_enabled,
-            ]):
+            if any(
+                p is not None
+                for p in [
+                    sec_confidentiality,
+                    sec_confidentiality_enabled,
+                    sec_integrity,
+                    sec_integrity_enabled,
+                    sec_availability,
+                    sec_availability_enabled,
+                ]
+            ):
+
                 def _merge_cia(key, new_val, new_enabled):
                     existing = cur_sec.get(key) or {"value": 0, "is_enabled": False}
                     return {
-                        "value": new_val if new_val is not None else existing.get("value", 0),
-                        "is_enabled": new_enabled if new_enabled is not None else existing.get("is_enabled", False),
+                        "value": new_val
+                        if new_val is not None
+                        else existing.get("value", 0),
+                        "is_enabled": new_enabled
+                        if new_enabled is not None
+                        else existing.get("is_enabled", False),
                     }
+
                 payload["security_objectives"] = {
                     "objectives": {
-                        "confidentiality": _merge_cia("confidentiality", sec_confidentiality, sec_confidentiality_enabled),
-                        "integrity": _merge_cia("integrity", sec_integrity, sec_integrity_enabled),
-                        "availability": _merge_cia("availability", sec_availability, sec_availability_enabled),
+                        "confidentiality": _merge_cia(
+                            "confidentiality",
+                            sec_confidentiality,
+                            sec_confidentiality_enabled,
+                        ),
+                        "integrity": _merge_cia(
+                            "integrity", sec_integrity, sec_integrity_enabled
+                        ),
+                        "availability": _merge_cia(
+                            "availability", sec_availability, sec_availability_enabled
+                        ),
                     }
                 }
 
             if any(p is not None for p in [dro_rto, dro_rpo, dro_mtd]):
                 payload["disaster_recovery_objectives"] = {
                     "objectives": {
-                        "rto": {"value": dro_rto if dro_rto is not None else (cur_dro.get("rto") or {}).get("value", 0)},
-                        "rpo": {"value": dro_rpo if dro_rpo is not None else (cur_dro.get("rpo") or {}).get("value", 0)},
-                        "mtd": {"value": dro_mtd if dro_mtd is not None else (cur_dro.get("mtd") or {}).get("value", 0)},
+                        "rto": {
+                            "value": dro_rto
+                            if dro_rto is not None
+                            else (cur_dro.get("rto") or {}).get("value", 0)
+                        },
+                        "rpo": {
+                            "value": dro_rpo
+                            if dro_rpo is not None
+                            else (cur_dro.get("rpo") or {}).get("value", 0)
+                        },
+                        "mtd": {
+                            "value": dro_mtd
+                            if dro_mtd is not None
+                            else (cur_dro.get("mtd") or {}).get("value", 0)
+                        },
                     }
                 }
 
@@ -1171,7 +1211,9 @@ async def update_vulnerability(
         if filtering_labels is not None:
             payload["filtering_labels"] = filtering_labels
         if applied_controls is not None:
-            resolved_controls = [resolve_applied_control_id(c) for c in applied_controls]
+            resolved_controls = [
+                resolve_applied_control_id(c) for c in applied_controls
+            ]
             payload["applied_controls"] = resolved_controls
         if assets is not None:
             resolved_assets = [resolve_asset_id(a) for a in assets]

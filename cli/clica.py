@@ -1251,19 +1251,26 @@ def export_domain(folder, output):
     folder_id = resolve_folder_id(folder, required=True)
     headers = {"Authorization": f"Token {TOKEN}"}
     url = f"{API_URL}/folders/{folder_id}/export/"
-    res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
-
-    if res.status_code != 200:
-        rprint(
-            f"[bold red]Error exporting domain: {res.status_code} {res.reason}[/bold red]",
-            file=sys.stderr,
-        )
-        rprint(res.text, file=sys.stderr)
-        sys.exit(1)
-
     out_path = Path(output) if output else Path(f"./{folder}-domain-export.zip")
-    with open(out_path, "wb") as f:
-        f.write(res.content)
+
+    with requests.get(
+        url,
+        headers=headers,
+        verify=VERIFY_CERTIFICATE,
+        stream=True,
+        timeout=(10, 3600),
+    ) as res:
+        if res.status_code != 200:
+            rprint(
+                f"[bold red]Error exporting domain: {res.status_code} {res.reason}[/bold red]",
+                file=sys.stderr,
+            )
+            rprint(res.text, file=sys.stderr)
+            sys.exit(1)
+
+        with open(out_path, "wb") as f:
+            for chunk in res.iter_content(chunk_size=1024 * 1024):
+                f.write(chunk)
     rprint(f"[green]✓ Domain exported to {out_path}[/green]")
 
 
@@ -1305,6 +1312,7 @@ def import_domain(file, name, load_missing_libraries):
             params=params,
             data=f,
             verify=VERIFY_CERTIFICATE,
+            timeout=(10, 3600),
         )
 
     if res.status_code != 200:
